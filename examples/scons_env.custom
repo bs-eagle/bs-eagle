@@ -1,0 +1,72 @@
+import os;
+Import('*');
+
+if (build_kind == "init") :
+    ss_tree = ss_tree + [
+            "plugins/bs_bos_core/SConscript"
+            , "plugins/bs_hdf5_storage/SConscript"
+            ]
+    Export ("ss_tree")
+
+    includes = dict ()
+    includes["kernel"]                      = ["#kernel/include", "#kernel/include/python"]
+    includes["bs_bos_core_base"]            = "#plugins/bs_bos_core/bs_bos_core_base/include"
+    includes["bs_matrix"]                   = "#plugins/bs_bos_core/bs_matrix/include"
+    includes["bs_base_linear_solvers"]      = "#plugins/bs_bos_core/bs_base_linear_solvers/include"
+    includes["bs_csr_ilu_prec"]             = "#plugins/bs_bos_core/bs_csr_ilu_prec/include"
+    includes["bs_bos_core_data_storage"]    = "#plugins/bs_bos_core/bs_bos_core_data_storage/include"
+    includes["bs_mesh"]                     = ["#plugins/bs_bos_core/bs_mesh/include", "#plugins/bs_bos_core/bs_mesh/src"]
+    includes["bs_scal"]                     = "#plugins/bs_bos_core/bs_scal/include"
+    includes["bs_pvt"]                      = "#plugins/bs_bos_core/bs_pvt/include"
+    includes["bs_bos_core"]                 = "#plugins/bs_bos_core/bs_bos_core/include"
+    includes["bs_hdf5_storage"]             = ["#plugins/bs_hdf5_storage/src", "/home/zerg/hdf5-1.8.1/include"]
+
+    defines = dict ()
+    defines["bs_hdf5_storage"]              = ["_HDF5", "H5_USE_16_API"]
+
+    lib_path = dict ()
+    lib_path["hdf5"]                        = ["/home/zerg/hdf5-1.8.1/lib"]
+
+    Export ("includes")
+    Export ("defines")
+    Export ("lib_path")
+
+    tlsf = dict ()
+    tlsf["cpp_path"] = ["/home/zerg/code/tlsf/src"] 
+    tlsf["lib_path"] = ["/home/zerg/code/tlsf/src"]
+
+    hoard = dict ()
+    hoard["cpp_path"] = ["/home/zerg/code/hoard-371/src"]
+    hoard["lib_path"] = ["/home/zerg/code/hoard-371/src"]
+
+    dlmalloc = dict ()
+    dlmalloc["cpp_path"] = ["/home/zerg/code/dlmalloc"]
+    dlmalloc["lib_path"] = ["/home/zerg/code/dlmalloc"]
+
+    tcmalloc = dict ()
+    tcmalloc["cpp_path"] = ["/home/zerg/code/google-perftools/src/"]
+    tcmalloc["lib_path"] = ["/home/zerg/code/google-perftools/.libs"]
+
+    Export ("tlsf")
+    Export ("hoard")
+    Export ("dlmalloc")
+    Export ("tcmalloc")
+
+else :
+    custom_env.AppendUnique (
+            CPPPATH = ["/opt/boost_1_36_0", "/usr/include/python2.5", "#kernel/include", "#kernel/include/python"],
+            LIBPATH = ["/opt/boost_1_36_lnx_x86_64_build", "/usr/lib"],
+            CCFLAGS = ["-DBS_DISABLE_MT_LOCKS", "-DBS_EXPORTING_PLUGIN", "-DBSPY_EXPORTING_PLUGIN", "-DBS_EXPORTING", "-DBSPY_EXPORTING", "-DBS_EXCEPTION_USE_BOOST_FORMAT", "-g"],
+            LINKFLAGS = ["-Wl,-E"]
+            )
+
+    if ("cfl" not in custom_vars.keys ()) :
+        custom_vars.Add ("cfl", "Set to 1 to use csr_ilu_cfl_prec", "0")
+        custom_vars.Update (custom_env)
+
+    if ("hdf5" not in custom_vars.keys ()) :
+        custom_vars.Add ("hdf5", "Set to 1 to use hdf5 storage", "0")
+        custom_vars.Update (custom_env)
+
+    Export ("custom_env")
+

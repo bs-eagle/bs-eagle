@@ -1,0 +1,7 @@
+BLUE_SKY_PATH = d:\blue-sky
+BLUE_SKY_PREFIX = d:\blue-sky
+BLUE_SKY_PLUGINS_PATH = d:\blue-sky\exe\debug\plugins
+BLUE_SKY_GUI_OBJ_PATH = d:\blue-sky\gui\plugins\gui
+BLUE_SKY_GUI_PLUGIN_PATH = d:\blue-sky\gui\plugins\obj
+PYTHON_PATH = d:\_zerg\lib\Python25\
+

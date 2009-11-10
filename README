@@ -1,0 +1,30 @@
+BS Eagle black-oil simulator
+
+The BS Eagle Project (bs-eagle) is an open source black-oil simulator. 
+The main goal of this project is to provide a free access to the state 
+of the art oil simulation software to study new methods of oil's 
+simulation. 
+
+The project based on a BlueSky integration platform and
+has a modular architecture and open to modifications and extensions. 
+
+Current available plugins are: 
+ - linear solvers (gmres, cgs, tfqmr, bicgstab, csr_ilu_prec)
+ - data storages (hdf5)
+ - grids (ijk, eclipse)
+ - wells (full implicit black oil model)
+ - jacobian's fillers
+ - array arithmetics
+
+To build bs-eagle you need:
+ 1. BlueSky kernel
+ 2. Python 2.5
+ 3. SCons (or MS Visual Studio 2005)
+ 4. Boost library, recomended version is 1.39
+ 5. Loki library, recomended version 0.1.6
+ 6. HDF5 library, recomnded version 1.8.3
+    6.1. SZIP, recomnded version 2.1
+    6.2. ZLIB, recomnded version 1.2
+
+Example of BlueSky BuildSystem script placed at 
+examples/scons_env.custom and examples/scons_vars.custom.

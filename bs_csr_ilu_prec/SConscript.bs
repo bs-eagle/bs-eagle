@@ -1,0 +1,31 @@
+import os
+Import ("*")
+
+lib_name = "bs_csr_ilu_prec"
+tar_name = "bs_csr_ilu_prec"
+
+env = custom_env.Clone ()
+env.Append (CPPPATH = ["include",
+    includes["bs_bos_core_base"],
+    includes["bs_matrix"],
+    includes["bs_base_linear_solvers"]
+    ] + includes["kernel"])
+
+libs = ["blue_sky", "bs_bos_core_base", "bs_matrix", "bs_base_linear_solvers"]
+
+if (build_kind == "debug") :
+    env.AppendUnique (LIBS = list_suffix (libs, "_d"))
+    lib_name += "_d"
+elif (build_kind == "release") :
+    env.AppendUnique (LIBS = libs)
+
+bs_csr_ilu_prec = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
+
+env.Alias (tar_name, bs_csr_ilu_prec)
+Export ("bs_csr_ilu_prec")
+
+if (env["install"] == 1) :
+    inst_tar = env.Install ("$plugins_prefix", bs_csr_ilu_prec)
+    env.Alias (tar_name, inst_tar)
+
+

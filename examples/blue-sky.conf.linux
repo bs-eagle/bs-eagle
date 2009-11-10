@@ -1,0 +1,6 @@
+BLUE_SKY_PATH = /home/zerg/bs/blue_sky
+BLUE_SKY_PREFIX = /home/zerg/bs/blue_sky
+BLUE_SKY_PLUGINS_PATH = /home/zerg/bs/blue_sky/exe/debug/plugins
+BLUE_SKY_GUI_OBJ_PATH = /home/zerg/bs/blue_sky/gui/plugins/gui
+BLUE_SKY_GUI_PLUGIN_PATH = /home/zerg/bs/blue_sky/gui/plugins/obj
+PYTHON_PATH = /home

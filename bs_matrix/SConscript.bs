@@ -1,0 +1,26 @@
+import os
+Import ("*")
+
+lib_name = "bs_matrix"
+tar_name = "bs_matrix"
+
+env = custom_env.Clone ()
+env.Append (CPPPATH = ["include", includes["bs_bos_core_base"]] + includes["kernel"])
+
+if (env["cfl"] == "1") :
+    env.AppendUnique (CPPDEFINES = ["BS_BOS_CORE_USE_CSR_ILU_CFL_PREC"])
+
+if (build_kind == "debug") :
+    env.AppendUnique (LIBS = ["blue_sky_d", "bs_bos_core_base_d"])
+    lib_name += "_d"
+elif (build_kind == "release") :
+    env.AppendUnique (LIBS = ["blue_sky", "bs_bos_core_base"])
+
+bs_matrix = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
+
+env.Alias (tar_name, bs_matrix)
+Export ("bs_matrix")
+
+if (env["install"] == 1) :
+    inst_tar = env.Install ("$plugins_prefix", bs_matrix)
+    env.Alias (tar_name, inst_tar)

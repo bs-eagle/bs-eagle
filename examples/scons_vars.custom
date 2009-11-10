@@ -1,0 +1,6 @@
+platform = "lin-gcc"
+python_name = "python2.5"
+build_kinds = "release,debug"
+py = "1"
+cfl = "0"
+

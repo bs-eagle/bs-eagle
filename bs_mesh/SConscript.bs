@@ -1,0 +1,31 @@
+import os
+Import ("*")
+
+lib_name = "bs_mesh"
+tar_name = "bs_mesh"
+
+env = custom_env.Clone ()
+env.Append (CPPPATH = ["include", "src",
+    includes["bs_bos_core_base"],
+    includes["bs_matrix"],
+    includes["bs_bos_core_data_storage"]
+    ] + includes["kernel"])
+
+libs = ["blue_sky", "bs_bos_core_base", "bs_matrix", "bs_bos_core_data_storage"]
+
+if (build_kind == "debug") :
+    env.AppendUnique (LIBS = list_suffix (libs, "_d"))
+    lib_name += "_d"
+elif (build_kind == "release") :
+    env.AppendUnique (LIBS = libs)
+
+bs_mesh = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
+
+env.Alias (tar_name, bs_mesh)
+Export ("bs_mesh")
+
+if (env["install"] == 1) :
+    inst_tar = env.Install ("$plugins_prefix", bs_mesh)
+    env.Alias (tar_name, inst_tar)
+
+

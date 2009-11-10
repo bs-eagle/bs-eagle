@@ -1,0 +1,55 @@
+import os
+Import ("*")
+
+lib_name = "bs_bos_core"
+tar_name = "bs_bos_core"
+
+env = custom_env.Clone ()
+env.Append (CPPPATH = ["include",
+    includes["bs_bos_core_base"],
+    includes["bs_matrix"],
+    includes["bs_base_linear_solvers"],
+    includes["bs_csr_ilu_prec"],
+    includes["bs_bos_core_data_storage"],
+    includes["bs_mesh_mpfa"],
+    includes["bs_scal"],
+    includes["bs_pvt"]
+    ] + includes["kernel"]
+    + includes["bs_mesh"]
+    )
+
+libs = ["blue_sky", 
+     "bs_bos_core_base", 
+     "bs_matrix", 
+     "bs_base_linear_solvers", 
+     "bs_csr_ilu_prec",
+     "bs_bos_core_data_storage",
+     "bs_scal",
+     "bs_pvt"
+     ]
+
+boost_libs = ["boost_date_time-mt"]
+
+if (env["cfl"] == "1") :
+    env.AppendUnique (CPPDEFINES = ["BS_BOS_CORE_USE_CSR_ILU_CFL_PREC"])
+
+if (env["hdf5"] == "1") :
+    env.AppendUnique (CPPDEFINES = defines["bs_hdf5_storage"], CPPPATH = includes["bs_hdf5_storage"])
+    libs = libs + ["bs_hdf5_storage"]
+
+if (build_kind == "debug") :
+    env.AppendUnique (LIBS = list_suffix (libs, "_d") + list_suffix (boost_libs, "-d"))
+    lib_name += "_d"
+elif (build_kind == "release") :
+    env.AppendUnique (LIBS = libs + boost_libs)
+
+bs_bos_core = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
+
+env.Alias (tar_name, bs_bos_core)
+Export ("bs_bos_core")
+
+if (env["install"] == 1) :
+    inst_tar = env.Install ("$plugins_prefix", bs_bos_core)
+    env.Alias (tar_name, inst_tar)
+
+
