@@ -1,8 +1,14 @@
 /**
- * \file closure.h
- * \brief closure impl 
- * \author Sergey Miryanov
- * \date 13.02.2009
+ *       \file  closure.h
+ *      \brief  Closure implementation, it is not a 'standart CS closure', 
+ *              it is an object that stores pointer to member function and
+ *              references to params with this member function should be 
+ *              called. Name convention closureN, where N is a number of
+ *              member function params
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  13.02.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_CLOSURE_IMPL_H_
 #define BS_CLOSURE_IMPL_H_

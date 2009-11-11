@@ -1,8 +1,10 @@
 /**
- * \file calc_well_pressure.cpp
- * \brief
- * \author Sergey Miryanov
- * \date 26.09.2008
+ *       \file  calc_well_pressure.cpp
+ *      \brief  Implementation of calc_well_pressure
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  26.09.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 #include "calc_well_pressure.h"
@@ -17,14 +19,22 @@
 namespace blue_sky
   {
 
+  /**
+   * \brief  'default' ctor for calc_well_pressure
+   * \param  param Additional params for ctor
+   * */
   template <typename strategy_t>
   calc_well_pressure <strategy_t>::calc_well_pressure (bs_type_ctor_param /*param = NULL */)
   {
   }
 
+  /**
+   * \brief  copy-ctor for calc_well_pressure
+   * \param  rhs Instance of calc_well_pressure to be copied
+   * */
   template <typename strategy_t>
   calc_well_pressure <strategy_t>::calc_well_pressure (const calc_well_pressure &rhs)
-        : bs_refcounter ()
+  : bs_refcounter ()
   {
     *this = rhs;
   }
@@ -45,6 +55,10 @@ namespace blue_sky
         }
     }
 
+  /**
+   * \class calc_for_rate
+   * \brief Calculates BHP for well if well controlled by rate
+   * */
   template <typename calc_well_pressure_t>
   struct calc_for_rate
     {
@@ -59,6 +73,14 @@ namespace blue_sky
       typedef typename calc_well_pressure_t::sp_well_t    sp_well_t;
 
 
+      /**
+       * \brief  ctor for calc_for_rate, initializes references and flags
+       * \param  well
+       * \param  phase_d
+       * \param  sat_d
+       * \param  n_phases
+       * \param  gas_oil_ratio
+       * */
       calc_for_rate (const sp_well_t &well, const phase_d_t &phase_d, const sat_d_t &sat_d, index_t n_phases, const item_array_t &gas_oil_ratio)
           : is_prod (well->get_well_controller ()->is_production ())
           , phase_d (phase_d)
@@ -92,12 +114,18 @@ namespace blue_sky
         is_o = phase_d[FI_PHASE_OIL] != -1 && is_o;
       }
 
+      /**
+       * \brief      Calculates denom and numer for production well
+       * \param[in]  data
+       * \param[out] denom
+       * \param[out] numer
+       * */
       void
       calc_prod (const calc_model_data_t &data, item_t &denom, item_t &numer)
       {
         if (is_w)
           {
-            const item_t &mw		= MOBILITY (data, phase_d, FI_PHASE_WATER);
+            const item_t &mw    = MOBILITY (data, phase_d, FI_PHASE_WATER);
             item_t pcwo         = n_phases == 1 ? 0 : CAP_PRESSURE (data, phase_d, FI_PHASE_WATER);
             item_t y            = gw * mw;
             item_t z            = y * (H  - po - pcwo);
@@ -107,9 +135,9 @@ namespace blue_sky
           }
         if (is_g)
           {
-            const item_t &mg		= MOBILITY (data, phase_d, FI_PHASE_GAS);
-            item_t mo		        = phase_d[FI_PHASE_OIL]   == -1 ? 0 : MOBILITY (data, phase_d, FI_PHASE_OIL);
-            item_t gor		      = phase_d[FI_PHASE_OIL]   == -1 ? 0 : gas_oil_ratio [n_block];
+            const item_t &mg    = MOBILITY (data, phase_d, FI_PHASE_GAS);
+            item_t mo           = phase_d[FI_PHASE_OIL]   == -1 ? 0 : MOBILITY (data, phase_d, FI_PHASE_OIL);
+            item_t gor          = phase_d[FI_PHASE_OIL]   == -1 ? 0 : gas_oil_ratio [n_block];
             item_t pcgo         = n_phases == 1 ? 0 : CAP_PRESSURE (data, phase_d, FI_PHASE_GAS);
             item_t Po           = (H - po);
             item_t Pg           = (Po - pcgo);
@@ -130,11 +158,17 @@ namespace blue_sky
           }
       }
 
+      /**
+       * \brief      Calculates denom and numer for injection well
+       * \param[in]  data
+       * \param[out] denom
+       * \param[out] numer
+       * */
       void
       calc_inj (const calc_model_data_t &data, item_t &denom, item_t &numer)
       {
-        item_t mw		= 0;
-        item_t mg		= 0;
+        item_t mw   = 0;
+        item_t mg   = 0;
         item_t mo   = 0;
         item_t pcwo = 0;
         item_t pcgo = 0;
@@ -222,10 +256,10 @@ public:
       typedef typename base_t::well_t::connection_t         connection_t;
       typedef typename base_t::well_t::sp_connection_t      sp_connection_t;
 
-      typedef typename base_t::calc_model_t::sat_d_t			  sat_d_t;
-      typedef typename base_t::calc_model_t::phase_d_t		  phase_d_t;
+      typedef typename base_t::calc_model_t::sat_d_t        sat_d_t;
+      typedef typename base_t::calc_model_t::phase_d_t      phase_d_t;
 
-      typedef typename base_t::calc_model_t::data_t				  calc_model_data_t;
+      typedef typename base_t::calc_model_t::data_t         calc_model_data_t;
 
       if (well->get_connections_count () == 0)
         {

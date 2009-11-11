@@ -1,11 +1,12 @@
 /**
- * \file   call_helper.cpp
- * \brief  Helper functions for call methods of derived from py_object classes
- * \author Miryanov Sergey
- * \date 2008-04-07
- */
-
-
+ *       \file  call_helper.h
+ *      \brief  Helper functions for call methods of derived from py_object classes
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  11.11.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
+ * */
 #ifndef CALL_HELPER_H_
 #define CALL_HELPER_H_
 

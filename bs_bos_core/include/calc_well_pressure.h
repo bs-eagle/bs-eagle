@@ -1,8 +1,10 @@
-/*
- * \file calc_well_pressure.h
- * \brief base class for objects that calculate distribution of pressure inside well
- * \author Sergey Miryanov
- * \date 26.09.2008
+/**
+ *       \file  calc_well_pressure.h
+ *      \brief  Base class for objects that calculate BHP for well
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  26.09.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_CALC_WELL_PRESSURE_H_
 #define BS_CALC_WELL_PRESSURE_H_
@@ -20,6 +22,11 @@ namespace blue_sky
   template <typename strategy_t>
   class well;
 
+  /**
+   * \class calc_well_pressure_base
+   * \brief Base class for objects that calculate BHP for well
+   * \todo  Should be renamed to calc_well_pressure_iface
+   * */
   template <typename strategy_t>
   class calc_well_pressure_base : public objbase
     {
@@ -33,10 +40,27 @@ namespace blue_sky
       typedef smart_ptr <well_t, true>          sp_well_t;
 
     public:
+      /**
+       * \brief  calc_well_pressure_base dtor
+       * \param  
+       * \return 
+       * */
       virtual ~calc_well_pressure_base () {}
-      virtual bool calculate (sp_well_t &well, const sp_calc_model_t &calc_model) const = 0;
+
+      /**
+       * \brief  Calculates BHP for well
+       * \param  well
+       * \param  calc_model
+       * \return True if well should be switched to controll by BHP otherwise false
+       * */
+      virtual bool 
+      calculate (sp_well_t &well, const sp_calc_model_t &calc_model) const = 0;
     };
 
+  /**
+   * \class calc_well_pressure
+   * \brief Calculates BHP for well
+   * */
   template <typename strategy_t>
   class calc_well_pressure : public calc_well_pressure_base <strategy_t>
     {
@@ -53,18 +77,36 @@ namespace blue_sky
 
     public:
 
+      /**
+       * \brief  Calculates BHP for well
+       * \param  well
+       * \param  calc_model
+       * \return True if well should be switched to controll by BHP otherwise false
+       * */
       bool
       calculate (sp_well_t &well, const sp_calc_model_t &calc_model) const;
 
+      //! blue-sky type declaration
       BLUE_SKY_TYPE_DECL_T (calc_well_pressure <strategy_t>);
 
     protected:
 
+      /**
+       * \brief  Calculates BHP for well if well controlled by rate
+       * \param  well
+       * \param  calc_model
+       * \return True if well should be switched to controll by BHP otherwise false
+       * */
       bool
       calculate_for_rate (sp_well_t &well, const sp_calc_model_t &calc_model) const;
 
     };
 
+  /**
+   * \brief  Registers calc_well_pressure types in blue-sky kernel
+   * \param  pd plugin_descriptor
+   * \return True if all types registered successfully
+   * */
   bool
   calc_well_pressure_register_types (const blue_sky::plugin_descriptor &pd);
 
