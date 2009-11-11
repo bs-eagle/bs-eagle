@@ -1,8 +1,10 @@
 /**
- * \file facility_manager.cpp
- * \brief impl of
- * \author Sergey Miryanov
- * \date 17.07.2008
+ *       \file  facility_manager.cpp
+ *      \brief  Implementation of facility manager
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  17.07.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 
@@ -20,6 +22,10 @@ namespace blue_sky
   BLUE_SKY_TYPE_IMPL_T_EXT (2, (bos_val_table <std::string, facility_manager<base_strategy_di>::sp_facility_t>), 1, (objbase), "bos_map<str, facility>_seq_di", "map of str and facility", "map of str and facility", false);
   BLUE_SKY_TYPE_IMPL_T_EXT (2, (bos_val_table <std::string, facility_manager<base_strategy_mixi>::sp_facility_t>), 1, (objbase), "bos_map<str, facility>_seq_mixi", "map of str and facility", "map of str and facility", false);
 
+  /**
+   * \brief  'default' ctor for facility_manager
+   * \param  param Additional params for ctor
+   * */
   template <typename strategy_t>
   facility_manager<strategy_t>::facility_manager (bs_type_ctor_param /* param = NULL */)
       : facility_list_ (BS_KERNEL.create_object (facility_map_t::bs_type ()))
@@ -27,6 +33,10 @@ namespace blue_sky
 
   }
 
+  /**
+   * \brief  copy-ctor for facility_manager
+   * \param  fs Instance of facility_manager to be copied
+   * */
   template <typename strategy_t>
   facility_manager<strategy_t>::facility_manager (const facility_manager &fs)
   : bs_refcounter (fs), objbase (fs), facility_list_ (fs.facility_list_)
@@ -123,7 +133,7 @@ namespace blue_sky
   /*template <typename strategy_t>
   unsigned int
   facility_manager<strategy_t>::wells_size () const {
-  	return facility_list_.size ();
+    return facility_list_.size ();
   }*/
 
   //////////////////////////////////////////////////////////////////////////
@@ -149,4 +159,4 @@ namespace blue_sky
     return res;
   }
 
-}	// namespace blue_sky
+} // namespace blue_sky

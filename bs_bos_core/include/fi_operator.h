@@ -1,8 +1,11 @@
 /**
- * \file fi_operator.h
- * \brief fi_operator
- * \author Sergey Miryanov
- * \date 12.01.2009
+ *       \file  fi_operator.h
+ *      \brief  fi_operator (calculates full implicit model)
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  12.01.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Should be moved to src/ directory.
  * */
 #ifndef BS_FI_OPERATOR_H_
 #define BS_FI_OPERATOR_H_
@@ -23,6 +26,12 @@
 
 namespace blue_sky {
 
+  /**
+   * \class fi_operator_impl
+   * \brief Implementation of fi_operator, parametrized with 
+   *        is_w, is_g, is_o (for water, gas, oil phases)
+   * \todo  Describes data members
+   * */
   template <typename strategy_type, bool is_w, bool is_g, bool is_o>
   struct fi_operator_impl
   {
@@ -64,6 +73,14 @@ namespace blue_sky {
     };
 
   public:
+    /**
+     * \brief  fi_operator_impl ctor
+     * \param  calc_model
+     * \param  reservoir
+     * \param  mesh
+     * \param  jacobian
+     * \param  jmatrix
+     * */
     fi_operator_impl (sp_calc_model_t &calc_model, sp_reservoir_t &reservoir, const sp_mesh_iface_t &mesh, sp_jacobian_t &jacobian, sp_jmatrix_t &jmatrix)
     : calc_model_ (calc_model),
     rock_grid_prop_ (calc_model_->rock_grid_prop),
@@ -129,6 +146,17 @@ namespace blue_sky {
     {
     }
 
+    /**
+     * \brief       Main fi_operator function
+     * \param[out]  dt
+     * \param       istart
+     * \param       istart_well_contr
+     * \param       __formal
+     * \param       update_rhs_after_gauss_elimination
+     * \param       save_debug_files
+     * \return      
+     * \todo        Describe return type
+     * */
     fi_operator_return_type
     fi_operator (double &dt, index_t istart, index_t istart_well_contr, index_t &, bool update_rhs_after_gauss_elimination, bool save_debug_files)
     {
@@ -229,6 +257,12 @@ namespace blue_sky {
       return FI_OPERATOR_RETURN_OK;
     }
 
+    /**
+     * \brief  Inits fi_operator process, called from main_loop_calc
+     * \param  istart
+     * \param  dt
+     * \return 
+     * */
     void
     fi_operator_init (index_t istart, double dt)
     {
@@ -250,7 +284,11 @@ namespace blue_sky {
       fi_operator_cells (istart, dt);
     }
 
-    //! calculate phisical parameters for all cells
+    /**
+     * \brief  Calculates physical parameters for all cells
+     * \param  
+     * \return 
+     * */
     void
     fi_operator_cells (index_t istart, const item_t dt)
     {
@@ -395,14 +433,25 @@ namespace blue_sky {
 #define PREV_FLUID_VOLUME_G     data_i.prev_fluid_volume[d_g]
 #define PREV_FLUID_VOLUME_W     data_i.prev_fluid_volume[d_w]
 
+    /**
+     * \class local_data
+     * \brief Local data that used in calculation of each cell
+     * */
     struct local_data
     {
-      item_t                    sat_w;
-      item_t                    sat_g;
-      item_t                    sat_o;
-      boost::array <item_t, 3>  ps_block;
+      item_t                    sat_w;      //!< Saturation value for water phase
+      item_t                    sat_g;      //!< Saturation value for gas phase
+      item_t                    sat_o;      //!< Saturation value for oil phase
+      boost::array <item_t, 3>  ps_block;   //!< PS block
     };
 
+    /**
+     * \brief  Fills Jacobain part for cell i
+     * \param  i Index of mesh cell
+     * \param  data_i 
+     * \param  jac_block Jacobian value for cell
+     * \param  local_data_
+     * */
     BS_FORCE_INLINE void
     fill_jacobian (index_t i, const data_t &data_i, rhs_item_t *jac_block, local_data &local_data_)
     {
@@ -535,7 +584,8 @@ namespace blue_sky {
     }
 
     /**
-     * \brief switch main vars for gas phase (Undersaturated conditon or free gas exist)
+     * \brief Switches main vars for gas phase (Undersaturated conditon or free gas exist)
+     * \param dt
      * */
     void
     fi_operator_switch_main_vars (double dt)
@@ -583,6 +633,13 @@ namespace blue_sky {
         << bs_end;
     }
 
+    /**
+     * \brief  Fills accumulative rhs part for cell i
+     * \param  i Index of cell
+     * \param  data_i
+     * \param  rhs_block
+     * \param  local_data_
+     * */
     BS_FORCE_INLINE void
     fill_acc_rhs (index_t i, const data_t &data_i, rhs_item_t *rhs_block, local_data &local_data_)
     {
@@ -658,6 +715,14 @@ namespace blue_sky {
         }
     }
 
+    /**
+     * \brief  Eliminates cell
+     * \param  local_data_
+     * \param  jac_block
+     * \param  rhs_block
+     * \param  sp_block
+     * \param  s_rhs_block
+     * */
     BS_FORCE_INLINE void
     eliminate_cell (const local_data &local_data_, rhs_item_t *jac_block, rhs_item_t *rhs_block, rhs_item_t *sp_block, rhs_item_t *s_rhs_block)
     {
@@ -668,6 +733,9 @@ namespace blue_sky {
       V_MINUS_VS_PROD (n_phases, local_data_.ps_block, s_rhs_block, rhs_block);
     }
 
+    /**
+     * \brief  Fills Jacobian, accumulative rhs and eliminates all cells
+     * */
     void
     fi_operator_fill ()
     {
@@ -776,6 +844,21 @@ namespace blue_sky {
         }
     }
 
+    /**
+     * \brief Calculates physical params for cell
+     * \param istart
+     * \param dt
+     * \param cell_ind
+     * \param jac_block
+     * \param rhs_block
+     * \param ss_block
+     * \param s_rhs_block
+     * \param switch_to_sg_count
+     * \param switch_to_ro_count
+     * \param switch_to_momg_count
+     * \param total_volume
+     * \todo  Remove obsolete params
+     * */
 #ifdef FI_OPERATOR_CELLS_PARALLEL
     inline void
     fi_operator_cell (index_t istart, const item_t dt,
@@ -794,8 +877,8 @@ namespace blue_sky {
 #else //FI_OPERATOR_CELLS_PARALLEL
     inline void
     fi_operator_cell (index_t /*istart*/, const item_t dt,
-        index_t cell_ind, rhs_item_t * /*jac_block*/,
-        rhs_item_t * /*rhs_block*/,
+      index_t cell_ind, rhs_item_t * /*jac_block*/,
+      rhs_item_t * /*rhs_block*/,
         rhs_item_t * /*ss_block*/,
         rhs_item_t * /*s_rhs_block*/,
         int &/*switch_to_sg_count*/,
@@ -1083,6 +1166,11 @@ namespace blue_sky {
 
     }
 
+    /**
+     * \brief  Checks norm
+     * \param  istart
+     * \return True if norm smaller than threshold
+     * */
     bool
     check_norm (index_t istart)
     {
@@ -1102,6 +1190,10 @@ namespace blue_sky {
 
       return false;
     }
+    /**
+     * \brief  Checks multiplier
+     * \todo   Obsolete
+     * */
     bool
     check_solution_mult_cell (index_t istart, index_t iteration, index_t n_approx, const norms_storage_t &base_norm)
     {
@@ -1138,6 +1230,11 @@ namespace blue_sky {
       return false;
     }
 
+    /**
+     * \brief       Reduces dt and multiplies Jacobian with new dt value
+     * \param[out]  dt
+     * \param[in]   istart
+     * */
     void
     do_dt_reduce (double &dt, index_t istart)
     {
@@ -1154,6 +1251,11 @@ namespace blue_sky {
           dt_mult = 0;
         }
     }
+    /**
+     * \brief      Multiplies Jacobian with new calculated dt value
+     * \param[in]  dt
+     * \param[in]  istart
+     * */
     void
     do_dt_tuning (const double &dt, bool tuning)
     {
@@ -1171,6 +1273,9 @@ namespace blue_sky {
         }
     }
 
+    /**
+     * \brief  Saves data before start of new newton iteration
+     * */
     void
     save_prev_niter_vars ()
     {
@@ -1182,6 +1287,9 @@ namespace blue_sky {
         }
     }
 
+    /**
+     * \brief  Restores data if newton iteration failed
+     * */
     void
     restore_prev_niter_vars ()
     {
@@ -1189,38 +1297,37 @@ namespace blue_sky {
     }
 
     /**
-     * @brief calculate norms
-     *
-     * @param i_start -- if ne 0
-     *
-     * @return
+     * \brief Calculates norms
      * */
     void
     norm_calc ();
 
-    // calculate norm in one cell and update norm storage
+    /**
+     * \brief  Calculates norm in one cell and update norm storage
+     * \param  i Index of cell
+     * \param  ns Norms storage
+     * */
     void
     update_norm_by_cell (index_t i, norms_storage_t &ns);
 
     /**
-     * @brief calculate dt at the first newton iteration on time step
-     *
-     * @param dt -- <INPUT/OUTPUT> time step length
-     *
-     * @return 0 -- if success
+     * \brief  Calculates dt at the first newton iteration on time step
+     * \param  prev_mult Previous dt multiplier
+     * \param  max_res
+     * \return New dt multiplier
      * */
     item_t
     calc_step_dt_mult (item_t prev_mult, item_t max_res);
 
     /**
-     * @brief calculate porosity and derivativies, also calculate trunsmissibility multiplier
+     * \brief Calculates porosity and derivativies, also calculates trunsmissibility multiplier
      *
-     * @param i -- cell index
-     * @param pvt_reg -- PVT region index
-     * @param poro -- <RETURN> porosity
-     * @param dp_poro -- <RETURN> porosity derivative
-     * @param t_mult  -- <RETURN> trunsmissibility multiplier
-     * @param dp_t_mult -- <RETURN> trunsmissibility multiplier derivative
+     * \param[in]  i Cell index
+     * \param[in]  pvt_reg PVT region index
+     * \param[out] poro Calculated porosity
+     * \param[out] dp_poro Calculated porosity derivative
+     * \param[out] t_mult  Calculated trunsmissibility multiplier
+     * \param[out] dp_t_mult Calculated trunsmissibility multiplier derivative
      * */
     void
     calc_porosity_and_deriv (index_t i,
@@ -1230,87 +1337,104 @@ namespace blue_sky {
                              item_t *t_mult,
                              item_t *dp_t_mult);
 
+    /**
+     * \brief  Calculates fluid volume on previous step
+     * */
     void
     calc_prev_fluid_volume ();
 
+    /**
+     * \brief  Saves debug data
+     * \param  dt
+     * */
     void
     debug_save_data (item_t dt);
 
+    /**
+     * \brief  Calculates multipler for cell for solution
+     * \param  base_norm Norm storage
+     * \return Calculated multiplier
+     * */
     item_t
     calc_solution_mult_cell (const norms_storage_t &base_norm);
 
+    /**
+     * \brief  Calculates flux part of Jacobian
+     * \param  dt
+     * \return True
+     * */
     bool
     block_connections_mpfa (const item_t &dt);
 
   public:
-    sp_calc_model_t       &calc_model_;
-    const sp_rock_grid_prop_t  &rock_grid_prop_;
-    sp_reservoir_t        &reservoir_;
-    sp_jacobian_t         &jacobian_;
-    sp_jmatrix_t          &jmatrix_;
-    const sp_mesh_iface_t       &mesh_;
+    sp_calc_model_t               &calc_model_;
+    const sp_rock_grid_prop_t     &rock_grid_prop_;
+    sp_reservoir_t                &reservoir_;
+    sp_jacobian_t                 &jacobian_;
+    sp_jmatrix_t                  &jmatrix_;
+    const sp_mesh_iface_t         &mesh_;
 
-    sp_bcsr_matrix_t      trns_matrix_;
-    const rhs_item_array_t    &trns_values_;
-    const index_array_t   &trns_rows_ptr_;
-    const index_array_t   &trns_cols_ptr_;
+    sp_bcsr_matrix_t              trns_matrix_;
+    const rhs_item_array_t        &trns_values_;
+    const index_array_t           &trns_rows_ptr_;
+    const index_array_t           &trns_cols_ptr_;
 
-    sp_bcsr_matrix_t      reg_matrix_;
-    rhs_item_array_t      &reg_values_;
-    const index_array_t   &reg_rows_ptr_;
-    const index_array_t   &reg_cols_ptr_;
+    sp_bcsr_matrix_t              reg_matrix_;
+    rhs_item_array_t              &reg_values_;
+    const index_array_t           &reg_rows_ptr_;
+    const index_array_t           &reg_cols_ptr_;
 
-    const index_array_t   &m_array_;
-    const index_array_t   &p_array_;
+    const index_array_t           &m_array_;
+    const index_array_t           &p_array_;
 
-    rhs_item_array_t      &rhs_;
-    item_array_t          &sol_;
-    rhs_item_array_t      &flux_rhs_;
-    rhs_item_array_t      &sp_diag_;
-    rhs_item_array_t      &s_rhs_;
+    rhs_item_array_t              &rhs_;
+    item_array_t                  &sol_;
+    rhs_item_array_t              &flux_rhs_;
+    rhs_item_array_t              &sp_diag_;
+    rhs_item_array_t              &s_rhs_;
 
-    const item_array_t    &depths_;
+    const item_array_t            &depths_;
 
-    index_t               n_cells_;
-    index_t               n_connections_;
+    index_t                       n_cells_;
+    index_t                       n_connections_;
 
-    index_t               n_sec_vars;
+    index_t                       n_sec_vars;
 
-    index_t               d_w;
-    index_t               d_g;
-    index_t               d_o;
-    index_t               ds_w;
-    index_t               ds_g;
+    index_t                       d_w;
+    index_t                       d_g;
+    index_t                       d_o;
+    index_t                       ds_w;
+    index_t                       ds_g;
 
-    index_t               d_gg, d_gw, d_go;
-    index_t               d_wg, d_ww, d_wo;
-    index_t               d_og, d_ow, d_oo;
+    index_t                       d_gg, d_gw, d_go;
+    index_t                       d_wg, d_ww, d_wo;
+    index_t                       d_og, d_ow, d_oo;
 
-    data_array_t          &data_;
-    item_array_t          &saturation_3p_;
-    const item_array_t    &pressure_;
-    item_array_t          &gas_oil_ratio_;
-    main_var_array_t      &main_vars_;
-    const item_array_t    &volume_;
-    const item_array_t    &poro_array_;
-    const item_array_t    &rock_grid_comp_const_;
-    const item_array_t    &rock_grid_comp_ref_pressure_;
-    const index_array_t   &sat_regions_;
-    const index_array_t   &pvt_regions_;
+    data_array_t                  &data_;
+    item_array_t                  &saturation_3p_;
+    const item_array_t            &pressure_;
+    item_array_t                  &gas_oil_ratio_;
+    main_var_array_t              &main_vars_;
+    const item_array_t            &volume_;
+    const item_array_t            &poro_array_;
+    const item_array_t            &rock_grid_comp_const_;
+    const item_array_t            &rock_grid_comp_ref_pressure_;
+    const index_array_t           &sat_regions_;
+    const index_array_t           &pvt_regions_;
 
     const sp_pvt_dead_oil_array_t &pvt_oil_array;                  //!< (n_pvt_regions)
     const sp_pvt_water_array_t    &pvt_water_array;
     const sp_pvt_gas_array_t      &pvt_gas_array;
 
-    item_t                min_p_;
-    item_t                max_p_;
-    item_t                drsdt_;
-    item_t                rhs_residual_;
-    item_t                mb_error_;
-    item_t                s_rhs_norm_;
+    item_t                        min_p_;
+    item_t                        max_p_;
+    item_t                        drsdt_;
+    item_t                        rhs_residual_;
+    item_t                        mb_error_;
+    item_t                        s_rhs_norm_;
 
-    norms_storage_t       &norm_;
-    rhs_item_array_t      &cfl_;
+    norms_storage_t               &norm_;
+    rhs_item_array_t              &cfl_;
   };
 
 } // namespace blue_sky
