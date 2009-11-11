@@ -1,8 +1,11 @@
 /**
-	\file reservoir_simulator.h
-	\brief main reservoir simulator of bos core implementations
-	\author Nikonov Max
-*/
+ *       \file  reservoir_simulator.cpp
+ *      \brief  reservoir_simulator implementation
+ *     \author  Nikonov Max
+ *       \date  10.11.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
 #include "stdafx.h"
 
 #include "event_base.h"
@@ -17,14 +20,13 @@
 #include "keyword_manager.h"
 #include "strategy_name.h"
 
-#define DM_ASSERT_EXCEPTION \
-  BS_ASSERT(false) (out_s.str());\
-  throw bs_exception("Data manager class",out_s.str().c_str());
-
-
 namespace blue_sky
 {
 
+  /**
+   * \brief  'default' ctor for reservoir_simulator
+   * \param  param additional params for reservoir_simulator
+   * */
   template <class strategy_t>
   reservoir_simulator<strategy_t>::reservoir_simulator (bs_type_ctor_param)
       : bs_refcounter ()
@@ -51,6 +53,10 @@ namespace blue_sky
     //bs_node::insert (bs_link::create (facility_storage_, "facility_storage"), false);
   }
 
+  /**
+   * \brief  copy-ctor for reservoir_simulator
+   * \param  src source copy of reservoir_simulator
+   * */
   template <class strategy_t>
   reservoir_simulator<strategy_t>::reservoir_simulator (const this_t &src)
       : bs_refcounter ()
@@ -77,12 +83,24 @@ namespace blue_sky
     this->mesh = src;
   }
 
+  /**
+   * \brief  actions that should be executed before read of data
+   * \param  em pointer to event_manager instance
+   * */
   template <typename sp_em_t>
   void 
   pre_read (const sp_em_t &/*em*/)
   {
   }
 
+  /**
+   * \brief  actions that should be executed after read of data
+   * \param  em pointer to event_manager instance
+   * \details if event_list is empty inserts two events otherwise
+   *          if last element of event list contains events we add 
+   *          another empty element with date 30 days later than 
+   *          previous
+   * */
   template <typename em_t>
   void 
   post_read (const smart_ptr <em_t, true> &em)
@@ -106,13 +124,20 @@ namespace blue_sky
         em->event_list.insert(std::make_pair(boost::gregorian::from_us_string ("01-02-1970"), tl));
       }
   }
+
+  /**
+   * \brief  reads model file and process keywords
+   * \param  filename name of model file
+   * \param  key_handlers pointer to keyword_manager instance
+   * \param  params params that will be passed to each keyword_handler
+   * */
   template <typename keyword_manager_t>
   void
   read_keyword_file (const std::string &filename, const smart_ptr <keyword_manager_t, true> &key_handlers, typename keyword_manager_t::keyword_params_t &params)
   {
     const typename keyword_manager_t::sp_reader_t &l_reader (params.reader);
     typedef event_manager<typename keyword_manager_t::strategy_type> event_manager_t;
-    typedef smart_ptr <event_manager_t, true>	sp_event_manager_t;
+    typedef smart_ptr <event_manager_t, true> sp_event_manager_t;
     sp_event_manager_t em (params.em);
     
     char buf[CHAR_BUF_LEN];
@@ -232,15 +257,12 @@ namespace blue_sky
     return reservoir_;
   }
 
-  /*!
-    \brief checking saturation
-    \return if success                              0
-    \return if one of nx, ny, nz == 0               -1
-    \return if soil[i] is out of range              -2
-    \return if swat[i] is out of range              -3
-    \return if error in swof                        -4
-    \return if error in sgof                        -5
-   */
+  /**
+   * \brief  checks saturation saturation
+   * \param  mesh pointer to mesh instance
+   * \param  data pointer to data storage (pool)
+   * \return may throw exception
+   * */
   template <class strategy_t>
   void 
   check_sat (const smart_ptr <rs_mesh_iface <strategy_t>, true> &mesh, const smart_ptr <idata, true> &data)
@@ -297,13 +319,12 @@ namespace blue_sky
       }
   }
 
-  /*!
-    \brief checking permx, permy, permz
-    \return if success                                      0
-    \return if one of nx, ny, nz == 0                       -1
-    \return if bad pointer permx, permy, permz              -10
-    \return if value of permx[i], permy[i], permz[i] == 0   -11
-   */
+  /**
+   * \brief  checks permx, permy, permz
+   * \param  mesh pointer to mesh instance
+   * \param  data pointer to data storage (pool)
+   * \return may throw exception
+   * */
   template <class strategy_t>
   void 
   check_perm (const smart_ptr <rs_mesh_iface <strategy_t>, true> &mesh, const smart_ptr <idata, true> &data)
@@ -337,6 +358,12 @@ namespace blue_sky
       }
   }
 
+  /**
+   * \brief  checks poro, ntg and multpv
+   * \param  mesh pointer to mesh instance
+   * \param  data pointer to data storage (pool)
+   * \return may throw exception
+   * */
   template <class strategy_t>
   void 
   check_poro_ntg_multpv (const smart_ptr <rs_mesh_iface <strategy_t>, true> &mesh, const smart_ptr <idata, true> &data)
@@ -409,6 +436,12 @@ namespace blue_sky
       }
   }
 
+  /**
+   * \brief  checks nums - eqlnum, satnum, pvtnum, fipnum
+   * \param  mesh pointer to mesh instance
+   * \param  data pointer to data storage (pool)
+   * \return may throw exception
+   * */
   template <typename strategy_t>
   void 
   check_num (const smart_ptr <rs_mesh_iface <strategy_t>, true> &mesh, const smart_ptr <idata, true> &data)
@@ -487,6 +520,11 @@ namespace blue_sky
 
   }
 
+  /**
+   * \brief  checks rock and p_ref
+   * \param  data pointer to data storage (pool)
+   * \return 
+   * */
   template <class strategy_t>
   void 
   check_rock (const smart_ptr <idata, true> &data)
@@ -521,6 +559,12 @@ namespace blue_sky
   }
 
 
+  /**
+   * \brief  checks geometry (mesh), redirect call to mesh
+   * \param  mesh pointer to mesh instance
+   * \param  data pointer to data storage (pool)
+   * \return may throw exception
+   * */
   template <class strategy_t>
   void 
   check_geometry (const smart_ptr <rs_mesh_iface <strategy_t>, true> &mesh, const smart_ptr <idata, true> &data)
@@ -551,6 +595,12 @@ namespace blue_sky
     mesh->check_data();
   }
 
+  /**
+   * \brief  checks equil
+   * \param  mesh pointer to mesh instance
+   * \param  data pointer to data storage (pool)
+   * \return may throw exception
+   * */
   template <class strategy_t>
   void 
   check_equil (const smart_ptr <rs_mesh_iface <strategy_t>, true> &mesh, const smart_ptr <idata, true> &data)
@@ -607,6 +657,12 @@ namespace blue_sky
       }
   }
 
+  /**
+   * \brief  checks volume
+   * \param  mesh pointer to mesh instance
+   * \param  data pointer to data storage (pool)
+   * \return may throw exception
+   * */
   template <class strategy_t>
   void 
   check_volume (const smart_ptr <rs_mesh_iface <strategy_t>, true> &mesh, const smart_ptr <idata, true> &/*data*/)
@@ -632,6 +688,9 @@ namespace blue_sky
   }
 
 
+  /**
+   * \todo write properly comment
+   * */
   template <typename T, typename sp_idata_t, typename sp_mesh_iface_t>
   bool
   check5 (T function, const sp_idata_t &ldata, const sp_mesh_iface_t &mesh, const char *description, bool check_init)
@@ -658,6 +717,9 @@ namespace blue_sky
     return false;
   }
 
+  /**
+   * \todo write properly comment
+   * */
   template <typename T, typename sp_idata_t>
   bool
   check3 (T function, const sp_idata_t &ldata, const char *description)
@@ -678,6 +740,11 @@ namespace blue_sky
     return false;
   }
 
+  /**
+   * \brief  checks all data
+   * \param  mesh pointer to mesh instance
+   * \param  data pointer to data storage (pool)
+   * */
   template <typename strategy_t>
   void
   check_data (const smart_ptr <rs_mesh_iface <strategy_t>, true> &mesh, const smart_ptr <idata, true> &data)

@@ -1,8 +1,10 @@
 /**
- * \file reservoir.cpp
- * \brief impl of
- * \author Sergey Miryanov
- * \date 16.07.2008
+ *       \file  reservoir.cpp
+ *      \brief  implementation of reservoir class
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  16.07.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 
@@ -36,6 +38,10 @@ namespace blue_sky
   }
 
   //! constructor
+  /**
+   * \brief  copy-ctor for reservoir
+   * \param  cl reservoir instance to be copied
+   * */
   template <class strategy_t>
   reservoir <strategy_t>::reservoir(const reservoir & cl)
   : bs_refcounter (cl), objbase (cl)
@@ -45,6 +51,10 @@ namespace blue_sky
   }
 
 
+  /**
+   * \brief  'default' reservoir ctor
+   * \param  param additional ctor params
+   * */
   template <class strategy_t>
   reservoir <strategy_t>::reservoir (bs_type_ctor_param /*param*/)
   {
@@ -232,8 +242,8 @@ namespace blue_sky
   {
     const sp_jacobian_matrix_t &jmx (jacobian->get_jmatrix ());
 
-    const index_array_t &rows		= jmx->get_irregular_matrix ()->get_rows_ptr ();
-    index_array_t &cols		      = jmx->get_irregular_matrix ()->get_cols_ind ();
+    const index_array_t &rows   = jmx->get_irregular_matrix ()->get_rows_ptr ();
+    index_array_t &cols         = jmx->get_irregular_matrix ()->get_cols_ind ();
     rhs_item_array_t &values    = jmx->get_irregular_matrix ()->get_values ();
 
     if (rows.empty ())
@@ -514,5 +524,5 @@ namespace blue_sky
 
   BLUE_SKY_TYPE_IMPL_T_EXT (1, (reservoir <base_strategy_mixi>), 1, (objbase), "reservior_seq_mixi", "", "", false)
 
-}	// namespace blue_sky
+} // namespace blue_sky
 

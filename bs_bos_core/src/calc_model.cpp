@@ -1,3 +1,9 @@
+/**
+ *       \file  calc_model.cpp
+ *      \brief  calc_model implementation
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
 #include "stdafx.h"
 
 #include "calc_model.h"
@@ -32,6 +38,9 @@
 //! if ORI < NEW than ORI = NEW
 #define IF_LE_REPLACE(ORI,NEW,C,V) if ((ORI) > (NEW)) {(ORI) = (NEW);(C) = (V);}
 
+/**
+ * \todo describe
+ * */
 template <typename item_t>
 BS_FORCE_INLINE void
 CHECK_VALUE (item_t X, item_t DX, item_t MIN, item_t MAX, item_t DMAX, item_t &M)
@@ -53,6 +62,10 @@ CHECK_VALUE (item_t X, item_t DX, item_t MIN, item_t MAX, item_t DMAX, item_t &M
 namespace blue_sky
 {
 
+  /**
+   * \brief  'default' ctor for calc_model
+   * \param  param additional params for calc_model
+   * */
   template <class strategy_t>
   calc_model<strategy_t>::calc_model (bs_type_ctor_param /*param*/)
       : bs_refcounter(), bs_node(bs_node::create_node())
@@ -62,6 +75,10 @@ namespace blue_sky
     init();
   }
 
+  /**
+   * \brief  copy-ctor for calc_model
+   * \param  src calc_model instance
+   * */
   template <class strategy_t>
   calc_model<strategy_t>::calc_model (const this_t & /*src*/)
       : bs_refcounter(), bs_node(bs_node::create_node())
@@ -79,8 +96,8 @@ namespace blue_sky
 
 
 
-  template <class strategy_t /*, class mtrx_fp_type*/>
-  void calc_model<strategy_t /*,mtrx_fp_type*/ >::init()
+  template <class strategy_t>
+  void calc_model<strategy_t>::init()
   {
     n_comps = 0;
     n_phases = 0;
@@ -107,7 +124,6 @@ namespace blue_sky
     ts_params = BS_KERNEL.create_object (fi_params::bs_type ());
   }
 
-  // initialize main arrays
   template <class strategy_t>
   int calc_model<strategy_t>::init_main_arrays (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
   {
@@ -342,7 +358,6 @@ namespace blue_sky
     return 0;
   }
 
-  // initialize initial conditions
   template <class strategy_t>
   int calc_model<strategy_t>::set_initial_data (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
   {
@@ -370,7 +385,6 @@ namespace blue_sky
     return 0;
   }
 
-  // initialize saturation array
   template <class strategy_t>
   int calc_model<strategy_t>::init_saturation (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
   {
@@ -720,7 +734,6 @@ namespace blue_sky
     return 0;
   }
 
-  // initialize saturation array
   template <class strategy_t>
   int calc_model<strategy_t>::init_pressure (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
   {
@@ -756,7 +769,6 @@ namespace blue_sky
     return 0;
   }
 
-  // initialize arrays for calculation process
   template <class strategy_t>
   int calc_model<strategy_t>::init_calcul_arrays (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
   {
@@ -772,14 +784,14 @@ namespace blue_sky
       workspace.resize(mesh->get_n_active_elements() * this->n_phases);
 
     // well storage
-// 		FI_FREE (new_fwell_storage);
-// 		new_fwell_storage = new t_well_storage;
-// 		if (!new_fwell_storage)
-// 			r_code = -1;
+//    FI_FREE (new_fwell_storage);
+//    new_fwell_storage = new t_well_storage;
+//    if (!new_fwell_storage)
+//      r_code = -1;
 
-// 		if (new_fwell_storage->init (get_mesh()->n_elements, ADD_WELLS, ADD_WELLS, n_phases))
-// 			// Error message already output
-// 			return -1;
+//    if (new_fwell_storage->init (get_mesh()->n_elements, ADD_WELLS, ADD_WELLS, n_phases))
+//      // Error message already output
+//      return -1;
 
     if (this->ts_params->get_bool(fi_params::STORE_PANE_FLOW_RATES))
       {
@@ -790,12 +802,12 @@ namespace blue_sky
 
     iwksp.resize(mesh->get_n_active_elements());
 
-// 		FI_DOUBLE_ARRAY_REALLOCATOR (bconn_pressure, get_mesh()->n_boundary_connections, r_code);
-// 		FI_DOUBLE_ARRAY_REALLOCATOR (bconn_saturation, get_mesh()->n_boundary_connections * (n_phases - 1), r_code);
-// 		if (FI_CHK_OIL_GAS (phases)) {
-// 			FI_DOUBLE_ARRAY_REALLOCATOR (bconn_gor, get_mesh()->n_boundary_connections, r_code);
-// 			FI_INT_ARRAY_REALLOCATOR (bconn_mainvar, get_mesh()->n_boundary_connections, r_code);
-// 		}
+//    FI_DOUBLE_ARRAY_REALLOCATOR (bconn_pressure, get_mesh()->n_boundary_connections, r_code);
+//    FI_DOUBLE_ARRAY_REALLOCATOR (bconn_saturation, get_mesh()->n_boundary_connections * (n_phases - 1), r_code);
+//    if (FI_CHK_OIL_GAS (phases)) {
+//      FI_DOUBLE_ARRAY_REALLOCATOR (bconn_gor, get_mesh()->n_boundary_connections, r_code);
+//      FI_INT_ARRAY_REALLOCATOR (bconn_mainvar, get_mesh()->n_boundary_connections, r_code);
+//    }
 
     init_boundary_connections (input_data, mesh);
 
@@ -864,7 +876,6 @@ namespace blue_sky
 //     }
   }
 
-  // initialize phases variables (rs) and select number of phases
   template <class strategy_t>
   int calc_model<strategy_t>::init_rs (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
   {
@@ -987,6 +998,10 @@ namespace blue_sky
     return *this;
   }
 
+  /**
+   * \class pvt_helper
+   * \todo  describe
+   * */
   struct pvt_helper
     {
       template <typename pvt_array_t, typename pvt_vector_t>
@@ -1023,8 +1038,8 @@ namespace blue_sky
       sp_pvt_water_array_t &pvtw,
       const sp_idata_t &idata)
   {
-    typedef typename idata_t::pvt_vector		pvt_vector;
-    typedef typename idata_t::pvt_info			pvt_info;
+    typedef typename idata_t::pvt_vector    pvt_vector;
+    typedef typename idata_t::pvt_info      pvt_info;
 
     pvto.resize(this->n_pvt_regions);
     pvtg.resize(this->n_pvt_regions);
@@ -1113,14 +1128,6 @@ namespace blue_sky
     return apply_newton_correction (1.0, 0, mesh, jacobian);
   }
 
-  /**
-   * @brief apply newton correction, and multiply it by given #mult (default 1.0)
-   *
-   * @param mult -- mult cofficient
-   * @param istart_line_search -- flag
-   *
-   * @return return 0 if success, < 0 if error occur, > 0 if newton process should be restarted
-   */
   template <typename strategy_t>
   restore_solution_return_type
   calc_model<strategy_t>::apply_newton_correction (item_t mult, index_t istart_line_search, const sp_mesh_iface_t &mesh, const sp_jacobian_matrix_t &jacobian)
@@ -1304,11 +1311,6 @@ namespace blue_sky
     return mult;
   }
 
-  /**
-   * @brief calculate multiplier (m) for newton correction vector (J(x0) * w = -F(x0), x1 = x0 + m * w)
-   *
-   * @return multiplier (m)
-   */
   template <typename strategy_t>
   typename calc_model<strategy_t>::item_t
   calc_model<strategy_t>::new_simple_get_cell_solution_mult (const sp_mesh_iface_t &msh,
@@ -1427,15 +1429,6 @@ namespace blue_sky
     return 1.0;//mult;
   }
 
-  //! new get solution from jacobian
-  /**
-   * @brief restore solution from Jacobian, using #mult if #istart_linear_search != 0
-   *
-   * @param mult -- x^n = x^(n-1) + mult * dx
-   * @param istart_linear_search -- use mult if != 0
-   *
-   * @return 0 if success
-   */
   template <typename strategy_t>
   int
   calc_model<strategy_t>::new_simple_get_cell_solution (const double mult, int istart_linear_search,
@@ -1686,7 +1679,6 @@ namespace blue_sky
     return 0;
   }
 
-  //! calculate approximal value of So, Sg, Ro from full mass of gas (mg_in) and oil (mo_in)
   template <typename strategy_t>
   int
   calc_model<strategy_t>::calc_approx_so_sg_ro (const item_t mo_in, const item_t mg_in, const item_t poro,

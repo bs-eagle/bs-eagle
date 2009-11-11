@@ -1,9 +1,11 @@
 /**
- * @file well_event.h
- * @brief event manager functions
- * @author Morozov Andrey
- * @date 2008-06-07
- */
+ *       \file  event_manager.cpp
+ *      \brief  event_manager functions
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  07.06.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
 #include "stdafx.h"
 
 #include "event_manager.h"
@@ -24,11 +26,19 @@ namespace blue_sky
 
   }
 
+  /**
+   * \brief  'default' ctor for event_manager
+   * \param  param additional params for event_manager
+   * */
   template <typename strategy_t>
   event_manager<strategy_t>::event_manager(bs_type_ctor_param /*param*/)
   {
   }
 
+  /**
+   * \brief  copy-ctor for event_manager
+   * \param  src source copy of event_manager
+   * */
   template <typename strategy_t>
   event_manager<strategy_t>::event_manager(const event_manager& src)
   : bs_refcounter (src), objbase (src)
@@ -96,21 +106,21 @@ namespace blue_sky
   }
 
 
-#define EVENT_LIST_REGISTRATION(WHERE, strategy_t)	\
-  REG_EVENT_IN_##WHERE(WELSPECS,			strategy_t)		\
-  REG_EVENT_IN_##WHERE(WELLCON,				strategy_t)		\
-  REG_EVENT_IN_##WHERE(COMPDAT,				strategy_t)		\
-  REG_EVENT_IN_##WHERE(WCONPROD,			strategy_t)		\
-  REG_EVENT_IN_##WHERE(WCONHIST,			strategy_t)		\
-  REG_EVENT_IN_##WHERE(WCONINJE,			strategy_t)		\
-  REG_EVENT_IN_##WHERE(WECON,					strategy_t)		\
-  REG_EVENT_IN_##WHERE(WECONINJ,			strategy_t)		\
-  REG_EVENT_IN_##WHERE(WEFAC,					strategy_t)		\
-  REG_EVENT_IN_##WHERE(WELTARG,				strategy_t)		\
-  REG_EVENT_IN_##WHERE(WPIMULT,				strategy_t)		\
-  REG_EVENT_IN_##WHERE(COMPENSATION,	strategy_t)		\
-  REG_EVENT_IN_##WHERE(FRACTURE,			strategy_t)		\
-  REG_EVENT_IN_##WHERE(PERMFRAC,			strategy_t)
+#define EVENT_LIST_REGISTRATION(WHERE, strategy_t)  \
+  REG_EVENT_IN_##WHERE(WELSPECS,      strategy_t)   \
+  REG_EVENT_IN_##WHERE(WELLCON,       strategy_t)   \
+  REG_EVENT_IN_##WHERE(COMPDAT,       strategy_t)   \
+  REG_EVENT_IN_##WHERE(WCONPROD,      strategy_t)   \
+  REG_EVENT_IN_##WHERE(WCONHIST,      strategy_t)   \
+  REG_EVENT_IN_##WHERE(WCONINJE,      strategy_t)   \
+  REG_EVENT_IN_##WHERE(WECON,         strategy_t)   \
+  REG_EVENT_IN_##WHERE(WECONINJ,      strategy_t)   \
+  REG_EVENT_IN_##WHERE(WEFAC,         strategy_t)   \
+  REG_EVENT_IN_##WHERE(WELTARG,       strategy_t)   \
+  REG_EVENT_IN_##WHERE(WPIMULT,       strategy_t)   \
+  REG_EVENT_IN_##WHERE(COMPENSATION,  strategy_t)   \
+  REG_EVENT_IN_##WHERE(FRACTURE,      strategy_t)   \
+  REG_EVENT_IN_##WHERE(PERMFRAC,      strategy_t)
 
 #define REG_EVENT_IN_FACTORY(NAME, strategy_t)\
   factory_register <NAME##_event <strategy_t> >     (#NAME);
