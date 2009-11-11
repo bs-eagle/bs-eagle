@@ -1,8 +1,11 @@
 /**
- * \file data_storage_interface.h
- * \brief interface for storage different data
- * \author Sergey Miryanov
- * \date 21.07.2008
+ *       \file  data_storage_interface.h
+ *      \brief  Interface for storage different data
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  21.07.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be redisigned
  * */
 #ifndef BS_DATA_STORAGE_INTERFACE_H_
 #define BS_DATA_STORAGE_INTERFACE_H_
@@ -50,10 +53,10 @@ namespace blue_sky
     {
     public:
 
-      typedef sp_obj																				sp_storage_t;
-      typedef smart_ptr <data_serializer>										sp_serializer_t;
-      typedef bos_val_table <std::string, sp_serializer_t>	serializer_list_t;
-      typedef smart_ptr <serializer_list_t>									sp_serializer_list_t;
+      typedef sp_obj                                        sp_storage_t;
+      typedef smart_ptr <data_serializer>                   sp_serializer_t;
+      typedef bos_val_table <std::string, sp_serializer_t>  serializer_list_t;
+      typedef smart_ptr <serializer_list_t>                 sp_serializer_list_t;
 
     public:
       virtual ~data_storage_interface () {}
@@ -67,8 +70,8 @@ namespace blue_sky
 
     private:
 
-      sp_storage_t						storage_;
-      sp_serializer_list_t		serializer_list_;
+      sp_storage_t            storage_;
+      sp_serializer_list_t    serializer_list_;
     };
 
   //////////////////////////////////////////////////////////////////////////
@@ -76,7 +79,7 @@ namespace blue_sky
   bool data_serializer_register_type (const plugin_descriptor &pd);
   bool data_storage_interface_register_type (const plugin_descriptor &pd);
 
-}	// namespace blue_sky
+} // namespace blue_sky
 
 
-#endif	// #ifndef BS_DATA_STORAGE_INTERFACE_H_
+#endif  // #ifndef BS_DATA_STORAGE_INTERFACE_H_

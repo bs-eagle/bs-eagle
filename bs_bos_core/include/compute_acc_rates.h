@@ -1,5 +1,10 @@
 /**
- *
+ *       \file  compute_acc_rates.h
+ *      \brief  Calculates total rates
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  22.12.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_MAIN_LOOP_CALC_COMPUTE_ACC_RATES_H_
 #define BS_MAIN_LOOP_CALC_COMPUTE_ACC_RATES_H_
@@ -9,6 +14,10 @@
 namespace blue_sky
   {
 
+  /**
+   * \brief  Calculates total rates for well and 
+   *         rate and total rate for reservoir
+   * */
   template <typename strategy_t, bool is_w, bool is_g, bool is_o>
   inline void
   main_loop_calc <strategy_t, is_w, is_g, is_o>::compute_acc_rates ()

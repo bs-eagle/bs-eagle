@@ -1,11 +1,15 @@
+/**
+ *       \file  debug_tools.h
+ *      \brief  Useful tools for debug
+ *     \author  Borschuk Oleg
+ *       \date  19.06.2006
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
+ * */
 #ifndef __DEBUG_TOOLS_H_
 #define __DEBUG_TOOLS_H_
-/*!
- * \file debug_tools.h
- * \brief usefull tools for debug
- * \author Borschuk Oleg
- * \date 2006-06-19
- */
+
 #ifdef _MPI
 #include <mpi.h>
 #endif

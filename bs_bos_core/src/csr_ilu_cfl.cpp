@@ -1,9 +1,12 @@
-/*!
-* \file csr_ilu_cfl.cpp
-* \brief child for class csr_ilu (for adaptive cpr)
-* \author Salimgareeva Elmira
-* \date 11.05.09
-*/
+/**
+ *       \file  csr_ilu_cfl.cpp
+ *      \brief  Builds matrix based on CFL for csr_ilu preconditioner
+ *              and solves this matrix
+ *     \author  Elmira Salimgareeva
+ *       \date  11.05.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
 #include "stdafx.h"
 #include "csr_ilu_cfl.h"
 

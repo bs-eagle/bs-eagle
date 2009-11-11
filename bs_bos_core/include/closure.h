@@ -15,6 +15,10 @@
 
 namespace blue_sky {
 
+  /**
+   * \class closure0
+   * \brief Implements 'closure' with no params and return type R
+   * */
   template <typename R, typename T, typename M>
   struct closure0
   {
@@ -31,6 +35,10 @@ namespace blue_sky {
 
     M m;
   };
+  /**
+   * \class closure0
+   * \brief Implements 'closure' with no params and no return value
+   * */
   template <typename T, typename M>
   struct closure0 <void, T, M>
   {
@@ -50,6 +58,10 @@ namespace blue_sky {
     M m;
   };
 
+  /**
+   * \class closure1
+   * \brief Implements 'closure' with 1 param and return type R
+   * */
   template <typename R, typename T, typename M, typename A1>
   struct closure1
   {
@@ -68,6 +80,10 @@ namespace blue_sky {
     M m;
     A1 a1;
   };
+  /**
+   * \class closure1
+   * \brief Implements 'closure' with 1 param and no return value
+   * */
   template <typename T, typename M, typename A1>
   struct closure1 <void, T, M, A1>
   {
@@ -87,6 +103,10 @@ namespace blue_sky {
     A1 a1;
   };
 
+  /**
+   * \class closure2
+   * \brief Implements 'closure' with 2 param and return type R
+   * */
   template <typename R, typename T, typename M, typename A1, typename A2>
   struct closure2
   {
@@ -107,6 +127,10 @@ namespace blue_sky {
     A1 a1;
     A2 a2;
   };
+  /**
+   * \class closure2
+   * \brief Implements 'closure' with 2 param and no return value
+   * */
   template <typename T, typename M, typename A1, typename A2>
   struct closure2 <void, T, M, A1, A2>
   {
@@ -128,6 +152,10 @@ namespace blue_sky {
     A2 a2;
   };
 
+  /**
+   * \class closure3
+   * \brief Implements 'closure' with 3 param and return type R
+   * */
   template <typename R, typename T, typename M, typename A1, typename A2, typename A3>
   struct closure3
   {
@@ -150,6 +178,10 @@ namespace blue_sky {
     A2 a2;
     A3 a3;
   };
+  /**
+   * \class closure3
+   * \brief Implements 'closure' with 3 param and no return value
+   * */
   template <typename T, typename M, typename A1, typename A2, typename A3>
   struct closure3 <void, T, M, A1, A2, A3>
   {
@@ -173,6 +205,10 @@ namespace blue_sky {
     A3 a3;
   };
 
+  /**
+   * \class closure4
+   * \brief Implements 'closure' with 4 param and return type R
+   * */
   template <typename R, typename T, typename M, typename A1, typename A2, typename A3, typename A4>
   struct closure4 
   {
@@ -197,6 +233,10 @@ namespace blue_sky {
     A3 a3;
     A4 a4;
   };
+  /**
+   * \class closure4
+   * \brief Implements 'closure' with 4 param and no return value
+   * */
   template <typename T, typename M, typename A1, typename A2, typename A3, typename A4>
   struct closure4 <void, T, M, A1, A2, A3, A4>
   {
@@ -221,6 +261,10 @@ namespace blue_sky {
     A3 a3;
     A4 a4;
   };
+  /**
+   * \class closure5
+   * \brief Implements 'closure' with 5 param and return type R
+   * */
   template <typename R, typename T, typename M, typename A1, typename A2, typename A3, typename A4, typename A5>
   struct closure5 
   {
@@ -247,6 +291,10 @@ namespace blue_sky {
     A4 a4;
     A5 a5;
   };
+  /**
+   * \class closure5
+   * \brief Implements 'closure' with 5 param and no return value
+   * */
   template <typename T, typename M, typename A1, typename A2, typename A3, typename A4, typename A5>
   struct closure5 <void, T, M, A1, A2, A3, A4, A5>
   {
@@ -274,6 +322,10 @@ namespace blue_sky {
     A5 a5;
   };
 
+  /**
+   * \class closure6
+   * \brief Implements 'closure' with 6 param and return type R
+   * */
   template <typename R, typename T, typename M, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
   struct closure6
   {
@@ -297,6 +349,10 @@ namespace blue_sky {
     A5 a5;
     A6 a6;
   };
+  /**
+   * \class closure6
+   * \brief Implements 'closure' with 6 param and no return value
+   * */
   template <typename T, typename M, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
   struct closure6<void, T, M, A1, A2, A3, A4, A5, A6>
   {

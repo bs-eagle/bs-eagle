@@ -1,9 +1,12 @@
-/*!
-* \file debug_tools.cpp
-* \brief usefull tools for debug
-* \author Borschuk Oleg
-* \date 2006-06-19
-*/
+/**
+ *       \file  debug_tools.cpp
+ *      \brief  Useful tools for debug
+ *     \author  Borschuk Oleg
+ *       \date  19.06.2006
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
+ * */
 #include "stdafx.h"
 
 #ifdef _MPI

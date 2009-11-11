@@ -1,8 +1,10 @@
 /**
- * \file data_storage_interface.cpp
- * \brief impl of
- * \author Sergey Miryanov
- * \date 21.07.2008
+ *       \file  data_storage_interface.cpp
+ *      \brief  Implementation of data_storage_interface
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  21.07.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 
@@ -173,4 +175,4 @@ namespace blue_sky
 
     return res;
   }
-}	// namespace blue_sky
+} // namespace blue_sky

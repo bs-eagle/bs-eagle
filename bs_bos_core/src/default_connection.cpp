@@ -1,8 +1,10 @@
 /**
- * \file default_connection.h
- * \brief impl of
- * \author Sergey Miryanov
- * \date 20.05.2009
+ *       \file  default_connection.cpp
+ *      \brief  Implementation of default connection
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  20.05.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 #include "default_connection.h"
@@ -10,12 +12,20 @@
 namespace blue_sky {
 namespace wells {
 
+  /**
+   * \brief  'default' ctor for default_connection
+   * \param  param Additional params for ctor
+   * */
   template <typename strategy_t>
   default_connection <strategy_t>::default_connection (bs_type_ctor_param param /* = NULL */)
   : base_t (param)
   {
     clear_data ();
   }
+  /**
+   * \brief  copy-ctor for default_connection
+   * \param  c Instance of default_connection to be copied
+   * */
   template <typename strategy_t>
   default_connection <strategy_t>::default_connection (const default_connection &c)
         : bs_refcounter (), connection <strategy_t> () 

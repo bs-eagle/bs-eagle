@@ -1,8 +1,11 @@
 /**
- * \file default_well_rate_control_factory.h
- * \brief factory to construct well_rate_control for default well model
- * \author Sergey Miryanov
- * \date 21.05.2009
+ *       \file  default_well_rate_control_factory.h
+ *      \brief  Factory of well_rate_control for default well 
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  21.05.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
  * */
 #ifndef BS_BOS_CORE_DEFAULT_WELL_RATE_CONTROL_FACTORY_H_
 #define BS_BOS_CORE_DEFAULT_WELL_RATE_CONTROL_FACTORY_H_

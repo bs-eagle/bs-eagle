@@ -1,8 +1,11 @@
 /**
- * \file default_well_rate_control_factory.cpp
- * \brief
- * \author Sergey Miryanov
- * \date 21.05.2009
+ *       \file  default_well_rate_control_factory.cpp
+ *      \brief  Impementation of default_well_rate_control_factory
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  21.05.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
  * */
 #include "stdafx.h"
 #include "default_well_rate_control_factory.h"

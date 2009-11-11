@@ -1,8 +1,10 @@
 /**
- * \file default_well.cpp
- * \brief
- * \author Sergey Miryanov
- * \date 20.05.2009
+ *       \file  default_well.cpp
+ *      \brief  Implementation of default_well
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  20.05.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 #include "default_well.h"
@@ -18,6 +20,10 @@
 namespace blue_sky {
 namespace wells {
 
+  /**
+   * \brief  'default' ctor for default_well
+   * \param  param Additional params for ctor
+   * */
   template <typename strategy_t>
   default_well <strategy_t>::default_well (bs_type_ctor_param param /* = NULL */)
   : base_t (param)
@@ -26,6 +32,11 @@ namespace wells {
   {
   }
 
+  /**
+   * \brief  ctor for default_well
+   * \param  well_name Name of well
+   * \todo   Obsolete 
+   * */
   template <typename strategy_t>
   default_well <strategy_t>::default_well (const std::string &well_name)
   : base_t (well_name)
@@ -35,6 +46,10 @@ namespace wells {
 
   }
 
+  /**
+   * \brief  copy-ctor for default_well
+   * \param  w Instance of default_well to be copied
+   * */
   template <typename strategy_t>
   default_well <strategy_t>::default_well (const default_well &w)
         : bs_refcounter (), well < strategy_t> ()
@@ -44,9 +59,19 @@ namespace wells {
 
   namespace detail {
 
+    /**
+     * \class sort_connection_list
+     * \brief Sorts connection list in ASC order
+     * */
     template <typename connection_t>
     struct sort_connection_list : std::binary_function <const connection_t &, const connection_t &, bool>
     {
+      /**
+       * \brief  Sorts connection list in ASC order
+       * \param  lhs
+       * \param  rhs
+       * \return True if n_block of lhs < of n_block of rhs
+       * */
       bool
       operator () (const connection_t &lhs, const connection_t &rhs) const
       {
@@ -248,6 +273,10 @@ namespace wells {
       }
   }
 
+  /**
+   * \brief  Prints rr, pw, rw, wr values of well t
+   * \param  t Instance of default_well
+   * */
   template <typename T>
   void
   print (const T &t)
@@ -276,6 +305,10 @@ namespace wells {
         printf ("wr[%d] = %10.15f\n", i, t->get_wr_value ()[i]);
       }
   }
+  /**
+   * \brief  Prints production and injection rates of T
+   * \param  t Instance of default_well or default_connection
+   * */
   template <typename T>
   void
   print_rate (const T &t)
