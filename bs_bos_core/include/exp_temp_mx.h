@@ -1,8 +1,11 @@
 /**
- * \file exp_temp_mx.h
- * \brief matrix arithmetics on expression templates
- * \author Sergey Miryanov
- * \date 20.10.2008
+ *       \file  exp_temp_mx.h
+ *      \brief  Matrix arithmetics on expression templates
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  20.10.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed or redisigned
  * */
 #ifndef BS_EXPRESSION_TEMPLATES_MATRIX_ARITHMETIC_H_
 #define BS_EXPRESSION_TEMPLATES_MATRIX_ARITHMETIC_H_
@@ -248,10 +251,10 @@ namespace blue_sky
           return block_size_;
         }
 
-      const array_t 			&array_;
-      size_t          		block_size_;
-      size_t							index_;
-      const value_type		*unsafe_array_;
+      const array_t       &array_;
+      size_t              block_size_;
+      size_t              index_;
+      const value_type    *unsafe_array_;
     };
 
   template <typename array_type>
@@ -282,10 +285,10 @@ namespace blue_sky
         return *this;
       }
 
-      const array_t 			&array_;
-      size_t          		block_size_;
-      size_t							index_;
-      const value_type		*unsafe_array_;
+      const array_t       &array_;
+      size_t              block_size_;
+      size_t              index_;
+      const value_type    *unsafe_array_;
     };
 
   template <typename array_type>
@@ -314,8 +317,8 @@ namespace blue_sky
         return *this;
       }
 
-      array_t 			      &array_;
-      size_t          		block_size_;
+      array_t             &array_;
+      size_t              block_size_;
     };
 
   template <typename mx_op_t>
@@ -374,7 +377,7 @@ namespace blue_sky
   struct line_op
     {
       typedef typename line_op_t::value_type value_type;
-      typedef line_op_t												op_t;
+      typedef line_op_t                       op_t;
 
       line_op (const line_op_t &line_op)
           : line_op_ (line_op)
@@ -648,7 +651,7 @@ namespace blue_sky
 
       array_t       lhs_;
       value_type    rhs_;
-      size_t					block_size_;
+      size_t          block_size_;
     };
   template <typename array_type>
   struct clmn_scalar_mul
@@ -740,9 +743,9 @@ namespace blue_sky
   template <typename array_t_>
   struct mx_inverse
     {
-      typedef array_t_												array_t;
-      typedef typename array_t::value_type		value_type;
-      typedef mx_inverse <array_t>						this_t;
+      typedef array_t_                        array_t;
+      typedef typename array_t::value_type    value_type;
+      typedef mx_inverse <array_t>            this_t;
 
       mx_inverse (const array_t &mx, size_t size)
           : mx_ (mx)

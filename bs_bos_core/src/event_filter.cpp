@@ -1,8 +1,10 @@
 /**
- * \file event_filter.cpp
- * \brief impl of
- * \author Sergey Miryanov
- * \date 15.12.2008
+ *       \file  event_filter.cpp
+ *      \brief  Impementation of event_filter
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  15.12.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 #include "event_filter.h"

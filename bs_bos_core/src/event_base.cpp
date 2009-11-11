@@ -1,13 +1,14 @@
 /**
- * @file event_base.h
- * @brief cpp file for event base
- * @author Morozov Andrey
- * @date 2008-06-07
+ *       \file  event_base.cpp
+ *      \brief  Implementation of event_base
+ *     \author  Morozov Andrey
+ *       \date  07.06.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 #include <boost/spirit.hpp>
 #include <boost/spirit/core.hpp>
-//#include <boost/spirit/iterator/file_iterator.hpp>
 
 #include "event_base.h"
 #include "str_functor.h"
@@ -18,6 +19,10 @@ namespace blue_sky {
 
   namespace detail {
 
+    /**
+     * \class str_functor
+     * \brief Handles actions in boost::spirit parser
+     * */
     template <typename T>
     struct str_functor
     {
@@ -42,6 +47,10 @@ namespace blue_sky {
       method_t        method;
     };
 
+    /**
+     * \class char_functor
+     * \brief Handles actions in boost::spirit parser
+     * */
     template <typename T>
     struct char_functor
     {
@@ -74,13 +83,20 @@ namespace blue_sky {
 
   }
 
-  //constructors
+  /**
+   * \brief  'default' ctor for event_base
+   * \param  param Additional params for ctor
+   * */
   template <typename strategy_t>
   event_base<strategy_t>::event_base(bs_type_ctor_param /*param*/)
   {
     num   = 1;
     index = 1;
   }
+  /**
+   * \brief  copy-ctor for event_base
+   * \param  src Instance of event_base to be copied
+   * */
   template <typename strategy_t>
   event_base<strategy_t>::event_base(const event_base& src)
   : bs_refcounter (src), objbase (src)

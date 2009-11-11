@@ -1,10 +1,11 @@
 /**
- * @file event_base.h
- * @brief
- * @author Morozov Andrey
- * @date 2008-06-07
+ *       \file  event_base.h
+ *      \brief  Base class for model events
+ *     \author  Morozov Andrey
+ *       \date  07.06.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
-
 #ifndef EVENT_BASE_H_
 #define EVENT_BASE_H_
 
@@ -22,8 +23,12 @@ namespace blue_sky
   template <typename strategy_t>
   class calc_model;
 
+  /**
+   * \class event_base
+   * \brief Base class for model events
+   * */
   template <typename strategy_t>
-  class BS_API_PLUGIN event_base : public objbase //: public named_pbase//, public combase
+  class BS_API_PLUGIN event_base : public objbase 
     {
       //-----------------------------------------
       //  TYPES
@@ -32,11 +37,11 @@ namespace blue_sky
       //TODO:change objbase to reservoir
       typedef reservoir <strategy_t>          reservoir_t;
       typedef rs_mesh_iface <strategy_t>      mesh_iface_t;
-      typedef calc_model <strategy_t>					calc_model_t;
+      typedef calc_model <strategy_t>         calc_model_t;
 
       typedef smart_ptr <mesh_iface_t , true> sp_mesh_iface_t;
       typedef smart_ptr <reservoir_t, true>   sp_top;
-      typedef smart_ptr <calc_model_t, true>	sp_calc_model_t;
+      typedef smart_ptr <calc_model_t, true>  sp_calc_model_t;
       typedef smart_ptr <named_pbase, true>   sp_named_pbase;
 
       typedef event_base <strategy_t>         self_t;
@@ -51,25 +56,45 @@ namespace blue_sky
       //-----------------------------------------
       //  METHODS
       //-----------------------------------------
-      //blue-sky class declaration
     public:
+      //! blue-sky type declaration
       BLUE_SKY_TYPE_DECL(event_base);
 
     public:
       //! destructor
       virtual ~event_base ();
 
-      virtual void apply(const sp_top &top, const sp_mesh_iface_t &mesh,
-                   const sp_calc_model_t &calc_model) const;										//!< virtual apply function
+      /**
+       * \brief  Applies actions from event
+       * \param  top Pointer to reservoir instance
+       * \param  mesh Pointer to mesh instance
+       * \param  calc_model Pointer to calc_model instance
+       * \return 
+       * */
+      virtual void 
+      apply (const sp_top &top, const sp_mesh_iface_t &mesh, 
+             const sp_calc_model_t &calc_model) const;
 
-      //!< initialization
+      /**
+       * \brief  Inits event
+       * \param  event_name Name of event
+       * \param  params String with event params
+       * */
       void 
       init (const std::string &event_name, const std::string &params);
       
+      /**
+       * \brief  Adds subevent
+       * \param  event_name Name of event
+       * \param  params String with event params
+       * */
       void
       add_next_line (const std::string &event_name, const std::string &params);
 
-      //!< check is keyword (or event) is multiline
+      /**
+       * \brief  Checks is keyword (or event) is multiline
+       * \return True is event is multiline
+       * */
       virtual bool 
       is_multi_line () const
       {
@@ -80,40 +105,70 @@ namespace blue_sky
       
 
 
+      /**
+       * \brief  Returns pointer to main_params instance
+       * \return Instance of named_pbase
+       * */
       virtual sp_named_pbase
       main_params () const
       {
         return 0;
       }
 
+      /**
+       * \brief  Creates params for new subevent and returns it
+       * \return Instance of named_pbase
+       * */
       virtual sp_named_pbase
       add_next_line_params () 
       {
         bs_throw_exception ("PURE CALL");
       }
 
-
-      //!< parameters string parsing
+      /**
+       * \brief  Parses event parameters
+       * \param  params_str String with event parameters that should be parsed
+       * \param  params Parameters holder
+       * */
       void 
       parse (const std::string &params_str, const sp_named_pbase &params);
 
-      //!< functions used by boost spirit parser
+      /**
+       * \brief  Saves default value in parameters holder
+       * \param  params Parameters holder
+       * \param  c _not_used_
+       * */
       void
       save_def (const sp_named_pbase &params, const char c = '_'); //!< skip a default value
 
-      //!< clear num
+      /**
+       * \brief  Resets num (internal parser state)
+       * \param  params Parameters holder
+       * \param  begin Begin of chunk of parsed string
+       * \param  end End of chunk of parsed string
+       * */
       void
       clear_num (const sp_named_pbase &params, const char *begin = 0, const char *end = 0);
       
       //!<simple ..
+      /**
+       * \brief  Saves parsed value to holder
+       * \param  params Parameters holder
+       * \param  first Begin of chunk of parsed string
+       * \param  last End of chunk of parsed string
+       * */
       void 
-      save_value(const sp_named_pbase &params, char const* first, char const* last); //< function saves any income value
+      save_value (const sp_named_pbase &params, char const* first, char const* last); //< function saves any income value
 
       //-----------------------------------------
       //  VARIABLES
       //-----------------------------------------
     private:
 #ifdef _DEBUG
+      /**
+       * \class debug_data
+       * \brief Stores debug data for parser
+       * */
       struct debug_data
       {
         std::string               params;                     //!< event parameters
@@ -128,6 +183,11 @@ namespace blue_sky
       bool                        no_error_;
     };
 
+  /**
+   * \brief  Registers event_base types in blue-sky kernel
+   * \param  pd plugin_descriptor
+   * \return True if all types registered successfully
+   * */
   bool
   event_base_register_types (const plugin_descriptor &pd);
 
