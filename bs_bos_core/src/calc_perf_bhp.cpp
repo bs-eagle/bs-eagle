@@ -1,8 +1,10 @@
 /**
- * \file calc_perf_bhp.h
- * \brief impl of
- * \author Sergey Miryanov
- * \date 18.11.2008
+ *       \file  calc_perf_bhp.cpp
+ *      \brief  Implementation of calc_perf_bhp
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  18.11.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 
@@ -16,11 +18,19 @@
 namespace blue_sky
   {
 
+    /**
+     * \brief  'default' calc_perf_bhp ctor
+     * \param  param additional ctor params
+     * */
   template <typename strategy_t>
   calc_perf_bhp <strategy_t>::calc_perf_bhp(bs_type_ctor_param /*param = NULL */)
   {
 
   }
+  /**
+   * \brief  copy-ctor for calc_perf_bhp
+   * \param  src calc_perf_bhp instance to be copied
+   * */
   template <typename strategy_t>
   calc_perf_bhp<strategy_t>::calc_perf_bhp(const calc_perf_bhp<strategy_t> & /*x*/)
         : bs_refcounter ()
@@ -36,9 +46,9 @@ namespace blue_sky
 
       typedef typename base_t::well_t::connection_t           connection_t;
       typedef typename base_t::well_t::sp_connection_t        sp_connection_t;
-      typedef typename base_t::calc_model_t::sat_d_t					sat_d_t;
-      typedef typename base_t::calc_model_t::phase_d_t				phase_d_t;
-      typedef typename base_t::calc_model_t::data_t						calc_model_data_t;
+      typedef typename base_t::calc_model_t::sat_d_t          sat_d_t;
+      typedef typename base_t::calc_model_t::phase_d_t        phase_d_t;
+      typedef typename base_t::calc_model_t::data_t           calc_model_data_t;
 
       if (well->get_connections_count () == 0)
         {

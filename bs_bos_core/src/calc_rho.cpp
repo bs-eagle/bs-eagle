@@ -1,5 +1,10 @@
 /**
- *
+ *       \file  calc_rho.cpp
+ *      \brief  Implementation of calc_total_average_rho
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  26.09.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 
@@ -14,11 +19,19 @@
 namespace blue_sky
   {
 
+    /**
+     * \brief  'default' ctor for calc_total_average_rho 
+     * \param  param additional ctor params
+     * */
   template <typename strategy_t>
   calc_total_average_rho <strategy_t>::calc_total_average_rho (bs_type_ctor_param /* param = NULL */)
   {
   }
 
+  /**
+   * \brief  copy-ctor for calc_total_average_rho
+   * \param  rhs calc_total_average_rho instance to be copied
+   * */
   template <typename strategy_t>
   calc_total_average_rho <strategy_t>::calc_total_average_rho (const calc_total_average_rho &rhs)
         : bs_refcounter ()

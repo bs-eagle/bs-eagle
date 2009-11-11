@@ -1,6 +1,8 @@
 /**
  *       \file  calc_model.h
  *      \brief  calc_model declaration
+ *     \author  Max Nikonov
+ *       \date  07.07.2008
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
@@ -69,7 +71,7 @@ namespace blue_sky
       typedef typename strategy_t::item_t         item_t;         //!< item type (floating point)
       typedef typename strategy_t::item_array_t   item_array_t;   //!< type for array of item_t values
       //! type for array of main_var_type values
-      typedef typename strategy_t::template vec <main_var_type>::type main_var_array_t
+      typedef typename strategy_t::template vec <main_var_type>::type main_var_array_t;
       typedef calc_model <strategy_t>             calc_model_t;   //!< calc_model type
       typedef smart_ptr <calc_model_t, true>      sp_calc_model_t;//!< smart_ptr to calc_model type
 
@@ -179,6 +181,7 @@ namespace blue_sky
       typedef boost::array <index_t, FI_PHASE_TOT>      phase_d_t;                //!< type for array of shifts for each phase
       typedef boost::array <index_t, FI_PHASE_TOT>      sat_d_t;                  //!< type for array of shifts for each phase, for saturation
       typedef norms_storage <strategy_t>                norms_storage_t;          //!< norms_storage type
+      typedef boost::array <item_t, FI_PHASE_TOT>       invers_fvf_avgerage_t;    //!< type for store invers_fvf_average value (by phase)
 
       //! type for array of main_var_type values
       typedef typename strategy_t::template vec <main_var_type>::type  main_var_array_t;

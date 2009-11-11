@@ -1,8 +1,10 @@
 /**
- * \file calc_well.cpp
- * \brief impl of
- * \author Sergey Miryanov
- * \date 23.06.2008
+ *       \file  calc_well.cpp
+ *      \brief  Impementation of base well class
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  23.06.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 #include "calc_well.h"

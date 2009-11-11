@@ -273,7 +273,7 @@ namespace blue_sky
       end_jacobian (item_t dt, const sp_calc_model_t &calc_model, sp_jacobian_t &jacobian);
 
       /**
-       * \brief  for each facility calss restore_solution
+       * \brief  for each facility calls restore_solution
        * \param  dt
        * \param  p_sol primary solution vector
        * \param  s_sol secondary solution vector

@@ -1,7 +1,7 @@
 /**
  *       \file  event_manager.cpp
  *      \brief  event_manager functions
- *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *     \author  Morozov Andrey
  *       \date  07.06.2008
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.

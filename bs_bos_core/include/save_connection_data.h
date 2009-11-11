@@ -23,9 +23,6 @@ namespace blue_sky
       typedef typename calc_model_t::item_t                                           item_t;
       typedef typename calc_model_t::item_array_t                                     item_array_t;
       typedef typename strategy_t::rhs_item_array_t                                   rhs_item_array_t;
-      typedef typename calc_model_t::helper_t::item_rr_block_t                        item_rr_block_t;
-      typedef typename calc_model_t::helper_t::item_rw_block_t                        item_rw_block_t;
-      typedef typename calc_model_t::helper_t::item_wr_block_t                        item_wr_block_t;
       typedef typename calc_model_t::connection_t                                     connection_t;
       typedef typename calc_model_t::well_t                                           well_t;
       typedef typename calc_model_t::reservoir_t::facility_manager_t::well_const_iterator_t well_iterator_t;

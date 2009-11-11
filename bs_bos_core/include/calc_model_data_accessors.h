@@ -1,8 +1,15 @@
 /**
- * \file calc_model_data_accessors.h
- * \brief accessor for calc_model data
- * \author Sergey Miryanov
- * \date 12.11.2008
+ *       \file  calc_model_data_accessors.h
+ *      \brief  Accessors for calc_model data, can check invalid access to 
+ *              data at compile time.
+ *    \details  Uses Boost::Preprocessor to generate for each accessor 
+ *              a number of template classes that specialized for valid
+ *              phase values.
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  12.11.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Deprecated due performance reasons
  * */
 #ifndef BS_CALC_MODEL_DATA_ACCESSORS_H_
 #define BS_CALC_MODEL_DATA_ACCESSORS_H_
@@ -19,7 +26,7 @@ namespace blue_sky
     static typename strategy_t::item_t                                                                              \
     get (const calc_model_data <strategy_t> &data, const boost::array <int, FI_PHASE_TOT> &phase_d)                 \
     {                                                                                                               \
-			BS_ASSERT (phase_d[phase] != -1) (phase);																																			\
+      BS_ASSERT (phase_d[phase] != -1) (phase);                                                                     \
       return data.name [phase_d[phase]];                                                                            \
     }                                                                                                               \
   };
@@ -32,8 +39,8 @@ namespace blue_sky
     static typename strategy_t::item_t                                                                              \
     get (const calc_model_data <strategy_t> &data, const boost::array <int, FI_PHASE_TOT> &phase_d, int n_phases)   \
     {                                                                                                               \
-			BS_ASSERT (phase_d[phase1] != -1) (phase1);																																		\
-			BS_ASSERT (phase_d[phase2] != -1) (phase2);																																		\
+      BS_ASSERT (phase_d[phase1] != -1) (phase1);                                                                   \
+      BS_ASSERT (phase_d[phase2] != -1) (phase2);                                                                   \
       return data.name [phase_d[phase1] * n_phases + phase_d[phase2]];                                              \
     }                                                                                                               \
   };
@@ -76,8 +83,8 @@ namespace blue_sky
     static typename strategy_t::item_t                                                                              \
     get (const calc_model_data <strategy_t> &data, const boost::array <int, FI_PHASE_TOT> &phase_d)                 \
     {                                                                                                               \
-			class inclomplete_type_1;																	                                               			\
-			inclomplete_type_1 invalid_phase_value;                    																										\
+      class inclomplete_type_1;                                                                                     \
+      inclomplete_type_1 invalid_phase_value;                                                                       \
     }                                                                                                               \
   };                                                                                                                \
   BOOST_PP_SEQ_FOR_EACH (DEF_FUN_I, name, BOOST_PP_TUPLE_TO_SEQ (ts, tp))
@@ -88,10 +95,10 @@ namespace blue_sky
   {                                                                                                                 \
     template <typename strategy_t>                                                                                  \
     static typename strategy_t::item_t                                                                              \
-    get (const calc_model_data <strategy_t> &data, const boost::array <int, FI_PHASE_TOT> &phase_d, int n_phases)		\
-		{                                              																																	\
-			class inclomplete_type_1;																	                                               			\
-			inclomplete_type_1 invalid_phase_value;                    																										\
+    get (const calc_model_data <strategy_t> &data, const boost::array <int, FI_PHASE_TOT> &phase_d, int n_phases)   \
+    {                                                                                                               \
+      class inclomplete_type_1;                                                                                     \
+      inclomplete_type_1 invalid_phase_value;                                                                       \
     }                                                                                                               \
   };                                                                                                                \
   DEF_FUN_2_I (name, ts1, tp1, ts2, tp2)
@@ -102,10 +109,10 @@ namespace blue_sky
   {                                                                                                                 \
     template <typename strategy_t>                                                                                  \
     static typename strategy_t::item_t                                                                              \
-    get (const calc_model_data <strategy_t> &data, const boost::array <int, FI_PHASE_TOT> &phase_d)									\
+    get (const calc_model_data <strategy_t> &data, const boost::array <int, FI_PHASE_TOT> &phase_d)                 \
     {                                                                                                               \
-			class inclomplete_type_1;																	                                               			\
-			inclomplete_type_1 invalid_phase_value;                    																										\
+      class inclomplete_type_1;                                                                                     \
+      inclomplete_type_1 invalid_phase_value;                                                                       \
     }                                                                                                               \
   };                                                                                                                \
   BOOST_PP_SEQ_FOR_EACH (DEF_FUN_PAIR_I, (name, name1, name2), BOOST_PP_TUPLE_TO_SEQ (ts, tp))

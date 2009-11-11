@@ -1,6 +1,8 @@
 /**
  *       \file  calc_model.cpp
  *      \brief  calc_model implementation
+ *     \author  Max Nikonov
+ *       \date  07.07.2008
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */

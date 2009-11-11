@@ -1,8 +1,10 @@
 /**
- * \file calc_well.h
- * \brief calculated wells
- * \author Sergey Miryanov
- * \date 23.06.2008
+ *       \file  calc_well.h
+ *      \brief  Base class for wells
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  23.06.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_CALC_WELL_H_
 #define BS_CALC_WELL_H_
@@ -48,10 +50,14 @@ namespace blue_sky
   ///////////////////////////////////////////////////////////////////////////
 
   ///////////////////////////////////////////////////////////////////////////
+  /**
+   * \enum  well_state_type
+   * \brief Type of well status
+   * */
   enum well_state_type
   {
-    well_open,
-    well_shut,
+    well_open,          //!< Well is open
+    well_shut,          //!< Well is shut
 
     well_state_total,
   };
@@ -60,13 +66,21 @@ namespace blue_sky
   well_state_cast (const std::string &str);
   ///////////////////////////////////////////////////////////////////////////
 
+  /**
+   * \class well_state
+   * \brief Incapsulates state of well
+   * */
   template <typename strategy_t>
   struct well_state
     {
-      auto_value <well_state_type, well_open>   state;
-      auto_value <bool, false>                  is_work;
+      auto_value <well_state_type, well_open>   state;    //!< Status of well directed by model
+      auto_value <bool, false>                  is_work;  //!< Is well work by inner state
     };
 
+  /**
+   * \class well
+   * \brief Base class for wells
+   * */
   template <typename strategy_t>
   class BS_API_PLUGIN well : public facility_base<strategy_t>
     {
@@ -128,181 +142,503 @@ namespace blue_sky
       typedef smart_ptr <fi_params, true>               sp_params_t;
 
     public:
+      /**
+       * \brief  Adds connection (perforation) to well and return it
+       * \param  i_coord i coordinate of perforation
+       * \param  j_coord j coordinate of perforation
+       * \param  k_coord k coordinate of perforation
+       * \param  n_block Index of block (cell) in mesh for (i, j, k) coordinates
+       * \return Created connection
+       * */
       virtual sp_connection_t 
       add_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
       {
         bs_throw_exception ("PURE CALL");
       }
+      /**
+       * \brief  Returns connection (perforation) with index idx
+       * \param  idx Index of connection
+       * \return connection instance on success otherwise null pointer
+       * */
       virtual sp_connection_t
       get_connection (index_t idx) const
       {
         bs_throw_exception ("PURE CALL");
       }
+      /**
+       * \brief  Returns connection (perforation) with n_block
+       * \param  n_block Value of block index
+       * \return connection instance on success otherwise null pointer
+       * */
       virtual sp_connection_t
       get_connection_map (index_t n_block) const
       {
         bs_throw_exception ("PURE CALL");
       }
+      /**
+       * \brief  Returns count of connection (perforation) for well
+       * \return Count of connections
+       * */
       virtual size_t 
       get_connections_count () const
       {
         bs_throw_exception ("PURE CALL");
       }
 
-      void set_coord (index_t i_coord, index_t j_coord);
-      void set_bhp_depth (item_t bhp_depth);
-      void set_state (well_state_type well_state, const sp_calc_model_t &calc_model);
-      void set_exploitation_factor (item_t exploitation_factor);
+      /**
+       * \brief  Sets coordinates of heel
+       * \param  i_coord i coordinate of heel
+       * \param  j_coord j coordinate of heel
+       * */
+      void 
+      set_coord (index_t i_coord, index_t j_coord);
 
-      void set_controller (sp_well_controller_t controller);
-      void set_limit_operation (sp_well_limit_operation_t limit_operation);
+      /**
+       * \brief  Sets BHP reference depth
+       * \param  bhp_depth BHP reference depth
+       * */
+      void 
+      set_bhp_depth (item_t bhp_depth);
 
-      sp_well_controller_t get_controller () const;
-      sp_well_limit_operation_t get_limit_operation () const;
+      /**
+       * \brief  Sets initial state of well
+       * \param  well_state initial well state
+       * \param  calc_model
+       * */
+      void 
+      set_state (well_state_type well_state, const sp_calc_model_t &calc_model);
 
-      const std::string &get_name () const;
-      void set_name (const std::string &name);
+      /**
+       * \brief  Sets exploitation factor (wefac)
+       * \param  exploitation_factor 
+       * \todo   Should be renamed to wefac
+       * */
+      void 
+      set_exploitation_factor (item_t exploitation_factor);
 
-      item_t get_bhp_depth () const
+      /**
+       * \brief  Sets well controller
+       * \param  controller Pointer to well_control instance
+       * */
+      void 
+      set_controller (sp_well_controller_t controller);
+
+      /**
+       * \brief  Sets well limit operation - operation that 
+       *         should be performed if well limits reached
+       * \param  limit_operation Pointer to well_limit_operation instance
+       * */
+      void 
+      set_limit_operation (sp_well_limit_operation_t limit_operation);
+
+      /**
+       * \brief  Returns well_controler instance
+       * \return well_controller instance
+       * */
+      sp_well_controller_t 
+      get_controller () const;
+
+      /**
+       * \brief  Returns well_limit_operation instance
+       * \return well_limit_operation instance
+       * */
+      sp_well_limit_operation_t 
+      get_limit_operation () const;
+
+      /**
+       * \brief  Returns name of the well
+       * \return Name of the well
+       * */
+      const std::string &
+      get_name () const;
+
+      /**
+       * \brief  Sets name of the well
+       * \param  name Name of the well
+       * */
+      void 
+      set_name (const std::string &name);
+
+      /**
+       * \brief  Returns BHP reference depth
+       * \return Value of BHP reference depth
+       * */
+      item_t 
+      get_bhp_depth () const
         {
           return bhp_depth_;
         }
 
-      item_t bhp () const
+      /**
+       * \brief  Returns BHP value
+       * \return Value of BHP
+       * */
+      item_t 
+      bhp () const
         {
           return bhp_;
         }
 
-      const rate_data_t &rate () const
+      /**
+       * \brief  Returns rate data
+       * \return Rate data
+       * */
+      const rate_data_t &
+      rate () const
         {
           return rate_;
         }
-      const rate_data_t &rate_total () const
+      /**
+       * \brief  Returns total rate data
+       * \return Total rate data
+       * */
+      const rate_data_t &
+      rate_total () const
         {
           return rate_total_;
         }
 
+      /**
+       * \brief  Returns production part of rate data
+       * \return Production part of rate data
+       * */
       const rate_data_inner_t &
       rate_prod () const
       {
         return rate_.prod;
       }
+      /**
+       * \brief  Returns injection part of rate data
+       * \return Injection part of rate data
+       * */
       const rate_data_inner_t &
       rate_inj () const
       {
         return rate_.inj;
       }
 
-      bool is_open () const
+      /**
+       * \brief  Checks if well is open
+       * \return True if well is open otherwise false
+       * */
+      bool 
+      is_open () const
         {
           if (well_state_.state == well_open)
             return true;
           return false;
         }
 
-      const std::string &name () const;
+      /**
+       * \brief  Returns name of the well
+       * \return Name of the well
+       * */
+      const std::string &
+      name () const;
 
-      void set_bhp (item_t bhp);
+      /**
+       * \brief  Sets value of BHP
+       * \param  bhp Value of BHP 
+       * */
+      void 
+      set_bhp (item_t bhp);
 
-      bool fi_check_limits () const;
+      /**
+       * \todo May be this method is obsolete
+       * */
+      bool 
+      fi_check_limits () const;
 
-      item_t get_reference_depth (const sp_mesh_iface_t &mesh) const;
-      item_t get_reference_pressure () const;
+      /**
+       * \brief  Returns calculated reference depth
+       * \param  mesh
+       * \return Value of calculated reference depth
+       * */
+      item_t 
+      get_reference_depth (const sp_mesh_iface_t &mesh) const;
 
-      bool check_connections_bhp (const item_array_t &pressure) const;
+      /**
+       * \brief  Returns BHP value
+       * \return BHP value
+       * */
+      item_t 
+      get_reference_pressure () const;
 
-      bool is_bhp () const;
-      bool is_rate () const;
-      bool is_shut () const;
+      /**
+       * \brief  Checks connections BHP
+       * \param  pressure Array of pressure
+       * \return True if any connection have valid BHP value otherwise false
+       * */
+      bool 
+      check_connections_bhp (const item_array_t &pressure) const;
 
-      const sp_well_controller_t &get_well_controller () const;
+      /**
+       * \brief  Returns true if well controlled by BHP
+       * \return True if well controlled by BHP
+       * */
+      bool 
+      is_bhp () const;
 
-      item_t get_input_rate () const;
+      /**
+       * \brief  Returns true if well controlled by rate
+       * \return True if well controlled by rate
+       * */
+      bool 
+      is_rate () const;
 
-      bool check_shut (const sp_calc_model_t &calc_model);
+      /**
+       * \brief  Returns true is well is shuted
+       * \return True if well state is shut
+       * */
+      bool 
+      is_shut () const;
 
-      void reset_init_approx ();
+      /**
+       * \brief  Returns well_controller instance
+       * \return Pointer to well_controller instance
+       * */
+      const sp_well_controller_t &
+      get_well_controller () const;
 
-      virtual array_ext <item_t> get_ww_value ();
-      virtual array_ext <item_t> get_bw_value ();
+      /**
+       * \brief  Returns input rate (from well_controller)
+       * \return Input rate
+       * */
+      item_t 
+      get_input_rate () const;
 
-      virtual void eliminate      (rhs_item_t *array, index_t rw_index, index_t wr_index, double dt, index_t block_size) const;
-      virtual void process        (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix);
-      virtual void clear_data     ();
+      /**
+       * \brief  Checks well on shut if not shut fills 
+       *         open_connections_ array
+       * \param  calc_model (obsolete, should be removed)
+       * \return True if well is shut
+       * */
+      bool 
+      check_shut (const sp_calc_model_t &calc_model);
 
-      virtual void fill_rows (index_array_t &rows) const;
-      virtual void fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const;
-      virtual void fill_rhs (double dt, index_t n_phases, bool is_g, bool is_o, bool is_w, rhs_item_array_t &rhs) const;
-      virtual void restore_solution (double dt, const item_array_t &p_sol, const item_array_t &s_sol, index_t block_size);
+      /**
+       * \brief  Resets init_approx_is_calc_ flag
+       * */
+      void 
+      reset_init_approx ();
 
-      virtual void custom_init (const sp_calc_model_t &mdl);
+      /**
+       * \brief  Returns ww_value
+       * \todo   Obsolete, should be removed
+       * */
+      virtual array_ext <item_t> 
+      get_ww_value ();
 
-      virtual void pre_large_step (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh);
-      virtual void pre_small_step ();
-      virtual void pre_newton_step ();
-      virtual void restart_small_step ();
-      virtual void restart_newton_step ();
+      /**
+       * \brief  Returns bw_value
+       * \todo   Obsolete, should be removed 
+       * */
+      virtual array_ext <item_t> 
+      get_bw_value ();
 
+      /**
+       * \brief  Calculates Jacobian value and stores it in array
+       * \param  array Array of Jacobian values
+       * \param  rw_index
+       * \param  wr_index
+       * \param  dt
+       * \param  block_size
+       * */
+      virtual void 
+      eliminate (rhs_item_t *array, index_t rw_index, index_t wr_index, double dt, index_t block_size) const;
+
+      /**
+       * \brief  Calculates rate and deriv values for well and 
+       *         well perforations (connections)
+       * \param  is_start 
+       * \param  dt
+       * \param  calc_model
+       * \param  mesh
+       * \param  jmatrix
+       * */
+      virtual void 
+      process (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix);
+
+      /**
+       * \brief  Clears well and well perforations data
+       * */
+      virtual void 
+      clear_data ();
+
+      /**
+       * \brief  Fills Jacobian rows
+       * \param  rows Array of Jacobian Rows
+       * */
+      virtual void 
+      fill_rows (index_array_t &rows) const;
+
+      /**
+       * \brief  Fills Jacobian colls and values, uses eliminate for 
+       *         fill values
+       * \param  dt
+       * \param  block_size
+       * \param  rows
+       * \param  cols
+       * \param  values
+       * \param  markers
+       * */
+      virtual void 
+      fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const;
+
+      /**
+       * \brief  Fills rhs array with rate values
+       * \param  dt
+       * \param  n_phases
+       * \param  is_g
+       * \param  is_o
+       * \param  is_w
+       * \param  rhs Array of rhs values
+       * */
+      virtual void 
+      fill_rhs (double dt, index_t n_phases, bool is_g, bool is_o, bool is_w, rhs_item_array_t &rhs) const;
+
+      /**
+       * \brief  Restores solution
+       * \param  dt
+       * \param  p_sol primary solution vector
+       * \param  s_sol secondary solution vector
+       * \param  block_size size of one block in vectors
+       * */
+      virtual void 
+      restore_solution (double dt, const item_array_t &p_sol, const item_array_t &s_sol, index_t block_size);
+
+      /**
+       * \brief  Custom init
+       * \param  mdl Pointer to calc_model instance
+       * \todo   Specify more details
+       * */
+      virtual void 
+      custom_init (const sp_calc_model_t &mdl);
+
+      /**
+       * \brief  Performs actions before start of each large step
+       * \param  calc_model
+       * \param  mesh
+       * */
+      virtual void 
+      pre_large_step (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh);
+
+      /**
+       * \brief  Performs actions before start of each small step
+       * */
+      virtual void 
+      pre_small_step ();
+
+      /**
+       * \brief  Performs actions before start of each newton step
+       * */
+      virtual void 
+      pre_newton_step ();
+
+      /**
+       * \brief  Restores 'internal-state' of well if small step failed
+       * */
+      virtual void 
+      restart_small_step ();
+
+      /**
+       * \brief  Restores 'internal-state' of well if newton step failed
+       * */
+      virtual void 
+      restart_newton_step ();
+
+      /**
+       * \brief  well dtor
+       * */
       virtual ~well ();
 
+      /**
+       * \brief  well ctor
+       * \param  name of new well
+       * \todo   Obsolete
+       * */
       well (const std::string &well_name);
 
     public:
+      //! blue-sky type declaration
       BLUE_SKY_TYPE_DECL_T (well <strategy_t>);
 
     protected:
 
-      void shut_well (const sp_calc_model_t &well);
-      void reset_rhs_block ();
+      /**
+       * \brief  Shuts well, sets bulkp and bhp values
+       *         for each perforation (connection) to
+       *         value of calc_model pressure
+       * \param  calc_model
+       * */
+      void 
+      shut_well (const sp_calc_model_t &well);
 
-      void compute_connection_factor (const physical_constants &internal_constants,
-                                      const sp_params_t &params,
-                                      const sp_mesh_iface_t &mesh,
-                                      const item_array_t &perm,
-                                      const item_array_t &ntg,
-                                      bool ro_calc_flag);
+      /**
+       * \brief  Computes perforations (connections) factor
+       * \param  internal_constants
+       * \param  params
+       * \param  mesh
+       * \param  perm
+       * \param  ntg
+       * \param  ro_calc_flag
+       * \return 
+       * */
+      void 
+      compute_connection_factor (const physical_constants &internal_constants,
+                                 const sp_params_t &params,
+                                 const sp_mesh_iface_t &mesh,
+                                 const item_array_t &perm,
+                                 const item_array_t &ntg,
+                                 bool ro_calc_flag);
 
     public:
 
-      std::string                 name_;
+      std::string                 name_;                      //!< Name of the well
 
-      auto_value <index_t, -1>    i_coord_;
-      auto_value <index_t, -1>    j_coord_;
+      auto_value <index_t, -1>    i_coord_;                   //!< i coordinate of hell (well head)
+      auto_value <index_t, -1>    j_coord_;                   //!< j coordinate of hell (well head)
 
-      sp_well_controller_t        well_controller_;
+      sp_well_controller_t        well_controller_;           //!< well_controller instance
 
 //  private:
     public:
-      auto_value <item_t, -1>     bhp_depth_;
-      auto_value <item_t, 1>      exploitation_factor_;
+      auto_value <item_t, -1>     bhp_depth_;                 //!< BHP reference depth
+      auto_value <item_t, 1>      exploitation_factor_;       //!< Exploitation factor (wefac)
 
-      well_state_t                well_state_;
-      well_state_t                saved_well_state_;
-      well_state_t                saved_niter_well_state_;
+      well_state_t                well_state_;                //!< State of well
+      well_state_t                saved_well_state_;          //!< State of well on begin of small (or large) step
+      well_state_t                saved_niter_well_state_;    //!< State of well on begin of newton step
 
-      sp_well_limit_operation_t   well_limit_operation_;
+      sp_well_limit_operation_t   well_limit_operation_;      //!< well_limit_operation instance
 
-      rate_data_t                 rate_;
-      rate_data_t                 rate_total_;
-      rate_data_t                 rate_rc_;
+      rate_data_t                 rate_;                      //!< Rate data 
+      rate_data_t                 rate_total_;                //!< Total rate data (from begin of simulation)
+      rate_data_t                 rate_rc_;                   //!< Rate data in reservoir conditions
 
-      item_t                      bhp_;
-      item_t                      gor_;
-
-    protected:
-
-      auto_value <bool, false>    init_approx_is_calc_;
-      auto_value <item_t>         input_reference_depth_;
-
-      sp_calc_well_pressure_t     calc_well_pressure_;
-      sp_calc_rho_t               calc_rho_;
-      sp_calc_perf_density_t      calc_perf_density_;
-      sp_calc_perf_bhp_t          calc_perf_bhp_;
+      item_t                      bhp_;                       //!< BHP value
+      item_t                      gor_;                       //!< gas_oil_ratio value
 
     protected:
-      index_array_t               open_connections_;
+
+      auto_value <bool, false>    init_approx_is_calc_;       //!< Flag that specified should initial approximation calculated
+      auto_value <item_t>         input_reference_depth_;     //!< \todo Should be removed
+
+      sp_calc_well_pressure_t     calc_well_pressure_;        //!< Instance of object that calculates well pressure
+      sp_calc_rho_t               calc_rho_;                  //!< \todo Should be removed
+      sp_calc_perf_density_t      calc_perf_density_;         //!< Instance of object that calculates well perforations density
+      sp_calc_perf_bhp_t          calc_perf_bhp_;             //!< Instance of object that calculates well perforations BHP
+
+    protected:
+      index_array_t               open_connections_;          //!< Array of indexes of open perforations (connections)
     };
 
+  /**
+   * \class well_factory
+   * \brief Creates wells and perforations
+   * \todo  create_connection should be removed because
+   *        perforations now created in add_connection
+   * */
   template <typename strategy_t>
   class BS_API_PLUGIN well_factory : public objbase
     {
@@ -315,17 +651,43 @@ namespace blue_sky
 
     public:
 
+      /**
+       * \brief  well_factory dtor
+       * */
       virtual ~well_factory () {}
 
-      virtual sp_well_t             create_well (const std::string &group_name, const std::string &well_name) const;
-      virtual sp_connection_t create_connection () const;
+      /**
+       * \brief  Creates well with name well_name and in group group_name
+       * \param  group_name Name of group to which the well belongs
+       * \param  well_name Name of well
+       * \return Instance of well
+       * */
+      virtual sp_well_t
+      create_well (const std::string &group_name, const std::string &well_name) const;
 
+      /**
+       * \todo   Obsolete, should be removed
+       * */
+      virtual sp_connection_t
+      create_connection () const;
+
+      //! blue-sky type declaration
       BLUE_SKY_TYPE_DECL_T (well_factory <strategy_t>);
     };
 
+  /**
+   * \brief  Registers well types in blue-sky kernel
+   * \param  pd plugin_desriptor
+   * \return True if all types registered successfully
+   * */
   bool
   calc_well_register_types (const blue_sky::plugin_descriptor &pd);
 
+  /**
+   * \brief  Registers well factory types in blue-sky kernel
+   * \param  pd plugin_desriptor
+   * \return True if all types registered successfully
+   * */
   bool
   well_factory_register_type (const blue_sky::plugin_descriptor &pd);
 
