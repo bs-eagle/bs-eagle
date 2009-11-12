@@ -1,5 +1,12 @@
 /**
- *
+ *       \file  main_loop_calc.h
+ *      \brief  Main calculation loop implementation
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  04.09.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Split and move implementation to src/
+ *       \todo  Describe data members
  * */
 #ifndef BS_MAIN_LOOP_CALC_H_
 #define BS_MAIN_LOOP_CALC_H_
@@ -34,20 +41,43 @@ namespace blue_sky
   {
 
   template <typename strategy_t>
+    /**
+     * \class main_loop_calc_base
+     * \brief Base interface for main_loop calculation 
+     *        implementation
+     * \todo  Should be renamed to main_loop_calc_iface
+     * */
   struct main_loop_calc_base
   {
     typedef event_manager <strategy_t>                    event_manager_t;
     typedef typename event_manager_t::sp_event_base_list  sp_event_base_list_t;
 
+  public:
+    /**
+     * \brief  dtor
+     * */
     virtual ~main_loop_calc_base () {}
 
+    //! Prepares calculation
     virtual void ready () = 0;
+    //! Starts calculation loop
     virtual void go ()    = 0;
+    //! Ends calculation
     virtual void end ()   = 0;
 
-    virtual void apply_events (const sp_event_base_list_t &) = 0;
+    //! Applies model events on each step
+    /**
+     * \brief  Applies model events on each step
+     * \param  event_list
+     * */
+    virtual void 
+    apply_events (const sp_event_base_list_t &) = 0;
   };
 
+  /**
+   * \class main_loop_calc
+   * \brief Main calculation loop implementation
+   * */
   template <typename strategy_t, bool is_w, bool is_g, bool is_o>
   struct main_loop_calc : public main_loop_calc_base <strategy_t>
     {
@@ -66,7 +96,7 @@ namespace blue_sky
       typedef jacobian <strategy_t>                         jacobian_t;
       typedef reservoir_simulator <strategy_t>              reservoir_simulator_t;
       typedef idata                                         idata_t;
-      typedef typename calc_model_t::scal_3p_t							scal_3p_t;
+      typedef typename calc_model_t::scal_3p_t              scal_3p_t;
       typedef jacobian_matrix <strategy_t>                  jmatrix_t;
 
       typedef typename event_manager_t::sp_event_base_list  sp_event_base_list_t;
@@ -82,11 +112,17 @@ namespace blue_sky
       typedef smart_ptr <data_storage_interface, true>      sp_storage_t;
       typedef smart_ptr <reservoir_simulator_t, true>       sp_rs_t;
       typedef smart_ptr <idata_t, true>                     sp_idata_t;
-      typedef typename calc_model_t::sp_scal3p							sp_scal3p_t;
+      typedef typename calc_model_t::sp_scal3p              sp_scal3p_t;
       typedef smart_ptr <jmatrix_t, true>                   sp_jmatrix_t;
 
       typedef boost::posix_time::ptime                      ptime;
 
+    public:
+      /**
+       * \brief  ctor
+       * \param  rs Instance of reservoir_simulator to which
+       *            calculation will be performed
+       * */
       main_loop_calc (const sp_rs_t &rs)
           : rs_ (rs)
           , calc_model_ (rs->cm)
@@ -137,6 +173,10 @@ namespace blue_sky
           }
       }
 
+      /**
+       * \brief  Inits fi_operator
+       * \param  i
+       * */
       inline void
       fi_operator_cells (index_t i)
       {
@@ -145,6 +185,10 @@ namespace blue_sky
         fi_operator_impl_.fi_operator_init (i, dt_);
       }
 
+      /**
+       * \brief  Applies model events
+       * \param  event_list
+       * */
       inline void
       apply_events (const sp_event_base_list_t &event_list)
       {
@@ -157,12 +201,19 @@ namespace blue_sky
           }
       }
 
+      /**
+       * \brief  Calls compute_jacobian from reservoir
+       * */
       inline void
       compute_jacobian ()
       {
         reservoir_->compute_jacobian (calc_model_);
       }
 
+      /**
+       * \brief  Returns new time-step value
+       * \return New time-step value
+       * */
       inline item_t
       get_dt () const
         {
@@ -195,12 +246,19 @@ namespace blue_sky
             }
         }
 
+      /**
+       * \brief  Custom initialization of wells
+       * \param  calc_model
+       * */
       inline void
       init_custom_wells (const sp_calc_model_t &calc_model)
       {
         reservoir_->init_custom_wells (calc_model);
       }
 
+      /**
+       * \brief  Small-step loop
+       * */
       inline void
       process_small_steps ()
       {
@@ -245,6 +303,10 @@ namespace blue_sky
           }
       }
 
+      /**
+       * \brief  Called if newton iteration failed
+       * \param  ret_code Return code from newton iteration
+       * */
       BS_FORCE_INLINE
       void
       newton_iter_fail (size_t ret_code)
@@ -273,6 +335,9 @@ namespace blue_sky
         do_calc_prev_fluid_volume_ = false;
         rs_->on_newton_iter_fail ();
        }
+      /**
+       * \brief  Called if newton iteration successed
+       * */
       BS_FORCE_INLINE
       void
       newton_iter_success ()
@@ -297,6 +362,10 @@ namespace blue_sky
         rs_->on_newton_iter_success ();
       }
 
+      /**
+       * \brief  Saves info about newton iteration
+       * \todo   Obsolete, should be removed  
+       * */
       inline void
       save_newton_iter_info ()
       {
@@ -310,6 +379,10 @@ namespace blue_sky
         fflush (file);
       }
 
+      /**
+       * \brief  Saves saturation values to file
+       * \todo   Obsolete, should be removed  
+       * */
       void
       print_saturation ()
       {
@@ -317,6 +390,10 @@ namespace blue_sky
         ++iter_counter;
         tools::save_seq_vector (tools::string_formater ("nw_saturation.bs.%d.txt", iter_counter).str).save (calc_model_->saturation_3p);
       }
+      /**
+       * \brief  Saves pressure values to file
+       * \todo   Obsolete, should be removed  
+       * */
       void
       print_pressure ()
       {
@@ -325,6 +402,10 @@ namespace blue_sky
         tools::save_seq_vector (tools::string_formater ("nw_pressure.bs.%d.txt", iter_counter).str).save (calc_model_->pressure);
       }
 
+      /**
+       * \brief  Saves volume values to file
+       * \todo   Obsolete, should be removed  
+       * */
       void
       print_volume ()
       {
@@ -414,29 +495,53 @@ namespace blue_sky
         BS_ASSERT (false && "NOT IMPL YET. IN OLD CODE TOO.");
       }
 
+      /**
+       * \brief  Returns number of maximum newton iterations 
+       *         (fi_params::NEWTON_ITERS_NUM)
+       * \return Number of newton iterations
+       * */
       inline item_t
       get_newton_iters_num () const
         {
           return params_->get_int (fi_params::NEWTON_ITERS_NUM);
         }
 
+      /**
+       * \brief  Returns maximum (?) pressure value
+       * \return Maximum (?) pressure value
+       * */
       inline item_t
       get_clamp_pressure () const
         {
           return params_->get_bool (fi_params::CLAMP_PRESSURE);
         }
 
+      /**
+       * \brief  Returns maximum linear solver tolerance 
+       *         (fi_params::MAX_ALLOWED_LIN_SOLV_RESID)
+       * \return Maximum linear solver tolerance
+       * */
       inline item_t
       get_max_tolerance () const
         {
           return params_->get_float (fi_params::MAX_ALLOWED_LIN_SOLV_RESID);
         }
 
+      /**
+       * \brief  Returns minimum value of time-step
+       *         (fi_params::MIN_TS)
+       * \return Minimum value of time-step
+       * */
       inline item_t
       get_small_ts () const
         {
           return 10 * params_->get_float (fi_params::MIN_TS);
         }
+      /**
+       * \brief  Return value of first time-step
+       *         (fi_params::FIRST_TS)
+       * \return Value of first time-step
+       * */
       inline item_t
       get_first_ts () const
         {
@@ -445,6 +550,11 @@ namespace blue_sky
           //return params_->check_value (fi_params::FIRST_TS);
         }
 
+      /**
+       * \brief  Returns number of maximum newton iterations 
+       *         (fi_params::APPROX_STEPS or fi_params::NEWTON_ITERS_NUM)
+       * \return Number of maximum newton iterations
+       * */
       inline index_t
       get_n_max_iters () const
       {
@@ -459,6 +569,14 @@ namespace blue_sky
         return 1;
       }
 
+      /**
+       * \brief  Calculates one small step
+       * \param  fi_operator Instance of fi_operator_impl
+       * \param  jacobian_impl_
+       * \param  nniters
+       * \param  nliters
+       * \return Number of newton iteration was performed
+       * */
       inline index_t
       compute_small_time_step (fi_operator_impl <strategy_t, is_w, is_g, is_o> &fi_operator,
         jacobian_impl <strategy_t> &jacobian_impl_,
@@ -554,12 +672,26 @@ namespace blue_sky
 #endif
       }
 
+      /**
+       * \brief  Fills jacobian with derivs that numerically calculated
+       * \param  init
+       * \todo   Obsolete 
+       * */
       inline void
       generate_numeric_jacobian (int init);
 
+      /**
+       * \brief  Calculates total rates for well and 
+       *         rate and total rate for reservoir
+       * */
       inline void
       compute_acc_rates ();
 
+      /**
+       * \brief  Checks time-step
+       * \return Throws exception is time-step smaller 
+       *         than threshold
+       * */
       inline void
       check_time_step ()
       {
@@ -569,6 +701,9 @@ namespace blue_sky
           }
       }
 
+      /**
+       * \todo   Obsolete
+       * */
       inline void
       compute_solution_range ()
       {
@@ -582,11 +717,17 @@ namespace blue_sky
         calc_model_->update_max_pressure_range (max_z_ + 10);
       }
 
+      /**
+       * \brief  Setups Jacobian solvers params
+       * */
       inline void
       setup_jacobian_solver_params ()
       {
         jacobian_->setup_solver_params (calc_model_->well_model_type_, calc_model_->n_phases, params_);
       }
+      /**
+       * \brief  Setups Jacobian
+       * */
       inline void
       setup_jacobian ()
       {
@@ -595,6 +736,9 @@ namespace blue_sky
             throw bs_exception ("compute_small_time_step", "return -1");
           }
       }
+      /**
+       * \brief  Solves Jacobian
+       * */
       inline item_t
       solve_jacobian (index_t &n)
       {
@@ -608,6 +752,9 @@ namespace blue_sky
         mesh_->get_dimensions_range (foo, foo, foo, foo, max_z_, min_z_);
       }
 
+      /**
+       * \brief  Saves facilities data to facility storage
+       * */
       inline void
       save_data ()
       {
@@ -615,8 +762,8 @@ namespace blue_sky
       }
 
       /**
-       * \brief check limits
-       * \return true for stop simulation and false in other cases
+       * \brief Checks limits
+       * \return True for stop simulation and false in other cases
        * */
       inline bool
       check_limits ()
@@ -624,6 +771,12 @@ namespace blue_sky
         return reservoir_->check_limits (params_);
       }
 
+      /**
+       * \brief  Decreases time-step if newton iteration failed
+       * \param  old_ts
+       * \param  max_ts
+       * \return New time-step value
+       * */
       inline item_t
       decrease_ts (double old_ts, double max_ts) const
         {
@@ -639,6 +792,13 @@ namespace blue_sky
           return new_ts;
         }
 
+      /**
+       * \brief  Increases time-step if previous newton iteration successed
+       * \param  old_ts
+       * \param  max_ts
+       * \param  n_iters
+       * \return New time-step value
+       * */
       inline item_t
       increase_ts (item_t old_ts, item_t max_ts, index_t n_iters) const
         {
@@ -805,13 +965,20 @@ namespace blue_sky
           return new_ts;
         }
 
-      // TODO: BAD DESIGN:
+      /**
+       * \brief  Saves base vars
+       * \todo   Bad design
+       * */
       inline void
       save_base_vars ()
       {
         calc_model_->old_data_.save (calc_model_);
         reservoir_->pre_small_step ();
       }
+      /**
+       * \brief  Restores base vars
+       * \todo   Bad design
+       * */
       inline void
       restore_base_vars ()
       {
@@ -822,26 +989,44 @@ namespace blue_sky
         reservoir_->restart_small_step ();
       }
 
+      /**
+       * \brief  Updates total number of newton iterations
+       * \param  nniters
+       * */
       inline void
       update_number_of_newtonian_iterations (index_t nniters)
       {
         number_of_newtonian_iterations += nniters;
       }
+      /**
+       * \brief  Updates total number of linear iterations
+       * \param  nliters
+       * */
       inline void
       update_number_of_linear_iterations (index_t nliters)
       {
         number_of_linear_iterations += nliters;
       }
+      /**
+       * \brief  Updates current time-step
+       * \param  step_
+       * */
       inline void
       update_current_time (item_t step_)
       {
         current_time_ += step_;
       }
+      /**
+       * \brief  Updates total number of fi_operator restarts
+       * */
       inline void
       update_number_of_fi_operator_restarts ()
       {
         ++number_of_fi_operator_restarts;
       }
+      /**
+       * \brief  Updates total number of restarts
+       * */
       inline void
       update_number_of_restarts ()
       {
@@ -859,6 +1044,12 @@ namespace blue_sky
       }
 
 
+      /**
+       * \brief  Updates length of large time-step (from model)
+       * \param  current_time
+       * \param  next_time
+       * \return True if length of time-step positive
+       * */
       BS_FORCE_INLINE bool
       update_large_time_step_length (const ptime &current_time, const ptime &next_time)
       {
@@ -879,12 +1070,18 @@ namespace blue_sky
         return false;
       }
 
+      /**
+       * \brief  Updates number of processed large time-steps
+       * */
       inline void
       update_large_time_step_num ()
       {
         ++number_of_large_time_steps;
       }
 
+      /**
+       * \brief  Prints mesh info
+       * */
       void
       print_mesh_info ()
       {
@@ -892,6 +1089,9 @@ namespace blue_sky
         BOSOUT (section::mesh, level::medium) << "mesh connections: " << mesh_->get_n_connections () << bs_end;
       }
 
+      /**
+       * \brief  Prints PVT tables
+       * */
       void
       print_pvt_info ()
       {
@@ -909,9 +1109,14 @@ namespace blue_sky
           }
       }
 
-      typedef boost::posix_time::ptime ptime_t;
+      /**
+       * \brief  Large time-step iteration
+       * \param  current_time
+       * \param  next_time
+       * \param  event_list
+       * */
       inline void
-      iteration (const ptime_t &current_time, const ptime_t &next_time, const sp_event_base_list_t &event_list)
+      iteration (const ptime &current_time, const ptime &next_time, const sp_event_base_list_t &event_list)
       {
         using namespace boost::posix_time;
         BOSOUT (section::main_loop, level::high) << "\nTIMESTEP " << boost::posix_time::to_simple_string (current_time) << "\n" << bs_end;
@@ -931,6 +1136,10 @@ namespace blue_sky
           }
       }
 
+      /**
+       * \brief  Performs actions on time-step end
+       * \param  total_number_of_time_steps
+       * */
       inline void
       time_step_end (int total_number_of_time_steps)
       {
@@ -961,6 +1170,9 @@ namespace blue_sky
         BOSOUT (section::main_loop, level::high) << "number_of_close_wells_restarts: "  << number_of_close_wells_restarts << bs_end;
       }
 
+      /**
+       * \brief  Prepares calculation
+       * */
       inline void
       ready ()
       {
@@ -983,6 +1195,9 @@ namespace blue_sky
 #endif
       }
 
+      /**
+       * \brief  Starts calculation loop
+       * */
       inline void
       go ()
       {
@@ -999,6 +1214,9 @@ namespace blue_sky
           }
       }
 
+      /**
+       * \brief  Ends calculation
+       * */
       inline void
       end ()
       {
@@ -1018,11 +1236,17 @@ namespace blue_sky
         BOSOUT (section::main_loop, level::high) << "number_of_close_wells_restarts: "  << number_of_close_wells_restarts << bs_end;
       }
 
+      /**
+       * \brief  Resets init_approximation flag
+       * */
       inline void
       reset_init_approx ()
       {
         reservoir_->reset_init_approx ();
       }
+      /**
+       * \brief  Reinits wells
+       * */
       inline void
       reset_wells ()
       {
@@ -1052,15 +1276,15 @@ public:
       double                                  dt_;
       double                                  current_time_;
 
-      item_t											            large_time_step_length_;
-      item_t											            large_time_step_start_;
-      item_t											            large_time_step_end_;
+      item_t                                  large_time_step_length_;
+      item_t                                  large_time_step_start_;
+      item_t                                  large_time_step_end_;
 
       index_t                                 num_last_newton_iters_;
       index_t                                 num_last_lin_iters_;
 
       index_t                                 number_of_small_time_steps;
-      index_t									                number_of_large_time_steps;
+      index_t                                 number_of_large_time_steps;
 
       index_t                                 number_of_newtonian_iterations;
       index_t                                 number_of_linear_iterations;

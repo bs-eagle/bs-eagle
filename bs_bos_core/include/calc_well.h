@@ -116,10 +116,6 @@ namespace blue_sky
       typedef calc_perf_density_base <strategy_t>       calc_perf_density_t;
       typedef calc_perf_bhp_base <strategy_t>           calc_perf_bhp_t;
 
-      typedef nc_ptr <calc_model_t>                     nc_calc_model_t;
-      typedef nc_ptr <mesh_iface_t>                     nc_mesh_iface_t;
-      typedef nc_ptr <jacobian_matrix_t>                nc_jmatrix_t;
-
       typedef smart_ptr <well_controller_t, true>       sp_well_controller_t;
       typedef smart_ptr <wells::well_limit_operation, true>     sp_well_limit_operation_t;
       typedef smart_ptr <calc_model_t, true>            sp_calc_model_t;

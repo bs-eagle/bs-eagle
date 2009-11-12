@@ -1,14 +1,22 @@
 /**
- * \file matrix_vector_op.h
- * \brief
- * \author Sergey Miryanov
- * \date 08.10.2009
+ *       \file  matrix_vector_op.h
+ *      \brief  Matrix-vector operations for derivs
+ *              calculations
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  08.10.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_BOS_CORE_MATRIX_VECTOR_OP_H_
 #define BS_BOS_CORE_MATRIX_VECTOR_OP_H_
 
 namespace blue_sky {
 
+  /**
+   * \class v_minus_vs_prod
+   * \brief Incapsulates A = A - B * C operation, 
+   *        A, B, C vectors
+   * */
   template <size_t size>
   struct v_minus_vs_prod
   {
@@ -50,6 +58,11 @@ namespace blue_sky {
     }
   };
 
+  /**
+   * \class m_minus_vv_prod
+   * \brief Incapsulates A = A - B * C operation,
+   *        A - matrix, B, C - vectors
+   * */
   template <size_t size>
   struct m_minus_vv_prod
   {

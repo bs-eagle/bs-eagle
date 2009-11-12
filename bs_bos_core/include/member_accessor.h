@@ -1,8 +1,12 @@
 /**
- * \file member_accessor.h
- * \brief helper to adapt vector of calc_model_data to do save via tools::save_seq_vector (only for debug purpose)
- * \author Sergey Miryanov
- * \date 31.10.2008
+ *       \file  member_accessor.h
+ *      \brief  Helpers to adapt vector of calc_model_data to save via
+ *              tools::save_seq_vector, only for debug purposes
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  31.10.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
  * */
 #ifndef BS_TOOLS_MEMBER_ACCESSOR_H_
 #define BS_TOOLS_MEMBER_ACCESSOR_H_
@@ -55,13 +59,13 @@ private:
 
 // use like
 //
-//#define SAVE_BOOST_ARRAY(name)																															\
-//	tools::save_seq_vector (BOOST_PP_CAT (BOOST_PP_STRINGIZE(name), ".bs.txt"))								\
-//		.save_via_fn (member_accessor (data, (item_t *)&data[0], &data[0].name[0], data[0].name.size ()));
+//#define SAVE_BOOST_ARRAY(name)                                                              \
+//  tools::save_seq_vector (BOOST_PP_CAT (BOOST_PP_STRINGIZE(name), ".bs.txt"))               \
+//    .save_via_fn (member_accessor (data, (item_t *)&data[0], &data[0].name[0], data[0].name.size ()));
 //
-//#define SAVE_ITEM(name)																																			\
-//	tools::save_seq_vector (BOOST_PP_CAT (BOOST_PP_STRINGIZE(name), ".bs.txt"))								\
-//		.save_via_fn (member_accessor (data, (item_t *)&data[0], &data[0].name, 1));
+//#define SAVE_ITEM(name)                                                                     \
+//  tools::save_seq_vector (BOOST_PP_CAT (BOOST_PP_STRINGIZE(name), ".bs.txt"))               \
+//    .save_via_fn (member_accessor (data, (item_t *)&data[0], &data[0].name, 1));
 
 
   } // namespace tools

@@ -128,7 +128,6 @@
 #include "strategies.h"
 
 #include "bos_map.h"
-#include "noncopyable_ptr.h"
 #include "constants.h"
 #include "main_def.h"
 #include "err_num_def.h"

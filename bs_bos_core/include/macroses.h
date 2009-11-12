@@ -1,11 +1,16 @@
+/**
+ *       \file  macroses.h
+ *      \brief  Usefull macroses
+ *     \author  Borschuk Oleg 
+ *       \date  26.09.2005
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete
+ *       \todo  Desribe
+ * */
 #ifndef __MACROSES_H__
 #define __MACROSES_H__
-/*!
- * \file macroses.h
- * \brief usefull macroses
- * \author Borschuk Oleg
- * \date 2005-09-26
- */
+
 #include "memory_macroses.h"
 #include "debug_macroses.h"
 

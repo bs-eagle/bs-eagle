@@ -1,9 +1,11 @@
 /**
- * @file norm_cacl.h
- * @brief calculate norms
- * @author Borschuk Oleg
- * @date 2008-01-31
- */
+ *       \file  norm_calc.h
+ *      \brief  Calculates norms
+ *     \author  Borschuk Oleg
+ *       \date  31.01.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
 #ifndef NORM_CALC_H
 #define NORM_CALC_H
 
@@ -60,11 +62,11 @@ namespace blue_sky
     typedef seq_vector <const char *>                 name_array_t;
 
   public:
-    // default constructor
+    //! default constructor
     norms_storage ();
-    // default destructor
+    //! default destructor
     ~norms_storage ();
-    // clear all norms
+    //! clear all norms
     void clear ();
 
     // print norms

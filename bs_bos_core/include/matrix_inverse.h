@@ -1,5 +1,10 @@
 /**
- *
+ *       \file  matrix_inverse.h
+ *      \brief  Calculates inverse matrix
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  15.09.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_CALC_INVERSE_MATRIX_H_
 #define BS_CALC_INVERSE_MATRIX_H_
@@ -7,13 +12,12 @@
 namespace blue_sky
   {
 
-  /*!
-   * \brief calculate inverse matrix
-   * \param n -- size of matrix
-   * \param matrix -- original matrix
-   * \return 0 if success
-            -1 else
-   */
+  /**
+   * \brief  Calculates inverse matrix
+   * \param  n Size of matrix
+   * \param  matrix Original matrix
+   * \return 0 on success otherwise -1
+   * */
   template <typename matrix_t>
   inline void
   calc_inverse_matrix (int n, matrix_t &matrix)

@@ -1,9 +1,11 @@
 /**
- * @file norm_cacl.cpp
- * @brief calculate norms
- * @author Borschuk Oleg
- * @date 2008-01-31
- */
+ *       \file  norm_calc.cpp
+ *      \brief  Calculates norms
+ *     \author  Borschuk Oleg
+ *       \date  31.01.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
 #include "stdafx.h"
 #include "norm_calc.h"
 
