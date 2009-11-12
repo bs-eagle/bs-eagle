@@ -1,9 +1,12 @@
 /**
- * \file table_2d.h
- * \brief
- * \author Miryanov Sergey
- * \date 07.05.2008
- */
+ *       \file  table_2d.h
+ *      \brief  Obsolete
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  07.05.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
+ * */
 #ifndef BS_TABLE_2D_H_
 #define BS_TABLE_2D_H_
 

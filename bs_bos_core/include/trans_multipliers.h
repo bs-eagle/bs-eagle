@@ -1,5 +1,11 @@
 /**
- *
+ *       \file  trans_multipliers.h
+ *      \brief  Calculates transsmisibility mutlipliers
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  04.09.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete
  * */
 #ifndef BS_TRANS_MULTIPLIERS_HPP_
 #define BS_TRANS_MULTIPLIERS_HPP_

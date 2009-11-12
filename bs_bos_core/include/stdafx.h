@@ -1,4 +1,11 @@
 /**
+ *       \file  stdafx.h
+ *      \brief  Precompiled header... 
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
+
+/**
  * \file stdafx.h
  * \brief precompiled header
  * \author Sergey Miryanov

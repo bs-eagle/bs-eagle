@@ -1,4 +1,15 @@
 /**
+ *       \file  str_functor.h
+ *      \brief  Functor that used in event_manager and event_bae parse functions,
+ *              it should be used instead std or boost functors to avoid
+ *              ICE under MSVC
+ *     \author  Morozov Andrey
+ *       \date  06.08.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
+
+/**
  * \file str_functor.h
  * \brief functor that used in event_manager and event_base parse functions. it should be used instead std or boost function to avoid ICE under MSVS
  * \author Morozov Andrey

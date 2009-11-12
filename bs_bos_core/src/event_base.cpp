@@ -21,7 +21,9 @@ namespace blue_sky {
 
     /**
      * \class str_functor
-     * \brief Handles actions in boost::spirit parser
+     * \brief Handles actions in boost::spirit parser,
+     *        it should be used instead std or boost 
+     *        functors to avoid ICE under MSVC     
      * */
     template <typename T>
     struct str_functor
@@ -49,7 +51,9 @@ namespace blue_sky {
 
     /**
      * \class char_functor
-     * \brief Handles actions in boost::spirit parser
+     * \brief Handles actions in boost::spirit parser,
+     *        it should be used instead std or boost 
+     *        functors to avoid ICE under MSVC     
      * */
     template <typename T>
     struct char_functor
