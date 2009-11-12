@@ -1,9 +1,11 @@
 /**
-* @file keywords.h
-* @brief keyword handler methods
-* @author Morozov Andrey
-* @date 2008-07-02
-*/
+ *       \file  keyword_manager.cpp
+ *      \brief  Implementation of keyword_manager
+ *     \author  Morozov Andrey
+ *       \date  02.07.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
 #include "stdafx.h"
 
 #include "keyword_manager.h"

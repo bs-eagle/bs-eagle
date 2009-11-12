@@ -1,8 +1,10 @@
- /**
- * @file keywords.h
- * @brief declaration of keyword hadling class
- * @author Morozov Andrey
- * @date 2008-07-02
+/**
+ *       \file  keyword_manager.h
+ *      \brief  Declaration of keyword handling class
+ *     \author  Morozov Andrey
+ *       \date  02.07.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef KEYWORD_MANAGER_H_
 #define KEYWORD_MANAGER_H_
@@ -22,7 +24,10 @@ namespace blue_sky
   template <class strategy_t>
   class BS_API_PLUGIN keyword_info_base;
 
-  //! keyword_manager - class-factory which contain a set of handlers for different keywords
+  /**
+   * \class keyword_manager
+   * \brief Class-factory which contains a set of handlers for different keywords
+   * */
   template <class strategy_t>
   class BS_API_PLUGIN keyword_manager: public keyword_manager_iface <strategy_t>
     {
@@ -36,7 +41,7 @@ namespace blue_sky
       typedef typename strategy_t::item_array_t       item_array_t;
       typedef strategy_t                              strategy_type;
 
-      typedef keyword_manager <strategy_t>		        this_t;               //<! self type
+      typedef keyword_manager <strategy_t>		        this_t;                 //<! self type
       typedef keyword_manager_iface <strategy_t>      base_t;
 
       typedef idata             							        idata_t;
@@ -45,7 +50,7 @@ namespace blue_sky
       typedef keyword_info_base <strategy_t>          keyword_info_base_t;
       typedef keyword_params <strategy_t>             keyword_params_t;
 
-      typedef smart_ptr <this_t, true>							  sp_this_t;            //<! smart pointer to self
+      typedef smart_ptr <this_t, true>							  sp_this_t;              //<! smart pointer to self
       typedef smart_ptr <FRead, true>							    sp_reader_t;            //<! smart pointer to reader
       typedef smart_ptr <idata_t, true>						    sp_idata_t;             //<! smart pointr to initial data storage
       typedef smart_ptr <mesh_iface_t, true >         sp_mesh_iface_t;
@@ -65,56 +70,106 @@ namespace blue_sky
       typedef std::map <std::string, std::list<std::string> > supported_keywords_t;
 
 
+    public:
       //-----------------------------------------
       //  VARIABLES
       //-----------------------------------------
-      handlers_t handlers; //<!handlers map for active keywords
-      supported_keywords_t supported_keywords; //<! all keywords supported by different plugins
+      handlers_t handlers;                                //!< Handlers map for active keywords
+      supported_keywords_t supported_keywords;            //!< All keywords supported by different plugins
 
-      //! temp variables for date and event_handlers
-      boost::posix_time::ptime current_date;
-      boost::posix_time::ptime starting_date;
+      boost::posix_time::ptime current_date;              //!< temp variable for date and event_handlers
+      boost::posix_time::ptime starting_date;             //!< temp variable for date and event_handlers
 
       //-----------------------------------------
       //  METHODS
       //-----------------------------------------
     public:
+      //! blue-sky type declaration
       BLUE_SKY_TYPE_DECL_T(keyword_manager);
+
+      /**
+       * \brief  dtor
+       * */
       ~keyword_manager ();
 
 
     public:
-      //! initialization used in py constructor
-      void init()//const sp_event_manager_t & em)
+      /**
+       * \brief  Registers built-in keyword and keywords from plugins
+       * */
+      void 
+      init()
       {
-        this->register_keywords();//em);
+        this->register_keywords();
         this->register_plugin_keywords();
       }
 
-      //! handle keyword, called from data_manager.read_keyword_file
-      void handle_keyword (const std::string &keyword, keyword_params_t &params);
+      /**
+       * \brief  Handles keyword, call proper handler
+       * \return 
+       * */
+      void 
+      handle_keyword (const std::string &keyword, keyword_params_t &params);
 
-      //! registration of active keyword in factory
-      void register_keyword(const std::string &keyword, keyword_handler handler);
+      /**
+       * \brief  Registers active keyword in factory
+       * \param  keyword Keyword name
+       * \param  handler Keyword handler description
+       * */
+      void 
+      register_keyword (const std::string &keyword, keyword_handler handler);
 
-      //! registration of active keyword in factory
-      void register_keyword (const std::string &keyword, const shared_handler_t &handler);
+      /**
+       * \brief  Registers active keyword in factory
+       * \param  keyword Keyword name
+       * \param  handler Instance of object which implements 
+       *                 keyword handler interface
+       * */
+      void 
+      register_keyword (const std::string &keyword, const shared_handler_t &handler);
 
-      //! registration of supported keywords in factory
-      void register_supported_keyword(const std::string &keyword, const std::string &provider);
+      /**
+       * \brief  Registers supported keyword by plugins in factory
+       * \param  keyword Keyword name
+       * \param  provider
+       * */
+      void 
+      register_supported_keyword(const std::string &keyword, const std::string &provider);
 
-      //! registration of known keywords
-      void register_keywords(); //const sp_event_manager_t &em);
+      /**
+       * \brief  Registers built-in keywords
+       * */
+      void 
+      register_keywords(); 
 
-      //! registration of known keywords
-      void register_plugin_keywords();
+      /**
+       * \brief  Registers keyword from plugins
+       * */
+      void 
+      register_plugin_keywords();
 
-      //! return starting date
-      boost::posix_time::ptime get_starting_date () {return starting_date;}
+      /**
+       * \brief  Returns starting date
+       * \return Starting date
+       * */
+      boost::posix_time::ptime 
+      get_starting_date () {return starting_date;}
 
+      /**
+       * \brief  Returns true if keyword supported by plugins
+       * \param  keyword Keyword name
+       * \param  params
+       * \return True if keyword supported by plugins
+       * */
       bool
       is_keyword_supported (const std::string &keyword, keyword_params_t &params) const;
 
+      /**
+       * \brief  Returns true if any handler binded to keyword
+       * \param  keyword Keyword name
+       * \param  params
+       * \return True if any handler binded to keyword
+       * */
       bool 
       is_keyword_activated (const std::string &keyword, keyword_params_t &params) const;
 

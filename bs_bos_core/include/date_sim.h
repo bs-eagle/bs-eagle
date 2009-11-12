@@ -1,7 +1,7 @@
 /**
  *       \file  date_sim.h
  *      \brief  Typedef of date structure
- *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *     \author  Morozov Andrey
  *       \date  18.06.2008
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
