@@ -1,8 +1,10 @@
 /**
- * \file well_controller.cpp
- * \brief impl of
- * \author Sergey Miryanov
- * \date 16.07.2008
+ *       \file  well_controller.cpp
+ *      \brief  Implementation of well_controller
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  16.07.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 #include "well_controller.h"
@@ -140,14 +142,14 @@ namespace blue_sky
     ///////////////////////////////////////////////////////////////////////////
     template <typename strategy_t>
     void
-    well_controller<strategy_t>::add_bhp_control	(const sp_rate_control_t &control)
+    well_controller<strategy_t>::add_bhp_control  (const sp_rate_control_t &control)
     {
       BS_ASSERT (control);
       bhp_control_ = control;
     }
     template <typename strategy_t>
     void
-    well_controller<strategy_t>::add_rate_control	(const sp_rate_control_t &control)
+    well_controller<strategy_t>::add_rate_control (const sp_rate_control_t &control)
     {
       BS_ASSERT (control);
       rate_control_ = control;
@@ -580,6 +582,6 @@ namespace blue_sky
     }
     //////////////////////////////////////////////////////////////////////////
 
-  }	// namespace wells
-}	// namespace blue_sky
+  } // namespace wells
+} // namespace blue_sky
 

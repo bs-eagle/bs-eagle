@@ -1,8 +1,10 @@
 /**
- * \file well_connection.h
- * \brief well connection class declaration
- * \author Sergey Miryanov
- * \date 06.08.2008
+ *       \file  well_connection.h
+ *      \brief  Base class for well perforations (well connections)
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  06.08.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_WELL_CONNECTION_H_
 #define BS_WELL_CONNECTION_H_
@@ -32,44 +34,74 @@ namespace blue_sky
     {
 
     ///////////////////////////////////////////////////////////////////////////
+    /**
+     * \enum  connection_type
+     * \brief Type of perforation (connection)
+     * */
     enum connection_type
     {
-      CONNECTION_USUAL,
-      CONNECTION_GRP_PRIMARY,
-      CONNECTION_GRP_SECONDARY,
+      CONNECTION_USUAL,             //!< Usual perforation
+      CONNECTION_GRP_PRIMARY,       //!< Primary GRP perforation
+      CONNECTION_GRP_SECONDARY,     //!< Secondary GRP perforation
 
       CONNECTION_TOTAL,
     };
     ///////////////////////////////////////////////////////////////////////////
 
     ///////////////////////////////////////////////////////////////////////////
+    /**
+     * \enum  connection_deriction_type
+     * \brief Direction in which the well penetrates the grid block
+     * */
     enum connection_direction_type
     {
-      direction_x,
-      direction_y,
-      direction_z,
+      direction_x,                  //!< Along X axe
+      direction_y,                  //!< Along Y axe
+      direction_z,                  //!< Along Z axe
 
       direction_total,
     };
 
+    /**
+     * \brief  Converts string value to connection_direction_type
+     * \param  str String value to convert
+     * \return Throws exception if value is an invalid,
+     *         direction_z if value is an empty otherwise
+     *         element of connection_direction_type
+     * */
     connection_direction_type
     connection_direction_cast (const std::string &str);
     ///////////////////////////////////////////////////////////////////////////
 
     ///////////////////////////////////////////////////////////////////////////
+    /**
+     * \enum  connection_status_type
+     * \brief Perforation (connection) status
+     * */
     enum connection_status_type
     {
-      connection_open,
-      connection_shut,
+      connection_open,            //!< Is perforation (connection) is open
+      connection_shut,            //!< Is perforation (connection) is shut
 
       connection_total,
     };
 
+    /**
+     * \brief  Converts string value to connection_status_type
+     * \param  str String value to convert
+     * \return Throws exception if value is an invalid,
+     *         connection_shut if value is an empty otherwise
+     *         element of connection_status_type
+     * */
     connection_status_type
     connection_status_cast (const std::string &str);
     ///////////////////////////////////////////////////////////////////////////
 
     ///////////////////////////////////////////////////////////////////////////
+    /**
+     * \class connection
+     * \brief Base class for well perforations (well connections)
+     * */
     template <typename strategy_t>
     class BS_API_PLUGIN connection : public objbase
       {
@@ -98,96 +130,313 @@ namespace blue_sky
 
       public:
 
-        void compute_factors (const physical_constants &internal_contstants,
-                              const sp_params_t &params,
-                              const sp_mesh_iface_t &mesh,
-                              const item_array_t &perm,
-                              const item_array_t &ntg,
-                              bool ro_calc_flag = false);
+        /**
+         * \brief  Computes perforation (connection) factor
+         * \param  internal_constants
+         * \param  params
+         * \param  mesh
+         * \param  perm
+         * \param  ntg
+         * \param  ro_calc_flag
+         * */
+        void 
+        compute_factors (const physical_constants &internal_contstants,
+                         const sp_params_t &params,
+                         const sp_mesh_iface_t &mesh,
+                         const item_array_t &perm,
+                         const item_array_t &ntg,
+                         bool ro_calc_flag = false);
 
-        void mul_perm_mult (item_t mult);
+        /**
+         * \brief  Multiplies mult_ with mult
+         * \param  mult
+         * */
+        void 
+        mul_perm_mult (item_t mult);
 
-        void set_half_length (item_t half_length);
-        void set_theta (item_t theta);
-        void set_skin (item_t skin);
-        void set_status (connection_status_type connection_status);
-        void set_factor (item_t factor);
-        void set_diameter (item_t diameter);
-        void set_Kh (item_t kh);
-        void set_direction (connection_direction_type direction);
-        void set_coord (index_t i, index_t j, index_t k, index_t n_block);
-        void set_connection_depth (const sp_mesh_iface_t &mesh);
+        /**
+         * \brief  Sets half of fracture length
+         * \param  half_length Half of fracte length
+         * */
+        void 
+        set_half_length (item_t half_length);
 
-        index_t n_block () const;
-        item_t get_fact () const;
+        /**
+         * \brief  Sets angle between fracture and positive X direction
+         * \param  theta An angle
+         * */
+        void 
+        set_theta (item_t theta);
 
-        void set_bulkp (item_t bulkp);
-        void set_rate (item_t rate);
-        void set_head_term (item_t head_term);
-        void set_cur_bhp (item_t cur_bhp);
-        void set_mult (item_t mult);
-        void set_seg_number (const index_t &seg);
+        /**
+         * \brief  Sets skin factor
+         * \param  skin
+         * */
+        void 
+        set_skin (item_t skin);
 
-        bool is_shut () const;
+        /**
+         * \brief  Sets perforation (connection) status
+         * \param  connection_status
+         * */
+        void 
+        set_status (connection_status_type connection_status);
 
-        connection_status_type get_status () const
+        /**
+         * \brief  Sets transmissibility factor
+         * \param  factor
+         * */
+        void 
+        set_factor (item_t factor);
+
+        /**
+         * \brief  Sets wellbore diameter
+         * \param  diameter
+         * */
+        void 
+        set_diameter (item_t diameter);
+
+        /**
+         * \brief  Sets effective Kh 
+         *         (permeability * thikness)
+         * \param  Kh
+         * */
+        void 
+        set_Kh (item_t kh);
+
+        /**
+         * \brief  Sets direction in which the well 
+         *         penetrates the grid block
+         * \param  
+         * \return 
+         * */
+        void 
+        set_direction (connection_direction_type direction);
+
+        /**
+         * \brief  Sets coordinates and index of grid block
+         * \param  i
+         * \param  j
+         * \param  k
+         * \param  n_block Number of grid block
+         * \return 
+         * */
+        void 
+        set_coord (index_t i, index_t j, index_t k, index_t n_block);
+
+        /**
+         * \brief  Sets depth
+         * \param  mesh
+         * */
+        void 
+        set_connection_depth (const sp_mesh_iface_t &mesh);
+
+        /**
+         * \brief  Returns index of grid block to
+         *         which perforation belongs
+         * \return Index of grid block
+         * */
+        index_t 
+        n_block () const;
+
+        /**
+         * \brief  Returns connection_factor
+         * \return Connection factor
+         * */
+        item_t 
+        get_fact () const;
+
+        /**
+         * \brief  Sets bulkp
+         * \param  bulkp
+         * */
+        void 
+        set_bulkp (item_t bulkp);
+
+        /**
+         * \brief  Sets rate
+         * \param  rate
+         * \todo   Obsolete, should be removed 
+         * */
+        void 
+        set_rate (item_t rate);
+
+        /**
+         * \brief  Sets head_term (?)
+         * \param  head_term
+         * */
+        void 
+        set_head_term (item_t head_term);
+
+        /**
+         * \brief  Sets current connection BHP
+         * \param  cur_bhp
+         * */
+        void 
+        set_cur_bhp (item_t cur_bhp);
+
+        /**
+         * \brief  Sets multiplier
+         * \param  mult
+         * */
+        void 
+        set_mult (item_t mult);
+
+        /**
+         * \brief  Sets number of segment which
+         *         contains this perforation (connection)
+         * \param  seg
+         * */
+        void 
+        set_seg_number (const index_t &seg);
+
+        /**
+         * \brief  Is perforation (connection) is shut?
+         * \return True if status of connection is shut
+         * */
+        bool 
+        is_shut () const;
+
+        /**
+         * \brief  Returns status of connection
+         * \return Connection status
+         * */
+        connection_status_type 
+        get_status () const
           {
             return status_;
           }
 
-        connection_direction_type get_dir () const
+        /**
+         * \brief  Returns direction of connection
+         * \return Connection direction
+         * */
+        connection_direction_type 
+        get_dir () const
           {
             return dir_;
           }
 
-        item_t                get_cur_bhp             () const;
-        item_t                get_density             () const;
-        item_t                get_connection_depth    () const;
-        item_t                get_bulkp               () const;
+        //! Returns current BHP
+        item_t                
+        get_cur_bhp () const;
 
-        index_t               i_coord () const;
-        index_t               j_coord () const;
-        index_t               k_coord () const;
+        //! Returns density
+        item_t
+        get_density () const;
 
-        item_t                mult () const;
+        //! Returns depth
+        item_t
+        get_connection_depth () const;
 
-        item_t                get_head_term () const;
-        index_t               get_seg_number () const;
+        //! Returns bulkp
+        item_t
+        get_bulkp () const;
 
-        virtual void clear_data ();
-        virtual array_ext <item_t> get_rw_value   ();
-        virtual array_ext <item_t> get_wr_value   ();
-        virtual array_ext <item_t> get_rr_value   ();
-        virtual array_ext <item_t> get_ps_value   ();
-        virtual array_ext <rhs_item_t> get_rate_value ();
+        //! Returns i coord
+        index_t
+        i_coord () const;
 
-      public:
-        auto_value <item_t>           head_term;
-        auto_value <item_t>           cur_bhp;
-        auto_value <item_t>           connection_depth;
-        auto_value <item_t>           density;
-        auto_value <item_t>						bulkp;
+        //! Return j coord
+        index_t
+        j_coord () const;
 
-        rate_data_t                   rate_;
-        rate_data_t                   rate_rc_;
+        //! Return k coord
+        index_t
+        k_coord () const;
 
+        //! Return multiplier
+        item_t
+        mult () const;
+
+        //! Returns head_term (?)
+        item_t
+        get_head_term () const;
+
+        //! Returns segment number
+        index_t
+        get_seg_number () const;
+
+        /**
+         * \brief  Clears data
+         * */
+        virtual void 
+        clear_data ();
+
+        /**
+         * \brief  Returns RW value
+         * \todo   Obsolete, should be removed
+         * */
+        virtual array_ext <item_t> 
+        get_rw_value   ();
+
+        /**
+         * \brief  Returns WR value
+         * \todo   Obsolete, should be removed
+         * */
+        virtual array_ext <item_t> 
+        get_wr_value   ();
+
+        /**
+         * \brief  Returns RR value
+         * \todo   Obsolete, should be removed
+         * */
+        virtual array_ext <item_t> 
+        get_rr_value   ();
+
+        /**
+         * \brief  Returns PS value
+         * \todo   Obsolete, should be removed
+         * */
+        virtual array_ext <item_t> 
+        get_ps_value   ();
+
+        /**
+         * \brief  Returns rate array
+         * \todo   Obsolete, should be removed
+         * */
+        virtual array_ext <rhs_item_t> 
+        get_rate_value ();
+
+        /**
+         * \brief  Returns rate data
+         * \return Rate data
+         * */
         const rate_data_t &
         rate () const
         {
           return rate_;
         }
 
+        /**
+         * \brief  Returns production part of rate data
+         * \return Production part of rate data
+         * */
         const rate_data_inner_t &
         rate_prod () const
         {
           return rate_.prod;
         }
 
+        /**
+         * \brief  Returns injection part of rate data
+         * \return Injection part of rate data
+         * */
         const rate_data_inner_t &
         rate_inj () const
         {
           return rate_.inj;
         }
+
+      public:
+        auto_value <item_t>           head_term;
+        auto_value <item_t>           cur_bhp;
+        auto_value <item_t>           connection_depth;
+        auto_value <item_t>           density;
+        auto_value <item_t>           bulkp;
+
+        rate_data_t                   rate_;
+        rate_data_t                   rate_rc_;
 
       private:
 
@@ -197,12 +446,12 @@ namespace blue_sky
         template <typename strategy_t_x>
         friend struct wells::compute_factors::baby_odeh_model;
 
-        auto_value <index_t, -1>			i_coord_;											//!< i coord of connection
-        auto_value <index_t, -1>			j_coord_;											//!< j coord of connection
-        auto_value <index_t, -1>			k_coord_;											//!< k coord of connection
+        auto_value <index_t, -1>      i_coord_;                     //!< i coord of connection
+        auto_value <index_t, -1>      j_coord_;                     //!< j coord of connection
+        auto_value <index_t, -1>      k_coord_;                     //!< k coord of connection
 
         auto_value <connection_status_type, connection_open>
-        status_;											//!< connection status
+        status_;                      //!< connection status
 
         // for compute factors. in the future this vars should be evolved to separate class
         auto_value <item_t>           diam_;                        //!< Well diameter
@@ -227,6 +476,7 @@ namespace blue_sky
       protected:
         auto_value <index_t, 0>       iseg_;
       public:
+        //! blue-sky type declaration
         BLUE_SKY_TYPE_DECL_T (connection <strategy_t>);
       };
 

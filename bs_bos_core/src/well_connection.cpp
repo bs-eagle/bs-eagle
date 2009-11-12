@@ -1,8 +1,11 @@
 /**
- * \file well_connection.cpp
- * \brief impl of wells::connection
- * \author Sergey Miryanov
- * \date 15.07.2008
+ *       \file  well_connection.cpp
+ *      \brief  Implementation of base class for well
+ *              perforations (connections)
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  15.07.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 
@@ -56,11 +59,19 @@ namespace blue_sky
     }
     ///////////////////////////////////////////////////////////////////////////
 
+    /**
+     * \brief  'default' ctor for connection
+     * \param  param Additional params for ctor
+     * */
     template <typename strategy_t>
     connection<strategy_t>::connection (blue_sky::bs_type_ctor_param param /* = NULL */)
     : n_block_ (-1)
     {
     }
+    /**
+     * \brief  copy-ctor for connection
+     * \param  c Instance of connection to be copied
+     * */
     template <typename strategy_t>
     connection<strategy_t>::connection (const connection_t &c)
     : bs_refcounter (c), objbase (c)
@@ -347,4 +358,4 @@ namespace blue_sky
     BLUE_SKY_TYPE_IMPL_T_EXT (1, (connection <base_strategy_mixi>), 1, (objbase), "well_connection_seq_mixi", "BOS_Core well connection class", "BOS_Core well connection class", false)
 
   } // namespace wells
-}	// namespace blue_sky
+} // namespace blue_sky

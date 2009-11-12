@@ -578,7 +578,6 @@ namespace blue_sky
        * \param  perm
        * \param  ntg
        * \param  ro_calc_flag
-       * \return 
        * */
       void 
       compute_connection_factor (const physical_constants &internal_constants,
