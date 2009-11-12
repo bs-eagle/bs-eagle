@@ -1,8 +1,11 @@
 /**
- * \file jacobian_impl.h
- * \brief impl of jacobian method
- * \author Sergey Miryanov
- * \date 23.01.2009
+ *       \file  jacobian_impl.h
+ *      \brief  Implementation of jacobian class methods, used to reduce
+ *              some overhead
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  23.01.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_JACOBIAN_IMPL_H_
 #define BS_JACOBIAN_IMPL_H_
@@ -10,28 +13,39 @@
 
 namespace blue_sky {
 
+  /**
+   * \class jacobian_impl
+   * \brief Implementation of jacobian class methods, used to reduce
+   *        some overhead
+   * */
   template <typename strategy_t>
   struct jacobian_impl
   {
-    typedef typename strategy_t::item_t         item_t;
-    typedef typename strategy_t::index_t        index_t;
-    typedef typename strategy_t::matrix_t       matrix_t;
-    typedef typename strategy_t::csr_matrix_t   bcsr_matrix_t;
-    typedef typename strategy_t::item_array_t   item_array_t;
-    typedef typename strategy_t::rhs_item_array_t rhs_item_array_t;
+    typedef typename strategy_t::item_t             item_t;
+    typedef typename strategy_t::index_t            index_t;
+    typedef typename strategy_t::matrix_t           matrix_t;
+    typedef typename strategy_t::csr_matrix_t       bcsr_matrix_t;
+    typedef typename strategy_t::item_array_t       item_array_t;
+    typedef typename strategy_t::rhs_item_array_t   rhs_item_array_t;
 
-    typedef jacobian <strategy_t>               jacobian_t;
-    typedef jacobian_matrix <strategy_t>        jmatrix_t;
-    typedef linear_solver_base <strategy_t>     linear_solver_t;
+    typedef jacobian <strategy_t>                   jacobian_t;
+    typedef jacobian_matrix <strategy_t>            jmatrix_t;
+    typedef linear_solver_base <strategy_t>         linear_solver_t;
 
-    typedef smart_ptr <jacobian_t, true>        sp_jacobian_t;
-    typedef smart_ptr <jmatrix_t, true>         sp_jmatrix_t;
-    typedef smart_ptr <linear_solver_t, true>   sp_linear_solver_t;
-    typedef smart_ptr <matrix_t>                sp_matrix_t;
-    typedef smart_ptr <bcsr_matrix_t, true>     sp_bcsr_matrix_t;
+    typedef smart_ptr <jacobian_t, true>            sp_jacobian_t;
+    typedef smart_ptr <jmatrix_t, true>             sp_jmatrix_t;
+    typedef smart_ptr <linear_solver_t, true>       sp_linear_solver_t;
+    typedef smart_ptr <matrix_t>                    sp_matrix_t;
+    typedef smart_ptr <bcsr_matrix_t, true>         sp_bcsr_matrix_t;
 
-    typedef sp_linear_solver_t                  sp_solver_t;
+    typedef sp_linear_solver_t                      sp_solver_t;
 
+  public:
+    /**
+     * \brief  ctor
+     * \param  jacobian
+     * \param  jmatrix
+     * */
     jacobian_impl (sp_jacobian_t &jacobian, sp_jmatrix_t &jmatrix)
     : jacobian_ (jacobian),
     jmatrix_ (jmatrix),
@@ -56,6 +70,9 @@ namespace blue_sky {
         }
     }
 
+    /**
+     * \brief  Setups Jacobian solvers to solve Jacobian matrix
+     * */
     void
     setup_jacobian ()
     {
@@ -71,6 +88,13 @@ namespace blue_sky {
       OMP_TIME_MEASURE_END (gmres_setup_timer);
     }
 
+    /**
+     * \brief      Solves Jacobian matrix with Jacobian solvers
+     * \param[out] Number of linear iteration used to solve 
+     *             Jacobian matrix
+     * \return     Tolerance value
+     * \todo       Throw exception on error
+     * */
     item_t
     solve_jacobian (index_t &n_lin_iters)
     {
@@ -141,6 +165,10 @@ namespace blue_sky {
       return tol;
     }
 
+    /**
+     * \brief  Prints Jacobian matrix
+     * \todo   Obsolete
+     * */
     void
     full_matrix_print ()
     {
@@ -161,16 +189,16 @@ namespace blue_sky {
 
   private:
 
-    sp_jacobian_t     &jacobian_;
-    sp_jmatrix_t      &jmatrix_;
-    sp_solver_t       solver_;
-    sp_solver_t       preconditioner_;
+    sp_jacobian_t     &jacobian_;           //!< Jacobian
+    sp_jmatrix_t      &jmatrix_;            //!< Jacobian matrix
+    sp_solver_t       solver_;              //!< Solver from Jacobian
+    sp_solver_t       preconditioner_;      //!< Preconditioner from Jacobian
 
-    rhs_item_array_t  &rhs_;
-    item_array_t      &sol_;
+    rhs_item_array_t  &rhs_;                //!< RHS vector of Jacobian
+    item_array_t      &sol_;                //!< Solution vector of Jacobian
 
-    sp_matrix_t       regular_matrix_;
-    sp_matrix_t       irregular_matrix_;
+    sp_matrix_t       regular_matrix_;      //!< Regular part of Jacobian
+    sp_matrix_t       irregular_matrix_;    //!< Irregular part of Jacobian
   };
 
 

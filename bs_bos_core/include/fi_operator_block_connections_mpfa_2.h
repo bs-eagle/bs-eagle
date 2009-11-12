@@ -150,7 +150,7 @@ namespace blue_sky {
       rhs_ (rhs_),
       m_mem (0),
       p_mem (0),
-      depth_top (0),
+      depth_top (0)
       {
       }
 

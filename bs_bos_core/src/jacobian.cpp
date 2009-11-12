@@ -1,7 +1,11 @@
-/*! \file jacobian.cpp
-		\brief jacobian class implementations
-		\author Nikonov Max
-*/
+/**
+ *       \file  jacobian.cpp
+ *      \brief  Implementation of Jacobian Matrix
+ *     \author  Nikonov Max
+ *       \date  27.06.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
 #include "stdafx.h"
 
 #include "jacobian.h"
@@ -17,6 +21,10 @@
 namespace blue_sky
   {
 
+    /**
+     * \brief  'default' ctor for jacobian
+     * \param  param Additional params for ctor
+     * */
   template<class strategy_t>
   jacobian<strategy_t>::jacobian (bs_type_ctor_param /*param*/)
   : bs_node(bs_node::create_node(new jacob_traits))
@@ -24,6 +32,10 @@ namespace blue_sky
   {
   }
 
+  /**
+   * \brief  copy-ctor for jacobian
+   * \param  src Instance of jacobian to be copied
+   * */
   template<class strategy_t>
   jacobian<strategy_t>::jacobian (const jacobian<strategy_t>& src)
   : bs_refcounter (src), bs_node(src)
