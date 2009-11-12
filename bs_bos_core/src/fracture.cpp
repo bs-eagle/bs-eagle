@@ -1,3 +1,13 @@
+/**
+ *       \file  fracture.cpp
+ *      \brief  Fractures...
+ *     \author  Nikonov Max
+ *       \date  05.06.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
+ * */
+
 #include "stdafx.h"
 #include "fracture.h"
 

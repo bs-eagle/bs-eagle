@@ -1,8 +1,11 @@
 /**
- * \file generate_numeric_jacobian.h
- * \brief
- * \author Sergey Miryanov
- * \date 27.11.2008
+ *       \file  generate_numeric_jacobian.h
+ *      \brief  Fills jacobian with derivs that numerically calculated
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  27.11.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete
  * */
 #ifndef BS_MAIN_LOOP_GENERATE_NUMERIC_JACOBIAN_H_
 #define BS_MAIN_LOOP_GENERATE_NUMERIC_JACOBIAN_H_

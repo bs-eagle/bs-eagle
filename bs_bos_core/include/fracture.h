@@ -1,3 +1,12 @@
+/**
+ *       \file  fracture.h
+ *      \brief  Fractures...
+ *     \author  Nikonov Max
+ *       \date  05.06.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
+ * */
 #ifndef FRACTURE_H
 #define FRACTURE_H
 
