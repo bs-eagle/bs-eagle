@@ -1,8 +1,12 @@
 /**
- * \file rr_rw_wr_saver.h
- * \brief helper for save rr, rw and wr arrays of connections as one plain file. only for debug purpose.
- * \author Sergey Miryanov
- * \date 24.09.2008
+ *       \file  rr_rw_wr_saver.h
+ *      \brief  Helpers for save rr, rw and wr arrays from connections
+ *              as one plain file
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  12.11.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
  * */
 #ifndef BS_RR_RW_WR_SAVER_H_
 #define BS_RR_RW_WR_SAVER_H_
@@ -75,15 +79,15 @@ namespace blue_sky
           }
 
         mutable well_iterator_t   wb_;
-        well_iterator_t   				we_;
-        size_t            				array_size_;
-        size_t            				total_connection_count_;
-        accessor_t        				accessor_;
+        well_iterator_t           we_;
+        size_t                    array_size_;
+        size_t                    total_connection_count_;
+        accessor_t                accessor_;
 
-        mutable size_t    				current_connection_;
-        mutable size_t    				current_connection_count_;
-        mutable size_t    				current_item_;
-        mutable size_t    				total_item_;
+        mutable size_t            current_connection_;
+        mutable size_t            current_connection_count_;
+        mutable size_t            current_item_;
+        mutable size_t            total_item_;
       };
 
     template <typename strategy_t, typename accessor_t>

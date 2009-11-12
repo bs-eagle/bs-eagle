@@ -1,3 +1,12 @@
+/**
+ *       \file  res_file_id.h
+ *      \brief  Identifiers
+ *     \author  Nikonov Max
+ *       \date  05.06.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
+ * */
 #ifndef _RES_FILE_ID_H_
 #define _RES_FILE_ID_H_
 

@@ -1,8 +1,11 @@
 /**
- * \file fip_results_hdf5_writer.cpp
- * \brief
- * \author Sergey Miryanov
- * \date 25.08.2009
+ *       \file  results_hdf5_writer.cpp
+ *      \brief  Writes [well|fip]_results to HDF5 storage
+ *     \author  Original author Sayfulling Ilshat, splited to
+ *              separate file by Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  25.08.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 #include "results_hdf5_writer.h"
