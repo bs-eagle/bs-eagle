@@ -1,8 +1,12 @@
 /**
- * \file well_rate_connection_loop.h
- * \brief loop through connection for well derivs computations
- * \author Sergey Miryanov
- * \date 21.11.2008
+ *       \file  well_rate_connection_loop.h
+ *      \brief  Loop through connections for well derivs 
+ *              computations
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  21.11.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
  * */
 #ifndef BS_WELLS_WELL_RATE_CONTROL_CONNECTION_LOOP_H_
 #define BS_WELLS_WELL_RATE_CONTROL_CONNECTION_LOOP_H_

@@ -1,8 +1,10 @@
 /**
- * \file well_event_params_decl.h
- * \brief
- * \author Sergey Miryanov
- * \date 15.07.2009
+ *       \file  well_event_params_decl.h
+ *      \brief  Parameters declaration for well events
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  15.07.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_BOS_CORE_WELL_EVENT_PARAMS_DECL_H_
 #define BS_BOS_CORE_WELL_EVENT_PARAMS_DECL_H_

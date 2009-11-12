@@ -1,8 +1,11 @@
 /**
- * \file well_rate_control_impl_type.h
- * \brief types for parametrization well_rate_control_impl
- * \author Sergey Miryanov
- * \date 25.11.2008
+ *       \file  well_rate_control_impl_type.h
+ *      \brief  Types for parametrization well_rate_control_impl
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  25.11.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
  * */
 #ifndef BS_WELLS_WELL_RATE_CONTROL_IMPL_TYPE_H_
 #define BS_WELLS_WELL_RATE_CONTROL_IMPL_TYPE_H_

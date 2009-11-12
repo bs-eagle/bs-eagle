@@ -1,8 +1,11 @@
 /**
- * \file well_rate_control_inj_mobility.h
- * \brief mobility computation for injection wells
- * \author Sergey Miryanov
- * \date 21.11.2008
+ *       \file  well_rate_control_inj_mobility.h
+ *      \brief  Calculates mobility for injection wells
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  21.11.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
  * */
 #ifndef BS_WELLS_WELL_RATE_INJ_MOBILITY_H_
 #define BS_WELLS_WELL_RATE_INJ_MOBILITY_H_

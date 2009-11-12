@@ -1,9 +1,11 @@
 /**
-* @file well_event.h
-* @brief declaration of well events
-* @author Morozov Andrey
-* @date 2008-06-07
-*/
+ *       \file  well_events.h
+ *      \brief  Declaration of well events
+ *     \author  Morozov Andrey
+ *       \date  07.06.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
 #ifndef WELL_EVENTS_H_
 #define WELL_EVENTS_H_
 
@@ -33,6 +35,10 @@ namespace blue_sky
     class well_limit_operation;
   }
 
+  /**
+   * \class well_event
+   * \brief Base class for well events
+   * */
   template <typename strategy_t>
   class BS_API_PLUGIN well_event : public event_base<strategy_t>
     {
@@ -46,7 +52,7 @@ namespace blue_sky
       typedef wells::well_limit_operation                     well_limit_operation_t;
       typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
       typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>													calc_model_t;
+      typedef calc_model <strategy_t>                         calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -54,30 +60,65 @@ namespace blue_sky
       typedef smart_ptr <smesh_iface_t, true>                 sp_smesh_iface_t;
       typedef smart_ptr <well_controller_t, true>             sp_well_controller_t;
       typedef smart_ptr <well_limit_operation_t, true>        sp_well_limit_operation_t;
-      typedef smart_ptr <calc_model_t, true>									sp_calc_model_t;
+      typedef smart_ptr <calc_model_t, true>                  sp_calc_model_t;
 
       typedef smart_ptr <reservoir_t, true>                   sp_top;
     public:
 
+      //! dtor
       virtual ~well_event () {}
-      virtual void apply (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;
 
-      virtual std::string get_well_name () const;
-      virtual std::string get_group_name () const;
-      virtual std::string get_event_name () const;
+      /**
+       * \brief  Applies event
+       * \param  top Instance of reservoir_simulator
+       * \param  msh
+       * \param  calc_model
+       * */
+      virtual void 
+      apply (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;
+
+      /**
+       * \brief  Returns name of well in event
+       * \return Name of well in event
+       * */
+      virtual std::string 
+      get_well_name () const;
+
+      /**
+       * \brief  Returns name of group in event
+       * \return Name of group in event
+       * */
+      virtual std::string 
+      get_group_name () const;
+
+      /**
+       * \brief  Returns name of event
+       * \return Name of event
+       * */
+      virtual std::string 
+      get_event_name () const;
 
     protected:
-      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;
+      /**
+       * \brief  Applies event
+       * \param  top Instance of reservoir_simulator
+       * \param  msh
+       * \param  calc_model
+       * */
+      virtual void 
+      apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;
 
     };
 
 //============================================================================================
-  //!  WELLSPEC_event class.
-  /*!
-  WELLSPEC Introduces a new well 3
-  This keyword introduces a new well, specifying the name and position of the well
-  head, the BHP reference depth and the separator used.
-  */
+  /**
+   * \class   WELSPECS_event
+   * \brief   WELSPECS keyword
+   * \details WELLSPEC Introduces a new well 3
+   *          This keyword introduces a new well, specifying the 
+   *          name and position of the well head, the BHP reference 
+   *          depth and the separator used.
+   * */
   template <typename strategy_t>
   class BS_API_PLUGIN WELSPECS_event: public well_event<strategy_t>
     {
@@ -90,7 +131,7 @@ namespace blue_sky
       typedef wells::well_limit_operation                     well_limit_operation_t;
       typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
       typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>			      calc_model_t;
+      typedef calc_model <strategy_t>           calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -132,11 +173,14 @@ namespace blue_sky
 
 //============================================================================================
 
-  //!  WELLCON_event class.
-  /*!
-  Specifies the position and properties of one or more well completions. This must be
-    entered after the WELLSPEC keyword defining the appropriate well.
-  */
+  /**
+   * \class   WELLCON_event
+   * \brief   WELLCON keyword
+   * \details Specifies the position and properties of one 
+   *          or more well completions. This must be 
+   *          entered after the WELLSPEC keyword defining 
+   *          the appropriate well.
+   * */
   template <typename strategy_t>
   class BS_API_PLUGIN WELLCON_event: public well_event<strategy_t>
     {
@@ -149,7 +193,7 @@ namespace blue_sky
       typedef wells::well_limit_operation                     well_limit_operation_t;
       typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
       typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>			      calc_model_t;
+      typedef calc_model <strategy_t>           calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -188,11 +232,13 @@ namespace blue_sky
     };
 
 //============================================================================================
-  //!  COMPDAT_event class.
-  /*!
-  COMPDAT specifies the position and properties of one or more well completions. This
-  must be entered after the WELSPECS keyword defining the appropriate well.
-  */
+  /**
+   * \class   COMPDAT_event
+   * \brief   COMPDAT keyword
+   * \details Specifies the position and properties of one or 
+   *          more well completions. This must be entered after 
+   *          the WELSPECS keyword defining the appropriate well.
+   * */
   template <typename strategy_t>
   class BS_API_PLUGIN COMPDAT_event: public well_event<strategy_t>
     {
@@ -208,7 +254,7 @@ namespace blue_sky
       typedef wells::well_limit_operation                     well_limit_operation_t;
       typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
       typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>			      calc_model_t;
+      typedef calc_model <strategy_t>           calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -216,7 +262,7 @@ namespace blue_sky
       typedef smart_ptr <smesh_iface_t, true>                 sp_smesh_iface_t;
       typedef smart_ptr <well_controller_t, true>             sp_well_controller_t;
       typedef smart_ptr <well_limit_operation_t, true>        sp_well_limit_operation_t;
-      typedef smart_ptr <calc_model_t, true>		      sp_calc_model_t;
+      typedef smart_ptr <calc_model_t, true>          sp_calc_model_t;
 
       typedef smart_ptr <reservoir_t, true>                   sp_top;
       BLUE_SKY_TYPE_DECL(COMPDAT_event);
@@ -250,10 +296,11 @@ namespace blue_sky
 
 //============================================================================================
 
-  //!  WCONPROD_event class.
-  /*!
-  WCONPROD Control data for production wells
-  */
+  /**
+   * \class   WCONPROD_event
+   * \brief   WCONPROD keyword
+   * \details Control data for production wells
+   * */
   template <typename strategy_t>
   class BS_API_PLUGIN WCONPROD_event: public well_event<strategy_t>
     {
@@ -266,7 +313,7 @@ namespace blue_sky
       typedef wells::well_limit_operation                     well_limit_operation_t;
       typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
       typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>			      calc_model_t;
+      typedef calc_model <strategy_t>           calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -303,21 +350,22 @@ namespace blue_sky
 
 //============================================================================================
 
-  //!  WCONHIST_event class.
-  /*!
-  WCONHIST Observed rates for history matching
-  production wells
-
-  This keyword is used in place of WCONPROD to declare production wells as special
-  history matching wells, and to enter their observed flow rates (and optionally their
-  measured BHP and THP values). The equivalent keyword for defining history
-  matching injection wells is WCONINJH.
-  */
+  /**
+   * \class   WCONHIST_event
+   * \brief   WCONHIST keyword
+   * \details Observed rates for history matching production wells.
+   *          This keyword is used in place of WCONPROD to declare 
+   *          production wells as special history matching wells, 
+   *          and to enter their observed flow rates (and optionally 
+   *          their measured BHP and THP values). The equivalent 
+   *          keyword for defining history matching injection wells 
+   *          is WCONINJH.
+   * */
   template <typename strategy_t>
   class BS_API_PLUGIN WCONHIST_event: public well_event<strategy_t>
     {
     public:
-      typedef reservoir <strategy_t>														reservoir_t;
+      typedef reservoir <strategy_t>                            reservoir_t;
 
       typedef well <strategy_t>                               well_t;
       typedef wells::connection <strategy_t>                  connection_t;
@@ -325,7 +373,7 @@ namespace blue_sky
       typedef wells::well_limit_operation                     well_limit_operation_t;
       typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
       typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>													calc_model_t;
+      typedef calc_model <strategy_t>                         calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -365,18 +413,18 @@ namespace blue_sky
 
 //============================================================================================
 
-  //!  WCONINJE_event class.
-  /*!
-  Injection well control data, with no group
-  control
-  This keyword can be used to set individual control targets and limits for injection
-  wells,
-  */
+  /**
+   * \class   WCONINJE_event
+   * \brief   WCONINJE keyword
+   * \details Injection well control data, with no group control.
+   *          This keyword can be used to set individual control 
+   *          targets and limits for injection wells
+   * */
   template <typename strategy_t>
   class BS_API_PLUGIN WCONINJE_event: public well_event<strategy_t>
     {
     public:
-      typedef reservoir <strategy_t>														reservoir_t;
+      typedef reservoir <strategy_t>                            reservoir_t;
 
       typedef well <strategy_t>                               well_t;
       typedef wells::connection <strategy_t>                  connection_t;
@@ -384,7 +432,7 @@ namespace blue_sky
       typedef wells::well_limit_operation                     well_limit_operation_t;
       typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
       typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>													calc_model_t;
+      typedef calc_model <strategy_t>                         calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -423,10 +471,11 @@ namespace blue_sky
 
 //============================================================================================
 
-  //!  WECON_event class.
-  /*!
-    Economic limit data for production wells
-  */
+  /**
+   * \class   WECON_event
+   * \brief   WECON keyword
+   * \details Economic limit data for production wells
+   * */
   template <typename strategy_t>
   class BS_API_PLUGIN WECON_event: public well_event<strategy_t>
     {
@@ -439,7 +488,7 @@ namespace blue_sky
       typedef wells::well_limit_operation                     well_limit_operation_t;
       typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
       typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>													calc_model_t;
+      typedef calc_model <strategy_t>                         calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -472,10 +521,11 @@ namespace blue_sky
 
 //============================================================================================
 
-  //!  WECONINJ_event class.
-  /*!
-    Economic limit data for injection wells
-  */
+  /**
+   * \class   WECONINJ_event
+   * \brief   WECONINJ keyword
+   * \details Economic limit data for injection wells
+   * */
   template <typename strategy_t>
   class BS_API_PLUGIN WECONINJ_event: public well_event<strategy_t>
     {
@@ -519,10 +569,11 @@ namespace blue_sky
 
 //============================================================================================
 
-  //!  WEFAC_event class.
-  /*!
-    Sets well efficiency factors (for downtime)
-  */
+  /**
+   * \class   WEFAC_event
+   * \brief   WEFAC keyword
+   * \details Sets well efficiency factors (for downtime)
+   * */
   template <typename strategy_t>
   class BS_API_PLUGIN WEFAC_event: public well_event<strategy_t>
     {
@@ -535,7 +586,7 @@ namespace blue_sky
       typedef wells::well_limit_operation                     well_limit_operation_t;
       typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
       typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>													calc_model_t;
+      typedef calc_model <strategy_t>                         calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -566,18 +617,21 @@ namespace blue_sky
 
 //============================================================================================
 
-  //!  WELTARG_event class.
-  /*!
-  WELTARG Resets a well operating target or limit
-  This keyword can be used to reset a target or limit value for a well, without having to
-  re-specify all the other quantities required by the control keywords WCONPROD or
-  WCONINJE. These other quantities are left unchanged, including the open/shut status
-  of the well.
-  If the well has been declared a history matching well (see keywords WCONHIST and
-  WCONINJH) the WELTARG keyword may be used to modify its BHP limit, VFP table
-  number, and artificial lift quantity. The other quantities should not be modified with
-  this keyword.
-  */
+  /**
+   * \class   WELTARG_event
+   * \brief   WELTARG keyword
+   * \details Resets a well operating target or limit.
+   *          This keyword can be used to reset a target or 
+   *          limit value for a well, without having to re-specify 
+   *          all the other quantities required by the control 
+   *          keywords WCONPROD or WCONINJE. These other 
+   *          quantities are left unchanged, including the open/shut 
+   *          status of the well. If the well has been declared a 
+   *          history matching well (see keywords WCONHIST and WCONINJH) 
+   *          the WELTARG keyword may be used to modify its BHP limit, 
+   *          VFP table number, and artificial lift quantity. The other 
+   *          quantities should not be modified with this keyword.
+   * */
   template <typename strategy_t>
   class BS_API_PLUGIN WELTARG_event: public well_event<strategy_t>
     {
@@ -590,7 +644,7 @@ namespace blue_sky
       typedef wells::well_limit_operation                     well_limit_operation_t;
       typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
       typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>													calc_model_t;
+      typedef calc_model <strategy_t>                         calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -622,17 +676,20 @@ namespace blue_sky
 
 //============================================================================================
 
-  //!  WPIMULT_event class.
-  /*!
-    WPIMULT Multiplies well connection factors by a given
-    value
-    This keyword can be used to multiply the connection transmissibility factors of
-    selected well connections by a specified value. To multiply the transmissibility factors
-    of all the connections in a well, leave items 3 - 7 defaulted. To multiply the
-    transmissibility factors of a subset of connections in a well, you can identify the subset
-    by their I,J,K location (items 3 - 5). A subset of connections can also be identified by
-    their completion
-  */
+  /**
+   * \class   WPIMULT_event
+   * \brief   WPIMULT keyword
+   * \details Multiplies well connection factors by a given value.
+   *          This keyword can be used to multiply the connection 
+   *          transmissibility factors of selected well connections 
+   *          by a specified value. To multiply the transmissibility 
+   *          factors of all the connections in a well, leave 
+   *          items 3 - 7 defaulted. To multiply the transmissibility 
+   *          factors of a subset of connections in a well, you can 
+   *          identify the subset by their I,J,K location (items 3 - 5).
+   *          A subset of connections can also be identified by their 
+   *          completion.
+   * */
   template <typename strategy_t>
   class BS_API_PLUGIN WPIMULT_event: public well_event<strategy_t>
     {
@@ -645,7 +702,7 @@ namespace blue_sky
       typedef wells::well_limit_operation                     well_limit_operation_t;
       typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
       typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>													calc_model_t;
+      typedef calc_model <strategy_t>                         calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -681,10 +738,11 @@ namespace blue_sky
 
 //============================================================================================
 
-  //!  COMPENSATION_event class.
-  /*!
-    COMPENSATION defines a compensation type and rate for well group
-  */
+  /**
+   * \class   COMPENSATION_event
+   * \brief   COMPENSATION keyword
+   * \details Defines a compensation type and rate for well group
+   * */
   template <typename strategy_t>
   class BS_API_PLUGIN COMPENSATION_event: public well_event<strategy_t>
     {
@@ -728,10 +786,12 @@ namespace blue_sky
 
 //============================================================================================
 
-  //!  FRACTURE_event class.
-  /*!
-  Defines the fracture in well
-  */
+  /**
+   * \class   FRACTURE_event
+   * \brief   FRACTURE keyword
+   * \details Defines the fracture in well
+   * \todo    Obsolete
+   * */
   template <typename strategy_t>
   class BS_API_PLUGIN FRACTURE_event: public well_event<strategy_t>
     {
@@ -783,10 +843,12 @@ namespace blue_sky
 
 //============================================================================================
 
-  //!  PERMFRAC_event class.
-  /*!
-  Defines the fracture in cells
-  */
+  /**
+   * \class   PERMFRAC_event
+   * \brief   PERMFRAC keyword
+   * \details Defines the fracture in cells
+   * \todo    Obsolete
+   * */
   template <typename strategy_t>
   class BS_API_PLUGIN PERMFRAC_event: public well_event<strategy_t>
     {

@@ -1,8 +1,11 @@
 /**
- * \file well_limit_operation.h
- * \brief well_limit_operation
- * \author Sergey Miryanov
- * \date 14.07.2008
+ *       \file  well_limit_operation.h
+ *      \brief  Class well_limit_operation
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  14.07.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete
  * */
 #ifndef BS_WELL_LIMIT_OPERATION_H_
 #define BS_WELL_LIMIT_OPERATION_H_
@@ -55,7 +58,7 @@ namespace blue_sky
       {
       public:
 
-        typedef smart_ptr <well_limit_operation>		sp_well_limit_operation_t;
+        typedef smart_ptr <well_limit_operation>    sp_well_limit_operation_t;
 
       public:
 

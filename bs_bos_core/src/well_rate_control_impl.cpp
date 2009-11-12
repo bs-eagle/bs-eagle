@@ -1,8 +1,11 @@
 /**
- * \file
- * \brief
- * \author
- * \date
+ *       \file  well_rate_control_impl.cpp
+ *      \brief  Implementation of well_rate_control
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  21.11.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
  * */
 #include "stdafx.h"
 
@@ -47,9 +50,9 @@ namespace blue_sky
   BLUE_SKY_TYPE_STD_COPY_T_DEF (well_rate_control_impl, (class));
 
 #define DEFINE_WELL_RATE_CONTROL_IMPL(TYPE) \
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (well_rate_control_impl <TYPE <base_strategy_fi> >), 	1, (objbase), BOOST_PP_STRINGIZE(well_rate_control_impl <TYPE <base_strategy_fi> >), BOOST_PP_STRINGIZE(well_rate_control_impl <TYPE <base_strategy_fi> >), BOOST_PP_STRINGIZE(well_rate_control_impl <TYPE <base_strategy_fi> >), false);  \
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (well_rate_control_impl <TYPE <base_strategy_di> >), 	1, (objbase), BOOST_PP_STRINGIZE(well_rate_control_impl <TYPE <base_strategy_di> >), BOOST_PP_STRINGIZE(well_rate_control_impl <TYPE <base_strategy_di> >), BOOST_PP_STRINGIZE(well_rate_control_impl <TYPE <base_strategy_di> >), false);\
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (well_rate_control_impl <TYPE <base_strategy_mixi> >), 	1, (objbase), BOOST_PP_STRINGIZE(well_rate_control_impl <TYPE <base_strategy_di> >), BOOST_PP_STRINGIZE(well_rate_control_impl <TYPE <base_strategy_mixi> >), BOOST_PP_STRINGIZE(well_rate_control_impl <TYPE <base_strategy_mixi> >), false);
+  BLUE_SKY_TYPE_IMPL_T_EXT (1, (well_rate_control_impl <TYPE <base_strategy_fi> >),   1, (objbase), BOOST_PP_STRINGIZE(well_rate_control_impl <TYPE <base_strategy_fi> >), BOOST_PP_STRINGIZE(well_rate_control_impl <TYPE <base_strategy_fi> >), BOOST_PP_STRINGIZE(well_rate_control_impl <TYPE <base_strategy_fi> >), false);  \
+  BLUE_SKY_TYPE_IMPL_T_EXT (1, (well_rate_control_impl <TYPE <base_strategy_di> >),   1, (objbase), BOOST_PP_STRINGIZE(well_rate_control_impl <TYPE <base_strategy_di> >), BOOST_PP_STRINGIZE(well_rate_control_impl <TYPE <base_strategy_di> >), BOOST_PP_STRINGIZE(well_rate_control_impl <TYPE <base_strategy_di> >), false);\
+  BLUE_SKY_TYPE_IMPL_T_EXT (1, (well_rate_control_impl <TYPE <base_strategy_mixi> >),   1, (objbase), BOOST_PP_STRINGIZE(well_rate_control_impl <TYPE <base_strategy_di> >), BOOST_PP_STRINGIZE(well_rate_control_impl <TYPE <base_strategy_mixi> >), BOOST_PP_STRINGIZE(well_rate_control_impl <TYPE <base_strategy_mixi> >), false);
 
   using namespace wells;
   DEFINE_WELL_RATE_CONTROL_IMPL (compute_bhp_3p_type);

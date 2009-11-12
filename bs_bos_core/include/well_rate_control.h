@@ -1,8 +1,11 @@
 /**
- * \file well_rate_control.h
- * \brief well control impl
- * \author Sergey Miryanov
- * \date 21.11.2008
+ *       \file  well_rate_control.h
+ *      \brief  Implementation of well control
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  21.11.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
  * */
 #ifndef BS_WELLS_WELL_RATE_CONTROL_H_
 #define BS_WELLS_WELL_RATE_CONTROL_H_
@@ -99,7 +102,7 @@ namespace blue_sky
       private:
         bool                                            is_bhp_;
         bool                                            is_prod_;
-        auto_value <rate_control_type, null_control>	  control_type_;
+        auto_value <rate_control_type, null_control>    control_type_;
         sp_well_rate_control_impl_t                     impl_;
       };
 

@@ -1,8 +1,11 @@
 /**
- * \file well_rate_control_prod_mobility.h
- * \brief mobility computation for production wells
- * \author Sergey Miryanov
- * \date 21.11.2008
+ *       \file  well_rate_control_prod_mobility.h
+ *      \brief  Calculates mobility for production wells
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  21.11.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
  * */
 #ifndef BS_WELLS_WELL_RATE_PROD_MOBILITY_H_
 #define BS_WELLS_WELL_RATE_PROD_MOBILITY_H_
@@ -316,10 +319,10 @@ public:
         {
           const item_t &gw  = params.gw;
           const item_t &Pg  = params.Pg;
-          const item_t &Po	= params.Po;
+          const item_t &Po  = params.Po;
           const item_t &mg  = MOBILITY (data, params.phase_d, FI_PHASE_GAS);
-          const item_t &mo	= MOBILITY (data, params.phase_d, FI_PHASE_OIL);
-          const item_t &Rso	= GAS_OIL_RATIO (data);
+          const item_t &mo  = MOBILITY (data, params.phase_d, FI_PHASE_OIL);
+          const item_t &Rso = GAS_OIL_RATIO (data);
 
 #ifdef _DEBUG
           BOSOUT (section::wells, level::debug) << boost::format ("[%s : %d] qg (%.20e) gw: %.20e mg: %.20e pg: %.20e gor: %.20e") % params.well_->name ().c_str () % params.n_block % (gw * (mg * Pg + Rso * mo * Po)) % gw % mg % Pg % Rso << bs_end;
@@ -342,9 +345,9 @@ public:
         get_solution_gas_rate (const data_t &data, const params_t &params) const
         {
           const item_t &gw  = params.gw;
-          const item_t &Po	= params.Po;
-          const item_t &mo	= MOBILITY (data, params.phase_d, FI_PHASE_OIL);
-          const item_t &Rso	= GAS_OIL_RATIO (data);
+          const item_t &Po  = params.Po;
+          const item_t &mo  = MOBILITY (data, params.phase_d, FI_PHASE_OIL);
+          const item_t &Rso = GAS_OIL_RATIO (data);
 
           return gw * Rso * mo * Po;
         }

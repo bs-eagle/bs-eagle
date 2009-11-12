@@ -1,8 +1,11 @@
 /**
- * \file well_rate_contorl.cpp
- * \brief well_rate_control impl
- * \author Sergey Miryanov
- * \date 21.11.2008
+ *       \file  well_rate_control.cpp
+ *      \brief  Implementation of well control
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  21.11.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
  * */
 #include "stdafx.h"
 #include "well_rate_control.h"

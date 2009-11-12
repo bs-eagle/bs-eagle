@@ -1,8 +1,12 @@
 /**
- * \file well_rate_compute_potentials.h
- * \brief compute perforation potential for well derivs computation
- * \author Sergey Miryanov
- * \date 21.11.2008
+ *       \file  well_rate_compute_potentials.h
+ *      \brief  Compute perforation potentials for well derivs
+ *              computation
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  21.11.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
  * */
 #ifndef BS_WELLS_WELL_RATE_CONTROL_COMPUTE_POTENTIALS_H_
 #define BS_WELLS_WELL_RATE_CONTROL_COMPUTE_POTENTIALS_H_

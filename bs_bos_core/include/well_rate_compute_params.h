@@ -1,8 +1,11 @@
-/** 
- * \file well_rate_compute_params.h
- * \brief params for compute well derivs
- * \author Sergey Miryanov
- * \date 14.01.2009
+/**
+ *       \file  well_rate_compute_params.h
+ *      \brief  Params for compute well derivs
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  14.01.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
  * */
 #ifndef BS_WELLS_WELL_RATE_COMPUTE_PARAMS_H_
 #define BS_WELLS_WELL_RATE_COMPUTE_PARAMS_H_

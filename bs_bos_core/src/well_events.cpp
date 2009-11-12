@@ -1,9 +1,11 @@
 /**
-* @file well_events.cpp
-* @brief Constructors of well events. Each constructor contains the structure of event parameters defenition
-* @author Morozov Andrey
-* @date 2008-06-07
-*/
+ *       \file  well_events.cpp
+ *      \brief  Constructors for well events
+ *     \author  Morozov Andrey
+ *       \date  07.06.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
 #include "stdafx.h"
 
 #include "well_events.h"

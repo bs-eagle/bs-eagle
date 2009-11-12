@@ -1,8 +1,11 @@
 /**
- * \file well_rate_control_deriv_typedef.h
- * \brief
- * \author Sergey Miryanov
- * \date 24.11.2008
+ *       \file  well_rate_control_compute_deriv_typedef.h
+ *      \brief  Get types from base class (well_rate_control_deriv)
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  24.11.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
  * */
 #ifndef BS_WELLS_WELL_RATE_CONTROL_DERIV_TYPEDEF_H_
 #define BS_WELLS_WELL_RATE_CONTROL_DERIV_TYPEDEF_H_
