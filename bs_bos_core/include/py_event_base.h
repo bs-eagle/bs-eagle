@@ -1,3 +1,13 @@
+/**
+ *       \file  py_event_base.h
+ *      \brief  Python wrappers for event_base, python events iterator,
+ *              for event_base see event_base.h
+ *     \author  Nikonov Max
+ *       \date  17.10.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  A bit outdate
+ * */
 #ifndef PY_EVENT_BASE_H
 #define PY_EVENT_BASE_H
 
@@ -36,7 +46,7 @@ namespace python {
 
    // template <typename strategy_t>
    // class BS_API_PLUGIN py_event_base : public py_event_base_pv_holder<strategy_t>
-			//																, public boost::python::wrapper< py_event_base_pv_holder<strategy_t> > //objbase > 
+      //                                , public boost::python::wrapper< py_event_base_pv_holder<strategy_t> > //objbase > 
    // {
    // public:
    //   typedef event_base <strategy_t>                 wrapped_t;
@@ -71,9 +81,9 @@ namespace python {
    //                       const py_mesh_iface_t &mesh,
    //                       const py_calc_model_t &calc_model);
 
-			//void default_apply_from_py (const py_reservoir_t &top,
-			//														const py_mesh_iface_t &mesh,
-			//														const py_calc_model_t &calc_model);
+      //void default_apply_from_py (const py_reservoir_t &top,
+      //                            const py_mesh_iface_t &mesh,
+      //                            const py_calc_model_t &calc_model);
    // };
 
 
@@ -90,12 +100,12 @@ namespace python {
 
       typedef event_manager <strategy_t>           event_manager_t;
       typedef typename event_manager_t::event_map  em_t;
-      typedef typename em_t::iterator       			 list_iterator_t;
+      typedef typename em_t::iterator              list_iterator_t;
       typedef typename list_iterator_t::value_type value_t;
-      typedef typename value_t::second_type  			 elist_t;
+      typedef typename value_t::second_type        elist_t;
 
-      typedef py_el_pair <strategy_t>          		 py_el_pair_t;
-      typedef typename elist_t::value_type     		 sp_event_base_t;
+      typedef py_el_pair <strategy_t>              py_el_pair_t;
+      typedef typename elist_t::value_type         sp_event_base_t;
       typedef typename elist_t::iterator           iterator_t;
       typedef typename elist_t::const_iterator     const_iterator_t;
 
@@ -139,11 +149,11 @@ namespace python {
 
       typedef event_manager <strategy_t>           event_manager_t;
       typedef typename event_manager_t::event_map  em_t;
-      typedef typename em_t::const_iterator 			 const_iterator_t;
-      typedef typename em_t::iterator       			 iterator_t;
+      typedef typename em_t::const_iterator        const_iterator_t;
+      typedef typename em_t::iterator              iterator_t;
       typedef typename iterator_t::value_type      value_t;
-      typedef typename value_t::first_type   			 first_t; // posix_time::ptime
-      typedef typename value_t::second_type  			 second_t; // list < smart_ptr <event_base> >
+      typedef typename value_t::first_type         first_t; // posix_time::ptime
+      typedef typename value_t::second_type        second_t; // list < smart_ptr <event_base> >
 
       typedef py_event_base_iterator <strategy_t>  py_event_base_iterator_t;
 
@@ -172,10 +182,10 @@ namespace python {
       typedef event_manager <strategy_t>           event_manager_t;
       typedef smart_ptr <event_manager_t>          sp_event_manager_t;
       typedef typename event_manager_t::event_map  em_t;
-      typedef typename em_t::const_iterator 			 const_iterator_t;
-      typedef typename em_t::iterator       			 iterator_t;
-      typedef typename em_t::key_type       			 first_t;
-      typedef typename em_t::value_type     			 second_t;
+      typedef typename em_t::const_iterator        const_iterator_t;
+      typedef typename em_t::iterator              iterator_t;
+      typedef typename em_t::key_type              first_t;
+      typedef typename em_t::value_type            second_t;
       typedef py_el_pair <strategy_t>              py_el_pair_t;
 
       typedef std::iterator<std::bidirectional_iterator_tag,
@@ -209,7 +219,11 @@ namespace python {
       //py_el_pair_t pair_;
     };
 
-    void py_export_events ();
+    /**
+     * \brief  Exports wrappers to python
+     * */
+    void 
+    py_export_events ();
 
 } // namespace python
 } // namespace blue_sky

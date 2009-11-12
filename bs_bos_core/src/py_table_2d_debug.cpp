@@ -1,9 +1,12 @@
 /**
- * \file py_table_2d_debug.cpp
- * \brief python wrappers for table_2d. debug only
- * \author Miryanov Sergey
- * \date 12.05.2008
- */
+ *       \file  py_table_2d_debug.cpp
+ *      \brief  Python wrappers for table_2d
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  12.05.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
+ * */
 #include "stdafx.h"
 
 #ifdef _DEBUG

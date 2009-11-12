@@ -1,8 +1,12 @@
 /**
- * \file py_calc_well_detail.h
- * \brief
- * \author Sergey Miryanov
- * \date 01.07.2009
+ *       \file  py_calc_well_detail.h
+ *      \brief  Implementation of useful functions for calc_well exporter,
+ *              see calc_well_exporter (py_calc_well.h)
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  01.07.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Should be moved to src/
  * */
 #ifndef BS_BOS_CORE_PY_CALC_WELL_DETAIL_H_
 #define BS_BOS_CORE_PY_CALC_WELL_DETAIL_H_

@@ -1,3 +1,13 @@
+/**
+ *       \file  py_reservoir.cpp
+ *      \brief  Export python wrappers for reservoir,
+ *              see reservoir.h
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  17.10.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
+
 #include "stdafx.h"
 
 #include "py_reservoir.h"

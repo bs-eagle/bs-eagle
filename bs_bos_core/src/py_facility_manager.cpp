@@ -1,3 +1,13 @@
+/**
+ *       \file  py_facility_manager.cpp
+ *      \brief  Python wrappers for facility_manager,
+ *              see facility_manager.h
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  17.10.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
+
 #include "stdafx.h"
 
 #include "py_facility_manager.h"
@@ -16,7 +26,7 @@ namespace python {
   //{
   //  class_<py_facility_manager<strategy_t>, bases<py_objbase> >(name)
   //  //.def("__iter__", range(&py_facility_manager<strategy_t>::wells_begin,
-  //  //									 	 	 &py_facility_manager<strategy_t>::wells_end))
+  //  //                       &py_facility_manager<strategy_t>::wells_end))
   //  .def("add_well", &py_facility_manager<strategy_t>::add_well)
   //  .def("wells", &py_facility_manager<strategy_t>::wells_begin)
   //  .def("wells_end", &py_facility_manager<strategy_t>::wells_end)

@@ -1,3 +1,12 @@
+/**
+ *       \file  py_reservoir_simulator.cpp
+ *      \brief  Exports python wrappers for reservoir_simulator,
+ *              see reservoir_simulator.h
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  18.07.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
 #include "stdafx.h"
 
 #include "py_reservoir_simulator.h"

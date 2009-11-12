@@ -1,3 +1,12 @@
+/**
+ *       \file  py_calc_model.h
+ *      \brief  Python wrappers for calc_model, calc_model_data
+ *     \author  Morozov Andrey
+ *       \date  25.08.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  A bit outdate
+ * */
 #ifndef PY_CALC_MODEL_H
 #define PY_CALC_MODEL_H
 
@@ -83,7 +92,7 @@ namespace blue_sky
         typedef typename strategy_t::index_t        index_t;
 
         typedef calc_model<strategy_t>              wrapped_t;
-        typedef smart_ptr<wrapped_t>					      sp_cm_t;
+        typedef smart_ptr<wrapped_t>                sp_cm_t;
 
         typedef py_idata <strategy_t>               py_idata_t;
 
@@ -223,7 +232,11 @@ namespace blue_sky
       private:
       };
 
-    void py_export_calc_model ();
+    /**
+     * \brief  Exports wrappers to python
+     * */
+    void 
+    py_export_calc_model ();
   }
 }
 

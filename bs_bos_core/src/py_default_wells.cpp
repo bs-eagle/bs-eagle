@@ -1,8 +1,10 @@
-/** 
- * \file py_default_wells.cpp
- * \brief
- * \author Sergey Miryanov
- * \date 22.05.2009
+/**
+ *       \file  py_default_wells.cpp
+ *      \brief  Exports python wrappers for default_well
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  22.05.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 #include "py_default_wells.h"

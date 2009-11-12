@@ -1,8 +1,11 @@
 /**
- * \file py_data_storage_interface.cpp
- * \brief impl of
- * \author Sergey Miryanov
- * \date 23.07.2008
+ *       \file  py_data_storage_interface.cpp
+ *      \brief  Python wrappers data_serializer, data_storage_interface
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  23.07.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  A bit outdate
  * */
 #include "stdafx.h"
 
@@ -16,9 +19,9 @@ namespace blue_sky
     //////////////////////////////////////////////////////////////////////////
     struct BS_API_PLUGIN data_storage_proxy : public data_storage
       {
-        typedef py_data_storage							py_impl_t;
-        typedef smart_ptr <py_impl_t>				sp_impl_t;
-        typedef data_storage								ds_t;
+        typedef py_data_storage             py_impl_t;
+        typedef smart_ptr <py_impl_t>       sp_impl_t;
+        typedef data_storage                ds_t;
 
         BLUE_SKY_TYPE_DECL (data_storage_proxy);
 
@@ -87,16 +90,16 @@ private:
     py_data_serializer::save (const sp_storage_t &/*storage*/, const sp_obj &/*obj*/)
     {
       //Sergey Miryanov:
-      //	today (23.07.2008) we haven't any way to convert sp_obj
-      //	to corresponding python wrapper
-      //	in future - if we build table between such types we can
-      //	convert python wrappers to objects and vice versa
+      //  today (23.07.2008) we haven't any way to convert sp_obj
+      //  to corresponding python wrapper
+      //  in future - if we build table between such types we can
+      //  convert python wrappers to objects and vice versa
     }
 
     //void
     //py_data_storage_interface::register_serializer (py_data_serializer serializer)
     //{
-    //	get_lspx (this)->register_serializer (serializer.get_spx <py_data_serializer::wrapped_t> ());
+    //  get_lspx (this)->register_serializer (serializer.get_spx <py_data_serializer::wrapped_t> ());
     //}
     void
     py_data_storage_interface::set_storage (const py_data_storage &storage)
@@ -140,5 +143,5 @@ private:
       ;
     }
 
-  }	// namespace python
-}	// namespace blue_sky
+  } // namespace python
+} // namespace blue_sky

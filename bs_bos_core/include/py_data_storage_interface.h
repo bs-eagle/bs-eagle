@@ -1,8 +1,11 @@
 /**
- * \file py_data_storage_interface.h
- * \brief python wrapper for
- * \author Sergey Miryanov
- * \date 23.07.2008
+ *       \file  py_data_storage_interface.h
+ *      \brief  Python wrappers data_serializer, data_storage_interface
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  23.07.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  A bit outdate
  * */
 #ifndef BS_PY_DATA_STORAGE_INTERFACE_H_
 #define BS_PY_DATA_STORAGE_INTERFACE_H_
@@ -19,7 +22,7 @@ namespace blue_sky
       {
       public:
 
-        typedef py_objbase		base_t;
+        typedef py_objbase    base_t;
 
       public:
 
@@ -38,8 +41,8 @@ namespace blue_sky
       {
       public:
 
-        typedef data_serializer		wrapped_t;
-        typedef py_objbase				base_t;
+        typedef data_serializer   wrapped_t;
+        typedef py_objbase        base_t;
 
       public:
 
@@ -63,8 +66,8 @@ namespace blue_sky
       {
       public:
 
-        typedef data_storage_interface	wrapped_t;
-        typedef py_objbase							base_t;
+        typedef data_storage_interface  wrapped_t;
+        typedef py_objbase              base_t;
 
       public:
 
@@ -89,9 +92,9 @@ namespace blue_sky
     void
     py_export_data_storage_interface ();
 
-  }	// namespace python
-}	// namespace blue_sky
+  } // namespace python
+} // namespace blue_sky
 
 
 
-#endif	// #ifndef BS_PY_DATA_STORAGE_INTERFACE_H_
+#endif  // #ifndef BS_PY_DATA_STORAGE_INTERFACE_H_

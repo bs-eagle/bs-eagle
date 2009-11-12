@@ -1,8 +1,12 @@
 /**
- * \file py_well_factory.cpp
- * \brief
- * \author Sergey Miryanov
- * \date 21.05.2009
+ *       \file  py_well_factory.cpp
+ *      \brief  Python wrappers for well factories (well, well_controller,
+ *              well_rate_controller, well_limit_operation factories),
+ *              see calc_well.h and related files
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  21.05.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 #include "py_well_factory.h"

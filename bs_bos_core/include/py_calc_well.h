@@ -1,8 +1,11 @@
 /**
- * \file py_calc_well.h
- * \brief python wrapper for calc_well
- * \author Sergey Miryanov
- * \date 23.06.2008
+ *       \file  py_calc_well.h
+ *      \brief  Python wrapper for calc_well, see calc_well.h
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  23.06.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  A bit outdate
  * */
 #ifndef PY_BS_CALC_WELL_H_
 #define PY_BS_CALC_WELL_H_

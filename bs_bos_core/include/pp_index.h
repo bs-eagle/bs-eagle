@@ -1,8 +1,10 @@
 /**
- * \file pp_index.h
- * \brief 
- * \author Sergey Miryanov
- * \date 15.10.2009
+ *       \file  pp_index.h
+ *      \brief  Incapsulates indexes for derivs for n-phase models
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  15.10.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_BOS_CORE_PP_INDEX_H_
 #define BS_BOS_CORE_PP_INDEX_H_
@@ -10,6 +12,10 @@
 namespace blue_sky {
 namespace detail {
 
+  /**
+   * \class pp_index
+   * \brief Incapsulates indexes for derivs for n-phase models
+   * */
   template <size_t, bool, bool>
   struct pp_index
   {

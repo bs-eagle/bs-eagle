@@ -1,3 +1,14 @@
+/**
+ *       \file  py_event_base.cpp
+ *      \brief  Python wrappers for event_base, python events iterator,
+ *              for event_base see event_base.h
+ *     \author  Nikonov Max
+ *       \date  17.10.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  A bit outdate
+ * */
+
 #include "stdafx.h"
 
 #include "calc_model.h"
@@ -33,8 +44,8 @@ namespace blue_sky
 
     template <typename strategy_t>
     py_event_base_iterator<strategy_t>::py_event_base_iterator (const this_t &iter1)
-//				: events (iter.events)
-//				, iter (iter.iter)
+//        : events (iter.events)
+//        , iter (iter.iter)
     {
       events.resize (0);
       events.assign (iter1.events.begin (), iter1.events.end ());
@@ -171,10 +182,10 @@ namespace blue_sky
         //, pair_ (iter.iter)
     {
       /*for (const_iterator_t i = evm->event_list.begin (); i != evm->event_list.end (); ++i)
-      	if (*i == *(iter1.iter)) {
-      		iter = const_iterator_t (i);
-      		break;
-      	}*/
+        if (*i == *(iter1.iter)) {
+          iter = const_iterator_t (i);
+          break;
+        }*/
     }
 
     template <typename strategy_t>

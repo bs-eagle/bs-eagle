@@ -1,8 +1,12 @@
 /**
- * \file py_well_factory.h
- * \brief 
- * \author Sergey Miryanov
- * \date 21.05.2009
+ *       \file  py_well_factory.h
+ *      \brief  Python wrappers for well factories (well, well_controller,
+ *              well_rate_controller, well_limit_operation factories),
+ *              see calc_well.h and related files
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  21.05.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_BOS_CORE_PY_WELL_FACTORY_H_
 #define BS_BOS_CORE_PY_WELL_FACTORY_H_
@@ -68,7 +72,11 @@ namespace python {
     WRAPPER_METHOD_R (create_limit, sp_well_limit_operation_t, 1, (limit_operation_type));
   };
 
-  void py_export_well_factories ();
+  /**
+   * \brief  Exports wrappers to python
+   * */
+  void 
+  py_export_well_factories ();
 
 } // namespace python
 } // namespace blue_sky

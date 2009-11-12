@@ -1,4 +1,13 @@
 /**
+ *       \file  prepare_fpu_win.cpp
+ *      \brief  Prepares FPU to work (enables exceptions, etc), windows version
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  10.09.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
+
+/**
  * \file prepare_fpu_win.cpp
  * \brief prepare fpu to work (enable exception, etc)
  * \author Sergey Miryanov

@@ -1,3 +1,12 @@
+/**
+ *       \file  py_event_manager.cpp
+ *      \brief  Python wrapper for event_manager, 
+ *              see event_manager.h
+ *     \author  Morozov Andrey
+ *       \date  07.06.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
 #include "stdafx.h"
 
 #include "event_manager.h"

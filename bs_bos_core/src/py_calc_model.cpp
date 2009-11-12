@@ -1,3 +1,13 @@
+/**
+ *       \file  py_calc_model.cpp
+ *      \brief  Python wrappers for calc_model, calc_model_data
+ *     \author  Morozov Andrey
+ *       \date  25.08.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  A bit outdate
+ * */
+
 #include "stdafx.h"
 
 #include "calc_model.h"
@@ -450,12 +460,12 @@ namespace blue_sky
     //template <typename strategy_t>
     //typename py_calc_model<strategy_t>::index_t
     //py_calc_model<strategy_t>::gas_oil_ratio_len () const {
-    //	return 1;
+    //  return 1;
     //}
     //template <typename strategy_t>
     //typename py_calc_model<strategy_t>::item_t
     //py_calc_model<strategy_t>::get_gas_oil_ratio (index_t i, index_t j) const {
-    //	return this->get_spx<wrapped_t> ()->gas_oil_ratio[j];
+    //  return this->get_spx<wrapped_t> ()->gas_oil_ratio[j];
     //}
 
     template <typename strategy_t>

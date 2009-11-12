@@ -1,8 +1,11 @@
 /**
- * \file py_keyword_manager.cpp
- * \brief
- * \author Sergey Miryanov
- * \date 28.10.2009
+ *       \file  py_keyword_manager.cpp
+ *      \brief  Exports python wrappers for keyword_manager,
+ *              see keyword_manager.h
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  28.10.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 #include "py_keyword_manager.h"

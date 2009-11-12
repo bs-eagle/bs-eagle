@@ -1,9 +1,11 @@
 /**
- * \file py_two_stage_preconditioner.cpp
- * \brief Python wrapper for two_stage_preconditioner
- * \author Miryanov Sergey
- * \date 16.04.2008
- */
+ *       \file  py_two_stage_preconditioner.cpp
+ *      \brief  Python wrapper for two_stage_preconditioner
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  16.04.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
 #include "stdafx.h"
 
 #include "py_two_stage_preconditioner.h"

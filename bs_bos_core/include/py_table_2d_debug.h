@@ -1,9 +1,12 @@
 /**
- * \file py_table_2d_debug.h
- * \brief python wrapeps for table_2d. only for debug
- * \author Miryanov Sergey
- * \date 12.05.2008
- */
+ *       \file  py_table_2d_debug.h
+ *      \brief  Python wrappers for table_2d
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  12.05.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
+ * */
 #ifndef PY_BS_TABLE_2D_H_
 #define PY_BS_TABLE_2D_H_
 

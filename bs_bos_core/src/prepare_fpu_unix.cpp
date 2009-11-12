@@ -1,8 +1,10 @@
 /**
- * \file prepare_fpu_unix.cpp
- * \brief prepare fpu to work (enable exception, etc)
- * \author Sergey Miryanov
- * \date 10.09.2009
+ *       \file  prepare_fpu_unix.cpp
+ *      \brief  Prepares FPU to work (enables exceptions, etc), linux version
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  10.09.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 #include "prepare_fpu.h"
