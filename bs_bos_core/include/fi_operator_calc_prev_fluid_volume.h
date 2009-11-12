@@ -1,14 +1,19 @@
 /**
- * \file fi_operator_calc_prev_fluid_volume.h
- * \brief
- * \author Sergey Miryanov
- * \date 23.01.2009
+ *       \file  fi_operator_calc_prev_fluid_volume.h
+ *      \brief  Calculates fluid volume on previous step
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  23.01.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_FI_OPERATOR_CALC_PREV_FLUID_VOLUME_H_
 #define BS_FI_OPERATOR_CALC_PREV_FLUID_VOLUME_H_
 
 namespace blue_sky {
 
+  /**
+   * \brief  Calculates fluid volume on previous step
+   * */
   template <class strategy_t, bool is_w, bool is_g, bool is_o>
   BS_FORCE_INLINE void
   fi_operator_impl <strategy_t, is_w, is_g, is_o>::calc_prev_fluid_volume ()

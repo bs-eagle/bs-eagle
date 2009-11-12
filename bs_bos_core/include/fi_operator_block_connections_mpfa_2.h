@@ -1,8 +1,10 @@
 /**
- * \file fi_operator_block_connections_mpfa_2.h
- * \brief new (full mpfa) mpfa impl
- * \author Sergey Miryanov
- * \date 06.04.2009
+ *       \file  fi_operator_block_connections_mpfa_2.h
+ *      \brief  Calculates flux part of Jacobian (full mpfa implementation)
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  06.04.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_FI_OPERATOR_BLOCK_CONNECTION_MPFA_2_H_
 #define BS_FI_OPERATOR_BLOCK_CONNECTION_MPFA_2_H_
@@ -60,6 +62,14 @@ namespace blue_sky {
     #define MAIN_VAR_UP_O           main_var_up_o
     #define P_DERIV_GOR_UP_O        p_deriv_gor_up_o
 
+    /**
+     * \class mpfa_base_impl
+     * \brief Calculates flux part of Jacobian (full mpfa implementation), 
+     *        parametrized with is_w, is_g is_o (is water, gas and oil phases
+     *        present)
+     * \todo  Should be renamed
+     * \todo  Describe data members
+     * */
     template <typename strategy_t, bool is_w, bool is_g, bool is_o>
     struct mpfa_base_impl
     {
@@ -76,55 +86,50 @@ namespace blue_sky {
       typedef typename calc_model_t::data_array_t     data_array_t;
       typedef typename calc_model_t::main_var_array_t main_var_array_t;
 
-      typedef typename calc_model_t::sp_pvt_dead_oil_array_t  sp_pvt_dead_oil_array_t;
-      typedef typename calc_model_t::sp_pvt_gas_array_t       sp_pvt_gas_array_t;
-      typedef typename calc_model_t::sp_pvt_water_array_t     sp_pvt_water_array_t;
-
-
-      typedef rs_mesh_iface <strategy_t>               mesh_iface_t;
-      //typedef nc_ptr <mesh_iface_t>                           nc_mesh_iface_t;
-      typedef smart_ptr <mesh_iface_t, true>           sp_mesh_iface_t;
-      typedef rs_smesh_iface <strategy_t>              rs_smesh_iface_t;
-
-
       enum
         {
-          n_phases = is_w + is_g + is_o,
-          b_sqr = n_phases * n_phases,
+          n_phases = is_w + is_g + is_o,  //!< Number of phases present in model
+          b_sqr = n_phases * n_phases,    //!< Size of Jacobian block
         };
 
       enum
         {
-          is_1p = n_phases == 1,
-          is_2p = n_phases == 2,
-          is_3p = n_phases == 3,
+          is_1p = n_phases == 1,          //!< Is an one phase model
+          is_2p = n_phases == 2,          //!< Is a two phase model
+          is_3p = n_phases == 3,          //!< Is a tree phase model
         };
 
       enum
         {
-          gas_sg = detail::pp_index <n_phases, is_w, is_g>::gas_sg,
-          gas_so = detail::pp_index <n_phases, is_w, is_g>::gas_so,
-          gas_po = detail::pp_index <n_phases, is_w, is_g>::gas_po,
-          oil_sg = detail::pp_index <n_phases, is_w, is_g>::oil_sg,
-          oil_so = detail::pp_index <n_phases, is_w, is_g>::oil_so,
-          oil_po = detail::pp_index <n_phases, is_w, is_g>::oil_po,
-          wat_sg = detail::pp_index <n_phases, is_w, is_g>::wat_sg,
-          wat_so = detail::pp_index <n_phases, is_w, is_g>::wat_so,
-          wat_po = detail::pp_index <n_phases, is_w, is_g>::wat_po,
+          gas_sg = detail::pp_index <n_phases, is_w, is_g>::gas_sg,     //!< Index of deriv by gas saturation for gas phase
+          gas_so = detail::pp_index <n_phases, is_w, is_g>::gas_so,     //!< Index of deriv by oil saturation for gas phase
+          gas_po = detail::pp_index <n_phases, is_w, is_g>::gas_po,     //!< Index of deriv by pressure for gas phase
+          oil_sg = detail::pp_index <n_phases, is_w, is_g>::oil_sg,     //!< Index of deriv by gas saturation for oil phase
+          oil_so = detail::pp_index <n_phases, is_w, is_g>::oil_so,     //!< Index of deriv by oil saturation for oil phase
+          oil_po = detail::pp_index <n_phases, is_w, is_g>::oil_po,     //!< Index of deriv by pressure for oil phase
+          wat_sg = detail::pp_index <n_phases, is_w, is_g>::wat_sg,     //!< Index of deriv by gas saturation for water phase
+          wat_so = detail::pp_index <n_phases, is_w, is_g>::wat_so,     //!< Index of deriv by oil saturation for water phase
+          wat_po = detail::pp_index <n_phases, is_w, is_g>::wat_po,     //!< Index of deriv by pressure for water phase
         };
 
       enum
         {
-          gas_idx = 0,
-          oil_idx = is_g,
-          wat_idx = is_g + is_o,
+          gas_idx = 0,                                                  //!< Index of gas phase
+          oil_idx = is_g,                                               //!< Index of oil phase
+          wat_idx = is_g + is_o,                                        //!< Index of water phase
 
-          gas_sw = !is_1p ? b_sqr + gas_idx : -1,
-          oil_sw = !is_1p ? b_sqr + oil_idx : -1,
-          wat_sw = !is_1p ? b_sqr + wat_idx : -1,
+          gas_sw = !is_1p ? b_sqr + gas_idx : -1,                       //!< Index of deriv by water saturation for gas phase
+          oil_sw = !is_1p ? b_sqr + oil_idx : -1,                       //!< Index of deriv by water saturation for oil phase
+          wat_sw = !is_1p ? b_sqr + wat_idx : -1,                       //!< Index of deriv by water saturation for water phase
         };
 
     public:
+      /**
+       * \brief  mpfa_base_impl ctor
+       * \param  fi_operator_ Instance of fi_operator_impl
+       * \param  rhs_ RHS part of Jacobian
+       * \param  reg_values_ Values of regular part of Jacobian
+       * */
       mpfa_base_impl (const fi_operator_impl <strategy_t, is_w, is_g, is_o> &fi_operator_, rhs_item_array_t &rhs_, rhs_item_array_t &reg_values_)
       : d_w (fi_operator_.d_w),
       d_g (fi_operator_.d_g),
@@ -146,11 +151,13 @@ namespace blue_sky {
       m_mem (0),
       p_mem (0),
       depth_top (0),
-      mesh_ (fi_operator_.mesh_)
-
       {
       }
 
+      /**
+       * \brief  Copies calculated derivs to values of regular part of Jacobian
+       * \param  k Index of cell for which derivs were calculated
+       * */
       BS_FORCE_INLINE void
       fill_jacobian_k_derivs (index_t k) const
       {
@@ -164,6 +171,11 @@ namespace blue_sky {
           }
       }
 
+      /**
+       * \brief  Calculates average (for all connection cells) density
+       * \param  cells Connection cells indexes
+       * \param  cells_count Count of indexes
+       * */
       void
       compute_rho (const index_t *cells, index_t cells_count)
       {
@@ -219,6 +231,12 @@ namespace blue_sky {
           }
       }
 
+      /**
+       * \brief  Calculates total potential for all connection cells
+       * \param  truns Transmissibilities for cells
+       * \param  cells Connection cells indexes
+       * \param  cells_count Count of indexes
+       * */
       void
       compute_psi (const rhs_item_t *truns, const index_t *cells, index_t cells_count)
       {
@@ -238,6 +256,14 @@ namespace blue_sky {
         }
       }
 
+      /**
+       * \brief  Calculates upstrem cell for connection, also initializes
+       *         some mobilities for upstrem cell
+       * \param  i Index of cell in connection
+       * \param  j Index of cell in connection
+       * \param  i_cell Index of cell in mesh
+       * \param  j_cell Index of cell in mesh
+       * */
       void
       compute_upstream (index_t i, index_t j, index_t i_cell, index_t j_cell)
       {
@@ -272,6 +298,10 @@ namespace blue_sky {
         if (is_o)         main_var_up_o          = main_vars_[UP_CELL_O];
       }
 
+      /**
+       * \brief  Calculates flow
+       * \param  dt Current time-step
+       * */
       void
       compute_flow (const double &dt)
       {
@@ -283,6 +313,11 @@ namespace blue_sky {
           FLOW_G += FLOW_O * GOR_UP_O;
       }
 
+      /**
+       * \brief  Fills RHS with flow values
+       * \param  i_cell Index of cell in mesh
+       * \param  j_cell Index of cell in mesh
+       * */
       void
       fill_rhs (index_t i_cell, index_t j_cell)
       {
@@ -303,88 +338,171 @@ namespace blue_sky {
           }
       }
 
+      /**
+       * \brief  Calculates deriv by water saturation for water phase
+       * \param  k_cell
+       * \param  main_var
+       * \param  truns
+       * \return Deriv by water saturation for water phase
+       * */
       inline item_t
       wat_sw_deriv (index_t k_cell, main_var_type main_var, item_t truns)
       {
         return MOBILITY_UP_W * truns * S_DERIV_CAP_PRESSURE_K_W;
       }
+      /**
+       * \brief  Calculates upstream part of deriv by water saturation for water phase
+       * \return Upstream part of deriv by water saturation for water phase
+       * */
       inline item_t
       wat_sw_deriv_up ()
       {
         return SW_DERIV_MOBILITY_UP_W * PSI_W;
       }
+      /**
+       * \brief  Calculates deriv by pressure for water phase
+       * \param  k_cell
+       * \param  main_var
+       * \param  truns
+       * \return Deriv by pressure for water phase
+       * */
       inline item_t
       wat_po_deriv (index_t k_cell, main_var_type main_var, item_t truns)
       {
         return MOBILITY_UP_W * truns;
       }
+      /**
+       * \brief  Calculates upstream part of deriv by pressure for water phase
+       * \return Upstream part of deriv by pressure for water phase
+       * */
       inline item_t
       wat_po_deriv_up ()
       {
         return P_DERIV_MOBILITY_UP_W * PSI_W;
       }
+      /**
+       * \brief  Calculates upstream part of deriv by gas saturation for water phase
+       * \return Upstream part of deriv by gas saturation for water phase
+       * */
       inline item_t
       wat_sg_deriv_up ()
       {
         return SW_DERIV_MOBILITY_UP_G * PSI_W;
       }
+      /**
+       * \brief  Calculates upstream part of deriv by oil saturation for water phase
+       * \return Upstream part of deriv by oil saturation for water phase
+       * */
       inline item_t
       wat_so_deriv_up ()
       {
         return SW_DERIV_MOBILITY_UP_O * PSI_W;
       }
 
+      /**
+       * \brief  Calculates upstream part of deriv by water saturation for gas phase
+       * \return Upstream part of deriv by water saturation for gas phase
+       * */
       inline item_t
       gas_sw_deriv_up ()
       {
         return SG_DERIV_MOBILITY_UP_W * PSI_G;
       }
+      /**
+       * \brief  Calculates deriv by pressure for gas phase
+       * \param  k_cell
+       * \param  main_var
+       * \param  truns
+       * \return Deriv by pressure for gas phase
+       * */
       inline item_t
       gas_po_deriv (index_t k_cell, main_var_type main_var, item_t truns)
       {
         return MOBILITY_UP_G * truns;
       }
+      /**
+       * \brief  Calculates upstream part of deriv by pressure for gas phase
+       * \return Upstream part of deriv by pressure for gas phase
+       * */
       inline item_t
       gas_po_deriv_up ()
       {
         return P_DERIV_MOBILITY_UP_G * PSI_G;
       }
+      /**
+       * \brief  Calculates deriv by gas saturation for gas phase
+       * \param  k_cell
+       * \param  main_var
+       * \param  truns
+       * \return Deriv by gas saturation for gas phase
+       * */
       inline item_t
       gas_sg_deriv (index_t k_cell, main_var_type main_var, item_t truns)
       {
         return main_var == FI_SG_VAR ? MOBILITY_UP_G * truns * S_DERIV_CAP_PRESSURE_K_G : 0;
       }
+      /**
+       * \brief  Calculates upstream part of deriv by gas saturation for gas phase
+       * \return Upstream part of deriv by gas saturation for gas phase
+       * */
       inline item_t
       gas_sg_deriv_up ()
       {
         return MAIN_VAR_UP_G == FI_SG_VAR ? SG_DERIV_MOBILITY_UP_G * PSI_G : 0;
       }
+      /**
+       * \brief  Calculates upstream part of deriv by oil saturation for gas phase
+       * \return Upstream part of deriv by oil saturation for gas phase
+       * */
       inline item_t
       gas_so_deriv_up ()
       {
         return SG_DERIV_MOBILITY_UP_O * PSI_G;
       }
 
+      /**
+       * \brief  Calculates upstream part of deriv by water saturation for oil phase
+       * \return Upstream part of deriv by water saturation for oil phase
+       * */
       inline item_t
       oil_sw_deriv_up ()
       {
         return SO_DERIV_MOBILITY_UP_W * PSI_O;
       }
+      /**
+       * \brief  Calculates deriv by pressure for oil phase
+       * \param  k_cell
+       * \param  main_var
+       * \param  truns
+       * \return Deriv by pressure for oil phase
+       * */
       inline item_t
       oil_po_deriv (index_t k_cell, main_var_type main_var, item_t truns)
       {
         return MOBILITY_UP_O * truns;
       }
+      /**
+       * \brief  Calculates upstream part of deriv by pressure for oil phase
+       * \return Upstream part of deriv by pressure for oil phase
+       * */
       inline item_t
       oil_po_deriv_up ()
       {
         return P_DERIV_MOBILITY_UP_O * PSI_O;
       }
+      /**
+       * \brief  Calculates upstream part of deriv by gas saturation for oil phase
+       * \return Upstream part of deriv by gas saturation for oil phase
+       * */
       inline item_t
       oil_sg_deriv_up ()
       {
         return MAIN_VAR_UP_O == FI_SG_VAR ? (SO_DERIV_MOBILITY_UP_G * PSI_O) : (data_[UP_CELL_O].gor_deriv_invers_visc_fvf * data_[UP_CELL_O].relative_perm[d_o] * PSI_O);
       }
+      /**
+       * \brief  Calculates upstream part of deriv by oil saturation for oil phase
+       * \return Upstream part of deriv by oil saturation for oil phase
+       * */
       inline item_t
       oil_so_deriv_up ()
       {
@@ -392,8 +510,8 @@ namespace blue_sky {
       }
 
       /**
-       * \brief compute derivatives for k cell
-       * \detail
+       * \brief Calculates derivatives for k cell
+       * \details
        *    ps [p3_gas]     = 0;
        *    ps [p3_oil]     = 0;
        *    ps [p3_wat]     = wat_sw_deriv (k_cell, main_var, truns);
@@ -414,6 +532,12 @@ namespace blue_sky {
        *    pp [p3_gas_so]  += GOR_UP_O * pp [p3_oil_so];
        *    pp [p3_gas_po]  += GOR_UP_O * pp [p3_oil_po];
        *    ps [p3_gas]     += GOR_UP_O * ps [p3_oil];
+       * \param k Index of cell in connection
+       * \param k_cell Index of cell in mesh
+       * \param main_var
+       * \param truns
+       * \param i_cell
+       * \param j_cell
        * */
       void
       compute_k_derivs (index_t k, index_t k_cell, main_var_type main_var, item_t truns, index_t i_cell, index_t j_cell)
@@ -443,6 +567,13 @@ namespace blue_sky {
         fill_jacobian_k_derivs (k);
       }
 
+      /**
+       * \brief Calculates upstream parth of derivatives for connection 
+       *        (i and j cells)
+       * \param dt
+       * \param i_cell
+       * \param j_cell
+       * */
       void
       compute_up_derivs (const double &dt, index_t i_cell, index_t j_cell)
       {
@@ -505,7 +636,13 @@ namespace blue_sky {
           }
       }
 
-      void eliminate (index_t i_cell, index_t j_cell)
+      /**
+       * \brief  Eliminates PS from PP
+       * \param  i_cell
+       * \param  j_cell
+       * */
+      void 
+      eliminate (index_t i_cell, index_t j_cell)
       {
         BS_ASSERT (!is_1p);
         if (is_g)
@@ -541,6 +678,9 @@ namespace blue_sky {
         if (is_w) rhs_ [j_cell * n_phases + wat_idx]  += pp [wat_sw] * s_rhs_ [UP_CELL_W];
       }
 
+      /**
+       * \brief  Fills jacobian
+       * */
       void
       fill_jacobian ()
       {
@@ -556,9 +696,14 @@ namespace blue_sky {
           }
       }
 
-      // Salimgareeva EM, 1.07.09
-
-
+      /**
+       * \class   cfl_info
+       * \brief   Stores data that used to compute CFL
+       * \author  Salimgareeva EM
+       * \date    01.07.2009
+       * \details IMPES Stability: The Stable Step, K.H.Coats, 
+       *          SPE, Coats Engineering, Inc.
+       * */
       struct cfl_info
       {
         rhs_item_array_t f11_i;
@@ -588,6 +733,15 @@ namespace blue_sky {
       };
 
 
+      /**
+       * \brief  Calculates CFL, see cfl_info
+       * \param  f 
+       * \param  truns
+       * \param  i_cell
+       * \param  j_cell
+       * \param  cfl
+       * \param  saturation_3p
+       * */
       void
       fill_cfl (cfl_info &f, const rhs_item_t *truns, index_t i_cell, index_t j_cell, rhs_item_array_t &cfl, item_array_t &saturation_3p)
       {
@@ -751,7 +905,6 @@ namespace blue_sky {
       item_t                                  p_deriv_gor_up_o;
       main_var_type                           main_var_up_g;
       main_var_type                           main_var_up_o;
-      const sp_mesh_iface_t                  &mesh_;
     };
 
     template <typename fi_operator_t, typename mpfa_t>
@@ -762,10 +915,6 @@ namespace blue_sky {
       typedef typename mpfa_t::item_t       item_t;
       typedef typename mpfa_t::rhs_item_t   rhs_item_t;
       typedef typename mpfa_t::item_array_t item_array_t;
-
-      typedef rs_mesh_iface <typename fi_operator_t::strategy_t>    mesh_iface_t;
-      typedef smart_ptr <mesh_iface_t, true>                        sp_mesh_iface_t;
-      typedef rs_smesh_iface <typename fi_operator_t::strategy_t>   rs_smesh_iface_t;
 
 #ifdef BS_BOS_CORE_USE_CSR_ILU_CFL_PREC
       index_t n_active_cells = fi_operator.n_cells_;
@@ -836,41 +985,16 @@ namespace blue_sky {
     }
   } // namespace mpfa
 
+  /**
+   * \brief  Calculates flux part of Jacobian
+   * \param  dt
+   * \return True
+   * */
   template <typename strategy_t, bool is_w, bool is_g, bool is_o>
   bool
   fi_operator_impl <strategy_t, is_w, is_g, is_o>::block_connections_mpfa (const item_t &dt)
   {
     mpfa::block_connections_mpfa (dt, *this, mpfa::mpfa_base_impl <strategy_t, is_w, is_g, is_o> (*this, flux_rhs_, reg_values_));
-
-    //if (n_phases == 3)
-    //  {
-    //    mpfa::block_connections_mpfa (dt, *this, mpfa::mpfa_base_impl <strategy_t, true, true, true> (*this, flux_rhs_, reg_values_));
-    //  }
-    //else if (is_w && is_o)
-    //  {
-    //    mpfa::block_connections_mpfa (dt, *this, mpfa::mpfa_base_impl <strategy_t, true, false, true> (*this, rhs_, reg_values_));
-    //  }
-    //else if (is_g && is_o)
-    //  {
-    //    mpfa::block_connections_mpfa (dt, *this, mpfa::mpfa_base_impl <strategy_t, false, true, true> (*this, rhs_, reg_values_));
-    //  }
-    //else if (is_w)
-    //  {
-    //    mpfa::block_connections_mpfa (dt, *this, mpfa::mpfa_base_impl <strategy_t, true, false, false> (*this, rhs_, reg_values_));
-    //  }
-    //else if (is_g)
-    //  {
-    //    mpfa::block_connections_mpfa (dt, *this, mpfa::mpfa_base_impl <strategy_t, false, true, false> (*this, rhs_, reg_values_));
-    //  }
-    //else if (is_o)
-    //  {
-    //    mpfa::block_connections_mpfa (dt, *this, mpfa::mpfa_base_impl <strategy_t, false, false, true> (*this, rhs_, reg_values_));
-    //  }
-    //else
-    //  {
-    //    throw bs_exception ("block_connections_mpfa", "unknown phase value");
-    //  }
-
     return false;
   }
 

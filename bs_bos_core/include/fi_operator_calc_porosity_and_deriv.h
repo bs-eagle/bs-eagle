@@ -1,8 +1,11 @@
 /**
- * \file fi_operator_calc_porosity_and_deriv.h
- * \brief calculate porosity and derivativies, also calculate trunsmissibility multiplier
- * \author Sergey Miryanov
- * \date 23.01.2009
+ *       \file  fi_operator_calc_porosity_and_deriv.h
+ *      \brief  Calculates porosity and derivs, also calculates
+ *              transmissibility multipliers
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  23.01.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_FI_OPERATOR_CALC_POROSITY_AND_DERIV_H_
 #define BS_FI_OPERATOR_CALC_POROSITY_AND_DERIV_H_
@@ -10,15 +13,16 @@
 namespace blue_sky {
 
   /**
-  * @brief calculate porosity and derivativies, also calculate trunsmissibility multiplier
-  *
-  * @param i -- cell index
-  * @param pvt_reg -- PVT region index
-  * @param poro -- <RETURN> porosity
-  * @param dp_poro -- <RETURN> porosity derivative
-  * @param t_mult  -- <RETURN> trunsmissibility multiplier
-  * @param dp_t_mult -- <RETURN> trunsmissibility multiplier derivative
-  */
+   * \brief      Calculates porosity and derivativies, also calculates 
+   *             trunsmissibility multipliers
+   *
+   * \param[in]  i Cell index
+   * \param[in]  pvt_reg PVT region index
+   * \param[out] poro Calculated porosity
+   * \param[out] dp_poro Calculated porosity derivative
+   * \param[out] t_mult  Calculated trunsmissibility multiplier
+   * \param[out] dp_t_mult Calculated trunsmissibility multiplier derivative
+   * */
   template <class strategy_t, bool is_w, bool is_g, bool is_o>
   BS_FORCE_INLINE void
   fi_operator_impl <strategy_t, is_w, is_g, is_o>::calc_porosity_and_deriv (index_t i, 

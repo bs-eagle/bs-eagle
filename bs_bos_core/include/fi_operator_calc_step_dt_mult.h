@@ -1,14 +1,22 @@
 /**
- * \file calc_step_dt_mult.h
- * \brief 
- * \author Sergey Miryanov
- * \date 23.01.2009
+ *       \file  fi_operator_calc_step_dt_mult.h
+ *      \brief  Calculates dt at the first newton iteration on time step
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  23.01.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_FI_OPERATOR_CALC_STEP_DT_MULT_H_
 #define BS_FI_OPERATOR_CALC_STEP_DT_MULT_H_
 
 namespace blue_sky {
 
+  /**
+   * \brief  Calculates dt at the first newton iteration on time step
+   * \param  prev_mult Previous dt multiplier
+   * \param  max_res
+   * \return New dt multiplier
+   * */
   template <class strategy_t, bool is_w, bool is_g, bool is_o>
   BS_FORCE_INLINE typename strategy_t::item_t
   fi_operator_impl <strategy_t, is_w, is_g, is_o>::calc_step_dt_mult (item_t prev_mult, item_t max_res)

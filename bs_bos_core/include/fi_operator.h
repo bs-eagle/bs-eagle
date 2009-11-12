@@ -30,7 +30,7 @@ namespace blue_sky {
    * \class fi_operator_impl
    * \brief Implementation of fi_operator, parametrized with 
    *        is_w, is_g, is_o (for water, gas, oil phases)
-   * \todo  Describes data members
+   * \todo  Describe data members
    * */
   template <typename strategy_type, bool is_w, bool is_g, bool is_o>
   struct fi_operator_impl
@@ -1320,7 +1320,8 @@ namespace blue_sky {
     calc_step_dt_mult (item_t prev_mult, item_t max_res);
 
     /**
-     * \brief Calculates porosity and derivativies, also calculates trunsmissibility multiplier
+     * \brief      Calculates porosity and derivativies, also calculates 
+     *             trunsmissibility multipliers
      *
      * \param[in]  i Cell index
      * \param[in]  pvt_reg PVT region index
@@ -1351,7 +1352,7 @@ namespace blue_sky {
     debug_save_data (item_t dt);
 
     /**
-     * \brief  Calculates multipler for cell for solution
+     * \brief  Calculates multipler for solution
      * \param  base_norm Norm storage
      * \return Calculated multiplier
      * */

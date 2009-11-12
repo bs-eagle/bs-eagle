@@ -1,8 +1,10 @@
 /**
- * \file fi_operator_norm_calc.h
- * \brief norm calculation for fi_operator
- * \author Sergey Miryanov
- * \date 23.01.2009
+ *       \file  fi_operator_norm_calc.h
+ *      \brief  Calculates norm for fi_operator
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  23.01.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_FI_OPERATOR_NORM_CALC_H_
 #define BS_FI_OPERATOR_NORM_CALC_H_
@@ -22,11 +24,7 @@ struct di
 #endif //_MPI
 
   /**
-   * @brief calculate norms
-   *
-   * @param i_start -- if ne 0
-   *
-   * @return
+   * \brief Calculates norms
    */
   template <typename strategy_t, bool is_w, bool is_g, bool is_o>
   BS_FORCE_INLINE void
@@ -173,7 +171,11 @@ struct di
 #endif //_MPI
   }
 
-  // calculate norm in one cell and update norm storage
+  /**
+   * \brief  Calculates norm in one cell and update norm storage
+   * \param  i Index of cell
+   * \param  ns Norms storage
+   * */
   template <class strategy_t, bool is_w, bool is_g, bool is_o>
   BS_FORCE_INLINE void 
   fi_operator_impl <strategy_t, is_w, is_g, is_o>::update_norm_by_cell (index_t i, norms_storage_t &ns)

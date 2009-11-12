@@ -1,14 +1,21 @@
 /**
- * \file for_each_well.h
- * \brief well traversers
- * \author Sergey Miryanov
- * \date 13.02.2009
+ *       \file  for_each_well.h
+ *      \brief  Calls methods for each facility (or well) in list
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  13.02.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_FOR_EACH_WELL_H_
 #define BS_FOR_EACH_WELL_H_
 
 namespace blue_sky {
 
+  /**
+   * \brief  For each well in facility_list calls method method
+   * \param  facility_list
+   * \param  method
+   * */
   template <typename strategy_t, typename method_t>
   void
   for_each_well (facility_manager <strategy_t> &facility_list, method_t method)
@@ -30,6 +37,11 @@ namespace blue_sky {
       }
   }
 
+  /**
+   * \brief  For each facility in facility_list calls method method
+   * \param  facility_list
+   * \param  method
+   * */
   template <typename strategy_t, typename method_t>
   void
   for_each_facility (facility_manager <strategy_t> &facility_list, method_t method)
@@ -48,6 +60,13 @@ namespace blue_sky {
       }
   }
 
+  /**
+   * \brief  For each well in facilit_list calls method method 
+   *         while method not return true
+   * \param  facility_list
+   * \param  method
+   * \return True if for any well in list method returns true
+   * */
   template <typename strategy_t, typename method_t>
   bool
   for_each_well_while_cond (facility_manager <strategy_t> &facility_list, method_t method)
@@ -69,6 +88,13 @@ namespace blue_sky {
 
     return false;
   }
+  /**
+   * \brief  Accumulates values returned by method for each well in 
+   *         facility_list
+   * \param  facility_list
+   * \param  method
+   * \return Accumulated value
+   * */
   template <typename strategy_t, typename method_t>
   size_t
   for_each_well_acc (facility_manager <strategy_t> &facility_list, method_t method)

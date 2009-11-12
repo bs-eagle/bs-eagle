@@ -1,7 +1,11 @@
-/*! \file fi_params.cpp
-		\brief fi_params class implementations
-		\author Nikonov Max
-*/
+/**
+ *       \file  fi_params.cpp
+ *      \brief  fi_params class implementation
+ *     \author  Nikonov Max
+ *       \date  27.06.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
 #include "stdafx.h"
 #include "fi_params.h"
 
@@ -169,7 +173,7 @@ namespace blue_sky
     set_bool (SAVE_WRATES_TO_ASCII_FILE, 1);           // save well rates to ascii file by default
     set_bool (CREATE_HDF5_FILE, 1);                    // create hdf5 file
     set_bool (WRITE_PRESSURE_TO_HDF5, 1);              // write pressure to hdf5
-    set_bool (WRITE_SATURATION_TO_HDF5, 0);				  	// write saturation to hdf5
+    set_bool (WRITE_SATURATION_TO_HDF5, 0);           // write saturation to hdf5
     set_bool (FIX_SOIL_BUG, 1);//0);
     set_bool (DISABLE_CROSSFLOW, 0);
     set_bool (WRITE_PRESSURE_TO_HDF5, 1);

@@ -1,8 +1,11 @@
-/*! \file fi_params.h
-		\brief Comtains fi_params - named_pbase inherited class
-		\author Nikonov Max
-*/
-
+/**
+ *       \file  fi_params.h
+ *      \brief  Contains model params
+ *     \author  Nikonov Max
+ *       \date  27.06.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
 #ifndef FI_PARAMS_H
 #define FI_PARAMS_H
 
@@ -88,7 +91,7 @@ namespace blue_sky
       PREC_TYPE_ONE_PHASE,                        //!< type of the preconditioner for linear solver for 1-phase problem
       MIN_CELLS_IN_REGION,                        //!< minimum allowed cells in region for ACTNUM = 1
       SAVE_STEP_DATA_PERIOD,                      //!< save step data every n step
-      I_TOTAL,                                      //!< all parameters should be before this item
+      I_TOTAL,                                    //!< all parameters should be before this item
 
       //! indexes for boolean parameters
       PRINT_PVTO_TABLE,                           //!< if this item is set print PVTO to LOG file
@@ -131,7 +134,7 @@ namespace blue_sky
       WRITE_PLANE_FLOW_RATES_TO_HDF5,             //!< write plane flow rates to hdf5 file
       USE_CFL,                                    //!< compute CFL in fi_operator and use csr_ilu_cfl_prec, used only if BS_BOS_CORE_USE_CSR_ILU_CFL_PREC defined
       WRITE_CFL_TO_HDF5,                          //!< write CFL vector to hdf5 file
-      B_TOTAL,                                      //!< all parameters should be before this item
+      B_TOTAL,                                    //!< all parameters should be before this item
       FI_PARAMS_TOTAL,
       PROP_BASE_IDX_DECL_END
 

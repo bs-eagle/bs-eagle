@@ -1,8 +1,11 @@
 /**
- * \file fi_operator_save_debug_data.h
- * \brief save debug data on each fi_operator iteration
- * \author Sergey Miryanov
- * \date 03.02.2009
+ *       \file  fi_operator_save_debug_data.h
+ *      \brief  Saves debug data on each fi_operator iteration
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  03.02.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
  * */
 #ifndef BS_FI_OPERATOR_SAVE_DEBUG_DATA_H_
 #define BS_FI_OPERATOR_SAVE_DEBUG_DATA_H_
@@ -16,12 +19,12 @@
 #include "member_accessor.h"
 
 #define SAVE_BOOST_ARRAY(name, size_j) \
-	tools::save_seq_vector (tools::string_formater (std::string (BOOST_PP_STRINGIZE(name)) + std::string (".bs.%d.txt"), iter_counter).str) \
-		.save_via_fn (debug::BOOST_PP_CAT (save_, name) <data_array_t, item_t> (calc_model_->data, size_j));
+  tools::save_seq_vector (tools::string_formater (std::string (BOOST_PP_STRINGIZE(name)) + std::string (".bs.%d.txt"), iter_counter).str) \
+    .save_via_fn (debug::BOOST_PP_CAT (save_, name) <data_array_t, item_t> (calc_model_->data, size_j));
 
 #define SAVE_ITEM(name) \
-	tools::save_seq_vector (tools::string_formater (std::string (BOOST_PP_STRINGIZE(name)) + std::string (".bs.%d.txt"), iter_counter).str) \
-		.save_via_fn (debug::BOOST_PP_CAT (save_, name) <data_array_t, item_t> (calc_model_->data));
+  tools::save_seq_vector (tools::string_formater (std::string (BOOST_PP_STRINGIZE(name)) + std::string (".bs.%d.txt"), iter_counter).str) \
+    .save_via_fn (debug::BOOST_PP_CAT (save_, name) <data_array_t, item_t> (calc_model_->data));
 
 namespace blue_sky {
 

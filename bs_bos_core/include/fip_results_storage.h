@@ -1,3 +1,13 @@
+/**
+ *       \file  fip_results_storage.h
+ *      \brief  Storage for fip results
+ *     \author  Ilshat Sayfullin
+ *       \date  10.02.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Describe
+ * */
+
 #ifndef __BS_FIP_RESULTS_STORAGE_H
 #define __BS_FIP_RESULTS_STORAGE_H
 

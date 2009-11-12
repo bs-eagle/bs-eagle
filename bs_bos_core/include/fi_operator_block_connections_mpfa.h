@@ -1,8 +1,11 @@
 /**
- * \file fi_operator_block_connections_mpfa.h
- * \brief old (two point) mpfa impl
- * \author Sergey Miryanov
- * \date 06.04.2009
+ *       \file  fi_operator_block_connections_mpfa.h
+ *      \brief  Old (two point) mpfa implementation
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  06.04.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
  * */
 #ifndef BS_FI_OPERATOR_BLOCK_CONNECTIONS_MPFA_H_
 #define BS_FI_OPERATOR_BLOCK_CONNECTIONS_MPFA_H_
