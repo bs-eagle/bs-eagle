@@ -1,5 +1,11 @@
 /**
- *
+ *       \file  well_type_helper.h
+ *      \brief  Type helper, stores common well types
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  09.09.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete, should be removed
  * */
 #ifndef BS_WELL_TYPE_HELPER_H_
 #define BS_WELL_TYPE_HELPER_H_
@@ -18,7 +24,7 @@ namespace blue_sky
       {
         typedef strategy_type                             strategy_t;
         typedef typename strategy_t::item_t               item_t;
-        typedef typename strategy_t::index_t							index_t;
+        typedef typename strategy_t::index_t              index_t;
 
         typedef boost::array <index_t, FI_PHASE_TOT>      phase_d_t;
         typedef boost::array <index_t, FI_PHASE_TOT>      sat_d_t;

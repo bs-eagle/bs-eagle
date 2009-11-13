@@ -1,4 +1,13 @@
 /**
+ *       \file  well_results_storage.cpp
+ *      \brief  Well results storage
+ *     \author  Sayfullin Ilshat
+ *       \date  28.01.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ * */
+
+/**
  * @file well_results_storage.cpp
  * @brief well results storage
  * @author Sayfullin Ilshat

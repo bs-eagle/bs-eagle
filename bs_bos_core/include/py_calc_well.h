@@ -13,7 +13,6 @@
 #ifdef BSPY_EXPORTING_PLUGIN
 #include "calc_well.h"
 #include "well_connection.h"
-#include "well_iterator.h"
 #include "calc_model.h"
 #include "py_calc_well_detail.h"
 #include "facility_manager.h"

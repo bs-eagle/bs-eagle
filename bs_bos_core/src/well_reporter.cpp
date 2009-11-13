@@ -1,8 +1,10 @@
 /**
- * \file well_reporter.cpp
- * \brief prints well data
- * \date 29.09.2009
- * \author Sergey Miryanov
+ *       \file  well_reporter.cpp
+ *      \brief  Functions to print well information tables
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  29.09.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 #include "well_reporter.h"
@@ -761,6 +763,13 @@ namespace blue_sky {
   };
 
   namespace detail {
+    /**
+     * \brief  Calculates length which required to allocate
+     *         buffer to store line data
+     * \param  holder Object which contains control data
+     *                to print tables
+     * \return Length of buffer
+     * */
     template <typename holder_t>
     size_t 
     buffer_len (const holder_t &holder)
@@ -773,21 +782,12 @@ namespace blue_sky {
 
       return len;
     }
-
-    template <typename T>
-    struct aptr
-    {
-      aptr (T *t = 0) : t (t) {}
-      ~aptr () {delete[] t;}
-
-      T *get () { return t; }
-      T &operator[] (size_t i) { return t[i];}
-
-      T *t;
-    };
-
   }
 
+  /**
+   * \brief  Prints line (like '---...---')
+   * \param  holder Object which contains control data to print tables
+   * */
   template <typename holder_t>
   void
   print_line (const holder_t &holder)
@@ -813,6 +813,10 @@ namespace blue_sky {
     BOSOUT (section::print_reports, level::highest) << holder.line_buffer << bs_end;
   }
 
+  /**
+   * \brief  Prints units
+   * \param  holder Object which contains control data to print tables
+   * */
   template <typename holder_t>
   void
   print_units (const holder_t &holder)
@@ -835,6 +839,11 @@ namespace blue_sky {
     BOSOUT (section::print_reports, level::highest) << holder.unit_buffer << bs_end;
   }
 
+  /**
+   * \brief   Prints table header
+   * \details Prints columns name and units
+   * \param   holder Object which contains control data to print tables
+   * */
   template <typename holder_t>
   void
   print_header (const holder_t &holder)
@@ -876,8 +885,17 @@ namespace blue_sky {
   }
 
   namespace detail {
+    /**
+     * \class is_prod
+     * \brief Well filter, filters only production wells
+     * */
     struct is_prod
     {
+      /**
+       * \brief  Returns true if well is production
+       * \param  well Well to filter
+       * \return True if well is production
+       * */
       template <typename T>
       inline bool
       filter (const T &well) const
@@ -886,8 +904,17 @@ namespace blue_sky {
       }
     };
 
+    /**
+     * \class is_inj
+     * \brief Well filter, filters only injection wells
+     * */
     struct is_inj
     {
+      /**
+       * \brief  Returns true if well is injection
+       * \param  well Well to filter
+       * \return True if well is production
+       * */
       template <typename T>
       inline bool
       filter (const T &well) const
@@ -896,6 +923,15 @@ namespace blue_sky {
       }
     };
 
+    /**
+     * \brief  Generic function to print information tables, prints
+     *         top level, well and connection data
+     * \param  printer Object which contains control data to print tables
+     * \param  data Data holder
+     * \param  rs Instance of reservoir_simulator
+     * \param  well_filter Filters, for example, only injection or 
+     *                     production wells
+     * */
     template <typename printer_t, typename data_t, typename rs_t, typename well_filter_t>
     void
     print_well_data (const printer_t &printer, const data_t &data, const rs_t &rs, const well_filter_t &well_filter)
@@ -933,6 +969,10 @@ namespace blue_sky {
     }
   }
 
+  /**
+   * \class prod_printer
+   * \brief Incapsulates data to print production info
+   * */
   template <typename strategy_t>
   struct prod_printer
   {
@@ -956,6 +996,11 @@ namespace blue_sky {
         BHP,
         BULK_PRESSURE));
 
+    /**
+     * \brief   Holds columns descriptions
+     * \details Columns descriptions consists column width info
+     *          and units info, filled in owner class ctor
+     * */
     prod_columns_holder_t columns;
 
     typedef liquid_rate <detail::rate,            detail::prod_rate_data> liquid_rate_t;
@@ -976,6 +1021,11 @@ namespace blue_sky {
     typedef prod_fluid_rate <detail::rate_rc>                             fluid_rate_t;
     typedef prod_fluid_rate <detail::rate_rc_wefac>                       fluid_rate_rc_wefac_t;
 
+    /**
+     * \brief  Inits columns descriptor
+     * \param  data Data holder
+     * \param  rs Instance of reservoir_simulator
+     * */
     prod_printer (const sp_data_t &data, const smart_ptr <reservoir_t, true> &rs)
     {
       columns.WELL_NAME           (column (12, 0, "WELL NAME"),                               unit (""));
@@ -993,6 +1043,11 @@ namespace blue_sky {
       columns.BULK_PRESSURE       (column (12, 2, "Bulk Pressure", PRESSURE_MULT),            unit (PRESSURE_NOTE));
     }
 
+    /**
+     * \brief   Describes a top level data line
+     * \details Holds objects which incapsulate way to 
+     *          obtain specific info
+     * */
     DATA_LINE (prod_columns_holder_t, reservoir_data, sp_data_t, reservoir_t, 
       ((WELL_NAME,       reservoir_name (),                              1.0))
       ((GRID_BLOCK,      empty_cell (),                                  1.0))
@@ -1009,6 +1064,9 @@ namespace blue_sky {
       ((BULK_PRESSURE,   empty_cell (),                                  1.0))
     );
 
+    /**
+     * \brief  Per well data line description, like top level line
+     * */
     DATA_LINE (prod_columns_holder_t, well_data, sp_data_t, well_t, 
       ((WELL_NAME,       well_name (),                                   1.0))
       ((GRID_BLOCK,      empty_cell (),                                  1.0))
@@ -1025,6 +1083,9 @@ namespace blue_sky {
       ((BULK_PRESSURE,   first_con_bulkp (),                             1.0))
     );
 
+    /**
+     * \brief  Per connection data line description, like top level line
+     * */
     DATA_LINE (prod_columns_holder_t, connection_data, sp_data_t, connection_t, 
       ((WELL_NAME,       empty_cell (),                                  1.0))
       ((GRID_BLOCK,      grid_block (),                                  1.0))
@@ -1042,6 +1103,10 @@ namespace blue_sky {
     );
   };
 
+  /**
+   * \class inj_printer
+   * \brief Incapsulates data to print injection info
+   * */
   template <typename strategy_t>
   struct inj_printer
   {
@@ -1064,6 +1129,11 @@ namespace blue_sky {
         BULK_PRESSURE
       ));
 
+    /**
+     * \brief   Holds columns descriptions
+     * \details Columns descriptions consists column width info
+     *          and units info, filled in owner class ctor
+     * */
     inj_columns_holder_t columns;
 
     typedef oil_rate <detail::rate,       detail::inj_rate_data>  oil_rate_t;
@@ -1077,6 +1147,11 @@ namespace blue_sky {
     typedef inj_fluid_rate <detail::rate_rc>                      fluid_rate_t;
     typedef inj_fluid_rate <detail::rate_rc_wefac>                fluid_rate_rc_wefac_t;
 
+    /**
+     * \brief  Inits columns descriptor
+     * \param  data Data holder
+     * \param  rs Instance of reservoir_simulator
+     * */
     inj_printer (const sp_data_t &data, const smart_ptr <reservoir_t, true> &rs)
     {
       columns.WELL_NAME           (column (12, 0, "WELL NAME"),                               unit (""));
@@ -1091,6 +1166,11 @@ namespace blue_sky {
       columns.BULK_PRESSURE       (column (13, 2, "Bulk Pressure", PRESSURE_MULT),            unit (PRESSURE_NOTE));
     }
 
+    /**
+     * \brief   Describes a top level data line
+     * \details Holds objects which incapsulate way to 
+     *          obtain specific info
+     * */
     DATA_LINE (inj_columns_holder_t, reservoir_data, sp_data_t, reservoir_t,
       ((WELL_NAME,       reservoir_name (),                             1.0))
       ((GRID_BLOCK,      empty_cell (),                                 1.0))
@@ -1104,6 +1184,9 @@ namespace blue_sky {
       ((BULK_PRESSURE,   empty_cell (),                                 1.0))
     );
 
+    /**
+     * \brief  Per well data line description, like top level line
+     * */
     DATA_LINE (inj_columns_holder_t, well_data, sp_data_t, well_t,
       ((WELL_NAME,       well_name (),                                  1.0))
       ((GRID_BLOCK,      empty_cell (),                                 1.0))
@@ -1117,6 +1200,9 @@ namespace blue_sky {
       ((BULK_PRESSURE,   first_con_bulkp (),                            1.0))
     );
 
+    /**
+     * \brief  Per connection data line description, like top level line
+     * */
     DATA_LINE (inj_columns_holder_t, connection_data, sp_data_t, connection_t,
       ((WELL_NAME,       empty_cell (),                                 1.0))
       ((GRID_BLOCK,      grid_block (),                                 1.0))
@@ -1131,6 +1217,11 @@ namespace blue_sky {
     );
   };
 
+  /**
+   * \class prod_total_printer
+   * \brief Incapsulates data to print total
+   *        production and injection info
+   * */
   template <typename strategy_t>
   struct prod_total_printer
   {
@@ -1153,6 +1244,11 @@ namespace blue_sky {
         GAS_INJ
       ));
 
+    /**
+     * \brief   Holds columns descriptions
+     * \details Columns descriptions consists column width info
+     *          and units info, filled in owner class ctor
+     * */
     columns_holder columns;
 
     typedef oil_rate <detail::rate_total,     detail::prod_rate_data>  prod_oil_rate_t;
@@ -1164,6 +1260,11 @@ namespace blue_sky {
     typedef water_rate <detail::rate_total,   detail::inj_rate_data>   inj_water_rate_t;
     typedef gas_rate <detail::rate_total,     detail::inj_rate_data>   inj_gas_rate_t;
 
+    /**
+     * \brief  Inits columns descriptor
+     * \param  data Data holder
+     * \param  rs Instance of reservoir_simulator
+     * */
     prod_total_printer (const sp_data_t &data, const smart_ptr <reservoir_t, true> &rs)
     {
       columns.WELL_NAME   (column (12, 0, "WELL NAME"),                                     unit (""));
@@ -1177,6 +1278,11 @@ namespace blue_sky {
       columns.GAS_INJ     (column (20, 0, "Total Gas injection", GAS_RATE_MULT),            unit (*rs, inj_gas_rate_t     (), VOL_GAS_SURFACE_NOTE));
     }
 
+    /**
+     * \brief   Describes a top level data line
+     * \details Holds objects which incapsulate way to 
+     *          obtain specific info
+     * */
     DATA_LINE (columns_holder, reservoir_data, sp_data_t, reservoir_t, 
       ((WELL_NAME,      reservoir_name (),                          1.0))
       ((CTRL_MODE,      empty_cell (),                              1.0))
@@ -1189,6 +1295,9 @@ namespace blue_sky {
       ((GAS_INJ,        inj_gas_rate_t (),                          1.0))
     );
 
+    /**
+     * \brief  Per well data line description, like top level line
+     * */
     DATA_LINE (columns_holder, well_data, sp_data_t, well_t,
       ((WELL_NAME,      well_name (),                               1.0))
       ((CTRL_MODE,      total_ctrl_mode (),                         1.0))
@@ -1201,6 +1310,12 @@ namespace blue_sky {
       ((GAS_INJ,        inj_gas_rate_t (),                          1.0))
     );
 
+    /**
+     * \brief  Custom function to print information
+     *         tables (avoid prints of connection data)
+     * \param  data Data holder
+     * \param  rs Instance of reservoir_simulator
+     * */
     void
     print (const sp_data_t &data, const reservoir_t &rs)
     {

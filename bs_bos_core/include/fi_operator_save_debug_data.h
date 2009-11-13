@@ -13,7 +13,6 @@
 #include "save_connection_data.h"
 #include "string_formater.h"
 #include "calc_well.h"
-#include "well_iterator.h"
 #include "rr_rw_wr_saver.h"
 #include "well_type_helper.h"
 #include "member_accessor.h"

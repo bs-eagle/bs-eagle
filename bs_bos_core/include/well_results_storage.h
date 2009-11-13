@@ -1,8 +1,10 @@
 /**
- * \file well_results_storage.cpp
- * \brief Storage for well and connection results
- * \author Ilshat Sayfullin
- * \date 25.09.2009
+ *       \file  well_results_storage.h
+ *      \brief  Storage for well and connection results
+ *     \author  Ilshat Sayfullin
+ *       \date  25.09.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef __BS_WELL_RESULTS_STORAGE_H
 #define __BS_WELL_RESULTS_STORAGE_H
@@ -16,91 +18,108 @@
 namespace blue_sky
   {
 
+    /**
+     * \enum  well_d_params
+     * \brief Floating point parameters for well
+     * */
   enum well_d_params
   {
-    WELL_D_PARAM_COR = 0,         //0 - current oil rate
-    WELL_D_PARAM_CWR,             //1 - current water rate
-    WELL_D_PARAM_CGR,             //2 - current gas rate
-    WELL_D_PARAM_CLR,             //3 - current liquid rate
-    WELL_D_PARAM_COI,             //4 - current oil injection
-    WELL_D_PARAM_CWI,             //5 - current water injection
-    WELL_D_PARAM_CGI,             //6 - current gas injection
+    WELL_D_PARAM_COR = 0,         //!< 0 - current oil rate
+    WELL_D_PARAM_CWR,             //!< 1 - current water rate
+    WELL_D_PARAM_CGR,             //!< 2 - current gas rate
+    WELL_D_PARAM_CLR,             //!< 3 - current liquid rate
+    WELL_D_PARAM_COI,             //!< 4 - current oil injection
+    WELL_D_PARAM_CWI,             //!< 5 - current water injection
+    WELL_D_PARAM_CGI,             //!< 6 - current gas injection
 
-    WELL_D_PARAM_HCOR,            //7 - current history oil rate
-    WELL_D_PARAM_HCWR,            //8 - current history water rate
-    WELL_D_PARAM_HCGR,            //9 - current history gas rate
-    WELL_D_PARAM_HCLR,            //10- current history liquid rate
-    WELL_D_PARAM_HCOI,            //11- current history oil injection
-    WELL_D_PARAM_HCWI,            //12- current history water injection
-    WELL_D_PARAM_HCGI,            //13- current history gas injection
+    WELL_D_PARAM_HCOR,            //!< 7 - current history oil rate
+    WELL_D_PARAM_HCWR,            //!< 8 - current history water rate
+    WELL_D_PARAM_HCGR,            //!< 9 - current history gas rate
+    WELL_D_PARAM_HCLR,            //!< 10- current history liquid rate
+    WELL_D_PARAM_HCOI,            //!< 11- current history oil injection
+    WELL_D_PARAM_HCWI,            //!< 12- current history water injection
+    WELL_D_PARAM_HCGI,            //!< 13- current history gas injection
 
-    WELL_D_PARAM_CBHP,            //14- BHP for connection
-    WELL_D_PARAM_HBHP,            //15- BHP defined for well
+    WELL_D_PARAM_CBHP,            //!< 14- BHP for connection
+    WELL_D_PARAM_HBHP,            //!< 15- BHP defined for well
 
-    WELL_D_PARAM_TOR,             //16- total oil rate
-    WELL_D_PARAM_TWR,             //17- total water rate
-    WELL_D_PARAM_TGR,             //18- total gas rate
-    WELL_D_PARAM_TLR,             //19- total liquid rate
-    WELL_D_PARAM_TOI,             //20- total oil injection
-    WELL_D_PARAM_TWI,             //21- total water injection
-    WELL_D_PARAM_TGI,             //22- total gas injection
+    WELL_D_PARAM_TOR,             //!< 16- total oil rate
+    WELL_D_PARAM_TWR,             //!< 17- total water rate
+    WELL_D_PARAM_TGR,             //!< 18- total gas rate
+    WELL_D_PARAM_TLR,             //!< 19- total liquid rate
+    WELL_D_PARAM_TOI,             //!< 20- total oil injection
+    WELL_D_PARAM_TWI,             //!< 21- total water injection
+    WELL_D_PARAM_TGI,             //!< 22- total gas injection
 
-    WELL_D_PARAM_HTOR,            //23- total history oil rate
-    WELL_D_PARAM_HTWR,            //24- total history water rate
-    WELL_D_PARAM_HTGR,            //25- total history gas rate
-    WELL_D_PARAM_HTLR,            //26- total history liquid rate
-    WELL_D_PARAM_HTOI,            //27- total history oil injection
-    WELL_D_PARAM_HTWI,            //28- total history water injection
-    WELL_D_PARAM_HTGI,            //29- total history gas injection
-    WELL_D_PARAM_WEFAC,           //30- wefac (effectivity of well)
-    WELL_D_PARAM_WBP1,            //31- average well's pressure for 1 block
-    WELL_D_PARAM_WBP4,            //32- average well's pressure for 4 block
-    WELL_D_PARAM_WBP5,            //33- average well's pressure for 5 block
-    WELL_D_PARAM_WBP9,            //34- average well's pressure for 9 block
+    WELL_D_PARAM_HTOR,            //!< 23- total history oil rate
+    WELL_D_PARAM_HTWR,            //!< 24- total history water rate
+    WELL_D_PARAM_HTGR,            //!< 25- total history gas rate
+    WELL_D_PARAM_HTLR,            //!< 26- total history liquid rate
+    WELL_D_PARAM_HTOI,            //!< 27- total history oil injection
+    WELL_D_PARAM_HTWI,            //!< 28- total history water injection
+    WELL_D_PARAM_HTGI,            //!< 29- total history gas injection
+    WELL_D_PARAM_WEFAC,           //!< 30- wefac (effectivity of well)
+    WELL_D_PARAM_WBP1,            //!< 31- average well's pressure for 1 block
+    WELL_D_PARAM_WBP4,            //!< 32- average well's pressure for 4 block
+    WELL_D_PARAM_WBP5,            //!< 33- average well's pressure for 5 block
+    WELL_D_PARAM_WBP9,            //!< 34- average well's pressure for 9 block
 
     // should be the last
     WELL_D_PARAM_COUNT
   };
 
+  /**
+   * \enum  conn_d_params
+   * \brief Floating point paramters for connection
+   * */
   enum conn_d_params
   {
-    CONN_D_PARAM_COR = 0,         //0 - current oil rate
-    CONN_D_PARAM_CWR,             //1 - current water rate
-    CONN_D_PARAM_CGR,             //2 - current gas rate
-    CONN_D_PARAM_CLR,             //3 - current liquid rate
-    CONN_D_PARAM_COI,             //4 - current oil injection
-    CONN_D_PARAM_CWI,             //5 - current water injection
-    CONN_D_PARAM_CGI,             //6 - current gas injection
-    CONN_D_PARAM_BHP,             //7 - BHP for connection
-    CONN_D_PARAM_BULKP,           //8 - bulk pressure
-    CONN_D_PARAM_TOR,             //9 - total oil rate
-    CONN_D_PARAM_TWR,             //10- total water rate
-    CONN_D_PARAM_TGR,             //11- total gas rate
-    CONN_D_PARAM_TLR,             //12- total liquid rate
-    CONN_D_PARAM_TOI,             //13- total oil injection
-    CONN_D_PARAM_TWI,             //14- total water injection
-    CONN_D_PARAM_TGI,             //15- total gas injection
-    CONN_D_PARAM_FACTOR,          //16- connection factor
-    CONN_D_PARAM_DEPTH,           //17- connection depth
+    CONN_D_PARAM_COR = 0,         //!< 0 - current oil rate
+    CONN_D_PARAM_CWR,             //!< 1 - current water rate
+    CONN_D_PARAM_CGR,             //!< 2 - current gas rate
+    CONN_D_PARAM_CLR,             //!< 3 - current liquid rate
+    CONN_D_PARAM_COI,             //!< 4 - current oil injection
+    CONN_D_PARAM_CWI,             //!< 5 - current water injection
+    CONN_D_PARAM_CGI,             //!< 6 - current gas injection
+    CONN_D_PARAM_BHP,             //!< 7 - BHP for connection
+    CONN_D_PARAM_BULKP,           //!< 8 - bulk pressure
+    CONN_D_PARAM_TOR,             //!< 9 - total oil rate
+    CONN_D_PARAM_TWR,             //!< 10- total water rate
+    CONN_D_PARAM_TGR,             //!< 11- total gas rate
+    CONN_D_PARAM_TLR,             //!< 12- total liquid rate
+    CONN_D_PARAM_TOI,             //!< 13- total oil injection
+    CONN_D_PARAM_TWI,             //!< 14- total water injection
+    CONN_D_PARAM_TGI,             //!< 15- total gas injection
+    CONN_D_PARAM_FACTOR,          //!< 16- connection factor
+    CONN_D_PARAM_DEPTH,           //!< 17- connection depth
 
     // should be the last
     CONN_D_PARAM_COUNT
   };
 
+  /**
+   * \enum  conn_i_params
+   * \brief Integer parameters for connection
+   * */
   enum conn_i_params
   {
-    CONN_I_PARAM_STATUS = 0,      //0 - state of connection: 0 - close, 1 - open
-    CONN_I_PARAM_GRP_STATUS,      //1 - type of connection: 0 - usual, 1 - grp_primary, 2 - grp_secondary
-    CONN_I_PARAM_I,               //2 - index of connection block by X axes in mesh
-    CONN_I_PARAM_J,               //3 - index of connection block by Y axes in mesh
-    CONN_I_PARAM_K1,              //4 - start layer index of connection block by Z
-    CONN_I_PARAM_K2,              //5 - end layer index of connection block by Z
-    CONN_I_PARAM_NBLOCK,          //6 - block number in mesh
+    CONN_I_PARAM_STATUS = 0,      //!< 0 - state of connection: 0 - close, 1 - open
+    CONN_I_PARAM_GRP_STATUS,      //!< 1 - type of connection: 0 - usual, 1 - grp_primary, 2 - grp_secondary
+    CONN_I_PARAM_I,               //!< 2 - index of connection block by X axes in mesh
+    CONN_I_PARAM_J,               //!< 3 - index of connection block by Y axes in mesh
+    CONN_I_PARAM_K1,              //!< 4 - start layer index of connection block by Z
+    CONN_I_PARAM_K2,              //!< 5 - end layer index of connection block by Z
+    CONN_I_PARAM_NBLOCK,          //!< 6 - block number in mesh
 
     // should be the last
     CONN_I_PARAM_COUNT
   };
 
+  /**
+   * \enum  well_i_params
+   * \brief Integer parameters for well
+   * \todo  Describe elements
+   * */
   enum well_i_params
   {
     WELL_I_PARAM_HSTATUS = 0,
@@ -110,6 +129,10 @@ namespace blue_sky
     WELL_I_PARAM_COUNT
   };
 
+  /**
+   * \class connection_results
+   * \brief Stores results for connection
+   * */
   class BS_API_PLUGIN connection_results
     {
       // methods
@@ -122,10 +145,10 @@ namespace blue_sky
 
       // variables
     public:
-      typedef std::vector<double> dates_type;
-      typedef std::vector<float> d_params_internal_type;
+      typedef std::vector<double>                 dates_type;
+      typedef std::vector<float>                  d_params_internal_type;
       typedef std::vector<d_params_internal_type> d_params_type;
-      typedef std::vector<int> i_params_internal_type;
+      typedef std::vector<int>                    i_params_internal_type;
       typedef std::vector<i_params_internal_type> i_params_type;
 
       dates_type dates;                           //!< dates array
@@ -133,6 +156,10 @@ namespace blue_sky
       i_params_type i_params;                     //!< set of int   parameter arrays
     };
 
+  /**
+   * \class well_results
+   * \brief Stores results for well
+   * */
   class BS_API_PLUGIN well_results
     {
       // methods
@@ -145,13 +172,13 @@ namespace blue_sky
 
       // variables
     public:
-      typedef std::vector<double> dates_type;
-      typedef std::vector<float> d_params_internal_type;
+      typedef std::vector<double>                 dates_type;
+      typedef std::vector<float>                  d_params_internal_type;
       typedef std::vector<d_params_internal_type> d_params_type;
-      typedef std::vector<int> i_params_internal_type;
+      typedef std::vector<int>                    i_params_internal_type;
       typedef std::vector<i_params_internal_type> i_params_type;
-      typedef std::map<int, connection_results> conn_type;
-      typedef std::pair<int, connection_results> conn_pair_type;
+      typedef std::map<int, connection_results>   conn_type;
+      typedef std::pair<int, connection_results>  conn_pair_type;
 
       conn_type connections;
       dates_type dates;
@@ -160,6 +187,10 @@ namespace blue_sky
       std::string group;
     };
 
+  /**
+   * \class well_results_storage
+   * \brief Storage for well and connection results
+   * */
   class BS_API_PLUGIN well_results_storage : public objbase
     {
       BLUE_SKY_TYPE_DECL (well_results_storage);
@@ -169,30 +200,46 @@ namespace blue_sky
 
       // variables
     public:
-      typedef std::map<std::string, well_results> wells_type;
-      typedef std::pair<std::string, well_results> wells_pair_type;
+      typedef std::map<std::string, well_results>   wells_type;
+      typedef std::pair<std::string, well_results>  wells_pair_type;
+
       wells_type wells;
     };
 
 
+  /**
+   * \class save_well_data
+   * \brief Saves well and connection data to well_results_storage
+   * */
   template <typename strategy_t>
   struct save_well_data
     {
-      typedef calc_model <strategy_t>                                                 calc_model_t;
-      typedef typename strategy_t::index_t                                            index_t;
+      typedef calc_model <strategy_t>                                 calc_model_t;
+      typedef typename strategy_t::index_t                            index_t;
 
-      typedef typename calc_model_t::data_array_t                                     data_array_t;
-      typedef typename calc_model_t::item_t                                           item_t;
-      typedef typename calc_model_t::connection_t                                     connection_t;
-      typedef typename calc_model_t::well_t                                           well_t;
-      typedef typename calc_model_t::reservoir_t::facility_manager_t::well_const_iterator_t well_iterator_t;
-      typedef typename calc_model_t::strategy_type                                    strategy_type;
+      typedef typename calc_model_t::data_array_t                     data_array_t;
+      typedef typename calc_model_t::item_t                           item_t;
+      typedef typename calc_model_t::connection_t                     connection_t;
+      typedef typename calc_model_t::well_t                           well_t;
+      typedef typename calc_model_t::strategy_type                    strategy_type;
 
-      typedef smart_ptr <calc_model_t, true>                                          sp_calc_model_t;
-      typedef typename calc_model_t::sp_well_t                                        sp_well_t;
-      typedef typename calc_model_t::sp_connection_t                                sp_connection_t;
-      typedef smart_ptr<well_results_storage, true>     sp_well_results_storage;
+      typedef smart_ptr <calc_model_t, true>                          sp_calc_model_t;
+      typedef typename calc_model_t::sp_well_t                        sp_well_t;
+      typedef typename calc_model_t::sp_connection_t                  sp_connection_t;
+      typedef smart_ptr<well_results_storage, true>                   sp_well_results_storage;
 
+      typedef typename calc_model_t::reservoir_t::facility_manager_t  facility_manager_t;
+      typedef typename facility_manager_t::well_const_iterator_t      well_iterator_t;
+
+      /**
+       * \brief  Saves well and connection data to well_results_storage
+       * \param  calc_model
+       * \param  __formal
+       * \param  wb Begin of well list
+       * \param  we End of well list
+       * \param  __formal
+       * \param  time Current simulation time
+       * */
       void
       copy_well_data_to_storage (sp_calc_model_t &calc_model, item_t /*dt*/, well_iterator_t wb, const well_iterator_t &we, size_t /*iter_counter*/, item_t time)
       {

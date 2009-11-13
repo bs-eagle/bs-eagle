@@ -1,8 +1,11 @@
 /**
- * \file wells_common_const.h
- * \brief wells common consts holder
- * \author Sergey Miryanov
- * \date 07.07.2008
+ *       \file  wells_common_const.h
+ *      \brief  Common constants for wells
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  07.07.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  May be obsolete
  * */
 #ifndef BS_WELLS_COMMON_CONST_H_
 #define BS_WELLS_COMMON_CONST_H_

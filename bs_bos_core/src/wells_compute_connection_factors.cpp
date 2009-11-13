@@ -1,8 +1,10 @@
 /**
- * \file wells_compute_connection_factors.cpp
- * \brief impl of
- * \author Sergey Miryanov
- * \date 08.07.2008
+ *       \file  wells_compute_connection_factors.cpp
+ *      \brief  Computes connection factors
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  08.07.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 
@@ -19,12 +21,6 @@ namespace blue_sky
     namespace compute_factors
       {
 
-      /**
-       * \brief computes connection factor by peaceman model.
-       *          d1 equals to msh->elements[k].d[dir_plane1]
-       *          d2 equals to msh->elements[k].d[dir_plane2]
-       *          d3 or d_ort equals to msh->elements[k].d[dir_orthogonal]
-       * */
       template <typename strategy_t>
       void
       peaceman_model<strategy_t>::compute (connection_t &con,

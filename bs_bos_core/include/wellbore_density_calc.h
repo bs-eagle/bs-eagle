@@ -1,8 +1,10 @@
 /**
- * \file wellbore_density_calc.h
- * \brief perforation's density calculation (like as wellbore_density_calc in old code)
- * \author Sergey Miryanov
- * \date 18.11.2008
+ *       \file  wellbore_density_calc.h
+ *      \brief  Calculates perforation density
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  18.11.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_WELLBORE_DENSITY_CALC_H_
 #define BS_WELLBORE_DENSITY_CALC_H_
@@ -12,6 +14,10 @@
 namespace blue_sky
   {
 
+  /**
+   * \class wellbore_density_calc
+   * \brief Calculates density for all well perforations
+   * */
   template <typename strategy_t>
   class BS_API_PLUGIN wellbore_density_calc : public calc_perf_density_base <strategy_t>
     {
@@ -26,13 +32,26 @@ namespace blue_sky
 
     public:
 
+      /**
+       * \brief  For each well perforation calculates density value
+       * \param  well well to calculate perforation density value
+       * \param  calc_model
+       * */
       void
       calculate (sp_well_t &well, const sp_calc_model_t &calc_model) const;
 
+      //! blue-sky type declaration
       BLUE_SKY_TYPE_DECL_T (wellbore_density_calc);
 
     protected:
 
+      /**
+       * \brief  For each well perforation calculates density value
+       * \param  well well to calculate perforation density value
+       * \param  calc_model
+       * \param  bhp Precalculated BHP value
+       * \return True if density calculated
+       * */
       bool
       density_calc (sp_well_t &well, const sp_calc_model_t &calc_model, item_t bhp) const;
 

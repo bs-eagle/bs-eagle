@@ -1,8 +1,11 @@
 /**
- * \file well_serializer.cpp
- * \brief impl of
- * \author Sergey Miryanov
- * \date 21.07.2008
+ *       \file  well_serializer.cpp
+ *      \brief  Implementation of well_serializer
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  21.07.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete
  * */
 #include "stdafx.h"
 
@@ -41,7 +44,7 @@ namespace blue_sky
 
         st.save ("i_coord", w->i_coord_)
         .save ("j_coord", w->j_coord_)
-        .save ("name",		w->name_)
+        .save ("name",    w->name_)
         ;
       }
 
@@ -64,5 +67,5 @@ namespace blue_sky
 
       return res;
     }
-  }	// namespace wells
-}	// namespace blue_sky
+  } // namespace wells
+} // namespace blue_sky

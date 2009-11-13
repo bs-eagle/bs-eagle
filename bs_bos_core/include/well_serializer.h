@@ -1,8 +1,11 @@
 /**
- * \file well_serializer.h
- * \brief class for serialize well data
- * \author Sergey Miryanov
- * \date 21.07.2008
+ *       \file  well_serializer.h
+ *      \brief  Class for well data serialization
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  21.07.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
+ *       \todo  Obsolete
  * */
 #ifndef BS_WELL_SERIALIZER_H_
 #define BS_WELL_SERIALIZER_H_
@@ -38,8 +41,8 @@ namespace blue_sky
     well_serializer_register_type (const plugin_descriptor &pd);
 
 
-  }	// namespace wells
-}	// namespace blue_sky
+  } // namespace wells
+} // namespace blue_sky
 
 
-#endif	// #ifndef BS_WELL_SERIALIZER_H_
+#endif  // #ifndef BS_WELL_SERIALIZER_H_

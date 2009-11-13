@@ -1,8 +1,10 @@
 /**
- * \file wellbore_density_calc.h
- * \brief impl of
- * \author Sergey Miryanov
- * \date 18.11.2008
+ *       \file  wellbore_density_calc.cpp
+ *      \brief  Implementation of wellbore_density_calc
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  18.11.2008
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
 
@@ -19,11 +21,19 @@
 namespace blue_sky
   {
 
+    /**
+     * \brief  'default' ctor for wellbore_density_calc
+     * \param  param Additional parameters for ctor
+     * */
   template <typename strategy_t>
   wellbore_density_calc<strategy_t>::wellbore_density_calc (bs_type_ctor_param param /* = NULL */)
   {
 
   }
+  /**
+   * \brief  copy-ctor for wellbore_density_calc
+   * \param  x Instance of wellbore_density_calc to be copied
+   * */
   template <typename strategy_t>
   wellbore_density_calc<strategy_t>::wellbore_density_calc (const wellbore_density_calc &x)
   : bs_refcounter (x)
@@ -143,8 +153,8 @@ namespace blue_sky
           index_t i_g       = n_block * n_phases + d_g;
           index_t i_o       = n_block * n_phases + d_o;
 
-          item_t con_denom	= 0;
-          item_t con_upnom	= 0;
+          item_t con_denom  = 0;
+          item_t con_upnom  = 0;
 
           if (prev_con && prev_con->cur_bhp)
             ppo1 = prev_con->cur_bhp + 0.5 * (prev_con->density + con->density) * gravity_const *
