@@ -8,6 +8,7 @@
 
 #include "py_bs_assert.h"
 #include "named_pbase_access.h"
+#include "data_dimens.h"
 
 using namespace blue_sky;
 using namespace blue_sky::python;
@@ -37,5 +38,6 @@ BLUE_SKY_INIT_PY_FUN
 
   //python::py_export_assert ();
   python::py_export_named_pbase ("named_pbase");
+  python::export_data_dimens ();
 }
 #endif 
