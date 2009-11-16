@@ -14,9 +14,9 @@ mesh_rs <strategy_t>::init_props (const sp_idata_t &idata)
 {
   base_t::init_props (idata);
   
-  nx = idata->nx;
-  ny = idata->ny;
-  nz = idata->nz;
+  nx = idata->dimens.nx;
+  ny = idata->dimens.ny;
+  nz = idata->dimens.nz;
   
   sp_permx = idata->get_float_non_empty_array("PERMX");
   sp_permy = idata->get_float_non_empty_array("PERMY");

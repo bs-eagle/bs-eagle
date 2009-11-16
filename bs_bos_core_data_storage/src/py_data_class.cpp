@@ -123,13 +123,34 @@ namespace python {
     return t->get_float_non_empty_array (cur_index);
   }
 
+  template <typename T>
+  long long
+  get_nx (T *t)
+  {
+    return t->dimens.nx;
+  }
+  template <typename T>
+  long long
+  get_ny (T *t)
+  {
+    return t->dimens.ny;
+  }
+  template <typename T>
+  long long
+  get_nz (T *t)
+  {
+    return t->dimens.nz;
+  }
+
+
   PY_EXPORTER (idata_exporter, default_exporter)
     .def("init",                          &T::init)
     .add_property ("rpo_model",           &T::rpo_model)
     .add_property ("minimal_pore_volume", &T::minimal_pore_volume)
-    .add_property ("nx",                  &T::nx)
-    .add_property ("ny",                  &T::ny)
-    .add_property ("nz",                  &T::nz)
+    .add_property ("nx",                  get_nx <T>)
+    .add_property ("ny",                  get_ny <T>)
+    .add_property ("nz",                  get_nz <T>)
+    .add_property ("dimens",              &T::dimens)
     .add_property ("pvt_region",          &T::pvt_region)
     .add_property ("sat_region",          &T::sat_region)
     .add_property ("eql_region",          &T::eql_region)

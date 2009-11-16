@@ -65,9 +65,6 @@ namespace blue_sky
   d_map (BS_KERNEL.create_object (amap_d::bs_type()))
   {
     init_section = 0;
-    nx=0;
-    ny=0;
-    nz=0;
     pvt_region = 1;
     sat_region = 1;
     eql_region = 1;

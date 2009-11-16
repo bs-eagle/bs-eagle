@@ -97,24 +97,24 @@ namespace blue_sky
           KH_ASSERT_EXCEPTION
         }
 
-      idata->nx = itmp[0];
-      idata->ny = itmp[1];
-      idata->nz = itmp[2];
-      idata->d_map->init(idata->nx,idata->ny,idata->nz);
-      idata->i_map->init(idata->nx,idata->ny,idata->nz);
+      idata->dimens.nx = itmp[0];
+      idata->dimens.ny = itmp[1];
+      idata->dimens.nz = itmp[2];
+      idata->d_map->init (idata->dimens.nx, idata->dimens.ny, idata->dimens.nz);
+      idata->i_map->init (idata->dimens.nx, idata->dimens.ny, idata->dimens.nz);
       
       // Number of nodes
-      ndim = idata->nx * idata->ny * idata->nz;
+      ndim = idata->dimens.nx * idata->dimens.ny * idata->dimens.nz;
       // Number of blocks
-      nblock = idata->nx * idata->ny * idata->nz;
+      nblock = idata->dimens.nx * idata->dimens.ny * idata->dimens.nz;
       
       idata->set_defaults_in_pool();
       
       BOSOUT (section::read_data, level::medium) <<
         "Keyword " << keyword <<
-        ": NX = " << idata->nx <<
-        ", NY = " << idata->ny <<
-        ", NZ = " << idata->nz << bs_end;
+        ": NX = " << idata->dimens.nx <<
+        ", NY = " << idata->dimens.ny <<
+        ", NZ = " << idata->dimens.nz << bs_end;
       BOSOUT (section::read_data,level::medium) << keyword << bs_end;
     }
   

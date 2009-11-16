@@ -576,7 +576,7 @@ namespace blue_sky
 
     std::ostringstream out_s;
 
-    index_t nb = data->nx * data->ny * data->nz;
+    index_t nb = data->dimens.nx * data->dimens.ny * data->dimens.nz;
     
     if (!nb)
       {

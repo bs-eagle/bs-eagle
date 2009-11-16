@@ -14,6 +14,8 @@
 #include "arrays_tables.h"
 #include "convert_units.h"
 
+#include "data_dimens.h"
+
 namespace blue_sky {
 
 //!< values of geometry definition type
@@ -177,9 +179,8 @@ namespace blue_sky {
       double minimal_splice_volume;   //!< Minimal pore volume allowed for active cells to splice with other cells
       double maximum_splice_thickness;//!< Default maximum thickness allowed between active cells to be coupled
 
-      long long nx;                                   //!< Number of nodes in X dimension (NX)
-      long long ny;                                   //!< Number of nodes in Y dimension (NY)
-      long long nz;                                   //!< Number of nodes in Z dimension (NZ)
+      data_dimens dimens;                                  //!< dimension description
+
       auto_value <long long> pvt_region;               //!< Number of PVT regions in simulation
       auto_value <long long> sat_region;               //!< Number of saturation regions in simulation
       auto_value <long long> eql_region;               //!< Number of equilibrium regions in simulation

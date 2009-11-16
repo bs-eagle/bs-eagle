@@ -6,6 +6,9 @@
 namespace blue_sky {
 namespace python {
 
+  /**
+   * \brief Exports shared_vectors and idata to python
+   * */
   void 
   py_export_idata();
 

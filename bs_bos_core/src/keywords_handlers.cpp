@@ -151,10 +151,10 @@ namespace blue_sky
             {
               index_t i_c, j_c, k_c;
               index_t c_n = i;
-              k_c = c_n / (idata->nx * idata->ny);
-              c_n -= k_c * (idata->nx * idata->ny);
-              j_c = c_n / idata->nx;
-              i_c = c_n - j_c * idata->nx;
+              k_c = c_n / (idata->dimens.nx * idata->dimens.ny);
+              c_n -= k_c * (idata->dimens.nx * idata->dimens.ny);
+              j_c = c_n / idata->dimens.nx;
+              i_c = c_n - j_c * idata->dimens.nx;
 
               BOSWARN (section::read_data, level::warning) << "Warning: unknown boundary condition in cell ["
               << i_c << " , " << j_c << " , " << k_c << "]" << bs_end;

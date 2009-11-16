@@ -68,9 +68,9 @@ namespace blue_sky
       if ((ACTNUM))                                                                     \
         {                                                                               \
           int ix, iy, iz;                                                               \
-          iz = i / (data->nx * data->ny);                                               \
-          iy = (i - iz * (data->nx * data->ny)) / data->nx;                             \
-          ix = i - iz * (data->nx * data->ny) - iy * data->nx;                          \
+          iz = i / (data->dimens.nx * data->dimens.ny);                                 \
+          iy = (i - iz * (data->dimens.nx * data->dimens.ny)) / data->dimens.nx;        \
+          ix = i - iz * (data->dimens.nx * data->dimens.ny) - iy * data->dimens.nx;     \
           BOSWARN (section::check_data, level::low)                                     \
             << "blocks[" << (ix + 1) << ", " << (iy + 1) << ", " << (iz + 1)            \
             << "] will be set inactive because of " << #VAL << " = " << VAL << bs_end;  \
@@ -296,7 +296,7 @@ namespace blue_sky
   void data_manager<strategy_t>::check_arrays_for_inactive_blocks () const
     {
       std::ostringstream out_s;
-      int nb = data->nx * data->ny * data->nz;
+      int nb = data->dimens.nx * data->dimens.ny * data->dimens.nz;
       int permx_counter = 0;
       int permy_counter = 0;
       int permz_counter = 0;
@@ -320,9 +320,9 @@ namespace blue_sky
           if (actnum[i] && permx[i] < DEFAULT_MINIMAL_PERM && permy[i] < DEFAULT_MINIMAL_PERM && permz[i] < DEFAULT_MINIMAL_PERM)
             {
               int ix, iy, iz;
-              iz = i / (data->nx * data->ny);
-              iy = (i - iz * (data->nx * data->ny)) / data->nx;
-              ix = i - iz * (data->nx * data->ny) - iy * data->nx;
+              iz = i / (data->dimens.nx * data->dimens.ny);
+              iy = (i - iz * (data->dimens.nx * data->dimens.ny)) / data->dimens.nx;
+              ix = i - iz * (data->dimens.nx * data->dimens.ny) - iy * data->dimens.nx;
 
               BOSWARN (section::check_data, level::low)
                 << "blocks " << i << " [" << (ix + 1) << ", " << (iy + 1) << ", "
