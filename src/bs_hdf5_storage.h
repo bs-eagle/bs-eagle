@@ -6,8 +6,99 @@
 #include "hdf5.h"
 #include "throw_exception.h"
 
+#include "shared_vector.h"
+#include "seq_vector.h"
+#include "constants.h"
+
 namespace blue_sky
   {
+
+    namespace detail {
+
+      /**
+       * \brief  Checks is object name is exists in location
+       * \param  location HDF5 object id
+       * \param  name Name of the object to check
+       * \return True if object exists
+       * */
+      inline bool 
+      is_object_exists (const hid_t &location, const std::string &name) 
+      {
+        htri_t status = H5Lexists (location, name.c_str (), NULL);
+        return status != 0;
+      }
+
+      /**
+       * \brief  Returns object name
+       * \param  location HDF5 object id
+       * \return Name of the object on success otherwise throws exception
+       * */
+      inline std::string
+      object_name (hid_t location)
+      {
+        char *name = 0;
+        int name_length = (int) H5Iget_name (location, name, NULL);
+        if (name_length < 0)
+          {
+            bs_throw_exception ("Can't get HDF5 object name");
+          }
+
+        name = new char[name_length + 1];
+        memset (name, 0, name_length + 1);
+        H5Iget_name (location, name, name_length + 1);
+
+        std::string n (name, name_length);
+        delete [] name;
+
+        return n;
+      }
+
+      /**
+       * \brief  Open group if exists, if no throws exception
+       * \param  location HDF5 object id
+       * \param  path Path of the group to open
+       * \return Group id on success otherwise throws exception
+       * */
+      inline hid_t
+      open_group (const hid_t location, const char *path) 
+      {
+        if (!H5Lexists (location, path, NULL)) // not exist
+          {
+            bs_throw_exception (boost::format ("Group %s/%s is not exists") % object_name (location) % path);
+          }
+
+        hid_t group = H5Gopen (location, path);
+        if (group < 0)
+          {
+            bs_throw_exception (boost::format ("Can't open group %s/%s") % object_name (location) % path);
+          }
+
+        return group;
+      }
+
+      /**
+       * \brief  Open dataset if exists, if no throws exception
+       * \param  location HDF5 object id
+       * \param  path Path of the dataset to open
+       * \return Dataset id on success otherwise throws exception
+       * */
+      inline hid_t
+      open_dataset (const hid_t location, const char *path) 
+      {
+        if (!H5Lexists(location, path, NULL)) // not exist
+          {
+            bs_throw_exception (boost::format ("Dataset %s/%s is not exists") % object_name (location) % path);
+          }
+
+        hid_t ds = H5Dopen (location, path);
+        if (ds < 0)
+          {
+            bs_throw_exception (boost::format ("Can't open dataset %s/%s") % object_name (location) % path);
+          }
+
+        return ds;
+      }
+    }
 
   class BS_API_PLUGIN bs_hdf5_storage : public objbase //public bs_abstract_storage
     {
@@ -29,11 +120,6 @@ namespace blue_sky
 
       // COMMON FUNCTIONS:
 
-      bool is_object_exists (const hid_t &location, const std::string &name) const
-      {
-        htri_t status = H5Lexists (location, name.c_str (), NULL);
-        return status != 0;
-      }
 
       // Return file descriptor
       hid_t get_file_id () const
@@ -49,12 +135,6 @@ namespace blue_sky
 
       // Returns true if opened, false else.
       bool is_opened () const;
-
-      // Open dataset
-      hid_t open_dataset (const hid_t location, const char *path) const;
-
-      // Open group
-      hid_t open_group (const hid_t location, const char *path) const;
 
       // Create group
       hid_t begin_object (const hid_t location, const std::string &name) const;
@@ -107,42 +187,6 @@ namespace blue_sky
           throw bs_exception ("bs_hdf5_storage", "group_creating_error");
           }
     return group;
-  }
-
-  // check group exists, print error if doesn't exist, open group else.
-  inline hid_t
-  bs_hdf5_storage::open_group (const hid_t location, const char *path) const
-  {
-    if (!H5Lexists (location, path, NULL)) // not exist
-    {
-      char *name = 0;
-      int name_length = (int) H5Iget_name (location, name, NULL) + 1;
-        name = new char[name_length];
-        H5Iget_name (location, name, name_length);
-        printf ("Error: Can't open group %s/%s!\n", name, path);
-        throw bs_exception ("bs_hdf5_storage", "group_opening_error");
-        delete [] name;
-        return -1;
-      }
-    return H5Gopen (location, path);
-  }
-
-  // check dataset exists, print error if doesn't exist, open dataset else.
-  inline hid_t
-  bs_hdf5_storage::open_dataset (const hid_t location, const char *path) const
-  {
-    if (!H5Lexists(location, path, NULL)) // not exist
-    {
-      char *name = 0;
-      int name_length = (int) H5Iget_name (location, name, NULL) + 1;
-        name = new char[name_length];
-        H5Iget_name (location, name, name_length);
-        printf ("Error: Can't open dataset %s/%s!\n", name, path);
-        throw bs_exception("bs_hdf5_storage", "dataset_opening_error");
-        delete [] name;
-        return -1;
-      }
-    return H5Dopen (location, path);
   }
 
   // calls H5Gget_objname_by_idx and return as std::string
@@ -290,9 +334,9 @@ namespace blue_sky
       }
     else // group already exists
       {
-        group = open_group (file_id, path.c_str ());
-        dataset_value = open_dataset (group, values.c_str ());
-        dataset_time = open_dataset (group, time.c_str ());
+        group = detail::open_group (file_id, path.c_str ());
+        dataset_value = detail::open_dataset (group, values.c_str ());
+        dataset_time = detail::open_dataset (group, time.c_str ());
 
         hsize_t size_value[2];
         hsize_t size_time[2];
@@ -306,6 +350,8 @@ namespace blue_sky
 
         size[0]   = size_value[0];
         size[1]   = size_value[1] + 1;
+      std::cout << "_size[0] = " << size[0] << std::endl;
+      std::cout << "_size[1] = " << size[1] << std::endl;
         H5Dextend (dataset_value, size);
 
         size[0] = size_time[0];
@@ -351,7 +397,7 @@ namespace blue_sky
   inline
   int bs_hdf5_storage::get_datatype_size (const char *path) const
   {
-    hid_t dataset = open_dataset (file_id, path);
+    hid_t dataset = detail::open_dataset (file_id, path);
     if (dataset < 0)
     return -1;
     hid_t datatype = H5Dget_type(dataset);
@@ -366,7 +412,7 @@ namespace blue_sky
   bs_hdf5_storage::get_data (const char *path, T *buf) const
   {
     hid_t h5_type = get_hdf5_type<T>();
-    hid_t dataset = open_dataset (file_id, path);
+    hid_t dataset = detail::open_dataset (file_id, path);
     if (dataset < 0)
     return -2;
     herr_t status = H5Dread(dataset, h5_type, NULL, NULL, H5P_DEFAULT, buf);
@@ -400,6 +446,208 @@ namespace blue_sky
       }
   }
 
+  struct hdf5_name
+  {
+    hdf5_name (const std::string &name)
+    : name (name)
+    {
+    } 
+
+    const char *
+    str ()
+    {
+      return name.c_str ();
+    }
+
+  private:
+    std::string name;
+  };
+
+  namespace hdf5 {
+  namespace private_ {
+
+    template <typename T>
+    const hid_t &get_hdf5_type_ (const T &)
+    {
+      return get_hdf5_type <T> ();
+    }
+    template <>
+    inline const hid_t &
+    get_hdf5_type_ <main_var_type> (const main_var_type &)
+    {
+      return H5T_NATIVE_UINT;
+    }
+
+    template <typename T>
+    inline const hid_t &
+    get_hdf5_type_ (const seq_vector <T> &)
+    {
+      return get_hdf5_type_ <T> (T ());
+    }
+
+
+    struct hdf5_buffer__ 
+    {
+      typedef size_t size_type;
+
+      template <typename T>
+      hdf5_buffer__ (const T *data, size_type size, size_type stride, size_type offset)
+      : type (get_hdf5_type_ (T ()))
+      , size (size)
+      , data_ (!stride ? data : (new T[size / stride]))
+      , owner_ (stride)
+      {
+        if (stride)
+          {
+            for (size_type i = 0, j = 0; i < size; i += stride)
+              {
+                ((T *)data_)[++j] = data[i];
+              }
+          }
+      }
+
+      ~hdf5_buffer__ ()
+      {
+        if (owner_)
+          delete [] data_;
+      }
+
+      const void *
+      data () const
+      {
+        return data_;
+      }
+
+    public:
+      hid_t       type;
+      size_type   size;
+
+      const void  *data_;
+      bool        owner_;
+    };
+  } // namespace private
+  } // namespace hdf5
+
+  template <typename T>
+  hdf5::private_::hdf5_buffer__
+  hdf5_buffer (const shared_vector <T> &data, 
+      hdf5::private_::hdf5_buffer__::size_type stride = 0, 
+      hdf5::private_::hdf5_buffer__::size_type offset = 0)
+  {
+    return hdf5::private_::hdf5_buffer__ (data.data (), data.size (), stride, offset);
+  }
+
+  template <typename T>
+  hdf5::private_::hdf5_buffer__
+  hdf5_buffer (const T &t)
+  {
+    return hdf5::private_::hdf5_buffer__ (&t, 1, 0, 0);
+  }
+
+  struct BS_API_PLUGIN hdf5_group_v2;
+  struct BS_API_PLUGIN hdf5_property_v2;
+  struct BS_API_PLUGIN hdf5_storage_v2
+  {
+    hdf5_group_v2 
+    operator [] (const std::string &name);
+
+    hdf5_storage_v2 (const std::string &file_name)
+    : file_id_ (-1)
+    , file_name_ (file_name)
+    {
+    }
+
+    ~hdf5_storage_v2 ();
+
+  private:
+
+    hid_t       file_id_;
+    std::string file_name_;
+
+    struct impl;
+
+    friend struct hdf5_group_v2;
+    friend struct hdf5_property_v2;
+    friend struct hdf5_storage_v2::impl;
+  };
+
+  struct BS_API_PLUGIN hdf5_group_v2
+  {
+  private:
+    typedef hdf5::private_::hdf5_buffer__ hdf5_buffer_t;
+
+  public:
+
+    hdf5_group_v2 &
+    operator << (const hdf5_buffer_t &buffer);
+
+    template <typename T>
+    hdf5_group_v2 &
+    operator << (const shared_vector <T> &data)
+    {
+      return operator << (hdf5_buffer (data));
+    }
+
+    template <typename T>
+    hdf5_group_v2 &
+    operator << (T t)
+    {
+      return operator << (hdf5_buffer (t));
+    }
+
+    hdf5_property_v2 
+    operator << (const hdf5_name &sub_name);
+
+    hdf5_property_v2 
+    operator << (const std::string &sub_name);
+
+    hdf5_group_v2 (const hdf5_storage_v2 &storage, const hdf5_name &name)
+    : storage_ (storage)
+    , name_ (name)
+    {
+    }
+
+  private:
+    hdf5_storage_v2 storage_;
+    hdf5_name       name_;
+
+    friend class hdf5_property_v2;
+  };
+
+  struct BS_API_PLUGIN hdf5_property_v2
+  {
+  private:
+    typedef hdf5::private_::hdf5_buffer__ hdf5_buffer_t;
+
+  public:
+
+    hdf5_group_v2 &
+    operator << (const hdf5_buffer_t &buffer);
+
+    template <typename T>
+    hdf5_group_v2 &
+    operator << (const shared_vector <T> &data)
+    {
+      return operator << (hdf5_buffer_t (data));
+    }
+
+    template <typename T>
+    hdf5_group_v2 &
+    operator << (T t)
+    {
+      return operator << (hdf5_buffer_t (&t, 1, 0, 0));
+    }
+
+    hdf5_property_v2 (const hdf5_group_v2 &group, const hdf5_name &name)
+    : group_ (group)
+    , name_ (name)
+    {
+    }
+
+  private:
+    hdf5_group_v2   group_;
+    hdf5_name       name_;
+  };
 
 } // namespace blue_sky
 

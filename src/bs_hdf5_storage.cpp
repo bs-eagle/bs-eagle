@@ -278,6 +278,283 @@ namespace blue_sky
     return 0;
   }
 
+  hdf5_group_v2
+  hdf5_storage_v2::operator[] (const std::string &name)
+  {
+    return hdf5_group_v2 (*this, hdf5_name (name));
+  }
+
+  hdf5_property_v2
+  hdf5_group_v2::operator << (const hdf5_name &sub_name)
+  {
+    return hdf5_property_v2 (*this, sub_name);
+  }
+
+  hdf5_property_v2 
+  hdf5_group_v2::operator << (const std::string &sub_name)
+  {
+    return hdf5_property_v2 (*this, hdf5_name (sub_name));
+  }
+
+  namespace detail {
+
+    enum hid_type {
+      hdf5_property_type
+      , hdf5_dataspace_type
+      , hdf5_dataset_type
+      , hdf5_group_type
+    };
+
+    template <hid_type type>
+    struct hid_closer
+    {
+    };
+
+    template <>
+    struct hid_closer <hdf5_property_type>
+    {
+      static void
+      close (hid_t v)
+      {
+        H5Pclose (v);
+      }
+    };
+
+    template <>
+    struct hid_closer <hdf5_dataspace_type>
+    {
+      static void
+      close (hid_t v)
+      {
+        H5Sclose (v);
+      }
+    };
+
+    template <>
+    struct hid_closer <hdf5_dataset_type>
+    {
+      static void
+      close (hid_t v)
+      {
+        H5Dclose (v);
+      }
+    };
+
+    template <>
+    struct hid_closer <hdf5_group_type>
+    {
+      static void
+      close (hid_t v)
+      {
+        H5Gclose (v);
+      }
+    };
+
+    template <hid_type hid_type_t>
+    struct hid_holder
+    {
+      hid_holder (hid_t h)
+      : h_ (h)
+      {
+      }
+
+      ~hid_holder ()
+      {
+        if (h_ >= 0)
+          hid_closer <hid_type_t>::close (h_);
+      }
+
+      hid_holder &
+      operator= (hid_t h)
+      {
+        if (h_ >= 0)
+          hid_closer <hid_type_t>::close (h_);
+
+        h_ = h;
+        return *this;
+      }
+
+      operator hid_t () 
+      {
+        return h_;
+      }
+
+      hid_t h_;
+    };
+
+    hid_holder <hdf5_property_type>
+    create_dataset_property ()
+    {
+      hid_t plist = H5Pcreate (H5P_DATASET_CREATE);
+      if (plist < 0)
+        {
+          bs_throw_exception ("Can't create property for create dataset");
+        }
+
+      return hid_holder <hdf5_property_type> (plist);
+    }
+
+    hid_holder <hdf5_property_type>
+    raw_transfer_property ()
+    {
+      hid_t plist = H5Pcreate (H5P_DATASET_XFER);
+      if (plist < 0)
+        {
+          bs_throw_exception ("Can't create property for raw data transfer");
+        }
+
+      return plist;
+    }
+  }
+
+  typedef detail::hid_holder <detail::hdf5_group_type>      hid_group_t;
+  typedef detail::hid_holder <detail::hdf5_dataspace_type>  hid_dspace_t;
+  typedef detail::hid_holder <detail::hdf5_dataset_type>    hid_dset_t;
+  typedef detail::hid_holder <detail::hdf5_property_type>   hid_property_t;
+
+  typedef hdf5::private_::hdf5_buffer__ hdf5_buffer_t;
+
+  hdf5_storage_v2::~hdf5_storage_v2 ()
+  {
+    if (file_id_ >= 0)
+      {
+        H5Fclose (file_id_);
+      }
+  }
+
+  struct hdf5_storage_v2::impl 
+  {
+    static hid_t
+    get_file_id (hdf5_storage_v2 &storage)
+    {
+      if (storage.file_id_ < 0)
+        {
+          storage.file_id_ = H5Fcreate (storage.file_name_.c_str (), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+          if (storage.file_id_ < 0)
+            {
+              bs_throw_exception (boost::format ("Can't open file %s") % storage.file_name_);
+            }
+
+          hid_group_t group = H5Gcreate (storage.file_id_, "/results", NULL);
+          if (group < 0)
+            {
+              bs_throw_exception (boost::format ("Can't create group '/results' in file %s") % storage.file_name_);
+            }
+        }
+
+      return storage.file_id_;
+    }
+
+    static void
+    write_to_hdf5 (hdf5_storage_v2 &storage, 
+                   const std::string &group_name, 
+                   const std::string &dataset_name, 
+                   const hdf5_buffer_t &buffer)
+    {
+      hid_t file_id           = get_file_id (storage);
+
+      hsize_t chunk_dimens[]  = {buffer.size, 1};
+      hsize_t max_dimens[]    = {buffer.size, H5S_UNLIMITED};
+      int rank                = sizeof (chunk_dimens) / sizeof (chunk_dimens[0]);
+
+      if (!detail::is_object_exists (file_id, group_name.c_str ()))
+        {
+          hid_group_t group = H5Gcreate (file_id, group_name.c_str (), H5P_DEFAULT);
+          if (group < 0)
+            {
+              bs_throw_exception (boost::format ("Can't create group %s") % group_name.c_str ());
+            }
+        }
+      hid_group_t group = detail::open_group (file_id, group_name.c_str ());
+
+      if (!detail::is_object_exists (group, dataset_name.c_str ()))
+        {
+          hid_property_t plist = detail::create_dataset_property ();
+          if (H5Pset_chunk (plist, rank, chunk_dimens) < 0)
+            {
+              bs_throw_exception (boost::format ("Can't set chunk for dataset %s in group %s") % dataset_name % group_name);
+            }
+
+          hid_dspace_t fspace = H5Screate_simple (rank, chunk_dimens, max_dimens);
+          if (fspace < 0)
+            {
+              bs_throw_exception (boost::format ("Can't create simple dataspace for dataset %s in group %s") % dataset_name % group_name);
+            }
+
+          hid_dset_t ds_value = H5Dcreate (group, dataset_name.c_str (), buffer.type, fspace, plist);
+          if (ds_value < 0)
+            {
+              bs_throw_exception (boost::format ("Can't create dataset %s in group %s") % dataset_name % group_name);
+            }
+        }
+
+      hid_dset_t dataset = detail::open_dataset (group, dataset_name.c_str ());
+      hid_dset_t space = H5Dget_space (dataset);
+      if (space < 0)
+        {
+          bs_throw_exception (boost::format ("Can't get space for dataset %s in group %s") % dataset_name % group_name);
+        }
+
+      hsize_t size_value[] = {0, 0};
+      if (H5Sget_simple_extent_dims (space, size_value, NULL) < 0)
+        {
+          bs_throw_exception (boost::format ("Can't get dataspace dims for dataset %s in group %s") % dataset_name % group_name);
+        }
+
+      hsize_t size[] = {size_value[0], size_value[1] + 1};
+      std::cout << "size[0] = " << size[0] << std::endl;
+      std::cout << "size[1] = " << size[1] << std::endl;
+      if (H5Dextend (dataset, size) < 0)
+        {
+          bs_throw_exception (boost::format ("Can't extend dataset %s in group %s") % dataset_name % group_name);
+        }
+
+      hid_dspace_t fspace = H5Dget_space (dataset);
+      if (fspace < 0)
+        {
+          bs_throw_exception (boost::format ("Can't get dataspace for dataset %s in group %s") % dataset_name % group_name);
+        }
+
+      hsize_t offset[] = {0, size_value[1]};
+      chunk_dimens[1] = 1;
+      if (H5Sselect_hyperslab (fspace, H5S_SELECT_SET, offset, NULL, chunk_dimens, NULL) < 0)
+        {
+          bs_throw_exception (boost::format ("Can't select hyperslab for dataset %s in group %s") % dataset_name % group_name);
+        }
+
+      hid_dspace_t mspace = H5Screate_simple (rank, chunk_dimens, max_dimens);
+      if (mspace < 0)
+        {
+          bs_throw_exception (boost::format ("Can't create simple dataspace for dataset %s in group %s") % dataset_name % group_name);
+        }
+
+      hid_t status = H5Dwrite (dataset, buffer.type, mspace, fspace, detail::raw_transfer_property (), buffer.data ());
+      if (status < 0)
+        {
+          bs_throw_exception (boost::format ("Can't write data (dataset %s, group %s)") % dataset_name % group_name);
+        }
+    }
+  };
+
+  hdf5_group_v2 &
+  hdf5_property_v2::operator << (const hdf5_buffer_t &buffer)
+  {
+    std::cout << "out: " << name_.str () << ", group: " << group_.name_.str () << std::endl;
+    hdf5_storage_v2::impl::write_to_hdf5 (group_.storage_, group_.name_.str (), name_.str (), buffer);
+    return group_;
+  }
+
+  hdf5_group_v2 &
+  hdf5_group_v2::operator << (const hdf5_buffer_t &buffer)
+  {
+    const char *tmp = strrchr (name_.str (), '/');
+    std::string group_name (name_.str (), tmp - 1);
+    std::string dataset_name (tmp);
+
+    hdf5_storage_v2::impl::write_to_hdf5 (storage_, group_name, dataset_name, buffer);
+    return *this;
+  }
+
 //bs stuff
   BLUE_SKY_TYPE_STD_CREATE(bs_hdf5_storage)
   BLUE_SKY_TYPE_STD_COPY(bs_hdf5_storage)
