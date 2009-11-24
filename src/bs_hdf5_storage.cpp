@@ -12,6 +12,8 @@
 #include "py_bs_hdf5_storage.h"
 #include "bos_report.h"
 
+#include <boost/tokenizer.hpp>
+
 using namespace blue_sky;
 using namespace blue_sky::python;
 using namespace boost::python;
@@ -279,7 +281,7 @@ namespace blue_sky
   }
 
   hdf5_group_v2
-  hdf5_storage_v2::operator[] (const std::string &name)
+  hdf5_file::operator[] (const std::string &name)
   {
     return hdf5_group_v2 (*this, hdf5_name (name));
   }
@@ -292,6 +294,12 @@ namespace blue_sky
 
   hdf5_property_v2 
   hdf5_group_v2::operator << (const std::string &sub_name)
+  {
+    return hdf5_property_v2 (*this, hdf5_name (sub_name));
+  }
+
+  hdf5_property_v2
+  hdf5_group_v2::operator << (const char *sub_name)
   {
     return hdf5_property_v2 (*this, hdf5_name (sub_name));
   }
@@ -405,6 +413,27 @@ namespace blue_sky
 
       return plist;
     }
+
+    void
+    create_group_hierarchy (hid_t file_id, const std::string &group_name)
+    {
+      typedef boost::tokenizer <boost::char_separator <char> > tokenizer_t;
+      boost::char_separator <char> s ("/");
+      tokenizer_t t (group_name, s);
+      std::string gn = "";
+      for (tokenizer_t::iterator it = t.begin (); it != t.end (); ++it)
+        {
+          if (!detail::is_object_exists (file_id, it->c_str ()))
+            {
+              gn += "/" + *it;
+              hid_holder <detail::hdf5_group_type> group = H5Gcreate (file_id, gn.c_str (), H5P_DEFAULT);
+              if (group < 0)
+                {
+                  bs_throw_exception (boost::format ("Can't create group %s") % gn);
+                }
+            }
+        }
+    }
   }
 
   typedef detail::hid_holder <detail::hdf5_group_type>      hid_group_t;
@@ -414,55 +443,111 @@ namespace blue_sky
 
   typedef hdf5::private_::hdf5_buffer__ hdf5_buffer_t;
 
-  hdf5_storage_v2::~hdf5_storage_v2 ()
+  hdf5_file::~hdf5_file ()
   {
-    if (file_id_ >= 0)
-      {
-        H5Fclose (file_id_);
-      }
   }
 
   struct hdf5_storage_v2::impl 
   {
-    static hid_t
-    get_file_id (hdf5_storage_v2 &storage)
-    {
-      if (storage.file_id_ < 0)
-        {
-          storage.file_id_ = H5Fcreate (storage.file_name_.c_str (), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-          if (storage.file_id_ < 0)
-            {
-              bs_throw_exception (boost::format ("Can't open file %s") % storage.file_name_);
-            }
+    typedef std::map <std::string, hid_t>   file_id_map_t;
 
-          hid_group_t group = H5Gcreate (storage.file_id_, "/results", NULL);
-          if (group < 0)
+    ~impl ()
+    {
+      file_id_map_t::iterator it = file_map_.begin (), e = file_map_.end ();
+      for (; it != e; ++it)
+        {
+          if (it->second >= 0)
             {
-              bs_throw_exception (boost::format ("Can't create group '/results' in file %s") % storage.file_name_);
+              H5Fclose (it->second);
             }
         }
-
-      return storage.file_id_;
     }
 
-    static void
-    write_to_hdf5 (hdf5_storage_v2 &storage, 
+    void
+    register_file (const std::string &name, hid_t id)
+    {
+      file_id_map_t::iterator it = file_map_.find (name);
+      if (it == file_map_.end ())
+        {
+          file_map_.insert (std::make_pair (name, id));
+        }
+      else
+        {
+          if (it->second != -1)
+            {
+              BOSWARN (section::app_info, level::warning) 
+                << boost::format ("Register already opened file %s, (old id: %d, new id: %d)")
+                  % name % it->second % id
+                << bs_end;
+            }
+          else
+            {
+              it->second = id;
+            }
+        }
+    }
+
+    hid_t
+    get_file_id (const std::string &name) const
+    {
+      file_id_map_t::const_iterator it = file_map_.find (name);
+      if (it == file_map_.end ())
+        {
+          return -1;
+        }
+
+      return it->second;
+    }
+
+    hid_t
+    get_file_id (hdf5_file &file)
+    {
+      if (file.file_id_ < 0)
+        {
+          file.file_id_ = get_file_id (file.file_name_);
+        }
+
+      if (file.file_id_ < 0)
+        {
+          file.file_id_ = H5Fcreate (file.file_name_.c_str (), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+          if (file.file_id_ < 0)
+            {
+              bs_throw_exception (boost::format ("Can't open file %s") % file.file_name_);
+            }
+
+          hid_group_t group = H5Gcreate (file.file_id_, "/results", NULL);
+          if (group < 0)
+            {
+              bs_throw_exception (boost::format ("Can't create group '/results' in file %s") % file.file_name_);
+            }
+
+          register_file (file.file_name_, file.file_id_);
+        }
+
+      return file.file_id_;
+    }
+
+    template <typename data_t>
+    void
+    write_to_hdf5 (hdf5_file &file, 
                    const std::string &group_name, 
                    const std::string &dataset_name, 
-                   const hdf5_buffer_t &buffer)
+                   const data_t &buffer)
     {
-      hid_t file_id           = get_file_id (storage);
+      hid_t file_id               = get_file_id (file);
 
-      hsize_t chunk_dimens[]  = {buffer.size, 1};
-      hsize_t max_dimens[]    = {buffer.size, H5S_UNLIMITED};
-      int rank                = sizeof (chunk_dimens) / sizeof (chunk_dimens[0]);
+      const int rank              = 2;
+      hsize_t chunk_dimens[rank]  = {buffer.size, 1};
+      hsize_t fspace_dimens[rank] = {buffer.size, 0};
+      hsize_t mspace_dimens[rank] = {buffer.size, 1};
+      hsize_t max_dimens[rank]    = {buffer.size, H5S_UNLIMITED};
 
       if (!detail::is_object_exists (file_id, group_name.c_str ()))
         {
           hid_group_t group = H5Gcreate (file_id, group_name.c_str (), H5P_DEFAULT);
           if (group < 0)
             {
-              bs_throw_exception (boost::format ("Can't create group %s") % group_name.c_str ());
+              detail::create_group_hierarchy (file_id, group_name);
             }
         }
       hid_group_t group = detail::open_group (file_id, group_name.c_str ());
@@ -475,7 +560,7 @@ namespace blue_sky
               bs_throw_exception (boost::format ("Can't set chunk for dataset %s in group %s") % dataset_name % group_name);
             }
 
-          hid_dspace_t fspace = H5Screate_simple (rank, chunk_dimens, max_dimens);
+          hid_dspace_t fspace = H5Screate_simple (rank, fspace_dimens, max_dimens);
           if (fspace < 0)
             {
               bs_throw_exception (boost::format ("Can't create simple dataspace for dataset %s in group %s") % dataset_name % group_name);
@@ -502,8 +587,6 @@ namespace blue_sky
         }
 
       hsize_t size[] = {size_value[0], size_value[1] + 1};
-      std::cout << "size[0] = " << size[0] << std::endl;
-      std::cout << "size[1] = " << size[1] << std::endl;
       if (H5Dextend (dataset, size) < 0)
         {
           bs_throw_exception (boost::format ("Can't extend dataset %s in group %s") % dataset_name % group_name);
@@ -516,13 +599,12 @@ namespace blue_sky
         }
 
       hsize_t offset[] = {0, size_value[1]};
-      chunk_dimens[1] = 1;
-      if (H5Sselect_hyperslab (fspace, H5S_SELECT_SET, offset, NULL, chunk_dimens, NULL) < 0)
+      if (H5Sselect_hyperslab (fspace, H5S_SELECT_SET, offset, NULL, mspace_dimens, NULL) < 0)
         {
           bs_throw_exception (boost::format ("Can't select hyperslab for dataset %s in group %s") % dataset_name % group_name);
         }
 
-      hid_dspace_t mspace = H5Screate_simple (rank, chunk_dimens, max_dimens);
+      hid_dspace_t mspace = H5Screate_simple (rank, mspace_dimens, max_dimens);
       if (mspace < 0)
         {
           bs_throw_exception (boost::format ("Can't create simple dataspace for dataset %s in group %s") % dataset_name % group_name);
@@ -534,13 +616,41 @@ namespace blue_sky
           bs_throw_exception (boost::format ("Can't write data (dataset %s, group %s)") % dataset_name % group_name);
         }
     }
+
+    file_id_map_t   file_map_;
   };
+
+  hdf5_storage_v2::hdf5_storage_v2 ()
+  : impl_ (new impl ())
+  {
+  }
+
+  hdf5_storage_v2::~hdf5_storage_v2 ()
+  {
+    delete impl_;
+  }
+
+  hdf5_storage_v2 *
+  hdf5_storage_v2::instance ()
+  {
+    static hdf5_storage_v2 instance_;
+    return &instance_;
+  }
 
   hdf5_group_v2 &
   hdf5_property_v2::operator << (const hdf5_buffer_t &buffer)
   {
-    std::cout << "out: " << name_.str () << ", group: " << group_.name_.str () << std::endl;
-    hdf5_storage_v2::impl::write_to_hdf5 (group_.storage_, group_.name_.str (), name_.str (), buffer);
+    std::cout << "buffer -> out: " << name_.str () << ", group: " << group_.name_.str () << std::endl;
+    hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (group_.file_, group_.name_.str (), name_.str (), buffer);
+    return group_;
+  }
+
+  hdf5_group_v2 &
+  hdf5_property_v2::operator << (const hdf5_pod &pod)
+  {
+    std::cout << "pod -> out: " << name_.str () << ", group: " << group_.name_.str () << std::endl;
+    hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (group_.file_, group_.name_.str (), name_.str (), pod);
+
     return group_;
   }
 
@@ -548,10 +658,12 @@ namespace blue_sky
   hdf5_group_v2::operator << (const hdf5_buffer_t &buffer)
   {
     const char *tmp = strrchr (name_.str (), '/');
-    std::string group_name (name_.str (), tmp - 1);
-    std::string dataset_name (tmp);
+    std::string group_name (name_.str (), tmp);
+    std::string dataset_name (tmp + 1);
 
-    hdf5_storage_v2::impl::write_to_hdf5 (storage_, group_name, dataset_name, buffer);
+    std::cout << "out: " << dataset_name << ", group: " << group_name << std::endl;
+
+    hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (file_, group_name, dataset_name, buffer);
     return *this;
   }
 

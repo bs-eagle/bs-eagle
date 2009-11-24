@@ -10,6 +10,8 @@
 #include "seq_vector.h"
 #include "constants.h"
 
+#include <boost/type_traits.hpp>
+
 namespace blue_sky
   {
 
@@ -25,7 +27,7 @@ namespace blue_sky
       is_object_exists (const hid_t &location, const std::string &name) 
       {
         htri_t status = H5Lexists (location, name.c_str (), NULL);
-        return status != 0;
+        return status > 0;
       }
 
       /**
@@ -34,13 +36,13 @@ namespace blue_sky
        * \return Name of the object on success otherwise throws exception
        * */
       inline std::string
-      object_name (hid_t location)
+      object_name (hid_t location, const std::string &path)
       {
         char *name = 0;
         int name_length = (int) H5Iget_name (location, name, NULL);
         if (name_length < 0)
           {
-            bs_throw_exception ("Can't get HDF5 object name");
+            bs_throw_exception (boost::format ("Can't get HDF5 object name, path: %s") % path);
           }
 
         name = new char[name_length + 1];
@@ -64,13 +66,13 @@ namespace blue_sky
       {
         if (!H5Lexists (location, path, NULL)) // not exist
           {
-            bs_throw_exception (boost::format ("Group %s/%s is not exists") % object_name (location) % path);
+            bs_throw_exception (boost::format ("Group %s/%s is not exists") % object_name (location, path) % path);
           }
 
         hid_t group = H5Gopen (location, path);
         if (group < 0)
           {
-            bs_throw_exception (boost::format ("Can't open group %s/%s") % object_name (location) % path);
+            bs_throw_exception (boost::format ("Can't open group %s/%s") % object_name (location, path) % path);
           }
 
         return group;
@@ -87,13 +89,13 @@ namespace blue_sky
       {
         if (!H5Lexists(location, path, NULL)) // not exist
           {
-            bs_throw_exception (boost::format ("Dataset %s/%s is not exists") % object_name (location) % path);
+            bs_throw_exception (boost::format ("Dataset %s/%s is not exists") % object_name (location, path) % path);
           }
 
         hid_t ds = H5Dopen (location, path);
         if (ds < 0)
           {
-            bs_throw_exception (boost::format ("Can't open dataset %s/%s") % object_name (location) % path);
+            bs_throw_exception (boost::format ("Can't open dataset %s/%s") % object_name (location, path) % path);
           }
 
         return ds;
@@ -350,8 +352,6 @@ namespace blue_sky
 
         size[0]   = size_value[0];
         size[1]   = size_value[1] + 1;
-      std::cout << "_size[0] = " << size[0] << std::endl;
-      std::cout << "_size[1] = " << size[1] << std::endl;
         H5Dextend (dataset_value, size);
 
         size[0] = size_time[0];
@@ -490,18 +490,22 @@ namespace blue_sky
     {
       typedef size_t size_type;
 
-      template <typename T>
-      hdf5_buffer__ (const T *data, size_type size, size_type stride, size_type offset)
-      : type (get_hdf5_type_ (T ()))
+      template <typename T, typename Y>
+      hdf5_buffer__ (const Y &, const T *data, size_type size, size_type stride, size_type offset)
+      : type (get_hdf5_type_ (Y ()))
       , size (size)
-      , data_ (!stride ? data : (new T[size / stride]))
-      , owner_ (stride)
+      , owner_ (stride || !boost::is_same <typename boost::remove_cv <T>::type, typename boost::remove_cv <Y>::type> ())
+      , data_ (!owner_ ? (void *)data : (void *)(new Y[stride ? (size / stride) : size]))
       {
-        if (stride)
+        if (owner_)
           {
-            for (size_type i = 0, j = 0; i < size; i += stride)
+            if (!stride)
+              stride = 1;
+
+            size = size / stride;
+            for (size_type i = 0, j = 0; i < size; i += stride, ++j)
               {
-                ((T *)data_)[++j] = data[i];
+                static_cast <Y *> (data_)[j] = static_cast <Y> (data[i]);
               }
           }
       }
@@ -522,53 +526,274 @@ namespace blue_sky
       hid_t       type;
       size_type   size;
 
-      const void  *data_;
       bool        owner_;
+      void        *data_;
     };
+
+    template <typename T>
+    struct get_size
+    {
+      enum { size = T::size, };
+    };
+
+    template <>
+    struct get_size <size_t>
+    {
+      enum { size = 1, };
+    };
+    template <>
+    struct get_size <int>
+    {
+      enum { size = 1,  };
+    };
+
+    template <>
+    struct get_size <float>
+    {
+      enum { size = 1, };
+    };
+    template <>
+    struct get_size <double>
+    {
+      enum { size = 1, };
+    };
+
+    template <typename T>
+    struct get_type
+    {
+      typedef typename get_type <typename T::lhs_type>::type type;
+    };
+
+    template <>
+    struct get_type <int>
+    {
+      typedef int type;
+    };
+    template <>
+    struct get_type <float>
+    {
+      typedef float type;
+    };
+    template <>
+    struct get_type <double>
+    {
+      typedef double type;
+    };
+
+    template <size_t s>
+    struct buffer_filler 
+    {
+      template <typename R, typename B>
+      static void
+      fill (const R &h, B *buffer)
+      {
+        buffer[R::size - 1] = h.rhs;
+        buffer_filler <R::lhs_type::size>::fill (h.lhs, buffer);
+      }
+    };
+    template <>
+    struct buffer_filler <2>
+    {
+      template <typename R, typename B>
+      static void
+      fill (const R &h, B *buffer)
+      {
+        buffer[0] = h.lhs;
+        buffer[1] = h.rhs;
+      }
+    };
+
   } // namespace private
   } // namespace hdf5
 
   template <typename T>
-  hdf5::private_::hdf5_buffer__
+  inline hdf5::private_::hdf5_buffer__
   hdf5_buffer (const shared_vector <T> &data, 
       hdf5::private_::hdf5_buffer__::size_type stride = 0, 
       hdf5::private_::hdf5_buffer__::size_type offset = 0)
   {
-    return hdf5::private_::hdf5_buffer__ (data.data (), data.size (), stride, offset);
+    return hdf5::private_::hdf5_buffer__ (T (), data.data (), data.size (), stride, offset);
   }
 
   template <typename T>
-  hdf5::private_::hdf5_buffer__
-  hdf5_buffer (const T &t)
+  inline hdf5::private_::hdf5_buffer__
+  hdf5_buffer (const seq_vector <T> &data, 
+      hdf5::private_::hdf5_buffer__::size_type stride = 0, 
+      hdf5::private_::hdf5_buffer__::size_type offset = 0)
   {
-    return hdf5::private_::hdf5_buffer__ (&t, 1, 0, 0);
+    return hdf5::private_::hdf5_buffer__ (T (), data.data (), data.size (), stride, offset);
   }
 
+  template <>
+  inline hdf5::private_::hdf5_buffer__
+  hdf5_buffer (const shared_vector <double> &data,
+      hdf5::private_::hdf5_buffer__::size_type stride,
+      hdf5::private_::hdf5_buffer__::size_type offset)
+  {
+    return hdf5::private_::hdf5_buffer__ (float (), data.data (), data.size (), stride, offset);
+  }
+
+  template <>
+  inline hdf5::private_::hdf5_buffer__
+  hdf5_buffer (const seq_vector <double> &data,
+      hdf5::private_::hdf5_buffer__::size_type stride,
+      hdf5::private_::hdf5_buffer__::size_type offset)
+  {
+    return hdf5::private_::hdf5_buffer__ (float (), data.data (), data.size (), stride, offset);
+  }
+
+  template <typename T>
+  inline hdf5::private_::hdf5_buffer__
+  hdf5_buffer (const T &t)
+  {
+    return hdf5::private_::hdf5_buffer__ (T (), &t, 1, 0, 0);
+  }
+
+  template <typename lhs_t, typename rhs_t>
+  struct hdf5_value_holder
+  {
+    typedef lhs_t lhs_type;
+    typedef rhs_t rhs_type;
+    
+    hdf5_value_holder (const lhs_t &lhs, const rhs_t &rhs)
+    : lhs (lhs)
+    , rhs (rhs)
+    {
+    }
+
+    enum { 
+      size = hdf5::private_::get_size <lhs_t>::size 
+           + hdf5::private_::get_size <rhs_t>::size, 
+    };
+
+    const lhs_t &lhs;
+    const rhs_t &rhs;
+  };
+
+  template <typename T>
+  struct hdf5_value_holder_unary
+  {
+    typedef T type;
+    hdf5_value_holder_unary (const T &v)
+    : v (v)
+    {
+    }
+
+    enum { size = hdf5::private_::get_size <T>::size, };
+
+    const T &v;
+  };
+
+  template <typename T>
+  hdf5_value_holder_unary <T>
+  hdf5_value (const T &v)
+  {
+    return hdf5_value_holder_unary <T> (v);
+  }
+
+  template <typename L, typename R>
+  hdf5_value_holder <L, R>
+  operator << (const hdf5_value_holder_unary <L> &lhs, const R &rhs)
+  {
+    return hdf5_value_holder <L, R> (lhs.v, rhs);
+  }
+
+  template <typename LL, typename LR, typename R>
+  hdf5_value_holder <hdf5_value_holder <LL, LR>, R>
+  operator << (const hdf5_value_holder <LL, LR> &lhs, const R &rhs)
+  {
+    return hdf5_value_holder <hdf5_value_holder <LL, LR>, R> (lhs, rhs);
+  }
+
+  template <typename L, typename R>
+  hdf5_value_holder <L, R>
+  operator % (const hdf5_value_holder_unary <L> &lhs, const R &rhs)
+  {
+    return hdf5_value_holder <L, R> (lhs.v, rhs);
+  }
+
+  struct hdf5_pod
+  {
+    typedef size_t size_type;
+
+    template <typename T>
+    hdf5_pod (const hdf5_value_holder_unary <T> &)
+    {
+    }
+
+    template <typename L, typename R>
+    hdf5_pod (const hdf5_value_holder <L, R> &h)
+    : data_ (0)
+    {
+      typedef typename hdf5::private_::get_type <L>::type type_t;
+      type = hdf5::private_::get_hdf5_type_ (type_t ());
+      size = h.size;
+
+      type_t *buffer = new type_t [size];
+      hdf5::private_::buffer_filler <hdf5_value_holder <L, R>::size>::fill (h, buffer);
+
+      data_ = buffer;
+    }
+
+    ~hdf5_pod ()
+    {
+      delete [] data_;
+    }
+
+    const void *
+    data () const
+    {
+      return data_;
+    }
+
+    hid_t       type;
+    size_type   size;
+    void        *data_;
+  };
+
+  struct BS_API_PLUGIN hdf5_file;
   struct BS_API_PLUGIN hdf5_group_v2;
   struct BS_API_PLUGIN hdf5_property_v2;
   struct BS_API_PLUGIN hdf5_storage_v2
   {
+  private:
+
+    static hdf5_storage_v2 *
+    instance ();
+
+    hdf5_storage_v2 ();
+    ~hdf5_storage_v2 ();
+
+    struct impl;
+    impl *impl_;
+
+    friend struct hdf5_file;
+    friend struct hdf5_group_v2;
+    friend struct hdf5_property_v2;
+    friend struct impl;
+  };
+
+  struct BS_API_PLUGIN hdf5_file
+  {
     hdf5_group_v2 
     operator [] (const std::string &name);
 
-    hdf5_storage_v2 (const std::string &file_name)
+    hdf5_file (const std::string &file_name)
     : file_id_ (-1)
     , file_name_ (file_name)
     {
     }
 
-    ~hdf5_storage_v2 ();
+    ~hdf5_file ();
 
   private:
 
     hid_t       file_id_;
     std::string file_name_;
 
-    struct impl;
-
     friend struct hdf5_group_v2;
     friend struct hdf5_property_v2;
-    friend struct hdf5_storage_v2::impl;
+    friend struct hdf5_storage_v2;
   };
 
   struct BS_API_PLUGIN hdf5_group_v2
@@ -588,6 +813,15 @@ namespace blue_sky
       return operator << (hdf5_buffer (data));
     }
 
+    hdf5_property_v2 
+    operator << (const hdf5_name &sub_name);
+
+    hdf5_property_v2 
+    operator << (const std::string &sub_name);
+
+    hdf5_property_v2
+    operator << (const char *sub_name);
+
     template <typename T>
     hdf5_group_v2 &
     operator << (T t)
@@ -595,21 +829,15 @@ namespace blue_sky
       return operator << (hdf5_buffer (t));
     }
 
-    hdf5_property_v2 
-    operator << (const hdf5_name &sub_name);
-
-    hdf5_property_v2 
-    operator << (const std::string &sub_name);
-
-    hdf5_group_v2 (const hdf5_storage_v2 &storage, const hdf5_name &name)
-    : storage_ (storage)
+    hdf5_group_v2 (const hdf5_file &file, const hdf5_name &name)
+    : file_ (file)
     , name_ (name)
     {
     }
 
   private:
-    hdf5_storage_v2 storage_;
-    hdf5_name       name_;
+    hdf5_file   file_;
+    hdf5_name   name_;
 
     friend class hdf5_property_v2;
   };
@@ -630,6 +858,12 @@ namespace blue_sky
     {
       return operator << (hdf5_buffer_t (data));
     }
+    template <typename T>
+    hdf5_group_v2 &
+    operator << (const seq_vector <T> &data)
+    {
+      return operator << (hdf5_buffer (data));
+    }
 
     template <typename T>
     hdf5_group_v2 &
@@ -637,6 +871,9 @@ namespace blue_sky
     {
       return operator << (hdf5_buffer_t (&t, 1, 0, 0));
     }
+
+    hdf5_group_v2 &
+    operator << (const hdf5_pod &buffer);
 
     hdf5_property_v2 (const hdf5_group_v2 &group, const hdf5_name &name)
     : group_ (group)
