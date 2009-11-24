@@ -646,7 +646,7 @@ namespace blue_sky
   }
 
   hdf5_group_v2 &
-  hdf5_property_v2::operator << (const hdf5_pod &pod)
+  hdf5_property_v2::operator << (const hdf5_pod_t &pod)
   {
     std::cout << "pod -> out: " << name_.str () << ", group: " << group_.name_.str () << std::endl;
     hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (group_.file_, group_.name_.str (), name_.str (), pod);

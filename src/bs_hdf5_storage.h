@@ -11,6 +11,8 @@
 #include "constants.h"
 
 #include <boost/type_traits.hpp>
+#include <boost/array.hpp>
+#include "auto_value.h"
 
 namespace blue_sky
   {
@@ -557,6 +559,16 @@ namespace blue_sky
     {
       enum { size = 1, };
     };
+    template <>
+    struct get_size <auto_value <double> >
+    {
+      enum { size = 1, };
+    };
+    template <>
+    struct get_size <auto_value <float> >
+    {
+      enum { size = 1, };
+    };
 
     template <typename T>
     struct get_type
@@ -564,6 +576,11 @@ namespace blue_sky
       typedef typename get_type <typename T::lhs_type>::type type;
     };
 
+    template <>
+    struct get_type <size_t>
+    {
+      typedef size_t type;
+    };
     template <>
     struct get_type <int>
     {
@@ -579,13 +596,23 @@ namespace blue_sky
     {
       typedef double type;
     };
+    template <>
+    struct get_type <auto_value <double> >
+    {
+      typedef double type;
+    };
+    template <>
+    struct get_type <auto_value <float> >
+    {
+      typedef float type;
+    };
 
     template <size_t s>
     struct buffer_filler 
     {
       template <typename R, typename B>
       static void
-      fill (const R &h, B *buffer)
+      fill (const R &h, B &buffer)
       {
         buffer[R::size - 1] = h.rhs;
         buffer_filler <R::lhs_type::size>::fill (h.lhs, buffer);
@@ -596,11 +623,85 @@ namespace blue_sky
     {
       template <typename R, typename B>
       static void
-      fill (const R &h, B *buffer)
+      fill (const R &h, B &buffer)
       {
         buffer[0] = h.lhs;
         buffer[1] = h.rhs;
       }
+    };
+
+    struct hdf5_pod__
+    {
+      typedef size_t size_type;
+
+      hdf5_pod__ ()
+      : type (0)
+      , size (0)
+      , data_ (0)
+      {
+      }
+
+      const void *
+      data () const
+      {
+        return data_;
+      }
+
+      hid_t       type;
+      size_type   size;
+      void        *data_;
+    };
+
+    template <typename T>
+    struct hdf5_pod_impl : hdf5_pod__
+    {
+      typedef size_t size_type;
+      typedef typename get_type <typename T::lhs_type>::type type_t;
+
+      hdf5_pod_impl (const T &h)
+      {
+        type  = hdf5::private_::get_hdf5_type_ (type_t ());
+        size  = T::size;
+        data_ = buffer_.data ();
+
+        hdf5::private_::buffer_filler <T::size>::fill (h, buffer_);
+      }
+
+      boost::array <type_t, T::size> buffer_;
+    };
+
+    template <typename lhs_t, typename rhs_t>
+    struct hdf5_value_holder
+    {
+      typedef lhs_t lhs_type;
+      typedef rhs_t rhs_type;
+      
+      hdf5_value_holder (const lhs_t &lhs, const rhs_t &rhs)
+      : lhs (lhs)
+      , rhs (rhs)
+      {
+      }
+
+      enum { 
+        size = get_size <lhs_t>::size + get_size <rhs_t>::size, 
+      };
+
+      const lhs_t &lhs;
+      const rhs_t &rhs;
+    };
+
+    template <typename T>
+    struct hdf5_value_holder_unary
+    {
+      typedef T type;
+      hdf5_value_holder_unary (const T &v)
+      : v (v)
+      {
+      }
+
+      enum { size = get_size <T>::size, };
+
+      const T &v;
     };
 
   } // namespace private
@@ -649,107 +750,26 @@ namespace blue_sky
     return hdf5::private_::hdf5_buffer__ (T (), &t, 1, 0, 0);
   }
 
-  template <typename lhs_t, typename rhs_t>
-  struct hdf5_value_holder
-  {
-    typedef lhs_t lhs_type;
-    typedef rhs_t rhs_type;
-    
-    hdf5_value_holder (const lhs_t &lhs, const rhs_t &rhs)
-    : lhs (lhs)
-    , rhs (rhs)
-    {
-    }
-
-    enum { 
-      size = hdf5::private_::get_size <lhs_t>::size 
-           + hdf5::private_::get_size <rhs_t>::size, 
-    };
-
-    const lhs_t &lhs;
-    const rhs_t &rhs;
-  };
-
   template <typename T>
-  struct hdf5_value_holder_unary
+  inline hdf5::private_::hdf5_value_holder_unary <T>
+  hdf5_pod (const T &v)
   {
-    typedef T type;
-    hdf5_value_holder_unary (const T &v)
-    : v (v)
-    {
-    }
-
-    enum { size = hdf5::private_::get_size <T>::size, };
-
-    const T &v;
-  };
-
-  template <typename T>
-  hdf5_value_holder_unary <T>
-  hdf5_value (const T &v)
-  {
-    return hdf5_value_holder_unary <T> (v);
+    return hdf5::private_::hdf5_value_holder_unary <T> (v);
   }
 
   template <typename L, typename R>
-  hdf5_value_holder <L, R>
-  operator << (const hdf5_value_holder_unary <L> &lhs, const R &rhs)
+  inline hdf5::private_::hdf5_value_holder <L, R>
+  operator % (const hdf5::private_::hdf5_value_holder_unary <L> &lhs, const R &rhs)
   {
-    return hdf5_value_holder <L, R> (lhs.v, rhs);
+    return hdf5::private_::hdf5_value_holder <L, R> (lhs.v, rhs);
   }
 
   template <typename LL, typename LR, typename R>
-  hdf5_value_holder <hdf5_value_holder <LL, LR>, R>
-  operator << (const hdf5_value_holder <LL, LR> &lhs, const R &rhs)
+  inline hdf5::private_::hdf5_value_holder <hdf5::private_::hdf5_value_holder <LL, LR>, R>
+  operator % (const hdf5::private_::hdf5_value_holder <LL, LR> &lhs, const R &rhs)
   {
-    return hdf5_value_holder <hdf5_value_holder <LL, LR>, R> (lhs, rhs);
+    return hdf5::private_::hdf5_value_holder <hdf5::private_::hdf5_value_holder <LL, LR>, R> (lhs, rhs);
   }
-
-  template <typename L, typename R>
-  hdf5_value_holder <L, R>
-  operator % (const hdf5_value_holder_unary <L> &lhs, const R &rhs)
-  {
-    return hdf5_value_holder <L, R> (lhs.v, rhs);
-  }
-
-  struct hdf5_pod
-  {
-    typedef size_t size_type;
-
-    template <typename T>
-    hdf5_pod (const hdf5_value_holder_unary <T> &)
-    {
-    }
-
-    template <typename L, typename R>
-    hdf5_pod (const hdf5_value_holder <L, R> &h)
-    : data_ (0)
-    {
-      typedef typename hdf5::private_::get_type <L>::type type_t;
-      type = hdf5::private_::get_hdf5_type_ (type_t ());
-      size = h.size;
-
-      type_t *buffer = new type_t [size];
-      hdf5::private_::buffer_filler <hdf5_value_holder <L, R>::size>::fill (h, buffer);
-
-      data_ = buffer;
-    }
-
-    ~hdf5_pod ()
-    {
-      delete [] data_;
-    }
-
-    const void *
-    data () const
-    {
-      return data_;
-    }
-
-    hid_t       type;
-    size_type   size;
-    void        *data_;
-  };
 
   struct BS_API_PLUGIN hdf5_file;
   struct BS_API_PLUGIN hdf5_group_v2;
@@ -846,6 +866,7 @@ namespace blue_sky
   {
   private:
     typedef hdf5::private_::hdf5_buffer__ hdf5_buffer_t;
+    typedef hdf5::private_::hdf5_pod__    hdf5_pod_t;
 
   public:
 
@@ -869,11 +890,26 @@ namespace blue_sky
     hdf5_group_v2 &
     operator << (T t)
     {
-      return operator << (hdf5_buffer_t (&t, 1, 0, 0));
+      return operator << (hdf5_buffer (&t));
     }
 
     hdf5_group_v2 &
-    operator << (const hdf5_pod &buffer);
+    operator << (const hdf5_pod_t &buffer);
+
+    template <typename L>
+    hdf5_group_v2 &
+    operator << (const hdf5::private_::hdf5_value_holder_unary <L> &h)
+    {
+      return operator<< (hdf5_buffer (h.v));
+    }
+
+    template <typename L, typename R>
+    hdf5_group_v2 &
+    operator << (const hdf5::private_::hdf5_value_holder <L, R> &h)
+    {
+      using namespace hdf5::private_;
+      return operator<< (static_cast <const hdf5_pod_t &> (hdf5_pod_impl <hdf5_value_holder <L, R> > (h)));
+    }
 
     hdf5_property_v2 (const hdf5_group_v2 &group, const hdf5_name &name)
     : group_ (group)
