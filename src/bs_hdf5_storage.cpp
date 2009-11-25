@@ -286,24 +286,6 @@ namespace blue_sky
     return hdf5_group_v2 (*this, hdf5_name (name));
   }
 
-  hdf5_property_v2
-  hdf5_group_v2::operator << (const hdf5_name &sub_name)
-  {
-    return hdf5_property_v2 (*this, sub_name);
-  }
-
-  hdf5_property_v2 
-  hdf5_group_v2::operator << (const std::string &sub_name)
-  {
-    return hdf5_property_v2 (*this, hdf5_name (sub_name));
-  }
-
-  hdf5_property_v2
-  hdf5_group_v2::operator << (const char *sub_name)
-  {
-    return hdf5_property_v2 (*this, hdf5_name (sub_name));
-  }
-
   namespace detail {
 
     enum hid_type {
@@ -532,7 +514,7 @@ namespace blue_sky
     write_to_hdf5 (hdf5_file &file, 
                    const std::string &group_name, 
                    const std::string &dataset_name, 
-                   const data_t &buffer)
+                   data_t &buffer)
     {
       hid_t file_id               = get_file_id (file);
 
@@ -638,32 +620,23 @@ namespace blue_sky
   }
 
   hdf5_group_v2 &
-  hdf5_property_v2::operator << (const hdf5_buffer_t &buffer)
+  hdf5_group_v2::write_buffer (const char *dataset, const hdf5_buffer_t &buffer)
   {
-    std::cout << "buffer -> out: " << name_.str () << ", group: " << group_.name_.str () << std::endl;
-    hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (group_.file_, group_.name_.str (), name_.str (), buffer);
-    return group_;
+    hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (file_, name_.str (), dataset, buffer);
+    return *this;
   }
 
   hdf5_group_v2 &
-  hdf5_property_v2::operator << (const hdf5_pod_t &pod)
+  hdf5_group_v2::write_pod (const char *dataset, const hdf5_pod_t &pod)
   {
-    std::cout << "pod -> out: " << name_.str () << ", group: " << group_.name_.str () << std::endl;
-    hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (group_.file_, group_.name_.str (), name_.str (), pod);
-
-    return group_;
+    hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (file_, name_.str (), dataset, pod);
+    return *this;
   }
 
   hdf5_group_v2 &
-  hdf5_group_v2::operator << (const hdf5_buffer_t &buffer)
+  hdf5_group_v2::write_struct (const char *dataset, const hdf5_struct_t &s)
   {
-    const char *tmp = strrchr (name_.str (), '/');
-    std::string group_name (name_.str (), tmp);
-    std::string dataset_name (tmp + 1);
-
-    std::cout << "out: " << dataset_name << ", group: " << group_name << std::endl;
-
-    hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (file_, group_name, dataset_name, buffer);
+    hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (file_, name_.str (), dataset, s);
     return *this;
   }
 
