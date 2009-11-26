@@ -15,6 +15,8 @@
 #include "fi_params.h"
 //#include "well_connection.h"
 
+#include "bs_hdf5_storage.h"
+
 namespace blue_sky
   {
 
@@ -206,13 +208,62 @@ namespace blue_sky
       wells_type wells;
     };
 
+  namespace detail {
+
+    template <typename T>
+    int
+    get_status_old (const T &ws)
+    {
+      using namespace wells;
+      int status = -999, producer = 0;
+      if (ws->get_well_controller ()->is_production ())
+        producer = 1;
+      rate_control_type control_type = ws->get_well_controller ()->get_control_type ();
+      if (!ws->is_open ())
+        {
+          status = 0;
+        }
+      else if (control_type == bhp_control)
+        {
+          if (producer)
+            status = -2;
+          else
+            status = 2;
+        }
+      else if (control_type == oil_rate_control) // (assume is producer)
+        {
+          status = -4;
+        }
+      else if (control_type == water_rate_control)
+        {
+          if (producer)
+            status = -3;
+          else
+            status = 1;
+        }
+      else if (control_type == gas_rate_control) // (assume is producer)
+        {
+          status = -5;
+        }
+      else if (control_type == rate_control) // (assume is injector)
+        {
+          status = 3;
+        }
+      else if (control_type == liquid_rate_control)// (assume is producer)
+        {
+          status = -1;
+        }
+
+      return status;
+    }
+  }
 
   /**
    * \class save_well_data
    * \brief Saves well and connection data to well_results_storage
    * */
   template <typename strategy_t>
-  struct save_well_data
+  struct BS_API_PLUGIN save_well_data
     {
       typedef calc_model <strategy_t>                                 calc_model_t;
       typedef typename strategy_t::index_t                            index_t;
@@ -231,6 +282,7 @@ namespace blue_sky
       typedef typename calc_model_t::reservoir_t::facility_manager_t  facility_manager_t;
       typedef typename facility_manager_t::well_const_iterator_t      well_iterator_t;
 
+
       /**
        * \brief  Saves well and connection data to well_results_storage
        * \param  calc_model
@@ -244,6 +296,8 @@ namespace blue_sky
       copy_well_data_to_storage (sp_calc_model_t &calc_model, item_t /*dt*/, well_iterator_t wb, const well_iterator_t &we, size_t /*iter_counter*/, item_t time)
       {
         const sp_well_results_storage &w_res (calc_model->well_res);
+
+        bool write_conn_results_to_hdf5 = calc_model->ts_params->get_bool (fi_params::WRITE_CONN_RESULTS_TO_HDF5);
 
         //TODO: groups
         for (well_iterator_t well = wb; well != we; ++well)
@@ -297,50 +351,10 @@ namespace blue_sky
             wr.d_params[WELL_D_PARAM_HBHP].push_back ((float)ws->get_well_controller ()->bhp_history ());
 
             // add integer information
-            using namespace wells;
-            int status = -999, producer = 0;
-            if (ws->get_well_controller ()->is_production ())
-              producer = 1;
-            rate_control_type control_type = ws->get_well_controller ()->get_control_type ();
-            if (!ws->is_open ())
-              {
-                status = 0;
-              }
-            else if (control_type == bhp_control)
-              {
-                if (producer)
-                  status = -2;
-                else
-                  status = 2;
-              }
-            else if (control_type == oil_rate_control) // (assume is producer)
-              {
-                status = -4;
-              }
-            else if (control_type == water_rate_control)
-              {
-                if (producer)
-                  status = -3;
-                else
-                  status = 1;
-              }
-            else if (control_type == gas_rate_control) // (assume is producer)
-              {
-                status = -5;
-              }
-            else if (control_type == rate_control) // (assume is injector)
-              {
-                status = 3;
-              }
-            else if (control_type == liquid_rate_control)// (assume is producer)
-              {
-                status = -1;
-              }
-
             wr.i_params[WELL_I_PARAM_HSTATUS].push_back (0);//TODO
-            wr.i_params[WELL_I_PARAM_STATUS].push_back (status);
+            wr.i_params[WELL_I_PARAM_STATUS].push_back (detail::get_status_old (ws));
 
-            if (calc_model->ts_params->get_bool (fi_params::WRITE_CONN_RESULTS_TO_HDF5))
+            if (write_conn_results_to_hdf5)
               {
                 for (size_t i = 0, cnt = ws->get_connections_count (); i < cnt; ++i)
                   {
