@@ -28,6 +28,8 @@
 #include "scal_3p.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
+#include "data_saver.h"
+
 namespace blue_sky
   {
 
@@ -66,6 +68,8 @@ namespace blue_sky
 #ifdef _HDF5
     hdf5                          = BS_KERNEL.create_object (bs_hdf5_storage::bs_type (), true);
 #endif
+
+    data_saver_.reset (new data_saver_t);
   }
 
   template <typename strategy_t>
@@ -387,7 +391,6 @@ namespace blue_sky
       || l_time_step_num == total_ts_count
       || l_time_step_num == 1)
     {
-
       if (calc_model->ts_params->get_bool (fi_params::WRITE_PRESSURE_TO_HDF5))
         {
           copy_to (&calc_model->pressure[mpi_start], &tmp_buf[0], n_elem_local);
@@ -396,7 +399,7 @@ namespace blue_sky
 
       if (calc_model->ts_params->get_bool (fi_params::WRITE_GAS_OIL_RATIO_TO_HDF5))
         {
-          if (FI_CHK_GAS (calc_model->phases) && FI_CHK_OIL (calc_model->phases))
+          if (calc_model->is_gas () && calc_model->is_oil ())
             {
               copy_to (&calc_model->gas_oil_ratio[mpi_start], &tmp_buf[0], n_elem_local);
               hdf5->add_to_results ("/results/gor", &tmp_buf[0], n_elem_global, n_elem_local, mpi_offset, time);
@@ -405,7 +408,7 @@ namespace blue_sky
 
       copy_to (&calc_model->main_variable[mpi_start], &main_var_tmp[0], n_elem_local);
       hdf5->add_to_results ("/results/mainvar", &main_var_tmp[0], n_elem_global, n_elem_local, mpi_offset, time);
-
+      
       if (calc_model->ts_params->get_bool (fi_params::WRITE_SATURATION_TO_HDF5))
         {
           // for 1-phase no saturations
@@ -414,15 +417,15 @@ namespace blue_sky
               int d_w = calc_model->phase_d[FI_PHASE_WATER];
               int d_g = calc_model->phase_d[FI_PHASE_GAS];
 
-              if (FI_CHK_GAS (calc_model->phases))
+              if (calc_model->is_gas ())
                 {
-                copy_to (&calc_model->saturation_3p[n_phases * mpi_start], &tmp_buf[0], n_phases * n_elem_local, n_phases/*stride*/, d_g/*start*/);
-                hdf5->add_to_results ("/results/sgas", &tmp_buf[0], n_elem_global, n_elem_local, mpi_offset, time);
+                  copy_to (&calc_model->saturation_3p[n_phases * mpi_start], &tmp_buf[0], n_phases * n_elem_local, n_phases/*stride*/, d_g/*start*/);
+                  hdf5->add_to_results ("/results/sgas", &tmp_buf[0], n_elem_global, n_elem_local, mpi_offset, time);
                 }
-              if (FI_CHK_WATER (calc_model->phases))
+              if (calc_model->is_water ())
                 {
-                copy_to (&calc_model->saturation_3p[n_phases * mpi_start], &tmp_buf[0], n_phases * n_elem_local, n_phases /*stride*/, d_w/*start*/);
-                hdf5->add_to_results ("/results/swat", &tmp_buf[0], n_elem_global, n_elem_local, mpi_offset, time);
+                  copy_to (&calc_model->saturation_3p[n_phases * mpi_start], &tmp_buf[0], n_phases * n_elem_local, n_phases /*stride*/, d_w/*start*/);
+                  hdf5->add_to_results ("/results/swat", &tmp_buf[0], n_elem_global, n_elem_local, mpi_offset, time);
                 }
             }
         }//saturation
@@ -477,6 +480,43 @@ namespace blue_sky
     }
 #endif // #ifdef HDF5
 
+  template <typename strategy_t>
+  void
+  reservoir <strategy_t>::write_step_to_storage (const sp_calc_model_t &calc_model, 
+    const sp_mesh_iface_t &mesh, 
+    const sp_jmatrix_t &jmx, 
+    size_t large_time_step_num, 
+    size_t total_time_step_num, 
+    double time)
+  {
+    BS_ASSERT (data_saver_);
+
+    data_saver_->write_well_results (calc_model, facility_list_->wells_begin (), facility_list_->wells_end (), time);
+    data_saver_->write_fip_results  (calc_model);
+    data_saver_->write_calc_model_data (calc_model, jmx, large_time_step_num, total_time_step_num, time);
+  }
+  template <typename strategy_t>
+  void
+  reservoir <strategy_t>::write_mesh_to_storage (const sp_mesh_iface_t &mesh)
+  {
+    BS_ASSERT (data_saver_);
+    data_saver_->write_mesh (mesh);
+  }
+  template <typename strategy_t>
+  void
+  reservoir <strategy_t>::write_starting_date_to_storage (const boost::posix_time::ptime &date)
+  {
+    BS_ASSERT (data_saver_);
+    data_saver_->write_starting_date (date);
+  }
+
+  template <typename strategy_t>
+  void
+  reservoir <strategy_t>::open_storage (const std::string &name)
+  {
+    BS_ASSERT (data_saver_) (name);
+    data_saver_->open_storage (name);
+  }
 
   template <typename strategy_t>
   typename reservoir <strategy_t>::sp_well_factory_t

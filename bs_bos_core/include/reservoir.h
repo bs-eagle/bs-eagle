@@ -19,6 +19,8 @@
 #include "rs_smesh_iface.h"
 #endif
 
+#include <boost/shared_ptr.hpp>
+
 namespace blue_sky
   {
 
@@ -60,6 +62,9 @@ namespace blue_sky
     class well_limit_operation;
   }
 
+  template <typename strategy_t>
+  struct data_saver;
+
   /**
    * \class reservoir
    * \brief storage for and manager of facilities. also
@@ -94,6 +99,8 @@ namespace blue_sky
       typedef reservoir_simulator <strategy_t>                reservoir_simulator_t;              //!< reservoir_simulator type
       typedef rate_data <strategy_t>                          rate_data_t;                        //!< type for rate data holder
       typedef typename rate_data_t::rate_data_inner           rate_data_inner_t;                  //!< type for internal data of rate data holder
+
+      typedef data_saver <strategy_t>                         data_saver_t;
 
       typedef smart_ptr <reservoir_simulator_t, true>         sp_top_t;                           //!< smart_ptr to reservoir_simulator type
 
@@ -407,6 +414,44 @@ namespace blue_sky
 #endif
 
       /**
+       * \brief  Writes data of current time-step to storage (HDF5 for example)
+       * \param  calc_model
+       * \param  mesh
+       * \param jmx
+       * \param 
+       * \param
+       * \param time Current time-step
+       * */
+      void
+      write_step_to_storage (const sp_calc_model_t &calc_model, 
+        const sp_mesh_iface_t &mesh, 
+        const sp_jmatrix_t &jmx, 
+        size_t large_time_step_num, 
+        size_t total_time_step_num, 
+        double time);
+
+      /**
+       * \brief  Writes initial mesh status to storage
+       * \param  mesh
+       * */
+      void
+      write_mesh_to_storage (const sp_mesh_iface_t &mesh);
+
+      /**
+       * \brief  Writes starting date to storage
+       * \param  date
+       * */
+      void
+      write_starting_date_to_storage (const boost::posix_time::ptime &date);
+
+      /**
+       * \brief  Opens data storage
+       * \param  name Name of the data storage
+       * */
+      void
+      open_storage (const std::string &name);
+
+      /**
        * \brief  returns rate data
        * \return rate data
        * */
@@ -447,6 +492,8 @@ namespace blue_sky
 #ifdef _HDF5
       sp_bs_hdf5_storage                  hdf5;                               //!< pointer to hdf5_storage instance
 #endif
+
+      boost::shared_ptr <data_saver_t>    data_saver_;
     };
 
 
