@@ -166,7 +166,7 @@ namespace blue_sky
       add_dates (const bs_hdf5_storage &hdf5, const hid_t &hid, const dates_t &dates)
       {
         hid_t dataset;
-        if (!hdf5.is_object_exists (hid, "dates"))
+        if (!blue_sky::detail::is_object_exists (hid, "dates"))
           {
             // creating dataset_dates
             hsize_t dims[]      = {0};
@@ -185,7 +185,7 @@ namespace blue_sky
           }
         else
           {
-            dataset = hdf5.open_dataset (hid, "dates");
+            dataset = blue_sky::detail::open_dataset (hid, "dates");
           }
 
         // determine new dims of dataset_dates and extend it
@@ -221,7 +221,7 @@ namespace blue_sky
       add_params (const bs_hdf5_storage &hdf5, const hid_t &hid, const std::string &name, const params_t &params, size_t size)
       {
         hid_t dataset;
-        if (!hdf5.is_object_exists (hid, name))
+        if (!blue_sky::detail::is_object_exists (hid, name))
           {
             // creating dataset_d_params
             hsize_t dims[]      = {params.size(), 0};
@@ -238,7 +238,7 @@ namespace blue_sky
           }
         else
           {
-            dataset = hdf5.open_dataset (hid, name.c_str ());
+            dataset = blue_sky::detail::open_dataset (hid, name.c_str ());
           }
 
         // determine new dims of dataset_d_params and extend it
