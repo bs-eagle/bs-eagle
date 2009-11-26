@@ -283,7 +283,7 @@ namespace blue_sky
   hdf5_group_v2
   hdf5_file::operator[] (const std::string &name)
   {
-    return hdf5_group_v2 (*this, hdf5_name (name));
+    return hdf5_group_v2 (*this, name);
   }
 
   namespace detail {
@@ -405,9 +405,9 @@ namespace blue_sky
       std::string gn = "";
       for (tokenizer_t::iterator it = t.begin (); it != t.end (); ++it)
         {
-          if (!detail::is_object_exists (file_id, it->c_str ()))
+          gn += "/" + *it;
+          if (!detail::is_object_exists (file_id, gn.c_str ()))
             {
-              gn += "/" + *it;
               hid_holder <detail::hdf5_group_type> group = H5Gcreate (file_id, gn.c_str (), H5P_DEFAULT);
               if (group < 0)
                 {
@@ -622,21 +622,21 @@ namespace blue_sky
   hdf5_group_v2 &
   hdf5_group_v2::write_buffer (const char *dataset, const hdf5_buffer_t &buffer)
   {
-    hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (file_, name_.str (), dataset, buffer);
+    hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (file_, name_, dataset, buffer);
     return *this;
   }
 
   hdf5_group_v2 &
   hdf5_group_v2::write_pod (const char *dataset, const hdf5_pod_t &pod)
   {
-    hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (file_, name_.str (), dataset, pod);
+    hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (file_, name_, dataset, pod);
     return *this;
   }
 
   hdf5_group_v2 &
   hdf5_group_v2::write_struct (const char *dataset, const hdf5_struct_t &s)
   {
-    hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (file_, name_.str (), dataset, s);
+    hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (file_, name_, dataset, s);
     return *this;
   }
 
