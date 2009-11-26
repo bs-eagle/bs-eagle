@@ -1153,11 +1153,12 @@ namespace blue_sky
         iter_counter++;
         //connection_data.save_acc ("con_data.ts.bs.%d.txt", calc_model_, dt_, reservoir_->get_facility_list ()->wells_begin (), reservoir_->get_facility_list ()->wells_end (), iter_counter, current_time_, jacobian_->get_jmatrix ()->get_solution (), jacobian_->get_jmatrix ()->get_rhs ());
 
-        well_data.copy_well_data_to_storage (calc_model_, dt_, reservoir_->get_facility_list ()->wells_begin (), reservoir_->get_facility_list ()->wells_end (), iter_counter, current_time_);
-
-#ifdef _HDF5
-        reservoir_->write_step_to_hdf5 (calc_model_, mesh_, jacobian_->get_jmatrix (), number_of_large_time_steps, total_number_of_time_steps, current_time_);
-#endif
+//        well_data.copy_well_data_to_storage (calc_model_, dt_, reservoir_->get_facility_list ()->wells_begin (), reservoir_->get_facility_list ()->wells_end (), iter_counter, current_time_);
+//
+//#ifdef _HDF5
+//        reservoir_->write_step_to_hdf5 (calc_model_, mesh_, jacobian_->get_jmatrix (), number_of_large_time_steps, total_number_of_time_steps, current_time_);
+//#endif
+        reservoir_->write_step_to_storage (calc_model_, mesh_, jacobian_->get_jmatrix (), number_of_large_time_steps, total_number_of_time_steps, current_time_);
 
         BOSOUT (section::main_loop, level::high) << "number_of_large_time_steps: "      << number_of_large_time_steps << bs_end;
         BOSOUT (section::main_loop, level::high) << "number_of_small_time_steps: "      << number_of_small_time_steps << bs_end;
@@ -1193,6 +1194,10 @@ namespace blue_sky
         double starting_date = (start_date - base_date).days () + 2;
         reservoir_->get_hdf5_file ()->write_array ("/initial_data", "starting_date", &starting_date, 1);
 #endif
+
+        reservoir_->open_storage (path::join (path::dirname (rs_->model_filename ()), "results-v2.h5"));
+        reservoir_->write_mesh_to_storage (mesh_);
+        reservoir_->write_starting_date_to_storage (rs_->keyword_manager_->get_starting_date ());
       }
 
       /**
