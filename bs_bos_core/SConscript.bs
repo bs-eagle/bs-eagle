@@ -11,7 +11,7 @@ env.Append (CPPPATH = ["include",
     includes["bs_base_linear_solvers"],
     includes["bs_csr_ilu_prec"],
     includes["bs_bos_core_data_storage"],
-    includes["bs_mesh_mpfa"],
+#    includes["bs_mesh_mpfa"],
     includes["bs_scal"],
     includes["bs_pvt"]
     ] + includes["kernel"]
