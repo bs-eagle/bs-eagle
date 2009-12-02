@@ -31,10 +31,10 @@ namespace blue_sky
         void
         oil_function (const sp_connection_t &c, const data_t &data, params_t &params) const
           {
-            array_ext <item_t> rw_block = c->get_rw_value ();
-            array_ext <item_t> wr_block = c->get_wr_value ();
-            array_ext <item_t> rr_block = c->get_rr_value ();
-            array_ext <item_t> ww_value = params.ww_value;
+            shared_vector <item_t> rw_block = c->get_rw_value ();
+            shared_vector <item_t> wr_block = c->get_wr_value ();
+            shared_vector <item_t> rr_block = c->get_rr_value ();
+            shared_vector <item_t> ww_value = params.ww_value;
             item_t rw                   = 0;
 
             if (mobility_calc_t::is_oil_injection (params))
@@ -52,10 +52,10 @@ namespace blue_sky
         void
         water_function (const sp_connection_t &c, const data_t &data, params_t &params) const
           {
-            array_ext <item_t> rw_block = c->get_rw_value ();
-            array_ext <item_t> wr_block = c->get_wr_value ();
-            array_ext <item_t> rr_block = c->get_rr_value ();
-            array_ext <item_t> ww_value = params.ww_value;
+            shared_vector <item_t> rw_block = c->get_rw_value ();
+            shared_vector <item_t> wr_block = c->get_wr_value ();
+            shared_vector <item_t> rr_block = c->get_rr_value ();
+            shared_vector <item_t> ww_value = params.ww_value;
             item_t rw                   = 0;
 
             if (mobility_calc_t::is_water_injection (params))
@@ -76,10 +76,10 @@ namespace blue_sky
         void
         gas_function (const sp_connection_t &c, const data_t &data, params_t &params) const
           {
-            array_ext <item_t> rw_block = c->get_rw_value ();
-            array_ext <item_t> wr_block = c->get_wr_value ();
-            array_ext <item_t> rr_block = c->get_rr_value ();
-            array_ext <item_t> ww_value = params.ww_value;
+            shared_vector <item_t> rw_block = c->get_rw_value ();
+            shared_vector <item_t> wr_block = c->get_wr_value ();
+            shared_vector <item_t> rr_block = c->get_rr_value ();
+            shared_vector <item_t> ww_value = params.ww_value;
             item_t rw                   = 0;
 
             if (mobility_calc_t::is_gas_injection (params))
@@ -104,7 +104,7 @@ namespace blue_sky
         void
         apply_wefac (const sp_connection_t &c, params_t &params) const
         {
-          array_ext <item_t> rw = c->get_rw_value ();
+          shared_vector <item_t> rw = c->get_rw_value ();
           item_t wefac = params.well_->exploitation_factor_;
 
           rw[0] = blue_sky::apply_wefac (rw[0], wefac);
@@ -136,10 +136,10 @@ namespace blue_sky
         void
         oil_function (const sp_connection_t &c, const data_t &data, params_t &params) const
           {
-            array_ext <item_t> rw_block = c->get_rw_value ();
-            array_ext <item_t> wr_block = c->get_wr_value ();
-            array_ext <item_t> rr_block = c->get_rr_value ();
-            array_ext <item_t> ww_value = params.ww_value;
+            shared_vector <item_t> rw_block = c->get_rw_value ();
+            shared_vector <item_t> wr_block = c->get_wr_value ();
+            shared_vector <item_t> rr_block = c->get_rr_value ();
+            shared_vector <item_t> ww_value = params.ww_value;
             item_t rw                   = 0;
 
             if (mobility_calc_t::is_oil_injection (params))
@@ -156,10 +156,10 @@ namespace blue_sky
         void
         water_function (const sp_connection_t &c, const data_t &data, params_t &params) const
           {
-            array_ext <item_t> rw_block = c->get_rw_value ();
-            array_ext <item_t> wr_block = c->get_wr_value ();
-            array_ext <item_t> rr_block = c->get_rr_value ();
-            array_ext <item_t> ww_value = params.ww_value;
+            shared_vector <item_t> rw_block = c->get_rw_value ();
+            shared_vector <item_t> wr_block = c->get_wr_value ();
+            shared_vector <item_t> rr_block = c->get_rr_value ();
+            shared_vector <item_t> ww_value = params.ww_value;
             item_t rw                   = 0;
 
             if (mobility_calc_t::is_water_injection (params))
@@ -186,7 +186,7 @@ namespace blue_sky
         void
         apply_wefac (const sp_connection_t &c, params_t &params) const
         {
-          array_ext <item_t> rw = c->get_rw_value ();
+          shared_vector <item_t> rw = c->get_rw_value ();
           item_t wefac = params.well_->exploitation_factor_;
 
           rw[0] = blue_sky::apply_wefac (rw[0], wefac);
@@ -215,10 +215,10 @@ namespace blue_sky
         void
         oil_function (const sp_connection_t &c, const data_t &data, params_t &params) const
           {
-            array_ext <item_t> rw_block = c->get_rw_value ();
-            array_ext <item_t> wr_block = c->get_wr_value ();
-            array_ext <item_t> rr_block = c->get_rr_value ();
-            array_ext <item_t> ww_value = params.ww_value;
+            shared_vector <item_t> rw_block = c->get_rw_value ();
+            shared_vector <item_t> wr_block = c->get_wr_value ();
+            shared_vector <item_t> rr_block = c->get_rr_value ();
+            shared_vector <item_t> ww_value = params.ww_value;
             item_t rw                   = 0;
 
             if (mobility_calc_t::is_oil_injection (params))
@@ -239,10 +239,10 @@ namespace blue_sky
         void
         gas_function (const sp_connection_t &c, const data_t &data, params_t &params) const
           {
-            array_ext <item_t> rw_block = c->get_rw_value ();
-            array_ext <item_t> wr_block = c->get_wr_value ();
-            array_ext <item_t> rr_block = c->get_rr_value ();
-            array_ext <item_t> ww_value = params.ww_value;
+            shared_vector <item_t> rw_block = c->get_rw_value ();
+            shared_vector <item_t> wr_block = c->get_wr_value ();
+            shared_vector <item_t> rr_block = c->get_rr_value ();
+            shared_vector <item_t> ww_value = params.ww_value;
             item_t rw                   = 0;
 
             if (mobility_calc_t::is_gas_injection (params))
@@ -265,7 +265,7 @@ namespace blue_sky
         void
         apply_wefac (const sp_connection_t &c, params_t &params) const
         {
-          array_ext <item_t> rw = c->get_rw_value ();
+          shared_vector <item_t> rw = c->get_rw_value ();
           item_t wefac = params.well_->exploitation_factor_;
 
           rw[0] = blue_sky::apply_wefac (rw[0], wefac);
@@ -294,10 +294,10 @@ namespace blue_sky
         void
         oil_function (const sp_connection_t &c, const data_t &data, params_t &params) const
           {
-            array_ext <item_t> rw_block = c->get_rw_value ();
-            array_ext <item_t> wr_block = c->get_wr_value ();
-            array_ext <item_t> rr_block = c->get_rr_value ();
-            array_ext <item_t> ww_value = params.ww_value;
+            shared_vector <item_t> rw_block = c->get_rw_value ();
+            shared_vector <item_t> wr_block = c->get_wr_value ();
+            shared_vector <item_t> rr_block = c->get_rr_value ();
+            shared_vector <item_t> ww_value = params.ww_value;
             item_t rw                   = 0;
 
             if (mobility_calc_t::is_oil_injection (params))
@@ -326,7 +326,7 @@ namespace blue_sky
         void
         apply_wefac (const sp_connection_t &c, params_t &params) const
         {
-          array_ext <item_t> rw = c->get_rw_value ();
+          shared_vector <item_t> rw = c->get_rw_value ();
           item_t wefac = params.well_->exploitation_factor_;
 
           rw[0] = blue_sky::apply_wefac (rw[0], wefac);
@@ -356,10 +356,10 @@ namespace blue_sky
         void
         water_function (const sp_connection_t &c, const data_t &data, params_t &params) const
           {
-            array_ext <item_t> rw_block = c->get_rw_value ();
-            array_ext <item_t> wr_block = c->get_wr_value ();
-            array_ext <item_t> rr_block = c->get_rr_value ();
-            array_ext <item_t> ww_value = params.ww_value;
+            shared_vector <item_t> rw_block = c->get_rw_value ();
+            shared_vector <item_t> wr_block = c->get_wr_value ();
+            shared_vector <item_t> rr_block = c->get_rr_value ();
+            shared_vector <item_t> ww_value = params.ww_value;
             item_t rw                   = 0;
 
             if (mobility_calc_t::is_water_injection (params))
@@ -384,7 +384,7 @@ namespace blue_sky
         void
         apply_wefac (const sp_connection_t &c, params_t &params) const
         {
-          array_ext <item_t> rw = c->get_rw_value ();
+          shared_vector <item_t> rw = c->get_rw_value ();
           item_t wefac = params.well_->exploitation_factor_;
 
           rw[0] = blue_sky::apply_wefac (rw[0], wefac);
@@ -418,10 +418,10 @@ namespace blue_sky
       void
       gas_function (const sp_connection_t &c, const data_t &data, params_t &params) const
       {
-        array_ext <item_t> rw_block = c->get_rw_value ();
-        array_ext <item_t> wr_block = c->get_wr_value ();
-        array_ext <item_t> rr_block = c->get_rr_value ();
-        array_ext <item_t> ww_value = params.ww_value;
+        shared_vector <item_t> rw_block = c->get_rw_value ();
+        shared_vector <item_t> wr_block = c->get_wr_value ();
+        shared_vector <item_t> rr_block = c->get_rr_value ();
+        shared_vector <item_t> ww_value = params.ww_value;
         item_t rw                   = 0;
 
         if (mobility_calc_t::is_gas_injection (params))
@@ -442,7 +442,7 @@ namespace blue_sky
       void
       apply_wefac (const sp_connection_t &c, params_t &params) const
       {
-        array_ext <item_t> rw = c->get_rw_value ();
+        shared_vector <item_t> rw = c->get_rw_value ();
         item_t wefac = params.well_->exploitation_factor_;
 
         rw[0] = blue_sky::apply_wefac (rw[0], wefac);

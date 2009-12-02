@@ -182,19 +182,19 @@ namespace blue_sky
 
         }
 
-        void insert_socr (const array_ext <item_t> &socr)
+        void insert_socr (const shared_vector <item_t> &socr)
         {
           get_spx (this)->insert_socr (socr);
         }
-        void insert_scr (const array_ext <item_t> &scr)
+        void insert_scr (const shared_vector <item_t> &scr)
         {
           get_spx (this)->insert_scr (scr);
         }
-        void insert_su (const array_ext <item_t> &su)
+        void insert_su (const shared_vector <item_t> &su)
         {
           get_spx (this)->insert_su (su);
         }
-        void insert_sl (const array_ext <item_t> &sl)
+        void insert_sl (const shared_vector <item_t> &sl)
         {
           get_spx (this)->insert_sl (sl);
         }

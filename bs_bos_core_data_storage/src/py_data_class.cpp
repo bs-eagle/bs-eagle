@@ -96,7 +96,7 @@ namespace python {
     bp::ssize_t len = numpy_tools::get_len (obj);
     uint8_t *buffer = numpy_tools::get_buffer <uint8_t> (obj, len);
 
-    (*t->i_map)[cur_index].array = numpy_array (buffer, len);
+    (*t->i_map)[cur_index].array = shared_array (buffer, len);
     t->subscribe (objbase::on_delete, new py_object_handler (obj.ptr ()));
   }
   template <typename T>
@@ -106,7 +106,7 @@ namespace python {
     bp::ssize_t len   = numpy_tools::get_len (obj);
     float16_t *buffer = numpy_tools::get_buffer <float16_t> (obj, len);
 
-    (*t->d_map)[cur_index].array = numpy_array (buffer, len);
+    (*t->d_map)[cur_index].array = shared_array (buffer, len);
     t->subscribe (objbase::on_delete, new py_object_handler (obj.ptr ()));
   }
 

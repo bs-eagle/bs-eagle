@@ -34,34 +34,34 @@ namespace wells {
   }
 
   template <typename strategy_t>
-  array_ext <typename default_connection <strategy_t>::item_t>
+  shared_vector <typename default_connection <strategy_t>::item_t>
   default_connection <strategy_t>::get_rw_value ()
   {
-    return array_ext <item_t> (&rw_value[0], rw_value.size ());
+    return shared_array <item_t> (&rw_value[0], rw_value.size ());
   }
   template <typename strategy_t>
-  array_ext <typename default_connection <strategy_t>::item_t>
+  shared_vector <typename default_connection <strategy_t>::item_t>
   default_connection <strategy_t>::get_wr_value ()
   {
-    return array_ext <item_t> (&wr_value[0], wr_value.size ());
+    return shared_array <item_t> (&wr_value[0], wr_value.size ());
   }
   template <typename strategy_t>
-  array_ext <typename default_connection <strategy_t>::item_t>
+  shared_vector <typename default_connection <strategy_t>::item_t>
   default_connection <strategy_t>::get_rr_value ()
   {
-    return array_ext <item_t> (&rr_value[0], rr_value.size ());
+    return shared_array <item_t> (&rr_value[0], rr_value.size ());
   }
   template <typename strategy_t>
-  array_ext <typename default_connection <strategy_t>::item_t>
+  shared_vector <typename default_connection <strategy_t>::item_t>
   default_connection <strategy_t>::get_ps_value ()
   {
-    return array_ext <item_t> (&ps_value[0], ps_value.size ());
+    return shared_array <item_t> (&ps_value[0], ps_value.size ());
   }
   template <typename strategy_t>
-  array_ext <typename default_connection <strategy_t>::rhs_item_t>
+  shared_vector <typename default_connection <strategy_t>::rhs_item_t>
   default_connection <strategy_t>::get_rate_value ()
   {
-    return array_ext <rhs_item_t> (&rate_value[0], rate_value.size ());
+    return shared_array <rhs_item_t> (&rate_value[0], rate_value.size ());
   }
 
   template <typename strategy_t>

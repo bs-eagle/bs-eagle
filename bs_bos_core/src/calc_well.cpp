@@ -118,16 +118,16 @@ namespace blue_sky
   //}
 
   template <typename strategy_t>
-  array_ext <typename strategy_t::item_t>
+  shared_vector <typename strategy_t::item_t>
   well <strategy_t>::get_ww_value () 
   {
-    return array_ext <item_t> (0, 0);
+    return shared_array <item_t> (0, 0);
   }
   template <typename strategy_t>
-  array_ext <typename strategy_t::item_t>
+  shared_vector <typename strategy_t::item_t>
   well <strategy_t>::get_bw_value () 
   {
-    return array_ext <item_t> (0, 0);
+    return shared_array <item_t> (0, 0);
   }
 
   template <typename strategy_t>
@@ -356,7 +356,7 @@ namespace blue_sky
   well <strategy_t>::check_shut (const sp_calc_model_t &/*calc_model*/)
   {
     open_connections_.clear ();
-    open_connections_.reserve (get_connections_count ());
+    //open_connections_.reserve (get_connections_count ());
     if (is_shut ())
       {
         return true;
@@ -580,7 +580,7 @@ namespace blue_sky
           const sp_connection_t &c              = get_connection (con_index);
           int n_block                           = c->n_block ();
           int index                             = n_block * n_phases;
-          const array_ext <rhs_item_t> &c_rate  = c->get_rate_value ();
+          const shared_vector <rhs_item_t> &c_rate  = c->get_rate_value ();
 
           if (n_phases == 3)
             {

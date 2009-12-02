@@ -8,7 +8,7 @@
 #define BS_SCAL_SCALE_ARRAY_HOLDER_H_
 
 #include "scale_arrays_placement_strategies.h"
-#include "array_ext.h"
+#include "shared_vector.h"
 
 namespace blue_sky
   {
@@ -76,7 +76,7 @@ private:
 
       typedef typename strategy_t::item_t     item_t;
       typedef typename strategy_t::item_array_t vector_t;
-      typedef void (this_t::*inserter_t) (const array_ext <float> &);
+      typedef void (this_t::*inserter_t) (const shared_vector <float> &);
       typedef typename strategy_t::template vec <float> vec_t;
       typedef typename vec_t::type             data_t;
 

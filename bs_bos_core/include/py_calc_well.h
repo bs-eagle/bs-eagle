@@ -37,11 +37,11 @@ namespace python {
     STRATEGY_CLASS_WRAPPER_DECL (py_connection);
 
     WRAPPER_METHOD (clear_data, void, 0, (empty_arg__));
-    WRAPPER_METHOD_R (get_rw_value, array_ext <item_t>, 0, (empty_arg__));
-    WRAPPER_METHOD_R (get_wr_value, array_ext <item_t>, 0, (empty_arg__));
-    WRAPPER_METHOD_R (get_rr_value, array_ext <item_t>, 0, (empty_arg__));
-    WRAPPER_METHOD_R (get_ps_value, array_ext <item_t>, 0, (empty_arg__));
-    WRAPPER_METHOD_R (get_rate_value, array_ext <rhs_item_t>, 0, (empty_arg__));
+    WRAPPER_METHOD_R (get_rw_value, shared_vector <item_t>, 0, (empty_arg__));
+    WRAPPER_METHOD_R (get_wr_value, shared_vector <item_t>, 0, (empty_arg__));
+    WRAPPER_METHOD_R (get_rr_value, shared_vector <item_t>, 0, (empty_arg__));
+    WRAPPER_METHOD_R (get_ps_value, shared_vector <item_t>, 0, (empty_arg__));
+    WRAPPER_METHOD_R (get_rate_value, shared_vector <rhs_item_t>, 0, (empty_arg__));
   };
 
   STRATEGY_CLASS_WRAPPER (well, py_well)
@@ -64,8 +64,8 @@ namespace python {
 
     STRATEGY_CLASS_WRAPPER_DECL (py_well);
 
-    WRAPPER_METHOD_R (get_ww_value,   array_ext <item_t>, 0, (empty_arg__));
-    WRAPPER_METHOD_R (get_bw_value,   array_ext <item_t>, 0, (empty_arg__));
+    WRAPPER_METHOD_R (get_ww_value,   shared_vector <item_t>, 0, (empty_arg__));
+    WRAPPER_METHOD_R (get_bw_value,   shared_vector <item_t>, 0, (empty_arg__));
     WRAPPER_METHOD (eliminate,        void, 5, (rhs_item_t *, index_t, index_t, item_t, index_t));
     WRAPPER_METHOD (process,          void, 5, (int, double, const sp_calc_model_t &, const sp_mesh_iface_t &, sp_jmatrix_t &));
     WRAPPER_METHOD (process_newton,   void, 4, (int, const sp_calc_model_t &, const sp_mesh_iface_t &, sp_jmatrix_t &));

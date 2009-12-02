@@ -20,7 +20,7 @@
 #include "fi_params.h"
 #include "well_type_helper.h"
 #include "norm_calc.h"
-#include "array_ext.h"
+#include "shared_vector.h"
 #include "jacobian.h"
 
 #include "calc_model_data.h"

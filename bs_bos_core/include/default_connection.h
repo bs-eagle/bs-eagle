@@ -11,7 +11,7 @@
 #define BS_BOS_CORE_DEFAULT_CONNECTION_H_
 
 #include "well_connection.h"
-#include "array_ext.h"
+#include "shared_vector.h"
 
 namespace blue_sky {
 namespace wells {
@@ -45,7 +45,7 @@ namespace wells {
      * \return rw_value
      * \todo   Obsolete, should be removed
      * */
-    array_ext <item_t> 
+    shared_vector <item_t> 
     get_rw_value ();
 
     /**
@@ -53,7 +53,7 @@ namespace wells {
      * \return wr_value
      * \todo   Obsolete, should be removed
      * */
-    array_ext <item_t> 
+    shared_vector <item_t> 
     get_wr_value ();
 
     /**
@@ -61,7 +61,7 @@ namespace wells {
      * \return rr_value
      * \todo   Obsolete, should be removed
      * */
-    array_ext <item_t> 
+    shared_vector <item_t> 
     get_rr_value ();
 
     /**
@@ -69,7 +69,7 @@ namespace wells {
      * \return ps_value
      * \todo   Obsolete, should be removed
      * */
-    array_ext <item_t> 
+    shared_vector <item_t> 
     get_ps_value ();
 
     /**
@@ -77,7 +77,7 @@ namespace wells {
      * \return rate_value
      * \todo   Obsolete, should be removed
      * */
-    array_ext <rhs_item_t> 
+    shared_vector <rhs_item_t> 
     get_rate_value ();
 
   public:

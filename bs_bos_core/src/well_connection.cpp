@@ -80,34 +80,34 @@ namespace blue_sky
     }
 
     template <typename strategy_t>
-    array_ext <typename strategy_t::item_t>
+    shared_vector <typename strategy_t::item_t>
     connection<strategy_t>::get_rw_value ()
     {
-      return array_ext <item_t> (0, 0);
+      return shared_array <item_t> (0, 0);
     }
     template <typename strategy_t>
-    array_ext <typename strategy_t::item_t>
+    shared_vector <typename strategy_t::item_t>
     connection<strategy_t>::get_wr_value ()
     {
-      return array_ext <item_t> (0, 0);
+      return shared_array <item_t> (0, 0);
     }
     template <typename strategy_t>
-    array_ext <typename strategy_t::item_t>
+    shared_vector <typename strategy_t::item_t>
     connection<strategy_t>::get_rr_value ()
     {
-      return array_ext <item_t> (0, 0);
+      return shared_array <item_t> (0, 0);
     }
     template <typename strategy_t>
-    array_ext <typename strategy_t::item_t>
+    shared_vector <typename strategy_t::item_t>
     connection<strategy_t>::get_ps_value ()
     {
-      return array_ext <item_t> (0, 0);
+      return shared_array <item_t> (0, 0);
     }
     template <typename strategy_t>
-    array_ext <typename strategy_t::rhs_item_t>
+    shared_vector <typename strategy_t::rhs_item_t>
     connection<strategy_t>::get_rate_value ()
     {
-      return array_ext <rhs_item_t> (0, 0);
+      return shared_array <rhs_item_t> (0, 0);
     }
 
     template <typename strategy_t>

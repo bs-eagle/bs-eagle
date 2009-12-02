@@ -21,7 +21,7 @@
 #include "calc_perf_bhp_base.h"
 #include "calc_perf_density_base.h"
 #include "well_rate_control.h"
-#include "array_ext.h"
+#include "shared_vector.h"
 
 namespace blue_sky
   {
@@ -422,14 +422,14 @@ namespace blue_sky
        * \brief  Returns ww_value
        * \todo   Obsolete, should be removed
        * */
-      virtual array_ext <item_t> 
+      virtual shared_vector <item_t> 
       get_ww_value ();
 
       /**
        * \brief  Returns bw_value
        * \todo   Obsolete, should be removed 
        * */
-      virtual array_ext <item_t> 
+      virtual shared_vector <item_t> 
       get_bw_value ();
 
       /**

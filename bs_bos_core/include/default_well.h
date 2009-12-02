@@ -104,14 +104,14 @@ namespace wells {
      * \brief  Returns ww_value
      * \todo   Obsolete, should be removed
      * */
-    array_ext <item_t>
+    shared_vector <item_t>
     get_ww_value ();
 
     /**
      * \brief  Returns bw_value
      * \todo   Obsolete, should be removed 
      * */
-    array_ext <item_t>
+    shared_vector <item_t>
     get_bw_value ();
 
   protected:

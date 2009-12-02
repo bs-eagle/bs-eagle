@@ -5,7 +5,7 @@
   \file read_class.h
   \brief Read functions for Keyword Input Language -- class #FRead, list of file included -- class #include_files
 */
-#include "array_ext.h"
+#include "shared_vector.h"
 #include "main_def.h"
 #include "err_num_def.h"
 #include "throw_exception.h"

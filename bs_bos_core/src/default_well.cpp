@@ -151,8 +151,8 @@ namespace wells {
   {
     BS_ASSERT (get_connections_count ()) (base_t::name ());
 
-    typedef array_ext <item_t>        item_wr_block_t;
-    typedef array_ext <const item_t>  item_xr_block_t;
+    typedef shared_vector <item_t> item_wr_block_t;
+    typedef shared_vector <item_t> item_xr_block_t;
 
     // TODO: may be we can not check is_work flag
     if (!base_t::well_state_.is_work)
@@ -171,7 +171,7 @@ namespace wells {
 
         const sp_connection_t &c  = connection_list_[con_index];
         const item_wr_block_t &wr = c->get_wr_value ();
-        const item_xr_block_t &xr = item_xr_block_t (&p_sol[c->n_block () * block_size], block_size);
+        const item_xr_block_t &xr = shared_array (const_cast <item_t *> (&p_sol[c->n_block () * block_size]), block_size);
 
         item_t wr_xr = 0;
         for (index_t j = 0; j < block_size; ++j)
@@ -199,9 +199,9 @@ namespace wells {
     const sp_connection_t &rw_con = connection_list_[rw_index];
     const sp_connection_t &wr_con = connection_list_[wr_index];
 
-    const array_ext <item_t> &rw = rw_con->get_rw_value ();
-    const array_ext <item_t> &wr = wr_con->get_wr_value ();
-    const array_ext <item_t> &rr = wr_con->get_rr_value ();
+    const shared_vector <item_t> &rw = rw_con->get_rw_value ();
+    const shared_vector <item_t> &wr = wr_con->get_wr_value ();
+    const shared_vector <item_t> &rr = wr_con->get_rr_value ();
 
     BS_ASSERT (rw.size () == (size_t)block_size) (rw.size ()) (block_size);
     BS_ASSERT (wr.size () == (size_t)block_size) (wr.size ()) (block_size);
@@ -496,16 +496,16 @@ namespace wells {
   }
 
   template <typename strategy_t>
-  array_ext <typename default_well <strategy_t>::item_t>
+  shared_vector <typename default_well <strategy_t>::item_t>
   default_well <strategy_t>::get_ww_value ()
   {
-    return array_ext <item_t> (&ww_value, 1);
+    return shared_array <item_t> (&ww_value, 1);
   }
   template <typename strategy_t>
-  array_ext <typename default_well <strategy_t>::item_t>
+  shared_vector <typename default_well <strategy_t>::item_t>
   default_well <strategy_t>::get_bw_value ()
   {
-    return array_ext <item_t> (&bw_value, 1);
+    return shared_array <item_t> (&bw_value, 1);
   }
   //////////////////////////////////////////////////////////////////////////
   BLUE_SKY_TYPE_STD_CREATE_T_DEF (default_well, (class));

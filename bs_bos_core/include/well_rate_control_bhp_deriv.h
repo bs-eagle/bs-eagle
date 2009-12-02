@@ -33,8 +33,8 @@ namespace blue_sky
           {
             if (mobility_calc_t::is_oil_injection (params))
               {
-                array_ext <item_t> rr_block = c->get_rr_value ();
-                array_ext <item_t> ps_block = c->get_ps_value ();
+                shared_vector <item_t> rr_block = c->get_rr_value ();
+                shared_vector <item_t> ps_block = c->get_ps_value ();
 
                 ps_block [p3_oil]     = base_t::compute_oil_sw_deriv (data, params);
                 rr_block [p3_oil_po]  = base_t::compute_oil_po_deriv (data, params);
@@ -47,8 +47,8 @@ namespace blue_sky
           {
             if (mobility_calc_t::is_water_injection (params))
               {
-                array_ext <item_t> rr_block = c->get_rr_value ();
-                array_ext <item_t> ps_block = c->get_ps_value ();
+                shared_vector <item_t> rr_block = c->get_rr_value ();
+                shared_vector <item_t> ps_block = c->get_ps_value ();
 
                 ps_block [p3_wat]     = base_t::compute_water_sw_deriv (data, params);
                 rr_block [p3_wat_po]  = base_t::compute_water_po_deriv (data, params);
@@ -61,8 +61,8 @@ namespace blue_sky
           {
             if (mobility_calc_t::is_gas_injection (params))
               {
-                array_ext <item_t> rr_block = c->get_rr_value ();
-                array_ext <item_t> ps_block = c->get_ps_value ();
+                shared_vector <item_t> rr_block = c->get_rr_value ();
+                shared_vector <item_t> ps_block = c->get_ps_value ();
 
                 ps_block [p3_gas]     = base_t::compute_gas_sw_deriv (data, params);
                 rr_block [p3_gas_po]  = base_t::compute_gas_po_deriv (data, params);
@@ -74,8 +74,8 @@ namespace blue_sky
         void
         update_rr (const sp_connection_t &c, const data_t &data, params_t &params) const
           {
-            array_ext <item_t> rr = c->get_rr_value ();
-            array_ext <item_t> ps = c->get_ps_value ();
+            shared_vector <item_t> rr = c->get_rr_value ();
+            shared_vector <item_t> ps = c->get_ps_value ();
             const rhs_item_t *sp    = &params.jmatrix_->get_sp_diagonal ()[params.n_block * params.n_phases];
 
             M_MINUS_VV_PROD_3x3 (ps, sp, rr);
@@ -83,9 +83,9 @@ namespace blue_sky
         void
         update_rhs_flux (const sp_connection_t &c, const data_t &data, params_t &params) const
           {
-            array_ext <item_t> ps         = c->get_ps_value ();
+            shared_vector <item_t> ps         = c->get_ps_value ();
             const rhs_item_t *s_rhs_block   = &params.jmatrix_->get_sec_rhs ()[params.calc_model_->n_sec_vars * params.n_block];
-            array_ext <rhs_item_t> r_rhs_block  = c->get_rate_value ();
+            shared_vector <rhs_item_t> r_rhs_block  = c->get_rate_value ();
 
             V_MINUS_VS_PROD_3x3 (ps, s_rhs_block, r_rhs_block);
           }
@@ -132,7 +132,7 @@ namespace blue_sky
         void
         apply_wefac (const sp_connection_t &c, params_t &params) const
         {
-          array_ext <item_t> rr = c->get_rr_value ();
+          shared_vector <item_t> rr = c->get_rr_value ();
           item_t wefac = params.well_->exploitation_factor_;
 
           rr[0] = blue_sky::apply_wefac (rr[0], wefac);
@@ -162,8 +162,8 @@ namespace blue_sky
           {
             if (mobility_calc_t::is_oil_injection (params))
               {
-                array_ext <item_t> rr_block = c->get_rr_value ();
-                array_ext <item_t> ps_block = c->get_ps_value ();
+                shared_vector <item_t> rr_block = c->get_rr_value ();
+                shared_vector <item_t> ps_block = c->get_ps_value ();
 
                 ps_block [p2ow_oil]     = base_t::compute_oil_sw_deriv (data, params);
                 rr_block [p2ow_oil_po]  = base_t::compute_oil_po_deriv (data, params);
@@ -175,8 +175,8 @@ namespace blue_sky
           {
             if (mobility_calc_t::is_water_injection (params))
               {
-                array_ext <item_t> rr_block = c->get_rr_value ();
-                array_ext <item_t> ps_block = c->get_ps_value ();
+                shared_vector <item_t> rr_block = c->get_rr_value ();
+                shared_vector <item_t> ps_block = c->get_ps_value ();
 
                 ps_block [p2ow_wat]     = base_t::compute_water_sw_deriv (data, params);
                 rr_block [p2ow_wat_po]  = base_t::compute_water_po_deriv (data, params);
@@ -191,8 +191,8 @@ namespace blue_sky
         void
         update_rr (const sp_connection_t &c, const data_t &data, params_t &params) const
           {
-            array_ext <item_t> rr = c->get_rr_value ();
-            array_ext <item_t> ps = c->get_ps_value ();
+            shared_vector <item_t> rr = c->get_rr_value ();
+            shared_vector <item_t> ps = c->get_ps_value ();
             const rhs_item_t *sp  = &params.jmatrix_->get_sp_diagonal ()[params.n_block * params.n_phases];
 
             M_MINUS_VV_PROD_2x2 (ps, sp, rr);
@@ -200,9 +200,9 @@ namespace blue_sky
         void
         update_rhs_flux (const sp_connection_t &c, const data_t &data, params_t &params) const
           {
-            array_ext <item_t> ps               = c->get_ps_value ();
+            shared_vector <item_t> ps               = c->get_ps_value ();
             const rhs_item_t *s_rhs_block       = &params.jmatrix_->get_sec_rhs ()[params.calc_model_->n_sec_vars * params.n_block];
-            array_ext <rhs_item_t> r_rhs_block  = c->get_rate_value ();
+            shared_vector <rhs_item_t> r_rhs_block  = c->get_rate_value ();
 
             V_MINUS_VS_PROD_2x2 (ps, s_rhs_block, r_rhs_block);
           }
@@ -230,7 +230,7 @@ namespace blue_sky
         void
         apply_wefac (const sp_connection_t &c, params_t &params) const
         {
-          array_ext <item_t> rr = c->get_rr_value ();
+          shared_vector <item_t> rr = c->get_rr_value ();
           item_t wefac = params.well_->exploitation_factor_;
 
           rr[0] = blue_sky::apply_wefac (rr[0], wefac);
@@ -255,8 +255,8 @@ namespace blue_sky
           {
             if (mobility_calc_t::is_oil_injection (params))
               {
-                array_ext <item_t> rr_block = c->get_rr_value ();
-                array_ext <item_t> ps_block = c->get_ps_value ();
+                shared_vector <item_t> rr_block = c->get_rr_value ();
+                shared_vector <item_t> ps_block = c->get_ps_value ();
 
                 ps_block [p2og_oil]     = base_t::compute_oil_so_deriv (data, params);
                 rr_block [p2og_oil_po]  = base_t::compute_oil_po_deriv (data, params);
@@ -272,8 +272,8 @@ namespace blue_sky
           {
             if (mobility_calc_t::is_gas_injection (params))
               {
-                array_ext <item_t> rr_block = c->get_rr_value ();
-                array_ext <item_t> ps_block = c->get_ps_value ();
+                shared_vector <item_t> rr_block = c->get_rr_value ();
+                shared_vector <item_t> ps_block = c->get_ps_value ();
 
                 ps_block [p2og_gas]     = base_t::compute_gas_so_deriv (data, params);
                 rr_block [p2og_gas_po]  = base_t::compute_gas_po_deriv (data, params);
@@ -284,8 +284,8 @@ namespace blue_sky
         void
         update_rr (const sp_connection_t &c, const data_t &data, params_t &params) const
           {
-            array_ext <item_t> rr = c->get_rr_value ();
-            array_ext <item_t> ps = c->get_ps_value ();
+            shared_vector <item_t> rr = c->get_rr_value ();
+            shared_vector <item_t> ps = c->get_ps_value ();
             const rhs_item_t *sp    = &params.jmatrix_->get_sp_diagonal ()[params.n_block * params.n_phases];
 
             M_MINUS_VV_PROD_2x2 (ps, sp, rr);
@@ -293,9 +293,9 @@ namespace blue_sky
         void
         update_rhs_flux (const sp_connection_t &c, const data_t &data, params_t &params) const
           {
-            array_ext <item_t> ps               = c->get_ps_value ();
+            shared_vector <item_t> ps               = c->get_ps_value ();
             const rhs_item_t *s_rhs_block       = &params.jmatrix_->get_sec_rhs ()[params.calc_model_->n_sec_vars * params.n_block];
-            array_ext <rhs_item_t> r_rhs_block  = c->get_rate_value ();
+            shared_vector <rhs_item_t> r_rhs_block  = c->get_rate_value ();
 
             V_MINUS_VS_PROD_2x2 (ps, s_rhs_block, r_rhs_block);
           }
@@ -323,7 +323,7 @@ namespace blue_sky
         void
         apply_wefac (const sp_connection_t &c, params_t &params) const
         {
-          array_ext <item_t> rr = c->get_rr_value ();
+          shared_vector <item_t> rr = c->get_rr_value ();
           item_t wefac = params.well_->exploitation_factor_;
 
           rr[0] = blue_sky::apply_wefac (rr[0], wefac);
@@ -348,7 +348,7 @@ namespace blue_sky
           {
             if (mobility_calc_t::is_oil_injection (params))
               {
-                array_ext <item_t> rr_block = c->get_rr_value ();
+                shared_vector <item_t> rr_block = c->get_rr_value ();
                 rr_block [0] = base_t::compute_oil_po_deriv (data, params);
               }
           }
@@ -368,9 +368,9 @@ namespace blue_sky
         void
         update_rhs_flux (const sp_connection_t &c, const data_t &data, params_t &params) const
           {
-            array_ext <item_t> ps               = c->get_ps_value ();
+            shared_vector <item_t> ps               = c->get_ps_value ();
             const rhs_item_t *s_rhs_block       = &params.jmatrix_->get_sec_rhs ()[params.calc_model_->n_sec_vars * params.n_block];
-            array_ext <rhs_item_t> r_rhs_block  = c->get_rate_value ();
+            shared_vector <rhs_item_t> r_rhs_block  = c->get_rate_value ();
 
             V_MINUS_VS_PROD_1x1 (ps, s_rhs_block, r_rhs_block);
           }
@@ -387,7 +387,7 @@ namespace blue_sky
         void
         apply_wefac (const sp_connection_t &c, params_t &params) const
         {
-          array_ext <item_t> rr = c->get_rr_value ();
+          shared_vector <item_t> rr = c->get_rr_value ();
           item_t wefac = params.well_->exploitation_factor_;
 
           rr[0] = blue_sky::apply_wefac (rr[0], wefac);
@@ -412,7 +412,7 @@ namespace blue_sky
           {
             if (mobility_calc_t::is_water_injection (params))
               {
-                array_ext <item_t> rr_block = c->get_rr_value ();
+                shared_vector <item_t> rr_block = c->get_rr_value ();
                 rr_block [0] = base_t::compute_water_po_deriv (data, params);
               }
           }
@@ -428,9 +428,9 @@ namespace blue_sky
         void
         update_rhs_flux (const sp_connection_t &c, const data_t &data, params_t &params) const
           {
-            array_ext <item_t> ps               = c->get_ps_value ();
+            shared_vector <item_t> ps               = c->get_ps_value ();
             const rhs_item_t *s_rhs_block       = &params.jmatrix_->get_sec_rhs ()[params.calc_model_->n_sec_vars * params.n_block];
-            array_ext <rhs_item_t> r_rhs_block  = c->get_rate_value ();
+            shared_vector <rhs_item_t> r_rhs_block  = c->get_rate_value ();
 
             V_MINUS_VS_PROD_1x1 (ps, s_rhs_block, r_rhs_block);
           }
@@ -447,7 +447,7 @@ namespace blue_sky
         void
         apply_wefac (const sp_connection_t &c, params_t &params) const
         {
-          array_ext <item_t> rr = c->get_rr_value ();
+          shared_vector <item_t> rr = c->get_rr_value ();
           item_t wefac = params.well_->exploitation_factor_;
 
           rr[0] = blue_sky::apply_wefac (rr[0], wefac);
@@ -476,7 +476,7 @@ namespace blue_sky
           {
             if (mobility_calc_t::is_gas_injection (params))
               {
-                array_ext <item_t> rr_block = c->get_rr_value ();
+                shared_vector <item_t> rr_block = c->get_rr_value ();
                 rr_block [0] = base_t::compute_gas_po_deriv (data, params);
               }
           }
@@ -488,9 +488,9 @@ namespace blue_sky
         void
         update_rhs_flux (const sp_connection_t &c, const data_t &data, params_t &params) const
           {
-            array_ext <item_t> ps               = c->get_ps_value ();
+            shared_vector <item_t> ps               = c->get_ps_value ();
             const rhs_item_t *s_rhs_block       = &params.jmatrix_->get_sec_rhs ()[params.calc_model_->n_sec_vars * params.n_block];
-            array_ext <rhs_item_t> r_rhs_block  = c->get_rate_value ();
+            shared_vector <rhs_item_t> r_rhs_block  = c->get_rate_value ();
 
             V_MINUS_VS_PROD_1x1 (ps, s_rhs_block, r_rhs_block);
           }
@@ -507,7 +507,7 @@ namespace blue_sky
         void
         apply_wefac (const sp_connection_t &c, params_t &params) const
         {
-          array_ext <item_t> rr = c->get_rr_value ();
+          shared_vector <item_t> rr = c->get_rr_value ();
           item_t wefac = params.well_->exploitation_factor_;
 
           rr[0] = blue_sky::apply_wefac (rr[0], wefac);

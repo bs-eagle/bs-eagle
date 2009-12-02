@@ -168,8 +168,8 @@ public:
     bool                      is_o;
     bool                      is_w;
     bool                      is_g;
-    array_ext <item_t>        bw_value;
-    array_ext <item_t>        ww_value;
+    shared_vector <item_t>        bw_value;
+    shared_vector <item_t>        ww_value;
     rate_data_t               &rate;
     const rate_data_t         &limit_rate;
     inj_params                inj_params_;

@@ -16,7 +16,7 @@
 
 #include "well_type_helper.h"
 #include "wells_compute_connection_factors.h"
-#include "array_ext.h"
+#include "shared_vector.h"
 
 #include "well_controller.h"
 
@@ -367,35 +367,35 @@ namespace blue_sky
          * \brief  Returns RW value
          * \todo   Obsolete, should be removed
          * */
-        virtual array_ext <item_t> 
+        virtual shared_vector <item_t> 
         get_rw_value   ();
 
         /**
          * \brief  Returns WR value
          * \todo   Obsolete, should be removed
          * */
-        virtual array_ext <item_t> 
+        virtual shared_vector <item_t> 
         get_wr_value   ();
 
         /**
          * \brief  Returns RR value
          * \todo   Obsolete, should be removed
          * */
-        virtual array_ext <item_t> 
+        virtual shared_vector <item_t> 
         get_rr_value   ();
 
         /**
          * \brief  Returns PS value
          * \todo   Obsolete, should be removed
          * */
-        virtual array_ext <item_t> 
+        virtual shared_vector <item_t> 
         get_ps_value   ();
 
         /**
          * \brief  Returns rate array
          * \todo   Obsolete, should be removed
          * */
-        virtual array_ext <rhs_item_t> 
+        virtual shared_vector <rhs_item_t> 
         get_rate_value ();
 
         /**

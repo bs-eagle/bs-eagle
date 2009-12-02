@@ -205,7 +205,7 @@ namespace blue_sky
       //  }
 
       //shared_array <item_t> a (allocate (nlen), nlen);
-      add_item (key, internal_array <item_t> (nlen), dimens, def_val);
+      add_item (key, shared_vector <item_t> (nlen, def_val), dimens, def_val);
 
       //deallocate (p);
     }
