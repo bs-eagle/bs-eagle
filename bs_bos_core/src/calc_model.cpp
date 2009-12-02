@@ -150,7 +150,7 @@ namespace blue_sky
     if (n_phases > 1)
       n_sec_vars = 1;
 
-    for (int i = 0, sat_counter = 0; i < FI_PHASE_TOT; ++i)
+    for (size_t i = 0, sat_counter = 0; i < FI_PHASE_TOT; ++i)
       {
         if ((this->phases & (1 << i)) && (sat_counter < this->n_phases - 1))
           this->sat_d[i] = sat_counter++;
@@ -1047,7 +1047,7 @@ namespace blue_sky
     pvtg.resize(this->n_pvt_regions);
     pvtw.resize(this->n_pvt_regions);
 
-    for (int i = 0; i<this->n_pvt_regions; i++)
+    for (size_t i = 0; i<this->n_pvt_regions; i++)
       {
         BS_ASSERT (idata->pvto.size ());
         if (idata->pvto.back ().main_data_.empty ())
@@ -1083,7 +1083,7 @@ namespace blue_sky
     float max_p     = this->ts_params->get_float (fi_params::PVT_PRESSURE_RANGE_MAX);
     int n_intervals = this->ts_params->get_int (fi_params::PVT_INTERP_POINTS);
 
-    for (int i = 0; i<this->n_pvt_regions; i++)
+    for (size_t i = 0; i<this->n_pvt_regions; i++)
       {
         if (is_oil ())
           pvto[i]->build (atm_p, min_p, max_p, n_intervals);

@@ -171,7 +171,6 @@ namespace blue_sky
       index_t nlen = (dimens[ARRAY_POOL_NX_A] * ni + dimens[ARRAY_POOL_NX_B])
                    * (dimens[ARRAY_POOL_NY_A] * nj + dimens[ARRAY_POOL_NY_B])
                    * (dimens[ARRAY_POOL_NZ_A] * nk + dimens[ARRAY_POOL_NZ_B]);
-      item_t *p = 0;
       if (nlen <= 0)
         {
           bs_throw_exception (boost::format (
@@ -194,19 +193,7 @@ namespace blue_sky
           dimens[ARRAY_POOL_NZ_A] % dimens[ARRAY_POOL_NZ_B]);
         }  
         
-      //if (contain (key))
-      //  {
-      //    array_info &info = (*array_map)[key];
-      //    if (info.array.size ())
-      //      {
-      //        p = info.array.data ();
-      //      }
-      //  }
-
-      //shared_array <item_t> a (allocate (nlen), nlen);
       add_item (key, shared_vector <item_t> (nlen, def_val), dimens, def_val);
-
-      //deallocate (p);
     }
 
     /*!
@@ -291,44 +278,9 @@ namespace blue_sky
     }
 
   private:
-    //item_t *
-    //allocate (index_t len)
-    //{
-    //  item_t *p = new item_t [len];
-    //  if (!p)
-    //    {
-    //      bs_throw_exception ("Can't allocate memory");
-    //    }
-
-    //  memory_list_.push_back (p);
-    //  return p;
-    //}
-
-    //void 
-    //deallocate (item_t *p)
-    //{
-    //  free_pointer (p);
-
-    //  for (size_t i = 0, cnt = memory_list_.size (); i < cnt; ++i)
-    //    {
-    //      if (memory_list_[i] == p)
-    //        {
-    //          memory_list_.erase (memory_list_.begin () + i);
-    //          break;
-    //        }
-    //    }
-    //}
-
-    //void
-    //free_pointer (item_t *p)
-    //{
-    //  delete []p;
-    //}
 
   private:
     
-    //std::vector <item_t*>   memory_list_;
-
     auto_value <index_t, 0> ni, nj, nk;   //! model size
     sp_container_t          array_map;
   };

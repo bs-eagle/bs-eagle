@@ -173,23 +173,23 @@ namespace blue_sky {
       
     public:
 			arrays_helper ahelper;
-      int rpo_model;                //!< 3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)
+      int rpo_model;                   //!< 3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)
 
-      double minimal_pore_volume;     //!< Minimal pore volume allowed for active cells
-      double minimal_splice_volume;   //!< Minimal pore volume allowed for active cells to splice with other cells
-      double maximum_splice_thickness;//!< Default maximum thickness allowed between active cells to be coupled
+      double minimal_pore_volume;      //!< Minimal pore volume allowed for active cells
+      double minimal_splice_volume;    //!< Minimal pore volume allowed for active cells to splice with other cells
+      double maximum_splice_thickness; //!< Default maximum thickness allowed between active cells to be coupled
 
-      data_dimens dimens;                                  //!< dimension description
+      data_dimens dimens;              //!< dimension description
 
-      auto_value <long long> pvt_region;               //!< Number of PVT regions in simulation
-      auto_value <long long> sat_region;               //!< Number of saturation regions in simulation
-      auto_value <long long> eql_region;               //!< Number of equilibrium regions in simulation
-      auto_value <long long> fip_region;               //!< Number of FIP regions in simulation
+      size_t pvt_region;               //!< Number of PVT regions in simulation
+      size_t sat_region;               //!< Number of saturation regions in simulation
+      size_t eql_region;               //!< Number of equilibrium regions in simulation
+      size_t fip_region;               //!< Number of FIP regions in simulation
 
-      auto_value <int> fi_n_phase;               //!< number of phases if full implicit simulation
-      auto_value <int> fi_phases;                //!< sizeof (int) bit fields (1 -- phase present, 0 -- do not present)
+      size_t fi_n_phase;               //!< number of phases if full implicit simulation
+      size_t fi_phases;                //!< sizeof (int) bit fields (1 -- phase present, 0 -- do not present)
 
-      auto_value <long long> rock_region;              //!< Number of ROCK regions
+      size_t rock_region;              //!< Number of ROCK regions
 
       vec_i equil_regions;
 

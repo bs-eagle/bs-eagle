@@ -536,7 +536,7 @@ namespace blue_sky
         bs_throw_exception ("ROCK is not specified");
       }
 
-    for (index_t i = 0; i < data->pvt_region; ++i)
+    for (size_t i = 0; i < data->pvt_region; ++i)
       {
         if (data->rock[i] < 0)
           {

@@ -103,7 +103,7 @@ namespace wells {
   typename default_well <strategy_t>::sp_connection_t
   default_well <strategy_t>::get_connection (index_t idx) const
   {
-    BS_ASSERT (idx < connection_list_.size ()) (base_t::name ()) (idx) (connection_list_.size ());
+    BS_ASSERT ((size_t)idx < connection_list_.size ()) (base_t::name ()) (idx) (connection_list_.size ());
     return connection_list_[idx];
   }
   template <typename strategy_t>

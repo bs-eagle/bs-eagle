@@ -582,7 +582,7 @@ namespace blue_sky
 
     reader->read_line (buf, CHAR_BUF_LEN);
     // Read and convert UNITS to data
-    if (sscanf (buf, "%s %d", key1, &idata->rock_region.data ()) != 2)
+    if (sscanf (buf, "%s %ld", key1, &idata->rock_region) != 2)
       {
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
           % reader->get_prefix() % keyword);
@@ -682,7 +682,7 @@ namespace blue_sky
     reader->read_line (buf, CHAR_BUF_LEN);
     // read number of saturation tables
     strt = buf;
-    scanf_u (strt, &end_ptr, &idata->sat_region.data ());
+    scanf_u (strt, &end_ptr, &idata->sat_region);
     //if (reader->)
     //  {
     //    out_s << "Error in " << reader->get_prefix() << ": can't read number of saturation tables from " << strt;
@@ -692,7 +692,7 @@ namespace blue_sky
 
     strt=end_ptr;
     // read number of PVT tables
-    scanf_u (strt, &end_ptr, &idata->pvt_region.data ());
+    scanf_u (strt, &end_ptr, &idata->pvt_region);
     //if (reader->)
     //  {
     //    out_s << "Error in " << reader->get_prefix() << ": can't read number of PVT tables from " << strt;
@@ -710,7 +710,7 @@ namespace blue_sky
     //  }
     strt = end_ptr;
     // read number of FIP regions
-    scanf_u (strt, &end_ptr, &idata->fip_region.data ());
+    scanf_u (strt, &end_ptr, &idata->fip_region);
     //if (reader->)
     //  {
     //    out_s << "Error in " << reader->get_prefix() << ": can't read the maximum number of FIP regions from " << strt;
@@ -775,7 +775,7 @@ namespace blue_sky
     
     density.resize (idata->pvt_region*3);
     
-    for (index_t i = 0; i < (int) idata->pvt_region; i++)
+    for (size_t i = 0; i < idata->pvt_region; i++)
       {
         if ((len = reader->read_array (keyword, density, 3*i, 3)) != 3)
           {
@@ -813,7 +813,7 @@ namespace blue_sky
 
     // Read table for each of region
     shared_vector <double> dbuf;
-    for (index_t i = 0; i < idata->rock_region; i++)
+    for (size_t i = 0; i < idata->rock_region; i++)
       {
         std::vector <float> &p_col = idata->rocktab[i].get_column (0);
         std::vector <float> &pvm_col = idata->rocktab[i].get_column (1);
@@ -926,7 +926,7 @@ namespace blue_sky
       }
 
     // Read table for each of region
-    for (index_t i = 0; i < idata->pvt_region; i++)
+    for (size_t i = 0; i < idata->pvt_region; i++)
       {
         if ((len = reader->read_table (keyword, idata->pvtdo[i].main_data_, 3)) < 1)
           {
@@ -952,7 +952,7 @@ namespace blue_sky
       }
 
     // Read table for each of region
-    for (index_t i = 0; i < idata->pvt_region; i++)
+    for (size_t i = 0; i < idata->pvt_region; i++)
       {
         //idata->pvtw[i].main_data_.resize(4);
         if ((len = reader->read_table (keyword, idata->pvtw[i].main_data_, 4)) < 1)
@@ -978,7 +978,7 @@ namespace blue_sky
     sp_idata_t idata (params.data, bs_dynamic_cast ());
 
     // Read table for each of region
-    for (index_t i = 0; i < idata->pvt_region; i++)
+    for (size_t i = 0; i < idata->pvt_region; i++)
       {
         //idata->pvtg[i].main_data_.resize(DOUB_BUF_LEN);
         if ((len = reader->read_table (keyword, idata->pvtg[i].main_data_, 3)) < 1)
@@ -1002,7 +1002,7 @@ namespace blue_sky
     boost::array <item_t, 2> dbuf;
 
     // Compressibility of rock
-    for (index_t i = 0; i < idata->pvt_region; ++i)
+    for (size_t i = 0; i < idata->pvt_region; ++i)
       {
         if ((len = reader->read_array (keyword, dbuf)) != 2)
           {
@@ -1026,7 +1026,7 @@ namespace blue_sky
     sp_idata_t idata (params.data, bs_dynamic_cast ());
 
     // Read table for each of region
-    for (index_t i = 0; i < idata->sat_region; ++i)
+    for (size_t i = 0; i < idata->sat_region; ++i)
       {
         if ((len = reader->read_table (keyword, swof, 4)) < 1)
           {
@@ -1050,7 +1050,7 @@ namespace blue_sky
     sp_idata_t idata (params.data, bs_dynamic_cast ());
 
     // Read table for each of region
-    for (index_t i = 0; i < idata->sat_region; ++i)
+    for (size_t i = 0; i < idata->sat_region; ++i)
       {
         if ((len = reader->read_table (keyword, sgof, 4)) < 1)
           {
@@ -1076,7 +1076,7 @@ namespace blue_sky
     sp_idata_t idata (params.data, bs_dynamic_cast ());
 
     // Read table for each of region
-    for (index_t i = 0; i < idata->sat_region; ++i)
+    for (size_t i = 0; i < idata->sat_region; ++i)
       {
         if ((len = reader->read_table (keyword, swfn, 3)) < 1)
           {
@@ -1101,7 +1101,7 @@ namespace blue_sky
     sp_idata_t idata (params.data, bs_dynamic_cast ());
 
     // Read table for each of region
-    for (index_t i = 0; i < idata->sat_region; ++i)
+    for (size_t i = 0; i < idata->sat_region; ++i)
       {
         if ((len = reader->read_table (keyword, sgfn, 3)) < 1)
           {
@@ -1126,7 +1126,7 @@ namespace blue_sky
     sp_idata_t idata (params.data, bs_dynamic_cast ());
 
     // Read table for each of region
-    for (index_t i = 0; i < idata->sat_region; ++i)
+    for (size_t i = 0; i < idata->sat_region; ++i)
       {
         if ((len = reader->read_table (keyword, sof3, 3)) < 1)
           {
@@ -1342,7 +1342,7 @@ namespace blue_sky
 
     // Read table for each of region
     shared_vector <double> dbuf;
-    for (index_t i = 0; i < idata->eql_region; ++i)
+    for (size_t i = 0; i < idata->eql_region; ++i)
       {
         if ((len =reader->read_table (keyword, dbuf, 2)) < 1)
           {
@@ -1380,7 +1380,7 @@ namespace blue_sky
 
     // Read table for each of region
     shared_vector <double> dbuf;
-    for (index_t i = 0; i < idata->eql_region; ++i)
+    for (size_t i = 0; i < idata->eql_region; ++i)
       {
         if ((len =reader->read_table (keyword, dbuf, 2)) < 1)
           {
@@ -1421,7 +1421,7 @@ namespace blue_sky
 
     // Read table for each of region
     shared_vector <double> dbuf;
-    for (index_t i = 0; i < idata->eql_region; ++i)
+    for (size_t i = 0; i < idata->eql_region; ++i)
       {
         if ((len =reader->read_table (keyword, dbuf, 2)) < 1)
           {

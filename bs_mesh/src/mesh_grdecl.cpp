@@ -2699,7 +2699,6 @@ int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (c
   (*rows_ptr)[0] = 0;
 
   std::vector<bool> is_butting(nx*ny,false);
-  int nButting = 0;
 
   std::set<index_t, std::less<index_t> > boundary_set;
 
@@ -2729,8 +2728,6 @@ int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (c
   conn_trans->init_struct(con_num,2*con_num,2*con_num);
 
   index_array_t *rows_ptr_transmis = &conn_trans->get_rows_ptr();
-  index_array_t *cols_ind_transmis = &conn_trans->get_cols_ind();
-  rhs_item_array_t *values_transmis = &conn_trans->get_values();
   index_array_t &matrix_block_idx_minus = flux_conn->get_matrix_block_idx_minus ();
   index_array_t &matrix_block_idx_plus = flux_conn->get_matrix_block_idx_plus ();
 

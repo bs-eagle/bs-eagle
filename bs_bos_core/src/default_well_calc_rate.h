@@ -742,7 +742,7 @@ namespace wells {
     {
       bw = 0;
       item_t mult = is_production_well ? -1.0 : 1.0;
-      if (is_o && is_w && (is_oil_control <is_production_well> () && is_water_control <is_production_well> () || is_liquid_control <is_production_well> ()))
+      if (is_o && is_w && ((is_oil_control <is_production_well> () && is_water_control <is_production_well> ()) || is_liquid_control <is_production_well> ()))
         {
           bw += (rate.oil + rate.water) - mult * limit.liquid;
         }

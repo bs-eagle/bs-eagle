@@ -315,7 +315,6 @@ namespace blue_sky {
       index_t switch_to_momg_count = 0;
       item_t total_volume = 0.0;
       rhs_item_t *ss_block = 0;
-      rhs_item_t *sp_block = 0;
       rhs_item_t *s_rhs_block = 0;
 
 #ifdef _MPI

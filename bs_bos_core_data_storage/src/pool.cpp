@@ -14,10 +14,6 @@ namespace blue_sky
   template <typename K, typename T>
   blue_sky::bs_array_map <K, T>::~bs_array_map () 
   {
-    //for (size_t i = 0, cnt = memory_list_.size (); i < cnt; ++i)
-    //  {
-    //    free_pointer (memory_list_[i]);
-    //  }
   }
 
 

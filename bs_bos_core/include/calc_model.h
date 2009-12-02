@@ -579,22 +579,22 @@ namespace blue_sky
       //! base parameters
     public:
 
-      auto_value <int>                                        n_comps;                        //!< number of components
-      auto_value <int>                                        n_phases;                       //!< number of phases
-      auto_value <int>                                        n_sec_vars;                     //!< number if secondary variables
+      auto_value <size_t>                                     n_comps;                        //!< number of components
+      auto_value <size_t>                                     n_phases;                       //!< number of phases
+      auto_value <size_t>                                     n_sec_vars;                     //!< number if secondary variables
       auto_value <FI_PHASE_ENUM>                              phases;                         //!< sizeof (int) bit fields (1 -- phase present, 0 -- do not present)
-      auto_value <int>                                        n_HCcomps;                      //!< number of hydrocarbon components (n_comps = n_HCcomps + 1)
-      auto_value <int>                                        n_HCphases;                     //!< number of hydrocarbon phases (n_phases = n_HCphases + 1)
-      auto_value <int>                                        n_pri;                          //!< number of primary variables
-      auto_value <int>                                        n_sec;                          //!< number of secondary variables
-      auto_value <int>                                        n_vars;                         //!< full number of variables
+      auto_value <size_t>                                     n_HCcomps;                      //!< number of hydrocarbon components (n_comps = n_HCcomps + 1)
+      auto_value <size_t>                                     n_HCphases;                     //!< number of hydrocarbon phases (n_phases = n_HCphases + 1)
+      auto_value <size_t>                                     n_pri;                          //!< number of primary variables
+      auto_value <size_t>                                     n_sec;                          //!< number of secondary variables
+      auto_value <size_t>                                     n_vars;                         //!< full number of variables
 
       phase_d_t                                               phase_d;                        //!< displacement of phase in arrays
       sat_d_t                                                 sat_d;                          //!< displacement of phase in saturation array
 
-      auto_value <int>                                        n_pvt_regions;                  //!< number of pvt regions
-      auto_value <int>                                        n_sat_regions;                  //!< number of sat regions
-      auto_value <int>                                        n_fip_regions;                  //!< number of fip regions
+      auto_value <size_t>                                     n_pvt_regions;                  //!< number of pvt regions
+      auto_value <size_t>                                     n_sat_regions;                  //!< number of sat regions
+      auto_value <size_t>                                     n_fip_regions;                  //!< number of fip regions
 
       physical_constants                                      internal_constants;             //!< physical constants in internal units
 
@@ -611,7 +611,7 @@ namespace blue_sky
 
 
       auto_value <double>                                     last_c_norm;                    //!< obsolete
-      auto_value <int>                                        approx_flag;                    //!< flag of initial approximation
+      auto_value <size_t>                                     approx_flag;                    //!< flag of initial approximation
 
       sp_fi_params                                            ts_params;                      //!< input model params
       invers_fvf_avgerage_t                                   invers_fvf_average;             //!< (n_phases) 1. / (formation volume factor) for all phases average

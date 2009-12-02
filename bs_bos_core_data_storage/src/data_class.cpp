@@ -61,21 +61,21 @@ namespace blue_sky
 
   idata::idata(bs_type_ctor_param param)
   : bs_node(bs_node::create_node (new this_t::idata_traits ())),
+  rpo_model (0), // RPO_DEFAULT_MODEL
+  minimal_pore_volume (DEFAULT_MINIMAL_PORE_VOLUME),
+  minimal_splice_volume (DEFAULT_MINIMAL_SPLICE_VOLUME),
+  maximum_splice_thickness (DEFAULT_MAXIMUM_SPLICE_THICKNESS),
+  pvt_region (1),
+  sat_region (1),
+  eql_region (1),
+  fip_region (1),
+  fi_n_phase (0),
+  fi_phases (0),
+  rock_region (1),
   i_map (BS_KERNEL.create_object (amap_i::bs_type())),
-  d_map (BS_KERNEL.create_object (amap_d::bs_type()))
+  d_map (BS_KERNEL.create_object (amap_d::bs_type())),
+  init_section (0)
   {
-    init_section = 0;
-    pvt_region = 1;
-    sat_region = 1;
-    eql_region = 1;
-    fip_region = 1;
-    rock_region = 0;
-    minimal_pore_volume = DEFAULT_MINIMAL_PORE_VOLUME;
-    minimal_splice_volume = DEFAULT_MINIMAL_SPLICE_VOLUME;
-    maximum_splice_thickness = DEFAULT_MAXIMUM_SPLICE_THICKNESS;
-    fi_n_phase = 0;
-    fi_phases = 0;
-    rpo_model = 0;//RPO_DEFAULT_MODEL;
     init();
   }
 
@@ -197,7 +197,7 @@ namespace blue_sky
     if (!equil.size())
       throw bs_exception("idata.set_density()","EQUIL table has not been initialized yet");
 
-    for (long long i = 0; i < pvt_region; ++i)
+    for (size_t i = 0; i < pvt_region; ++i)
       {
         idata::pvt_info &pvto__ = pvto[i];
         idata::pvt_info &pvtw__ = pvtw[i];
