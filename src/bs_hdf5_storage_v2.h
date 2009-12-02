@@ -4,7 +4,6 @@
 #define BS_EAGLE_HDF5_STORAGE_V2_H_
 
 #include "shared_vector.h"
-#include "seq_vector.h"
 #include "constants.h"
 
 #include <boost/type_traits.hpp>
@@ -32,7 +31,7 @@ namespace blue_sky {
 
     template <typename T>
     inline const hid_t &
-    get_hdf5_type_ (const seq_vector <T> &)
+    get_hdf5_type_ (const shared_vector <T> &)
     {
       return get_hdf5_type_ <T> (T ());
     }
@@ -296,27 +295,9 @@ namespace blue_sky {
     return hdf5::private_::hdf5_buffer__ (T (), data.data (), data.size (), stride, offset);
   }
 
-  template <typename T>
-  inline hdf5::private_::hdf5_buffer__
-  hdf5_buffer (const seq_vector <T> &data, 
-      hdf5::private_::hdf5_buffer__::size_type stride = 0, 
-      hdf5::private_::hdf5_buffer__::size_type offset = 0)
-  {
-    return hdf5::private_::hdf5_buffer__ (T (), data.data (), data.size (), stride, offset);
-  }
-
   template <>
   inline hdf5::private_::hdf5_buffer__
   hdf5_buffer (const shared_vector <double> &data,
-      hdf5::private_::hdf5_buffer__::size_type stride,
-      hdf5::private_::hdf5_buffer__::size_type offset)
-  {
-    return hdf5::private_::hdf5_buffer__ (float (), data.data (), data.size (), stride, offset);
-  }
-
-  template <>
-  inline hdf5::private_::hdf5_buffer__
-  hdf5_buffer (const seq_vector <double> &data,
       hdf5::private_::hdf5_buffer__::size_type stride,
       hdf5::private_::hdf5_buffer__::size_type offset)
   {
@@ -371,7 +352,7 @@ namespace blue_sky {
     }
 
     void 
-    write (const seq_vector <T> &v)
+    write (const shared_vector <T> &v)
     {
       write_vec (&v[0], v.size ());
     }
@@ -439,12 +420,12 @@ namespace blue_sky {
     }
 
   public:
-    hid_t                     type;
-    size_t                    size;
+    hid_t                       type;
+    size_t                      size;
 
   private:
-    mutable void              *data_;
-    seq_vector <data_chunk>   chunks_;
+    mutable void                *data_;
+    shared_vector <data_chunk>  chunks_;
   };
 
   namespace hdf5 {
@@ -617,7 +598,7 @@ namespace blue_sky {
 
     template <typename T>
     hdf5_group_v2 &
-    write (const char *dataset, const seq_vector <T> &data)
+    write (const char *dataset, const shared_vector <T> &data)
     {
       return write_buffer (dataset, hdf5_buffer (data));
     }

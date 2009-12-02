@@ -12,7 +12,7 @@
 #include "py_bs_object_base.h"
 #include "hdf5_functions.h"
 #include "aligned_allocator.h"
-#include "seq_vector.h"
+#include "shared_vector.h"
 #include <vector>
 
 namespace blue_sky
@@ -40,7 +40,7 @@ namespace blue_sky
         }
 
         template<typename T>
-        int write (seq_vector<T> &x, std::string dataset_name)
+        int write (shared_vector<T> &x, std::string dataset_name)
         {
           return write_data_to_hdf5 (get_spx (this)->get_file_id(), dataset_name, &x[0], (int)x.size ());
         }
