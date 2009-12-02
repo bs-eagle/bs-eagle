@@ -6,7 +6,6 @@
  * */
 #include "bs_matrix_stdafx.h"
 
-#include "shared_vector.h"
 #include "matrix_base.h"
 #include "bcsr_matrix.h"
 #include "read_b_matrix.h"
@@ -50,19 +49,6 @@ BLUE_SKY_INIT_PY_FUN
 {
   using namespace boost::python;
 
-  //Python vector types
-  class_<shared_vector<float> >("vector_float")
-    .def(vector_indexing_suite<shared_vector<float> >())
-    ;
-
-  class_<shared_vector<double> >("vector_double")
-    .def(vector_indexing_suite<shared_vector<double> >())
-    ;
-
-  class_ <shared_vector <int> > ("vector_int")
-    .def (vector_indexing_suite <shared_vector <int> > ())
-    ;
-
   python::py_export_naive_file_reader ();
   python::py_export_save_seq_vector ();
 
@@ -70,8 +56,6 @@ BLUE_SKY_INIT_PY_FUN
   python::py_export_jacobian_matrix ();
 
   python::py_export_read_b_matrix ();
-
-  
 }
 #endif
 

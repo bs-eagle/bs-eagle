@@ -211,69 +211,9 @@ namespace python {
     //  REGISTER_PROPERTIES (0, 16, (idata_export, double_names_table, idata_float_array_getter, strategy_t));
     //}
 
-  template <typename T>
-  long 
-  get_index (T *c, typename T::size_type i, const char *context)
-  {
-    long index = long (i);
-    if (index < 0)
-      {
-        index += (long)c->size ();
-      }
-    if (index >= long (c->size ()) || index < 0)
-      {
-        bs_throw_exception ((boost::format ("[%s] Index out of range: %d -> %d") % context % c->size () % index).str ());
-      }
-
-    return index;
-  }
-
-  template <typename T>
-  typename T::value_type
-  get_item_array_ext (T *c, typename T::size_type i)
-  {
-    return (*c)[get_index (c, i, "get_item_array_ext")];
-  }
-  template <typename T>
-  void 
-  set_item_array_ext (T *c, typename T::size_type i, const typename T::value_type &v)
-  {
-    (*c)[get_index (c, i, "set_item_array_ext")] = v;
-  }
-
-  template <typename T>
-  typename T::size_type
-  get_size (T *t)
-  {
-    return t->size ();
-  }
-
-  template <typename T>
-  void
-  get_resize (T *t, size_t s, typename T::value_type v)
-  {
-    t->resize (s, v);
-    t->assign (s, v);
-  }
-
-  template <typename T>
-  void 
-  py_export_shared_vector (const char *name)
-  {
-    class_ <T> (name)
-      .def ("__len__",      make_function (get_size <T>))
-      .def ("__iter__",     bp::iterator <T> ())
-      .def ("__getitem__",  get_item_array_ext <T>)
-      .def ("__setitem__",  set_item_array_ext <T>)
-      .def ("resize",       get_resize <T>)
-      ;
-  }
 
   void py_export_idata()
   {
-    py_export_shared_vector <array_float16_t> ("array_ext_f");
-    py_export_shared_vector <array_uint8_t>   ("array_ext_i");
-
     base_exporter <idata, idata_exporter>::export_class ("idata");
   }
 

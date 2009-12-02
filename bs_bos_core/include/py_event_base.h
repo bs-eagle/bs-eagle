@@ -34,7 +34,6 @@ namespace python {
     public:
       typedef rs_mesh_iface <strategy_t>        mesh_t;
       typedef reservoir <strategy_t>            reservoir_t;
-      typedef py_calc_model <strategy_t>        py_calc_model_t;
       typedef smart_ptr <mesh_t, true>          sp_mesh_iface_t;
       typedef smart_ptr <reservoir_t, true>     sp_reservoir_t;
       typedef event_base <strategy_t>           base_t;

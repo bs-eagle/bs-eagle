@@ -28,6 +28,14 @@ namespace blue_sky {
       typedef boost::array <item_t, FI_PHASE_TOT>                 item_array_N_t;   //!< type for store N-Phase values
       typedef boost::array <item_t, FI_PHASE_TOT - 1>             item_array_N_1_t; //!< type for store N-1-Phase values, for example for 3phase model stores 2phase values
       typedef boost::array <item_t, FI_PHASE_TOT * FI_PHASE_TOT>  item_array_N_N_t; //!< type for store N*N-Phase values
+
+
+      bool
+      operator== (const this_t &rhs)
+      {
+        bs_throw_exception ("calc_model_data objects are not comparable");
+      }
+
 //#else
 //      typedef array_ext <item_t>      item_array_N_t;
 //      typedef array_ext <item_t>      item_array_N_1_t;
