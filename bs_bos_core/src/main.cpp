@@ -437,8 +437,8 @@ BLUE_SKY_INIT_PY_FUN
 
   py_export_two_stage_prec ();
 
-  //python::py_export_events ();
-  //py_export_event_manager();
+  py_export_events ();
+  py_export_event_manager();
 
   python::py_export_reservoir_simulator ();
   python::py_export_calc_model ();

@@ -17,6 +17,10 @@
 #include "well_connection.h"
 #include "calc_model.h"
 
+#include "export_python_wrapper.h"
+
+#include <boost/python/suite/indexing/map_indexing_suite.hpp>
+
 using namespace boost;
 using namespace boost::posix_time;
 
@@ -91,12 +95,48 @@ namespace python {
       ;
   }
 
+  PY_EXPORTER (event_manager_exporter, default_exporter)
+    .add_property ("event_list", &T::event_list)
+  PY_EXPORTER_END;
+
+  template <typename T>
+  void
+  list_begin (T *t)
+  {
+  }
+
+  template <typename T>
+  void
+  export_event_list (const char *name)
+  {
+    using namespace boost::python;
+
+    class_ <T> (name)
+      .def ("begin", list_begin <T>)
+      ;
+  }
+
+  template <typename T>
+  void
+  export_event_map (const char *name)
+  {
+    using namespace boost::python;
+
+    class_ <T> (name)
+      .def (map_indexing_suite <T> ())
+      ;
+  }
+
   void
   py_export_event_manager ()
   {
-    py_export_event_manager_ <base_strategy_fi> ("event_manager_seq_fi");
-    py_export_event_manager_ <base_strategy_di> ("event_manager_seq_di");
-    py_export_event_manager_ <base_strategy_mixi> ("event_manager_seq_mixi");
+    typedef event_base <base_strategy_di> event_base_di_t;
+    typedef std::list <smart_ptr <event_base_di_t> > event_list_di_t;
+
+    export_event_list <event_list_di_t> ("event_list_di");
+    export_event_map <std::map <boost::posix_time::ptime, event_list_di_t> > ("event_map_di");
+
+    strategy_exporter::export_base <event_manager, event_manager_exporter> ("event_manager");
   }
 
   template class py_event_manager <base_strategy_fi>;

@@ -300,11 +300,12 @@ namespace blue_sky
 
     void py_export_events ()
     {
-      strategy_exporter::export_class <py_event_base, event_base, event_base_exporter> ("event_base");
+      strategy_exporter::export_base <event_base, event_base_exporter> ("event_base");
+      strategy_exporter::export_class <py_event_base, event_base, event_base_exporter> ("py_event_base");
 
-      export_py_event_base <base_strategy_fi> ("event_base_f");
-      export_py_event_base <base_strategy_di> ("event_base_d");
-      export_py_event_base <base_strategy_mixi> ("event_base_m");
+      //export_py_event_base <base_strategy_fi> ("event_base_f");
+      //export_py_event_base <base_strategy_di> ("event_base_d");
+      //export_py_event_base <base_strategy_mixi> ("event_base_m");
     }
 
     template class py_el_pair <base_strategy_fi>;
