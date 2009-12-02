@@ -13,7 +13,7 @@
 #include "mpi_vector.h"
 #endif
 
-#include "seq_vector.h"
+#include "shared_vector.h"
 
 namespace blue_sky
 {
@@ -69,26 +69,27 @@ namespace blue_sky
   template <class rhs_fp_type, class fp_type, class i_type>
   struct BS_API_PLUGIN base_strategy
   {
+    typedef seq_barrier                                       barrier_t;          ///< short name for barrier
+
     typedef fp_type                                           item_t;             ///< short name for floating point type (old array_item_t)
     typedef i_type                                            index_t;            ///< short name for index type
-    typedef seq_vector<item_t>                                item_array_t;       ///< short name for array type (old array_t)
-    typedef seq_vector<index_t>                               index_array_t;      ///< short name for type of array of indexes
+    typedef shared_vector <item_t>                            item_array_t;       ///< short name for array type (old array_t)
+    typedef shared_vector <index_t>                           index_array_t;      ///< short name for type of array of indexes
     typedef rhs_fp_type		                                    rhs_item_t;         ///< short name for type of rhs
-    typedef seq_vector<rhs_item_t>	                          rhs_item_array_t;   ///< short name for rhs array type
+    typedef shared_vector <rhs_item_t>	                      rhs_item_array_t;   ///< short name for rhs array type
 
     typedef matrix_base<rhs_item_array_t, index_array_t>      matrix_t;           ///< short name for matrix type
     typedef bcsr_matrix<rhs_item_array_t, index_array_t>      csr_matrix_t;       ///< short name for csr_matrix type (it's fail way today)
 
-    typedef std::vector<matrix_t>                             matrix_array_t;     ///< short name for vector of matrices type
-    typedef seq_vector<fp_type>                               wksp_t;             ///< short name for workspace array
+    typedef shared_vector <fp_type>                           wksp_t;             ///< short name for workspace array
+
+    //typedef std::vector<matrix_t>                             matrix_array_t;     ///< short name for vector of matrices type
 
     template <typename T>
     struct vec
       {
-        typedef seq_vector <T>              type;               ///< helper to define type of vector with element T
+        typedef shared_vector <T>                             type;               ///< helper to define type of vector with element T
       };
-
-    typedef seq_barrier                   barrier_t;          ///< short name for barrier
   };
 
   struct BS_API_PLUGIN base_strategy_di : public base_strategy<double, double, int>

@@ -84,7 +84,7 @@ namespace python {
     py_export_<bcsr_matrix_di> ("bcsr_matrix_di");
     py_export_<bcsr_matrix_fi> ("bcsr_matrix_fi");
 
-    register_ptr_to_python <matrix_base <seq_vector <double>, seq_vector <int> > *> ();
+    register_ptr_to_python <matrix_base <shared_vector <double>, shared_vector <int> > *> ();
     register_ptr_to_python <base_matrix_fi *> ();
     register_ptr_to_python <smart_ptr <base_matrix_di, true> > ();
     register_ptr_to_python <smart_ptr <base_matrix_fi, true> > ();

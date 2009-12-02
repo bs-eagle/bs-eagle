@@ -380,7 +380,6 @@ namespace blue_sky
       typedef typename strategy_t::item_array_t   item_array_t;   ///< short name to array type
       typedef typename strategy_t::item_t         item_t;         ///< short name to array item type
       typedef typename strategy_t::index_t        index_t;        ///< short name to matrix's index type
-      typedef typename strategy_t::matrix_array_t matrix_array_t; ///< short name to matrix array type
 
       typedef typename strategy_t::rhs_item_t	  rhs_item_t;     ///< short name for type of rhs
       typedef typename strategy_t::rhs_item_array_t	rhs_item_array_t;   ///< short name for rhs array type

@@ -9,7 +9,7 @@
 
 #include <cstdio>
 
-#include "seq_vector.h"
+#include "shared_vector.h"
 #include "locale_keeper.h"
 #include "bs_assert.h"
 

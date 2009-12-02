@@ -18,7 +18,7 @@ namespace blue_sky {
 
   template <typename item_t, typename val_t>
   BS_FORCE_INLINE void
-  assign (seq_vector <item_t> &array, const val_t &val)
+  assign (shared_vector <item_t> &array, const val_t &val)
   {
     size_t size = array.size ();
     if (size)
@@ -27,7 +27,7 @@ namespace blue_sky {
 
   template <typename item_t, typename val_t, typename size_type>
   BS_FORCE_INLINE void
-  assign (seq_vector <item_t> &array, size_type size, const val_t &val)
+  assign (shared_vector <item_t> &array, size_type size, const val_t &val)
   {
     array.resize (size);
     assign (array, val);

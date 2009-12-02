@@ -289,11 +289,11 @@ namespace blue_sky
     for (int i = 0, cnt = (int)vec_p.size (); i < cnt; ++i)
       {
         vec_p[i] = item_array_t ();
-        vec_p[i].template init_by_matrix<matrix_t> (matrix);
+        matrix->init_vector (vec_p[i]);
       }
 
-    vec_w.template init_by_matrix<matrix_t> (matrix);
-    vec_r.template init_by_matrix<matrix_t> (matrix);
+    matrix->init_vector (vec_w);
+    matrix->init_vector (vec_r);
 
     // initialize work arrays
     s = &base_t::wksp[0];

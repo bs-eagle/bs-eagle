@@ -12,7 +12,7 @@ namespace blue_sky
 
   template <class solver_t>
   int
-  solve_helper (solver_t *solver, typename solver_t::matrix_t *mx, seq_vector <float> &rhs, typename solver_t::item_array_t &sol)
+  solve_helper (solver_t *solver, typename solver_t::matrix_t *mx, shared_vector <float> &rhs, typename solver_t::item_array_t &sol)
     {
       solver->solve (mx, rhs, sol);
       return 0;
@@ -20,7 +20,7 @@ namespace blue_sky
 
   template <class solver_t>
   int
-  solve_helper (solver_t *solver, typename solver_t::matrix_t *mx, seq_vector <double> &rhs, typename solver_t::item_array_t &sol)
+  solve_helper (solver_t *solver, typename solver_t::matrix_t *mx, shared_vector <double> &rhs, typename solver_t::item_array_t &sol)
     {
       solver->solve_prec (mx, rhs, sol);
       return 0;

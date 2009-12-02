@@ -388,7 +388,7 @@ namespace blue_sky
       {
         static size_t iter_counter = 0;
         ++iter_counter;
-        tools::save_seq_vector (tools::string_formater ("nw_saturation.bs.%d.txt", iter_counter).str).save (calc_model_->saturation_3p);
+        //tools::save_seq_vector (tools::string_formater ("nw_saturation.bs.%d.txt", iter_counter).str).save (calc_model_->saturation_3p);
       }
       /**
        * \brief  Saves pressure values to file
@@ -399,7 +399,7 @@ namespace blue_sky
       {
         static size_t iter_counter = 0;
         ++iter_counter;
-        tools::save_seq_vector (tools::string_formater ("nw_pressure.bs.%d.txt", iter_counter).str).save (calc_model_->pressure);
+        //tools::save_seq_vector (tools::string_formater ("nw_pressure.bs.%d.txt", iter_counter).str).save (calc_model_->pressure);
       }
 
       /**
@@ -411,7 +411,7 @@ namespace blue_sky
       {
         static size_t iter_counter = 0;
         ++iter_counter;
-        tools::save_seq_vector (tools::string_formater ("nw_volumes.bs.%d.txt", iter_counter).str).save (calc_model_->rock_grid_prop->volume);
+        //tools::save_seq_vector (tools::string_formater ("nw_volumes.bs.%d.txt", iter_counter).str).save (calc_model_->rock_grid_prop->volume);
       }
 
       inline bool

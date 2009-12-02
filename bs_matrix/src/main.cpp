@@ -6,7 +6,7 @@
  * */
 #include "bs_matrix_stdafx.h"
 
-#include "seq_vector.h"
+#include "shared_vector.h"
 #include "matrix_base.h"
 #include "bcsr_matrix.h"
 #include "read_b_matrix.h"
@@ -33,11 +33,11 @@ namespace blue_sky {
 
     bool res = true;
 
-    res &= BS_KERNEL.register_type(*bs_init.pd_, matrix_base<seq_vector<float>, seq_vector<int> >::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, matrix_base<seq_vector<double>, seq_vector<int> >::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, matrix_base<shared_vector<float>, shared_vector<int> >::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, matrix_base<shared_vector<double>, shared_vector<int> >::bs_type()); BS_ASSERT (res);
 
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_matrix<seq_vector<float>, seq_vector<int> >::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_matrix<seq_vector<double>, seq_vector<int> >::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_matrix<shared_vector<float>, shared_vector<int> >::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_matrix<shared_vector<double>, shared_vector<int> >::bs_type()); BS_ASSERT (res);
 
     res &= blue_sky::jacobian_matrix_register_type (pd); BS_ASSERT (res);
 
@@ -51,16 +51,16 @@ BLUE_SKY_INIT_PY_FUN
   using namespace boost::python;
 
   //Python vector types
-  class_<seq_vector<float> >("vector_float")
-    .def(vector_indexing_suite<seq_vector<float> >())
+  class_<shared_vector<float> >("vector_float")
+    .def(vector_indexing_suite<shared_vector<float> >())
     ;
 
-  class_<seq_vector<double> >("vector_double")
-    .def(vector_indexing_suite<seq_vector<double> >())
+  class_<shared_vector<double> >("vector_double")
+    .def(vector_indexing_suite<shared_vector<double> >())
     ;
 
-  class_ <seq_vector <int> > ("vector_int")
-    .def (vector_indexing_suite <seq_vector <int> > ())
+  class_ <shared_vector <int> > ("vector_int")
+    .def (vector_indexing_suite <shared_vector <int> > ())
     ;
 
   python::py_export_naive_file_reader ();

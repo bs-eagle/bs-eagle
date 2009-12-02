@@ -13,7 +13,7 @@
 #include "matrix_base.h"
 #include "matrix_macroses.h"
 #include "setup_preconditioner.h"
-#include "seq_vector.h"
+#include "shared_vector.h"
 
 #include "vector_assign.h"
 
@@ -55,8 +55,8 @@ namespace blue_sky
       typedef bcsr_matrix<fp_vector_t, i_vector_t>  this_t;
       typedef matrix_t                              matrix_base_t;
 
-      typedef seq_vector <float>                    float_array_t;
-      typedef seq_vector <double>                   double_array_t;
+      typedef shared_vector <float>                 float_array_t;
+      typedef shared_vector <double>                double_array_t;
 
       typedef smart_ptr <matrix_t, true>            sp_matrix_t;
       typedef smart_ptr<this_t, true>               sp_bcsr_matrix_t;
@@ -277,6 +277,22 @@ namespace blue_sky
 
       //! merge two csr matrices into current
       int merge(const this_t *lhs, const this_t *rhs, int key, const item_array_t &cfl_vector);
+
+      virtual void
+      init_vector (float_array_t &v)
+      {
+        v.assign (this->n_rows * this->n_block_size, 0);
+      }
+      virtual void
+      init_vector (double_array_t &v)
+      {
+        v.assign (this->n_rows * this->n_block_size, 0);
+      }
+      virtual void
+      init_vector (i_vector_t &v)
+      {
+        v.assign (this->n_rows * this->n_block_size, 0);
+      }
 
     public:
       ////////////////////////

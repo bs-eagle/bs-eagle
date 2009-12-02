@@ -9,6 +9,7 @@
 
 #include "bs_object_base.h"
 #include "bs_assert.h"
+#include "throw_exception.h"
 
 
 /**
@@ -191,6 +192,21 @@ namespace blue_sky
         n_cols = n;
       }
 
+      virtual void
+      init_vector (float_array_t &v)
+      {
+        bs_throw_exception ("PURE CALL");
+      }
+      virtual void
+      init_vector (double_array_t &v)
+      {
+        bs_throw_exception ("PURE CALL");
+      }
+      virtual void
+      init_vector (i_vector_t &v)
+      {
+        bs_throw_exception ("PURE CALL");
+      }
 
     public:
       i_type_t n_block_size;        //!< block size

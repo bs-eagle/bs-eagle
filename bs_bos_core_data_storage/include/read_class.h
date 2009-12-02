@@ -285,7 +285,7 @@ namespace detail {
       {
         typedef typename array_t::value_type item_t;
 
-        seq_vector <item_t> temp;
+        shared_vector <item_t> temp;
         temp.resize(num_col);
 
         size_t line_count = 0;
@@ -312,7 +312,7 @@ namespace detail {
         return feof (fp);
       }
 
-      typedef seq_vector <include_file> file_list_t;
+      typedef shared_vector <include_file> file_list_t;
 
       //! set pointer to the external include list
       void 

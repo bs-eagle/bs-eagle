@@ -8,7 +8,7 @@
 
 #include "strategies.h"
 #include "jacobian_matrix.h"
-#include "seq_vector.h"
+#include "shared_vector.h"
 #include "naive_file_reader.h"
 #include "read_b_matrix.h"
 //#include "mesh_rs.h"

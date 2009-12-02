@@ -29,9 +29,6 @@ namespace blue_sky
       typedef typename strategy_t::rhs_item_t	  rhs_item_t;     ///< short name for type of rhs
       typedef typename strategy_t::rhs_item_array_t	rhs_item_array_t;   ///< short name for rhs array type
 
-
-      typedef typename strategy_t::matrix_array_t matrix_array_t; ///< short name to matrix array type
-
       typedef typename strategy_t::index_array_t  index_array_t;
 
       typedef linear_solver_base<strategy_t>      this_t;         ///< typedef to this type

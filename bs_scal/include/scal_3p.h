@@ -49,7 +49,7 @@ namespace blue_sky
       typedef boost::array <index_t, FI_PHASE_TOT>			sat_d_t;
 
       typedef calc_model_data <strategy_t>              data_t;
-      typedef seq_vector <data_t>                       data_array_t;
+      typedef shared_vector <data_t>                    data_array_t;
 
       typedef unsigned char															phase_index_t;
       typedef unsigned char															sat_index_t;

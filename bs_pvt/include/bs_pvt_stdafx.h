@@ -75,7 +75,7 @@
 #include "strategies.h"
 
 #include "constants.h"
-#include "seq_vector.h"
+#include "shared_vector.h"
 #include "naive_file_reader.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 

@@ -18,7 +18,7 @@ namespace blue_sky
 
       struct separate_scale_vectors_t
         {
-          typedef seq_vector <float> vector_t;
+          typedef shared_vector <float> vector_t;
 
           enum array_name
           {
@@ -298,7 +298,7 @@ private:
 
       struct struct_like_scale_arrays_t
         {
-          typedef seq_vector <float> vector_t;
+          typedef shared_vector <float> vector_t;
 
           enum field_name
           {
@@ -470,7 +470,7 @@ private:
           }
 
           static void
-          copy (vector_t &dst, const seq_vector <double> &src, int before, int after, int size)
+          copy (vector_t &dst, const shared_vector <double> &src, int before, int after, int size)
           {
             int count = before + after;
             for (int i = size - 1; i >= 0; --i)
@@ -486,7 +486,7 @@ private:
           }
 
           static void
-          set_stored (vector_t &dst, const seq_vector <double> &src, int offset, int step, int size)
+          set_stored (vector_t &dst, const shared_vector <double> &src, int offset, int step, int size)
           {
             vector_t::value_type *d = &dst[offset];
             for (int si = 0, di = 0; si < size; ++si, di += step)

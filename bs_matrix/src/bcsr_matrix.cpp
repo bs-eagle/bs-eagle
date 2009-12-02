@@ -1293,7 +1293,7 @@ namespace blue_sky
   BLUE_SKY_TYPE_STD_CREATE_T_DEF(bcsr_matrix, (class)(class));
   BLUE_SKY_TYPE_STD_COPY_T_DEF(bcsr_matrix, (class)(class));
 
-  BLUE_SKY_TYPE_IMPL_T_EXT(2, (bcsr_matrix<seq_vector<float>, seq_vector<int> >) , 2, (matrix_base<seq_vector<float>, seq_vector<int> >), "bcsr_matrix<float, int>", "Block CSR Matrix class", "Realization of Block CSR Matricies", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(2, (bcsr_matrix<seq_vector<double>, seq_vector<int> >) , 2, (matrix_base<seq_vector<double>, seq_vector<int> >), "bcsr_matrix<double, int>", "Block CSR Matrix class", "Realization of Block CSR Matricies", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT(2, (bcsr_matrix<shared_vector<float>, shared_vector<int> >) , 2, (matrix_base<shared_vector<float>, shared_vector<int> >), "bcsr_matrix<float, int>", "Block CSR Matrix class", "Realization of Block CSR Matricies", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT(2, (bcsr_matrix<shared_vector<double>, shared_vector<int> >) , 2, (matrix_base<shared_vector<double>, shared_vector<int> >), "bcsr_matrix<double, int>", "Block CSR Matrix class", "Realization of Block CSR Matricies", false);
 
 }//bs ns

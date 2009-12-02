@@ -125,7 +125,7 @@
 #include "mv_tools.h"
 
 #include "aligned_allocator.h"
-#include "seq_vector.h"
+#include "shared_vector.h"
 
 #ifdef _MPI
   #include "mpi_type_t.h"

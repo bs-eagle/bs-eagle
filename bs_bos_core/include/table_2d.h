@@ -10,7 +10,7 @@
 #ifndef BS_TABLE_2D_H_
 #define BS_TABLE_2D_H_
 
-#include "seq_vector.h"
+#include "shared_vector.h"
 
 namespace blue_sky
   {
@@ -377,7 +377,7 @@ namespace blue_sky
       private:
 
         typedef item_array_t              data_t;
-        typedef seq_vector <data_group_t> group_list_t;
+        typedef shared_vector <data_group_t> group_list_t;
 
         data_t        data;
         group_list_t  group_list;

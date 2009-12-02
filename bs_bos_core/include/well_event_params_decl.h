@@ -113,7 +113,7 @@
 #define NEXT_LINE_PARAMS(seq)                                                 \
   MAIN_PARAMS_DECLARE_CLASS (next_line_params_class, seq);                    \
   typedef smart_ptr <next_line_params_class, true>  sp_next_line_params_t;    \
-  seq_vector <sp_next_line_params_t>      next_line_params_;                  \
+  shared_vector <sp_next_line_params_t>      next_line_params_;               \
   smart_ptr <named_pbase, true>                                               \
   add_next_line_params ()                                                     \
   {                                                                           \

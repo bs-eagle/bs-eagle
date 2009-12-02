@@ -6,7 +6,7 @@
 
 #include "matrix_base.h"
 #include "bs_kernel.h"
-#include "seq_vector.h"
+#include "shared_vector.h"
 
 namespace blue_sky
   {
@@ -34,8 +34,8 @@ namespace blue_sky
   BLUE_SKY_TYPE_STD_CREATE_T_DEF(matrix_base, (class)(class));
   BLUE_SKY_TYPE_STD_COPY_T_DEF(matrix_base, (class)(class));
 
-  BLUE_SKY_TYPE_IMPL_T_EXT(2, (matrix_base<seq_vector<float>, seq_vector<int> >) , 1, (objbase), "matrix_base<float, int>", "Base Matrix class", "Realization of Base Matricies", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(2, (matrix_base<seq_vector<double>, seq_vector<int> >) , 1, (objbase), "matrix_base<double, int>", "Base Matrix class", "Realization of Base Matricies", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT(2, (matrix_base<shared_vector<float>, shared_vector<int> >) , 1, (objbase), "matrix_base<float, int>", "Base Matrix class", "Realization of Base Matricies", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT(2, (matrix_base<shared_vector<double>, shared_vector<int> >) , 1, (objbase), "matrix_base<double, int>", "Base Matrix class", "Realization of Base Matricies", false);
 
 #ifdef _MPI
   BLUE_SKY_TYPE_IMPL_T_EXT(2, (matrix_base<mpi_vector<float>, mpi_vector<int> >) , 1, (objbase), "matrix_mpi<float, int>", "MPI Matrix class", "Realization of MPI Matricies", false);

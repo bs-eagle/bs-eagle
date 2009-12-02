@@ -84,7 +84,7 @@
 
 #include "aligned_allocator.h"
 #include "strategies.h"
-#include "seq_vector.h"
+#include "shared_vector.h"
 #include "bs_prop_base.h"
 #include "vector_assign.h"
 #include "locale_keeper.h"

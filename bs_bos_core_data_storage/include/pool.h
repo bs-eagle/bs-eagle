@@ -43,8 +43,7 @@ namespace blue_sky
     typedef index_type                            index_t;
     typedef item_type                             item_t;         //! type of value
     typedef bs_array_map <index_type, item_type>  this_t;         //! type of *this
-    typedef aligned_allocator <item_t, 16>        allocator_t;
-    typedef shared_vector <item_t, allocator_t>   shared_vector_t;
+    typedef shared_vector <item_t>                shared_vector_t;
 
     //! \brief class of array dimension parameters
     struct array_info

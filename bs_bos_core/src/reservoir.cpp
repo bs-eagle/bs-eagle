@@ -383,8 +383,8 @@ namespace blue_sky
   int n_phases = calc_model->n_phases;
   // temporary storage for values, need to extract saturations
   // and converting to float if need.
-  seq_vector <float> tmp_buf (n_elem_local);
-  seq_vector <int> main_var_tmp (n_elem_local);
+  shared_vector <float> tmp_buf (n_elem_local);
+  shared_vector <int> main_var_tmp (n_elem_local);
   //tmp_buf.resize (n_elem_local);
 
   if ((l_time_step_num % calc_model->ts_params->get_int (fi_params::SAVE_STEP_DATA_PERIOD) == 0)

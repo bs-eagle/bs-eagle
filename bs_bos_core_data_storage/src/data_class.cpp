@@ -168,7 +168,7 @@ namespace blue_sky
     this->pvtw.resize(r_pvt);
   }
 
-  void idata::set_density (const seq_vector <double> &density)
+  void idata::set_density (const shared_vector <double> &density)
   {
     if ((density.size() % 3 != 0) || (density.size()<3))
       {

@@ -2676,7 +2676,7 @@ struct build_jacobian_and_flux : boost::noncopyable
   index_t                     nx;
   index_t                     ny;
   index_t                     nz;
-  seq_vector <bool>           is_butting;
+  shared_vector <bool>        is_butting;
   index_t                     con_num;
 };
 

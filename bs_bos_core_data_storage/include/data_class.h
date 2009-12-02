@@ -66,15 +66,15 @@ namespace blue_sky {
       typedef smart_ptr<amap_i>                           sp_amap_i;
       typedef smart_ptr<amap_d>                           sp_amap_d;
 
-      typedef seq_vector <val_vs_depth>                   vval_vs_depth;
-      typedef seq_vector <float16_t>                      vec_d;
-      typedef seq_vector <uint8_t>                        vec_i;
+      typedef shared_vector <val_vs_depth>                vval_vs_depth;
+      typedef shared_vector <float16_t>                   vec_d;
+      typedef shared_vector <uint8_t>                     vec_i;
 
       typedef smart_ptr <FRead, true>										  sp_reader_t;
 
       struct pvt_info
         {
-          typedef seq_vector <double> main_pvt_data_t;
+          typedef shared_vector <double> main_pvt_data_t;
 
           main_pvt_data_t							main_data_;
           auto_value <bool, false>		has_density_;
@@ -82,7 +82,7 @@ namespace blue_sky {
           auto_value <double>         molar_density_;
         };
 
-      typedef seq_vector <pvt_info>											pvt_vector;
+      typedef shared_vector <pvt_info>									  pvt_vector;
 
 			struct BS_API_PLUGIN arrays_helper {
 				typedef std::map < std::string, int > names_map_t;
@@ -118,7 +118,7 @@ namespace blue_sky {
       void set_defaults_in_pool();
       void set_region (int r_pvt, int r_sat, int r_eql, int r_fip);
 
-      void set_density (const seq_vector <double> &density);
+      void set_density (const shared_vector <double> &density);
       void set_density_internal (const double *density);
 
       //! return prvd vector

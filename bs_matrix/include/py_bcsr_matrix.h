@@ -343,11 +343,11 @@ namespace blue_sky
     //  return return_value;
     //}
 
-    typedef bcsr_matrix <seq_vector<float>,  seq_vector<int> >    bcsr_matrix_fi;
-    typedef bcsr_matrix <seq_vector<double>, seq_vector<int> >    bcsr_matrix_di;
+    typedef bcsr_matrix <shared_vector<float>,  shared_vector<int> >    bcsr_matrix_fi;
+    typedef bcsr_matrix <shared_vector<double>, shared_vector<int> >    bcsr_matrix_di;
 
-    typedef matrix_base <seq_vector<double>, seq_vector<int> >    base_matrix_di;
-    typedef matrix_base <seq_vector<float>,  seq_vector<int> >    base_matrix_fi;
+    typedef matrix_base <shared_vector<double>, shared_vector<int> >    base_matrix_di;
+    typedef matrix_base <shared_vector<float>,  shared_vector<int> >    base_matrix_fi;
   }
 }//ns bs
 #endif //BSPY_EXPORT_PLUGIN

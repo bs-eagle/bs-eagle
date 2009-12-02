@@ -43,7 +43,7 @@ namespace wells {
       typedef typename base_t::sp_connection_t          sp_connection_t;
       typedef smart_ptr <default_connection_t>          sp_default_connection_t;
 
-      typedef seq_vector <sp_default_connection_t>      connection_list_t;
+      typedef shared_vector <sp_default_connection_t>   connection_list_t;
       typedef index_t                                   connection_block_t;
       typedef index_t                                   connection_index_t;
 

@@ -59,7 +59,7 @@ namespace blue_sky
   public:
     typedef typename strategy_t::item_array_t         item_array_t;
     typedef typename strategy_t::rhs_item_array_t     rhs_item_array_t;
-    typedef seq_vector <const char *>                 name_array_t;
+    typedef shared_vector <const char *>              name_array_t;
 
   public:
     //! default constructor

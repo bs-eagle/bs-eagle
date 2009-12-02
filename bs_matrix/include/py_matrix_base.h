@@ -22,8 +22,8 @@ namespace blue_sky
         typedef matrix_t                                          wrapped_t;
         typedef typename matrix_t::item_t                         item_t;
         typedef typename matrix_t::index_t                        index_t;
-        typedef seq_vector <item_t>                               item_seq_array_t;
-        typedef seq_vector <index_t>                              index_seq_array_t;
+        typedef shared_vector <item_t>                            item_seq_array_t;
+        typedef shared_vector <index_t>                           index_seq_array_t;
 
       public:
 

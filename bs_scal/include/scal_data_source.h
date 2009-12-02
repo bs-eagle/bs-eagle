@@ -59,7 +59,7 @@ namespace blue_sky
 
   struct input_scal_region
     {
-      typedef seq_vector <double> vector_t;
+      typedef shared_vector <double> vector_t;
 
       vector_t    So;                       ///< oil saturation
       vector_t    Sp;                       ///< phase (water or gas) saturation

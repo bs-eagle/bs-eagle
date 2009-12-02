@@ -28,8 +28,8 @@ namespace blue_sky {
     typedef scal_region_info <strategy_t>           scal_region_info_t;
     typedef data_vector<strategy_t>                 data_vector_t;
     typedef typename strategy_t::item_array_t       item_array_t;
-    typedef seq_vector <scal_region_info_t>         region_vector_t;
-    typedef seq_vector <scal_region_t *>            region_vector_2_t;
+    typedef shared_vector <scal_region_info_t>      region_vector_t;
+    typedef shared_vector <scal_region_t *>         region_vector_2_t;
 
     typedef smart_ptr <this_t, true>								sp_scal_data_t;
 

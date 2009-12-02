@@ -38,7 +38,7 @@ namespace blue_sky
       typedef typename strategy_t::index_t						index_t;
       typedef typename strategy_t::item_array_t			  item_array_t;
       typedef typename strategy_t::index_array_t		  index_array_t;
-      typedef seq_vector <double>    		              input_vector_t;
+      typedef shared_vector <double>    		          input_vector_t;
 
       typedef std::vector <item_t>                    vector_t;
 

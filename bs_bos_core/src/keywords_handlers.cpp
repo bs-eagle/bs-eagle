@@ -600,7 +600,7 @@ namespace blue_sky
   void keyword_manager<strategy_t>::REGNUM_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    seq_vector<int> itmp;
+    shared_vector<int> itmp;
     itmp.resize(4);
     sp_idata_t idata (params.data, bs_dynamic_cast ());
 
@@ -624,7 +624,7 @@ namespace blue_sky
   void keyword_manager<strategy_t>::REGDIMS_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    seq_vector<int> itmp;
+    shared_vector<int> itmp;
     itmp.resize(4);
     sp_idata_t idata (params.data, bs_dynamic_cast ());
     
@@ -649,7 +649,7 @@ namespace blue_sky
   void keyword_manager<strategy_t>::EQLDIMS_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    seq_vector <int> itmp;
+    shared_vector <int> itmp;
     itmp.resize(1);
     sp_idata_t idata (params.data, bs_dynamic_cast ());
     
@@ -735,7 +735,7 @@ namespace blue_sky
   void keyword_manager<strategy_t>::MINPV_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    seq_vector <double> tmp;
+    shared_vector <double> tmp;
     tmp.resize(1);
     sp_idata_t idata (params.data, bs_dynamic_cast ());
     
@@ -753,7 +753,7 @@ namespace blue_sky
   void keyword_manager<strategy_t>::MINSV_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    seq_vector <double> tmp;
+    shared_vector <double> tmp;
     tmp.resize(1);
     sp_idata_t idata (params.data, bs_dynamic_cast ());
     
@@ -771,7 +771,7 @@ namespace blue_sky
   {
     KH_READER_DEF
     sp_idata_t idata (params.data, bs_dynamic_cast ());
-    seq_vector <double> density;
+    shared_vector <double> density;
     
     density.resize (idata->pvt_region*3);
     
@@ -812,7 +812,7 @@ namespace blue_sky
     idata->rocktab.resize (idata->rock_region);
 
     // Read table for each of region
-    seq_vector <double> dbuf;
+    shared_vector <double> dbuf;
     for (index_t i = 0; i < idata->rock_region; i++)
       {
         std::vector <float> &p_col = idata->rocktab[i].get_column (0);
@@ -1341,7 +1341,7 @@ namespace blue_sky
     idata->prvd.resize(idata->eql_region);
 
     // Read table for each of region
-    seq_vector <double> dbuf;
+    shared_vector <double> dbuf;
     for (index_t i = 0; i < idata->eql_region; ++i)
       {
         if ((len =reader->read_table (keyword, dbuf, 2)) < 1)
@@ -1379,7 +1379,7 @@ namespace blue_sky
     idata->rsvd.resize(idata->eql_region);
 
     // Read table for each of region
-    seq_vector <double> dbuf;
+    shared_vector <double> dbuf;
     for (index_t i = 0; i < idata->eql_region; ++i)
       {
         if ((len =reader->read_table (keyword, dbuf, 2)) < 1)
@@ -1420,7 +1420,7 @@ namespace blue_sky
     idata->pbvd.resize(idata->eql_region);
 
     // Read table for each of region
-    seq_vector <double> dbuf;
+    shared_vector <double> dbuf;
     for (index_t i = 0; i < idata->eql_region; ++i)
       {
         if ((len =reader->read_table (keyword, dbuf, 2)) < 1)
@@ -1505,7 +1505,7 @@ namespace blue_sky
   void keyword_manager<strategy_t>::TSTEP_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    seq_vector <double> dtmp;
+    shared_vector <double> dtmp;
     dtmp.resize(MAX_TIME_STEPS_DEF);
     typedef event_manager <strategy_t> event_manager_t;
     typedef smart_ptr <event_manager_t, true>	sp_event_manager_t;
