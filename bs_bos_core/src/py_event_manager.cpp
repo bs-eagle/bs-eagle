@@ -20,6 +20,7 @@
 #include "export_python_wrapper.h"
 
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
+#include <datetime.h>
 
 using namespace boost;
 using namespace boost::posix_time;
@@ -127,9 +128,79 @@ namespace python {
       ;
   }
 
+  struct boost_ptime_to_python_datetime
+  {
+    static PyObject *
+    convert (const boost::posix_time::ptime &pt)
+    {
+      boost::gregorian::date date = pt.date ();
+      boost::posix_time::time_duration td = pt.time_of_day ();
+
+      int year    = date.year ();
+      int month   = date.month ();
+      int day     = date.day ();
+      int hour    = td.hours ();
+      int minute  = td.minutes ();
+      int second  = td.seconds ();
+
+      return PyDateTime_FromDateAndTime (year, month, day, hour, minute, second, 0);
+    }
+  };
+
+  struct boost_ptime_from_python_datetime
+  {
+    boost_ptime_from_python_datetime ()
+    {
+      boost::python::converter::registry::push_back (
+        &convertible, &construct,
+        boost::python::type_id <boost::posix_time::ptime> ());
+    }
+
+    static void *
+    convertible (PyObject *obj_ptr)
+    {
+      return PyDateTime_Check (obj_ptr) ? obj_ptr : 0;
+    }
+
+    static void
+    construct (PyObject *obj_ptr, 
+      boost::python::converter::rvalue_from_python_stage1_data *data)
+    {
+      const PyDateTime_DateTime *pydate = reinterpret_cast <PyDateTime_DateTime *> (obj_ptr);
+
+      int year      = PyDateTime_GET_YEAR (pydate);
+      int month     = PyDateTime_GET_MONTH (pydate);
+      int day       = PyDateTime_GET_DAY (pydate);
+      int hour      = PyDateTime_TIME_GET_HOUR (pydate);
+      int minute    = PyDateTime_TIME_GET_MINUTE (pydate);
+      int second    = PyDateTime_TIME_GET_SECOND (pydate);
+      int mcsecond  = PyDateTime_TIME_GET_MICROSECOND (pydate);
+
+      boost::gregorian::date d (year, month, day);
+      boost::posix_time::time_duration td (hour, minute, second, 0);
+      td += boost::posix_time::microseconds (mcsecond);
+
+      using namespace boost::python;
+      using namespace boost::posix_time;
+
+      void *storage = ((converter::rvalue_from_python_storage <ptime>*)data)->storage.bytes;
+
+      new (storage) boost::posix_time::ptime (d, td);
+      data->convertible = storage;
+    }
+  };
+
+
   void
   py_export_event_manager ()
   {
+    using namespace boost::python;
+
+    PyDateTime_IMPORT;
+
+    boost_ptime_from_python_datetime ();
+    to_python_converter <boost::posix_time::ptime, boost_ptime_to_python_datetime> ();
+
     typedef event_base <base_strategy_di> event_base_di_t;
     typedef std::list <smart_ptr <event_base_di_t> > event_list_di_t;
 

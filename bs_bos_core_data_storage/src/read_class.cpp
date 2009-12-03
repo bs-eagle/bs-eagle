@@ -192,7 +192,7 @@ namespace blue_sky
   {
     using namespace boost::spirit;
 
-    tm temp_date;
+    tm temp_date = {0};
 
     //Date parsing
     // d.m.y
@@ -200,23 +200,28 @@ namespace blue_sky
                          int_p[assign_a(temp_date.tm_mon)] >> ch_p(".") >>
                          int_p[assign_a(temp_date.tm_year)];
     // d 'M' y | d "M" y | d M y
-    rule <> month_p = str_p("JAN")[assign_a(temp_date.tm_mon,0)]|
-                      str_p("FEB")[assign_a(temp_date.tm_mon,1)] |
-                      str_p("MAR")[assign_a(temp_date.tm_mon,2)] |
-                      str_p("APR")[assign_a(temp_date.tm_mon,3)] |
-                      str_p("MAY")[assign_a(temp_date.tm_mon,4)] |
-                      str_p("JUN")[assign_a(temp_date.tm_mon,5)] |
-                      str_p("JUL")[assign_a(temp_date.tm_mon,6)] |
-                      str_p("AUG")[assign_a(temp_date.tm_mon,7)] |
-                      str_p("SEP")[assign_a(temp_date.tm_mon,8)] |
-                      str_p("OCT")[assign_a(temp_date.tm_mon,9)]|
-                      str_p("NOV")[assign_a(temp_date.tm_mon,10)]|
-                      str_p("DEC")[assign_a(temp_date.tm_mon,11)];
-    rule <> q_month_p = month_p | ch_p("'") >> month_p >> ch_p("'") | ch_p("\"") >> month_p >> ch_p("\"");
-    rule <> space_date_p= int_p[assign_a(temp_date.tm_mday)] >> +(space_p) >>
-                          q_month_p  >> +(space_p) >>
-                          int_p[assign_a(temp_date.tm_year)];
-    rule <> any_date_p = dot_date_p | space_date_p;
+    rule <> month_p = str_p("JAN")[assign_a(temp_date.tm_mon, 0)] |
+                      str_p("FEB")[assign_a(temp_date.tm_mon, 1)] |
+                      str_p("MAR")[assign_a(temp_date.tm_mon, 2)] |
+                      str_p("APR")[assign_a(temp_date.tm_mon, 3)] |
+                      str_p("MAY")[assign_a(temp_date.tm_mon, 4)] |
+                      str_p("JUN")[assign_a(temp_date.tm_mon, 5)] |
+                      str_p("JUL")[assign_a(temp_date.tm_mon, 6)] |
+                      str_p("AUG")[assign_a(temp_date.tm_mon, 7)] |
+                      str_p("SEP")[assign_a(temp_date.tm_mon, 8)] |
+                      str_p("OCT")[assign_a(temp_date.tm_mon, 9)]|
+                      str_p("NOV")[assign_a(temp_date.tm_mon, 10)]|
+                      str_p("DEC")[assign_a(temp_date.tm_mon, 11)];
+
+    rule <> q_month_p     = month_p 
+                              | ch_p("'") >> month_p >> ch_p("'") 
+                              | ch_p("\"") >> month_p >> ch_p("\"");
+
+    rule <> space_date_p  = int_p[assign_a(temp_date.tm_mday)] >> +(space_p) 
+                              >> q_month_p  >> +(space_p) 
+                              >> int_p[assign_a(temp_date.tm_year)];
+
+    rule <> any_date_p    = dot_date_p | space_date_p;
 
     if (!parse(str_date.c_str(),any_date_p).full)
       throw bs_exception("Fread::read_date","Date parsing failed");
