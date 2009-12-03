@@ -443,8 +443,8 @@ namespace blue_sky
         template <typename strategy_t_x>
         friend struct wells::compute_factors::peaceman_model;
 
-        template <typename strategy_t_x>
-        friend struct wells::compute_factors::baby_odeh_model;
+        //template <typename strategy_t_x>
+        //friend struct wells::compute_factors::baby_odeh_model;
 
         auto_value <index_t, -1>      i_coord_;                     //!< i coord of connection
         auto_value <index_t, -1>      j_coord_;                     //!< j coord of connection

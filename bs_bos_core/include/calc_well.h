@@ -14,6 +14,7 @@
 #include "well_limit_operation.h"
 #include "fi_params.h"
 #include "well_type_helper.h"
+#include "connection_iterator.h"
 
 // TODO: BUG
 #include "calc_well_pressure.h"
@@ -115,6 +116,8 @@ namespace blue_sky
       typedef calc_perf_density_base <strategy_t>       calc_perf_density_t;
       typedef calc_perf_bhp_base <strategy_t>           calc_perf_bhp_t;
 
+      typedef connection_iterator <strategy_t>          connection_iterator_t;
+
       typedef smart_ptr <well_controller_t, true>       sp_well_controller_t;
       typedef smart_ptr <wells::well_limit_operation, true>     sp_well_limit_operation_t;
       typedef smart_ptr <calc_model_t, true>            sp_calc_model_t;
@@ -179,6 +182,28 @@ namespace blue_sky
       get_connections_count () const
       {
         bs_throw_exception ("PURE CALL");
+      }
+
+      /**
+       * \brief  Returns iterator for begin of primary and 
+       *         secondary connections
+       * \return Begin iterator
+       * */
+      virtual connection_iterator_t
+      connections_begin () const
+      {
+        bs_throw_exception ("");
+      }
+
+      /**
+       * \brief  Returns iterator for end of primary and 
+       *         secondary connections
+       * \return End iterator
+       * */
+      virtual connection_iterator_t
+      connections_end () const
+      {
+        bs_throw_exception ("");
       }
 
       /**

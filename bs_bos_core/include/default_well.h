@@ -187,6 +187,12 @@ namespace wells {
     virtual size_t 
     get_connections_count () const;
 
+    virtual typename base_t::connection_iterator_t
+    connections_begin () const;
+
+    virtual typename base_t::connection_iterator_t
+    connections_end () const;
+
   public:
 
     item_t                      ww_value;           //!< WW value

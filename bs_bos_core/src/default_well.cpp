@@ -15,6 +15,7 @@
 
 // TODO: 
 #include "default_well_calc_rate.h"
+#include "default_connection_iterator.h"
 
 namespace blue_sky {
 namespace wells {
@@ -140,6 +141,20 @@ namespace wells {
   default_well <strategy_t>::get_connections_count () const
   {
     return connection_list_.size ();
+  }
+
+  template <typename strategy_t>
+  typename default_well <strategy_t>::base_t::connection_iterator_t
+  default_well <strategy_t>::connections_begin () const
+  {
+    return typename base_t::connection_iterator_t (new default_connection_iterator <strategy_t> (this, 0));
+  }
+
+  template <typename strategy_t>
+  typename default_well <strategy_t>::base_t::connection_iterator_t
+  default_well <strategy_t>::connections_end () const
+  {
+    return typename base_t::connection_iterator_t (new default_connection_iterator <strategy_t> (this, get_connections_count ()));
   }
 
 
