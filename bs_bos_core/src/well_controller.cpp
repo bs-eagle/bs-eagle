@@ -12,11 +12,8 @@
 #include "calc_model.h"
 #include "well_connection.h"
 
-#include "well_rate_control.h"
-
 #include "reservoir.h"
 #include "facility_manager.h"
-#include "default_well_rate_control_factory.h"
 #define WELL_ACCUMULATION_TERM 1e-6
 
 namespace blue_sky
@@ -99,15 +96,11 @@ namespace blue_sky
     ///////////////////////////////////////////////////////////////////////////
 
     template <typename strategy_t>
-    typename well_controller<strategy_t>::sp_rate_control_t well_controller<strategy_t>::dummy_control_ = 0;
-
-    template <typename strategy_t>
     well_controller<strategy_t>::well_controller (bs_type_ctor_param param /* = NULL */)
     : bhp_ (0)
     , bhp_history_ (0)
     , injection_type_ (injection_none)
     {
-      current_control_ = 0;
     }
 
     template <typename strategy_t>
@@ -142,44 +135,28 @@ namespace blue_sky
     ///////////////////////////////////////////////////////////////////////////
     template <typename strategy_t>
     void
-    well_controller<strategy_t>::add_bhp_control  (const sp_rate_control_t &control)
+    well_controller<strategy_t>::set_main_control (const sp_well_t &well, rate_control_type type, bool is_production)
     {
-      BS_ASSERT (control);
-      bhp_control_ = control;
-    }
-    template <typename strategy_t>
-    void
-    well_controller<strategy_t>::add_rate_control (const sp_rate_control_t &control)
-    {
-      BS_ASSERT (control);
-      rate_control_ = control;
-    }
-
-    template <typename strategy_t>
-    void
-    well_controller<strategy_t>::set_main_control (const sp_well_t &well, rate_control_type type)
-    {
-      current_control_ = 0;
-      BS_ASSERT (bhp_control_);
-      BS_ASSERT (rate_control_);
-
       if (is_bhp_control (type))
         {
           BOSOUT (section::wells, level::low) << "[" << well->name () << "] set control to bhp" << bs_end;
 
-          current_control_ = bhp_control_;
+          current_control_.is_bhp         = true;
+          current_control_.is_production  = is_production;
+          current_control_.control_type   = type;
           well->set_bhp (bhp_);
         }
       else if (is_rate_control (type))
         {
           BOSOUT (section::wells, level::low) << "[" << well->name () << "] set control to rate" << bs_end;
 
-          current_control_ = rate_control_;
+          current_control_.is_bhp         = false;
+          current_control_.is_production  = is_production;
+          current_control_.control_type   = type;
         }
-
-      if (!current_control_)
+      else
         {
-          bs_throw_exception ("Current control is null");
+          bs_throw_exception ("Unsupported rate_control_type");
         }
     }
 
@@ -233,7 +210,7 @@ namespace blue_sky
             }
           else
             {
-              throw bs_exception ("well_controller::set_rate", "invalid control value type");
+              bs_throw_exception (boost::format ("Invalid control value type (%d)") % type);
             }
         }
       else
@@ -258,7 +235,7 @@ namespace blue_sky
               rate_.liquid_inner = value;
               break;
             default:
-              throw bs_exception ("well_controller::set_rate", "invalid control value type");
+              bs_throw_exception (boost::format ("Invalid control value type (%d)") % type);
             }
         }
     }
@@ -267,14 +244,12 @@ namespace blue_sky
     void
     well_controller<strategy_t>::save_control ()
     {
-      BS_ASSERT (current_control_);
       saved_control_ = current_control_;
     }
     template <typename strategy_t>
     bool
     well_controller<strategy_t>::restore_control ()
     {
-      BS_ASSERT (current_control_);
       bool flag = current_control_ != saved_control_;
       current_control_ = saved_control_;
 
@@ -284,14 +259,12 @@ namespace blue_sky
     void
     well_controller<strategy_t>::save_niter_control ()
     {
-      BS_ASSERT (current_control_);
       saved_niter_control_ = current_control_;
     }
     template <typename strategy_t>
     bool
     well_controller<strategy_t>::restore_niter_control ()
     {
-      BS_ASSERT (current_control_);
       bool flag = current_control_ != saved_niter_control_;
       current_control_ = saved_niter_control_;
 
@@ -303,17 +276,13 @@ namespace blue_sky
     bool
     well_controller<strategy_t>::check (sp_well_t &well)
     {
-      BS_ASSERT (current_control_);
-      BS_ASSERT (rate_control_);
-      BS_ASSERT (bhp_control_);
-
       //BOSOUT (section::wells, level::low) << "[" << well->name () << "] " << "limit_bhp: "     << bhp_          << "\twell_bhp: "     << well->bhp ()           << bs_end;
       //BOSOUT (section::wells, level::low) << "[" << well->name () << "] " << "limit_liquid: "  << rate_.liquid   << "\twell_liquid: "  << -well->liquid_rate ()  << bs_end;
       //BOSOUT (section::wells, level::low) << "[" << well->name () << "] " << "limit_oil: "     << rate_.oil      << "\twell_oil: "     << -well->oil_rate ()     << bs_end;
       //BOSOUT (section::wells, level::low) << "[" << well->name () << "] " << "limit_water: "   << rate_.water    << "\twell_water: "   << -well->water_rate ()   << bs_end;
       //BOSOUT (section::wells, level::low) << "[" << well->name () << "] " << "limit_gas: "     << rate_.gas      << "\twell_gas: "     << -well->gas_rate ()     << bs_end;
 
-      if (current_control_ == rate_control_)
+      if (!current_control_.is_bhp)
         {
           bool do_switch = false;
           if (is_production ())
@@ -329,19 +298,17 @@ namespace blue_sky
             {
               BOSOUT (section::wells, level::medium) << "[" << well->name () << "] switch from rate to bhp (is_prod: " << is_production() << ") " << bs_end;
 
-              current_control_ = bhp_control_;
+              current_control_.is_bhp = true;
               well->set_bhp (bhp_);
               return true;
             }
         }
-      else if (current_control_ == bhp_control_)
+      else if (current_control_.is_bhp)
         {
-          rate_control_type control_type = rate_control_->get_control_type ();
           bool do_switch = false;
-
-          if (is_production ())
+          if (current_control_.is_production)
             {
-              switch (control_type)
+              switch (current_control_.control_type)
               {
                 case liquid_rate_control:
                   do_switch = rate_.prod.liquid < -well->rate ().prod.liquid;
@@ -356,7 +323,7 @@ namespace blue_sky
                   do_switch = rate_.prod.gas < -well->rate ().prod.gas;
                   break;
                 default:
-                  bs_throw_exception (boost::format ("control_type is unknown: %d") % control_type);
+                  bs_throw_exception (boost::format ("Control_type is unknown: %d (well: %s)") % current_control_.control_type % well->name ());
               }
             }
           else
@@ -373,7 +340,7 @@ namespace blue_sky
                   do_switch = rate_.inj.gas < well->rate ().inj.gas;
                   break;
                 default:
-                  throw bs_exception ("well_controller::check", "injection_type is unknown");
+                  bs_throw_exception (boost::format ("Injection_type is unknown: %d (well: %s)") % injection_type_ % well->name ());
               }
             }
 
@@ -381,7 +348,7 @@ namespace blue_sky
             {
               BOSOUT (section::wells, level::medium) << "[" << well->name () << "] switch from bhp to rate (is_prod: " << is_production() << ") " << bs_end;
 
-              current_control_ = rate_control_;
+              current_control_.is_bhp = false;
               //if (is_production ())
               //  {
               //    well->bhp_ = bhp_ + 1;
@@ -406,22 +373,19 @@ namespace blue_sky
     bool
     well_controller<strategy_t>::is_bhp () const
       {
-        BS_ASSERT (current_control_);
-        return current_control_->is_bhp ();
+        return current_control_.is_bhp;
       }
     template <typename strategy_t>
     bool
     well_controller<strategy_t>::is_rate () const
       {
-        BS_ASSERT (current_control_);
-        return current_control_->is_rate ();
+        return !current_control_.is_bhp;
       }
     template <typename strategy_t>
     bool
     well_controller<strategy_t>::is_production () const
       {
-        BS_ASSERT (current_control_);
-        return current_control_->is_production ();
+        return current_control_.is_production;
       }
 
     template <typename strategy_t>
@@ -440,14 +404,11 @@ namespace blue_sky
     void
     well_controller<strategy_t>::switch_to_bhp (sp_well_t &well)
     {
-      BS_ASSERT (current_control_);
-      BS_ASSERT (bhp_control_);
-
       BOSOUT (section::wells, level::medium) << "[" << well->name () << "] switch to bhp" << bs_end;
       BOSOUT (section::wells, level::low)    << "\tlimit_bhp: " << bhp_ << "\twell_bhp: " << well->bhp () << bs_end;
 
       well->set_bhp (bhp_);
-      current_control_ = bhp_control_;
+      current_control_.is_bhp = true;
     }
 
     template <typename strategy_t>
@@ -467,32 +428,30 @@ namespace blue_sky
     void
     well_controller <strategy_t>::calc_rate (const sp_calc_model_t &calc_model, sp_well_t &well, sp_jmatrix_t &jmatrix) const
     {
-      BS_ASSERT (current_control_);
-      const smart_ptr <const this_t> sp_this (this);
-      current_control_->compute_rate (calc_model, jmatrix, well, sp_this);
+      //BS_ASSERT (current_control_);
+      //const smart_ptr <const this_t> sp_this (this);
+      //current_control_->compute_rate (calc_model, jmatrix, well, sp_this);
     }
     template <typename strategy_t>
     void
     well_controller <strategy_t>::calc_derivs (const sp_calc_model_t &calc_model, sp_well_t &well, sp_jmatrix_t &jmatrix) const
     {
-      BS_ASSERT (current_control_);
-      const smart_ptr <const this_t> sp_this (this);
-      current_control_->compute_derivs (calc_model, jmatrix, well, sp_this);
+      //BS_ASSERT (current_control_);
+      //const smart_ptr <const this_t> sp_this (this);
+      //current_control_->compute_derivs (calc_model, jmatrix, well, sp_this);
     }
 
     template <typename strategy_t>
     rate_control_type
     well_controller <strategy_t>::get_control_type () const
       {
-        BS_ASSERT (current_control_);
-        return current_control_->get_control_type ();
+        return current_control_.control_type;
       }
 
     //////////////////////////////////////////////////////////////////////////
 
     template <typename strategy_t>
     well_controller_factory<strategy_t>::well_controller_factory (bs_type_ctor_param param /* = NULL */)
-    : well_rate_control_factory_ (BS_KERNEL.create_object (default_well_rate_control_factory <strategy_t>::bs_type ()))
     {
 
     }
@@ -509,32 +468,6 @@ namespace blue_sky
     {
       return BS_KERNEL.create_object (well_controller_t::bs_type (), true);
     }
-
-    template <typename strategy_t>
-    typename well_controller_factory<strategy_t>::sp_rate_control_t
-    well_controller_factory<strategy_t>::create_control (rate_control_type control_type, bool is_prod, const sp_calc_model_t &calc_model) const
-    {
-      sp_rate_control_t control = BS_KERNEL.create_object (well_rate_control_t::bs_type (), true);
-      if (!control)
-        {
-          bs_throw_exception ("Can't create well_rate_control");
-        }
-
-      control->set_is_bhp (is_bhp_control (control_type));
-      control->set_is_prod (is_prod);
-      control->set_control_type (control_type);
-      control->set_impl (well_rate_control_factory_->create_control (control_type, is_bhp_control (control_type), is_prod, calc_model));
-
-      return control;
-    }
-
-    template <typename strategy_t>
-    void
-    well_controller_factory <strategy_t>::set_rate_control_factory (const sp_well_rate_control_factory_t &f)
-    {
-      well_rate_control_factory_ = f;
-    }
-
     //////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////////////////////////////////

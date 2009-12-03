@@ -14,8 +14,6 @@
 #include "calc_well.h"
 #include "well_connection.h"
 
-#include "well_rate_control.h"
-
 #include "reservoir.h"
 #include "facility_manager.h"
 namespace blue_sky

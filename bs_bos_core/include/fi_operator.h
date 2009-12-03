@@ -1443,7 +1443,6 @@ namespace blue_sky {
 #include "fi_operator_calc_step_dt_mult.h"
 #include "fi_operator_calc_porosity_and_deriv.h"
 #include "fi_operator_calc_prev_fluid_volume.h"
-#include "fi_operator_save_debug_data.h"
 #include "fi_operator_calc_solution_mult_cell.h"
 
 #ifdef BS_USE_TPFA_

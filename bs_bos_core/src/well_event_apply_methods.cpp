@@ -14,7 +14,6 @@
 #include "well_limit_operation.h"
 #include "well_connection.h"
 #include "facility_manager.h"
-#include "well_rate_control.h"
 
 #include "calc_model.h"
 
@@ -205,9 +204,7 @@ namespace blue_sky
     locked_well->set_bhp (locked_controller->bhp ());
 
     wells::rate_control_type control_type = wells::rate_control_cast (main_params_->get_WELL_CONTROL_MODE (""));
-    locked_controller->add_bhp_control (locked->create_bhp_control (true, calc_model));
-    locked_controller->add_rate_control (locked->create_rate_control (true, control_type, calc_model));
-    locked_controller->set_main_control (well, control_type);
+    locked_controller->set_main_control (well, control_type, true);
 
     // TODO: bad design, but i don't know better way
     locked_controller->clear_rate ();
@@ -249,9 +246,7 @@ namespace blue_sky
     locked_well->set_bhp (locked_controller->bhp ());
 
     wells::rate_control_type control_type = wells::rate_control_cast (main_params_->get_WELL_CONTROL_MODE (""));
-    locked_controller->add_bhp_control (locked->create_bhp_control (true, calc_model));
-    locked_controller->add_rate_control (locked->create_rate_control (true, control_type, calc_model));
-    locked_controller->set_main_control (well, control_type);
+    locked_controller->set_main_control (well, control_type, true);
 
     // TODO: bad design, but i don't know better way
     locked_controller->clear_rate ();
@@ -291,9 +286,7 @@ namespace blue_sky
     locked_well->set_bhp (locked_controller->bhp ());
 
     wells::rate_control_type control_type = wells::rate_control_cast (main_params_->get_WELL_CONTROL_MODE (""));
-    locked_controller->add_bhp_control (locked->create_bhp_control (false, calc_model));
-    locked_controller->add_rate_control (locked->create_rate_control (false, control_type, calc_model));
-    locked_controller->set_main_control (well, control_type);
+    locked_controller->set_main_control (well, control_type, false);
 
     // TODO: bad design, but i don't know better way
     locked_controller->clear_rate ();

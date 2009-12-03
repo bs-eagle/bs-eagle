@@ -12,7 +12,6 @@
 #include "well_connection.h"
 #include "facility_manager.h"
 #include "jacobian.h"
-#include "well_rate_control.h"
 #include "calc_model.h"
 #include "event_filter.h"
 
@@ -117,21 +116,6 @@ namespace blue_sky
 
     return wc;
   }
-
-  template <typename strategy_t>
-  typename reservoir<strategy_t>::sp_rate_control_t
-  reservoir<strategy_t>::create_bhp_control (bool is_prod, const sp_calc_model_t &calc_model)
-  {
-    return well_controller_factory_->create_control (wells::bhp_control, is_prod, calc_model);
-  }
-
-  template <typename strategy_t>
-  typename reservoir<strategy_t>::sp_rate_control_t
-  reservoir<strategy_t>::create_rate_control (bool is_prod, wells::rate_control_type control_type, const sp_calc_model_t &calc_model)
-  {
-    return well_controller_factory_->create_control ((wells::is_rate_control (control_type) ? control_type : wells::liquid_rate_control), is_prod, calc_model);
-  }
-
 
   template <typename strategy_t>
   typename reservoir<strategy_t>::sp_well_limit_operation_t

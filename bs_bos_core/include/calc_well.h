@@ -20,7 +20,6 @@
 #include "calc_rho.h"
 #include "calc_perf_bhp_base.h"
 #include "calc_perf_density_base.h"
-#include "well_rate_control.h"
 #include "shared_vector.h"
 
 namespace blue_sky
@@ -154,7 +153,8 @@ namespace blue_sky
       /**
        * \brief  Returns connection (perforation) with index idx
        * \param  idx Index of connection
-       * \return connection instance on success otherwise null pointer
+       * \return connection instance on success otherwise null pointer,
+       *         throws exception if not implemented in child class
        * */
       virtual sp_connection_t
       get_connection (index_t idx) const

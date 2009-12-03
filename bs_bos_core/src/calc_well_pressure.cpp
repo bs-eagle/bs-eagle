@@ -11,7 +11,6 @@
 #include "calc_model.h"
 #include "calc_well.h"
 #include "well_connection.h"
-#include "well_rate_control.h"
 #include "calc_model_data_accessors.h"
 #include "reservoir.h"
 #include "facility_manager.h"

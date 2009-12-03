@@ -9,11 +9,10 @@
 #ifndef __BS_WELL_RESULTS_STORAGE_H
 #define __BS_WELL_RESULTS_STORAGE_H
 
-#include "well_rate_control.h"
 #include "apply_wefac.h"
 #include "rate_control_type.h"
 #include "fi_params.h"
-//#include "well_connection.h"
+#include "calc_model.h"
 
 #include "bs_hdf5_storage.h"
 

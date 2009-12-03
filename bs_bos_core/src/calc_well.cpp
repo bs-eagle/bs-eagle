@@ -26,8 +26,6 @@
 #include "wellbore_density_calc.h"
 #include "calc_perf_bhp.h"
 
-#include "well_rate_control.h"
-
 #include "exp_temp_mx.h"
 #include "apply_wefac.h"
 #include "default_rr_eliminator.h"

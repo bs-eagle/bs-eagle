@@ -11,7 +11,6 @@
 
 #include "well_type_helper.h"
 #include "rate_control_type.h"
-#include "well_rate_control_interface.h"
 
 namespace blue_sky
   {
@@ -269,7 +268,6 @@ namespace blue_sky
         typedef typename strategy_t::index_t              index_t;
         typedef typename strategy_t::item_array_t         item_array_t;
         typedef typename strategy_t::index_array_t        index_array_t;
-        typedef well_rate_control <strategy_t>            well_rate_control_t;
         typedef well <strategy_t>                         well_t;
         typedef connection <strategy_t>                   connection_t;
         typedef jacobian_matrix <strategy_t>              jacobian_matrix_t;
@@ -282,7 +280,6 @@ namespace blue_sky
         typedef smart_ptr <jacobian_matrix_t, true>       sp_jmatrix_t;
         typedef smart_ptr <well_t, true>                  sp_well_t;
 
-        typedef smart_ptr <well_rate_control_t, true>     sp_rate_control_t;
         typedef smart_ptr <connection_t, true>            sp_connection_t;
         typedef smart_ptr <jacobian_matrix_t, true>       sp_jacobian_matrix_t;
         typedef smart_ptr <this_t, true>                  sp_this_t;
@@ -326,26 +323,13 @@ namespace blue_sky
         set_bhp_history (item_t value);
 
         /**
-         * \brief  Adds BHP control (controls well by BHP)
-         * \param  bhp_control 
-         * */
-        void 
-        add_bhp_control (const sp_rate_control_t &bhp_control);
-
-        /**
-         * \brief  Adds rate control (controls well by rate)
-         * \param  rate_control
-         * */
-        void 
-        add_rate_control (const sp_rate_control_t &rate_control);
-
-        /**
          * \brief  Sets main control (bhp or rate depends on control value)
          * \param  well
-         * \param  control
+         * \param  control Is a control type
+         * \param  is_production Is a well production
          * */
         void 
-        set_main_control (const sp_well_t &well, rate_control_type control);
+        set_main_control (const sp_well_t &well, rate_control_type control, bool is_production);
 
         /**
          * \brief  Sets injection type
@@ -481,13 +465,34 @@ namespace blue_sky
 
         injection_type                  injection_type_;      //!< Injection type (now only WATER injection supports)
 
-        static sp_rate_control_t        dummy_control_;
-        sp_rate_control_t               bhp_control_;
-        sp_rate_control_t               rate_control_;
+        struct control_state
+        {
+          control_state (bool is_bhp = true, 
+            bool is_production = true, 
+            rate_control_type control_type = bhp_control)
+          : is_bhp (is_bhp)
+          , is_production (is_production)
+          , control_type (control_type)
+          {
+          }
 
-        sp_rate_control_t               current_control_;
-        sp_rate_control_t               saved_control_;
-        sp_rate_control_t               saved_niter_control_;
+          bool                is_bhp;
+          bool                is_production;
+          rate_control_type   control_type;
+
+          bool
+          operator != (const control_state &rhs)
+          {
+            return is_bhp != rhs.is_bhp
+              && is_production != rhs.is_production
+              && control_type != rhs.control_type
+              ;
+          }
+        };
+
+        control_state                   current_control_;
+        control_state                   saved_control_;
+        control_state                   saved_niter_control_;
       };
 
     /**
@@ -503,24 +508,15 @@ namespace blue_sky
         typedef calc_model <strategy_t>                       calc_model_t;
         typedef well_controller <strategy_t>                  well_controller_t;
         typedef well_rate_control <strategy_t>                well_rate_control_t;
-        typedef well_rate_control_factory <strategy_t>        well_rate_control_factory_t;
 
         typedef smart_ptr <calc_model_t, true>                sp_calc_model_t;
         typedef smart_ptr <well_controller_t, true>           sp_well_controller_t;
         typedef smart_ptr <well_rate_control_t, true>         sp_rate_control_t;
-        typedef smart_ptr <well_rate_control_factory_t, true> sp_well_rate_control_factory_t;
 
       public:
 
         //! dtor
         virtual ~well_controller_factory () {};
-
-        /**
-         * \brief  Sets pointer to factory of rate_control
-         * \param  rate_control_factory
-         * */
-        void 
-        set_rate_control_factory (const sp_well_rate_control_factory_t &rate_control_factory);
 
         /**
          * \brief  Creates well_controller
@@ -529,22 +525,8 @@ namespace blue_sky
         virtual sp_well_controller_t
         create_controller () const;
 
-        /**
-         * \brief  Creates well_controller_factory
-         * \param  rate_control
-         * \param  is_prod
-         * \param  calc_model
-         * \return Instance of rate_control
-         * */
-        virtual sp_rate_control_t
-        create_control (rate_control_type rate_control, bool is_prod, const sp_calc_model_t &calc_model) const;
-
         //! blue-sky type declaration
         BLUE_SKY_TYPE_DECL_T (well_controller_factory);
-
-      private:
-
-        sp_well_rate_control_factory_t well_rate_control_factory_; //!< rate_control factory
       };
 
     /**

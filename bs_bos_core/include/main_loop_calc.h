@@ -14,15 +14,11 @@
 #include "data_storage_interface.h"
 #include "event_manager.h"
 
-#include "well_rate_control.h"
-
 #include "string_formater.h"
 #include "well_type_helper.h"
 #include "well_connection.h"
 #include "calc_well.h"
 #include "rr_rw_wr_saver.h"
-
-#include "save_connection_data.h"
 
 #include "fi_operator.h"
 #include "jacobian_impl.h"
@@ -1149,10 +1145,6 @@ namespace blue_sky
 
         update_large_time_step_num ();
 
-        static size_t iter_counter = 0;
-        iter_counter++;
-        //connection_data.save_acc ("con_data.ts.bs.%d.txt", calc_model_, dt_, reservoir_->get_facility_list ()->wells_begin (), reservoir_->get_facility_list ()->wells_end (), iter_counter, current_time_, jacobian_->get_jmatrix ()->get_solution (), jacobian_->get_jmatrix ()->get_rhs ());
-
 //        well_data.copy_well_data_to_storage (calc_model_, dt_, reservoir_->get_facility_list ()->wells_begin (), reservoir_->get_facility_list ()->wells_end (), iter_counter, current_time_);
 //
 //#ifdef _HDF5
@@ -1300,7 +1292,6 @@ public:
 
       bool                                    do_calc_prev_fluid_volume_;
 
-      save_connection_data <strategy_t>       connection_data;
       save_well_data <strategy_t>             well_data;
     };
 

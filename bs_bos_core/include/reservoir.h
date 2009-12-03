@@ -192,25 +192,6 @@ namespace blue_sky
       create_connection ();
 
       /**
-       * \brief  creates rate_control that control well by bhp
-       * \param  is_prod type of control (production or injection)
-       * \param  calc_model used to determine what phases present in model
-       * \return rate_control instance if created successfully otherwise null pointer
-       * */
-      sp_rate_control_t         
-      create_bhp_control (bool is_prod, const sp_calc_model_t &calc_model);
-
-      /**
-       * \brief  creates rate_control that control well by rate
-       * \param  is_prod type of control (production or injection)
-       * \param  control_type of control (see rate_control_type)
-       * \param  calc_model used to determine what phases present in model
-       * \return rate_control instance if created successfully otherwise null pointer
-       * */
-      sp_rate_control_t         
-      create_rate_control (bool is_prod, wells::rate_control_type control_type, const sp_calc_model_t &calc_model);
-
-      /**
        * \brief  saves facilities data in data storage
        * \param  storage data storage
        * */

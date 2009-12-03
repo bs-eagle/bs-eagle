@@ -14,7 +14,6 @@
 
 
 // TODO: 
-#include "well_rate_control_deriv.h"
 #include "default_well_calc_rate.h"
 
 namespace blue_sky {
