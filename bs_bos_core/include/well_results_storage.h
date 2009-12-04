@@ -355,9 +355,10 @@ namespace blue_sky
 
             if (write_conn_results_to_hdf5)
               {
-                for (size_t i = 0, cnt = ws->get_connections_count (); i < cnt; ++i)
+                typename well_t::connection_iterator_t it = ws->connections_begin (), e = ws->connections_end ();
+                for (; it != e; ++it)
                   {
-                    const sp_connection_t &ci = ws->get_connection (i);
+                    const sp_connection_t &ci = *it;
                     int cell = ci->n_block ();
                     connection_results &cr = wr.connections[cell];
                     cr.dates.push_back (time);

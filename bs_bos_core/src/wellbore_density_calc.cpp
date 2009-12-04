@@ -53,9 +53,11 @@ namespace blue_sky
 
       item_t atm_pressure = calc_model->internal_constants.atmospheric_pressure;
 
-      for (size_t i = 0, cnt = well->get_connections_count (); i < cnt; ++i)
+      typename well_t::connection_iterator_t it = well->connections_begin (),
+               e = well->connections_end ();
+      for (; it != e; ++it)
         {
-          const sp_connection_t &c (well->get_connection (i));
+          const sp_connection_t &c (*it);
 
           item_t pbhp = calc_model->pressure[c->n_block ()];
           if (c->cur_bhp >= atm_pressure)
@@ -80,7 +82,7 @@ namespace blue_sky
   wellbore_density_calc <strategy_t>::density_calc (sp_well_t &well, const sp_calc_model_t &calc_model, item_t p_bhp) const
     {
       BS_ASSERT (!well->is_shut ()) (well->name ());
-      BS_ASSERT (well->get_connections_count ()) (well->name ());
+      BS_ASSERT (!well->is_no_connections ()) (well->name ());
 
       typedef typename base_t::index_t                          index_t;
       typedef typename base_t::well_t::sp_connection_t          sp_connection_t;
@@ -105,9 +107,12 @@ namespace blue_sky
       boost::array <item_t, FI_PHASE_TOT> local_invers_fvf;
       local_invers_fvf.assign (0);
 
-      BS_ERROR (well->get_connections_count (), "density_calc");
+      if (well->is_no_primary_connections ())
+        {
+          bs_throw_exception (boost::format ("No primary connections (well: %s)") % well->name ());
+        }
 
-      const sp_connection_t &first_con = well->get_connection (0);
+      const sp_connection_t &first_con = well->get_first_connection ();
       BS_ASSERT (first_con);
 
       item_t ppo = 0;
@@ -141,9 +146,11 @@ namespace blue_sky
       const rate_data <strategy_t> &rate = well->rate ();
 
       sp_connection_t prev_con;
-      for (size_t i = 0, cnt = well->get_connections_count (); i < cnt; ++i)
+      typename base_t::well_t::connection_iterator_t it = well->connections_begin (),
+               e = well->connections_end ();
+      for (; it != e; ++it)
         {
-          const sp_connection_t &con (well->get_connection (i));
+          const sp_connection_t &con (*it);
 
           index_t n_block   = con->n_block ();
           index_t n_pvt_reg = calc_model->pvt_regions[n_block];

@@ -153,17 +153,17 @@ namespace blue_sky
       {
         bs_throw_exception ("PURE CALL");
       }
-      /**
-       * \brief  Returns connection (perforation) with index idx
-       * \param  idx Index of connection
-       * \return connection instance on success otherwise null pointer,
-       *         throws exception if not implemented in child class
-       * */
-      virtual sp_connection_t
-      get_connection (index_t idx) const
-      {
-        bs_throw_exception ("PURE CALL");
-      }
+      ///**
+      // * \brief  Returns connection (perforation) with index idx
+      // * \param  idx Index of connection
+      // * \return connection instance on success otherwise null pointer,
+      // *         throws exception if not implemented in child class
+      // * */
+      //virtual sp_connection_t
+      //get_connection (index_t idx) const
+      //{
+      //  bs_throw_exception ("PURE CALL");
+      //}
       /**
        * \brief  Returns connection (perforation) with n_block
        * \param  n_block Value of block index
@@ -174,15 +174,15 @@ namespace blue_sky
       {
         bs_throw_exception ("PURE CALL");
       }
-      /**
-       * \brief  Returns count of connection (perforation) for well
-       * \return Count of connections
-       * */
-      virtual size_t 
-      get_connections_count () const
-      {
-        bs_throw_exception ("PURE CALL");
-      }
+      ///**
+      // * \brief  Returns count of connection (perforation) for well
+      // * \return Count of connections
+      // * */
+      //virtual size_t 
+      //get_connections_count () const
+      //{
+      //  bs_throw_exception ("PURE CALL");
+      //}
 
       /**
        * \brief  Returns iterator for begin of primary and 
@@ -192,7 +192,7 @@ namespace blue_sky
       virtual connection_iterator_t
       connections_begin () const
       {
-        bs_throw_exception ("");
+        bs_throw_exception ("PURE CALL");
       }
 
       /**
@@ -203,7 +203,38 @@ namespace blue_sky
       virtual connection_iterator_t
       connections_end () const
       {
-        bs_throw_exception ("");
+        bs_throw_exception ("PURE CALL");
+      }
+
+      /**
+       * \brief  Returns true if no any connections
+       * \return True if no any connections
+       * */
+      virtual bool
+      is_no_connections () const
+      {
+        bs_throw_exception ("PURE CALL");
+      }
+
+      /**
+       * \brief  Returns true if no primary connections
+       * \return True if no primary connections
+       * */
+      virtual bool
+      is_no_primary_connections () const
+      {
+        bs_throw_exception ("PURE CALL");
+      }
+
+      /**
+       * \brief  Returns first primary connection
+       * \return First primary connection or throw exception
+       *         is_no_primary_connections == true
+       * */
+      virtual sp_connection_t 
+      get_first_connection () const
+      {
+        bs_throw_exception ("PURE CALL");
       }
 
       /**
@@ -431,11 +462,13 @@ namespace blue_sky
       /**
        * \brief  Checks well on shut if not shut fills 
        *         open_connections_ array
-       * \param  calc_model (obsolete, should be removed)
        * \return True if well is shut
        * */
-      bool 
-      check_shut (const sp_calc_model_t &calc_model);
+      virtual bool 
+      check_shut ()
+      {
+        bs_throw_exception ("PURE CALL");
+      }
 
       /**
        * \brief  Resets init_approx_is_calc_ flag
@@ -456,17 +489,6 @@ namespace blue_sky
        * */
       virtual shared_vector <item_t> 
       get_bw_value ();
-
-      /**
-       * \brief  Calculates Jacobian value and stores it in array
-       * \param  array Array of Jacobian values
-       * \param  rw_index
-       * \param  wr_index
-       * \param  dt
-       * \param  block_size
-       * */
-      virtual void 
-      eliminate (rhs_item_t *array, index_t rw_index, index_t wr_index, double dt, index_t block_size) const;
 
       /**
        * \brief  Calculates rate and deriv values for well and 
@@ -491,7 +513,10 @@ namespace blue_sky
        * \param  rows Array of Jacobian Rows
        * */
       virtual void 
-      fill_rows (index_array_t &rows) const;
+      fill_rows (index_array_t &rows) const
+      {
+        bs_throw_exception ("PURE CALL");
+      }
 
       /**
        * \brief  Fills Jacobian colls and values, uses eliminate for 
@@ -504,7 +529,10 @@ namespace blue_sky
        * \param  markers
        * */
       virtual void 
-      fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const;
+      fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const
+      {
+        bs_throw_exception ("PURE CALL");
+      }
 
       /**
        * \brief  Fills rhs array with rate values
@@ -516,7 +544,10 @@ namespace blue_sky
        * \param  rhs Array of rhs values
        * */
       virtual void 
-      fill_rhs (double dt, index_t n_phases, bool is_g, bool is_o, bool is_w, rhs_item_array_t &rhs) const;
+      fill_rhs (double dt, index_t n_phases, bool is_g, bool is_o, bool is_w, rhs_item_array_t &rhs) const
+      {
+        bs_throw_exception ("PURE CALL");
+      }
 
       /**
        * \brief  Restores solution
@@ -648,9 +679,6 @@ namespace blue_sky
       sp_calc_rho_t               calc_rho_;                  //!< \todo Should be removed
       sp_calc_perf_density_t      calc_perf_density_;         //!< Instance of object that calculates well perforations density
       sp_calc_perf_bhp_t          calc_perf_bhp_;             //!< Instance of object that calculates well perforations BHP
-
-    protected:
-      index_array_t               open_connections_;          //!< Array of indexes of open perforations (connections)
     };
 
   /**

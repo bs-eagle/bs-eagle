@@ -50,7 +50,7 @@ namespace blue_sky
       typedef typename base_t::calc_model_t::phase_d_t        phase_d_t;
       typedef typename base_t::calc_model_t::data_t           calc_model_data_t;
 
-      if (well->get_connections_count () == 0)
+      if (well->is_no_connections ())
         {
           BOSOUT (section::wells, level::debug) 
             << "[" << well->name () << "] calc_perf_bhp: connection list is empty"
@@ -70,9 +70,10 @@ namespace blue_sky
 
       sp_connection_t prev_connection;
       const typename base_t::calc_model_t::item_array_t &pressure = calc_model->pressure;
-      for (size_t i = 0, cnt = well->get_connections_count (); i < cnt; ++i)
+      typename base_t::well_t::connection_iterator_t it = well->connections_begin (), e = well->connections_end ();
+      for (; it != e; ++it)
         {
-          const sp_connection_t &c (well->get_connection (i));
+          const sp_connection_t &c (*it);
 
           if (!c->is_shut ())
             {

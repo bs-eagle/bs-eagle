@@ -45,7 +45,7 @@ namespace blue_sky
                                                  const sp_mesh_iface_t & /*mesh*/) const
     {
       BS_ASSERT (!well->is_shut ()) (well->name ());
-      BS_ASSERT (well->get_connections_count ()) (well->name ());
+      BS_ASSERT (!well->is_no_connections ()) (well->name ());
 
       typedef typename well_t::connection_t               connection_t;
       typedef typename well_t::sp_connection_t            sp_connection_t;
@@ -66,9 +66,11 @@ namespace blue_sky
       index_t i_g = phase_d[FI_PHASE_GAS];
       index_t i_o = phase_d[FI_PHASE_OIL];
 
-      for (size_t i = 0, cnt = well->get_connections_count (); i < cnt; ++i)
+      typename well_t::connection_iterator_t it = well->connections_begin (), 
+               e = well->connections_end ();
+      for (; it != e; ++it)
         {
-          const sp_connection_t &c = well->get_connection (i);
+          const sp_connection_t &c = *it;
           if (c->is_shut ())
             continue;
 
@@ -95,9 +97,10 @@ namespace blue_sky
       BS_ASSERT (sat != 0);
       item_t rho = rhop_satp / sat;
 
-      for (size_t i = 0, cnt = well->get_connections_count (); i < cnt; ++i)
+      it = well->connections_begin ();
+      for (; it != e; ++it)
         {
-          const sp_connection_t &c (well->get_connection (i));
+          const sp_connection_t &c (*it);
           if (!c->is_shut ())
             c->density = rho;
         }

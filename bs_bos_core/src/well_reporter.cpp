@@ -694,7 +694,7 @@ namespace blue_sky {
     float
     data (const column_t &c, const data_source_t &ds, float mult, float) const
     {
-      return ds.get_connections_count () ? (ds.get_connection (0)->get_cur_bhp () * mult) : 0;
+      return !ds.is_no_primary_connections () ? (ds.get_first_connection ()->get_cur_bhp () * mult) : 0;
     }
   };
 
@@ -704,7 +704,7 @@ namespace blue_sky {
     float
     data (const column_t &c, const data_source_t &ds, float mult, float) const
     {
-      return ds.get_connections_count () ? (ds.get_connection (0)->get_bulkp () * mult) : 0;
+      return !ds.is_no_primary_connections () ? (ds.get_first_connection ()->get_bulkp () * mult) : 0;
     }
   };
 
@@ -958,11 +958,13 @@ namespace blue_sky {
             {
               printer.well_data.print (printer.columns, data, *well);
 
-              for (size_t j = 0, jcnt = well->get_connections_count (); j < jcnt; ++j)
+              typename well_t::connection_iterator_t it = well->connections_begin (),
+                       e = well->connections_end ();
+              for (; it != e; ++it)
                 {
-                  printer.connection_data.print (printer.columns, data, *well->get_connection (j), false);
+                  printer.connection_data.print (printer.columns, data, **it, false);
                 }
-              if (well->get_connections_count ())
+              if (!well->is_no_connections ())
                 print_line (printer.columns);
             }
         }

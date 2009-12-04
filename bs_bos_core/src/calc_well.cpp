@@ -90,31 +90,6 @@ namespace blue_sky
     *this = w;
   }
 
-  //namespace wells {
-
-  //  template <typename strategy_t>
-  //  struct sort_connection_list : std::binary_function <const smart_ptr <connection <strategy_t>, true> &, const smart_ptr <connection <strategy_t>, true> &, bool>
-  //  {
-  //    bool
-  //    operator () (const smart_ptr <connection <strategy_t>, true> &lhs, const smart_ptr <connection <strategy_t>, true> &rhs) const
-  //    {
-  //      return lhs->n_block () < rhs->n_block ();
-  //    }
-  //  };
-  //} // namespace wells
-
-  //template <typename strategy_t>
-  //void
-  //well<strategy_t>::add_connection (const sp_connection_t &connection)
-  //{
-  //  if (connection->n_block () < 0)
-  //    throw bs_exception ("well::add_connection", "invalid connection n_block value");
-
-  //  connection_list_.push_back (connection);
-  //  std::sort (connection_list_.begin (), connection_list_.end (), wells::sort_connection_list <strategy_t> ());
-  //  connection_map_.insert (std::make_pair (connection->n_block (), (index_t)connection_list_.size () - 1));
-  //}
-
   template <typename strategy_t>
   shared_vector <typename strategy_t::item_t>
   well <strategy_t>::get_ww_value () 
@@ -172,7 +147,7 @@ namespace blue_sky
       }
 #endif
 
-    check_shut (calc_model);
+    check_shut ();
   }
   template <typename strategy_t>
   void
@@ -234,29 +209,6 @@ namespace blue_sky
     name_ = name;
   }
 
-//  template <typename strategy_t>
-//  typename well <strategy_t>::sp_connection_t
-//  well <strategy_t>::get_connection (index_t n_block) const
-//  {
-//    typename connection_map_t::const_iterator it = connection_map_.find (n_block);
-//    if (it == connection_map_.end ())
-//      return 0;
-//
-//    if (it->second >= (int)connection_list_.size ())
-//      {
-//#ifdef _DEBUG
-//        typename connection_map_t::const_iterator i = connection_map_.begin (), e = connection_map_.end ();
-//        for (; i != e; ++i)
-//          {
-//            BOSOUT (section::wells, level::debug) << boost::format ("[%d: %d]") % i->first % i->second << bs_end;
-//          }
-//#endif
-//        bs_throw_exception (boost::format ("Connection map has an invalid value ([%s]: %d - %d, %d, %d)") % name_ % n_block % it->second % connection_list_.size () % connection_map_.size ());
-//      }
-//
-//    return connection_list_[it->second];
-//  }
-
   template <typename strategy_t>
   void
   well<strategy_t>::compute_connection_factor (const physical_constants &internal_constants,
@@ -266,11 +218,12 @@ namespace blue_sky
       const item_array_t &ntg,
       bool ro_calc_flag)
   {
-    BS_ASSERT (get_connections_count ()) (name ());
+    BS_ASSERT (!is_no_connections ()) (name ());
 
-    for (size_t i = 0, cnt = get_connections_count (); i < cnt; ++i)
+    connection_iterator_t it = connections_begin (), e = connections_end ();
+    for (; it != e; ++it)
       {
-        const sp_connection_t &c (get_connection (i));
+        const sp_connection_t &c (*it);
 
         if (!c->is_shut ())
           c->compute_factors (internal_constants, params, mesh, perm, ntg, ro_calc_flag);
@@ -296,7 +249,7 @@ namespace blue_sky
   well <strategy_t>::check_connections_bhp (const item_array_t &pressure) const
     {
       BS_ASSERT (!is_shut ()) (name ());
-      if (get_connections_count () == 0)
+      if (is_no_connections ())
         {
           BOSOUT (section::wells, level::debug)
             << "[" << name_ << "] check_connections_bhp: connection list is empty"
@@ -305,9 +258,10 @@ namespace blue_sky
           return false;
         }
 
-      for (size_t i = 0, cnt = get_connections_count (); i < cnt; ++i)
+      connection_iterator_t it = connections_begin (), e = connections_end ();
+      for (; it != e; ++it)
         {
-          const sp_connection_t &c (get_connection (i));
+          const sp_connection_t &c (*it);
           if (c->is_shut ())
             continue;
 
@@ -338,39 +292,16 @@ namespace blue_sky
     rate_ = 0;
 
     const item_array_t &pressure = calc_model->pressure;
-    for (size_t i = 0, cnt = get_connections_count (); i < cnt; ++i)
+    connection_iterator_t it = connections_begin (), e = connections_end ();
+    for (; it != e; ++it)
       {
-        const sp_connection_t &c (get_connection (i));
+        const sp_connection_t &c (*it);
         index_t n_block = c->n_block ();
         item_t bulkp = pressure[n_block];
 
         c->set_cur_bhp (bulkp);
         c->set_bulkp (bulkp);
       }
-  }
-
-  template <typename strategy_t>
-  bool
-  well <strategy_t>::check_shut (const sp_calc_model_t &/*calc_model*/)
-  {
-    open_connections_.clear ();
-    //open_connections_.reserve (get_connections_count ());
-    if (is_shut ())
-      {
-        return true;
-      }
-
-    for (index_t i = 0, cnt = (index_t)get_connections_count (); i < cnt; ++i)
-      {
-        const sp_connection_t &c (get_connection (i));
-
-        if (!c->is_shut ())
-          {
-            open_connections_.push_back (i);
-          }
-      }
-
-    return false;
   }
 
   template <typename strategy_t>
@@ -384,17 +315,21 @@ namespace blue_sky
   typename well<strategy_t>::item_t
   well<strategy_t>::get_reference_depth (const sp_mesh_iface_t &mesh) const
   {
-    BS_ASSERT (get_connections_count ()) (name ());
+    BS_ASSERT (!is_no_connections ()) (name ());
 
-    wells::connection_direction_type dir = get_connection (0)->get_dir ();
+    if (is_no_primary_connections ())
+      return input_reference_depth_;
+
+    const sp_connection_t &c = get_first_connection ();
+    wells::connection_direction_type dir = c->get_dir ();
     item_t dtop = 0;
     if (dir == wells::direction_x || dir == wells::direction_y)
       {
-        dtop = get_connection (0)->get_connection_depth ();
+        dtop = c->get_connection_depth ();
       }
     else
       {
-        dtop = mesh->get_element_dtop (get_connection (0)->n_block ());
+        dtop = mesh->get_element_dtop (c->n_block ());
       }
 
     return input_reference_depth_ > 0 ? input_reference_depth_ : dtop;
@@ -487,12 +422,6 @@ namespace blue_sky
 
   template <typename strategy_t>
   void
-  well <strategy_t>::eliminate (rhs_item_t * /*array*/, index_t /*rw_index*/, index_t /*wr_index*/, double /*dt*/, index_t /*block_size*/) const
-  {
-    bs_throw_exception ("PURE CALL");
-  }
-  template <typename strategy_t>
-  void
   well<strategy_t>::process (bool /*is_start*/, double /*dt*/, const sp_calc_model_t &/*calc_model*/, const sp_mesh_iface_t &/*mesh*/, sp_jmatrix_t &/*jmatrix*/)
   {
     bs_throw_exception ("PURE_CALL");
@@ -505,114 +434,6 @@ namespace blue_sky
     rate_rc_  = 0;
     gor_      = 0;
   }
-
-  template <typename strategy_t>
-  void
-  well <strategy_t>::fill_rows (index_array_t &rows) const
-  {
-    for (index_t j = 0, jcnt = (index_t)open_connections_.size (); j < jcnt; ++j)
-      {
-        index_t con_index = open_connections_[j];
-        BS_ASSERT (get_connection (con_index)->is_shut () == false) (j);
-        index_t n_block = get_connection (con_index)->n_block ();
-        index_t k = rows[n_block + 1] != 0;
-        rows[n_block + 1] += jcnt - k;
-      }
-  }
-
-  template <typename strategy_t>
-  void
-  well <strategy_t>::fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const
-  {
-    index_t b_sqr = block_size * block_size;
-    for (index_t j = 0, jcnt = (index_t)open_connections_.size (); j < jcnt; ++j)
-      {
-        index_t rw_index = open_connections_[j];
-        BS_ASSERT (get_connection (rw_index)->is_shut () == false) (j);
-
-        index_t n_block = get_connection (rw_index)->n_block ();
-        index_t l = rows[n_block];
-
-        if (markers[n_block] == 0)
-          {
-            markers[n_block] = 1;
-          }
-
-        for (index_t k = 0, kcnt = jcnt; k < kcnt; ++k)
-          {
-            index_t index = l;
-            index_t wr_index = open_connections_[k];
-            if (j == k)
-              {
-                BS_ASSERT (cols[l] == -1) (cols[l]) (n_block);
-                cols[l] = n_block;
-
-                BS_ASSERT (l * b_sqr < (index_t)values.size ()) (l) (values.size ());
-                eliminate (&values[l * b_sqr], rw_index, wr_index, dt, block_size);
-              }
-            else
-              {
-                BS_ASSERT (cols[l + markers[n_block]] == -1) (cols[l + markers[n_block]]) (get_connection (wr_index)->n_block ());
-                index = l + markers[n_block];
-                cols[index] = get_connection (wr_index)->n_block ();
-                markers[n_block]++;
-
-                BS_ASSERT (index * b_sqr < (index_t)values.size ()) (index) (b_sqr) (values.size ());
-                eliminate (&values[index * b_sqr], rw_index, wr_index, dt, block_size);
-              }
-          }
-      }
-  }
-
-  template <typename strategy_t>
-  void
-  well <strategy_t>::fill_rhs (double dt, index_t n_phases, bool is_g, bool is_o, bool is_w, rhs_item_array_t &rhs) const
-    {
-      item_t wefac = exploitation_factor_ > 0 ? exploitation_factor_ * dt : dt;
-
-      for (index_t j = 0, jcnt = (index_t)open_connections_.size (); j < jcnt; ++j)
-        {
-          index_t con_index = open_connections_[j];
-          BS_ASSERT (get_connection (con_index)->is_shut () == false) (j);
-
-          const sp_connection_t &c              = get_connection (con_index);
-          int n_block                           = c->n_block ();
-          int index                             = n_block * n_phases;
-          const shared_vector <rhs_item_t> &c_rate  = c->get_rate_value ();
-
-          if (n_phases == 3)
-            {
-              rhs[index + p3_gas] += wefac * c_rate[p3_gas];
-              rhs[index + p3_oil] += wefac * c_rate[p3_oil];
-              rhs[index + p3_wat] += wefac * c_rate[p3_wat];
-            }
-          else if (n_phases == 2)
-            {
-              if (is_w)
-                {
-                  rhs[index + p2ow_oil] += wefac * c_rate[p2ow_oil];
-                  rhs[index + p2ow_wat] += wefac * c_rate[p2ow_wat];
-                }
-              else if (is_g)
-                {
-                  rhs[index + p2og_gas] += wefac * c_rate[p2og_gas];
-                  rhs[index + p2og_oil] += wefac * c_rate[p2og_oil];
-                }
-            }
-          else
-            {
-              if (is_w)
-                rhs[index] += wefac * c_rate[0];
-              else if (is_g)
-                rhs[index] += wefac * c_rate[0];
-              else
-                {
-                  BS_ASSERT (is_o);
-                  rhs[index] += wefac * c_rate[0];
-                }
-            }
-        }
-    }
 
   template <typename strategy_t>
   void 
@@ -639,7 +460,7 @@ namespace blue_sky
       false);
 
     reset_init_approx ();
-    check_shut (calc_model);
+    check_shut ();
     custom_init (calc_model);
   }
   template <typename strategy_t>

@@ -300,13 +300,6 @@ namespace blue_sky
       get_facility_list () const;
 
       /**
-       * \brief  returns total connections count over all facilities
-       * \return total connections count
-       * */
-      size_t                    
-      get_connections_count () const;
-
-      /**
        * \brief  specifies what well should be filtered be event_filter
        * \param  well_name name of well
        * */

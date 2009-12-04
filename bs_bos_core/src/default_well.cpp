@@ -157,6 +157,32 @@ namespace wells {
     return typename base_t::connection_iterator_t (new default_connection_iterator <strategy_t> (this, get_connections_count ()));
   }
 
+  template <typename strategy_t>
+  bool
+  default_well <strategy_t>::is_no_connections () const
+  {
+    return get_connections_count () == 0;
+  }
+
+  template <typename strategy_t>
+  bool
+  default_well <strategy_t>::is_no_primary_connections () const
+  {
+    return connection_list_.empty ();
+  }
+
+  template <typename strategy_t>
+  typename default_well <strategy_t>::sp_connection_t
+  default_well <strategy_t>::get_first_connection () const
+  {
+    if (connection_list_.empty ())
+      {
+        bs_throw_exception (boost::format ("No primary connections (well: %s)") % base_t::name ());
+      }
+
+    return connection_list_[0];
+  }
+
 
   template <typename strategy_t>
   void
@@ -178,9 +204,9 @@ namespace wells {
     item_t xw = 0;
     item_t ww_bw = (1.0 / ww_value) * bw_value;
 
-    for (index_t j = 0, jcnt = (index_t)base_t::open_connections_.size (); j < jcnt; ++j)
+    for (index_t j = 0, jcnt = (index_t)open_connections_.size (); j < jcnt; ++j)
       {
-        index_t con_index = base_t::open_connections_[j];
+        index_t con_index = open_connections_[j];
         BS_ASSERT (connection_list_[con_index]->is_shut () == false) (j);
 
         const sp_connection_t &c  = connection_list_[con_index];
@@ -199,31 +225,44 @@ namespace wells {
     BOSOUT (section::wells, level::low) << "[" << base_t::name_ << boost::format ("] Restore solution: change bhp from %f to %f (bw: %f, ww: %f)") % base_t::bhp_ % (base_t::bhp_ + xw) % bw_value % ww_value << bs_end;
     base_t::bhp_ += xw;
   }
-  template <typename strategy_t>
-  void
-  default_well <strategy_t>::eliminate (rhs_item_t *res, index_t rw_index, index_t wr_index, double dt, index_t block_size) const
+
+  /**
+   * \brief  Calculates Jacobian value and stores it in array
+   * \param  well
+   * \param  array Array of Jacobian values
+   * \param  rw_index
+   * \param  wr_index
+   * \param  dt
+   * \param  block_size
+   * */
+  template <typename well_t, typename rhs_item_t, typename index_t, typename connection_t>
+  static void
+  eliminate (well_t *well, 
+    rhs_item_t *res, 
+    const smart_ptr <connection_t> &rw_con, 
+    const smart_ptr <connection_t> &wr_con, 
+    double dt, 
+    index_t block_size) 
   {
-    BS_ASSERT (!base_t::is_shut ()) (base_t::name ());
-    BS_ASSERT (get_connections_count ()) (base_t::name ());
+    BS_ASSERT (!well->is_shut ()) (well->name ());
     BS_ASSERT (res);
 
     if (block_size > 3 && block_size < 1)
       bs_throw_exception ("block_size invalid");
 
-    const sp_connection_t &rw_con = connection_list_[rw_index];
-    const sp_connection_t &wr_con = connection_list_[wr_index];
+    typedef typename well_t::item_t item_t;
 
-    const shared_vector <item_t> &rw = rw_con->get_rw_value ();
-    const shared_vector <item_t> &wr = wr_con->get_wr_value ();
-    const shared_vector <item_t> &rr = wr_con->get_rr_value ();
+    const boost::array <item_t, FI_PHASE_TOT> &rw                 = rw_con->rw_value;
+    const boost::array <item_t, FI_PHASE_TOT> &wr                 = wr_con->wr_value;
+    const boost::array <item_t, connection_t::rr_value_count> &rr = wr_con->rr_value;
 
     BS_ASSERT (rw.size () == (size_t)block_size) (rw.size ()) (block_size);
     BS_ASSERT (wr.size () == (size_t)block_size) (wr.size ()) (block_size);
     BS_ASSERT (rr.size () == (size_t)block_size * block_size) (rr.size ()) (block_size);
 
-    if (rw_index == wr_index)
+    if (rw_con->n_block () == wr_con->n_block ())
       {
-        if (well_t::well_controller_->is_rate ())
+        if (well->get_well_controller ()->is_rate ())
           {
             if (block_size == 3)
               default_rr_eliminator <3>::process_diag_rate (res, rr, rw, wr, dt);
@@ -244,7 +283,7 @@ namespace wells {
       }
     else
       {
-        if (well_t::well_controller_->is_rate ())
+        if (well->get_well_controller ()->is_rate ())
           {
             if (block_size == 3)
               default_rr_eliminator <3>::process_rate (res, rw, wr, dt);
@@ -252,6 +291,117 @@ namespace wells {
               default_rr_eliminator <2>::process_rate (res, rw, wr, dt);
             else if (block_size == 1)
               default_rr_eliminator <1>::process_rate (res, rw, wr, dt);
+          }
+      }
+  }
+
+  template <typename strategy_t>
+  void
+  default_well <strategy_t>::fill_rows (index_array_t &rows) const
+  {
+    for (index_t j = 0, jcnt = (index_t)open_connections_.size (); j < jcnt; ++j)
+      {
+        index_t con_index = open_connections_[j];
+        BS_ASSERT (get_connection (con_index)->is_shut () == false) (j);
+
+        index_t n_block = get_connection (con_index)->n_block ();
+        index_t k = rows[n_block + 1] != 0;
+        rows[n_block + 1] += jcnt - k;
+      }
+  }
+  template <typename strategy_t>
+  void
+  default_well <strategy_t>::fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const
+  {
+    index_t b_sqr = block_size * block_size;
+    for (index_t j = 0, jcnt = (index_t)open_connections_.size (); j < jcnt; ++j)
+      {
+        index_t rw_index = open_connections_[j];
+        const sp_default_connection_t &rw_con = get_connection (rw_index);
+        BS_ASSERT (rw_con->is_shut () == false) (j);
+
+        index_t n_block = rw_con->n_block ();
+        index_t l = rows[n_block];
+
+        if (markers[n_block] == 0)
+          {
+            markers[n_block] = 1;
+          }
+
+        for (index_t k = 0, kcnt = jcnt; k < kcnt; ++k)
+          {
+            index_t index = l;
+            index_t wr_index = open_connections_[k];
+            const sp_default_connection_t &wr_con = get_connection (wr_index);
+
+            if (j == k)
+              {
+                BS_ASSERT (cols[l] == -1) (cols[l]) (n_block);
+                cols[l] = n_block;
+
+                BS_ASSERT (l * b_sqr < (index_t)values.size ()) (l) (values.size ());
+                eliminate (this, &values[l * b_sqr], rw_con, wr_con, dt, block_size);
+              }
+            else
+              {
+                BS_ASSERT (cols[l + markers[n_block]] == -1) (cols[l + markers[n_block]]) (wr_con->n_block ());
+                index = l + markers[n_block];
+                cols[index] = wr_con->n_block ();
+                markers[n_block]++;
+
+                BS_ASSERT (index * b_sqr < (index_t)values.size ()) (index) (b_sqr) (values.size ());
+                eliminate (this, &values[index * b_sqr], rw_con, wr_con, dt, block_size);
+              }
+          }
+      }
+  }
+
+  template <typename strategy_t>
+  void
+  default_well <strategy_t>::fill_rhs (double dt, index_t n_phases, bool is_g, bool is_o, bool is_w, rhs_item_array_t &rhs) const
+  {
+    item_t wefac = base_t::exploitation_factor_ > 0 ? base_t::exploitation_factor_ * dt : dt;
+
+    for (index_t j = 0, jcnt = (index_t)open_connections_.size (); j < jcnt; ++j)
+      {
+        index_t con_index = open_connections_[j];
+        BS_ASSERT (get_connection (con_index)->is_shut () == false) (j);
+
+        const sp_connection_t &c              = get_connection (con_index);
+        int n_block                           = c->n_block ();
+        int index                             = n_block * n_phases;
+        const shared_vector <rhs_item_t> &c_rate  = c->get_rate_value ();
+
+        if (n_phases == 3)
+          {
+            rhs[index + p3_gas] += wefac * c_rate[p3_gas];
+            rhs[index + p3_oil] += wefac * c_rate[p3_oil];
+            rhs[index + p3_wat] += wefac * c_rate[p3_wat];
+          }
+        else if (n_phases == 2)
+          {
+            if (is_w)
+              {
+                rhs[index + p2ow_oil] += wefac * c_rate[p2ow_oil];
+                rhs[index + p2ow_wat] += wefac * c_rate[p2ow_wat];
+              }
+            else if (is_g)
+              {
+                rhs[index + p2og_gas] += wefac * c_rate[p2og_gas];
+                rhs[index + p2og_oil] += wefac * c_rate[p2og_oil];
+              }
+          }
+        else
+          {
+            if (is_w)
+              rhs[index] += wefac * c_rate[0];
+            else if (is_g)
+              rhs[index] += wefac * c_rate[0];
+            else
+              {
+                BS_ASSERT (is_o);
+                rhs[index] += wefac * c_rate[0];
+              }
           }
       }
   }
@@ -521,6 +671,31 @@ namespace wells {
   {
     return shared_array <item_t> (&bw_value, 1);
   }
+
+  template <typename strategy_t>
+  bool
+  default_well <strategy_t>::check_shut ()
+  {
+    open_connections_.clear ();
+    if (base_t::is_shut ())
+      {
+        return true;
+      }
+
+    typedef connection_iterator <strategy_t> connection_iterator_t;
+    connection_iterator_t it = connections_begin (), e = connections_end ();
+    for (size_t i = 0; it != e; ++it, ++i)
+      {
+        const sp_connection_t &c (*it);
+        if (!c->is_shut ())
+          {
+            open_connections_.push_back (i);
+          }
+      }
+
+    return false;
+  }
+
   //////////////////////////////////////////////////////////////////////////
   BLUE_SKY_TYPE_STD_CREATE_T_DEF (default_well, (class));
   BLUE_SKY_TYPE_STD_COPY_T_DEF (default_well, (class));

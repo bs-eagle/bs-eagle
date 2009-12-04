@@ -260,7 +260,7 @@ public:
 
       typedef typename base_t::calc_model_t::data_t         calc_model_data_t;
 
-      if (well->get_connections_count () == 0)
+      if (well->is_no_primary_connections ())
         {
           return false;
         }
@@ -268,12 +268,13 @@ public:
       item_t gravity                = calc_model->internal_constants.gravity_constant;
       item_t numer                  = 0;
       item_t denom                  = 0;
-      item_t prev_depth             = well->get_connection (0)->connection_depth;
+      item_t prev_depth             = well->get_first_connection ()->connection_depth;
 
       calc_for_rate <this_t> calc (well, calc_model->phase_d, calc_model->sat_d, calc_model->n_phases, calc_model->gas_oil_ratio);
-      for (size_t i = 0, cnt = well->get_connections_count (); i < cnt; ++i)
+      typename base_t::well_t::connection_iterator_t it = well->connections_begin (), e = well->connections_end ();
+      for (; it != e; ++it)
         {
-          const sp_connection_t &c = well->get_connection (i);
+          const sp_connection_t &c (*it);
           if (c->is_shut ())
             {
               prev_depth                  = c->connection_depth;

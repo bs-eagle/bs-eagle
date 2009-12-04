@@ -84,17 +84,6 @@ namespace wells {
     process (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix);
 
     /**
-     * \brief  Calculates Jacobian value and stores it in array
-     * \param  array Array of Jacobian values
-     * \param  rw_index
-     * \param  wr_index
-     * \param  dt
-     * \param  block_size
-     * */
-    void
-    eliminate (rhs_item_t *array, index_t rw_index, index_t wr_index, double dt, index_t block_size) const;
-
-    /**
      * \brief  Clears well and well perforations data
      * */
     void
@@ -184,14 +173,86 @@ namespace wells {
      * \brief  Returns count of connection (perforation) for well
      * \return Count of connections
      * */
-    virtual size_t 
+    size_t 
     get_connections_count () const;
 
+    /**
+     * \brief  Returns iterator for begin of primary and 
+     *         secondary connections
+     * \return Begin iterator
+     * */
     virtual typename base_t::connection_iterator_t
     connections_begin () const;
 
+    /**
+     * \brief  Returns iterator for end of primary and 
+     *         secondary connections
+     * \return End iterator
+     * */
     virtual typename base_t::connection_iterator_t
     connections_end () const;
+
+    /**
+     * \brief  Returns true if no any connections
+     * \return True if no any connections
+     * */
+    virtual bool
+    is_no_connections () const;
+
+    /**
+     * \brief  Returns true if no primary connections
+     * \return True if no primary connections
+     * */
+    virtual bool
+    is_no_primary_connections () const;
+
+    /**
+     * \brief  Returns first primary connection
+     * \return First primary connection or throw exception
+     *         is_no_primary_connections == true
+     * */
+    virtual sp_connection_t
+    get_first_connection () const;
+
+    /**
+     * \brief  Checks well on shut if not shut fills 
+     *         open_connections_ array
+     * \return True if well is shut
+     * */
+    virtual bool
+    check_shut ();
+
+    /**
+     * \brief  Fills Jacobian rows
+     * \param  rows Array of Jacobian Rows
+     * */
+    virtual void 
+    fill_rows (index_array_t &rows) const;
+
+    /**
+     * \brief  Fills Jacobian colls and values, uses eliminate for 
+     *         fill values
+     * \param  dt
+     * \param  block_size
+     * \param  rows
+     * \param  cols
+     * \param  values
+     * \param  markers
+     * */
+    virtual void 
+    fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const;
+
+    /**
+     * \brief  Fills rhs array with rate values
+     * \param  dt
+     * \param  n_phases
+     * \param  is_g
+     * \param  is_o
+     * \param  is_w
+     * \param  rhs Array of rhs values
+     * */
+    virtual void 
+    fill_rhs (double dt, index_t n_phases, bool is_g, bool is_o, bool is_w, rhs_item_array_t &rhs) const;
 
   public:
 
@@ -200,6 +261,7 @@ namespace wells {
 
     connection_list_t           connection_list_;   //!< List of connections (default_connection)
     connection_map_t            connection_map_;    //!< \todo Obsolete
+    index_array_t               open_connections_;  //!< Array of indexes of open perforations (connections)
   };
 
   /**

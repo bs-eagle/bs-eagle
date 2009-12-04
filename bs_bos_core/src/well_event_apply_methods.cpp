@@ -172,7 +172,7 @@ namespace blue_sky
         locked_connection->set_seg_number (seg_number);
       }
 
-    locked_well->check_shut (calc_model);
+    locked_well->check_shut ();
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -413,9 +413,11 @@ namespace blue_sky
 
     if (/*(!z1_cell && !z2_cell) || */!i_cell || !j_cell || !k_cell)
       {
-        for (size_t i = 0, cnt = well->get_connections_count (); i < cnt; ++i)
+        typename well_t::connection_iterator_t it = well->connections_begin (),
+                 e = well->connections_end ();
+        for (; it != e; ++it)
           {
-            well->get_connection (i)->mul_perm_mult (perm_mult);
+            it->mul_perm_mult (perm_mult);
           }
       }
     else if (i_cell && j_cell && k_cell)

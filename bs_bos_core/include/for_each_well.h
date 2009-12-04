@@ -30,7 +30,7 @@ namespace blue_sky {
         sp_well_t well (wb->second, bs_dynamic_cast ());
         BS_ASSERT (well);
 
-        if (well->get_connections_count ())
+        if (!well->is_no_connections ())
           {
             method (*well);
           }
@@ -80,7 +80,7 @@ namespace blue_sky {
       {
         sp_well_t well (wb->second, bs_dynamic_cast ());
         BS_ASSERT (well);
-        if (well->get_connections_count () && method (*well))
+        if (!well->is_no_connections () && method (*well))
           {
             return true;
           }
@@ -110,7 +110,7 @@ namespace blue_sky {
         sp_well_t well (wb->second, bs_dynamic_cast ());
         BS_ASSERT (well);
 
-        if (well->get_connections_count ())
+        if (!well->is_no_connections ())
           {
             acc += method (*well);
           }

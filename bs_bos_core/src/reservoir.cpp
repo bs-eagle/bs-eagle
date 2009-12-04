@@ -208,13 +208,6 @@ namespace blue_sky
     }
 
   template <typename strategy_t>
-  size_t
-  reservoir<strategy_t>::get_connections_count () const
-  {
-    return for_each_well_acc (*facility_list_, closure <size_t, well_t> (&well_t::get_connections_count));
-  }
-
-  template <typename strategy_t>
   void
   reservoir<strategy_t>::init_jacobian (const sp_jmatrix_t &jmx, index_t n_cells)
   {

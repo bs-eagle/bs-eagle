@@ -99,7 +99,6 @@ namespace python {
     .def ("process",                      &T::process)
     .def ("update",                       &T::restore_solution)
     .def ("clear_data",                   &T::clear_data)
-    //.def ("get_connection",               &T::get_connection)
     .add_property ("ww",                  &T::get_ww_value)
     .add_property ("bw",                  &T::get_bw_value)
     .add_property ("name",                make_function (&T::get_name, return_value_policy <copy_const_reference> ()), &T::set_name)
@@ -110,7 +109,6 @@ namespace python {
     .add_property ("state",               make_function (detail::get_well_state<T>))
     .add_property ("bhp_rate",            &T::bhp)
     .add_property ("is_work",             make_function (detail::get_well_is_work<T>), make_function (detail::set_well_is_work<T>))
-    .add_property ("connections",         &T::get_connections_count)
     .add_property ("is_production",       make_function (detail::well_is_production<T>))
   PY_EXPORTER_END;
 

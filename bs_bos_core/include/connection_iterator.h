@@ -40,6 +40,17 @@ namespace blue_sky {
     }
 
     /**
+     * \brief  Returns object which iterator points
+     * \return Base connection object
+     * */
+    sp_connection_t
+    operator-> () const
+    {
+      BS_ASSERT (impl_);
+      return impl_->get ();
+    }
+
+    /**
      * \brief  Moves iterator forward, only 
      *         preincrement operation supports
      * \return This object

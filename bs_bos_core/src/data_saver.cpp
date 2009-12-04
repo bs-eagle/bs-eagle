@@ -50,9 +50,9 @@ namespace blue_sky {
     typedef typename calc_model_t::sp_connection_t                  sp_connection_t;
  
     //TODO: groups
-    for (well_iterator_t well = wb; well != we; ++well)
+    for (well_iterator_t w = wb; w != we; ++w)
       {
-        sp_well_t ws (well->second, bs_dynamic_cast ());
+        sp_well_t ws (w->second, bs_dynamic_cast ());
 
         file["/wells/" + ws->get_name ()]
           .write ("d_params", 
@@ -78,11 +78,13 @@ namespace blue_sky {
             hdf5_pod (0) << detail::get_status_old (ws))
           ;
 
-        if (true || write_conn_results_to_hdf5)
+        if (write_conn_results_to_hdf5)
           {
-            for (size_t i = 0, cnt = ws->get_connections_count (); i < cnt; ++i)
+            typedef well <strategy_t> well_t;
+            typename well_t::connection_iterator_t it = ws->connections_begin (), e = ws->connections_end ();
+            for (; it != e; ++it)
               {
-                const sp_connection_t &ci = ws->get_connection (i);
+                const sp_connection_t &ci (*it);
                 int cell = ci->n_block ();
 
                 hdf5_group_v2 group = file[(boost::format ("/wells/%s/connections/%d") % ws->get_name () % cell).str ()];
