@@ -36,7 +36,7 @@ namespace blue_sky {
     operator* () const
     {
       BS_ASSERT (impl_);
-      return impl_->get ();
+      return impl_->operator * ();
     }
 
     /**
@@ -47,7 +47,7 @@ namespace blue_sky {
     operator-> () const
     {
       BS_ASSERT (impl_);
-      return impl_->get ();
+      return impl_->operator * ();
     }
 
     /**
@@ -59,7 +59,7 @@ namespace blue_sky {
     operator++ ()
     {
       BS_ASSERT (impl_);
-      impl_->increment ();
+      impl_->operator++ ();
       return *this;
     }
 
@@ -71,7 +71,7 @@ namespace blue_sky {
     operator== (const this_t &rhs) const
     {
       BS_ASSERT (impl_);
-      return impl_->is_equal (rhs.impl_);
+      return impl_->operator== (rhs.impl_);
     }
 
     /**
@@ -82,7 +82,7 @@ namespace blue_sky {
     operator!= (const this_t &rhs) const
     {
       BS_ASSERT (impl_);
-      return !impl_->is_equal (rhs.impl_);
+      return !impl_->operator== (rhs.impl_);
     }
 
     struct impl
@@ -90,13 +90,19 @@ namespace blue_sky {
       virtual ~impl () {}
 
       virtual sp_connection_t
-      get () const = 0;
+      operator* () const = 0;
 
-      virtual void
-      increment () = 0;
+      virtual sp_connection_t
+      operator-> () const = 0;
+
+      virtual impl &
+      operator++ () = 0;
 
       virtual bool
-      is_equal (const boost::shared_ptr <impl> &rhs) const = 0;
+      operator== (const boost::shared_ptr <impl> &rhs) const = 0;
+
+      virtual bool
+      operator!= (const boost::shared_ptr <impl> &rhs) const = 0;
 
       virtual typename strategy_t::index_t
       position () const = 0;
@@ -110,7 +116,6 @@ namespace blue_sky {
   protected:
     boost::shared_ptr <impl> impl_;
   };
-
 
 } // namespace blue_sky
 

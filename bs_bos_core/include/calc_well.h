@@ -141,7 +141,7 @@ namespace blue_sky
 
     public:
       /**
-       * \brief  Adds connection (perforation) to well and return it
+       * \brief  Adds primary connection (perforation) to well and return it
        * \param  i_coord i coordinate of perforation
        * \param  j_coord j coordinate of perforation
        * \param  k_coord k coordinate of perforation
@@ -149,21 +149,23 @@ namespace blue_sky
        * \return Created connection
        * */
       virtual sp_connection_t 
-      add_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
+      add_primary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
       {
         bs_throw_exception ("PURE CALL");
       }
-      ///**
-      // * \brief  Returns connection (perforation) with index idx
-      // * \param  idx Index of connection
-      // * \return connection instance on success otherwise null pointer,
-      // *         throws exception if not implemented in child class
-      // * */
-      //virtual sp_connection_t
-      //get_connection (index_t idx) const
-      //{
-      //  bs_throw_exception ("PURE CALL");
-      //}
+      /**
+       * \brief  Adds secondary connection (perforation) to well and return it
+       * \param  i_coord i coordinate of perforation
+       * \param  j_coord j coordinate of perforation
+       * \param  k_coord k coordinate of perforation
+       * \param  n_block Index of block (cell) in mesh for (i, j, k) coordinates
+       * \return Created connection
+       * */
+      virtual sp_connection_t 
+      add_secondary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
+      {
+        bs_throw_exception ("PURE CALL");
+      }
       /**
        * \brief  Returns connection (perforation) with n_block
        * \param  n_block Value of block index
@@ -174,15 +176,6 @@ namespace blue_sky
       {
         bs_throw_exception ("PURE CALL");
       }
-      ///**
-      // * \brief  Returns count of connection (perforation) for well
-      // * \return Count of connections
-      // * */
-      //virtual size_t 
-      //get_connections_count () const
-      //{
-      //  bs_throw_exception ("PURE CALL");
-      //}
 
       /**
        * \brief  Returns iterator for begin of primary and 

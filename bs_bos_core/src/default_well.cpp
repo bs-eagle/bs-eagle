@@ -29,6 +29,7 @@ namespace wells {
   : base_t (param)
   , ww_value (0)
   , bw_value (0)
+  , open_connections_count_ (0)
   {
   }
 
@@ -42,6 +43,7 @@ namespace wells {
   : base_t (well_name)
   , ww_value (0)
   , bw_value (0)
+  , open_connections_count_ (0)
   {
 
   }
@@ -80,40 +82,58 @@ namespace wells {
     };
   } // namespace wells
 
-  template <typename strategy_t>
-  typename default_well <strategy_t>::sp_connection_t
-  default_well <strategy_t>::add_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
+  template <typename index_t, typename connection_list_t, typename well_t>
+  typename connection_list_t::value_type
+  add_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block, connection_list_t &connection_list, well_t *well)
   {
     if (n_block < 0)
-      bs_throw_exception ("Invalid connection n_block value");
+      {
+        bs_throw_exception (boost::format ("Invalid connection n_block value (ijk: {%d, %d, %d}, n_block: %d, well: %s") 
+          % i_coord % j_coord % k_coord
+          % n_block
+          % well->name ());
+      }
 
-    sp_default_connection_t connection = BS_KERNEL.create_object (default_connection_t::bs_type (), true);
+    typename well_t::sp_default_connection_t connection = BS_KERNEL.create_object (well_t::default_connection_t::bs_type (), true);
     if (!connection)
-        bs_throw_exception ("Can't create connection");
+        bs_throw_exception (boost::format ("Can't create connection (well: %s)") % well->name ());
 
     connection->set_coord (i_coord, j_coord, k_coord, n_block);
-    connection_list_.push_back (connection);
-    std::sort (connection_list_.begin (), connection_list_.end (), detail::sort_connection_list <sp_default_connection_t> ());
-    connection_map_.insert (std::make_pair (connection->n_block (), (index_t)connection_list_.size () - 1));
+    connection_list.push_back (connection);
+    std::sort (connection_list.begin (), connection_list.end (), detail::sort_connection_list <typename well_t::sp_default_connection_t> ());
+    //connection_map_.insert (std::make_pair (connection->n_block (), (index_t)primary_connection_list_.size () - 1));
 
     return connection;
   }
 
   template <typename strategy_t>
   typename default_well <strategy_t>::sp_connection_t
+  default_well <strategy_t>::add_primary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
+  {
+    return add_connection (i_coord, j_coord, k_coord, n_block, primary_connection_list_, this);
+  }
+  template <typename strategy_t>
+  typename default_well <strategy_t>::sp_connection_t
+  default_well <strategy_t>::add_secondary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
+  {
+    return add_connection (i_coord, j_coord, k_coord, n_block, secondary_connection_list_, this);
+  }
+
+  template <typename strategy_t>
+  typename default_well <strategy_t>::sp_connection_t
   default_well <strategy_t>::get_connection (index_t idx) const
   {
-    BS_ASSERT ((size_t)idx < connection_list_.size ()) (base_t::name ()) (idx) (connection_list_.size ());
-    return connection_list_[idx];
+    BS_ASSERT ((size_t)idx < primary_connection_list_.size ()) (base_t::name ()) (idx) (primary_connection_list_.size ());
+    return primary_connection_list_[idx];
   }
   template <typename strategy_t>
   typename default_well <strategy_t>::sp_connection_t
   default_well <strategy_t>::get_connection_map (index_t n_block) const
   {
-    for (size_t i = 0, cnt = connection_list_.size (); i < cnt; ++i)
+    for (size_t i = 0, cnt = primary_connection_list_.size (); i < cnt; ++i)
       {
-        if (connection_list_[i]->n_block () == n_block)
-          return connection_list_[i];
+        if (primary_connection_list_[i]->n_block () == n_block)
+          return primary_connection_list_[i];
       }
 
     return 0;
@@ -140,47 +160,51 @@ namespace wells {
   size_t
   default_well <strategy_t>::get_connections_count () const
   {
-    return connection_list_.size ();
+    return primary_connection_list_.size () + 
+      secondary_connection_list_.size ();
   }
 
   template <typename strategy_t>
   typename default_well <strategy_t>::base_t::connection_iterator_t
   default_well <strategy_t>::connections_begin () const
   {
-    return typename base_t::connection_iterator_t (new default_connection_iterator <strategy_t> (this, 0));
+    return typename base_t::connection_iterator_t (
+      new default_connection_iterator <strategy_t> (this, begin_iterator_tag));
   }
 
   template <typename strategy_t>
   typename default_well <strategy_t>::base_t::connection_iterator_t
   default_well <strategy_t>::connections_end () const
   {
-    return typename base_t::connection_iterator_t (new default_connection_iterator <strategy_t> (this, get_connections_count ()));
+    return typename base_t::connection_iterator_t (
+      new default_connection_iterator <strategy_t> (this, end_iterator_tag));
   }
 
   template <typename strategy_t>
   bool
   default_well <strategy_t>::is_no_connections () const
   {
-    return get_connections_count () == 0;
+    return primary_connection_list_.empty () && 
+      secondary_connection_list_.empty ();
   }
 
   template <typename strategy_t>
   bool
   default_well <strategy_t>::is_no_primary_connections () const
   {
-    return connection_list_.empty ();
+    return primary_connection_list_.empty ();
   }
 
   template <typename strategy_t>
   typename default_well <strategy_t>::sp_connection_t
   default_well <strategy_t>::get_first_connection () const
   {
-    if (connection_list_.empty ())
+    if (primary_connection_list_.empty ())
       {
         bs_throw_exception (boost::format ("No primary connections (well: %s)") % base_t::name ());
       }
 
-    return connection_list_[0];
+    return primary_connection_list_[0];
   }
 
 
@@ -189,7 +213,7 @@ namespace wells {
   default_well <strategy_t>::restore_solution (double /*dt*/, const item_array_t &p_sol, 
                                                const item_array_t & /*s_sol*/, index_t block_size)
   {
-    BS_ASSERT (get_connections_count ()) (base_t::name ());
+    BS_ASSERT (!is_no_connections ()) (base_t::name ());
 
     typedef shared_vector <item_t> item_wr_block_t;
     typedef shared_vector <item_t> item_xr_block_t;
@@ -204,22 +228,24 @@ namespace wells {
     item_t xw = 0;
     item_t ww_bw = (1.0 / ww_value) * bw_value;
 
-    for (index_t j = 0, jcnt = (index_t)open_connections_.size (); j < jcnt; ++j)
+    typedef default_connection_iterator_impl <strategy_t> iterator_t;
+    iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
+    for (; it != e; ++it)
       {
-        index_t con_index = open_connections_[j];
-        BS_ASSERT (connection_list_[con_index]->is_shut () == false) (j);
-
-        const sp_connection_t &c  = connection_list_[con_index];
-        const item_wr_block_t &wr = c->get_wr_value ();
-        const item_xr_block_t &xr = shared_array (const_cast <item_t *> (&p_sol[c->n_block () * block_size]), block_size);
-
-        item_t wr_xr = 0;
-        for (index_t j = 0; j < block_size; ++j)
+        const sp_connection_t &c  = *it;
+        if (!c->is_shut ())
           {
-            wr_xr += wr[j] * xr[j];
-          }
+            const item_wr_block_t &wr = c->get_wr_value ();
+            const item_xr_block_t &xr = shared_array (const_cast <item_t *> (&p_sol[c->n_block () * block_size]), block_size);
 
-        xw += ww_bw - wr_xr;
+            item_t wr_xr = 0;
+            for (index_t j = 0; j < block_size; ++j)
+              {
+                wr_xr += wr[j] * xr[j];
+              }
+
+            xw += ww_bw - wr_xr;
+          }
       }
 
     BOSOUT (section::wells, level::low) << "[" << base_t::name_ << boost::format ("] Restore solution: change bhp from %f to %f (bw: %f, ww: %f)") % base_t::bhp_ % (base_t::bhp_ + xw) % bw_value % ww_value << bs_end;
@@ -299,58 +325,65 @@ namespace wells {
   void
   default_well <strategy_t>::fill_rows (index_array_t &rows) const
   {
-    for (index_t j = 0, jcnt = (index_t)open_connections_.size (); j < jcnt; ++j)
+    typedef default_connection_iterator_impl <strategy_t> iterator_t;
+    iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
+    for (; it != e; ++it)
       {
-        index_t con_index = open_connections_[j];
-        BS_ASSERT (get_connection (con_index)->is_shut () == false) (j);
-
-        index_t n_block = get_connection (con_index)->n_block ();
-        index_t k = rows[n_block + 1] != 0;
-        rows[n_block + 1] += jcnt - k;
+        if (!it->is_shut ())
+          {
+            index_t n_block = it->n_block ();
+            index_t k = rows[n_block + 1] != 0;
+            rows[n_block + 1] += open_connections_count_ - k;
+          }
       }
   }
   template <typename strategy_t>
   void
   default_well <strategy_t>::fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const
   {
+    typedef default_connection_iterator_impl <strategy_t> iterator_t;
+    iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
+
     index_t b_sqr = block_size * block_size;
-    for (index_t j = 0, jcnt = (index_t)open_connections_.size (); j < jcnt; ++j)
+    for (; it != e; ++it)
       {
-        index_t rw_index = open_connections_[j];
-        const sp_default_connection_t &rw_con = get_connection (rw_index);
-        BS_ASSERT (rw_con->is_shut () == false) (j);
-
-        index_t n_block = rw_con->n_block ();
-        index_t l = rows[n_block];
-
-        if (markers[n_block] == 0)
+        const sp_default_connection_t &rw_con = *it;
+        if (!rw_con->is_shut ())
           {
-            markers[n_block] = 1;
-          }
+            index_t n_block = rw_con->n_block ();
+            index_t l = rows[n_block];
 
-        for (index_t k = 0, kcnt = jcnt; k < kcnt; ++k)
-          {
-            index_t index = l;
-            index_t wr_index = open_connections_[k];
-            const sp_default_connection_t &wr_con = get_connection (wr_index);
-
-            if (j == k)
+            if (markers[n_block] == 0)
               {
-                BS_ASSERT (cols[l] == -1) (cols[l]) (n_block);
-                cols[l] = n_block;
-
-                BS_ASSERT (l * b_sqr < (index_t)values.size ()) (l) (values.size ());
-                eliminate (this, &values[l * b_sqr], rw_con, wr_con, dt, block_size);
+                markers[n_block] = 1;
               }
-            else
-              {
-                BS_ASSERT (cols[l + markers[n_block]] == -1) (cols[l + markers[n_block]]) (wr_con->n_block ());
-                index = l + markers[n_block];
-                cols[index] = wr_con->n_block ();
-                markers[n_block]++;
 
-                BS_ASSERT (index * b_sqr < (index_t)values.size ()) (index) (b_sqr) (values.size ());
-                eliminate (this, &values[index * b_sqr], rw_con, wr_con, dt, block_size);
+            iterator_t wr_it (this, begin_iterator_tag);
+            for (; wr_it != e; ++wr_it)
+              {
+                index_t index = l;
+                const sp_default_connection_t &wr_con = *wr_it;
+                if (!wr_con->is_shut ())
+                  {
+                    if (rw_con->n_block () == wr_con->n_block ())
+                      {
+                        BS_ASSERT (cols[l] == -1) (cols[l]) (n_block);
+                        cols[l] = n_block;
+
+                        BS_ASSERT (l * b_sqr < (index_t)values.size ()) (l) (values.size ());
+                        eliminate (this, &values[l * b_sqr], rw_con, wr_con, dt, block_size);
+                      }
+                    else
+                      {
+                        BS_ASSERT (cols[l + markers[n_block]] == -1) (cols[l + markers[n_block]]) (wr_con->n_block ());
+                        index = l + markers[n_block];
+                        cols[index] = wr_con->n_block ();
+                        markers[n_block]++;
+
+                        BS_ASSERT (index * b_sqr < (index_t)values.size ()) (index) (b_sqr) (values.size ());
+                        eliminate (this, &values[index * b_sqr], rw_con, wr_con, dt, block_size);
+                      }
+                  }
               }
           }
       }
@@ -362,45 +395,47 @@ namespace wells {
   {
     item_t wefac = base_t::exploitation_factor_ > 0 ? base_t::exploitation_factor_ * dt : dt;
 
-    for (index_t j = 0, jcnt = (index_t)open_connections_.size (); j < jcnt; ++j)
+    typedef default_connection_iterator_impl <strategy_t> iterator_t;
+    iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
+    for (; it != e; ++it)
       {
-        index_t con_index = open_connections_[j];
-        BS_ASSERT (get_connection (con_index)->is_shut () == false) (j);
+        const sp_connection_t &c = *it;
+        if (!c->is_shut ())
+          {
+            int n_block = c->n_block ();
+            int index   = n_block * n_phases;
+            const shared_vector <rhs_item_t> &c_rate  = c->get_rate_value ();
 
-        const sp_connection_t &c              = get_connection (con_index);
-        int n_block                           = c->n_block ();
-        int index                             = n_block * n_phases;
-        const shared_vector <rhs_item_t> &c_rate  = c->get_rate_value ();
-
-        if (n_phases == 3)
-          {
-            rhs[index + p3_gas] += wefac * c_rate[p3_gas];
-            rhs[index + p3_oil] += wefac * c_rate[p3_oil];
-            rhs[index + p3_wat] += wefac * c_rate[p3_wat];
-          }
-        else if (n_phases == 2)
-          {
-            if (is_w)
+            if (n_phases == 3)
               {
-                rhs[index + p2ow_oil] += wefac * c_rate[p2ow_oil];
-                rhs[index + p2ow_wat] += wefac * c_rate[p2ow_wat];
+                rhs[index + p3_gas] += wefac * c_rate[p3_gas];
+                rhs[index + p3_oil] += wefac * c_rate[p3_oil];
+                rhs[index + p3_wat] += wefac * c_rate[p3_wat];
               }
-            else if (is_g)
+            else if (n_phases == 2)
               {
-                rhs[index + p2og_gas] += wefac * c_rate[p2og_gas];
-                rhs[index + p2og_oil] += wefac * c_rate[p2og_oil];
+                if (is_w)
+                  {
+                    rhs[index + p2ow_oil] += wefac * c_rate[p2ow_oil];
+                    rhs[index + p2ow_wat] += wefac * c_rate[p2ow_wat];
+                  }
+                else if (is_g)
+                  {
+                    rhs[index + p2og_gas] += wefac * c_rate[p2og_gas];
+                    rhs[index + p2og_oil] += wefac * c_rate[p2og_oil];
+                  }
               }
-          }
-        else
-          {
-            if (is_w)
-              rhs[index] += wefac * c_rate[0];
-            else if (is_g)
-              rhs[index] += wefac * c_rate[0];
             else
               {
-                BS_ASSERT (is_o);
-                rhs[index] += wefac * c_rate[0];
+                if (is_w)
+                  rhs[index] += wefac * c_rate[0];
+                else if (is_g)
+                  rhs[index] += wefac * c_rate[0];
+                else
+                  {
+                    BS_ASSERT (is_o);
+                    rhs[index] += wefac * c_rate[0];
+                  }
               }
           }
       }
@@ -492,7 +527,7 @@ namespace wells {
   default_well <strategy_t>::calc_rate_and_derivs_concrete (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
   {
 
-    calc_rate_and_derivs_t <strategy_t, is_w, is_g, is_o, is_prod> calc_ (calc_model, jmatrix, this, this->connection_list_);
+    calc_rate_and_derivs_t <strategy_t, is_w, is_g, is_o, is_prod> calc_ (calc_model, jmatrix, this, this->primary_connection_list_);
 
     //clear_data ();
     //for (size_t i = 0; i < 10000; ++i)
@@ -600,7 +635,7 @@ namespace wells {
       }
 
 #ifdef _DEBUG
-    if (!base_t::is_shut () &&  connection_list_.empty ())
+    if (!base_t::is_shut () && is_no_connections ())
       {
         bs_throw_exception (boost::format ("[%s]: not shut but connection list is empty") % base_t::name ());
       }
@@ -648,9 +683,12 @@ namespace wells {
   void
   default_well <strategy_t>::clear_data ()
   {
-    for (size_t i = 0, cnt = connection_list_.size (); i < cnt; ++i)
+    typedef default_connection_iterator_impl <strategy_t> iterator_t;
+    iterator_t it (iterator_t (this, begin_iterator_tag)), 
+               e (iterator_t (this, end_iterator_tag));
+    for (; it != e; ++it)
       {
-        connection_list_ [i]->clear_data ();
+        it->clear_data ();
       }
 
     ww_value = 0;
@@ -676,20 +714,19 @@ namespace wells {
   bool
   default_well <strategy_t>::check_shut ()
   {
-    open_connections_.clear ();
+    open_connections_count_ = 0;
     if (base_t::is_shut ())
       {
         return true;
       }
 
-    typedef connection_iterator <strategy_t> connection_iterator_t;
-    connection_iterator_t it = connections_begin (), e = connections_end ();
-    for (size_t i = 0; it != e; ++it, ++i)
+    typedef default_connection_iterator_impl <strategy_t> iterator_t;
+    iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
+    for (; it != e; ++it)
       {
-        const sp_connection_t &c (*it);
-        if (!c->is_shut ())
+        if (!it->is_shut ())
           {
-            open_connections_.push_back (i);
+            open_connections_count_++;
           }
       }
 

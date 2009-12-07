@@ -143,7 +143,7 @@ namespace wells {
 
   public:
     /**
-     * \brief  Adds connection (perforation) to well and return it
+     * \brief  Adds primary connection (perforation) to well and return it
      * \param  i_coord i coordinate of perforation
      * \param  j_coord j coordinate of perforation
      * \param  k_coord k coordinate of perforation
@@ -151,7 +151,18 @@ namespace wells {
      * \return Created connection
      * */
     sp_connection_t
-    add_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block);
+    add_primary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block);
+
+    /**
+     * \brief  Adds secondary connection (perforation) to well and return it
+     * \param  i_coord i coordinate of perforation
+     * \param  j_coord j coordinate of perforation
+     * \param  k_coord k coordinate of perforation
+     * \param  n_block Index of block (cell) in mesh for (i, j, k) coordinates
+     * \return Created connection
+     * */
+    sp_connection_t
+    add_secondary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block);
 
     /**
      * \brief  Returns connection (perforation) with index idx
@@ -256,12 +267,14 @@ namespace wells {
 
   public:
 
-    item_t                      ww_value;           //!< WW value
-    item_t                      bw_value;           //!< BW value
+    item_t                      ww_value;                   //!< WW value
+    item_t                      bw_value;                   //!< BW value
 
-    connection_list_t           connection_list_;   //!< List of connections (default_connection)
-    connection_map_t            connection_map_;    //!< \todo Obsolete
-    index_array_t               open_connections_;  //!< Array of indexes of open perforations (connections)
+    connection_list_t           primary_connection_list_;   //!< List of primary connections (default_connection)
+    connection_list_t           secondary_connection_list_; //!< List of secondary connections 
+    connection_map_t            connection_map_;            //!< \todo Obsolete
+
+    index_t                     open_connections_count_;    //!< Number of open connections
   };
 
   /**

@@ -149,7 +149,7 @@ namespace blue_sky
         sp_connection_t con = well->get_connection_map (n_block);
         if (!con)
           {
-            con = well->add_connection (i_coord - 1, j_coord - 1, k_coord - 1, n_block);
+            con = well->add_primary_connection (i_coord - 1, j_coord - 1, k_coord - 1, n_block);
           }
         else
           {

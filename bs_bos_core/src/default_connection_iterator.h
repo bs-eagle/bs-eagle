@@ -11,81 +11,188 @@
 namespace blue_sky {
 namespace wells {
 
-  template <typename strategy_t>
-  struct default_connection_iterator : connection_iterator <strategy_t>::impl
+  enum iterator_tag
   {
-    typedef typename connection_iterator <strategy_t>::impl   base_t;
+    begin_iterator_tag,
+    end_iterator_tag,
+  };
+
+  template <typename strategy_t>
+  struct default_connection_iterator_impl 
+  {
+    typedef default_connection_iterator_impl <strategy_t>     this_t;
     typedef connection <strategy_t>                           connection_t;
-    typedef default_connection <strategy_t>                   default_connection_t;
     typedef default_well <strategy_t>                         default_well_t;
 
     typedef smart_ptr <connection_t>                          sp_connection_t;
-    typedef smart_ptr <default_connection_t>                  sp_default_connection_t;
     typedef smart_ptr <default_well_t>                        sp_default_well_t;
 
   public:
 
-    default_connection_iterator (const sp_default_well_t &well, 
-      typename strategy_t::index_t connection_idx)
-    : well_ (well)
-    , connection_idx_ (connection_idx)
-    , connection_count_ (well_->get_connections_count ())
+    default_connection_iterator_impl (const default_well_t *well, 
+      iterator_tag tag)
+    : well_ (const_cast <default_well_t *> (well))
+    , list_idx_ (0)
     {
+      if (tag == begin_iterator_tag)
+        {
+          connection_idx_[0] = 0;
+          connection_idx_[1] = 0;
+        }
+      else
+        {
+          connection_idx_[0] = well_->primary_connection_list_.size ();
+          connection_idx_[1] = well_->secondary_connection_list_.size ();
+        }
+
+      connection_list_[0] = &well_->primary_connection_list_;
+      connection_list_[1] = &well_->secondary_connection_list_;
+
+#ifdef _DEBUG
+      connection_count_[0] = well_->primary_connection_list_.size ();
+      connection_count_[1] = well_->secondary_connection_list_.size ();
+#endif
     }
 
-    virtual sp_connection_t
-    get () const
+    inline sp_connection_t
+    operator* () const
     {
 #ifdef _DEBUG
-      if (connection_count_ != well_->get_connections_count ())
+      if (connection_count_[list_idx_] != connection_list_[list_idx_]->size ())
         {
-          bs_throw_exception (boost::format ("Iterator no more valid (well: %s)") 
+          bs_throw_exception (boost::format ("Iterator no more valid (list: %ld, well: %s)") 
+            % list_idx_
             % well_->name ());
         }
-      if (connection_idx_ >= connection_count_)
+      if (connection_idx_[list_idx_] >= connection_list_[list_idx_]->size ())
         {
-          bs_throw_exception (boost::format ("Index out of range (idx: %ld, count: %ld, well: %s)") 
-            % connection_idx_ % connection_count_ % well_->name ())
+          bs_throw_exception (boost::format ("Index out of range (list: %ls, idx: %ld, count: %ld, well: %s)") 
+            % list_idx_
+            % connection_idx_[list_idx_] % connection_count_[list_idx_] % well_->name ())
         }
 #endif
 
-      return well_->get_connection (connection_idx_);
+      return connection_list_[list_idx_]->operator[] (connection_idx_[list_idx_]);
     }
 
-    virtual void
-    increment () 
+    inline sp_connection_t
+    operator-> () const
+    {
+      return operator* ();
+    }
+
+    inline this_t &
+    operator++ () 
     {
 #ifdef _DEBUG
-      if (connection_count_ != well_->get_connections_count ())
+      if (connection_count_[list_idx_] != connection_list_[list_idx_]->size ())
         {
-          bs_throw_exception (boost::format ("Iterator no more valid (well: %s)") 
+          bs_throw_exception (boost::format ("Iterator no more valid (list: %ld, well: %s)") 
+            % list_idx_
             % well_->name ());
         }
-      if (connection_idx_ >= connection_count_)
+      if (connection_idx_[list_idx_] >= connection_list_[list_idx_]->size ())
         {
-          bs_throw_exception (boost::format ("Index out of range (idx: %ld, count: %ld, well: %s)") 
-            % connection_idx_ % connection_count_ % well_->name ())
+          bs_throw_exception (boost::format ("Index out of range (list: %ls, idx: %ld, count: %ld, well: %s)") 
+            % list_idx_ % connection_idx_[list_idx_] % connection_count_[list_idx_] % well_->name ())
         }
 #endif
-      ++connection_idx_;
+      ++connection_idx_[list_idx_];
+      list_idx_ += static_cast <size_t> (connection_idx_[list_idx_]) >= connection_list_[list_idx_]->size ();
+
+#ifdef _DEBUG
+      if (list_idx_ > 1)
+        {
+          bs_throw_exception (boost::format ("List index out of range (list: %ld, well: %s)")
+            % list_idx_ % well_->name ());
+        }
+#endif
+
+      return *this;
     }
 
-    bool
-    is_equal (const boost::shared_ptr <base_t> &rhs) const
+    inline bool 
+    operator== (const this_t &rhs) const
     {
-      return connection_idx_ == rhs->position ();
+      return position () == rhs.position ();
+    }
+    inline bool
+    operator!= (const this_t &rhs) const
+    {
+      return !operator== (rhs);
     }
 
     typename strategy_t::index_t
     position () const
     {
-      return connection_idx_;
+      return connection_idx_[0] + connection_idx_[1];
     }
 
   private:
-    sp_default_well_t               well_;
-    typename strategy_t::index_t    connection_idx_;
-    typename strategy_t::index_t    connection_count_;
+    default_well_t                              *well_;
+    typename strategy_t::index_t                list_idx_;
+    typename strategy_t::index_t                connection_idx_[2];
+    typename default_well_t::connection_list_t  *connection_list_[2];
+
+#ifdef _DEBUG
+    typename strategy_t::index_t                connection_count_[2];
+#endif
+  };
+
+  template <typename strategy_t>
+  struct default_connection_iterator : connection_iterator <strategy_t>::impl
+  {
+    typedef typename connection_iterator <strategy_t>::impl   base_t;
+    typedef connection <strategy_t>                           connection_t;
+    typedef default_well <strategy_t>                         default_well_t;
+    typedef smart_ptr <connection_t>                          sp_connection_t;
+
+  public:
+
+    default_connection_iterator (const default_well_t *well, 
+      iterator_tag tag)
+    : impl_ (well, tag)
+    {
+    }
+
+    virtual sp_connection_t
+    operator* () const
+    {
+      return impl_.operator* ();
+    }
+
+    virtual sp_connection_t
+    operator-> () const
+    {
+      return impl_.operator-> ();
+    }
+
+    virtual base_t &
+    operator++ ()
+    {
+      impl_.operator++ ();
+      return *this;
+    }
+
+    virtual bool
+    operator== (const boost::shared_ptr <base_t> &rhs) const
+    {
+      return impl_.position () == rhs->position ();
+    }
+    virtual bool 
+    operator!= (const boost::shared_ptr <base_t> &rhs) const
+    {
+      return !operator== (rhs);
+    }
+
+    virtual typename strategy_t::index_t
+    position () const
+    {
+      return impl_.position ();
+    }
+
+  private:
+    default_connection_iterator_impl <strategy_t> impl_;
   };
 
 

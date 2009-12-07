@@ -230,13 +230,6 @@ namespace blue_sky {
               reservoir_->end_jacobian (dt, calc_model_, jacobian_);
             }
 
-#ifdef _DEBUG
-          //if (save_debug_files)
-            {
-              debug_save_data (dt);
-            }
-#endif
-
           if (check_norm (istart))
             return FI_OPERATOR_RETURN_FAIL;
 
