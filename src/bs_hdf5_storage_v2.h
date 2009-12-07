@@ -72,7 +72,7 @@ namespace blue_sky {
       ~hdf5_buffer__ ()
       {
         if (owner_)
-          delete [] data_;
+          delete [] reinterpret_cast <char *> (data_);
       }
 
       void *
