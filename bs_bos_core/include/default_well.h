@@ -165,14 +165,6 @@ namespace wells {
     add_secondary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block);
 
     /**
-     * \brief  Returns connection (perforation) with index idx
-     * \param  idx Index of connection
-     * \return connection instance on success otherwise null pointer
-     * */
-    sp_connection_t
-    get_connection (index_t idx) const;
-
-    /**
      * \brief  Returns connection (perforation) with n_block
      * \param  n_block Value of block index
      * \return connection instance on success otherwise null pointer

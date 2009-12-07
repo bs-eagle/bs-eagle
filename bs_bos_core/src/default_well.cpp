@@ -121,19 +121,18 @@ namespace wells {
 
   template <typename strategy_t>
   typename default_well <strategy_t>::sp_connection_t
-  default_well <strategy_t>::get_connection (index_t idx) const
-  {
-    BS_ASSERT ((size_t)idx < primary_connection_list_.size ()) (base_t::name ()) (idx) (primary_connection_list_.size ());
-    return primary_connection_list_[idx];
-  }
-  template <typename strategy_t>
-  typename default_well <strategy_t>::sp_connection_t
   default_well <strategy_t>::get_connection_map (index_t n_block) const
   {
     for (size_t i = 0, cnt = primary_connection_list_.size (); i < cnt; ++i)
       {
         if (primary_connection_list_[i]->n_block () == n_block)
           return primary_connection_list_[i];
+      }
+
+    for (size_t i = 0, cnt = secondary_connection_list_.size (); i < cnt; ++i)
+      {
+        if (secondary_connection_list_[i]->n_block () == n_block)
+          return secondary_connection_list_[i];
       }
 
     return 0;
