@@ -66,9 +66,7 @@ namespace python {
 
     WRAPPER_METHOD_R (get_ww_value,   shared_vector <item_t>, 0, (empty_arg__));
     WRAPPER_METHOD_R (get_bw_value,   shared_vector <item_t>, 0, (empty_arg__));
-    WRAPPER_METHOD (eliminate,        void, 5, (rhs_item_t *, index_t, index_t, item_t, index_t));
-    WRAPPER_METHOD (process,          void, 5, (int, double, const sp_calc_model_t &, const sp_mesh_iface_t &, sp_jmatrix_t &));
-    WRAPPER_METHOD (process_newton,   void, 4, (int, const sp_calc_model_t &, const sp_mesh_iface_t &, sp_jmatrix_t &));
+    WRAPPER_METHOD (process_impl,     void, 5, (bool, double, const sp_calc_model_t &, const sp_mesh_iface_t &, sp_jmatrix_t &));
     WRAPPER_METHOD (restore_solution, void, 4, (double, const item_array_t &, const item_array_t &, index_t));
     WRAPPER_METHOD (clear_data,       void, 0, (empty_arg__));
   };
@@ -95,8 +93,8 @@ namespace python {
   PY_EXPORTER_END;
 
   PY_EXPORTER (well_exporter, default_exporter)
-    //.def ("eliminate",                    &T::eliminate)
     .def ("process",                      &T::process)
+    .def ("process_impl",                 &T::process_impl)
     .def ("update",                       &T::restore_solution)
     .def ("clear_data",                   &T::clear_data)
     .add_property ("ww",                  &T::get_ww_value)

@@ -422,9 +422,30 @@ namespace blue_sky
 
   template <typename strategy_t>
   void
-  well<strategy_t>::process (bool /*is_start*/, double /*dt*/, const sp_calc_model_t &/*calc_model*/, const sp_mesh_iface_t &/*mesh*/, sp_jmatrix_t &/*jmatrix*/)
+  well<strategy_t>::process_impl (bool, double, const sp_calc_model_t &, const sp_mesh_iface_t &, sp_jmatrix_t &)
   {
-    bs_throw_exception ("PURE_CALL");
+    bs_throw_exception ("PURE CALL");
+  }
+  template <typename strategy_t>
+  void
+  well<strategy_t>::process (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
+  {
+    if (is_shut ())
+      {
+        BOSOUT (section::wells, level::debug) << "[" << name () << "] is_shut" << bs_end;
+        return ;
+      }
+
+#ifdef _DEBUG
+    if (!is_shut () && is_no_connections ())
+      {
+        bs_throw_exception (boost::format ("[%s]: not shut but connection list is empty") % name ());
+      }
+#endif
+
+    pre_process_facilities ();
+    process_impl (is_start, dt, calc_model, mesh, jmatrix);
+    post_process_facilities ();
   }
   template <typename strategy_t>
   void
@@ -500,6 +521,33 @@ namespace blue_sky
     init_approx_is_calc_ = well_controller_->restore_niter_control ();
   }
 
+  template <typename strategy_t>
+  void
+  well <strategy_t>::pre_process_facilities ()
+  {
+    for (size_t i = 0, cnt = well_facility_list_.size (); i < cnt; ++i)
+      {
+        well_facility_list_[i]->pre_process (this);
+      }
+  }
+
+  template <typename strategy_t>
+  void
+  well <strategy_t>::post_process_facilities ()
+  {
+    for (size_t i = 0, cnt = well_facility_list_.size (); i < cnt; ++i)
+      {
+        well_facility_list_[i]->post_process (this);
+      }
+  }
+
+  template <typename strategy_t>
+  void
+  well <strategy_t>::add_well_facility (const sp_well_facility_t &facility)
+  {
+    well_facility_list_.push_back (facility);
+  }
+
   //////////////////////////////////////////////////////////////////////////
   BLUE_SKY_TYPE_STD_CREATE_T_DEF (well, (class));
   BLUE_SKY_TYPE_STD_COPY_T_DEF (well, (class));
@@ -515,17 +563,12 @@ namespace blue_sky
   {
     bool res = true;
 
-    res &= BS_KERNEL.register_type (pd, wells::connection<base_strategy_fi>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, wells::connection<base_strategy_di>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, wells::connection<base_strategy_mixi>::bs_type ());
-    BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, wells::connection<base_strategy_fi>::bs_type ());    BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, wells::connection<base_strategy_di>::bs_type ());    BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, wells::connection<base_strategy_mixi>::bs_type ());    BS_ASSERT (res);
 
-    res &= BS_KERNEL.register_type (pd, well<base_strategy_fi>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, well<base_strategy_di>::bs_type ());
-    BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, well<base_strategy_fi>::bs_type ());    BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, well<base_strategy_di>::bs_type ());    BS_ASSERT (res);
 
     return res;
   }

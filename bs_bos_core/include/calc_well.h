@@ -15,13 +15,14 @@
 #include "fi_params.h"
 #include "well_type_helper.h"
 #include "connection_iterator.h"
+#include "well_facility.h"
+#include "shared_vector.h"
 
 // TODO: BUG
 #include "calc_well_pressure.h"
 #include "calc_rho.h"
 #include "calc_perf_bhp_base.h"
 #include "calc_perf_density_base.h"
-#include "shared_vector.h"
 
 namespace blue_sky
   {
@@ -117,6 +118,7 @@ namespace blue_sky
       typedef calc_perf_bhp_base <strategy_t>           calc_perf_bhp_t;
 
       typedef connection_iterator <strategy_t>          connection_iterator_t;
+      typedef wells::well_facility_iface <strategy_t>   well_facility_t;
 
       typedef smart_ptr <well_controller_t, true>       sp_well_controller_t;
       typedef smart_ptr <wells::well_limit_operation, true>     sp_well_limit_operation_t;
@@ -138,6 +140,9 @@ namespace blue_sky
       typedef smart_ptr <calc_perf_bhp_t, true>         sp_calc_perf_bhp_t;
 
       typedef smart_ptr <fi_params, true>               sp_params_t;
+
+      typedef smart_ptr <well_facility_t>               sp_well_facility_t;
+      typedef shared_vector <sp_well_facility_t>        well_facility_list_t;
 
     public:
       /**
@@ -593,6 +598,24 @@ namespace blue_sky
       restart_newton_step ();
 
       /**
+       * \brief  Calculates rate and deriv values for well and 
+       *         well perforations (connections). Process function
+       *         should call
+       *         pre_process_facilities -> process -> post_process_facilities
+       *         To guarantee this we implement process function in process_impl.
+       * \param  is_start 
+       * \param  dt
+       * \param  calc_model
+       * \param  mesh
+       * \param  jmatrix
+       * */
+      virtual void 
+      process_impl (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix);
+
+      void
+      add_well_facility (const sp_well_facility_t &facility);
+
+      /**
        * \brief  well dtor
        * */
       virtual ~well ();
@@ -636,6 +659,19 @@ namespace blue_sky
                                  const item_array_t &ntg,
                                  bool ro_calc_flag);
 
+
+      /**
+       * \brief  Performs facilities actions before process
+       * */
+      void
+      pre_process_facilities ();
+
+      /**
+       * \brief  Performs facilities actions after process
+       * */
+      void
+      post_process_facilities ();
+
     public:
 
       std::string                 name_;                      //!< Name of the well
@@ -672,6 +708,8 @@ namespace blue_sky
       sp_calc_rho_t               calc_rho_;                  //!< \todo Should be removed
       sp_calc_perf_density_t      calc_perf_density_;         //!< Instance of object that calculates well perforations density
       sp_calc_perf_bhp_t          calc_perf_bhp_;             //!< Instance of object that calculates well perforations BHP
+
+      well_facility_list_t        well_facility_list_;        //!< Well facilities list
     };
 
   /**

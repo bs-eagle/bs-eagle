@@ -81,7 +81,7 @@ namespace wells {
      * \param  jmatrix
      * */
     void
-    process (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix);
+    process_impl (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix);
 
     /**
      * \brief  Clears well and well perforations data

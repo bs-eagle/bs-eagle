@@ -617,21 +617,8 @@ namespace wells {
 
   template <typename strategy_t>
   void
-  default_well <strategy_t>::process (bool is_start, double /*dt*/, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
+  default_well <strategy_t>::process_impl (bool is_start, double /*dt*/, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
   {
-    if (base_t::is_shut ())
-      {
-        BOSOUT (section::wells, level::debug) << "[" << base_t::name () << "] is_shut" << bs_end;
-        return ;
-      }
-
-#ifdef _DEBUG
-    if (!base_t::is_shut () && is_no_connections ())
-      {
-        bs_throw_exception (boost::format ("[%s]: not shut but connection list is empty") % base_t::name ());
-      }
-#endif
-
     process_internal (is_start, calc_model, mesh, jmatrix);
 
     if (base_t::is_rate ())
