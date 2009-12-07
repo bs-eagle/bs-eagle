@@ -9,6 +9,7 @@
 
 #include "matrix_vector_op.h"
 #include "pp_index.h"
+#include "default_connection_iterator.h"
 
 #define RELATIVE_PERM_W data.relative_perm[d_w]
 #define RELATIVE_PERM_G data.relative_perm[d_g]
@@ -197,7 +198,7 @@ namespace wells {
           wat_sw = !is_1p ? b_sqr + wat_idx : -1,
         };
 
-    calc_rate_and_derivs_t (const sp_calc_model_t &calc_model, const sp_jmatrix_t &jmatrix, well_t *well, connection_list_t &list_)
+    calc_rate_and_derivs_t (const sp_calc_model_t &calc_model, const sp_jmatrix_t &jmatrix, well_t *well)
     : cell_data_ (calc_model->data)
     , main_vars_ (calc_model->main_variable)
     , pressure_ (calc_model->pressure)
@@ -209,7 +210,6 @@ namespace wells {
     , d_w (0)
     , d_g (0)
     , d_o (0)
-    , list_ (list_)
     , injection_type_ (well->get_well_controller ()->injection ())
     , control_type_ (well->get_well_controller ()->get_control_type ())
     , sp_diagonal_ (jmatrix->get_sp_diagonal ())
@@ -235,7 +235,6 @@ namespace wells {
     index_t                   d_g;
     index_t                   d_o;
     bool                      is_production;
-    connection_list_t         &list_;
     wells::injection_type     injection_type_;
     wells::rate_control_type  control_type_;
 
@@ -286,7 +285,7 @@ namespace wells {
     void 
     connection_loop (well_t *well)
     {
-      if (list_.empty ())
+      if (well->is_no_connections ())
         {
           BOSOUT (section::wells, level::debug)
             << "[" << well->name () << "] connection loop: connection list is empty"
@@ -295,23 +294,23 @@ namespace wells {
           return ;
         }
 
-      for (size_t i = 0, cnt = list_.size (); i < cnt; ++i)
+      typedef default_connection_iterator_impl <strategy_t> iterator_t;
+      iterator_t it (well, begin_iterator_tag), e (well, end_iterator_tag);
+      for (; it != e; ++it)
         {
-          typename well_t::sp_default_connection_t &c (list_[i]);
-          if (c->is_shut ())
+          const typename well_t::sp_default_connection_t &c (*it);
+          if (!c->is_shut ())
             {
-              continue;
-            }
-
-          index_t n_block = c->n_block ();
-          item_t Po  = c->cur_bhp - pressure_[n_block];
-          if (Po < item_t (0.0))
-            {
-              connection_loop_main_var <is_rate_loop, is_rate, true> (c, cell_data_[n_block], main_vars_[n_block], Po);
-            }
-          else
-            {
-              connection_loop_main_var <is_rate_loop, is_rate, false> (c, cell_data_[n_block], main_vars_[n_block], Po);
+              index_t n_block = c->n_block ();
+              item_t Po  = c->cur_bhp - pressure_[n_block];
+              if (Po < item_t (0.0))
+                {
+                  connection_loop_main_var <is_rate_loop, is_rate, true> (c, cell_data_[n_block], main_vars_[n_block], Po);
+                }
+              else
+                {
+                  connection_loop_main_var <is_rate_loop, is_rate, false> (c, cell_data_[n_block], main_vars_[n_block], Po);
+                }
             }
         }
     }
@@ -376,7 +375,7 @@ namespace wells {
     void
     update_loop (well_t *well)
     {
-      if (list_.empty ())
+      if (well->is_no_connections ())
         {
           BOSOUT (section::wells, level::debug)
             << "[" << well->name () << "] connection loop: connection list is empty"
@@ -392,16 +391,16 @@ namespace wells {
         }
       item_t ww_bw = well->bw_value * inv_ww;
 
-      for (size_t i = 0, cnt = list_.size (); i < cnt; ++i)
+      typedef default_connection_iterator_impl <strategy_t> iterator_t;
+      iterator_t it (well, begin_iterator_tag), e (well, end_iterator_tag);
+      for (; it != e; ++it)
         {
-          typename well_t::sp_default_connection_t &c (list_[i]);
-          if (c->is_shut ())
+          const typename well_t::sp_default_connection_t &c (*it);
+          if (!c->is_shut ())
             {
-              continue;
+              update_wr (c, inv_ww); 
+              update_rate (c, ww_bw);
             }
-
-          update_wr (c, inv_ww); 
-          update_rate (c, ww_bw);
         }
     }
 

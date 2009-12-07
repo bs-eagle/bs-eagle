@@ -519,7 +519,7 @@ namespace wells {
   default_well <strategy_t>::calc_rate_and_derivs_concrete (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
   {
 
-    calc_rate_and_derivs_t <strategy_t, is_w, is_g, is_o, is_prod> calc_ (calc_model, jmatrix, this, this->primary_connection_list_);
+    calc_rate_and_derivs_t <strategy_t, is_w, is_g, is_o, is_prod> calc_ (calc_model, jmatrix, this);
 
     //clear_data ();
     //for (size_t i = 0; i < 10000; ++i)

@@ -22,9 +22,11 @@ namespace wells {
   {
     typedef default_connection_iterator_impl <strategy_t>     this_t;
     typedef connection <strategy_t>                           connection_t;
+    typedef default_connection <strategy_t>                   default_connection_t;
     typedef default_well <strategy_t>                         default_well_t;
 
     typedef smart_ptr <connection_t>                          sp_connection_t;
+    typedef smart_ptr <default_connection_t>                  sp_default_connection_t;
     typedef smart_ptr <default_well_t>                        sp_default_well_t;
 
   public:
@@ -54,7 +56,7 @@ namespace wells {
 #endif
     }
 
-    inline sp_connection_t
+    inline sp_default_connection_t
     operator* () const
     {
 #ifdef _DEBUG
