@@ -60,13 +60,13 @@ namespace wells {
     operator* () const
     {
 #ifdef _DEBUG
-      if (connection_count_[list_idx_] != connection_list_[list_idx_]->size ())
+      if (static_cast <size_t> (connection_count_[list_idx_]) != connection_list_[list_idx_]->size ())
         {
           bs_throw_exception (boost::format ("Iterator no more valid (list: %ld, well: %s)") 
             % list_idx_
             % well_->name ());
         }
-      if (connection_idx_[list_idx_] >= connection_list_[list_idx_]->size ())
+      if (static_cast <size_t> (connection_idx_[list_idx_]) >= connection_list_[list_idx_]->size ())
         {
           bs_throw_exception (boost::format ("Index out of range (list: %ls, idx: %ld, count: %ld, well: %s)") 
             % list_idx_
@@ -87,13 +87,13 @@ namespace wells {
     operator++ () 
     {
 #ifdef _DEBUG
-      if (connection_count_[list_idx_] != connection_list_[list_idx_]->size ())
+      if (static_cast <size_t> (connection_count_[list_idx_]) != connection_list_[list_idx_]->size ())
         {
           bs_throw_exception (boost::format ("Iterator no more valid (list: %ld, well: %s)") 
             % list_idx_
             % well_->name ());
         }
-      if (connection_idx_[list_idx_] >= connection_list_[list_idx_]->size ())
+      if (static_cast <size_t> (connection_idx_[list_idx_]) >= connection_list_[list_idx_]->size ())
         {
           bs_throw_exception (boost::format ("Index out of range (list: %ls, idx: %ld, count: %ld, well: %s)") 
             % list_idx_ % connection_idx_[list_idx_] % connection_count_[list_idx_] % well_->name ())
