@@ -181,13 +181,6 @@ namespace wells {
     get_connection_map (index_t n_block) const;
 
     /**
-     * \brief  Returns count of connection (perforation) for well
-     * \return Count of connections
-     * */
-    size_t 
-    get_connections_count () const;
-
-    /**
      * \brief  Returns iterator for begin of primary and 
      *         secondary connections
      * \return Begin iterator

@@ -157,14 +157,6 @@ namespace wells {
   }
 
   template <typename strategy_t>
-  size_t
-  default_well <strategy_t>::get_connections_count () const
-  {
-    return primary_connection_list_.size () + 
-      secondary_connection_list_.size ();
-  }
-
-  template <typename strategy_t>
   typename default_well <strategy_t>::base_t::connection_iterator_t
   default_well <strategy_t>::connections_begin () const
   {
