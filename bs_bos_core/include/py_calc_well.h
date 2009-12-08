@@ -64,8 +64,6 @@ namespace python {
 
     STRATEGY_CLASS_WRAPPER_DECL (py_well);
 
-    WRAPPER_METHOD_R (get_ww_value,   shared_vector <item_t>, 0, (empty_arg__));
-    WRAPPER_METHOD_R (get_bw_value,   shared_vector <item_t>, 0, (empty_arg__));
     WRAPPER_METHOD (process_impl,     void, 5, (bool, double, const sp_calc_model_t &, const sp_mesh_iface_t &, sp_jmatrix_t &));
     WRAPPER_METHOD (restore_solution, void, 4, (double, const item_array_t &, const item_array_t &, index_t));
     WRAPPER_METHOD (clear_data,       void, 0, (empty_arg__));
@@ -97,8 +95,6 @@ namespace python {
     .def ("process_impl",                 &T::process_impl)
     .def ("update",                       &T::restore_solution)
     .def ("clear_data",                   &T::clear_data)
-    .add_property ("ww",                  &T::get_ww_value)
-    .add_property ("bw",                  &T::get_bw_value)
     .add_property ("name",                make_function (&T::get_name, return_value_policy <copy_const_reference> ()), &T::set_name)
     .add_property ("i_coord",             make_function (detail::get_well_i_coord<T>), make_function (detail::set_well_i_coord<T>))
     .add_property ("j_coord",             make_function (detail::get_well_j_coord<T>), make_function (detail::set_well_j_coord<T>))

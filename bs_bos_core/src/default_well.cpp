@@ -676,19 +676,6 @@ namespace wells {
   }
 
   template <typename strategy_t>
-  shared_vector <typename default_well <strategy_t>::item_t>
-  default_well <strategy_t>::get_ww_value ()
-  {
-    return shared_array <item_t> (&ww_value, 1);
-  }
-  template <typename strategy_t>
-  shared_vector <typename default_well <strategy_t>::item_t>
-  default_well <strategy_t>::get_bw_value ()
-  {
-    return shared_array <item_t> (&bw_value, 1);
-  }
-
-  template <typename strategy_t>
   bool
   default_well <strategy_t>::check_shut ()
   {

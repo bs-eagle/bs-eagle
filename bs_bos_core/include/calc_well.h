@@ -475,20 +475,6 @@ namespace blue_sky
       reset_init_approx ();
 
       /**
-       * \brief  Returns ww_value
-       * \todo   Obsolete, should be removed
-       * */
-      virtual shared_vector <item_t> 
-      get_ww_value ();
-
-      /**
-       * \brief  Returns bw_value
-       * \todo   Obsolete, should be removed 
-       * */
-      virtual shared_vector <item_t> 
-      get_bw_value ();
-
-      /**
        * \brief  Calculates rate and deriv values for well and 
        *         well perforations (connections)
        * \param  is_start 

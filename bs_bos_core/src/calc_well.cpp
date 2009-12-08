@@ -91,19 +91,6 @@ namespace blue_sky
   }
 
   template <typename strategy_t>
-  shared_vector <typename strategy_t::item_t>
-  well <strategy_t>::get_ww_value () 
-  {
-    return shared_array <item_t> (0, 0);
-  }
-  template <typename strategy_t>
-  shared_vector <typename strategy_t::item_t>
-  well <strategy_t>::get_bw_value () 
-  {
-    return shared_array <item_t> (0, 0);
-  }
-
-  template <typename strategy_t>
   const std::string &
   well <strategy_t>::name () const
   {

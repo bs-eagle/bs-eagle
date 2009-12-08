@@ -425,23 +425,6 @@ namespace blue_sky
     }
 
     template <typename strategy_t>
-    void
-    well_controller <strategy_t>::calc_rate (const sp_calc_model_t &calc_model, sp_well_t &well, sp_jmatrix_t &jmatrix) const
-    {
-      //BS_ASSERT (current_control_);
-      //const smart_ptr <const this_t> sp_this (this);
-      //current_control_->compute_rate (calc_model, jmatrix, well, sp_this);
-    }
-    template <typename strategy_t>
-    void
-    well_controller <strategy_t>::calc_derivs (const sp_calc_model_t &calc_model, sp_well_t &well, sp_jmatrix_t &jmatrix) const
-    {
-      //BS_ASSERT (current_control_);
-      //const smart_ptr <const this_t> sp_this (this);
-      //current_control_->compute_derivs (calc_model, jmatrix, well, sp_this);
-    }
-
-    template <typename strategy_t>
     rate_control_type
     well_controller <strategy_t>::get_control_type () const
       {

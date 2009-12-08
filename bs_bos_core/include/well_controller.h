@@ -434,19 +434,6 @@ namespace blue_sky
         check (sp_well_t &well);
 
         /**
-         * \brief  Calculates rate
-         * \todo   Obsolete, should be removed
-         * */
-        void 
-        calc_rate (const sp_calc_model_t &calc_model, sp_well_t &well, sp_jmatrix_t &jmatrix) const;
-        /**
-         * \brief  Calculates derivs
-         * \todo   Obsolete, should be removed
-         * */
-        void 
-        calc_derivs (const sp_calc_model_t &calc_model, sp_well_t &well, sp_jmatrix_t &jmatrix) const;
-
-        /**
          * \brief  Returns type of control
          * \return Type of control
          * */

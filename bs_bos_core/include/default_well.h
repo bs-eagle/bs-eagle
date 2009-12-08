@@ -89,20 +89,6 @@ namespace wells {
     void
     clear_data ();
 
-    /**
-     * \brief  Returns ww_value
-     * \todo   Obsolete, should be removed
-     * */
-    shared_vector <item_t>
-    get_ww_value ();
-
-    /**
-     * \brief  Returns bw_value
-     * \todo   Obsolete, should be removed 
-     * */
-    shared_vector <item_t>
-    get_bw_value ();
-
   protected:
     /**
      * \brief  Calculates rate and deriv values for well and 
@@ -177,7 +163,7 @@ namespace wells {
      *         secondary connections
      * \return Begin iterator
      * */
-    virtual typename base_t::connection_iterator_t
+    virtual connection_iterator <strategy_t>
     connections_begin () const;
 
     /**
@@ -185,7 +171,7 @@ namespace wells {
      *         secondary connections
      * \return End iterator
      * */
-    virtual typename base_t::connection_iterator_t
+    virtual connection_iterator <strategy_t>
     connections_end () const;
 
     /**
