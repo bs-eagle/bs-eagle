@@ -46,6 +46,7 @@ namespace blue_sky {
           sp_well_t ws (w->second, bs_dynamic_cast ());
 
           file["/wells/" + ws->get_name ()]
+            .write ("group", "FIELD")
             .write ("d_params", 
               hdf5_pod (-ws->rate ().prod.oil)
                 << -ws->rate ().prod.water 

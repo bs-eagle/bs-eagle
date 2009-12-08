@@ -9,7 +9,7 @@
 #include "stdafx.h"
 #include "data_saver.h"
 
-#ifdef HDF5
+#ifdef _HDF5
 #include "data_saver_hdf5.h"
 #else
 #include "data_saver_dummy.h"
