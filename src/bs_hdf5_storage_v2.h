@@ -17,44 +17,23 @@ namespace blue_sky {
   namespace hdf5 {
   namespace private_ {
 
-    template <typename T>
-    const hid_t &get_hdf5_type_ (const T &)
-    {
-      return get_hdf5_type <T> ();
-    }
-    template <>
-    inline const hid_t &
-    get_hdf5_type_ <main_var_type> (const main_var_type &)
-    {
-      return H5T_NATIVE_UINT;
-    }
-
-    template <typename T>
-    inline const hid_t &
-    get_hdf5_type_ (const shared_vector <T> &)
-    {
-      return get_hdf5_type_ <T> (T ());
-    }
-
-
     struct hdf5_buffer__ 
     {
       typedef size_t size_type;
 
       template <typename T, typename Y>
-      hdf5_buffer__ (const Y &, const T *data, size_type size, size_type stride, size_type offset)
-      : type (get_hdf5_type_ (Y ()))
-      , size (size)
+      hdf5_buffer__ (const Y &, const T *data, size_type size_, size_type stride, size_type offset)
+      : type (get_hdf5_type (Y ()))
+      , size (stride ? (size_ / stride) : size_)
       , owner_ (stride || !boost::is_same <typename boost::remove_cv <T>::type, typename boost::remove_cv <Y>::type> ())
-      , data_ (!owner_ ? (void *)data : (void *)(new Y[stride ? (size / stride) : size]))
+      , data_ (!owner_ ? (void *)data : (void *)(new Y[ size]))
       {
         if (owner_)
           {
             if (!stride)
               stride = 1;
 
-            size = size / stride;
-            for (size_type i = 0, j = 0; i < size; i += stride, ++j)
+            for (size_type i = offset, j = 0; i < size_; i += stride, ++j)
               {
                 static_cast <Y *> (data_)[j] = static_cast <Y> (data[i]);
               }
@@ -217,7 +196,7 @@ namespace blue_sky {
 
       hdf5_pod_impl (const T &h)
       {
-        type  = hdf5::private_::get_hdf5_type_ (type_t ());
+        type  = get_hdf5_type (type_t ());
         size  = T::static_size;
         data_ = buffer_.data ();
 
@@ -302,6 +281,14 @@ namespace blue_sky {
       hdf5::private_::hdf5_buffer__::size_type offset)
   {
     return hdf5::private_::hdf5_buffer__ (float (), data.data (), data.size (), stride, offset);
+  }
+  template <>
+  inline hdf5::private_::hdf5_buffer__
+  hdf5_buffer (const shared_vector <main_var_type> &data,
+    hdf5::private_::hdf5_buffer__::size_type stride,
+    hdf5::private_::hdf5_buffer__::size_type offset)
+  {
+    return hdf5::private_::hdf5_buffer__ (int (), data.data (), data.size (), stride, offset);
   }
 
   template <typename T>
