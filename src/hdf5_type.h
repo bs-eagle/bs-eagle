@@ -14,6 +14,61 @@
 namespace blue_sky
   {
 
+    enum hdf5_type
+    {
+      hdf5_char,
+      hdf5_int,
+      hdf5_uint,
+      hdf5_long,
+      hdf5_ulong,
+      hdf5_float,
+      hdf5_double,
+    };
+
+  template <typename T>
+  struct hdf5_type_helper
+  {
+    enum { 
+      type = hdf5_type_helper <typename T::value_type>::type, 
+    };
+  };
+
+  template <>
+  struct hdf5_type_helper <char>
+  {
+    enum { type = hdf5_char, };
+  };
+  template <>
+  struct hdf5_type_helper <int>
+  {
+    enum { type = hdf5_int, };
+  };
+  template <>
+  struct hdf5_type_helper <unsigned int>
+  {
+    enum { type = hdf5_uint, };
+  };
+  template <>
+  struct hdf5_type_helper <long>
+  {
+    enum { type = hdf5_long, };
+  };
+  template <>
+  struct hdf5_type_helper <unsigned long>
+  {
+    enum { type = hdf5_ulong, };
+  };
+  template <>
+  struct hdf5_type_helper <float>
+  {
+    enum { type = hdf5_float, };
+  };
+  template <>
+  struct hdf5_type_helper <double>
+  {
+    enum { type = hdf5_double, };
+  };
+
   template<typename T>
   const hid_t & get_hdf5_type()
   {
