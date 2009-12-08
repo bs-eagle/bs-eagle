@@ -27,6 +27,7 @@ namespace python {
       }
 
     obj->subscribe (objbase::on_delete, new blue_sky::tools::py_object_handler (py_obj.ptr ()));
+    boost::python::detail::initialize_wrapper (py_obj.ptr (), obj);
     return return_value;
   }
 
