@@ -15,6 +15,7 @@
  */
 #include "stdafx.h"
 #include "well_results_storage.h"
+#include "fip_results_storage.h"
 
 namespace blue_sky
   {
