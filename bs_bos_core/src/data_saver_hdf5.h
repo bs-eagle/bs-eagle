@@ -120,6 +120,64 @@ namespace blue_sky {
     }
 
     void
+    write_vector (const char *name, 
+      const shared_vector <item_t> &array, 
+      double time,
+      shared_vector <float> &temp)
+    {
+      const size_t array_size = array.size ();
+      if (array_size)
+        {
+          temp.resize (array_size);
+
+          temp[0]     = array[0];
+          item_t min_ = array[0];
+          item_t max_ = array[0];
+          for (size_t i = 1, cnt = array_size; i < cnt; ++i)
+            {
+              temp[i] = array[i];
+              min_    = (std::min) (min_, array[i]);
+              max_    = (std::max) (max_, array[i]);
+            }
+
+          file_[name]
+            .write ("value", temp)
+            .write ("dates", hdf5_pod (time) << max_ << min_);
+        }
+    }
+    void
+    write_vector (const char *name,
+      const shared_vector <item_t> &array,
+      size_t stride, 
+      size_t offset,
+      double time,
+      shared_vector <float> &temp)
+    {
+      const size_t array_size = array.size ();
+      if (array_size)
+        {
+          temp.resize (array_size);
+
+          if (!stride)
+            stride = 1;
+
+          temp[0]     = array[offset];
+          item_t min_ = array[offset];
+          item_t max_ = array[offset];
+          for (size_t i = offset + stride, j = 1; i < array_size; i += stride, ++j)
+            {
+              temp[j] = static_cast <item_t> (array[i]);
+              min_    = (std::min) (min_, array[i]);
+              max_    = (std::max) (max_, array[i]);
+            }
+
+          file_[name]
+            .write ("values", temp)
+            .write ("dates", hdf5_pod (time) << max_ << min_);
+        }
+    }
+
+    void
     write_calc_model_data (const sp_calc_model_t &calc_model,
       const sp_jmatrix_t &jmx,
       size_t large_time_step_num,
@@ -139,19 +197,16 @@ namespace blue_sky {
             .write ("values", calc_model->main_variable)
             .write ("dates", hdf5_buffer (time));
 
+          shared_vector <float> temp_data;
           if (params->get_bool (fi_params::WRITE_PRESSURE_TO_HDF5))
             {
-              file["/results/pressure"]
-                .write ("values", calc_model->pressure)
-                .write ("dates", hdf5_buffer (time));
+              write_vector ("/results/pressure", calc_model->pressure, time, temp_data);
             }
 
           if (params->get_bool (fi_params::WRITE_GAS_OIL_RATIO_TO_HDF5) 
             && calc_model->is_gas () && calc_model->is_oil ())
             {
-              file["/results/gor"]
-                .write ("values", calc_model->gas_oil_ratio)
-                .write ("dates", hdf5_buffer (time));
+              write_vector ("/results/gor", calc_model->gas_oil_ratio, time, temp_data);
             }
 
           if (params->get_bool (fi_params::WRITE_SATURATION_TO_HDF5) && calc_model->n_phases > 1)
@@ -161,15 +216,15 @@ namespace blue_sky {
 
               if (calc_model->is_gas ())
                 {
-                  file["/results/sgas"]
-                    .write ("values", hdf5_buffer (calc_model->saturation_3p, calc_model->n_phases, d_g))
-                    .write ("dates", hdf5_buffer (time));
+                  write_vector ("/results/sgas",
+                    calc_model->saturation_3p, calc_model->n_phases, d_g,
+                    time, temp_data);
                 }
               if (calc_model->is_water ())
                 {
-                  file["/results/swat"]
-                    .write ("values", hdf5_buffer (calc_model->saturation_3p, calc_model->n_phases, d_w))
-                    .write ("dates", hdf5_buffer (time));
+                  write_vector ("/results/swat",
+                    calc_model->saturation_3p, calc_model->n_phases, d_w,
+                    time, temp_data);
                 }
             }
 
