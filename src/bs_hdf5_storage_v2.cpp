@@ -21,6 +21,7 @@ namespace blue_sky {
       , hdf5_dataspace_type
       , hdf5_dataset_type
       , hdf5_group_type
+      , hdf5_datatype_type
     };
 
     template <hid_type type>
@@ -65,6 +66,16 @@ namespace blue_sky {
       close (hid_t v)
       {
         H5Gclose (v);
+      }
+    };
+
+    template <>
+    struct hid_closer <hdf5_datatype_type>
+    {
+      static void
+      close (hid_t v)
+      {
+        H5Tclose (v);
       }
     };
 
@@ -129,6 +140,7 @@ namespace blue_sky {
   typedef detail::hid_holder <detail::hdf5_dataspace_type>  hid_dspace_t;
   typedef detail::hid_holder <detail::hdf5_dataset_type>    hid_dset_t;
   typedef detail::hid_holder <detail::hdf5_property_type>   hid_property_t;
+  typedef detail::hid_holder <detail::hdf5_datatype_type>   hid_dtype_t;
 
   typedef hdf5::private_::hdf5_buffer__ hdf5_buffer_t;
 
@@ -334,6 +346,63 @@ namespace blue_sky {
         }
     }
 
+    void
+    write_string_to_hdf5 (hdf5_file &file,
+                          const std::string &group_name,
+                          const std::string &dataset_name,
+                          const std::string &value)
+    {
+      hid_t file_id = get_file_id (file);
+
+      if (set_error_context (group_name) && !detail::is_object_exists (file_id, group_name.c_str ()))
+        {
+          hid_group_t group = H5Gcreate (file_id, group_name.c_str (), H5P_DEFAULT);
+          if (group < 0)
+            {
+              create_group_hierarchy (file_id, group_name);
+            }
+        }
+      hid_group_t group = detail::open_group (file_id, group_name.c_str ());
+
+      if (set_error_context (dataset_name) && !detail::is_object_exists (group, dataset_name.c_str ()))
+        {
+          hid_dspace_t dspace = H5Screate (H5S_SCALAR);
+          if (dspace < 0)
+            {
+              bs_throw_exception (boost::format ("Can't create dataspace for dataset %s in group %s") % dataset_name % group_name);
+            }
+
+          hid_dtype_t dtype = H5Tcopy (H5T_C_S1);
+          if (dtype < 0)
+            {
+              bs_throw_exception (boost::format ("Can't create datatype for dataset %s in group %s") % dataset_name % group_name);
+            }
+
+          if (H5Tset_size (dtype, value.length ()) < 0)
+            {
+              bs_throw_exception (boost::format ("Can't set size of datatype for dataset %s in group %s") % dataset_name % group_name);
+            }
+
+          hid_dset_t dset = H5Dcreate (group, dataset_name.c_str (), dtype, dspace, H5P_DEFAULT);
+          if (dset < 0)
+            {
+              bs_throw_exception (boost::format ("Can't create dataset %s in group %s") % dataset_name % group_name);
+            }
+
+          hid_dspace_t fspace = H5Dget_space (dset);
+          if (fspace < 0)
+            {
+              bs_throw_exception (boost::format ("Can't get space for dataset %s in group %s") % dataset_name % group_name);
+            }
+
+          hid_t status = H5Dwrite (dset, dtype, dspace, fspace, detail::raw_transfer_property (), value.c_str ());
+          if (status < 0)
+            {
+              bs_throw_exception (boost::format ("Can't write data (dataset %s, group %s)") % dataset_name % group_name);
+            }
+        }
+    }
+
     static herr_t
     hdf5_walk_handler (unsigned n, const H5E_error2_t *err, void *p)
     {
@@ -478,6 +547,13 @@ namespace blue_sky {
   hdf5_group_v2::write_struct (const char *dataset, const hdf5_struct_t &s)
   {
     hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (file_, name_, dataset, s);
+    return *this;
+  }
+
+  hdf5_group_v2 &
+  hdf5_group_v2::write_string (const char *dataset, const std::string &value)
+  {
+    hdf5_storage_v2::instance ()->impl_->write_string_to_hdf5 (file_, name_, dataset, value);
     return *this;
   }
 

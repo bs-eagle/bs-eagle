@@ -556,7 +556,6 @@ namespace blue_sky {
     std::string file_name_;
 
     friend struct hdf5_group_v2;
-    friend struct hdf5_property_v2;
     friend struct hdf5_storage_v2;
   };
 
@@ -617,6 +616,12 @@ namespace blue_sky {
       return write_struct (dataset, hdf5_struct_t (s));
     }
 
+    hdf5_group_v2 &
+    write (const char *dataset, const std::string &value)
+    {
+      return write_string (dataset, value);
+    }
+
   private:
 
     hdf5_group_v2 &
@@ -627,6 +632,9 @@ namespace blue_sky {
 
     hdf5_group_v2 &
     write_struct (const char *dataset, const hdf5_struct_t &s);
+
+    hdf5_group_v2 &
+    write_string (const char *dataset, const std::string &value);
 
   private:
     hdf5_file   file_;
