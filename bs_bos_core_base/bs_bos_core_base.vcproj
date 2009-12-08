@@ -372,6 +372,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\include\data_dimens.h"
+			>
+		</File>
+		<File
+			RelativePath=".\src\py_data_diments.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\src\stdafx.cpp"
 			>
 			<FileConfiguration

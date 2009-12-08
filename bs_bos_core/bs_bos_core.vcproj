@@ -298,7 +298,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Zm1000"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_matrix/include/&quot;;&quot;$(ProjectDir)/../bs_base_linear_solvers/include/&quot;;&quot;$(ProjectDir)/../bs_csr_ilu_prec/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_data_storage/include/&quot;;&quot;$(ProjectDir)/../bs_mesh/include&quot;;&quot;$(ProjectDir)/../bs_scal/include/&quot;;&quot;$(ProjectDir)/../bs_pvt/include/&quot;;&quot;$(ProjectDir)/../../bs_hdf5_storage/src&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;"
+				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_matrix/include/&quot;;&quot;$(ProjectDir)/../bs_base_linear_solvers/include/&quot;;&quot;$(ProjectDir)/../bs_csr_ilu_prec/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_data_storage/include/&quot;;&quot;$(ProjectDir)/../bs_mesh/include&quot;;&quot;$(ProjectDir)/../bs_scal/include/&quot;;&quot;$(ProjectDir)/../bs_pvt/include/&quot;;&quot;$(ProjectDir)/../../bs-eagle-hdf5-storage/src&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;"
 				PreprocessorDefinitions="_DEBUG;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;BS_BOS_CORE_DEBUG_MEMORY_;_HDF5;H5_USE_16_API;_HDF5USEDLL_;_MPI_;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;_SCL_SECURE_NO_WARNINGS"
 				GeneratePreprocessedFile="0"
 				MinimalRebuild="true"
@@ -454,6 +454,14 @@
 		<Filter
 			Name="data"
 			>
+			<File
+				RelativePath=".\src\data_saver.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\data_saver.h"
+				>
+			</File>
 			<Filter
 				Name="events"
 				>
@@ -856,14 +864,6 @@
 						RelativePath=".\include\facility_manager.h"
 						>
 					</File>
-					<File
-						RelativePath=".\src\well_iterator.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\include\well_iterator.h"
-						>
-					</File>
 				</Filter>
 				<Filter
 					Name="well limit operation"
@@ -977,106 +977,6 @@
 						>
 					</File>
 					<File
-						RelativePath=".\include\well_rate_call_proxy.h"
-						>
-					</File>
-					<File
-						RelativePath=".\include\well_rate_compute_params.h"
-						>
-					</File>
-					<File
-						RelativePath=".\include\well_rate_compute_potentials.h"
-						>
-					</File>
-					<File
-						RelativePath=".\include\well_rate_connection_loop.h"
-						>
-					</File>
-					<File
-						RelativePath=".\src\well_rate_control.cpp"
-						>
-						<FileConfiguration
-							Name="Release|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="2"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release_HDF5|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="2"
-							/>
-						</FileConfiguration>
-					</File>
-					<File
-						RelativePath=".\include\well_rate_control.h"
-						>
-					</File>
-					<File
-						RelativePath=".\include\well_rate_control_bhp_deriv.h"
-						>
-					</File>
-					<File
-						RelativePath=".\include\well_rate_control_compute_deriv_typedef.h"
-						>
-					</File>
-					<File
-						RelativePath=".\include\well_rate_control_deriv.h"
-						>
-					</File>
-					<File
-						RelativePath=".\src\well_rate_control_impl.cpp"
-						>
-						<FileConfiguration
-							Name="Release|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="2"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release_HDF5|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="2"
-							/>
-						</FileConfiguration>
-					</File>
-					<File
-						RelativePath=".\include\well_rate_control_impl.h"
-						>
-					</File>
-					<File
-						RelativePath=".\include\well_rate_control_impl_type.h"
-						>
-					</File>
-					<File
-						RelativePath=".\include\well_rate_control_inj_mobility.h"
-						>
-					</File>
-					<File
-						RelativePath=".\include\well_rate_control_interface.h"
-						>
-					</File>
-					<File
-						RelativePath=".\include\well_rate_control_prod_mobility.h"
-						>
-					</File>
-					<File
-						RelativePath=".\include\well_rate_control_rate.h"
-						>
-					</File>
-					<File
-						RelativePath=".\include\well_rate_control_rate_deriv.h"
-						>
-					</File>
-					<File
 						RelativePath=".\include\well_type_helper.h"
 						>
 					</File>
@@ -1106,14 +1006,6 @@
 					</File>
 					<File
 						RelativePath=".\src\default_well_calc_rate.h"
-						>
-					</File>
-					<File
-						RelativePath=".\src\default_well_rate_control_factory.cpp"
-						>
-					</File>
-					<File
-						RelativePath=".\include\default_well_rate_control_factory.h"
 						>
 					</File>
 					<File
@@ -1729,7 +1621,7 @@
 						>
 						<Tool
 							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="2"
+							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
 				</File>
