@@ -156,7 +156,7 @@ namespace wells {
   }
 
   template <typename strategy_t>
-  typename default_well <strategy_t>::base_t::connection_iterator_t
+  connection_iterator <strategy_t>
   default_well <strategy_t>::connections_begin () const
   {
     return typename base_t::connection_iterator_t (
@@ -164,7 +164,7 @@ namespace wells {
   }
 
   template <typename strategy_t>
-  typename default_well <strategy_t>::base_t::connection_iterator_t
+  connection_iterator <strategy_t>
   default_well <strategy_t>::connections_end () const
   {
     return typename base_t::connection_iterator_t (
