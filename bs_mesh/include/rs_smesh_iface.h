@@ -50,9 +50,6 @@ namespace blue_sky
       //! get mesh dimensions
       virtual index_point3d_t get_dimens () = 0;
 
-      //! get mesh dimensions
-      virtual index_t get_n_block (const index_t i, const index_t j, const index_t k) const = 0;
-
       //! return coords of block vertexes by IJK indexes
       virtual grd_ecl::fpoint3d_vector top_cube (const index_t i, const index_t j, const index_t k) const = 0;
 

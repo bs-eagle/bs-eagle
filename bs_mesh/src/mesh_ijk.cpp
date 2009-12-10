@@ -34,9 +34,9 @@ mesh_ijk <strategy_t>::init_props (const sp_idata_t &data)
 template<class strategy_t>
 int mesh_ijk<strategy_t>::init_ext_to_int()
 {
-  
+
   calc_shift_arrays();
-  
+
   item_array_t volumes_temp (n_elements);
   int splicing_num = 0;//splicing(volumes_temp);
 
@@ -78,15 +78,15 @@ template<class strategy_t>
 void mesh_ijk<strategy_t>::check_data() const
 {
   base_t::check_data ();
-  
+
   if (!sp_dx.size ())
     bs_throw_exception ("DX array is not initialized");
   if (!sp_dy.size ())
     bs_throw_exception ("DY array is not initialized");
   if (!sp_dz.size ())
-    bs_throw_exception ("DZ array is not initialized");  
+    bs_throw_exception ("DZ array is not initialized");
   if (!sp_tops.size ())
-    bs_throw_exception ("TOPS array is not initialized");  
+    bs_throw_exception ("TOPS array is not initialized");
 }
 
 /*!
@@ -136,11 +136,11 @@ template<class strategy_t>
 grd_ecl::fpoint3d_vector
 mesh_ijk<strategy_t>::top_cube (const index_t i, const index_t j, const index_t k) const
   {
-    index_t index = get_n_block (i, j, k);
+    index_t index = XYZ_to_inside (i, j, k);
     grd_ecl::fpoint3d_vector cube_vertex = top_cube (index);
     return cube_vertex;
   }
-  
+
 template <typename strategy_t>
 typename mesh_ijk<strategy_t>::center_t
 mesh_ijk<strategy_t>::get_center (index_t n_block) const
@@ -148,7 +148,7 @@ mesh_ijk<strategy_t>::get_center (index_t n_block) const
   BS_ASSERT (n_block != -1) (n_block);
   grd_ecl::fpoint3d_vector cube_vertex;
   center_t res;
-  
+
   cube_vertex = top_cube (n_block);
   grd_ecl::fpoint3d point (get_cube_center (cube_vertex));
 
@@ -157,7 +157,7 @@ mesh_ijk<strategy_t>::get_center (index_t n_block) const
   res[2] = point.z;
 
   return res;
-}  
+}
 
 template<class strategy_t>
 int mesh_ijk<strategy_t>::splicing(item_array_t& volumes_temp)
@@ -200,20 +200,20 @@ int mesh_ijk<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t &
 
   jacobian->alloc_rows_ptr (n_active_elements);
   jacobian->n_cols = n_active_elements;
-  
+
   index_array_t &rows_ptr = jacobian->get_rows_ptr();
   rows_ptr.assign (n_active_elements + 1, 0);
-  
+
   boundary_array.clear();
 
   //all blocks are butting
   //first step - define and fill rows_ptr
-  
+
   for (i = 0; i < nx; ++i)
     {
       for (j = 0; j < ny; ++j)
         {
-          for (k = 0; k < nz; ++k) 
+          for (k = 0; k < nz; ++k)
             {
               block_idx_ext = BLOCK_NUM(i, j, k, nx, ny);
               if (!sp_actnum[block_idx_ext])//skip non-active cells
@@ -226,15 +226,15 @@ int mesh_ijk<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t &
                   rows_ptr[ext_to_int[block_idx_ext] + 1]++;
                   rows_ptr[ext_to_int[next_block_idx_ext] + 1]++;
                 }
-                
-              next_block_idx_ext = BLOCK_NUM (i, j + 1, k, nx, ny);  
+
+              next_block_idx_ext = BLOCK_NUM (i, j + 1, k, nx, ny);
               if ((j + 1 < ny) && sp_actnum[next_block_idx_ext])
                 {
                   rows_ptr[ext_to_int[block_idx_ext] + 1]++;
                   rows_ptr[ext_to_int[next_block_idx_ext] + 1]++;
                 }
-                
-              next_block_idx_ext = BLOCK_NUM (i, j, k + 1, nx, ny);   
+
+              next_block_idx_ext = BLOCK_NUM (i, j, k + 1, nx, ny);
               if ((k + 1 < nz) && sp_actnum[next_block_idx_ext])
                 {
                   rows_ptr[ext_to_int[block_idx_ext] + 1]++;
@@ -242,10 +242,10 @@ int mesh_ijk<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t &
                 }
             }
         }
-    }  
+    }
 
   //jacobian
-  
+
   //sum rows_ptr
   for (i = 1; i < n_active_elements + 1; ++i)
     {
@@ -253,20 +253,20 @@ int mesh_ijk<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t &
       rows_ptr[i] += rows_ptr[i - 1];
     }
   n_non_zeros = rows_ptr[n_active_elements];
-  
+
   //create cols_ind
   jacobian->alloc_cols_ind (n_non_zeros);
   index_array_t &cols_ind = jacobian->get_cols_ind();
-  
+
   //tran
 
   n_connections = (n_non_zeros - n_active_elements) / 2; //connection number
-  
+
   if (n_connections == 0)
     {
       bs_throw_exception ("Mesh has no connections!");
     }
-  
+
   conn_trans = flux_conn->get_conn_trans();
   conn_trans->init (n_connections, n_active_elements, 1, 2 * n_connections);
 
@@ -285,21 +285,21 @@ int mesh_ijk<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t &
   //additional array for current index in rows_ptr
   index_array_t tmp_rows_ptr;
   tmp_rows_ptr.resize (n_active_elements);
-  
+
   // tmp_rows_ptr point to second value in each row
   // first value is always diagonal
   for (i = 0; i < n_active_elements; ++i)
     tmp_rows_ptr[i] = rows_ptr[i] + 1;
-    
 
-  
-  
-  for (i = 0; i < nx; ++i) 
+
+
+
+  for (i = 0; i < nx; ++i)
     {
       for (j = 0; j < ny; ++j)
         {
           for (k = 0; k < nz; ++k)
-            {         
+            {
               block_idx_ext = BLOCK_NUM (i, j, k, nx, ny);
 
               if (!sp_actnum[block_idx_ext])//skip-non-active cells
@@ -319,8 +319,8 @@ int mesh_ijk<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t &
                                      matrix_block_idx_minus, matrix_block_idx_plus,
                                      cols_ind_tran, values_tran, along_dim1);
                 }
-                
-              next_block_idx_ext = BLOCK_NUM (i, j + 1, k, nx, ny);  
+
+              next_block_idx_ext = BLOCK_NUM (i, j + 1, k, nx, ny);
               if ((j+1 < ny) && sp_actnum[next_block_idx_ext])//skip non-active
                 {
                   set_neigbour_data (block_idx, block_idx_ext, next_block_idx_ext, conn_idx,
@@ -328,8 +328,8 @@ int mesh_ijk<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t &
                                     matrix_block_idx_minus, matrix_block_idx_plus,
                                     cols_ind_tran, values_tran, along_dim2);
                 }
-              
-              next_block_idx_ext = BLOCK_NUM (i, j, k + 1, nx, ny);  
+
+              next_block_idx_ext = BLOCK_NUM (i, j, k + 1, nx, ny);
               if ((k+1 < nz) && sp_actnum[next_block_idx_ext])//skip non-active
                 {
                   set_neigbour_data (block_idx, block_idx_ext, next_block_idx_ext, conn_idx,
@@ -345,7 +345,7 @@ int mesh_ijk<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t &
 
 template<class strategy_t>
 void mesh_ijk<strategy_t>::set_neigbour_data (const index_t index1, const index_t index1_ext, const index_t index2_ext, index_t &conn_idx,
-                                                   const index_array_t &rows_ptr, index_array_t &cols_ind, index_array_t& tmp_rows_ptr, 
+                                                   const index_array_t &rows_ptr, index_array_t &cols_ind, index_array_t& tmp_rows_ptr,
                                                    index_array_t& m_memory, index_array_t& p_memory,
                                                    index_array_t &cols_ind_tran, rhs_item_array_t &values_tran, direction dir)
 {
