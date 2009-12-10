@@ -12,6 +12,7 @@
 
 namespace grd_ecl
 {
+
   struct fpoint3d
   {
     float x,y,z;
@@ -175,45 +176,57 @@ namespace grd_ecl
     return A;
   }
   /*! \brief calculate intersection point for plane and segment
-      \param side - vector of sides points
+      \param p1,p2,p3,p4 - nodes of block edge which defines plane (currently used only first 3 points)
       \param center_side - center of side (for making decision about intersection_point inside side or not)
-      \param start_point - ends of segment
-      \param delta - difference = end_point - start_point
-      \param dif_epsilon - difference between almost equal numbers
+      \param start_point - end_point of segment
+      \param delta = end_point - start_point
+      \param eps_diff - difference between almost equal numbers
       \param intersection_point - return value
       \return false if no intersection*/
 
   inline bool 
-  calc_intersection_of_plane_and_segment(const fpoint3d &p1, const fpoint3d &p2, const fpoint3d &p3, 
+  calc_intersection_of_plane_and_segment (const fpoint3d &p1, const fpoint3d &p2,
+                                          const fpoint3d &p3, /*const fpoint3d &p4,*/
                                          const fpoint3d &center_side,
                                          const fpoint3d &start_point, 
                                          const fpoint3d &delta, 
                                          fpoint3d &intersection_point, 
                                          double eps_diff=1.0e-7)
   {
-    //get plane a,b,c,d params
+  // calculate a, b, c, d for plane equation: ax+by+cz+d=0
+  // a = (y1-y2)(z1+z2)+(y2-y3)(z2+z3)+(y3-y1)(z3+z1)
+  // b = (z1-z2)(x1+x2)+(z2-z3)(x2+x3)+(z3-z1)(x3+x1)
+  // c = (x1-x2)(y1+y2)+(x2-x3)(y2+y3)+(x3-x1)(y3+y1)
+  // d = - (a * x1 + b * y1 + c * z1)
     double a,b,c,d;
     a = (p1.y-p2.y)*(p1.z+p2.z)+(p2.y-p3.y)*(p2.z+p3.z)+(p3.y-p1.y)*(p3.z+p1.z);
     b = (p1.z-p2.z)*(p1.x+p2.x)+(p2.z-p3.z)*(p2.x+p3.x)+(p3.z-p1.z)*(p3.x+p1.x);
     c = (p1.x-p2.x)*(p1.y+p2.y)+(p2.x-p3.x)*(p2.y+p3.y)+(p3.x-p1.x)*(p3.y+p1.y);
     d = -(a*p1.x + b*p1.y + c*p1.z);
 
-    //find t params
+  // intersection point = start + delta * t (from parametric definition)
+  // define plane vector A=[a,b,c,d] and S=[s1, s2, s3, 1]
+  // S belongs to plane, so A * S = 0
+  // A * start + A * delta * t = 0    =>   t = - A * start / A * delta.
     double n1 = a*start_point.x + b*start_point.y + c*start_point.z + d;
     double n2 = a*delta.x + b*delta.y + c*delta.z;
     if (!n2)
       return false;
     double t = -n1/n2;
 
+  // hold t in [0,1]. length of delta equal to cut length, we only reduce it.
+  // So intersection_point in case t > 1 and t < 0 will not belong to plane.
     if (t > 1)
       t = 1;
     if (t < 0)
       t = 0;
+  // parametric definition of line
     intersection_point.x = start_point.x + t*delta.x;
     intersection_point.y = start_point.y + t*delta.y;
     intersection_point.z = start_point.z + t*delta.z;
 
-    //is it between side[0],side[1],side[2]
+    // check intersection point is between p1, p2, p3, p4 (between side[0],side[1],side[2])
+    //TODO: this is not precize checking, replace it with more complicated correct check
     double len = get_len(center_side,p1);
     double len_c = get_len(intersection_point,center_side);
 
@@ -223,5 +236,6 @@ namespace grd_ecl
       return false;
   }
 
+  typedef boost::array <fpoint3d, 8>  fpoint3d_vector;
 };//namespace grd_ecl
 #endif

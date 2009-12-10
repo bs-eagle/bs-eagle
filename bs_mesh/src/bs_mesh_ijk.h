@@ -42,6 +42,7 @@ namespace blue_sky
       ///////////////////////
       // OWN TYPES
       ///////////////////////
+      typedef boost::array <grd_ecl::fpoint3d, 8>         fpoint3d_vector;
       
     public:
       //! blue-sky class declaration
@@ -135,6 +136,17 @@ namespace blue_sky
       index_t get_element_ijk_to_int (const index_t i, const index_t j, const index_t k) const
       {return wrapped.XYZ_to_inside(i, j, k);};      
       
+      //! return internal number of an element by I, J and K structured mesh coordinates
+      index_t get_n_block (const index_t i, const index_t j, const index_t k) const
+        {return wrapped.get_n_block (i, j, k);};
+
+      //! return coords of block vertexes by IJK indexes
+      grd_ecl::fpoint3d_vector top_cube (const index_t i, const index_t j, const index_t k) const
+        {return wrapped.top_cube (i, j, k);};
+
+      //! return coords of block vertexes by n_block index
+      grd_ecl::fpoint3d_vector top_cube (const index_t index) const
+        {return wrapped.top_cube (index);};
       
       ///////////////////////
       // ACCESS ARRAYS

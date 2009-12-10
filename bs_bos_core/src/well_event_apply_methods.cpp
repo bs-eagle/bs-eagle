@@ -105,7 +105,7 @@ namespace blue_sky
     const sp_top &locked (top);
     const sp_smesh_iface_t struct_msh (msh, bs_dynamic_cast());
     BS_ASSERT (struct_msh);
-    
+
     sp_well_t well = locked->get_well (main_params_->get_WELL_NAME (""));
     BS_ASSERT (well) (main_params_->get_WELL_NAME (""));
     if (!well)
@@ -153,9 +153,9 @@ namespace blue_sky
           }
         else
           {
-            BOSOUT (section::schedule, level::debug) << boost::format ("COMPDAT: Connection for well %s in cell [%d, %d, %d, %d] will be set to [%d, %d, %d, %d]") 
+            BOSOUT (section::schedule, level::debug) << boost::format ("COMPDAT: Connection for well %s in cell [%d, %d, %d, %d] will be set to [%d, %d, %d, %d]")
               % well->name () % (con->i_coord () + 1) % (con->j_coord () + 1) % (con->k_coord () + 1) % con->n_block ()
-              % i_coord % j_coord % k_coord % n_block 
+              % i_coord % j_coord % k_coord % n_block
               << bs_end;
           }
 
@@ -387,7 +387,7 @@ namespace blue_sky
   {
     const sp_top &locked (top);
     const sp_smesh_iface_t struct_msh (msh, bs_dynamic_cast());
-    
+
     sp_well_t well = locked->get_well (main_params_->get_WELL_NAME (""));
     BS_ASSERT (well) (main_params_->get_WELL_NAME (""));
     if (!well)
@@ -429,7 +429,7 @@ namespace blue_sky
             c->mul_perm_mult (perm_mult);
           }
       }
-    //else 
+    //else
     //  {
     //    if (!z1_cell)
     //      {
@@ -462,53 +462,6 @@ namespace blue_sky
   {
     bs_throw_exception ("NOT IMPL YET");
   }
-
-  //////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
-  void
-  FRACTURE_event<strategy_t>::apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const
-  {
-    const sp_top &locked (top);
-    const sp_smesh_iface_t struct_msh (msh, bs_dynamic_cast());
-    
-    sp_well_t well = locked->get_well (main_params_->get_WELL_NAME (""));
-    BS_ASSERT (well) (main_params_->get_WELL_NAME (""));
-    if (!well)
-      return ;
-
-    typedef typename strategy_t::index_t index_t;
-    typedef typename strategy_t::item_t  item_t;
-
-    index_t i_cell = main_params_->get_I (0);
-    index_t j_cell = main_params_->get_J (0);
-    index_t kw1_cell = main_params_->get_KW1 (0);
-    index_t kw2_cell = main_params_->get_KW2 (0);
-
-    if (!i_cell || !j_cell || !kw1_cell || !kw2_cell)
-      {
-        bs_throw_exception ("Default values not allowed");
-      }
-
-    item_t half_length  = main_params_->get_HALF_LENGHT (0);
-    item_t theta        = main_params_->get_TETTA (0);
-    item_t skin         = main_params_->get_SKIN (0);
-
-    for (index_t k = kw1_cell; k < kw2_cell; ++k)
-      {
-        index_t n_block = struct_msh->get_element_ijk_to_int (i_cell - 1, j_cell - 1, k - 1);
-        const typename well_t::sp_connection_t &c = well->get_connection_map (n_block);
-        if (c)
-          {
-            c->set_half_length (half_length);
-            c->set_theta (theta);
-            c->set_skin (skin);
-          }
-
-      }
-
-    well->set_state (well_state_cast (main_params_->get_WELL_STATE ("")), calc_model);
-  }
-
 #define SPEC_APPLY(name)																																																		          \
 	template void name<base_strategy_fi>::apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;\
 	template void name<base_strategy_di>::apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;\
@@ -526,7 +479,6 @@ namespace blue_sky
   SPEC_APPLY (WELTARG_event);
   SPEC_APPLY (WPIMULT_event);
   SPEC_APPLY (COMPENSATION_event);
-  SPEC_APPLY (FRACTURE_event);
 //SPEC_APPLY (PERMFRAC_event);
 
   DECL_GET_WELL_EVENT_NAMES (WELSPECS_event);
@@ -540,7 +492,6 @@ namespace blue_sky
   DECL_GET_WELL_EVENT_NAMES (WEFAC_event);
   DECL_GET_WELL_EVENT_NAMES (WELTARG_event);
   DECL_GET_WELL_EVENT_NAMES (WPIMULT_event);
-  DECL_GET_WELL_EVENT_NAMES (FRACTURE_event);
 
   DECL_GET_WELL_EVENT_NAME (COMPENSATION_event);
   DECL_GET_WELL_EVENT_NAME (PERMFRAC_event);
@@ -581,9 +532,6 @@ namespace blue_sky
   template class COMPENSATION_event <base_strategy_fi>;
   template class COMPENSATION_event <base_strategy_di>;
   template class COMPENSATION_event <base_strategy_mixi>;
-  template class FRACTURE_event <base_strategy_fi>;
-  template class FRACTURE_event <base_strategy_di>;
-  template class FRACTURE_event <base_strategy_mixi>;
   template class PERMFRAC_event <base_strategy_fi>;
   template class PERMFRAC_event <base_strategy_di>;
   template class PERMFRAC_event <base_strategy_mixi>;

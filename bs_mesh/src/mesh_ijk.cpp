@@ -19,7 +19,6 @@ using namespace blue_sky;
 
 #define BLOCK_NUM(i, j, k, nx, ny) (i)+(j)*(nx)+(k)*(nx)*(ny)
 
-
 template <typename strategy_t>
 void
 mesh_ijk <strategy_t>::init_props (const sp_idata_t &data)
@@ -90,9 +89,16 @@ void mesh_ijk<strategy_t>::check_data() const
     bs_throw_exception ("TOPS array is not initialized");  
 }
 
+/*!
+ * \brief  return coords of block vertexes
+ * \param  i,j,k      - IJK index of block
+ * \output cube_vertex - array of 3d-points - 8 block vertexes and block center coordinates
+ */
 template<class strategy_t>
-void mesh_ijk<strategy_t>::top_cube(const index_t index, g_fpoint3d_vector& cube_vertex) const
+grd_ecl::fpoint3d_vector
+mesh_ijk<strategy_t>::top_cube (index_t index) const
   {
+    grd_ecl::fpoint3d_vector cube_vertex;
     /*
      *                             X
      *                  0+-------+1
@@ -105,20 +111,34 @@ void mesh_ijk<strategy_t>::top_cube(const index_t index, g_fpoint3d_vector& cube
      *             6  +-------+7
      */
 
-    cube_vertex.clear();
+    // upper
+    cube_vertex[0] = fpoint3d (dx_shift_array[index],                dy_shift_array[index],                dz_shift_array[index]);
+    cube_vertex[1] = fpoint3d (dx_shift_array[index] + sp_dx[index], dy_shift_array[index],                dz_shift_array[index]);
+    cube_vertex[2] = fpoint3d (dx_shift_array[index],                dy_shift_array[index] + sp_dy[index], dz_shift_array[index]);
+    cube_vertex[3] = fpoint3d (dx_shift_array[index] + sp_dx[index], dy_shift_array[index] + sp_dy[index], dz_shift_array[index]);
+    // lower
+    cube_vertex[4] = fpoint3d (dx_shift_array[index],                dy_shift_array[index],                dz_shift_array[index] + sp_dz[index]);
+    cube_vertex[5] = fpoint3d (dx_shift_array[index] + sp_dx[index], dy_shift_array[index],                dz_shift_array[index] + sp_dz[index]);
+    cube_vertex[6] = fpoint3d (dx_shift_array[index],                dy_shift_array[index] + sp_dy[index], dz_shift_array[index] + sp_dz[index]);
+    cube_vertex[7] = fpoint3d (dx_shift_array[index] + sp_dx[index], dy_shift_array[index] + sp_dy[index], dz_shift_array[index] + sp_dz[index]);
+    // center
+    //cube_vertex[8] = fpoint3d (dx_shift_array[index] + sp_dx[index]/2., dy_shift_array[index] + sp_dy[index]/2., dz_shift_array[index] + sp_dz[index]/2.));
 
+    return cube_vertex;
+  }
 
-    cube_vertex.push_back (fpoint3d(dx_shift_array[index],dy_shift_array[index],dz_shift_array[index]));
-    cube_vertex.push_back (fpoint3d(dx_shift_array[index]+sp_dx[index],dy_shift_array[index],dz_shift_array[index]));
-    cube_vertex.push_back (fpoint3d(dx_shift_array[index],dy_shift_array[index]+sp_dy[index],dz_shift_array[index]));
-    cube_vertex.push_back (fpoint3d(dx_shift_array[index]+sp_dx[index],dy_shift_array[index]+sp_dy[index],dz_shift_array[index]));
-
-    cube_vertex.push_back (fpoint3d(dx_shift_array[index],dy_shift_array[index],dz_shift_array[index]+ sp_dz[index]));
-    cube_vertex.push_back (fpoint3d(dx_shift_array[index]+sp_dx[index],dy_shift_array[index],dz_shift_array[index]+ sp_dz[index]));
-    cube_vertex.push_back (fpoint3d(dx_shift_array[index],dy_shift_array[index]+sp_dy[index],dz_shift_array[index]+ sp_dz[index]));
-    cube_vertex.push_back (fpoint3d(dx_shift_array[index]+sp_dx[index],dy_shift_array[index]+sp_dy[index],dz_shift_array[index]+ sp_dz[index]));
-
-    cube_vertex.push_back (fpoint3d(dx_shift_array[index]+sp_dx[index]/2,dy_shift_array[index]+sp_dy[index]/2,dz_shift_array[index]+ sp_dz[index]/2));
+/*!
+ * \brief  return coords of block vertexes
+ * \param  index       - index of block in mesh
+ * \output cube_vertex - array of 3d-points - 8 block vertexes and block center coordinates
+ */
+template<class strategy_t>
+grd_ecl::fpoint3d_vector
+mesh_ijk<strategy_t>::top_cube (const index_t i, const index_t j, const index_t k) const
+  {
+    index_t index = get_n_block (i, j, k);
+    grd_ecl::fpoint3d_vector cube_vertex = top_cube (index);
+    return cube_vertex;
   }
   
 template <typename strategy_t>
@@ -126,13 +146,12 @@ typename mesh_ijk<strategy_t>::center_t
 mesh_ijk<strategy_t>::get_center (index_t n_block) const
 {
   BS_ASSERT (n_block != -1) (n_block);
-  g_fpoint3d_vector cube_vertex;
+  grd_ecl::fpoint3d_vector cube_vertex;
   center_t res;
   
-  top_cube (n_block, cube_vertex);
+  cube_vertex = top_cube (n_block);
   grd_ecl::fpoint3d point (get_cube_center (cube_vertex));
 
-  
   res[0] = point.x;
   res[1] = point.y;
   res[2] = point.z;
@@ -446,244 +465,6 @@ int mesh_ijk<strategy_t>::calc_depths ()
       }
   return 0;
 }
-template<class strategy_t>
-int mesh_ijk<strategy_t>::calc_fracture_intersection_blocks(const int i_frac, const int j_frac, const int k_lower, const int k_upper,
-    const item_t fracture_angle, const item_t half_length, item_t eps_diff)
-{
-  int fl; //type of direction
-  (fracture_angle > M_PI/2)? fl = -1: fl = 1;
-
-  for (int k = k_lower; k <= k_upper; ++k)
-    {
-      //calculate start_point and end_point
-      int block_index = XYZ_to_inside(i_frac,j_frac,k);
-      g_fpoint3d_vector cube_fracture_center;
-      g_fpoint3d_vector cube_others; //cube of current block neighbour
-      top_cube(block_index, cube_fracture_center);
-      fpoint3d start_point, end_point;
-      //cube_fracture_center[8] - center of current cube
-      fpoint3d delta = fpoint3d(half_length*cos(fracture_angle),half_length*sin(fracture_angle),0);
-      start_point = cube_fracture_center[8] - delta;
-      end_point = cube_fracture_center[8] + delta;
-      delta *= 2;
-
-      grd_ecl::fpoint2d normal = grd_ecl::fpoint2d(1.0f,1.0f);
-      //calculate normal for 2d start_point
-      if (delta.x == 0.0)
-        normal.x = 0.0f;
-      else if (delta.y == 0.0)
-        normal.y = 0.0f;
-      else
-        {
-          normal.x = -delta.y/delta.x;
-          item_t len = sqrt(normal.x * normal.x + normal.y * normal.y);
-          normal.x /= len;
-          normal.y /= len;
-        }
-
-      stack <typename base_t::elem_index, deque<typename base_t::elem_index> > st_nb;
-      item_t fr_length1, fr_length2;
-
-#pragma region go from center to end_point
-      /*! \angle < M_PI/2 =>		fl = 1	=> for [i,j] neighbours are [i+1,j]&&[i,j+1]
-            angle >= M_PI/2 =>	fl = -1 => for [i,j] neighbours are [i-1,j]&&[i,j+1]
-        =>common formula for neighbours is [i,j] => [i+fl,j]&&[i,j+1]*/
-      if ((int)i_frac+fl >= 0 && i_frac+fl < nx)
-        st_nb.push(typename base_t::elem_index(i_frac+fl,j_frac));
-      if ((int)j_frac+1 < (int)ny)
-        st_nb.push(typename base_t::elem_index(i_frac,j_frac+1));
-      vector<size_t> vector_l; //already added block
-
-      while (!st_nb.empty())
-        {
-          //take index and check is it good for continue
-          typename base_t::elem_index n_index = st_nb.top();
-          st_nb.pop();
-          int cur_index = BLOCK_NUM(n_index.first, n_index.second,k, nx, ny);
-          //we try to find intersection in any case
-
-          int res = 0;
-          res = find_fracture_intersection(fl, cur_index, start_point, end_point, delta, cube_fracture_center[8],1, cube_others, fr_length1, fr_length2);
-          if (res > 1 && sp_actnum[cur_index])
-            {
-              if (add_grp_ijk_connection (/*many many params,*/ fr_length1, fr_length2,
-                  cube_fracture_center[8], n_index.first, n_index.second, cube_others, false))
-                return -5;
-            }
-          if (res > 0) //take neighbours
-            {
-              cur_index = -1;
-              if ((n_index.first+fl) < nx && (n_index.first+fl+1) > 0)
-                {
-                  //check - is it new block or it'a already have been added
-                  cur_index = (n_index.first+fl)*nx + n_index.second;
-                  if (find(vector_l.begin(),vector_l.end(),cur_index) == vector_l.end()) //new value
-                    {
-                      st_nb.push(typename base_t::elem_index(n_index.first+fl,n_index.second));
-                      vector_l.push_back(cur_index);
-                    }
-                }
-              else if (half_length  - fr_length2 > eps_diff) //boundary block
-                {
-                  cur_index = 0;
-                  BOSWARN (section::mesh, level::warning) << "Warning: fracture is out of mesh, fracture [" <<
-                  i_frac+1 << "," << j_frac+1 << "," << k+1 << "], block [" <<
-                  n_index.first+1 << "," << n_index.second+1 << "," << k+1 << bs_end;
-                }
-
-              if (n_index.second+1 < ny)
-                {
-                  //check - is it new constant?
-                  cur_index = n_index.first*nx + n_index.second+1;
-                  if (find(vector_l.begin(),vector_l.end(),cur_index) == vector_l.end()) //new value
-                    {
-                      st_nb.push(typename base_t::elem_index(n_index.first,	n_index.second+1));
-                      vector_l.push_back(cur_index);
-                    }
-                }
-              else if (half_length - fr_length2 > eps_diff && cur_index) //boundary block
-                BOSWARN (section::mesh, level::warning) << "Warning: fracture is out of mesh, fracture [" <<
-                i_frac+1 << "," << j_frac+1 << "," << k+1 << "], block [" <<
-                n_index.first+1 << "," << n_index.second+1 << "," << k+1 << bs_end;
-            } //end take neighbours
-        } //end while
-#pragma endregion
-#pragma region go from center to start_point
-      if ((int)i_frac-fl >= 0 && i_frac-fl < nx)
-        st_nb.push(typename base_t::elem_index(i_frac-fl,j_frac));
-      if ((int)j_frac-1 >= 0)
-        st_nb.push(typename base_t::elem_index(i_frac,j_frac-1));
-      vector_l.clear();
-      while (!st_nb.empty())
-        {
-
-          //take index and check is it good for continue
-          typename base_t::elem_index n_index = st_nb.top();
-          st_nb.pop();
-          int cur_index = BLOCK_NUM(n_index.first, n_index.second,k , nx, ny);
-
-          int res = 0;
-          res = find_fracture_intersection(fl, cur_index, start_point, end_point, delta, cube_fracture_center[8],-1, cube_others, fr_length1, fr_length2);
-          if (res > 1 && sp_actnum[cur_index])
-            {
-              if (add_grp_ijk_connection (//many many params,
-                    fr_length1, fr_length2,
-                    cube_fracture_center[8], n_index.first, n_index.second, cube_others, false))
-                return -5;
-            }
-          if (res > 0)
-            {
-              //take neighbours
-              cur_index = -1;
-              if ((n_index.first-fl) < nx && (n_index.first-fl+1) > 0)
-                {
-                  //check - is it new block or it'a already have been added
-                  cur_index = (n_index.first-fl)*nx + n_index.second;
-                  if (find(vector_l.begin(),vector_l.end(),cur_index) == vector_l.end()) //new value
-                    {
-                      st_nb.push(typename base_t::elem_index(n_index.first-fl,n_index.second));
-                      vector_l.push_back(cur_index);
-                    }
-                }
-              else if (half_length  - fr_length2 > eps_diff) //boundary block
-                {
-                  cur_index = 0;
-                  BOSWARN (section::mesh, level::warning) << "Warning: fracture is out of mesh, fracture [" <<
-                  i_frac+1 << "," << j_frac+1 << "," << k+1 << "], block [" <<
-                  n_index.first+1 << "," << n_index.second+1 << "," << k+1 << bs_end;
-                }
-
-              if (n_index.second > 0)
-                {
-                  //check - is it new constant?
-                  cur_index = n_index.first*nx + n_index.second-1;
-                  if (find(vector_l.begin(),vector_l.end(),cur_index) == vector_l.end()) //new value
-                    {
-                      st_nb.push(typename base_t::elem_index(n_index.first,	n_index.second-1));
-                      vector_l.push_back(cur_index);
-                    }
-                }
-              else if (half_length - fr_length2 > eps_diff && cur_index) //boundary block
-                BOSWARN (section::mesh, level::warning) << "Warning: fracture is out of mesh, fracture [" <<
-                i_frac+1 << "," << j_frac+1 << "," << k+1 << "], block [" <<
-                n_index.first+1 << "," << n_index.second+1 << "," << k+1 << bs_end;
-            } //end take neighbours
-        } //end while
-#pragma endregion
-    } //end for
-
-  return 0;
-}
-
-template<class strategy_t>
-int  mesh_ijk<strategy_t>::find_fracture_intersection(int fl, int cur_index, const fpoint3d &start_point, const fpoint3d &end_point,
-    const fpoint3d &delta, const fpoint3d &center_fracture, int is_going_to_end_point,
-    g_fpoint3d_vector &cube_others,  item_t &fr_length1, item_t &fr_length2, item_t eps_diff)
-{
-  /*
-  *                             X
-  *                  0+-------+1
-  *                  /|      / |
-  *                 / |/B   /  |
-  *                +------+3   |
-  *              Y |/4+---|----+5
-  *               A| /Z    |  /
-  *              / |/      | /
-  *             /6 +-------+7
-  /-fault line
-  A,B- intersection point
-  */
-  top_cube (cur_index, cube_others);
-  bool flag_is_intersect_a = false;
-  //try to find first intersection point
-  fpoint3d intersection_point_a, intersection_point_b;
-  intersection_point_b = (is_going_to_end_point == 1)? end_point : start_point;
-  //first plane (PLANE_MINUS_Y)
-  if (is_going_to_end_point == 1)
-    flag_is_intersect_a = grd_ecl::calc_intersection_of_plane_and_segment (cube_others[0], cube_others[1], cube_others[4], cube_others[8],
-                          start_point, delta, intersection_point_a);
-  else
-    flag_is_intersect_a = grd_ecl::calc_intersection_of_plane_and_segment (cube_others[2], cube_others[3], cube_others[6], cube_others[8],
-                          start_point, delta, intersection_point_a);
-  //try other plane
-  if (!flag_is_intersect_a)
-    {
-      if (fl*is_going_to_end_point > 0) //PLANE_MINUS_X
-        flag_is_intersect_a = grd_ecl::calc_intersection_of_plane_and_segment(cube_others[0], cube_others[2], cube_others[6], cube_others[8],
-                              start_point, delta, intersection_point_a);
-      else //PLANE_PLUS_X
-        flag_is_intersect_a = grd_ecl::calc_intersection_of_plane_and_segment(cube_others[1], cube_others[3], cube_others[5], cube_others[8],
-                              start_point, delta, intersection_point_a);
-    }
-  if (flag_is_intersect_a) //try get find next intersect
-    {
-      bool flag_is_intersect_b = false;
-      //first plane (PLANE_PLUS_Y)
-      if (is_going_to_end_point == 1)
-        flag_is_intersect_b = grd_ecl::calc_intersection_of_plane_and_segment (cube_others[2], cube_others[3], cube_others[6], cube_others[8],
-                              start_point, delta, intersection_point_b);
-      else
-        flag_is_intersect_b = grd_ecl::calc_intersection_of_plane_and_segment (cube_others[0], cube_others[1], cube_others[4], cube_others[8],
-                              start_point, delta, intersection_point_b);
-      //try other plane
-      if (!flag_is_intersect_b)
-        {
-          if (fl*is_going_to_end_point < 0) //PLANE_MINUS_X
-            grd_ecl::calc_intersection_of_plane_and_segment(cube_others[0], cube_others[2], cube_others[6], cube_others[8],
-                start_point, delta, intersection_point_b);
-          else //PLANE_PLUS_X
-            grd_ecl::calc_intersection_of_plane_and_segment(cube_others[1], cube_others[3], cube_others[5], cube_others[8],
-                start_point, delta, intersection_point_b);
-        }
-      //add this block
-      fr_length1 = grd_ecl::get_len(intersection_point_a, center_fracture);
-      fr_length2 = grd_ecl::get_len(intersection_point_b, center_fracture);
-      if (fabs(fr_length1-fr_length2) > eps_diff)
-        return 2;
-      return 1;
-    }
-  return 0;
-}
 
 template<class strategy_t>
 int mesh_ijk<strategy_t>::calc_shift_arrays()
@@ -726,59 +507,6 @@ int mesh_ijk<strategy_t>::calc_shift_arrays()
             dz_shift_array[index] = dz_shift_array[index-layer_size] + sp_dz[index];
         }
     }
-  return 0;
-}
-
-template<class strategy_t>
-int mesh_ijk<strategy_t>::add_grp_ijk_connection (/*many many params,*/ double fr_length1, double fr_length2, const fpoint3d &center_fracture,
-    int i1, int j1, const g_fpoint3d_vector &cube_current_block, bool is_center_block, item_t eps_diff)
-{
-  //make fr_length1 & fr_length2 correct
-  if (fr_length1 > fr_length2)
-    {
-      item_t tmp = fr_length1;
-      fr_length1 = fr_length2;
-      fr_length2 = tmp;
-    }
-
-  if (fabs(fr_length1-fr_length2) < eps_diff && fabs(fr_length1) > eps_diff)
-    {
-      fr_length1 -= 0.1;
-      fr_length2 += 0.1;
-    }
-
-  /*
-  smart_ptr<connection <strategy_t>, true> grp_conn = BS_KERNEL.create_object (connection <strategy_t>::bs_type());
-
-  //set params
-  grp_conn->set_half_length = ...;
-  grp_conn->connection_type = con_type;
-  grp_conn->set_fracture_r1 = fr_length1;
-  grp_conn->set_fracture_r2 = fr_length2;
-
-  ? grp_conn->x_fracture_center = x_fracture_center;
-  ? grp_conn->y_fracture_center = y_fracture_center;
-  ? grp_conn->dirX_fracture = dirX;
-
-  // change position of connection in mesh
-  ? grp_conn->set_dim_x(i1+1);
-  ? grp_conn->set_dim_y(j1+1);
-  ? grp_conn->set_dim_z(k1+1);
-  ? grp_conn->set_n_block = XYZ_to_inside(i1,j1,k1);
-
-  if (grp_conn->compute_grp_connection_factors_final (dat, msh, frac,
-      perm, ntg, m_el->d[0], m_el->d[1], m_el->center.array[0], m_el->center.array[1],  ws->tubing_diam/2,is_center_block))
-  {
-      delete grp_conn;
-      return -5;
-  }
-  if (!(ws->add_connection (*grp_conn, rsv_status, msh)))
-  {
-      delete grp_conn;
-      return -6;
-  }
-  delete grp_conn;
-  */
   return 0;
 }
 

@@ -89,12 +89,11 @@ class BS_API_PLUGIN mesh_grdecl : public  mesh_rs<strategy_t>
     ///////////////////////
 
     typedef grd_ecl::fpoint3d                           fpoint3d;
-    typedef boost::array <fpoint3d, 8>                  g_fpoint3d_vector;
     typedef std::vector<grd_ecl::fpoint2d>              g_fpoint2d_vector;
     typedef typename strategy_t::rhs_item_array_t       rhs_item_array_t;
     typedef typename array_float16_t::value_type        pool_item_t;
 
-    typedef g_fpoint3d_vector                           ijk_cube_t;
+    typedef grd_ecl::fpoint3d_vector                    ijk_cube_t;
     typedef boost::array <index_t, 4>                   side_t;
     typedef boost::array <fpoint3d, 4>                  point_side_t;
     typedef boost::array <item_t, 3>                    center_t;
@@ -160,11 +159,15 @@ class BS_API_PLUGIN mesh_grdecl : public  mesh_rs<strategy_t>
     get_center (index_t n_block) const;
 
     //! get volume of current fpoint3d cube
-    float get_volume_cube(const g_fpoint3d_vector &cube) const ;
+    float get_volume_cube (const grd_ecl::fpoint3d_vector &cube) const;
 
-    //! get vertex of cube [i,j,k]
-    g_fpoint3d_vector top_cube(const index_t i, const index_t j, const index_t k) const ;
+    //! get vertex of cube (i,j,k) and center
+    //! length of (fpoint3d_vector) = 8
+    grd_ecl::fpoint3d_vector top_cube (const index_t i, const index_t j, const index_t k) const;
 
+    //! get vertex of cube (i,j,k) and center
+    //! length of (fpoint3d_vector) = 8
+    grd_ecl::fpoint3d_vector top_cube (const index_t index) const;
 
     //-------------------------------------------
     //  INHERITED FUNCTIONS

@@ -3,7 +3,7 @@
  *      \brief  Base class for well perforations (well connections)
  *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
  *       \date  06.08.2008
- *  \copyright  This source code is released under the terms of 
+ *  \copyright  This source code is released under the terms of
  *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_WELL_CONNECTION_H_
@@ -139,7 +139,7 @@ namespace blue_sky
          * \param  ntg
          * \param  ro_calc_flag
          * */
-        void 
+        void
         compute_factors (const physical_constants &internal_contstants,
                          const sp_params_t &params,
                          const sp_mesh_iface_t &mesh,
@@ -151,66 +151,66 @@ namespace blue_sky
          * \brief  Multiplies mult_ with mult
          * \param  mult
          * */
-        void 
+        void
         mul_perm_mult (item_t mult);
 
         /**
          * \brief  Sets half of fracture length
          * \param  half_length Half of fracte length
          * */
-        void 
+        void
         set_half_length (item_t half_length);
 
         /**
          * \brief  Sets angle between fracture and positive X direction
          * \param  theta An angle
          * */
-        void 
+        void
         set_theta (item_t theta);
 
         /**
          * \brief  Sets skin factor
          * \param  skin
          * */
-        void 
+        void
         set_skin (item_t skin);
 
         /**
          * \brief  Sets perforation (connection) status
          * \param  connection_status
          * */
-        void 
+        void
         set_status (connection_status_type connection_status);
 
         /**
          * \brief  Sets transmissibility factor
          * \param  factor
          * */
-        void 
+        void
         set_factor (item_t factor);
 
         /**
          * \brief  Sets wellbore diameter
          * \param  diameter
          * */
-        void 
+        void
         set_diameter (item_t diameter);
 
         /**
-         * \brief  Sets effective Kh 
+         * \brief  Sets effective Kh
          *         (permeability * thikness)
          * \param  Kh
          * */
-        void 
+        void
         set_Kh (item_t kh);
 
         /**
-         * \brief  Sets direction in which the well 
+         * \brief  Sets direction in which the well
          *         penetrates the grid block
-         * \param  
-         * \return 
+         * \param
+         * \return
          * */
-        void 
+        void
         set_direction (connection_direction_type direction);
 
         /**
@@ -219,16 +219,16 @@ namespace blue_sky
          * \param  j
          * \param  k
          * \param  n_block Number of grid block
-         * \return 
+         * \return
          * */
-        void 
+        void
         set_coord (index_t i, index_t j, index_t k, index_t n_block);
 
         /**
          * \brief  Sets depth
          * \param  mesh
          * */
-        void 
+        void
         set_connection_depth (const sp_mesh_iface_t &mesh);
 
         /**
@@ -236,50 +236,50 @@ namespace blue_sky
          *         which perforation belongs
          * \return Index of grid block
          * */
-        index_t 
+        index_t
         n_block () const;
 
         /**
          * \brief  Returns connection_factor
          * \return Connection factor
          * */
-        item_t 
+        item_t
         get_fact () const;
 
         /**
          * \brief  Sets bulkp
          * \param  bulkp
          * */
-        void 
+        void
         set_bulkp (item_t bulkp);
 
         /**
          * \brief  Sets rate
          * \param  rate
-         * \todo   Obsolete, should be removed 
+         * \todo   Obsolete, should be removed
          * */
-        void 
+        void
         set_rate (item_t rate);
 
         /**
          * \brief  Sets head_term (?)
          * \param  head_term
          * */
-        void 
+        void
         set_head_term (item_t head_term);
 
         /**
          * \brief  Sets current connection BHP
          * \param  cur_bhp
          * */
-        void 
+        void
         set_cur_bhp (item_t cur_bhp);
 
         /**
          * \brief  Sets multiplier
          * \param  mult
          * */
-        void 
+        void
         set_mult (item_t mult);
 
         /**
@@ -287,21 +287,21 @@ namespace blue_sky
          *         contains this perforation (connection)
          * \param  seg
          * */
-        void 
+        void
         set_seg_number (const index_t &seg);
 
         /**
          * \brief  Is perforation (connection) is shut?
          * \return True if status of connection is shut
          * */
-        bool 
+        bool
         is_shut () const;
 
         /**
          * \brief  Returns status of connection
          * \return Connection status
          * */
-        connection_status_type 
+        connection_status_type
         get_status () const
           {
             return status_;
@@ -311,14 +311,23 @@ namespace blue_sky
          * \brief  Returns direction of connection
          * \return Connection direction
          * */
-        connection_direction_type 
+        connection_direction_type
         get_dir () const
           {
             return dir_;
           }
+        /*!
+         * \brief  Returns diameter of well at connection
+         * \return well diameter of connection
+         */
+        item_t
+        get_diam () const
+          {
+            return diam_;
+          }
 
         //! Returns current BHP
-        item_t                
+        item_t
         get_cur_bhp () const;
 
         //! Returns density
@@ -360,42 +369,42 @@ namespace blue_sky
         /**
          * \brief  Clears data
          * */
-        virtual void 
+        virtual void
         clear_data ();
 
         /**
          * \brief  Returns RW value
          * \todo   Obsolete, should be removed
          * */
-        virtual shared_vector <item_t> 
+        virtual shared_vector <item_t>
         get_rw_value   ();
 
         /**
          * \brief  Returns WR value
          * \todo   Obsolete, should be removed
          * */
-        virtual shared_vector <item_t> 
+        virtual shared_vector <item_t>
         get_wr_value   ();
 
         /**
          * \brief  Returns RR value
          * \todo   Obsolete, should be removed
          * */
-        virtual shared_vector <item_t> 
+        virtual shared_vector <item_t>
         get_rr_value   ();
 
         /**
          * \brief  Returns PS value
          * \todo   Obsolete, should be removed
          * */
-        virtual shared_vector <item_t> 
+        virtual shared_vector <item_t>
         get_ps_value   ();
 
         /**
          * \brief  Returns rate array
          * \todo   Obsolete, should be removed
          * */
-        virtual shared_vector <rhs_item_t> 
+        virtual shared_vector <rhs_item_t>
         get_rate_value ();
 
         /**

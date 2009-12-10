@@ -3,7 +3,7 @@
  *      \brief  Constructors for well events
  *     \author  Morozov Andrey
  *       \date  07.06.2008
- *  \copyright  This source code is released under the terms of 
+ *  \copyright  This source code is released under the terms of
  *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
@@ -234,20 +234,6 @@ namespace blue_sky
 //========================================================================
 
   template <typename strategy_t>
-  FRACTURE_event<strategy_t>::FRACTURE_event(bs_type_ctor_param param)
-  : main_params_ (BS_KERNEL.create_object (main_params_class::bs_type ()))
-  {
-  }
-  template <typename strategy_t>
-  FRACTURE_event<strategy_t>::FRACTURE_event(const FRACTURE_event& src)
-  : bs_refcounter (src)
-  {
-    *this = src;
-  }
-
-//========================================================================
-
-  template <typename strategy_t>
   PERMFRAC_event<strategy_t>::PERMFRAC_event(bs_type_ctor_param param)
   : main_params_ (BS_KERNEL.create_object (main_params_class::bs_type ()))
   {
@@ -333,12 +319,6 @@ namespace blue_sky
   BLUE_SKY_TYPE_IMPL_T_EXT (1, (COMPENSATION_event <base_strategy_fi>), 1, (well_event <base_strategy_fi>), "COMPENSATION_seq_fi", "COMPENSATION", "BOS_Core COMPENSATION_event class", false)
   BLUE_SKY_TYPE_IMPL_T_EXT (1, (COMPENSATION_event <base_strategy_di>), 1, (well_event <base_strategy_di>), "COMPENSATION_seq_di", "COMPENSATION", "BOS_Core COMPENSATION_event class", false)
   BLUE_SKY_TYPE_IMPL_T_EXT (1, (COMPENSATION_event <base_strategy_mixi>), 1, (well_event <base_strategy_mixi>), "COMPENSATION_seq_mixi", "COMPENSATION", "BOS_Core COMPENSATION_event class", false)
-
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF (FRACTURE_event, (class))
-  BLUE_SKY_TYPE_STD_COPY_T_DEF (FRACTURE_event, (class))
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (FRACTURE_event <base_strategy_fi>), 1, (well_event <base_strategy_fi>), "FRACTURE_seq_fi", "FRACTURE", "BOS_Core FRACTURE_event class", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (FRACTURE_event <base_strategy_di>), 1, (well_event <base_strategy_di>), "FRACTURE_seq_di", "FRACTURE", "BOS_Core FRACTURE_event class", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (FRACTURE_event <base_strategy_mixi>), 1, (well_event <base_strategy_mixi>), "FRACTURE_seq_mixi", "FRACTURE", "BOS_Core FRACTURE_event class", false)
 
   BLUE_SKY_TYPE_STD_CREATE_T_DEF (PERMFRAC_event, (class))
   BLUE_SKY_TYPE_STD_COPY_T_DEF (PERMFRAC_event, (class))

@@ -6,11 +6,10 @@
 #include "mesh_grdecl.h"
 
 using namespace grd_ecl;
-
 using namespace rs_mesh_detail;
 using namespace blue_sky;
 
-const char filename_hdf5[] = "d:\\grid_swap.h5";
+const char filename_hdf5[] = "grid_swap.h5";
 
 #ifdef _HDF5_MY
 template<class strategy_t>
@@ -295,11 +294,21 @@ fpoint3d  mesh_grdecl<strategy_t>::cross_coord(const item_t z, const pool_item_t
     p.y = temp *(coord[4] - coord[1]) + coord[1];
     return p;
   }
-template<class strategy_t>
-boost::array <fpoint3d, 8> mesh_grdecl<strategy_t>::top_cube(const index_t i, const index_t j, const index_t k) const
-  {
-    g_fpoint3d_vector cubeVertex;
 
+template<class strategy_t>
+grd_ecl::fpoint3d_vector
+mesh_grdecl<strategy_t>::top_cube (const index_t index) const
+  {
+    //TODO!
+    grd_ecl::fpoint3d_vector cube_vertex;
+    return cube_vertex;
+  }
+
+template<class strategy_t>
+grd_ecl::fpoint3d_vector
+mesh_grdecl<strategy_t>::top_cube (const index_t i, const index_t j, const index_t k) const
+  {
+    grd_ecl::fpoint3d_vector cubeVertex;
 
 #ifdef _DEBUG
     BS_ASSERT ( (i >= 0) && (i < nx) && (j >= 0) && (j < ny) && (k >= 0) && (k < nz));
@@ -321,12 +330,12 @@ boost::array <fpoint3d, 8> mesh_grdecl<strategy_t>::top_cube(const index_t i, co
     cubeVertex[6] = cross_coord(zcorn_array[index2+2*nx],coord_array[iCOORD+(nx+1)]);
     cubeVertex[7] = cross_coord(zcorn_array[index2+2*nx+1],coord_array[iCOORD+(nx+1)+1]);
     */
-    
+    //upper
     cubeVertex[0] = cross_coord(zcorn_array[index1], &coord_array[iCOORD * 6]);
     cubeVertex[1] = cross_coord(zcorn_array[index1+1], &coord_array[(iCOORD+1) * 6]);
     cubeVertex[2] = cross_coord(zcorn_array[index1+2*nx], &coord_array[(iCOORD+(nx+1)) * 6]);
     cubeVertex[3] = cross_coord(zcorn_array[index1+2*nx+1], &coord_array[(iCOORD+(nx+1)+1) * 6]);
-
+    //lower
     cubeVertex[4] = cross_coord(zcorn_array[index2], &coord_array[(iCOORD) * 6]);
     cubeVertex[5] = cross_coord(zcorn_array[index2+1], &coord_array[(iCOORD+1) * 6]);
     cubeVertex[6] = cross_coord(zcorn_array[index2+2*nx], &coord_array[(iCOORD+(nx+1)) * 6]);
@@ -335,7 +344,7 @@ boost::array <fpoint3d, 8> mesh_grdecl<strategy_t>::top_cube(const index_t i, co
     return cubeVertex;
   }
 template<class strategy_t>
-float mesh_grdecl<strategy_t>::get_volume_cube(const g_fpoint3d_vector &cube) const
+float mesh_grdecl<strategy_t>::get_volume_cube (const fpoint3d_vector &cube) const
   {
     fpoint3d center = get_cube_center (cube);
     item_t volume = 0.0;
@@ -410,7 +419,7 @@ bool mesh_grdecl<strategy_t>::is_small(const index_t i, const index_t j, const i
 template<class strategy_t>
 typename mesh_grdecl<strategy_t>::item_t mesh_grdecl<strategy_t>::calc_block_volume(const index_t i, const index_t j, const index_t k) const
   {
-    const g_fpoint3d_vector &cube = top_cube(i, j, k);
+    const fpoint3d_vector &cube = top_cube(i, j, k);
     index_t index = i + j * nx + k * nx * ny;
     if (sp_ntg.empty ())
       return (get_volume_cube(cube)); // * (*sp_poro)[index]);

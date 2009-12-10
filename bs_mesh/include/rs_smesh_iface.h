@@ -8,6 +8,7 @@
  */
 
 #include "rs_mesh_iface.h"
+#include "fpoint3d.h"
 
 namespace blue_sky
   {
@@ -38,23 +39,35 @@ namespace blue_sky
       ///////////////////////
       // OWN TYPES
       //////////////////////
-      
+
       typedef boost::array <index_t, 3>                   index_point3d_t;
-      
+
     public:
 
       //! default destructor
       virtual ~rs_smesh_iface ()	{};
-      
+
       //! get mesh dimensions
       virtual index_point3d_t get_dimens () = 0;
-      
+
+      //! get mesh dimensions
+      virtual index_t get_n_block (const index_t i, const index_t j, const index_t k) const = 0;
+
+      //! return coords of block vertexes by IJK indexes
+      virtual grd_ecl::fpoint3d_vector top_cube (const index_t i, const index_t j, const index_t k) const = 0;
+
+      //! return coords of block vertexes by n_block index
+      virtual grd_ecl::fpoint3d_vector top_cube (const index_t index) const = 0;
+
       //! return center point of an element
-      virtual point3d_t get_element_center (const index_t i, const index_t j, const index_t k)const = 0;
-      
+      virtual point3d_t get_element_center (const index_t index) const = 0;
+
+      //! return center point of an element
+      virtual point3d_t get_element_center (const index_t i, const index_t j, const index_t k) const = 0;
+
       //! return I, J and K structured mesh coordinates of an element by internal number
       virtual void get_element_int_to_ijk (const index_t n_element, index_t &i, index_t &j, index_t &k) const = 0;
-      
+
       //! return internal number of an element by I, J and K structured mesh coordinates
       virtual index_t get_element_ijk_to_int (const index_t i, const index_t j, const index_t k) const = 0;
     };

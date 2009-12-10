@@ -10,7 +10,6 @@
 #include "fpoint3d.h"
 #include "flux_connections_iface.h"
 
-
 //! class for basic work with mesh based on IJK and tpfa calculating
 template<class strategy_t>
 class  mesh_ijk : public mesh_rs<strategy_t>
@@ -37,9 +36,7 @@ class  mesh_ijk : public mesh_rs<strategy_t>
     ///////////////////////
     // OWN TYPES
     ///////////////////////
-    
     typedef grd_ecl::fpoint3d                           fpoint3d;
-    typedef std::vector<fpoint3d>                       g_fpoint3d_vector;
     typedef std::vector<grd_ecl::fpoint2d>              g_fpoint2d_vector;
     typedef typename strategy_t::rhs_item_array_t       rhs_item_array_t;
     typedef boost::array <item_t, 3>                    center_t;
@@ -114,20 +111,12 @@ class  mesh_ijk : public mesh_rs<strategy_t>
         return depths[n_elem];
       };
 
-    /*! \brief calc blocks which intersect by fracture
-          \param i_frac, j_frac - i,j coordinates of fracture
-          \param k_lower, k_upper - number of layers which fracture perforate of
-          \param fracture_angle - angle of fracture (in [0,PI])
-          \param half_length - half_length of fracture
-      */
+    //! get vertexes of cube (index = i+j*nx+k*nx*ny)
+    //! length of (fpoint3d_vector) = 8
+    grd_ecl::fpoint3d_vector top_cube (const index_t i, const index_t j, const index_t k) const;
 
-    int calc_fracture_intersection_blocks(const int i_frac, const int j_frac, const int k_lower, const int k_upper,
-                                          const item_t fracture_angle, const item_t half_length,
-                                          item_t eps_diff = 1.0e-7);
+    grd_ecl::fpoint3d_vector top_cube (const index_t index) const;
 
-    //! get vertex of cube (index = i+j*nx+k*nx*ny) and center
-    //! length of (g_fpoint3d_vector) = 9 (8 vertices + center)
-    void top_cube(const index_t index, g_fpoint3d_vector &) const ;
     
     //! get element center
     center_t
@@ -163,30 +152,6 @@ class  mesh_ijk : public mesh_rs<strategy_t>
 
     //! calc values of all shift arrays
     int calc_shift_arrays();
-
-    /*! \brief additional function for find intersection_points
-        \param cur_index index of neighours block
-        \param start_point, end_point, delta - ends of segment
-        \param fracture_center - center of fracture
-        \param is_goint_to_end_point = 1, if go to end_point, -1 if go to start_point
-        \param cube_others - calculates cubes of current block
-        \param fr_length1, fr_length2 - calculated distance between center of fracture and intersection point
-        \return 2 if intersection_points are exist, and (fr_length2-fr_length1) enought for adding block
-        \return 1 if intersection points are exist, but almost equal
-        \return 0 if intersection points aren't exist
-    */
-    int  find_fracture_intersection(int fl, int cur_index, const fpoint3d &start_point, const fpoint3d &end_point,const fpoint3d &delta,
-                                    const fpoint3d &fracture_center, int is_going_to_end_point, g_fpoint3d_vector &cube_others, item_t &fr_length1, item_t &fr_length2,
-                                    item_t eps_diff = 1.0e-7);
-
-    /*! \brief add new grp connection
-        \param many mane params
-        \param fr_length1, fr_length2 - distance from center of fracture*/
-    int add_grp_ijk_connection (/*many many params,*/ double fr_length1, double fr_length2, const fpoint3d &center_fracture,
-        int i1, int j1, const g_fpoint3d_vector &cube_current_block, bool is_center_block,
-        item_t eps_diff = 1.0e-7);
-
-
 
 //-------------------------------------------
 //  VARIABLES
