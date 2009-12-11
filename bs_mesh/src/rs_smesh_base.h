@@ -9,6 +9,7 @@
 
 #include "flux_connections.h"
 #include "rs_mesh_base.h"
+#include "fpoint3d.h"
 
 using namespace blue_sky;
 
@@ -53,6 +54,7 @@ class BS_API_PLUGIN mesh_rs : public rs_mesh_base<strategy_t>
     typedef mesh_rs <strategy_t>                        this_t;
     typedef boost::array <index_t, 3>                   index_point3d_t;
     typedef std::pair<index_t, index_t>                 elem_index;
+    typedef boost::array <grd_ecl::fpoint3d, 8>         fpoint3d_vector;
 
 //-------------------------------------------
 //  METHODS
@@ -101,9 +103,9 @@ class BS_API_PLUGIN mesh_rs : public rs_mesh_base<strategy_t>
     ////////indexation functions
 
     //! return index of block[i,j,k] - same as XYZ_to_inside
-    index_t get_n_block (index_t i_coord, index_t j_coord, index_t k_coord) const
+    index_t get_n_block (const index_t i, const index_t j, const index_t k) const
       {
-        return XYZ_to_inside (i_coord, j_coord, k_coord);
+        return XYZ_to_inside (i, j, k);
       }
 
     //! convert global [i,j,k] to local indexing
@@ -133,6 +135,13 @@ class BS_API_PLUGIN mesh_rs : public rs_mesh_base<strategy_t>
     //-------------------------------------------
     //  VIRTUAL FUNCTIONS
     //===========================================
+    virtual
+    grd_ecl::fpoint3d_vector top_cube (const index_t i, const index_t j, const index_t k) const
+      {
+        BS_ASSERT (false && "PURE CALL");
+        static grd_ecl::fpoint3d_vector dummy;
+        return dummy;
+      };
 
     /*! \brief get_block_dx_dy_dz
         \param n_elem - block number

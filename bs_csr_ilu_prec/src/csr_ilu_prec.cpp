@@ -127,6 +127,7 @@ namespace blue_sky
 
 #ifdef _DEBUG
     item_t *sol_ = &sol[0];
+    sol_;
 #endif
     // solve Ly = b
     r = &sol[0];

@@ -3,7 +3,7 @@
  *      \brief  event_manager functions
  *     \author  Morozov Andrey
  *       \date  07.06.2008
- *  \copyright  This source code is released under the terms of 
+ *  \copyright  This source code is released under the terms of
  *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
@@ -82,7 +82,7 @@ namespace blue_sky
     for (size_t i = 0, cnt = types.size (); i < cnt; ++i)
       {
         const type_descriptor &td = types[i].td_;
-        
+
         if (boost::regex_match (td.stype_.c_str (), re_check_type))
           {
             event_object = BS_KERNEL.create_object (td);
@@ -119,7 +119,6 @@ namespace blue_sky
   REG_EVENT_IN_##WHERE(WELTARG,       strategy_t)   \
   REG_EVENT_IN_##WHERE(WPIMULT,       strategy_t)   \
   REG_EVENT_IN_##WHERE(COMPENSATION,  strategy_t)   \
-  REG_EVENT_IN_##WHERE(FRACTURE,      strategy_t)   \
   REG_EVENT_IN_##WHERE(PERMFRAC,      strategy_t)
 
 #define REG_EVENT_IN_FACTORY(NAME, strategy_t)\

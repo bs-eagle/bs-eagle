@@ -6,11 +6,10 @@
 #include "mesh_grdecl.h"
 
 using namespace grd_ecl;
-
 using namespace rs_mesh_detail;
 using namespace blue_sky;
 
-const char filename_hdf5[] = "d:\\grid_swap.h5";
+const char filename_hdf5[] = "grid_swap.h5";
 
 #ifdef _HDF5_MY
 template<class strategy_t>
@@ -295,11 +294,22 @@ fpoint3d  mesh_grdecl<strategy_t>::cross_coord(const item_t z, const pool_item_t
     p.y = temp *(coord[4] - coord[1]) + coord[1];
     return p;
   }
-template<class strategy_t>
-boost::array <fpoint3d, 8> mesh_grdecl<strategy_t>::top_cube(const index_t i, const index_t j, const index_t k) const
-  {
-    g_fpoint3d_vector cubeVertex;
 
+template<class strategy_t>
+grd_ecl::fpoint3d_vector
+mesh_grdecl<strategy_t>::top_cube (const index_t index) const
+  {
+    grd_ecl::fpoint3d_vector cube_vertex;
+    //TODO
+    bs_throw_exception ("NOT IMPL YET");
+    return cube_vertex;
+  }
+
+template<class strategy_t>
+grd_ecl::fpoint3d_vector
+mesh_grdecl<strategy_t>::top_cube (const index_t i, const index_t j, const index_t k) const
+  {
+    grd_ecl::fpoint3d_vector cubeVertex;
 
 #ifdef _DEBUG
     BS_ASSERT ( (i >= 0) && (i < nx) && (j >= 0) && (j < ny) && (k >= 0) && (k < nz));
@@ -321,21 +331,21 @@ boost::array <fpoint3d, 8> mesh_grdecl<strategy_t>::top_cube(const index_t i, co
     cubeVertex[6] = cross_coord(zcorn_array[index2+2*nx],coord_array[iCOORD+(nx+1)]);
     cubeVertex[7] = cross_coord(zcorn_array[index2+2*nx+1],coord_array[iCOORD+(nx+1)+1]);
     */
-    
+    //upper
     cubeVertex[0] = cross_coord(zcorn_array[index1], &coord_array[iCOORD * 6]);
     cubeVertex[1] = cross_coord(zcorn_array[index1+1], &coord_array[(iCOORD+1) * 6]);
     cubeVertex[2] = cross_coord(zcorn_array[index1+2*nx], &coord_array[(iCOORD+(nx+1)) * 6]);
     cubeVertex[3] = cross_coord(zcorn_array[index1+2*nx+1], &coord_array[(iCOORD+(nx+1)+1) * 6]);
-
+    //lower
     cubeVertex[4] = cross_coord(zcorn_array[index2], &coord_array[(iCOORD) * 6]);
     cubeVertex[5] = cross_coord(zcorn_array[index2+1], &coord_array[(iCOORD+1) * 6]);
     cubeVertex[6] = cross_coord(zcorn_array[index2+2*nx], &coord_array[(iCOORD+(nx+1)) * 6]);
     cubeVertex[7] = cross_coord(zcorn_array[index2+2*nx+1], &coord_array[(iCOORD+(nx+1)+1) * 6]);
-    
+
     return cubeVertex;
   }
 template<class strategy_t>
-float mesh_grdecl<strategy_t>::get_volume_cube(const g_fpoint3d_vector &cube) const
+float mesh_grdecl<strategy_t>::get_volume_cube (const fpoint3d_vector &cube) const
   {
     fpoint3d center = get_cube_center (cube);
     item_t volume = 0.0;
@@ -410,7 +420,7 @@ bool mesh_grdecl<strategy_t>::is_small(const index_t i, const index_t j, const i
 template<class strategy_t>
 typename mesh_grdecl<strategy_t>::item_t mesh_grdecl<strategy_t>::calc_block_volume(const index_t i, const index_t j, const index_t k) const
   {
-    const g_fpoint3d_vector &cube = top_cube(i, j, k);
+    const fpoint3d_vector &cube = top_cube(i, j, k);
     index_t index = i + j * nx + k * nx * ny;
     if (sp_ntg.empty ())
       return (get_volume_cube(cube)); // * (*sp_poro)[index]);
@@ -507,7 +517,7 @@ void mesh_grdecl<strategy_t>::change_col(const index_t index1, const index_t ind
 }
 
 template<class index_t, typename index_array_t>
-void 
+void
 change_col_add( const index_t index1, const index_t index2, index_array_t &cols_ind, index_array_t& curIndex,
     index_array_t &m_memory, index_array_t &p_memory, bool is_m_memory,
     bool is_need_to_add, const index_t connection_number, const index_array_t &rows_ptr)
@@ -799,7 +809,7 @@ int mesh_grdecl<strategy_t>::splicing(item_array_t& volumes_temp)
 
   array_uint8_t &actnum     = sp_actnum;
   const array_float16_t &poro = sp_poro;
-  
+
   for (i = 0; i < nx; ++i)
     for (j = 0; j < ny; ++j)
       {
@@ -951,9 +961,9 @@ typename mesh_grdecl<strategy_t>::item_t mesh_grdecl<strategy_t>::calculate_tran
 
     if (koef1 < 10e-16 || koef2 < 10e-16)
       {
-        BOSWARN (section::mesh, level::warning) 
+        BOSWARN (section::mesh, level::warning)
           << boost::format ("For indexes (%d, %d) transmissibility will be set to 0 because koef1 = 0 (%f) or koef2 = 0 (%f)")
-          % index1 % index2 % koef1 % koef2 
+          % index1 % index2 % koef1 % koef2
           << bs_end;
 
         return 0;
@@ -1202,7 +1212,7 @@ int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_
 //
 //  index_t con_num = (cols_ind_n-max_size)/2;//connection number
 //  n_connections = con_num;
-//  
+//
 //  conn_trans = flux_conn->get_conn_trans();
 //  conn_trans->init_struct(con_num, 2*con_num, 2*con_num);
 //
@@ -1506,55 +1516,55 @@ template<class strategy_t>
 void mesh_grdecl<strategy_t>::init_props(const sp_idata_t &idata)
 {
   base_t::init_props (idata);
-  
+
   // init ZCORN
   zcorn_array = idata->get_float_non_empty_array("ZCORN");
   min_z = *(std::min_element(zcorn_array.begin(),zcorn_array.end()));
   max_z = *(std::max_element(zcorn_array.begin(),zcorn_array.end()));
-  
+
   // init COORD
   coord_array = idata->get_float_non_empty_array("COORD");
-  
+
   max_x = min_x = coord_array[0];
   max_y = min_y = coord_array[1];
 
   array_float16_t::iterator it, e = coord_array.end ();
-  
+
   for (it = coord_array.begin (); it != e; it += 6)
     {
       // move matching points apart
       if (it[2] == it[5])
         it[5] += 1.0f;
-        
+
       //looking for max&min coordinates
       if (min_x > it[0]) min_x = it[0];
       if (min_x > it[3]) min_x = it[3];
-      
+
       if (min_y > it[1]) min_y = it[1];
       if (min_y > it[4]) min_y = it[4];
-      
+
       if (max_x < it[0]) max_x = it[0];
       if (max_x < it[3]) max_x = it[3];
 
       if (max_y < it[1]) max_y = it[1];
       if (max_y < it[4]) max_y = it[4];
-      
+
     }
-  
+
 }
 
 template<class strategy_t>
 void mesh_grdecl<strategy_t>::check_data() const
 {
   base_t::check_data ();
-  
+
   if (min_x < 0)
     bs_throw_exception (boost::format ("min_x = %d is out of range")% min_x);
   if (min_y < 0)
     bs_throw_exception (boost::format ("min_y = %d is out of range")% min_y);
   if (min_z < 0)
     bs_throw_exception (boost::format ("min_z = %d is out of range")% min_z);
-    
+
   if (!coord_array.size ())
     bs_throw_exception ("COORD array is not initialized");
   if (!zcorn_array.size ())
@@ -1622,7 +1632,7 @@ float mesh_grdecl<strategy_t>:: get_block_dy(index_t n_elem) const
       dy += tmp_top_side[ii].y - tmp_bottom_side[ii].y;
     return fabs(dy/4);
   }
-  
+
 template<class strategy_t>
 float mesh_grdecl<strategy_t>:: get_block_dz(index_t n_elem) const
   {
@@ -1713,7 +1723,7 @@ void mesh_grdecl<strategy_t>::generate_array()
       sp_multy->push_back(1.0f);
       sp_multz->push_back(1.0f);
     }
-#endif 
+#endif
 }
 
 
@@ -2147,7 +2157,7 @@ struct build_jacobian_rows_class
             for (size_t ii = 0; ii < bottomSide.size(); ii++)
               flag = flag && (mesh->zcorn_array[bottomSide[ii]] == mesh->zcorn_array[topSide[ii]]);
           }
-        //if (flag) 
+        //if (flag)
         //  nButting++;
 
         loop->is_butting[j*nx+i] = flag;
@@ -2256,7 +2266,7 @@ struct build_jacobian_cols_class
   define_butting (index_t, index_t, index_t)
   {
   }
-  void 
+  void
   add_boundary (index_t)
   {
   }
@@ -2307,7 +2317,7 @@ struct build_jacobian_cols_class
     return tran;
   }
 
-  item_t 
+  item_t
   calc_tran_by_y (index_t i, index_t j, index_t km, index_t kp)
   {
     const ijk_cube_t &cube2         = mesh->top_cube(i,j+1,kp);
@@ -2324,7 +2334,7 @@ struct build_jacobian_cols_class
     return tran;
   }
 
-  item_t 
+  item_t
   calc_tran_is_butting_by_z (index_t i, index_t j, index_t km, index_t kp)
   {
     const point_side_t &upperSide = get_side( upper,cube_IJK,0);
@@ -2443,7 +2453,7 @@ template <typename M, typename L, typename RP, typename CI, typename CT, typenam
 build_jacobian_cols_class <M, L>
 build_jacobian_cols (mesh_grdecl <M> *m, L *l, RP *rp, CI *ci, CT &conn_trans, FC &flux_conn)
 {
-  return build_jacobian_cols_class <M, L> (m, l, rp, ci, 
+  return build_jacobian_cols_class <M, L> (m, l, rp, ci,
     conn_trans->get_cols_ind (), conn_trans->get_values (),
     flux_conn->get_matrix_block_idx_minus (), flux_conn->get_matrix_block_idx_plus ());
 }
@@ -2682,7 +2692,7 @@ struct build_jacobian_and_flux : boost::noncopyable
 
 
 template<class strategy_t>
-int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr_t &jacobian, 
+int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr_t &jacobian,
                                                                                const sp_flux_conn_iface_t &flux_conn,
                                                                                index_array_t &boundary_array)
 {
@@ -2693,7 +2703,7 @@ int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (c
   jacobian->get_rows_ptr().clear();
   jacobian->init_struct(max_size,max_size, max_size);
   index_array_t* rows_ptr = &jacobian->get_rows_ptr();
-  
+
   sp_bcsr_t conn_trans;
 
   (*rows_ptr)[0] = 0;
