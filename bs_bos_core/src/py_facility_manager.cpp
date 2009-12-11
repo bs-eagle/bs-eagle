@@ -21,29 +21,81 @@ using namespace boost::python;
 namespace blue_sky {
 namespace python {
 
-  //template <class strategy_t>
-  //void py_export_facility_manager_t(const char *name)
-  //{
-  //  class_<py_facility_manager<strategy_t>, bases<py_objbase> >(name)
-  //  //.def("__iter__", range(&py_facility_manager<strategy_t>::wells_begin,
-  //  //                       &py_facility_manager<strategy_t>::wells_end))
-  //  .def("add_well", &py_facility_manager<strategy_t>::add_well)
-  //  .def("wells", &py_facility_manager<strategy_t>::wells_begin)
-  //  .def("wells_end", &py_facility_manager<strategy_t>::wells_end)
-  //  //.def("__iter__", pass_throught) // boost::python::iterator< py_facility_manager<strategy_t> >())
-  //  //.def("next", &py_facility_manager<strategy_t>::next)
-  //  ;
-  //}
+  template <typename facility_manager_t>
+  struct well_iterator
+  {
+    typedef typename facility_manager_t::sp_well_t              sp_well_t;
+    typedef typename facility_manager_t::well_const_iterator_t  iterator_t;
+
+    well_iterator (facility_manager_t *facility_manager_)
+    : facility_manager_ (facility_manager_)
+    , iterator_ (facility_manager_->wells_begin ())
+    , iterator_end_ (facility_manager_->wells_end ())
+    {
+    }
+
+    sp_well_t
+    next () 
+    {
+#ifdef _DEBUG
+      if (iterator_end_ != facility_manager_->wells_end ())
+        {
+          bs_throw_exception ("Well iterator not more valid");
+        }
+#endif
+      while (iterator_ != iterator_end_)
+        {
+          sp_well_t well (iterator_->second, bs_dynamic_cast ());
+          ++iterator_;
+
+          if (well)
+            return well;
+        }
+      if (iterator_ == iterator_end_)
+        {
+          PyErr_SetString (PyExc_StopIteration, "No more data");
+          boost::python::throw_error_already_set ();
+        }
+      bs_throw_exception ("Not reachable state reachabled");
+    }
+
+    smart_ptr <facility_manager_t>  facility_manager_;
+    iterator_t                      iterator_;
+    iterator_t                      iterator_end_;
+  };
+
+  template <typename T>
+  well_iterator <T>
+  get_wells (T *t)
+  {
+    return well_iterator <T> (t);
+  }
 
   PY_EXPORTER (facility_manager_exporter, default_exporter)
-    .def ("add_well",   &T::add_well)
-    .def ("wells",      &T::wells_begin)
-    .def ("wells_end",  &T::wells_end)
+    .def ("add_well",       &T::add_well)
+    .add_property ("wells", get_wells <T>)
   PY_EXPORTER_END;
+
+  template <typename strategy_t>
+  void
+  export_well_iterator (const char *name)
+  {
+    typedef well_iterator <facility_manager <strategy_t> > T;
+
+    using namespace boost::python;
+    class_ <T> (name, init <facility_manager <strategy_t> *> ())
+      .def ("next", &T::next)
+      .def ("__iter__", pass_through)
+      ;
+  }
 
   void py_export_facility_manager()
   {
     strategy_exporter::export_base <facility_manager, facility_manager_exporter> ("facility_manager");
+
+    export_well_iterator <base_strategy_fi> ("well_iterator_fi");
+    export_well_iterator <base_strategy_di> ("well_iterator_di");
+    export_well_iterator <base_strategy_mixi> ("well_iterator_mixi");
   }
 
 } // namespace python
