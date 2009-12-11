@@ -1390,14 +1390,6 @@
 				Name="to exclude"
 				>
 				<File
-					RelativePath=".\src\fracture.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\fracture.h"
-					>
-				</File>
-				<File
 					RelativePath=".\include\inverse_matrix.h"
 					>
 				</File>
