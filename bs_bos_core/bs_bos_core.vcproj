@@ -462,6 +462,14 @@
 				RelativePath=".\src\data_saver.h"
 				>
 			</File>
+			<File
+				RelativePath=".\src\data_saver_dummy.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\data_saver_hdf5.h"
+				>
+			</File>
 			<Filter
 				Name="events"
 				>
