@@ -3,7 +3,7 @@
  *      \brief  Main calculation loop implementation
  *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
  *       \date  04.09.2008
- *  \copyright  This source code is released under the terms of 
+ *  \copyright  This source code is released under the terms of
  *              the BSD License. See LICENSE for more details.
  *       \todo  Split and move implementation to src/
  *       \todo  Describe data members
@@ -39,7 +39,7 @@ namespace blue_sky
   template <typename strategy_t>
     /**
      * \class main_loop_calc_base
-     * \brief Base interface for main_loop calculation 
+     * \brief Base interface for main_loop calculation
      *        implementation
      * \todo  Should be renamed to main_loop_calc_iface
      * */
@@ -66,7 +66,7 @@ namespace blue_sky
      * \brief  Applies model events on each step
      * \param  event_list
      * */
-    virtual void 
+    virtual void
     apply_events (const sp_event_base_list_t &) = 0;
   };
 
@@ -193,7 +193,7 @@ namespace blue_sky
 
         for (; it != e; ++it)
           {
-            (*it)->apply (reservoir_, mesh_, calc_model_);
+            (*it)->apply (reservoir_, mesh_, calc_model_, data_map_);
           }
       }
 
@@ -360,7 +360,7 @@ namespace blue_sky
 
       /**
        * \brief  Saves info about newton iteration
-       * \todo   Obsolete, should be removed  
+       * \todo   Obsolete, should be removed
        * */
       inline void
       save_newton_iter_info ()
@@ -377,7 +377,7 @@ namespace blue_sky
 
       /**
        * \brief  Saves saturation values to file
-       * \todo   Obsolete, should be removed  
+       * \todo   Obsolete, should be removed
        * */
       void
       print_saturation ()
@@ -388,7 +388,7 @@ namespace blue_sky
       }
       /**
        * \brief  Saves pressure values to file
-       * \todo   Obsolete, should be removed  
+       * \todo   Obsolete, should be removed
        * */
       void
       print_pressure ()
@@ -400,7 +400,7 @@ namespace blue_sky
 
       /**
        * \brief  Saves volume values to file
-       * \todo   Obsolete, should be removed  
+       * \todo   Obsolete, should be removed
        * */
       void
       print_volume ()
@@ -492,7 +492,7 @@ namespace blue_sky
       }
 
       /**
-       * \brief  Returns number of maximum newton iterations 
+       * \brief  Returns number of maximum newton iterations
        *         (fi_params::NEWTON_ITERS_NUM)
        * \return Number of newton iterations
        * */
@@ -513,7 +513,7 @@ namespace blue_sky
         }
 
       /**
-       * \brief  Returns maximum linear solver tolerance 
+       * \brief  Returns maximum linear solver tolerance
        *         (fi_params::MAX_ALLOWED_LIN_SOLV_RESID)
        * \return Maximum linear solver tolerance
        * */
@@ -547,7 +547,7 @@ namespace blue_sky
         }
 
       /**
-       * \brief  Returns number of maximum newton iterations 
+       * \brief  Returns number of maximum newton iterations
        *         (fi_params::APPROX_STEPS or fi_params::NEWTON_ITERS_NUM)
        * \return Number of maximum newton iterations
        * */
@@ -671,13 +671,13 @@ namespace blue_sky
       /**
        * \brief  Fills jacobian with derivs that numerically calculated
        * \param  init
-       * \todo   Obsolete 
+       * \todo   Obsolete
        * */
       inline void
       generate_numeric_jacobian (int init);
 
       /**
-       * \brief  Calculates total rates for well and 
+       * \brief  Calculates total rates for well and
        *         rate and total rate for reservoir
        * */
       inline void
@@ -685,7 +685,7 @@ namespace blue_sky
 
       /**
        * \brief  Checks time-step
-       * \return Throws exception is time-step smaller 
+       * \return Throws exception is time-step smaller
        *         than threshold
        * */
       inline void
@@ -1258,7 +1258,7 @@ public:
       sp_rock_grid_t                          rock_grid_prop_;
       sp_storage_t                            facility_storage_;
       sp_reservoir_t                          reservoir_;
-      sp_mesh_iface_t                               mesh_;
+      sp_mesh_iface_t                         mesh_;
       sp_jacobian_t                           jacobian_;
       sp_fi_params_t                          params_;
       sp_idata_t                              data_map_;
