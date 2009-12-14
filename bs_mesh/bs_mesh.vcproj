@@ -215,11 +215,11 @@
 			Name="mesh"
 			>
 			<File
-				RelativePath=".\src\fpoint2d.h"
+				RelativePath=".\include\fpoint2d.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\fpoint3d.h"
+				RelativePath=".\include\fpoint3d.h"
 				>
 			</File>
 			<File

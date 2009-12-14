@@ -462,6 +462,14 @@
 				RelativePath=".\src\data_saver.h"
 				>
 			</File>
+			<File
+				RelativePath=".\src\data_saver_dummy.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\data_saver_hdf5.h"
+				>
+			</File>
 			<Filter
 				Name="events"
 				>
@@ -1381,14 +1389,6 @@
 			<Filter
 				Name="to exclude"
 				>
-				<File
-					RelativePath=".\src\fracture.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\fracture.h"
-					>
-				</File>
 				<File
 					RelativePath=".\include\inverse_matrix.h"
 					>

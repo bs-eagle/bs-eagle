@@ -106,61 +106,6 @@ namespace python {
     .add_property ("is_production",       make_function (detail::well_is_production<T>))
   PY_EXPORTER_END;
 
-  //template <typename strategy_t>
-  //class py_well_iterator
-  //      : public std::iterator<
-  //      std::forward_iterator_tag,
-  //      py_well<strategy_t>, ptrdiff_t,
-  //      py_well<strategy_t>, py_well<strategy_t> >
-  //  {
-  //    friend class py_well <strategy_t>;
-
-  //  public:
-  //    typedef py_well <strategy_t>              py_well_t;
-
-  //    typedef py_well_iterator <strategy_t>     this_t;
-
-  //    typedef std::iterator<
-  //    std::forward_iterator_tag,
-  //    //std::bidirectional_iterator_tag,
-  //    py_well<strategy_t>, ptrdiff_t,
-  //    py_well<strategy_t>, py_well<strategy_t> >  base_t;
-
-  //    typedef typename base_t::reference  reference;
-  //    typedef typename base_t::pointer    pointer;
-
-  //    typedef facility_manager <strategy_t>                       facility_manager_t;
-  //    typedef smart_ptr <facility_manager_t>                      sp_facility_t;
-
-  //    typedef this_t                                              wrapped_t;
-  //    typedef typename facility_manager_t::well_const_iterator_t  well_const_iterator_t;
-  //    typedef well <strategy_t>                                   well_t;
-  //    typedef smart_ptr <well_t, true>                            sp_well_t;
-
-  //    sp_facility_t   mgr;
-  //    well_const_iterator_t ins;
-
-  //  public:
-  //    py_well_iterator(const py_well_iterator &src);
-  //    py_well_iterator(const sp_facility_t &mgr);
-  //    ~py_well_iterator();
-
-  //    reference operator*() const;
-  //    pointer operator->() const;
-
-  //    py_well_iterator& operator++();
-  //    py_well_iterator operator++(int);
-
-  //    py_well_t next ();
-
-  //    //py_well_iterator& operator--();
-  //    //py_well_iterator operator--(int);
-
-  //    bool operator ==(const py_well_iterator &ritr) const;
-  //    bool operator !=(const py_well_iterator &ritr) const;
-  //    const this_t &operator =(const this_t &ritr);
-  //  };
-
   void
   py_export_calc_well ();
 
