@@ -43,6 +43,13 @@ namespace blue_sky
       return t->ts_params;
     }
 
+    template <typename T>
+    smart_ptr <typename T::scal_3p_t, true>
+    get_scal_3p (T *t)
+    {
+      return t->scal_prop;
+    }
+
     PY_EXPORTER (calc_model_exporter, default_exporter)
       .add_property ("n_phases",    get_n_phases <T>)
       .add_property ("is_water",    get_is_water <T>)
@@ -55,7 +62,7 @@ namespace blue_sky
       .add_property ("pvt_num",     &T::n_pvt_regions)
       .add_property ("sat_num",     &T::n_sat_regions)
       .add_property ("fip_num",     &T::n_fip_regions)
-      .add_property ("scal",        &T::scal_prop)
+      .add_property ("scal",        get_scal_3p <T>)
       .add_property ("pvt_regions", &T::pvt_regions)
       .add_property ("sat_regions", &T::sat_regions)
       .add_property ("fip_regions", &T::fip_regions)
