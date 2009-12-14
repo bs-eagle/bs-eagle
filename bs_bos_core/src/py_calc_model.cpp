@@ -109,6 +109,95 @@ namespace blue_sky
         ;
     }
 
+    template <typename T>
+    typename T::value_type
+    get_pvt_item (T *t, size_t index)
+    {
+      return t->operator[] (index);
+    }
+
+    template <typename T>
+    struct pvt_array_iterator
+    {
+      pvt_array_iterator (T *t)
+      : array_ (t)
+      , iterator_ (t->begin ())
+      , iterator_end_ (t->end ())
+      {
+      }
+
+      typename T::value_type
+      next ()
+      {
+#ifdef _DEBUG
+        if (iterator_end_ != array_->end ())
+          {
+            bs_throw_exception ("PVT array iterator not more valid");
+          }
+#endif
+
+        if (iterator_ == iterator_end_)
+          {
+            PyErr_SetString (PyExc_StopIteration, "No more data");
+            boost::python::throw_error_already_set ();
+          }
+
+        return *(iterator_++);
+      }
+
+      T                     *array_;
+      typename T::iterator  iterator_;
+      typename T::iterator  iterator_end_;
+    };
+
+    template <typename T>
+    pvt_array_iterator <T>
+    get_pvt_iterator (T *t)
+    {
+      return pvt_array_iterator <T> (t);
+    }
+
+    template <typename T>
+    void
+    export_pvt_iterator (const char *name)
+    {
+      using namespace boost::python;
+
+      class_ <pvt_array_iterator <T> > (name, init <T *> ())
+        .def ("next",     &pvt_array_iterator <T>::next)
+        .def ("__iter__", pass_through)
+        ;
+    }
+
+    template <template <typename> class T>
+    void
+    export_pvt_array (const char *name)
+    {
+      typedef std::vector <smart_ptr <T <base_strategy_di> > > T_di;
+      typedef std::vector <smart_ptr <T <base_strategy_fi> > > T_fi;
+      typedef std::vector <smart_ptr <T <base_strategy_mixi> > > T_mixi;
+
+      class_ <T_di> (std::string (std::string (name) + "_di").c_str ())
+        .def ("__getitem__",  get_pvt_item <T_di>)
+        .def ("__len__",      &T_di::size)
+        .def ("__iter__",     get_pvt_iterator <T_di>)
+        ;
+      class_ <T_fi> (std::string (std::string (name) + "_fi").c_str ())
+        .def ("__getitem__",  get_pvt_item <T_fi>)
+        .def ("__len__",      &T_fi::size)
+        .def ("__iter__",     get_pvt_iterator <T_fi>)
+        ;
+      class_ <T_mixi> (std::string (std::string (name) + "_mixi").c_str ())
+        .def ("__getitem__",  get_pvt_item <T_mixi>)
+        .def ("__len__",      &T_mixi::size)
+        .def ("__iter__",     get_pvt_iterator <T_mixi>)
+        ;
+
+      export_pvt_iterator <T_di> ("pvt_array_iter_di");
+      export_pvt_iterator <T_fi> ("pvt_array_iter_fi");
+      export_pvt_iterator <T_mixi> ("pvt_array_iter_mixi");
+    }
+
     void py_export_calc_model()
     {
       strategy_exporter::export_base_ext <calc_model_data, calc_model_data_exporter, class_type::concrete_class> ("calc_model_data");
@@ -116,6 +205,10 @@ namespace blue_sky
       export_calc_model_data_vector <shared_vector <calc_model_data <base_strategy_di> > >   ("calc_model_data_vector_di");
       export_calc_model_data_vector <shared_vector <calc_model_data <base_strategy_fi> > >   ("calc_model_data_vector_fi");
       export_calc_model_data_vector <shared_vector <calc_model_data <base_strategy_mixi> > > ("calc_model_data_vector_mixi");
+
+      export_pvt_array <pvt_dead_oil> ("pvt_dead_oil_array");
+      export_pvt_array <pvt_water> ("pvt_water_array");
+      export_pvt_array <pvt_gas> ("pvt_gas");
 
       strategy_exporter::export_base <calc_model, calc_model_exporter> ("calc_model");
     }
