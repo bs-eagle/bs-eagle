@@ -171,10 +171,10 @@ namespace python {
       int year      = PyDateTime_GET_YEAR (pydate);
       int month     = PyDateTime_GET_MONTH (pydate);
       int day       = PyDateTime_GET_DAY (pydate);
-      int hour      = PyDateTime_TIME_GET_HOUR (pydate);
-      int minute    = PyDateTime_TIME_GET_MINUTE (pydate);
-      int second    = PyDateTime_TIME_GET_SECOND (pydate);
-      int mcsecond  = PyDateTime_TIME_GET_MICROSECOND (pydate);
+      int hour      = PyDateTime_DATE_GET_HOUR (pydate);
+      int minute    = PyDateTime_DATE_GET_MINUTE (pydate);
+      int second    = PyDateTime_DATE_GET_SECOND (pydate);
+      int mcsecond  = PyDateTime_DATE_GET_MICROSECOND (pydate);
 
       boost::gregorian::date d (year, month, day);
       boost::posix_time::time_duration td (hour, minute, second, 0);
@@ -186,6 +186,7 @@ namespace python {
       void *storage = ((converter::rvalue_from_python_storage <ptime>*)data)->storage.bytes;
 
       new (storage) boost::posix_time::ptime (d, td);
+
       data->convertible = storage;
     }
   };
