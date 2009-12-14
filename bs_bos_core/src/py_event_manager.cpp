@@ -28,82 +28,81 @@ using namespace boost::posix_time;
 namespace blue_sky {
 namespace python {
 
-  template <typename strategy_t>
-  py_event_manager<strategy_t>::~py_event_manager ()
-  {
-
-  }
-
-  template <typename strategy_t>
-  py_event_manager<strategy_t>::py_event_manager()
-      : py_objbase(wrapped_t::bs_type())
-  {
-  }
-
-  template <typename strategy_t>
-  py_event_manager<strategy_t>::py_event_manager (const sp_em_t &src)
-  : py_objbase (src)
-  {
-  }
-
-  template <typename strategy_t>
-  py_event_manager<strategy_t>::py_event_manager(const this_t &src)
-  : py_objbase (src.get_spx <wrapped_t> ())
-  {}
-
-  template <typename strategy_t>
-  typename py_event_manager<strategy_t>::py_event_base_t *
-  py_event_manager<strategy_t>::create_event (const std::string &date, const std::string &event_name, const std::string &event_params)
-  {
-    return new py_event_base_t (this->template get_spx <wrapped_t> ()->create_event (boost::posix_time::ptime (time_from_string (date)), event_name, event_params));
-  }
-
-  template <typename strategy_t>
-  void py_event_manager<strategy_t>::factory_register(const std::string &/*name*/, const event_creater_base_t &/*creater*/)
-  {
-    BS_ASSERT (false && "NOT_IMPL_YET");
-  }
-
-  template <typename strategy_t>
-  event_creater_base<strategy_t>::event_creater_base (boost::python::object &pobj)
-      : obj (pobj)
-  {}
-
-  template <typename strategy_t>
-  typename py_event_manager<strategy_t>::event_list_iterator_t
-  py_event_manager<strategy_t>::el_begin ()
-  {
-    return event_list_iterator_t (this->get_spx <wrapped_t> ());
-  }
-
-  //event_list_iterator_t el_end ();
-
-  template <typename strategy_t>
-  typename event_creater_base<strategy_t>::py_event_base_t *
-  event_creater_base<strategy_t>::create ()
-  {
-    // CALL PYTHON IMPL (pure virtual)
-  }
-
-
-  template <typename strategy_t>
-  void py_export_event_manager_ (const char *name)
-  {
-    using namespace boost::python;
-    class_<py_event_manager <strategy_t>, bases<py_objbase> >(name)
-      .def ("create_event", &py_event_manager <strategy_t>::create_event, return_value_policy <manage_new_object> ())
-      .def ("el_begin", &py_event_manager <strategy_t>::el_begin)
-      ;
-  }
-
   PY_EXPORTER (event_manager_exporter, default_exporter)
     .add_property ("event_list", &T::event_list)
   PY_EXPORTER_END;
 
   template <typename T>
-  void
-  list_begin (T *t)
+  struct event_list_iterator 
   {
+    event_list_iterator (T *t)
+    : list_ (t)
+    , iterator_ (t->begin ())
+    , iterator_end_ (t->end ())
+    {
+    }
+
+    typename T::value_type
+    next ()
+    {
+#ifdef _DEBUG
+      if (iterator_end_ != list_->end ())
+        {
+          bs_throw_exception ("Event list iterator not more valid");
+        }
+#endif
+
+      if (iterator_ == iterator_end_)
+        {
+          PyErr_SetString (PyExc_StopIteration, "No more data");
+          boost::python::throw_error_already_set ();
+        }
+
+      return *(iterator_++);
+    }
+
+    T                     *list_;
+    typename T::iterator  iterator_;
+    typename T::iterator  iterator_end_;
+  };
+
+  template <typename T>
+  event_list_iterator <T>
+  get_event_list_iterator (T *t)
+  {
+    return event_list_iterator <T> (t);
+  }
+  template <typename T>
+  size_t
+  get_event_list_size (T *t)
+  {
+    return t->size ();
+  }
+  template <typename T>
+  typename T::value_type
+  get_event_list_item (T *list_, size_t idx)
+  {
+    if (idx >= list_->size ())
+      {
+        bs_throw_exception (boost::format ("Index out of bound (idx: %ld, size: %ld)") 
+          % idx % list_->size ());
+      }
+
+    typename T::iterator it = list_->begin ();
+    std::advance (it, idx);
+    return *it;
+  }
+
+  template <typename T>
+  void
+  export_event_list_iterator (const char *name)
+  {
+    using namespace boost::python;
+
+    class_ <event_list_iterator <T> > (name, init <T *> ())
+      .def ("__iter__",     pass_through)
+      .def ("next",         &event_list_iterator <T>::next)
+      ;
   }
 
   template <typename T>
@@ -113,8 +112,12 @@ namespace python {
     using namespace boost::python;
 
     class_ <T> (name)
-      .def ("begin", list_begin <T>)
+      .def ("__iter__",     get_event_list_iterator <T>)
+      .def ("__len__",      get_event_list_size <T>)
+      .def ("__getitem__",  get_event_list_item <T>)
       ;
+
+    export_event_list_iterator <T> (std::string (std::string (name) + "_iterator").c_str ());
   }
 
   template <typename T>
@@ -202,18 +205,21 @@ namespace python {
     boost_ptime_from_python_datetime ();
     to_python_converter <boost::posix_time::ptime, boost_ptime_to_python_datetime> ();
 
-    typedef event_base <base_strategy_di> event_base_di_t;
-    typedef std::list <smart_ptr <event_base_di_t> > event_list_di_t;
+    typedef std::list <smart_ptr <event_base <base_strategy_di> > > event_list_di_t;
+    typedef std::list <smart_ptr <event_base <base_strategy_fi> > > event_list_fi_t;
+    typedef std::list <smart_ptr <event_base <base_strategy_mixi> > > event_list_mixi_t;
 
     export_event_list <event_list_di_t> ("event_list_di");
+    export_event_list <event_list_fi_t> ("event_list_fi");
+    export_event_list <event_list_mixi_t> ("event_list_mixi");
+
     export_event_map <std::map <boost::posix_time::ptime, event_list_di_t> > ("event_map_di");
+    export_event_map <std::map <boost::posix_time::ptime, event_list_fi_t> > ("event_map_fi");
+    export_event_map <std::map <boost::posix_time::ptime, event_list_mixi_t> > ("event_map_mixi");
 
     strategy_exporter::export_base <event_manager, event_manager_exporter> ("event_manager");
   }
 
-  template class py_event_manager <base_strategy_fi>;
-  template class py_event_manager <base_strategy_di>;
-  template class py_event_manager <base_strategy_mixi>;
 } // namespace python
 } // namespace blue_sky
 
