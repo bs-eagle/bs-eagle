@@ -140,7 +140,7 @@ namespace blue_sky
          * \param  ro_calc_flag
          * */
         void
-        compute_factors (const physical_constants &internal_contstants,
+        compute_factors (const physical_constants &internal_constants,
                          const sp_params_t &params,
                          const sp_mesh_iface_t &mesh,
                          const item_array_t &perm,
