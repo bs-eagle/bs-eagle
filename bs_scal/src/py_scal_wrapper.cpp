@@ -1,8 +1,10 @@
 /**
- * \file py_scal_wrapper.cpp
- * \brief
- * \author
- * \date
+ *       \file  py_scal_wrapper.cpp
+ *      \brief  Exports scal_3p (+) to python
+ *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
+ *       \date  14.12.2009
+ *  \copyright  This source code is released under the terms of 
+ *              the BSD License. See LICENSE for more details.
  * */
 #include "bs_scal_stdafx.h"
 
@@ -15,77 +17,6 @@ namespace blue_sky
   {
   namespace python
     {
-
-    template <typename strategy_t>
-    py_scal_data_holder<strategy_t>::py_scal_data_holder ()
-        : base_t (wrapped_t::bs_type ())
-    {
-    }
-
-    template <typename strategy_t>
-    py_scal_data_holder<strategy_t>::py_scal_data_holder (sp_scal_data_holder_t holder)
-        : base_t (holder)
-    {
-    }
-
-#ifdef _DEBUG
-    template <typename strategy_t>
-    void
-    py_scal_data_holder<strategy_t>::save_raw_data (const std::string &filename)
-    {
-      sp_scal_data_holder_t spx = get_spx <wrapped_t> ();
-      BS_ASSERT (spx) (filename);
-
-      const scal::data_placement::scal_placement_info &info = spx->get_placement_info ();
-      const typename wrapped_t::item_array_t &raw_data              = spx->get_raw_data ();
-      const typename wrapped_t::region_vector_t &region_info         = spx->get_region_info ();
-
-      using namespace scal;
-      using namespace data_placement;
-      switch (info.type)
-        {
-        case spof:
-          save_spof_raw_data <strategy_t> (raw_data, region_info, filename);
-          break;
-        case spfn_sof3:
-          save_spfn_sof3_raw_data <strategy_t> (raw_data, region_info, filename);
-          break;
-        case sof3_spfn:
-          save_sof3_spfn_raw_data <strategy_t> (raw_data, region_info, filename);
-          break;
-        default:
-          bs_throw_exception ("Unknown type");
-        }
-    }
-
-    template <typename strategy_t>
-    void
-    py_scal_data_holder<strategy_t>::save_data (const std::string &filename)
-    {
-      sp_scal_data_holder_t spx (get_spx <wrapped_t> ());
-      BS_ASSERT (spx) (filename);
-
-      const scal::data_placement::scal_placement_info &info = spx->get_placement_info ();
-      const typename wrapped_t::region_vector_t &region_info         = spx->get_region_info ();
-
-      using namespace scal;
-      using namespace data_placement;
-      switch (info.type)
-        {
-        case spof:
-          save_spof_data <strategy_t> (*spx, region_info, filename);
-          break;
-        case spfn_sof3:
-          save_spfn_sof3_data <strategy_t> (*spx, region_info, filename);
-          break;
-        case sof3_spfn:
-          save_sof3_spfn_data <strategy_t> (*spx, region_info, filename);
-          break;
-        default:
-          bs_throw_exception ("Unknown type");
-        }
-    }
-#endif
 
     PY_EXPORTER (scale_array_holder_exporter, default_exporter)
     PY_EXPORTER_END;
