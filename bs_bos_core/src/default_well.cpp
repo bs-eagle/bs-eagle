@@ -221,7 +221,7 @@ namespace wells {
 
     typedef default_connection_iterator_impl <strategy_t> iterator_t;
     iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
-    for (; it != e; ++it)
+    for (; !base_t::is_shut () && it != e; ++it)
       {
         const sp_connection_t &c  = *it;
         if (!c->is_shut ())
@@ -318,7 +318,7 @@ namespace wells {
   {
     typedef default_connection_iterator_impl <strategy_t> iterator_t;
     iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
-    for (; it != e; ++it)
+    for (; !base_t::is_shut () && it != e; ++it)
       {
         if (!it->is_shut ())
           {
@@ -336,7 +336,7 @@ namespace wells {
     iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
 
     index_t b_sqr = block_size * block_size;
-    for (; it != e; ++it)
+    for (; !base_t::is_shut () && it != e; ++it)
       {
         const sp_default_connection_t &rw_con = *it;
         if (!rw_con->is_shut ())
@@ -388,7 +388,7 @@ namespace wells {
 
     typedef default_connection_iterator_impl <strategy_t> iterator_t;
     iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
-    for (; it != e; ++it)
+    for (; !base_t::is_shut () && it != e; ++it)
       {
         const sp_connection_t &c = *it;
         if (!c->is_shut ())
