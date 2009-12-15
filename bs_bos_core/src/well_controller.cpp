@@ -310,6 +310,7 @@ namespace blue_sky
             {
               switch (current_control_.control_type)
               {
+                case bhp_control:
                 case liquid_rate_control:
                   do_switch = rate_.prod.liquid < -well->rate ().prod.liquid;
                   break;
