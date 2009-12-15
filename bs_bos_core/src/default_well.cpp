@@ -273,9 +273,9 @@ namespace wells {
     const boost::array <item_t, FI_PHASE_TOT> &wr                 = wr_con->wr_value;
     const boost::array <item_t, connection_t::rr_value_count> &rr = wr_con->rr_value;
 
-    BS_ASSERT (rw.size () == (size_t)block_size) (rw.size ()) (block_size);
-    BS_ASSERT (wr.size () == (size_t)block_size) (wr.size ()) (block_size);
-    BS_ASSERT (rr.size () == (size_t)block_size * block_size) (rr.size ()) (block_size);
+    BS_ASSERT (rw.size () >= (size_t)block_size) (rw.size ()) (block_size);
+    BS_ASSERT (wr.size () >= (size_t)block_size) (wr.size ()) (block_size);
+    BS_ASSERT (rr.size () >= (size_t)block_size * block_size) (rr.size ()) (block_size);
 
     if (rw_con->n_block () == wr_con->n_block ())
       {
