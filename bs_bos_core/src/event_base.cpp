@@ -3,7 +3,7 @@
  *      \brief  Implementation of event_base
  *     \author  Morozov Andrey
  *       \date  07.06.2008
- *  \copyright  This source code is released under the terms of 
+ *  \copyright  This source code is released under the terms of
  *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
@@ -12,6 +12,7 @@
 
 #include "event_base.h"
 #include "str_functor.h"
+
 
 using namespace boost::spirit;
 
@@ -22,8 +23,8 @@ namespace blue_sky {
     /**
      * \class str_functor
      * \brief Handles actions in boost::spirit parser,
-     *        it should be used instead std or boost 
-     *        functors to avoid ICE under MSVC     
+     *        it should be used instead std or boost
+     *        functors to avoid ICE under MSVC
      * */
     template <typename T>
     struct str_functor
@@ -52,8 +53,8 @@ namespace blue_sky {
     /**
      * \class char_functor
      * \brief Handles actions in boost::spirit parser,
-     *        it should be used instead std or boost 
-     *        functors to avoid ICE under MSVC     
+     *        it should be used instead std or boost
+     *        functors to avoid ICE under MSVC
      * */
     template <typename T>
     struct char_functor
@@ -165,7 +166,7 @@ namespace blue_sky {
       {
         BOSERR (section::schedule, level::error) << "Event params parser: too many parameters (" << index << ", " << main_params ()->size () << ")" << bs_end;
         return ;
-      } 
+      }
 
     index += num;
   }
@@ -188,7 +189,7 @@ namespace blue_sky {
     detail::str_functor  <this_t> save_value_ (this, params, &self_t::save_value);
 
     // matches to tabs and/or spaces repeated one or more times
-    rule<> delimeter_p = +(space_p); 
+    rule<> delimeter_p = +(space_p);
 
     // matches to any type value
     rule<> value_p = confix_p ("\"", (+anychar_p)[save_value_], "\"")
@@ -210,7 +211,7 @@ namespace blue_sky {
                     | (*anychar_p)[clear_num_] >> nothing_p
                     | default_value_p
                     | value_p
-                    ; 
+                    ;
 
     rule <> event_p = param_p >> *(delimeter_p >> param_p); //main parser with delimiters
 
@@ -228,7 +229,7 @@ namespace blue_sky {
 
   template <typename strategy_t>
   void
-  event_base<strategy_t>::apply (const sp_top &/*top*/, const sp_mesh_iface_t &/*mesh*/, const sp_calc_model_t &/*calc_model*/) const
+  event_base<strategy_t>::apply (const sp_top &/*top*/, const sp_mesh_iface_t &/*mesh*/, const sp_calc_model_t &/*calc_model*/, const smart_ptr <idata, true> &/*data*/) const
   {
     BS_ASSERT (false && "BASE METHOD CALL");
   }

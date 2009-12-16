@@ -75,7 +75,7 @@ namespace blue_sky
        * \param  calc_model
        * */
       virtual void
-      apply (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;
+      apply (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &data) const;
 
       /**
        * \brief  Returns name of well in event
@@ -106,7 +106,8 @@ namespace blue_sky
        * \param  calc_model
        * */
       virtual void
-      apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;
+      apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
+      const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &data) const;
 
     };
 
@@ -164,7 +165,8 @@ namespace blue_sky
       //! destructor
       virtual ~WELSPECS_event () {}
 
-      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;
+      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
+                   const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &/*data*/) const;
 
     protected:
       virtual std::string get_well_name () const;
@@ -224,7 +226,8 @@ namespace blue_sky
       //! destructor
       virtual ~WELLCON_event () {}
 
-      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;
+      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
+                   const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &/*data*/) const;
 
     protected:
       virtual std::string get_well_name () const;
@@ -287,7 +290,8 @@ namespace blue_sky
 
       //! destructor
       virtual ~COMPDAT_event () {}
-      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;
+      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
+                   const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &/*data*/) const;
 
     protected:
       virtual std::string get_well_name () const;
@@ -340,7 +344,8 @@ namespace blue_sky
 
       //! destructor
       virtual ~WCONPROD_event () {}
-      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;
+      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
+                   const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &/*data*/) const;
 
     protected:
       virtual std::string get_well_name () const;
@@ -403,7 +408,8 @@ namespace blue_sky
 
       //! destructor
       virtual ~WCONHIST_event () {}
-      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;
+      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
+                                   const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &/*data*/) const;
 
     protected:
       virtual std::string get_well_name () const;
@@ -460,7 +466,8 @@ namespace blue_sky
 
       //! destructor
       virtual ~WCONINJE_event () {}
-      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;
+      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
+                   const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &/*data*/) const;
       //float def_outer_rate(){return 0;}
       //float def_inner_rate(){return 0;}
 
@@ -512,7 +519,8 @@ namespace blue_sky
 
       //! destructor
       virtual ~WECON_event () {}
-      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;
+      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
+                   const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &/*data*/) const;
 
     protected:
       virtual std::string get_well_name () const;
@@ -560,7 +568,8 @@ namespace blue_sky
 
       //! destructor
       virtual ~WECONINJ_event () {}
-      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;
+      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
+                   const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &/*data*/) const;
 
     protected:
       virtual std::string get_well_name () const;
@@ -608,7 +617,8 @@ namespace blue_sky
 
       //! destructor
       virtual ~WEFAC_event () {}
-      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;
+      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
+                   const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &/*data*/) const;
 
     protected:
       virtual std::string get_well_name () const;
@@ -667,7 +677,8 @@ namespace blue_sky
 
       //! destructor
       virtual ~WELTARG_event () {}
-      void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;
+      void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
+           const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &/*data*/) const;
 
     protected:
       virtual std::string get_well_name () const;
@@ -729,7 +740,8 @@ namespace blue_sky
 
       //! destructor
       virtual ~WPIMULT_event () {}
-      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;
+      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
+                   const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &/*data*/) const;
 
     protected:
       virtual std::string get_well_name () const;
@@ -778,7 +790,8 @@ namespace blue_sky
 
       //! destructor
       virtual ~COMPENSATION_event () {}
-      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model) const;
+      virtual void apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
+                   const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &/*data*/) const;
 
     protected:
       virtual std::string get_event_name () const;

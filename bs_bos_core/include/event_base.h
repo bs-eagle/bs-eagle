@@ -3,12 +3,12 @@
  *      \brief  Base class for model events
  *     \author  Morozov Andrey
  *       \date  07.06.2008
- *  \copyright  This source code is released under the terms of 
+ *  \copyright  This source code is released under the terms of
  *              the BSD License. See LICENSE for more details.
  * */
 #ifndef EVENT_BASE_H_
 #define EVENT_BASE_H_
-
+#include "data_class.h"
 // WTF??
 #include "well_results_storage.h"
 #include "fip_results_storage.h"
@@ -23,12 +23,14 @@ namespace blue_sky
   template <typename strategy_t>
   class calc_model;
 
+  class idata;
+
   /**
    * \class event_base
    * \brief Base class for model events
    * */
   template <typename strategy_t>
-  class BS_API_PLUGIN event_base : public objbase 
+  class BS_API_PLUGIN event_base : public objbase
     {
       //-----------------------------------------
       //  TYPES
@@ -69,20 +71,20 @@ namespace blue_sky
        * \param  top Pointer to reservoir instance
        * \param  mesh Pointer to mesh instance
        * \param  calc_model Pointer to calc_model instance
-       * \return 
+       * \return
        * */
-      virtual void 
-      apply (const sp_top &top, const sp_mesh_iface_t &mesh, 
-             const sp_calc_model_t &calc_model) const;
+      virtual void
+      apply (const sp_top &top, const sp_mesh_iface_t &mesh,
+             const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &data) const;
 
       /**
        * \brief  Inits event
        * \param  event_name Name of event
        * \param  params String with event params
        * */
-      void 
+      void
       init (const std::string &event_name, const std::string &params);
-      
+
       /**
        * \brief  Adds subevent
        * \param  event_name Name of event
@@ -95,14 +97,14 @@ namespace blue_sky
        * \brief  Checks is keyword (or event) is multiline
        * \return True is event is multiline
        * */
-      virtual bool 
+      virtual bool
       is_multi_line () const
       {
         return false;
       }
 
     protected:
-      
+
 
 
       /**
@@ -120,7 +122,7 @@ namespace blue_sky
        * \return Instance of named_pbase
        * */
       virtual sp_named_pbase
-      add_next_line_params () 
+      add_next_line_params ()
       {
         bs_throw_exception ("PURE CALL");
       }
@@ -130,7 +132,7 @@ namespace blue_sky
        * \param  params_str String with event parameters that should be parsed
        * \param  params Parameters holder
        * */
-      void 
+      void
       parse (const std::string &params_str, const sp_named_pbase &params);
 
       /**
@@ -149,7 +151,7 @@ namespace blue_sky
        * */
       void
       clear_num (const sp_named_pbase &params, const char *begin = 0, const char *end = 0);
-      
+
       //!<simple ..
       /**
        * \brief  Saves parsed value to holder
@@ -157,7 +159,7 @@ namespace blue_sky
        * \param  first Begin of chunk of parsed string
        * \param  last End of chunk of parsed string
        * */
-      void 
+      void
       save_value (const sp_named_pbase &params, char const* first, char const* last); //< function saves any income value
 
       //-----------------------------------------

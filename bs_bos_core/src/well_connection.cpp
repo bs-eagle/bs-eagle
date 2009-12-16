@@ -4,7 +4,7 @@
  *              perforations (connections)
  *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
  *       \date  15.07.2008
- *  \copyright  This source code is released under the terms of 
+ *  \copyright  This source code is released under the terms of
  *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
@@ -139,7 +139,7 @@ namespace blue_sky
 
     template <typename strategy_t>
     void
-    connection<strategy_t>::compute_factors (const physical_constants &internal_contstants,
+    connection<strategy_t>::compute_factors (const physical_constants &internal_constants,
         const sp_params_t &params,
         const sp_mesh_iface_t &mesh,
         const item_array_t &perm,
@@ -154,7 +154,7 @@ namespace blue_sky
 
       if (HORIZ_WELL_MODEL_PEACEMAN || dir_ == direction_z /* || !wfrictn_keyword_active*/)
         {
-          peaceman_model<strategy_t>::compute (*this, internal_contstants, params, mesh, perm, ntg, ro_calc_flag);
+          peaceman_model<strategy_t>::compute (*this, internal_constants, params, mesh, perm, ntg, ro_calc_flag);
         }
       //else
       //  baby_odeh_model::compute (*this, internal_contstants, d1, d2, d3, perm1, perm2, perm3, ntg, ro_calc_flag);
@@ -165,10 +165,10 @@ namespace blue_sky
     connection<strategy_t>::mul_perm_mult (item_t mult)
     {
       //BOSOUT (section::wells, level::debug)
-      //  << "WPIMULT: " << (*it)->n_block () 
+      //  << "WPIMULT: " << (*it)->n_block ()
       //  << "  before: " << (*it)->mult ()
       //  << "  after:  " << (*it)->mult () * perm_mult
-      //  << bs_end; 
+      //  << bs_end;
 
       mult_ *= mult;
     }

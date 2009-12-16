@@ -3,7 +3,7 @@
  *      \brief  Base class for wells
  *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
  *       \date  23.06.2008
- *  \copyright  This source code is released under the terms of 
+ *  \copyright  This source code is released under the terms of
  *              the BSD License. See LICENSE for more details.
  * */
 #ifndef BS_CALC_WELL_H_
@@ -153,7 +153,7 @@ namespace blue_sky
        * \param  n_block Index of block (cell) in mesh for (i, j, k) coordinates
        * \return Created connection
        * */
-      virtual sp_connection_t 
+      virtual sp_connection_t
       add_primary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
       {
         bs_throw_exception ("PURE CALL");
@@ -166,7 +166,7 @@ namespace blue_sky
        * \param  n_block Index of block (cell) in mesh for (i, j, k) coordinates
        * \return Created connection
        * */
-      virtual sp_connection_t 
+      virtual sp_connection_t
       add_secondary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
       {
         bs_throw_exception ("PURE CALL");
@@ -183,7 +183,7 @@ namespace blue_sky
       }
 
       /**
-       * \brief  Returns iterator for begin of primary and 
+       * \brief  Returns iterator for begin of primary and
        *         secondary connections
        * \return Begin iterator
        * */
@@ -194,7 +194,7 @@ namespace blue_sky
       }
 
       /**
-       * \brief  Returns iterator for end of primary and 
+       * \brief  Returns iterator for end of primary and
        *         secondary connections
        * \return End iterator
        * */
@@ -229,7 +229,7 @@ namespace blue_sky
        * \return First primary connection or throw exception
        *         is_no_primary_connections == true
        * */
-      virtual sp_connection_t 
+      virtual sp_connection_t
       get_first_connection () const
       {
         bs_throw_exception ("PURE CALL");
@@ -265,14 +265,14 @@ namespace blue_sky
        * \param  i_coord i coordinate of heel
        * \param  j_coord j coordinate of heel
        * */
-      void 
+      void
       set_coord (index_t i_coord, index_t j_coord);
 
       /**
        * \brief  Sets BHP reference depth
        * \param  bhp_depth BHP reference depth
        * */
-      void 
+      void
       set_bhp_depth (item_t bhp_depth);
 
       /**
@@ -280,44 +280,44 @@ namespace blue_sky
        * \param  well_state initial well state
        * \param  calc_model
        * */
-      void 
+      void
       set_state (well_state_type well_state, const sp_calc_model_t &calc_model);
 
       /**
        * \brief  Sets exploitation factor (wefac)
-       * \param  exploitation_factor 
+       * \param  exploitation_factor
        * \todo   Should be renamed to wefac
        * */
-      void 
+      void
       set_exploitation_factor (item_t exploitation_factor);
 
       /**
        * \brief  Sets well controller
        * \param  controller Pointer to well_control instance
        * */
-      void 
+      void
       set_controller (sp_well_controller_t controller);
 
       /**
-       * \brief  Sets well limit operation - operation that 
+       * \brief  Sets well limit operation - operation that
        *         should be performed if well limits reached
        * \param  limit_operation Pointer to well_limit_operation instance
        * */
-      void 
+      void
       set_limit_operation (sp_well_limit_operation_t limit_operation);
 
       /**
        * \brief  Returns well_controler instance
        * \return well_controller instance
        * */
-      sp_well_controller_t 
+      sp_well_controller_t
       get_controller () const;
 
       /**
        * \brief  Returns well_limit_operation instance
        * \return well_limit_operation instance
        * */
-      sp_well_limit_operation_t 
+      sp_well_limit_operation_t
       get_limit_operation () const;
 
       /**
@@ -331,14 +331,14 @@ namespace blue_sky
        * \brief  Sets name of the well
        * \param  name Name of the well
        * */
-      void 
+      void
       set_name (const std::string &name);
 
       /**
        * \brief  Returns BHP reference depth
        * \return Value of BHP reference depth
        * */
-      item_t 
+      item_t
       get_bhp_depth () const
         {
           return bhp_depth_;
@@ -348,7 +348,7 @@ namespace blue_sky
        * \brief  Returns BHP value
        * \return Value of BHP
        * */
-      item_t 
+      item_t
       bhp () const
         {
           return bhp_;
@@ -396,7 +396,7 @@ namespace blue_sky
        * \brief  Checks if well is open
        * \return True if well is open otherwise false
        * */
-      bool 
+      bool
       is_open () const
         {
           if (well_state_.state == well_open)
@@ -413,15 +413,15 @@ namespace blue_sky
 
       /**
        * \brief  Sets value of BHP
-       * \param  bhp Value of BHP 
+       * \param  bhp Value of BHP
        * */
-      void 
+      void
       set_bhp (item_t bhp);
 
       /**
        * \todo May be this method is obsolete
        * */
-      bool 
+      bool
       fi_check_limits () const;
 
       /**
@@ -429,14 +429,14 @@ namespace blue_sky
        * \param  mesh
        * \return Value of calculated reference depth
        * */
-      item_t 
+      item_t
       get_reference_depth (const sp_mesh_iface_t &mesh) const;
 
       /**
        * \brief  Returns BHP value
        * \return BHP value
        * */
-      item_t 
+      item_t
       get_reference_pressure () const;
 
       /**
@@ -444,28 +444,28 @@ namespace blue_sky
        * \param  pressure Array of pressure
        * \return True if any connection have valid BHP value otherwise false
        * */
-      bool 
+      bool
       check_connections_bhp (const item_array_t &pressure) const;
 
       /**
        * \brief  Returns true if well controlled by BHP
        * \return True if well controlled by BHP
        * */
-      bool 
+      bool
       is_bhp () const;
 
       /**
        * \brief  Returns true if well controlled by rate
        * \return True if well controlled by rate
        * */
-      bool 
+      bool
       is_rate () const;
 
       /**
        * \brief  Returns true is well is shuted
        * \return True if well state is shut
        * */
-      bool 
+      bool
       is_shut () const;
 
       /**
@@ -479,15 +479,15 @@ namespace blue_sky
        * \brief  Returns input rate (from well_controller)
        * \return Input rate
        * */
-      item_t 
+      item_t
       get_input_rate () const;
 
       /**
-       * \brief  Checks well on shut if not shut fills 
+       * \brief  Checks well on shut if not shut fills
        *         open_connections_ array
        * \return True if well is shut
        * */
-      virtual bool 
+      virtual bool
       check_shut ()
       {
         bs_throw_exception ("PURE CALL");
@@ -496,39 +496,39 @@ namespace blue_sky
       /**
        * \brief  Resets init_approx_is_calc_ flag
        * */
-      void 
+      void
       reset_init_approx ();
 
       /**
-       * \brief  Calculates rate and deriv values for well and 
+       * \brief  Calculates rate and deriv values for well and
        *         well perforations (connections)
-       * \param  is_start 
+       * \param  is_start
        * \param  dt
        * \param  calc_model
        * \param  mesh
        * \param  jmatrix
        * */
-      virtual void 
+      virtual void
       process (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix);
 
       /**
        * \brief  Clears well and well perforations data
        * */
-      virtual void 
+      virtual void
       clear_data ();
 
       /**
        * \brief  Fills Jacobian rows
        * \param  rows Array of Jacobian Rows
        * */
-      virtual void 
+      virtual void
       fill_rows (index_array_t &rows) const
       {
         bs_throw_exception ("PURE CALL");
       }
 
       /**
-       * \brief  Fills Jacobian colls and values, uses eliminate for 
+       * \brief  Fills Jacobian colls and values, uses eliminate for
        *         fill values
        * \param  dt
        * \param  block_size
@@ -537,7 +537,7 @@ namespace blue_sky
        * \param  values
        * \param  markers
        * */
-      virtual void 
+      virtual void
       fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const
       {
         bs_throw_exception ("PURE CALL");
@@ -552,7 +552,7 @@ namespace blue_sky
        * \param  is_w
        * \param  rhs Array of rhs values
        * */
-      virtual void 
+      virtual void
       fill_rhs (double dt, index_t n_phases, bool is_g, bool is_o, bool is_w, rhs_item_array_t &rhs) const
       {
         bs_throw_exception ("PURE CALL");
@@ -565,7 +565,7 @@ namespace blue_sky
        * \param  s_sol secondary solution vector
        * \param  block_size size of one block in vectors
        * */
-      virtual void 
+      virtual void
       restore_solution (double dt, const item_array_t &p_sol, const item_array_t &s_sol, index_t block_size);
 
       /**
@@ -573,7 +573,7 @@ namespace blue_sky
        * \param  mdl Pointer to calc_model instance
        * \todo   Specify more details
        * */
-      virtual void 
+      virtual void
       custom_init (const sp_calc_model_t &mdl);
 
       /**
@@ -581,50 +581,62 @@ namespace blue_sky
        * \param  calc_model
        * \param  mesh
        * */
-      virtual void 
+      virtual void
       pre_large_step (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh);
 
       /**
        * \brief  Performs actions before start of each small step
        * */
-      virtual void 
+      virtual void
       pre_small_step ();
 
       /**
        * \brief  Performs actions before start of each newton step
        * */
-      virtual void 
+      virtual void
       pre_newton_step ();
 
       /**
        * \brief  Restores 'internal-state' of well if small step failed
        * */
-      virtual void 
+      virtual void
       restart_small_step ();
 
       /**
        * \brief  Restores 'internal-state' of well if newton step failed
        * */
-      virtual void 
+      virtual void
       restart_newton_step ();
 
       /**
-       * \brief  Calculates rate and deriv values for well and 
+       * \brief  Calculates rate and deriv values for well and
        *         well perforations (connections). Process function
        *         should call
        *         pre_process_facilities -> process -> post_process_facilities
        *         To guarantee this we implement process function in process_impl.
-       * \param  is_start 
+       * \param  is_start
        * \param  dt
        * \param  calc_model
        * \param  mesh
        * \param  jmatrix
        * */
-      virtual void 
+      virtual void
       process_impl (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix);
 
+      /**
+       * \brief  add well facility to facility list
+       * */
       void
       add_well_facility (const sp_well_facility_t &facility);
+
+      /**
+       * \brief  return well facility list
+       * */
+      well_facility_list_t
+      get_facility_list ()
+        {
+          return well_facility_list_;
+        }
 
       /**
        * \brief  well dtor
@@ -650,7 +662,7 @@ namespace blue_sky
        *         value of calc_model pressure
        * \param  calc_model
        * */
-      void 
+      void
       shut_well (const sp_calc_model_t &well);
 
       /**
@@ -662,7 +674,7 @@ namespace blue_sky
        * \param  ntg
        * \param  ro_calc_flag
        * */
-      void 
+      void
       compute_connection_factor (const physical_constants &internal_constants,
                                  const sp_params_t &params,
                                  const sp_mesh_iface_t &mesh,
@@ -703,7 +715,7 @@ namespace blue_sky
 
       sp_well_limit_operation_t   well_limit_operation_;      //!< well_limit_operation instance
 
-      rate_data_t                 rate_;                      //!< Rate data 
+      rate_data_t                 rate_;                      //!< Rate data
       rate_data_t                 rate_total_;                //!< Total rate data (from begin of simulation)
       rate_data_t                 rate_rc_;                   //!< Rate data in reservoir conditions
 

@@ -22,11 +22,12 @@ namespace blue_sky
 
   template <typename strategy_t>
   void
-  well_event <strategy_t>::apply (const sp_top &top, const sp_mesh_iface_t &mesh, const sp_calc_model_t &calc_model) const
+  well_event <strategy_t>::apply (const sp_top &top, const sp_mesh_iface_t &mesh,
+                           const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &data) const
   {
     if (top->get_event_filter ()->accept_well (get_well_name ()))
       {
-        apply_internal (top, mesh, calc_model);
+        apply_internal (top, mesh, calc_model, data);
       }
     else
       {
@@ -35,7 +36,8 @@ namespace blue_sky
   }
   template <typename strategy_t>
   void
-  well_event <strategy_t>::apply_internal (const sp_top &top, const sp_mesh_iface_t &mesh, const sp_calc_model_t &calc_model) const
+  well_event <strategy_t>::apply_internal (const sp_top &top, const sp_mesh_iface_t &mesh,
+                           const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &data) const
   {
     BS_ASSERT (false && "BASE METHOD CALL");
   }
