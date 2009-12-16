@@ -85,6 +85,18 @@ namespace blue_sky {
       return !impl_->operator== (rhs.impl_);
     }
 
+    /**
+     * \brief  Returns position of iterator, useful
+     *         for some auxulliary functions
+     * \return Iterator position
+     * */
+    typename strategy_t::index_t
+    position () const
+    {
+      BS_ASSERT (impl_);
+      return impl_->position ();
+    }
+
     struct impl
     {
       virtual ~impl () {}

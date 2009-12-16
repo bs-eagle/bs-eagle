@@ -236,6 +236,31 @@ namespace blue_sky
       }
 
       /**
+       * \brief  Returns true if connection n_block is 
+       *         in primary_connection list
+       * \param  n_block Number of connection block
+       * \return True if connection is in primary_connection list
+       * */
+      virtual bool
+      is_primary_connection (index_t n_block) const
+      {
+        bs_throw_exception ("PURE CALL");
+      }
+
+      /**
+       * \brief  Returns true if connection it is in 
+       *         primary_connection list
+       * \param  it Connection iterator
+       * \return True if connection is in primary_connection list
+       * */
+      virtual bool
+      is_primary_connection (const connection_iterator_t &it) const
+      {
+        bs_throw_exception ("PURE CALL");
+      }
+
+
+      /**
        * \brief  Sets coordinates of heel
        * \param  i_coord i coordinate of heel
        * \param  j_coord j coordinate of heel

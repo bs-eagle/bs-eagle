@@ -197,6 +197,25 @@ namespace wells {
     get_first_connection () const;
 
     /**
+     * \brief  Returns true if connection n_block is 
+     *         in primary_connection list
+     * \param  n_block Number of connection block
+     * \return True if connection is in primary_connection
+     *         list
+     * */
+    virtual bool
+    is_primary_connection (index_t n_block) const;
+
+    /**
+     * \brief  Returns true if connection it is in 
+     *         primary_connection list
+     * \param  it Connection iterator
+     * \return True if connection is in primary_connection list
+     * */
+    virtual bool
+    is_primary_connection (const connection_iterator <strategy_t> &it) const;
+
+    /**
      * \brief  Checks well on shut if not shut fills 
      *         open_connections_ array
      * \return True if well is shut

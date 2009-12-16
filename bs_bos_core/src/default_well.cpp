@@ -156,6 +156,26 @@ namespace wells {
   }
 
   template <typename strategy_t>
+  bool
+  default_well <strategy_t>::is_primary_connection (index_t n_block) const
+  {
+    for (size_t i = 0, cnt = primary_connection_list_.size (); i < cnt; ++i)
+      {
+        if (primary_connection_list_[i]->n_block () == n_block)
+          return true;
+      }
+
+    return false;
+  }
+
+  template <typename strategy_t>
+  bool
+  default_well <strategy_t>::is_primary_connection (const connection_iterator <strategy_t> &it) const
+  {
+    return it.position () < static_cast <index_t> (primary_connection_list_.size ());
+  }
+
+  template <typename strategy_t>
   connection_iterator <strategy_t>
   default_well <strategy_t>::connections_begin () const
   {
