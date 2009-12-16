@@ -24,6 +24,8 @@
 #include "calc_perf_bhp_base.h"
 #include "calc_perf_density_base.h"
 
+#include "kernel_signals.h"
+
 namespace blue_sky
   {
 
@@ -694,6 +696,11 @@ namespace blue_sky
        * */
       void
       post_process_facilities ();
+
+    public:
+      DECLARE_EVENT_LIST_V2 (well, 
+        ((connection_change, (const index_t &), 1))
+      );
 
     public:
 

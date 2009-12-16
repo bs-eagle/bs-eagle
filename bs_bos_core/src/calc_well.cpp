@@ -65,6 +65,7 @@ namespace blue_sky
       , calc_rho_ (BS_KERNEL.create_object (calc_total_average_rho <strategy_t>::bs_type (), true))
       , calc_perf_density_ (BS_KERNEL.create_object (wellbore_density_calc <strategy_t>::bs_type (), true))
       , calc_perf_bhp_ (BS_KERNEL.create_object (calc_perf_bhp <strategy_t>::bs_type (), true))
+      , well_events_init_ (this)
   {
     clear_data ();
     bhp_ = 0;
@@ -76,6 +77,7 @@ namespace blue_sky
   , calc_rho_ (BS_KERNEL.create_object (calc_total_average_rho <strategy_t>::bs_type (), true))
   , calc_perf_density_ (BS_KERNEL.create_object (wellbore_density_calc <strategy_t>::bs_type (), true))
   , calc_perf_bhp_ (BS_KERNEL.create_object (calc_perf_bhp <strategy_t>::bs_type (), true))
+  , well_events_init_ (this)
   {
     set_name (well_name);
 
@@ -86,6 +88,7 @@ namespace blue_sky
   template <typename strategy_t>
   well<strategy_t>::well (const well &w)
         : bs_refcounter ()
+        , well_events_init_ (w.well_events_init_)
   {
     *this = w;
   }
