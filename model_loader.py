@@ -124,14 +124,6 @@ def prepare_1_phase_solver (rs) :
     else :
         rs.jacobian.prec = bs.bs_amg_solver.amg_solver_di ()
 
-class on_post_read (bs.slot_wrap) :
-    def __init__ (self, rs) :
-        bs.slot_wrap.__init__ (self)
-        self.rs = rs
-
-    def execute (self, sig) :
-        print ("on_post_read")
-
 def simulate (input_name, is_no_action) :
 
     model_name = input_name.replace ("'", "")
@@ -140,8 +132,11 @@ def simulate (input_name, is_no_action) :
         try :
             print ("Create reservoir simulator...")
             rs = bos.reservoir_simulator_di ()
-            on_post_read_ = on_post_read (rs)
-            rs.subscribe (bs.bs_bos_core.reservoir_simulator_signals.post_read, on_post_read_)
+
+            def on_post_read () :
+                print ("on_post_read")
+
+            rs.add_post_read_handler (on_post_read)
 
             print ("Load data from " + model_name)
             rs.init (model_name)

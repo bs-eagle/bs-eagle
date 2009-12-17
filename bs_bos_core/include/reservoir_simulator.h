@@ -47,6 +47,7 @@ namespace blue_sky
     {
     public:
       // typedefs
+      typedef bs_node                               base_t;
       typedef reservoir_simulator < strategy_t >    this_t;               //!< shortname for this type
       typedef smart_ptr < this_t, true >            sp_this_t;            //!< smart pointer to this_t
 
@@ -211,23 +212,20 @@ namespace blue_sky
       typedef bs_array <std::string> signal_params_t;
 
       //! declaration of reservoir_simulator events
-      DECLARE_EVENT_LIST (reservoir_simulator,
-                          signal_params_t,
-                          12,
-                          ((begin, (clock_t), 1)
-                           , (newton_iter_fail, (), 0)
-                           , (newton_iter_success, (), 0)
-                           , (before_fi_operator, (), 0)
-                           , (before_jacobian_setup, (), 0)
-                           , (before_jacobian_solve, (), 0)
-                           , (before_restore_solution, (), 0)
-                           , (simulation_start, (), 0)
-                           , (large_step_start, (), 0)
-                           , (small_step_start, (), 0)
-                           , (end, (clock_t), 1)
-                           , (post_read, (), 0)
-                          ));
-
+      DECLARE_EVENT_LIST_V2 (reservoir_simulator,
+        ((begin, (clock_t), 1))
+        ((newton_iter_fail, (), 0))
+        ((newton_iter_success, (), 0))
+        ((before_fi_operator, (), 0))
+        ((before_jacobian_setup, (), 0))
+        ((before_jacobian_solve, (), 0))
+        ((before_restore_solution, (), 0))
+        ((simulation_start, (), 0))
+        ((large_step_start, (), 0))
+        ((small_step_start, (), 0))
+        ((end, (clock_t), 1))
+        ((post_read, (), 0))
+      );
 
       sp_dm_t                 dm;                 //!< pointer to data_manager instance
       sp_em_t                 em;                 //!< pointer to event_manager instance

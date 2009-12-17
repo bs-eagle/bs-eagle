@@ -89,6 +89,7 @@ namespace blue_sky
     {
     public:
 
+      typedef facility_base <strategy_t>                base_t;
       typedef well <strategy_t>                         well_t;
       typedef typename strategy_t::item_array_t         item_array_t;
       typedef typename strategy_t::rhs_item_array_t     rhs_item_array_t;

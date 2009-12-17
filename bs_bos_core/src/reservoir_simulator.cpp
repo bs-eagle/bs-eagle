@@ -40,6 +40,7 @@ namespace blue_sky
       , jacobian_ (give_kernel::Instance().create_object (jacobian_t::bs_type ()))
       , keyword_manager_ (BS_KERNEL.create_object (keyword_manager_t::bs_type ()))
       , mloop (0)
+      , reservoir_simulator_events_init_ (this)
   {
     this->add_signal (BS_SIGNAL_RANGE (reservoir_simulator));
     keyword_manager_->init ();//em);
@@ -69,6 +70,7 @@ namespace blue_sky
       , facility_storage_ (src.facility_storage_)
       , jacobian_ (src.jacobian_)
       , mloop (0)
+      , reservoir_simulator_events_init_ (src.reservoir_simulator_events_init_)
   {
   }
 

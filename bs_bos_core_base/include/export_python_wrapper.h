@@ -45,7 +45,7 @@ namespace python {
         .def ("__init__", make_function (init_python_object  <T>))
         ;
 
-      return class__;
+      return T::python_exporter (class__);
     }
   };
 

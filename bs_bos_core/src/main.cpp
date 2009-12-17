@@ -449,9 +449,6 @@ BLUE_SKY_INIT_PY_FUN
 
   python::py_export_data_storage_interface ();
 
-  reservoir_simulator <base_strategy_di>::py_export_signals_enum();
-  reservoir_simulator <base_strategy_fi>::py_export_signals_enum();
-
   python::py_export_jacobian ();
 
   python::py_export_facility_manager ();
