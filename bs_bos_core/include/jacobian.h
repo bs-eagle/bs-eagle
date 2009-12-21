@@ -12,6 +12,7 @@
 #include "fi_params.h"
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "linear_solvers.h"
+#include "rs_mesh_iface.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #include "make_me_happy.h"

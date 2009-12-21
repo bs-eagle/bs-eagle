@@ -7,6 +7,8 @@
 #ifndef BS_VECTOR_ASSIGN_H_
 #define BS_VECTOR_ASSIGN_H_
 
+#include "force_inline.h"
+
 namespace blue_sky {
 
   template <typename item_t, size_t size, typename val_t>

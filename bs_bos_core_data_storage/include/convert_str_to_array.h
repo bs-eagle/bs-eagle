@@ -7,6 +7,9 @@
 #ifndef BS_BOS_CORE_DATA_STORAGE_CONVERT_STR_TO_ARRAY_H_
 #define BS_BOS_CORE_DATA_STORAGE_CONVERT_STR_TO_ARRAY_H_
 
+#include "bos_report.h"
+
+
 namespace blue_sky {
 namespace data_reader {
 namespace detail {

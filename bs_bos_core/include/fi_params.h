@@ -9,6 +9,8 @@
 #ifndef FI_PARAMS_H
 #define FI_PARAMS_H
 
+#include "named_pbase_access.h"
+
 namespace blue_sky
   {
   class BS_API_PLUGIN fi_params : public named_pbase

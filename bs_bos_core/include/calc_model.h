@@ -15,6 +15,13 @@
 #include "prvd_table.h"
 #include "arrays.h"
 #include "rocktab_table.h"
+#include "jacobian_matrix.h"
+#include "rs_smesh_iface.h"
+#include "pvt_oil.h"
+#include "pvt_gas.h"
+#include "pvt_water.h"
+#include "scal_3p.h"
+#include "rock_grid.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #include "fi_params.h"

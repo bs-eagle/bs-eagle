@@ -16,6 +16,9 @@
 
 #include "data_dimens.h"
 
+#include "strategies.h"
+#include "bs_tree.h"
+
 namespace blue_sky {
 
 //!< values of geometry definition type

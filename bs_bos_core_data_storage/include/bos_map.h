@@ -1,6 +1,9 @@
 #ifndef BOS_VAL_TABLE_H
 #define BOS_VAL_TABLE_H
 
+#include "bs_object_base.h"
+#include "bs_prop_base.h"
+
 namespace blue_sky
   {
   /*!

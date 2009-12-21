@@ -9,7 +9,9 @@
 #include "bos_map.h"
 #include "throw_exception.h"
 
-#include "shared_array.h"
+#include "shared_vector.h"
+#include "auto_value.h"
+#include <boost/array.hpp>
 
 namespace blue_sky
   {

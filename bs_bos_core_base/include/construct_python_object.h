@@ -10,6 +10,8 @@
 #include "throw_exception.h"
 #include "py_object_handler.h"
 
+#include <boost/python.hpp>
+
 namespace blue_sky {
 namespace python {
 
