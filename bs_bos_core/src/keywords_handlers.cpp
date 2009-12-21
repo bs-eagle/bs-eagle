@@ -600,24 +600,26 @@ namespace blue_sky
   void keyword_manager<strategy_t>::REGNUM_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    shared_vector<int> itmp;
-    itmp.resize(4);
     sp_idata_t idata (params.data, bs_dynamic_cast ());
 
-    if ((len = reader->read_array (keyword, itmp)) != 4)
+    boost::array <int, 4> regions;
+    if ((len = reader->read_array (keyword, regions)) != regions.size ())
       {
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
           % reader->get_prefix() % keyword);
       }
 
-    idata->set_region(itmp[0],itmp[1],itmp[2],itmp[3]);
+    idata->set_region (regions[0], regions[1], regions[2], regions[3]);
+    BS_ASSERT (regions[0] == idata->pvt_region) (regions [0]) (idata->pvt_region);
+    BS_ASSERT (regions[1] == idata->sat_region) (regions [1]) (idata->sat_region);
+    BS_ASSERT (regions[2] == idata->eql_region) (regions [2]) (idata->eql_region);
+    BS_ASSERT (regions[3] == idata->fip_region) (regions [3]) (idata->fip_region);
 
     BOSOUT (section::read_data, level::medium) <<
-    "Keyword " << keyword << ":(" <<
-    idata->pvt_region << ", " << idata->sat_region << ", " <<
-    idata->eql_region << ", " << idata->fip_region << ")" << bs_end;
-
-    BOSOUT (section::read_data, level::medium) << keyword << bs_end;
+    "Keyword " << keyword << ":(" 
+      << idata->pvt_region << ", " << idata->sat_region << ", " 
+      << idata->eql_region << ", " << idata->fip_region << ")" 
+      << bs_end;
   }
 
   template <class strategy_t>
