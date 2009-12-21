@@ -225,6 +225,7 @@ namespace blue_sky
         ((small_step_start, (), 0))
         ((end, (clock_t), 1))
         ((post_read, (), 0))
+        ((pre_read, (sp_this_t), 1))
       );
 
       sp_dm_t                 dm;                 //!< pointer to data_manager instance

@@ -204,7 +204,8 @@ namespace blue_sky
 
     keyword_params <strategy_t> params (keyword_manager_, dm->reader, dm->data, em, mesh, cm->ts_params, cm->scal_prop);
     model_filename_ = path;
-    pre_read (em);
+    pre_read (em); 
+    on_pre_read (this);
     read_keyword_file(path, keyword_manager_, params);
     post_read (em);
     on_post_read ();
