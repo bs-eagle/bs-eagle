@@ -34,6 +34,33 @@ a.set_factory(f)
 bos = bs.bs_bos_core
 bos.enable_fpu_exceptions ()
 
+def get_param (index) :
+    if (index >= len (sys.argv)) :
+        return ""
+
+    if (sys.argv[index] == "--verbose") :
+        return get_param (index + 1)
+
+    return sys.argv[index]
+def get_named (name, default = False) :
+    for arg in sys.argv :
+        if (arg == name) :
+            sys.argv.remove (arg)
+            return True
+
+    return default
+def get_time () :
+    return get_named ("--time")
+def get_deep () :
+    return get_named ("--deep")
+
+is_deep = get_deep ()
+is_time = get_time ()
+is_verbose = get_named ("--verbose")
+is_no_action = get_named ("--no")
+is_print_files = get_named ("--print-files")
+is_init_only = get_named ("--init-only", False)
+
 def bs_amg () :
     amg                         = bs.bs_amg_solver.amg_solver_di ()
     amg_prop                    = bs.bs_amg_solver.amg_properties ()
@@ -147,8 +174,10 @@ def simulate (input_name, is_no_action) :
             else :
                 prepare_n_phase_solver (rs)
 
-            print ("Simulate...")
-            rs.simulate ()
+            if (not is_init_only) :
+                print ("Simulate...")
+                rs.simulate ()
+
         except:
             print ("Exception")
             exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
@@ -167,25 +196,6 @@ def process_file_list (file_list, is_time, is_no_action) :
         else :
             simulate (file, is_no_action)
 
-def get_param (index) :
-    if (index >= len (sys.argv)) :
-        return ""
-
-    if (sys.argv[index] == "--verbose") :
-        return get_param (index + 1)
-
-    return sys.argv[index]
-def get_named (name) :
-    for arg in sys.argv :
-        if (arg == name) :
-            sys.argv.remove (arg)
-            return True
-
-    return False
-def get_time () :
-    return get_named ("--time")
-def get_deep () :
-    return get_named ("--deep")
 def get_file_list (root, ext) :
     dir_list = glob.glob (os.path.join (root, "*"))
     file_list = []
@@ -200,12 +210,6 @@ def get_file_list (root, ext) :
         file_list.extend ([d])
 
     return file_list
-
-is_deep = get_deep ()
-is_time = get_time ()
-is_verbose = get_named ("--verbose")
-is_no_action = get_named ("--no")
-is_print_files = get_named ("--print-files")
 
 if (is_deep and is_print_files) :
     file_list = [file[0] for file in get_file_list ("./", "*.DATA")]
