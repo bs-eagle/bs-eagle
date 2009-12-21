@@ -350,12 +350,12 @@ namespace blue_sky {
            if trim_left return error  code         current_error_num
   */
   inline void 
-  scanf_d (char *start_ptr, char **end_ptr, double *dest, int no_default_p = 0, int *is_default = 0)
+  scanf_d (char *start_ptr, char **end_ptr, double *dest, int no_default_p = 0, int *is_default = 0, const char *exception_context = "")
   {
     //check input pointers
     if (!start_ptr || !dest)
       {
-        bs_throw_exception ((boost::format ("Invalid argument: start_ptr or dest is null [%p, %p]") % start_ptr % dest).str ());
+        bs_throw_exception (boost::format ("%s: Invalid argument: start_ptr or dest is null [%p, %p]") % exception_context % start_ptr % dest);
       }
 
     // Try to trim all left blanks and tab symbols
@@ -381,7 +381,7 @@ namespace blue_sky {
       {
         *end_ptr = start_ptr;
         if (no_default_p)
-          bs_throw_exception ("End of string reach and no default value");
+          bs_throw_exception (boost::format ("%s: End of string reach and no default value") % exception_context);
 
         if (is_default)
           *is_default = 1;
@@ -395,8 +395,7 @@ namespace blue_sky {
     // if have read nothing return -3
     if (start_ptr == *end_ptr)
       {
-        // Cannot read double: error output should be done by caller
-        bs_throw_exception ("Can't read double");
+        bs_throw_exception (boost::format ("%s: Can't read double") % exception_context);
       }
     *dest = t;
   }

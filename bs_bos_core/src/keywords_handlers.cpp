@@ -1154,13 +1154,12 @@ namespace blue_sky
   {
     KH_READER_DEF
     char buf[CHAR_BUF_LEN] = {0};
-    double dbuf[DOUB_BUF_LEN] = {0};
-    char *strt = 0, *end_ptr = 0;
+    boost::array <double, DOUB_BUF_LEN> dbuf;
+    char *end_ptr = 0;
     sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_this_t km (params.km, bs_dynamic_cast ());
 
     //! EQUIL keyword enumerated params
-
-    int i,ii;
 
     if (!idata->pvto.size())
       {
@@ -1182,14 +1181,6 @@ namespace blue_sky
         bs_throw_exception (boost::format ("Error in %s: rock properties have not been initialized yet (keyword: %s")
           % reader->get_prefix () % keyword);
       }
-    /*if (!(idata->swof.size() && data->sgof.size()) &&
-        !(idata->swfn.size() && idata->sgfn.size() && idata->sof3.size()))
-    {
-      out_s << "Error in " << reader->get_prefix() <<
-        ": SCAL tables has not been initialized yet in keyword "
-        << keyword;
-      KH_ASSERT_EXCEPTION
-    }*/
     if (!idata->equil.size())
       {
         bs_throw_exception (boost::format ("Error in %s: EQUIL table has not been initialized yet (keyword: %s")
@@ -1199,7 +1190,7 @@ namespace blue_sky
     if (idata->eql_region == 0)
       idata->eql_region = 1;
 
-    for (i = 0; i < (int) idata->eql_region; ++i)
+    for (size_t i = 0; i < idata->eql_region; ++i)
       {
         reader->read_line (buf, CHAR_BUF_LEN);
         if (buf[0] == '/')
@@ -1207,13 +1198,6 @@ namespace blue_sky
             bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
               % reader->get_prefix () % keyword);
           }
-        unwrap (buf);
-        //if (reader->)
-        //  {
-        //    out_s << "Error in " << reader->get_prefix() <<
-        //    ": not valid string format: " << buf;
-        //    KH_ASSERT_EXCEPTION
-        //  }
 
         // Values by default
         dbuf[EQUIL_DAT_DEPTH] = -1.0; //Ddat
@@ -1222,67 +1206,39 @@ namespace blue_sky
         dbuf[EQUIL_WOC_PRESS] = 0.0;  //Pwoc
         dbuf[EQUIL_GOC_DEPTH] = 0.0;  // Dgoc
         dbuf[EQUIL_GOC_PRESS] = 0.0;  // Pgoc
-        dbuf[EQUIL_RS_TYPE] = 0;      // RS type initialization
-        dbuf[EQUIL_RV_TYPE] = 0;      // RV type initialization
-        dbuf[EQUIL_NUM_SEC] = 100;      // number of points
-        dbuf[EQUIL_COMP_TYPE] = 0;      // composition type initialization
-        dbuf[EQUIL_COMP_ARG] = 0;      // composition argument initialization
+        dbuf[EQUIL_RS_TYPE]   = 0;    // RS type initialization
+        dbuf[EQUIL_RV_TYPE]   = 0;    // RV type initialization
+        dbuf[EQUIL_NUM_SEC]   = 100;  // number of points
+        dbuf[EQUIL_COMP_TYPE] = 0;    // composition type initialization
+        dbuf[EQUIL_COMP_ARG]  = 0;    // composition argument initialization
 
-        strt = buf;
-        scanf_d (strt, &end_ptr, &dbuf[EQUIL_DAT_DEPTH]);
-        //if (reader->)
-        //  {
-        //    out_s << "Error in " << reader->get_prefix() <<
-        //    ": can't read datum depth " << strt;
-        //    KH_ASSERT_EXCEPTION
-        //  }
+        unwrap (buf);
+        scanf_d (buf,     &end_ptr, &dbuf[EQUIL_DAT_DEPTH], 0, 0, "Can't read EQUIL_DEPTH");
+        scanf_d (end_ptr, &end_ptr, &dbuf[EQUIL_DAT_PRESS], 0, 0, "Can't read EQUIL_DEPTH_PRESSURE");
+        scanf_d (end_ptr, &end_ptr, &dbuf[EQUIL_WOC_DEPTH], 0, 0, "Can't read EQUIL_WOC_DEPTH");
+        scanf_d (end_ptr, &end_ptr, &dbuf[EQUIL_WOC_PRESS], 0, 0, "Can't read EQUIL_WOC_DEPTH_PRESSURE");
+        scanf_d (end_ptr, &end_ptr, &dbuf[EQUIL_GOC_DEPTH], 0, 0, "Can't read EQUIL_GOC_DEPTH");
+        scanf_d (end_ptr, &end_ptr, &dbuf[EQUIL_GOC_PRESS], 0, 0, "Can't read EQUIL_GOC_DEPTH_PRESSURE");
+        scanf_d (end_ptr, &end_ptr, &dbuf[EQUIL_RS_TYPE],   0, 0, "Can't read RS initialization type at GOC depth");
+
         if (dbuf[EQUIL_DAT_DEPTH] < 0) // Ddat
           {
-            bs_throw_exception (boost::format ("Error in %s: incorrect value of datum depth %f")
+            bs_throw_exception (boost::format ("Error in %s: incorrect value of EQUIL_DEPTH %f")
               % reader->get_prefix () % dbuf[EQUIL_DAT_DEPTH]);
           }
-        strt = end_ptr;
-        scanf_d (strt, &end_ptr, &dbuf[EQUIL_DAT_PRESS]);
-        //if (reader->)
-        //  {
-        //    out_s << "Error in " << reader->get_prefix() <<
-        //    ": can't read pressure at datum depth " << strt;
-        //    KH_ASSERT_EXCEPTION
-        //  }
+
         if (dbuf[EQUIL_DAT_PRESS] < 0) //Pdat
           {
             bs_throw_exception (boost::format ("Error in %s: incorrect pressure value at datum depth %f")
               % reader->get_prefix () % dbuf[EQUIL_DAT_PRESS]);
           }
-        strt = end_ptr;
-        scanf_d (strt, &end_ptr, &dbuf[EQUIL_WOC_DEPTH]);
-        //if (reader->)
-        //  {
-        //    out_s << "Error in " << reader->get_prefix() <<
-        //    ": can't read WOC depth " << strt;
-        //    KH_ASSERT_EXCEPTION
-        //  }
+
         if (dbuf[EQUIL_WOC_DEPTH] < 0)
           {
             bs_throw_exception (boost::format ("Error in %s: incorrect value of WOC depth %f")
               % reader->get_prefix () % dbuf[EQUIL_WOC_DEPTH]);
           }
-        strt = end_ptr;
-        scanf_d (strt, &end_ptr, &dbuf[EQUIL_WOC_PRESS]);
-        //if (reader->)
-        //  {
-        //    out_s << "Error in " << reader->get_prefix() <<
-        //    ": can't read pressure at WOC depth " << strt;
-        //    KH_ASSERT_EXCEPTION
-        //  }
-        strt = end_ptr;
-        scanf_d (strt, &end_ptr, &dbuf[EQUIL_GOC_DEPTH]);
-        //if (reader->)
-        //  {
-        //    out_s << "Error in " << reader->get_prefix() <<
-        //    ": can't read GOC depth " << strt;
-        //    KH_ASSERT_EXCEPTION
-        //  }
+
         if (dbuf[EQUIL_GOC_DEPTH] < 0)
           {
             //                rep->print (LOG_READ_SECTION, LOG_ERR,
@@ -1290,34 +1246,11 @@ namespace blue_sky
             //                  return -8;
             dbuf[EQUIL_GOC_DEPTH] = 0;
           }
-        strt = end_ptr;
-        scanf_d (strt, &end_ptr, &dbuf[EQUIL_GOC_PRESS]);
-        //if (reader->)
-        //  {
-        //    out_s << "Error in " << reader->get_prefix() <<
-        //    ": can't read pressure at GOC depth " << strt;
-        //    KH_ASSERT_EXCEPTION
-        //  }
-        strt = end_ptr;
-        scanf_d (strt, &end_ptr, &dbuf[EQUIL_RS_TYPE]);
-        //if (reader->)
-        //  {
-        //    out_s << "Error in " << reader->get_prefix() <<
-        //    ": can't read RS initialization type at GOC depth " << strt;
-        //    KH_ASSERT_EXCEPTION
-        //  }
-#if 1
-        for (ii = 0; ii < EQUIL_TOTAL; ++ii)
+
+        for (size_t ii = 0; ii < EQUIL_TOTAL; ++ii)
           idata->equil[EQUIL_TOTAL * i + ii] = dbuf[ii];
-#else
-        idata->equil[EQUIL_TOTAL * i + EQUIL_DAT_DEPTH] = dbuf[0]; //Ddat
-        idata->equil[EQUIL_TOTAL * i + EQUIL_DAT_PRESS] = dbuf[1]; //Pdat
-        idata->equil[EQUIL_TOTAL * i + EQUIL_WOC_DEPTH] = dbuf[2]; //Dwoc
-        idata->equil[EQUIL_TOTAL * i + EQUIL_WOC_PRESS] = dbuf[3]; //Pwoc
-        idata->equil[EQUIL_TOTAL * i + EQUIL_GOC_DEPTH] = dbuf[4]; //Dgoc
-        idata->equil[EQUIL_TOTAL * i + EQUIL_GOC_PRESS] = dbuf[5]; //Pgoc
-#endif
       }
+
     if (idata->prvd.size())
       idata->prvd.resize(0);
     if (idata->rsvd.size())
