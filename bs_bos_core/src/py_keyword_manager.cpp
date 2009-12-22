@@ -49,9 +49,9 @@ namespace python {
 
   template <typename T>
   void
-  register_keyword (T *t, const std::string &keyword, const typename T::shared_handler_t &handler)
+  register_keyword (T *t, const std::string &keyword, const typename T::shared_handler_t &handler, bool replace_existing)
   {
-    t->register_keyword (keyword, handler);
+    t->register_keyword (keyword, handler, replace_existing);
   }
 
   template <typename T>

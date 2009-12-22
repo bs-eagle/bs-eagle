@@ -126,7 +126,7 @@ namespace blue_sky
        *                 keyword handler interface
        * */
       void 
-      register_keyword (const std::string &keyword, const shared_handler_t &handler);
+      register_keyword (const std::string &keyword, const shared_handler_t &handler, bool replace_existing);
 
       /**
        * \brief  Registers supported keyword by plugins in factory

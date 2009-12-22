@@ -99,12 +99,15 @@ namespace blue_sky
 
   template <typename strategy_t>
   void
-  keyword_manager <strategy_t>::register_keyword (const std::string &keyword, const shared_handler_t &handler)
+  keyword_manager <strategy_t>::register_keyword (const std::string &keyword, const shared_handler_t &handler, bool replace_existing)
   {
     typename handlers_t::iterator it = handlers.find (keyword);
     if (it != handlers.end ())
       {
-        bs_throw_exception(boost::format ("Keyword [%s] registration failed, keyword is already registered") % keyword);
+        if (replace_existing)
+          handlers.erase (it);
+        else
+          bs_throw_exception(boost::format ("Keyword [%s] registration failed, keyword is already registered") % keyword);
       }
 
     handlers.insert (std::make_pair (keyword, keyword_handler (handler)));
