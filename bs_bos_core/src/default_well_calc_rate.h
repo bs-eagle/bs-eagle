@@ -294,7 +294,7 @@ namespace wells {
           return ;
         }
 
-      typedef default_connection_iterator_impl <strategy_t> iterator_t;
+      typedef default_connection_iterator_impl <strategy_t, default_well <strategy_t>, default_connection <strategy_t> > iterator_t;
       iterator_t it (well, begin_iterator_tag), e (well, end_iterator_tag);
       for (; it != e; ++it)
         {
@@ -391,7 +391,7 @@ namespace wells {
         }
       item_t ww_bw = well->bw_value * inv_ww;
 
-      typedef default_connection_iterator_impl <strategy_t> iterator_t;
+      typedef default_connection_iterator_impl <strategy_t, default_well <strategy_t>, default_connection <strategy_t> > iterator_t;
       iterator_t it (well, begin_iterator_tag), e (well, end_iterator_tag);
       for (; it != e; ++it)
         {

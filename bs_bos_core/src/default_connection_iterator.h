@@ -17,23 +17,19 @@ namespace wells {
     end_iterator_tag,
   };
 
-  template <typename strategy_t>
+  template <typename strategy_t, typename well_t, typename connection_t>
   struct default_connection_iterator_impl 
   {
-    typedef default_connection_iterator_impl <strategy_t>     this_t;
-    typedef connection <strategy_t>                           connection_t;
-    typedef default_connection <strategy_t>                   default_connection_t;
-    typedef default_well <strategy_t>                         default_well_t;
+    typedef default_connection_iterator_impl <strategy_t, well_t, connection_t>     this_t;
 
-    typedef smart_ptr <connection_t>                          sp_connection_t;
-    typedef smart_ptr <default_connection_t>                  sp_default_connection_t;
-    typedef smart_ptr <default_well_t>                        sp_default_well_t;
+    typedef smart_ptr <connection_t>                  sp_connection_t;
+    typedef smart_ptr <well_t>                        sp_well_t;
 
   public:
 
-    default_connection_iterator_impl (const default_well_t *well, 
+    default_connection_iterator_impl (const well_t *well, 
       iterator_tag tag)
-    : well_ (const_cast <default_well_t *> (well))
+    : well_ (const_cast <well_t *> (well))
     , list_idx_ (0)
     {
       if (tag == begin_iterator_tag)
@@ -56,7 +52,7 @@ namespace wells {
 #endif
     }
 
-    inline sp_default_connection_t
+    inline sp_connection_t
     operator* () const
     {
 #ifdef _DEBUG
@@ -131,39 +127,38 @@ namespace wells {
     }
 
   private:
-    default_well_t                              *well_;
+    well_t                                      *well_;
     typename strategy_t::index_t                list_idx_;
     typename strategy_t::index_t                connection_idx_[2];
-    typename default_well_t::connection_list_t  *connection_list_[2];
+    typename well_t::connection_list_t          *connection_list_[2];
 
 #ifdef _DEBUG
     typename strategy_t::index_t                connection_count_[2];
 #endif
   };
 
-  template <typename strategy_t>
+  template <typename strategy_t, typename well_t, typename connection_t>
   struct default_connection_iterator : connection_iterator <strategy_t>::impl
   {
     typedef typename connection_iterator <strategy_t>::impl   base_t;
-    typedef connection <strategy_t>                           connection_t;
-    typedef default_well <strategy_t>                         default_well_t;
-    typedef smart_ptr <connection_t>                          sp_connection_t;
+    typedef connection <strategy_t>                           base_connection_t;
+    typedef smart_ptr <base_connection_t>                     sp_base_connection_t;
 
   public:
 
-    default_connection_iterator (const default_well_t *well, 
+    default_connection_iterator (const well_t *well, 
       iterator_tag tag)
     : impl_ (well, tag)
     {
     }
 
-    virtual sp_connection_t
+    virtual sp_base_connection_t
     operator* () const
     {
       return impl_.operator* ();
     }
 
-    virtual sp_connection_t
+    virtual sp_base_connection_t
     operator-> () const
     {
       return impl_.operator-> ();
@@ -194,7 +189,7 @@ namespace wells {
     }
 
   private:
-    default_connection_iterator_impl <strategy_t> impl_;
+    default_connection_iterator_impl <strategy_t, well_t, connection_t> impl_;
   };
 
 

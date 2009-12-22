@@ -180,7 +180,7 @@ namespace wells {
   default_well <strategy_t>::connections_begin () const
   {
     return typename base_t::connection_iterator_t (
-      new default_connection_iterator <strategy_t> (this, begin_iterator_tag));
+      new default_connection_iterator <strategy_t, default_well, default_connection_t> (this, begin_iterator_tag));
   }
 
   template <typename strategy_t>
@@ -188,7 +188,7 @@ namespace wells {
   default_well <strategy_t>::connections_end () const
   {
     return typename base_t::connection_iterator_t (
-      new default_connection_iterator <strategy_t> (this, end_iterator_tag));
+      new default_connection_iterator <strategy_t, default_well, default_connection_t> (this, end_iterator_tag));
   }
 
   template <typename strategy_t>
@@ -239,7 +239,7 @@ namespace wells {
     item_t xw = 0;
     item_t ww_bw = (1.0 / ww_value) * bw_value;
 
-    typedef default_connection_iterator_impl <strategy_t> iterator_t;
+    typedef default_connection_iterator_impl <strategy_t, default_well <strategy_t>, default_connection <strategy_t> > iterator_t;
     iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
     for (; !base_t::is_shut () && it != e; ++it)
       {
@@ -336,7 +336,7 @@ namespace wells {
   void
   default_well <strategy_t>::fill_rows (index_array_t &rows) const
   {
-    typedef default_connection_iterator_impl <strategy_t> iterator_t;
+    typedef default_connection_iterator_impl <strategy_t, default_well <strategy_t>, default_connection <strategy_t> > iterator_t;
     iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
     for (; !base_t::is_shut () && it != e; ++it)
       {
@@ -352,7 +352,7 @@ namespace wells {
   void
   default_well <strategy_t>::fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const
   {
-    typedef default_connection_iterator_impl <strategy_t> iterator_t;
+    typedef default_connection_iterator_impl <strategy_t, default_well <strategy_t>, default_connection <strategy_t> > iterator_t;
     iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
 
     index_t b_sqr = block_size * block_size;
@@ -406,7 +406,7 @@ namespace wells {
   {
     item_t wefac = base_t::exploitation_factor_ > 0 ? base_t::exploitation_factor_ * dt : dt;
 
-    typedef default_connection_iterator_impl <strategy_t> iterator_t;
+    typedef default_connection_iterator_impl <strategy_t, default_well <strategy_t>, default_connection <strategy_t> > iterator_t;
     iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
     for (; !base_t::is_shut () && it != e; ++it)
       {
@@ -681,7 +681,7 @@ namespace wells {
   void
   default_well <strategy_t>::clear_data ()
   {
-    typedef default_connection_iterator_impl <strategy_t> iterator_t;
+    typedef default_connection_iterator_impl <strategy_t, default_well <strategy_t>, default_connection <strategy_t> > iterator_t;
     iterator_t it (iterator_t (this, begin_iterator_tag)), 
                e (iterator_t (this, end_iterator_tag));
     for (; it != e; ++it)
@@ -705,7 +705,7 @@ namespace wells {
         return true;
       }
 
-    typedef default_connection_iterator_impl <strategy_t> iterator_t;
+    typedef default_connection_iterator_impl <strategy_t, default_well <strategy_t>, default_connection <strategy_t> > iterator_t;
     iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
     for (; it != e; ++it)
       {
