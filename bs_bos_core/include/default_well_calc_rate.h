@@ -475,6 +475,56 @@ namespace wells {
         return t->Po * INVERS_FVF_O * t->sw_part;
       }
     };
+
+    template <bool is_prod, main_var_type main_var>
+    struct deriv_precalc
+    {
+    };
+
+    template <main_var_type main_var>
+    struct deriv_precalc <true, main_var>
+    {
+      template <typename data_t, typename T>
+      static void
+      precalc (const data_t &data, T *t)
+      {
+      }
+    };
+
+    template <main_var_type main_var>
+    struct deriv_precalc <false, main_var>
+    {
+      template <typename data_t, typename T>
+      static void
+      precalc (const data_t &data, T *t)
+      {
+        bool is_g = t->is_g;
+        bool is_o = t->is_o;
+        bool is_w = t->is_w;
+
+        const typename T::index_t &d_g = t->d_g;
+        const typename T::index_t &d_o = t->d_o;
+        const typename T::index_t &d_w = t->d_w;
+        const typename T::index_t &n_phases = t->n_phases;
+
+        t->sw_part = 0;
+        t->po_part = 0;
+        t->sg_part = 0;
+
+        if (is_g)         t->sg_part += S_DERIV_RELATIVE_PERM_GG * INVERS_VISC_G;
+        if (is_g)         t->sg_part += RELATIVE_PERM_G * S_DERIV_INVERS_VISC_G * CAP_PRESSURE_G;
+        if (is_g && is_o) t->sg_part += S_DERIV_RELATIVE_PERM_OG * INVERS_VISC_O;
+                          
+        if (is_g)         t->po_part += RELATIVE_PERM_G * P_DERIV_INVERS_VISC_G;
+        if (is_o)         t->po_part += RELATIVE_PERM_O * P_DERIV_INVERS_VISC_O;
+        if (is_w)         t->po_part += RELATIVE_PERM_W * P_DERIV_INVERS_VISC_W;
+         
+        if (is_w && is_o) t->sw_part += S_DERIV_RELATIVE_PERM_OW * INVERS_VISC_O;
+        if (is_w)         t->sw_part += S_DERIV_RELATIVE_PERM_WW * INVERS_VISC_W;
+        if (is_w)         t->sw_part += RELATIVE_PERM_W * S_DERIV_INVERS_VISC_W * CAP_PRESSURE_W;
+        if (is_w)         t->sw_part -= P_DERIV_INVERS_FVF_W * CAP_PRESSURE_W;
+      }
+    };
   }
 
   template <typename strategy_t, bool is_w, bool is_g, bool is_o, bool is_production_well>
