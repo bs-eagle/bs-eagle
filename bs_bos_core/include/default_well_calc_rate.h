@@ -101,6 +101,7 @@ namespace wells {
     struct mobility <true, main_var>
     {
       enum { is_prod = true, };
+      enum { main_var_value = main_var, };
 
       template <typename data_t, typename index_t, typename T>
       static typename data_t::item_t
@@ -126,6 +127,7 @@ namespace wells {
     struct mobility <false, main_var>
     {
       enum { is_prod = false, };
+      enum { main_var_value = main_var, };
 
       template <typename data_t, typename index_t, typename T>
       static typename data_t::item_t
