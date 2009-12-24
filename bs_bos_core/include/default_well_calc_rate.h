@@ -101,7 +101,7 @@ namespace wells {
     struct mobility <true, main_var>
     {
       enum { is_prod = true, };
-      enum { main_var_value = main_var, };
+      const static main_var_type main_var_value = main_var;
 
       template <typename data_t, typename index_t, typename T>
       static typename data_t::item_t
@@ -127,7 +127,7 @@ namespace wells {
     struct mobility <false, main_var>
     {
       enum { is_prod = false, };
-      enum { main_var_value = main_var, };
+      const static main_var_type main_var_value = main_var;
 
       template <typename data_t, typename index_t, typename T>
       static typename data_t::item_t
@@ -341,7 +341,6 @@ namespace wells {
       {
         const typename T::index_t &d_g = t->d_g;
         const typename T::index_t &d_o = t->d_o;
-        const typename T::index_t &n_phases = t->n_phases;
 
         if (main_var == FI_SG_VAR)
           return t->Pg * (S_DERIV_INVERS_FVF_G * t->krp_tetap + INVERS_FVF_G * t->sg_part) - mobility[t->gas_idx] * S_DERIV_CAP_PRESSURE_G;
