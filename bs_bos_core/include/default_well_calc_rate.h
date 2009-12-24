@@ -42,6 +42,26 @@
 #define CAP_PRESSURE_W data.cap_pressure[d_w]
 #define CAP_PRESSURE_G data.cap_pressure[d_g]
 
+#define P_DERIV_MOBILITY_G  data.p_deriv_mobility[d_g]
+#define P_DERIV_MOBILITY_O  data.p_deriv_mobility[d_o]
+#define P_DERIV_MOBILITY_W  data.p_deriv_mobility[d_w]
+
+#define S_DERIV_MOBILITY_GG data.s_deriv_mobility[d_g * n_phases + d_g]
+#define S_DERIV_MOBILITY_GO data.s_deriv_mobility[d_g * n_phases + d_o]
+#define S_DERIV_MOBILITY_GW data.s_deriv_mobility[d_g * n_phases + d_w]
+#define S_DERIV_MOBILITY_OG data.s_deriv_mobility[d_o * n_phases + d_g]
+#define S_DERIV_MOBILITY_OO data.s_deriv_mobility[d_o * n_phases + d_o]
+#define S_DERIV_MOBILITY_OW data.s_deriv_mobility[d_o * n_phases + d_w]
+#define S_DERIV_MOBILITY_WG data.s_deriv_mobility[d_w * n_phases + d_g]
+#define S_DERIV_MOBILITY_WO data.s_deriv_mobility[d_w * n_phases + d_o]
+#define S_DERIV_MOBILITY_WW data.s_deriv_mobility[d_w * n_phases + d_w]
+
+#define GAS_OIL_RATIO gas_oil_ratio_[n_block]
+#define P_DERIV_GOR data.p_deriv_gas_oil_ratio
+#define MOBILITY_G data.mobility[d_g]
+#define MOBILITY_O data.mobility[d_o]
+#define MOBILITY_W data.mobility[d_w]
+
 namespace blue_sky {
 namespace wells {
 
@@ -80,6 +100,8 @@ namespace wells {
     template <main_var_type main_var>
     struct mobility <true, main_var>
     {
+      enum { is_prod = true, };
+
       template <typename data_t, typename index_t, typename T>
       static typename data_t::item_t
       water (const data_t &data, index_t d_w, T *)
@@ -103,6 +125,8 @@ namespace wells {
     template <main_var_type main_var>
     struct mobility <false, main_var>
     {
+      enum { is_prod = false, };
+
       template <typename data_t, typename index_t, typename T>
       static typename data_t::item_t
       get_mobility (const data_t &data, index_t d, T *t)
@@ -134,6 +158,320 @@ namespace wells {
       gas (const data_t &data, index_t d_g, T *t)
       {
         return get_mobility (data, d_g, t);
+      }
+    };
+
+    template <bool is_prod, main_var_type main_var>
+    struct water_deriv
+    {
+    };
+
+    template <main_var_type main_var>
+    struct water_deriv <true, main_var>
+    {
+      enum { is_prod = true, };
+
+      template <typename data_t, typename T>
+      static typename data_t::item_t
+      sg (const data_t &data, T *t)
+      {
+        const typename T::index_t &d_g = t->d_g;
+        const typename T::index_t &d_w = t->d_w;
+        const typename T::index_t &n_phases = t->n_phases;
+
+        return t->Pw * S_DERIV_MOBILITY_WG;
+      }
+      template <typename data_t, typename T>
+      static typename data_t::item_t
+      so (const data_t &data, T *t)
+      {
+        const typename T::index_t &d_o = t->d_o;
+        const typename T::index_t &d_w = t->d_w;
+        const typename T::index_t &n_phases = t->n_phases;
+
+        return t->Pw * S_DERIV_MOBILITY_WO;
+      }
+      template <typename data_t, typename T, typename mobility_t>
+      static typename data_t::item_t
+      po (const data_t &data, T *t, const mobility_t &mobility)
+      {
+        const typename T::index_t &d_w = t->d_w;
+        return t->Pw * P_DERIV_MOBILITY_W - mobility[t->wat_idx];
+      }
+      template <typename data_t, typename T, typename mobility_t>
+      static typename data_t::item_t
+      sw (const data_t &data, T *t, const mobility_t &mobility)
+      {
+        const typename T::index_t &d_w = t->d_w;
+        const typename T::index_t &n_phases = t->n_phases;
+
+        return t->Pw * S_DERIV_MOBILITY_WW - mobility[t->wat_idx] * S_DERIV_CAP_PRESSURE_W;
+      }
+    };
+
+    template <main_var_type main_var>
+    struct water_deriv <false, main_var>
+    {
+      enum { is_prod = false, };
+
+      template <typename data_t, typename T>
+      static typename data_t::item_t
+      sg (const data_t &data, T *t)
+      {
+        const typename T::index_t &d_w = t->d_w;
+        const typename T::index_t &d_o = t->d_o;
+
+        if (main_var == FI_SG_VAR)
+          return t->Pw * INVERS_FVF_W * t->sg_part;
+        else
+          return t->Pw * INVERS_FVF_W * RELATIVE_PERM_O * GOR_DERIV_INVERS_VISC;
+      }
+      template <typename data_t, typename T>
+      static typename data_t::item_t
+      so (const data_t &data, T *t)
+      {
+        const typename T::index_t &d_o = t->d_o;
+        const typename T::index_t n_phases = t->n_phases;
+
+        return t->Pw * S_DERIV_RELATIVE_PERM_OO * INVERS_VISC_O;
+      }
+      template <typename data_t, typename T, typename mobility_t>
+      static typename data_t::item_t
+      po (const data_t &data, T *t, const mobility_t &mobility)
+      {
+        const typename T::index_t &d_o = t->d_o;
+        const typename T::index_t &d_w = t->d_w;
+
+        return t->Pw * (RELATIVE_PERM_O * P_DERIV_INVERS_VISC_O 
+                      + RELATIVE_PERM_W * P_DERIV_INVERS_VISC_W 
+                      - common (data, t)) - mobility[t->wat_idx];
+      }
+      template <typename data_t, typename T, typename mobility_t>
+      static typename data_t::item_t
+      sw (const data_t &data, T *t, const mobility_t &mobility)
+      {
+        const typename T::index_t &d_o = t->d_o;
+        const typename T::index_t &d_w = t->d_w;
+        const typename T::index_t &n_phases = t->n_phases;
+
+        return t->Pw * (S_DERIV_RELATIVE_PERM_WW * INVERS_VISC_W 
+                      + S_DERIV_RELATIVE_PERM_OW * INVERS_VISC_O 
+                      + RELATIVE_PERM_W * P_DERIV_INVERS_VISC_W * S_DERIV_CAP_PRESSURE_W 
+                      - common (data, t)) - mobility[t->wat_idx] * S_DERIV_CAP_PRESSURE_W;
+      }
+      template <typename data_t, typename T>
+      static typename data_t::item_t
+      common (const data_t &data, T *t)
+      {
+        const typename T::index_t &d_w = t->d_w;
+
+        return INVERS_FVF_W * t->krp_tetap * P_DERIV_INVERS_FVF_W;
+      }
+    };
+
+    template <bool is_prod, main_var_type main_var>
+    struct gas_deriv
+    {
+    };
+
+    template <main_var_type main_var>
+    struct gas_deriv <true, main_var>
+    {
+      template <typename data_t, typename T, typename mobility_t>
+      static typename data_t::item_t
+      sg (const data_t &data, T *t, const mobility_t &, typename T::index_t n_block)
+      {
+        const typename T::index_t &d_g = t->d_g;
+        const typename T::index_t &d_o = t->d_o;
+        const typename T::index_t &n_phases = t->n_phases;
+
+        if (main_var == FI_SG_VAR)
+          return t->Pg * S_DERIV_MOBILITY_GG
+            - MOBILITY_G * S_DERIV_CAP_PRESSURE_G 
+            + t->GAS_OIL_RATIO * S_DERIV_MOBILITY_OG * t->Po;
+        else
+          return t->Po * (MOBILITY_O + t->GAS_OIL_RATIO * S_DERIV_MOBILITY_OG);
+      }
+
+      template <typename data_t, typename T>
+      static typename data_t::item_t
+      so (const data_t &data, T *t, typename T::index_t n_block)
+      {
+        const typename T::index_t &d_g = t->d_g;
+        const typename T::index_t &d_o = t->d_o;
+        const typename T::index_t &n_phases = t->n_phases;
+
+        return t->Pg * S_DERIV_MOBILITY_GO + t->Po * S_DERIV_MOBILITY_OO * t->GAS_OIL_RATIO;
+      }
+
+      template <typename data_t, typename T>
+      static typename data_t::item_t
+      po (const data_t &data, T *t, typename T::index_t n_block)
+      {
+        const typename T::index_t &d_g = t->d_g;
+        const typename T::index_t &d_o = t->d_o;
+
+        typename data_t::item_t po_deriv = t->GAS_OIL_RATIO * (P_DERIV_MOBILITY_O * t->Po - MOBILITY_O);
+        if (main_var == FI_SG_VAR)
+          po_deriv += P_DERIV_MOBILITY_G * t->Pg - MOBILITY_G + P_DERIV_GOR * MOBILITY_O * t->Po;
+
+        return po_deriv;
+      }
+
+      template <typename data_t, typename T>
+      static typename data_t::item_t
+      sw (const data_t &data, T *t, typename T::index_t n_block)
+      {
+        const typename T::index_t &d_g = t->d_g;
+        const typename T::index_t &d_o = t->d_o;
+        const typename T::index_t &d_w = t->d_w;
+        const typename T::index_t &n_phases = t->n_phases;
+        return t->Pg * S_DERIV_MOBILITY_GW + t->Po * S_DERIV_MOBILITY_OW * t->GAS_OIL_RATIO;
+      }
+    };
+
+    template <main_var_type main_var>
+    struct gas_deriv <false, main_var>
+    {
+      template <typename data_t, typename T, typename mobility_t>
+      static typename data_t::item_t
+      sg (const data_t &data, T *t, const mobility_t &mobility, typename T::index_t)
+      {
+        const typename T::index_t &d_g = t->d_g;
+        const typename T::index_t &d_o = t->d_o;
+        const typename T::index_t &n_phases = t->n_phases;
+
+        if (main_var == FI_SG_VAR)
+          return t->Pg * (S_DERIV_INVERS_FVF_G * t->krp_tetap + INVERS_FVF_G * t->sg_part) - mobility[t->gas_idx] * S_DERIV_CAP_PRESSURE_G;
+        else
+          return t->Pg * INVERS_FVF_G * RELATIVE_PERM_O * data.gor_deriv_invers_viscosity;
+      }
+
+      template <typename data_t, typename T>
+      static typename data_t::item_t
+      so (const data_t &data, T *t, typename T::index_t)
+      {
+        const typename T::index_t &d_g = t->d_g;
+        const typename T::index_t &d_o = t->d_o;
+        const typename T::index_t &n_phases = t->n_phases;
+
+        return t->Pg * INVERS_FVF_G * S_DERIV_RELATIVE_PERM_GO;
+      }
+
+      template <typename data_t, typename T>
+      static typename data_t::item_t
+      po (const data_t &data, T *t, typename T::index_t)
+      {
+        const typename T::index_t &d_g = t->d_g;
+
+        if (main_var == FI_SG_VAR)
+          return t->Pg * (P_DERIV_INVERS_FVF_G * t->krp_tetap + INVERS_FVF_G * t->po_part) - INVERS_FVF_G * t->krp_tetap;
+        else
+          return t->Pg * (P_DERIV_INVERS_FVF_G * t->krp_tetap + INVERS_FVF_G * t->po_part) - INVERS_FVF_G * t->krow_tetaow;
+      }
+      template <typename data_t, typename T>
+      static typename data_t::item_t
+      sw (const data_t &data, T *t, typename T::index_t)
+      {
+        const typename T::index_t &d_g = t->d_g;
+        return t->Pg * INVERS_FVF_G * t->sw_part;
+      }
+    };
+
+    template <bool is_prod, main_var_type main_var>
+    struct oil_deriv
+    {
+    };
+
+    template <main_var_type main_var>
+    struct oil_deriv <true, main_var>
+    {
+      template <typename data_t, typename T>
+      static typename data_t::item_t
+      sg (const data_t &data, T *t)
+      {
+        const typename T::index_t &d_g = t->d_g;
+        const typename T::index_t &d_o = t->d_o;
+        const typename T::index_t &n_phases = t->n_phases;
+
+        if (main_var == FI_SG_VAR)
+          return t->Po * S_DERIV_MOBILITY_OG;
+        else
+          return t->Po * RELATIVE_PERM_O * data.gor_deriv_invers_visc_fvf;
+      }
+
+      template <typename data_t, typename T>
+      static typename data_t::item_t
+      so (const data_t &data, T *t)
+      {
+        const typename T::index_t &d_o = t->d_o;
+        const typename T::index_t &n_phases = t->n_phases;
+
+        return t->Po * S_DERIV_MOBILITY_OO;
+      }
+
+      template <typename data_t, typename T, typename mobility_t>
+      static typename data_t::item_t
+      po (const data_t &data, T *t, const mobility_t &mobility)
+      {
+        const typename T::index_t &d_o = t->d_o;
+
+        return t->Po * P_DERIV_MOBILITY_O - mobility[t->oil_idx];
+      }
+
+      template <typename data_t, typename T>
+      static typename data_t::item_t
+      sw (const data_t &data, T *t)
+      {
+        const typename T::index_t &d_o = t->d_o;
+        const typename T::index_t &d_w = t->d_w;
+        const typename T::index_t &n_phases = t->n_phases;
+
+        return t->Po * S_DERIV_MOBILITY_OW;
+      }
+    };
+
+    template <main_var_type main_var>
+    struct oil_deriv <false, main_var>
+    {
+      template <typename data_t, typename T>
+      static typename data_t::item_t
+      sg (const data_t &data, T *t)
+      {
+        const typename T::index_t &d_o = t->d_o;
+
+        if (main_var == FI_SG_VAR)
+          return t->Po * INVERS_FVF_O * t->sg_part;
+        else
+          return t->Po * RELATIVE_PERM_O * (INVERS_FVF_O * data.gor_deriv_invers_viscosity + INVERS_VISC_O * data.gor_deriv_invers_fvf);
+      }
+
+      template <typename data_t, typename T>
+      static typename data_t::item_t
+      so (const data_t &data, T *t)
+      {
+        const typename T::index_t &d_o = t->d_o;
+        const typename T::index_t &n_phases = t->n_phases;
+
+        return t->Po * INVERS_FVF_O * S_DERIV_RELATIVE_PERM_OO;
+      }
+
+      template <typename data_t, typename T, typename mobility_t>
+      static typename data_t::item_t
+      po (const data_t &data, T *t, const mobility_t &mobility)
+      {
+        const typename T::index_t &d_o = t->d_o;
+
+        return t->Po * (P_DERIV_INVERS_FVF_O * t->krp_tetap + INVERS_FVF_O * t->po_part) - mobility[t->oil_idx];
+      }
+
+      template <typename data_t, typename T>
+      static typename data_t::item_t
+      sw (const data_t &data, T *t)
+      {
+        const typename T::index_t &d_o = t->d_o;
+
+        return t->Po * INVERS_FVF_O * t->sw_part;
       }
     };
   }
@@ -248,6 +586,8 @@ namespace wells {
     item_t                    po_part;
     item_t                    sg_part;
 
+    item_t                    Pg, Po, Pw;
+
     item_t                    &ww;
     item_t                    wefac;
 
@@ -302,14 +642,14 @@ namespace wells {
           if (!c->is_shut ())
             {
               index_t n_block = c->n_block ();
-              item_t Po  = c->cur_bhp - pressure_[n_block];
+              Po  = c->cur_bhp - pressure_[n_block];
               if (Po < item_t (0.0))
                 {
-                  connection_loop_main_var <is_rate_loop, is_rate, true> (c, cell_data_[n_block], main_vars_[n_block], Po);
+                  connection_loop_main_var <is_rate_loop, is_rate, true> (c, cell_data_[n_block], main_vars_[n_block]);
                 }
               else
                 {
-                  connection_loop_main_var <is_rate_loop, is_rate, false> (c, cell_data_[n_block], main_vars_[n_block], Po);
+                  connection_loop_main_var <is_rate_loop, is_rate, false> (c, cell_data_[n_block], main_vars_[n_block]);
                 }
             }
         }
@@ -317,57 +657,57 @@ namespace wells {
 
     template <bool is_rate_loop, bool is_rate, bool is_prod>
     void
-    connection_loop_main_var (connection_t *c, const calc_model_data_t &data, main_var_t main_var, item_t Po)
+    connection_loop_main_var (connection_t *c, const calc_model_data_t &data, main_var_t main_var)
     {
       if (main_var == FI_SG_VAR)
-        connection_loop_injection <is_rate_loop, is_rate, is_prod, FI_SG_VAR> (c, data, Po);
+        connection_loop_injection <is_rate_loop, is_rate, is_prod, FI_SG_VAR> (c, data);
       else if (main_var == FI_RO_VAR)
-        connection_loop_injection <is_rate_loop, is_rate, is_prod, FI_RO_VAR> (c, data, Po);
+        connection_loop_injection <is_rate_loop, is_rate, is_prod, FI_RO_VAR> (c, data);
       else if (main_var == FI_MOMG_VAR)
-        connection_loop_injection <is_rate_loop, is_rate, is_prod, FI_MOMG_VAR> (c, data, Po);
+        connection_loop_injection <is_rate_loop, is_rate, is_prod, FI_MOMG_VAR> (c, data);
     }
 
     template <bool is_rate_loop, bool is_rate, bool is_prod, main_var_t main_var>
     void
-    connection_loop_injection (connection_t *c, const calc_model_data_t &data, item_t Po)
+    connection_loop_injection (connection_t *c, const calc_model_data_t &data)
     {
       if (is_water_injection <is_prod> () && is_gas_injection <is_prod> () && is_oil_injection <is_prod> ())
         {
-          connection_loop_concrete <is_rate_loop, is_rate, is_prod, main_var, true, true, true> (c, data, Po);
+          connection_loop_concrete <is_rate_loop, is_rate, is_prod, main_var, true, true, true> (c, data);
         }
       else if (is_water_injection <is_prod> () && is_oil_injection <is_prod> ())
         {
-          connection_loop_concrete <is_rate_loop, is_rate, is_prod, main_var, true, false, true> (c, data, Po);
+          connection_loop_concrete <is_rate_loop, is_rate, is_prod, main_var, true, false, true> (c, data);
         }
       else if (is_gas_injection <is_prod> () && is_oil_injection <is_prod> ())
         {
-          connection_loop_concrete <is_rate_loop, is_rate, is_prod, main_var, false, true, true> (c, data, Po);
+          connection_loop_concrete <is_rate_loop, is_rate, is_prod, main_var, false, true, true> (c, data);
         }
       else if (is_water_injection <is_prod> ())
         {
-          connection_loop_concrete <is_rate_loop, is_rate, is_prod, main_var, true, false, false> (c, data, Po);
+          connection_loop_concrete <is_rate_loop, is_rate, is_prod, main_var, true, false, false> (c, data);
         }
       else if (is_gas_injection <is_prod> ())
         {
-          connection_loop_concrete <is_rate_loop, is_rate, is_prod, main_var, false, true, false> (c, data, Po);
+          connection_loop_concrete <is_rate_loop, is_rate, is_prod, main_var, false, true, false> (c, data);
         }
       else if (is_oil_injection <is_prod> ())
         {
-          connection_loop_concrete <is_rate_loop, is_rate, is_prod, main_var, false, false, true> (c, data, Po);
+          connection_loop_concrete <is_rate_loop, is_rate, is_prod, main_var, false, false, true> (c, data);
         }
     }
 
     template <bool is_rate_loop, bool is_rate, bool is_prod, main_var_t main_var, bool is_w_inj, bool is_g_inj, bool is_o_inj>
     void
-    connection_loop_concrete (connection_t *c, const calc_model_data_t &data, item_t Po)
+    connection_loop_concrete (connection_t *c, const calc_model_data_t &data)
     {
       if (is_rate_loop)
         {
-          calc_rate <is_prod, main_var, is_w_inj, is_g_inj, is_o_inj> (c, data, Po);
+          calc_rate <is_prod, main_var, is_w_inj, is_g_inj, is_o_inj> (c, data);
         }
       else
         {
-          calc_derivs <is_prod, is_rate, main_var, is_w_inj, is_g_inj, is_o_inj> (c, data, Po);
+          calc_derivs <is_prod, is_rate, main_var, is_w_inj, is_g_inj, is_o_inj> (c, data);
         }
     }
 
@@ -406,14 +746,14 @@ namespace wells {
 
     template <bool is_prod, main_var_t main_var, bool is_w_inj, bool is_g_inj, bool is_o_inj>
     void
-    calc_rate (connection_t *c, const calc_model_data_t &data, item_t Po)
+    calc_rate (connection_t *c, const calc_model_data_t &data)
     {
       index_t n_block = c->n_block ();
       item_t gw  = c->get_fact ();
-      item_t Pw  = Po;
-      item_t Pg  = Po;
       item_t wat = 0, gas = 0, oil = 0, free_gas = 0, solution_gas = 0;
 
+      Pw = Po;
+      Pg = Po;
       if (is_w_inj)
         Pw -= data.cap_pressure [d_w];
       if (is_g_inj)
@@ -528,120 +868,15 @@ namespace wells {
         }
     }
 
-    template <bool is_prod, main_var_t main_var>
-    void
-    wat_deriv (connection_t *c, const calc_model_data_t &data, const boost::array <item_t, FI_PHASE_TOT> &mobility, item_t gw, item_t Pw)
-    {
-      if (is_w)
-        {
-          item_t sw_deriv = 0, po_deriv = 0, so_deriv = 0, sg_deriv = 0;
-
-          if (is_prod)
-            {
-              if (is_g)                           sg_deriv = data.s_deriv_mobility[d_w * n_phases + d_g];
-              if (is_o)                           so_deriv = data.s_deriv_mobility[d_w * n_phases + d_o];
-                                                  po_deriv = data.p_deriv_mobility[d_w];
-              if (!is_1p)                         sw_deriv = data.s_deriv_mobility[d_w * n_phases + d_w];
-            }
-          else
-            {
-              if (is_g && main_var == FI_SG_VAR)  sg_deriv = INVERS_FVF_W * sg_part;
-              if (is_g && main_var != FI_SG_VAR)  sg_deriv = INVERS_FVF_W * RELATIVE_PERM_O * GOR_DERIV_INVERS_VISC;
-              if (is_o)                           so_deriv = S_DERIV_RELATIVE_PERM_OO * INVERS_VISC_O;
-              item_t                              common   = INVERS_FVF_W * krp_tetap * P_DERIV_INVERS_FVF_W;
-                                                  po_deriv = (RELATIVE_PERM_O * P_DERIV_INVERS_VISC_O 
-                                                              + RELATIVE_PERM_W * P_DERIV_INVERS_VISC_W 
-                                                              - common);
-              if (!is_1p)                         sw_deriv = (S_DERIV_RELATIVE_PERM_WW * INVERS_VISC_W 
-                                                              + S_DERIV_RELATIVE_PERM_OW * INVERS_VISC_O 
-                                                              + RELATIVE_PERM_W * P_DERIV_INVERS_VISC_W * S_DERIV_CAP_PRESSURE_W 
-                                                              - common);
-            }
-
-
-          if (is_g)   c->rr_value[wat_sg] = -gw * (Pw * sg_deriv);
-          if (is_o)   c->rr_value[wat_so] = -gw * (Pw * so_deriv);
-          if (is_w)   c->rr_value[wat_po] = -gw * (Pw * po_deriv - mobility[wat_idx]);
-          if (!is_1p) c->rr_value[wat_sw] = -gw * (Pw * sw_deriv - mobility[wat_idx] * S_DERIV_CAP_PRESSURE_W);
-        }
-    }
-
-    template <bool is_prod, main_var_t main_var>
-    void
-    gas_deriv (connection_t *c, const calc_model_data_t &data, const boost::array <item_t, FI_PHASE_TOT> &mobility, item_t gw, item_t Pg, item_t Po, index_t n_block)
-    {
-      if (is_g)
-        {
-          item_t sw_deriv = 0, po_deriv = 0, so_deriv = 0, sg_deriv = 0;
-          if (is_prod)
-            {
-              if (!is_1p && main_var == FI_SG_VAR)  sg_deriv = Pg * data.s_deriv_mobility[d_g * n_phases + d_g] 
-                                                                - data.mobility[d_g] * data.s_deriv_cap_pressure[d_g] 
-                                                                + gas_oil_ratio_[n_block] * data.s_deriv_mobility[d_o * n_phases + d_g] * Po;
-              if (!is_1p && main_var != FI_SG_VAR)  sg_deriv = Po * (data.mobility[d_o] + gas_oil_ratio_[n_block] * data.s_deriv_mobility[d_o * n_phases + d_g]);
-              if (is_o)                             so_deriv = Pg * data.s_deriv_mobility[d_g * n_phases + d_o] + Po * data.s_deriv_mobility[d_o * n_phases + d_o] * gas_oil_ratio_[n_block];
-                                                    po_deriv = gas_oil_ratio_[n_block] * (data.p_deriv_mobility[d_o] * Po - data.mobility[d_o]);
-              if (main_var == FI_SG_VAR)            po_deriv += data.p_deriv_mobility[d_g] * Pg - data.mobility[d_g] + data.p_deriv_gas_oil_ratio * data.mobility[d_o] * Po;
-              if (is_w)                             sw_deriv = Pg * data.s_deriv_mobility[d_g * n_phases + d_w] + Po * data.s_deriv_mobility[d_o * n_phases + d_w] * gas_oil_ratio_[n_block];
-            }
-          else
-            {
-              if (!is_1p && main_var == FI_SG_VAR)  sg_deriv = Pg * (S_DERIV_INVERS_FVF_G * krp_tetap + INVERS_FVF_G * sg_part) - mobility[gas_idx] * S_DERIV_CAP_PRESSURE_G;
-              if (!is_1p && main_var != FI_SG_VAR)  sg_deriv = Pg * INVERS_FVF_G * RELATIVE_PERM_O * data.gor_deriv_invers_viscosity;
-              if (is_o)                             so_deriv = Pg * INVERS_FVF_G * S_DERIV_RELATIVE_PERM_GO;
-              if (main_var == FI_SG_VAR)            po_deriv = Pg * (P_DERIV_INVERS_FVF_G * krp_tetap + INVERS_FVF_G * po_part) - INVERS_FVF_G * krp_tetap;
-              if (main_var != FI_SG_VAR)            po_deriv = Pg * (P_DERIV_INVERS_FVF_G * krp_tetap + INVERS_FVF_G * po_part) - INVERS_FVF_G * krow_tetaow;
-              if (is_w)                             sw_deriv = Pg * INVERS_FVF_G * sw_part;
-            }
-
-          if (!is_1p) c->rr_value[gas_sg] = -gw * sg_deriv;
-          if (is_o)   c->rr_value[gas_so] = -gw * so_deriv;
-          if (is_g)   c->rr_value[gas_po] = -gw * po_deriv;
-          if (is_w)   c->rr_value[gas_sw] = -gw * sw_deriv;
-        }
-    }
-
-    template <bool is_prod, main_var_t main_var>
-    void
-    oil_deriv (connection_t *c, const calc_model_data_t &data, const boost::array <item_t, FI_PHASE_TOT> &mobility, item_t gw, item_t Po)
-    {
-      if (is_o)
-        {
-          item_t sw_deriv = 0, po_deriv = 0, so_deriv = 0, sg_deriv = 0;
-
-          if (is_prod)
-            {
-              if (is_g && main_var == FI_SG_VAR)  sg_deriv = data.s_deriv_mobility[d_o * n_phases + d_g];
-              if (is_g && main_var != FI_SG_VAR)  sg_deriv = data.relative_perm[d_o] * data.gor_deriv_invers_visc_fvf;
-              if (!is_1p)                         so_deriv = data.s_deriv_mobility[d_o * n_phases + d_o];
-                                                  po_deriv = data.p_deriv_mobility[d_o];
-              if (is_w)                           sw_deriv = data.s_deriv_mobility[d_o * n_phases + d_w];
-            }
-          else
-            {
-              if (is_g && main_var == FI_SG_VAR)  sg_deriv = INVERS_FVF_O * sg_part;
-              if (is_g && main_var != FI_SG_VAR)  sg_deriv = RELATIVE_PERM_O * (INVERS_FVF_O * data.gor_deriv_invers_viscosity + INVERS_VISC_O * data.gor_deriv_invers_fvf);
-              if (!is_1p)                         so_deriv = INVERS_FVF_O * S_DERIV_RELATIVE_PERM_OO;
-                                                  po_deriv = P_DERIV_INVERS_FVF_O * krp_tetap + INVERS_FVF_O * po_part;
-              if (is_w)                           sw_deriv = INVERS_FVF_O * sw_part;
-            }
-
-          if (is_g)   c->rr_value[oil_sg] = -gw * (Po * sg_deriv);
-          if (!is_1p) c->rr_value[oil_so] = -gw * (Po * so_deriv);
-          if (is_o)   c->rr_value[oil_po] = -gw * (Po * po_deriv - mobility[oil_idx]);
-          if (is_w)   c->rr_value[oil_sw] = -gw * (Po * sw_deriv);
-        }
-    }
-
     template <bool is_prod, bool is_rate, main_var_t main_var, bool is_w_inj, bool is_g_inj, bool is_o_inj>
     void
-    calc_derivs (connection_t *c, const calc_model_data_t &data, item_t Po)
+    calc_derivs (connection_t *c, const calc_model_data_t &data)
     {
       index_t n_block = c->n_block ();
       item_t gw  = c->get_fact ();
-      item_t Pw  = Po;
-      item_t Pg  = Po;
 
+      Pw = Po;
+      Pg = Po;
       if (is_w)
         Pw -= data.cap_pressure [d_w];
       if (is_g)
@@ -665,13 +900,33 @@ namespace wells {
           if (is_w)         sw_part += S_DERIV_RELATIVE_PERM_WW * INVERS_VISC_W;
           if (is_w)         sw_part += RELATIVE_PERM_W * S_DERIV_INVERS_VISC_W * CAP_PRESSURE_W;
           if (is_w)         sw_part -= P_DERIV_INVERS_FVF_W * CAP_PRESSURE_W;
-
-
         }
 
-      if (is_g && is_g_inj) gas_deriv <is_prod, main_var> (c, data, c->mobility_value, gw, Pg, Po, n_block);
-      if (is_o && is_o_inj) oil_deriv <is_prod, main_var> (c, data, c->mobility_value, gw, Po);
-      if (is_w && is_w_inj) wat_deriv <is_prod, main_var> (c, data, c->mobility_value, gw, Pw);
+      typedef detail::gas_deriv <is_prod, main_var> gas_deriv_t;
+      typedef detail::oil_deriv <is_prod, main_var> oil_deriv_t;
+      typedef detail::water_deriv <is_prod, main_var> water_deriv_t;
+
+      if (is_g && is_g_inj) 
+        {
+          if (!is_1p) c->rr_value[gas_sg] = -gw * gas_deriv_t::sg (data, this, c->mobility_value, n_block);
+          if (is_o)   c->rr_value[gas_so] = -gw * gas_deriv_t::so (data, this, n_block);
+          if (is_g)   c->rr_value[gas_po] = -gw * gas_deriv_t::po (data, this, n_block);
+          if (is_w)   c->rr_value[gas_sw] = -gw * gas_deriv_t::sw (data, this, n_block);
+        }
+      if (is_o && is_o_inj) 
+        {
+          if (is_g)   c->rr_value[oil_sg] = -gw * oil_deriv_t::sg (data, this);
+          if (!is_1p) c->rr_value[oil_so] = -gw * oil_deriv_t::so (data, this);
+          if (is_o)   c->rr_value[oil_po] = -gw * oil_deriv_t::po (data, this, c->mobility_value);
+          if (is_w)   c->rr_value[oil_sw] = -gw * oil_deriv_t::sw (data, this);
+        }
+      if (is_w && is_w_inj) 
+        {
+          if (is_g)   c->rr_value[wat_sg] = -gw * water_deriv_t::sg (data, this);
+          if (is_o)   c->rr_value[wat_so] = -gw * water_deriv_t::so (data, this);
+          if (is_w)   c->rr_value[wat_po] = -gw * water_deriv_t::po (data, this, c->mobility_value);
+          if (!is_1p) c->rr_value[wat_sw] = -gw * water_deriv_t::sw (data, this, c->mobility_value);
+        }
 
       m_minus_vv_prod <n_phases>::eliminate (&c->rr_value[b_sqr], &sp_diagonal_[n_block * n_phases], c->rr_value);
 
