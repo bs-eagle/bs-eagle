@@ -12,10 +12,11 @@
 #include "default_connection.h"
 #include "calc_model.h"
 
-
 // TODO: 
 #include "default_well_calc_rate.h"
 #include "default_connection_iterator.h"
+
+#include "add_connection_to_list.h"
 
 namespace blue_sky {
 namespace wells {
@@ -59,64 +60,17 @@ namespace wells {
     *this = w;
   }
 
-  namespace detail {
-
-    /**
-     * \class sort_connection_list
-     * \brief Sorts connection list in ASC order
-     * */
-    template <typename connection_t>
-    struct sort_connection_list : std::binary_function <const connection_t &, const connection_t &, bool>
-    {
-      /**
-       * \brief  Sorts connection list in ASC order
-       * \param  lhs
-       * \param  rhs
-       * \return True if n_block of lhs < of n_block of rhs
-       * */
-      bool
-      operator () (const connection_t &lhs, const connection_t &rhs) const
-      {
-        return lhs->n_block () < rhs->n_block ();
-      }
-    };
-  } // namespace wells
-
-  template <typename index_t, typename connection_list_t, typename well_t>
-  typename connection_list_t::value_type
-  add_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block, connection_list_t &connection_list, well_t *well)
-  {
-    if (n_block < 0)
-      {
-        bs_throw_exception (boost::format ("Invalid connection n_block value (ijk: {%d, %d, %d}, n_block: %d, well: %s") 
-          % i_coord % j_coord % k_coord
-          % n_block
-          % well->name ());
-      }
-
-    typename well_t::sp_default_connection_t connection = BS_KERNEL.create_object (well_t::default_connection_t::bs_type (), true);
-    if (!connection)
-        bs_throw_exception (boost::format ("Can't create connection (well: %s)") % well->name ());
-
-    connection->set_coord (i_coord, j_coord, k_coord, n_block);
-    connection_list.push_back (connection);
-    std::sort (connection_list.begin (), connection_list.end (), detail::sort_connection_list <typename well_t::sp_default_connection_t> ());
-    //connection_map_.insert (std::make_pair (connection->n_block (), (index_t)primary_connection_list_.size () - 1));
-
-    return connection;
-  }
-
   template <typename strategy_t>
   typename default_well <strategy_t>::sp_connection_t
   default_well <strategy_t>::add_primary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
   {
-    return add_connection (i_coord, j_coord, k_coord, n_block, primary_connection_list_, this);
+    return detail::add_connection (i_coord, j_coord, k_coord, n_block, primary_connection_list_, this);
   }
   template <typename strategy_t>
   typename default_well <strategy_t>::sp_connection_t
   default_well <strategy_t>::add_secondary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
   {
-    return add_connection (i_coord, j_coord, k_coord, n_block, secondary_connection_list_, this);
+    return detail::add_connection (i_coord, j_coord, k_coord, n_block, secondary_connection_list_, this);
   }
 
   template <typename strategy_t>
