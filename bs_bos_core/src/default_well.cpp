@@ -17,6 +17,7 @@
 #include "default_connection_iterator.h"
 
 #include "add_connection_to_list.h"
+#include "well_tools.h"
 
 namespace blue_sky {
 namespace wells {
@@ -290,17 +291,7 @@ namespace wells {
   void
   default_well <strategy_t>::fill_rows (index_array_t &rows) const
   {
-    typedef default_connection_iterator_impl <strategy_t, default_well <strategy_t>, default_connection <strategy_t> > iterator_t;
-    iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
-    for (; !base_t::is_shut () && it != e; ++it)
-      {
-        if (!it->is_shut ())
-          {
-            index_t n_block = it->n_block ();
-            index_t k = rows[n_block + 1] != 0;
-            rows[n_block + 1] += open_connections_count_ - k;
-          }
-      }
+    detail::fill_rows <strategy_t, default_well, default_connection_t> (this, rows);
   }
   template <typename strategy_t>
   void
