@@ -210,6 +210,14 @@ namespace grd_ecl
     side_center.y = (p1.y + p2.y + p3.y + p4.y) / 4.;
     side_center.z = (p1.z + p2.z + p3.y + p4.z) / 4.;
 
+    std::cout<<"p1     ("<<p1.x<<",\t"<<p1.y<<",\t"<<p1.z<<")\n";
+    std::cout<<"p2     ("<<p2.x<<",\t"<<p2.y<<",\t"<<p2.z<<")\n";
+    std::cout<<"p3     ("<<p3.x<<",\t"<<p3.y<<",\t"<<p3.z<<")\n";
+    std::cout<<"center ("<<side_center.x<<",\t"<<side_center.y<<",\t"<<side_center.z<<")\n";
+    std::cout<<"start  ("<<start_point.x<<",\t"<<start_point.y<<",\t"<<start_point.z<<")\n";
+    std::cout<<"delta  ("<<delta.x<<",\t"<<delta.y<<",\t"<<delta.z<<")\n";
+
+
     // intersection point = start + delta * t (from parametric definition)
     // define plane vector A=[a,b,c,d] and S=[s1, s2, s3, 1]
     // S belongs to plane, so A * S = 0
