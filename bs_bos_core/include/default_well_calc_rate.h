@@ -80,6 +80,12 @@ namespace wells {
       {
         return t.prod;
       }
+      template <typename T>
+      static const typename T::rate_data_inner &
+      get (const T &t) 
+      {
+        return t.prod;
+      }
     };
     template <>
     struct rate_data <false>
@@ -87,6 +93,12 @@ namespace wells {
       template <typename T>
       static typename T::rate_data_inner &
       get (T &t)
+      {
+        return t.inj;
+      }
+      template <typename T>
+      static const typename T::rate_data_inner &
+      get (const T &t)
       {
         return t.inj;
       }
