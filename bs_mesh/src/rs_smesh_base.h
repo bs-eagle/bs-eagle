@@ -25,8 +25,8 @@ using namespace blue_sky;
 template<class strategy_t>
 class BS_API_PLUGIN mesh_rs : public rs_mesh_base<strategy_t>
   {
-   
-    
+
+
   //-----------------------------------------
   // TYPES
   //-----------------------------------------
@@ -62,10 +62,10 @@ class BS_API_PLUGIN mesh_rs : public rs_mesh_base<strategy_t>
   public:
     //! default constructor
     mesh_rs ()	{};
-    
+
     //! default destructor
     virtual ~mesh_rs ()	{};
-    
+
     //! init mesh
     void init_props (const sp_idata_t &idata);
 
@@ -91,7 +91,7 @@ class BS_API_PLUGIN mesh_rs : public rs_mesh_base<strategy_t>
         dims[2] = nz;
         return dims;
       }
-      
+
 
     /*	\brief count how many activ blocks in layers, forming according direction
     	\param dir - direction of layers dividing
@@ -111,6 +111,8 @@ class BS_API_PLUGIN mesh_rs : public rs_mesh_base<strategy_t>
     //! convert global [i,j,k] to local indexing
     index_t inline XYZ_to_inside(const index_t i, const index_t j, const index_t k) const
       {
+        if (i < 0 || j < 0 || k < 0 || i >= nx || j >= ny || k >= nz)
+          return -1;
         return base_t::base_t::ext_to_int[i + j*nx + k*nx*ny];
       }
 
@@ -200,7 +202,7 @@ class BS_API_PLUGIN mesh_rs : public rs_mesh_base<strategy_t>
         static boost::array <item_t, 3> dummy;
         return dummy;
       }
-      
+
     virtual boost::array <item_t, 3>
     get_center (index_t /*n_element*/) const
       {
@@ -208,7 +210,7 @@ class BS_API_PLUGIN mesh_rs : public rs_mesh_base<strategy_t>
 
         static boost::array <item_t, 3> dummy;
         return dummy;
-      }  
+      }
 
 //-------------------------------------------
 //  VARIABLES
@@ -219,11 +221,11 @@ class BS_API_PLUGIN mesh_rs : public rs_mesh_base<strategy_t>
     item_t min_x, max_x; //!< min&max x coordinates
     item_t min_y, max_y; //!< min&max y coordinates
     item_t min_z, max_z; //!< min&max z coordinates
-    
+
     array_float16_t sp_permx;	  //!< smart_ptr on permx array
     array_float16_t sp_permy;	  //!< smart_ptr on permy array
     array_float16_t sp_permz;	  //!< smart_ptr on permz array
-    
+
     array_float16_t sp_multx;	  //!< smart_ptr on multx array
     array_float16_t sp_multy;	  //!< smart_ptr on multy array
     array_float16_t sp_multz;	  //!< smart_ptr on multz array

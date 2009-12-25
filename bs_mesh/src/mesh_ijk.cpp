@@ -137,8 +137,7 @@ grd_ecl::fpoint3d_vector
 mesh_ijk<strategy_t>::top_cube (const index_t i, const index_t j, const index_t k) const
   {
     index_t index = XYZ_to_inside (i, j, k);
-    grd_ecl::fpoint3d_vector cube_vertex = top_cube (index);
-    return cube_vertex;
+    return top_cube (index);
   }
 
 template <typename strategy_t>

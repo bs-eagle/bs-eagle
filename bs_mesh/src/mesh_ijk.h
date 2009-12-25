@@ -40,7 +40,7 @@ class  mesh_ijk : public mesh_rs<strategy_t>
     typedef std::vector<grd_ecl::fpoint2d>              g_fpoint2d_vector;
     typedef typename strategy_t::rhs_item_array_t       rhs_item_array_t;
     typedef boost::array <item_t, 3>                    center_t;
-    
+
 //-------------------------------------------
 //  METHODS
 //===========================================
@@ -52,24 +52,24 @@ class  mesh_ijk : public mesh_rs<strategy_t>
     //! default destructor
     ~mesh_ijk() {};
 
-    
-    
-    
+
+
+
 
     //-------------------------------------------
     //  INHERITED FUNCTIONS
     //===========================================
-    
+
     using base_t::init_int_to_ext;
     using base_t::XYZ_to_inside;
-    
+
     //! init mesh properties
     void init_props (const sp_idata_t &data);
-    
+
     //! make indexation - create proxy and non-proxy array using info of minpv
     //! return number of non active blocks (less than mpv)
     int init_ext_to_int();
-    
+
     //! check mesh data
     void check_data () const;
 
@@ -78,7 +78,7 @@ class  mesh_ijk : public mesh_rs<strategy_t>
     		\param jacobian jacobian (like adjacency matrix)
     		\param flux_conn connection with calculated transmissibility
     		\return 0 if success*/
-    int build_jacobian_and_flux_connections (const sp_bcsr_t &jacobian, const sp_flux_conn_iface_t &flux_conn, 
+    int build_jacobian_and_flux_connections (const sp_bcsr_t &jacobian, const sp_flux_conn_iface_t &flux_conn,
                                              index_array_t &boundary_array);
 
     /*!	\brief  find neighbours (adjacency matrix)
@@ -105,7 +105,7 @@ class  mesh_ijk : public mesh_rs<strategy_t>
     float get_depth(index_t n_elem) const
       {
         return depths[n_elem];
-      };  
+      };
     float get_dtop(index_t n_elem) const
       {
         return depths[n_elem];
@@ -117,11 +117,10 @@ class  mesh_ijk : public mesh_rs<strategy_t>
 
     grd_ecl::fpoint3d_vector top_cube (const index_t index) const;
 
-    
     //! get element center
     center_t
     get_center (index_t n_block) const;
-    
+
     center_t
     get_center (index_t i, index_t j, index_t k) const {return base_t::get_center (i,j,k);};
 
@@ -133,8 +132,8 @@ class  mesh_ijk : public mesh_rs<strategy_t>
   private:
 
     /*! \brief add index info into cols_ind, change m&p_memory block indexation, calculate and save transmissibility*/
-    void inline set_neigbour_data (const index_t index1, const index_t index1_ext, const index_t index2_ext, index_t &conn_idx, 
-                        const index_array_t &rows_ptr, index_array_t &cols_ind, index_array_t& tmp_rows_ptr, 
+    void inline set_neigbour_data (const index_t index1, const index_t index1_ext, const index_t index2_ext, index_t &conn_idx,
+                        const index_array_t &rows_ptr, index_array_t &cols_ind, index_array_t& tmp_rows_ptr,
                         index_array_t& m_memory, index_array_t& p_memory,
                         index_array_t &cols_ind_tran, rhs_item_array_t &values_tran, direction dir);
 
@@ -177,7 +176,7 @@ class  mesh_ijk : public mesh_rs<strategy_t>
     using base_t::n_connections;
     using base_t::darcy_constant;
     using base_t::volumes;
-    
+
 
     blue_sky::array_float16_t sp_dx, sp_dy, sp_dz; //geometric properties
     blue_sky::array_float16_t sp_tops; // layers

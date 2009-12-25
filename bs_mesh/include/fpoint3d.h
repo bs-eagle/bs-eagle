@@ -1,14 +1,16 @@
-/*! 
+/*!
   \file fpoint3d.h
   \brief addition structure for mesh_grdecl - point3d
   \author Iskhakov Ruslan
-  \date 2008-05-01 
+  \date 2008-05-01
  * */
 
 #ifndef FPOINT3D_H
 #define FPOINT3D_H
 
 #include "fpoint2d.h"
+
+#define EPSILON 1.0e-7
 
 namespace grd_ecl
 {
@@ -184,35 +186,39 @@ namespace grd_ecl
       \param intersection_point - return value
       \return false if no intersection*/
 
-  inline bool 
+  inline bool
   calc_intersection_of_plane_and_segment (const fpoint3d &p1, const fpoint3d &p2,
-                                          const fpoint3d &p3, /*const fpoint3d &p4,*/
-                                         const fpoint3d &center_side,
-                                         const fpoint3d &start_point, 
-                                         const fpoint3d &delta, 
-                                         fpoint3d &intersection_point, 
-                                         double eps_diff=1.0e-7)
+                                          const fpoint3d &p3, const fpoint3d &p4,
+                                          const fpoint3d &start_point,
+                                          const fpoint3d &delta,
+                                          fpoint3d &intersection_point,
+                                          double eps_diff = EPSILON)
   {
-  // calculate a, b, c, d for plane equation: ax+by+cz+d=0
-  // a = (y1-y2)(z1+z2)+(y2-y3)(z2+z3)+(y3-y1)(z3+z1)
-  // b = (z1-z2)(x1+x2)+(z2-z3)(x2+x3)+(z3-z1)(x3+x1)
-  // c = (x1-x2)(y1+y2)+(x2-x3)(y2+y3)+(x3-x1)(y3+y1)
-  // d = - (a * x1 + b * y1 + c * z1)
+    // calculate a, b, c, d for plane equation: ax+by+cz+d=0
+    // a = (y1-y2)(z1+z2)+(y2-y3)(z2+z3)+(y3-y1)(z3+z1)
+    // b = (z1-z2)(x1+x2)+(z2-z3)(x2+x3)+(z3-z1)(x3+x1)
+    // c = (x1-x2)(y1+y2)+(x2-x3)(y2+y3)+(x3-x1)(y3+y1)
+    // d = - (a * x1 + b * y1 + c * z1)
     double a,b,c,d;
     a = (p1.y-p2.y)*(p1.z+p2.z)+(p2.y-p3.y)*(p2.z+p3.z)+(p3.y-p1.y)*(p3.z+p1.z);
     b = (p1.z-p2.z)*(p1.x+p2.x)+(p2.z-p3.z)*(p2.x+p3.x)+(p3.z-p1.z)*(p3.x+p1.x);
     c = (p1.x-p2.x)*(p1.y+p2.y)+(p2.x-p3.x)*(p2.y+p3.y)+(p3.x-p1.x)*(p3.y+p1.y);
-    d = -(a*p1.x + b*p1.y + c*p1.z);
+    d = -(a * p1.x + b * p1.y + c * p1.z);
 
-  // intersection point = start + delta * t (from parametric definition)
-  // define plane vector A=[a,b,c,d] and S=[s1, s2, s3, 1]
-  // S belongs to plane, so A * S = 0
-  // A * start + A * delta * t = 0    =>   t = - A * start / A * delta.
-    double n1 = a*start_point.x + b*start_point.y + c*start_point.z + d;
-    double n2 = a*delta.x + b*delta.y + c*delta.z;
+    fpoint3d side_center;
+    side_center.x = (p1.x + p2.x + p3.x + p4.x) / 4.;
+    side_center.y = (p1.y + p2.y + p3.y + p4.y) / 4.;
+    side_center.z = (p1.z + p2.z + p3.y + p4.z) / 4.;
+
+    // intersection point = start + delta * t (from parametric definition)
+    // define plane vector A=[a,b,c,d] and S=[s1, s2, s3, 1]
+    // S belongs to plane, so A * S = 0
+    // A * start + A * delta * t = 0    =>   t = - A * start / A * delta.
+    double n1 = a * start_point.x + b * start_point.y + c * start_point.z + d;
+    double n2 = a * delta.x + b * delta.y + c * delta.z;
     if (!n2)
       return false;
-    double t = -n1/n2;
+    double t = - n1 / n2;
 
   // hold t in [0,1]. length of delta equal to cut length, we only reduce it.
   // So intersection_point in case t > 1 and t < 0 will not belong to plane.
@@ -221,14 +227,14 @@ namespace grd_ecl
     if (t < 0)
       t = 0;
   // parametric definition of line
-    intersection_point.x = start_point.x + t*delta.x;
-    intersection_point.y = start_point.y + t*delta.y;
-    intersection_point.z = start_point.z + t*delta.z;
+    intersection_point.x = start_point.x + t * delta.x;
+    intersection_point.y = start_point.y + t * delta.y;
+    intersection_point.z = start_point.z + t * delta.z;
 
     // check intersection point is between p1, p2, p3, p4 (between side[0],side[1],side[2])
     //TODO: this is not precize checking, replace it with more complicated correct check
-    double len = get_len(center_side,p1);
-    double len_c = get_len(intersection_point,center_side);
+    double len = get_len (side_center, p1);
+    double len_c = get_len (intersection_point, side_center);
 
     if (len_c < len || (fabs(len_c-len) < eps_diff))
       return true;

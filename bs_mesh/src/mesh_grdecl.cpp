@@ -299,10 +299,9 @@ template<class strategy_t>
 grd_ecl::fpoint3d_vector
 mesh_grdecl<strategy_t>::top_cube (const index_t index) const
   {
-    grd_ecl::fpoint3d_vector cube_vertex;
-    //TODO
-    bs_throw_exception ("NOT IMPL YET");
-    return cube_vertex;
+    index_t i, j, k;
+    inside_to_XYZ (index, i, j, k);
+    return top_cube (i, j, k);
   }
 
 template<class strategy_t>
