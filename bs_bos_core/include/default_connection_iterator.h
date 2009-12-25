@@ -58,13 +58,13 @@ namespace wells {
 #ifdef _DEBUG
       if (static_cast <size_t> (connection_count_[list_idx_]) != connection_list_[list_idx_]->size ())
         {
-          bs_throw_exception (boost::format ("Iterator no more valid (list: %ld, well: %s)") 
+          bs_throw_exception (boost::format ("Iterator no more valid (list: %ld, well: %s)")
             % list_idx_
             % well_->name ());
         }
       if (static_cast <size_t> (connection_idx_[list_idx_]) >= connection_list_[list_idx_]->size ())
         {
-          bs_throw_exception (boost::format ("Index out of range (list: %ls, idx: %ld, count: %ld, well: %s)") 
+          bs_throw_exception (boost::format ("Index out of range (list: %ls, idx: %ld, count: %ld, well: %s)")
             % list_idx_
             % connection_idx_[list_idx_] % connection_count_[list_idx_] % well_->name ())
         }
@@ -80,36 +80,36 @@ namespace wells {
     }
 
     inline this_t &
-    operator++ () 
+    operator++ ()
     {
+      if (list_idx_ > 1)
+        {
+          //bs_throw_exception (boost::format ("List index out of range (list: %ld, well: %s)")
+          //  % list_idx_ % well_->name ());
+
+          return *this;
+        }
+
 #ifdef _DEBUG
       if (static_cast <size_t> (connection_count_[list_idx_]) != connection_list_[list_idx_]->size ())
         {
-          bs_throw_exception (boost::format ("Iterator no more valid (list: %ld, well: %s)") 
+          bs_throw_exception (boost::format ("Iterator no more valid (list: %ld, well: %s)")
             % list_idx_
             % well_->name ());
         }
       if (static_cast <size_t> (connection_idx_[list_idx_]) >= connection_list_[list_idx_]->size ())
         {
-          bs_throw_exception (boost::format ("Index out of range (list: %ls, idx: %ld, count: %ld, well: %s)") 
+          bs_throw_exception (boost::format ("Index out of range (list: %ls, idx: %ld, count: %ld, well: %s)")
             % list_idx_ % connection_idx_[list_idx_] % connection_count_[list_idx_] % well_->name ())
         }
 #endif
       ++connection_idx_[list_idx_];
       list_idx_ += static_cast <size_t> (connection_idx_[list_idx_]) >= connection_list_[list_idx_]->size ();
 
-#ifdef _DEBUG
-      if (list_idx_ > 1)
-        {
-          bs_throw_exception (boost::format ("List index out of range (list: %ld, well: %s)")
-            % list_idx_ % well_->name ());
-        }
-#endif
-
       return *this;
     }
 
-    inline bool 
+    inline bool
     operator== (const this_t &rhs) const
     {
       return position () == rhs.position ();
@@ -176,7 +176,7 @@ namespace wells {
     {
       return impl_.position () == rhs->position ();
     }
-    virtual bool 
+    virtual bool
     operator!= (const boost::shared_ptr <base_t> &rhs) const
     {
       return !operator== (rhs);
