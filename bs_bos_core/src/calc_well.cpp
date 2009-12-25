@@ -3,7 +3,7 @@
  *      \brief  Impementation of base well class
  *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
  *       \date  23.06.2008
- *  \copyright  This source code is released under the terms of 
+ *  \copyright  This source code is released under the terms of
  *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
@@ -173,14 +173,14 @@ namespace blue_sky
 #if 0
   template <typename strategy_t>
   typename well<strategy_t>::ijk_filter_t
-  well<strategy_t>::filter_connections (index_t /*i_coord*/, index_t /*j_coord*/, index_t /*k*/, 
+  well<strategy_t>::filter_connections (index_t /*i_coord*/, index_t /*j_coord*/, index_t /*k*/,
                                         index_t /*z1*/, index_t /*z2*/)
   {
     return ijk_filter_t (connection_list_, ijk_pred_t (0));  // TODO:
   }
   template <typename strategy_t>
   typename well<strategy_t>::ijk1k2_filter_t
-  well<strategy_t>::filter_connections (index_t /*i_coord*/, index_t /*j_coord*/, index_t /*kw1*/, 
+  well<strategy_t>::filter_connections (index_t /*i_coord*/, index_t /*j_coord*/, index_t /*kw1*/,
                                         index_t /*kw2*/)
   {
     return ijk1k2_filter_t (connection_list_, ijk1k2_pred_t (0));  // TODO:
@@ -447,7 +447,7 @@ namespace blue_sky
   }
 
   template <typename strategy_t>
-  void 
+  void
   well <strategy_t>::restore_solution (double /*dt*/, const item_array_t &/*p_sol*/, const item_array_t &/*s_sol*/, index_t /*block_size*/)
   {
     bs_throw_exception ("PURE CALL");
@@ -463,8 +463,8 @@ namespace blue_sky
   void
   well <strategy_t>::pre_large_step (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh)
   {
-    compute_connection_factor (calc_model->internal_constants, 
-      calc_model->ts_params, 
+    compute_connection_factor (calc_model->internal_constants,
+      calc_model->ts_params,
       mesh,
       calc_model->rock_grid_prop->permeability,
       calc_model->rock_grid_prop->net_to_gros,
@@ -536,6 +536,13 @@ namespace blue_sky
   well <strategy_t>::add_well_facility (const sp_well_facility_t &facility)
   {
     well_facility_list_.push_back (facility);
+  }
+
+  template <typename strategy_t>
+  void
+  well <strategy_t>::delete_well_facility (typename well_facility_list_t::iterator iter)
+  {
+    well_facility_list_.erase (iter);
   }
 
   //////////////////////////////////////////////////////////////////////////

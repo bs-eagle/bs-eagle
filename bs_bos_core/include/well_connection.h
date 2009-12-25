@@ -325,6 +325,15 @@ namespace blue_sky
           {
             return diam_;
           }
+        /*!
+         * \brief  Returns kh of well at connection
+         * \return well kh of connection
+         */
+        item_t
+        get_kh () const
+          {
+            return kh_;
+          }
 
         //! Returns current BHP
         item_t
@@ -470,6 +479,7 @@ namespace blue_sky
         auto_value <item_t, -1>       fact_;                        //!< connection factor
         auto_value <item_t, -1>       R0_;                          //!< R0
 
+        //FRACPERM
         auto_value <item_t>           fracture_half_length_;        //!< half length of fracture
         auto_value <item_t>           fracture_angle_;              //!< angle of fracture in grid block to OX direction
         auto_value <item_t>           fracture_perm_;               //!< coefficient of "permeability" on fracture

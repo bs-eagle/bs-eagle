@@ -633,9 +633,15 @@ namespace blue_sky
       add_well_facility (const sp_well_facility_t &facility);
 
       /**
+       * \brief  delete well facility from facility list by iterator
+       * */
+      void
+      delete_well_facility (typename well_facility_list_t::iterator iter);
+
+      /**
        * \brief  return well facility list
        * */
-      well_facility_list_t
+      well_facility_list_t &
       get_facility_list ()
         {
           return well_facility_list_;
