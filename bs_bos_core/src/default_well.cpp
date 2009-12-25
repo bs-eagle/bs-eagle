@@ -297,52 +297,8 @@ namespace wells {
   void
   default_well <strategy_t>::fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const
   {
-    typedef default_connection_iterator_impl <strategy_t, default_well <strategy_t>, default_connection <strategy_t> > iterator_t;
-    iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
-
-    index_t b_sqr = block_size * block_size;
-    for (; !base_t::is_shut () && it != e; ++it)
-      {
-        const sp_default_connection_t &rw_con = *it;
-        if (!rw_con->is_shut ())
-          {
-            index_t n_block = rw_con->n_block ();
-            index_t l = rows[n_block];
-
-            if (markers[n_block] == 0)
-              {
-                markers[n_block] = 1;
-              }
-
-            iterator_t wr_it (this, begin_iterator_tag);
-            for (; wr_it != e; ++wr_it)
-              {
-                index_t index = l;
-                const sp_default_connection_t &wr_con = *wr_it;
-                if (!wr_con->is_shut ())
-                  {
-                    if (rw_con->n_block () == wr_con->n_block ())
-                      {
-                        BS_ASSERT (cols[l] == -1) (cols[l]) (n_block);
-                        cols[l] = n_block;
-
-                        BS_ASSERT (l * b_sqr < (index_t)values.size ()) (l) (values.size ());
-                        eliminate (this, &values[l * b_sqr], rw_con, wr_con, dt, block_size);
-                      }
-                    else
-                      {
-                        BS_ASSERT (cols[l + markers[n_block]] == -1) (cols[l + markers[n_block]]) (wr_con->n_block ());
-                        index = l + markers[n_block];
-                        cols[index] = wr_con->n_block ();
-                        markers[n_block]++;
-
-                        BS_ASSERT (index * b_sqr < (index_t)values.size ()) (index) (b_sqr) (values.size ());
-                        eliminate (this, &values[index * b_sqr], rw_con, wr_con, dt, block_size);
-                      }
-                  }
-              }
-          }
-      }
+    detail::fill_jacobian <strategy_t, default_well, default_connection_t> (this,
+      dt, block_size, rows, cols, values, markers);
   }
 
   template <typename strategy_t>
