@@ -3,7 +3,7 @@
  *      \brief  fi_operator (calculates full implicit model)
  *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
  *       \date  12.01.2009
- *  \copyright  This source code is released under the terms of 
+ *  \copyright  This source code is released under the terms of
  *              the BSD License. See LICENSE for more details.
  *       \todo  Should be moved to src/ directory.
  * */
@@ -28,7 +28,7 @@ namespace blue_sky {
 
   /**
    * \class fi_operator_impl
-   * \brief Implementation of fi_operator, parametrized with 
+   * \brief Implementation of fi_operator, parametrized with
    *        is_w, is_g, is_o (for water, gas, oil phases)
    * \todo  Describe data members
    * */
@@ -154,7 +154,7 @@ namespace blue_sky {
      * \param       __formal
      * \param       update_rhs_after_gauss_elimination
      * \param       save_debug_files
-     * \return      
+     * \return
      * \todo        Describe return type
      * */
     fi_operator_return_type
@@ -168,7 +168,7 @@ namespace blue_sky {
 
       if (istart)
         {
-          reservoir_->init_jacobian (jmatrix_, n_cells_);
+          //reservoir_->init_jacobian (jmatrix_, n_cells_);
         }
 
       index_t n_approx = 5;
@@ -227,6 +227,7 @@ namespace blue_sky {
           if (update_rhs_after_gauss_elimination)
             {
               // fill jacobian (irregular matrix) by wells
+              reservoir_->init_jacobian (jmatrix_, n_cells_);
               reservoir_->end_jacobian (dt, calc_model_, jacobian_);
             }
 
@@ -254,7 +255,7 @@ namespace blue_sky {
      * \brief  Inits fi_operator process, called from main_loop_calc
      * \param  istart
      * \param  dt
-     * \return 
+     * \return
      * */
     void
     fi_operator_init (index_t istart, double dt)
@@ -279,8 +280,8 @@ namespace blue_sky {
 
     /**
      * \brief  Calculates physical parameters for all cells
-     * \param  
-     * \return 
+     * \param
+     * \return
      * */
     void
     fi_operator_cells (index_t istart, const item_t dt)
@@ -440,7 +441,7 @@ namespace blue_sky {
     /**
      * \brief  Fills Jacobain part for cell i
      * \param  i Index of mesh cell
-     * \param  data_i 
+     * \param  data_i
      * \param  jac_block Jacobian value for cell
      * \param  local_data_
      * */
@@ -1312,7 +1313,7 @@ namespace blue_sky {
     calc_step_dt_mult (item_t prev_mult, item_t max_res);
 
     /**
-     * \brief      Calculates porosity and derivativies, also calculates 
+     * \brief      Calculates porosity and derivativies, also calculates
      *             trunsmissibility multipliers
      *
      * \param[in]  i Cell index
