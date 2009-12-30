@@ -208,15 +208,16 @@ namespace grd_ecl
     fpoint3d side_center;
     side_center.x = (p1.x + p2.x + p3.x + p4.x) / 4.;
     side_center.y = (p1.y + p2.y + p3.y + p4.y) / 4.;
-    side_center.z = (p1.z + p2.z + p3.y + p4.z) / 4.;
-
+    side_center.z = (p1.z + p2.z + p3.z + p4.z) / 4.;
+/*
     std::cout<<"p1     ("<<p1.x<<",\t"<<p1.y<<",\t"<<p1.z<<")\n";
     std::cout<<"p2     ("<<p2.x<<",\t"<<p2.y<<",\t"<<p2.z<<")\n";
     std::cout<<"p3     ("<<p3.x<<",\t"<<p3.y<<",\t"<<p3.z<<")\n";
+    std::cout<<"p4     ("<<p4.x<<",\t"<<p4.y<<",\t"<<p4.z<<")\n";
     std::cout<<"center ("<<side_center.x<<",\t"<<side_center.y<<",\t"<<side_center.z<<")\n";
     std::cout<<"start  ("<<start_point.x<<",\t"<<start_point.y<<",\t"<<start_point.z<<")\n";
     std::cout<<"delta  ("<<delta.x<<",\t"<<delta.y<<",\t"<<delta.z<<")\n";
-
+*/
 
     // intersection point = start + delta * t (from parametric definition)
     // define plane vector A=[a,b,c,d] and S=[s1, s2, s3, 1]
@@ -244,7 +245,7 @@ namespace grd_ecl
     double len = get_len (side_center, p1);
     double len_c = get_len (intersection_point, side_center);
 
-    if (len_c < len || (fabs(len_c-len) < eps_diff))
+    if (len_c < len || (fabs (len_c - len) < eps_diff))
       return true;
     else
       return false;
