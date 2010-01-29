@@ -174,7 +174,7 @@ namespace blue_sky
         locked_connection->set_mult (1.0);
         locked_connection->set_seg_number (seg_number);
 
-        well->on_connection_change (n_block);
+        well->on_connection_change (well, n_block);
       }
 
     locked_well->check_shut ();
@@ -431,7 +431,7 @@ namespace blue_sky
         for (; it != e; ++it)
           {
             it->mul_perm_mult (perm_mult);
-            well->on_connection_change (it->n_block ());
+            well->on_connection_change (well, it->n_block ());
           }
       }
     else if (i_cell && j_cell && k_cell)
@@ -441,7 +441,7 @@ namespace blue_sky
         if (c)
           {
             c->mul_perm_mult (perm_mult);
-            well->on_connection_change (n_block);
+            well->on_connection_change (well, n_block);
           }
       }
     //else

@@ -239,7 +239,7 @@ namespace blue_sky
       }
 
       /**
-       * \brief  Returns true if connection n_block is 
+       * \brief  Returns true if connection n_block is
        *         in primary_connection list
        * \param  n_block Number of connection block
        * \return True if connection is in primary_connection list
@@ -251,7 +251,7 @@ namespace blue_sky
       }
 
       /**
-       * \brief  Returns true if connection it is in 
+       * \brief  Returns true if connection it is in
        *         primary_connection list
        * \param  it Connection iterator
        * \return True if connection is in primary_connection list
@@ -705,8 +705,8 @@ namespace blue_sky
       post_process_facilities ();
 
     public:
-      DECLARE_EVENT_LIST_V2 (well, 
-        ((connection_change, (const index_t &), 1))
+      DECLARE_EVENT_LIST_V2 (well,
+        ((connection_change, (const sp_well_t &, const index_t &), 2))
       );
 
     public:
