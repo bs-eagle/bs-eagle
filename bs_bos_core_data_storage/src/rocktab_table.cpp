@@ -137,9 +137,6 @@ namespace blue_sky
     return columns[col_num].data;
   }
 
-
-
-
   /**
    * @brief constructor
    */
@@ -149,6 +146,23 @@ namespace blue_sky
     this->add_column ("pressure");
     this->add_column ("poro volume multiplier");
     this->add_column ("transmissibility multiplier");
+  }
+
+  template <class strategy_t> 
+  rocktab_table <strategy_t> & 
+	  rocktab_table <strategy_t>::operator= (const rocktab_table <strategy_t> & rhs)
+  {
+	  if (this == &rhs)
+		  return *this;
+
+	  bs_table <strategy_t>::operator=(rhs);
+	  return *this; 
+  }
+
+  template <class strategy_t>
+  rocktab_table <strategy_t>::rocktab_table (const rocktab_table <strategy_t> & rhs)
+  {
+	  *this = rhs;
   }
 
   /**

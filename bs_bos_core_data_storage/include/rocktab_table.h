@@ -72,6 +72,10 @@ namespace blue_sky
       //rocktab_table(const rocktab_table&);
       //! dtor
       ~rocktab_table();
+
+	  rocktab_table (const rocktab_table &rhs);
+	  rocktab_table & operator = (const rocktab_table & rhs);
+
       //! interpolate method
 
       //! \brief interpolate values in rocktab table
