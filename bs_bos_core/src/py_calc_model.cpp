@@ -6,8 +6,8 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
-#include "boost_array_adapter.h"
 #include "stdafx.h"
+#include "boost_array_adapter.h"
 
 #include "calc_model.h"
 #include "py_calc_model.h"
