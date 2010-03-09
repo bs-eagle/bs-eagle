@@ -48,6 +48,7 @@ namespace detail {
 } // namespace detail
 } // namespace blue_sky
 
+#ifdef BSPY_EXPORTING_PLUGIN
 namespace boost {
 namespace python {
 namespace detail {
@@ -66,6 +67,7 @@ namespace detail {
 
 #include <boost/python/class.hpp>
 #include <boost/python/module.hpp>
+#endif
 
 #endif // #ifndef BS_EAGLE_BOOST_ARRAY_ADAPTER_H_
 

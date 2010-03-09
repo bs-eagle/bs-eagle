@@ -11,6 +11,7 @@
 #ifndef PY_FACILITY_MANAGER_H
 #define PY_FACILITY_MANAGER_H
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "py_calc_well.h"
 #include "facility_manager.h"
 
@@ -28,5 +29,6 @@ namespace python {
 }
 }
 
+#endif
 #endif // PY_FACILITY_MANAGER_H
 

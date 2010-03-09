@@ -16,6 +16,7 @@
 #include "data_class.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "export_python_wrapper.h"
 
 namespace blue_sky {
@@ -144,4 +145,4 @@ namespace python {
 
 } // namespace python
 } // namespace blue_sky
-
+#endif

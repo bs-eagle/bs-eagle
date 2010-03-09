@@ -10,6 +10,7 @@
 #ifndef PY_RESERVOIR_SIMULATOR_H
 #define PY_RESERVOIR_SIMULATOR_H
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "py_event_manager.h"
 #include "py_calc_model.h"
 
@@ -31,4 +32,5 @@ namespace python {
 } // namespace python
 } // namespace blue_sky
 
+#endif
 #endif // PY_RESERVOIR_SIMULATOR_H

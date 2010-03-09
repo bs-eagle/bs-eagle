@@ -1,6 +1,7 @@
 #ifndef PY_MESH_GRDECL_H
 #define PY_MESH_GRDECL_H
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "py_rs_mesh.h"
 #include "bs_mesh_grdecl.h"
 
@@ -18,4 +19,5 @@ namespace python {
 } // namespace python
 } // namespace blue_sky
 
+#endif
 #endif // PY_MESH_GRDECL_H

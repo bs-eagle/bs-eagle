@@ -4,14 +4,13 @@
  * \author Sergey Miryanov
  * \date 16.06.2008
  * */
+
 #include "bs_matrix_stdafx.h"
-
 #include "py_jacobian_matrix.h"
-
-#ifdef BSPY_EXPORTING_PLUGIN
 
 #include "jacobian_matrix.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "construct_python_object.h"
 #include BS_STOP_PLUGIN_IMPORT ()

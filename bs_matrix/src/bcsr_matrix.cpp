@@ -7,7 +7,9 @@
 #include "bs_matrix_stdafx.h"
 
 #include "bcsr_matrix.h"
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "py_bcsr_matrix.h"
+#endif
 #include "locale_keeper.h"
 #include "bos_report.h"
 
@@ -16,7 +18,10 @@
 #include "bcsr_calc_lin_comb.h"
 
 using namespace std;
+
+#ifdef BSPY_EXPORTING_PLUGIN
 using namespace boost::python;
+#endif
 
 
 namespace blue_sky

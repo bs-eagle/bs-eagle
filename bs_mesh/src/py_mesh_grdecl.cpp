@@ -3,6 +3,7 @@
 #include "py_mesh_grdecl.h"
 #include "export_python_wrapper.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 using namespace boost::python;
 
 namespace blue_sky {
@@ -15,3 +16,4 @@ namespace python {
 
 } // namespace python
 } // namespace blue_sky
+#endif

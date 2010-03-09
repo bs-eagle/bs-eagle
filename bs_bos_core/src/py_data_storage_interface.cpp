@@ -8,9 +8,9 @@
  *       \todo  A bit outdate
  * */
 #include "stdafx.h"
-
 #include "py_data_storage_interface.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 namespace blue_sky
   {
   namespace python
@@ -145,3 +145,4 @@ private:
 
   } // namespace python
 } // namespace blue_sky
+#endif

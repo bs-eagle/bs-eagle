@@ -10,6 +10,7 @@
 #ifndef PY_RESERVOIR_H
 #define PY_RESERVOIR_H
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "reservoir.h"
 #include "facility_manager.h"
 #include "well_connection.h"
@@ -26,5 +27,6 @@ namespace python {
 } // namespace python
 } // namespace blue_sky
 
+#endif
 #endif // PY_RESERVOIR_H
 

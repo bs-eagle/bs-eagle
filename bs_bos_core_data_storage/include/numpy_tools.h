@@ -47,6 +47,7 @@ namespace type_helper
   };
 }
 
+#ifdef BSPY_EXPORTING_PLUGIN
   template <typename item_t>
   item_t *
   get_buffer (const boost::python::object &obj, boost::python::ssize_t size)
@@ -93,6 +94,7 @@ namespace type_helper
     namespace bp = boost::python;
     return bp::len (obj.attr ("data")) / (bp::ssize_t)bp::extract<bp::ssize_t> (obj.attr ("itemsize"));
   }
+#endif
 
 
 } // namespace numpy_tools

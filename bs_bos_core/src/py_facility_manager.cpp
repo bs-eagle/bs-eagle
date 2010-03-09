@@ -14,6 +14,7 @@
 #include "reservoir.h"
 #include "facility_manager.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "export_python_wrapper.h"
 
 using namespace boost::python;
@@ -100,3 +101,4 @@ namespace python {
 
 } // namespace python
 } // namespace blue_sky
+#endif

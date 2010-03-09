@@ -66,8 +66,11 @@
 
 
 using namespace blue_sky;
+
+#ifdef BSPY_EXPORTING_PLUGIN
 using namespace blue_sky::python;
 using namespace boost::python;
+#endif
 
 namespace blue_sky
 {
@@ -351,8 +354,11 @@ namespace blue_sky
     res &= wells::well_limit_operation_factory_register_type (pd);
     BS_ASSERT (res);
 
+	#ifdef BSPY_EXPORTING_PLUGIN
     res &= data_storage_proxy_register_type (pd);
     BS_ASSERT (res);
+	#endif
+
     res &= data_storage_register_type (pd);
     BS_ASSERT (res);
     res &= data_serializer_register_type (pd);

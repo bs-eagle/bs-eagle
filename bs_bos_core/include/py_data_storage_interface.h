@@ -12,6 +12,7 @@
 
 #include "data_storage_interface.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 namespace blue_sky
   {
   namespace python
@@ -96,5 +97,5 @@ namespace blue_sky
 } // namespace blue_sky
 
 
-
+#endif
 #endif  // #ifndef BS_PY_DATA_STORAGE_INTERFACE_H_

@@ -5,6 +5,7 @@
 #include "py_rs_mesh.h"
 #include "py_flux_connections.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 using namespace boost::python;
 
 namespace blue_sky {
@@ -17,3 +18,4 @@ namespace python {
 
 } // namespace python
 } // namespace blue_sky
+#endif

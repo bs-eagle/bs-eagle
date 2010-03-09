@@ -1,6 +1,7 @@
 #include "bs_mesh_stdafx.h"
 #include "py_flux_connections.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 using namespace boost::python;
 
 namespace blue_sky
@@ -37,3 +38,4 @@ namespace blue_sky
     template class py_flux_connections< base_strategy_di >;
   }
 }
+#endif

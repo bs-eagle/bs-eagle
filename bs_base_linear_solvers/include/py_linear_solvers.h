@@ -14,16 +14,18 @@
 #include "tfqmr.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "py_bcsr_matrix.h"
+#include "construct_python_object.h"
+#endif
 #include "write_time_to_log.h"
 #include "dummy_base.h"
-#include "construct_python_object.h"
 #include "make_me_happy.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "export_python_wrapper.h"
 
-#ifdef BSPY_EXPORTING_PLUGIN
 namespace blue_sky {
 namespace python {
 

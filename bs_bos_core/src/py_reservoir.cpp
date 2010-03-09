@@ -15,6 +15,7 @@
 #include "well_connection.h"
 #include "py_facility_manager.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 using namespace boost::python;
 
 namespace blue_sky {
@@ -35,3 +36,4 @@ namespace python {
 
 } // namespace python
 } // namespace blue_sky
+#endif

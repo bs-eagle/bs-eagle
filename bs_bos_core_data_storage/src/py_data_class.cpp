@@ -9,6 +9,7 @@
 
 #include "export_python_wrapper.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 using namespace boost::python;
 namespace bp = boost::python;
 using namespace blue_sky::tools;
@@ -219,3 +220,4 @@ namespace python {
 
 } // namespace python
 } // namespace blue_sky
+#endif

@@ -7,6 +7,7 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
+
 #include "stdafx.h"
 
 #include "py_reservoir_simulator.h"
@@ -23,6 +24,7 @@
 #include "keyword_manager.h"
 #include "well_connection.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "export_python_wrapper.h"
 #include <boost/python/call_method.hpp>
 
@@ -79,4 +81,4 @@ namespace python {
 
 } // namespace python
 } // namespace blue_sky
-
+#endif

@@ -1,6 +1,7 @@
 #ifndef PY_RS_MESH_H
 #define PY_RS_MESH_H
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "bcsr_matrix.h"
 #include "py_flux_connections.h"
 #include "rs_mesh_iface.h"
@@ -22,4 +23,5 @@ namespace python {
 } // namespace python
 } // namespace blue_sky
 
+#endif
 #endif // PY_RS_MESH_H

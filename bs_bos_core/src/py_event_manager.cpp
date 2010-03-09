@@ -17,6 +17,7 @@
 #include "well_connection.h"
 #include "calc_model.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "export_python_wrapper.h"
 
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
@@ -222,4 +223,4 @@ namespace python {
 
 } // namespace python
 } // namespace blue_sky
-
+#endif

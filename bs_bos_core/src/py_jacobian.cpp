@@ -7,12 +7,14 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
+
 #include "stdafx.h"
+
 #include "py_jacobian.h"
 #include "jacobian.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "construct_python_object.h"
-
 namespace blue_sky {
 namespace python {
 
@@ -46,4 +48,4 @@ namespace python {
 
 } // namespace python
 } // namespace blue_sky 
-
+#endif

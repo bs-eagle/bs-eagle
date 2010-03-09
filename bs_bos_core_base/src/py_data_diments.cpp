@@ -6,9 +6,12 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
+
+
 #include "bs_bos_core_base_stdafx.h"
 #include "data_dimens.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include <boost/python.hpp>
 
 namespace blue_sky {
@@ -28,4 +31,4 @@ namespace python {
 
 } // namespace python
 } // namespace blue_sky
-
+#endif

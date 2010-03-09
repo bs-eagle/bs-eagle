@@ -9,6 +9,7 @@
 #ifndef PY_CALC_MODEL_H
 #define PY_CALC_MODEL_H
 
+#ifdef BSPY_EXPORTING_PLUGIN
 namespace blue_sky {
 namespace python  {
 
@@ -21,4 +22,5 @@ namespace python  {
 } // namespace python
 } // namespace blue_sky
 
+#endif
 #endif // PY_CALC_MODEL_H

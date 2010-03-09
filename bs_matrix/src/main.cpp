@@ -20,8 +20,11 @@
 #include "py_jacobian_matrix.h"
 
 using namespace blue_sky;
+
+#ifdef BSPY_EXPORTING_PLUGIN
 using namespace blue_sky::python;
 using namespace boost::python;
+#endif
 
 namespace blue_sky {
   BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("bs_mx", "1.0.0", "Base matrixes for blue_sky", "Base matrixes for blue_sky", "bs_mx")

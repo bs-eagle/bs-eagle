@@ -11,8 +11,11 @@
 #include "data_dimens.h"
 
 using namespace blue_sky;
+
+#ifdef BSPY_EXPORTING_PLUGIN
 using namespace blue_sky::python;
 using namespace boost::python;
+#endif
 
 namespace blue_sky {
   BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("bs_bos_core_base", "1.0.0", "BS_BOS_CORE_BASE", "BS_BOS_CORE_BASE", "bs_bos_core_base")

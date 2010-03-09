@@ -8,13 +8,11 @@
  *       \todo  A bit outdate
  * */
 #include "stdafx.h"
-
-#ifdef BSPY_EXPORTING_PLUGIN
-
 #include "py_calc_well.h"
 #include "reservoir.h"
 #include "facility_manager.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 namespace blue_sky {
 namespace python {
 
@@ -27,8 +25,6 @@ namespace python {
     strategy_exporter::export_class <py_well, well, well_exporter> ("py_well_seq");
     strategy_exporter::export_class <py_connection, wells::connection, connection_exporter> ("py_connection_seq");
   }
-
-#endif  // #ifdef BSPY_EXPORTING_PLUGIN
 } // namespace python
 } // namespace blue_sky
-
+#endif  // #ifdef BSPY_EXPORTING_PLUGIN

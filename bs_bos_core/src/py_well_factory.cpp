@@ -8,10 +8,12 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
+
 #include "stdafx.h"
 #include "py_well_factory.h"
 #include "well_connection.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 namespace blue_sky {
 namespace python {
 
@@ -36,4 +38,4 @@ namespace python {
 
 } // namespace python
 } // namespace blue_sky
-
+#endif

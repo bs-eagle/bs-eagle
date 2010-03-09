@@ -13,6 +13,7 @@
 
 #include "export_python_wrapper.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 namespace blue_sky
   {
   namespace python
@@ -70,4 +71,4 @@ namespace blue_sky
     }
   }
 }
-
+#endif

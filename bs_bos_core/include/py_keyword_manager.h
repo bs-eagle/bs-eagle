@@ -10,6 +10,7 @@
 #ifndef BS_BOS_CORE_PY_KEYWORD_MANAGER_H_
 #define BS_BOS_CORE_PY_KEYWORD_MANAGER_H_
 
+#ifdef BSPY_EXPORTING_PLUGIN
 namespace blue_sky {
 namespace python {
 
@@ -22,6 +23,5 @@ namespace python {
 } // namespace python
 } // namespace blue_sky
 
-
+#endif
 #endif // #ifndef BS_BOS_CORE_PY_KEYWORD_MANAGER_H_
-

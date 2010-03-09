@@ -7,6 +7,7 @@
 #ifndef BS_BOS_CORE_BASE_EXPORT_PYTHON_WRAPPER_H_
 #define BS_BOS_CORE_BASE_EXPORT_PYTHON_WRAPPER_H_
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "construct_python_object.h"
 #include "python_method_wrapper.h"
 #include "python_class_wrapper.h"
@@ -218,5 +219,5 @@ namespace python {
 } // namespace python
 } // namespace blue_sky
 
-
+#endif
 #endif // #ifndef BS_BOS_CORE_BASE_EXPORT_PYTHON_WRAPPER_H_

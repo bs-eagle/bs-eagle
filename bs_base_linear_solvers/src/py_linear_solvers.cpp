@@ -8,8 +8,8 @@
 #include "bs_base_linear_solvers_stdafx.h"
 #include "py_linear_solvers.h"
 
-using namespace boost::python;
 #ifdef BSPY_EXPORTING_PLUGIN
+using namespace boost::python;
 
 namespace blue_sky {
 namespace python {

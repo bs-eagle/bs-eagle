@@ -1,6 +1,7 @@
 #ifndef PY_FLUX_CONNECTIONS_H
 #define PY_FLUX_CONNECTIONS_H
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "flux_connections_iface.h"
 
 namespace blue_sky {
@@ -32,4 +33,5 @@ namespace python {
 } // namespace python
 } // namespace boost
 
+#endif
 #endif // PY_FLUX_CONNECTIONS_H

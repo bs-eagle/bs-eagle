@@ -5,8 +5,10 @@
 #include "bs_report.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
+#ifdef BSPY_EXPORTING
 #include <boost/python/enum.hpp>
 #include <boost/preprocessor/seq/for_each.hpp>
+#endif
 
 #define STLOG BS_KERNEL.get_log ()
 #define MTLOG BS_KERNEL.get_tlog ()

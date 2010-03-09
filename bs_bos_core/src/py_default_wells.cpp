@@ -6,6 +6,7 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
+
 #include "stdafx.h"
 #include "py_default_wells.h"
 #include "export_python_wrapper.h"
@@ -13,6 +14,7 @@
 #include "default_connection.h"
 #include "py_calc_well.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 using namespace blue_sky::wells;
 
 namespace blue_sky {
@@ -27,4 +29,4 @@ namespace python {
 
 } // namespace python
 } // namespace blue_sky
-
+#endif

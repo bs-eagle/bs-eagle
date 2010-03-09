@@ -11,6 +11,7 @@
 #ifndef BS_BOS_CORE_PY_WELL_FACTORY_H_
 #define BS_BOS_CORE_PY_WELL_FACTORY_H_
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "calc_well.h"
 #include "well_controller.h"
 #include "well_limit_operation.h"
@@ -66,6 +67,5 @@ namespace python {
 } // namespace python
 } // namespace blue_sky
 
-
+#endif
 #endif  // #ifndef BS_BOS_CORE_PY_WELL_FACTORY_H_
-

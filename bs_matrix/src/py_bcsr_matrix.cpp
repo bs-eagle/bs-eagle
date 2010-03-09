@@ -4,9 +4,11 @@
  * \author Sergey Miryanov
  * \date 06.05.2009
  * */
+
 #include "bs_matrix_stdafx.h"
 #include "py_bcsr_matrix.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "construct_python_object.h"
 #include BS_STOP_PLUGIN_IMPORT ()
@@ -94,3 +96,4 @@ namespace python {
 
 } // namespace python
 } // namespace blue_sky
+#endif

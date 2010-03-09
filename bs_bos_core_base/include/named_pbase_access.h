@@ -9,7 +9,10 @@
 
 #include "property_base.h"
 #include "throw_exception.h"
+
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "construct_python_object.h"
+#endif
 
 /* How to use this:
 	 ~~~~~~~~~~~~~~~~

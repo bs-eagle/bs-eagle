@@ -11,6 +11,8 @@
 #ifndef PY_EVENT_BASE_H
 #define PY_EVENT_BASE_H
 
+#ifdef BSPY_EXPORTING_PLUGIN
+
 #include "event_base.h"
 #include "event_manager.h"
 
@@ -52,4 +54,5 @@ namespace python {
 } // namespace python
 } // namespace blue_sky
 
+#endif
 #endif // PY_EVENT_BASE_H
