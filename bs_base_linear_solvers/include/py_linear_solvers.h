@@ -16,7 +16,6 @@
 #include BS_FORCE_PLUGIN_IMPORT ()
 #ifdef BSPY_EXPORTING_PLUGIN
 #include "py_bcsr_matrix.h"
-#include "construct_python_object.h"
 #endif
 #include "write_time_to_log.h"
 #include "dummy_base.h"
@@ -24,6 +23,7 @@
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #ifdef BSPY_EXPORTING_PLUGIN
+#include "construct_python_object.h"
 #include "export_python_wrapper.h"
 
 namespace blue_sky {

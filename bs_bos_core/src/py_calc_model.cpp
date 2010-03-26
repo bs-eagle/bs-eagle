@@ -7,13 +7,11 @@
  *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
-#include "py_calc_model.h"
 
 #ifdef BSPY_EXPORTING_PLUGIN
-
 #include "boost_array_adapter.h"
 #include "calc_model.h"
-
+#include "py_calc_model.h"
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "py_scal_wrapper.h"
 #include "py_data_class.h"
