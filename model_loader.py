@@ -32,7 +32,7 @@ a = bs.bs_assert ()
 a.set_factory(f)
 
 bos = bs.bs_bos_core
-bos.enable_fpu_exceptions ()
+#bos.enable_fpu_exceptions ()
 
 def get_param (index) :
     if (index >= len (sys.argv)) :

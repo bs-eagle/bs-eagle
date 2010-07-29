@@ -134,8 +134,8 @@ Global
 		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.Debug|Win32.Build.0 = Debug|Win32
 		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.Release_HDF5|Win32.ActiveCfg = Release|Win32
 		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.Release_HDF5|Win32.Build.0 = Release|Win32
-		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.Release_WO_Python|Win32.ActiveCfg = Release_WO_Python|Win32
-		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.Release_WO_Python|Win32.Build.0 = Release_WO_Python|Win32
+		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.Release_WO_Python|Win32.ActiveCfg = release_with_debug|Win32
+		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.Release_WO_Python|Win32.Build.0 = release_with_debug|Win32
 		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.Release|Win32.ActiveCfg = Release|Win32
 		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.Release|Win32.Build.0 = Release|Win32
 		{5FC52CB5-D666-4608-A354-81E3B5DE6035}.Debug_HDF5|Win32.ActiveCfg = Debug|Win32
