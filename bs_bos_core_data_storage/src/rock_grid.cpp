@@ -5,6 +5,7 @@
 #include "data_class.h"
 
 #include "plane_orientation.h"
+#include "write_time_to_log.h"
 
 
 #ifndef PI

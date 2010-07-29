@@ -24,7 +24,7 @@ namespace blue_sky
       : str (str)
       , postfix (postfix)
       {
-        BOSOUT (section::app_info, level::medium) << "---" << str << "_" << postfix << bs_end;
+        //BOSOUT (section::app_info, level::medium) << "---" << str << "_" << postfix << bs_end;
         t = clock ();
       }
 
@@ -32,7 +32,10 @@ namespace blue_sky
       {
         clock_t t2 = clock ();
         double diff = double (t2 - t) / double (CLOCKS_PER_SEC);
-        BOSOUT (section::app_info, level::medium) << str << "_" << postfix << "--- " << diff << "s" << bs_end;
+        if (postfix != "")
+          BOSOUT (section::app_info, level::medium) << str << "_" << postfix << " --- " << diff << "s" << bs_end;
+        else
+          BOSOUT (section::app_info, level::medium) << str << " --- " << diff << "s" << bs_end;
       }
     };
 

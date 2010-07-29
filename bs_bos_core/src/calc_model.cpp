@@ -132,7 +132,7 @@ namespace blue_sky
 #ifdef _DEBUG
     BOSOUT (section::init_data, level::debug) << "FI DEBUG: begin of init_main_arrays method" << bs_end;
 #endif // _DEBUG
-
+    write_time_to_log init_time ("Main arrays initialization", "");
 
     BS_ASSERT(input_data);
 
@@ -774,7 +774,8 @@ namespace blue_sky
   template <class strategy_t>
   int calc_model<strategy_t>::init_calcul_arrays (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
   {
-
+    write_time_to_log init_time ("Calc arrays initialization", "");
+    
     // trans mult
     //this->truns_mult.resize(mesh->get_n_active_elements());
     //this->p_deriv_truns_mult.resize(mesh->get_n_active_elements());
@@ -820,6 +821,7 @@ namespace blue_sky
   void
   calc_model <strategy_t>::init_jacobian (const sp_jacobian_t &jacobian, const sp_mesh_iface_t &mesh)
   {
+    write_time_to_log init_time ("Jacobian initialization", "");
     const sp_jacobian_matrix_t &locked_jmatrix (jacobian->get_jmatrix ());
 
 #ifdef _MPI

@@ -146,6 +146,8 @@ namespace blue_sky
     char key[CHAR_BUF_LEN];
     int flag;
     int len;
+    
+    write_time_to_log init_time ("Read model", "");
 
     l_reader->init (filename, filename);
 
@@ -753,7 +755,7 @@ namespace blue_sky
   check_data (const smart_ptr <rs_mesh_iface <strategy_t>, true> &mesh, const smart_ptr <idata, true> &data)
   {
     std::ostringstream out_s;
-
+    
     BOSOUT (section::check_data, level::medium)
     << "\n***************************************************************\n"
     << "                            CHECK INPUT DATA\n"
@@ -764,7 +766,7 @@ namespace blue_sky
     count += check5 (check_sat <strategy_t>,              data, mesh,  "Saturation check... ", false);
     count += check5 (check_geometry <strategy_t>,         data, mesh,  "Geometry check... ", false);
     count += check5 (check_perm <strategy_t>,             data, mesh,  "Permability check... ", false);
-    count += check5 (check_poro_ntg_multpv <strategy_t>,  data, mesh,  "Porosity and NTG, MULTPV check check... ", false);
+    count += check5 (check_poro_ntg_multpv <strategy_t>,  data, mesh,  "Porosity and NTG, MULTPV check ... ", false);
     count += check5 (check_equil <strategy_t>,            data, mesh,  "Equil region numbers check... ", true);
     count += check5 (check_volume <strategy_t>,           data, mesh,  "Volume check... ", false);
     count += check3 (check_rock <strategy_t>,             data,        "Rock check... ");

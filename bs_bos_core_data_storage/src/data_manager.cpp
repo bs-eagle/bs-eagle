@@ -7,6 +7,8 @@
 #include "arrays_tables.h"
 #include "data_class.h"
 
+#include "write_time_to_log.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // You can add new variable just find next Words
 // for symple variable                  -- VAR_V
@@ -302,7 +304,7 @@ namespace blue_sky
       int permz_counter = 0;
       int poro_counter = 0;
       int ntg_counter = 0;
-
+      
       array_uint8_t   &actnum = data->get_int_non_empty_array ("ACTNUM");
       const array_float16_t &permx  = data->get_float_non_empty_array ("PERMX");
       const array_float16_t &permy  = data->get_float_non_empty_array ("PERMY");
