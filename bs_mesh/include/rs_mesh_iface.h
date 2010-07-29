@@ -94,7 +94,7 @@ namespace blue_sky
       virtual void set_darcy (double darcy_constant_) = 0;
       
       //! get element internal number by external
-      virtual index_t get_element_ext_to_int (const index_t n_element) const = 0;
+      virtual index_t convert_ext_to_int (const index_t n_element) const = 0;
 
       //! get element external number by internal
       virtual index_t get_element_int_to_ext (const index_t n_element) const = 0;

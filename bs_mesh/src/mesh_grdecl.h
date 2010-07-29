@@ -9,7 +9,7 @@
 #include "rs_smesh_base.h"
 #include "flux_connections_iface.h"
 
-#include "fpoint3d.h"
+#include "mesh_element3d.h"
 
 #ifdef _HDF5_MY //!< using HDF5 or not
 #include "H5Cpp.h"
@@ -23,43 +23,9 @@
 #define HDF5_MAX_SPACE 40 //!< maxinum size of space that we can read from ASCII file
 #endif
 
-
-namespace rs_mesh_detail {
-
-  //! enum for define type of crossing between planes of cells
-  enum cross_section
-  {
-    empty, //!< no intersection
-    left, right,
-    top, bottom,
-    upper, lower,
-  };
-
-  //! element of coord line (2 point - start and begin)
-  struct coordElem
-  {
-    grd_ecl::fpoint3d pStart;	//!< start point of coord
-    grd_ecl::fpoint3d pEnd;		//!< end point of coord
-
-    //!< default constructor
-    coordElem() 
-    {
-    }	
-
-    //! constructor
-    coordElem(const grd_ecl::fpoint3d &apStart, const grd_ecl::fpoint3d &apEnd)
-    {
-      pStart = apStart;
-      pEnd = apEnd;
-    }
-  };
-
-} // namespace mesh_detail
-
-
 //! class for basic work with mesh based on ZCORN&COORD and tpfa calculating
 template<class strategy_t>
-class BS_API_PLUGIN mesh_grdecl : public  mesh_rs<strategy_t>
+class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base<strategy_t>
   {
   
 //+++++++++++++++++++++++++++++++++++++++++++
@@ -69,7 +35,7 @@ class BS_API_PLUGIN mesh_grdecl : public  mesh_rs<strategy_t>
     ///////////////////////
     // BASE TYPES
     ///////////////////////
-    typedef mesh_rs <strategy_t>                        base_t;
+    typedef rs_smesh_base <strategy_t>                  base_t;
 
     typedef typename base_t::index_t                    index_t;
     typedef typename base_t::item_t                     item_t;
@@ -88,16 +54,21 @@ class BS_API_PLUGIN mesh_grdecl : public  mesh_rs<strategy_t>
     // OWN TYPES
     ///////////////////////
 
-    typedef grd_ecl::fpoint3d                           fpoint3d;
-    typedef std::vector<grd_ecl::fpoint2d>              g_fpoint2d_vector;
+    typedef mesh_element3d <strategy_t>                 element_t;
+    typedef smart_ptr <element_t, true>                 sp_element_t;
+    typedef typename element_t::corners_t               corners_t;
+    typedef typename element_t::plane_t                 plane_t;
+
+    typedef typename grd_ecl::fpoint3d                  fpoint3d_t;
+    typedef typename grd_ecl::fpoint2d                  fpoint2d_t;
+    typedef typename grd_ecl::quadrangle_t              quadrangle_t;
+    
+    typedef typename boost::array <index_t, 8>          element_zcorn_index_t;
+    typedef typename boost::array <index_t, 4>          plane_zcorn_index_t;
+    typedef boost::array <item_t, 3>                    point3d_t;
+
     typedef typename strategy_t::rhs_item_array_t       rhs_item_array_t;
     typedef typename array_float16_t::value_type        pool_item_t;
-
-    typedef grd_ecl::fpoint3d_vector                    ijk_cube_t;
-    typedef boost::array <index_t, 4>                   side_t;
-    typedef boost::array <fpoint3d, 4>                  point_side_t;
-    typedef boost::array <item_t, 3>                    center_t;
-    typedef boost::array <index_t, 8>                   cube_index_t;
 
     typedef blue_sky::smart_ptr <blue_sky::FRead, true> sp_fread_t;
 
@@ -118,6 +89,12 @@ class BS_API_PLUGIN mesh_grdecl : public  mesh_rs<strategy_t>
     //! init arrays of properties
     void init_props (const sp_idata_t &idata);
     
+    //! get vertex of cube [i,j,k]
+    void calc_element (const index_t i, const index_t j, const index_t k, element_t &element) const;
+    
+    //! get vertex of cube [index]
+    element_t calc_element (const index_t index) const;
+
     //! get coords && zcorn from file_name
     bool file_open_cube(const char* file_name);
 
@@ -152,6 +129,8 @@ class BS_API_PLUGIN mesh_grdecl : public  mesh_rs<strategy_t>
 #endif
     ///////////////
 
+
+	/*
     center_t
     get_center (index_t i, index_t j, index_t k) const;
 
@@ -161,13 +140,7 @@ class BS_API_PLUGIN mesh_grdecl : public  mesh_rs<strategy_t>
     //! get volume of current fpoint3d cube
     float get_volume_cube (const grd_ecl::fpoint3d_vector &cube) const;
 
-    //! get vertex of cube (i,j,k) and center
-    //! length of (fpoint3d_vector) = 8
-    grd_ecl::fpoint3d_vector top_cube (const index_t i, const index_t j, const index_t k) const;
-
-    //! get vertex of cube (i,j,k) and center
-    //! length of (fpoint3d_vector) = 8
-    grd_ecl::fpoint3d_vector top_cube (const index_t index) const;
+	*/
 
     //-------------------------------------------
     //  INHERITED FUNCTIONS
@@ -204,7 +177,7 @@ class BS_API_PLUGIN mesh_grdecl : public  mesh_rs<strategy_t>
     /*!	\brief  find neighbours (adjacency matrix)
     	\param neig_matrix - bcsr adjacency matrix
     	\return 0 if success */
-    int find_neighbours(sp_bcsr_t &neig_matrix);
+    int find_neighbours(sp_bcsr_t &neig_matrix) {return 0;};
 
     /*! \brief get_block_dx_dy_dz
         \param n_elem - block number
@@ -244,7 +217,7 @@ class BS_API_PLUGIN mesh_grdecl : public  mesh_rs<strategy_t>
     int define_side(const index_t i, const index_t j,const  index_t k, const index_t i1, const index_t j1, const index_t k1) const;
 
     //! crossing coord&z - real coordinat of one point
-    fpoint3d cross_coord(const item_t z, const pool_item_t *coord) const;
+    void calc_corner_point (const pool_item_t z, const pool_item_t *coord, fpoint3d_t &p) const;
 
     /*!	\brief is block[i,j,k] have been already splicing
     	\return true if already splicing, else - false */
@@ -259,23 +232,24 @@ class BS_API_PLUGIN mesh_grdecl : public  mesh_rs<strategy_t>
 
     /*! \brief check if 2 blocks (block [i,j,k] and [i,j,k1]) are close enough to be coupled*/
     bool are_two_blocks_close (const index_t i, const index_t j, const index_t k, const index_t k1) ;
+    
+    /*! \brief check if every active cell in mesh is adjacent*/
+    bool check_adjacency(int shift_zcorn = 0);
 
   public:
     //! calculate projection of area for all axis (for transmissibility and others calculation)
-    fpoint3d get_side_crossing_projection_on_all_axis(const point_side_t &side1, const point_side_t &side2)const;
+    void get_plane_crossing_projection_on_all_axis(const plane_t &side1, const plane_t &side2, fpoint3d_t &A)const;
+
+    plane_zcorn_index_t get_plane_zcorn_index (element_zcorn_index_t element, element_plane_orientation_t orientation) const;
+
+    void get_element_zcorn_index (const index_t i, const index_t j, const index_t k, element_zcorn_index_t& element) const;
+
 
   protected:
 
-    ///*! \brief get elems from cube which from selected side
-    //	\param i_side side, which we take from cube
-    //	\param cube source vector of vertex (or indexex)
-    //	\param is_anti if we take i_side, is_anti must be false; if we take antiside (left->right) is_anti must be true
-    //	\return selected side, defined by params */
-    //template <class array_t>
-    //array_t get_side(cross_section i_side, const array_t &cube, const bool is_anti)const;
 
     //! get arithmetic center of cube, which elements are indexes from zcorn_array[]
-    item_t get_center_zcorn(const cube_index_t &cube) const;
+    item_t get_center_zcorn(const element_zcorn_index_t &element) const;
 
     /*! \brief splicing block if it's too small
         \param volumes_temp - array of volumes
@@ -285,42 +259,19 @@ class BS_API_PLUGIN mesh_grdecl : public  mesh_rs<strategy_t>
     	also this too small block will be non-active (change actnum_array)*/
     int  splicing(item_array_t& volumes_temp);
 
-    /*! \brief add one element[i,j,k] in rows_ptr*/
-    void change_row(const index_t i, const index_t j, const index_t k, index_array_t &rows_ptr);
-
-    /*! \brief add index2 into cols_ind by address curIndex[index1]*/
-    void change_col(const index_t index1, const index_t index2, index_array_t &cols_ind, index_array_t& curIndex);
-
-    /*! \brief add index2 into cols_ind by address curIndex[index1] and change m&p_memory block indexation
-      \param is_m_memory define what array use to push_back index2
-      \param connection_number define what number of connection we put in*/
-    void change_col_add(const index_t index1, const index_t index2, index_array_t &cols_ind,
-                        index_array_t& curIndex, index_array_t& m_memory, index_array_t& p_memory, bool is_m_memory,
-                        bool is_need_to_add, const index_t connection_number, const index_array_t &rows_ptr);
-
-    /*! \brief set pointers to index1 and index2 connection in jacobian
-      \param connection_number define what number of connection we put in*/
-    void set_plus_minus (const index_t index1, const index_t index2, index_array_t &cols_ind, index_array_t &m_memory, index_array_t &p_memory,
-                         const index_t connection_number_minus, const index_t connection_number_plus,  const index_array_t &rows_ptr);
-
   public:
-    /*!	\brief is 2 side crossing or not (using zcorn dependences between blocks)
-    	\param side1 - fpoint3d vector of selected side (block 1)
-    	\param side2 - fpoint3d vector of selected side (block 2)
-    	\param x_dir - true if dir = {left, right}, else (dir = {top, bottom}) = false
-    	\return true if 2 side have common intersection area*/
-    bool is_2side_crossing(const side_t &side1, const side_t &side2, bool x_dir);
 
-    /*! \brief calculate transmissbility between two blocks
-    	\param index1 - global indexation (X->Y->Z) for first block
-    	\param inded2 - global indexation (X->Y->Z) for second block
-    	\param A - intersection area projection on all axis
-    	\param D1 - difference between center of side1 && center of block1
-    	\param side2 - fpoint3d vector of vertex (selected side)
+    /*! \brief calculate transmissbility between two blocks ()
+    	\param ext_index1 - global indexation (X->Y->Z) for first block
+    	\param ext_index2 - global indexation (X->Y->Z) for second block
+    	\param plane1 - contact plane of block1
+    	\param center1 - center of block1
     	\param center2 - center of block2
     	\param d_dir - direction of transmissibility
+    	\param plane2 - contact plane of block2 (if 0, then blocks are fully adjacent and contact area calculation is simple)
     	\return transmissiblity value between 2 blocks */
-    item_t calculate_tran(const index_t index1, const index_t index2, const fpoint3d& A, const fpoint3d& D1, const point_side_t &side2,const fpoint3d &center2, direction d_dir) const;
+      item_t calc_tran (const index_t ext_index1, const index_t ext_index2, const plane_t &plane1, 
+                          const fpoint3d_t &center1, const fpoint3d_t &center2, direction d_dir, plane_t *plane2  = 0) const;                          
 
 
 //-------------------------------------------
@@ -367,121 +318,5 @@ class BS_API_PLUGIN mesh_grdecl : public  mesh_rs<strategy_t>
     array_float16_t zcorn_array;				    //!< ZCORN array
   };
 
-//! get arithmetic center of cube
-template<class array_t>
-typename array_t::value_type 
-get_cube_center(const array_t &cube)
-{
-  typename array_t::value_type res;
-
-  for (size_t i = 0; i < cube.size(); i++)
-    {
-      res += cube[i];
-    }
-
-  return res / cube.size();
-}
-
-//! get vertex's index in zcorn_array of block[i,j,k]
-template<class index_t>
-boost::array <index_t, 8>
-top_cube_index(index_t i, index_t j, index_t k, index_t nx, index_t ny) 
-{
-  boost::array <index_t, 8> cubeIndex;
-  //define index
-  index_t index1 = i * 2 + j * 4 * nx + k * 8 * nx * ny;
-  index_t index2 = index1 + 4 * nx * ny;
-
-  cubeIndex[0] = index1;
-  cubeIndex[1] = index1 + 1;
-  cubeIndex[2] = index1 + 2 * nx;
-  cubeIndex[3] = index1 + 2 * nx + 1;
-
-  cubeIndex[4] = index2;
-  cubeIndex[5] = index2 + 1;
-  cubeIndex[6] = index2 + 2 * nx;
-  cubeIndex[7] = index2 + 2 * nx + 1;
-
-  return cubeIndex;
-}
-
-template <class array_t>
-boost::array <typename array_t::value_type, 4> 
-get_side(rs_mesh_detail::cross_section i_side, const array_t &cube, const bool is_anti)
-{
-  using namespace rs_mesh_detail;
-
-  if (is_anti)
-    {
-      switch (i_side)
-        {
-        case left :
-          i_side = right;
-          break;
-        case upper:
-          i_side = lower;
-          break;
-        case top:
-          i_side = bottom;
-          break;
-        case right:
-          i_side = left;
-          break;
-        case bottom:
-          i_side = top;
-          break;
-        case lower:
-          i_side = upper;
-          break;
-        default:
-          bs_throw_exception ("Invalid i_size value");
-        };
-    }
-
-  boost::array <typename array_t::value_type, 4> side;
-  switch (i_side)
-    {
-    case left :
-      side[0] = cube[2];
-      side[1] = cube[0];
-      side[2] = cube[6];
-      side[3] = cube[4];
-      break;
-    case right:
-      side[0] = cube[3];
-      side[1] = cube[1];
-      side[2] = cube[7];
-      side[3] = cube[5];
-      break;
-    case upper:
-      side[0] = cube[6];
-      side[1] = cube[4];
-      side[2] = cube[7];
-      side[3] = cube[5];
-      break;
-    case lower:
-      side[0] = cube[2];
-      side[1] = cube[0];
-      side[2] = cube[3];
-      side[3] = cube[1];
-      break;
-    case top:
-      side[0] = cube[4];
-      side[1] = cube[5];
-      side[2] = cube[0];
-      side[3] = cube[1];
-      break;
-    case bottom:
-      side[0] = cube[6];
-      side[1] = cube[7];
-      side[2] = cube[2];
-      side[3] = cube[3];
-      break;
-    default:
-      bs_throw_exception ("Invalid i_size value");;
-    }
-
-  return side;
-}
 
 #endif //MESH_GRDECL_H

@@ -81,7 +81,7 @@ using namespace blue_sky;
       }
       
       //! get const ext_to_int
-      index_t get_element_ext_to_int (const index_t n_element) const
+      index_t convert_ext_to_int (const index_t n_element) const
       {
         return ext_to_int[n_element];
       }

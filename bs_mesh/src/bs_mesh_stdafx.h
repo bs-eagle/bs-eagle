@@ -40,6 +40,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+// for timing
+#include <stdio.h>
+#include <time.h>
 
 #include <boost/array.hpp>
 
@@ -52,6 +55,7 @@
 #include "bs_tree.h"
 #include "bs_exception.h"
 #include "bs_prop_base.h"
+#include "write_time_to_log.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #ifdef BSPY_EXPORTING_PLUGIN

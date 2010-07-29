@@ -1,7 +1,7 @@
 #include "bs_mesh_stdafx.h"
 
 #include "mesh_ijk.h"
-#include "mesh_grdecl.h"
+//#include "mesh_grdecl.h"
 #include <stack>
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -89,6 +89,8 @@ void mesh_ijk<strategy_t>::check_data() const
     bs_throw_exception ("TOPS array is not initialized");
 }
 
+
+#if 1
 /*!
  * \brief  return coords of block vertexes
  * \param  i,j,k      - IJK index of block
@@ -96,7 +98,7 @@ void mesh_ijk<strategy_t>::check_data() const
  */
 template<class strategy_t>
 grd_ecl::fpoint3d_vector
-mesh_ijk<strategy_t>::top_cube (index_t index) const
+mesh_ijk<strategy_t>::calc_element (index_t index) const
   {
     grd_ecl::fpoint3d_vector cube_vertex;
     /*
@@ -127,6 +129,8 @@ mesh_ijk<strategy_t>::top_cube (index_t index) const
     return cube_vertex;
   }
 
+#endif
+
 /*!
  * \brief  return coords of block vertexes
  * \param  index       - index of block in mesh
@@ -134,10 +138,10 @@ mesh_ijk<strategy_t>::top_cube (index_t index) const
  */
 template<class strategy_t>
 grd_ecl::fpoint3d_vector
-mesh_ijk<strategy_t>::top_cube (const index_t i, const index_t j, const index_t k) const
+mesh_ijk<strategy_t>::calc_element (const index_t i, const index_t j, const index_t k) const
   {
     index_t index = XYZ_to_inside (i, j, k);
-    return top_cube (index);
+    return calc_element (index);
   }
 
 template <typename strategy_t>
@@ -145,17 +149,21 @@ typename mesh_ijk<strategy_t>::center_t
 mesh_ijk<strategy_t>::get_center (index_t n_block) const
 {
   BS_ASSERT (n_block != -1) (n_block);
-  grd_ecl::fpoint3d_vector cube_vertex;
-  center_t res;
+  center_t center;
+  
+  center[0] = dx_shift_array[n_block] + sp_dx[n_block] / 2;
+  center[1] = dy_shift_array[n_block] + sp_dy[n_block] / 2;
+  center[2] = dz_shift_array[n_block] + sp_dz[n_block] / 2;
 
-  cube_vertex = top_cube (n_block);
-  grd_ecl::fpoint3d point (get_cube_center (cube_vertex));
+  return center;
+}  
 
-  res[0] = point.x;
-  res[1] = point.y;
-  res[2] = point.z;
-
-  return res;
+template <typename strategy_t>
+typename mesh_ijk<strategy_t>::center_t
+mesh_ijk<strategy_t>::get_center (index_t i, index_t j, index_t k) const
+{
+  index_t n_block = BLOCK_NUM (i, j, k, nx, ny);
+  return get_center (n_block);
 }
 
 template<class strategy_t>

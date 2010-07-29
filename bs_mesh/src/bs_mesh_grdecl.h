@@ -123,8 +123,8 @@ namespace blue_sky
         {return wrapped.get_dtop(n_element);};
 
       //! get element internal number by external
-      index_t get_element_ext_to_int (const index_t n_element) const
-        {return wrapped.get_element_ext_to_int(n_element);};
+      index_t convert_ext_to_int (const index_t n_element) const
+        {return wrapped.convert_ext_to_int(n_element);};
 
       //! get element external number by internal
       index_t get_element_int_to_ext (const index_t n_element) const
@@ -139,12 +139,14 @@ namespace blue_sky
         {return wrapped.XYZ_to_inside(i, j, k);};
 
       //! return coords of block vertexes by IJK indexes
-      grd_ecl::fpoint3d_vector top_cube (const index_t i, const index_t j, const index_t k) const
-        {return wrapped.top_cube (i, j, k);};
+      grd_ecl::fpoint3d_vector calc_element (const index_t i, const index_t j, const index_t k) const
+        { mesh_grdecl<strategy_t>::element_t element;
+          wrapped.calc_element (i, j, k, element);
+          return element.get_corners ();};
 
       //! return coords of block vertexes by n_block index
-      grd_ecl::fpoint3d_vector top_cube (const index_t index) const
-        {return wrapped.top_cube (index);};
+      grd_ecl::fpoint3d_vector calc_element (const index_t index) const
+        {return wrapped.calc_element (index).get_corners ();};
 
       ///////////////////////
       // ACCESS ARRAYS

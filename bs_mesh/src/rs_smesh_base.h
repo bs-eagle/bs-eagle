@@ -9,7 +9,6 @@
 
 #include "flux_connections.h"
 #include "rs_mesh_base.h"
-#include "fpoint3d.h"
 
 using namespace blue_sky;
 
@@ -23,7 +22,7 @@ using namespace blue_sky;
 
 
 template<class strategy_t>
-class BS_API_PLUGIN mesh_rs : public rs_mesh_base<strategy_t>
+class BS_API_PLUGIN rs_smesh_base : public rs_mesh_base<strategy_t>
   {
 
 
@@ -51,20 +50,20 @@ class BS_API_PLUGIN mesh_rs : public rs_mesh_base<strategy_t>
     // OWN TYPES
     ///////////////////////
 
-    typedef mesh_rs <strategy_t>                        this_t;
+    typedef rs_smesh_base <strategy_t>                        this_t;
     typedef boost::array <index_t, 3>                   index_point3d_t;
     typedef std::pair<index_t, index_t>                 elem_index;
-    typedef boost::array <grd_ecl::fpoint3d, 8>         fpoint3d_vector;
+    //typedef boost::array <grd_ecl::fpoint3d, 8>         fpoint3d_vector;
 
 //-------------------------------------------
 //  METHODS
 //===========================================
   public:
     //! default constructor
-    mesh_rs ()	{};
+    rs_smesh_base ()	{};
 
     //! default destructor
-    virtual ~mesh_rs ()	{};
+    virtual ~rs_smesh_base ()	{};
 
     //! init mesh
     void init_props (const sp_idata_t &idata);
@@ -137,14 +136,17 @@ class BS_API_PLUGIN mesh_rs : public rs_mesh_base<strategy_t>
     //-------------------------------------------
     //  VIRTUAL FUNCTIONS
     //===========================================
+    
+    /*
     virtual
-    grd_ecl::fpoint3d_vector top_cube (const index_t i, const index_t j, const index_t k) const
+    grd_ecl::fpoint3d_vector calc_element (const index_t i, const index_t j, const index_t k) const
       {
         BS_ASSERT (false && "PURE CALL");
         static grd_ecl::fpoint3d_vector dummy;
         return dummy;
       };
-
+    */
+    
     /*! \brief get_block_dx_dy_dz
         \param n_elem - block number
         \param (return value) dx, dy, dz - average size of current block

@@ -7,12 +7,12 @@
 	\date 2008-11-13 */
 
 #include "rs_smesh_base.h"
-#include "fpoint3d.h"
+#include "mesh_element3d.h"
 #include "flux_connections_iface.h"
 
 //! class for basic work with mesh based on IJK and tpfa calculating
 template<class strategy_t>
-class  mesh_ijk : public mesh_rs<strategy_t>
+class  mesh_ijk : public rs_smesh_base<strategy_t>
   {
 //+++++++++++++++++++++++++++++++++++++++++++
 //  INTERNAL TYPE DECLARATION
@@ -21,7 +21,7 @@ class  mesh_ijk : public mesh_rs<strategy_t>
     ///////////////////////
     // BASE TYPES
     ///////////////////////
-    typedef mesh_rs <strategy_t>                        base_t;
+    typedef rs_smesh_base <strategy_t>                  base_t;
 
     typedef typename base_t::index_t                    index_t;
     typedef typename base_t::item_t                     item_t;
@@ -113,16 +113,18 @@ class  mesh_ijk : public mesh_rs<strategy_t>
 
     //! get vertexes of cube (index = i+j*nx+k*nx*ny)
     //! length of (fpoint3d_vector) = 8
-    grd_ecl::fpoint3d_vector top_cube (const index_t i, const index_t j, const index_t k) const;
+    
+    grd_ecl::fpoint3d_vector calc_element (const index_t i, const index_t j, const index_t k) const;
 
-    grd_ecl::fpoint3d_vector top_cube (const index_t index) const;
-
+    grd_ecl::fpoint3d_vector calc_element (const index_t index) const;
+    
+   
     //! get element center
     center_t
     get_center (index_t n_block) const;
 
     center_t
-    get_center (index_t i, index_t j, index_t k) const {return base_t::get_center (i,j,k);};
+    get_center (index_t i, index_t j, index_t k) const;
 
   protected:
     /*! \brief calc depth for mesh (length n_active_elements)

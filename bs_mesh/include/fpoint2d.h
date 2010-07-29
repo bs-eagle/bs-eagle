@@ -34,6 +34,10 @@ namespace grd_ecl
         return *this;
       }
     };
+  
+  typedef boost::array <fpoint2d, 4>       quadrangle_t;
+  typedef boost::array <fpoint2d, 3>       triangle_t;
+  
   inline float get_sq_distance(const fpoint2d &a, const fpoint2d &b)
   {
     return (a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y);
@@ -57,28 +61,30 @@ namespace grd_ecl
   }
 
   //additional functions
+  // find cross point of two cuts, return 1 if point is INSIDE both of cuts
   inline int crossing_points_2d( //crossing of 2 cut
-    const fpoint2d &p11, const fpoint2d &p12,   // coordinates of first cut
-    const fpoint2d &p21, const fpoint2d &p22,   // coordinates of second cut
+    const fpoint2d &p1, const fpoint2d &p2,   // coordinates of first cut
+    const fpoint2d &p3, const fpoint2d &p4,   // coordinates of second cut
     fpoint2d &resPoint, double eps)
   {
 
-    double Z  = (p12.y-p11.y)*(p21.x-p22.x)-(p21.y-p22.y)*(p12.x-p11.x); //denominator
+    double Z  = (p4.y - p3.y) * (p2.x - p1.x) - (p2.y - p1.y) * (p4.x - p3.x); //denominator
     //if denominator = 0 => lines are parallel
     if ( fabs(Z) < eps)
       return 0;
 
-    double Ua = ( (p12.y-p11.y)*(p21.x-p11.x)-(p21.y-p11.y)*(p12.x-p11.x) ) / Z; //numerator1
-    double Ub = ( (p21.y-p11.y)*(p21.x-p22.x)-(p21.y-p22.y)*(p21.x-p11.x) ) / Z; //numerator2
+    double Ua = ((p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x) ) / Z; //numerator1
+    double Ub = ((p2.x - p1.x) * (p1.y - p3.y) - (p2.y - p1.y) * (p1.x - p3.x) ) / Z; //numerator2
 
-    resPoint.x = (float)(p11.x + (p12.x - p11.x) * Ub);
-    resPoint.y = (float)(p11.y + (p12.y - p11.y) * Ub);
+    resPoint.x = (float)(p1.x + (p2.x - p1.x) * Ua);
+    resPoint.y = (float)(p1.y + (p2.y - p1.y) * Ua);
 
-    // if 0<=Ua<=1 && 0<=Ub<=1 -> crossing point inside cut
-    if ( (0 <= Ua)&&(Ua <= 1)&&(0 <= Ub)&&(Ub <= 1) )
+    if ( (0 < Ua) && (Ua < 1)&&(0 < Ub) && (Ub < 1) )
       return 1;
+
     return 0;
   }
+  
   inline float formula_gerona2d(const fpoint2d &p1, const fpoint2d &p2, const fpoint2d &p3)
   {
     float a = get_len(p2,p1);
@@ -94,97 +100,125 @@ namespace grd_ecl
     return sqrtf(x);
   }
 
-  inline float get_triangle_crossing_area(const std::vector<fpoint2d> &tri1, const  std::vector<fpoint2d> &tri2, double eps)
+  inline float get_triangle_crossing_area(const triangle_t &tri1, const  triangle_t &tri2, double eps, int are_opposed)
   {
-    std::vector<fpoint2d> f;
-    fpoint2d p;
-    //side 0-1
-    if (crossing_points_2d(tri1[0],tri1[1],tri2[0],tri2[1],p,eps))
-      f.push_back(p);
-    if (crossing_points_2d(tri1[0],tri1[1],tri2[1],tri2[2],p,eps))
-      f.push_back(p);
-    if (crossing_points_2d(tri1[0],tri1[1],tri2[0],tri2[2],p,eps))
-      f.push_back(p);
-    //side 1-2
-    if (crossing_points_2d(tri1[2],tri1[1],tri2[0],tri2[1],p,eps))
-      f.push_back(p);
-    if (crossing_points_2d(tri1[2],tri1[1],tri2[1],tri2[2],p,eps))
-      f.push_back(p);
-    if (crossing_points_2d(tri1[2],tri1[1],tri2[0],tri2[2],p,eps))
-      f.push_back(p);
-
-    //side 0-2
-    if (crossing_points_2d(tri1[0],tri1[2],tri2[0],tri2[1],p,eps))
-      f.push_back(p);
-
-    if (!f.size()) //2 point are not triangle
-      return 0.0;
-
-    if (crossing_points_2d(tri1[0],tri1[2],tri2[1],tri2[2],p,eps))
-      f.push_back(p);
-    if (crossing_points_2d(tri1[0],tri1[2],tri2[0],tri2[2],p,eps))
-      f.push_back(p);
-
-    //we can have 1 extra point
-    size_t ik = 0;
-    for (size_t i = 0; i < f.size()-1 && !ik; i++)
-      for (size_t j = i+1; j < f.size(); j++)
-        if (get_sq_distance(f[i],f[j]) < eps)
-          {
-            ik = j;
-            break;
-          }
-
-    if (ik) //got out extra point
+    boost::array <fpoint2d, 6> f;
+    fpoint2d p, p1;
+    int i, n = 0;
+    int vertice_match1 = 0, vertice_match2 = 0;
+    float area = 0.0;
+    
+    
+    if (!are_opposed && (tri1[2].x == tri2[2].x) && (tri1[2].y == tri2[2].y))
       {
-        std::vector<fpoint2d>::iterator i;
-        i = f.begin()+ik;
-        f.erase(i);
+        // edges do not cross each other
+        f[n++] = tri1[2];
       }
-    if (f.size() < 3)
-      return 0.0;
-
-    float area = formula_gerona2d(f[0],f[1],f[2]);
-
-    if (f.size() == 4) //add second triangle
-      area += formula_gerona2d(f[1],f[2],f[3]);
-
+    else
+      {
+        // search crossing points of triangles non-coord edges (edge between 0 and 1 point is always on COORD)
+        
+        if (are_opposed && (((tri1[2].x == tri2[0].x) && (tri1[2].y == tri2[0].y)) || ((tri1[2].x == tri2[1].x) && (tri1[2].y == tri2[1].y))))
+          {
+            // edge 0-2 of tri1 do not cross other edges
+            f[n++] = tri1[2];
+            vertice_match1 = 1;
+          }
+        else
+          {
+            if (crossing_points_2d(tri1[0], tri1[2], tri2[1], tri2[2], p, eps))
+              f[n++] = p;
+            if (crossing_points_2d(tri1[0], tri1[2], tri2[0], tri2[2], p, eps))
+              f[n++] = p;
+          }
+          
+        if (are_opposed && (((tri2[2].x == tri1[0].x) && (tri2[2].y == tri1[0].y)) || ((tri2[2].x == tri1[1].x) && (tri2[2].y == tri1[1].y))))
+          {
+            // edge 0-2 of tri2 do not cross other edges
+            f[n++] = tri2[2];
+            vertice_match2 = 1;
+          }
+        else
+          {
+            if (crossing_points_2d(tri1[2], tri1[1], tri2[1], tri2[2], p, eps))
+              f[n++] = p;
+            if (crossing_points_2d(tri1[2], tri1[1], tri2[0], tri2[2], p, eps))
+              f[n++] = p;
+          }
+      }
+      
+    // here we check points on same COORD, using y coordinate, which is z-coordinate in 3D
+    if (are_opposed)
+      {
+        if (!vertice_match1 && (tri1[2].y > tri2[0].y) && (tri1[2].y < tri2[1].y))
+           f[n++] = tri1[2];
+           
+        if (!vertice_match2 && (tri2[2].y > tri1[0].y) && (tri2[2].y < tri1[1].y))
+           f[n++] = tri2[2];  
+      }
+    else
+      {
+        if (tri1[0].y > tri2[0].y)
+          p = tri1[0];
+        else
+          p = tri2[0];
+          
+        if (tri1[1].y < tri2[1].y)
+          p1 = tri1[1];
+        else
+          p1 = tri2[1];
+        
+        if (p.y < p1.y)
+          {
+            f[n++] = p;
+            f[n++] = p1;  
+          }
+      }
+    
+    n -= 2;
+    
+    for (i = 0; i < n; ++i)
+      area += formula_gerona2d(f[0],f[i + 1],f[i + 2]);  
+    
     return area;
   }
 
-  inline float get_polygon_crossing_area(const std::vector<fpoint2d> &polyg1, const std::vector<fpoint2d> &polyg2, double eps)
+  inline float get_quadrangle_crossing_area(const quadrangle_t &polyg1, const quadrangle_t &polyg2, double eps)
   {
-    //we have only 4-polygon -> we can share it on 2 triangles and after
-    //find triangle crossing area -> for our triangles they can
-    //have 0, 3 or 4 crossing point->using geron formula we can get the area -> sum = sum(area-triangle)
-    //всего может получитс€ 4 больших пересечени€ - искома€ площадь - их сумма (подходит дл€ всех случаев)
+    // devide each quadrangle into 2 triangles and find 4 areas of triangles crossing
+    // crossing area calculation is greatly simplified using MESH_GRDECL properties
 
     //share first polygon
-    std::vector<fpoint2d> tri1, tri2;
-    tri1.push_back(polyg1[0]);
-    tri1.push_back(polyg1[1]);
-    tri1.push_back(polyg1[2]);
+    triangle_t tri1, tri2;
+    tri1[0] = polyg1[0];  // COORD1
+    tri1[1] = polyg1[2];  // COORD1
+    tri1[2] = polyg1[1];  // COORD2 
+    
+    tri2[0] = polyg1[1];  // COORD2
+    tri2[1] = polyg1[3];  // COORD2
+    tri2[2] = polyg1[2];  // COORD1
 
-    tri2.push_back(polyg1[2]);
-    tri2.push_back(polyg1[3]);
-    tri2.push_back(polyg1[1]);
 
     //share second polygon
-    std::vector<fpoint2d> tri3, tri4;
-    tri3.push_back(polyg2[0]);
-    tri3.push_back(polyg2[1]);
-    tri3.push_back(polyg2[2]);
-
-    tri4.push_back(polyg2[2]);
-    tri4.push_back(polyg2[3]);
-    tri4.push_back(polyg2[1]);
+    triangle_t tri3, tri4;
+    tri3[0] = polyg2[0];  // COORD1
+    tri3[1] = polyg2[2];  // COORD1
+    tri3[2] = polyg2[1];  // COORD2 
+    
+    tri4[0] = polyg2[1];  // COORD2
+    tri4[1] = polyg2[3];  // COORD2
+    tri4[2] = polyg2[2];  // COORD1
 
     //find their area
     float area = 0.0;
-    area += get_triangle_crossing_area(tri1, tri3,eps);
-    area += get_triangle_crossing_area(tri1, tri4,eps);
-    area += get_triangle_crossing_area(tri2, tri3,eps);
-    area += get_triangle_crossing_area(tri2, tri4,eps);
+    
+    // tri1 and tri4, tri2 and tri3 are opposed (the have edge on different COORD)
+    area += get_triangle_crossing_area(tri1, tri4, eps, true);
+    area += get_triangle_crossing_area(tri2, tri3, eps, true);
+    
+    // tri1 and tri3, tri2 and tri4 are not opposed (the have edge on same COORD)
+    area += get_triangle_crossing_area(tri1, tri3, eps, false);
+    area += get_triangle_crossing_area(tri2, tri4, eps, false);
 
     return area;
   }

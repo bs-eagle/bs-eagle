@@ -1,6 +1,6 @@
 /*!
-	\file mesh_rs.cpp
-	\brief This file implement interface class #mesh_rs which transfers  mesh data to the reservoir simulation process
+	\file rs_smesh_base.cpp
+	\brief This file implement interface class #rs_smesh_base which transfers  mesh data to the reservoir simulation process
 	\author Iskhakov Ruslan
 	\date 2008-05-20
  */
@@ -10,7 +10,7 @@
 
 template <typename strategy_t>
 void
-mesh_rs <strategy_t>::init_props (const sp_idata_t &idata)
+rs_smesh_base <strategy_t>::init_props (const sp_idata_t &idata)
 {
   base_t::init_props (idata);
   
@@ -27,7 +27,7 @@ mesh_rs <strategy_t>::init_props (const sp_idata_t &idata)
 }
 
 template<class strategy_t>
-void mesh_rs<strategy_t>::inside_to_XYZ(const index_t index, index_t &i1,index_t &j1, index_t &k1) const
+void rs_smesh_base<strategy_t>::inside_to_XYZ(const index_t index, index_t &i1,index_t &j1, index_t &k1) const
   {
     index_t r_index = base_t::base_t::int_to_ext[index];
     k1 = r_index / (nx*ny);
@@ -36,7 +36,7 @@ void mesh_rs<strategy_t>::inside_to_XYZ(const index_t index, index_t &i1,index_t
   }
 
 template<class strategy_t>
-int mesh_rs<strategy_t>::init_int_to_ext()
+int rs_smesh_base<strategy_t>::init_int_to_ext()
 {
   if (base_t::base_t::ext_to_int.size() == 0)
     return -1;
@@ -54,7 +54,7 @@ int mesh_rs<strategy_t>::init_int_to_ext()
 }
 
 template<class strategy_t>
-void mesh_rs<strategy_t>::check_data() const
+void rs_smesh_base<strategy_t>::check_data() const
 {
   base_t::check_data ();
   
@@ -74,7 +74,7 @@ void mesh_rs<strategy_t>::check_data() const
 }
 
 template<class strategy_t>
-int mesh_rs<strategy_t>::get_elems_n_in_layers(const direction d_dir, index_array_t &elem_in_layers) const
+int rs_smesh_base<strategy_t>::get_elems_n_in_layers(const direction d_dir, index_array_t &elem_in_layers) const
 {
   index_t i_index;
   if (d_dir == along_dim3)
@@ -125,4 +125,4 @@ int mesh_rs<strategy_t>::get_elems_n_in_layers(const direction d_dir, index_arra
   return (int) elem_in_layers.size();
 }
 
-BS_INST_STRAT(mesh_rs);
+BS_INST_STRAT(rs_smesh_base);

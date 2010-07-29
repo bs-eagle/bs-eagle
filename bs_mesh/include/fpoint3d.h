@@ -70,6 +70,13 @@ namespace grd_ecl
     {
       return fpoint3d (fabs(a.x),fabs(a.y),fabs(a.z));
     }
+    
+    inline void distance_to_point (const fpoint3d &a, fpoint3d &distance)
+      {
+        distance.x = fabs(x - a.x); 
+        distance.y = fabs(y - a.y);
+        distance.z = fabs(z - a.z);
+      }
   };
 
   inline fpoint3d operator + (const fpoint3d &a, const fpoint3d  &b)

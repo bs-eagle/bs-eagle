@@ -51,10 +51,11 @@ namespace blue_sky
       virtual index_point3d_t get_dimens () = 0;
 
       //! return coords of block vertexes by IJK indexes
-      virtual grd_ecl::fpoint3d_vector top_cube (const index_t i, const index_t j, const index_t k) const = 0;
+      virtual grd_ecl::fpoint3d_vector calc_element (const index_t i, const index_t j, const index_t k) const = 0;
 
       //! return coords of block vertexes by n_block index
-      virtual grd_ecl::fpoint3d_vector top_cube (const index_t index) const = 0;
+      virtual grd_ecl::fpoint3d_vector calc_element (const index_t index) const = 0;
+      
 
       //! return center point of an element
       virtual point3d_t get_element_center (const index_t index) const = 0;

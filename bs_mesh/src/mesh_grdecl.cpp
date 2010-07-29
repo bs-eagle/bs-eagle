@@ -6,10 +6,1519 @@
 #include "mesh_grdecl.h"
 
 using namespace grd_ecl;
-using namespace rs_mesh_detail;
 using namespace blue_sky;
 
 const char filename_hdf5[] = "grid_swap.h5";
+
+#ifdef BS_MESH_WRITE_TRANSMISS_MATRIX  
+  FILE*  fp;
+#endif BS_MESH_WRITE_TRANSMISS_MATRIX 
+
+
+template<class strategy_t>
+inline void
+mesh_grdecl<strategy_t>::calc_corner_point(const pool_item_t z, const pool_item_t *coord, fpoint3d_t &p)const
+  {
+    p.z = z;
+    /*
+    float temp = (p.z-m_Coord.pStart.z)/(m_Coord.pEnd.z-m_Coord.pStart.z);
+    p.x = temp *(m_Coord.pEnd.x-m_Coord.pStart.x)+m_Coord.pStart.x;
+    p.y = temp *(m_Coord.pEnd.y-m_Coord.pStart.y)+m_Coord.pStart.y;
+    */
+    float temp = (p.z - coord[2]) / (coord[5] - coord[2]);
+    p.x = temp *(coord[3] - coord[0]) + coord[0];
+    p.y = temp *(coord[4] - coord[1]) + coord[1];
+  }
+  
+//! get element corners index in zcorn_array of block[i,j,k]
+ /* nodes layout
+     *                             X
+     *                    0+-------+1
+     *                    /|     / |
+     *                  /  |   /   |
+     *               2/-------+3   |
+     *              Y |   4+--|----+5
+     *                |   /Z  |   /
+     *                | /     | /
+     *              6 /-------/7
+     */
+
+template<class strategy_t>
+inline void
+typename mesh_grdecl<strategy_t>::get_element_zcorn_index(index_t i, index_t j, index_t k, element_zcorn_index_t& element)  const
+{
+  //typename mesh_grdecl<strategy_t>::element_zcorn_index_t element;
+  
+  index_t index1 = i * 2 + j * 4 * nx + k * 8 * nx * ny;
+  index_t index2 = index1 + 4 * nx * ny;
+
+  element[0] = index1;
+  element[1] = index1 + 1;
+  element[2] = index1 + 2 * nx;
+  element[3] = index1 + 2 * nx + 1;
+
+  element[4] = index2;
+  element[5] = index2 + 1;
+  element[6] = index2 + 2 * nx;
+  element[7] = index2 + 2 * nx + 1;
+}
+
+//! get element corners index in zcorn_array of block[i,j,k]
+template<class strategy_t>
+typename mesh_grdecl<strategy_t>::plane_zcorn_index_t
+typename mesh_grdecl<strategy_t>::get_plane_zcorn_index (element_zcorn_index_t element, 
+                                                         element_plane_orientation_t orientation)  const
+{
+  typename mesh_grdecl<strategy_t>::plane_zcorn_index_t plane;
+  switch (orientation)
+    {
+      case x_axis_minus:  //left_cross
+        plane[0] = element[0];
+        plane[1] = element[2];
+        plane[2] = element[4];
+        plane[3] = element[6];
+        break;
+      case x_axis_plus:   //right_cross
+        plane[0] = element[1];
+        plane[1] = element[3];
+        plane[2] = element[5];
+        plane[3] = element[7];
+        break;
+      case y_axis_minus:  //top_cross
+        plane[0] = element[0];
+        plane[1] = element[1];
+        plane[2] = element[4];
+        plane[3] = element[5];
+        break;
+      case y_axis_plus:   //bottom_cross
+        plane[0] = element[2];
+        plane[1] = element[3];
+        plane[2] = element[6];
+        plane[3] = element[7];
+        break;
+      case z_axis_minus:  //lower_cross
+        plane[0] = element[0];
+        plane[1] = element[2];
+        plane[2] = element[1];
+        plane[3] = element[3];
+        break;
+      case z_axis_plus:   //upper_cross
+        plane[0] = element[4];
+        plane[1] = element[6];
+        plane[2] = element[5];
+        plane[3] = element[7];
+        break;
+      
+      default:
+        bs_throw_exception ("Invalid orientation!");;
+    }
+}
+
+template<class strategy_t>
+typename mesh_grdecl<strategy_t>::element_t
+mesh_grdecl<strategy_t>::calc_element (const index_t index) const
+  {
+    index_t i, j, k;
+    element_t element;
+    
+    inside_to_XYZ (index, i, j, k);
+    calc_element (i, j, k, element);
+    return element;
+  }
+
+template<class strategy_t>
+void
+mesh_grdecl<strategy_t>::calc_element (const index_t i, const index_t j, const index_t k, element_t &element) const
+  {
+    corners_t corners;
+
+#ifdef _DEBUG
+    BS_ASSERT ( (i >= 0) && (i < nx) && (j >= 0) && (j < ny) && (k >= 0) && (k < nz));
+#endif
+
+    /* nodes layout
+     *                             X
+     *                    0+-------+1
+     *                    /|     / |
+     *                  /  |   /   |
+     *               2/-------+3   |
+     *              Y |   4+--|----+5
+     *                |   /Z  |   /
+     *                | /     | /
+     *              6 /-------/7
+     */
+
+    //define index
+
+    index_t index1 = i * 2 + j * 4 * nx + k * 8 * nx * ny;//upper side
+    index_t index2 = index1 + 4 * nx * ny;//lower side
+    index_t iCOORD = i + j * (nx + 1);
+
+    calc_corner_point (zcorn_array[index1], &coord_array[iCOORD * 6], corners[0]);
+    calc_corner_point (zcorn_array[index1 + 1], &coord_array[(iCOORD + 1) * 6], corners[1]);
+    calc_corner_point (zcorn_array[index1 + 2 * nx], &coord_array[(iCOORD + (nx + 1)) * 6], corners[2]);
+    calc_corner_point (zcorn_array[index1 + 2 * nx + 1], &coord_array[(iCOORD + (nx + 1) + 1) * 6], corners[3]);
+
+    calc_corner_point (zcorn_array[index2], &coord_array[iCOORD * 6], corners[4]);
+    calc_corner_point (zcorn_array[index2 + 1], &coord_array[(iCOORD + 1) * 6], corners[5]);
+    calc_corner_point (zcorn_array[index2 + 2 * nx], &coord_array[(iCOORD + (nx + 1)) * 6], corners[6]);
+    calc_corner_point (zcorn_array[index2 + 2 * nx + 1], &coord_array[(iCOORD + (nx + 1) + 1) * 6], corners[7]);
+    
+    element.init (corners);
+  }
+  
+template<class strategy_t>
+bool mesh_grdecl<strategy_t>::is_small(const index_t i, const index_t j, const index_t k, item_t eps)  const
+  {
+    if (k >= nz)
+      return false;
+
+    item_t dz1, dz2, dz3, dz4; //height for each coord
+    //define index
+    index_t index1 = i*2+j*4*nx+k*8*nx*ny;	//lower side
+    index_t index2 = index1+4*nx*ny;			//upper side
+    dz1 = zcorn_array[index2]-zcorn_array[index1];
+    dz2 = zcorn_array[index2+1]-zcorn_array[index1+1];
+    dz3 = zcorn_array[index2+2*nx]-zcorn_array[index1+2*nx];
+    dz4 = zcorn_array[index2+2*nx+1]-zcorn_array[index1+2*nx+1];
+
+    if (dz1 <= eps && dz2 <= eps && dz3 <= eps && dz4 <= eps)
+      return true;
+    return false;
+  }
+
+template<class strategy_t>
+void
+mesh_grdecl<strategy_t>::get_plane_crossing_projection_on_all_axis(const plane_t &plane1, const plane_t &plane2, fpoint3d_t &A)const
+  {
+    quadrangle_t quad1, quad2;
+
+    //project on YoZ
+    for (size_t i = 0; i < N_PLANE_CORNERS; i++)
+      {
+        quad1[i] = fpoint2d(plane1[i].y, plane1[i].z);
+        quad2[i] = fpoint2d(plane2[i].y, plane2[i].z);
+      }
+
+    A.x = get_quadrangle_crossing_area (quad1, quad2, EPS_SQ);
+
+    //project on XoZ
+    for (size_t i = 0; i < N_PLANE_CORNERS; i++)
+      {
+        quad1[i] = fpoint2d(plane1[i].x, plane1[i].z);
+        quad2[i] = fpoint2d(plane2[i].x, plane2[i].z);
+      }
+    A.y = get_quadrangle_crossing_area (quad1, quad2, EPS_SQ);
+
+    if ((A.x + A.y )!= 0.0)
+      {
+        //project on XoY
+        for (size_t i = 0; i < N_PLANE_CORNERS; i++)
+          {
+            quad1[i] = fpoint2d (plane1[i].x, plane1[i].y);
+            quad2[i] = fpoint2d (plane2[i].x, plane2[i].y);
+          }
+        A.z = get_quadrangle_crossing_area (quad1, quad2, EPS_SQ);
+     }
+  }
+
+template<class strategy_t>
+typename mesh_grdecl<strategy_t>::item_t 
+mesh_grdecl<strategy_t>::get_center_zcorn(const element_zcorn_index_t &element)const
+  {
+    item_t res = 0.0;
+    size_t i, n = element.size();
+    
+    for (i = 0; i < n; i++)
+      res += zcorn_array[element[i]];
+      
+    return res/n;
+  }
+
+
+
+template<class strategy_t>
+int mesh_grdecl<strategy_t>::init_ext_to_int()
+{
+ 
+  write_time_to_log init_time ("Mesh initialization", ""); 
+  item_array_t volumes_temp(n_elements);
+
+  //tools::save_seq_vector ("actnum.bs.txt").save sp_actnum;
+  
+  int splicing_num = splicing(volumes_temp);
+  
+  //check_adjacency (1);
+  //tools::save_seq_vector ("active_blocks.bs.txt").save sp_actnum;
+  
+  check_adjacency ();
+  
+  //make proxy array
+  ext_to_int.resize(n_elements,0);
+  size_t n_count = 0;
+
+  index_t nn_active = 0, i_index; //number of non-active previous cells
+  for (index_t i = 0; i < nz; ++i)
+    {
+      for (index_t j = 0; j < ny; ++j)
+        for (index_t k = 0; k < nx; ++k, ++n_count)
+          {
+            i_index = k + (nx * j) + (i * nx * ny);
+            
+            if (!sp_actnum[i_index])
+              {
+                nn_active++;
+                ext_to_int[n_count] = -1;
+              }
+            else
+              ext_to_int[n_count] = i_index-nn_active;
+          }
+    }
+
+  //tools::save_seq_vector ("ext_to_int.bs.txt").save (ext_to_int);
+
+  init_int_to_ext();
+
+  //fill volume array (except non-active block and using proxy array)
+  volumes.resize(n_active_elements);
+  for (int i = 0; i < n_active_elements; ++i)
+    volumes[i] = volumes_temp[int_to_ext[i]];
+    
+  calc_depths();
+  
+
+  //bs_throw_exception ("NOT IMPL YET");
+  return n_active_elements;
+}
+
+template<class strategy_t>
+void mesh_grdecl<strategy_t>::splice_two_blocks (const index_t i, const index_t j, const index_t k, const index_t k1)
+{
+  index_t index, index1, index2;
+
+  index1 = i * 2 + j * 4 * nx + k1 * 8 * nx * ny; //upper side of [i,j,k1]
+  index2 = i * 2 + j * 4 * nx + (k1 * 8 + 4) * nx * ny; //lower side of [i,j,k1]
+  if (k > k1)
+    {
+      index = i * 2 + j * 4 * nx + k * 8 * nx * ny; //upper side of [i,j,k]
+
+      zcorn_array[index] = zcorn_array[index1];
+      zcorn_array[index + 1] = zcorn_array[index1 + 1];
+      zcorn_array[index + 2 * nx] = zcorn_array[index1 + 2 * nx];
+      zcorn_array[index + 2 * nx + 1] = zcorn_array[index1 + 2 * nx + 1];
+
+      zcorn_array[index2] = zcorn_array[index1];
+      zcorn_array[index2 + 1] = zcorn_array[index1 + 1];
+      zcorn_array[index2 + 2 * nx] = zcorn_array[index1 + 2 * nx];
+      zcorn_array[index2 + 2 * nx + 1] = zcorn_array[index1 + 2 * nx + 1];
+    }
+  else
+    {
+      index = i * 2 + j * 4 * nx + (k * 8 + 4) * nx * ny; //lower side of [i,j,k]
+
+      zcorn_array[index] = zcorn_array[index2];
+      zcorn_array[index + 1] = zcorn_array[index2 + 1];
+      zcorn_array[index + 2 * nx] = zcorn_array[index2 + 2 * nx];
+      zcorn_array[index + 2 * nx + 1] = zcorn_array[index2 + 2 * nx + 1];
+
+      zcorn_array[index1] = zcorn_array[index2];
+      zcorn_array[index1 + 1] = zcorn_array[index2 + 1];
+      zcorn_array[index1 + 2 * nx] = zcorn_array[index2 + 2 * nx];
+      zcorn_array[index1 + 2 * nx + 1] = zcorn_array[index2 + 2 * nx + 1];
+    }
+}
+
+template<class strategy_t>
+bool mesh_grdecl<strategy_t>::are_two_blocks_close (const index_t i, const index_t j, const index_t k, const index_t k1)
+{
+  index_t index, index1;
+  if (k > k1)
+    {
+      index = i * 2 + j * 4 * nx + k * 8 *nx * ny; //upper side of [i,j,k]
+      index1 = i * 2 + j * 4 * nx + (k1 * 8 + 4) * nx * ny; //lower side of [i,j,k1]
+    }
+  else
+    {
+      index = i * 2 + j * 4 * nx + (k * 8 + 4) * nx * ny; //lower side of [i,j,k]
+      index1 = i * 2 + j * 4 * nx + k1 * 8 * nx * ny; //upper side of [i,j,k1]
+    }
+
+  if ((fabs (zcorn_array[index1] - zcorn_array[index]) < max_thickness) &&
+      (fabs (zcorn_array[index1 + 1] - zcorn_array[index + 1]) < max_thickness) &&
+      (fabs (zcorn_array[index1 + 2 * nx] - zcorn_array[index + 2 * nx]) < max_thickness) &&
+      (fabs (zcorn_array[index1 + 2 * nx + 1] - zcorn_array[index + 2 * nx + 1]) < max_thickness))
+    {
+      return true;
+    }
+  else
+    {
+      return false;
+    }
+}
+
+template<class strategy_t>
+bool mesh_grdecl<strategy_t>::check_adjacency(int shift_zcorn)
+{
+   index_t i, j, k;
+   index_t index, zindex, zindex1;
+   index_t n_adjacent = 0;
+   array_uint8_t &actnum     = sp_actnum;
+   
+  for (i = 0; i < nx; ++i)
+    for (j = 0; j < ny; ++j)
+      for (k = 0; k < nz; ++k)
+        {
+          
+          index = i + j * nx + k * nx * ny;
+          
+          
+          // miss inactive blocks
+          if (!actnum[index])
+            {
+              continue;
+            }
+                       
+          // check blocks adjacency
+          zindex = i * 2 + j * 4 * nx + k * 8 *nx * ny;
+          zindex1 = zindex + 2; // check next by x
+         
+          if (i + 1 == nx ||
+              zcorn_array[zindex + 1] == zcorn_array[zindex1] &&
+              zcorn_array[zindex +  2 * nx + 1] == zcorn_array[zindex1 +  2 * nx] &&
+              zcorn_array[zindex + 4 * nx * ny + 1] == zcorn_array[zindex1 + 4 * nx * ny ] &&
+              zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == zcorn_array[zindex1 + 4 * nx * ny + 2 * nx])
+            {
+              
+              zindex1 = zindex + 4 * nx; // check next by y
+              if (j + 1 == ny ||
+                  zcorn_array[zindex + 2 * nx] == zcorn_array[zindex1] &&
+                  zcorn_array[zindex + 2 * nx + 1] == zcorn_array[zindex1 +  1] &&
+                  zcorn_array[zindex + 4 * nx * ny + 2 * nx] == zcorn_array[zindex1 + 4 * nx * ny] &&
+                  zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == zcorn_array[zindex1+ 4 * nx * ny + 1])
+                  {
+                    n_adjacent++;
+                  }
+            }
+            if (shift_zcorn && (i + j) % 2 == 1)
+              {
+                zcorn_array[zindex] += 2;
+                zcorn_array[zindex + 1] += 2;
+                zcorn_array[zindex +  2 * nx] += 2;
+                zcorn_array[zindex +  2 * nx + 1] += 2;
+                zcorn_array[zindex + 4 * nx * ny] += 2;
+                zcorn_array[zindex + 4 * nx * ny + 1] += 2;
+                zcorn_array[zindex + 4 * nx * ny +  2 * nx] += 2;
+                zcorn_array[zindex + 4 * nx * ny +  2 * nx + 1] += 2;
+              }
+       }
+  
+  BOSOUT (section::mesh, level::medium) << "  adjacent cells:"<< n_adjacent <<" ("<< n_adjacent * 100 / (n_active_elements)<<"% active)" << bs_end;
+  return (n_adjacent == n_active_elements);
+}
+
+template<class strategy_t>
+int mesh_grdecl<strategy_t>::splicing(item_array_t& volumes_temp)
+{
+  index_t nCount = 0;
+  item_t vol_sum, vol_block;
+  index_t i, j, k, k1;
+  index_t small_block_top, big_block_top;
+  index_t n_inactive_orig, n_inactive_vol, n_incative_splice;
+  index_t index;
+  element_t element;
+
+#ifdef _DEBUG
+    BS_ASSERT (zcorn_array.size() && coord_array.size());
+#endif
+
+  array_uint8_t &actnum     = sp_actnum;
+  const array_float16_t &poro = sp_poro;
+  
+
+  n_inactive_orig = 0;
+  n_inactive_vol = 0;
+  n_incative_splice = 0;
+
+  for (i = 0; i < nx; ++i)
+    for (j = 0; j < ny; ++j)
+      {
+        small_block_top = -1;
+        big_block_top = -1;
+        vol_sum = 0.0;
+        for (k = 0; k < nz; ++k)
+          {
+            index = i + j * nx + k * nx * ny;
+            
+            // miss inactive blocks
+            if (!actnum[index])
+              {
+                // blocks can`t be spliced across inactive blocks
+                big_block_top = -1;
+                small_block_top = -1;
+                vol_sum = 0.0;
+                n_inactive_orig++;
+                continue;
+              }
+            calc_element (i, j, k, element);
+            vol_block = element.calc_volume ();
+            item_t vol_block_poro = vol_block * poro[index];
+
+            if (vol_block_poro <= minpv)
+              {
+                // block is too small, set as inactive
+                actnum[index] = 0;
+                ++nCount;
+                n_inactive_vol++;
+                // blocks can`t be spliced across inactive blocks
+                vol_sum = 0.0;
+                big_block_top = -1;
+                small_block_top = -1;
+                continue;
+              }
+            else if (vol_block_poro < minsv)
+              {
+                // this is small block
+
+                volumes_temp[index] = vol_block;
+
+                if (big_block_top != -1)
+                  {
+                    // this block is absorbed by bigger block above
+                    splice_two_blocks (i, j, big_block_top, k);
+                    // add volume this small block to the volume of big block
+                    volumes_temp[i + j * nx + big_block_top * nx * ny] += vol_block;
+
+                    // make block inactive
+                    actnum[index] = 0;
+                    ++nCount;
+                    n_incative_splice++;
+                    small_block_top = -1;
+                  }
+
+                // check if this block is close enough to next block
+                if ((k < (nz - 1)) && (are_two_blocks_close (i, j, k, k + 1)))
+                  {
+                    if (big_block_top == -1)
+                      {
+                        if (small_block_top == -1)
+                          {
+                            // if already not spliced, can be spliced with lower block
+                            small_block_top = k;
+                          }
+
+                        // aggregate volume of small blocks in case they`ll be spliced with lower block
+                        vol_sum += vol_block;
+                      }
+                  }
+                else
+                  {
+                    // this block and next block are not close, can`t be coupled
+                    small_block_top = -1;
+                    big_block_top = -1;
+                    vol_sum = 0.0;
+                    // TODO: make multperm = 0
+                  }
+
+              }
+            else
+              {
+                // this is big block
+
+                volumes_temp[index] = vol_block;
+
+                if (small_block_top != -1)
+                  {
+                    // this block absorbes all smaller blocks above
+                    for (k1 = k - 1; k1 >= small_block_top; --k1)
+                      {
+                        splice_two_blocks (i, j, k, k1);
+                        n_incative_splice++;
+                        // make small block inactive
+                        actnum[i + j * nx + k1 * nx * ny] = 0;
+                        ++nCount;
+                      }
+
+                    // add volume all small blocks above to the volume of this big block
+                    volumes_temp[index] += vol_sum;
+                    vol_sum = 0.0;
+                    small_block_top = -1;
+                  }
+
+                // check if this block is close enough to next block
+                if ((k < (nz - 1)) && (are_two_blocks_close (i, j, k, k + 1)))
+                  {
+                    // this block can absorb lower small blocks
+                    big_block_top = k;
+                  }
+                else
+                  {
+                    // this block and next block are not close, can`t be coupled
+                    small_block_top = -1;
+                    big_block_top = -1;
+                    // TODO: make multperm = 0
+                  }
+              }
+           }
+        }
+  
+  
+  index_t n_total = n_active_elements + n_inactive_orig;
+  /*
+  if (n_total != nx * ny * nz)
+  
+    {
+      BOSOUT (section::mesh, level::error) << "MESH_GRDECL total cells assert failed!" << bs_end;
+      return -1;
+    }  
+  */      
+  
+  BOSOUT (section::mesh, level::medium) << "Mesh cells info:" << bs_end;
+  BOSOUT (section::mesh, level::medium) << "  total: "<< n_total << bs_end; 
+  BOSOUT (section::mesh, level::medium) << "  initial active: "<< n_active_elements <<" ("<< n_active_elements * 100 / (n_total)<<"%)" << bs_end;
+  BOSOUT (section::mesh, level::medium) << "  marked inactive: "<< nCount << " (" << n_inactive_vol << " by volume, " << n_incative_splice << " by splice)" << bs_end;
+  n_active_elements -= nCount;
+  BOSOUT (section::mesh, level::medium) << "  total active: "<< n_active_elements <<" ("<< n_active_elements * 100 / (n_total)<<"%)" << bs_end;
+  
+  return nCount;
+}
+
+
+template<class strategy_t>
+int mesh_grdecl<strategy_t >::calc_depths ()
+{
+  depths.resize(n_active_elements,0);
+  index_t index = 0;
+  element_zcorn_index_t element;
+  for (index_t k = 0; k < nz; ++k)
+    for (index_t j = 0; j < ny; ++j)
+      for (index_t i = 0; i < nx; ++i, ++index)
+        {
+          if (sp_actnum[index])
+            {
+              get_element_zcorn_index(i, j, k, element);
+              depths[ext_to_int[index]] = get_center_zcorn(element);
+            }
+        }
+  return 0;
+}
+
+
+static int n_tran_calc = 0;
+
+// calculating method have been taken from td eclipse (page 896)
+// calc transmissibility between fully adjacent cells index1 and index2
+template<class strategy_t>
+typename mesh_grdecl<strategy_t>::item_t 
+mesh_grdecl<strategy_t>::calc_tran(const index_t ext_index1, const index_t ext_index2, const plane_t &plane1, 
+                                       const fpoint3d_t &center1, const fpoint3d_t &center2, direction d_dir, plane_t* plane2) const
+{
+  item_t tran;
+  fpoint3d_t D1, D2, A, plane_contact_center;
+  
+  n_tran_calc ++;
+  
+  // if (plane2 != 0) then column is not adjacent - but there still can be adjacent cells, so check it
+  if (plane2 == 0 || ((plane1[0].z == (*plane2)[0].z) && (plane1[1].z == (*plane2)[1].z) && (plane1[2].z == (*plane2)[2].z) && (plane1[3].z == (*plane2)[3].z)))
+  //if (plane2 == 0)
+    {
+      get_plane_center(plane1, plane_contact_center);
+      plane_contact_center.distance_to_point (center1, D1);
+      plane_contact_center.distance_to_point (center2, D2);
+      A = get_projection_on_all_axis_for_one_side(plane1);
+    }
+  else 
+    {
+      fpoint3d_t plane1_center, plane2_center;
+      
+      get_plane_center(plane1, plane1_center);
+      get_plane_center(*plane2, plane2_center);
+      
+      plane1_center.distance_to_point (center1, D1);
+      plane2_center.distance_to_point (center2, D2);
+      
+      // check simple cases of plane intersection  
+      
+      // 1. plane1 is completely inside plane2
+      if ((plane1[0].z >= (*plane2)[0].z) && (plane1[1].z >= (*plane2)[1].z) && (plane1[2].z <= (*plane2)[2].z) && (plane1[3].z <= (*plane2)[3].z))
+        A = get_projection_on_all_axis_for_one_side(plane1);
+      else 
+      // 2. plane2 is completely inside plane1  
+      if ((plane1[0].z <= (*plane2)[0].z) && (plane1[1].z <= (*plane2)[1].z) && (plane1[2].z >= (*plane2)[2].z) && (plane1[3].z >= (*plane2)[3].z))
+        A = get_projection_on_all_axis_for_one_side(*plane2);
+      else
+      // 3. plane1 is lower than plane2
+      if ((plane1[0].z >= (*plane2)[0].z) && (plane1[1].z >= (*plane2)[1].z) && (plane1[0].z <= (*plane2)[2].z) && (plane1[1].z <= (*plane2)[3].z) && (plane1[2].z >= (*plane2)[2].z) && (plane1[3].z >= (*plane2)[3].z))
+        {
+          (*plane2)[0] = plane1[0];
+          (*plane2)[1] = plane1[1];
+          A = get_projection_on_all_axis_for_one_side(*plane2);
+        }
+      else    
+       // 4. plane2 is lower than plane1
+      if ((plane1[0].z <= (*plane2)[0].z) && (plane1[1].z <= (*plane2)[1].z) && (plane1[2].z >= (*plane2)[0].z) && (plane1[3].z >= (*plane2)[1].z) && (plane1[2].z <= (*plane2)[2].z) && (plane1[3].z <= (*plane2)[3].z))
+        {
+          (*plane2)[2] = plane1[2];
+          (*plane2)[3] = plane1[3];
+          A = get_projection_on_all_axis_for_one_side(*plane2);
+        }
+      else    
+        get_plane_crossing_projection_on_all_axis(plane1, *plane2, A);
+    }
+  
+
+
+  float koef1, koef2 ; //koef = (A,Di)/(Di,Di)
+  
+  koef1 = A*D1 / (D1*D1);
+  koef2 = A*D2 / (D2*D2);
+  
+  #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
+        if (ext_index1 < 1000)
+          {
+             /*
+            fprintf (fp, "[A: %lf; %lf; %lf K1: %lf, K2: %lf]\n", A.x, A.y, A.z, koef1, koef2);
+           
+            fprintf (fp, "[D1: %lf; %lf; %lf, D2: %lf; %lf; %lf, plane_center: %lf; %lf; %lf, center1: %lf; %lf; %lf, center2: %lf; %lf; %lf]", \
+            D1.x, D1.y, D1.z, D2.x, D2.y, D2.z,  plane_contact_center.x, plane_contact_center.y, plane_contact_center.z,  
+            center1.x, center1.y, center1.z, center2.x, center2.y, center2.z);
+            fprintf (fp, "[D1: %lf; %lf; %lf, D2: %lf; %lf; %lf, plane_center: %lf; %lf; %lf, center1: %lf; %lf; %lf, center2: %lf; %lf; %lf]", \
+            D1.x, D1.y, D1.z, D2.x, D2.y, D2.z,  plane_contact_center.x, plane_contact_center.y, plane_contact_center.z,  
+            center1.x, center1.y, center1.z, center2.x, center2.y, center2.z);
+            */
+          }
+  #endif //BS_MESH_WRITE_TRANSMISS_MATRIX   
+
+  if (koef1 < 10e-16 || koef2 < 10e-16)
+    {
+      /*
+      BOSWARN (section::mesh, level::warning) 
+        << boost::format ("For indexes (%d, %d) transmissibility will be set to 0 because koef1 = 0 (%f) or koef2 = 0 (%f)")
+        % ext_index1 % ext_index2 % koef1 % koef2 
+        << bs_end;
+      */
+      return 0;
+    }
+
+  item_t Ti, Tj;
+
+  item_t ntg_index1 = 1;
+  item_t ntg_index2 = 1;
+  if (!sp_ntg.empty ())
+    {
+      ntg_index1 = sp_ntg[ext_index1];
+      ntg_index2 = sp_ntg[ext_index2];
+    }
+
+  if (d_dir == along_dim1) //lengthwise OX
+    {
+      Ti = sp_permx[ext_index1]*ntg_index1*koef1;
+      Tj = sp_permx[ext_index2]*ntg_index2*koef2;
+      tran = darcy_constant / (1 / Ti + 1 / Tj);
+      if (!sp_multx.empty ())
+        tran *= sp_multx[ext_index1];
+    }
+  else if (d_dir == along_dim2) //lengthwise OY
+    {
+      Ti = sp_permy[ext_index1]*ntg_index1*koef1;
+      Tj = sp_permy[ext_index2]*ntg_index2*koef2;
+      tran = darcy_constant / (1 / Ti + 1 / Tj);
+      if (!sp_multy.empty ())
+        tran *= sp_multy[ext_index1];
+    }
+  else //lengthwise OZ
+    {
+      Ti = sp_permz[ext_index1]*koef1;
+      Tj = sp_permz[ext_index2]*koef2;
+      tran = darcy_constant / (1 / Ti + 1 / Tj);
+      if (!sp_multz.empty ())
+        tran *= sp_multz[ext_index1];
+    }
+  
+  /*
+  #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
+    if (ext_index1 < 1000)
+      fprintf (fp, "[Ti: %lf; Tj: %lf]", Ti, Tj);
+  #endif //BS_MESH_WRITE_TRANSMISS_MATRIX  
+  */
+  return tran;
+}
+
+
+
+template<class strategy_t>
+int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t &jacobian,const sp_flux_conn_iface_t & flux_conn,
+                                                                  index_array_t &boundary_array)
+
+{
+  return build_jacobian_and_flux_connections_add_boundary (jacobian, flux_conn, boundary_array);
+}
+
+template<class strategy_t>
+void mesh_grdecl<strategy_t>::init_props(const sp_idata_t &idata)
+{
+  base_t::init_props (idata);
+
+  // init ZCORN
+  zcorn_array = idata->get_float_non_empty_array("ZCORN");
+  min_z = *(std::min_element(zcorn_array.begin(),zcorn_array.end()));
+  max_z = *(std::max_element(zcorn_array.begin(),zcorn_array.end()));
+
+  // init COORD
+  coord_array = idata->get_float_non_empty_array("COORD");
+
+  max_x = min_x = coord_array[0];
+  max_y = min_y = coord_array[1];
+
+  array_float16_t::iterator it, e = coord_array.end ();
+
+  for (it = coord_array.begin (); it != e; it += 6)
+    {
+      // move matching points apart
+      if (it[2] == it[5])
+        it[5] += 1.0f;
+
+      //looking for max&min coordinates
+      if (min_x > it[0]) min_x = it[0];
+      if (min_x > it[3]) min_x = it[3];
+
+      if (min_y > it[1]) min_y = it[1];
+      if (min_y > it[4]) min_y = it[4];
+
+      if (max_x < it[0]) max_x = it[0];
+      if (max_x < it[3]) max_x = it[3];
+
+      if (max_y < it[1]) max_y = it[1];
+      if (max_y < it[4]) max_y = it[4];
+
+    }
+
+}
+
+template<class strategy_t>
+void mesh_grdecl<strategy_t>::check_data() const
+{
+  base_t::check_data ();
+
+  if (min_x < 0)
+    bs_throw_exception (boost::format ("min_x = %d is out of range")% min_x);
+  if (min_y < 0)
+    bs_throw_exception (boost::format ("min_y = %d is out of range")% min_y);
+  if (min_z < 0)
+    bs_throw_exception (boost::format ("min_z = %d is out of range")% min_z);
+
+  if (!coord_array.size ())
+    bs_throw_exception ("COORD array is not initialized");
+  if (!zcorn_array.size ())
+    bs_throw_exception ("ZCORN array is not initialized");
+}
+
+template<class strategy_t>
+void mesh_grdecl<strategy_t>::get_block_dx_dy_dz (index_t n_elem, item_t &dx, item_t &dy, item_t &dz) const
+  {
+    element_t &elem = calc_element(n_elem);
+    point3d_t sizes = elem.get_dx_dy_dz (); 
+    dx = sizes[0];
+    dy = sizes[1];
+    dz = sizes[2];
+  }
+
+template<class strategy_t>
+float mesh_grdecl<strategy_t>:: get_block_dx(index_t n_elem) const
+  {
+    return calc_element(n_elem).get_dx();
+  }
+
+template<class strategy_t>
+float mesh_grdecl<strategy_t>:: get_block_dy(index_t n_elem) const
+  {
+    return calc_element(n_elem).get_dy();
+  }
+
+template<class strategy_t>
+float mesh_grdecl<strategy_t>:: get_block_dz(index_t n_elem) const
+  {
+    return calc_element(n_elem).get_dz();
+  }
+
+template<class strategy_t>
+float  mesh_grdecl<strategy_t>::get_dtop(index_t n_elem) const
+{
+  element_t elem;
+  
+  elem = calc_element (n_elem);
+
+  return elem.get_center().z - elem.get_dz();
+}
+
+template<class strategy_t>
+void mesh_grdecl<strategy_t>::generate_array()
+{
+#if 0
+  index_t n_size = n_elements;
+  sp_poro->clear();
+  sp_ntg->clear();
+
+  sp_permx->clear();
+  sp_permy->clear();
+  sp_permz->clear();
+
+  sp_multx->clear();
+  sp_multy->clear();
+  sp_multz->clear();
+
+
+  for (index_t i =0; i < n_size; ++i)
+    {
+      sp_poro->push_back(0.2f);
+      sp_ntg->push_back(0.4f);
+
+      sp_permx->push_back(10.0f);
+      sp_permy->push_back(10.0f);
+      sp_permz->push_back(10.0f);
+
+      sp_multx->push_back(1.0f);
+      sp_multy->push_back(1.0f);
+      sp_multz->push_back(1.0f);
+    }
+#endif
+}
+
+
+template <typename strategy_t, typename loop_t>
+struct build_jacobian_rows_class
+{
+  typedef typename strategy_t::index_t          index_t;
+  typedef typename strategy_t::item_t           item_t;
+  typedef typename strategy_t::index_array_t    index_array_t;
+  typedef typename strategy_t::item_array_t     item_array_t;
+
+  typedef mesh_grdecl <strategy_t>                mesh_t;
+  typedef typename mesh_t::plane_t                plane_t;
+  typedef typename mesh_t::element_zcorn_index_t  element_zcorn_index_t;
+
+  build_jacobian_rows_class (mesh_grdecl <strategy_t> *mesh, loop_t *loop, std::set <index_t, std::less <index_t> > &boundary_set, index_array_t *rows_ptr)
+  : mesh (mesh)
+  , loop (loop)
+  , boundary_set (boundary_set)
+  , rows_ptr (rows_ptr)
+  , nx (mesh->nx)
+  , ny (mesh->ny)
+  , nz (mesh->nz)
+  {
+  }
+
+  void
+  prepare (index_t i, index_t j, index_t k)
+  {
+    ext_index  = i + j * nx + k * nx * ny;
+  }
+
+  // check if (i, j) column of cells is adjacent to neigbours
+  // that is true, if every cell of a column is fully adjacent to X and Y neighbour
+  
+  bool
+  check_column_adjacency (index_t i, index_t j)
+  {
+    bool flag = true;
+    index_t k, zindex, zindex1, index;
+         
+    for (k = 0; k < nz; ++k)
+      {
+        index = i + j * nx + k * nx * ny;
+         
+        // miss inactive blocks
+        if (!mesh->sp_actnum[index])
+          {
+            continue;
+          }
+          
+        // check blocks adjacency
+        zindex = i * 2 + j * 4 * nx + k * 8 *nx * ny;
+        zindex1 = zindex + 2; // check next by x
+       
+        if (i + 1 == nx ||
+            mesh->zcorn_array[zindex + 1] == mesh->zcorn_array[zindex1] &&
+            mesh->zcorn_array[zindex +  2 * nx + 1] == mesh->zcorn_array[zindex1 +  2 * nx] &&
+            mesh->zcorn_array[zindex + 4 * nx * ny + 1] == mesh->zcorn_array[zindex1 + 4 * nx * ny ] &&
+            mesh->zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == mesh->zcorn_array[zindex1 + 4 * nx * ny + 2 * nx])
+          {
+            
+            zindex1 = zindex + 4 * nx; // check next by y
+            if (j + 1 == ny ||
+                mesh->zcorn_array[zindex + 2 * nx] == mesh->zcorn_array[zindex1] &&
+                mesh->zcorn_array[zindex + 2 * nx + 1] == mesh->zcorn_array[zindex1 +  1] &&
+                mesh->zcorn_array[zindex + 4 * nx * ny + 2 * nx] == mesh->zcorn_array[zindex1 + 4 * nx * ny] &&
+                mesh->zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == mesh->zcorn_array[zindex1+ 4 * nx * ny + 1])
+                {
+                  // cell is adjacent;
+                }
+             else
+              {
+                flag = false;
+                break;
+              }
+          }
+         else
+          {
+            flag = false;
+            break;
+          }  
+       }
+    loop->is_column_adjacent[j * nx + i] = flag;
+    return flag;
+  }
+
+  void
+  change_by_x (index_t i, index_t j, index_t k, index_t ext_index2, bool is_adjacent)
+  {
+    (*rows_ptr)[mesh->convert_ext_to_int (ext_index) + 1]++;
+    (*rows_ptr)[mesh->convert_ext_to_int (ext_index2) + 1]++;
+  }
+
+  void
+  change_by_y (index_t i, index_t j, index_t k, index_t ext_index2, bool is_adjacent)
+  {
+    (*rows_ptr)[mesh->convert_ext_to_int (ext_index) + 1]++;
+    (*rows_ptr)[mesh->convert_ext_to_int (ext_index2) + 1]++;
+  }
+
+  void
+  change_by_z (index_t i, index_t j, index_t k, index_t ext_index2, bool is_adjacent)
+  {
+    (*rows_ptr)[mesh->convert_ext_to_int (ext_index) + 1]++;
+    (*rows_ptr)[mesh->convert_ext_to_int (ext_index2) + 1]++;
+  }
+
+  void
+  add_boundary (index_t external_cell_index)
+  {
+    boundary_set.insert (external_cell_index);
+  }
+
+  mesh_grdecl <strategy_t>                  *mesh;
+  loop_t                                    *loop;
+  std::set <index_t, std::less <index_t> >  &boundary_set;
+  index_array_t                             *rows_ptr;
+  index_t                                   nx;
+  index_t                                   ny;
+  index_t                                   nz;
+  index_t                                   ext_index;
+};
+
+template <typename T, typename L, typename BS, typename RP>
+build_jacobian_rows_class <T, L>
+build_jacobian_rows (mesh_grdecl <T> *mesh, L *l, BS &bs, RP *rp)
+{
+  return build_jacobian_rows_class <T, L> (mesh, l, bs, rp);
+}
+
+template <typename strategy_t, typename loop_t>
+struct build_jacobian_cols_class
+{
+  typedef typename strategy_t::index_t          index_t;
+  typedef typename strategy_t::item_t           item_t;
+  typedef typename strategy_t::index_array_t    index_array_t;
+  typedef typename strategy_t::item_array_t     item_array_t;
+  typedef typename strategy_t::rhs_item_array_t rhs_item_array_t;
+
+  typedef mesh_grdecl <strategy_t>                mesh_t;
+  typedef typename mesh_t::element_t              element_t;
+  typedef typename mesh_t::plane_t                plane_t;
+  typedef typename mesh_t::element_zcorn_index_t  element_zcorn_index_t;
+
+  build_jacobian_cols_class (mesh_t *mesh, loop_t *loop, index_array_t *rows_ptr, index_array_t *cols_ind,
+    index_array_t &cols_ind_transmis, rhs_item_array_t &values_transmis,
+    index_array_t &matrix_block_idx_minus, index_array_t &matrix_block_idx_plus)
+  : mesh (mesh)
+  , loop (loop)
+  , rows_ptr (rows_ptr)
+  , cols_ind (cols_ind)
+  , cols_ind_transmis (cols_ind_transmis)
+  , values_transmis (values_transmis)
+  , matrix_block_idx_minus (matrix_block_idx_minus)
+  , matrix_block_idx_plus (matrix_block_idx_plus)
+  , nx (mesh->nx)
+  , ny (mesh->ny)
+  , nz (mesh->nz)
+  {
+    //curIndex.assign (rows_ptr->begin (), rows_ptr->end ());
+    index_t i;
+    index_t n = mesh->n_active_elements;
+    
+    
+    rows_ptr_tmp.resize (n);
+    for (i = 0; i < n; ++i)
+      {
+        // let it point to first non-diagonal column in each row
+        rows_ptr_tmp[i] = (*rows_ptr)[i] + 1;
+        (*cols_ind)[(*rows_ptr)[i]]= i;
+      }
+  }
+  
+  void
+  prepare (index_t i, index_t j, index_t k)
+  {
+    ext_index  = i + j * nx + k * nx * ny;
+    int_index  = mesh->convert_ext_to_int (ext_index);
+
+    mesh->calc_element(i, j, k, element);
+    center1  = element.get_center();
+  }
+  
+    
+  void
+  change_jac_and_flux_conn( const index_t ext_index1, const index_t ext_index2, item_t tran)
+  {
+    index_t index1 = mesh->convert_ext_to_int (ext_index);
+    index_t index2 = mesh->convert_ext_to_int (ext_index2);
+    
+    (*cols_ind)[rows_ptr_tmp[index1]] = index2;
+    (*cols_ind)[rows_ptr_tmp[index2]] = index1;
+
+    matrix_block_idx_minus[loop->con_num] = (*rows_ptr)[index1];
+    matrix_block_idx_minus[loop->con_num + 1] = rows_ptr_tmp[index1];
+    matrix_block_idx_plus[loop->con_num + 1] = (*rows_ptr)[index2];
+    matrix_block_idx_plus[loop->con_num] = rows_ptr_tmp[index2];
+    
+    ++rows_ptr_tmp[index1];
+    ++rows_ptr_tmp[index2];
+    
+    cols_ind_transmis[loop->con_num++] = index1;
+    cols_ind_transmis[loop->con_num++] = index2;
+    
+    values_transmis.push_back(tran);
+    values_transmis.push_back(-tran);
+  }
+
+  bool
+  check_column_adjacency (index_t i, index_t j)
+  {
+    return loop->is_column_adjacent[i + j * nx];
+  }
+  
+  void
+  add_boundary (index_t)
+  {
+  }
+
+  void
+  change_by_x (index_t i, index_t j, index_t k, index_t ext_index2, bool is_adjacent)
+  {
+    item_t tran;
+    plane_t plane1;
+    element_t element2;
+    fpoint3d center2  = element2.get_center ();
+    
+    element.get_plane (x_axis_plus, plane1);
+    mesh->calc_element(i, j, k, element2);
+     
+    if (is_adjacent)
+      {
+        tran = mesh->calc_tran (ext_index, ext_index2, plane1, center1, center2, along_dim1);
+      }
+    else
+      {
+        plane_t plane2;
+        element2.get_plane (x_axis_minus, plane2);
+        tran = mesh->calc_tran (ext_index, ext_index2, plane1, center1, center2, along_dim1, &plane2);
+      }
+    
+    if (tran != 0)
+      {
+        change_jac_and_flux_conn (ext_index, ext_index2, tran);
+      }  
+    /*  
+    #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
+        if (ext_index < 1000)
+          fprintf (fp, " %d [%d;%d;%d] (%lf)", ext_index2, i, j, k, tran);
+    #endif //BS_MESH_WRITE_TRANSMISS_MATRIX 
+    */
+  }
+
+  void
+  change_by_y (index_t i, index_t j, index_t k, index_t ext_index2, bool is_adjacent)
+  {
+    item_t tran;
+    
+    plane_t plane1;
+    element_t element2;
+    fpoint3d center2  = element2.get_center ();
+    
+    element.get_plane (y_axis_plus, plane1);
+    mesh->calc_element(i, j, k, element2);
+     
+    if (is_adjacent)
+      {
+        tran = mesh->calc_tran (ext_index, ext_index2, plane1, center1, center2, along_dim2);
+      }
+    else
+      {
+        plane_t plane2;
+        element2.get_plane (y_axis_minus, plane2);
+        tran = mesh->calc_tran (ext_index, ext_index2, plane1, center1, center2, along_dim2, &plane2);
+      }
+     
+    if (tran != 0)
+      {
+        change_jac_and_flux_conn (ext_index, ext_index2, tran);
+      }
+     /* 
+    #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
+        if (ext_index < 1000)
+          fprintf (fp, " %d [%d;%d;%d] (%lf)", ext_index2, i, j, k, tran);
+    #endif //BS_MESH_WRITE_TRANSMISS_MATRIX 
+    */
+  }
+
+  void
+  change_by_z (index_t i, index_t j, index_t k, index_t ext_index2, bool is_adjacent)
+  {
+    item_t tran;
+    
+    plane_t plane1;
+    element_t element2;
+    fpoint3d center2  = element2.get_center ();
+    
+    element.get_plane (z_axis_plus, plane1);
+    mesh->calc_element(i, j, k, element2);
+    
+    tran = mesh->calc_tran (ext_index, ext_index2, plane1, center1, center2, along_dim3);
+         
+    if (tran != 0)
+      {
+        change_jac_and_flux_conn (ext_index, ext_index2, tran);
+      }
+    /*  
+    #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
+        if (ext_index < 1000)
+          fprintf (fp, " %d [%d;%d;%d] (%lf)", ext_index2, i, j, k, tran);
+    #endif //BS_MESH_WRITE_TRANSMISS_MATRIX  
+    */
+  }
+
+  mesh_t              *mesh;
+  loop_t              *loop;
+  index_array_t       *rows_ptr;
+  index_array_t       *cols_ind;
+  index_array_t       &cols_ind_transmis;
+  rhs_item_array_t    &values_transmis;
+  index_array_t       &matrix_block_idx_minus;
+  index_array_t       &matrix_block_idx_plus;
+
+  index_t             nx;
+  index_t             ny;
+  index_t             nz;
+
+  // points to current column position for each row
+  // while adding new columns
+  index_array_t       rows_ptr_tmp; 
+
+  index_t             ext_index; // index1
+  index_t             int_index; // index_ijk
+
+  element_t           element;
+  fpoint3d            center1;
+
+};
+
+template <typename M, typename L, typename RP, typename CI, typename CT, typename FC>
+build_jacobian_cols_class <M, L>
+build_jacobian_cols (mesh_grdecl <M> *m, L *l, RP *rp, CI *ci, CT &conn_trans, FC &flux_conn)
+{
+  return build_jacobian_cols_class <M, L> (m, l, rp, ci,
+    conn_trans->get_cols_ind (), conn_trans->get_values (),
+    flux_conn->get_matrix_block_idx_minus (), flux_conn->get_matrix_block_idx_plus ());
+}
+
+template <typename strategy_t>
+struct build_jacobian_and_flux : boost::noncopyable
+{
+  typedef typename strategy_t::index_t          index_t;
+  typedef typename strategy_t::item_t           item_t;
+  typedef typename strategy_t::index_array_t    index_array_t;
+  typedef typename strategy_t::item_array_t     item_array_t;
+
+  typedef mesh_grdecl <strategy_t>                mesh_t;
+  typedef typename mesh_t::plane_t                plane_t;
+  typedef typename mesh_t::element_zcorn_index_t  element_zcorn_index_t;
+
+  build_jacobian_and_flux (mesh_grdecl <strategy_t> *mesh)
+  : mesh (mesh)
+  , nx (mesh->nx)
+  , ny (mesh->ny)
+  , nz (mesh->nz)
+  , con_num (0)
+  {
+    is_column_adjacent.assign (nx * ny, true);
+  }
+
+  template <typename loop_body_t>
+  void
+  cell_loop (loop_body_t loop_body)
+  {
+    index_t ext_index1, ext_index2;
+    index_t last_k_x, last_k_y, k_x, k_y;
+    bool is_adjacent;
+    index_t n_adj_elems = 0, n_non_adj_elems = 0;
+    
+    element_zcorn_index_t zcorn_index1, zcorn_index2; 
+    array_float16_t &zcorn = mesh->zcorn_array;
+    for (index_t i = 0; i < nx; ++i)
+      {
+        for (index_t j = 0; j < ny; ++j)
+          {
+            is_adjacent = loop_body.check_column_adjacency (i, j);
+            
+            if (is_adjacent)
+              {   
+                
+                // simple loop
+                
+                for (index_t k = 0; k < nz; ++k)
+                  {
+                    ext_index1  = i + j * nx + k * nx * ny;
+                    
+                    //skip non-active cells
+                    if (!mesh->sp_actnum[ext_index1])
+                      continue;
+                      
+                    n_adj_elems++;
+                    
+                    /*
+                    #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
+                    if (ext_index1 < 1000)
+                      fprintf (fp, "\n%d [%d;%d;%d]", ext_index1, i, j, k);
+                    #endif //BS_MESH_WRITE_TRANSMISS_MATRIX  
+                    */
+                      
+                    loop_body.prepare (i, j, k);
+                    
+                    if (i+1 < nx && mesh->sp_actnum[ext_index1 + 1])
+                      {
+                        loop_body.change_by_x (i + 1, j, k, ext_index1 + 1, true);
+                      }
+                      
+                    if (j+1 < ny && mesh->sp_actnum[ext_index1 + nx])
+                      {
+                        loop_body.change_by_y (i, j + 1, k, ext_index1 + nx, true);
+                      }
+                     
+                    if (k+1 < nz && mesh->sp_actnum[ext_index1 + nx * ny])
+                      {
+                        loop_body.change_by_z (i, j, k + 1, ext_index1 + nx * ny, true);
+                      }
+                  }
+              }
+            else
+              {
+                // complicated loop
+                
+                last_k_x = 0;
+                last_k_y = 0;
+                
+                 /*                             X
+                 *                    0+-------+1
+                 *                    /|     / |
+                 *                  /  |   /   |
+                 *               2/-------+3   |
+                 *              Y |   4+--|----+5
+                 *                |   /Z  |   /
+                 *                | /     | /
+                 *              6 /-------/7
+                 */
+                            
+                for (index_t k = 0; k < nz; ++k)
+                  {
+                    ext_index1  = i + j * nx + k * nx * ny;
+                    
+                    //skip non-active cells
+                    if (!mesh->sp_actnum[ext_index1])
+                      continue;
+                    
+                    n_non_adj_elems++;
+                    
+                    /*
+                    #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
+                    if (ext_index1 < 1000)
+                      fprintf (fp, "\n%d [%d;%d;%d]", ext_index1, i, j, k);
+                    #endif //BS_MESH_WRITE_TRANSMISS_MATRIX  
+                    */
+                    
+                    mesh->get_element_zcorn_index (i, j, k, zcorn_index1);
+                    
+                    loop_body.prepare (i, j, k);
+                    
+                    if (i + 1 < nx) 
+                      {
+                        k_x = last_k_x - 1;
+                        
+                        // search first possible neighbour
+                        do
+                          {
+                            k_x++;
+                            mesh->get_element_zcorn_index (i + 1, j, k_x, zcorn_index2);
+                          }
+                        while ((k_x < nz) && ((zcorn[zcorn_index1[1]] >= zcorn[zcorn_index2[4]]) && (zcorn[zcorn_index1[3]] >= zcorn[zcorn_index2[6]])));
+                        
+                        // calc all neihbours
+                        while ((k_x < nz) && ((zcorn[zcorn_index1[5]] > zcorn[zcorn_index2[0]]) || (zcorn[zcorn_index1[7]] > zcorn[zcorn_index2[2]])))
+                          {
+                            if ((zcorn[zcorn_index1[5]] >= zcorn[zcorn_index2[4]]) && (zcorn[zcorn_index1[7]] >= zcorn[zcorn_index2[6]]))
+                              {
+                                // this (i + 1, j, k_x) neigbour won`t touch next (i, j, k + 1) element
+                                last_k_x = k_x + 1;
+                              }
+                              
+                            ext_index2 = ext_index1 + 1 + (k_x - k) * nx * ny;
+                            
+                            if (mesh->sp_actnum[ext_index2])
+                              {
+                                loop_body.change_by_x (i + 1, j, k_x, ext_index2, false);
+                              }
+                            k_x++;
+                            mesh->get_element_zcorn_index (i + 1, j, k_x, zcorn_index2);
+                          }
+                      }
+                      
+                    if (j + 1 < ny) 
+                      {
+                        k_y = last_k_y - 1;
+                        
+                        // search first possible neighbour
+                        do
+                          {
+                            k_y++;
+                            mesh->get_element_zcorn_index (i, j + 1, k_y, zcorn_index2);
+                          }
+                        while ((k_y < nz) && ((zcorn[zcorn_index1[2]] >= zcorn[zcorn_index2[4]]) && (zcorn[zcorn_index1[3]] >= zcorn[zcorn_index2[5]])));
+                        
+                        // calc all neighbours
+                        while ((k_y < nz) && ((zcorn[zcorn_index1[6]] > zcorn[zcorn_index2[0]]) || (zcorn[zcorn_index1[7]] > zcorn[zcorn_index2[1]])))
+                          {
+                            if ((zcorn[zcorn_index1[6]] >= zcorn[zcorn_index2[4]]) && (zcorn[zcorn_index1[7]] >= zcorn[zcorn_index2[5]]))
+                              {
+                                // this (i, j + 1, k_y) neigbour won`t touch next (i, j, k + 1) element
+                                last_k_y = k_y + 1;
+                              }
+                              
+                            ext_index2 = ext_index1 + ny + (k_y - k) * nx * ny;
+                            
+                            if (mesh->sp_actnum[ext_index2])
+                              {
+                                loop_body.change_by_y (i, j + 1, k_y, ext_index2, false);
+                              }
+                            k_y++;
+                            mesh->get_element_zcorn_index (i, j + 1, k_y, zcorn_index2);
+                          }
+                      }
+                      
+                    if (k + 1 < nz && mesh->sp_actnum[ext_index1 + nx * ny])
+                      {
+                        loop_body.change_by_z (i, j, k + 1, ext_index1 + nx * ny, true);
+                      }    
+                  }
+              }
+          }
+      }
+    BOSWARN (section::mesh, level::warning)<< boost::format ("MESH_GRDECL: elements adj %d, non-adj %d, total %d") \
+            % n_adj_elems % n_non_adj_elems % (n_adj_elems + n_non_adj_elems) << bs_end;  
+    BOSWARN (section::mesh, level::warning)<< boost::format ("MESH_GRDECL: number of tran calcs is %d") % n_tran_calc << bs_end;  
+  }
+
+  mesh_grdecl <strategy_t>    *mesh;
+  index_t                     nx;
+  index_t                     ny;
+  index_t                     nz;
+  shared_vector <bool>        is_column_adjacent;
+  index_t                     con_num;
+};
+
+
+template<class strategy_t>
+int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr_t &jacobian,
+                                                                               const sp_flux_conn_iface_t &flux_conn,
+                                                                               index_array_t &boundary_array)
+{
+  write_time_to_log init_time ("Mesh transmissibility calculation", ""); 
+  
+  n_connections = 0;
+  
+  index_t max_size = n_active_elements;
+  jacobian->get_cols_ind().clear();
+  jacobian->get_rows_ptr().clear();
+  jacobian->init_struct(max_size,max_size, max_size);
+  index_array_t* rows_ptr = &jacobian->get_rows_ptr();
+
+  sp_bcsr_t conn_trans;
+
+  (*rows_ptr)[0] = 0;
+
+  std::vector<bool> is_butting(nx*ny,false);
+
+  std::set<index_t, std::less<index_t> > boundary_set;
+
+  build_jacobian_and_flux <strategy_t> build_jacobian (this);
+  
+ #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX     
+  fp = fopen ("transmiss.out", "w");
+ #endif BS_MESH_WRITE_TRANSMISS_MATRIX   
+
+  //first step - define and fill - rows_ptr (jacobian)
+  build_jacobian.cell_loop (build_jacobian_rows (this, &build_jacobian, boundary_set, rows_ptr));
+
+  //////jacobian//////////////////////
+  //sum rows_ptr
+  for (size_t i = 1; i < rows_ptr->size(); ++i)
+    {
+      (*rows_ptr)[i]++;
+      (*rows_ptr)[i] += (*rows_ptr)[i-1];
+    }
+  //create cols_ind
+  index_array_t* cols_ind = &jacobian->get_cols_ind();
+
+  cols_ind->resize((*rows_ptr)[rows_ptr->size()-1],-1);
+
+
+  ////////transmis/////////////////////////
+  index_t cols_ind_n = (index_t)cols_ind->size();
+
+
+  index_t con_num = (cols_ind_n-max_size)/2;//connection number
+  n_connections = con_num;
+  conn_trans = flux_conn->get_conn_trans();
+  conn_trans->init_struct(con_num,2*con_num,2*con_num);
+
+  index_array_t *rows_ptr_transmis = &conn_trans->get_rows_ptr();
+  index_array_t &matrix_block_idx_minus = flux_conn->get_matrix_block_idx_minus ();
+  index_array_t &matrix_block_idx_plus = flux_conn->get_matrix_block_idx_plus ();
+
+  matrix_block_idx_minus.resize(con_num*2,-1);
+  matrix_block_idx_plus.resize(con_num*2,-1);
+
+  if (!con_num)
+    {
+      for (int i = 0; i < cols_ind_n; ++i)
+        (*cols_ind)[i] = i;
+      return 0;
+    }
+
+  for (index_t i = 0; i < con_num+1; ++i)
+    (*rows_ptr_transmis)[i] = i*2;
+
+  //second step - fill and define cols_ind
+  build_jacobian.con_num = 0;
+  build_jacobian.cell_loop (build_jacobian_cols (this, &build_jacobian, rows_ptr, cols_ind, conn_trans, flux_conn));
+
+
+  boundary_array.assign(boundary_set.begin(), boundary_set.end());
+  
+  #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX  
+    fflush (fp);
+    fclose (fp);
+  #endif BS_MESH_WRITE_TRANSMISS_MATRIX 
+
+  return (int) boundary_array.size();
+}
 
 #ifdef _HDF5_MY
 template<class strategy_t>
@@ -280,300 +1789,6 @@ bool mesh_grdecl<strategy_t>::file_open_cube_with_hdf5_swap(const char* file_nam
 #endif
 
 template<class strategy_t>
-fpoint3d  mesh_grdecl<strategy_t>::cross_coord(const item_t z, const pool_item_t *coord)const
-  {
-    fpoint3d p;
-    p.z = z;
-    /*
-    float temp = (p.z-m_Coord.pStart.z)/(m_Coord.pEnd.z-m_Coord.pStart.z);
-    p.x = temp *(m_Coord.pEnd.x-m_Coord.pStart.x)+m_Coord.pStart.x;
-    p.y = temp *(m_Coord.pEnd.y-m_Coord.pStart.y)+m_Coord.pStart.y;
-    */
-    float temp = (p.z - coord[2]) / (coord[5] - coord[2]);
-    p.x = temp *(coord[3] - coord[0]) + coord[0];
-    p.y = temp *(coord[4] - coord[1]) + coord[1];
-    return p;
-  }
-
-template<class strategy_t>
-grd_ecl::fpoint3d_vector
-mesh_grdecl<strategy_t>::top_cube (const index_t index) const
-  {
-    index_t i, j, k;
-    inside_to_XYZ (index, i, j, k);
-    return top_cube (i, j, k);
-  }
-
-template<class strategy_t>
-grd_ecl::fpoint3d_vector
-mesh_grdecl<strategy_t>::top_cube (const index_t i, const index_t j, const index_t k) const
-  {
-    grd_ecl::fpoint3d_vector cubeVertex;
-
-#ifdef _DEBUG
-    BS_ASSERT ( (i >= 0) && (i < nx) && (j >= 0) && (j < ny) && (k >= 0) && (k < nz));
-#endif
-
-    //define index
-    index_t index1 = i*2+j*4*nx+k*8*nx*ny;//upper side
-    index_t index2 = index1+4*nx*ny;//lower side
-    index_t iCOORD = i+j*(nx+1);
-
-    /*
-    cubeVertex[0] = cross_coord(zcorn_array[index1],coord_array[iCOORD]);
-    cubeVertex[1] = cross_coord(zcorn_array[index1+1],coord_array[iCOORD+1]);
-    cubeVertex[2] = cross_coord(zcorn_array[index1+2*nx],coord_array[iCOORD+(nx+1)]);
-    cubeVertex[3] = cross_coord(zcorn_array[index1+2*nx+1],coord_array[iCOORD+(nx+1)+1]);
-
-    cubeVertex[4] = cross_coord(zcorn_array[index2],coord_array[iCOORD]);
-    cubeVertex[5] = cross_coord(zcorn_array[index2+1],coord_array[iCOORD+1]);
-    cubeVertex[6] = cross_coord(zcorn_array[index2+2*nx],coord_array[iCOORD+(nx+1)]);
-    cubeVertex[7] = cross_coord(zcorn_array[index2+2*nx+1],coord_array[iCOORD+(nx+1)+1]);
-    */
-    //upper
-    cubeVertex[0] = cross_coord(zcorn_array[index1], &coord_array[iCOORD * 6]);
-    cubeVertex[1] = cross_coord(zcorn_array[index1+1], &coord_array[(iCOORD+1) * 6]);
-    cubeVertex[2] = cross_coord(zcorn_array[index1+2*nx], &coord_array[(iCOORD+(nx+1)) * 6]);
-    cubeVertex[3] = cross_coord(zcorn_array[index1+2*nx+1], &coord_array[(iCOORD+(nx+1)+1) * 6]);
-    //lower
-    cubeVertex[4] = cross_coord(zcorn_array[index2], &coord_array[(iCOORD) * 6]);
-    cubeVertex[5] = cross_coord(zcorn_array[index2+1], &coord_array[(iCOORD+1) * 6]);
-    cubeVertex[6] = cross_coord(zcorn_array[index2+2*nx], &coord_array[(iCOORD+(nx+1)) * 6]);
-    cubeVertex[7] = cross_coord(zcorn_array[index2+2*nx+1], &coord_array[(iCOORD+(nx+1)+1) * 6]);
-
-    return cubeVertex;
-  }
-template<class strategy_t>
-float mesh_grdecl<strategy_t>::get_volume_cube (const fpoint3d_vector &cube) const
-  {
-    fpoint3d center = get_cube_center (cube);
-    item_t volume = 0.0;
-
-    //share for 12 tetraidr (6 side -> 2 tetraidr for each)
-    volume += grd_ecl::calc_tetra_volume(cube[0],cube[1],cube[2], center);
-    volume += grd_ecl::calc_tetra_volume(cube[1],cube[2],cube[3], center);
-
-    volume += grd_ecl::calc_tetra_volume(cube[1],cube[3],cube[7], center);
-    volume += grd_ecl::calc_tetra_volume(cube[1],cube[5],cube[7], center);
-
-    volume += grd_ecl::calc_tetra_volume(cube[0],cube[2],cube[6], center);
-    volume += grd_ecl::calc_tetra_volume(cube[0],cube[4],cube[6], center);
-
-    volume += grd_ecl::calc_tetra_volume(cube[4],cube[5],cube[6], center);
-    volume += grd_ecl::calc_tetra_volume(cube[5],cube[6],cube[7], center);
-
-    volume += grd_ecl::calc_tetra_volume(cube[0],cube[1],cube[4], center);
-    volume += grd_ecl::calc_tetra_volume(cube[1],cube[4],cube[5], center);
-
-    volume += grd_ecl::calc_tetra_volume(cube[2],cube[3],cube[6], center);
-    volume += grd_ecl::calc_tetra_volume(cube[3],cube[6],cube[7], center);
-
-    return volume;
-  }
-
-
-template<class strategy_t>
-int mesh_grdecl<strategy_t>::define_side(const index_t i, const index_t j,const  index_t k, const index_t i1, const index_t j1, const index_t k1) const
-  {
-    if (j == j1) //one row
-      {
-        if (i == i1+1)
-          return  left;
-        if (i == i1-1)
-          return  right;
-      }
-    if (i == i1) //one column
-      {
-        if (j == j1+1)
-          return  top;
-        if (j == j1-1)
-          return  bottom;
-      }
-    if (k == k1+1)
-      return upper;
-    if (k == k1-1)
-      return lower;
-    return empty;
-  }
-
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::is_small(const index_t i, const index_t j, const index_t k, item_t eps)  const
-  {
-    if (k >= nz)
-      return false;
-
-    item_t dz1, dz2, dz3, dz4; //height for each coord
-    //define index
-    index_t index1 = i*2+j*4*nx+k*8*nx*ny;	//lower side
-    index_t index2 = index1+4*nx*ny;			//upper side
-    dz1 = zcorn_array[index2]-zcorn_array[index1];
-    dz2 = zcorn_array[index2+1]-zcorn_array[index1+1];
-    dz3 = zcorn_array[index2+2*nx]-zcorn_array[index1+2*nx];
-    dz4 = zcorn_array[index2+2*nx+1]-zcorn_array[index1+2*nx+1];
-
-    if (dz1 <= eps && dz2 <= eps && dz3 <= eps && dz4 <= eps)
-      return true;
-    return false;
-  }
-
-template<class strategy_t>
-typename mesh_grdecl<strategy_t>::item_t mesh_grdecl<strategy_t>::calc_block_volume(const index_t i, const index_t j, const index_t k) const
-  {
-    const fpoint3d_vector &cube = top_cube(i, j, k);
-    index_t index = i + j * nx + k * nx * ny;
-    if (sp_ntg.empty ())
-      return (get_volume_cube(cube)); // * (*sp_poro)[index]);
-    else
-      return (get_volume_cube(cube) * sp_ntg[index]);// * (*sp_poro)[index]);
-  }
-
-template<class strategy_t>
-fpoint3d mesh_grdecl<strategy_t>::get_side_crossing_projection_on_all_axis(const point_side_t &side1, const point_side_t &side2)const
-  {
-    fpoint3d sqArea;
-    g_fpoint2d_vector polyg1, polyg2;
-
-    //project on YoZ
-    for (size_t i = 0; i < side1.size(); i++)
-      {
-        polyg1.push_back(fpoint2d(side1[i].y, side1[i].z));
-        polyg2.push_back(fpoint2d(side2[i].y, side2[i].z));
-      }
-    sqArea.x = get_polygon_crossing_area(polyg1, polyg2, EPS_SQ);
-
-    //project on XoZ
-    polyg1.clear();
-    polyg2.clear();
-    for (size_t i = 0; i < side1.size(); i++)
-      {
-        polyg1.push_back(fpoint2d(side1[i].x, side1[i].z));
-        polyg2.push_back(fpoint2d(side2[i].x, side2[i].z));
-      }
-    sqArea.y = get_polygon_crossing_area(polyg1, polyg2, EPS_SQ);
-
-    if (sqArea.x + sqArea.y == 0.0)
-      return fpoint3d(0,0,0);
-
-    //project on XoY
-    polyg1.clear();
-    polyg2.clear();
-    for (size_t i = 0; i < side1.size(); i++)
-      {
-        polyg1.push_back(fpoint2d(side1[i].x, side1[i].y));
-        polyg2.push_back(fpoint2d(side2[i].x, side2[i].y));
-      }
-    sqArea.z = get_polygon_crossing_area(polyg1, polyg2, EPS_SQ);
-    return sqArea;
-  }
-
-template <typename strategy_t>
-typename mesh_grdecl<strategy_t>::center_t
-mesh_grdecl<strategy_t>::get_center (index_t i_coord, index_t j_coord, index_t k_coord) const
-{
-  BS_ASSERT (i_coord != -1 && j_coord != -1 && k_coord != -1) (i_coord) (j_coord) (k_coord);
-
-  grd_ecl::fpoint3d point (get_cube_center (top_cube (i_coord, j_coord, k_coord)));
-
-  center_t res;
-  res[0] = point.x;
-  res[1] = point.y;
-  res[2] = point.z;
-
-  return res;
-}
-
-template <typename strategy_t>
-typename mesh_grdecl<strategy_t>::center_t
-mesh_grdecl<strategy_t>::get_center (index_t n_block) const
-{
-  BS_ASSERT (n_block != -1) (n_block);
-
-  index_t i_coord = 0, j_coord = 0, k_coord = 0;
-  inside_to_XYZ (n_block, i_coord, j_coord, k_coord);
-  return get_center (i_coord, j_coord, k_coord);
-}
-
-template<class strategy_t>
-typename mesh_grdecl<strategy_t>::item_t mesh_grdecl<strategy_t>::get_center_zcorn(const cube_index_t &cube)const
-  {
-    item_t res = 0.0;
-    for (size_t i = 0; i < cube.size(); i++)
-      res += zcorn_array[cube[i]];
-    return res/cube.size();
-  }
-
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::change_row(const index_t i, const index_t j,const  index_t k, index_array_t &rows_ptr)
-{
-  index_t index = XYZ_to_inside(i,j,k);
-  rows_ptr[index+1]++;
-}
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::change_col(const index_t index1, const index_t index2, index_array_t &cols_ind, index_array_t& curIndex)
-{
-  cols_ind[curIndex[index1]] = index2;
-  curIndex[index1]++;
-}
-
-template<class index_t, typename index_array_t>
-void
-change_col_add( const index_t index1, const index_t index2, index_array_t &cols_ind, index_array_t& curIndex,
-    index_array_t &m_memory, index_array_t &p_memory, bool is_m_memory,
-    bool is_need_to_add, const index_t connection_number, const index_array_t &rows_ptr)
-{
-  cols_ind[curIndex[index1]] = index2;
-
-  if (is_need_to_add)
-    {
-      if (is_m_memory)
-        {
-          m_memory[connection_number] = rows_ptr[index1];
-          m_memory[connection_number+1] = curIndex[index1];
-        }
-      else
-        {
-          p_memory[connection_number+1] = rows_ptr[index1];
-          p_memory[connection_number] = curIndex[index1];
-        }
-    }
-  ++curIndex[index1];
-}
-
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::set_plus_minus (const index_t index1, const index_t index2, index_array_t &cols_ind,
-    index_array_t &m_memory, index_array_t &p_memory, const index_t connection_number_minus,
-    const index_t connection_number_plus, const index_array_t &rows_ptr)
-{
-
-  int i, i1, i2;
-
-  i1 = rows_ptr[index1] + 1;
-  i2 = rows_ptr[index1 + 1];
-
-  //TODO: make search taking into account cols_ind is sorted
-  for (i = i1; i < i2; ++i)
-    {
-      if (cols_ind[i] == index2)
-        {
-          m_memory[connection_number_minus] = i;
-          break;
-        }
-    }
-
-  i1 = rows_ptr[index2] + 1;
-  i2 = rows_ptr[index2 + 1];
-
-  for (i = i1; i < i2; ++i)
-    {
-      if (cols_ind[i] == index1)
-        {
-          p_memory[connection_number_plus] = i;
-          break;
-        }
-    }
-}
-
-template<class strategy_t>
 bool mesh_grdecl<strategy_t>::file_open_actnum(const char* file_name)
 {
 #if 0
@@ -682,2084 +1897,5 @@ bool mesh_grdecl<strategy_t>::file_open_cube(const char* file_name)
   return false;
 }
 
-template<class strategy_t>
-int mesh_grdecl<strategy_t>::init_ext_to_int()
-{
-  item_array_t volumes_temp(n_elements);
-
-  //tools::save_seq_vector ("actnum.bs.txt").save sp_actnum;
-
-  int splicing_num = splicing(volumes_temp);
-
-  //tools::save_seq_vector ("active_blocks.bs.txt").save sp_actnum;
-
-
-  //make proxy array
-  ext_to_int.resize(n_elements,0);
-  size_t n_count = 0;
-
-  index_t nn_active = 0, i_index; //number of non-active previous cells
-  for (index_t i = 0; i < nz; ++i)
-    {
-      for (index_t j = 0; j < ny; ++j)
-        for (index_t k = 0; k < nx; ++k, ++n_count)
-          {
-            i_index = k + (nx * j) + (i * nx * ny);
-            if (!sp_actnum[i_index])
-              {
-                nn_active++;
-                ext_to_int[n_count] = -1;
-              }
-            else
-              ext_to_int[n_count] = i_index-nn_active;
-          }
-    }
-
-  //tools::save_seq_vector ("ext_to_int.bs.txt").save (ext_to_int);
-
-  init_int_to_ext();
-
-  //fill volume array (except non-active block and using proxy array)
-  volumes.resize(n_active_elements);
-  for (int i = 0; i < n_active_elements; ++i)
-    volumes[i] = volumes_temp[int_to_ext[i]];
-
-  calc_depths();
-  return splicing_num;
-}
-
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::splice_two_blocks (const index_t i, const index_t j, const index_t k, const index_t k1)
-{
-  index_t index, index1, index2;
-
-  index1 = i * 2 + j * 4 * nx + k1 * 8 * nx * ny; //upper side of [i,j,k1]
-  index2 = i * 2 + j * 4 * nx + (k1 * 8 + 4) * nx * ny; //lower side of [i,j,k1]
-  if (k > k1)
-    {
-      index = i * 2 + j * 4 * nx + k * 8 * nx * ny; //upper side of [i,j,k]
-
-      zcorn_array[index] = zcorn_array[index1];
-      zcorn_array[index + 1] = zcorn_array[index1 + 1];
-      zcorn_array[index + 2 * nx] = zcorn_array[index1 + 2 * nx];
-      zcorn_array[index + 2 * nx + 1] = zcorn_array[index1 + 2 * nx + 1];
-
-      zcorn_array[index2] = zcorn_array[index1];
-      zcorn_array[index2 + 1] = zcorn_array[index1 + 1];
-      zcorn_array[index2 + 2 * nx] = zcorn_array[index1 + 2 * nx];
-      zcorn_array[index2 + 2 * nx + 1] = zcorn_array[index1 + 2 * nx + 1];
-    }
-  else
-    {
-      index = i * 2 + j * 4 * nx + (k * 8 + 4) * nx * ny; //lower side of [i,j,k]
-
-      zcorn_array[index] = zcorn_array[index2];
-      zcorn_array[index + 1] = zcorn_array[index2 + 1];
-      zcorn_array[index + 2 * nx] = zcorn_array[index2 + 2 * nx];
-      zcorn_array[index + 2 * nx + 1] = zcorn_array[index2 + 2 * nx + 1];
-
-      zcorn_array[index1] = zcorn_array[index2];
-      zcorn_array[index1 + 1] = zcorn_array[index2 + 1];
-      zcorn_array[index1 + 2 * nx] = zcorn_array[index2 + 2 * nx];
-      zcorn_array[index1 + 2 * nx + 1] = zcorn_array[index2 + 2 * nx + 1];
-    }
-}
-
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::are_two_blocks_close (const index_t i, const index_t j, const index_t k, const index_t k1)
-{
-  index_t index, index1;
-  if (k > k1)
-    {
-      index = i * 2 + j * 4 * nx + k * 8 *nx * ny; //upper side of [i,j,k]
-      index1 = i * 2 + j * 4 * nx + (k1 * 8 + 4) * nx * ny; //lower side of [i,j,k1]
-    }
-  else
-    {
-      index = i * 2 + j * 4 * nx + (k * 8 + 4) * nx * ny; //lower side of [i,j,k]
-      index1 = i * 2 + j * 4 * nx + k1 * 8 * nx * ny; //upper side of [i,j,k1]
-    }
-
-  if ((fabs (zcorn_array[index1] - zcorn_array[index]) < max_thickness) &&
-      (fabs (zcorn_array[index1 + 1] - zcorn_array[index + 1]) < max_thickness) &&
-      (fabs (zcorn_array[index1 + 2 * nx] - zcorn_array[index + 2 * nx]) < max_thickness) &&
-      (fabs (zcorn_array[index1 + 2 * nx + 1] - zcorn_array[index + 2 * nx + 1]) < max_thickness))
-    {
-      return true;
-    }
-  else
-    {
-      return false;
-    }
-}
-
-template<class strategy_t>
-int mesh_grdecl<strategy_t>::splicing(item_array_t& volumes_temp)
-{
-  index_t nCount = 0;
-  item_t vol_sum, vol_block;
-  index_t i, j, k, k1;
-  index_t small_block_top, big_block_top;
-
-
-#ifdef _DEBUG
-    BS_ASSERT (zcorn_array.size() && coord_array.size());
-#endif
-
-  array_uint8_t &actnum     = sp_actnum;
-  const array_float16_t &poro = sp_poro;
-
-  for (i = 0; i < nx; ++i)
-    for (j = 0; j < ny; ++j)
-      {
-        small_block_top = -1;
-        big_block_top = -1;
-        vol_sum = 0.0;
-        for (k = 0; k < nz; ++k)
-          {
-            index_t index = i + j * nx + k * nx * ny;
-            // miss inactive blocks
-            if (!actnum[index])
-              {
-                // blocks can`t be spliced across inactive blocks
-                big_block_top = -1;
-                small_block_top = -1;
-                vol_sum = 0.0;
-                continue;
-              }
-
-            vol_block = calc_block_volume(i,j,k);
-            item_t vol_block_poro = vol_block * poro[index];
-
-            if (vol_block_poro < minpv * 0.99)
-              {
-                // block is too small, set as inactive
-                actnum[index] = 0;
-                ++nCount;
-                // blocks can`t be spliced across inactive blocks
-                vol_sum = 0.0;
-                big_block_top = -1;
-                small_block_top = -1;
-                continue;
-              }
-            else if (vol_block_poro < minsv)
-              {
-                // this is small block
-
-                volumes_temp[index] = vol_block;
-
-                if (big_block_top != -1)
-                  {
-                    // this block is absorbed by bigger block above
-                    splice_two_blocks (i, j, big_block_top, k);
-                    // add volume this small block to the volume of big block
-                    volumes_temp[i + j * nx + big_block_top * nx * ny] += vol_block;
-
-                    // make block inactive
-                    actnum[index] = 0;
-                    ++nCount;
-                    small_block_top = -1;
-                  }
-
-                // check if this block is close enough to next block
-                if ((k < (nz - 1)) && (are_two_blocks_close (i, j, k, k + 1)))
-                  {
-                    if (big_block_top == -1)
-                      {
-                        if (small_block_top == -1)
-                          {
-                            // if already not spliced, can be spliced with lower block
-                            small_block_top = k;
-                          }
-
-                        // aggregate volume of small blocks in case they`ll be spliced with lower block
-                        vol_sum += vol_block;
-                      }
-                  }
-                else
-                  {
-                    // this block and next block are not close, can`t be coupled
-                    small_block_top = -1;
-                    big_block_top = -1;
-                    vol_sum = 0.0;
-                    // TODO: make multperm = 0
-                  }
-
-              }
-            else
-              {
-                // this is big block
-
-                volumes_temp[index] = vol_block;
-
-                if (small_block_top != -1)
-                  {
-                    // this block absorbes all smaller blocks above
-                    for (k1 = k - 1; k1 >= small_block_top; --k1)
-                      {
-                        splice_two_blocks (i, j, k, k1);
-                        // make small block inactive
-                        actnum[i + j * nx + k1 * nx * ny] = 0;
-                        ++nCount;
-                      }
-
-                    // add volume all small blocks above to the volume of this big block
-                    volumes_temp[index] += vol_sum;
-                    vol_sum = 0.0;
-                    small_block_top = -1;
-                  }
-
-                // check if this block is close enough to next block
-                if ((k < (nz - 1)) && (are_two_blocks_close (i, j, k, k + 1)))
-                  {
-                    // this block can absorb lower small blocks
-                    big_block_top = k;
-                  }
-                else
-                  {
-                    // this block and next block are not close, can`t be coupled
-                    small_block_top = -1;
-                    big_block_top = -1;
-                    // TODO: make multperm = 0
-                  }
-              }
-           }
-        }
-  n_active_elements -= nCount;
-  return nCount;
-}
-
-
-template<class strategy_t>
-int mesh_grdecl<strategy_t >::calc_depths ()
-{
-  depths.resize(n_active_elements,0);
-  index_t index = 0;
-  for (index_t k = 0; k < nz; ++k)
-    for (index_t j = 0; j < ny; ++j)
-      for (index_t i = 0; i < nx; ++i, ++index)
-        {
-          if (sp_actnum[index])
-            depths[ext_to_int[index]] = get_center_zcorn(top_cube_index(i,j,k, nx, ny));
-        }
-  return 0;
-}
-
-// calculating method have been taken from td eclipse (page 896)
-template<class strategy_t>
-typename mesh_grdecl<strategy_t>::item_t mesh_grdecl<strategy_t>::calculate_tran(const index_t index1, const index_t index2,
-    const fpoint3d& A, const fpoint3d& D1,  const point_side_t &side2, const fpoint3d &center2, direction d_dir) const
-  {
-    item_t tran;
-    fpoint3d centerSide2 = get_cube_center(side2);
-    fpoint3d D2 = fpoint3d::abs(centerSide2-center2);
-
-    float koef1, koef2 ; //koef = (A,Di)/(Di,Di)
-    koef1 = A*D1 / (D1*D1);
-    koef2 = A*D2 / (D2*D2);
-
-    if (koef1 < 10e-16 || koef2 < 10e-16)
-      {
-        BOSWARN (section::mesh, level::warning)
-          << boost::format ("For indexes (%d, %d) transmissibility will be set to 0 because koef1 = 0 (%f) or koef2 = 0 (%f)")
-          % index1 % index2 % koef1 % koef2
-          << bs_end;
-
-        return 0;
-      }
-
-    item_t Ti, Tj;
-
-    item_t ntg_index1 = 1;
-    item_t ntg_index2 = 1;
-    if (!sp_ntg.empty ())
-      {
-        ntg_index1 = sp_ntg[index1];
-        ntg_index2 = sp_ntg[index2];
-      }
-
-    if (d_dir == along_dim1) //lengthwise OX
-      {
-        Ti = sp_permx[index1]*ntg_index1*koef1;
-        Tj = sp_permx[index2]*ntg_index2*koef2;
-        tran = darcy_constant / (1 / Ti + 1 / Tj);
-        if (!sp_multx.empty ())
-          tran *= sp_multx[index1];
-      }
-    else if (d_dir == along_dim2) //lengthwise OY
-      {
-        Ti = sp_permy[index1]*ntg_index1*koef1;
-        Tj = sp_permy[index2]*ntg_index2*koef2;
-        tran = darcy_constant / (1 / Ti + 1 / Tj);
-        if (!sp_multy.empty ())
-          tran *= sp_multy[index1];
-      }
-    else //lengthwise OZ
-      {
-        Ti = sp_permz[index1]*koef1;
-        Tj = sp_permz[index2]*koef2;
-        tran = darcy_constant / (1 / Ti + 1 / Tj);
-        if (!sp_multz.empty ())
-          tran *= sp_multz[index1];
-      }
-
-    return tran;
-  }
-
-
-template<class strategy_t>
-int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t &jacobian,const sp_flux_conn_iface_t & flux_conn,
-                                                                  index_array_t &boundary_array)
-
-{
-  return build_jacobian_and_flux_connections_add_boundary (jacobian, flux_conn, boundary_array);
-
-//  n_connections = 0;
-//
-//  index_t max_size = n_active_elements;
-//
-//  jacobian->get_cols_ind().clear();
-//  jacobian->get_rows_ptr().clear();
-//  jacobian->init_struct(max_size,max_size, max_size);
-//  index_array_t* rows_ptr = &jacobian->get_rows_ptr();
-//  sp_bcsr_t conn_trans;
-//
-//  (*rows_ptr)[0] = 0;
-//  std::vector<bool> is_butting(nx*ny,false);
-//  int nButting = 0;
-//  boundary_array.clear();
-//
-//
-//#pragma region //first step - define and fill - rows_ptr (jacobian)
-//  for (index_t i = 0; i < nx; ++i)
-//    {
-//      for (index_t j = 0; j < ny; ++j)
-//        {
-//          index_t bottom_Kx = 0;
-//          index_t bottom_Ky = 0;
-//
-//          index_t top_Kx, top_Ky, top_Kz;
-//          for (index_t k = 0; k < nz; ++k)
-//            {
-//              if (!sp_actnum[i+j*nx+k*nx*ny])//skip non-active cells
-//                continue;
-//
-//              index_array_t cube_IJK_index = top_cube_index(i,j,k, nx, ny);
-//#pragma region skip butting cells && define is_ butting
-//              if (k == 0)
-//                {
-//                  //define is_butting ([i,j,0]&&[i,j+1,0]) ([i,j,0]&&[i+1,j,0]
-//                  bool flag = true;
-//
-//                  if (i+1 < nx)
-//                    {
-//                      const index_array_t &cube_IIJK_index = top_cube_index(i+1,j,k, nx, ny);
-//
-//                      const side_t &rightSide = get_side(right,cube_IJK_index,0);
-//                      const side_t &leftSide = get_side(right,cube_IIJK_index,1);
-//                      //check for butting
-//
-//                      for (size_t ii = 0; ii < rightSide.size(); ii++)
-//                        flag = flag&&(zcorn_array[rightSide[ii]] == zcorn_array[leftSide[ii]]);
-//                    }
-//                  if (j+1 < ny && flag)
-//                    {
-//                      const index_array_t &cube_IJJK_index = top_cube_index(i,j+1,k, nx, ny);
-//
-//                      const side_t &bottomSide = get_side(bottom,cube_IJK_index,0);
-//                      const side_t &topSide = get_side( bottom,cube_IJJK_index,1);
-//
-//                      //check for butting
-//                      for (size_t ii = 0; ii < bottomSide.size(); ii++)
-//                        flag = flag&&(zcorn_array[bottomSide[ii]] == zcorn_array[topSide[ii]]);
-//                    }
-//                  if (flag) nButting++;
-//                  is_butting[j*nx+i] = flag;
-//                }
-//
-//              //look only 3 positive-direction side
-//              if (is_butting[j*nx+i])
-//                {
-//                  //speed-up by calculating just one square
-//                  if ((i+1 < nx) && sp_actnum[(i+1)+j*nx + k*nx*ny])
-//                    {
-//                      change_row(i,j,k,*rows_ptr);
-//                      change_row(i+1, j, k,*rows_ptr);
-//                    }
-//                  if ((j+1 < ny) && sp_actnum[i+(j+1)*nx + k*nx*ny])
-//                    {
-//                      change_row(i,j,k,*rows_ptr);
-//                      change_row(i, j+1, k,*rows_ptr);
-//                    }
-//                  if ((k+1 < nz) && sp_actnum[i+j*nx + (k+1)*nx*ny])
-//                    {
-//                      change_row(i,j,k,*rows_ptr);
-//                      change_row(i, j, k+1,*rows_ptr);
-//                    }
-//                  continue;
-//                }
-//#pragma endregion
-//
-//              //calculating for non butting cell!
-//              top_Kx = bottom_Kx-1;
-//#pragma region rightSide
-//              if (i+1 < nx)
-//                {
-//                  //looking for incident block at right side and their zmin(kmin) & zmax(kmax)
-//                  const side_t &right_side = get_side( right, cube_IJK_index,0);
-//                  item_t maxZ_RS = zcorn_array[*std::max_element(right_side.begin(),right_side.end())];
-//
-//                  //go to top
-//                  //looking for top block for right side - minZ_LS <= maxZ_RS
-//                  while (top_Kx < nz-1)
-//                    {
-//                      top_Kx++;
-//
-//                      if (!sp_actnum[(i+1)+j*nx + top_Kx*nx*ny])//skip non-active cells
-//                        continue;
-//
-//                      const side_t &temp_left_side = get_side( left, top_cube_index(i+1,j,top_Kx, nx, ny),0);
-//                      item_t minZ_LS = zcorn_array[*std::min_element(temp_left_side.begin(),temp_left_side.end())];
-//
-//                      if (minZ_LS >= maxZ_RS) //we can't go more
-//                        break;
-//                      else if (is_2side_crossing(right_side, temp_left_side, true))// => [i,j,k] && [i+1,j,top_Kx] have common contact
-//                        {
-//                          change_row(i,j,k,*rows_ptr);
-//                          change_row( i+1, j, top_Kx,*rows_ptr);
-//                        }
-//                    }
-//                }
-//
-//#pragma endregion
-//
-//              top_Ky = bottom_Ky-1;
-//#pragma region bottomSide
-//              if (j+1 < ny)
-//                {
-//                  const side_t &bottom_side = get_side( bottom,cube_IJK_index,0);
-//                  item_t maxZ_BS = zcorn_array[*std::max_element(bottom_side.begin(),bottom_side.end())];
-//
-//                  //go to top
-//                  //looking for top block for bottom side - minZ_TS <= maxT_RS
-//                  while (top_Ky < nz-1)
-//                    {
-//                      top_Ky++;
-//                      if (!sp_actnum[i+(j+1)*nx + top_Ky*nx*ny])//skip non-active cells
-//                        continue;
-//
-//                      const side_t &temp_top_side = get_side( left, top_cube_index(i,j+1,top_Ky, nx, ny),0);
-//                      item_t minZ_TS = zcorn_array[*std::min_element(temp_top_side.begin(),temp_top_side.end())];
-//                      if (minZ_TS >= maxZ_BS) //we can't go more
-//                        break;
-//                      else if (is_2side_crossing(bottom_side, temp_top_side,!true))// => [i,j,k] && [i,j+1,top_Ky] have common contact
-//                        {
-//                          change_row(i,j,k,*rows_ptr);
-//                          change_row( i, j+1, top_Ky,*rows_ptr);
-//                        }
-//                    }
-//                }
-//
-//#pragma endregion
-//
-//#pragma region upperSide
-//              if (k+1 < nz)
-//                {
-//                  top_Kz = k+1;
-//                  while (top_Kz < nz)
-//                    {
-//                      //TODO add null volume case
-//                      if (!sp_actnum[i+j*nx+top_Kz*nx*ny])
-//                        {
-//                          top_Kz++;
-//                          continue;
-//                        }
-//                      break;
-//                    }
-//                  if (top_Kz == nz) //no connections
-//                    continue;
-//                  else if (sp_actnum[i+j*nx+top_Kz*nx*ny])
-//                    {
-//                      // => [i,j,k] && [i,j,k_Topz] have common contact (take square upperSide) -> findAreaOfSide(upperSide[0],upperSide[1],upperSide[2],upperSide[3]);
-//                      change_row(i,j,k,*rows_ptr);
-//                      change_row(i, j, top_Kz,*rows_ptr);
-//                    }
-//                }
-//#pragma endregion
-//              bottom_Kx = top_Kx;
-//              bottom_Ky = top_Ky;
-//
-//            }
-//        }
-//    }
-//#pragma endregion
-//
-//  //////jacobian//////////////////////
-//  //sum rows_ptr
-//  for (size_t i = 1; i < rows_ptr->size(); ++i)
-//    {
-//      (*rows_ptr)[i]++;
-//      (*rows_ptr)[i] += (*rows_ptr)[i-1];
-//    }
-//  //create cols_ind
-//  index_array_t* cols_ind = &jacobian->get_cols_ind();
-//
-//  cols_ind->resize((*rows_ptr)[rows_ptr->size()-1],-1);
-//  ////////transmis/////////////////////////
-//  index_t cols_ind_n = (index_t)cols_ind->size();
-//
-//
-//  index_t con_num = (cols_ind_n-max_size)/2;//connection number
-//  n_connections = con_num;
-//
-//  conn_trans = flux_conn->get_conn_trans();
-//  conn_trans->init_struct(con_num, 2*con_num, 2*con_num);
-//
-//  index_array_t *rows_ptr_transmis = &conn_trans->get_rows_ptr();
-//  index_array_t *cols_ind_transmis = &conn_trans->get_cols_ind();
-//  rhs_item_array_t *values_transmis = &conn_trans->get_values();
-//  index_array_t &matrix_block_idx_plus = flux_conn->get_matrix_block_idx_plus();
-//  index_array_t &matrix_block_idx_minus = flux_conn->get_matrix_block_idx_minus();
-//
-//  matrix_block_idx_minus.resize(con_num*2,-1);
-//  matrix_block_idx_plus.resize(con_num*2,-1);
-//
-//  if (!con_num)
-//    {
-//      for (int i = 0; i < cols_ind_n; ++i)
-//        (*cols_ind)[i] = i;
-//      return 0;
-//    }
-//  for (index_t i = 0; i < con_num+1; ++i)
-//    (*rows_ptr_transmis)[i] = i*2;
-//
-//  //additional array for current index in rows_ptr
-//  index_array_t curIndex;
-//  curIndex.clear();//curIndex.push_back(0);
-//  for (size_t i = 0; i < rows_ptr->size(); ++i)
-//    curIndex.push_back((*rows_ptr)[i]);
-//
-//  con_num = 0;
-//
-//#pragma region //second step - fill and define cols_ind
-//  for (index_t i = 0; i < nx; ++i)
-//    {
-//      for (index_t j = 0; j < ny; ++j)
-//        {
-//          index_t bottom_Kx = 0;
-//          index_t bottom_Ky = 0;
-//
-//          index_t top_Kx, top_Ky, top_Kz;
-//          for (index_t k = 0; k < nz; ++k)
-//            {
-//              index_t index1_extern = i+j*nx+k*nx*ny;
-//
-//              if (!sp_actnum[index1_extern])//skip-non-active cells
-//                continue;
-//
-//              index_t index1 = XYZ_to_inside(i,j,k);
-//
-//              //condition of first place for own (always)
-//              index_t tmp = curIndex[index1];
-//              curIndex[index1] = (*rows_ptr)[index1];
-//              change_col_add(index1,index1,*cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus, true,false,con_num,*rows_ptr);
-//              if (tmp == (*rows_ptr)[index1])
-//                tmp++;
-//              curIndex[index1] = tmp;
-//
-//              const ijk_cube_t &cube_IJK = top_cube(i,j,k);
-//              const index_array_t &cube_IJK_index = top_cube_index(i,j,k, nx, ny);
-//
-//              fpoint3d center1 = get_cube_center (cube_IJK);
-//
-//              //look only 3 positive-direction side
-//#pragma region quick calculating
-//              if (is_butting[j*nx+i])
-//                {
-//                  //speed-up by calculating just one square
-//                  if ((i+1 < nx) && sp_actnum[(i+1)+j*nx + k*nx*ny])
-//                    {
-//                      const point_side_t &rightSide = get_side( right,cube_IJK,0);
-//
-//                      fpoint3d sqRS = get_projection_on_all_axis_for_one_side(rightSide);
-//                      //change jacobian
-//                      index_t index2 = XYZ_to_inside(i+1,j,k);
-//
-//                      change_col_add(index1, index2,*cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus, true,true,con_num,*rows_ptr);
-//                      if (curIndex[index2] == (*rows_ptr)[index2])
-//                        curIndex[index2]++;
-//                      change_col_add(index2, index1, *cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus, false,true,con_num,*rows_ptr);
-//
-//                      //change flux_connection
-//                      const ijk_cube_t &cube2 = top_cube(i+1,j,k);
-//                      fpoint3d D1 = fpoint3d::abs(get_cube_center(rightSide)-center1);
-//                      fpoint3d center2 = get_cube_center(cube2);
-//                      item_t tran = calculate_tran(index1_extern, ((i+1)+j*nx+k*nx*ny), sqRS,D1, rightSide, center2, along_dim1);
-//
-//                      (*cols_ind_transmis)[con_num++] = index1;
-//                      (*cols_ind_transmis)[con_num++] = index2;
-//                      values_transmis->push_back(tran);
-//                      values_transmis->push_back(-tran);
-//                    }
-//                  if ((j+1 < ny) && sp_actnum[i+(j+1)*nx + k*nx*ny])//skip non-active
-//                    {
-//                      const point_side_t &bottomSide = get_side( bottom,cube_IJK,0);
-//                      fpoint3d sqBS = get_projection_on_all_axis_for_one_side(bottomSide);
-//
-//                      const ijk_cube_t &cube2 = top_cube(i,j+1,k);
-//                      index_t index2 = XYZ_to_inside(i,j+1,k);
-//
-//                      change_col_add(index1, index2, *cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus, true,true,con_num,*rows_ptr);
-//                      if (curIndex[index2] == (*rows_ptr)[index2])
-//                        curIndex[index2]++;
-//                      change_col_add(index2, index1, *cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus, false,true,con_num,*rows_ptr);
-//
-//                      //change flux_connection
-//                      fpoint3d center2 = get_cube_center(cube2);
-//                      fpoint3d D1 = fpoint3d::abs(get_cube_center(bottomSide)-center1);
-//                      item_t tran = calculate_tran(index1_extern, (i+(j+1)*nx+k*nx*ny), sqBS, D1, bottomSide,center2,along_dim2);
-//
-//                      (*cols_ind_transmis)[con_num++] = index1;
-//                      (*cols_ind_transmis)[con_num++] = index2;
-//                      values_transmis->push_back(tran);
-//                      values_transmis->push_back(-tran);
-//                    }
-//                  if ((k+1 < nz) && sp_actnum[i+j*nx + (k+1)*nx*ny])//skip non-active
-//                    {
-//                      const point_side_t &upperSide = get_side( upper,cube_IJK,0);
-//
-//                      //change jacobian
-//                      index_t index2 = XYZ_to_inside(i,j,k+1);
-//
-//                      change_col_add(index1, index2,*cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus, true,true,con_num,*rows_ptr);
-//                      if (curIndex[index2] == (*rows_ptr)[index2])
-//                        curIndex[index2]++;
-//                      change_col_add(index2, index1, *cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus, false,true,con_num,*rows_ptr);
-//
-//                      fpoint3d sqUS = get_projection_on_all_axis_for_one_side(upperSide);
-//                      fpoint3d D1 = fpoint3d::abs(get_cube_center(upperSide)-center1);
-//
-//                      const ijk_cube_t &cube2 = top_cube(i,j,k+1);
-//
-//                      //change flux_connection
-//                      fpoint3d center2 = get_cube_center(cube2);
-//                      item_t tran = calculate_tran(index1_extern, (i+j*nx+(k+1)*nx*ny), sqUS, D1, upperSide,center2,along_dim3);
-//
-//                      (*cols_ind_transmis)[con_num++] = index1;
-//                      (*cols_ind_transmis)[con_num++] = index2;
-//                      values_transmis->push_back(tran);
-//                      values_transmis->push_back(-tran);
-//
-//                    }
-//                  continue;
-//                }
-//#pragma endregion
-//
-//              top_Kx = bottom_Kx-1;
-//#pragma region rightSide
-//              if (i+1 < nx)
-//                {
-//                  //looking for incident block at right side and their zmin(kmin) & zmax(kmax)
-//                  const side_t &right_side = get_side( right, cube_IJK_index,0);
-//                  item_t maxZ_RS = zcorn_array[*std::max_element(right_side.begin(),right_side.end())];
-//
-//                  const point_side_t &rightSide = get_side( right,cube_IJK,0);
-//                  fpoint3d centerSide1 = get_cube_center(rightSide);
-//                  fpoint3d D1 = fpoint3d::abs(centerSide1-center1);
-//
-//                  //go to top
-//                  //looking for top block for right side - minZ_LS <= maxZ_RS
-//                  while (top_Kx < nz-1)
-//                    {
-//                      top_Kx++;
-//                      if (!sp_actnum[(i+1)+j*nx + top_Kx*nx*ny])//skip non-active
-//                        continue;
-//
-//                      const side_t &temp_left_side = get_side( left, top_cube_index(i+1,j,top_Kx, nx, ny),0);
-//                      item_t minZ_LS = zcorn_array[*std::min_element(temp_left_side.begin(),temp_left_side.end())];
-//                      if (minZ_LS >= maxZ_RS) //we can't go more
-//                        break;
-//                      else if (is_2side_crossing(right_side, temp_left_side, true))// => [i,j,k] && [i+1,j,top_Kx] have common contact
-//                        {
-//                          //looking for square of intersection
-//                          const ijk_cube_t &cube2 = top_cube(i+1,j,top_Kx);
-//                          const point_side_t &leftSide = get_side( left, cube2,0);
-//                          fpoint3d A = get_side_crossing_projection_on_all_axis(leftSide, rightSide);
-//
-//                          //change jacobian
-//                          index_t index2 = XYZ_to_inside(i+1,j,top_Kx);
-//
-//                          change_col_add(index1, index2, *cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus, true,true,con_num,*rows_ptr);
-//                          if (curIndex[index2] == (*rows_ptr)[index2])
-//                            curIndex[index2]++;
-//                          change_col_add(index2, index1, *cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus, false,true,con_num,*rows_ptr);
-//
-//                          //change flux_connection
-//                          fpoint3d center2 = get_cube_center(cube2);
-//                          item_t tran = calculate_tran(index1_extern, ((i+1)+j*nx+top_Kx*nx*ny), A,D1, leftSide,center2,along_dim1);
-//
-//                          (*cols_ind_transmis)[con_num++] = index1;//add [i,j,k]->index1 && [i+1,j,bottom_K]->index2=>index1&index2
-//                          (*cols_ind_transmis)[con_num++] = index2;
-//                          values_transmis->push_back(tran);
-//                          values_transmis->push_back(-tran);
-//                        }
-//                    }
-//                }
-//#pragma endregion
-//
-//              top_Ky = bottom_Ky-1;
-//#pragma region bottomSide
-//              if (j+1 < ny)
-//                {
-//                  //looking for incident block at bottom side and their zmin(kmin) & zmax(kmax)
-//                  const point_side_t &bottomSide = get_side( bottom,cube_IJK,0);
-//                  fpoint3d centerSide1 = get_cube_center(bottomSide);
-//                  fpoint3d D1 = fpoint3d::abs(centerSide1-center1);
-//
-//                  const side_t &bottom_side = get_side( bottom,cube_IJK_index,0);
-//                  item_t maxZ_BS = zcorn_array[*std::max_element(bottom_side.begin(),bottom_side.end())];
-//
-//                  //go to top
-//                  //looking for top block for bottom side - minZ_TS <= maxT_RS
-//                  while (top_Ky < nz-1)
-//                    {
-//                      top_Ky++;
-//                      if (!sp_actnum[i+(j+1)*nx + top_Ky*nx*ny])//skip non-active cells
-//                        continue;
-//
-//                      const side_t &temp_top_side  = get_side( left, top_cube_index(i,j+1,top_Ky, nx, ny),0);
-//                      item_t minZ_TS = zcorn_array[*std::min_element(temp_top_side.begin(),temp_top_side.end())];
-//                      if (minZ_TS >= maxZ_BS) //we can't go more
-//                        break;
-//                      else if (is_2side_crossing(bottom_side, temp_top_side,!true))// => [i,j,k] && [i,j+1,top_Ky] have common contact
-//                        {
-//                          const ijk_cube_t &cube2 = top_cube(i,j+1,top_Ky);
-//                          const point_side_t &topSide = get_side( top, cube2,0);
-//                          fpoint3d A = get_side_crossing_projection_on_all_axis(topSide, bottomSide);
-//
-//                          //change jacobian
-//                          index_t index2 = XYZ_to_inside(i,j+1,top_Ky);
-//
-//                          change_col_add(index1, index2,*cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus, true,true,con_num,*rows_ptr);
-//                          if (curIndex[index2] == (*rows_ptr)[index2])
-//                            curIndex[index2]++;
-//                          change_col_add(index2, index1, *cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus, false,true,con_num,*rows_ptr);
-//
-//                          //change flux_connection
-//                          fpoint3d center2 = get_cube_center(cube2);
-//                          item_t tran = calculate_tran(index1_extern, (i+(j+1)*nx+top_Ky*nx*ny), A, D1, topSide,center2,along_dim2);
-//
-//                          (*cols_ind_transmis)[con_num++] = index1;//add [i,j,k]->index1 && [i+1,j,bottom_K]->index2=>index1&index2
-//                          (*cols_ind_transmis)[con_num++] = index2;
-//                          values_transmis->push_back(tran);
-//                          values_transmis->push_back(-tran);
-//
-//                        }
-//                    }
-//                }
-//#pragma endregion
-//
-//#pragma region 	upperSide
-//              if (k+1 < nz)
-//                {
-//                  top_Kz = k+1;
-//                  while (top_Kz < nz)
-//                    {
-//                      if (!sp_actnum[i+j*nx+top_Kz*nx*ny])
-//                        {
-//                          top_Kz++;
-//                          continue;
-//                        }
-//                      break;
-//                    }
-//                  if (top_Kz == nz) //no connection
-//                    continue;
-//                  else if (sp_actnum[i+j*nx+top_Kz*nx*ny])
-//                    {
-//                      //=> [i,j,k] && [i,j,top_K] have common contact  -> 	findAreaOfSide(upperSide[0],upperSide[1],upperSide[2],upperSide[3]);
-//                      const point_side_t &upperSide = get_side( upper,cube_IJK,0);
-//                      fpoint3d D1 = fpoint3d::abs(get_cube_center(upperSide)-center1);
-//
-//                      //change jacobian
-//                      index_t index2 = XYZ_to_inside(i,j,top_Kz);
-//
-//                      change_col_add(index1, index2,*cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus, true,true,con_num,*rows_ptr);
-//                      if (curIndex[index2] == (*rows_ptr)[index2])
-//                        curIndex[index2]++;
-//                      change_col_add(index2, index1, *cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus, false,true,con_num,*rows_ptr);
-//
-//                      const ijk_cube_t &cube2 = top_cube(i,j,top_Kz);
-//                      fpoint3d A = get_projection_on_all_axis_for_one_side(upperSide);//because it's too expensive calculate as triangles...
-//
-//                      //change flux_connection
-//                      fpoint3d center2 = get_cube_center(cube2);
-//                      item_t tran = calculate_tran(index1_extern, (i+j*nx+top_Kz*nx*ny), A, D1, upperSide,center2,along_dim3);
-//
-//                      (*cols_ind_transmis)[con_num++] = index1;//add [i,j,k]->index1 && [i+1,j,bottom_K]->index2=>index1&index2
-//                      (*cols_ind_transmis)[con_num++] = index2;
-//                      values_transmis->push_back(tran);
-//                      values_transmis->push_back(-tran);
-//                    }
-//                }
-//#pragma endregion
-//              bottom_Kx = top_Kx;
-//              bottom_Ky = top_Ky;
-//            }
-//        }
-//    }
-//#pragma endregion
-//  return 0;
-}
-
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::init_props(const sp_idata_t &idata)
-{
-  base_t::init_props (idata);
-
-  // init ZCORN
-  zcorn_array = idata->get_float_non_empty_array("ZCORN");
-  min_z = *(std::min_element(zcorn_array.begin(),zcorn_array.end()));
-  max_z = *(std::max_element(zcorn_array.begin(),zcorn_array.end()));
-
-  // init COORD
-  coord_array = idata->get_float_non_empty_array("COORD");
-
-  max_x = min_x = coord_array[0];
-  max_y = min_y = coord_array[1];
-
-  array_float16_t::iterator it, e = coord_array.end ();
-
-  for (it = coord_array.begin (); it != e; it += 6)
-    {
-      // move matching points apart
-      if (it[2] == it[5])
-        it[5] += 1.0f;
-
-      //looking for max&min coordinates
-      if (min_x > it[0]) min_x = it[0];
-      if (min_x > it[3]) min_x = it[3];
-
-      if (min_y > it[1]) min_y = it[1];
-      if (min_y > it[4]) min_y = it[4];
-
-      if (max_x < it[0]) max_x = it[0];
-      if (max_x < it[3]) max_x = it[3];
-
-      if (max_y < it[1]) max_y = it[1];
-      if (max_y < it[4]) max_y = it[4];
-
-    }
-
-}
-
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::check_data() const
-{
-  base_t::check_data ();
-
-  if (min_x < 0)
-    bs_throw_exception (boost::format ("min_x = %d is out of range")% min_x);
-  if (min_y < 0)
-    bs_throw_exception (boost::format ("min_y = %d is out of range")% min_y);
-  if (min_z < 0)
-    bs_throw_exception (boost::format ("min_z = %d is out of range")% min_z);
-
-  if (!coord_array.size ())
-    bs_throw_exception ("COORD array is not initialized");
-  if (!zcorn_array.size ())
-    bs_throw_exception ("ZCORN array is not initialized");
-}
-
-template<class strategy_t>
-void mesh_grdecl<strategy_t>:: get_block_dx_dy_dz(index_t n_elem, item_t &dx, item_t &dy, item_t &dz) const
-  {
-    index_t i,j,k;
-
-    inside_to_XYZ(n_elem,i,j,k);
-    const ijk_cube_t &cube_IJK = top_cube(i,j,k);
-
-    const point_side_t &tmp_left_side = get_side(left,cube_IJK,false);
-    const point_side_t &tmp_right_side = get_side(left,cube_IJK,true);
-
-    const point_side_t &tmp_top_side = get_side(top,cube_IJK,false);
-    const point_side_t &tmp_bottom_side = get_side(top,cube_IJK,true);
-
-    const point_side_t &tmp_upper_side = get_side(upper,cube_IJK,false);
-    const point_side_t &tmp_lower_side = get_side(upper,cube_IJK,true);
-
-    dx = dy = dz = 0.0;
-    for (index_t ii = 0; ii < 4; ++ii)
-      {
-        dx += tmp_left_side[ii].x - tmp_right_side[ii].x;
-        dy += tmp_top_side[ii].y - tmp_bottom_side[ii].y;
-        dz += tmp_upper_side[ii].z - tmp_lower_side[ii].z;
-      }
-
-    dx = fabs(dx/4);
-    dy = fabs(dy/4);
-    dz = fabs(dz/4);
-  }
-
-template<class strategy_t>
-float mesh_grdecl<strategy_t>:: get_block_dx(index_t n_elem) const
-  {
-    index_t i,j,k;
-    inside_to_XYZ(n_elem,i,j,k);
-    const ijk_cube_t &cube_IJK = top_cube(i,j,k);
-
-    const point_side_t &tmp_left_side = get_side(left,cube_IJK,false);
-    const point_side_t &tmp_right_side = get_side(left,cube_IJK,true);
-
-    double dx = 0.0;
-    for (index_t ii = 0; ii < 4; ++ii)
-      dx += tmp_left_side[ii].x - tmp_right_side[ii].x;
-    return fabs(dx/4);
-  }
-
-template<class strategy_t>
-float mesh_grdecl<strategy_t>:: get_block_dy(index_t n_elem) const
-  {
-    index_t i,j,k;
-    inside_to_XYZ(n_elem,i,j,k);
-    const ijk_cube_t &cube_IJK = top_cube(i,j,k);
-
-    const point_side_t &tmp_top_side = get_side(top,cube_IJK,false);
-    const point_side_t &tmp_bottom_side = get_side(top,cube_IJK,true);
-
-    double dy = 0.0;
-    for (index_t ii = 0; ii < 4; ++ii)
-      dy += tmp_top_side[ii].y - tmp_bottom_side[ii].y;
-    return fabs(dy/4);
-  }
-
-template<class strategy_t>
-float mesh_grdecl<strategy_t>:: get_block_dz(index_t n_elem) const
-  {
-    index_t i,j,k;
-    inside_to_XYZ(n_elem,i,j,k);
-    const ijk_cube_t &cube_IJK = top_cube (i,j,k);
-
-    const point_side_t &tmp_upper_side = get_side (upper,cube_IJK,false);
-    const point_side_t &tmp_lower_side = get_side (upper,cube_IJK,true);
-
-    double dz = 0.0;
-    for (index_t ii = 0; ii < 4; ++ii)
-      dz += tmp_upper_side[ii].z - tmp_lower_side[ii].z;
-
-    return fabs(dz/4);
-  }
-
-template<class strategy_t>
-float  mesh_grdecl<strategy_t>:: get_dtop(index_t n_elem) const
-{
-  BS_ASSERT (n_elem >= 0) (n_elem);
-
-  index_t i,j,k;
-  inside_to_XYZ(n_elem,i,j,k);
-  const ijk_cube_t &cube_IJK = top_cube(i,j,k);
-
-  const point_side_t &tmp_upper_side = get_side(upper,cube_IJK,false);
-  const point_side_t &tmp_lower_side = get_side(upper,cube_IJK,true);
-
-  double dz = 0.0;
-  for (index_t ii = 0; ii < 4; ++ii)
-    dz += tmp_upper_side[ii].z - tmp_lower_side[ii].z;
-  dz = fabs(dz/8);
-
-  return get_cube_center(cube_IJK).z - dz;
-}
-
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::is_2side_crossing (const side_t &side1, const side_t &side2, bool x_dir)
-{
-  //size_t j = 0;
-  if (x_dir)
-    {
-      for (size_t i = 0, j = 0; i < side1.size(); ++i, j = (j+1)%2)
-        {
-          if ((zcorn_array[side2[i]] > zcorn_array[side1[j]]) && (zcorn_array[side2[i]] < zcorn_array[side1[j+2]]))
-            return true;
-        }
-    }
-  else
-    {
-      for (size_t i = 0, j = 0; i < side1.size(); ++i, j = (j+1)%2)
-        {
-          if ((zcorn_array[side2[i]] < zcorn_array[side1[j]]) && (zcorn_array[side2[i]] > zcorn_array[side1[j+2]]))
-            return true;
-        }
-    }
-  return false;
-}
-
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::generate_array()
-{
-#if 0
-  index_t n_size = n_elements;
-  sp_poro->clear();
-  sp_ntg->clear();
-
-  sp_permx->clear();
-  sp_permy->clear();
-  sp_permz->clear();
-
-  sp_multx->clear();
-  sp_multy->clear();
-  sp_multz->clear();
-
-
-  for (index_t i =0; i < n_size; ++i)
-    {
-      sp_poro->push_back(0.2f);
-      sp_ntg->push_back(0.4f);
-
-      sp_permx->push_back(10.0f);
-      sp_permy->push_back(10.0f);
-      sp_permz->push_back(10.0f);
-
-      sp_multx->push_back(1.0f);
-      sp_multy->push_back(1.0f);
-      sp_multz->push_back(1.0f);
-    }
-#endif
-}
-
-
-template<class strategy_t>
-int mesh_grdecl<strategy_t>::find_neighbours(sp_bcsr_t &jacobian)
-{
-  index_t max_size = n_active_elements;
-  jacobian->init(max_size,max_size, 1, max_size);//1 - n_block_size
-  index_array_t* rows_ptr = &jacobian->get_rows_ptr();
-  (*rows_ptr)[0] = 0;
-
-  std::vector<bool> is_butting(nx*ny,false);
-  int nButting = 0;
-
-#pragma region //first step - define and fill - rows_ptr (jacobian)
-  for (index_t i = 0; i < nx; i++)
-    {
-      for (index_t j = 0; j < ny; j++)
-        {
-          index_t bottom_Kx = 0;
-          index_t bottom_Ky = 0;
-
-          index_t top_Kx, top_Ky, top_Kz;
-          for (index_t k = 0; k < nz; k++)
-            {
-              index_t index1_extern = i+j*nx+k*nx*ny;
-              if (!sp_actnum[index1_extern])//skip non-active cells
-                continue;
-
-              const cube_index_t &cube_IJK_index = top_cube_index(i,j,k, nx, ny);
-              index_t index2_extern;
-#pragma region skip butting cells && define is Butting
-              if (k == 0)
-                {
-                  //define is_butting ([i,j,0]&&[i,j+1,0])
-                  //				   ([i,j,0]&&[i+1,j,0]
-                  bool flag = true;
-
-                  if (i+1 < nx)
-                    {
-                      const cube_index_t &cube_IIJK_index = top_cube_index(i+1,j,k, nx, ny);
-
-                      const side_t &rightSide = get_side( right,cube_IJK_index,0);
-                      const side_t &leftSide = get_side( right,cube_IIJK_index,1);
-                      //check for butting
-
-                      for (size_t ii = 0; ii < rightSide.size(); ii++)
-                        flag = flag&&(zcorn_array[rightSide[ii]] == zcorn_array[leftSide[ii]]);
-                    }
-                  if (j+1 < ny && flag)
-                    {
-                      const cube_index_t &cube_IJJK_index = top_cube_index(i,j+1,k, nx, ny);
-
-                      const side_t &bottomSide = get_side( bottom,cube_IJK_index,0);
-                      const side_t &topSide = get_side( bottom,cube_IJJK_index,1);
-                      //check for butting
-                      for (size_t ii = 0; ii < bottomSide.size(); ii++)
-                        flag = flag&&(zcorn_array[bottomSide[ii]] == zcorn_array[topSide[ii]]);
-                    }
-                  if (flag) nButting++;
-                  is_butting[j*nx+i] = flag;
-                }
-
-              //look only 3 positive-direction side
-              if (is_butting[j*nx+i])
-                {
-                  //speed-up by calculating just one square
-                  index2_extern = (i+1)+j*nx + k*nx*ny;
-                  if (i+1 < nx)
-                    {
-                      if (sp_actnum[index2_extern])
-                        {
-                          ((*rows_ptr)[index1_extern+1])++;
-                          ((*rows_ptr)[index2_extern+1])++;
-                        }
-                    }
-                  index2_extern = i+(j+1)*nx + k*nx*ny;
-                  if (j+1 < ny)
-                    {
-                      if  (sp_actnum[index2_extern])
-                        {
-                          ((*rows_ptr)[index1_extern+1])++;
-                          ((*rows_ptr)[index2_extern+1])++;
-                        }
-                    }
-                  index2_extern = i+j*nx + (k+1)*nx*ny;
-                  if (k+1 < nz)
-                    {
-                      if (sp_actnum[index2_extern])
-                        {
-                          ((*rows_ptr)[index1_extern+1])++;
-                          ((*rows_ptr)[index2_extern+1])++;
-                        }
-                    }
-                  continue;
-                }
-#pragma endregion
-
-              //calculating for non butting cell!
-              top_Kx = bottom_Kx-1;
-#pragma region rightSide
-              if (i+1 < nx)
-                {
-                  //looking for incident block at right side and their zmin(kmin) & zmax(kmax)
-                  const side_t &right_side = get_side( right, cube_IJK_index,0);
-                  item_t maxZ_RS = zcorn_array[*std::max_element(right_side.begin(),right_side.end())];
-
-                  //go to top
-                  //looking for top block for right side - minZ_LS <= maxZ_RS
-                  while (top_Kx < nz-1)
-                    {
-                      top_Kx++;
-                      index2_extern = (i+1)+j*nx + top_Kx*nx*ny;
-                      if (!sp_actnum[index2_extern])//skip non-active cells
-                        continue;
-
-                      const side_t &temp_left_side = get_side( left, top_cube_index(i+1,j,top_Kx, nx, ny),0);
-                      item_t minZ_LS = zcorn_array[*std::min_element(temp_left_side.begin(),temp_left_side.end())];
-
-                      if (minZ_LS >= maxZ_RS) //we can't go more
-                        break;
-                      else if (is_2side_crossing(right_side, temp_left_side, true))// => [i,j,k] && [i+1,j,top_Kx] have common contact
-                        {
-                          ((*rows_ptr)[index1_extern+1])++;
-                          ((*rows_ptr)[index2_extern+1])++;
-                        }
-                    }
-                }
-
-#pragma endregion
-
-              top_Ky = bottom_Ky-1;
-#pragma region bottomSide
-              if (j+1 < ny)
-                {
-                  const side_t &bottom_side = get_side( bottom,cube_IJK_index,0);
-                  item_t maxZ_BS = zcorn_array[*std::max_element(bottom_side.begin(),bottom_side.end())];
-
-                  //go to top
-                  //looking for top block for bottom side - minZ_TS <= maxT_RS
-                  while (top_Ky < nz-1)
-                    {
-                      top_Ky++;
-                      index2_extern = i+(j+1)*nx + top_Ky*nx*ny;
-
-                      if (!sp_actnum[index2_extern])//skip non-active cells
-                        continue;
-
-                      const side_t &temp_top_side = get_side( left, top_cube_index(i,j+1,top_Ky, nx, ny),0);
-                      item_t minZ_TS = zcorn_array[*std::min_element(temp_top_side.begin(),temp_top_side.end())];
-                      if (minZ_TS >= maxZ_BS) //we can't go more
-                        break;
-                      else if (is_2side_crossing(bottom_side, temp_top_side,!true))// => [i,j,k] && [i,j+1,top_Ky] have common contact
-                        {
-                          ((*rows_ptr)[index1_extern+1])++;
-                          ((*rows_ptr)[index2_extern+1])++;
-                        }
-                    }
-                }
-
-#pragma endregion
-
-#pragma region upperSide
-              if (k+1 < nz)
-                {
-                  top_Kz = k+1;
-                  index2_extern = i+j*nx+top_Kz*nx*ny;
-
-                  while (top_Kz < nz)
-                    {
-                      if (!sp_actnum[index2_extern])
-                        {
-                          top_Kz++;
-                          index2_extern = i+j*nx+top_Kz*nx*ny;
-                          continue;
-                        }
-                      break;
-                    }
-                  if (top_Kz == nz) //no connections
-                    continue;
-                  else if (sp_actnum[index2_extern])
-                    {
-                      // => [i,j,k] && [i,j,k_Topz] have common contact (take square upperSide) -> findAreaOfSide(upperSide[0],upperSide[1],upperSide[2],upperSide[3]);
-                      ((*rows_ptr)[index1_extern+1])++;
-                      ((*rows_ptr)[index2_extern+1])++;
-                    }
-                }
-#pragma endregion
-              bottom_Kx = top_Kx;
-              bottom_Ky = top_Ky;
-            }
-        }
-    }
-#pragma endregion
-
-  //////jacobian//////////////////////
-  //sum rows_ptr
-  for (size_t i = 1; i < rows_ptr->size(); i++)
-    (*rows_ptr)[i] += (*rows_ptr)[i-1];
-
-  //create cols_ind
-  index_array_t* cols_ind = &jacobian->get_cols_ind();
-
-  cols_ind->resize((*rows_ptr)[rows_ptr->size()-1],-1);
-  ////////transmis/////////////////////////
-  //index_t cols_ind_n = (index_t)cols_ind->size();
-
-
-  //additional array for current index in rows_ptr
-  index_array_t curIndex;
-  curIndex.clear();
-  for (size_t i = 0; i < rows_ptr->size(); i++)
-    curIndex.push_back((*rows_ptr)[i]);
-
-  //we can optimize, if we using our structure, and just define square
-#pragma region //second step - fill and define cols_ind
-  for (index_t i = 0; i < nx; i++)
-    {
-      for (index_t j = 0; j < ny; j++)
-        {
-          index_t bottom_Kx = 0;
-          index_t bottom_Ky = 0;
-
-          index_t top_Kx, top_Ky, top_Kz;
-          for (index_t k = 0; k < nz; k++)
-            {
-              index_t index1_extern = i+j*nx+k*nx*ny;
-
-              if (!sp_actnum[index1_extern])//skip-non-active cells
-                continue;
-
-              const ijk_cube_t &cube_IJK = top_cube(i,j,k);
-              const cube_index_t &cube_IJK_index = top_cube_index(i,j,k, nx, ny);
-
-              fpoint3d center1 = get_cube_center(cube_IJK);
-              index_t index2_extern;
-
-              //look only 3 positive-direction side
-#pragma region quick calculating
-              if (is_butting[j*nx+i])
-                {
-                  //speed-up by calculating just one square
-                  index2_extern = (i+1)+j*nx + k*nx*ny;
-                  if (i+1 < nx)
-                    {
-                      if (sp_actnum[index2_extern])
-                        {
-                          //change jacobian
-                          change_col(index1_extern, index2_extern, *cols_ind,curIndex);
-                          change_col(index2_extern, index1_extern, *cols_ind,curIndex);
-                        }
-                    }
-                  index2_extern = i+(j+1)*nx + k*nx*ny;
-                  if (j+1 < ny)
-                    {
-                      if (sp_actnum[index2_extern])
-                        {
-                          change_col(index1_extern, index2_extern, *cols_ind,curIndex);
-                          change_col(index2_extern, index1_extern, *cols_ind,curIndex);
-                        }
-                    }
-                  index2_extern = i+j*nx + (k+1)*nx*ny;
-                  if (k+1 < nz)
-                    {
-                      if (sp_actnum[index2_extern])
-                        {
-                          //change jacobian
-                          change_col(index1_extern, index2_extern,*cols_ind,curIndex);
-                          change_col(index2_extern, index1_extern, *cols_ind,curIndex);
-                        }
-                    }
-                  continue;
-                }
-#pragma endregion
-
-              top_Kx = bottom_Kx-1;
-#pragma region rightSide
-              if (i+1 < nx)
-                {
-                  //looking for incident block at right side and their zmin(kmin) & zmax(kmax)
-                  const side_t &right_side = get_side( right, cube_IJK_index,0);
-                  item_t maxZ_RS = zcorn_array[*std::max_element(right_side.begin(),right_side.end())];
-
-                  //go to top
-                  //looking for top block for right side - minZ_LS <= maxZ_RS
-                  while (top_Kx < nz-1)
-                    {
-                      top_Kx++;
-                      index2_extern = (i+1)+j*nx + top_Kx*nx*ny;
-
-                      if (!sp_actnum[index2_extern])//skip non-active
-                        continue;
-
-                      const side_t &temp_left_side = get_side( left, top_cube_index(i+1,j,top_Kx, nx, ny),0);
-                      item_t minZ_LS = zcorn_array[*std::min_element(temp_left_side.begin(),temp_left_side.end())];
-                      if (minZ_LS >= maxZ_RS) //we can't go more
-                        break;
-                      else if (is_2side_crossing(right_side, temp_left_side, true))// => [i,j,k] && [i+1,j,top_Kx] have common contact
-                        {
-                          //change jacobian
-                          change_col(index1_extern, index2_extern, *cols_ind,curIndex);
-                          change_col(index2_extern, index1_extern, *cols_ind,curIndex);
-                        }
-                    }
-                }
-#pragma endregion
-
-              top_Ky = bottom_Ky-1;
-#pragma region bottomSide
-              if (j+1 < ny)
-                {
-                  //looking for incident block at bottom side and their zmin(kmin) & zmax(kmax)
-                  const side_t &bottom_side = get_side( bottom,cube_IJK_index,0);
-                  item_t maxZ_BS = zcorn_array[*std::max_element(bottom_side.begin(),bottom_side.end())];
-
-                  //go to top
-                  //looking for top block for bottom side - minZ_TS <= maxT_RS
-                  while (top_Ky < nz-1)
-                    {
-                      top_Ky++;
-                      index2_extern = i+(j+1)*nx + top_Ky*nx*ny;
-                      if (!sp_actnum[index2_extern])//skip non-active cells
-                        continue;
-
-                      const side_t &temp_top_side  = get_side( left, top_cube_index(i,j+1,top_Ky, nx, ny),0);
-                      item_t minZ_TS = zcorn_array[*std::min_element(temp_top_side.begin(),temp_top_side.end())];
-                      if (minZ_TS >= maxZ_BS) //we can't go more
-                        break;
-                      else if (is_2side_crossing(bottom_side, temp_top_side,!true))// => [i,j,k] && [i,j+1,top_Ky] have common contact
-                        {
-                          //change jacobian
-                          change_col(index1_extern, index2_extern,*cols_ind,curIndex);
-                          change_col(index2_extern, index1_extern, *cols_ind,curIndex);
-                        }
-                    }
-                }
-#pragma endregion
-
-#pragma region 	upperSide
-              if (k+1 < nz)
-                {
-                  top_Kz = k+1;
-                  index2_extern = i+j*nx + top_Kz*nx*ny;
-
-                  while (top_Kz < nz)
-                    {
-                      if (!sp_actnum[index2_extern])
-                        {
-                          top_Kz++;
-                          index2_extern = i+j*nx + top_Kz*nx*ny;
-                          continue;
-                        }
-                      break;
-                    }
-                  if (top_Kz == nz) //no connection
-                    continue;
-                  else if (sp_actnum[index2_extern])
-                    {
-                      //=> [i,j,k] && [i,j,top_K] have common contact  -> 	findAreaOfSide(upperSide[0],upperSide[1],upperSide[2],upperSide[3]);
-                      //change jacobian
-                      change_col(index1_extern, index2_extern,*cols_ind,curIndex);
-                      change_col(index2_extern, index1_extern, *cols_ind,curIndex);
-                    }
-                }
-#pragma endregion
-              bottom_Kx = top_Kx;
-              bottom_Ky = top_Ky;
-            }
-        }
-    }
-#pragma endregion
-  return 0;
-}
-
-template <typename strategy_t, typename loop_t>
-struct build_jacobian_rows_class
-{
-  typedef typename strategy_t::index_t          index_t;
-  typedef typename strategy_t::item_t           item_t;
-  typedef typename strategy_t::index_array_t    index_array_t;
-  typedef typename strategy_t::item_array_t     item_array_t;
-
-  typedef mesh_grdecl <strategy_t>              mesh_t;
-  typedef typename mesh_t::side_t               side_t;
-  typedef typename mesh_t::cube_index_t         cube_index_t;
-
-  build_jacobian_rows_class (mesh_grdecl <strategy_t> *mesh, loop_t *loop, std::set <index_t, std::less <index_t> > &boundary_set, index_array_t *rows_ptr)
-  : mesh (mesh)
-  , loop (loop)
-  , boundary_set (boundary_set)
-  , rows_ptr (rows_ptr)
-  , nx (mesh->nx)
-  , ny (mesh->ny)
-  , nz (mesh->nz)
-  {
-  }
-
-  void
-  prepare (index_t, index_t, index_t, const cube_index_t *cube_IJK_index_, bool)
-  {
-    cube_IJK_index = cube_IJK_index_;
-  }
-
-  //skip butting cells && define is Butting
-  void
-  define_butting (index_t i, index_t j, index_t k)
-  {
-    if (k == 0)
-      {
-        //define is_butting ([i,j,0]&&[i,j+1,0])
-        //				   ([i,j,0]&&[i+1,j,0]
-        bool flag = true;
-
-        if (i+1 < nx)
-          {
-            const cube_index_t &cube_IIJK_index   = top_cube_index(i+1,j,k, nx, ny);
-            const side_t &rightSide               = get_side (right, *cube_IJK_index, 0);
-            const side_t &leftSide                = get_side (right, cube_IIJK_index, 1);
-
-            //check for butting
-            for (size_t ii = 0; ii < rightSide.size(); ii++)
-              flag = flag && (mesh->zcorn_array[rightSide[ii]] == mesh->zcorn_array[leftSide[ii]]);
-          }
-        if (j+1 < ny && flag)
-          {
-            const cube_index_t &cube_IJJK_index   = top_cube_index(i,j+1,k, nx, ny);
-            const side_t &bottomSide              = get_side (bottom, *cube_IJK_index, 0);
-            const side_t &topSide                 = get_side (bottom, cube_IJJK_index, 1);
-
-            //check for butting
-            for (size_t ii = 0; ii < bottomSide.size(); ii++)
-              flag = flag && (mesh->zcorn_array[bottomSide[ii]] == mesh->zcorn_array[topSide[ii]]);
-          }
-        //if (flag)
-        //  nButting++;
-
-        loop->is_butting[j*nx+i] = flag;
-      }
-  }
-
-  void
-  change_by_x (index_t i, index_t j, index_t km, index_t kp, bool)
-  {
-    (*rows_ptr)[mesh->XYZ_to_inside (i,     j, km) + 1]++;
-    (*rows_ptr)[mesh->XYZ_to_inside (i + 1, j, kp) + 1]++;
-  }
-
-  void
-  change_by_y (index_t i, index_t j, index_t km, index_t kp, bool)
-  {
-    (*rows_ptr)[mesh->XYZ_to_inside (i, j,     km) + 1]++;
-    (*rows_ptr)[mesh->XYZ_to_inside (i, j + 1, kp) + 1]++;
-  }
-
-  void
-  change_by_z (index_t i, index_t j, index_t km, index_t kp, bool)
-  {
-    (*rows_ptr)[mesh->XYZ_to_inside (i, j, km) + 1]++;
-    (*rows_ptr)[mesh->XYZ_to_inside (i, j, kp) + 1]++;
-  }
-
-  void
-  add_boundary (index_t external_cell_index)
-  {
-    boundary_set.insert (external_cell_index);
-  }
-
-  mesh_grdecl <strategy_t>                  *mesh;
-  loop_t                                    *loop;
-  std::set <index_t, std::less <index_t> >  &boundary_set;
-  index_array_t                             *rows_ptr;
-  index_t                                   nx;
-  index_t                                   ny;
-  index_t                                   nz;
-  const cube_index_t                        *cube_IJK_index;
-};
-
-template <typename T, typename L, typename BS, typename RP>
-build_jacobian_rows_class <T, L>
-build_jacobian_rows (mesh_grdecl <T> *mesh, L *l, BS &bs, RP *rp)
-{
-  return build_jacobian_rows_class <T, L> (mesh, l, bs, rp);
-}
-
-template <typename strategy_t, typename loop_t>
-struct build_jacobian_cols_class
-{
-  typedef typename strategy_t::index_t          index_t;
-  typedef typename strategy_t::item_t           item_t;
-  typedef typename strategy_t::index_array_t    index_array_t;
-  typedef typename strategy_t::item_array_t     item_array_t;
-  typedef typename strategy_t::rhs_item_array_t rhs_item_array_t;
-
-  typedef mesh_grdecl <strategy_t>              mesh_t;
-  typedef typename mesh_t::ijk_cube_t           ijk_cube_t;
-  typedef typename mesh_t::point_side_t         point_side_t;
-  typedef typename mesh_t::cube_index_t         cube_index_t;
-
-  build_jacobian_cols_class (mesh_t *mesh, loop_t *loop, index_array_t *rows_ptr, index_array_t *cols_ind,
-    index_array_t &cols_ind_transmis, rhs_item_array_t &values_transmis,
-    index_array_t &matrix_block_idx_minus, index_array_t &matrix_block_idx_plus)
-  : mesh (mesh)
-  , loop (loop)
-  , rows_ptr (rows_ptr)
-  , cols_ind (cols_ind)
-  , cols_ind_transmis (cols_ind_transmis)
-  , values_transmis (values_transmis)
-  , matrix_block_idx_minus (matrix_block_idx_minus)
-  , matrix_block_idx_plus (matrix_block_idx_plus)
-  , nx (mesh->nx)
-  , ny (mesh->ny)
-  , nz (mesh->nz)
-  {
-    curIndex.assign (rows_ptr->begin (), rows_ptr->end ());
-  }
-
-  void
-  prepare (index_t i, index_t j, index_t k, const cube_index_t *cube_IJK_index_, bool is_active_cell)
-  {
-    if (is_active_cell)
-      {
-        cube_IJK_index  = cube_IJK_index_;
-        index1          = mesh->XYZ_to_inside(i,j,k);
-        index_ijk       = i + j * nx + k * nx * ny;
-
-        //condition of first place for own (always)
-        index_t tmp = curIndex[index1];
-        curIndex[index1] = (*rows_ptr)[index1];
-        change_col_add(index1,index1,*cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus, true, false,0,*rows_ptr);
-        if (tmp == (*rows_ptr)[index1])
-          tmp++;
-        curIndex[index1] = tmp;
-
-        cube_IJK = mesh->top_cube(i,j,k);
-        center1  = get_cube_center(cube_IJK);
-      }
-  }
-
-  void
-  define_butting (index_t, index_t, index_t)
-  {
-  }
-  void
-  add_boundary (index_t)
-  {
-  }
-
-  item_t
-  calc_tran_is_butting_by_x (index_t i, index_t j, index_t km, index_t kp)
-  {
-    const point_side_t &rightSide = get_side( right,cube_IJK,0);
-    const ijk_cube_t &cube2       = mesh->top_cube(i+1,j,km);
-
-    fpoint3d sqRS     = get_projection_on_all_axis_for_one_side(rightSide);
-    fpoint3d D1       = fpoint3d::abs(get_cube_center(rightSide)-center1);
-    fpoint3d center2  = get_cube_center(cube2);
-
-    item_t tran = mesh->calculate_tran(index_ijk, ((i+1)+j*nx+kp*nx*ny), sqRS, D1, rightSide, center2, along_dim1);
-
-    return tran;
-  }
-
-  item_t
-  calc_tran_is_butting_by_y (index_t i, index_t j, index_t km, index_t kp)
-  {
-    const point_side_t &bottomSide = get_side( bottom,cube_IJK,0);
-    const ijk_cube_t &cube2 = mesh->top_cube(i,j+1,kp);
-
-    fpoint3d sqBS     = get_projection_on_all_axis_for_one_side(bottomSide);
-    fpoint3d center2  = get_cube_center(cube2);
-    fpoint3d D1       = fpoint3d::abs(get_cube_center(bottomSide)-center1);
-
-    item_t tran = mesh->calculate_tran(index_ijk, (i+(j+1)*nx+kp*nx*ny), sqBS, D1, bottomSide,center2,along_dim2);
-
-    return tran;
-  }
-
-  item_t
-  calc_tran_by_x (index_t i, index_t j, index_t km, index_t kp)
-  {
-    const ijk_cube_t &cube2       = mesh->top_cube (i + 1, j, kp);
-    const point_side_t &leftSide  = get_side (left, cube2, 0);
-    const point_side_t &rightSide = get_side (right, cube_IJK, 0);
-
-    fpoint3d centerSide1  = get_cube_center(rightSide);
-    fpoint3d D1           = fpoint3d::abs(centerSide1-center1);
-    fpoint3d A            = mesh->get_side_crossing_projection_on_all_axis(leftSide, rightSide);
-    fpoint3d center2      = get_cube_center(cube2);
-
-    item_t tran = mesh->calculate_tran(index_ijk, ((i+1)+j*nx+kp*nx*ny), A,D1, leftSide,center2,along_dim1);
-    return tran;
-  }
-
-  item_t
-  calc_tran_by_y (index_t i, index_t j, index_t km, index_t kp)
-  {
-    const ijk_cube_t &cube2         = mesh->top_cube(i,j+1,kp);
-    const point_side_t &topSide     = get_side( top, cube2,0);
-    const point_side_t &bottomSide  = get_side( bottom,cube_IJK,0);
-
-    fpoint3d centerSide1  = get_cube_center(bottomSide);
-    fpoint3d D1           = fpoint3d::abs(centerSide1-center1);
-    fpoint3d A            = mesh->get_side_crossing_projection_on_all_axis(topSide, bottomSide);
-    fpoint3d center2      = get_cube_center(cube2);
-
-    item_t tran = mesh->calculate_tran(index_ijk, (i+(j+1)*nx+kp*nx*ny), A, D1, topSide,center2,along_dim2);
-
-    return tran;
-  }
-
-  item_t
-  calc_tran_is_butting_by_z (index_t i, index_t j, index_t km, index_t kp)
-  {
-    const point_side_t &upperSide = get_side( upper,cube_IJK,0);
-    const ijk_cube_t &cube2       = mesh->top_cube(i,j,kp);
-
-    fpoint3d center2  = get_cube_center(cube2);
-    fpoint3d sqUS     = get_projection_on_all_axis_for_one_side(upperSide);
-    fpoint3d D1       = fpoint3d::abs(get_cube_center(upperSide)-center1);
-
-    item_t tran = mesh->calculate_tran(index_ijk, (i + j * nx + kp * nx * ny), sqUS, D1, upperSide,center2,along_dim3);
-
-    return tran;
-  }
-
-  item_t
-  calc_tran_by_z (index_t i, index_t j, index_t km, index_t kp)
-  {
-    const point_side_t &upperSide = get_side(upper,cube_IJK,0);
-    const ijk_cube_t &cube2       = mesh->top_cube(i,j,kp);
-
-    fpoint3d D1       = fpoint3d::abs(get_cube_center(upperSide)-center1);
-    fpoint3d A        = get_projection_on_all_axis_for_one_side(upperSide);//because it's too expensive calculate as triangles...
-    fpoint3d center2  = get_cube_center(cube2);
-
-    item_t tran = mesh->calculate_tran(index_ijk, (i+j*nx+kp*nx*ny), A, D1, upperSide,center2,along_dim3);
-
-    return tran;
-  }
-
-  void
-  change_by_x (index_t i, index_t j, index_t km, index_t kp, bool is_butting)
-  {
-    //change jacobian
-    index_t index1 = mesh->XYZ_to_inside (i,    j, km);
-    index_t index2 = mesh->XYZ_to_inside (i + 1,j, kp);
-
-    change_col_add(index1, index2,*cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus, true,true,loop->con_num,*rows_ptr);
-    if (curIndex[index2] == (*rows_ptr)[index2])
-      curIndex[index2]++;
-    change_col_add(index2, index1, *cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus, false,true,loop->con_num,*rows_ptr);
-
-    item_t tran = is_butting ? calc_tran_is_butting_by_x (i, j, km, kp) : calc_tran_by_x (i, j, km, kp);
-
-    //change flux_connection
-    cols_ind_transmis[loop->con_num++] = index1;
-    cols_ind_transmis[loop->con_num++] = index2;
-    values_transmis.push_back(tran);
-    values_transmis.push_back(-tran);
-  }
-
-  void
-  change_by_y (index_t i, index_t j, index_t km, index_t kp, bool is_butting)
-  {
-    index_t index1 = mesh->XYZ_to_inside (i, j,     km);
-    index_t index2 = mesh->XYZ_to_inside (i, j + 1, kp);
-
-    change_col_add(index1, index2, *cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus,true,true,loop->con_num,*rows_ptr);
-    if (curIndex[index2] == (*rows_ptr)[index2])
-      curIndex[index2]++;
-    change_col_add(index2, index1, *cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus,false,true,loop->con_num,*rows_ptr);
-
-    item_t tran = is_butting ? calc_tran_is_butting_by_y (i, j, km, kp) : calc_tran_by_y (i, j, km, kp);
-
-    //change flux_connection
-    cols_ind_transmis[loop->con_num++] = index1;
-    cols_ind_transmis[loop->con_num++] = index2;
-    values_transmis.push_back(tran);
-    values_transmis.push_back(-tran);
-  }
-
-  void
-  change_by_z (index_t i, index_t j, index_t km, index_t kp, bool is_butting)
-  {
-    //change jacobian
-    index_t index1 = mesh->XYZ_to_inside (i, j, km);
-    index_t index2 = mesh->XYZ_to_inside (i, j, kp);
-
-    change_col_add(index1, index2,*cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus,true,true,loop->con_num,*rows_ptr);
-    if (curIndex[index2] == (*rows_ptr)[index2])
-      curIndex[index2]++;
-    change_col_add(index2, index1, *cols_ind,curIndex, matrix_block_idx_minus, matrix_block_idx_plus,false,true,loop->con_num,*rows_ptr);
-
-    item_t tran = is_butting ? calc_tran_is_butting_by_z (i, j, km, kp) : calc_tran_by_z (i, j, km, kp);
-
-    //change flux_connection
-    cols_ind_transmis[loop->con_num++] = index1;
-    cols_ind_transmis[loop->con_num++] = index2;
-    values_transmis.push_back(tran);
-    values_transmis.push_back(-tran);
-  }
-
-  mesh_t              *mesh;
-  loop_t              *loop;
-  index_array_t       *rows_ptr;
-  index_array_t       *cols_ind;
-  index_array_t       &cols_ind_transmis;
-  rhs_item_array_t    &values_transmis;
-  index_array_t       &matrix_block_idx_minus;
-  index_array_t       &matrix_block_idx_plus;
-
-  index_t             nx;
-  index_t             ny;
-  index_t             nz;
-
-  index_array_t       curIndex;
-
-  const cube_index_t  *cube_IJK_index;
-  index_t             index1;
-  index_t             index_ijk;
-
-  ijk_cube_t          cube_IJK;
-  fpoint3d            center1;
-};
-
-template <typename M, typename L, typename RP, typename CI, typename CT, typename FC>
-build_jacobian_cols_class <M, L>
-build_jacobian_cols (mesh_grdecl <M> *m, L *l, RP *rp, CI *ci, CT &conn_trans, FC &flux_conn)
-{
-  return build_jacobian_cols_class <M, L> (m, l, rp, ci,
-    conn_trans->get_cols_ind (), conn_trans->get_values (),
-    flux_conn->get_matrix_block_idx_minus (), flux_conn->get_matrix_block_idx_plus ());
-}
-
-template <typename strategy_t>
-struct build_jacobian_and_flux : boost::noncopyable
-{
-  typedef typename strategy_t::index_t          index_t;
-  typedef typename strategy_t::item_t           item_t;
-  typedef typename strategy_t::index_array_t    index_array_t;
-  typedef typename strategy_t::item_array_t     item_array_t;
-
-  typedef mesh_grdecl <strategy_t>              mesh_t;
-  typedef typename mesh_t::side_t               side_t;
-  typedef typename mesh_t::cube_index_t         cube_index_t;
-
-  build_jacobian_and_flux (mesh_grdecl <strategy_t> *mesh)
-  : mesh (mesh)
-  , nx (mesh->nx)
-  , ny (mesh->ny)
-  , nz (mesh->nz)
-  , con_num (0)
-  {
-    is_butting.assign (nx * ny, false);
-  }
-
-  template <typename loop_body_t>
-  void
-  cell_loop (loop_body_t loop_body)
-  {
-    for (index_t i = 0; i < nx; ++i)
-      {
-        for (index_t j = 0; j < ny; ++j)
-          {
-            index_t bottom_Kx = 0;
-            index_t bottom_Ky = 0;
-
-            index_t top_Kx, top_Ky, top_Kz;
-            for (index_t k = 0; k < nz; ++k)
-              {
-                index_t current_cell_index  = i+j*nx+k*nx*ny;
-                index_t external_cell_index = mesh->XYZ_to_inside(i,j,k);
-                //skip non-active cells but use it for adding new boundary cells
-                bool is_current_cell_active = mesh->sp_actnum[current_cell_index];
-
-                const cube_index_t &cube_IJK_index = top_cube_index (i, j, k, nx, ny);
-                bool flag_is_boundary = false;
-                if (is_current_cell_active && (i == 0 || j == 0 || k == 0 || i == nx-1 || j == ny-1 || k == nz-1))
-                  {
-                    loop_body.add_boundary (external_cell_index);
-                    flag_is_boundary = true;
-                  }
-
-                loop_body.prepare (i, j, k, &cube_IJK_index, is_current_cell_active);
-                loop_body.define_butting (i, j, k);
-
-                //look only 3 positive-direction side
-                if (is_butting[j*nx+i])
-                  {
-                    //speed-up by calculating just one square
-                    if (i+1 < nx)
-                      {
-                        if (is_current_cell_active && mesh->sp_actnum[(i+1)+j*nx + k*nx*ny])
-                          {
-                            loop_body.change_by_x (i, j, k, k, true);
-                          }
-                        else if (!flag_is_boundary)
-                          {
-                            if (is_current_cell_active)
-                              {
-                                loop_body.add_boundary (external_cell_index);
-                                flag_is_boundary = true;
-                              }
-                            else
-                              {
-                                loop_body.add_boundary (mesh->XYZ_to_inside(i + 1, j, k));
-                              }
-                          }
-                      }
-                    if (j+1 < ny)
-                      {
-                        if (is_current_cell_active && mesh->sp_actnum[i+(j+1)*nx + k*nx*ny])
-                          {
-                            loop_body.change_by_y (i, j, k, k, true);
-                          }
-                        else if (!flag_is_boundary)
-                          {
-                            if (is_current_cell_active)
-                              {
-                                loop_body.add_boundary (external_cell_index);
-                                flag_is_boundary = true;
-                              }
-                            else
-                              {
-                                loop_body.add_boundary (mesh->XYZ_to_inside(i,j+1,k));
-                              }
-                          }
-                      }
-                    if (is_current_cell_active && (k+1 < nz))
-                      {
-                        if (mesh->sp_actnum[i+j*nx + (k+1)*nx*ny])
-                          {
-                            loop_body.change_by_z (i, j, k, k + 1, true);
-                          }
-                      }
-                    continue;
-                  }
-#pragma endregion
-
-                //calculating for non butting cell!
-                top_Kx = bottom_Kx-1;
-#pragma region rightSide
-                if (i+1 < nx)
-                  {
-                    //looking for incident block at right side and their zmin(kmin) & zmax(kmax)
-                    const side_t &right_side = get_side( right, cube_IJK_index,0);
-                    item_t maxZ_RS = mesh->zcorn_array[*std::max_element(right_side.begin(),right_side.end())];
-
-                    //go to top
-                    //looking for top block for right side - minZ_LS <= maxZ_RS
-                    while (top_Kx < nz-1)
-                      {
-                        top_Kx++;
-                        if (flag_is_boundary && !mesh->sp_actnum[i+1+j*nx + top_Kx*nx*ny])//skip non-active cells
-                          continue;
-
-                        const side_t &temp_left_side = get_side( left, top_cube_index(i+1,j,top_Kx, nx, ny),0);
-                        item_t minZ_LS = mesh->zcorn_array[*std::min_element(temp_left_side.begin(),temp_left_side.end())];
-
-                        if (minZ_LS >= maxZ_RS) //we can't go more
-                          break;
-                        else if (mesh->is_2side_crossing(right_side, temp_left_side, true))// => [i,j,k] && [i+1,j,top_Kx] have common contact
-                          {
-                            if (is_current_cell_active)
-                              {
-                                if (mesh->sp_actnum[(i+1)+j*nx + top_Kx*nx*ny])
-                                  {
-                                    loop_body.change_by_x (i, j, k, top_Kx, false);
-                                  }
-                                else if (!flag_is_boundary)
-                                  {
-                                    loop_body.add_boundary (external_cell_index);
-                                    flag_is_boundary = true;
-                                  }
-                              }
-                            else if (mesh->sp_actnum[(i+1)+j*nx + top_Kx*nx*ny])
-                              {
-                                loop_body.add_boundary (mesh->XYZ_to_inside(i+1,j,top_Kx));
-                              }
-                          }
-                      }
-                  }
-
-#pragma endregion
-
-                top_Ky = bottom_Ky-1;
-#pragma region bottomSide
-                if (j+1 < ny)
-                  {
-                    const side_t &bottom_side = get_side( bottom,cube_IJK_index,0);
-                    item_t maxZ_BS = mesh->zcorn_array[*std::max_element(bottom_side.begin(),bottom_side.end())];
-
-                    //go to top
-                    //looking for top block for bottom side - minZ_TS <= maxT_RS
-                    while (top_Ky < nz-1)
-                      {
-                        top_Ky++;
-                        if (flag_is_boundary && !mesh->sp_actnum[i+(j+1)*nx + top_Ky*nx*ny])//skip non-active cells
-                          continue;
-
-                        const side_t &temp_top_side = get_side( left, top_cube_index(i,j+1,top_Ky, nx, ny),0);
-                        item_t minZ_TS = mesh->zcorn_array[*std::min_element(temp_top_side.begin(),temp_top_side.end())];
-                        if (minZ_TS >= maxZ_BS) //we can't go more
-                          break;
-                        else if (mesh->is_2side_crossing(bottom_side, temp_top_side,!true))// => [i,j,k] && [i,j+1,top_Ky] have common contact
-                          {
-                            if (is_current_cell_active) //standart case
-                              {
-                                if (mesh->sp_actnum[i+(j+1)*nx + top_Ky*nx*ny])
-                                  {
-                                    loop_body.change_by_y (i, j, k, top_Ky, false);
-                                  }
-                                else if (!flag_is_boundary)
-                                  {
-                                    loop_body.add_boundary (external_cell_index);
-                                    flag_is_boundary = true;
-                                  }
-                              }
-                            else if (mesh->sp_actnum[i+(j+1)*nx + top_Ky*nx*ny])
-                              {
-                                loop_body.add_boundary (mesh->XYZ_to_inside(i,j+1,top_Ky));
-                              }
-                          }
-                      }
-                  }
-
-#pragma endregion
-
-#pragma region upperSide
-                if (k+1 < nz && is_current_cell_active)
-                  {
-                    top_Kz = k+1;
-                    while (top_Kz < nz)
-                      {
-                        if (!mesh->sp_actnum[i+j*nx+top_Kz*nx*ny])
-                          {
-                            top_Kz++;
-                            continue;
-                          }
-                        break;
-                      }
-                    if (top_Kz == nz) //no connections
-                      continue;
-                    else if (mesh->sp_actnum[i+j*nx+top_Kz*nx*ny])
-                      {
-                        // => [i,j,k] && [i,j,k_Topz] have common contact (take square upperSide) -> findAreaOfSide(upperSide[0],upperSide[1],upperSide[2],upperSide[3]);
-                        loop_body.change_by_z (i, j, k, top_Kz, false);
-                      }
-                  }
-#pragma endregion
-                bottom_Kx = top_Kx;
-                bottom_Ky = top_Ky;
-
-              }
-          }
-      }
-  }
-
-  mesh_grdecl <strategy_t>    *mesh;
-  index_t                     nx;
-  index_t                     ny;
-  index_t                     nz;
-  shared_vector <bool>        is_butting;
-  index_t                     con_num;
-};
-
-
-template<class strategy_t>
-int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr_t &jacobian,
-                                                                               const sp_flux_conn_iface_t &flux_conn,
-                                                                               index_array_t &boundary_array)
-{
-  n_connections = 0;
-
-  index_t max_size = n_active_elements;
-  jacobian->get_cols_ind().clear();
-  jacobian->get_rows_ptr().clear();
-  jacobian->init_struct(max_size,max_size, max_size);
-  index_array_t* rows_ptr = &jacobian->get_rows_ptr();
-
-  sp_bcsr_t conn_trans;
-
-  (*rows_ptr)[0] = 0;
-
-  std::vector<bool> is_butting(nx*ny,false);
-
-  std::set<index_t, std::less<index_t> > boundary_set;
-
-  build_jacobian_and_flux <strategy_t> build_jacobian (this);
-
-  //first step - define and fill - rows_ptr (jacobian)
-  build_jacobian.cell_loop (build_jacobian_rows (this, &build_jacobian, boundary_set, rows_ptr));
-
-  //////jacobian//////////////////////
-  //sum rows_ptr
-  for (size_t i = 1; i < rows_ptr->size(); ++i)
-    {
-      (*rows_ptr)[i]++;
-      (*rows_ptr)[i] += (*rows_ptr)[i-1];
-    }
-  //create cols_ind
-  index_array_t* cols_ind = &jacobian->get_cols_ind();
-
-  cols_ind->resize((*rows_ptr)[rows_ptr->size()-1],-1);
-  ////////transmis/////////////////////////
-  index_t cols_ind_n = (index_t)cols_ind->size();
-
-
-  index_t con_num = (cols_ind_n-max_size)/2;//connection number
-  n_connections = con_num;
-  conn_trans = flux_conn->get_conn_trans();
-  conn_trans->init_struct(con_num,2*con_num,2*con_num);
-
-  index_array_t *rows_ptr_transmis = &conn_trans->get_rows_ptr();
-  index_array_t &matrix_block_idx_minus = flux_conn->get_matrix_block_idx_minus ();
-  index_array_t &matrix_block_idx_plus = flux_conn->get_matrix_block_idx_plus ();
-
-  matrix_block_idx_minus.resize(con_num*2,-1);
-  matrix_block_idx_plus.resize(con_num*2,-1);
-
-  if (!con_num)
-    {
-      for (int i = 0; i < cols_ind_n; ++i)
-        (*cols_ind)[i] = i;
-      return 0;
-    }
-
-  for (index_t i = 0; i < con_num+1; ++i)
-    (*rows_ptr_transmis)[i] = i*2;
-
-  //second step - fill and define cols_ind
-  build_jacobian.con_num = 0;
-  build_jacobian.cell_loop (build_jacobian_cols (this, &build_jacobian, rows_ptr, cols_ind, conn_trans, flux_conn));
-
-
-  boundary_array.assign(boundary_set.begin(), boundary_set.end());
-  return (int) boundary_array.size();
-}
 
 BS_INST_STRAT(mesh_grdecl);
