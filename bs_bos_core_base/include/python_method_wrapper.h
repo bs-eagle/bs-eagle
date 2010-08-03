@@ -12,6 +12,16 @@
 #include "throw_exception.h"
 
 
+/** 
+ * @brief wrap functions with out return type
+ * 
+ * @param name_         -- function name
+ * @param ret_          -- should be void
+ * @param len_          -- number of parameters
+ * @param seq_          -- list of parameters
+ * 
+ * @return nothing
+ */
 #define WRAPPER_METHOD(name_, ret_, len_, seq_)                                                       \
   ret_                                                                                                \
   name_ (PARAM_LIST (seq_, len_))                                                                     \
@@ -32,6 +42,16 @@
     wrapped_t::name_ (CALL_LIST (seq_, len_));                                                        \
   }
 
+/** 
+ * @brief wrap constant functions with out return type
+ * 
+ * @param name_         -- function name
+ * @param ret_          -- should be void
+ * @param len_          -- number of parameters
+ * @param seq_          -- list of parameters
+ * 
+ * @return nothing
+ */
 #define WRAPPER_METHOD_CONST(name_, ret_, len_, seq_)                                                 \
   ret_                                                                                                \
   name_ (PARAM_LIST (seq_, len_)) const                                                               \
@@ -52,6 +72,16 @@
     wrapped_t::name_ (CALL_LIST (seq_, len_));                                                        \
   }
 
+/** 
+ * @brief wrap functions
+ * 
+ * @param name_         -- function name
+ * @param ret_          -- return type
+ * @param len_          -- number of parameters
+ * @param seq_          -- list of parameters
+ * 
+ * @return nothing
+ */
 #define WRAPPER_METHOD_R(name_, ret_, len_, seq_)                                                     \
   ret_                                                                                                \
   name_ (PARAM_LIST (seq_, len_))                                                                     \
@@ -72,6 +102,16 @@
     return wrapped_t::name_ (CALL_LIST (seq_, len_));                                                 \
   }
 
+/** 
+ * @brief wrap constant functions
+ * 
+ * @param name_         -- function name
+ * @param ret_          -- return type
+ * @param len_          -- number of parameters
+ * @param seq_          -- list of parameters
+ * 
+ * @return nothing
+ */
 #define WRAPPER_METHOD_R_CONST(name_, ret_, len_, seq_)                                               \
   ret_                                                                                                \
   name_ (PARAM_LIST (seq_, len_)) const                                                               \
@@ -92,6 +132,16 @@
     return wrapped_t::name_ (CALL_LIST (seq_, len_));                                                 \
   }
 
+/** 
+ * @brief wrap pure virtual method with out return type
+ * 
+ * @param name_         -- function name
+ * @param ret_          -- should be void
+ * @param len_          -- number of parameters
+ * @param seq_          -- list of parameters
+ * 
+ * @return nothing
+ */
 #define WRAP_PURE_METHOD(name_, ret_, len_, seq_)                                                     \
   ret_                                                                                                \
   name_ (PARAM_LIST (seq_, len_))                                                                     \
@@ -107,6 +157,16 @@
       }                                                                                               \
   }
 
+/** 
+ * @brief wrap pure virtual const method with out return type
+ * 
+ * @param name_         -- function name
+ * @param ret_          -- should be void
+ * @param len_          -- number of parameters
+ * @param seq_          -- list of parameters
+ * 
+ * @return nothing
+ */
 #define WRAP_PURE_METHOD_CONST(name_, ret_, len_, seq_)                                               \
   ret_                                                                                                \
   name_ (PARAM_LIST (seq_, len_)) const                                                               \
@@ -122,6 +182,16 @@
       }                                                                                               \
   }
 
+/** 
+ * @brief wrap pure virtual method
+ * 
+ * @param name_         -- function name
+ * @param ret_          -- return type
+ * @param len_          -- number of parameters
+ * @param seq_          -- list of parameters
+ * 
+ * @return nothing
+ */
 #define WRAP_PURE_METHOD_R(name_, ret_, len_, seq_)                                                   \
   ret_                                                                                                \
   name_ (PARAM_LIST (seq_, len_))                                                                     \
@@ -137,6 +207,16 @@
       }                                                                                               \
   }
 
+/** 
+ * @brief wrap pure virtual const method
+ * 
+ * @param name_         -- function name
+ * @param ret_          -- return type
+ * @param len_          -- number of parameters
+ * @param seq_          -- list of parameters
+ * 
+ * @return nothing
+ */
 #define WRAP_PURE_METHOD_R_CONST(name_, ret_, len_, seq_)                                             \
   ret_                                                                                                \
   name_ (PARAM_LIST (seq_, len_)) const                                                               \

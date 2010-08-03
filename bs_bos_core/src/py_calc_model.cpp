@@ -73,6 +73,7 @@ namespace blue_sky
     PY_EXPORTER_END;
 
     PY_EXPORTER (calc_model_data_exporter, empty_exporter)
+#if 0
       .add_property ("cap_pressure",              detail::boost_array_adapter (&T::cap_pressure))
       .add_property ("s_deriv_cap_pressure",      detail::boost_array_adapter (&T::s_deriv_cap_pressure))
       .add_property ("relative_perm",             detail::boost_array_adapter (&T::relative_perm))
@@ -98,6 +99,7 @@ namespace blue_sky
       .add_property ("p_deriv_mobility",          detail::boost_array_adapter (&T::p_deriv_mobility))
       .add_property ("s_deriv_mobility",          detail::boost_array_adapter (&T::s_deriv_mobility))
       .add_property ("prev_fluid_volume",         detail::boost_array_adapter (&T::prev_fluid_volume))
+#endif //0
     PY_EXPORTER_END;
 
     template <typename T>

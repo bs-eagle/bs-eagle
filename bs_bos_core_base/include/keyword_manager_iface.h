@@ -70,8 +70,8 @@ namespace blue_sky
       //-----------------------------------------
       //  TYPES
       //-----------------------------------------
-      typedef typename strategy_t::index_t            index_t;
-      typedef typename strategy_t::item_t             item_t;
+      typedef typename strategy_t::i_type_t             i_type_t;
+      typedef typename strategy_t::fp_storage_type_t    fp_storage_type_t;
 
       typedef keyword_params <strategy_t>             keyword_params_t;
       typedef keyword_handler_iface <strategy_t>      keyword_handler_iface_t;
@@ -99,14 +99,14 @@ namespace blue_sky
         {
         }
 
-        keyword_handler (handler_t handle_function, index_t index_in_pool)
+        keyword_handler (handler_t handle_function, i_type_t index_in_pool)
         : handle_function (handle_function)
         , second_handle_function (0)
         , index_in_pool (index_in_pool)
         {
         }
         
-        keyword_handler (handler_t handle_function, index_t def_value, index_t *new_dimens)
+        keyword_handler (handler_t handle_function, i_type_t def_value, i_type_t *new_dimens)
           : second_handle_function (handle_function)
           , index_in_pool (-1)
           , int_def_value (def_value)
@@ -119,7 +119,7 @@ namespace blue_sky
             dimens[5] = new_dimens[5];
           }
         
-        keyword_handler (handler_t handle_function, item_t def_value, index_t *new_dimens)
+        keyword_handler (handler_t handle_function, fp_storage_type_t def_value, i_type_t *new_dimens)
           : second_handle_function (handle_function)
           , index_in_pool (-2)
           , float_def_value (def_value)
@@ -146,13 +146,13 @@ namespace blue_sky
         shared_handler_t  handle_object;            //<! alternative for handle_function
         handler_t         second_handle_function;   //<! pointer to function
         
-        index_t           index_in_pool;            //<! index in pool (for pooled keywords (pooled==handles by array handlers))
+        i_type_t           index_in_pool;            //<! index in pool (for pooled keywords (pooled==handles by array handlers))
                                                     //<! -1: insert in imap (int) with available index
                                                     //<! -2: insert in dmap (float) with available index
                                                     //<! -3: invalid_value (because 0 is valid)
-        index_t           int_def_value;            //<! default value (for int pooled keywords (pooled==handles by array handlers))
-        item_t            float_def_value;          //<! default value (for float pooled keywords (pooled==handles by array handlers))
-        index_t           dimens[6];                //<! dimensions of array (for pooled keywords (pooled==handles by array handlers))
+        i_type_t           int_def_value;            //<! default value (for int pooled keywords (pooled==handles by array handlers))
+        fp_storage_type_t            float_def_value;          //<! default value (for float pooled keywords (pooled==handles by array handlers))
+        i_type_t           dimens[6];                //<! dimensions of array (for pooled keywords (pooled==handles by array handlers))
       };
 
       

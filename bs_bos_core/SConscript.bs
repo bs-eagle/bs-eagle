@@ -33,9 +33,9 @@ boost_libs = ["boost_date_time-mt"]
 if (env["cfl"] == "1") :
     env.AppendUnique (CPPDEFINES = ["BS_BOS_CORE_USE_CSR_ILU_CFL_PREC"])
 
-if (env["hdf5"] == "1") :
-    env.AppendUnique (CPPDEFINES = defines["bs_hdf5_storage"], CPPPATH = includes["bs_hdf5_storage"])
-    libs = libs + ["bs_hdf5_storage"]
+#if (env["hdf5"] == "1") :
+#    env.AppendUnique (CPPDEFINES = defines["bs_hdf5_storage"], CPPPATH = includes["bs_hdf5_storage"])
+#    libs = libs + ["bs_hdf5_storage"]
 
 if (build_kind == "debug") :
     env.AppendUnique (LIBS = list_suffix (libs, "_d") + list_suffix (boost_libs, "-d"))

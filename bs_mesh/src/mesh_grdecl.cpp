@@ -12,7 +12,7 @@ const char filename_hdf5[] = "grid_swap.h5";
 
 #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX  
   FILE*  fp;
-#endif BS_MESH_WRITE_TRANSMISS_MATRIX 
+#endif //BS_MESH_WRITE_TRANSMISS_MATRIX 
 
 
 template<class strategy_t>
@@ -45,7 +45,7 @@ mesh_grdecl<strategy_t>::calc_corner_point(const pool_item_t z, const pool_item_
 
 template<class strategy_t>
 inline void
-typename mesh_grdecl<strategy_t>::get_element_zcorn_index(index_t i, index_t j, index_t k, element_zcorn_index_t& element)  const
+typename mesh_grdecl<strategy_t>::get_element_zcorn_index (index_t i, index_t j, index_t k, element_zcorn_index_t& element)  const
 {
   //typename mesh_grdecl<strategy_t>::element_zcorn_index_t element;
   
@@ -1461,7 +1461,7 @@ int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (c
   
  #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX     
   fp = fopen ("transmiss.out", "w");
- #endif BS_MESH_WRITE_TRANSMISS_MATRIX   
+ #endif //BS_MESH_WRITE_TRANSMISS_MATRIX   
 
   //first step - define and fill - rows_ptr (jacobian)
   build_jacobian.cell_loop (build_jacobian_rows (this, &build_jacobian, boundary_set, rows_ptr));
@@ -1515,7 +1515,7 @@ int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (c
   #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX  
     fflush (fp);
     fclose (fp);
-  #endif BS_MESH_WRITE_TRANSMISS_MATRIX 
+  #endif //BS_MESH_WRITE_TRANSMISS_MATRIX 
 
   return (int) boundary_array.size();
 }

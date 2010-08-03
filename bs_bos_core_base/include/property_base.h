@@ -119,16 +119,16 @@ namespace blue_sky
 
     template<class T>
     struct equal_check<T, true> {
-    	typedef T tval;
+        typedef T tval;
     };
 
     template<class T>
     struct equal_check<T, false> {
-    	typedef T tval;
-    	equal_check() {
-    		struct incomplete_type;
-    		incomplete_type smart_array_T;
-    	}
+        typedef T tval;
+        equal_check() {
+                struct incomplete_type;
+                incomplete_type smart_array_T;
+        }
     };*/
   }
 
@@ -137,12 +137,12 @@ namespace blue_sky
 //! @cname - inherited class name
 //! @bcname - base class name - property_base for p-base-inherited types
 #define PROP_BASE_IDX_DECL_BEGIN(cname,bcname) \
-	public: enum cname ## _idxs { \
-		__prop_base_idx_beg__ = (bcname::__prop_base_idx_end__ - 1),
+        public: enum cname ## _idxs { \
+                __prop_base_idx_beg__ = (bcname::__prop_base_idx_end__ - 1),
 
 //! end of property indexing enumeration
 #define PROP_BASE_IDX_DECL_END \
-		__prop_base_idx_end__ };
+                __prop_base_idx_end__ };
 
 //! methods of property_base-inherited for access map of variants
 // @class_name - name of property_base-inherited class
@@ -151,73 +151,73 @@ namespace blue_sky
 // set_param - sets element of container (idx enum-based index, value - allowed_type)
 // operator[] - returns const reference to element in container (idx - enum-based index)
 // get_ref - returns reference to element in container (idx - enum-based index)
-#define PBASE_ACCESS_MS(class_name)																				\
-	public:																																	\
-    typedef double fp_type;                                               \
-		typedef class_name ## _idxs idx_type;																	\
-    inline int check_value (size_t idx, size_t /*dummy*/) const           \
-    {													                                            \
-			return this->is_inited.get ((int)idx);                              \
-    }	                                                                    \
-    template <class T> T get_value_internal (size_t idx, size_t /*dummy*/) const          \
-    {                                                                     \
-      BS_ASSERT (check_value (idx, 0xdeadbeaf)) (idx);                    \
-      if ((int)idx >= this->get_length () || (int)idx < 0)                \
-        {							                                                    \
-				  BS_ASSERT (false && "index out of range");                      \
-        }											                                            \
-			allowed_types::cast_array_type(T());																\
-      static T dummy__ = T ();                                            \
-			return my_variant::get (this->values[idx], dummy__);                \
-    }																			                                \
-		template<class T> inline T get_param (idx_type idx) const             \
-    {						                                                          \
-			return get_value_internal <T> (idx, 0xdeadbeaf);                    \
-    }												                                              \
-		template<class T>	inline void set_param (idx_type idx, const T &value)\
-    {			                                                                \
-      my_variant::set (this->values[idx], value);											    \
-			this->is_inited.set ((int)idx);                                     \
-    }																		                                  \
-    template<class T>	inline void set_param (size_t idx, const T &value, size_t /*dummy*/)\
-    {			                                                                \
-      my_variant::set (this->values[idx], value);											    \
-			this->is_inited.set ((int)idx);                                     \
-    }												                                              \
-		inline int check_value (idx_type idx) const                           \
-    {													                                            \
-			return this->is_inited.get ((int)idx);                              \
-    }														                                          \
-    bool get_bool (idx_type idx) const {														      \
-      BS_ASSERT (check_value (idx)) (idx);                                \
-      return get_param <bool> (idx); }																		\
-    int get_int (idx_type idx) const {															      \
-      BS_ASSERT (check_value (idx)) (idx);                                \
-      return get_param <int> (idx); }																		  \
-    fp_type get_float (idx_type idx) const {													    \
-      BS_ASSERT (check_value (idx)) (idx);                                \
-      return get_param <fp_type> (idx); }																	\
-    std::string get_str (idx_type idx) const {							              \
-      BS_ASSERT (check_value (idx)) (idx);                                \
-      return get_param <std::string> (idx); }														  \
-    void set_bool (idx_type idx, bool v) {                                \
-      set_param <bool> (idx, v); }                                        \
-    void set_int (idx_type idx, int v) {                                  \
-      set_param <int> (idx, v); }                                         \
-    void set_float (idx_type idx, fp_type v) {                            \
-      set_param <fp_type> (idx, v); }                                     \
-    void set_str (idx_type idx, const std::string &v) {                   \
-      set_param <std::string> (idx, v); }                                 \
-    template <typename T>                                                 \
-    void set_param_internal (idx_type idx, const T &t) {                  \
-      set_param <T> (idx, t); }                                           \
-    bool get_bool_d (idx_type idx, const bool &def = false) const         \
-    { return check_value (idx) ? get_bool (idx) : def; }                  \
-    int get_int_d (idx_type idx, const int &def = 0) const                \
-    { return check_value (idx) ? get_int (idx) : def; }                   \
-    fp_type get_float_d (idx_type idx, const fp_type &def = 0) const      \
-    { return check_value (idx) ? get_float (idx) : def; }                 \
-    std::string get_str_d (idx_type idx, const std::string &def = "") const \
+#define PBASE_ACCESS_MS(class_name)                                                             \
+    public:                                                                                     \
+    typedef double fp_type;                                                                     \
+    typedef class_name ## _idxs idx_type;                                                       \
+    inline int check_value (size_t idx, size_t /*dummy*/) const                                 \
+    {                                                                                           \
+      return this->is_inited.get ((int)idx);                                                    \
+    }                                                                                           \
+    template <class T> T get_value_internal (size_t idx, size_t /*dummy*/) const                \
+    {                                                                                           \
+      BS_ASSERT (check_value (idx, 0xdeadbeaf)) (idx);                                          \
+      if ((int)idx >= this->get_length () || (int)idx < 0)                                      \
+        {                                                                                       \
+          BS_ASSERT (false && "index out of range");                                            \
+        }                                                                                       \
+      allowed_types::cast_array_type(T());                                                      \
+      static T dummy__ = T ();                                                                  \
+      return my_variant::get (this->values[idx], dummy__);                                      \
+    }                                                                                                                                                                                   \
+    template<class T> inline T get_param (idx_type idx) const                                   \
+    {                                                                                           \
+      return get_value_internal <T> (idx, 0xdeadbeaf);                                          \
+    }                                                                                           \
+    template<class T>   inline void set_param (idx_type idx, const T &value)                    \
+    {                                                                                           \
+      my_variant::set (this->values[idx], value);                                               \
+      this->is_inited.set ((int)idx);                                                           \
+    }                                                                                           \
+    template<class T>   inline void set_param (size_t idx, const T &value, size_t /*dummy*/)    \
+    {                                                                                           \
+      my_variant::set (this->values[idx], value);                                               \
+                        this->is_inited.set ((int)idx);                                         \
+    }                                                                                           \
+    inline int check_value (idx_type idx) const                                                 \
+    {                                                                                           \
+      return this->is_inited.get ((int)idx);                                                    \
+    }                                                                                           \
+    bool get_bool (idx_type idx) const {                                                        \
+      BS_ASSERT (check_value (idx)) (idx);                                                      \
+      return get_param <bool> (idx); }                                                          \
+    int get_int (idx_type idx) const {                                                          \
+      BS_ASSERT (check_value (idx)) (idx);                                                      \
+      return get_param <int> (idx); }                                                           \
+    fp_type get_float (idx_type idx) const {                                                    \
+      BS_ASSERT (check_value (idx)) (idx);                                                      \
+      return get_param <fp_type> (idx); }                                                       \
+    std::string get_str (idx_type idx) const {                                                  \
+      BS_ASSERT (check_value (idx)) (idx);                                                      \
+      return get_param <std::string> (idx); }                                                   \
+    void set_bool (idx_type idx, bool v) {                                                      \
+      set_param <bool> (idx, v); }                                                              \
+    void set_int (idx_type idx, int v) {                                                        \
+      set_param <int> (idx, v); }                                                               \
+    void set_float (idx_type idx, fp_type v) {                                                  \
+      set_param <fp_type> (idx, v); }                                                           \
+    void set_str (idx_type idx, const std::string &v) {                                         \
+      set_param <std::string> (idx, v); }                                                       \
+    template <typename T>                                                                       \
+    void set_param_internal (idx_type idx, const T &t) {                                        \
+      set_param <T> (idx, t); }                                                                 \
+    bool get_bool_d (idx_type idx, const bool &def = false) const                               \
+    { return check_value (idx) ? get_bool (idx) : def; }                                        \
+    int get_int_d (idx_type idx, const int &def = 0) const                                      \
+    { return check_value (idx) ? get_int (idx) : def; }                                         \
+    fp_type get_float_d (idx_type idx, const fp_type &def = 0) const                            \
+    { return check_value (idx) ? get_float (idx) : def; }                                       \
+    std::string get_str_d (idx_type idx, const std::string &def = "") const                     \
     { return check_value (idx) ? get_str (idx) : def; }                   
 
       struct my_variant
@@ -392,9 +392,9 @@ namespace blue_sky
       /*//! push back method - deprecated - will be removed in next versions
       template<class T>
       void push_back(const T &src) {
-      	allowed_types::cast_array_type(T()); // test for allowed types
-      	values.push_back(src);
-      	//is_inited.push_back()
+        allowed_types::cast_array_type(T()); // test for allowed types
+        values.push_back(src);
+        //is_inited.push_back()
       }*/
 
       //! clear all

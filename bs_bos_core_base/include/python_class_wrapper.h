@@ -40,6 +40,56 @@
 #define STRATEGY_CLASS_WRAPPER_DECL(wrapper_name_)                                                                                  \
   CLASS_WRAPPER_DECL_T (1, (strategy_t), wrapper_name_)
 
+#define MATRIX_IFACE_WRAPPER(class_name_, wrapper_name_)                                                                      \
+  CLASS_WRAPPER_T (2, (fp_vector_type, i_vector_type), class_name_, wrapper_name_)
 
+#define MATRIX_IFACE_WRAPPER_DECL(wrapper_name_)                                                                              \
+  CLASS_WRAPPER_DECL_T (2, (fp_vector_type, i_vector_type), wrapper_name_)
+
+#define BCSR_MATRIX_IFACE_WRAPPER(class_name_, wrapper_name_)                                                                      \
+  CLASS_WRAPPER_T (3, (fp_vector_type, i_vector_type, fp_storage_vector_type), class_name_, wrapper_name_)
+
+#define BDIAG_MATRIX_IFACE_WRAPPER(class_name_, wrapper_name_)                                                                      \
+  CLASS_WRAPPER_T (3, (fp_vector_type, i_vector_type, fp_storage_vector_type), class_name_, wrapper_name_)
+
+#define JAC_MATRIX_IFACE_WRAPPER(class_name_, wrapper_name_)                                                                      \
+  CLASS_WRAPPER_T (3, (fp_vector_type, i_vector_type, fp_storage_vector_type), class_name_, wrapper_name_)
+
+#define BCSR_MATRIX_WRAPPER(class_name_, wrapper_name_)                                                                      \
+  CLASS_WRAPPER_T (3, (fp_vector_type, i_vector_type, fp_storage_vector_type), class_name_, wrapper_name_)
+
+#define BDIAG_MATRIX_WRAPPER(class_name_, wrapper_name_)                                                                      \
+  CLASS_WRAPPER_T (3, (fp_vector_type, i_vector_type, fp_storage_vector_type), class_name_, wrapper_name_)
+
+#define BCSR_MATRIX_IFACE_WRAPPER_DECL(wrapper_name_)                                                                              \
+  CLASS_WRAPPER_DECL_T (3, (fp_vector_type, i_vector_type, fp_storage_vector_type), wrapper_name_)
+
+#define BDIAG_MATRIX_IFACE_WRAPPER_DECL(wrapper_name_)                                                                              \
+  CLASS_WRAPPER_DECL_T (3, (fp_vector_type, i_vector_type, fp_storage_vector_type), wrapper_name_)
+
+#define JAC_MATRIX_IFACE_WRAPPER_DECL(wrapper_name_)                                                                              \
+  CLASS_WRAPPER_DECL_T (3, (fp_vector_type, i_vector_type, fp_storage_vector_type), wrapper_name_)
+
+#define BCSR_MATRIX_WRAPPER_DECL(wrapper_name_)                                                                              \
+  CLASS_WRAPPER_DECL_T (3, (fp_vector_type, i_vector_type, fp_storage_vector_type), wrapper_name_)
+
+#define MATRIX_CLASS_WRAPPER(class_name_, wrapper_name_)                                                                            \
+  CLASS_WRAPPER_T (3, (fp_vector_type, i_vector_type, fp_storage_vector_type), class_name_, wrapper_name_)
+
+#define MATRIX_CLASS_WRAPPER_DECL(wrapper_name_)                                                                                    \
+  CLASS_WRAPPER_DECL_T (3, (fp_vector_type, i_vector_type, fp_storage_vector_type), wrapper_name_)
+
+
+#define PROP_IFACE_WRAPPER(class_name_, wrapper_name_)                                                                      \
+  CLASS_WRAPPER_T (4, (fp_type_t, i_type_t, s_type_t, b_type_t), class_name_, wrapper_name_)
+
+#define PROP_IFACE_WRAPPER_DECL(wrapper_name_)                                                                              \
+  CLASS_WRAPPER_DECL_T (4, (fp_type_t, i_type_t, s_type_t, b_type_t), wrapper_name_)
+
+#define LSOLVER_IFACE_WRAPPER(class_name_, wrapper_name_)                                                                      \
+  CLASS_WRAPPER_T (1, (strategy_t), class_name_, wrapper_name_)
+
+#define LSOLVER_IFACE_WRAPPER_DECL(wrapper_name_)                                                                              \
+  CLASS_WRAPPER_DECL_T (1, (strategy_t), wrapper_name_)
 #endif // #ifndef BS_BOS_CORE_BASE_PYTHON_CLASS_WRAPPER_H_
 
