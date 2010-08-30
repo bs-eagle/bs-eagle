@@ -19,9 +19,9 @@ namespace blue_sky
 
     public:
       typedef matrix_iface <strat_t>                            base_t;
-      typedef typename strat_t::fp_vector_type                  fp_vector_type_t;
-      typedef typename strat_t::i_vector_type                   i_vector_type_t;
-      typedef typename strat_t::fp_storage_vector_type          fp_storage_vector_type_t;
+      //typedef typename strat_t::fp_vector_type                  fp_vector_type_t;
+      //typedef typename strat_t::i_vector_type                   i_vector_type_t;
+      //typedef typename strat_t::fp_storage_vector_type          fp_storage_vector_type_t;
       typedef typename strat_t::fp_type_t                       fp_type_t;
       typedef typename strat_t::i_type_t                        i_type_t;
       typedef typename strat_t::fp_storage_type_t               fp_storage_type_t;
