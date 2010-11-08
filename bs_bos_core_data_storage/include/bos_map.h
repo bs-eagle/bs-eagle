@@ -11,11 +11,11 @@ namespace blue_sky
    \brief blue_sky map of item_t, accessed with index_t
   */
   template< class index_t, class item_t >
-  class bos_val_table : public BS_MAP(index_t, typename dt_val_traits< item_t >::value_type), public objbase
+  class bos_val_table : public BS_MAP(index_t, item_t), public objbase
     {
     public:
       //! type of value
-      typedef typename dt_val_traits< item_t >::value_type value_type;
+      typedef item_t value_type;
       //typedef T value_type;
       //! type of key
       typedef index_t key_type;
