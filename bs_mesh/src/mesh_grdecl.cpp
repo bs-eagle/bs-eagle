@@ -45,7 +45,7 @@ mesh_grdecl<strategy_t>::calc_corner_point(const pool_item_t z, const pool_item_
 
 template<class strategy_t>
 inline void
-typename mesh_grdecl<strategy_t>::get_element_zcorn_index(index_t i, index_t j, index_t k, element_zcorn_index_t& element)  const
+mesh_grdecl<strategy_t>::get_element_zcorn_index(index_t i, index_t j, index_t k, element_zcorn_index_t& element)  const
 {
   //typename mesh_grdecl<strategy_t>::element_zcorn_index_t element;
   
@@ -66,7 +66,7 @@ typename mesh_grdecl<strategy_t>::get_element_zcorn_index(index_t i, index_t j, 
 //! get element corners index in zcorn_array of block[i,j,k]
 template<class strategy_t>
 typename mesh_grdecl<strategy_t>::plane_zcorn_index_t
-typename mesh_grdecl<strategy_t>::get_plane_zcorn_index (element_zcorn_index_t element, 
+mesh_grdecl<strategy_t>::get_plane_zcorn_index (element_zcorn_index_t element, 
                                                          element_plane_orientation_t orientation)  const
 {
   typename mesh_grdecl<strategy_t>::plane_zcorn_index_t plane;
