@@ -113,7 +113,7 @@ using namespace blue_sky;
       item_t get_dy ();
       item_t get_dz ();
 
-      point3d_t get_dx_dy_dz ();
+      point3d_t get_dx_dy_dz () const;
 
     //-----------------------------------------
     //  VARIABLES

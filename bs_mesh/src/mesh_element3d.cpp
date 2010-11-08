@@ -204,7 +204,7 @@ mesh_element3d<strategy_t>::get_dz ()
 
 template<class strategy_t>
 typename mesh_element3d<strategy_t>::point3d_t
-mesh_element3d<strategy_t>::get_dx_dy_dz ()
+mesh_element3d<strategy_t>::get_dx_dy_dz () const
 {
   plane_t plane1, plane2, plane3, plane4, plane5, plane6;
   

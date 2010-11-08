@@ -815,7 +815,7 @@ void mesh_grdecl<strategy_t>::check_data() const
 template<class strategy_t>
 void mesh_grdecl<strategy_t>::get_block_dx_dy_dz (index_t n_elem, item_t &dx, item_t &dy, item_t &dz) const
   {
-    element_t &elem = calc_element(n_elem);
+    const element_t &elem = calc_element(n_elem);
     point3d_t sizes = elem.get_dx_dy_dz (); 
     dx = sizes[0];
     dy = sizes[1];
