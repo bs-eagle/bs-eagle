@@ -25,9 +25,13 @@ namespace blue_sky
     //*this = src;
   }
   
-  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_flux_connections<base_strategy_fi>) , 1, (objbase), "bs_flux_connections_fi", "Mesh base (virtual)  class", "Mesh base (virtual) class", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_flux_connections<base_strategy_di>) , 1, (objbase), "bs_flux_connections_di", "Mesh base (virtual)  class", "Mesh base (virtual)  class", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_flux_connections<base_strategy_mixi>) , 1, (objbase), "bs_flux_connections_mixi", "Mesh base (virtual)  class", "Mesh base (virtual)  class", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_flux_connections<base_strategy_fif>) , 1, (objbase), "bs_flux_connections_fif", "Mesh base (virtual)  class", "Mesh base (virtual) class", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_flux_connections<base_strategy_did>) , 1, (objbase), "bs_flux_connections_did", "Mesh base (virtual)  class", "Mesh base (virtual)  class", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_flux_connections<base_strategy_dif>) , 1, (objbase), "bs_flux_connections_dif", "Mesh base (virtual)  class", "Mesh base (virtual)  class", false);
+
+  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_flux_connections<base_strategy_flf>) , 1, (objbase), "bs_flux_connections_flf", "Mesh base (virtual)  class", "Mesh base (virtual) class", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_flux_connections<base_strategy_dld>) , 1, (objbase), "bs_flux_connections_dld", "Mesh base (virtual)  class", "Mesh base (virtual)  class", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_flux_connections<base_strategy_dlf>) , 1, (objbase), "bs_flux_connections_dlf", "Mesh base (virtual)  class", "Mesh base (virtual)  class", false);
 
   BLUE_SKY_TYPE_STD_CREATE_T_DEF(bs_flux_connections, (class));
   //BLUE_SKY_TYPE_STD_COPY_T_DEF(bs_flux_connections, (class));

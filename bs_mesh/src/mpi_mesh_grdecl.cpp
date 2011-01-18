@@ -302,8 +302,8 @@ namespace blue_sky
     return dset_id;
   }
 
-  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (mpi_mesh_grdecl<base_strategy_fi>) , 1, (objbase), "mpi_mesh_grdecl<float, int,float>", "MPI mesh_grdecl class", "MPI mesh ecllipse class", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (mpi_mesh_grdecl<base_strategy_di>) , 1, (objbase), "mpi_mesh_grdecl<double, int,double>", "MPI mesh ecllipse class", "MPI mesh ecllipse class", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (mpi_mesh_grdecl<base_strategy_fif>) , 1, (objbase), "mpi_mesh_grdecl<float, int,float>", "MPI mesh_grdecl class", "MPI mesh ecllipse class", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (mpi_mesh_grdecl<base_strategy_did>) , 1, (objbase), "mpi_mesh_grdecl<double, int,double>", "MPI mesh ecllipse class", "MPI mesh ecllipse class", false);
 
   BLUE_SKY_TYPE_STD_CREATE_T_DEF(mpi_mesh_grdecl, (class));
   BLUE_SKY_TYPE_STD_COPY_T_DEF(mpi_mesh_grdecl, (class));

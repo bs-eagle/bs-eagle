@@ -11,6 +11,9 @@
 template<class strategy_t>
 mesh_base<strategy_t>::mesh_base()
 {
+  volumes = give_kernel::Instance().create_object(bs_array<fp_type_t>::bs_type());
+  ext_to_int = give_kernel::Instance().create_object(bs_array<i_type_t>::bs_type());
+  int_to_ext = give_kernel::Instance().create_object(bs_array<i_type_t>::bs_type());
   n_elements = 0;
   n_active_elements = 0;
   n_connections = 0;
@@ -27,9 +30,9 @@ void mesh_base<strategy_t>::check_data() const
 //   if (n_connections <= 0)
 //     bs_throw_exception (boost::format ("n_connections = %d is out of range")% n_connections);
     
-  if (!volumes.size ())
+  if (!volumes->size ())
     bs_throw_exception ("volumes array is not initialized");
-  if (!ext_to_int.size ())
+  if (!ext_to_int->size ())
     bs_throw_exception ("ext_to_int array is not initialized");
 }
 

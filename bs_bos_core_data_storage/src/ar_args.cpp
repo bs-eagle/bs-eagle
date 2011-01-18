@@ -329,7 +329,7 @@ namespace blue_sky
 //	BLUE_SKY_TYPE_STD_CREATE_T_DEF(mesh_grdecl_mpfa, (class));
 //	BLUE_SKY_TYPE_STD_COPY_T_DEF(mesh_grdecl_mpfa, (class));
 
-  template class ar_args <base_strategy_fi>;
-  template class ar_args <base_strategy_di>;
-  template class ar_args <base_strategy_mixi>;
+  template class ar_args <base_strategy_fif>;
+  template class ar_args <base_strategy_did>;
+  template class ar_args <base_strategy_dif>;
 }

@@ -22,41 +22,41 @@ namespace blue_sky
   {
     bool res = true;
 
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_fi>::bs_type()); BS_ASSERT (res);
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_di>::bs_type()); BS_ASSERT (res);
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_mixi>::bs_type()); BS_ASSERT (res);
+    //res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_fif>::bs_type()); BS_ASSERT (res);
+    //res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_did>::bs_type()); BS_ASSERT (res);
+    //res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_dif>::bs_type()); BS_ASSERT (res);
 
     ////mesh_rs(virtual)
-    //res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, mesh_rs<base_strategy_fi>::bs_type()); BS_ASSERT (res);
-    //res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, mesh_rs<base_strategy_di>::bs_type()); BS_ASSERT (res);
+    //res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, mesh_rs<base_strategy_fif>::bs_type()); BS_ASSERT (res);
+    //res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, mesh_rs<base_strategy_did>::bs_type()); BS_ASSERT (res);
 
     //  //mesh_ijk
-    //res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, mesh_ijk<base_strategy_fi>::bs_type()); BS_ASSERT (res);
-    //res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, mesh_ijk<base_strategy_di>::bs_type()); BS_ASSERT (res);
+    //res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, mesh_ijk<base_strategy_fif>::bs_type()); BS_ASSERT (res);
+    //res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, mesh_ijk<base_strategy_did>::bs_type()); BS_ASSERT (res);
     
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_ijk_keywords<base_strategy_fi>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_ijk_keywords<base_strategy_di>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_ijk_keywords<base_strategy_mixi>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_ijk_keywords<base_strategy_fif>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_ijk_keywords<base_strategy_did>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_ijk_keywords<base_strategy_dif>::bs_type()); BS_ASSERT (res);
   
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_mesh_grdecl<base_strategy_fi>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_mesh_grdecl<base_strategy_di>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_mesh_grdecl<base_strategy_mixi>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_mesh_grdecl<base_strategy_fif>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_mesh_grdecl<base_strategy_did>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_mesh_grdecl<base_strategy_dif>::bs_type()); BS_ASSERT (res);
     
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_grdecl_keywords<base_strategy_fi>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_grdecl_keywords<base_strategy_di>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_grdecl_keywords<base_strategy_mixi>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_grdecl_keywords<base_strategy_fif>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_grdecl_keywords<base_strategy_did>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_grdecl_keywords<base_strategy_dif>::bs_type()); BS_ASSERT (res);
     
     //mpi_mesh_grdecl
 #ifdef _MPI_MY
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mpi_mesh_grdecl<base_strategy_fi>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mpi_mesh_grdecl<base_strategy_di>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mpi_mesh_grdecl<base_strategy_mixi>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, mpi_mesh_grdecl<base_strategy_fif>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, mpi_mesh_grdecl<base_strategy_did>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, mpi_mesh_grdecl<base_strategy_dif>::bs_type()); BS_ASSERT (res);
 #endif
 
     // flux_connections
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_fi>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_di>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_mixi>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_fif>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_did>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_dif>::bs_type()); BS_ASSERT (res);
     
     return res;
  }
@@ -69,7 +69,7 @@ BLUE_SKY_INIT_PY_FUN
 
   python::py_export_mesh ();
   python::py_export_mesh_grdecl ();
-  //python::py_export_flux_connections ();
+  python::py_export_flux_connections ();
 }
 #endif //BSPY_EXPORT_PLUGIN
 

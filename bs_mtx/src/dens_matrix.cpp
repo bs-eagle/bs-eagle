@@ -5,8 +5,9 @@
  */
 #include <sstream>
 
-#include "bs_matrix_stdafx.h"
+#include "bs_mtx_stdafx.h"
 #include "dens_matrix.h" 
+#include "pyublas/numpy.hpp"
 
 using namespace std;
 using namespace boost::python;

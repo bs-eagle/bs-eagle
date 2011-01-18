@@ -16,32 +16,63 @@ namespace tools {
   };
 
   template <>
-  struct strategy_name <base_strategy_di>
+  struct strategy_name <base_strategy_did>
   {
     static std::string
     name () 
     {
-      return "di";
+      return "did";
     }
   };
 
   template <>
-  struct strategy_name <base_strategy_fi>
+  struct strategy_name <base_strategy_fif>
   {
     static std::string
     name () 
     {
-      return "fi";
+      return "fif";
     }
   };
 
   template <>
-  struct strategy_name <base_strategy_mixi>
+  struct strategy_name <base_strategy_dif>
   {
     static std::string
     name () 
     {
-      return "mixi";
+      return "dif";
+    }
+  };
+  
+  
+  template <>
+  struct strategy_name <base_strategy_dld>
+  {
+    static std::string
+    name () 
+    {
+      return "dld";
+    }
+  };
+
+  template <>
+  struct strategy_name <base_strategy_flf>
+  {
+    static std::string
+    name () 
+    {
+      return "flf";
+    }
+  };
+
+  template <>
+  struct strategy_name <base_strategy_dlf>
+  {
+    static std::string
+    name () 
+    {
+      return "dlf";
     }
   };
 

@@ -106,7 +106,7 @@ namespace blue_sky
         {
         }
         
-        keyword_handler (handler_t handle_function, i_type_t def_value, i_type_t *new_dimens)
+        keyword_handler (handler_t handle_function, i_type_t def_value, int *new_dimens)
           : second_handle_function (handle_function)
           , index_in_pool (-1)
           , int_def_value (def_value)
@@ -151,8 +151,8 @@ namespace blue_sky
                                                     //<! -2: insert in dmap (float) with available index
                                                     //<! -3: invalid_value (because 0 is valid)
         i_type_t           int_def_value;            //<! default value (for int pooled keywords (pooled==handles by array handlers))
-        fp_storage_type_t            float_def_value;          //<! default value (for float pooled keywords (pooled==handles by array handlers))
-        i_type_t           dimens[6];                //<! dimensions of array (for pooled keywords (pooled==handles by array handlers))
+        fp_storage_type_t  float_def_value;          //<! default value (for float pooled keywords (pooled==handles by array handlers))
+        int            dimens[6];                //<! dimensions of array (for pooled keywords (pooled==handles by array handlers))
       };
 
       
@@ -165,6 +165,12 @@ namespace blue_sky
       
       //! registration of active keyword in factory
       virtual void register_keyword(const std::string &keyword, keyword_handler handler) = 0;
+      
+      //! registration of active integer pool keyword in factory
+      virtual void register_i_pool_keyword(const std::string &keyword, int *dimens, i_type_t def_value, handler_t external_handler = 0) = 0;
+      
+      //! registration of active floating point pool keyword in factory
+      virtual void register_fp_pool_keyword(const std::string &keyword, int *dimens, fp_storage_type_t def_value, handler_t external_handler = 0) = 0;
       
       //! registration of supported keywords in factory
       virtual void register_supported_keyword(const std::string &keyword, const std::string &provider) = 0;

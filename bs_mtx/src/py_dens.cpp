@@ -4,7 +4,7 @@
  * @date 2009-12-09
  */
 
-#include "bs_matrix_stdafx.h"
+#include "bs_mtx_stdafx.h"
 #include "py_dens.h"
 
 using namespace boost::python;

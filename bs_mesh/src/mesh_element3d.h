@@ -42,16 +42,14 @@ using namespace blue_sky;
       ///////////////////////
       // OWN TYPES
       ///////////////////////
-      typedef typename strategy_t::index_t                  index_t;
-      typedef typename strategy_t::item_t                   item_t;
+      typedef typename strategy_t::i_type_t                  i_type_t;
+      typedef typename strategy_t::fp_type_t                   fp_type_t;
 
-      typedef typename strategy_t::index_array_t            index_array_t;
-      typedef typename strategy_t::item_array_t             item_array_t;
       typedef grd_ecl::fpoint3d                             fpoint3d_t;
       
       typedef boost::array <fpoint3d_t, N_ELEMENT_CORNERS>  corners_t;
       typedef boost::array <fpoint3d_t, N_PLANE_CORNERS>    plane_t;
-      typedef boost::array <item_t, 3>                      point3d_t;
+      typedef boost::array <fp_type_t, 3>                      point3d_t;
       typedef boost::array <point3d_t, N_ELEMENT_CORNERS>   simple_corners_t;
 
     //-----------------------------------------
@@ -107,11 +105,11 @@ using namespace blue_sky;
       fpoint3d_t get_center () const;
 
       //! find volume of the element
-      item_t calc_volume();
+      fp_type_t calc_volume();
 
-      item_t get_dx ();
-      item_t get_dy ();
-      item_t get_dz ();
+      fp_type_t get_dx ();
+      fp_type_t get_dy ();
+      fp_type_t get_dz ();
 
       point3d_t get_dx_dy_dz ();
 
@@ -122,7 +120,7 @@ using namespace blue_sky;
     protected:
       corners_t corners;
 
-      index_t n_corners, n_plane_corners;
+      i_type_t n_corners, n_plane_corners;
     };
 
 //! get center of plane
@@ -133,9 +131,7 @@ inline void get_plane_center (const boost::array <grd_ecl::fpoint3d, N_PLANE_COR
       {
         center += plane[i];
       }
+    center /= N_PLANE_CORNERS;
   }
-
-
-  
 
 #endif //MESH_ELEMENT3D_H

@@ -4,7 +4,7 @@
  * \author Sergey Miryanov
  * \date 20.06.2008
  */
-#include "bs_matrix_stdafx.h"
+#include "bs_mtx_stdafx.h"
 
 #include "py_save_seq_vector.h"
 #include "save_seq_vector.h"

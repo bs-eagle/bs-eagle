@@ -26,8 +26,9 @@ namespace blue_sky
         typedef typename base_t::sp_objbase            sp_objbase;
         typedef typename base_t::keyword_handler       keyword_handler;
         typedef typename base_t::handler_t             handler_t;
-        typedef typename strategy_t::index_t           index_t;
-        typedef typename strategy_t::item_t            item_t;
+        typedef typename strategy_t::i_type_t          i_type_t;
+        typedef typename strategy_t::fp_type_t         fp_type_t;
+        typedef typename strategy_t::fp_storage_type_t fp_storage_type_t;
 
         typedef keyword_params <strategy_t>            keyword_params_t;
         
@@ -40,7 +41,7 @@ namespace blue_sky
         typedef keyword_manager_iface<strategy_t>      km_iface_t;
         typedef smart_ptr <km_iface_t, true>           sp_km_iface_t;
         
-        typedef idata                                  idata_t;
+        typedef idata<strategy_t>                      idata_t;
         typedef smart_ptr <idata_t, true>	             sp_idata_t;
         
         typedef FRead                                  reader_t;

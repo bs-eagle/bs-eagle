@@ -6,6 +6,8 @@
 	\date 2009-07-22
  * */
  
+#include "../../bs_mtx/include/bcsr_matrix_iface.h"
+
 namespace blue_sky
 {
   
@@ -17,10 +19,10 @@ namespace blue_sky
   //  INTERNAL TYPE DECLARATION
   ///////////////////////////////
   public:
-    typedef strategy_t                                  strategy_type;
-    typedef typename strategy_t::index_array_t          index_array_t;
+    typedef typename strategy_t::i_type_t               i_type_t;
+    typedef smart_ptr <bs_array<i_type_t>, true>        sp_i_array_t;
     
-    typedef typename strategy_t::csr_matrix_t           csr_matrix_t;
+    typedef bcsr_matrix_iface<strategy_t>               csr_matrix_t;
     typedef smart_ptr <csr_matrix_t, true>              sp_bcsr_t;
 
     //-------------------------------------------
@@ -35,12 +37,10 @@ namespace blue_sky
     virtual sp_bcsr_t get_conn_trans () = 0;
     
     //! get matrix pointers in positive direction 
-    virtual index_array_t &
-    get_matrix_block_idx_plus () = 0;
+    virtual sp_i_array_t get_matrix_block_idx_plus () = 0;
     
     //! get matrix pointers in negative direction 
-    virtual index_array_t &
-    get_matrix_block_idx_minus () = 0;
+    virtual sp_i_array_t get_matrix_block_idx_minus () = 0;
   };
   
 }; //namespace blue_sky

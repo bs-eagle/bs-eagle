@@ -153,7 +153,7 @@
 #include "print_process_memory_info.h"
 #include "write_time_to_log.h"
 
-#include "pool.h"
+#include "bs_array_map.h"
 #include "interpolation_macro.h"
 #include "rs_mesh_iface.h"
 #include "rs_smesh_iface.h"

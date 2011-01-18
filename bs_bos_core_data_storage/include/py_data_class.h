@@ -3,11 +3,19 @@
 
 #include "data_class.h"
 
+#include BS_FORCE_PLUGIN_IMPORT ()
+#include "dummy_base.h"
+#include "construct_python_object.h"
+#include "make_me_happy.h"
+#include BS_STOP_PLUGIN_IMPORT ()
+
+#include "export_python_wrapper.h"
+
 namespace blue_sky {
 namespace python {
 
   /**
-   * \brief Exports shared_vectors and idata to python
+   * \brief Exports idata to python
    * */
   void 
   py_export_idata();

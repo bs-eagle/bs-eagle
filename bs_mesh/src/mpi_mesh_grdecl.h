@@ -38,7 +38,7 @@ namespace blue_sky
       };
 
     public:
-      //typedef smart_ptr<mesh_grdecl<base_strategy_fi>, true> sp_mesh_grdecl_fi;
+      //typedef smart_ptr<mesh_grdecl<base_strategy_fif>, true> sp_mesh_grdecl_fi;
       typedef mpi_mesh_grdecl<strategy_t> this_t;
 
 //-------------------------------------------
@@ -101,11 +101,11 @@ namespace blue_sky
       MPI_Info mpi_info;
 
       //! parameters of local mesh
-      index_t lx, ly, lz; //!< number of blocks on X&Y&Z in local mesh
-      index_t i_start, j_start, k_start; //!< number of start block on X&Y&Z in global mesh for local mesh
-      index_t i_end, j_end, k_end; //!< number of end block on X&Y&Z in global mesh for local mesh
+      i_type_t lx, ly, lz; //!< number of blocks on X&Y&Z in local mesh
+      i_type_t i_start, j_start, k_start; //!< number of start block on X&Y&Z in global mesh for local mesh
+      i_type_t i_end, j_end, k_end; //!< number of end block on X&Y&Z in global mesh for local mesh
 
-      index_t n_layers;
+      i_type_t n_layers;
       //! 1-dimension decomposition params
       int cut_dir;
 

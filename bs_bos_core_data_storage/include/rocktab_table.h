@@ -12,8 +12,8 @@ namespace blue_sky
   class BS_API_PLUGIN bs_table
     {
 
-      typedef typename strategy_t::item_t   item_t;
-      typedef typename strategy_t::index_t  index_t;
+      typedef typename strategy_t::fp_type_t   item_t;
+      typedef typename strategy_t::i_type_t  index_t;
       //-------------------------
       // METHODS
       //-------------------------
@@ -63,8 +63,8 @@ namespace blue_sky
   class BS_API_PLUGIN rocktab_table  : public bs_table <strategy_t>
     {
     public:
-      typedef typename strategy_t::index_t  index_t;
-      typedef typename strategy_t::item_t   item_t;
+      typedef typename strategy_t::i_type_t  index_t;
+      typedef typename strategy_t::fp_type_t   item_t;
 
       //! ctor
       rocktab_table();

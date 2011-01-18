@@ -16,8 +16,84 @@ const char filename_hdf5[] = "grid_swap.h5";
 
 
 template<class strategy_t>
+mesh_grdecl<strategy_t>::mesh_grdecl ()
+{
+  zcorn_array = 0;
+  coord_array = 0;
+}
+
+
+template<class strategy_t>
+void mesh_grdecl<strategy_t>::init_props(const sp_idata_t &idata)
+{
+  base_t::init_props (idata);
+  i_type_t i, n;
+  sp_fp_storage_array_t data_array;
+  fp_storage_type_t *it;
+  
+  data_array = idata->get_fp_non_empty_array("ZCORN");
+  if (data_array->size()) zcorn_array = &(*data_array)[0];
+  
+
+  // init ZCORN
+  min_z = *(std::min_element(data_array->begin(),data_array->end()));
+  max_z = *(std::max_element(data_array->begin(),data_array->end()));
+
+  // init COORD
+  data_array = idata->get_fp_non_empty_array("COORD");
+  if (data_array->size()) coord_array = &(*data_array)[0];
+  
+  n = data_array->size();
+
+  max_x = min_x = coord_array[0];
+  max_y = min_y = coord_array[1];
+
+  for (i = 0; i < n; i += 6)
+    {
+      it = coord_array + i;
+      // move matching points apart
+      if (it[2] == it[5])
+        it[5] += 1.0f;
+
+      //looking for max&min coordinates
+      if (min_x > it[0]) min_x = it[0];
+      if (min_x > it[3]) min_x = it[3];
+
+      if (min_y > it[1]) min_y = it[1];
+      if (min_y > it[4]) min_y = it[4];
+
+      if (max_x < it[0]) max_x = it[0];
+      if (max_x < it[3]) max_x = it[3];
+
+      if (max_y < it[1]) max_y = it[1];
+      if (max_y < it[4]) max_y = it[4];
+
+    }
+
+}
+
+template<class strategy_t>
+void mesh_grdecl<strategy_t>::check_data() const
+{
+  base_t::check_data ();
+
+  if (min_x < 0)
+    bs_throw_exception (boost::format ("min_x = %d is out of range")% min_x);
+  if (min_y < 0)
+    bs_throw_exception (boost::format ("min_y = %d is out of range")% min_y);
+  if (min_z < 0)
+    bs_throw_exception (boost::format ("min_z = %d is out of range")% min_z);
+
+  if (!coord_array)
+    bs_throw_exception ("COORD array is not initialized");
+  if (!zcorn_array)
+    bs_throw_exception ("ZCORN array is not initialized");
+}
+
+
+template<class strategy_t>
 inline void
-mesh_grdecl<strategy_t>::calc_corner_point(const pool_item_t z, const pool_item_t *coord, fpoint3d_t &p)const
+mesh_grdecl<strategy_t>::calc_corner_point(const fp_storage_type_t z, const fp_storage_type_t *coord, fpoint3d_t &p)const
   {
     p.z = z;
     /*
@@ -45,12 +121,12 @@ mesh_grdecl<strategy_t>::calc_corner_point(const pool_item_t z, const pool_item_
 
 template<class strategy_t>
 inline void
-typename mesh_grdecl<strategy_t>::get_element_zcorn_index (index_t i, index_t j, index_t k, element_zcorn_index_t& element)  const
+typename mesh_grdecl<strategy_t>::get_element_zcorn_index (i_type_t i, i_type_t j, i_type_t k, element_zcorn_i_type_t& element)  const
 {
-  //typename mesh_grdecl<strategy_t>::element_zcorn_index_t element;
+  //typename mesh_grdecl<strategy_t>::element_zcorn_i_type_t element;
   
-  index_t index1 = i * 2 + j * 4 * nx + k * 8 * nx * ny;
-  index_t index2 = index1 + 4 * nx * ny;
+  i_type_t index1 = i * 2 + j * 4 * nx + k * 8 * nx * ny;
+  i_type_t index2 = index1 + 4 * nx * ny;
 
   element[0] = index1;
   element[1] = index1 + 1;
@@ -65,11 +141,11 @@ typename mesh_grdecl<strategy_t>::get_element_zcorn_index (index_t i, index_t j,
 
 //! get element corners index in zcorn_array of block[i,j,k]
 template<class strategy_t>
-typename mesh_grdecl<strategy_t>::plane_zcorn_index_t
-typename mesh_grdecl<strategy_t>::get_plane_zcorn_index (element_zcorn_index_t element, 
+typename mesh_grdecl<strategy_t>::plane_zcorn_i_type_t
+typename mesh_grdecl<strategy_t>::get_plane_zcorn_index (element_zcorn_i_type_t &element, 
                                                          element_plane_orientation_t orientation)  const
 {
-  typename mesh_grdecl<strategy_t>::plane_zcorn_index_t plane;
+  typename mesh_grdecl<strategy_t>::plane_zcorn_i_type_t plane;
   switch (orientation)
     {
       case x_axis_minus:  //left_cross
@@ -112,13 +188,14 @@ typename mesh_grdecl<strategy_t>::get_plane_zcorn_index (element_zcorn_index_t e
       default:
         bs_throw_exception ("Invalid orientation!");;
     }
+  return plane;  
 }
 
 template<class strategy_t>
 typename mesh_grdecl<strategy_t>::element_t
-mesh_grdecl<strategy_t>::calc_element (const index_t index) const
+mesh_grdecl<strategy_t>::calc_element (const i_type_t index) const
   {
-    index_t i, j, k;
+    i_type_t i, j, k;
     element_t element;
     
     inside_to_XYZ (index, i, j, k);
@@ -128,7 +205,7 @@ mesh_grdecl<strategy_t>::calc_element (const index_t index) const
 
 template<class strategy_t>
 void
-mesh_grdecl<strategy_t>::calc_element (const index_t i, const index_t j, const index_t k, element_t &element) const
+mesh_grdecl<strategy_t>::calc_element (const i_type_t i, const i_type_t j, const i_type_t k, element_t &element) const
   {
     corners_t corners;
 
@@ -150,9 +227,9 @@ mesh_grdecl<strategy_t>::calc_element (const index_t i, const index_t j, const i
 
     //define index
 
-    index_t index1 = i * 2 + j * 4 * nx + k * 8 * nx * ny;//upper side
-    index_t index2 = index1 + 4 * nx * ny;//lower side
-    index_t iCOORD = i + j * (nx + 1);
+    i_type_t index1 = i * 2 + j * 4 * nx + k * 8 * nx * ny;//upper side
+    i_type_t index2 = index1 + 4 * nx * ny;//lower side
+    i_type_t iCOORD = i + j * (nx + 1);
 
     calc_corner_point (zcorn_array[index1], &coord_array[iCOORD * 6], corners[0]);
     calc_corner_point (zcorn_array[index1 + 1], &coord_array[(iCOORD + 1) * 6], corners[1]);
@@ -168,15 +245,15 @@ mesh_grdecl<strategy_t>::calc_element (const index_t i, const index_t j, const i
   }
   
 template<class strategy_t>
-bool mesh_grdecl<strategy_t>::is_small(const index_t i, const index_t j, const index_t k, item_t eps)  const
+bool mesh_grdecl<strategy_t>::is_small(const i_type_t i, const i_type_t j, const i_type_t k, fp_type_t eps)  const
   {
     if (k >= nz)
       return false;
 
-    item_t dz1, dz2, dz3, dz4; //height for each coord
+    fp_type_t dz1, dz2, dz3, dz4; //height for each coord
     //define index
-    index_t index1 = i*2+j*4*nx+k*8*nx*ny;	//lower side
-    index_t index2 = index1+4*nx*ny;			//upper side
+    i_type_t index1 = i*2+j*4*nx+k*8*nx*ny;	//lower side
+    i_type_t index2 = index1+4*nx*ny;			//upper side
     dz1 = zcorn_array[index2]-zcorn_array[index1];
     dz2 = zcorn_array[index2+1]-zcorn_array[index1+1];
     dz3 = zcorn_array[index2+2*nx]-zcorn_array[index1+2*nx];
@@ -223,10 +300,10 @@ mesh_grdecl<strategy_t>::get_plane_crossing_projection_on_all_axis(const plane_t
   }
 
 template<class strategy_t>
-typename mesh_grdecl<strategy_t>::item_t 
-mesh_grdecl<strategy_t>::get_center_zcorn(const element_zcorn_index_t &element)const
+typename mesh_grdecl<strategy_t>::fp_type_t 
+mesh_grdecl<strategy_t>::get_center_zcorn(const element_zcorn_i_type_t &element)const
   {
-    item_t res = 0.0;
+    fp_type_t res = 0.0;
     size_t i, n = element.size();
     
     for (i = 0; i < n; i++)
@@ -240,49 +317,54 @@ mesh_grdecl<strategy_t>::get_center_zcorn(const element_zcorn_index_t &element)c
 template<class strategy_t>
 int mesh_grdecl<strategy_t>::init_ext_to_int()
 {
- 
+  i_type_t *ext_to_int_data, *int_to_ext_data;
   write_time_to_log init_time ("Mesh initialization", ""); 
   item_array_t volumes_temp(n_elements);
 
-  //tools::save_seq_vector ("actnum.bs.txt").save sp_actnum;
+  //tools::save_seq_vector ("actnum.bs.txt").save actnum_array;
   
   int splicing_num = splicing(volumes_temp);
   
   //check_adjacency (1);
-  //tools::save_seq_vector ("active_blocks.bs.txt").save sp_actnum;
+  //tools::save_seq_vector ("active_blocks.bs.txt").save actnum_array;
   
   check_adjacency ();
   
   //make proxy array
-  ext_to_int.resize(n_elements,0);
+  ext_to_int->resize(n_elements);
+  ext_to_int->assign(0);
+  ext_to_int_data = &(*ext_to_int)[0];
   size_t n_count = 0;
 
-  index_t nn_active = 0, i_index; //number of non-active previous cells
-  for (index_t i = 0; i < nz; ++i)
+  i_type_t nn_active = 0, i_index; //number of non-active previous cells
+  for (i_type_t i = 0; i < nz; ++i)
     {
-      for (index_t j = 0; j < ny; ++j)
-        for (index_t k = 0; k < nx; ++k, ++n_count)
+      for (i_type_t j = 0; j < ny; ++j)
+        for (i_type_t k = 0; k < nx; ++k, ++n_count)
           {
             i_index = k + (nx * j) + (i * nx * ny);
             
-            if (!sp_actnum[i_index])
+            if (!actnum_array[i_index])
               {
                 nn_active++;
-                ext_to_int[n_count] = -1;
+                ext_to_int_data[n_count] = -1;
               }
             else
-              ext_to_int[n_count] = i_index-nn_active;
+              ext_to_int_data[n_count] = i_index-nn_active;
           }
     }
 
   //tools::save_seq_vector ("ext_to_int.bs.txt").save (ext_to_int);
 
   init_int_to_ext();
-
+  int_to_ext_data = &(*int_to_ext)[0];
+  
   //fill volume array (except non-active block and using proxy array)
-  volumes.resize(n_active_elements);
+  volumes->resize(n_active_elements);
+  fp_type_t *volumes_data = &(*volumes)[0];
+  
   for (int i = 0; i < n_active_elements; ++i)
-    volumes[i] = volumes_temp[int_to_ext[i]];
+    volumes_data[i] = volumes_temp[int_to_ext_data[i]];
     
   calc_depths();
   
@@ -292,9 +374,9 @@ int mesh_grdecl<strategy_t>::init_ext_to_int()
 }
 
 template<class strategy_t>
-void mesh_grdecl<strategy_t>::splice_two_blocks (const index_t i, const index_t j, const index_t k, const index_t k1)
+void mesh_grdecl<strategy_t>::splice_two_blocks (const i_type_t i, const i_type_t j, const i_type_t k, const i_type_t k1)
 {
-  index_t index, index1, index2;
+  i_type_t index, index1, index2;
 
   index1 = i * 2 + j * 4 * nx + k1 * 8 * nx * ny; //upper side of [i,j,k1]
   index2 = i * 2 + j * 4 * nx + (k1 * 8 + 4) * nx * ny; //lower side of [i,j,k1]
@@ -329,9 +411,9 @@ void mesh_grdecl<strategy_t>::splice_two_blocks (const index_t i, const index_t 
 }
 
 template<class strategy_t>
-bool mesh_grdecl<strategy_t>::are_two_blocks_close (const index_t i, const index_t j, const index_t k, const index_t k1)
+bool mesh_grdecl<strategy_t>::are_two_blocks_close (const i_type_t i, const i_type_t j, const i_type_t k, const i_type_t k1)
 {
-  index_t index, index1;
+  i_type_t index, index1;
   if (k > k1)
     {
       index = i * 2 + j * 4 * nx + k * 8 *nx * ny; //upper side of [i,j,k]
@@ -359,10 +441,9 @@ bool mesh_grdecl<strategy_t>::are_two_blocks_close (const index_t i, const index
 template<class strategy_t>
 bool mesh_grdecl<strategy_t>::check_adjacency(int shift_zcorn)
 {
-   index_t i, j, k;
-   index_t index, zindex, zindex1;
-   index_t n_adjacent = 0;
-   array_uint8_t &actnum     = sp_actnum;
+  i_type_t i, j, k;
+  i_type_t index, zindex, zindex1;
+  i_type_t n_adjacent = 0;
    
   for (i = 0; i < nx; ++i)
     for (j = 0; j < ny; ++j)
@@ -373,7 +454,7 @@ bool mesh_grdecl<strategy_t>::check_adjacency(int shift_zcorn)
           
           
           // miss inactive blocks
-          if (!actnum[index])
+          if (!actnum_array[index])
             {
               continue;
             }
@@ -419,21 +500,18 @@ bool mesh_grdecl<strategy_t>::check_adjacency(int shift_zcorn)
 template<class strategy_t>
 int mesh_grdecl<strategy_t>::splicing(item_array_t& volumes_temp)
 {
-  index_t nCount = 0;
-  item_t vol_sum, vol_block;
-  index_t i, j, k, k1;
-  index_t small_block_top, big_block_top;
-  index_t n_inactive_orig, n_inactive_vol, n_incative_splice;
-  index_t index;
+  i_type_t nCount = 0;
+  fp_type_t vol_sum, vol_block;
+  i_type_t i, j, k, k1;
+  i_type_t small_block_top, big_block_top;
+  i_type_t n_inactive_orig, n_inactive_vol, n_incative_splice;
+  i_type_t index;
   element_t element;
 
 #ifdef _DEBUG
-    BS_ASSERT (zcorn_array.size() && coord_array.size());
+    BS_ASSERT (zcorn_array != 0 && coord_array != 0);
 #endif
 
-  array_uint8_t &actnum     = sp_actnum;
-  const array_float16_t &poro = sp_poro;
-  
 
   n_inactive_orig = 0;
   n_inactive_vol = 0;
@@ -450,7 +528,7 @@ int mesh_grdecl<strategy_t>::splicing(item_array_t& volumes_temp)
             index = i + j * nx + k * nx * ny;
             
             // miss inactive blocks
-            if (!actnum[index])
+            if (!actnum_array[index])
               {
                 // blocks can`t be spliced across inactive blocks
                 big_block_top = -1;
@@ -461,12 +539,12 @@ int mesh_grdecl<strategy_t>::splicing(item_array_t& volumes_temp)
               }
             calc_element (i, j, k, element);
             vol_block = element.calc_volume ();
-            item_t vol_block_poro = vol_block * poro[index];
+            fp_type_t vol_block_poro = vol_block * poro_array[index];
 
             if (vol_block_poro <= minpv)
               {
                 // block is too small, set as inactive
-                actnum[index] = 0;
+                actnum_array[index] = 0;
                 ++nCount;
                 n_inactive_vol++;
                 // blocks can`t be spliced across inactive blocks
@@ -489,7 +567,7 @@ int mesh_grdecl<strategy_t>::splicing(item_array_t& volumes_temp)
                     volumes_temp[i + j * nx + big_block_top * nx * ny] += vol_block;
 
                     // make block inactive
-                    actnum[index] = 0;
+                    actnum_array[index] = 0;
                     ++nCount;
                     n_incative_splice++;
                     small_block_top = -1;
@@ -534,7 +612,7 @@ int mesh_grdecl<strategy_t>::splicing(item_array_t& volumes_temp)
                         splice_two_blocks (i, j, k, k1);
                         n_incative_splice++;
                         // make small block inactive
-                        actnum[i + j * nx + k1 * nx * ny] = 0;
+                        actnum_array[i + j * nx + k1 * nx * ny] = 0;
                         ++nCount;
                       }
 
@@ -562,7 +640,7 @@ int mesh_grdecl<strategy_t>::splicing(item_array_t& volumes_temp)
         }
   
   
-  index_t n_total = n_active_elements + n_inactive_orig;
+  i_type_t n_total = n_active_elements + n_inactive_orig;
   /*
   if (n_total != nx * ny * nz)
   
@@ -586,17 +664,20 @@ int mesh_grdecl<strategy_t>::splicing(item_array_t& volumes_temp)
 template<class strategy_t>
 int mesh_grdecl<strategy_t >::calc_depths ()
 {
-  depths.resize(n_active_elements,0);
-  index_t index = 0;
-  element_zcorn_index_t element;
-  for (index_t k = 0; k < nz; ++k)
-    for (index_t j = 0; j < ny; ++j)
-      for (index_t i = 0; i < nx; ++i, ++index)
+  depths->resize(n_active_elements);
+  fp_type_t *depths_data = &(*depths)[0];
+  i_type_t *ext_to_int_data = &(*ext_to_int)[0];
+  i_type_t index = 0;
+  element_zcorn_i_type_t element;
+  
+  for (i_type_t k = 0; k < nz; ++k)
+    for (i_type_t j = 0; j < ny; ++j)
+      for (i_type_t i = 0; i < nx; ++i, ++index)
         {
-          if (sp_actnum[index])
+          if (actnum_array[index])
             {
               get_element_zcorn_index(i, j, k, element);
-              depths[ext_to_int[index]] = get_center_zcorn(element);
+              depths_data[ext_to_int_data[index]] = get_center_zcorn(element);
             }
         }
   return 0;
@@ -608,11 +689,11 @@ static int n_tran_calc = 0;
 // calculating method have been taken from td eclipse (page 896)
 // calc transmissibility between fully adjacent cells index1 and index2
 template<class strategy_t>
-typename mesh_grdecl<strategy_t>::item_t 
-mesh_grdecl<strategy_t>::calc_tran(const index_t ext_index1, const index_t ext_index2, const plane_t &plane1, 
+typename mesh_grdecl<strategy_t>::fp_type_t 
+mesh_grdecl<strategy_t>::calc_tran(const i_type_t ext_index1, const i_type_t ext_index2, const plane_t &plane1, 
                                        const fpoint3d_t &center1, const fpoint3d_t &center2, direction d_dir, plane_t* plane2) const
 {
-  item_t tran;
+  fp_type_t tran;
   fpoint3d_t D1, D2, A, plane_contact_center;
   
   n_tran_calc ++;
@@ -699,39 +780,39 @@ mesh_grdecl<strategy_t>::calc_tran(const index_t ext_index1, const index_t ext_i
       return 0;
     }
 
-  item_t Ti, Tj;
+  fp_type_t Ti, Tj;
 
-  item_t ntg_index1 = 1;
-  item_t ntg_index2 = 1;
-  if (!sp_ntg.empty ())
+  fp_type_t ntg_index1 = 1;
+  fp_type_t ntg_index2 = 1;
+  if (ntg_array)
     {
-      ntg_index1 = sp_ntg[ext_index1];
-      ntg_index2 = sp_ntg[ext_index2];
+      ntg_index1 = ntg_array[ext_index1];
+      ntg_index2 = ntg_array[ext_index2];
     }
 
   if (d_dir == along_dim1) //lengthwise OX
     {
-      Ti = sp_permx[ext_index1]*ntg_index1*koef1;
-      Tj = sp_permx[ext_index2]*ntg_index2*koef2;
+      Ti = permx_array[ext_index1]*ntg_index1*koef1;
+      Tj = permx_array[ext_index2]*ntg_index2*koef2;
       tran = darcy_constant / (1 / Ti + 1 / Tj);
-      if (!sp_multx.empty ())
-        tran *= sp_multx[ext_index1];
+      if (multx_array)
+        tran *= multx_array[ext_index1];
     }
   else if (d_dir == along_dim2) //lengthwise OY
     {
-      Ti = sp_permy[ext_index1]*ntg_index1*koef1;
-      Tj = sp_permy[ext_index2]*ntg_index2*koef2;
+      Ti = permy_array[ext_index1]*ntg_index1*koef1;
+      Tj = permy_array[ext_index2]*ntg_index2*koef2;
       tran = darcy_constant / (1 / Ti + 1 / Tj);
-      if (!sp_multy.empty ())
-        tran *= sp_multy[ext_index1];
+      if (multy_array)
+        tran *= multy_array[ext_index1];
     }
   else //lengthwise OZ
     {
-      Ti = sp_permz[ext_index1]*koef1;
-      Tj = sp_permz[ext_index2]*koef2;
+      Ti = permz_array[ext_index1]*koef1;
+      Tj = permz_array[ext_index2]*koef2;
       tran = darcy_constant / (1 / Ti + 1 / Tj);
-      if (!sp_multz.empty ())
-        tran *= sp_multz[ext_index1];
+      if (multz_array)
+        tran *= multz_array[ext_index1];
     }
   
   /*
@@ -746,74 +827,15 @@ mesh_grdecl<strategy_t>::calc_tran(const index_t ext_index1, const index_t ext_i
 
 
 template<class strategy_t>
-int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t &jacobian,const sp_flux_conn_iface_t & flux_conn,
-                                                                  index_array_t &boundary_array)
+int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t jacobian,const sp_flux_conn_iface_t flux_conn,
+                                                                  sp_i_array_t boundary_array)
 
 {
   return build_jacobian_and_flux_connections_add_boundary (jacobian, flux_conn, boundary_array);
 }
 
 template<class strategy_t>
-void mesh_grdecl<strategy_t>::init_props(const sp_idata_t &idata)
-{
-  base_t::init_props (idata);
-
-  // init ZCORN
-  zcorn_array = idata->get_float_non_empty_array("ZCORN");
-  min_z = *(std::min_element(zcorn_array.begin(),zcorn_array.end()));
-  max_z = *(std::max_element(zcorn_array.begin(),zcorn_array.end()));
-
-  // init COORD
-  coord_array = idata->get_float_non_empty_array("COORD");
-
-  max_x = min_x = coord_array[0];
-  max_y = min_y = coord_array[1];
-
-  array_float16_t::iterator it, e = coord_array.end ();
-
-  for (it = coord_array.begin (); it != e; it += 6)
-    {
-      // move matching points apart
-      if (it[2] == it[5])
-        it[5] += 1.0f;
-
-      //looking for max&min coordinates
-      if (min_x > it[0]) min_x = it[0];
-      if (min_x > it[3]) min_x = it[3];
-
-      if (min_y > it[1]) min_y = it[1];
-      if (min_y > it[4]) min_y = it[4];
-
-      if (max_x < it[0]) max_x = it[0];
-      if (max_x < it[3]) max_x = it[3];
-
-      if (max_y < it[1]) max_y = it[1];
-      if (max_y < it[4]) max_y = it[4];
-
-    }
-
-}
-
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::check_data() const
-{
-  base_t::check_data ();
-
-  if (min_x < 0)
-    bs_throw_exception (boost::format ("min_x = %d is out of range")% min_x);
-  if (min_y < 0)
-    bs_throw_exception (boost::format ("min_y = %d is out of range")% min_y);
-  if (min_z < 0)
-    bs_throw_exception (boost::format ("min_z = %d is out of range")% min_z);
-
-  if (!coord_array.size ())
-    bs_throw_exception ("COORD array is not initialized");
-  if (!zcorn_array.size ())
-    bs_throw_exception ("ZCORN array is not initialized");
-}
-
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::get_block_dx_dy_dz (index_t n_elem, item_t &dx, item_t &dy, item_t &dz) const
+void mesh_grdecl<strategy_t>::get_block_dx_dy_dz (i_type_t n_elem, fp_type_t &dx, fp_type_t &dy, fp_type_t &dz) const
   {
     element_t &elem = calc_element(n_elem);
     point3d_t sizes = elem.get_dx_dy_dz (); 
@@ -823,25 +845,25 @@ void mesh_grdecl<strategy_t>::get_block_dx_dy_dz (index_t n_elem, item_t &dx, it
   }
 
 template<class strategy_t>
-float mesh_grdecl<strategy_t>:: get_block_dx(index_t n_elem) const
+float mesh_grdecl<strategy_t>:: get_block_dx(i_type_t n_elem) const
   {
     return calc_element(n_elem).get_dx();
   }
 
 template<class strategy_t>
-float mesh_grdecl<strategy_t>:: get_block_dy(index_t n_elem) const
+float mesh_grdecl<strategy_t>:: get_block_dy(i_type_t n_elem) const
   {
     return calc_element(n_elem).get_dy();
   }
 
 template<class strategy_t>
-float mesh_grdecl<strategy_t>:: get_block_dz(index_t n_elem) const
+float mesh_grdecl<strategy_t>:: get_block_dz(i_type_t n_elem) const
   {
     return calc_element(n_elem).get_dz();
   }
 
 template<class strategy_t>
-float  mesh_grdecl<strategy_t>::get_dtop(index_t n_elem) const
+float  mesh_grdecl<strategy_t>::get_dtop(i_type_t n_elem) const
 {
   element_t elem;
   
@@ -851,34 +873,147 @@ float  mesh_grdecl<strategy_t>::get_dtop(index_t n_elem) const
 }
 
 template<class strategy_t>
+boost::python::list mesh_grdecl<strategy_t>::calc_element_tops ()
+{
+  element_t element;
+  sp_fp_array_t tops, prop;
+  sp_i_array_t indexes;
+  i_type_t i, j, k, c, ind, *indexes_data;
+  fp_type_t *tops_data, *prop_data;
+  boost::python::list myavi_list;
+
+  tops = give_kernel::Instance().create_object(bs_array<fp_type_t>::bs_type());
+  indexes = give_kernel::Instance().create_object(bs_array<i_type_t>::bs_type());
+  prop = give_kernel::Instance().create_object(bs_array<fp_type_t>::bs_type());
+
+  tops->resize (n_elements * 8 * 3);
+  indexes->resize (n_elements * 8);
+  prop->resize (n_elements);
+
+  indexes_data = &(*indexes)[0];
+  tops_data = &(*tops)[0];
+  prop_data = &(*prop)[0];
+
+  ind = 0;
+   
+  for (i = 0; i < nx; ++i)
+	  for (j = 0; j < ny; ++j)
+		  for (k = 0; k < nz; ++k, ++ind)
+		    {
+			  
+			  // check blocks adjacency
+          zindex = i * 2 + j * 4 * nx + k * 8 *nx * ny;
+          zindex1 = zindex + 2; // check next by x
+         
+          if (i + 1 == nx ||
+              zcorn_array[zindex + 1] == zcorn_array[zindex1] &&
+              zcorn_array[zindex +  2 * nx + 1] == zcorn_array[zindex1 +  2 * nx] &&
+              zcorn_array[zindex + 4 * nx * ny + 1] == zcorn_array[zindex1 + 4 * nx * ny ] &&
+              zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == zcorn_array[zindex1 + 4 * nx * ny + 2 * nx])
+            {
+              
+              zindex1 = zindex + 4 * nx; // check next by y
+              if (j + 1 == ny ||
+                  zcorn_array[zindex + 2 * nx] == zcorn_array[zindex1] &&
+                  zcorn_array[zindex + 2 * nx + 1] == zcorn_array[zindex1 +  1] &&
+                  zcorn_array[zindex + 4 * nx * ny + 2 * nx] == zcorn_array[zindex1 + 4 * nx * ny] &&
+                  zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == zcorn_array[zindex1+ 4 * nx * ny + 1])
+                  {
+                    n_adjacent++;
+                  }
+            }
+	
+		      calc_element (i, j, k, element);
+			  prop_data[ind] = poro_array[ind];
+			  for (c = 0; c < 8; ++c)
+				{
+				  tops_data[8 * 3 * ind + 3 * c] = element.get_corners()[c].x;
+				  tops_data[8 * 3 * ind + 3 * c + 1] = element.get_corners()[c].y;
+				  tops_data[8 * 3 * ind + 3 * c + 2] = element.get_corners()[c].z * 10;
+				}
+
+				
+			  indexes_data[8 * ind] = 8 * ind;
+			  indexes_data[8 * ind + 1] = 8 * ind + 1;
+			  indexes_data[8 * ind + 2] = 8 * ind + 3;
+			  indexes_data[8 * ind + 3] = 8 * ind + 2;
+
+			  indexes_data[8 * ind + 4] = 8 * ind + 4;
+			  indexes_data[8 * ind + 5] = 8 * ind + 5;
+			  indexes_data[8 * ind + 6] = 8 * ind + 7;
+			  indexes_data[8 * ind + 7] = 8 * ind + 6;
+
+/*			  
+			  // planes indexes
+			  indexes_data[24 * ind] = 8 * ind;
+			  indexes_data[24 * ind + 1] = 8 * ind + 1;
+			  indexes_data[24 * ind + 2] = 8 * ind + 3;
+			  indexes_data[24 * ind + 3] = 8 * ind + 2;
+
+			  indexes_data[24 * ind + 4] = 8 * ind + 4;
+			  indexes_data[24 * ind + 5] = 8 * ind + 5;
+			  indexes_data[24 * ind + 6] = 8 * ind + 7;
+			  indexes_data[24 * ind + 7] = 8 * ind + 6;
+
+			  indexes_data[24 * ind + 8] = 8 * ind;
+			  indexes_data[24 * ind + 9] = 8 * ind + 2;
+			  indexes_data[24 * ind + 10] = 8 * ind + 6;
+			  indexes_data[24 * ind + 11] = 8 * ind + 4;
+
+			  indexes_data[24 * ind + 12] = 8 * ind + 1;
+			  indexes_data[24 * ind + 13] = 8 * ind + 3;
+			  indexes_data[24 * ind + 14] = 8 * ind + 7;
+			  indexes_data[24 * ind + 15] = 8 * ind + 5;
+
+			  indexes_data[24 * ind + 16] = 8 * ind ;
+			  indexes_data[24 * ind + 17] = 8 * ind + 1;
+			  indexes_data[24 * ind + 18] = 8 * ind + 5;
+			  indexes_data[24 * ind + 19] = 8 * ind + 4;
+
+			  indexes_data[24 * ind + 20] = 8 * ind + 2;
+			  indexes_data[24 * ind + 21] = 8 * ind + 3;
+			  indexes_data[24 * ind + 22] = 8 * ind + 7;
+			  indexes_data[24 * ind + 23] = 8 * ind + 6;
+*/
+			}
+
+  myavi_list.append(tops);
+  myavi_list.append(indexes);
+  myavi_list.append(prop);
+
+  return myavi_list;
+}
+
+
+template<class strategy_t>
 void mesh_grdecl<strategy_t>::generate_array()
 {
 #if 0
-  index_t n_size = n_elements;
-  sp_poro->clear();
-  sp_ntg->clear();
+  i_type_t n_size = n_elements;
+  poro_array->clear();
+  ntg_array->clear();
 
-  sp_permx->clear();
-  sp_permy->clear();
-  sp_permz->clear();
+  permx_array->clear();
+  permy_array->clear();
+  permz_array->clear();
 
-  sp_multx->clear();
-  sp_multy->clear();
-  sp_multz->clear();
+  multx_array->clear();
+  multy_array->clear();
+  multz_array->clear();
 
 
-  for (index_t i =0; i < n_size; ++i)
+  for (i_type_t i =0; i < n_size; ++i)
     {
-      sp_poro->push_back(0.2f);
-      sp_ntg->push_back(0.4f);
+      poro_array->push_back(0.2f);
+      ntg_array->push_back(0.4f);
 
-      sp_permx->push_back(10.0f);
-      sp_permy->push_back(10.0f);
-      sp_permz->push_back(10.0f);
+      permx_array->push_back(10.0f);
+      permy_array->push_back(10.0f);
+      permz_array->push_back(10.0f);
 
-      sp_multx->push_back(1.0f);
-      sp_multy->push_back(1.0f);
-      sp_multz->push_back(1.0f);
+      multx_array->push_back(1.0f);
+      multy_array->push_back(1.0f);
+      multz_array->push_back(1.0f);
     }
 #endif
 }
@@ -887,16 +1022,16 @@ void mesh_grdecl<strategy_t>::generate_array()
 template <typename strategy_t, typename loop_t>
 struct build_jacobian_rows_class
 {
-  typedef typename strategy_t::index_t          index_t;
-  typedef typename strategy_t::item_t           item_t;
-  typedef typename strategy_t::index_array_t    index_array_t;
-  typedef typename strategy_t::item_array_t     item_array_t;
+  typedef typename strategy_t::i_type_t          i_type_t;
+  typedef typename strategy_t::fp_type_t           fp_type_t;
+  //typedef typename strategy_t::index_array_t    index_array_t;
+  //typedef typename strategy_t::item_array_t     item_array_t;
 
   typedef mesh_grdecl <strategy_t>                mesh_t;
   typedef typename mesh_t::plane_t                plane_t;
-  typedef typename mesh_t::element_zcorn_index_t  element_zcorn_index_t;
+  typedef typename mesh_t::element_zcorn_i_type_t  element_zcorn_i_type_t;
 
-  build_jacobian_rows_class (mesh_grdecl <strategy_t> *mesh, loop_t *loop, std::set <index_t, std::less <index_t> > &boundary_set, index_array_t *rows_ptr)
+  build_jacobian_rows_class (mesh_grdecl <strategy_t> *mesh, loop_t *loop, std::set <i_type_t, std::less <i_type_t> > &boundary_set, i_type_t *rows_ptr)
   : mesh (mesh)
   , loop (loop)
   , boundary_set (boundary_set)
@@ -908,7 +1043,7 @@ struct build_jacobian_rows_class
   }
 
   void
-  prepare (index_t i, index_t j, index_t k)
+  prepare (i_type_t i, i_type_t j, i_type_t k)
   {
     ext_index  = i + j * nx + k * nx * ny;
   }
@@ -917,17 +1052,17 @@ struct build_jacobian_rows_class
   // that is true, if every cell of a column is fully adjacent to X and Y neighbour
   
   bool
-  check_column_adjacency (index_t i, index_t j)
+  check_column_adjacency (i_type_t i, i_type_t j)
   {
     bool flag = true;
-    index_t k, zindex, zindex1, index;
+    i_type_t k, zindex, zindex1, index;
          
     for (k = 0; k < nz; ++k)
       {
         index = i + j * nx + k * nx * ny;
          
         // miss inactive blocks
-        if (!mesh->sp_actnum[index])
+        if (!mesh->actnum_array[index])
           {
             continue;
           }
@@ -969,40 +1104,40 @@ struct build_jacobian_rows_class
   }
 
   void
-  change_by_x (index_t i, index_t j, index_t k, index_t ext_index2, bool is_adjacent)
+  change_by_x (i_type_t i, i_type_t j, i_type_t k, i_type_t ext_index2, bool is_adjacent)
   {
-    (*rows_ptr)[mesh->convert_ext_to_int (ext_index) + 1]++;
-    (*rows_ptr)[mesh->convert_ext_to_int (ext_index2) + 1]++;
+    rows_ptr[mesh->convert_ext_to_int (ext_index) + 1]++;
+    rows_ptr[mesh->convert_ext_to_int (ext_index2) + 1]++;
   }
 
   void
-  change_by_y (index_t i, index_t j, index_t k, index_t ext_index2, bool is_adjacent)
+  change_by_y (i_type_t i, i_type_t j, i_type_t k, i_type_t ext_index2, bool is_adjacent)
   {
-    (*rows_ptr)[mesh->convert_ext_to_int (ext_index) + 1]++;
-    (*rows_ptr)[mesh->convert_ext_to_int (ext_index2) + 1]++;
+    rows_ptr[mesh->convert_ext_to_int (ext_index) + 1]++;
+    rows_ptr[mesh->convert_ext_to_int (ext_index2) + 1]++;
   }
 
   void
-  change_by_z (index_t i, index_t j, index_t k, index_t ext_index2, bool is_adjacent)
+  change_by_z (i_type_t i, i_type_t j, i_type_t k, i_type_t ext_index2, bool is_adjacent)
   {
-    (*rows_ptr)[mesh->convert_ext_to_int (ext_index) + 1]++;
-    (*rows_ptr)[mesh->convert_ext_to_int (ext_index2) + 1]++;
+    rows_ptr[mesh->convert_ext_to_int (ext_index) + 1]++;
+    rows_ptr[mesh->convert_ext_to_int (ext_index2) + 1]++;
   }
 
   void
-  add_boundary (index_t external_cell_index)
+  add_boundary (i_type_t external_cell_index)
   {
     boundary_set.insert (external_cell_index);
   }
 
   mesh_grdecl <strategy_t>                  *mesh;
   loop_t                                    *loop;
-  std::set <index_t, std::less <index_t> >  &boundary_set;
-  index_array_t                             *rows_ptr;
-  index_t                                   nx;
-  index_t                                   ny;
-  index_t                                   nz;
-  index_t                                   ext_index;
+  std::set <i_type_t, std::less <i_type_t> >  &boundary_set;
+  i_type_t                                   *rows_ptr;
+  i_type_t                                   nx;
+  i_type_t                                   ny;
+  i_type_t                                   nz;
+  i_type_t                                   ext_index;
 };
 
 template <typename T, typename L, typename BS, typename RP>
@@ -1015,20 +1150,19 @@ build_jacobian_rows (mesh_grdecl <T> *mesh, L *l, BS &bs, RP *rp)
 template <typename strategy_t, typename loop_t>
 struct build_jacobian_cols_class
 {
-  typedef typename strategy_t::index_t          index_t;
-  typedef typename strategy_t::item_t           item_t;
-  typedef typename strategy_t::index_array_t    index_array_t;
-  typedef typename strategy_t::item_array_t     item_array_t;
-  typedef typename strategy_t::rhs_item_array_t rhs_item_array_t;
+  typedef typename strategy_t::i_type_t          i_type_t;
+  typedef typename strategy_t::fp_type_t         fp_type_t;
+  typedef std::vector<i_type_t>                   index_array_t;
+  typedef typename strategy_t::fp_storage_type_t fp_storage_type_t;
 
   typedef mesh_grdecl <strategy_t>                mesh_t;
   typedef typename mesh_t::element_t              element_t;
   typedef typename mesh_t::plane_t                plane_t;
-  typedef typename mesh_t::element_zcorn_index_t  element_zcorn_index_t;
+  typedef typename mesh_t::element_zcorn_i_type_t  element_zcorn_i_type_t;
 
-  build_jacobian_cols_class (mesh_t *mesh, loop_t *loop, index_array_t *rows_ptr, index_array_t *cols_ind,
-    index_array_t &cols_ind_transmis, rhs_item_array_t &values_transmis,
-    index_array_t &matrix_block_idx_minus, index_array_t &matrix_block_idx_plus)
+  build_jacobian_cols_class (mesh_t *mesh, loop_t *loop, i_type_t *rows_ptr, i_type_t *cols_ind,
+    i_type_t *cols_ind_transmis, fp_storage_type_t *values_transmis,
+    i_type_t *matrix_block_idx_minus, i_type_t *matrix_block_idx_plus)
   : mesh (mesh)
   , loop (loop)
   , rows_ptr (rows_ptr)
@@ -1042,21 +1176,21 @@ struct build_jacobian_cols_class
   , nz (mesh->nz)
   {
     //curIndex.assign (rows_ptr->begin (), rows_ptr->end ());
-    index_t i;
-    index_t n = mesh->n_active_elements;
+    i_type_t i;
+    i_type_t n = mesh->n_active_elements;
     
     
     rows_ptr_tmp.resize (n);
     for (i = 0; i < n; ++i)
       {
         // let it point to first non-diagonal column in each row
-        rows_ptr_tmp[i] = (*rows_ptr)[i] + 1;
-        (*cols_ind)[(*rows_ptr)[i]]= i;
+        rows_ptr_tmp[i] = rows_ptr[i] + 1;
+        cols_ind[rows_ptr[i]]= i;
       }
   }
   
   void
-  prepare (index_t i, index_t j, index_t k)
+  prepare (i_type_t i, i_type_t j, i_type_t k)
   {
     ext_index  = i + j * nx + k * nx * ny;
     int_index  = mesh->convert_ext_to_int (ext_index);
@@ -1067,50 +1201,53 @@ struct build_jacobian_cols_class
   
     
   void
-  change_jac_and_flux_conn( const index_t ext_index1, const index_t ext_index2, item_t tran)
+  change_jac_and_flux_conn( const i_type_t ext_index1, const i_type_t ext_index2, fp_type_t tran)
   {
-    index_t index1 = mesh->convert_ext_to_int (ext_index);
-    index_t index2 = mesh->convert_ext_to_int (ext_index2);
+    i_type_t index1 = mesh->convert_ext_to_int (ext_index);
+    i_type_t index2 = mesh->convert_ext_to_int (ext_index2);
     
-    (*cols_ind)[rows_ptr_tmp[index1]] = index2;
-    (*cols_ind)[rows_ptr_tmp[index2]] = index1;
+    cols_ind[rows_ptr_tmp[index1]] = index2;
+    cols_ind[rows_ptr_tmp[index2]] = index1;
 
-    matrix_block_idx_minus[loop->con_num] = (*rows_ptr)[index1];
+    matrix_block_idx_minus[loop->con_num] = rows_ptr[index1];
     matrix_block_idx_minus[loop->con_num + 1] = rows_ptr_tmp[index1];
-    matrix_block_idx_plus[loop->con_num + 1] = (*rows_ptr)[index2];
+    matrix_block_idx_plus[loop->con_num + 1] = rows_ptr[index2];
     matrix_block_idx_plus[loop->con_num] = rows_ptr_tmp[index2];
     
     ++rows_ptr_tmp[index1];
     ++rows_ptr_tmp[index2];
     
-    cols_ind_transmis[loop->con_num++] = index1;
-    cols_ind_transmis[loop->con_num++] = index2;
+    cols_ind_transmis[loop->con_num] = index1;
+    cols_ind_transmis[loop->con_num + 1] = index2;
     
-    values_transmis.push_back(tran);
-    values_transmis.push_back(-tran);
+    values_transmis[loop->con_num] = tran;
+    values_transmis[loop->con_num + 1] = -tran;
+    loop->con_num += 2;
   }
 
   bool
-  check_column_adjacency (index_t i, index_t j)
+  check_column_adjacency (i_type_t i, i_type_t j)
   {
     return loop->is_column_adjacent[i + j * nx];
   }
   
   void
-  add_boundary (index_t)
+  add_boundary (i_type_t)
   {
   }
 
   void
-  change_by_x (index_t i, index_t j, index_t k, index_t ext_index2, bool is_adjacent)
+  change_by_x (i_type_t i, i_type_t j, i_type_t k, i_type_t ext_index2, bool is_adjacent)
   {
-    item_t tran;
+    fp_type_t tran;
     plane_t plane1;
     element_t element2;
+    
+    mesh->calc_element(i, j, k, element2);
     fpoint3d center2  = element2.get_center ();
     
     element.get_plane (x_axis_plus, plane1);
-    mesh->calc_element(i, j, k, element2);
+    
      
     if (is_adjacent)
       {
@@ -1127,25 +1264,24 @@ struct build_jacobian_cols_class
       {
         change_jac_and_flux_conn (ext_index, ext_index2, tran);
       }  
-    /*  
+   
     #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
         if (ext_index < 1000)
           fprintf (fp, " %d [%d;%d;%d] (%lf)", ext_index2, i, j, k, tran);
     #endif //BS_MESH_WRITE_TRANSMISS_MATRIX 
-    */
   }
 
   void
-  change_by_y (index_t i, index_t j, index_t k, index_t ext_index2, bool is_adjacent)
+  change_by_y (i_type_t i, i_type_t j, i_type_t k, i_type_t ext_index2, bool is_adjacent)
   {
-    item_t tran;
+    fp_type_t tran;
     
     plane_t plane1;
     element_t element2;
-    fpoint3d center2  = element2.get_center ();
     
-    element.get_plane (y_axis_plus, plane1);
     mesh->calc_element(i, j, k, element2);
+    fpoint3d center2  = element2.get_center ();
+    element.get_plane (y_axis_plus, plane1);
      
     if (is_adjacent)
       {
@@ -1162,25 +1298,23 @@ struct build_jacobian_cols_class
       {
         change_jac_and_flux_conn (ext_index, ext_index2, tran);
       }
-     /* 
     #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
         if (ext_index < 1000)
           fprintf (fp, " %d [%d;%d;%d] (%lf)", ext_index2, i, j, k, tran);
     #endif //BS_MESH_WRITE_TRANSMISS_MATRIX 
-    */
   }
 
   void
-  change_by_z (index_t i, index_t j, index_t k, index_t ext_index2, bool is_adjacent)
+  change_by_z (i_type_t i, i_type_t j, i_type_t k, i_type_t ext_index2, bool is_adjacent)
   {
-    item_t tran;
+    fp_type_t tran;
     
     plane_t plane1;
     element_t element2;
-    fpoint3d center2  = element2.get_center ();
     
-    element.get_plane (z_axis_plus, plane1);
     mesh->calc_element(i, j, k, element2);
+    fpoint3d center2  = element2.get_center ();
+    element.get_plane (z_axis_plus, plane1);
     
     tran = mesh->calc_tran (ext_index, ext_index2, plane1, center1, center2, along_dim3);
          
@@ -1188,33 +1322,31 @@ struct build_jacobian_cols_class
       {
         change_jac_and_flux_conn (ext_index, ext_index2, tran);
       }
-    /*  
     #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
         if (ext_index < 1000)
           fprintf (fp, " %d [%d;%d;%d] (%lf)", ext_index2, i, j, k, tran);
     #endif //BS_MESH_WRITE_TRANSMISS_MATRIX  
-    */
   }
 
   mesh_t              *mesh;
   loop_t              *loop;
-  index_array_t       *rows_ptr;
-  index_array_t       *cols_ind;
-  index_array_t       &cols_ind_transmis;
-  rhs_item_array_t    &values_transmis;
-  index_array_t       &matrix_block_idx_minus;
-  index_array_t       &matrix_block_idx_plus;
+  i_type_t             *rows_ptr;
+  i_type_t             *cols_ind;
+  i_type_t             *cols_ind_transmis;
+  fp_storage_type_t   *values_transmis;
+  i_type_t             *matrix_block_idx_minus;
+  i_type_t             *matrix_block_idx_plus;
 
-  index_t             nx;
-  index_t             ny;
-  index_t             nz;
+  i_type_t             nx;
+  i_type_t             ny;
+  i_type_t             nz;
 
   // points to current column position for each row
   // while adding new columns
   index_array_t       rows_ptr_tmp; 
 
-  index_t             ext_index; // index1
-  index_t             int_index; // index_ijk
+  i_type_t             ext_index; // index1
+  i_type_t             int_index; // index_ijk
 
   element_t           element;
   fpoint3d            center1;
@@ -1226,21 +1358,22 @@ build_jacobian_cols_class <M, L>
 build_jacobian_cols (mesh_grdecl <M> *m, L *l, RP *rp, CI *ci, CT &conn_trans, FC &flux_conn)
 {
   return build_jacobian_cols_class <M, L> (m, l, rp, ci,
-    conn_trans->get_cols_ind (), conn_trans->get_values (),
-    flux_conn->get_matrix_block_idx_minus (), flux_conn->get_matrix_block_idx_plus ());
+    &(*conn_trans->get_cols_ind ())[0], &(*conn_trans->get_values ())[0],
+    &(*flux_conn->get_matrix_block_idx_minus ())[0], &(*flux_conn->get_matrix_block_idx_plus ())[0]);
 }
 
 template <typename strategy_t>
 struct build_jacobian_and_flux : boost::noncopyable
 {
-  typedef typename strategy_t::index_t          index_t;
-  typedef typename strategy_t::item_t           item_t;
-  typedef typename strategy_t::index_array_t    index_array_t;
-  typedef typename strategy_t::item_array_t     item_array_t;
+  typedef typename strategy_t::i_type_t          i_type_t;
+  typedef typename strategy_t::fp_type_t         fp_type_t;
+  typedef typename strategy_t::fp_storage_type_t fp_storage_type_t;
+  //typedef typename strategy_t::index_array_t    index_array_t;
+  //typedef typename strategy_t::item_array_t     item_array_t;
 
   typedef mesh_grdecl <strategy_t>                mesh_t;
   typedef typename mesh_t::plane_t                plane_t;
-  typedef typename mesh_t::element_zcorn_index_t  element_zcorn_index_t;
+  typedef typename mesh_t::element_zcorn_i_type_t  element_zcorn_i_type_t;
 
   build_jacobian_and_flux (mesh_grdecl <strategy_t> *mesh)
   : mesh (mesh)
@@ -1256,16 +1389,17 @@ struct build_jacobian_and_flux : boost::noncopyable
   void
   cell_loop (loop_body_t loop_body)
   {
-    index_t ext_index1, ext_index2;
-    index_t last_k_x, last_k_y, k_x, k_y;
+    i_type_t ext_index1, ext_index2;
+    i_type_t last_k_x, last_k_y, k_x, k_y;
     bool is_adjacent;
-    index_t n_adj_elems = 0, n_non_adj_elems = 0;
+    i_type_t n_adj_elems = 0, n_non_adj_elems = 0;
     
-    element_zcorn_index_t zcorn_index1, zcorn_index2; 
-    array_float16_t &zcorn = mesh->zcorn_array;
-    for (index_t i = 0; i < nx; ++i)
+    element_zcorn_i_type_t zcorn_index1, zcorn_index2; 
+    fp_storage_type_t *zcorn_array = mesh->zcorn_array;
+
+    for (i_type_t i = 0; i < nx; ++i)
       {
-        for (index_t j = 0; j < ny; ++j)
+        for (i_type_t j = 0; j < ny; ++j)
           {
             is_adjacent = loop_body.check_column_adjacency (i, j);
             
@@ -1274,36 +1408,34 @@ struct build_jacobian_and_flux : boost::noncopyable
                 
                 // simple loop
                 
-                for (index_t k = 0; k < nz; ++k)
+                for (i_type_t k = 0; k < nz; ++k)
                   {
                     ext_index1  = i + j * nx + k * nx * ny;
                     
                     //skip non-active cells
-                    if (!mesh->sp_actnum[ext_index1])
+                    if (!mesh->actnum_array[ext_index1])
                       continue;
                       
                     n_adj_elems++;
                     
-                    /*
                     #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
                     if (ext_index1 < 1000)
                       fprintf (fp, "\n%d [%d;%d;%d]", ext_index1, i, j, k);
                     #endif //BS_MESH_WRITE_TRANSMISS_MATRIX  
-                    */
                       
                     loop_body.prepare (i, j, k);
                     
-                    if (i+1 < nx && mesh->sp_actnum[ext_index1 + 1])
+                    if (i+1 < nx && mesh->actnum_array[ext_index1 + 1])
                       {
                         loop_body.change_by_x (i + 1, j, k, ext_index1 + 1, true);
                       }
                       
-                    if (j+1 < ny && mesh->sp_actnum[ext_index1 + nx])
+                    if (j+1 < ny && mesh->actnum_array[ext_index1 + nx])
                       {
                         loop_body.change_by_y (i, j + 1, k, ext_index1 + nx, true);
                       }
                      
-                    if (k+1 < nz && mesh->sp_actnum[ext_index1 + nx * ny])
+                    if (k+1 < nz && mesh->actnum_array[ext_index1 + nx * ny])
                       {
                         loop_body.change_by_z (i, j, k + 1, ext_index1 + nx * ny, true);
                       }
@@ -1327,22 +1459,20 @@ struct build_jacobian_and_flux : boost::noncopyable
                  *              6 /-------/7
                  */
                             
-                for (index_t k = 0; k < nz; ++k)
+                for (i_type_t k = 0; k < nz; ++k)
                   {
                     ext_index1  = i + j * nx + k * nx * ny;
                     
                     //skip non-active cells
-                    if (!mesh->sp_actnum[ext_index1])
+                    if (!mesh->actnum_array[ext_index1])
                       continue;
                     
                     n_non_adj_elems++;
                     
-                    /*
                     #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
                     if (ext_index1 < 1000)
                       fprintf (fp, "\n%d [%d;%d;%d]", ext_index1, i, j, k);
                     #endif //BS_MESH_WRITE_TRANSMISS_MATRIX  
-                    */
                     
                     mesh->get_element_zcorn_index (i, j, k, zcorn_index1);
                     
@@ -1358,12 +1488,12 @@ struct build_jacobian_and_flux : boost::noncopyable
                             k_x++;
                             mesh->get_element_zcorn_index (i + 1, j, k_x, zcorn_index2);
                           }
-                        while ((k_x < nz) && ((zcorn[zcorn_index1[1]] >= zcorn[zcorn_index2[4]]) && (zcorn[zcorn_index1[3]] >= zcorn[zcorn_index2[6]])));
+                        while ((k_x < nz) && ((zcorn_array[zcorn_index1[1]] >= zcorn_array[zcorn_index2[4]]) && (zcorn_array[zcorn_index1[3]] >= zcorn_array[zcorn_index2[6]])));
                         
                         // calc all neihbours
-                        while ((k_x < nz) && ((zcorn[zcorn_index1[5]] > zcorn[zcorn_index2[0]]) || (zcorn[zcorn_index1[7]] > zcorn[zcorn_index2[2]])))
+                        while ((k_x < nz) && ((zcorn_array[zcorn_index1[5]] > zcorn_array[zcorn_index2[0]]) || (zcorn_array[zcorn_index1[7]] > zcorn_array[zcorn_index2[2]])))
                           {
-                            if ((zcorn[zcorn_index1[5]] >= zcorn[zcorn_index2[4]]) && (zcorn[zcorn_index1[7]] >= zcorn[zcorn_index2[6]]))
+                            if ((zcorn_array[zcorn_index1[5]] >= zcorn_array[zcorn_index2[4]]) && (zcorn_array[zcorn_index1[7]] >= zcorn_array[zcorn_index2[6]]))
                               {
                                 // this (i + 1, j, k_x) neigbour won`t touch next (i, j, k + 1) element
                                 last_k_x = k_x + 1;
@@ -1371,7 +1501,7 @@ struct build_jacobian_and_flux : boost::noncopyable
                               
                             ext_index2 = ext_index1 + 1 + (k_x - k) * nx * ny;
                             
-                            if (mesh->sp_actnum[ext_index2])
+                            if (mesh->actnum_array[ext_index2])
                               {
                                 loop_body.change_by_x (i + 1, j, k_x, ext_index2, false);
                               }
@@ -1390,12 +1520,12 @@ struct build_jacobian_and_flux : boost::noncopyable
                             k_y++;
                             mesh->get_element_zcorn_index (i, j + 1, k_y, zcorn_index2);
                           }
-                        while ((k_y < nz) && ((zcorn[zcorn_index1[2]] >= zcorn[zcorn_index2[4]]) && (zcorn[zcorn_index1[3]] >= zcorn[zcorn_index2[5]])));
+                        while ((k_y < nz) && ((zcorn_array[zcorn_index1[2]] >= zcorn_array[zcorn_index2[4]]) && (zcorn_array[zcorn_index1[3]] >= zcorn_array[zcorn_index2[5]])));
                         
                         // calc all neighbours
-                        while ((k_y < nz) && ((zcorn[zcorn_index1[6]] > zcorn[zcorn_index2[0]]) || (zcorn[zcorn_index1[7]] > zcorn[zcorn_index2[1]])))
+                        while ((k_y < nz) && ((zcorn_array[zcorn_index1[6]] > zcorn_array[zcorn_index2[0]]) || (zcorn_array[zcorn_index1[7]] > zcorn_array[zcorn_index2[1]])))
                           {
-                            if ((zcorn[zcorn_index1[6]] >= zcorn[zcorn_index2[4]]) && (zcorn[zcorn_index1[7]] >= zcorn[zcorn_index2[5]]))
+                            if ((zcorn_array[zcorn_index1[6]] >= zcorn_array[zcorn_index2[4]]) && (zcorn_array[zcorn_index1[7]] >= zcorn_array[zcorn_index2[5]]))
                               {
                                 // this (i, j + 1, k_y) neigbour won`t touch next (i, j, k + 1) element
                                 last_k_y = k_y + 1;
@@ -1403,7 +1533,7 @@ struct build_jacobian_and_flux : boost::noncopyable
                               
                             ext_index2 = ext_index1 + ny + (k_y - k) * nx * ny;
                             
-                            if (mesh->sp_actnum[ext_index2])
+                            if (mesh->actnum_array[ext_index2])
                               {
                                 loop_body.change_by_y (i, j + 1, k_y, ext_index2, false);
                               }
@@ -1412,7 +1542,7 @@ struct build_jacobian_and_flux : boost::noncopyable
                           }
                       }
                       
-                    if (k + 1 < nz && mesh->sp_actnum[ext_index1 + nx * ny])
+                    if (k + 1 < nz && mesh->actnum_array[ext_index1 + nx * ny])
                       {
                         loop_body.change_by_z (i, j, k + 1, ext_index1 + nx * ny, true);
                       }    
@@ -1426,36 +1556,37 @@ struct build_jacobian_and_flux : boost::noncopyable
   }
 
   mesh_grdecl <strategy_t>    *mesh;
-  index_t                     nx;
-  index_t                     ny;
-  index_t                     nz;
+  i_type_t                     nx;
+  i_type_t                     ny;
+  i_type_t                     nz;
   shared_vector <bool>        is_column_adjacent;
-  index_t                     con_num;
+  i_type_t                     con_num;
 };
 
 
 template<class strategy_t>
-int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr_t &jacobian,
-                                                                               const sp_flux_conn_iface_t &flux_conn,
-                                                                               index_array_t &boundary_array)
+int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr_t jacobian,
+                                                                               const sp_flux_conn_iface_t flux_conn,
+                                                                               sp_i_array_t boundary_array)
 {
   write_time_to_log init_time ("Mesh transmissibility calculation", ""); 
   
-  n_connections = 0;
   
-  index_t max_size = n_active_elements;
-  jacobian->get_cols_ind().clear();
-  jacobian->get_rows_ptr().clear();
-  jacobian->init_struct(max_size,max_size, max_size);
-  index_array_t* rows_ptr = &jacobian->get_rows_ptr();
-
+  i_type_t* rows_ptr, *cols_ind;
+  i_type_t i, n_non_zeros;
   sp_bcsr_t conn_trans;
-
-  (*rows_ptr)[0] = 0;
+  
+  n_connections = 0;
+  jacobian->get_cols_ind()->clear();
+  jacobian->get_rows_ptr()->clear();
+  jacobian->init_struct(n_active_elements, n_active_elements, n_active_elements);
+  
+  rows_ptr = &(*jacobian->get_rows_ptr())[0];
+  rows_ptr[0] = 0;
 
   std::vector<bool> is_butting(nx*ny,false);
 
-  std::set<index_t, std::less<index_t> > boundary_set;
+  std::set<i_type_t, std::less<i_type_t> > boundary_set;
 
   build_jacobian_and_flux <strategy_t> build_jacobian (this);
   
@@ -1468,56 +1599,56 @@ int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (c
 
   //////jacobian//////////////////////
   //sum rows_ptr
-  for (size_t i = 1; i < rows_ptr->size(); ++i)
+  for (i = 0; i < n_active_elements; ++i)
     {
-      (*rows_ptr)[i]++;
-      (*rows_ptr)[i] += (*rows_ptr)[i-1];
+      rows_ptr[i + 1] += rows_ptr[i] + 1;
     }
+    
+  n_non_zeros = rows_ptr[n_active_elements];
+  n_connections = (n_non_zeros - n_active_elements) / 2;
+    
   //create cols_ind
-  index_array_t* cols_ind = &jacobian->get_cols_ind();
-
-  cols_ind->resize((*rows_ptr)[rows_ptr->size()-1],-1);
+  jacobian->get_cols_ind()->resize(n_non_zeros);
+  cols_ind = &(*jacobian->get_cols_ind())[0];
 
 
   ////////transmis/////////////////////////
-  index_t cols_ind_n = (index_t)cols_ind->size();
 
-
-  index_t con_num = (cols_ind_n-max_size)/2;//connection number
-  n_connections = con_num;
   conn_trans = flux_conn->get_conn_trans();
-  conn_trans->init_struct(con_num,2*con_num,2*con_num);
+  conn_trans->init (n_connections, 2 * n_connections, 1, 2 * n_connections);
 
-  index_array_t *rows_ptr_transmis = &conn_trans->get_rows_ptr();
-  index_array_t &matrix_block_idx_minus = flux_conn->get_matrix_block_idx_minus ();
-  index_array_t &matrix_block_idx_plus = flux_conn->get_matrix_block_idx_plus ();
+  i_type_t *rows_ptr_transmis = &(*conn_trans->get_rows_ptr())[0];
+  
+  flux_conn->get_matrix_block_idx_minus ()->resize(n_connections * 2);
+  flux_conn->get_matrix_block_idx_plus ()->resize(n_connections * 2);
+  
+  //i_type_t *matrix_block_idx_minus = &(*flux_conn->get_matrix_block_idx_minus ())[0];
+  //i_type_t *matrix_block_idx_plus = &(*flux_conn->get_matrix_block_idx_plus ())[0];
 
-  matrix_block_idx_minus.resize(con_num*2,-1);
-  matrix_block_idx_plus.resize(con_num*2,-1);
-
-  if (!con_num)
+  if (!n_connections)
     {
-      for (int i = 0; i < cols_ind_n; ++i)
-        (*cols_ind)[i] = i;
+      for (i = 0; i < n_non_zeros; ++i)
+        cols_ind[i] = i;
       return 0;
     }
 
-  for (index_t i = 0; i < con_num+1; ++i)
-    (*rows_ptr_transmis)[i] = i*2;
+  for (i = 0; i < n_connections + 1; ++i)
+    rows_ptr_transmis[i] = i * 2;
 
   //second step - fill and define cols_ind
   build_jacobian.con_num = 0;
   build_jacobian.cell_loop (build_jacobian_cols (this, &build_jacobian, rows_ptr, cols_ind, conn_trans, flux_conn));
 
 
-  boundary_array.assign(boundary_set.begin(), boundary_set.end());
+  //boundary_array.assign(boundary_set.begin(), boundary_set.end());
   
   #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX  
     fflush (fp);
     fclose (fp);
   #endif //BS_MESH_WRITE_TRANSMISS_MATRIX 
 
-  return (int) boundary_array.size();
+  //return (int) boundary_array->size();
+  return 0;
 }
 
 #ifdef _HDF5_MY
@@ -1611,7 +1742,7 @@ bool mesh_grdecl<strategy_t>::file_open_cube_hdf5(const char* file_name, int is,
       H5::DataSpace dataspace_memory_coord(1, dims_memory_coord);
       H5::DataSpace dataspace_file_coord = dataset_coord.getSpace();
       coord_array.clear();
-      vector<item_t> buf_array(6 * (it - is + 2) * (jt - js  + 2));
+      vector<fp_type_t> buf_array(6 * (it - is + 2) * (jt - js  + 2));
       // hyperslab settings
       hsize_t count_coord[] = {jt - js + 2};
       hsize_t start_coord[] = {(is + js * (nx + 1)) * 6};
@@ -1626,21 +1757,21 @@ bool mesh_grdecl<strategy_t>::file_open_cube_hdf5(const char* file_name, int is,
 
       // read "zcorn" array
       H5::DataSet dataset_zcorn = file.openDataSet("zcorn");
-      hsize_t dims_memory_zcorn[] = {8 * (it - is + 1) * (jt - js + 1)};
+      hsize_t dims_memory_zcorn_array[] = {8 * (it - is + 1) * (jt - js + 1)};
       H5::DataSpace dataspace_memory_zcorn(1, dims_memory_zcorn);
       H5::DataSpace dataspace_file_zcorn = dataset_zcorn.getSpace();
       zcorn_array.resize(8 * (it - is + 1) * (jt - js  + 1) * (kt - ks + 1));
       // hyperslab settings (common for each plane)
-      hsize_t count_zcorn[] = {4 * (jt - js + 1)};
-      hsize_t stride_zcorn[] = {2 * nx};
-      hsize_t block_zcorn[] = {2 * (it - is + 1)};
+      hsize_t count_zcorn_array[] = {4 * (jt - js + 1)};
+      hsize_t stride_zcorn_array[] = {2 * nx};
+      hsize_t block_zcorn_array[] = {2 * (it - is + 1)};
       // we read "zcorn" array by planes - kt-ks+1 read operations
       for (int k = 0; k < kt - ks + 1; k++)
         {
           // determine start array for each plane individually
-          hsize_t start_zcorn[] = {2 * is + 4 * js * nx + 8 * k * nx * ny};
+          hsize_t start_zcorn_array[] = {2 * is + 4 * js * nx + 8 * k * nx * ny};
           dataspace_file_zcorn.selectHyperslab(H5S_SELECT_SET, count_zcorn, start_zcorn, stride_zcorn, block_zcorn);
-          dataset_zcorn.read(&zcorn_array[k * count_zcorn[0] * block_zcorn[0]], H5::PredType::NATIVE_FLOAT, dataspace_memory_zcorn, dataspace_file_zcorn);
+          dataset_zcorn.read(&zcorn_array[k * count_zcorn_array[0] * block_zcorn_array[0]], H5::PredType::NATIVE_FLOAT, dataspace_memory_zcorn, dataspace_file_zcorn);
         }
     }
   catch (H5::Exception exception)
@@ -1658,7 +1789,7 @@ bool mesh_grdecl<strategy_t>::file_open_cube_hdf5(const char* file_name, int is,
 }
 
 template<class strategy_t>
-int mesh_grdecl<strategy_t>::append_array_hdf5(const item_t *arr, size_t arr_length, H5::DataSet *dataset)
+int mesh_grdecl<strategy_t>::append_array_hdf5(const fp_type_t *arr, size_t arr_length, H5::DataSet *dataset)
 {
   // determine new dimensions of dataset
   hsize_t dims_old[1];
@@ -1797,21 +1928,21 @@ bool mesh_grdecl<strategy_t>::file_open_actnum(const char* file_name)
   char *start_ptr,*end_ptr;
   if (!file.is_open())
     {
-      n_active_elements =  accumulate(sp_actnum.begin(),sp_actnum.end(),0);
+      n_active_elements =  accumulate(actnum_array.begin(),actnum_array.end(),0);
       return false;
     }
-  sp_actnum.clear();
+  actnum_array.clear();
 
   while (!file.eof())
     {
       file >> buf;
       start_ptr = buf;
       if (strcmp (buf, "/") != 0)
-        sp_actnum.push_back((int)strtod (start_ptr, &end_ptr));
+        actnum_array.push_back((int)strtod (start_ptr, &end_ptr));
       else
         break;
     }
-  n_active_elements =  accumulate(sp_actnum.begin(),sp_actnum.end(),0);
+  n_active_elements =  accumulate(actnum_array.begin(),actnum_array.end(),0);
 #endif
   return true;
 }
@@ -1838,7 +1969,7 @@ bool mesh_grdecl<strategy_t>::file_open_cube(const char* file_name)
   max_x = max_y = -100000;
   min_x = min_y = 1000000;
 
-  index_t i_count = 0;
+  i_type_t i_count = 0;
   const int max_count = 6; //buffer_size
   vector<float> buf_vec(max_count);
   while (!file.eof())

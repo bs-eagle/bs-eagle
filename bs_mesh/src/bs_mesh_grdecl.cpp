@@ -18,7 +18,7 @@ namespace blue_sky
 
   template<class strategy_t>
   bs_mesh_grdecl<strategy_t>::bs_mesh_grdecl(const bs_mesh_grdecl<strategy_t>& src)
-  : bs_refcounter (src), objbase (src)
+  : bs_refcounter (src)//, objbase (src)
   {
     // TODO: BUG:
     bs_throw_exception ("NOT IMPL YET");
@@ -27,9 +27,13 @@ namespace blue_sky
   
 
 
-  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_mesh_grdecl<base_strategy_fi>) , 1, (objbase), "bs_mesh_grdecl_fi", "Mesh base (virtual)  class", "Mesh base (virtual) class", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_mesh_grdecl<base_strategy_di>) , 1, (objbase), "bs_mesh_grdecl_di", "Mesh base (virtual)  class", "Mesh base (virtual)  class", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_mesh_grdecl<base_strategy_mixi>) , 1, (objbase), "bs_mesh_grdecl_mixi", "Mesh base (virtual)  class", "Mesh base (virtual)  class", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_mesh_grdecl<base_strategy_fif>) , 1, (rs_smesh_iface), "bs_mesh_grdecl_fif", "Mesh base (virtual)  class", "Mesh base (virtual) class", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_mesh_grdecl<base_strategy_did>) , 1, (rs_smesh_iface), "bs_mesh_grdecl_did", "Mesh base (virtual)  class", "Mesh base (virtual)  class", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_mesh_grdecl<base_strategy_dif>) , 1, (rs_smesh_iface), "bs_mesh_grdecl_dif", "Mesh base (virtual)  class", "Mesh base (virtual)  class", false);
+  
+  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_mesh_grdecl<base_strategy_flf>) , 1, (rs_smesh_iface), "base_strategy_flf", "Mesh base (virtual)  class", "Mesh base (virtual) class", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_mesh_grdecl<base_strategy_dld>) , 1, (rs_smesh_iface), "base_strategy_dld", "Mesh base (virtual)  class", "Mesh base (virtual)  class", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_mesh_grdecl<base_strategy_dlf>) , 1, (rs_smesh_iface), "base_strategy_dlf", "Mesh base (virtual)  class", "Mesh base (virtual)  class", false);
 
   BLUE_SKY_TYPE_STD_CREATE_T_DEF(bs_mesh_grdecl, (class));
   //BLUE_SKY_TYPE_STD_COPY_T_DEF(bs_mesh_grdecl, (class));

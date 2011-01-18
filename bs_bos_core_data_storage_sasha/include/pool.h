@@ -9,9 +9,7 @@
 #include "bos_map.h"
 #include "throw_exception.h"
 
-#include "shared_vector.h"
-#include "auto_value.h"
-#include <boost/array.hpp>
+#include "shared_array.h"
 
 namespace blue_sky
   {
@@ -45,7 +43,6 @@ namespace blue_sky
     typedef index_type                            index_t;
     typedef item_type                             item_t;         //! type of value
     typedef bs_array_map <index_type, item_type>  this_t;         //! type of *this
-    typedef shared_vector <item_t>                shared_vector_t;
 
     //! \brief class of array dimension parameters
     struct array_info
@@ -56,7 +53,7 @@ namespace blue_sky
         dimens.assign (0);
       }
 
-      array_info (shared_vector_t &a, const index_t *dim, item_t def_val)
+      array_info (pool_shared_array <item_t> &a, const index_t *dim, item_t def_val)
       : array(a)
       , def_value(def_val)
       {
@@ -64,7 +61,7 @@ namespace blue_sky
           dimens[i] = dim[i];
       }
 
-      shared_vector_t                               array;
+      pool_shared_array <item_t>                         array;
       boost::array <index_t, ARRAY_POOL_TOTAL>      dimens;
       item_t                                        def_value;
     };
@@ -155,7 +152,7 @@ namespace blue_sky
     	\return such as std::map
     */
     bool 
-    add_item (const key_type key, shared_vector_t a, const index_t *dimens, item_t def_val)
+    add_item (const key_type key, pool_shared_array <item_t> &a, const index_t *dimens, item_t def_val)
     {
       bool b = array_map->add_item (key, array_info (a, dimens, def_val));
       if (!b)
@@ -173,6 +170,7 @@ namespace blue_sky
       index_t nlen = (dimens[ARRAY_POOL_NX_A] * ni + dimens[ARRAY_POOL_NX_B])
                    * (dimens[ARRAY_POOL_NY_A] * nj + dimens[ARRAY_POOL_NY_B])
                    * (dimens[ARRAY_POOL_NZ_A] * nk + dimens[ARRAY_POOL_NZ_B]);
+      item_t *p = 0;
       if (nlen <= 0)
         {
           bs_throw_exception (boost::format (
@@ -183,9 +181,9 @@ namespace blue_sky
           dimens[ARRAY_POOL_NZ_A] % dimens[ARRAY_POOL_NZ_B]);
         }
       
-      if ((dimens[ARRAY_POOL_NX_A] > 0 && ni == 0) ||
-          (dimens[ARRAY_POOL_NY_A] > 0 && nj == 0) ||
-          (dimens[ARRAY_POOL_NZ_A] > 0 && nk == 0))
+      if (dimens[ARRAY_POOL_NX_A] > 0 && ni == 0 ||
+          dimens[ARRAY_POOL_NY_A] > 0 && nj == 0 ||
+          dimens[ARRAY_POOL_NZ_A] > 0 && nk == 0)
         {
           bs_throw_exception (boost::format (
           "Some used pool dimens are zero (pool dimens [%d, %d, %d], array dimens [%d, %d, %d, %d, %d, %d])") \
@@ -195,7 +193,19 @@ namespace blue_sky
           dimens[ARRAY_POOL_NZ_A] % dimens[ARRAY_POOL_NZ_B]);
         }  
         
-      add_item (key, shared_vector <item_t> (nlen, def_val), dimens, def_val);
+      if (contain (key))
+        {
+          array_info &info = (*array_map)[key];
+          if (info.array.size ())
+            {
+              p = info.array.data ();
+            }
+        }
+
+      pool_shared_array <item_t> a (allocate (nlen), nlen);
+      add_item (key, a, dimens, def_val);
+
+      deallocate (p);
     }
 
     /*!
@@ -280,9 +290,44 @@ namespace blue_sky
     }
 
   private:
+    item_t *
+    allocate (index_t len)
+    {
+      item_t *p = new item_t [len];
+      if (!p)
+        {
+          bs_throw_exception ("Can't allocate memory");
+        }
+
+      memory_list_.push_back (p);
+      return p;
+    }
+
+    void 
+    deallocate (item_t *p)
+    {
+      free_pointer (p);
+
+      for (size_t i = 0, cnt = memory_list_.size (); i < cnt; ++i)
+        {
+          if (memory_list_[i] == p)
+            {
+              memory_list_.erase (memory_list_.begin () + i);
+              break;
+            }
+        }
+    }
+
+    void
+    free_pointer (item_t *p)
+    {
+      delete []p;
+    }
 
   private:
     
+    std::vector <item_t*>   memory_list_;
+
     auto_value <index_t, 0> ni, nj, nk;   //! model size
     sp_container_t          array_map;
   };

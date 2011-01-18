@@ -39,6 +39,7 @@
 // Please don't delete commented old style outputs .. like rep->blah blah blah
 namespace blue_sky
   {
+  
 #define DM_ASSERT_EXCEPTION \
     BS_ASSERT(false) (out_s.str());\
     throw bs_exception("Data manager class",out_s.str().c_str());
@@ -53,7 +54,8 @@ namespace blue_sky
   data_manager<strategy_t>::data_manager(bs_type_ctor_param /*param*/): lkeeper ("C", LC_ALL)
   {
     this->reader = BS_KERNEL.create_object(FRead::bs_type());
-    this->data = BS_KERNEL.create_object(idata::bs_type());
+    this->data = BS_KERNEL.create_object(idata<strategy_t>::bs_type());
+    this->km = BS_KERNEL.create_object(keyword_manager<strategy_t>::bs_type());
   }
 
   template <class strategy_t>
@@ -62,6 +64,72 @@ namespace blue_sky
   {
     *this = src;
   }
+  
+  template <class strategy_t>
+  void
+  data_manager<strategy_t>::init()
+  {
+    km->init();
+  }
+  
+  template <class strategy_t>
+  void 
+  data_manager<strategy_t>::read_keyword_file(const std::string filename)
+  {
+    typename keyword_manager_t::keyword_params_t params;
+    params.reader = reader;
+    params.data = data;
+    params.km = km;
+    
+    char buf[CHAR_BUF_LEN];
+    char key[CHAR_BUF_LEN];
+    int flag;
+    int len;
+    
+    write_time_to_log init_time ("Read model", "");
+
+    reader->init (filename, filename);
+
+    // start of loop for data file reading
+    flag = 1;
+
+    for (; flag;)
+      {
+        // reading keyword
+        len = reader->read_line (buf, CHAR_BUF_LEN);
+        if (len < 0)              // break if EOF
+          {
+            switch (len)
+              {
+              case YS_NOTHING_TO_READ:
+                break;
+              default:
+                return;
+              }
+            //rep->print (LOG_READ_SECTION, LOG_DEBUG, "Finish reading\n");
+            BOSOUT (section::read_data, level::low) << "Finish reading" << bs_end;
+            break;
+          }
+        if (sscanf (buf, "%s", key) != 1) // look from buffer keyword
+          continue;
+
+        std::string keywrd(key);
+
+        if (key[0] == '/')
+          {
+            continue;
+          }
+
+        if (std::string (key) == "END")
+          {
+            BOSOUT (section::read_data, level::low) << "Finish reading with END keyword" << bs_end;
+            break;
+          }
+
+        km->handle_keyword (keywrd, params);
+      }
+  }
+
 
   //! macros for checking
 #define CHECK_FOR_TWO_PARAMS(VAL,ACTNUM,MIN_DEF,COUNTER)                                \
@@ -305,12 +373,12 @@ namespace blue_sky
       int poro_counter = 0;
       int ntg_counter = 0;
       
-      array_uint8_t   &actnum = data->get_int_non_empty_array ("ACTNUM");
-      const array_float16_t &permx  = data->get_float_non_empty_array ("PERMX");
-      const array_float16_t &permy  = data->get_float_non_empty_array ("PERMY");
-      const array_float16_t &permz  = data->get_float_non_empty_array ("PERMZ");
-      const array_float16_t &poro   = data->get_float_non_empty_array ("PORO");
-      const array_float16_t &ntg    = data->get_float_array ("NTG");
+      i_type_t* actnum = &(*data->get_int_non_empty_array ("ACTNUM"))[0];
+      const fp_storage_type_t *permx  = &(*data->get_fp_non_empty_array ("PERMX"))[0];
+      const fp_storage_type_t *permy  = &(*data->get_fp_non_empty_array ("PERMY"))[0];
+      const fp_storage_type_t *permz  = &(*data->get_fp_non_empty_array ("PERMZ"))[0];
+      const fp_storage_type_t *poro   = &(*data->get_fp_non_empty_array ("PORO"))[0];
+      const fp_storage_type_t *ntg    = &(*data->get_fp_array ("NTG"))[0];
 
       for (int i = 0; i < nb; ++i)
         {
@@ -336,7 +404,7 @@ namespace blue_sky
             }
 
           CHECK_FOR_TWO_PARAMS (poro[i], actnum[i], DEFAULT_MINIMAL_PORO, poro_counter);
-          if (!ntg.empty ())
+          if ((*data->get_fp_array ("NTG")).size () != 0)
             {
               CHECK_FOR_TWO_PARAMS (ntg[i], actnum[i], DEFAULT_MINIMAL_NTG, ntg_counter);
             }
@@ -357,8 +425,12 @@ namespace blue_sky
   //bs stuff
   BLUE_SKY_TYPE_STD_CREATE_T_DEF(data_manager, (class))
   BLUE_SKY_TYPE_STD_COPY_T_DEF(data_manager, (class))
-  BLUE_SKY_TYPE_IMPL_T_SHORT(data_manager<base_strategy_di>, objbase, "BOS_Core data_manager class")
-  BLUE_SKY_TYPE_IMPL_T_SHORT(data_manager<base_strategy_fi>, objbase, "BOS_Core data_manager class")
-  BLUE_SKY_TYPE_IMPL_T_SHORT(data_manager<base_strategy_mixi>, objbase, "BOS_Core data_manager class")
+  BLUE_SKY_TYPE_IMPL_T_SHORT(data_manager<base_strategy_did>, objbase, "BOS_Core data_manager class")
+  BLUE_SKY_TYPE_IMPL_T_SHORT(data_manager<base_strategy_fif>, objbase, "BOS_Core data_manager class")
+  BLUE_SKY_TYPE_IMPL_T_SHORT(data_manager<base_strategy_dif>, objbase, "BOS_Core data_manager class")
+  
+  BLUE_SKY_TYPE_IMPL_T_SHORT(data_manager<base_strategy_dld>, objbase, "BOS_Core data_manager class")
+  BLUE_SKY_TYPE_IMPL_T_SHORT(data_manager<base_strategy_flf>, objbase, "BOS_Core data_manager class")
+  BLUE_SKY_TYPE_IMPL_T_SHORT(data_manager<base_strategy_dlf>, objbase, "BOS_Core data_manager class")
 
 }//ns bs

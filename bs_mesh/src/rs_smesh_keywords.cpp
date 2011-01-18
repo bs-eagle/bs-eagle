@@ -58,9 +58,9 @@ namespace blue_sky
     {
       smart_ptr <keyword_manager_iface <strategy_t>, true> keyword_manager (km);
       keyword_manager->register_keyword ("DIMENS", keyword_handler (&this_t::DIMENS_handler));
-      index_t array_dimens[6] = {1,0,1,0,1,0};
-      item_t def_value_zero = 0.0;
-      item_t def_value_one = 1.0;
+      i_type_t array_dimens[6] = {1,0,1,0,1,0};
+      fp_storage_type_t def_value_zero = 0.0;
+      fp_storage_type_t def_value_one = 1.0;
       
       keyword_manager->register_keyword ("ACTNUM", keyword_handler (0, 1, &array_dimens[0]));
       keyword_manager->register_keyword ("PERMX", keyword_handler (0, def_value_zero, &array_dimens[0]));
@@ -78,8 +78,8 @@ namespace blue_sky
   void smesh_keywords<strategy_t>::DIMENS_handler(const std::string &keyword, keyword_params_t &params)
     {
       KH_COMMON_VARIABLES_DEF
-      index_t ndim = 0, nblock = 0;
-      boost::array <index_t, 3> itmp;
+      i_type_t ndim = 0, nblock = 0;
+      boost::array <i_type_t, 3> itmp;
       sp_idata_t idata (params.data, bs_dynamic_cast ());
       sp_reader_t reader (params.reader, bs_dynamic_cast ());
       
@@ -100,7 +100,7 @@ namespace blue_sky
       idata->dimens.nx = itmp[0];
       idata->dimens.ny = itmp[1];
       idata->dimens.nz = itmp[2];
-      idata->d_map->init (idata->dimens.nx, idata->dimens.ny, idata->dimens.nz);
+      idata->fp_map->init (idata->dimens.nx, idata->dimens.ny, idata->dimens.nz);
       idata->i_map->init (idata->dimens.nx, idata->dimens.ny, idata->dimens.nz);
       
       // Number of nodes
@@ -121,11 +121,11 @@ namespace blue_sky
   
   BLUE_SKY_TYPE_STD_CREATE_T_DEF (smesh_keywords, (class))
   BLUE_SKY_TYPE_STD_COPY_T_DEF (smesh_keywords, (class))
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (smesh_keywords<base_strategy_fi>), 1, (keyword_info_base<base_strategy_fi>), 
+  BLUE_SKY_TYPE_IMPL_T_EXT (1, (smesh_keywords<base_strategy_fif>), 1, (keyword_info_base<base_strategy_fif>), 
     "BOS Core struct_mesh keyword_info_base_fi", "struct_mesh", "Reservoir sumulator structured struct mesh keywords keywords", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (smesh_keywords<base_strategy_di>), 1, (keyword_info_base<base_strategy_di>), 
+  BLUE_SKY_TYPE_IMPL_T_EXT (1, (smesh_keywords<base_strategy_did>), 1, (keyword_info_base<base_strategy_did>), 
     "BOS_Core struct_mesh keyword_info_base_di", "struct_mesh", "Reservoir sumulator structured struct mesh keywords keywords", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (smesh_keywords<base_strategy_mixi>), 1, (keyword_info_base<base_strategy_mixi>), 
+  BLUE_SKY_TYPE_IMPL_T_EXT (1, (smesh_keywords<base_strategy_dif>), 1, (keyword_info_base<base_strategy_dif>), 
     "BOS_Core struct_mesh keyword_info_base_mixi", "struct_mesh", "Reservoir sumulator structured struct mesh keywords keywords", false)
     
 }; //namespace blue_sky

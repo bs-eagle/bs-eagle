@@ -17,7 +17,7 @@ using namespace blue_sky::tools;
 namespace blue_sky {
 namespace python {
 
-  //template <typename strategy_t, typename strategy_t::index_t i>
+  //template <typename strategy_t, typename strategy_t::i_type_t i>
   //struct idata_int_array_getter
   //{
   //  static 
@@ -33,7 +33,7 @@ namespace python {
   //    self->set_int_array (i, obj);
   //  }
   //};
-  //template <typename strategy_t, typename strategy_t::index_t i>
+  //template <typename strategy_t, typename strategy_t::i_type_t i>
   //struct idata_float_array_getter
   //{
   //  static 
@@ -89,39 +89,31 @@ namespace python {
   {
     t->output_units_converter.set_output_units (v);
   }
-
+/*
   template <typename T>
   void 
-  set_int_array (T *t, int cur_index, const boost::python::object &obj)
+  set_int_array (T *t, int cur_index, typename T::sp_arr_i i_array)
   {
-    bp::ssize_t len = numpy_tools::get_len (obj);
-    uint8_t *buffer = numpy_tools::get_buffer <uint8_t> (obj, len);
-
-    (*t->i_map)[cur_index].array = shared_array (buffer, len);
-    t->subscribe (objbase::on_delete, new py_object_handler (obj.ptr ()));
+    (*t->i_map)[cur_index].array = i_array;
   }
   template <typename T>
   void 
-  set_float_array (T *t, int cur_index, const boost::python::object &obj)
+  set_fp_array (T *t, int cur_index, typename T::sp_arr_fp fp_array)
   {
-    bp::ssize_t len   = numpy_tools::get_len (obj);
-    float16_t *buffer = numpy_tools::get_buffer <float16_t> (obj, len);
-
-    (*t->d_map)[cur_index].array = shared_array (buffer, len);
-    t->subscribe (objbase::on_delete, new py_object_handler (obj.ptr ()));
+    (*t->fp_map)[cur_index].array = fp_array;
   }
 
   template <typename T>
-  array_uint8_t
+  typename T::sp_arr_i
   get_int_array (T *t, int cur_index)
   {
     return t->get_int_non_empty_array (cur_index);
   }
   template <typename T>
-  array_float16_t
-  get_float_array (T *t, int cur_index)
+  typename T::sp_arr_fp
+  get_fp_array (T *t, int cur_index)
   {
-    return t->get_float_non_empty_array (cur_index);
+    return t->get_fp_non_empty_array (cur_index);
   }
 
   template <typename T>
@@ -142,9 +134,10 @@ namespace python {
   {
     return t->dimens.nz;
   }
-
+*/
 
   PY_EXPORTER (idata_exporter, default_exporter)
+/*
     .def("init",                          &T::init)
     .add_property ("rpo_model",           &T::rpo_model)
     .add_property ("minimal_pore_volume", &T::minimal_pore_volume)
@@ -159,18 +152,19 @@ namespace python {
     .add_property ("fi_n_phase",          &T::fi_n_phase)
     .add_property ("fi_phases",           &T::fi_phases)
     .add_property ("rock_region",         &T::rock_region)
-    .add_property ("equil_regions",       make_function (get_equil_regions <T>, return_value_policy<reference_existing_object> ()))
-    .add_property ("units_in",            get_units_in <T>,  set_units_in <T>)
-    .add_property ("units_out",           get_units_out <T>, set_units_out <T>)
+    //.add_property ("equil_regions",       make_function (get_equil_regions <T>, return_value_policy<reference_existing_object> ()))
+    //.add_property ("units_in",            get_units_in <T>,  set_units_in <T>)
+    //.add_property ("units_out",           get_units_out <T>, set_units_out <T>)
     .add_property ("title",               &T::title)
     .add_property ("int_array",           get_int_array   <T>, set_int_array <T>)
-    .add_property ("float_array",         get_float_array <T>, set_float_array <T>)
+    .add_property ("fp_array",            get_fp_array <T>, get_fp_array <T>)
     .def ("get_int_array",                get_int_array   <T>)
-    .def ("get_float_array",              get_float_array <T>)
+    .def ("get_fp_array",                 get_fp_array <T>)
     .def ("set_int_array",                set_int_array   <T>)
-    .def ("set_float_array",              set_float_array <T>)
-    .def ("get_float_array",              &T::get_float_array)
-    .def ("get_int_array",                &T::get_int_array)
+    .def ("set_fp_array",                 set_fp_array <T>)
+    //.def ("get_float_array",              &T::get_float_array)
+    //.def ("get_int_array",                &T::get_int_array)
+*/    
   PY_EXPORTER_END;
 
     //template <class strategy_t>
@@ -215,7 +209,7 @@ namespace python {
 
   void py_export_idata()
   {
-    base_exporter <idata, idata_exporter>::export_class ("idata");
+    strategy_exporter::export_base<idata, idata_exporter> ("idata");
   }
 
 } // namespace python

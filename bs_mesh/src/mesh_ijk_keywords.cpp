@@ -57,9 +57,9 @@ namespace blue_sky
   void mesh_ijk_keywords<strategy_t>::activate_keywords (sp_objbase &km)
     {
       sp_km_iface_t keyword_manager (km, bs_dynamic_cast ());
-      index_t dx_dimens[] = {1,0,1,0,1,0};
-      index_t tops_dimens[] = {1,0,1,0,0,1};
-      item_t def_value = 0.0;
+      i_type_t dx_dimens[] = {1,0,1,0,1,0};
+      i_type_t tops_dimens[] = {1,0,1,0,0,1};
+      fp_storage_type_t def_value = 0.0;
       
       keyword_manager->register_keyword ("DX", keyword_handler (0, def_value, &dx_dimens[0]));
       keyword_manager->register_keyword ("DY", keyword_handler (0, def_value, &dx_dimens[0]));
@@ -70,11 +70,11 @@ namespace blue_sky
     
   BLUE_SKY_TYPE_STD_CREATE_T_DEF (mesh_ijk_keywords, (class))
   BLUE_SKY_TYPE_STD_COPY_T_DEF (mesh_ijk_keywords, (class))
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (mesh_ijk_keywords<base_strategy_fi>), 1, (keyword_info_base<base_strategy_fi>), 
+  BLUE_SKY_TYPE_IMPL_T_EXT (1, (mesh_ijk_keywords<base_strategy_fif>), 1, (keyword_info_base<base_strategy_fif>), 
     "BOS Core mesh_ijk keyword_info_fi", "MESH_IJK", "Reservoir sumulator structured mesh ijk keywords keywords", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (mesh_ijk_keywords<base_strategy_di>), 1, (keyword_info_base<base_strategy_di>), 
+  BLUE_SKY_TYPE_IMPL_T_EXT (1, (mesh_ijk_keywords<base_strategy_did>), 1, (keyword_info_base<base_strategy_did>), 
     "BOS_Core mesh_ijk keyword_info_di", "MESH_IJK", "Reservoir sumulator structured mesh ijk keywords keywords", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (mesh_ijk_keywords<base_strategy_mixi>), 1, (keyword_info_base<base_strategy_mixi>), 
+  BLUE_SKY_TYPE_IMPL_T_EXT (1, (mesh_ijk_keywords<base_strategy_dif>), 1, (keyword_info_base<base_strategy_dif>), 
     "BOS_Core mesh_ijk keyword_info_mixi", "MESH_IJK", "Reservoir sumulator structured mesh ijk keywords keywords", false)
     
 }; //namespace blue_sky

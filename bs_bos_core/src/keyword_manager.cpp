@@ -114,6 +114,8 @@ namespace blue_sky
     BOSOUT (section::keywords, level::low) << boost::format ("Keyword [%s] registered") % keyword << bs_end;
   }
   
+  
+
   template <class strategy_t>
   void keyword_manager<strategy_t>::register_supported_keyword(const std::string &keyword, const std::string &provider)
     {

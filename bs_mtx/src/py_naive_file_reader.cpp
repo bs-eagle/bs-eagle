@@ -5,7 +5,7 @@
  * \date 18.06.2008
  *
  */
-#include "bs_matrix_stdafx.h"
+#include "bs_mtx_stdafx.h"
 
 #include "py_naive_file_reader.h"
 #include "naive_file_reader.h"

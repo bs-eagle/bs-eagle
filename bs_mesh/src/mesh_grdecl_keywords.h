@@ -23,8 +23,8 @@ namespace blue_sky
         typedef typename base_t::sp_objbase            sp_objbase;
         typedef typename base_t::keyword_handler       keyword_handler;
         typedef typename base_t::handler_t             handler_t;
-        typedef typename base_t::index_t               index_t;
-        typedef typename base_t::item_t                item_t;
+        typedef typename base_t::i_type_t               i_type_t;
+        typedef typename base_t::fp_type_t                fp_type_t;
         typedef typename base_t::idata_t               idata_t;
         typedef typename base_t::sp_idata_t            sp_idata_t;
         typedef typename base_t::sp_km_iface_t         sp_km_iface_t;

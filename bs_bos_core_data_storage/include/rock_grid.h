@@ -7,20 +7,26 @@ namespace blue_sky
 {
   class BS_API_PLUGIN fi_params;
 
-  class BS_API_PLUGIN idata;
+  template <class strategy_t> class BS_API_PLUGIN idata;
 
   template <class strategy_t>
   class BS_API_PLUGIN rock_grid : public objbase
   {
   public:
     // typedefs
-    typedef typename strategy_t::matrix_t       matrix_t;       ///< short name to matrix type
-    typedef typename strategy_t::item_t         item_t;         ///< short name to array item type
-    typedef typename strategy_t::item_array_t   item_array_t;
-    typedef typename strategy_t::index_t        index_t;        ///< short name to matrix's index type
-    typedef typename strategy_t::index_array_t  index_array_t;
+    //typedef typename strategy_t::matrix_t       matrix_t;       ///< short name to matrix type
+    typedef typename strategy_t::fp_type_t         item_t;         ///< short name to array item type
+    //typedef typename strategy_t::item_array_t   item_array_t;
+    typedef typename strategy_t::i_type_t        index_t;        ///< short name to matrix's index type
+    //typedef typename strategy_t::index_array_t  index_array_t;
+    
+    typedef std::vector<item_t>                   item_array_t;
+    //typedef std::vector<item_t>                   item_array_t;
+    
+    typedef smart_ptr <bs_array<item_t>, true>    sp_item_array_t;
+    typedef smart_ptr <bs_array<index_t>, true>   sp_index_array_t;
 
-    typedef idata                               idata_t;
+    typedef idata <strategy_t>                               idata_t;
 
     typedef smart_ptr< fi_params, true>         sp_fi_params;
     typedef smart_ptr< idata_t, true>           sp_idata;
@@ -32,10 +38,10 @@ namespace blue_sky
     void init (const sp_idata &input_data, index_t n_els, index_t n_pvt_regs);
 
     //! calculate geometric plane transmissibility
-    int init_planes_trans (index_t cells_count, const item_array_t &mesh_volumes, const sp_fi_params &ts_params, physical_constants &internal_consts);
+    int init_planes_trans (index_t cells_count, const sp_item_array_t mesh_volumes, const sp_fi_params &ts_params, physical_constants &internal_consts);
 
     //! init data
-    int init_data (index_t cells_count, const index_array_t &index_map, const sp_idata &input_data);
+    int init_data (index_t cells_count, const sp_index_array_t index_map, const sp_idata &input_data);
 
     //! blue-sky class declaration
     BLUE_SKY_TYPE_DECL(rock_grid)

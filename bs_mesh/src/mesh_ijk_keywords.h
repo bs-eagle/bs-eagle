@@ -20,8 +20,8 @@ namespace blue_sky
       public:
         typedef mesh_ijk_keywords<strategy_t>          this_t;
         typedef smesh_keywords<strategy_t>             base_t;
-        typedef typename base_t::index_t               index_t;        
-        typedef typename base_t::item_t                item_t;
+        typedef typename base_t::i_type_t               i_type_t;        
+        typedef typename base_t::fp_type_t                fp_type_t;
         typedef typename base_t::sp_objbase            sp_objbase;
         typedef typename base_t::keyword_handler       keyword_handler;
         typedef typename base_t::handler_t             handler_t;

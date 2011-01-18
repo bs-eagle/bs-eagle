@@ -626,34 +626,6 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="keywords"
-				>
-				<File
-					RelativePath=".\src\keyword_manager.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\keyword_manager.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\keywords_handlers.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\src\keywords_registration.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\src\py_keyword_manager.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\py_keyword_manager.h"
-					>
-				</File>
-			</Filter>
-			<Filter
 				Name="wells"
 				>
 				<File

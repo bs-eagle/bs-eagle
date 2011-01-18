@@ -41,8 +41,8 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Zm1000"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_matrix/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;$(NUMPY_PATH)/include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_EXCEPTION_USE_BOOST_FORMAT;_SCL_SECURE_NO_WARNINGS"
+				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_mesh/include/&quot;;&quot;$(ProjectDir)/../bs_matrix/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;&quot;$(NUMPY_PATH)/include&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_EXCEPTION_USE_BOOST_FORMAT;_SCL_SECURE_NO_WARNINGS;NOMINMAX"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -67,7 +67,7 @@
 				OutputFile="$(ProjectDir)/../../../exe/debug/plugins/$(ProjectName)_d.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/lib&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/debug/&quot;;&quot;$(ProjectDir)/../../../exe/debug/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
-				IgnoreDefaultLibraryNames="python25_d.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -123,8 +123,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Zm1000"
-				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_matrix/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;$(NUMPY_PATH)/include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT"
+				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_mesh/include/&quot;;&quot;$(ProjectDir)/../bs_matrix/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;&quot;$(NUMPY_PATH)/include&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;NOMINMAX"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="bs_bos_core_data_storage_stdafx.h"
@@ -409,6 +409,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\bs_array_map.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\bs_array_map.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\bs_array_map_strategies.h"
 				>
 			</File>
@@ -426,14 +434,6 @@
 			</File>
 			<File
 				RelativePath=".\include\data_manager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\pool.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\include\pool.h"
 				>
 			</File>
 			<File
@@ -456,11 +456,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\src\py_bs_pool.cpp"
+					RelativePath=".\src\py_bs_array_map.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\include\py_bs_pool.h"
+					RelativePath=".\include\py_bs_array_map.h"
 					>
 				</File>
 				<File
@@ -480,6 +480,34 @@
 					>
 				</File>
 			</Filter>
+		</Filter>
+		<Filter
+			Name="keywords"
+			>
+			<File
+				RelativePath=".\src\keyword_manager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\keyword_manager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\keywords_handlers.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\keywords_registration.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\py_keyword_manager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\py_keyword_manager.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\src\bs_bos_core_data_storage.cpp"

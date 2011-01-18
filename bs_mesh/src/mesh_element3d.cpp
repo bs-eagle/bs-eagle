@@ -45,7 +45,7 @@ void mesh_element3d<strategy_t>::init(simple_corners_t new_corners)
      *              6 /-------/7
      */
 
-  index_t i;
+  i_type_t i;
   for (i = 0; i < n_corners; ++i)
     {
       corners[i].x = new_corners[i][0];
@@ -110,7 +110,7 @@ typename mesh_element3d<strategy_t>::fpoint3d_t
 mesh_element3d<strategy_t>::get_center () const
 {
   fpoint3d_t center;
-  index_t i;
+  i_type_t i;
   for (i = 0; i < n_corners; i++)
     {
       center += corners[i];
@@ -123,11 +123,11 @@ mesh_element3d<strategy_t>::get_center () const
 
 
 template<class strategy_t>
-typename mesh_element3d<strategy_t>::item_t
+typename mesh_element3d<strategy_t>::fp_type_t
 mesh_element3d<strategy_t>::calc_volume()
 {
     fpoint3d_t center = get_center ();
-    item_t volume = 0.0;
+    fp_type_t volume = 0.0;
 
     //share for 12 tetraidr (6 side -> 2 tetraidr for each)
     volume += calc_tetra_volume(corners[0],corners[1],corners[2], center);
@@ -152,7 +152,7 @@ mesh_element3d<strategy_t>::calc_volume()
 }
 
 template<class strategy_t>
-typename mesh_element3d<strategy_t>::item_t
+typename mesh_element3d<strategy_t>::fp_type_t
 mesh_element3d<strategy_t>::get_dx ()
 {
   plane_t plane1, plane2;
@@ -160,16 +160,16 @@ mesh_element3d<strategy_t>::get_dx ()
   get_plane(x_axis_minus, plane1);
   get_plane(x_axis_plus, plane2);
 
-  item_t dx = 0.0;
+  fp_type_t dx = 0.0;
 
-  for (index_t i = 0; i < n_plane_corners; ++i)
+  for (i_type_t i = 0; i < n_plane_corners; ++i)
     dx += plane1[i].x - plane2[i].x;
 
   return fabs (dx / n_plane_corners);
 }
 
 template<class strategy_t>
-typename mesh_element3d<strategy_t>::item_t
+typename mesh_element3d<strategy_t>::fp_type_t
 mesh_element3d<strategy_t>::get_dy ()
 {
   plane_t plane1, plane2;
@@ -177,16 +177,16 @@ mesh_element3d<strategy_t>::get_dy ()
   get_plane(y_axis_minus, plane1);
   get_plane(y_axis_plus, plane2);
   
-  item_t dy = 0.0;
+  fp_type_t dy = 0.0;
 
-  for (index_t i = 0; i < n_plane_corners; ++i)
+  for (i_type_t i = 0; i < n_plane_corners; ++i)
     dy += plane1[i].y - plane2[i].y;
 
   return fabs (dy / n_plane_corners);
 }
 
 template<class strategy_t>
-typename mesh_element3d<strategy_t>::item_t
+typename mesh_element3d<strategy_t>::fp_type_t
 mesh_element3d<strategy_t>::get_dz ()
 {
   plane_t plane1, plane2;
@@ -194,9 +194,9 @@ mesh_element3d<strategy_t>::get_dz ()
   get_plane(z_axis_minus, plane1);
   get_plane(z_axis_plus, plane2);
 
-  item_t dz = 0.0;
+  fp_type_t dz = 0.0;
 
-  for (index_t i = 0; i < n_plane_corners; ++i)
+  for (i_type_t i = 0; i < n_plane_corners; ++i)
     dz += plane1[i].x - plane2[i].x;
 
   return fabs (dz / n_plane_corners);
@@ -220,7 +220,7 @@ mesh_element3d<strategy_t>::get_dx_dy_dz ()
   element_size[1] = 0;
   element_size[2] = 0;
 
-  for (index_t i = 0; i < n_plane_corners; ++i)
+  for (i_type_t i = 0; i < n_plane_corners; ++i)
     {
       element_size[0] += plane1[i].x - plane2[i].x;
       element_size[1] += plane3[i].y - plane4[i].y;

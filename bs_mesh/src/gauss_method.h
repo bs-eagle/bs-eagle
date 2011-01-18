@@ -9,14 +9,14 @@
 namespace grd_ecl
   {
 
-  template <class item_t>
+  template <class fp_type_t>
   /*!	\brieve SWAP equations i && k
   	\param a[n*n] - matrix of left side
   	\param b[n*nn] - matrix of right side*/
-  void reverse_eqns (item_t *a, item_t *b, const int n,const int nn, const int i,const  int k)
+  void reverse_eqns (fp_type_t *a, fp_type_t *b, const int n,const int nn, const int i,const  int k)
   {
     int j;
-    item_t tmp;
+    fp_type_t tmp;
 
     for (j = 0; j < n; j++) //swap our string i&k
       {
@@ -36,11 +36,11 @@ namespace grd_ecl
   /*! \brief solve linear system
   	\param a - matrix [may be modified in this function] n*n
   	\param b - output matrix [n*nn]*/
-  template <class item_t>
-  int GaussSolve (item_t *a /*matrix*/, item_t *b, const int n, const int nn)
+  template <class fp_type_t>
+  int GaussSolve (fp_type_t *a /*matrix*/, fp_type_t *b, const int n, const int nn)
   {
     int i,j,k,k2,maxi;
-    item_t max;
+    fp_type_t max;
 
     //first step of gauss
     for (k=0; k<n; k++)

@@ -28,6 +28,15 @@ namespace type_helper
     //static const char cpp_type    = 'f';
   };
   template <>
+  struct type_kind <double>
+  {
+    enum {
+      numpy_type = 'd',
+    };
+    //static const char numpy_type  = 'f';
+    //static const char cpp_type    = 'f';
+  };
+  template <>
   struct type_kind <int>
   {
     enum {
@@ -35,6 +44,15 @@ namespace type_helper
     };
     //static const char numpy_type  = 'i';
     //static const char cpp_type    = 'i';
+  };
+  template <>
+  struct type_kind <long>
+  {
+    enum {
+      numpy_type = 'l',
+    };
+    //static const char numpy_type  = 'f';
+    //static const char cpp_type    = 'f';
   };
   template <>
   struct type_kind <unsigned char>

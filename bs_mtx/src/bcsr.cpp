@@ -6,7 +6,7 @@
  */
 #include "strategies.h"
 
-#include "bs_matrix_stdafx.h"
+#include "bs_mtx_stdafx.h"
 #include "bcsr.h"
 
 using namespace std;
@@ -693,7 +693,7 @@ namespace blue_sky
 
   BLUE_SKY_TYPE_STD_CREATE_T_DEF(bcsr, (class));
   BLUE_SKY_TYPE_STD_COPY_T_DEF(bcsr, (class));
-
+  
   BLUE_SKY_TYPE_IMPL_T_EXT(1, (bcsr<base_strategy_did>), 1, (bcsr_amg_matrix_iface <base_strategy_did> ), "bcsr_matrix_did", "Block CSR Matrix class", "Realization of Block CSR Matricies", false);
   BLUE_SKY_TYPE_IMPL_T_EXT(1, (bcsr<base_strategy_fif>), 1, (bcsr_amg_matrix_iface <base_strategy_fif> ), "bcsr_matrix_fif", "Block CSR Matrix class", "Realization of Block CSR Matricies", false);
   BLUE_SKY_TYPE_IMPL_T_EXT(1, (bcsr<base_strategy_dif>), 1, (bcsr_amg_matrix_iface <base_strategy_dif> ), "bcsr_matrix_dif", "Block CSR Matrix class", "Realization of Block CSR Matricies", false);

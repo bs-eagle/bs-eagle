@@ -64,46 +64,50 @@ namespace blue_sky
   \param array  -- pointer to destination array
   \param carray -- pointer to source array
   */
-  template <class index_array_t, class array_t, class src_t>
+  template <class i_type_t, class sp_index_array_t, class array_t, class src_t>
   void
-  convert_permeability (typename index_array_t::value_type cells_count, const index_array_t &index_map, array_t &perm, const src_t &permx, const src_t &permy, const src_t &permz)
+  convert_permeability (i_type_t cells_count, const sp_index_array_t index_map, array_t &perm, const src_t &permx, const src_t &permy, const src_t &permz)
   {
-    typedef typename index_array_t::value_type index_t;
-    for (index_t i = 0; i < cells_count; ++i)
+    i_type_t *index_map_data = &(*index_map)[0];
+    src_t::pointed_t::value_type *permx_data = &(*permx)[0];
+    src_t::pointed_t::value_type *permy_data = &(*permy)[0];
+    src_t::pointed_t::value_type *permz_data = &(*permz)[0];
+    
+    for (i_type_t i = 0; i < cells_count; ++i)
       {
-        index_t ind = index_map [i];
+        i_type_t ind = index_map_data [i];
 
-        if (permx[ind] < 0)
+        if (permx_data[ind] < 0)
           throw bs_exception ("convert_permeability", "the value of absolute permeability tensor element for node number [d] in X direction couldn't be less than 0");
 
-        if (permy[ind] < 0)
+        if (permy_data[ind] < 0)
           throw bs_exception ("convert_permeability", "the value of absolute permeability tensor element for node number [d] in Y direction couldn't be less than 0");
 
-        if (permz[ind] < 0)
+        if (permz_data[ind] < 0)
           throw bs_exception ("convert_permeability", "the value of absolute permeability tensor element for node number [d] in Z direction couldn't be less than 0");
 
-        perm[FI_PLANE_ORI_X_IND (i)] = permx[ind];
-        perm[FI_PLANE_ORI_Y_IND (i)] = permy[ind];
-        perm[FI_PLANE_ORI_Z_IND (i)] = permz[ind];
+        perm[FI_PLANE_ORI_X_IND (i)] = permx_data[ind];
+        perm[FI_PLANE_ORI_Y_IND (i)] = permy_data[ind];
+        perm[FI_PLANE_ORI_Z_IND (i)] = permz_data[ind];
       }
   }
 
   // init data
   template <class strategy_t>
   int
-  rock_grid<strategy_t>::init_data (index_t cells_count, const index_array_t &index_map, const sp_idata &input_data)
+  rock_grid<strategy_t>::init_data (index_t cells_count, const sp_index_array_t index_map, const sp_idata &input_data)
   {
-    if (input_data->get_rock().size())
+    if (input_data->get_rock()->size())
       {
-        comp_const.assign (input_data->get_rock().begin(), input_data->get_rock().end());
+        comp_const.assign (input_data->get_rock()->begin(), input_data->get_rock()->end());
       }
     else
       {
         bs_throw_exception ("Compressibility of rock has not been specified");
       }
-    if (input_data->get_p_ref().size())
+    if (input_data->get_p_ref()->size())
       {
-        comp_ref_pressure.assign (input_data->get_p_ref().begin(), input_data->get_p_ref().end());
+        comp_ref_pressure.assign (input_data->get_p_ref()->begin(), input_data->get_p_ref()->end());
       }
     else
       {
@@ -111,7 +115,7 @@ namespace blue_sky
         bs_throw_exception ("p_ref of rock has not been specified");
       }
 
-    convert_arrays(cells_count, index_map, porosity_p_ref, input_data->get_float_non_empty_array("PORO"));
+    convert_arrays(cells_count, index_map, porosity_p_ref, input_data->get_fp_non_empty_array("PORO"));
 
     // initialize net to gross
     if (!input_data->contain("NTG"))
@@ -120,15 +124,15 @@ namespace blue_sky
       }
     else
       {
-        convert_arrays (cells_count, index_map, net_to_gros, input_data->get_float_non_empty_array("NTG"));
+        convert_arrays (cells_count, index_map, net_to_gros, input_data->get_fp_non_empty_array("NTG"));
       }
 
-    convert_permeability (cells_count, index_map, permeability, input_data->get_float_non_empty_array("PERMX"), 
-                         input_data->get_float_non_empty_array("PERMY"), input_data->get_float_non_empty_array("PERMZ"));
+    convert_permeability (cells_count, index_map, permeability, input_data->get_fp_non_empty_array("PERMX"), 
+                         input_data->get_fp_non_empty_array("PERMY"), input_data->get_fp_non_empty_array("PERMZ"));
 
     if (input_data->contain("MULTPV"))
       {
-        convert_arrays (cells_count, index_map, multpv, input_data->get_float_non_empty_array("MULTPV"));
+        convert_arrays (cells_count, index_map, multpv, input_data->get_fp_non_empty_array("MULTPV"));
       }
 
     return 0;
@@ -147,18 +151,18 @@ namespace blue_sky
   */
   template <class strategy_t>
   int
-  rock_grid<strategy_t>::init_planes_trans (index_t cells_count, const item_array_t &mesh_volumes, const sp_fi_params &/*ts_params*/, physical_constants &/*internal_constants*/)
+  rock_grid<strategy_t>::init_planes_trans (index_t cells_count, const sp_item_array_t mesh_volumes, const sp_fi_params &/*ts_params*/, physical_constants &/*internal_constants*/)
   {
     if (net_to_gros.empty ())
       {
         bs_throw_exception ("net_to_gros is empty");
       }
-    if (mesh_volumes.empty ())
+    if (!mesh_volumes->size ())
       {
         bs_throw_exception ("mesh_volumes is empty");
       }
 
-    volume.assign (mesh_volumes.begin (), mesh_volumes.end ());
+    volume.assign (mesh_volumes->begin (), mesh_volumes->end ());
     if (!multpv.empty ())
       {
         if (multpv.size () == volume.size ())
@@ -181,7 +185,7 @@ namespace blue_sky
 
   BLUE_SKY_TYPE_STD_CREATE_T_DEF(rock_grid,(class))
   BLUE_SKY_TYPE_STD_COPY_T_DEF(rock_grid,(class))
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (rock_grid<base_strategy_fi>), 1, (objbase), "rock_grid_fi", "rock_grid_fi_i class", "rock grid fi i", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (rock_grid<base_strategy_di>), 1, (objbase), "rock_grid_di", "rock_grid_di class", "rock grid di i", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (rock_grid<base_strategy_mixi>), 1, (objbase), "rock_grid_mixi", "rock_grid_di class", "rock grid mixi i", false)
+  BLUE_SKY_TYPE_IMPL_T_EXT(1, (rock_grid<base_strategy_fif>), 1, (objbase), "rock_grid_fi", "rock_grid_fi_i class", "rock grid fi i", false)
+  BLUE_SKY_TYPE_IMPL_T_EXT(1, (rock_grid<base_strategy_did>), 1, (objbase), "rock_grid_di", "rock_grid_di class", "rock grid di i", false)
+  BLUE_SKY_TYPE_IMPL_T_EXT(1, (rock_grid<base_strategy_dif>), 1, (objbase), "rock_grid_mixi", "rock_grid_di class", "rock grid mixi i", false)
 }

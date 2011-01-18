@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <map>
 
-#include "bs_matrix_stdafx.h"
+#include "bs_mtx_stdafx.h"
 #include "bcsr_matrix_tools.h"
 
 #include "strategies.h"

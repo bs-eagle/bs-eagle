@@ -63,6 +63,21 @@ namespace detail {
     return t - 1;
     }
   };
+  
+  template <>
+  struct convert_helper <long>
+  {
+    static inline size_t 
+    read (const char *start, char **end)
+    {
+      return strtol (start, end, 10);
+    }
+    static inline size_t 
+    loop_condition (double t)
+    {
+    return t - 1;
+    }
+  };
 
   template <>
   struct convert_helper <unsigned char>

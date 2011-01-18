@@ -247,7 +247,7 @@ namespace blue_sky
         {
           int l = rows_ptr->size (); 
           if (l)
-            return rows_ptr->data ()[l - 1];
+            return rows_ptr->ss(l - 1);
           else
             return 0;
         }

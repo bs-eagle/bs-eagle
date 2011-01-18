@@ -1,5 +1,8 @@
 #include "bs_mesh_stdafx.h"
+
 #include "py_flux_connections.h"
+#include "bs_flux_connections.h"
+#include "export_python_wrapper.h"
 
 #ifdef BSPY_EXPORTING_PLUGIN
 using namespace boost::python;
@@ -29,13 +32,16 @@ namespace blue_sky
 
     void py_export_flux_connections ()
     {
-      py_export_flux_connections_t <base_strategy_fi> ("flux_connections_fi");
-      py_export_flux_connections_t <base_strategy_di> ("flux_connections_di");
-      //py_export_flux_connections_t <base_strategy_mixi> ("flux_connections_mixi");
+      py_export_flux_connections_t <base_strategy_fif> ("flux_connections_fif");
+      py_export_flux_connections_t <base_strategy_did> ("flux_connections_did");
+      py_export_flux_connections_t <base_strategy_dif> ("flux_connections_dif");
+      
+      strategy_exporter::export_base <flux_connections_iface, flux_conn_exporter> ("flux_conn_iface");
+      strategy_exporter::export_class <bs_flux_connections, flux_connections_iface, flux_conn_exporter> ("flux_conn");
     }
 
-    template class py_flux_connections< base_strategy_fi >;
-    template class py_flux_connections< base_strategy_di >;
+    template class py_flux_connections< base_strategy_fif >;
+    template class py_flux_connections< base_strategy_did >;
   }
 }
 #endif

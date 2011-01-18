@@ -25,11 +25,11 @@ namespace blue_sky
       ///////////////////////
       typedef rs_mesh_iface <strategy_t>                  base_t;
 
-      typedef typename base_t::index_t                    index_t;
-      typedef typename base_t::item_t                     item_t;
+      typedef typename base_t::i_type_t                   i_type_t;
+      typedef typename base_t::fp_type_t                  fp_type_t;
 
-      typedef typename base_t::index_array_t              index_array_t;
-      typedef typename base_t::item_array_t               item_array_t;
+      typedef typename base_t::sp_i_array_t               sp_i_array_t;
+      typedef typename base_t::sp_fp_array_t              sp_fp_array_t;
 
       typedef typename base_t::sp_flux_conn_iface_t       sp_flux_conn_iface_t;
       typedef typename base_t::sp_bcsr_t                  sp_bcsr_t;
@@ -40,7 +40,7 @@ namespace blue_sky
       // OWN TYPES
       //////////////////////
 
-      typedef boost::array <index_t, 3>                   index_point3d_t;
+      typedef boost::array <i_type_t, 3>                   index_point3d_t;
 
     public:
 
@@ -51,23 +51,23 @@ namespace blue_sky
       virtual index_point3d_t get_dimens () = 0;
 
       //! return coords of block vertexes by IJK indexes
-      virtual grd_ecl::fpoint3d_vector calc_element (const index_t i, const index_t j, const index_t k) const = 0;
+      virtual grd_ecl::fpoint3d_vector calc_element (const i_type_t i, const i_type_t j, const i_type_t k) const = 0;
 
       //! return coords of block vertexes by n_block index
-      virtual grd_ecl::fpoint3d_vector calc_element (const index_t index) const = 0;
+      virtual grd_ecl::fpoint3d_vector calc_element (const i_type_t index) const = 0;
       
 
       //! return center point of an element
-      virtual point3d_t get_element_center (const index_t index) const = 0;
+      virtual point3d_t get_element_center (const i_type_t index) const = 0;
 
       //! return center point of an element
-      virtual point3d_t get_element_center (const index_t i, const index_t j, const index_t k) const = 0;
+      virtual point3d_t get_element_center (const i_type_t i, const i_type_t j, const i_type_t k) const = 0;
 
       //! return I, J and K structured mesh coordinates of an element by internal number
-      virtual void get_element_int_to_ijk (const index_t n_element, index_t &i, index_t &j, index_t &k) const = 0;
+      virtual void get_element_int_to_ijk (const i_type_t n_element, i_type_t &i, i_type_t &j, i_type_t &k) const = 0;
 
       //! return internal number of an element by I, J and K structured mesh coordinates
-      virtual index_t get_element_ijk_to_int (const index_t i, const index_t j, const index_t k) const = 0;
+      virtual i_type_t get_element_ijk_to_int (const i_type_t i, const i_type_t j, const i_type_t k) const = 0;
     };
 
 };//namespace blue_sky

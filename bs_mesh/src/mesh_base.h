@@ -23,15 +23,21 @@ using namespace blue_sky;
       ///////////////////////
       // OWN TYPES
       ///////////////////////
-      typedef typename strategy_t::index_t                index_t;
+      typedef typename strategy_t::i_type_t               i_type_t;
+      typedef typename strategy_t::fp_type_t              fp_type_t;
+      typedef typename strategy_t::fp_storage_type_t      fp_storage_type_t;
 
-      typedef typename strategy_t::index_array_t          index_array_t;
-      typedef typename strategy_t::item_array_t           item_array_t;
-
-      typedef idata                                       idata_t;
+      typedef std::vector<i_type_t>                       index_array_t;
+      typedef std::vector<fp_type_t>                      item_array_t;
+      
+      typedef smart_ptr<bs_array<fp_type_t>, true>          sp_fp_array_t;
+      typedef smart_ptr<bs_array<i_type_t>, true>           sp_i_array_t;
+      typedef smart_ptr<bs_array<fp_storage_type_t>, true>  sp_fp_storage_array_t;
+      
+      typedef idata<strategy_t>                           idata_t;
       typedef smart_ptr <idata_t, true>                   sp_idata_t;
       
-      typedef typename strategy_t::csr_matrix_t           csr_matrix_t;
+      typedef bcsr_matrix_iface<strategy_t>               csr_matrix_t;
       typedef smart_ptr <csr_matrix_t, true>              sp_bcsr_t;
 
     //-----------------------------------------
@@ -67,53 +73,51 @@ using namespace blue_sky;
       ///////////////////////
       
       //! return number of active mesh elements
-      index_t 
+      i_type_t 
       get_n_active_elements ()const
       {
         return n_active_elements;
       }
       
       //! return number of mesh elements
-      index_t 
+      i_type_t 
       get_n_elements ()const
       {
         return n_elements;
       }
       
       //! get const ext_to_int
-      index_t convert_ext_to_int (const index_t n_element) const
+      i_type_t convert_ext_to_int (const i_type_t n_element) const
       {
-        return ext_to_int[n_element];
+        return (*ext_to_int)[n_element];
       }
       
       //! get const int_to_ext
-      index_t get_element_int_to_ext (const index_t n_element) const
+      i_type_t get_element_int_to_ext (const i_type_t n_element) const
       {
-        return int_to_ext[n_element];
+        return (*int_to_ext)[n_element];
       }
 
       //! get const int_to_ext
-      const index_array_t &
-      get_int_to_ext() const
+      const sp_i_array_t get_int_to_ext() const
       {
         return int_to_ext;
       }
       
       //! get const ext_to_int
-      const index_array_t &
-      get_ext_to_int() const
+      const sp_i_array_t get_ext_to_int() const
       {
         return ext_to_int;
       }
       
       //! get mesh elements volumes
-      const item_array_t &get_volumes () const
+      const sp_fp_array_t get_volumes () const
       {
         return volumes;
       }
 
       //! get connection_number
-      index_t 
+      i_type_t 
       get_n_connections() const
       {
         return n_connections;
@@ -124,7 +128,7 @@ using namespace blue_sky;
       ///////////////////////
 
       //!  find neighbors and put it in neighbour matrix (adjacency matrix)
-      virtual int find_neighbours(sp_bcsr_t &/*neig_matrix*/) = 0;
+      virtual int find_neighbours(sp_bcsr_t /*neig_matrix*/) = 0;
 
     //-----------------------------------------
     //  VARIABLES
@@ -132,15 +136,15 @@ using namespace blue_sky;
 
     protected:
 
-      index_t n_elements;	      //!< number of elements
-      index_t n_active_elements;	//!< number of active elements
-      index_t n_connections; //!< connection number
+      i_type_t n_elements;	      //!< number of elements
+      i_type_t n_active_elements;	//!< number of active elements
+      i_type_t n_connections; //!< connection number
       
       //! indexations arrays
-      index_array_t ext_to_int;
-      index_array_t int_to_ext;
+      sp_i_array_t ext_to_int;
+      sp_i_array_t int_to_ext;
       
-      item_array_t volumes; //!< elements volumes
+      sp_fp_array_t volumes; //!< elements volumes
     };
 
 #endif //

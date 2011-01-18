@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <map>
 
-#include "bs_matrix_stdafx.h"
+#include "bs_mtx_stdafx.h"
 #include "dens_matrix_tools.h"
 
 using namespace std;

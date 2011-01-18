@@ -26,7 +26,8 @@ namespace blue_sky
   	\class idata_traits
   	\brief for node insertion control
   */
-  struct idata::idata_traits : public bs_node::sort_traits
+  template <class strategy_t>
+  struct idata<strategy_t>::idata_traits : public bs_node::sort_traits
     {
       struct idata_key : bs_node::sort_traits::key_type
         {
@@ -54,12 +55,14 @@ namespace blue_sky
         }
     };
 
-  idata::~idata ()
+  template <class strategy_t>
+  idata<strategy_t>::~idata ()
   {
 
   }
 
-  idata::idata(bs_type_ctor_param param)
+  template <class strategy_t>
+  idata<strategy_t>::idata(bs_type_ctor_param param)
   : bs_node(bs_node::create_node (new this_t::idata_traits ())),
   rpo_model (0), // RPO_DEFAULT_MODEL
   minimal_pore_volume (DEFAULT_MINIMAL_PORE_VOLUME),
@@ -73,47 +76,53 @@ namespace blue_sky
   fi_phases (0),
   rock_region (1),
   i_map (BS_KERNEL.create_object (amap_i::bs_type())),
-  d_map (BS_KERNEL.create_object (amap_d::bs_type())),
+  fp_map (BS_KERNEL.create_object (amap_fp::bs_type())),
   init_section (0)
   {
     init();
   }
 
-  idata::idata(const this_t &src)
+  template <class strategy_t>
+  idata<strategy_t>::idata(const this_t &src)
       : bs_refcounter (src), bs_node(src), 
       i_map(give_kernel::Instance().create_object_copy(src.i_map)),
-      d_map(give_kernel::Instance().create_object_copy(src.d_map))
+      fp_map(give_kernel::Instance().create_object_copy(src.fp_map))
       //scal3(give_kernel::Instance().create_object_copy(src.scal3)),
   {
     *this = src;
   }
 
-  void idata::init()
+  template <class strategy_t>
+  void idata<strategy_t>::init()
   {
     //depth.resize((nx+1) * (ny+1) * (nz+1));
 		ahelper.init_names_maps ();
   }
 
-  idata &idata::operator=(const this_t &src)
+  template <class strategy_t>
+  idata<strategy_t> &idata<strategy_t>::operator=(const this_t &src)
   {
     i_map = src.i_map;
-    d_map = src.d_map;
+    fp_map = src.fp_map;
 		ahelper = src.ahelper;
     return *this;
   }
 
 
-  idata::vval_vs_depth &idata::get_prvd()
+  template <class strategy_t>
+  typename idata<strategy_t>::vval_vs_depth &idata<strategy_t>::get_prvd()
   {
     return prvd;
   }
 
-  idata::vval_vs_depth &idata::get_rsvd()
+  template <class strategy_t>
+  typename idata<strategy_t>::vval_vs_depth &idata<strategy_t>::get_rsvd()
   {
     return rsvd;
   }
 
-  idata::vval_vs_depth &idata::get_pbvd()
+  template <class strategy_t>
+  typename idata<strategy_t>::vval_vs_depth &idata<strategy_t>::get_pbvd()
   {
     return pbvd;
   }
@@ -133,18 +142,20 @@ namespace blue_sky
   	\return if success  0
   */
 
-  void idata::set_defaults_in_pool()
+  template <class strategy_t>
+  void idata<strategy_t>::set_defaults_in_pool()
   {
-    //d_map->create_item (MULTX,  &d_pool_sizes[ARRAY_POOL_TOTAL * MULTX],  d_pool_default_values[MULTX]);
-    //d_map->create_item (MULTY,  &d_pool_sizes[ARRAY_POOL_TOTAL * MULTY],  d_pool_default_values[MULTY]);
-    //d_map->create_item (MULTZ,  &d_pool_sizes[ARRAY_POOL_TOTAL * MULTZ],  d_pool_default_values[MULTZ]);
-    //d_map->create_item (NTG,    &d_pool_sizes[ARRAY_POOL_TOTAL * NTG],    d_pool_default_values[NTG]);
-    //d_map->create_item (MULTPV, &d_pool_sizes[ARRAY_POOL_TOTAL * MULTPV], d_pool_default_values[MULTPV]);
-    i_map->create_item (ACTNUM, &i_pool_sizes[ARRAY_POOL_TOTAL * ACTNUM], i_pool_default_values[ACTNUM]);
+    //fp_map->create_item (MULTX,  &d_pool_sizes[ARRAY_POOL_TOTAL * MULTX],  d_pool_default_values[MULTX]);
+    //fp_map->create_item (MULTY,  &d_pool_sizes[ARRAY_POOL_TOTAL * MULTY],  d_pool_default_values[MULTY]);
+    //fp_map->create_item (MULTZ,  &d_pool_sizes[ARRAY_POOL_TOTAL * MULTZ],  d_pool_default_values[MULTZ]);
+    //fp_map->create_item (NTG,    &d_pool_sizes[ARRAY_POOL_TOTAL * NTG],    d_pool_default_values[NTG]);
+    //fp_map->create_item (MULTPV, &d_pool_sizes[ARRAY_POOL_TOTAL * MULTPV], d_pool_default_values[MULTPV]);
+    //i_map->create_item ("ACTNUM", &i_pool_sizes[ARRAY_POOL_TOTAL * ACTNUM], i_pool_default_values[ACTNUM]);
   }
 
 
-  void idata::set_region (int r_pvt,int r_sat, int r_eql, int r_fip)
+  template <class strategy_t>
+  void idata<strategy_t>::set_region (int r_pvt,int r_sat, int r_eql, int r_fip)
   {
     this->pvt_region = r_pvt;
     this->fip_region = r_fip;
@@ -156,11 +167,15 @@ namespace blue_sky
       {
         bs_throw_exception ("One of init parameters <= 0");
       }
+    
+    i_type_t def_val = -1;
+    
+    this->rock->resize(r_pvt);
+    this->rock->resize(r_pvt);
+    this->rock->assign (def_val);
+    this->p_ref->assign (def_val);
 
-    assign (this->rock, r_pvt, -1);
-    assign (this->p_ref, r_pvt, -1);
-
-    this->equil.resize(EQUIL_TOTAL * eql_region); //!TODO: EQUIL_TOTAL instead of 3
+    this->equil->resize(EQUIL_TOTAL * eql_region); //!TODO: EQUIL_TOTAL instead of 3
 
     this->pvto.resize(r_pvt);
     this->pvtdo.resize(r_pvt);
@@ -168,17 +183,19 @@ namespace blue_sky
     this->pvtw.resize(r_pvt);
   }
 
-  void idata::set_density (const shared_vector <double> &density)
+  template <class strategy_t>
+  void idata<strategy_t>::set_density (sp_arr_fp density)
   {
-    if ((density.size() % 3 != 0) || (density.size()<3))
+    if ((density->size() % 3 != 0) || (density->size()<3))
       {
         bs_throw_exception ("Not enough valid arguments yet");
       }
 
-    set_density_internal(&density[0]);
+    set_density_internal(&(*density)[0]);
   }
 
-  void idata::set_density_internal (const double *density)
+  template <class strategy_t>
+  void idata<strategy_t>::set_density_internal (const fp_type_t *density)
   {
     std::ostringstream out_s;
 
@@ -191,10 +208,10 @@ namespace blue_sky
     if (!pvtg.size())
       throw bs_exception("idata.set_density()","PVT table for gas has not been initialized yet");
 
-    if (!rock.size())
+    if (!rock->size())
       throw bs_exception("idata.set_density()","Rock properties table has not been initialized yet");
 
-    if (!equil.size())
+    if (!equil->size())
       throw bs_exception("idata.set_density()","EQUIL table has not been initialized yet");
 
     for (size_t i = 0; i < pvt_region; ++i)
@@ -226,137 +243,128 @@ namespace blue_sky
 			ARRAYS_HELPER methods
 	*/
 
-	idata::arrays_helper::arrays_helper () {
-		dummy_array_i = new uint8_t [1];
-		dummy_array_d = new float16_t [1];
+	template <class strategy_t>
+  idata<strategy_t>::arrays_helper::arrays_helper () {
+		dummy_array_i = new i_type_t [1];
+		dummy_array_fp = new fp_type_t [1];
 	}
 
-	idata::arrays_helper::~arrays_helper () {
+	template <class strategy_t>
+  idata<strategy_t>::arrays_helper::~arrays_helper () {
 		delete [] dummy_array_i;
-		delete [] dummy_array_d;
+		delete [] dummy_array_fp;
 	}
 
-	void idata::arrays_helper::init_names_maps () {
+	template <class strategy_t>
+  void idata<strategy_t>::arrays_helper::init_names_maps () {
 		for (int i = MPFANUM; i < ARR_TOTAL_INT; ++i)
 			add_correspondence_i(int_names_table[i], i);
 
 		for (int i = SGL; i < ARR_TOTAL_DOUBLE; ++i)
-		add_correspondence_d(double_names_table[i], i);
+		add_correspondence_fp(double_names_table[i], i);
 	}
-
-	void idata::arrays_helper::add_correspondence_i (const std::string &name, int index) {
+	
+  template <class strategy_t>
+	void idata<strategy_t>::arrays_helper::add_correspondence_i (const std::string &name, int index) {
 		names_map_i[name] = index;
 	}
-	void idata::arrays_helper::add_correspondence_d (const std::string &name, int index) {
-		names_map_d[name] = index;
+	
+	template <class strategy_t>
+	void idata<strategy_t>::arrays_helper::add_correspondence_fp (const std::string &name, int index) {
+		names_map_fp[name] = index;
 	}
 
-	int idata::arrays_helper::get_idx_i (const std::string &name) const {
+	template <class strategy_t>
+	int idata<strategy_t>::arrays_helper::get_idx_i (const std::string &name) const {
 		names_map_t::const_iterator iter = names_map_i.find (name);
 		if (iter != names_map_i.end ())
 			return iter->second;
 		return -1;
 	}
-	int idata::arrays_helper::get_idx_d (const std::string &name) const {
-		names_map_t::const_iterator iter = names_map_d.find (name);
-		if (iter != names_map_d.end ())
+	template <class strategy_t>
+	int idata<strategy_t>::arrays_helper::get_idx_fp (const std::string &name) const {
+		names_map_t::const_iterator iter = names_map_fp.find (name);
+		if (iter != names_map_fp.end ())
 			return iter->second;
 		return -1;
 	}
 
-  array_uint8_t
-  idata::get_int_non_empty_array (int array_index)
+  template <class strategy_t>
+  typename idata<strategy_t>::sp_arr_i idata<strategy_t>::get_int_array (const std::string & array_name)
   {
-    return tools::get_non_empty ((*i_map)[array_index].array);
-  }
-  array_float16_t
-  idata::get_float_non_empty_array (int array_index)
-  {
-    return tools::get_non_empty ((*d_map)[array_index].array);
-  }
-  
-  array_uint8_t
-  idata::get_int_array (const std::string & array_name)
-  {
-    int array_index = ahelper.get_idx_i(array_name);
-    array_uint8_t dummy;
-    if (array_index < 0)
+    sp_arr_i dummy;
+    if (!fp_map->contain (array_name))
       {
         return dummy;
       }
     else
       {
-        return (*i_map)[array_index].array;
+        return (*i_map)[array_name].array;
       }
   }
-  array_float16_t
-  idata::get_float_array (const std::string &array_name)
+  template <class strategy_t>
+  typename idata<strategy_t>::sp_arr_fp idata<strategy_t>::get_fp_array (const std::string &array_name)
   {
-    int array_index = ahelper.get_idx_d(array_name);
-    array_float16_t dummy;
-    if (array_index < 0)
+    sp_arr_fp dummy;
+    if (!fp_map->contain (array_name))
       {
         return dummy;
       }
     else
       {
-        return (*d_map)[array_index].array;
+        return (*fp_map)[array_name].array;
       }
   }
   
-  array_uint8_t &
-  idata::get_int_non_empty_array (const std::string &array_name)
+  template <class strategy_t>
+  typename idata<strategy_t>::sp_arr_i idata<strategy_t>::get_int_non_empty_array (const std::string &array_name)
   {
-    int array_index = ahelper.get_idx_i(array_name);
-    if (array_index < 0)
+    if (!i_map->contain (array_name))
       {
         bs_throw_exception (boost::format ("Integer array %s is not initialized yet!") % array_name);
       }
     else
       {
-        return (*i_map)[array_index].array;
+        return (*i_map)[array_name].array;
       }
   }
   
-  array_float16_t
-  idata::get_float_non_empty_array (const std::string &array_name)
+  template <class strategy_t>
+  typename idata<strategy_t>::sp_arr_fp idata<strategy_t>::get_fp_non_empty_array (const std::string &array_name)
   {
-    int array_index = ahelper.get_idx_d(array_name);
-    if (array_index < 0)
+    if (!fp_map->contain (array_name))
       {
-        bs_throw_exception (boost::format ("Float array %s is not initialized yet!") % array_name);
+        bs_throw_exception (boost::format ("fp array %s is not initialized yet!") % array_name);
       }
     else
       {
-        return (*d_map)[array_index].array;
+        return (*fp_map)[array_name].array;
       }
   }
   
-  bool
-  idata::contain (const std::string &array_name) const
+  template <class strategy_t>
+  bool idata<strategy_t>::contain (const std::string &array_name) const
   {
     int array_index = ahelper.get_idx_i(array_name);
     if (array_index >= 0) return true;
     
-    array_index = ahelper.get_idx_d(array_name);
+    array_index = ahelper.get_idx_fp(array_name);
     if (array_index >= 0) return true;
     
     return false;    
   }
 
   // create object
-  BLUE_SKY_TYPE_STD_CREATE (idata);
-  BLUE_SKY_TYPE_STD_COPY (idata);
+  BLUE_SKY_TYPE_STD_CREATE_T_DEF(idata, (class))
+  BLUE_SKY_TYPE_STD_COPY_T_DEF(idata, (class))
 
-  BLUE_SKY_TYPE_IMPL (idata, bs_node, "idata", "Initial data storage", "Initial data storage");
+  BLUE_SKY_TYPE_IMPL_T_SHORT(idata<base_strategy_did>, bs_node, "BOS_Core Initial data storage")
+  BLUE_SKY_TYPE_IMPL_T_SHORT(idata<base_strategy_fif>, bs_node, "BOS_Core Initial data storage")
+  BLUE_SKY_TYPE_IMPL_T_SHORT(idata<base_strategy_dif>, bs_node, "BOS_Core Initial data storage")
+  
+  BLUE_SKY_TYPE_IMPL_T_SHORT(idata<base_strategy_dld>, bs_node, "BOS_Core Initial data storage")
+  BLUE_SKY_TYPE_IMPL_T_SHORT(idata<base_strategy_dlf>, bs_node, "BOS_Core Initial data storage")
+  BLUE_SKY_TYPE_IMPL_T_SHORT(idata<base_strategy_flf>, bs_node, "BOS_Core Initial data storage")
 
-  /*
-  	\brief register plugin
-   */
-  bool register_idata (const plugin_descriptor& pd)
-  {
-    bool res;
-    res = BLUE_SKY_REGISTER_TYPE (pd, idata); 
-    return res;
-  }
+
 }

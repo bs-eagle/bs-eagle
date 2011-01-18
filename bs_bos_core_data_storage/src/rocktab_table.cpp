@@ -34,7 +34,7 @@ namespace blue_sky
    * @return number of rows
    */
   template <class strategy_t>
-  typename strategy_t::index_t
+  typename strategy_t::i_type_t
   bs_table <strategy_t> ::get_num_rows ()
   {
     return n_rows;
@@ -46,7 +46,7 @@ namespace blue_sky
    * @return number of columns
    */
   template <class strategy_t>
-  typename strategy_t::index_t
+  typename strategy_t::i_type_t
   bs_table<strategy_t>::get_num_cols ()
   {
     return (int)columns.size ();
@@ -131,7 +131,7 @@ namespace blue_sky
    * @return column data
    */
   template <class strategy_t>
-  std::vector<typename strategy_t::item_t> &
+  std::vector<typename strategy_t::fp_type_t> &
   bs_table <strategy_t>::get_column (const index_t col_num)
   {
     return columns[col_num].data;
@@ -173,12 +173,12 @@ namespace blue_sky
   {
   }
 
-  template class bs_table <base_strategy_di>;
-  template class bs_table <base_strategy_fi>;
-  template class bs_table <base_strategy_mixi>;
+  template class bs_table <base_strategy_did>;
+  template class bs_table <base_strategy_fif>;
+  template class bs_table <base_strategy_dif>;
 
-  template class rocktab_table <base_strategy_di>;
-  template class rocktab_table <base_strategy_fi>;
-  template class rocktab_table <base_strategy_mixi>;
+  template class rocktab_table <base_strategy_did>;
+  template class rocktab_table <base_strategy_fif>;
+  template class rocktab_table <base_strategy_dif>;
 
 } // namespace blue_sky

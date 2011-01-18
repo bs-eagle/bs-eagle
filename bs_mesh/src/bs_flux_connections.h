@@ -21,7 +21,8 @@ namespace blue_sky
     public:
       typedef flux_connections_iface <strategy_t> base_t;
       
-      typedef typename base_t::index_array_t      index_array_t;
+      
+      typedef typename base_t::sp_i_array_t       sp_i_array_t;
       typedef typename base_t::sp_bcsr_t          sp_bcsr_t;
 
       //-------------------------------------------
@@ -39,13 +40,11 @@ namespace blue_sky
         { return wrapped.get_conn_trans();};
       
       //! get matrix pointers in positive direction 
-      index_array_t & 
-      get_matrix_block_idx_plus ()
+      sp_i_array_t get_matrix_block_idx_plus ()
         { return wrapped.get_matrix_block_idx_plus();};
       
       //! get matrix pointers in negative direction 
-      index_array_t &
-      get_matrix_block_idx_minus ()
+      sp_i_array_t get_matrix_block_idx_minus ()
         { return wrapped.get_matrix_block_idx_minus();};
 
     ////////////////////
