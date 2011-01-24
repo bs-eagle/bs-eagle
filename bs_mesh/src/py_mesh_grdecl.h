@@ -16,7 +16,8 @@ namespace python {
     .def ("get_element_size", &T::get_element_size, args ("n_elem, dx, dy, dz"), "get elements sizes")
     .def ("get_element_ijk_to_int", &T::get_element_ijk_to_int, args ("i, j, k"), "get elements sizes")
     .def ("get_n_active_elements", &T::get_n_active_elements, args (""), "Get elements sizes")
-    .def ("calc_element_tops", &T::calc_element_tops, args (""), "Calc element tops");
+    .def ("calc_element_tops", &T::calc_element_tops, args (""), "Calc element tops")
+	.def ("calc_element_center", &T::calc_element_center, args (""), "Calc element center");
   PY_EXPORTER_END;
 
   void 

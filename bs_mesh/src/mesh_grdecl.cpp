@@ -900,7 +900,8 @@ boost::python::list mesh_grdecl<strategy_t>::calc_element_tops ()
 	  for (j = 0; j < ny; ++j)
 		  for (k = 0; k < nz; ++k, ++ind)
 		    {
-			  
+			
+				/*
 			  // check blocks adjacency
           zindex = i * 2 + j * 4 * nx + k * 8 *nx * ny;
           zindex1 = zindex + 2; // check next by x
@@ -922,7 +923,7 @@ boost::python::list mesh_grdecl<strategy_t>::calc_element_tops ()
                     n_adjacent++;
                   }
             }
-	
+	*/
 		      calc_element (i, j, k, element);
 			  prop_data[ind] = poro_array[ind];
 			  for (c = 0; c < 8; ++c)
@@ -979,6 +980,42 @@ boost::python::list mesh_grdecl<strategy_t>::calc_element_tops ()
 
   myavi_list.append(tops);
   myavi_list.append(indexes);
+  myavi_list.append(prop);
+
+  return myavi_list;
+}
+
+template<class strategy_t>
+boost::python::list mesh_grdecl<strategy_t>::calc_element_center ()
+{
+  element_t element;
+  sp_fp_array_t centers, prop;
+  i_type_t i, j, k, c, ind, *indexes_data;
+  fp_type_t *centers_data, *prop_data;
+  boost::python::list myavi_list;
+
+  centers = give_kernel::Instance().create_object(bs_array<fp_type_t>::bs_type());
+  prop = give_kernel::Instance().create_object(bs_array<fp_type_t>::bs_type());
+
+  centers->resize (n_elements * 3);
+  prop->resize (n_elements);
+
+  centers_data = &(*centers)[0];
+  prop_data = &(*prop)[0];
+
+  ind = 0;
+   
+  for (i = 0; i < nx; ++i)
+	  for (j = 0; j < ny; ++j)
+		  for (k = 0; k < nz; ++k, ++ind)
+		    {
+		      calc_element (i, j, k, element);
+			  centers_data[3 * ind] = element.get_center().x;
+			  centers_data[3 * ind + 1] = element.get_center().y;
+			  centers_data[3 * ind + 2] = element.get_center().z;
+			}
+
+  myavi_list.append(centers);
   myavi_list.append(prop);
 
   return myavi_list;

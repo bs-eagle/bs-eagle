@@ -168,6 +168,8 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base<strategy_t>
 
 	boost::python::list calc_element_tops ();
 
+	boost::python::list calc_element_center ();
+
     /*!	\brief  find neighbours (adjacency matrix)
     	\param neig_matrix - bcsr adjacency matrix
     	\return 0 if success */

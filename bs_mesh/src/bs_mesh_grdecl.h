@@ -189,6 +189,11 @@ namespace blue_sky
 
       boost::python::list calc_element_tops ()
       {return wrapped.calc_element_tops();};
+
+	
+	  boost::python::list calc_element_center ()
+      {return wrapped.calc_element_center();};
+
     
     ////////////////////
     // wrapped class
