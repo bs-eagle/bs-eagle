@@ -13,10 +13,10 @@ env.Append (CPPPATH = ["include",
     includes["bs_bos_core_data_storage"],
 #    includes["bs_mesh_mpfa"],
     includes["bs_scal"],
-    includes["bs_pvt"]
-    ] + includes["kernel"]
-    + includes["bs_mesh"]
-    )
+    includes["bs_pvt"],
+	includes["kernel"],
+	includes["bs_mesh"]
+    ])
 
 libs = ["blue_sky", 
      "bs_bos_core_base", 
@@ -30,8 +30,8 @@ libs = ["blue_sky",
 
 boost_libs = ["boost_date_time-mt"]
 
-if (env["cfl"] == "1") :
-    env.AppendUnique (CPPDEFINES = ["BS_BOS_CORE_USE_CSR_ILU_CFL_PREC"])
+if ("cfl" in env and env["cfl"] == "1") :
+	env.AppendUnique (CPPDEFINES = ["BS_BOS_CORE_USE_CSR_ILU_CFL_PREC"])
 
 #if (env["hdf5"] == "1") :
 #    env.AppendUnique (CPPDEFINES = defines["bs_hdf5_storage"], CPPPATH = includes["bs_hdf5_storage"])

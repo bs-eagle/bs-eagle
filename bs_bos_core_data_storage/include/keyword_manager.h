@@ -136,10 +136,10 @@ namespace blue_sky
       void register_i_pool_keyword(const std::string &keyword, int *dimens, i_type_t def_value, handler_t external_handler = 0);
       
       //! registration of active floating point pool keyword in factory
-      void register_fp_pool_keyword(const std::string &keyword, int *dimens, fp_storage_type_t def_value, handler_t external_handler = 0);
+      void register_fp_pool_keyword(const std::string &keyword, int *dimens, fp_type_t def_value, handler_t external_handler = 0);
       
       //! python registration of active floating point pool keyword in factory
-      void py_register_fp_pool_keyword (const std::string keyword, boost::python::list dimens, fp_storage_type_t def_value);
+      void py_register_fp_pool_keyword (const std::string keyword, boost::python::list dimens, fp_type_t def_value);
 
       /**
        * \brief  Registers supported keyword by plugins in factory

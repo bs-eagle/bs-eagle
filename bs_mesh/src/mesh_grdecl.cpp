@@ -121,7 +121,7 @@ mesh_grdecl<strategy_t>::calc_corner_point(const fp_storage_type_t z, const fp_s
 
 template<class strategy_t>
 inline void
-typename mesh_grdecl<strategy_t>::get_element_zcorn_index (i_type_t i, i_type_t j, i_type_t k, element_zcorn_i_type_t& element)  const
+mesh_grdecl<strategy_t>::get_element_zcorn_index (const i_type_t i, const i_type_t j, const i_type_t k, element_zcorn_i_type_t& element)  const
 {
   //typename mesh_grdecl<strategy_t>::element_zcorn_i_type_t element;
   
@@ -142,7 +142,7 @@ typename mesh_grdecl<strategy_t>::get_element_zcorn_index (i_type_t i, i_type_t 
 //! get element corners index in zcorn_array of block[i,j,k]
 template<class strategy_t>
 typename mesh_grdecl<strategy_t>::plane_zcorn_i_type_t
-typename mesh_grdecl<strategy_t>::get_plane_zcorn_index (element_zcorn_i_type_t &element, 
+mesh_grdecl<strategy_t>::get_plane_zcorn_index (element_zcorn_i_type_t &element, 
                                                          element_plane_orientation_t orientation)  const
 {
   typename mesh_grdecl<strategy_t>::plane_zcorn_i_type_t plane;
@@ -837,7 +837,7 @@ int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_
 template<class strategy_t>
 void mesh_grdecl<strategy_t>::get_block_dx_dy_dz (i_type_t n_elem, fp_type_t &dx, fp_type_t &dy, fp_type_t &dz) const
   {
-    element_t &elem = calc_element(n_elem);
+    element_t elem = calc_element(n_elem);
     point3d_t sizes = elem.get_dx_dy_dz (); 
     dx = sizes[0];
     dy = sizes[1];

@@ -26,6 +26,7 @@ class  mesh_ijk : public rs_smesh_base<strategy_t>
     typedef typename base_t::i_type_t                   i_type_t;
     typedef typename base_t::fp_type_t                  fp_type_t;
     typedef typename base_t::fp_storage_type_t          fp_storage_type_t;
+    typedef typename base_t::sp_fp_storage_array_t      sp_fp_storage_array_t;
 
     typedef typename base_t::index_array_t              index_array_t;
     typedef typename base_t::item_array_t               item_array_t;
@@ -42,7 +43,7 @@ class  mesh_ijk : public rs_smesh_base<strategy_t>
     ///////////////////////
     typedef grd_ecl::fpoint3d                           fpoint3d;
     typedef std::vector<grd_ecl::fpoint2d>              g_fpoint2d_vector;
-    typedef typename strategy_t::fp_storage_type_t      fp_storage_type_t;
+    //typedef typename strategy_t::fp_storage_type_t      fp_storage_type_t;
     typedef boost::array <fp_type_t, 3>                    center_t;
 
 //-------------------------------------------

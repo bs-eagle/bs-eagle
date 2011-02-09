@@ -7,8 +7,8 @@ tar_name = "bs_mtx"
 env = custom_env.Clone ()
 env.Append (CPPPATH = ["include","src", includes["bs_bos_core_base"]] + includes["kernel"])
 
-if (env["cfl"] == "1") :
-    env.AppendUnique (CPPDEFINES = ["BS_BOS_CORE_USE_CSR_ILU_CFL_PREC"])
+if ("cfl" in env and env["cfl"] == "1") :
+	env.AppendUnique (CPPDEFINES = ["BS_BOS_CORE_USE_CSR_ILU_CFL_PREC"])
 
 if (build_kind == "debug") :
     env.AppendUnique (LIBS = ["blue_sky_d", "bs_bos_core_base_d"])

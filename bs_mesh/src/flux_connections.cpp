@@ -1,4 +1,4 @@
-ope/*! \file flux_connections.cpp
+/*! \file flux_connections.cpp
 	\brief This file implement interface class which transfers mesh data to the reservoir simulation process
 	\author Iskhakov Ruslan
 	\date 2008-05-20 */

@@ -118,7 +118,7 @@ namespace blue_sky
   //! registration of active integer pool keyword in factory
   template <class strategy_t>
   void 
-  keyword_manager <strategy_t>::register_i_pool_keyword(const std::string &keyword, int *dimens, i_type_t def_value, handler_t external_handler = 0)
+  keyword_manager <strategy_t>::register_i_pool_keyword(const std::string &keyword, int *dimens, i_type_t def_value, handler_t external_handler)
   {
     typename handlers_t::iterator it = handlers.find(keyword);
     if (it != handlers.end())
@@ -134,7 +134,7 @@ namespace blue_sky
   
   //! registration of active floating point pool keyword in factory
   template <class strategy_t>
-  void  keyword_manager<strategy_t>::register_fp_pool_keyword(const std::string &keyword, int *dimens, fp_storage_type_t def_value, handler_t external_handler = 0)
+  void  keyword_manager<strategy_t>::register_fp_pool_keyword(const std::string &keyword, int *dimens, fp_type_t def_value, handler_t external_handler)
   {
     typename handlers_t::iterator it = handlers.find(keyword);
     if (it != handlers.end())
@@ -149,7 +149,7 @@ namespace blue_sky
   }
   
   template <class strategy_t>
-  void  keyword_manager<strategy_t>::py_register_fp_pool_keyword (const std::string keyword, boost::python::list dimens, fp_storage_type_t def_value)
+  void  keyword_manager<strategy_t>::py_register_fp_pool_keyword (const std::string keyword, boost::python::list dimens, fp_type_t def_value)
     {
       int new_dimens[ARRAY_POOL_TOTAL];
       for (int i = 0; i < ARRAY_POOL_TOTAL; i++) 
@@ -163,7 +163,7 @@ namespace blue_sky
   boost::python::list 
   keyword_manager<strategy_t>::py_list_active_keywords()
   {
-    handlers_t::iterator it;
+    typename handlers_t::iterator it;
     boost::python::list items;
     for (it = handlers.begin(); it != handlers.end(); it++)
       items.append(it->first);

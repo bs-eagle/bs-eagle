@@ -20,8 +20,8 @@ namespace blue_sky
       public:
         typedef mesh_ijk_keywords<strategy_t>          this_t;
         typedef smesh_keywords<strategy_t>             base_t;
-        typedef typename base_t::i_type_t               i_type_t;        
-        typedef typename base_t::fp_type_t                fp_type_t;
+        typedef typename base_t::i_type_t              i_type_t;
+        typedef typename base_t::fp_type_t             fp_type_t;
         typedef typename base_t::sp_objbase            sp_objbase;
         typedef typename base_t::keyword_handler       keyword_handler;
         typedef typename base_t::handler_t             handler_t;
@@ -29,12 +29,13 @@ namespace blue_sky
         typedef typename base_t::sp_idata_t            sp_idata_t;
         typedef typename base_t::sp_km_iface_t         sp_km_iface_t;
         typedef typename base_t::keyword_params_t      keyword_params_t;
+        typedef typename base_t::fp_storage_type_t     fp_storage_type_t;
         
         typedef bs_mesh_ijk <strategy_t>               bs_mesh_ijk_t;
-        typedef smart_ptr <bs_mesh_ijk_t, true>				 sp_bs_mesh_ijk_t;
+        typedef smart_ptr <bs_mesh_ijk_t, true>        sp_bs_mesh_ijk_t;
         
         typedef rs_mesh_iface <strategy_t>             rs_mesh_iface_t;
-        typedef smart_ptr <rs_mesh_iface_t, true>			 sp_mesh_iface_t;
+        typedef smart_ptr <rs_mesh_iface_t, true>      sp_mesh_iface_t;
       
       public:
         //! blue-sky class declaration
