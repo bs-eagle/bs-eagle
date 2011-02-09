@@ -1515,7 +1515,8 @@ struct build_jacobian_and_flux : boost::noncopyable
                     
                     loop_body.prepare (i, j, k);
                     
-                    if (i + 1 < nx) 
+                    // if X neighbour exists and current element`s X+ plane is not a line
+					if (i + 1 < nx && ((zcorn[zcorn_index1[1]] != zcorn[zcorn_index1[5]]) || (zcorn[zcorn_index1[3]] != zcorn[zcorn_index1[7]])))
                       {
                         k_x = last_k_x - 1;
                         
@@ -1538,7 +1539,8 @@ struct build_jacobian_and_flux : boost::noncopyable
                               
                             ext_index2 = ext_index1 + 1 + (k_x - k) * nx * ny;
                             
-                            if (mesh->actnum_array[ext_index2])
+                            // if neighbour active and it`s X- plane is not a line
+							if (mesh->sp_actnum[ext_index2] && ((zcorn[zcorn_index2[0]] != zcorn[zcorn_index2[4]]) || (zcorn[zcorn_index2[2]] != zcorn[zcorn_index2[6]])))
                               {
                                 loop_body.change_by_x (i + 1, j, k_x, ext_index2, false);
                               }
@@ -1547,7 +1549,8 @@ struct build_jacobian_and_flux : boost::noncopyable
                           }
                       }
                       
-                    if (j + 1 < ny) 
+                    // if Y neighbour exists and current element`s Y+ plane is not a line
+					if (j + 1 < ny && ((zcorn[zcorn_index1[2]] != zcorn[zcorn_index1[6]]) || (zcorn[zcorn_index1[3]] != zcorn[zcorn_index1[7]])))
                       {
                         k_y = last_k_y - 1;
                         
@@ -1570,7 +1573,8 @@ struct build_jacobian_and_flux : boost::noncopyable
                               
                             ext_index2 = ext_index1 + ny + (k_y - k) * nx * ny;
                             
-                            if (mesh->actnum_array[ext_index2])
+                            // if neighbour active and it`s Y- plane is not a line
+							if (mesh->sp_actnum[ext_index2] && ((zcorn[zcorn_index2[0]] != zcorn[zcorn_index2[4]]) || (zcorn[zcorn_index2[1]] != zcorn[zcorn_index2[5]])))
                               {
                                 loop_body.change_by_y (i, j + 1, k_y, ext_index2, false);
                               }

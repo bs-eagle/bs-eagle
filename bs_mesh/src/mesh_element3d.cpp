@@ -224,8 +224,12 @@ mesh_element3d<strategy_t>::get_dx_dy_dz ()
     {
       element_size[0] += plane1[i].x - plane2[i].x;
       element_size[1] += plane3[i].y - plane4[i].y;
-      element_size[2] += plane6[i].z - plane6[i].z;
+      element_size[2] += plane5[i].z - plane6[i].z;
     }
+
+  element_size[0] = fabs (element_size[0] / n_plane_corners);
+  element_size[1] = fabs (element_size[1] / n_plane_corners);
+  element_size[2] = fabs (element_size[2] / n_plane_corners);
 
   return element_size;
 }
