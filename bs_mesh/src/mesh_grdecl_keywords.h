@@ -29,13 +29,14 @@ namespace blue_sky
         typedef typename base_t::sp_idata_t            sp_idata_t;
         typedef typename base_t::sp_km_iface_t         sp_km_iface_t;
         typedef typename base_t::keyword_params_t      keyword_params_t;
+        typedef typename base_t::fp_storage_type_t     fp_storage_type_t;
         
         typedef bs_mesh_grdecl <strategy_t>            bs_mesh_grdecl_t;
         typedef smart_ptr <bs_mesh_grdecl_t, true>		 sp_bs_mesh_grdecl_t;
         
         typedef rs_mesh_iface <strategy_t>             rs_mesh_iface_t;
         typedef smart_ptr <rs_mesh_iface_t, true>			 sp_mesh_iface_t;
-      
+
       public:
         //! blue-sky class declaration
         BLUE_SKY_TYPE_DECL(mesh_grdecl_keywords);

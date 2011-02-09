@@ -107,7 +107,7 @@
 #endif
 
 #include BS_FORCE_PLUGIN_IMPORT ()
-#include "force_inline.h"
+//#include "force_inline.h"
 
 #include "bs_assert.h"
 #include "bos_report.h"

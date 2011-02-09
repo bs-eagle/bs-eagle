@@ -85,9 +85,9 @@ namespace mesh_detail {
     return structured_mesh;
   }
 
-  template class create_mesh <base_strategy_fi >;
-  template class create_mesh <base_strategy_di >;
-  template class create_mesh <base_strategy_mixi>; 
+  template class create_mesh <base_strategy_fif >;
+  template class create_mesh <base_strategy_dif >;
+  //template class create_mesh <base_strategy_mixi>;
   
   
   template <typename flux_conn_t>
@@ -108,7 +108,7 @@ namespace mesh_detail {
   template class create_flux_conn <T <base_strategy_di> >;  \
   template class create_flux_conn <T <base_strategy_mixi> >; 
 
-  SPEC_FLUX_CONN (bs_flux_connections);
+  //SPEC_FLUX_CONN (bs_flux_connections);
 
 } // namespace mesh_detail
 } // namespace blue_sky

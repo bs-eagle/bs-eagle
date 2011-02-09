@@ -69,9 +69,9 @@ namespace blue_sky
   convert_permeability (i_type_t cells_count, const sp_index_array_t index_map, array_t &perm, const src_t &permx, const src_t &permy, const src_t &permz)
   {
     i_type_t *index_map_data = &(*index_map)[0];
-    src_t::pointed_t::value_type *permx_data = &(*permx)[0];
-    src_t::pointed_t::value_type *permy_data = &(*permy)[0];
-    src_t::pointed_t::value_type *permz_data = &(*permz)[0];
+    typename src_t::pointed_t::value_type *permx_data = &(*permx)[0];
+    typename src_t::pointed_t::value_type *permy_data = &(*permy)[0];
+    typename src_t::pointed_t::value_type *permz_data = &(*permz)[0];
     
     for (i_type_t i = 0; i < cells_count; ++i)
       {

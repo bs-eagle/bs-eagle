@@ -17,7 +17,7 @@ class BS_API_PLUGIN flux_connections
 public:
   //typedef strategy_t                                  strategy_type;
   typedef typename strategy_t::i_type_t               i_type_t;
-  typedef smart_ptr<bs_array<i_type_t>>               sp_i_array_t;
+  typedef smart_ptr< bs_array< i_type_t > >           sp_i_array_t;
 
   typedef bcsr_matrix_iface<strategy_t>               csr_matrix_t;
   typedef smart_ptr <csr_matrix_t, true>              sp_bcsr_t;
