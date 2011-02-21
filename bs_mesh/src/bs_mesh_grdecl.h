@@ -44,6 +44,9 @@ namespace blue_sky
       typedef typename base_t::sp_idata_t                 sp_idata_t;
       typedef typename base_t::point3d_t                  point3d_t;
 
+		typedef bs_array< fp_type_t >                       fp_array_t;
+		typedef smart_ptr< fp_array_t >                     spfp_array_t;
+
       ///////////////////////
       // OWN TYPES
       ///////////////////////
@@ -195,13 +198,21 @@ namespace blue_sky
       {return wrapped.calc_element_center();};
 
     
+	//! init coord & zcorn from (nx, ny, nz, dx, dy, dz)
+	//! return: first -- coord, second -- zcorn
+	static std::pair< spfp_array_t, spfp_array_t >
+	gen_coord_zcorn(i_type_t nx, i_type_t ny, i_type_t nz, spfp_array_t dx, spfp_array_t dy, spfp_array_t dz) {
+		return wrapped_t::gen_coord_zcorn(nx, ny, nz, dx, dy, dz);
+	}
+
     ////////////////////
     // wrapped class
     ///////////////////
 
     private:
 
-      mesh_grdecl<strategy_t> wrapped;
+		typedef mesh_grdecl< strategy_t > wrapped_t;
+		wrapped_t wrapped;
     };
 
 };//namespace blue_sky
