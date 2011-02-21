@@ -19,7 +19,8 @@ if (build_kind == "debug") :
 elif (build_kind == "release") :
     env.AppendUnique (LIBS = libs)
 
-bs_bos_core_data_storage = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."],["py_keyword_manager.cpp"]).sources)
+bs_bos_core_data_storage = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
+
 
 env.Alias (tar_name, bs_bos_core_data_storage)
 Export ("bs_bos_core_data_storage")
