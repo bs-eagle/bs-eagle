@@ -134,11 +134,11 @@ namespace blue_sky
                               const i_type_t new_n_cols, 
                               const i_type_t block_size)
     {
-      npy_intp dims[2];
+      //npy_intp dims[2];
       if (new_n_rows < 1 || new_n_cols < 1)
         return -1;
-      dims[0] = n_rows = new_n_rows;
-      dims[1] = n_cols = new_n_cols;
+      //dims[0] = n_rows = new_n_rows;
+      //dims[1] = n_cols = new_n_cols;
       calc_block_size = block_size;
       values->resize (n_rows * n_cols);
       // TODO: add this method
