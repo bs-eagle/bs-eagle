@@ -15,10 +15,10 @@ namespace blue_sky
   {
 
   template <typename strategy_t>
-  class BS_API_PLUGIN idata;
+  class idata;
 
   template <typename strategy_t>
-  class BS_API_PLUGIN mesh_grdecl_keywords;
+  class mesh_grdecl_keywords;
 
   template<class strategy_t>
   class BS_API_PLUGIN bs_mesh_grdecl : virtual public rs_smesh_iface<strategy_t>

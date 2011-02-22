@@ -412,7 +412,7 @@ int mesh_grdecl<strategy_t>::init_ext_to_int()
 
   //tools::save_seq_vector ("actnum.bs.txt").save actnum_array;
   
-  int splicing_num = splicing(volumes_temp);
+  /* int splicing_num = splicing(volumes_temp); */
   
   //check_adjacency (1);
   //tools::save_seq_vector ("active_blocks.bs.txt").save actnum_array;
@@ -553,18 +553,18 @@ bool mesh_grdecl<strategy_t>::check_adjacency(int shift_zcorn)
           zindex1 = zindex + 2; // check next by x
          
           if (i + 1 == nx ||
-              zcorn_array[zindex + 1] == zcorn_array[zindex1] &&
+              (zcorn_array[zindex + 1] == zcorn_array[zindex1] &&
               zcorn_array[zindex +  2 * nx + 1] == zcorn_array[zindex1 +  2 * nx] &&
               zcorn_array[zindex + 4 * nx * ny + 1] == zcorn_array[zindex1 + 4 * nx * ny ] &&
-              zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == zcorn_array[zindex1 + 4 * nx * ny + 2 * nx])
+              zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == zcorn_array[zindex1 + 4 * nx * ny + 2 * nx]))
             {
               
               zindex1 = zindex + 4 * nx; // check next by y
               if (j + 1 == ny ||
-                  zcorn_array[zindex + 2 * nx] == zcorn_array[zindex1] &&
+                  (zcorn_array[zindex + 2 * nx] == zcorn_array[zindex1] &&
                   zcorn_array[zindex + 2 * nx + 1] == zcorn_array[zindex1 +  1] &&
                   zcorn_array[zindex + 4 * nx * ny + 2 * nx] == zcorn_array[zindex1 + 4 * nx * ny] &&
-                  zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == zcorn_array[zindex1+ 4 * nx * ny + 1])
+                  zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == zcorn_array[zindex1+ 4 * nx * ny + 1]))
                   {
                     n_adjacent++;
                   }
@@ -1079,7 +1079,7 @@ boost::python::list mesh_grdecl<strategy_t>::calc_element_center ()
 {
   element_t element;
   sp_fp_array_t centers, prop;
-  i_type_t i, j, k, c, ind, *indexes_data;
+  i_type_t i, j, k /*, c */, ind /*, *indexes_data */;
   fp_type_t *centers_data, *prop_data;
   boost::python::list myavi_list;
 
@@ -1198,18 +1198,18 @@ struct build_jacobian_rows_class
         zindex1 = zindex + 2; // check next by x
        
         if (i + 1 == nx ||
-            mesh->zcorn_array[zindex + 1] == mesh->zcorn_array[zindex1] &&
+            (mesh->zcorn_array[zindex + 1] == mesh->zcorn_array[zindex1] &&
             mesh->zcorn_array[zindex +  2 * nx + 1] == mesh->zcorn_array[zindex1 +  2 * nx] &&
             mesh->zcorn_array[zindex + 4 * nx * ny + 1] == mesh->zcorn_array[zindex1 + 4 * nx * ny ] &&
-            mesh->zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == mesh->zcorn_array[zindex1 + 4 * nx * ny + 2 * nx])
+            mesh->zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == mesh->zcorn_array[zindex1 + 4 * nx * ny + 2 * nx]))
           {
             
             zindex1 = zindex + 4 * nx; // check next by y
             if (j + 1 == ny ||
-                mesh->zcorn_array[zindex + 2 * nx] == mesh->zcorn_array[zindex1] &&
+                (mesh->zcorn_array[zindex + 2 * nx] == mesh->zcorn_array[zindex1] &&
                 mesh->zcorn_array[zindex + 2 * nx + 1] == mesh->zcorn_array[zindex1 +  1] &&
                 mesh->zcorn_array[zindex + 4 * nx * ny + 2 * nx] == mesh->zcorn_array[zindex1 + 4 * nx * ny] &&
-                mesh->zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == mesh->zcorn_array[zindex1+ 4 * nx * ny + 1])
+                mesh->zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == mesh->zcorn_array[zindex1+ 4 * nx * ny + 1]))
                 {
                   // cell is adjacent;
                 }
