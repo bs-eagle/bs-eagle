@@ -18,11 +18,6 @@ struct mesh_grdecl_exporter_plus {
 	static class_t &
 	export_class (class_t &class__) {
 		using namespace boost::python;
-		typedef typename T::fp_type_t fp_t;
-		typedef bs_array< fp_t > fp_array_t;
-		typedef smart_ptr< fp_array_t > spfp_array_t;
-		//typedef typename T::fp_array_t fp_array_t;
-		//typedef typename T::spfp_array_t spfp_array_t;
 
 		mesh_grdecl_exporter<T>::export_class (class__)
 			.def("gen_coord_zcorn", &T::gen_coord_zcorn, args("nx, ny, nz, dx, dy, dz"), "Generate COORD & ZCORN from given dimensions")

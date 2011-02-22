@@ -44,8 +44,8 @@ namespace blue_sky
       typedef typename base_t::sp_idata_t                 sp_idata_t;
       typedef typename base_t::point3d_t                  point3d_t;
 
-		typedef bs_array< fp_type_t >                       fp_array_t;
-		typedef smart_ptr< fp_array_t >                     spfp_array_t;
+	  typedef bs_array< typename strategy_t::fp_storage_type_t > fp_storage_array_t;
+	  typedef smart_ptr< fp_storage_array_t >                sp_fp_storage_array_t;
 
       ///////////////////////
       // OWN TYPES
@@ -200,8 +200,8 @@ namespace blue_sky
     
 	//! init coord & zcorn from (nx, ny, nz, dx, dy, dz)
 	//! return: first -- coord, second -- zcorn
-	static std::pair< spfp_array_t, spfp_array_t >
-	gen_coord_zcorn(i_type_t nx, i_type_t ny, i_type_t nz, spfp_array_t dx, spfp_array_t dy, spfp_array_t dz) {
+	static std::pair< sp_fp_storage_array_t, sp_fp_storage_array_t >
+	gen_coord_zcorn(i_type_t nx, i_type_t ny, i_type_t nz, sp_fp_storage_array_t dx, sp_fp_storage_array_t dy, sp_fp_storage_array_t dz) {
 		return wrapped_t::gen_coord_zcorn(nx, ny, nz, dx, dy, dz);
 	}
 

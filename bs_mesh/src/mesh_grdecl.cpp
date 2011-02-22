@@ -19,23 +19,23 @@ struct mesh_grdecl< strategy_t >::inner {
 	// helper structure to get dx[i] regardless of whether it given by one number or by array of
 	// numbers
 	struct dim_subscript {
-		dim_ss(const fp_array_t& dim)
+		dim_subscript(const fp_storage_array_t& dim)
 			: dim_(dim), sum_(0)
 		{
 			if(dim_.size() == 1)
-				ss_fcn_ = &dim_ss::ss_const_dim;
+				ss_fcn_ = &dim_subscript::ss_const_dim;
 			else
-				ss_fcn_ = &dim_ss::ss_array_dim;
+				ss_fcn_ = &dim_subscript::ss_array_dim;
 		}
 
-		fp_type_t ss_const_dim(i_type_t idx) {
-			return dim_[0] * idx;
+		fp_storage_type_t ss_const_dim(i_type_t idx) {
+			return static_cast< fp_storage_type_t >(fp_type_t(dim_[0] * idx));
 		}
 
-		fp_type_t ss_array_dim(i_type_t idx) {
+		fp_storage_type_t ss_array_dim(i_type_t idx) {
 			fp_type_t tmp = sum_;
 			sum_ += dim_[idx];
-			return tmp;
+			return static_cast< fp_storage_type_t>(tmp);
 		}
 
 		void reset() { sum_ = 0; }
@@ -45,51 +45,10 @@ struct mesh_grdecl< strategy_t >::inner {
 		}
 
 	private:
-		const fp_array_t& dim_;
-		fp_type_t (dim_ss::*ss_fcn_)(i_type_t);
+		const fp_storage_array_t& dim_;
+		fp_storage_type_t (dim_subscript::*ss_fcn_)(i_type_t);
 		fp_type_t sum_;
 	};
-
-	//template< class dim_t, class = void >
-	//struct dim_subscript {
-	//	dim_subscript(dim_t dim) : dim_(dim), idx_(0) {}
-
-	//	void reset() {
-	//		idx_ = 0;
-	//	}
-
-	//	//dim_t next() const {
-	//	//	return (++idx_)*dim_;
-	//	//}
-	//	dim_t operator[](i_type_t idx) const {
-	//		return dim_ * idx;
-	//	}
-
-	//private:
-	//	dim_t dim_;
-	//	i_type_t idx_;
-	//};
-
-	//// specialization for arrays (pointers)
-	//// use reset() before start walking
-	//template< class dim_t, class unused >
-	//struct dim_subscript< dim_t*, unused > {
-	//	typedef dim_t* dim_ptr;
-
-	//	dim_subscript(dim_ptr dim) : dim_(dim), sum_(0) {}
-
-	//	void reset() { sum_ = 0; }
-
-	//	dim_t operator[](i_type_t idx) const {
-	//		dim_t tmp = sum_;
-	//		sum_ += dim_[idx];
-	//		return tmp;
-	//	}
-
-	//private:
-	//	dim_ptr dim_;
-	//	dim_t sum_;
-	//};
 };
 
 template<class strategy_t>
@@ -100,11 +59,11 @@ mesh_grdecl<strategy_t>::mesh_grdecl ()
 }
 
 template< class strategy_t >
-std::pair< typename mesh_grdecl< strategy_t >::spfp_array_t, typename mesh_grdecl< strategy_t >::spfp_array_t >
-mesh_grdecl< strategy_t >::gen_coord_zcorn(i_type_t nx, i_type_t ny, i_type_t nz, spfp_array_t dx, spfp_array_t dy, spfp_array_t dz) {
+std::pair< typename mesh_grdecl< strategy_t >::sp_fp_storage_array_t, typename mesh_grdecl< strategy_t >::sp_fp_storage_array_t >
+mesh_grdecl< strategy_t >::gen_coord_zcorn(i_type_t nx, i_type_t ny, i_type_t nz, sp_fp_storage_array_t dx, sp_fp_storage_array_t dy, sp_fp_storage_array_t dz) {
 	using namespace std;
-	typedef std::pair< spfp_array_t, spfp_array_t > ret_t;
-	typedef typename fp_array_t::value_type value_t;
+	typedef std::pair< sp_fp_storage_array_t, sp_fp_storage_array_t > ret_t;
+	typedef typename fp_storage_array_t::value_type value_t;
 
 	// create subscripters
 	if(!dx || !dy || !dz) return ret_t(NULL, NULL);
@@ -112,9 +71,6 @@ mesh_grdecl< strategy_t >::gen_coord_zcorn(i_type_t nx, i_type_t ny, i_type_t nz
 	typename inner::dim_subscript dxs(*dx);
 	typename inner::dim_subscript dys(*dy);
 	typename inner::dim_subscript dzs(*dz);
-	//typename inner::template dim_subscript< dx_t > dxs(dx);
-	//typename inner::template dim_subscript< dy_t > dys(dy);
-	//typename inner::template dim_subscript< dz_t > dzs(dz);
 
 	// if dimension offset is given as array, then size should be taken from array size
 	if(dx->size() > 1) nx = dx->size();
@@ -122,14 +78,14 @@ mesh_grdecl< strategy_t >::gen_coord_zcorn(i_type_t nx, i_type_t ny, i_type_t nz
 	if(dz->size() > 1) nz = dz->size();
 
 	// create arrays
-	spfp_array_t coord = BS_KERNEL.create_object(fp_array_t::bs_type());
-	spfp_array_t zcorn = BS_KERNEL.create_object(fp_array_t::bs_type());
+	sp_fp_storage_array_t coord = BS_KERNEL.create_object(fp_storage_array_t::bs_type());
+	sp_fp_storage_array_t zcorn = BS_KERNEL.create_object(fp_storage_array_t::bs_type());
 	if(!zcorn || !coord) return ret_t(NULL, NULL);
 
 	// fill coord
 	// coord is simple grid
 	coord->init((nx + 1)*(ny + 1)*6, value_t(0));
-	typename fp_array_t::iterator pcd = coord->begin();
+	typename fp_storage_array_t::iterator pcd = coord->begin();
 	for(i_type_t iy = 0; iy <= ny; ++iy) {
 		for(i_type_t ix = 0; ix <= nx; ++ix) {
 			pcd[0] = pcd[3] = dxs[ix];
@@ -145,14 +101,14 @@ mesh_grdecl< strategy_t >::gen_coord_zcorn(i_type_t nx, i_type_t ny, i_type_t nz
 	pcd = zcorn->begin();
 	const i_type_t plane_size = nx * ny * 4;
 	dxs.reset(); dys.reset();
-	fp_type_t z_cache = dzs[0];
+	fp_storage_type_t z_cache = dzs[0];
 	for(i_type_t iz = 1; iz <= nz; ++iz) {
 		pcd = fill_n(pcd, plane_size, z_cache);
 		z_cache = dzs[iz];
 		pcd = fill_n(pcd, plane_size, z_cache);
 	}
 
-	return make_pair(coord, zcorn);
+	return ret_t(coord, zcorn);
 }
 
 
