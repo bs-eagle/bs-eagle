@@ -26,9 +26,9 @@ namespace blue_sky
     //  tfqmr_solver
 
     //! constructor
-    template <class strat_t>
-    tfqmr_solver<strat_t>::tfqmr_solver (bs_type_ctor_param /*param*/)
-      : lsolver_iface<strat_t> ()
+    
+    tfqmr_solver::tfqmr_solver (bs_type_ctor_param /*param*/)
+      : lsolver_iface ()
     {
       prop = BS_KERNEL.create_object ("prop");
       if (!prop)
@@ -36,22 +36,22 @@ namespace blue_sky
           bs_throw_exception ("Type (prop) not registered");
         }
       init_prop ();
-      sp_p      = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_v      = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_w      = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_u      = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_q      = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_d      = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_res    = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_r      = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_rtilde = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_tmp    = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_rhat   = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_y      = BS_KERNEL.create_object (fp_array_t::bs_type ());
+      sp_p      = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_v      = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_w      = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_u      = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_q      = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_d      = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_res    = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_r      = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_rtilde = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_tmp    = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_rhat   = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_y      = BS_KERNEL.create_object (v_double::bs_type ());
     }
 
-    template <class strat_t> void
-    tfqmr_solver<strat_t>::init_prop ()
+     void
+    tfqmr_solver::init_prop ()
       {
         tol_idx = prop->get_index_f (std::string ("tolerance"));
         if (tol_idx < 0)
@@ -83,30 +83,30 @@ namespace blue_sky
           }
       }
     //! copy constructor
-    template <class strat_t>
-    tfqmr_solver<strat_t>::tfqmr_solver(const tfqmr_solver &solver)
-      : bs_refcounter (), lsolver_iface<strat_t> ()
+    
+    tfqmr_solver::tfqmr_solver(const tfqmr_solver &solver)
+      : bs_refcounter (), lsolver_iface ()
     {
       if (&solver != this)
         *this = solver;
     }
 
     //! destructor
-    template <class strat_t>
-    tfqmr_solver<strat_t>::~tfqmr_solver ()
+    
+    tfqmr_solver::~tfqmr_solver ()
     {}
 
     //! set solver's properties
-    template <class strat_t>
-    void tfqmr_solver<strat_t>::set_prop (sp_prop_t prop_)
+    
+    void tfqmr_solver::set_prop (sp_prop_t prop_)
     {
       prop = prop_;
 
       init_prop ();
     }
 
-    template <class strat_t>
-    int tfqmr_solver<strat_t>::solve (sp_matrix_t matrix, sp_fp_array_t sp_rhs, sp_fp_array_t sp_sol)
+    
+    int tfqmr_solver::solve (sp_matrix_t matrix, spv_double sp_rhs, spv_double sp_sol)
     {
       BOSOUT (section::solvers, level::debug) << "TFQMR\n" << bs_end;
 
@@ -116,23 +116,23 @@ namespace blue_sky
       BS_ERROR (prop, "tfqmr_solve");
 
 
-      fp_type_t rho_1, rho_2 = 1, alpha = 1, beta, sigma;
+      t_double rho_1, rho_2 = 1, alpha = 1, beta, sigma;
       int iter;
       const double epsmac = 1e-24;
-      fp_type_t r_norm, b_norm, den_norm, w_norm, eta, nu, tau, c;
+      t_double r_norm, b_norm, den_norm, w_norm, eta, nu, tau, c;
       //fp_type *x = solution;
 
       //OMP_TIME_MEASURE_START (tfqmr_solve_timer);
 
-      fp_type_t *rhs = &(*sp_rhs)[0];
-      fp_type_t *sol = &(*sp_sol)[0];
-      fp_type_t tol = prop->get_f (tol_idx);
+      t_double *rhs = &(*sp_rhs)[0];
+      t_double *sol = &(*sp_sol)[0];
+      t_double tol = prop->get_f (tol_idx);
       tol *= tol;
       //resid = prop->get_residuals ();
       //convergence_rate = prop->get_convergence_rate ();
 
       int max_iter  = prop->get_i (max_iters_idx);
-      i_type_t n         = matrix->get_n_rows () * matrix->get_n_block_size ();
+      t_long n         = matrix->get_n_rows () * matrix->get_n_block_size ();
 
       sp_p->resize (n);
       sp_v->resize (n);
@@ -161,29 +161,29 @@ namespace blue_sky
       sp_q->assign (0);
       sp_d->assign (0);
 
-      fp_type_t *r              = &(*sp_r)[0];
-      fp_type_t *p              = &(*sp_p)[0];
-      fp_type_t *v              = &(*sp_v)[0];
-      fp_type_t *w              = &(*sp_w)[0];
-      fp_type_t *u              = &(*sp_u)[0];
-      fp_type_t *q              = &(*sp_q)[0];
-      fp_type_t *d              = &(*sp_d)[0];
-      fp_type_t *res            = &(*sp_res)[0];
-      fp_type_t *rtilde         = &(*sp_rtilde)[0];
-      fp_type_t *tmp            = &(*sp_tmp)[0];
-      fp_type_t *rhat           = &(*sp_rhat)[0];
-      fp_type_t *y              = &(*sp_y)[0];
+      t_double *r              = &(*sp_r)[0];
+      t_double *p              = &(*sp_p)[0];
+      t_double *v              = &(*sp_v)[0];
+      t_double *w              = &(*sp_w)[0];
+      t_double *u              = &(*sp_u)[0];
+      t_double *q              = &(*sp_q)[0];
+      t_double *d              = &(*sp_d)[0];
+      t_double *res            = &(*sp_res)[0];
+      t_double *rtilde         = &(*sp_rtilde)[0];
+      t_double *tmp            = &(*sp_tmp)[0];
+      t_double *rhat           = &(*sp_rhat)[0];
+      t_double *y              = &(*sp_y)[0];
 
       // r = Ax0 - b
       matrix->calc_lin_comb (-1.0, 1.0, sp_sol, sp_rhs, sp_r);
-      memcpy (rtilde, r, sizeof (fp_type_t) * n);
+      memcpy (rtilde, r, sizeof (t_double) * n);
       //rtilde.assign (r.begin (), r.end ());
 
       // p0 = u0 = r0;
       //memcpy (p, r, n * sizeof (double));
-      memcpy (u, r, sizeof (fp_type_t) * n);
-      memcpy (p, r, sizeof (fp_type_t) * n);
-      memcpy (w, r, sizeof (fp_type_t) * n);
+      memcpy (u, r, sizeof (t_double) * n);
+      memcpy (p, r, sizeof (t_double) * n);
+      memcpy (w, r, sizeof (t_double) * n);
       //u.assign (r.begin (), r.end ());
       //p.assign (r.begin (), r.end ());
       //w.assign (r.begin (), r.end ());
@@ -195,8 +195,8 @@ namespace blue_sky
             {
               bs_throw_exception ("TFQMR: Preconditioner failed");
             }
-              memcpy (u, tmp, sizeof (fp_type_t) * n);
-              memcpy (p, tmp, sizeof (fp_type_t) * n);
+              memcpy (u, tmp, sizeof (t_double) * n);
+              memcpy (p, tmp, sizeof (t_double) * n);
 	      //u.assign (tmp.begin (), tmp.end ());
 	      //p.assign (u.begin (), u.end ());
         }
@@ -252,10 +252,10 @@ namespace blue_sky
                   
                   bs_throw_exception ("TFQMR: Failure - rho_1 == 0");
                 }
-               sum_vector_n (u, (fp_type_t)1., res, beta, p, n); //p[n] = u[n]+beta*res
+               sum_vector_n (u, (t_double)1., res, beta, p, n); //p[n] = u[n]+beta*res
 
                //v.assign (n, 0);
-               memset (v, 0, sizeof (fp_type_t) * n);
+               memset (v, 0, sizeof (t_double) * n);
                matrix->matrix_vector_product (sp_p, sp_v); //v[n]=Ap[n]
              }
 
@@ -270,17 +270,17 @@ namespace blue_sky
                 {
                   bs_throw_exception ("TFQMR: Preconditioner failed");
                 }
-                   memcpy (v, tmp, sizeof (fp_type_t) * n);
+                   memcpy (v, tmp, sizeof (t_double) * n);
 	           //v.assign (tmp.begin (), tmp.end ());
              }
 
-           sum_vector_n (u, (fp_type_t)1., v, -alpha, q, n); //q[n] = u[n-1]-alpha*v[n-1]
-           sum_vector_n (u, (fp_type_t)1., q, (fp_type_t)1., res, n); //res = u[n-1]+q[n]
+           sum_vector_n (u, (t_double)1., v, -alpha, q, n); //q[n] = u[n-1]-alpha*v[n-1]
+           sum_vector_n (u, (t_double)1., q, (t_double)1., res, n); //res = u[n-1]+q[n]
 
            //tmp.assign (n, 0);
-           memset (tmp, 0, sizeof (fp_type_t) * n);
+           memset (tmp, 0, sizeof (t_double) * n);
            matrix->matrix_vector_product (sp_res, sp_tmp);// tmp=A*res
-           sum_vector_n (r, (fp_type_t)1., tmp, -alpha, r, n);// r=r-alpha*res
+           sum_vector_n (r, (t_double)1., tmp, -alpha, r, n);// r=r-alpha*res
 
            //r_norm_old = r_norm;
            r_norm = mv_vector_inner_product_n (r, r, n);
@@ -289,24 +289,24 @@ namespace blue_sky
              {
                if (m == 1) // m is odd
                  {
-                   memcpy (y, u, sizeof (fp_type_t) * n);
+                   memcpy (y, u, sizeof (t_double) * n);
                    //y.assign (u.begin (), u.end ());
                    w_norm = sqrt(r_norm * r_norm);
                  }
                else // m is even
                  {
-                   memcpy (y, q, sizeof (fp_type_t) * n);
+                   memcpy (y, q, sizeof (t_double) * n);
                    //y.assign (q.begin (), q.end ());
                    w_norm = sqrt(r_norm);
                  }
 
-               sum_vector_n (y, (fp_type_t)1., d, eta*nu*nu/alpha, d, n); //d[m] = y[m] + (eta[m-1]*nu[m-1]^2/alpha[n-1])*d[m-1]
+               sum_vector_n (y, (t_double)1., d, eta*nu*nu/alpha, d, n); //d[m] = y[m] + (eta[m-1]*nu[m-1]^2/alpha[n-1])*d[m-1]
                nu = w_norm/tau; //nu[m]=||w[m+1]||/tau[m-1]
                c = 1./sqrt (1. + nu*nu);
                tau = tau*c*nu; //tau[m]=tau[m-1]nu[m]c[m]
                eta = c*c*alpha; //eta[m]=c[m]^2*alpha[n-1]
                //SUM_VECTOR(x,d,1,alpha,x_cgs,k,n); //x_cgs[n] = x[2n-1]+alpha[n-1]*d[2n]
-               sum_vector_n (sol, (fp_type_t)1., d, eta, sol, n); //x[m] = x[m-1]+eta[m]*d[m]
+               sum_vector_n (sol, (t_double)1., d, eta, sol, n); //x[m] = x[m-1]+eta[m]*d[m]
                if (r_norm <= tol)
                  {
                    count = 1;
@@ -330,12 +330,12 @@ namespace blue_sky
              }
            else // no precondition (preconditioner=identity_matrix)
              {
-               memcpy (rhat, r, sizeof (fp_type_t) * n);
+               memcpy (rhat, r, sizeof (t_double) * n);
                //rhat.assign (r.begin (), r.end ());
              }
 
-          sum_vector_n (rhat, (fp_type_t)1., q, beta, u, n); //u[n] = r[n]+beta*q[n]
-          sum_vector_n (q, (fp_type_t)1., p, beta, res, n); //res = q[n]+beta*p[n-1]
+          sum_vector_n (rhat, (t_double)1., q, beta, u, n); //u[n] = r[n]+beta*q[n]
+          sum_vector_n (q, (t_double)1., p, beta, res, n); //res = q[n]+beta*p[n-1]
 
           rho_2 = rho_1;
      }
@@ -360,8 +360,8 @@ namespace blue_sky
       return 0;
     }
 
-    template <class strat_t>
-    int tfqmr_solver<strat_t>::solve_prec (sp_matrix_t matrix, sp_fp_array_t rhs, sp_fp_array_t solution)
+    
+    int tfqmr_solver::solve_prec (sp_matrix_t matrix, spv_double rhs, spv_double solution)
     {
       return solve (matrix, rhs, solution);
     }
@@ -373,8 +373,8 @@ namespace blue_sky
     *
     * @return 0 if success
     */
-    template <class strat_t> int
-    tfqmr_solver<strat_t>::setup (sp_matrix_t matrix)
+    int
+    tfqmr_solver::setup (sp_matrix_t matrix)
     {
       if (!matrix)
         {
@@ -391,13 +391,8 @@ namespace blue_sky
     }
 
     //////////////////////////////////////////////////////////////////////////
-    BLUE_SKY_TYPE_STD_CREATE_T_DEF(tfqmr_solver, (class));
-    BLUE_SKY_TYPE_STD_COPY_T_DEF(tfqmr_solver, (class));
+    BLUE_SKY_TYPE_STD_CREATE (tfqmr_solver);
+    BLUE_SKY_TYPE_STD_COPY (tfqmr_solver);
 
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (tfqmr_solver<base_strategy_fif>) , 1, (lsolver_iface<base_strategy_fif>), "tfqmr_solver_fif", "TFQMR linear solver", "TFQMR linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (tfqmr_solver<base_strategy_did>) , 1, (lsolver_iface<base_strategy_did>), "tfqmr_solver_did", "TFQMR linear solver", "TFQMR linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (tfqmr_solver<base_strategy_dif>) , 1, (lsolver_iface<base_strategy_dif>), "tfqmr_solver_dif", "TFQMR linear solver", "TFQMR linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (tfqmr_solver<base_strategy_flf>) , 1, (lsolver_iface<base_strategy_flf>), "tfqmr_solver_flf", "TFQMR linear solver", "TFQMR linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (tfqmr_solver<base_strategy_dld>) , 1, (lsolver_iface<base_strategy_dld>), "tfqmr_solver_dld", "TFQMR linear solver", "TFQMR linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (tfqmr_solver<base_strategy_dlf>) , 1, (lsolver_iface<base_strategy_dlf>), "tfqmr_solver_dlf", "TFQMR linear solver", "TFQMR linear solver", false);
+    BLUE_SKY_TYPE_IMPL (tfqmr_solver, lsolver_iface, "tfqmr_solver", "TFQMR linear solver", "TFQMR linear solver");
   }

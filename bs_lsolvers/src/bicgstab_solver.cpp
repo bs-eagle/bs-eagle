@@ -29,9 +29,9 @@ namespace blue_sky
     //  bicgstab_solver
 
     //! constructor
-    template <class strat_t>
-    bicgstab_solver<strat_t>::bicgstab_solver (bs_type_ctor_param /*param*/)
-      : lsolver_iface<strat_t> ()
+    
+    bicgstab_solver::bicgstab_solver (bs_type_ctor_param /*param*/)
+      : lsolver_iface ()
     {
       prop = BS_KERNEL.create_object (prop_t::bs_type ());
       if (!prop)
@@ -39,42 +39,42 @@ namespace blue_sky
           bs_throw_exception ("Type (prop) not registered");
         }
       init_prop ();
-      sp_p = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_phat = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_s = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_shat = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_t = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_v = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_r = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_rtilde = BS_KERNEL.create_object (fp_array_t::bs_type ());
+      sp_p = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_phat = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_s = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_shat = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_t = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_v = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_r = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_rtilde = BS_KERNEL.create_object (v_double::bs_type ());
 
     }
 
     //! copy constructor
-    template <class strat_t>
-    bicgstab_solver<strat_t>::bicgstab_solver(const bicgstab_solver &solver)
-      : bs_refcounter (), lsolver_iface<strat_t> ()
+    
+    bicgstab_solver::bicgstab_solver(const bicgstab_solver &solver)
+      : bs_refcounter (), lsolver_iface ()
     {
       if (&solver != this)
         *this = solver;
     }
 
     //! destructor
-    template <class strat_t>
-    bicgstab_solver<strat_t>::~bicgstab_solver ()
+    
+    bicgstab_solver::~bicgstab_solver ()
     {}
 
     //! set solver's properties
-    template <class strat_t>
-    void bicgstab_solver<strat_t>::set_prop(sp_prop_t prop_)
+    
+    void bicgstab_solver::set_prop(sp_prop_t prop_)
     {
       prop = prop_;
 
       init_prop ();
     }
 
-    template <class strat_t> void
-    bicgstab_solver<strat_t>::init_prop ()
+     void
+    bicgstab_solver::init_prop ()
       {
         tol_idx = prop->get_index_f (std::string ("tolerance"));
         if (tol_idx < 0)
@@ -105,31 +105,31 @@ namespace blue_sky
             bs_throw_exception ("Can not regidter some properties");
           }
       }
-    template <class strat_t>
-    int bicgstab_solver<strat_t>::solve (sp_matrix_t matrix, sp_fp_array_t sp_rhs, sp_fp_array_t sp_sol)
+    
+    int bicgstab_solver::solve (sp_matrix_t matrix, spv_double sp_rhs, spv_double sp_sol)
     {
       BS_ERROR (matrix, "bicgstab_solve");
       BS_ERROR (sp_rhs->size (), "bicgstab_solve");
       BS_ERROR (sp_sol->size (), "bicgstab_solve");
       BS_ERROR (prop, "bicgstab_solve");
 
-      fp_type_t rho_1, rho_2 = 1, alpha = 1, beta, omega = 1;
+      t_double rho_1, rho_2 = 1, alpha = 1, beta, omega = 1;
       int iter;
       const double epsmac = 1e-24;
-      fp_type_t r_norm, b_norm, den_norm, s_norm;
-      fp_type_t *rhs = &(*sp_rhs)[0];
-      fp_type_t *sol = &(*sp_sol)[0];
-      //fp_type_t *x = solution;
+      t_double r_norm, b_norm, den_norm, s_norm;
+      t_double *rhs = &(*sp_rhs)[0];
+      t_double *sol = &(*sp_sol)[0];
+      //t_double *x = solution;
 
       //OMP_TIME_MEASURE_START (bicgstab_solve_timer);
 
-      fp_type_t tol = prop->get_f (tol_idx);
+      t_double tol = prop->get_f (tol_idx);
       tol *= tol;
       //resid = prop->get_residuals ();
       //convergence_rate = prop->get_convergence_rate ();
 
       int max_iter  = prop->get_i (max_iters_idx);
-      i_type_t n         = matrix->get_n_rows () * matrix->get_n_block_size ();
+      t_long n         = matrix->get_n_rows () * matrix->get_n_block_size ();
 
       sp_p->resize (n);
       sp_phat->resize (n);
@@ -140,19 +140,19 @@ namespace blue_sky
       sp_r->resize (n); 
       sp_rtilde->resize (n);
 
-      fp_type_t *p              = &(*sp_p)[0];
-      fp_type_t *phat           = &(*sp_phat)[0];
-      fp_type_t *s              = &(*sp_s)[0];
-      fp_type_t *shat           = &(*sp_shat)[0];
-      fp_type_t *t              = &(*sp_t)[0];
-      fp_type_t *v              = &(*sp_v)[0];
-      fp_type_t *r              = &(*sp_r)[0];
-      fp_type_t *rtilde         = &(*sp_rtilde)[0];
+      t_double *p              = &(*sp_p)[0];
+      t_double *phat           = &(*sp_phat)[0];
+      t_double *s              = &(*sp_s)[0];
+      t_double *shat           = &(*sp_shat)[0];
+      t_double *t              = &(*sp_t)[0];
+      t_double *v              = &(*sp_v)[0];
+      t_double *r              = &(*sp_r)[0];
+      t_double *rtilde         = &(*sp_rtilde)[0];
 
       prop->set_b (success_idx, false);
 
-      memset (sol, 0, sizeof (fp_type_t) * n);
-      memset (r, 0, sizeof (fp_type_t) * n);
+      memset (sol, 0, sizeof (t_double) * n);
+      memset (r, 0, sizeof (t_double) * n);
 
       matrix->calc_lin_comb (-1.0, 1.0, sp_sol, sp_rhs, sp_r);
       r_norm = mv_vector_inner_product_n (r, r, n);
@@ -162,9 +162,9 @@ namespace blue_sky
       rho_1 = r_norm;
       b_norm = sqrt (mv_vector_inner_product_n (rhs, rhs, n));
 
-      memcpy (p, r, sizeof (fp_type_t) * n);
-      memcpy (rtilde, r, sizeof (fp_type_t) * n);
-      memset (v, 0, sizeof (fp_type_t) * n);
+      memcpy (p, r, sizeof (t_double) * n);
+      memcpy (rtilde, r, sizeof (t_double) * n);
+      memset (v, 0, sizeof (t_double) * n);
 
       if (b_norm > epsmac) // choose convergence criterion
         {
@@ -216,12 +216,12 @@ namespace blue_sky
             }
           else // no precondition (preconditioner=identity_matrix)
             {
-              memcpy (phat, p, sizeof (fp_type_t) * n);
+              memcpy (phat, p, sizeof (t_double) * n);
               //phat.assign (p.begin (), p.end ());
             }
 
           // v = A * phat;
-          memset (v, 0, sizeof (fp_type_t) * n);
+          memset (v, 0, sizeof (t_double) * n);
           //v.assign (n, 0);
           matrix->matrix_vector_product (sp_phat, sp_v);
 
@@ -241,7 +241,7 @@ namespace blue_sky
 
           // s = r - alpha * v;
 
-          memcpy (s, r, sizeof (fp_type_t) * n);
+          memcpy (s, r, sizeof (t_double) * n);
           //s.assign (r.begin (), r.end ());
           axpy_n (s, v, -alpha, n);
           //AXPY (s, -alpha, v, k, n);
@@ -272,12 +272,12 @@ namespace blue_sky
             }
           else // no precondition (preconditioner=identity_matrix)
             {
-              memcpy (shat, s, sizeof (fp_type_t) * n);
+              memcpy (shat, s, sizeof (t_double) * n);
               //shat.assign (s.begin (), s.end ());
             }
 
           // t = A * shat;
-          memset (t, 0, sizeof (fp_type_t) * n);
+          memset (t, 0, sizeof (t_double) * n);
           //t.assign (n, 0);
           matrix->matrix_vector_product (sp_shat, sp_t);
 
@@ -313,9 +313,9 @@ namespace blue_sky
           axpy_n (sol, shat, omega, n);
 
           //r = s - omega * t;
-          //memcpy (r, s, n * sizeof (fp_type_t));
+          //memcpy (r, s, n * sizeof (t_double));
           //AXPY (r, -omega, t, k, n);
-          memcpy (r, s, n * sizeof (fp_type_t));
+          memcpy (r, s, n * sizeof (t_double));
           //r.assign (s.begin (), s.end ());
           axpy_n (r, t, -omega, n);
           /*
@@ -352,8 +352,8 @@ namespace blue_sky
       return 0;
     }
 
-    template <class strat_t>
-    int bicgstab_solver<strat_t>::solve_prec(sp_matrix_t matrix, sp_fp_array_t rhs, sp_fp_array_t solution)
+    
+    int bicgstab_solver::solve_prec (sp_matrix_t matrix, spv_double rhs, spv_double solution)
     {
       return solve (matrix, rhs, solution);
     }
@@ -365,8 +365,8 @@ namespace blue_sky
     *
     * @return 0 if success
     */
-    template <class strat_t> int
-    bicgstab_solver<strat_t>::setup (sp_matrix_t matrix)
+     int
+    bicgstab_solver::setup (sp_matrix_t matrix)
     {
       if (!matrix)
         {
@@ -383,14 +383,8 @@ namespace blue_sky
     }
 
     //////////////////////////////////////////////////////////////////////////
-    BLUE_SKY_TYPE_STD_CREATE_T_DEF(bicgstab_solver, (class));
-    BLUE_SKY_TYPE_STD_COPY_T_DEF(bicgstab_solver, (class));
+    BLUE_SKY_TYPE_STD_CREATE (bicgstab_solver);
+    BLUE_SKY_TYPE_STD_COPY (bicgstab_solver);
 
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (bicgstab_solver<base_strategy_fif>) , 1, (lsolver_iface<base_strategy_fif>), "bicgstab_solver_fif", "BiCGStab linear solver", "BiCGStab linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (bicgstab_solver<base_strategy_did>) , 1, (lsolver_iface<base_strategy_did>), "bicgstab_solver_did", "BiCGStab linear solver", "BiCGStab linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (bicgstab_solver<base_strategy_dif>) , 1, (lsolver_iface<base_strategy_dif>), "bicgstab_solver_dif", "BiCGStab linear solver", "BiCGStab linear solver", false);
-
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (bicgstab_solver<base_strategy_flf>) , 1, (lsolver_iface<base_strategy_flf>), "bicgstab_solver_flf", "BiCGStab linear solver", "BiCGStab linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (bicgstab_solver<base_strategy_dld>) , 1, (lsolver_iface<base_strategy_dld>), "bicgstab_solver_dld", "BiCGStab linear solver", "BiCGStab linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (bicgstab_solver<base_strategy_dlf>) , 1, (lsolver_iface<base_strategy_dlf>), "bicgstab_solver_dlf", "BiCGStab linear solver", "BiCGStab linear solver", false);
+    BLUE_SKY_TYPE_IMPL (bicgstab_solver, lsolver_iface, "bicgstab_solver", "BiCGStab linear solver", "BiCGStab linear solver");
   }

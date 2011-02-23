@@ -34,65 +34,17 @@ namespace blue_sky {
 
     bool res = true;
 
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, ndarray<float>::bs_type()); BS_ASSERT (res);
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, ndarray<double>::bs_type()); BS_ASSERT (res);
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, ndarray<int>::bs_type()); BS_ASSERT (res);
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, ndarray<long>::bs_type()); BS_ASSERT (res);
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, ndarray<char>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, dens_matrix::bs_type()); BS_ASSERT (res);
 
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, bsvector<float>::bs_type()); BS_ASSERT (res);
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, bsvector<double>::bs_type()); BS_ASSERT (res);
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, bsvector<int>::bs_type()); BS_ASSERT (res);
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, bsvector<long>::bs_type()); BS_ASSERT (res);
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, bsvector<char>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, dens_matrix_tools::bs_type()); BS_ASSERT (res);
 
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, bsmatrix<float>::bs_type()); BS_ASSERT (res);
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, bsmatrix<double>::bs_type()); BS_ASSERT (res);
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, bsmatrix<int>::bs_type()); BS_ASSERT (res);
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, bsmatrix<long>::bs_type()); BS_ASSERT (res);
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, bsmatrix<char>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr::bs_type()); BS_ASSERT (res);
 
-    res &= BS_KERNEL.register_type(*bs_init.pd_, dens_matrix<base_strategy_fif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, dens_matrix<base_strategy_did>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, dens_matrix<base_strategy_dif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, dens_matrix<base_strategy_flf>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, dens_matrix<base_strategy_dld>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, dens_matrix<base_strategy_dlf>::bs_type()); BS_ASSERT (res);
-
-    res &= BS_KERNEL.register_type(*bs_init.pd_, dens_matrix_tools<base_strategy_fif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, dens_matrix_tools<base_strategy_did>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, dens_matrix_tools<base_strategy_dif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, dens_matrix_tools<base_strategy_flf>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, dens_matrix_tools<base_strategy_dld>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, dens_matrix_tools<base_strategy_dlf>::bs_type()); BS_ASSERT (res);
-
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr<base_strategy_fif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr<base_strategy_did>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr<base_strategy_dif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr<base_strategy_flf>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr<base_strategy_dld>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr<base_strategy_dlf>::bs_type()); BS_ASSERT (res);
-
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_matrix_tools<base_strategy_fif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_matrix_tools<base_strategy_did>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_matrix_tools<base_strategy_dif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_matrix_tools<base_strategy_flf>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_matrix_tools<base_strategy_dld>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_matrix_tools<base_strategy_dlf>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_matrix_tools::bs_type()); BS_ASSERT (res);
     
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bdiag_matrix<base_strategy_fif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bdiag_matrix<base_strategy_did>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bdiag_matrix<base_strategy_dif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bdiag_matrix<base_strategy_flf>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bdiag_matrix<base_strategy_dld>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bdiag_matrix<base_strategy_dlf>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, bdiag_matrix::bs_type()); BS_ASSERT (res);
 
-    res &= BS_KERNEL.register_type(*bs_init.pd_, jac_matrix<base_strategy_fif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, jac_matrix<base_strategy_did>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, jac_matrix<base_strategy_dif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, jac_matrix<base_strategy_flf>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, jac_matrix<base_strategy_dld>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, jac_matrix<base_strategy_dlf>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, jac_matrix::bs_type()); BS_ASSERT (res);
 
     //res &= blue_sky::jacobian_matrix_register_type (pd); BS_ASSERT (res);
 

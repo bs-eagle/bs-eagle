@@ -12,6 +12,7 @@
 #include "gmres_solver.h"
 #include "bicgstab_solver.h"
 #include "tfqmr_solver.h"
+#include "gs_solver.h"
 #include "bcsr_ilu_prec.h"
 #include "two_stage_prec.h"
 #include "blu_solver.h"
@@ -31,62 +32,23 @@ namespace blue_sky {
 
     bool res = true;
 
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, matrix_base<seq_vector<float>, seq_vector<int> >::bs_type()); BS_ASSERT (res);
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, matrix_base<seq_vector<double>, seq_vector<int> >::bs_type()); BS_ASSERT (res);
-
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_matrix<seq_vector<float>, seq_vector<int> >::bs_type()); BS_ASSERT (res);
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_matrix<seq_vector<double>, seq_vector<int> >::bs_type()); BS_ASSERT (res);
-
     res &= BS_KERNEL.register_type(*bs_init.pd_, prop<float, int, std::string, bool>::bs_type()); BS_ASSERT (res);
 
-    res &= BS_KERNEL.register_type(*bs_init.pd_, cgs_solver<base_strategy_fif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, cgs_solver<base_strategy_did>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, cgs_solver<base_strategy_dif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, cgs_solver<base_strategy_flf>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, cgs_solver<base_strategy_dld>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, cgs_solver<base_strategy_dlf>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (*bs_init.pd_, cgs_solver::bs_type()); BS_ASSERT (res);
+    
+    res &= BS_KERNEL.register_type (*bs_init.pd_, gmres_solver::bs_type()); BS_ASSERT (res);
 
-    res &= BS_KERNEL.register_type(*bs_init.pd_, gmres_solver<base_strategy_fif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, gmres_solver<base_strategy_did>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, gmres_solver<base_strategy_dif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, gmres_solver<base_strategy_flf>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, gmres_solver<base_strategy_dld>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, gmres_solver<base_strategy_dlf>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (*bs_init.pd_, bicgstab_solver::bs_type()); BS_ASSERT (res);
 
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bicgstab_solver<base_strategy_fif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bicgstab_solver<base_strategy_did>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bicgstab_solver<base_strategy_dif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bicgstab_solver<base_strategy_flf>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bicgstab_solver<base_strategy_dld>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bicgstab_solver<base_strategy_dlf>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (*bs_init.pd_, tfqmr_solver::bs_type()); BS_ASSERT (res);
 
-    res &= BS_KERNEL.register_type(*bs_init.pd_, tfqmr_solver<base_strategy_fif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, tfqmr_solver<base_strategy_did>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, tfqmr_solver<base_strategy_dif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, tfqmr_solver<base_strategy_flf>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, tfqmr_solver<base_strategy_dld>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, tfqmr_solver<base_strategy_dlf>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (*bs_init.pd_, gs_solver::bs_type()); BS_ASSERT (res);
 
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_ilu_prec<base_strategy_fif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_ilu_prec<base_strategy_did>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_ilu_prec<base_strategy_dif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_ilu_prec<base_strategy_flf>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_ilu_prec<base_strategy_dld>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_ilu_prec<base_strategy_dlf>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (*bs_init.pd_, bcsr_ilu_prec::bs_type()); BS_ASSERT (res);
 
-    res &= BS_KERNEL.register_type(*bs_init.pd_, blu_solver<base_strategy_fif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, blu_solver<base_strategy_did>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, blu_solver<base_strategy_dif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, blu_solver<base_strategy_flf>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, blu_solver<base_strategy_dld>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, blu_solver<base_strategy_dlf>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (*bs_init.pd_, blu_solver::bs_type()); BS_ASSERT (res);
 
-    res &= BS_KERNEL.register_type(*bs_init.pd_, two_stage_prec<base_strategy_fif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, two_stage_prec<base_strategy_did>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, two_stage_prec<base_strategy_dif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, two_stage_prec<base_strategy_flf>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, two_stage_prec<base_strategy_dld>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, two_stage_prec<base_strategy_dlf>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (*bs_init.pd_, two_stage_prec::bs_type()); BS_ASSERT (res);
 
     return res;
   }

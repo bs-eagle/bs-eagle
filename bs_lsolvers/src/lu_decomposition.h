@@ -38,7 +38,7 @@
   m_str_2[2] -= m_str_2[1] * m_str_1[2];
   
   
-template <class fp_type_t, class i_type_t, class fp_storage_type_t> 
+template <class t_d, class t_l, class t_f> 
 class blu_solver_impl
 {
   public:
@@ -54,13 +54,13 @@ class blu_solver_impl
       \return < 0 if error occur
     */
     inline int 
-    lu_block_decomposition (const int matrix_size, fp_storage_type_t *block, const int block_size) const
+    lu_block_decomposition (const t_l matrix_size, t_f *block, const t_l block_size) const
     {
       // declaration
-      i_type_t i, j, k, nb;
-      fp_storage_type_t *row = 0;
-      fp_storage_type_t *uprow = 0;
-      fp_storage_type_t diag;
+      t_l i, j, k, nb;
+      t_f *row = 0;
+      t_f *uprow = 0;
+      t_d diag;
       
       // check input variables
       if (matrix_size < 1 || !block)
@@ -78,15 +78,15 @@ class blu_solver_impl
           // check diagonal element
           if (fabs (uprow[k]) < MIN_DIV)
             return -2;
-          diag = 1.0 / uprow[k];
+          diag = 1.0 / (t_d)uprow[k];
           for (j = k + 1; j < nb; ++j)
-            uprow[j] *= diag;
+            uprow[j] = (t_f)((t_d)uprow[j] * diag);
           // upgrade other elements
           for (i = k + 1; i < nb; ++i)
             {
               row = &(block[i * matrix_size]);
               for (j = k + 1; j < nb; ++j)
-                row[j] -= uprow[j] * row[k];
+                row[j] = (t_f)((t_d)row[j] - (t_d)uprow[j] * (t_d)row[k]);
 
             }
         }
@@ -108,9 +108,9 @@ class blu_solver_impl
       \return < 0 if error occur
     */
     inline int 
-    lu_block_find_L_roots (const i_type_t matrix_size, const fp_storage_type_t *block, fp_type_t *r_side, const i_type_t block_size) const
+    lu_block_find_L_roots (const t_l matrix_size, const t_f *block, t_d *r_side, const t_l block_size) const
     {
-      i_type_t i, j, nb;
+      t_l i, j, nb;
       // check input variables
       if (matrix_size < 1 || !block || !r_side)
         return -1;
@@ -123,9 +123,9 @@ class blu_solver_impl
         {
           if (fabs (block[i * matrix_size + i]) < MIN_DIV)
             return -2;
-          r_side[i] /= block[i * matrix_size + i];
+          r_side[i] = (t_f)(r_side[i] / (t_d)block[i * matrix_size + i]);
           for (j = i + 1; j < nb; ++j)
-            r_side[j] -= r_side[i] * block[j * matrix_size + i];
+            r_side[j] -= r_side[i] * (t_d)block[j * matrix_size + i];
         }  
       return 0;
     }
@@ -144,9 +144,9 @@ class blu_solver_impl
       \return < 0 if error occur
     */
     inline int 
-    lu_block_find_U_roots (const i_type_t matrix_size, const fp_storage_type_t *block, fp_type_t *r_side, const i_type_t block_size) const
+    lu_block_find_U_roots (const t_l matrix_size, const t_f *block, t_d *r_side, const t_l block_size) const
     {
-      i_type_t i, j, nb;
+      t_l i, j, nb;
 
       // check input variables
       if (matrix_size < 1 || !block || !r_side)
@@ -158,7 +158,7 @@ class blu_solver_impl
       
       for (i = nb - 1; i >= 0; --i)
         for (j = i - 1; j >= 0; --j)
-          r_side[j] -= r_side[i] * block[j * matrix_size + i];
+          r_side[j] -= r_side[i] * (t_d)block[j * matrix_size + i];
       return 0;
     }
 
@@ -175,10 +175,10 @@ class blu_solver_impl
       \return < 0 if error occur
     */
     inline int 
-    lu_block_find_U (const i_type_t matrix_size, const fp_storage_type_t *block_L, fp_storage_type_t *block_U, 
-                     const i_type_t block_size, const i_type_t ncol) const
+    lu_block_find_U (const t_l matrix_size, const t_f *block_L, t_f *block_U, 
+                     const t_l block_size, const t_l ncol) const
     {
-      i_type_t i, j, k;
+      t_l i, j, k;
       // check input variables
       if (matrix_size < 1 || !block_L || !block_U)
         return -1;
@@ -212,11 +212,11 @@ class blu_solver_impl
       \return < 0 if error occur
     */
     inline int 
-    lu_block_find_L (const i_type_t matrix_size, fp_storage_type_t *block_L, 
-                     const fp_storage_type_t *block_U, const i_type_t block_size, 
-                     const i_type_t nrow) const
+    lu_block_find_L (const t_l matrix_size, t_f *block_L, 
+                     const t_f *block_U, const t_l block_size, 
+                     const t_l nrow) const
     {
-      i_type_t i, j, k;
+      t_l i, j, k;
       // check input variables
       if (matrix_size < 1 || !block_L || !block_U)
         return -1;
@@ -225,8 +225,9 @@ class blu_solver_impl
           for (i = 0; i < block_size; ++i)
             {
               for (j = i + 1; j < block_size; ++j)
-                block_L[j + k * matrix_size] -= block_L[i + k * matrix_size] 
-                                                * block_U[j + i * matrix_size];
+                block_L[j + k * matrix_size] = (t_f)((t_d)block_L[j + k * matrix_size] 
+                                                     - (t_d)block_L[i + k * matrix_size] 
+                                                       * (t_d)block_U[j + i * matrix_size]);
             }  
           
         }
@@ -248,15 +249,15 @@ class blu_solver_impl
       \return < 0 if error occur
     */
     inline int 
-    lu_block_upgrade (const i_type_t matrix_size, fp_storage_type_t *block_A, 
-                      const fp_storage_type_t *block_L,
-                      const fp_storage_type_t *block_U, 
-                      const i_type_t block_size, 
-                      const i_type_t nrow, 
-                      const i_type_t ncol) const
+    lu_block_upgrade (const t_l matrix_size, t_f *block_A, 
+                      const t_f *block_L,
+                      const t_f *block_U, 
+                      const t_l block_size, 
+                      const t_l nrow, 
+                      const t_l ncol) const
     {
-      i_type_t i, j, k;
-      fp_storage_type_t update_value;
+      t_l i, j, k;
+      t_d update_value;
       
       // check input data
       if (!block_A || !block_L || !block_U || matrix_size < 1 
@@ -270,8 +271,8 @@ class blu_solver_impl
             {
               update_value = 0;
               for (k = 0; k < block_size; ++k)
-                update_value += block_L[i * matrix_size + k] * block_U[k * matrix_size +j];
-              block_A[i * matrix_size + j] -= update_value;
+                update_value += (t_d)block_L[i * matrix_size + k] * (t_d)block_U[k * matrix_size +j];
+              block_A[i * matrix_size + j] = (t_f)((t_d)block_A[i * matrix_size + j] - update_value);
             }
         }
       return 0;
@@ -287,23 +288,23 @@ class blu_solver_impl
       \return < 0 if error occur
     */
     int 
-    lu_decomposition (const i_type_t matrix_size, fp_storage_type_t *matrix, const i_type_t block_size) const
+    lu_decomposition (const t_l matrix_size, t_f *matrix, const t_l block_size) const
     {
-      i_type_t i, j, k;
-      i_type_t global_i;
+      t_l i, j, k;
+      t_l global_i;
       int ret_code;
       // last block size
-      i_type_t last_block_size;
+      t_l last_block_size;
       // number of blocks in matrix string
-      i_type_t number_of_blocks;
+      t_l number_of_blocks;
       // block on the corner
-      fp_storage_type_t *corner_block = 0;
+      t_f *corner_block = 0;
       // L block
-      fp_storage_type_t *block_L = 0;
+      t_f *block_L = 0;
       // U block
-      fp_storage_type_t *block_U = 0;
+      t_f *block_U = 0;
       // A block
-      fp_storage_type_t *block_A = 0;
+      t_f *block_A = 0;
       
       
       // check input data
@@ -383,13 +384,13 @@ class blu_solver_impl
       \return < 0 if error occur
     */
     inline int 
-    lu_upgrade_right_side (const i_type_t matrix_size,  const fp_storage_type_t *block, 
-                           const i_type_t nrow, const i_type_t ncol, 
-                           const fp_type_t *roots, fp_type_t *r_side) const 
+    lu_upgrade_right_side (const t_l matrix_size,  const t_f *block, 
+                           const t_l nrow, const t_l ncol, 
+                           const t_d *roots, t_d *r_side) const 
     {
-      i_type_t i, j;
-      fp_type_t upgrade_value = 0;
-      const fp_storage_type_t *block_row = 0;
+      t_l i, j;
+      t_d upgrade_value = 0;
+      const t_f *block_row = 0;
       
       // check input data
       if (matrix_size < 1 || !block || nrow < 1 || ncol < 1 || !roots || !r_side)
@@ -400,7 +401,7 @@ class blu_solver_impl
           upgrade_value = 0;
           block_row = &(block[i * matrix_size]);
           for (j = 0; j < ncol; ++j)
-            upgrade_value += block_row[j] * roots[j];
+            upgrade_value += (t_d)block_row[j] * roots[j];
           r_side[i] -= upgrade_value;
         }
       return 0;
@@ -419,16 +420,16 @@ class blu_solver_impl
       \return < 0 if error occur
     */
     int 
-    lu_find_L_roots (const i_type_t matrix_size, const fp_storage_type_t *matrix, 
-                     fp_type_t *r_side, const i_type_t block_size) const
+    lu_find_L_roots (const t_l matrix_size, const t_f *matrix, 
+                     t_d *r_side, const t_l block_size) const
     {
-      i_type_t i;
-      i_type_t k;
+      t_l i;
+      t_l k;
       int ret_code;
       // last block size
-      i_type_t last_block_size;
+      t_l last_block_size;
       // number of blocks in matrix string
-      i_type_t number_of_blocks;
+      t_l number_of_blocks;
       
       // check input data
       if (matrix_size < 1 || !matrix || !r_side)
@@ -481,16 +482,16 @@ class blu_solver_impl
       \return < 0 if error occur
     */
     int 
-    lu_find_U_roots (const i_type_t matrix_size, const fp_storage_type_t *matrix, 
-                     fp_type_t *r_side, const i_type_t block_size) const
+    lu_find_U_roots (const t_l matrix_size, const t_f *matrix, 
+                     t_d *r_side, const t_l block_size) const
     {
-      i_type_t i;
-      i_type_t k;
+      t_l i;
+      t_l k;
       int ret_code;
       // last block size
-      i_type_t last_block_size;
+      t_l last_block_size;
       // number of blocks in matrix string
-      i_type_t number_of_blocks;
+      t_l number_of_blocks;
       
       // check input data
       if (matrix_size < 1 || !matrix || !r_side)

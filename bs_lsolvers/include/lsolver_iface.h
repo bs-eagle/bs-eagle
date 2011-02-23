@@ -32,27 +32,14 @@ namespace blue_sky
    *                    3) call setup () -- for prepare solver and preconditioner
    *                    4) call solve () -- for solving linear system (for sequence of linear systems A(x_i) = b_i, 1--3 should be call only once)  
    */
-  template <class strategy_t>
   class lsolver_iface: public bs_node
     {
     public:
       //! matrix interface type
-      typedef matrix_iface<strategy_t>                  matrix_t;
-      //! internal fp type
-      typedef typename strategy_t::fp_type_t            fp_type_t;
-      //! internal integer type
-      typedef typename strategy_t::i_type_t             i_type_t;
-      
-      typedef bs_array<fp_type_t>                               fp_array_t;
-      typedef bs_array<i_type_t>                                i_array_t;
-      //typedef bs_array<fp_storage_type_t>                       fp_storage_array_t;
-
-      typedef smart_ptr<fp_array_t, true>                       sp_fp_array_t;
-      typedef smart_ptr<i_array_t, true>                        sp_i_array_t;
-      //typedef smart_ptr<fp_storage_array_t, true>               sp_fp_storage_array_t;
+      typedef matrix_iface                              matrix_t;
 
       //! this_t
-      typedef lsolver_iface <strategy_t>                this_t;
+      typedef lsolver_iface                             this_t;
       //! prop 
       typedef prop_iface<float, int, std::string, bool> prop_t;
       //! short name to smart pointer to this class
@@ -75,7 +62,7 @@ namespace blue_sky
        * 
        * @return 0 if success
        */
-      virtual int solve (sp_matrix_t matrix, sp_fp_array_t rhs, sp_fp_array_t sol) = 0;
+      virtual int solve (sp_matrix_t matrix, spv_double rhs, spv_double sol) = 0;
 
       /** 
        * @brief do only one solver iteration (Ax=b), where A -- <matrix>, x -- <sol>, b -- <rhs> 
@@ -87,7 +74,7 @@ namespace blue_sky
        * 
        * @return 0 if success
        */
-      virtual int solve_prec (sp_matrix_t matrix, sp_fp_array_t rhs, sp_fp_array_t sol) = 0;
+      virtual int solve_prec (sp_matrix_t matrix, spv_double rhs, spv_double sol) = 0;
 
       
       /** 
@@ -125,7 +112,7 @@ namespace blue_sky
        * 
        * @return final residual
        */
-      virtual fp_type_t get_final_residual () const = 0;
+      virtual t_double get_final_residual () const = 0;
 
       //! return number of used iterations
       /** 

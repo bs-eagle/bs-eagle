@@ -30,17 +30,17 @@ namespace python {
   {
     using namespace boost::python;
 
-    strategy_exporter::export_base <lsolver_iface, py_lsolver_iface_exporter> ("lsolver_iface");
+    base_exporter<lsolver_iface, py_lsolver_iface_exporter>::export_class ("lsolver_iface");
 
-    strategy_exporter::export_class <bicgstab_solver,   lsolver_iface, py_lsolver_iface_exporter> ("bicgstab");
-    strategy_exporter::export_class <cgs_solver,        lsolver_iface, py_lsolver_iface_exporter> ("cgs");
-    strategy_exporter::export_class <gmres_solver,      lsolver_iface, py_lsolver_iface_exporter> ("gmres");
-    strategy_exporter::export_class <bcsr_ilu_prec,     lsolver_iface, py_lsolver_iface_exporter> ("bcsr_ilu_prec");
-    strategy_exporter::export_class <blu_solver,        lsolver_iface, py_lsolver_iface_exporter> ("blu_solver");
-    strategy_exporter::export_class <two_stage_prec,    lsolver_iface, py_lsolver_iface_exporter> ("two_stage_prec");
-    strategy_exporter::export_class <tfqmr_solver,      lsolver_iface, py_lsolver_iface_exporter> ("tfqmr");
-    strategy_exporter::export_class <amg_smoother_iface,lsolver_iface, py_amg_smoother_iface_exporter> ("amg_smoother_iface");
-    strategy_exporter::export_class <gs_solver,         amg_smoother_iface, py_amg_smoother_iface_exporter> ("gs");
+    class_exporter<bicgstab_solver,   lsolver_iface, py_lsolver_iface_exporter>::export_class ("bicgstab");
+    class_exporter<cgs_solver,        lsolver_iface, py_lsolver_iface_exporter>::export_class ("cgs");
+    class_exporter<gmres_solver,      lsolver_iface, py_lsolver_iface_exporter>::export_class ("gmres");
+    class_exporter<bcsr_ilu_prec,     lsolver_iface, py_lsolver_iface_exporter>::export_class ("bcsr_ilu_prec");
+    class_exporter<blu_solver,        lsolver_iface, py_lsolver_iface_exporter>::export_class ("blu_solver");
+    class_exporter<two_stage_prec,    lsolver_iface, py_lsolver_iface_exporter>::export_class ("two_stage_prec");
+    class_exporter<tfqmr_solver,      lsolver_iface, py_lsolver_iface_exporter>::export_class ("tfqmr");
+    class_exporter<amg_smoother_iface,lsolver_iface, py_amg_smoother_iface_exporter>::export_class ("amg_smoother_iface");
+    class_exporter<gs_solver,         amg_smoother_iface, py_amg_smoother_iface_exporter>::export_class ("gs");
 
   }
 

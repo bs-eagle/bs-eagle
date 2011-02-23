@@ -21,10 +21,10 @@ namespace blue_sky
   /*!
    * \brief constructor
    */
-  template <class strategy_t>
-  bcsr_ilu_prec<strategy_t>::bcsr_ilu_prec (bs_type_ctor_param /*param*/)
+  
+  bcsr_ilu_prec::bcsr_ilu_prec (bs_type_ctor_param /*param*/)
 //      : sp_ilu(BS_KERNEL.create_object(bcsr_matrix_t::bs_type()))
-      //: lsolver_iface <strategy_t> ()
+      //: lsolver_iface  ()
   {
       prop = BS_KERNEL.create_object ("prop");
       if (!prop)
@@ -35,8 +35,7 @@ namespace blue_sky
       init_prop ();
   }
 
-  template <class strat_t>
-  bcsr_ilu_prec<strat_t>::bcsr_ilu_prec(const bcsr_ilu_prec& solver)
+  bcsr_ilu_prec::bcsr_ilu_prec(const bcsr_ilu_prec& solver)
       : bs_refcounter (solver) //, lsolver_iface <strat_t> ()
   {
     if (&solver != this)
@@ -46,22 +45,22 @@ namespace blue_sky
   /*!
    * \brief destructor
    */
-  template <class strategy_t>
-  bcsr_ilu_prec<strategy_t>::~bcsr_ilu_prec ()
+  
+  bcsr_ilu_prec::~bcsr_ilu_prec ()
   {
   }
 
   //! set solver's properties
-  template <class strat_t>
-  void bcsr_ilu_prec<strat_t>::set_prop(sp_prop_t prop_)
+  void 
+  bcsr_ilu_prec::set_prop(sp_prop_t prop_)
   {
     prop = prop_;
 
     init_prop ();
   }
 
-  template <class strat_t> void
-  bcsr_ilu_prec<strat_t>::init_prop ()
+  void
+  bcsr_ilu_prec::init_prop ()
     {
       use_internal_matrix_idx = prop->get_index_b (std::string ("use_internal_matrix"));
       if (use_internal_matrix_idx < 0)
@@ -74,19 +73,20 @@ namespace blue_sky
         }
     }
 
-  template <class strategy_t>
-  int bcsr_ilu_prec<strategy_t>::solve(sp_matrix_t matrix, sp_fp_array_t sp_rhs, sp_fp_array_t sp_sol)
+  
+  int 
+  bcsr_ilu_prec::solve(sp_matrix_t matrix, spv_double sp_rhs, spv_double sp_sol)
   {
     BS_ASSERT (matrix);
     BS_ASSERT (sp_rhs->size ());
     BS_ASSERT (sp_sol->size ());
     BS_ASSERT (sp_rhs->size () == sp_sol->size ()) (sp_rhs->size ()) (sp_sol->size ());
 
-    i_type_t b_sqr; 
-    i_type_t n;     
-    i_type_t nb;    
-    fp_type_t *rhs = &(*sp_rhs)[0];
-    fp_type_t *sol = &(*sp_sol)[0];
+    t_long b_sqr; 
+    t_long n;     
+    t_long nb;    
+    t_double *rhs = &(*sp_rhs)[0];
+    t_double *sol = &(*sp_sol)[0];
 
     sp_bcsr_matrix_t ilu;
 
@@ -99,12 +99,12 @@ namespace blue_sky
     //const item_array_t &values    = ilu.get_values   ();
     bool ff = prop->get_b (use_internal_matrix_idx);
 
-    sp_fp_storage_array_t sp_values     = ff ? lu_matrix->get_values () : ilu->get_values   ();
-    sp_i_array_t sp_rows                = ff ? lu_matrix->get_rows_ptr () : ilu->get_rows_ptr ();           
-    sp_i_array_t sp_cols                = ff ? lu_matrix->get_cols_ind () : ilu->get_cols_ind ();           
-    fp_storage_type_t *values           = &(*sp_values)[0];
-    i_type_t *rows                      = &(*sp_rows)[0];
-    i_type_t *cols                      = &(*sp_cols)[0];
+    spv_float spvalues     = ff ? lu_matrix->get_values () : ilu->get_values   ();
+    spv_long sp_rows                = ff ? lu_matrix->get_rows_ptr () : ilu->get_rows_ptr ();           
+    spv_long sp_cols                = ff ? lu_matrix->get_cols_ind () : ilu->get_cols_ind ();           
+    t_float *values           = &(*spvalues)[0];
+    t_long *rows                      = &(*sp_rows)[0];
+    t_long *cols                      = &(*sp_cols)[0];
 
     if (ff)
       {
@@ -119,18 +119,18 @@ namespace blue_sky
       }
     b_sqr = nb * nb;
 
-    i_type_t j, k, l;
-    i_type_t j1, j2;
+    t_long j, k, l;
+    t_long j1, j2;
     //const fp_type *D_block, *M_block;
     
-    const fp_storage_type_t *D_block, *M_block;
+    const t_float *D_block, *M_block;
 
-    fp_type_t *v, *r;
+    t_double *v, *r;
 
     memcpy (sol, rhs, sp_rhs->size () * sizeof (rhs[0]));
 
 #ifdef _DEBUG
-    fp_type_t *sol_ = &sol[0];
+    t_double *sol_ = &sol[0];
 #endif
     // solve Ly = b
     r = &sol[0];
@@ -139,7 +139,7 @@ namespace blue_sky
         // pointer to matrix row
         j1          = rows[k];
         j2          = j1;//diag_ind[k];
-        i_type_t j3  = rows[k + 1];
+        t_long j3  = rows[k + 1];
         for (j = j1 + 1; j < j3; ++j)
           {
             l = cols[j];
@@ -162,7 +162,7 @@ namespace blue_sky
     for (k = n - 1; k >= 0; --k, r -= nb)
       {
         // find element in k column
-        i_type_t j0  = rows[k];
+        t_long j0  = rows[k];
         j1          = j0;//diag_ind[k];
         j2          = rows[k + 1];
         for (j = j0; j < j2; ++j)
@@ -184,8 +184,9 @@ namespace blue_sky
     return 0;
   }
 
-  template <class strategy_t>
-  int bcsr_ilu_prec<strategy_t>::solve_prec(sp_matrix_t matrix, sp_fp_array_t rhs, sp_fp_array_t sol)
+  
+  int 
+  bcsr_ilu_prec::solve_prec (sp_matrix_t matrix, spv_double rhs, spv_double sol)
   {
      return solve (matrix, rhs, sol);
   }
@@ -196,15 +197,15 @@ namespace blue_sky
    * \param matrix Various matrix
    * \return 0 if success
    */
-  template <class strategy_t> int
-  bcsr_ilu_prec<strategy_t>::setup (sp_matrix_t matrix)
+  int
+  bcsr_ilu_prec::setup (sp_matrix_t matrix)
   {
     BS_ASSERT (matrix);
 
 
-    i_type_t n;     
-    i_type_t nb;    
-    i_type_t b_sqr; 
+    t_long n;     
+    t_long nb;    
+    t_long b_sqr; 
     bool ff = prop->get_b (use_internal_matrix_idx);
 
 
@@ -240,21 +241,21 @@ namespace blue_sky
         nb             = ilu->get_n_block_size ();
       }
 
-    sp_i_array_t sp_ilu_rows                    = ff ? lu_matrix->get_rows_ptr () : ilu->get_rows_ptr ();       
-    sp_i_array_t sp_ilu_cols                    = ff ? lu_matrix->get_cols_ind () : ilu->get_cols_ind ();       
-    sp_fp_storage_array_t  sp_ilu_values        = ff ? lu_matrix->get_values ()   : ilu->get_values (); 
+    spv_long sp_ilu_rows                    = ff ? lu_matrix->get_rows_ptr () : ilu->get_rows_ptr ();       
+    spv_long sp_ilu_cols                    = ff ? lu_matrix->get_cols_ind () : ilu->get_cols_ind ();       
+    spv_float  sp_ilu_values        = ff ? lu_matrix->get_values ()   : ilu->get_values (); 
 
-    i_type_t *ilu_rows                          = &(*sp_ilu_rows)[0];
-    i_type_t *ilu_cols                          = &(*sp_ilu_cols)[0];
-    fp_storage_type_t *ilu_values               = &(*sp_ilu_values)[0];
+    t_long *ilu_rows                          = &(*sp_ilu_rows)[0];
+    t_long *ilu_cols                          = &(*sp_ilu_cols)[0];
+    t_float *ilu_values               = &(*sp_ilu_values)[0];
 
     b_sqr          = nb * nb;
 
     // common
     //int r_code = 0;
-    i_type_t i, j, j1, j2, j3, cl, k;
+    t_long i, j, j1, j2, j3, cl, k;
 
-    fp_storage_type_t *block;
+    t_float *block;
 
 
 
@@ -263,11 +264,11 @@ namespace blue_sky
     //  ilu.write_matrix_to_file ("matrix.out");
     // ----------------------
     // STAGE 3: build ilu factorization
-    i_type_t i_str;
+    t_long i_str;
     //fp_type *d_block, *dd_block;
-    fp_storage_type_t *d_block, *dd_block;
-    fp_type_t d;
-    i_type_t jj, jj1, jj2;
+    t_float *d_block, *dd_block;
+    t_double d;
+    t_long jj, jj1, jj2;
 
     // loop through all rows
     for (i = 0; i < n; ++i)
@@ -335,7 +336,7 @@ namespace blue_sky
 
         for (j = j1; j < j3; ++j)
           {
-            i_type_t cl = ilu_cols[j];
+            t_long cl = ilu_cols[j];
             if (cl > i)
               {
                 d_block = &ilu_values[j * b_sqr];
@@ -349,32 +350,9 @@ namespace blue_sky
 
 
   //////////////////////////////////////////////////////////////////////////
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(bcsr_ilu_prec, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(bcsr_ilu_prec, (class));
+  BLUE_SKY_TYPE_STD_CREATE (bcsr_ilu_prec);
+  BLUE_SKY_TYPE_STD_COPY (bcsr_ilu_prec);
 
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bcsr_ilu_prec<base_strategy_fif>) , 1, (lsolver_iface<base_strategy_fif>), "bcsr_ilu_prec_fif", "BCSR ILU Preconditioner", "BCSR ILU Preconditioner", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bcsr_ilu_prec<base_strategy_did>) , 1, (lsolver_iface<base_strategy_did>), "bcsr_ilu_prec_did", "BCSR ILU Preconditioner", "BCSR ILU Preconditioner", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bcsr_ilu_prec<base_strategy_dif>) , 1, (lsolver_iface<base_strategy_dif>), "bcsr_ilu_prec_dif", "BCSR ILU Preconditioner", "BCSR ILU Preconditioner", false);
-
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bcsr_ilu_prec<base_strategy_flf>) , 1, (lsolver_iface<base_strategy_flf>), "bcsr_ilu_prec_flf", "BCSR ILU Preconditioner", "BCSR ILU Preconditioner", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bcsr_ilu_prec<base_strategy_dld>) , 1, (lsolver_iface<base_strategy_dld>), "bcsr_ilu_prec_dld", "BCSR ILU Preconditioner", "BCSR ILU Preconditioner", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bcsr_ilu_prec<base_strategy_dlf>) , 1, (lsolver_iface<base_strategy_dlf>), "bcsr_ilu_prec_dlf", "BCSR ILU Preconditioner", "BCSR ILU Preconditioner", false);
-
-#if 0
-  //////////////////////////////////////////////////////////////////////////
-  //! register types in kernel
-  bool bcsr_ilu_prec_register_type (const blue_sky::plugin_descriptor &pd)
-  {
-    bool res = true;
-
-    res &= BS_KERNEL.register_type (pd, bcsr_ilu_prec<base_strategy_fi>::bs_type ());
-    res &= BS_KERNEL.register_type (pd, bcsr_ilu_prec<base_strategy_di>::bs_type ());
-    res &= BS_KERNEL.register_type (pd, bcsr_ilu_prec<base_strategy_mixi>::bs_type ());
-
-
-
-    return res;
-  }
-#endif //0
+  BLUE_SKY_TYPE_IMPL (bcsr_ilu_prec, lsolver_iface, "bcsr_ilu_prec", "BCSR ILU Preconditioner", "BCSR ILU Preconditioner");
 
 } // namespace blue_sky

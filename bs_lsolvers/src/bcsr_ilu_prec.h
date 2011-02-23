@@ -22,32 +22,15 @@ namespace blue_sky
   /**
    * \brief ILU preconditioner for CSR matrix
    */
-  template <class strategy_t>
-  class BS_API_PLUGIN bcsr_ilu_prec: public lsolver_iface<strategy_t>
+  class BS_API_PLUGIN bcsr_ilu_prec: public lsolver_iface
     {
       //-----------------------------------------
       // TYPES
       //-----------------------------------------
     public:
       //! matrix interface type
-      typedef matrix_iface<strategy_t>                          matrix_t;
-      //! internal fp type
-      typedef typename strategy_t::fp_type_t                    fp_type_t;
-      //! internal integer type
-      typedef typename strategy_t::i_type_t                     i_type_t;
-      //! internal matrix fp type
-      typedef typename strategy_t::fp_storage_type_t            fp_storage_type_t;
-
-      typedef bs_array<fp_type_t>                               fp_array_t;
-      typedef bs_array<i_type_t>                                i_array_t;
-      typedef bs_array<fp_storage_type_t>                       fp_storage_array_t;
-
-      typedef smart_ptr<fp_array_t, true>                       sp_fp_array_t;
-      typedef smart_ptr<i_array_t, true>                        sp_i_array_t;
-      typedef smart_ptr<fp_storage_array_t, true>               sp_fp_storage_array_t;
-
-      //typedef linear_solver_base<strategy_t>      this_t;         ///< typedef to this type
-      typedef lsolver_iface<strategy_t>                         base_t;         ///< typedef to this type. in child classes used as a short name of base class
+      typedef matrix_iface                                      matrix_t;
+      typedef lsolver_iface                                     base_t;         ///< typedef to this type. in child classes used as a short name of base class
 
       typedef smart_ptr<matrix_t, true>                         sp_matrix_t;    ///< short name to smart pointer on matrix
 
@@ -55,7 +38,7 @@ namespace blue_sky
       typedef smart_ptr<base_t, true>                           sp_base_t;      ///< short name to smart pointer to this class
       typedef smart_ptr<prop_t, true>                           sp_prop_t;      ///< short name to smart pointer to properties holder class
       //! BCSR matrix type
-      typedef bcsr_matrix_iface<strategy_t>                     bcsr_matrix_iface_t;
+      typedef bcsr_matrix_iface                                 bcsr_matrix_iface_t;
       //! SP to BCSR matrix
       typedef smart_ptr<bcsr_matrix_iface_t, true>              sp_bcsr_matrix_t;
       //-----------------------------------------
@@ -65,9 +48,9 @@ namespace blue_sky
       //! destructor
       ~bcsr_ilu_prec ();
 
-      virtual int solve (sp_matrix_t matrix, sp_fp_array_t rhs, sp_fp_array_t sol);
+      virtual int solve (sp_matrix_t matrix, spv_double rhs, spv_double sol);
 
-      virtual int solve_prec (sp_matrix_t matrix, sp_fp_array_t rhs, sp_fp_array_t sol);
+      virtual int solve_prec (sp_matrix_t matrix, spv_double rhs, spv_double sol);
 
       // setup
       virtual int setup (sp_matrix_t matrix);
@@ -87,7 +70,7 @@ namespace blue_sky
         }
 
       //! return final residual
-      virtual fp_type_t get_final_residual () const
+      virtual t_double get_final_residual () const
         {
           return 0;
         }
@@ -133,8 +116,6 @@ namespace blue_sky
 
     };
 
-  //! register types in kernel
-  //bool bcsr_ilu_prec_register_type (const blue_sky::plugin_descriptor &pd);
 
 } // namespace blue_sky
 #endif // CSR_ILU__PREC__H__

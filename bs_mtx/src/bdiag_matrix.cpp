@@ -15,29 +15,27 @@ using namespace boost::python;
 
 namespace blue_sky
 {
-  template <class strat_t>
-  bdiag_matrix<strat_t>::bdiag_matrix (bs_type_ctor_param) 
-        : bdiag_matrix_iface<strat_t> (),
-        diag (BS_KERNEL.create_object (fp_storage_array_t::bs_type ()))
+  bdiag_matrix::bdiag_matrix (bs_type_ctor_param) 
+        : bdiag_matrix_iface (),
+        diag (BS_KERNEL.create_object (v_float::bs_type ()))
     {
     }
-  template <class strat_t>
-  bdiag_matrix <strat_t>::bdiag_matrix (const bdiag_matrix & /*src*/) :bs_refcounter (),
-        diag (BS_KERNEL.create_object (fp_storage_array_t::bs_type ()))
+  bdiag_matrix::bdiag_matrix (const bdiag_matrix & /*src*/) :bs_refcounter (),
+        diag (BS_KERNEL.create_object (v_float::bs_type ()))
      {
      }
-  template <class strat_t> int
-  bdiag_matrix<strat_t>::matrix_vector_product_t (sp_fp_array_t v_, sp_fp_array_t r_) const
+  int
+  bdiag_matrix::matrix_vector_product_t (spv_double v_, spv_double r_) const
     {
-      i_type_t i;
-      fp_type_t *v = &(*v_)[0];
-      fp_type_t *r = &(*r_)[0];
-      fp_storage_type_t *d = &(*diag)[0];
+      t_long i;
+      t_double *v = &(*v_)[0];
+      t_double *r = &(*r_)[0];
+      t_float *d = &(*diag)[0];
       
       //BS_ASSERT (v.size ());
       //BS_ASSERT (r.size ());
       //BS_ASSERT (v.size () >= r.size ()) (v.size ()) (r.size ());
-      //BS_ASSERT (n_rows == (i_type_t)v.size ());
+      //BS_ASSERT (n_rows == (t_long)v.size ());
 
       //BS_ASSERT (n_block_size <= 1);
       if (n_block_size > 1)
@@ -53,16 +51,16 @@ namespace blue_sky
       return 0;
     }
 
-  template <class strat_t> int
-  bdiag_matrix<strat_t>::calc_lin_comb (fp_type_t alpha, fp_type_t beta, sp_fp_array_t u_, sp_fp_array_t v_, sp_fp_array_t r_) const
+  int
+  bdiag_matrix::calc_lin_comb (t_double alpha, t_double beta, spv_double u_, spv_double v_, spv_double r_) const
   {
-    static const fp_type_t eps = fp_type_t (1.0e-12);
-    i_type_t i, n;
+    static const t_double eps = t_double (1.0e-12);
+    t_long i, n;
     int r_code = 0;
-    fp_type_t *v = &(*v_)[0];
-    fp_type_t *r = &(*r_)[0];
+    t_double *v = &(*v_)[0];
+    t_double *r = &(*r_)[0];
 
-    fp_type_t d = beta;
+    t_double d = beta;
     if (fabs (alpha) > eps)
       {
         //BS_ASSERT (u.size ());
@@ -76,11 +74,11 @@ namespace blue_sky
         //BS_ASSERT (r.size () >= (size_t)(n_rows * n_block_size)) (r.size ()) (n_rows) (n_block_size) (n_rows * n_block_size);
       }
 
-    n = (i_type_t)r_->size ();
+    n = (t_long)r_->size ();
     if (fabs (beta) > eps)
       {
         i = 0;
-        i_type_t n2 = n - (n % 4);
+        t_long n2 = n - (n % 4);
         // TODO:
         for (; i < n2; i+=4)
           {
@@ -95,7 +93,7 @@ namespace blue_sky
       }
     else
       {
-        memset (r, 0, sizeof (fp_type_t) * n);
+        memset (r, 0, sizeof (t_double) * n);
       }
 
     if (fabs (alpha) > eps)
@@ -108,15 +106,9 @@ namespace blue_sky
 /////////////////////////////////BS Register
 /////////////////////////////////Stuff//////////////////////////
 
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(bdiag_matrix, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(bdiag_matrix, (class));
+  BLUE_SKY_TYPE_STD_CREATE (bdiag_matrix);
+  BLUE_SKY_TYPE_STD_COPY (bdiag_matrix);
 
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bdiag_matrix<base_strategy_fif>), 1,  (bdiag_matrix_iface <base_strategy_fif> ), "bdiag_matrix_fif", "Block Diag Matrix class", "Realization of Block Diag Matricies", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bdiag_matrix<base_strategy_did>), 1,  (bdiag_matrix_iface <base_strategy_did> ), "bdiag_matrix_did", "Block Diag Matrix class", "Realization of Block Diag Matricies", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bdiag_matrix<base_strategy_dif>), 1,  (bdiag_matrix_iface <base_strategy_dif> ), "bdiag_matrix_dif", "Block Diag Matrix class", "Realization of Block Diag Matricies", false);
-
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bdiag_matrix<base_strategy_flf>), 1,  (bdiag_matrix_iface <base_strategy_flf> ), "bdiag_matrix_flf", "Block Diag Matrix class", "Realization of Block Diag Matricies", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bdiag_matrix<base_strategy_dld>), 1,  (bdiag_matrix_iface <base_strategy_dld> ), "bdiag_matrix_dld", "Block Diag Matrix class", "Realization of Block Diag Matricies", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bdiag_matrix<base_strategy_dlf>), 1,  (bdiag_matrix_iface <base_strategy_dlf> ), "bdiag_matrix_dlf", "Block Diag Matrix class", "Realization of Block Diag Matricies", false);
+  BLUE_SKY_TYPE_IMPL (bdiag_matrix, bdiag_matrix_iface, "bdiag_matrix", "Block Diag Matrix class", "Realization of Block Diag Matricies");
 }  // blue_sky namespace
 

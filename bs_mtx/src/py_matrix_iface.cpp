@@ -20,11 +20,11 @@ namespace python {
   {
     using namespace boost::python;
 
-    strategy_exporter::export_base <matrix_iface, py_matrix_iface_exporter> ("matrix_iface");
-    strategy_exporter::export_class <bdiag_matrix_iface, matrix_iface, py_bdiag_matrix_iface_exporter> ("bdiag_matrix_iface");
-    strategy_exporter::export_class <jac_matrix_iface, matrix_iface, py_jac_matrix_iface_exporter> ("jac_matrix_iface");
-    strategy_exporter::export_class <bdiag_matrix, bdiag_matrix_iface, py_bdiag_matrix_iface_exporter> ("bdiag_matrix");
-    strategy_exporter::export_class <jac_matrix, jac_matrix_iface, py_jac_matrix_iface_exporter> ("jac_matrix");
+    base_exporter<matrix_iface, py_matrix_iface_exporter>::export_class ("matrix_iface");
+    class_exporter<bdiag_matrix_iface, matrix_iface, py_bdiag_matrix_iface_exporter>::export_class  ("bdiag_matrix_iface");
+    class_exporter<jac_matrix_iface, matrix_iface, py_jac_matrix_iface_exporter>::export_class ("jac_matrix_iface");
+    class_exporter<bdiag_matrix, bdiag_matrix_iface, py_bdiag_matrix_iface_exporter>::export_class ("bdiag_matrix");
+    class_exporter<jac_matrix, jac_matrix_iface, py_jac_matrix_iface_exporter>::export_class ("jac_matrix");
 
   }
 

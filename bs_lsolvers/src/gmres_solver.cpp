@@ -25,9 +25,9 @@ namespace blue_sky
     //  gmres_solver
 
     //! constructor
-    template <class strat_t>
-    gmres_solver<strat_t>::gmres_solver (bs_type_ctor_param /*param*/)
-      : lsolver_iface<strat_t> ()
+    
+    gmres_solver::gmres_solver (bs_type_ctor_param /*param*/)
+      : lsolver_iface ()
     {
       prop = BS_KERNEL.create_object ("prop");
       if (!prop)
@@ -36,39 +36,39 @@ namespace blue_sky
         }
       init_prop ();
 
-      sp_w = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_r = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_s = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_c = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_rs = BS_KERNEL.create_object (fp_array_t::bs_type ());
-      sp_hh = BS_KERNEL.create_object (fp_array_t::bs_type ());
+      sp_w = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_r = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_s = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_c = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_rs = BS_KERNEL.create_object (v_double::bs_type ());
+      sp_hh = BS_KERNEL.create_object (v_double::bs_type ());
     }
 
     //! copy constructor
-    template <class strat_t>
-    gmres_solver<strat_t>::gmres_solver(const gmres_solver &solver)
-      : bs_refcounter (), lsolver_iface<strat_t> ()
+    
+    gmres_solver::gmres_solver(const gmres_solver &solver)
+      : bs_refcounter (), lsolver_iface ()
     {
       if (&solver != this)
         *this = solver;
     }
 
     //! destructor
-    template <class strat_t>
-    gmres_solver<strat_t>::~gmres_solver ()
+    
+    gmres_solver::~gmres_solver ()
     {}
 
     //! set solver's properties
-    template <class strat_t>
-    void gmres_solver<strat_t>::set_prop (sp_prop_t prop_)
+    
+    void gmres_solver::set_prop (sp_prop_t prop_)
     {
       prop = prop_;
 
       init_prop ();
     }
 
-    template <class strat_t> void
-    gmres_solver<strat_t>::init_prop ()
+     void
+    gmres_solver::init_prop ()
       {
         tol_idx = prop->get_index_f (std::string ("tolerance"));
         if (tol_idx < 0)
@@ -104,8 +104,8 @@ namespace blue_sky
             bs_throw_exception ("Can not regidter some properties");
           }
       }
-    template <class strat_t>
-    int gmres_solver<strat_t>::solve (sp_matrix_t matrix, sp_fp_array_t sp_rhs, sp_fp_array_t sp_sol)
+    
+    int gmres_solver::solve (sp_matrix_t matrix, spv_double sp_rhs, spv_double sp_sol)
     {
       BS_ASSERT (matrix);
       BS_ASSERT (sp_rhs->size ());
@@ -113,21 +113,21 @@ namespace blue_sky
       BS_ASSERT (sp_rhs->size () == sp_sol->size ()) (sp_rhs->size ()) (sp_sol->size ());
       BS_ASSERT (prop);
 
-      //fp_type_t *rs, *hh, *c, *s;
-      i_type_t i, j, k, cnt;
-      fp_type_t gamma, t, r_norm, b_norm, den_norm;
-      fp_type_t *cur_h;
+      //t_double *rs, *hh, *c, *s;
+      t_long i, j, k, cnt;
+      t_double gamma, t, r_norm, b_norm, den_norm;
+      t_double *cur_h;
       const double epsmac = 1.e-16;
       const int m = prop->get_i (m_idx);
 
-      fp_type_t *rhs = &(*sp_rhs)[0];
-      fp_type_t *sol = &(*sp_sol)[0];
+      t_double *rhs = &(*sp_rhs)[0];
+      t_double *sol = &(*sp_sol)[0];
       // do barrier at mpi or nothing do at seq (base)
       // in future we can hold instance of barrier_t as a data member
       //barrier_t ().barrier (barrier_t::comm_world_v ());
 
-      i_type_t n = matrix->get_n_rows () * matrix->get_n_block_size ();
-      fp_type_t tol = prop->get_f (tol_idx);
+      t_long n = matrix->get_n_rows () * matrix->get_n_block_size ();
+      t_double tol = prop->get_f (tol_idx);
 
       // check workspace
       //wksp.assign (n * (m + 3) + (m + 2) * (m + 1) + 2 * m, 0);
@@ -140,7 +140,7 @@ namespace blue_sky
       vec_p.resize (cnt);
       for (i = old_n; i < cnt; ++i)
         {
-          vec_p[i] = BS_KERNEL.create_object (fp_array_t::bs_type ());
+          vec_p[i] = BS_KERNEL.create_object (v_double::bs_type ());
         }
       for (i = 0, cnt = m + 1; i < cnt; ++i)
         {
@@ -159,12 +159,12 @@ namespace blue_sky
       sp_hh->resize ((m + 1) * (m + 1));
       sp_hh->assign (0);
       
-      fp_type_t *vec_s          = &(*sp_s)[0];
-      fp_type_t *vec_w          = &(*sp_w)[0];
-      fp_type_t *vec_r          = &(*sp_r)[0];
-      fp_type_t *vec_c          = &(*sp_c)[0];
-      fp_type_t *vec_rs          = &(*sp_rs)[0];
-      fp_type_t *vec_hh          = &(*sp_hh)[0];
+      t_double *vec_s          = &(*sp_s)[0];
+      t_double *vec_w          = &(*sp_w)[0];
+      t_double *vec_r          = &(*sp_r)[0];
+      t_double *vec_c          = &(*sp_c)[0];
+      t_double *vec_rs          = &(*sp_rs)[0];
+      t_double *vec_hh          = &(*sp_hh)[0];
 
       // initialize work arrays
       //s = &wksp[0];
@@ -185,7 +185,7 @@ namespace blue_sky
 
       /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
-      fp_type_t *vec_po = &(*vec_p[0])[0];
+      t_double *vec_po = &(*vec_p[0])[0];
       r_norm = sqrt (mv_vector_inner_product_n (vec_po, vec_po, n));
 
       //BOSOUT (section::solvers, level::low) << "r_norm = " << r_norm << bs_end;
@@ -236,7 +236,7 @@ namespace blue_sky
               else // no precondition (preconditioner=identity_matrix)
                 {
                   //vec_r.assign (vec_p[i - 1].begin (), vec_p[i - 1].end ());
-                  memcpy (vec_r, &(*vec_p[i - 1])[0], n * sizeof (fp_type_t));
+                  memcpy (vec_r, &(*vec_p[i - 1])[0], n * sizeof (t_double));
                 }
 
               //barrier_t ().barrier (barrier_t::comm_world_v ());
@@ -246,10 +246,10 @@ namespace blue_sky
 
               /* modified Gram_Schmidt */
               cur_h = &vec_hh[(i - 1) * (m + 1)];
-              fp_type_t *vec_pi = &(*vec_p[i])[0];
+              t_double *vec_pi = &(*vec_p[i])[0];
               for (j = 0; j < i; ++j)
                 {
-                  fp_type_t *vec_pj = &(*vec_p[j])[0];
+                  t_double *vec_pj = &(*vec_p[j])[0];
                   cur_h[j] = mv_vector_inner_product_n (vec_pj, vec_pi, n);
                   t = -cur_h[j];
 
@@ -312,7 +312,7 @@ namespace blue_sky
 
           /* form linear combination of p's to get solution */
           //vec_w.assign (vec_p[0].begin (), vec_p[0].end ());
-          memcpy (&(vec_w[0]), vec_po, sizeof (fp_type_t) * n);
+          memcpy (&(vec_w[0]), vec_po, sizeof (t_double) * n);
           t = vec_rs[0];
 
           scale_vector_n (vec_w, t, n);
@@ -320,7 +320,7 @@ namespace blue_sky
           for (j = 1; j < i; j++)
             {
               t = vec_rs[j];
-              fp_type_t *vec_pj = &(*vec_p[j])[0];
+              t_double *vec_pj = &(*vec_p[j])[0];
               axpy_n (vec_w, vec_pj, t, n);
             }
 
@@ -337,13 +337,13 @@ namespace blue_sky
             }
           else // no precondition (preconditioner=identity_matrix)
             {
-              memcpy (vec_r, vec_w, n * sizeof (fp_type_t));
+              memcpy (vec_r, vec_w, n * sizeof (t_double));
               //vec_r.assign (vec_w.begin (), vec_w.end ());
             }
 
           //barrier_t ().barrier (barrier_t::comm_world_v ());
 
-          axpy_n (sol, vec_r, (fp_type_t)1.0, n);
+          axpy_n (sol, vec_r, (t_double)1.0, n);
 
           /* check for convergence, evaluate actual residual */
           if (r_norm <= tol)
@@ -360,7 +360,7 @@ namespace blue_sky
               else
                 {
                   //vec_p[0].assign (vec_r.begin (), vec_r.end ());
-                  memcpy (vec_po, vec_r, sizeof (fp_type_t) * n);
+                  memcpy (vec_po, vec_r, sizeof (t_double) * n);
                   i = 0;
                   ++iter;
                 }
@@ -384,7 +384,7 @@ namespace blue_sky
           for (j = 1; j < i + 1; ++j)
             {
               t = vec_rs[j];
-              fp_type_t *vec_pj = &(*vec_p[j])[0];
+              t_double *vec_pj = &(*vec_p[j])[0];
               axpy_n (vec_po, vec_pj, t, n);
             }
         }
@@ -405,8 +405,8 @@ namespace blue_sky
       return 0;
     }
 
-    template <class strat_t>
-    int gmres_solver<strat_t>::solve_prec (sp_matrix_t matrix, sp_fp_array_t rhs, sp_fp_array_t sol)
+    
+    int gmres_solver::solve_prec (sp_matrix_t matrix, spv_double rhs, spv_double sol)
     {
       return solve (matrix, rhs, sol);
     }
@@ -418,8 +418,8 @@ namespace blue_sky
     *
     * @return 0 if success
     */
-    template <class strat_t> int
-    gmres_solver<strat_t>::setup (sp_matrix_t matrix)
+     int
+    gmres_solver::setup (sp_matrix_t matrix)
     {
       if (!matrix)
         {
@@ -436,14 +436,8 @@ namespace blue_sky
     }
 
     //////////////////////////////////////////////////////////////////////////
-    BLUE_SKY_TYPE_STD_CREATE_T_DEF(gmres_solver, (class));
-    BLUE_SKY_TYPE_STD_COPY_T_DEF(gmres_solver, (class));
+    BLUE_SKY_TYPE_STD_CREATE (gmres_solver);
+    BLUE_SKY_TYPE_STD_COPY (gmres_solver);
 
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (gmres_solver<base_strategy_fif>) , 1, (lsolver_iface<base_strategy_fif>), "gmres_solver_fif", "GMRES linear solver", "GMRES linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (gmres_solver<base_strategy_did>) , 1, (lsolver_iface<base_strategy_did>), "gmres_solver_did", "GMRES linear solver", "GMRES linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (gmres_solver<base_strategy_dif>) , 1, (lsolver_iface<base_strategy_dif>), "gmres_solver_dif", "GMRES linear solver", "GMRES linear solver", false);
-
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (gmres_solver<base_strategy_flf>) , 1, (lsolver_iface<base_strategy_flf>), "gmres_solver_flf", "GMRES linear solver", "GMRES linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (gmres_solver<base_strategy_dld>) , 1, (lsolver_iface<base_strategy_dld>), "gmres_solver_dld", "GMRES linear solver", "GMRES linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (gmres_solver<base_strategy_dlf>) , 1, (lsolver_iface<base_strategy_dlf>), "gmres_solver_dlf", "GMRES linear solver", "GMRES linear solver", false);
+    BLUE_SKY_TYPE_IMPL (gmres_solver, lsolver_iface, "gmres_solver", "GMRES linear solver", "GMRES linear solver");
   }

@@ -25,9 +25,9 @@ namespace blue_sky
     //  gs_solver
 
     //! constructor
-    template <class strat_t>
-    gs_solver<strat_t>::gs_solver (bs_type_ctor_param /*param*/)
-      : amg_smoother_iface<strat_t> ()
+    
+    gs_solver::gs_solver (bs_type_ctor_param /*param*/)
+      : amg_smoother_iface ()
     {
       prop = BS_KERNEL.create_object ("prop");
       if (!prop)
@@ -35,34 +35,34 @@ namespace blue_sky
           bs_throw_exception ("Type (prop) not registered");
         }
       init_prop ();
-      sp_r = BS_KERNEL.create_object (fp_array_t::bs_type ());
+      sp_r = BS_KERNEL.create_object (v_double::bs_type ());
     }
 
     //! copy constructor
-    template <class strat_t>
-    gs_solver<strat_t>::gs_solver(const gs_solver &solver)
-      : bs_refcounter (), amg_smoother_iface<strat_t> ()
+    
+    gs_solver::gs_solver(const gs_solver &solver)
+      : bs_refcounter (), amg_smoother_iface ()
     {
       if (&solver != this)
         *this = solver;
     }
 
     //! destructor
-    template <class strat_t>
-    gs_solver<strat_t>::~gs_solver ()
+    
+    gs_solver::~gs_solver ()
     {}
 
     //! set solver's properties
-    template <class strat_t>
-    void gs_solver<strat_t>::set_prop (sp_prop_t prop_)
+    
+    void gs_solver::set_prop (sp_prop_t prop_)
     {
       prop = prop_;
 
       init_prop ();
     }
 
-    template <class strat_t> void
-    gs_solver<strat_t>::init_prop ()
+     void
+    gs_solver::init_prop ()
       {
         tol_idx = prop->get_index_f (std::string ("tolerance"));
         if (tol_idx < 0)
@@ -101,9 +101,9 @@ namespace blue_sky
             bs_throw_exception ("Can not regidter some properties");
           }
       }
-    template <class strat_t>
-    int gs_solver<strat_t>::smooth (sp_bcsr_t matrix, sp_i_array_t cf_markers, const i_type_t iter_number, 
-                                    sp_fp_array_t sp_rhs, sp_fp_array_t sp_sol)
+    
+    int gs_solver::smooth (sp_bcsr_t matrix, spv_long cf_markers, const t_long iter_number, 
+                                    spv_double sp_rhs, spv_double sp_sol)
       {
         BS_ASSERT (matrix);
         BS_ASSERT (sp_rhs->size ());
@@ -111,24 +111,24 @@ namespace blue_sky
         BS_ASSERT (sp_rhs->size () == sp_sol->size ()) (sp_rhs->size ()) (sp_sol->size ());
         BS_ASSERT (matrix->get_n_block_size () >= 1) (matrix->get_n_block_size ());
 
-        i_type_t i, j1, j2, j, cl;
-        fp_type_t d, b;
+        t_long i, j1, j2, j, cl;
+        t_double d, b;
         static const double eps = 1.0e-24;
         bool inv = prop->get_b (invers_idx);
         int  cf  = prop->get_i (cf_type_idx);
 
-        i_type_t n                      = matrix->get_n_rows ();
-        sp_fp_storage_array_t sp_data         = matrix->get_values ();
-        sp_i_array_t          sp_rows         = matrix->get_rows_ptr ();
-        sp_i_array_t          sp_cols         = matrix->get_cols_ind ();
+        t_long n                      = matrix->get_n_rows ();
+        spv_float sp_data         = matrix->get_values ();
+        spv_long          sp_rows         = matrix->get_rows_ptr ();
+        spv_long          sp_cols         = matrix->get_cols_ind ();
 
-        fp_storage_type_t     *data           = &(*sp_data)[0];
-        i_type_t              *rows           = &(*sp_rows)[0];
-        i_type_t              *cols           = &(*sp_cols)[0];
+        t_float     *data           = &(*sp_data)[0];
+        t_long              *rows           = &(*sp_rows)[0];
+        t_long              *cols           = &(*sp_cols)[0];
 
-        fp_type_t *rhs = &(*sp_rhs)[0];
-        fp_type_t *sol = &(*sp_sol)[0];
-        i_type_t *cf_m = 0;
+        t_double *rhs = &(*sp_rhs)[0];
+        t_double *sol = &(*sp_sol)[0];
+        t_long *cf_m = 0;
         if (cf)
           cf_m                  = &(*cf_markers)[0];
         
@@ -156,7 +156,7 @@ namespace blue_sky
 #endif //OTHER_NON_IMPORTANT_PARALLEL
 
         if ((!inv) && (cf!=0))
-          for (i_type_t ii = 0; ii < iter_number; ++ii)
+          for (t_long ii = 0; ii < iter_number; ++ii)
             for (i = 0; i < n; ++i)
               {
                 if ((cf * cf_m[i]) > 0)
@@ -165,7 +165,7 @@ namespace blue_sky
                   }
               }
         if ((inv) && (cf!=0))
-          for (i_type_t ii = 0; ii < iter_number; ++ii)
+          for (t_long ii = 0; ii < iter_number; ++ii)
             for (i = n-1; i >= 0; --i)
               {
                 if ((cf * cf_m[i]) > 0)
@@ -174,13 +174,13 @@ namespace blue_sky
                   }
               }
         if ((!inv) && (cf==0))
-          for (i_type_t ii = 0; ii < iter_number; ++ii)
+          for (t_long ii = 0; ii < iter_number; ++ii)
             for (i = 0; i < n; ++i)
               {
                 GAUSS_LOOP
               }
         if ((inv) && (cf==0))
-          for (i_type_t ii = 0; ii < iter_number; ++ii)
+          for (t_long ii = 0; ii < iter_number; ++ii)
             for (i = n-1; i >= 0; --i)
               {
                 GAUSS_LOOP
@@ -188,8 +188,8 @@ namespace blue_sky
         return 0;
       }
 
-    template <class strat_t>
-    int gs_solver<strat_t>::solve (sp_matrix_t matrix, sp_fp_array_t sp_rhs, sp_fp_array_t sp_sol)
+    
+    int gs_solver::solve (sp_matrix_t matrix, spv_double sp_rhs, spv_double sp_sol)
     {
       BS_ERROR (matrix, "gs_solve");
       BS_ERROR (sp_rhs->size (), "gs_solve");
@@ -198,10 +198,10 @@ namespace blue_sky
 
       int iter;
       const double epsmac = 1e-24;
-      fp_type_t r_norm, b_norm, den_norm;
+      t_double r_norm, b_norm, den_norm;
 
-      fp_type_t *rhs = &(*sp_rhs)[0];
-      //fp_type_t *sol = &(*sp_sol)[0];
+      t_double *rhs = &(*sp_rhs)[0];
+      //t_double *sol = &(*sp_sol)[0];
 
       sp_bcsr_t bcsr;
       if (!dynamic_cast<bcsr_t *> (matrix.lock ()))
@@ -210,10 +210,10 @@ namespace blue_sky
           BS_ASSERT (bcsr);
         }
 
-      i_type_t n = matrix->get_n_rows () * matrix->get_n_block_size ();
-      sp_i_array_t flags;
+      t_long n = matrix->get_n_rows () * matrix->get_n_block_size ();
+      spv_long flags;
 
-      fp_type_t tol = prop->get_f (tol_idx);
+      t_double tol = prop->get_f (tol_idx);
       tol *= tol;
 
       int max_iter  = prop->get_i (max_iters_idx);
@@ -222,7 +222,7 @@ namespace blue_sky
       prop->set_b (success_idx, false);
 
       matrix->init_vector (sp_r);
-      fp_type_t *r = &(*sp_r)[0];
+      t_double *r = &(*sp_r)[0];
 
       matrix->calc_lin_comb (-1.0, 1.0, sp_sol, sp_rhs, sp_r);
       r_norm = mv_vector_inner_product_n (r, r, n);
@@ -274,8 +274,8 @@ namespace blue_sky
       return 0;
     }
 
-    template <class strat_t>
-    int gs_solver<strat_t>::solve_prec(sp_matrix_t matrix, sp_fp_array_t rhs, sp_fp_array_t solution)
+    
+    int gs_solver::solve_prec(sp_matrix_t matrix, spv_double rhs, spv_double solution)
     {
       return solve (matrix, rhs, solution);
     }
@@ -287,8 +287,8 @@ namespace blue_sky
     *
     * @return 0 if success
     */
-    template <class strat_t> int
-    gs_solver<strat_t>::setup (sp_matrix_t matrix)
+     int
+    gs_solver::setup (sp_matrix_t matrix)
     {
       if (!matrix)
         {
@@ -299,15 +299,9 @@ namespace blue_sky
     }
 
     //////////////////////////////////////////////////////////////////////////
-    BLUE_SKY_TYPE_STD_CREATE_T_DEF(gs_solver, (class));
-    BLUE_SKY_TYPE_STD_COPY_T_DEF(gs_solver, (class));
+    BLUE_SKY_TYPE_STD_CREATE (gs_solver);
+    BLUE_SKY_TYPE_STD_COPY (gs_solver);
 
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (gs_solver<base_strategy_fif>) , 1, (lsolver_iface<base_strategy_fif>), "gs_solver_base_fif", "gs linear solver", "gs linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (gs_solver<base_strategy_did>) , 1, (lsolver_iface<base_strategy_did>), "gs_solver_base_did", "gs linear solver", "gs linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (gs_solver<base_strategy_dif>) , 1, (lsolver_iface<base_strategy_dif>), "gs_solver_base_dif", "gs linear solver", "gs linear solver", false);
-
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (gs_solver<base_strategy_flf>) , 1, (lsolver_iface<base_strategy_flf>), "gs_solver_base_flf", "gs linear solver", "gs linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (gs_solver<base_strategy_dld>) , 1, (lsolver_iface<base_strategy_dld>), "gs_solver_base_dld", "gs linear solver", "gs linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (gs_solver<base_strategy_dlf>) , 1, (lsolver_iface<base_strategy_dlf>), "gs_solver_base_dlf", "gs linear solver", "gs linear solver", false);
+    BLUE_SKY_TYPE_IMPL (gs_solver, lsolver_iface, "gs_solver", "gs linear solver", "gs linear solver");
   }
 

@@ -45,11 +45,11 @@ namespace blue_sky
   public:                                                                                                       
                                                                                                                 
     typedef typename strategy_t::matrix_t                       matrix_t;                                       
-    typedef typename strategy_t::fp_type_t                      fp_type_t;                                      
+    typedef typename strategy_t::t_double                      t_double;                                      
     typedef typename strategy_t::i_type_t                       i_type_t;                                       
     typedef typename strategy_t::fp_vector_type                 fp_vector_type_t;                               
     typedef lsolver_iface <strategy_t>                          this_t;                                         
-    typedef prop_iface<fp_type_t, i_type_t, std::string, bool>  prop_t;                                         
+    typedef prop_iface<t_double, i_type_t, std::string, bool>  prop_t;                                         
     typedef smart_ptr<this_t, true>                             sp_this_t;                                      
     typedef smart_ptr<prop_t, true>                             sp_prop_t;                                      
                                                                                                                 
@@ -59,7 +59,7 @@ namespace blue_sky
     WRAP_PURE_METHOD    (set_prec, void, 1, (sp_this_t&));                                                      
     WRAP_PURE_METHOD    (set_prop, void, 1, (sp_prop_t&));                                                      
     WRAP_PURE_METHOD_R  (get_prop, sp_prop_t&, 0, (empty_arg__));                                               
-    WRAP_PURE_METHOD_R_CONST  (get_final_residual, fp_type_t, 0, (empty_arg__));                                      
+    WRAP_PURE_METHOD_R_CONST  (get_final_residual, t_double, 0, (empty_arg__));                                      
     WRAP_PURE_METHOD_R_CONST  (get_niters, int, 0, (empty_arg__));                                                    
     WRAP_PURE_METHOD_R_CONST  (py_str, std::string, 0, (empty_arg__));                                                    
                                                                                                                 
@@ -81,14 +81,14 @@ namespace blue_sky
   public:                                                                                                       
                                                                                                                 
     typedef typename strategy_t::matrix_t                       matrix_t;                                       
-    typedef typename strategy_t::fp_type_t                      fp_type_t;                                      
+    typedef typename strategy_t::t_double                      t_double;                                      
     typedef typename strategy_t::i_type_t                       i_type_t;                                       
     typedef typename strategy_t::fp_vector_type                 fp_vector_type_t;                               
     typedef typename strategy_t::fp_storage_vector_type         fp_storage_vector_type_t;
     typedef typename strategy_t::i_vector_type                  i_vector_type_t;
     typedef bcsr_matrix_iface<fp_vector_type_t, i_vector_type_t, fp_storage_vector_type_t> bcsr_t;
     typedef lsolver_iface <strategy_t>                          this_t;                                         
-    typedef prop_iface<fp_type_t, i_type_t, std::string, bool>  prop_t;                                         
+    typedef prop_iface<t_double, i_type_t, std::string, bool>  prop_t;                                         
     typedef smart_ptr<this_t, true>                             sp_this_t;                                      
     typedef smart_ptr<prop_t, true>                             sp_prop_t;                                      
                                                                                                                 
@@ -99,7 +99,7 @@ namespace blue_sky
     WRAP_PURE_METHOD    (set_prec, void, 1, (sp_this_t&));                                                      
     WRAP_PURE_METHOD    (set_prop, void, 1, (sp_prop_t&));                                                      
     WRAP_PURE_METHOD_R  (get_prop, sp_prop_t&, 0, (empty_arg__));                                               
-    WRAP_PURE_METHOD_R_CONST  (get_final_residual, fp_type_t, 0, (empty_arg__));                                      
+    WRAP_PURE_METHOD_R_CONST  (get_final_residual, t_double, 0, (empty_arg__));                                      
     WRAP_PURE_METHOD_R_CONST  (get_niters, int, 0, (empty_arg__));                                                    
     WRAP_PURE_METHOD_R_CONST  (py_str, std::string, 0, (empty_arg__));                                                    
                                                                                                                 

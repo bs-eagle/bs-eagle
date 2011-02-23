@@ -14,23 +14,16 @@ namespace blue_sky
   /** 
    * @brief interface class for block CSR matrix storage and manipulation
    */
-  template <class strat_t>
-  class BS_API_PLUGIN jac_matrix: public jac_matrix_iface<strat_t>
+  
+  class BS_API_PLUGIN jac_matrix: public jac_matrix_iface
     {
     public:
 
-      typedef typename strat_t::fp_vector_type                  fp_vector_type_t;
-      typedef typename strat_t::i_vector_type                   i_vector_type_t;
-      typedef typename strat_t::fp_storage_vector_type          fp_storage_vector_type_t;
-      typedef typename strat_t::fp_type_t                       fp_type_t;
-      typedef typename strat_t::i_type_t                        i_type_t;
-      typedef typename strat_t::fp_storage_type_t               fp_storage_type_t;
+      typedef bcsr_matrix_iface                                 bcsr_matrix_iface_t;
+      typedef bdiag_matrix_iface                                bdiag_matrix_iface_t;
 
-      typedef bcsr_matrix_iface<strat_t>                        bcsr_matrix_iface_t;
-      typedef bdiag_matrix_iface<strat_t>                       bdiag_matrix_iface_t;
-
-      typedef bcsr<strat_t>                                     bcsr_matrix_t;
-      typedef bdiag_matrix<strat_t>                             bdiag_matrix_t;
+      typedef bcsr                                              bcsr_matrix_t;
+      typedef bdiag_matrix                                      bdiag_matrix_t;
 
       typedef smart_ptr<bcsr_matrix_t, true>                    sp_bcsr_matrix_t;
       typedef smart_ptr<bdiag_matrix_t, true>                   sp_bdiag_matrix_t;
@@ -38,20 +31,11 @@ namespace blue_sky
       typedef smart_ptr<bcsr_matrix_iface_t, true>              sp_bcsr_matrix_iface_t;
       typedef smart_ptr<bdiag_matrix_iface_t, true>             sp_bdiag_matrix_iface_t;
 
-      typedef jac_matrix<strat_t>                               this_t;
-      typedef matrix_iface<strat_t>                             base_t;
-
-      typedef bs_array<fp_type_t>                               fp_array_t;
-      typedef bs_array<i_type_t>                                i_array_t;
-      typedef bs_array<fp_storage_type_t>                       fp_storage_array_t;
-
-      typedef smart_ptr<fp_array_t, true>                       sp_fp_array_t;
-      typedef smart_ptr<i_array_t, true>                        sp_i_array_t;
-      typedef smart_ptr<fp_storage_array_t, true>               sp_fp_storage_array_t;
-
+      typedef jac_matrix                                        this_t;
+      typedef matrix_iface                                      base_t;
 
       //blue-sky class declaration
-      BLUE_SKY_TYPE_DECL_T(jac_matrix);
+      BLUE_SKY_TYPE_DECL (jac_matrix);
 
       //! destructor
       virtual ~jac_matrix ()
@@ -65,7 +49,7 @@ namespace blue_sky
       //! calculate matrix vector product, v -- input vector, r -- output vector
       //! r += A * v
       //! return 0 if success
-      virtual int matrix_vector_product (sp_fp_array_t v, sp_fp_array_t r) const
+      virtual int matrix_vector_product (spv_double v, spv_double r) const
       {
         return sp_accum_matrix->matrix_vector_product (v, r) 
                || sp_flux_matrix->matrix_vector_product (v, r) 
@@ -75,7 +59,7 @@ namespace blue_sky
       //! calculate matrix^t vector product, v -- input vector, r -- output vector
       //! r += A^T * v
       //! return 0 if success
-      virtual int matrix_vector_product_t (sp_fp_array_t v, sp_fp_array_t r) const
+      virtual int matrix_vector_product_t (spv_double v, spv_double r) const
       {
         return sp_accum_matrix->matrix_vector_product_t (v, r) 
                || sp_flux_matrix->matrix_vector_product_t (v, r) 
@@ -87,10 +71,10 @@ namespace blue_sky
       //! v, u -- input vector
       //! r -- output vector
       //! return 0 if success
-      virtual int calc_lin_comb (fp_type_t alpha, fp_type_t beta, sp_fp_array_t u, sp_fp_array_t v, sp_fp_array_t r) const;
+      virtual int calc_lin_comb (t_double alpha, t_double beta, spv_double u, spv_double v, spv_double r) const;
 
       //! return total amount of allocated memory in bytes
-      virtual fp_type_t get_allocated_memory_in_mbytes () const
+      virtual t_double get_allocated_memory_in_mbytes () const
       {
         return sp_accum_matrix->get_allocated_memory_in_mbytes ()
                + sp_flux_matrix->get_allocated_memory_in_mbytes ()
@@ -98,19 +82,19 @@ namespace blue_sky
       }
 
       //! return block size 
-      virtual i_type_t get_n_block_size () const
+      virtual t_long get_n_block_size () const
       {
         return sp_flux_matrix->get_n_block_size ();
       }
 
       //! return number of rows in matrix 
-      virtual i_type_t get_n_rows () const 
+      virtual t_long get_n_rows () const 
       {
         return sp_flux_matrix->get_n_rows ();
       }
 
       //! return number of cols in matrix (return -1 in number of columns is unknown)
-      virtual i_type_t get_n_cols () const
+      virtual t_long get_n_cols () const
       {
         return sp_flux_matrix->get_n_cols ();
       }
@@ -121,10 +105,10 @@ namespace blue_sky
           return sp_flux_matrix->is_square ();
         }
       //! initialize vector
-      virtual void init_vector (sp_fp_array_t v) const
+      virtual void init_vector (spv_double v) const
         {
           v->resize (sp_flux_matrix->get_n_rows () * sp_flux_matrix->get_n_block_size ());
-          memset (&(*v)[0], 0, sizeof (fp_type_t) * v->size ());
+          memset (&(*v)[0], 0, sizeof (t_double) * v->size ());
         }
 
       //-----------------------------------------
@@ -189,78 +173,6 @@ namespace blue_sky
 
     };
 
-template <class strat_t> int
-jac_matrix<strat_t>::calc_lin_comb (fp_type_t alpha, 
-                                    fp_type_t beta, 
-                                    sp_fp_array_t u_,
-                                    sp_fp_array_t v_, 
-                                    sp_fp_array_t r_) const
-{
-  static const fp_type_t eps = fp_type_t (1.0e-12);
-  i_type_t i, n;
-  int r_code = 0;
-
-  fp_type_t *v = &(*v_)[0];
-  fp_type_t *r = &(*r_)[0];
-
-  fp_type_t d = beta;
-  if (fabs (alpha) > eps)
-    {
-      //BS_ASSERT (u.size ());
-      //BS_ASSERT (r.size () >= (size_t)(n_rows * n_block_size));
-      d /= alpha;
-    }
-  if (fabs (beta) > eps)
-    {
-      //BS_ASSERT (v.size ());
-      //BS_ASSERT (v.size () == r.size ())(v.size ())(r.size ());
-      //BS_ASSERT (r.size () >= (size_t)(n_rows * n_block_size)) (r.size ()) (n_rows) (n_block_size) (n_rows * n_block_size);
-    }
-
-  n = (i_type_t)r_->size ();
-  if (fabs (beta) > eps)
-    {
-      i = 0;
-      i_type_t n2 = n - (n % 4);
-      // TODO:
-      for (; i < n2; i+=4)
-        {
-          r[i + 0] = v[i + 0] * d;
-          r[i + 1] = v[i + 1] * d;
-          r[i + 2] = v[i + 2] * d;
-          r[i + 3] = v[i + 3] * d;
-        }
-
-      for (; i < n; ++i)
-        r[i] = v[i] * d;
-    }
-  else
-    {
-      memset (r, 0, sizeof (fp_type_t) * n);
-      //r.assign (n, 0);
-    }
-
-  if (fabs (alpha) > eps)
-    {
-      matrix_vector_product (u_, r_);
-      i = 0;
-      n = (i_type_t)r_->size ();
-      i_type_t n2 = n - (n % 4);
-      // TODO:
-      for (; i < n2; i+=4)
-        {
-          r[i + 0] *= alpha;
-          r[i + 1] *= alpha;
-          r[i + 2] *= alpha;
-          r[i + 3] *= alpha;
-        }
-
-      for (; i < n; ++i)
-        r[i] *= alpha;
-    }
-
-  return r_code;
-}
 
 
 }//namespace blue_sky

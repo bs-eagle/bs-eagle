@@ -13,14 +13,14 @@ using namespace boost::python;
 
 namespace blue_sky
 {
-  template <class fp_type_t, class i_type_t, class s_type_t, class b_type_t>
-  prop<fp_type_t, i_type_t, s_type_t, b_type_t>::prop (bs_type_ctor_param) 
-        : prop_iface<fp_type_t, i_type_t, s_type_t, b_type_t> ()
+  template <class t_double, class i_type_t, class s_type_t, class b_type_t>
+  prop<t_double, i_type_t, s_type_t, b_type_t>::prop (bs_type_ctor_param) 
+        : prop_iface<t_double, i_type_t, s_type_t, b_type_t> ()
     {
     }
-  template <class fp_type_t, class i_type_t, class s_type_t, class b_type_t>
-  prop<fp_type_t, i_type_t, s_type_t, b_type_t>::prop (const prop& rhs) 
-        : bs_refcounter (), prop_iface<fp_type_t, i_type_t, s_type_t, b_type_t> ()
+  template <class t_double, class i_type_t, class s_type_t, class b_type_t>
+  prop<t_double, i_type_t, s_type_t, b_type_t>::prop (const prop& rhs) 
+        : bs_refcounter (), prop_iface<t_double, i_type_t, s_type_t, b_type_t> ()
     {
       *this = rhs;
     }

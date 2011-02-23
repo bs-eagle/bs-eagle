@@ -21,9 +21,9 @@ namespace python {
     using namespace boost::python;
 
 
-    strategy_exporter::export_class <dens_matrix_iface, matrix_iface, py_dens_matrix_iface_exporter> ("dens_matrix_iface");
-    strategy_exporter::export_class <dens_matrix, dens_matrix_iface, py_dens_matrix_iface_exporter> ("dens_matrix");
-    strategy_exporter::export_base  <dens_matrix_tools, py_matrix_dens_tools_exporter> ("dens_matrix_tools");
+    class_exporter<dens_matrix_iface, matrix_iface, py_dens_matrix_iface_exporter>::export_class ("dens_matrix_iface");
+    class_exporter<dens_matrix, dens_matrix_iface, py_dens_matrix_iface_exporter>::export_class ("dens_matrix");
+    base_exporter<dens_matrix_tools, py_matrix_dens_tools_exporter>::export_class ("dens_matrix_tools");
   }
 
 }	// namespace python

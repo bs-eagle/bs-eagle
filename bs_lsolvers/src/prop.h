@@ -15,8 +15,8 @@
 namespace blue_sky
 {
   
-  template <class fp_type_t, class i_type_t, class s_type_t, class b_type_t>
-  class BS_API_PLUGIN prop : public prop_iface<fp_type_t, i_type_t, s_type_t, b_type_t>
+  template <class t_double, class i_type_t, class s_type_t, class b_type_t>
+  class BS_API_PLUGIN prop : public prop_iface<t_double, i_type_t, s_type_t, b_type_t>
     {
       // ------------------------------------
       // METHODS
@@ -30,7 +30,7 @@ namespace blue_sky
       // ------------------------------------
     public:
       //! add new floating point property to the list (return index of the property or < 0 if error occur)
-      virtual int add_property_f (const fp_type_t def_value, const std::string &short_name, const std::string &description)
+      virtual int add_property_f (const t_double def_value, const std::string &short_name, const std::string &description)
         {
           return fp_impl.add (def_value, short_name, description);
         }
@@ -87,7 +87,7 @@ namespace blue_sky
         }
 
       //! return property value
-      virtual const fp_type_t get_f (const int idx) const
+      virtual const t_double get_f (const int idx) const
         {
           return fp_impl.get (idx);
         }
@@ -111,7 +111,7 @@ namespace blue_sky
         }
 
       //! set value
-      virtual void set_f (const int idx, const fp_type_t value)
+      virtual void set_f (const int idx, const t_double value)
         {
           fp_impl.set (idx, value);
         }
@@ -211,7 +211,7 @@ namespace blue_sky
       // VARIABLES
       // ------------------------------
     protected:
-      prop_impl <fp_type_t> fp_impl;
+      prop_impl <t_double> fp_impl;
       prop_impl <i_type_t>  i_impl;
       prop_impl <s_type_t>  s_impl;
       prop_impl <b_type_t>  b_impl;

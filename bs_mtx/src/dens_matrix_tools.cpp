@@ -16,36 +16,36 @@ using namespace boost::python;
 
 namespace blue_sky
 {
-  template <class strat_t>
-  dens_matrix_tools<strat_t>::dens_matrix_tools (bs_type_ctor_param) 
-        : dens_matrix_tools_iface<strat_t> ()
+  
+  dens_matrix_tools::dens_matrix_tools (bs_type_ctor_param) 
+        : dens_matrix_tools_iface ()
     {
     }
-  template <class strat_t>
-  dens_matrix_tools <strat_t>::dens_matrix_tools (const dens_matrix_tools <strat_t>& /*src*/) : bs_refcounter ()
+  
+  dens_matrix_tools ::dens_matrix_tools (const dens_matrix_tools & /*src*/) : bs_refcounter ()
      {
      }
 
-template <class strat_t> int
-dens_matrix_tools<strat_t>::random_init (sp_dens_t matrix, 
-                                         const i_type_t ni, 
-                                         const i_type_t nj,
-                                         const i_type_t block_size,
-                                         const fp_type_t rand_value_dispersion 
+ int
+dens_matrix_tools::random_init (sp_dens_t matrix, 
+                                         const t_long ni, 
+                                         const t_long nj,
+                                         const t_long block_size,
+                                         const t_double rand_value_dispersion 
                                          ) const
 {
   if (matrix->init (ni, nj, block_size))
     return -2;
 
-  fp_storage_type_t *v = &(*(matrix->get_values ()))[0];
+  t_float *v = &(*(matrix->get_values ()))[0];
 
   srand ((unsigned)time( NULL ));
   
-  for (i_type_t i = 0; i < ni; ++i)
+  for (t_long i = 0; i < ni; ++i)
     {
-      for (i_type_t j = 0; j < nj; ++j)
+      for (t_long j = 0; j < nj; ++j)
         {
-          v[i * nj + j] = (fp_storage_type_t)rand () / (fp_storage_type_t)RAND_MAX * (fp_storage_type_t)rand_value_dispersion;
+          v[i * nj + j] = (t_float)rand () / (t_float)RAND_MAX * (t_float)rand_value_dispersion;
         }
     }
   return 0;
@@ -54,14 +54,8 @@ dens_matrix_tools<strat_t>::random_init (sp_dens_t matrix,
 /////////////////////////////////BS Register
 /////////////////////////////////Stuff//////////////////////////
 
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(dens_matrix_tools, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(dens_matrix_tools, (class));
+  BLUE_SKY_TYPE_STD_CREATE (dens_matrix_tools);
+  BLUE_SKY_TYPE_STD_COPY (dens_matrix_tools);
 
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (dens_matrix_tools<base_strategy_fif>), 1,  (dens_matrix_tools_iface <base_strategy_fif>), "dens_matrix_tools_fif", "Tools for Dens Matrix class", "Tools realization of Dens Matricies", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (dens_matrix_tools<base_strategy_did>), 1,  (dens_matrix_tools_iface <base_strategy_did>), "dens_matrix_tools_did", "Tools for Dens Matrix class", "Tools realization of Dens Matricies", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (dens_matrix_tools<base_strategy_dif>), 1,  (dens_matrix_tools_iface <base_strategy_dif>), "dens_matrix_tools_dif", "Tools for Dens Matrix class", "Tools realization of Dens Matricies", false);
-
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (dens_matrix_tools<base_strategy_flf>), 1,  (dens_matrix_tools_iface <base_strategy_flf>), "dens_matrix_tools_flf", "Tools for Dens Matrix class", "Tools realization of Dens Matricies", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (dens_matrix_tools<base_strategy_dld>), 1,  (dens_matrix_tools_iface <base_strategy_dld>), "dens_matrix_tools_dld", "Tools for Dens Matrix class", "Tools realization of Dens Matricies", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (dens_matrix_tools<base_strategy_dlf>), 1,  (dens_matrix_tools_iface <base_strategy_dlf>), "dens_matrix_tools_dlf", "Tools for Dens Matrix class", "Tools realization of Dens Matricies", false);
+  BLUE_SKY_TYPE_IMPL (dens_matrix_tools, dens_matrix_tools_iface, "dens_matrix_tools", "Tools for Dens Matrix class", "Tools realization of Dens Matricies");
 }  // blue_sky namespace

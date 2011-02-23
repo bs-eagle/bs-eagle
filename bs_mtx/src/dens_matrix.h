@@ -8,33 +8,18 @@ namespace blue_sky
   /** 
    * @brief interface class for block CSR matrix storage and manipulation
    */
-  template <class strat_t>
-  class BS_API_PLUGIN dens_matrix: public dens_matrix_iface<strat_t>
+  class BS_API_PLUGIN dens_matrix: public dens_matrix_iface
     {
 
     public:
-      typedef matrix_iface <strat_t>                            base_t;
-      typedef typename strat_t::fp_vector_type                  fp_vector_type_t;
-      typedef typename strat_t::i_vector_type                   i_vector_type_t;
-      typedef typename strat_t::fp_storage_vector_type          fp_storage_vector_type_t;
-      typedef typename strat_t::fp_type_t                       fp_type_t;
-      typedef typename strat_t::i_type_t                        i_type_t;
-      typedef typename strat_t::fp_storage_type_t               fp_storage_type_t;
+      typedef matrix_iface                                      base_t;
 
-      typedef bs_array<fp_type_t>                               fp_array_t;
-      typedef bs_array<i_type_t>                                i_array_t;
-      typedef bs_array<fp_storage_type_t>                       fp_storage_array_t;
-
-      typedef smart_ptr<fp_array_t, true>                       sp_fp_array_t;
-      typedef smart_ptr<i_array_t, true>                        sp_i_array_t;
-      typedef smart_ptr<fp_storage_array_t, true>               sp_fp_storage_array_t;
-
-      typedef dens_matrix_iface<strat_t>                        dens_matrix_iface_t;
+      typedef dens_matrix_iface                                 dens_matrix_iface_t;
       typedef smart_ptr<dens_matrix_iface_t, true>              sp_dens_matrix_iface_t;
-      typedef dens_matrix <strat_t>                             this_t;
+      typedef dens_matrix                                       this_t;
 
       //blue-sky class declaration
-      BLUE_SKY_TYPE_DECL_T(dens_matrix);
+      BLUE_SKY_TYPE_DECL (dens_matrix);
     public:
       
       //! destructor
@@ -48,45 +33,45 @@ namespace blue_sky
       //! calculate matrix vector product, v -- input vector, r -- output vector
       //! r += A * v
       //! return 0 if success
-      virtual int matrix_vector_product (sp_fp_array_t v, sp_fp_array_t r) const;
+      virtual int matrix_vector_product (spv_double v, spv_double r) const;
 
       //! calculate matrix^t vector product, v -- input vector, r -- output vector
       //! r += A^T * v
       //! return 0 if success
-      virtual int matrix_vector_product_t (sp_fp_array_t v, sp_fp_array_t r) const;
+      virtual int matrix_vector_product_t (spv_double v, spv_double r) const;
 
       //! calculate linear combination r = alpha * Au + beta * v
       //! alpha, beta -- scalar
       //! v, u -- input vector
       //! r -- output vector
       //! return 0 if success
-      virtual int calc_lin_comb (fp_type_t alpha, fp_type_t beta, sp_fp_array_t u, sp_fp_array_t v, sp_fp_array_t r) const;
+      virtual int calc_lin_comb (t_double alpha, t_double beta, spv_double u, spv_double v, spv_double r) const;
 
       //! return total amount of allocated memory in bytes
-      virtual fp_type_t get_allocated_memory_in_mbytes () const
+      virtual t_double get_allocated_memory_in_mbytes () const
         {
-          fp_type_t d = 0;
+          t_double d = 0;
           
           d += sizeof (this);
-          d += sizeof (fp_storage_type_t) * values->size ();
+          d += sizeof (t_float) * values->size ();
           d /= 1024 * 1024;
           return d;
         }
 
       //! return block size 
-      virtual i_type_t get_n_block_size () const
+      virtual t_long get_n_block_size () const
       {
         return 1;
       }
 
       //! return number of rows in matrix 
-      virtual i_type_t get_n_rows () const 
+      virtual t_long get_n_rows () const 
       {
         return n_rows;
       }
 
       //! return number of cols in matrix (return -1 in number of columns is unknown)
-      virtual i_type_t get_n_cols () const
+      virtual t_long get_n_cols () const
       {
         return n_cols;
       }
@@ -97,10 +82,10 @@ namespace blue_sky
           return n_cols == n_rows;
         }
       //! initialize vector
-      virtual void init_vector (sp_fp_array_t v) const
+      virtual void init_vector (spv_double v) const
         {
           v->resize (n_rows);
-          memset (&(*v)[0], 0, sizeof (fp_type_t) * n_rows);
+          memset (&(*v)[0], 0, sizeof (t_double) * n_rows);
         }
 
       //-----------------------------------------
@@ -125,7 +110,7 @@ namespace blue_sky
        * 
        * @return 0 if success
        */
-      virtual int init (const i_type_t new_n_rows, const i_type_t new_n_cols, const i_type_t calc_block_size);
+      virtual int init (const t_long new_n_rows, const t_long new_n_cols, const t_long calc_block_size);
 
       /** 
        * @brief make a copy of given matrix
@@ -139,7 +124,7 @@ namespace blue_sky
       /** 
        * @brief return reference to the vector of values 
        */
-      virtual sp_fp_storage_array_t get_values ()
+      virtual spv_float get_values ()
         {
           return values;
         }
@@ -157,7 +142,7 @@ namespace blue_sky
        * @brief return size of the calculation block in matrix vector product
        *        -1 -- use sequential algorithm
        */
-      virtual i_type_t get_calc_block_size () const
+      virtual t_long get_calc_block_size () const
         {
           return calc_block_size;
         }
@@ -170,7 +155,7 @@ namespace blue_sky
        * 
        * @param block_size      -- <INPUT> new calculation block size (-1 for sequential calculation)
        */
-      virtual void set_calc_block_size (const i_type_t block_size)
+      virtual void set_calc_block_size (const t_long block_size)
         {
           calc_block_size = block_size;
         }
@@ -188,15 +173,15 @@ namespace blue_sky
       virtual std::string py_str () const;
 #endif //BSPY_EXPORTING_PLUGIN
     protected:
-      void block_mv_product (i_type_t row_block, i_type_t col_block, const fp_type_t *v, fp_type_t *r) const;
-      void block_mv_product_t (i_type_t row_block, i_type_t col_block, const fp_type_t *v, fp_type_t *r) const;
+      void block_mv_product (t_long row_block, t_long col_block, const t_double *v, t_double *r) const;
+      void block_mv_product_t (t_long row_block, t_long col_block, const t_double *v, t_double *r) const;
 
     protected:
-      i_type_t n_rows;                  //!< number of rows in matrix
-      i_type_t n_cols;                  //!< number of columns in matrix
-      i_type_t calc_block_size;         //!< block size used in calculation method (don't affect on matrix storaging), -1 for sequential calculation 
+      t_long n_rows;                  //!< number of rows in matrix
+      t_long n_cols;                  //!< number of columns in matrix
+      t_long calc_block_size;         //!< block size used in calculation method (don't affect on matrix storaging), -1 for sequential calculation 
       //fp_storage_vector_type_t values;    //!< matrix values stored as linear vector by rows (i, j) -> (i * n_rows + j)
-      sp_fp_storage_array_t values;
+      spv_float values;
     };
 
 }//namespace blue_sky
