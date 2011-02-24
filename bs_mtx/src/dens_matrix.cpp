@@ -5,7 +5,6 @@
  */
 #include <sstream>
 
-#include "bs_mtx_stdafx.h"
 #include "dens_matrix.h" 
 #include "pyublas/numpy.hpp"
 

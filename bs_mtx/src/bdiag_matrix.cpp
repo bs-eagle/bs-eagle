@@ -5,7 +5,6 @@
  * @date 2009-08-18
  */
 
-#include "bs_mtx_stdafx.h"
 #include "bdiag_matrix.h"
 #include "strategies.h"
 

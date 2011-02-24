@@ -4,7 +4,6 @@
  * \author Sergey Miryanov
  * \date 23.03.2009
  * */
-#include "bs_mtx_stdafx.h"
 
 #include "bcsr.h"
 #include "bdiag_matrix.h"

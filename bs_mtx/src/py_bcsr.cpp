@@ -3,7 +3,6 @@
 * \brief  Python wrapper for BCSR matrices
 * \date 2008-04-04
 */
-#include "bs_mtx_stdafx.h"
 #include "py_bcsr.h"
 #include "bs_object_base.h"
 

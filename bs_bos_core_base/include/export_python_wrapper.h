@@ -173,7 +173,7 @@ namespace python {
     }
   };
 
-
+#if 0
   struct strategy_exporter
   {
     template <template <typename> class class_t, template <typename> class base_t, template <typename> class post_exporter_t>
@@ -228,6 +228,7 @@ namespace python {
       class_exporter <class_t <base_strategy_dlf>,   base_t <base_strategy_dlf>,   post_exporter_t, class_type_t>::export_class (name + "_dlf");
     }
   };
+#endif //0
 #if 0  
   struct matrix_exporter
   {

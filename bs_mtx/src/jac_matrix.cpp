@@ -5,7 +5,6 @@
  * @date 2009-08-14
  */
 
-#include "bs_mtx_stdafx.h"
 #include "jac_matrix.h"
 
 namespace blue_sky

@@ -6,7 +6,6 @@
  */
 #include "strategies.h"
 
-#include "bs_mtx_stdafx.h"
 #include "bcsr.h"
 
 using namespace std;
