@@ -4,7 +4,7 @@
 * \author Miryanov Sergey
 * \date 2008-04-04
 */
-#include "bs_lsolvers_stdafx.h"
+//#include "bs_lsolvers_stdafx.h"
 #include "py_prop.h"
 #include "prop.h"
 

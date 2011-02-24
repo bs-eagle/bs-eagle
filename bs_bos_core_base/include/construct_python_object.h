@@ -7,6 +7,7 @@
 #ifndef BS_CONSTRUCT_PYTHON_OBJECT_H_
 #define BS_CONSTRUCT_PYTHON_OBJECT_H_
 
+#include "bs_kernel.h"
 #include "throw_exception.h"
 #include "py_object_handler.h"
 
