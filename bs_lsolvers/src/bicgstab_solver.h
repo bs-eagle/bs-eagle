@@ -13,7 +13,6 @@
 #include "lsolver_iface.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
-#include "strategies.h"
 #include "matrix_iface.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
