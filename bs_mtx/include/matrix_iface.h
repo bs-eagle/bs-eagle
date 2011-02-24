@@ -11,7 +11,6 @@
 #include "bs_assert.h"
 #include "bs_tree.h"
 #include "smart_ptr.h"
-//#include "bsvector.h"
 #include "bs_array.h"
 #include "conf.h"
 
