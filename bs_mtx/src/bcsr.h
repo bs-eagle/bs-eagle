@@ -19,40 +19,20 @@ namespace blue_sky
   /** 
    * @brief interface class for block CSR matrix storage and manipulation
    */
-  template <class strat_t>
-  class BS_API_PLUGIN bcsr: public bcsr_amg_matrix_iface<strat_t>
+  class BS_API_PLUGIN bcsr: public bcsr_amg_matrix_iface
     {
 
     public:
 
-      typedef matrix_iface <strat_t>                            base_t;
-      typedef typename strat_t::fp_vector_type                  fp_vector_type_t;
-      typedef typename strat_t::i_vector_type                   i_vector_type_t;
-      typedef typename strat_t::fp_storage_vector_type          fp_storage_vector_type_t;
-      typedef typename strat_t::fp_type_t                       fp_type_t;
-      typedef typename strat_t::i_type_t                        i_type_t;
-      typedef typename strat_t::fp_storage_type_t               fp_storage_type_t;
-
-      typedef bs_array<fp_type_t>                               fp_array_t;
-      typedef bs_array<i_type_t>                                i_array_t;
-      typedef bs_array<fp_storage_type_t>                       fp_storage_array_t;
-
-      typedef smart_ptr<fp_array_t, true>                       sp_fp_array_t;
-      typedef smart_ptr<i_array_t, true>                        sp_i_array_t;
-      typedef smart_ptr<fp_storage_array_t, true>               sp_fp_storage_array_t;
-
-      typedef bcsr_matrix_iface<strat_t>                        bcsr_matrix_iface_t;
+      typedef matrix_iface                                      base_t;
+      typedef bcsr_matrix_iface                                 bcsr_matrix_iface_t;
       typedef smart_ptr <bcsr_matrix_iface_t, true>             sp_bcsr_matrix_iface_t;
-      typedef bcsr<strat_t>                                     this_t;
+      typedef bcsr                                              this_t;
 
       //blue-sky class declaration
-      BLUE_SKY_TYPE_DECL_T(bcsr);
+      BLUE_SKY_TYPE_DECL (bcsr);
     public:
-/*
-      //! constructor
-      bcsr ()
-        {};
-*/
+      
       //! destructor
       virtual ~bcsr ()
         {};
@@ -64,7 +44,7 @@ namespace blue_sky
       //! calculate matrix vector product, v -- input vector, r -- output vector
       //! r += A * v
       //! return 0 if success
-      virtual int matrix_vector_product (sp_fp_array_t v, sp_fp_array_t r) const
+      virtual int matrix_vector_product (spv_double v, spv_double r) const
       {
         return matrix_vector_product_internal <false> (v, r);
       }
@@ -72,33 +52,33 @@ namespace blue_sky
       //! calculate matrix^t vector product, v -- input vector, r -- output vector
       //! r += A^T * v
       //! return 0 if success
-      virtual int matrix_vector_product_t (sp_fp_array_t v, sp_fp_array_t r) const;
+      virtual int matrix_vector_product_t (spv_double v, spv_double r) const;
 
       //! calculate linear combination r = alpha * Au + beta * v
       //! alpha, beta -- scalar
       //! v, u -- input vector
       //! r -- output vector
       //! return 0 if success
-      virtual int calc_lin_comb (fp_type_t alpha, fp_type_t beta, sp_fp_array_t u, 
-                                 sp_fp_array_t v, sp_fp_array_t r) const;
+      virtual int calc_lin_comb (t_double alpha, t_double beta, spv_double u, 
+                                 spv_double v, spv_double r) const;
 
       //! return total amount of allocated memory in bytes
-      virtual fp_type_t get_allocated_memory_in_mbytes () const;
+      virtual t_double get_allocated_memory_in_mbytes () const;
 
       //! return block size 
-      virtual i_type_t get_n_block_size () const
+      virtual t_long get_n_block_size () const
       {
         return n_block_size;
       }
 
       //! return number of rows in matrix 
-      virtual i_type_t get_n_rows () const 
+      virtual t_long get_n_rows () const 
       {
         return n_rows;
       }
 
       //! return number of cols in matrix (return -1 in number of columns is unknown)
-      virtual i_type_t get_n_cols () const
+      virtual t_long get_n_cols () const
       {
         return n_cols;
       }
@@ -110,11 +90,11 @@ namespace blue_sky
         }
 
       //! initialize vector
-      virtual void init_vector (sp_fp_array_t v) const
+      virtual void init_vector (spv_double v) const
         {
           //v->resize (get_n_rows () * get_n_block_size (), 0);
           v->resize (get_n_rows () * get_n_block_size ());
-          memset (&(*v)[0], 0, sizeof (fp_type_t) * v->size ());
+          memset (&(*v)[0], 0, sizeof (t_double) * v->size ());
         }
 
       //-----------------------------------------
@@ -134,8 +114,8 @@ namespace blue_sky
        * 
        * @return 0 if success
        */
-      virtual int init_by_arrays (const i_type_t n_rows_, const i_type_t n_cols_, const i_type_t n_block_size_,
-                                  sp_i_array_t rows_, sp_i_array_t cols_, sp_fp_storage_array_t values_, bool make_copy)
+      virtual int init_by_arrays (const t_long n_rows_, const t_long n_cols_, const t_long n_block_size_,
+                                  spv_long rows_, spv_long cols_, spv_float values_, bool make_copy)
         {
           n_rows = n_rows_;
           n_cols = n_cols_;
@@ -168,8 +148,8 @@ namespace blue_sky
        * 
        * @return 0 if success
        */
-      virtual int init_by_raw_ptr (const i_type_t n_rows_, const i_type_t n_cols_, const i_type_t n_block_size_,
-                                  i_type_t *rows_, i_type_t *cols_, fp_storage_type_t *values_, bool make_copy)
+      virtual int init_by_raw_ptr (const t_long n_rows_, const t_long n_cols_, const t_long n_block_size_,
+                                  t_long *rows_, t_long *cols_, t_float *values_, bool make_copy)
         {
           if (init (n_rows_, n_cols_, n_block_size_, rows_[n_rows_]))
             return -1;
@@ -178,9 +158,9 @@ namespace blue_sky
             {
               int nnz = rows_[n_rows_];
 
-              memcpy (&(*rows_ptr)[0], rows_, sizeof (i_type_t) * (n_rows_ + 1));
-              memcpy (&(*cols_ind)[0], cols_, sizeof (i_type_t) * nnz);
-              memcpy (&(*values)[0], values_, sizeof (fp_storage_type_t) * nnz * n_block_size_ * n_block_size_);
+              memcpy (&(*rows_ptr)[0], rows_, sizeof (t_long) * (n_rows_ + 1));
+              memcpy (&(*cols_ind)[0], cols_, sizeof (t_long) * nnz);
+              memcpy (&(*values)[0], values_, sizeof (t_float) * nnz * n_block_size_ * n_block_size_);
             }
           return 0;
         }
@@ -189,25 +169,25 @@ namespace blue_sky
       virtual int init_by_matrix (sp_bcsr_matrix_iface_t m);
 
       //! allocate memory n_rows, n_cols, n_block_size, n_non_zeros, cols_ind, rows_ptr, values
-      virtual int init (const i_type_t new_n_rows, const i_type_t new_n_cols, const i_type_t new_n_blok_size,
-                        const i_type_t new_n_non_zeros);
+      virtual int init (const t_long new_n_rows, const t_long new_n_cols, const t_long new_n_blok_size,
+                        const t_long new_n_non_zeros);
 
       //! allocate memory n_rows, n_cols, n_block_size, n_non_zeros, cols_ind, rows_ptr
-      virtual int init_struct (const i_type_t new_n_rows, const i_type_t new_n_cols, const i_type_t new_n_non_zeros);
+      virtual int init_struct (const t_long new_n_rows, const t_long new_n_cols, const t_long new_n_non_zeros);
 
       //! setup n_rows, and allocate memory for rows_ptr
-      virtual int alloc_rows_ptr (const i_type_t new_n_rows);
+      virtual int alloc_rows_ptr (const t_long new_n_rows);
 
       //! allocate memory for column indexes and set it with default values
-      virtual int alloc_cols_ind (const i_type_t new_n_non_zeros);
+      virtual int alloc_cols_ind (const t_long new_n_non_zeros);
 
       //! allocate memory for values and set it with default values
-      virtual int alloc_values (const i_type_t new_n_non_zeros, const i_type_t new_n_blok_size);
+      virtual int alloc_values (const t_long new_n_non_zeros, const t_long new_n_blok_size);
 
       //! allocate memory for cols_ind and values
-      virtual int alloc_cols_ind_and_values (const i_type_t new_n_non_zeros, const i_type_t new_n_blok_size);
+      virtual int alloc_cols_ind_and_values (const t_long new_n_non_zeros, const t_long new_n_blok_size);
 
-      virtual void set_n_cols (const i_type_t new_n_cols)
+      virtual void set_n_cols (const t_long new_n_cols)
         {
           n_cols = new_n_cols;
         }
@@ -220,13 +200,13 @@ namespace blue_sky
 
       //! build B = A^T from given csr matrix, return 0 if success,
       //! rows number and offset can be set manually with new_n_rows and rows_offset
-      virtual int build_transpose (sp_bcsr_matrix_iface_t m, const i_type_t rows_offset/* = 0*/, 
-                                   const i_type_t cols_offset/* = 0*/, const i_type_t new_n_rows/* = 0*/);
+      virtual int build_transpose (sp_bcsr_matrix_iface_t m, const t_long rows_offset/* = 0*/, 
+                                   const t_long cols_offset/* = 0*/, const t_long new_n_rows/* = 0*/);
 
       //! build B = A^T from given csr matrix using matrix structure only, without values, return 0 if success,
       //! rows number and offset can be set manually with new_n_rows and rows_offset
-      virtual int build_transpose_struct (sp_bcsr_matrix_iface_t m, const i_type_t rows_offset/* = 0*/,
-                                          const i_type_t cols_offset/* = 0*/, const i_type_t new_n_rows/* = 0*/);
+      virtual int build_transpose_struct (sp_bcsr_matrix_iface_t m, const t_long rows_offset/* = 0*/,
+                                          const t_long cols_offset/* = 0*/, const t_long new_n_rows/* = 0*/);
       /** 
        * @brief realize M = RAP (triple matrix product)
        * 
@@ -243,16 +223,16 @@ namespace blue_sky
       // GET matrix private DATA methods
       // ------------------------------------------------
       //! return number of nonzeros elements
-      virtual i_type_t get_n_non_zeros () const
+      virtual t_long get_n_non_zeros () const
         {
           int l = rows_ptr->size (); 
           if (l)
-            return rows_ptr->ss(l - 1);
+            return (*rows_ptr)[l - 1];
           else
             return 0;
         }
 
-      virtual sp_i_array_t get_rows_ptr ()
+      virtual spv_long get_rows_ptr ()
       {
         return rows_ptr;
       }
@@ -262,7 +242,7 @@ namespace blue_sky
       //  return impl.get_rows_ptr_const ();
       //}
 
-      virtual sp_i_array_t get_cols_ind ()
+      virtual spv_long get_cols_ind ()
       {
         return cols_ind;
       }
@@ -272,7 +252,7 @@ namespace blue_sky
       //  return impl.get_cols_ind_const ();
       //}
 
-      virtual sp_fp_storage_array_t get_values ()
+      virtual spv_float get_values ()
       {
         return values;
       }
@@ -318,23 +298,23 @@ namespace blue_sky
     
     protected:
       template<bool mul_alpha>
-      int matrix_vector_product_internal (sp_fp_array_t v, sp_fp_array_t r, const fp_type_t &alpha = 1.0) const;
+      int matrix_vector_product_internal (spv_double v, spv_double r, const t_double &alpha = 1.0) const;
 
     //______________________________________
     //  VARIABLES
     //______________________________________
     protected:
       
-      i_type_t                  n_block_size;           //!< size of matrix block
-      i_type_t                  n_rows;                 //!< number of rows in matrix
-      i_type_t                  n_cols;                 //!< number of columns in matrix
-      sp_fp_storage_array_t     values;                 //!< values array
-      sp_i_array_t              cols_ind;               //!< cols array
-      sp_i_array_t              rows_ptr;               //!< rows array
+      t_long                    n_block_size;           //!< size of matrix block
+      t_long                    n_rows;                 //!< number of rows in matrix
+      t_long                    n_cols;                 //!< number of columns in matrix
+      spv_float                 values;                 //!< values array
+      spv_long                  cols_ind;               //!< cols array
+      spv_long                  rows_ptr;               //!< rows array
 
       // workspace
-      std::vector<i_type_t> a_marker_vec;
-      std::vector<i_type_t> p_marker_vec;
+      std::vector<t_long> a_marker_vec;
+      std::vector<t_long> p_marker_vec;
 
       //bcsr_matrix_impl<fp_vector_type_t, i_vector_type_t, fp_storage_vector_type_t> impl;    
     };
@@ -349,24 +329,24 @@ namespace blue_sky
  * 
  * @return 0 if success
  */
-template <class strat_t> template <bool mul_alpha> int
-bcsr<strat_t>::matrix_vector_product_internal (sp_fp_array_t v_, 
-                                               sp_fp_array_t r_, 
-                                               const fp_type_t &alpha) const
+template <bool mul_alpha> int
+bcsr::matrix_vector_product_internal (spv_double v_, 
+                                      spv_double r_, 
+                                      const t_double &alpha) const
 {
-  i_type_t i, j;
-  i_type_t j1, j2;
-  i_type_t cl               = 0;
-  fp_type_t *r_block = 0;
-  const fp_storage_type_t *m_block = 0;
-  const fp_type_t *v_block = 0;
-  i_type_t b_sqr = n_block_size * n_block_size;
+  t_long i, j;
+  t_long j1, j2;
+  t_long cl               = 0;
+  t_double *r_block = 0;
+  const t_float *m_block = 0;
+  const t_double *v_block = 0;
+  t_long b_sqr = n_block_size * n_block_size;
 
-  i_type_t *rows = &(*rows_ptr)[0];
-  i_type_t *cols = &(*cols_ind)[0];
-  fp_storage_type_t *val = &(*values)[0];
-  fp_type_t *v_val = &(*v_)[0];
-  fp_type_t *r_val = &(*r_)[0];
+  t_long *rows = &(*rows_ptr)[0];
+  t_long *cols = &(*cols_ind)[0];
+  t_float *val = &(*values)[0];
+  t_double *v_val = &(*v_)[0];
+  t_double *r_val = &(*r_)[0];
 
   //BS_ASSERT (v.size ());
   //BS_ASSERT (r.size ());
@@ -392,7 +372,7 @@ bcsr<strat_t>::matrix_vector_product_internal (sp_fp_array_t v_,
               //BS_ASSERT (j < cols_ind.size ());
               cl = cols[j];
 
-              //BS_ASSERT (cl * n_block_size < (i_type_t)v.size ());
+              //BS_ASSERT (cl * n_block_size < (t_long)v.size ());
               v_block = &v_val[cl * 1];
               MV_PROD_1x1 (m_block, v_block, r_block);
             }
@@ -406,7 +386,7 @@ bcsr<strat_t>::matrix_vector_product_internal (sp_fp_array_t v_,
     {
       for (i = 0; i < n_rows; ++i)
         {
-          //BS_ASSERT (i * n_block_size < (i_type_t)r.size ());
+          //BS_ASSERT (i * n_block_size < (t_long)r.size ());
 
           r_block = &r_val[i * n_block_size];
           j1      = rows[i];
@@ -417,11 +397,11 @@ bcsr<strat_t>::matrix_vector_product_internal (sp_fp_array_t v_,
           ////////////////////////////////////////////
           for (j = j1; j < j2; ++j)
             {
-              //BS_ASSERT (j < (i_type_t)cols_ind.size ());
+              //BS_ASSERT (j < (t_long)cols_ind.size ());
               cl = cols[j];
               m_block = &val[j * b_sqr];
 
-              //BS_ASSERT (cl * n_block_size < (i_type_t)v.size ());
+              //BS_ASSERT (cl * n_block_size < (t_long)v.size ());
               v_block = &v_val[cl * n_block_size];
               MV_PROD_2x2 (m_block, v_block, r_block);
             }
@@ -446,10 +426,10 @@ bcsr<strat_t>::matrix_vector_product_internal (sp_fp_array_t v_,
           m_block = &val[j1 * 9];
           for (j = j1; j < j2; ++j, m_block += 9)
             {
-              //BS_ASSERT (j < (i_type_t)cols_ind.size ());
+              //BS_ASSERT (j < (t_long)cols_ind.size ());
               cl = cols[j];
 
-              //BS_ASSERT (cl * n_block_size < (i_type_t)v.size ());
+              //BS_ASSERT (cl * n_block_size < (t_long)v.size ());
               v_block = &v_val[cl * 3];
               MV_PROD_3x3 (m_block, v_block, r_block);
             }

@@ -27,6 +27,8 @@
 template<class strategy_t>
 class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base<strategy_t>
   {
+  private:
+	  struct inner;
   
 //+++++++++++++++++++++++++++++++++++++++++++
 //  INTERNAL TYPE DECLARATION
@@ -40,6 +42,7 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base<strategy_t>
     typedef typename base_t::i_type_t                   i_type_t;
     typedef typename base_t::fp_type_t                  fp_type_t;
     typedef typename base_t::fp_storage_type_t          fp_storage_type_t;
+	typedef bs_array< typename strategy_t::fp_storage_type_t > fp_storage_array_t;
 
     typedef typename base_t::index_array_t              index_array_t;
     typedef typename base_t::item_array_t               item_array_t;
@@ -76,7 +79,6 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base<strategy_t>
 
     typedef blue_sky::smart_ptr <blue_sky::FRead, true> sp_fread_t;
 
-
 //-------------------------------------------
 //  METHODS
 //===========================================
@@ -92,6 +94,11 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base<strategy_t>
     
     //! init arrays of properties
     void init_props (const sp_idata_t &idata);
+
+	//! init coord & zcorn from (nx, ny, nz, dx, dy, dz)
+	//! return: first -- coord, second -- zcorn
+	static std::pair< sp_fp_storage_array_t, sp_fp_storage_array_t >
+	gen_coord_zcorn(i_type_t nx, i_type_t ny, i_type_t nz, sp_fp_storage_array_t dx, sp_fp_storage_array_t dy, sp_fp_storage_array_t dz);
     
     //! get vertex of cube [i,j,k]
     void calc_element (const i_type_t i, const i_type_t j, const i_type_t k, element_t &element) const;

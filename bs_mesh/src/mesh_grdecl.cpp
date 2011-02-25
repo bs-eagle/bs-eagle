@@ -14,12 +14,101 @@ const char filename_hdf5[] = "grid_swap.h5";
   FILE*  fp;
 #endif //BS_MESH_WRITE_TRANSMISS_MATRIX 
 
+template< class strategy_t >
+struct mesh_grdecl< strategy_t >::inner {
+	// helper structure to get dx[i] regardless of whether it given by one number or by array of
+	// numbers
+	struct dim_subscript {
+		dim_subscript(const fp_storage_array_t& dim)
+			: dim_(dim), sum_(0)
+		{
+			if(dim_.size() == 1)
+				ss_fcn_ = &dim_subscript::ss_const_dim;
+			else
+				ss_fcn_ = &dim_subscript::ss_array_dim;
+		}
+
+		fp_storage_type_t ss_const_dim(i_type_t idx) {
+			return static_cast< fp_storage_type_t >(fp_type_t(dim_[0] * idx));
+		}
+
+		fp_storage_type_t ss_array_dim(i_type_t idx) {
+			fp_type_t tmp = sum_;
+			sum_ += dim_[idx];
+			return static_cast< fp_storage_type_t>(tmp);
+		}
+
+		void reset() { sum_ = 0; }
+
+		fp_type_t operator[](i_type_t idx) {
+			return (this->*ss_fcn_)(idx);
+		}
+
+	private:
+		const fp_storage_array_t& dim_;
+		fp_storage_type_t (dim_subscript::*ss_fcn_)(i_type_t);
+		fp_type_t sum_;
+	};
+};
 
 template<class strategy_t>
 mesh_grdecl<strategy_t>::mesh_grdecl ()
 {
   zcorn_array = 0;
   coord_array = 0;
+}
+
+template< class strategy_t >
+std::pair< typename mesh_grdecl< strategy_t >::sp_fp_storage_array_t, typename mesh_grdecl< strategy_t >::sp_fp_storage_array_t >
+mesh_grdecl< strategy_t >::gen_coord_zcorn(i_type_t nx, i_type_t ny, i_type_t nz, sp_fp_storage_array_t dx, sp_fp_storage_array_t dy, sp_fp_storage_array_t dz) {
+	using namespace std;
+	typedef std::pair< sp_fp_storage_array_t, sp_fp_storage_array_t > ret_t;
+	typedef typename fp_storage_array_t::value_type value_t;
+
+	// create subscripters
+	if(!dx || !dy || !dz) return ret_t(NULL, NULL);
+	if(!dx->size() || !dy->size() || !dz->size()) return ret_t(NULL, NULL);
+	typename inner::dim_subscript dxs(*dx);
+	typename inner::dim_subscript dys(*dy);
+	typename inner::dim_subscript dzs(*dz);
+
+	// if dimension offset is given as array, then size should be taken from array size
+	if(dx->size() > 1) nx = dx->size();
+	if(dy->size() > 1) ny = dy->size();
+	if(dz->size() > 1) nz = dz->size();
+
+	// create arrays
+	sp_fp_storage_array_t coord = BS_KERNEL.create_object(fp_storage_array_t::bs_type());
+	sp_fp_storage_array_t zcorn = BS_KERNEL.create_object(fp_storage_array_t::bs_type());
+	if(!zcorn || !coord) return ret_t(NULL, NULL);
+
+	// fill coord
+	// coord is simple grid
+	coord->init((nx + 1)*(ny + 1)*6, value_t(0));
+	typename fp_storage_array_t::iterator pcd = coord->begin();
+	for(i_type_t iy = 0; iy <= ny; ++iy) {
+		for(i_type_t ix = 0; ix <= nx; ++ix) {
+			pcd[0] = pcd[3] = dxs[ix];
+			pcd[1] = pcd[4] = dys[iy];
+			pcd[5] = 1; // pcd[2] = 0 from init
+			pcd += 6;
+		}
+	}
+
+	// fill zcorn
+	// very simple case
+	zcorn->init(nx*ny*nz*8);
+	pcd = zcorn->begin();
+	const i_type_t plane_size = nx * ny * 4;
+	dxs.reset(); dys.reset();
+	fp_storage_type_t z_cache = dzs[0];
+	for(i_type_t iz = 1; iz <= nz; ++iz) {
+		pcd = fill_n(pcd, plane_size, z_cache);
+		z_cache = dzs[iz];
+		pcd = fill_n(pcd, plane_size, z_cache);
+	}
+
+	return ret_t(coord, zcorn);
 }
 
 
@@ -323,7 +412,7 @@ int mesh_grdecl<strategy_t>::init_ext_to_int()
 
   //tools::save_seq_vector ("actnum.bs.txt").save actnum_array;
   
-  int splicing_num = splicing(volumes_temp);
+  /* int splicing_num = splicing(volumes_temp); */
   
   //check_adjacency (1);
   //tools::save_seq_vector ("active_blocks.bs.txt").save actnum_array;
@@ -464,18 +553,18 @@ bool mesh_grdecl<strategy_t>::check_adjacency(int shift_zcorn)
           zindex1 = zindex + 2; // check next by x
          
           if (i + 1 == nx ||
-              zcorn_array[zindex + 1] == zcorn_array[zindex1] &&
+              (zcorn_array[zindex + 1] == zcorn_array[zindex1] &&
               zcorn_array[zindex +  2 * nx + 1] == zcorn_array[zindex1 +  2 * nx] &&
               zcorn_array[zindex + 4 * nx * ny + 1] == zcorn_array[zindex1 + 4 * nx * ny ] &&
-              zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == zcorn_array[zindex1 + 4 * nx * ny + 2 * nx])
+              zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == zcorn_array[zindex1 + 4 * nx * ny + 2 * nx]))
             {
               
               zindex1 = zindex + 4 * nx; // check next by y
               if (j + 1 == ny ||
-                  zcorn_array[zindex + 2 * nx] == zcorn_array[zindex1] &&
+                  (zcorn_array[zindex + 2 * nx] == zcorn_array[zindex1] &&
                   zcorn_array[zindex + 2 * nx + 1] == zcorn_array[zindex1 +  1] &&
                   zcorn_array[zindex + 4 * nx * ny + 2 * nx] == zcorn_array[zindex1 + 4 * nx * ny] &&
-                  zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == zcorn_array[zindex1+ 4 * nx * ny + 1])
+                  zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == zcorn_array[zindex1+ 4 * nx * ny + 1]))
                   {
                     n_adjacent++;
                   }
@@ -990,7 +1079,7 @@ boost::python::list mesh_grdecl<strategy_t>::calc_element_center ()
 {
   element_t element;
   sp_fp_array_t centers, prop;
-  i_type_t i, j, k, c, ind, *indexes_data;
+  i_type_t i, j, k /*, c */, ind /*, *indexes_data */;
   fp_type_t *centers_data, *prop_data;
   boost::python::list myavi_list;
 
@@ -1109,18 +1198,18 @@ struct build_jacobian_rows_class
         zindex1 = zindex + 2; // check next by x
        
         if (i + 1 == nx ||
-            mesh->zcorn_array[zindex + 1] == mesh->zcorn_array[zindex1] &&
+            (mesh->zcorn_array[zindex + 1] == mesh->zcorn_array[zindex1] &&
             mesh->zcorn_array[zindex +  2 * nx + 1] == mesh->zcorn_array[zindex1 +  2 * nx] &&
             mesh->zcorn_array[zindex + 4 * nx * ny + 1] == mesh->zcorn_array[zindex1 + 4 * nx * ny ] &&
-            mesh->zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == mesh->zcorn_array[zindex1 + 4 * nx * ny + 2 * nx])
+            mesh->zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == mesh->zcorn_array[zindex1 + 4 * nx * ny + 2 * nx]))
           {
             
             zindex1 = zindex + 4 * nx; // check next by y
             if (j + 1 == ny ||
-                mesh->zcorn_array[zindex + 2 * nx] == mesh->zcorn_array[zindex1] &&
+                (mesh->zcorn_array[zindex + 2 * nx] == mesh->zcorn_array[zindex1] &&
                 mesh->zcorn_array[zindex + 2 * nx + 1] == mesh->zcorn_array[zindex1 +  1] &&
                 mesh->zcorn_array[zindex + 4 * nx * ny + 2 * nx] == mesh->zcorn_array[zindex1 + 4 * nx * ny] &&
-                mesh->zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == mesh->zcorn_array[zindex1+ 4 * nx * ny + 1])
+                mesh->zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == mesh->zcorn_array[zindex1+ 4 * nx * ny + 1]))
                 {
                   // cell is adjacent;
                 }

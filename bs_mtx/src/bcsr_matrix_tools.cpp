@@ -7,10 +7,9 @@
 #include <stdlib.h>
 #include <map>
 
-#include "bs_mtx_stdafx.h"
 #include "bcsr_matrix_tools.h"
 
-#include "strategies.h"
+//#include "strategies.h"
 
 using namespace std;
 using namespace boost::python;
@@ -18,13 +17,11 @@ using namespace boost::python;
 
 namespace blue_sky
 {
-  template <class strat_t>
-  bcsr_matrix_tools<strat_t>::bcsr_matrix_tools (bs_type_ctor_param) 
-        : bcsr_matrix_tools_iface<strat_t> ()
+  bcsr_matrix_tools::bcsr_matrix_tools (bs_type_ctor_param) 
+        : bcsr_matrix_tools_iface ()
     {
     }
-  template <class strat_t>
-   bcsr_matrix_tools <strat_t>::bcsr_matrix_tools (const bcsr_matrix_tools <strat_t>& /*src*/) : bs_refcounter ()
+  bcsr_matrix_tools::bcsr_matrix_tools (const bcsr_matrix_tools & /*src*/) : bs_refcounter ()
      {
      }
 
@@ -34,20 +31,20 @@ namespace blue_sky
   \param file_name -- name of the file
   \return 0 if success
 */
-template <class strat_t> int
-bcsr_matrix_tools<strat_t>::ascii_read_from_csr_format (sp_bcsr_t matrix, const std::string &file_name) const 
+int
+bcsr_matrix_tools::ascii_read_from_csr_format (sp_bcsr_t matrix, const std::string &file_name) const 
 {
   //locale_keeper lkeeper ("C", LC_NUMERIC);
 
   FILE *fp = 0;
   char buf[4096];
   int state = 0;
-  i_type_t nc, nr, nnz = 0, nbs, b_sqr = 0;
-  i_type_t row_ind = 0;
-  i_type_t j_ind = 0, j = 0;
-  i_type_t *rows_ptr;
-  i_type_t *cols_ind;
-  fp_storage_type_t *values;
+  t_long nc, nr, nnz = 0, nbs, b_sqr = 0;
+  t_long row_ind = 0;
+  t_long j_ind = 0, j = 0;
+  t_long *rows_ptr;
+  t_long *cols_ind;
+  t_float *values;
   char *start_ptr, *end_ptr;
 
   fp = fopen (file_name.c_str (), "r");
@@ -101,7 +98,7 @@ bcsr_matrix_tools<strat_t>::ascii_read_from_csr_format (sp_bcsr_t matrix, const 
         }
       else if (state == 1) // read rows_ptr
         {
-          i_type_t n_rows = matrix->get_n_rows ();
+          t_long n_rows = matrix->get_n_rows ();
 
           start_ptr = buf;
           rows_ptr[row_ind + 1] = strtol (start_ptr, &end_ptr, 10);
@@ -136,17 +133,17 @@ bcsr_matrix_tools<strat_t>::ascii_read_from_csr_format (sp_bcsr_t matrix, const 
   return 0;
 }
 
-template <class strat_t> int
-bcsr_matrix_tools<strat_t>::random_init (sp_bcsr_t matrix, 
-                                         const i_type_t new_n_rows, 
-                                         const i_type_t new_n_block_size,
-                                         const fp_type_t rand_value_dispersion, 
-                                         const i_type_t elems_in_row
-                                         ) const
+int
+bcsr_matrix_tools::random_init (sp_bcsr_t matrix, 
+                                const t_long new_n_rows, 
+                                const t_long new_n_block_size,
+                                const t_double rand_value_dispersion, 
+                                const t_long elems_in_row
+                               ) const
 {
   int r_code = 0;
-  i_type_t i, j, j1, j2, b_sqr;
-  i_type_t n_non_zeros;
+  t_long i, j, j1, j2, b_sqr;
+  t_long n_non_zeros;
 
 
   // check input data
@@ -164,14 +161,14 @@ bcsr_matrix_tools<strat_t>::random_init (sp_bcsr_t matrix,
     //TODO: print error message
     return -2;
 
-  fp_storage_type_t *values = &(*(matrix->get_values ()))[0];
-  i_type_t *rows_ptr = &(*(matrix->get_rows_ptr ()))[0];
-  i_type_t *cols_ind = &(*(matrix->get_cols_ind ()))[0];
+  t_float *values = &(*(matrix->get_values ()))[0];
+  t_long *rows_ptr = &(*(matrix->get_rows_ptr ()))[0];
+  t_long *cols_ind = &(*(matrix->get_cols_ind ()))[0];
 
   srand ((unsigned)time( NULL ));
 
   for (i = 0; i < n_non_zeros * b_sqr; ++i)
-    values[i] = (fp_storage_type_t)rand () / (fp_storage_type_t)RAND_MAX * (fp_storage_type_t)rand_value_dispersion;
+    values[i] = (t_float)rand () / (t_float)RAND_MAX * (t_float)rand_value_dispersion;
 
   rows_ptr[0] = 0;
   for (i = 0; i < new_n_rows; ++i)
@@ -198,14 +195,14 @@ bcsr_matrix_tools<strat_t>::random_init (sp_bcsr_t matrix,
   return 0;
 }
       
-template <class strat_t> int
-bcsr_matrix_tools<strat_t>::dense_init (sp_bcsr_t matrix, 
-                                        const i_type_t n_rows, 
-                                        const i_type_t block_size,
-                                        const fp_type_t rand_value_dispersion) const
+int
+bcsr_matrix_tools::dense_init (sp_bcsr_t matrix, 
+                               const t_long n_rows, 
+                               const t_long block_size,
+                               const t_double rand_value_dispersion) const
 {
   int r_code = 0;
-  i_type_t b_sqr = block_size * block_size;
+  t_long b_sqr = block_size * block_size;
 
   srand ((unsigned)time( NULL ));
 
@@ -213,27 +210,27 @@ bcsr_matrix_tools<strat_t>::dense_init (sp_bcsr_t matrix,
   if (r_code)
     return -2;
 
-  fp_storage_type_t *values = &(*(matrix->get_values ()))[0];
-  i_type_t *rows_ptr = &(*(matrix->get_rows_ptr ()))[0];
-  i_type_t *cols_ind = &(*(matrix->get_cols_ind ()))[0];
+  t_float *values = &(*(matrix->get_values ()))[0];
+  t_long *rows_ptr = &(*(matrix->get_rows_ptr ()))[0];
+  t_long *cols_ind = &(*(matrix->get_cols_ind ()))[0];
   rows_ptr[0] = 0;
 
 
-  for (i_type_t i = 0; i < n_rows * n_rows * b_sqr; ++i)
+  for (t_long i = 0; i < n_rows * n_rows * b_sqr; ++i)
     {
-      values[i] = (fp_storage_type_t)rand () / (fp_storage_type_t)RAND_MAX * (fp_storage_type_t)rand_value_dispersion;
+      values[i] = (t_float)rand () / (t_float)RAND_MAX * (t_float)rand_value_dispersion;
     }
-  for (i_type_t i = 0; i < n_rows; ++i)
+  for (t_long i = 0; i < n_rows; ++i)
     {
-      i_type_t cl;
-      i_type_t j1 = rows_ptr[i];
+      t_long cl;
+      t_long j1 = rows_ptr[i];
 
       rows_ptr[i + 1] = j1 + n_rows;
       
       // diagonal should be the first
       cols_ind[j1] = i;
       cl = j1 + 1;
-      for (i_type_t j = 0; j < n_rows; ++j) 
+      for (t_long j = 0; j < n_rows; ++j) 
         {
           if (j != i)
             {
@@ -247,14 +244,8 @@ bcsr_matrix_tools<strat_t>::dense_init (sp_bcsr_t matrix,
 /////////////////////////////////BS Register
 /////////////////////////////////Stuff//////////////////////////
 
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(bcsr_matrix_tools, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(bcsr_matrix_tools, (class));
+  BLUE_SKY_TYPE_STD_CREATE (bcsr_matrix_tools);
+  BLUE_SKY_TYPE_STD_COPY (bcsr_matrix_tools);
 
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bcsr_matrix_tools<base_strategy_fif>), 1,  (bcsr_matrix_tools_iface <base_strategy_fif> ), "bcsr_matrix_tools_fif", "Tools for Block CSR Matrix class", "Tools realization of Block CSR Matricies", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bcsr_matrix_tools<base_strategy_did>), 1,  (bcsr_matrix_tools_iface <base_strategy_did> ), "bcsr_matrix_tools_did", "Tools for Block CSR Matrix class", "Tools realization of Block CSR Matricies", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bcsr_matrix_tools<base_strategy_dif>), 1,  (bcsr_matrix_tools_iface <base_strategy_dif> ), "bcsr_matrix_tools_dif", "Tools for Block CSR Matrix class", "Tools realization of Block CSR Matricies", false);
-
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bcsr_matrix_tools<base_strategy_flf>), 1,  (bcsr_matrix_tools_iface <base_strategy_flf> ), "bcsr_matrix_tools_flf", "Tools for Block CSR Matrix class", "Tools realization of Block CSR Matricies", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bcsr_matrix_tools<base_strategy_dld>), 1,  (bcsr_matrix_tools_iface <base_strategy_dld> ), "bcsr_matrix_tools_dld", "Tools for Block CSR Matrix class", "Tools realization of Block CSR Matricies", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bcsr_matrix_tools<base_strategy_dlf>), 1,  (bcsr_matrix_tools_iface <base_strategy_dlf> ), "bcsr_matrix_tools_dlf", "Tools for Block CSR Matrix class", "Tools realization of Block CSR Matricies", false);
+  BLUE_SKY_TYPE_IMPL(bcsr_matrix_tools,  bcsr_matrix_tools_iface, "bcsr_matrix_tools", "Tools for Block CSR Matrix class", "Tools realization of Block CSR Matricies");
 }  // blue_sky namespace

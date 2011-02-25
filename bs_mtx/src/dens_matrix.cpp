@@ -5,7 +5,6 @@
  */
 #include <sstream>
 
-#include "bs_mtx_stdafx.h"
 #include "dens_matrix.h" 
 #include "pyublas/numpy.hpp"
 
@@ -15,32 +14,31 @@ using namespace boost::python;
 
 namespace blue_sky
 {
-  template <class strat_t>
-  dens_matrix<strat_t>::dens_matrix (bs_type_ctor_param) 
-        : dens_matrix_iface<strat_t> (),
-        values (BS_KERNEL.create_object (fp_storage_array_t::bs_type ()))
+  dens_matrix::dens_matrix (bs_type_ctor_param) 
+        : dens_matrix_iface (),
+        values (BS_KERNEL.create_object (v_float::bs_type ()))
     {
     }
-  template <class strat_t>
-   dens_matrix <strat_t>::dens_matrix (const this_t & /*src*/) : bs_refcounter (),
-        values (BS_KERNEL.create_object (fp_storage_array_t::bs_type ()))
+  
+   dens_matrix ::dens_matrix (const this_t & /*src*/) : bs_refcounter (),
+        values (BS_KERNEL.create_object (v_float::bs_type ()))
      {
      }
 
   // TODO: 
-  template <class strat_t> int
-  dens_matrix<strat_t>::matrix_vector_product (sp_fp_array_t v_, 
-                                               sp_fp_array_t r_) const
+   int
+  dens_matrix::matrix_vector_product (spv_double v_, 
+                                               spv_double r_) const
     {
-      i_type_t block_rows;
-      i_type_t block_cols;
-      i_type_t clb = calc_block_size < 1 ? (n_rows + n_cols) : calc_block_size; 
+      t_long block_rows;
+      t_long block_cols;
+      t_long clb = calc_block_size < 1 ? (n_rows + n_cols) : calc_block_size; 
 
-      if (n_cols != (i_type_t)v_->size () || n_rows != (i_type_t)r_->size ())
+      if (n_cols != (t_long)v_->size () || n_rows != (t_long)r_->size ())
         return -1;
 
-      fp_type_t *v = &(*v_)[0];
-      fp_type_t *r = &(*r_)[0];
+      t_double *v = &(*v_)[0];
+      t_double *r = &(*r_)[0];
 
       block_rows = n_rows / clb;
       if (n_rows % clb)
@@ -50,9 +48,9 @@ namespace blue_sky
       if (n_cols % clb)
         ++block_cols;
 
-      for (i_type_t i = 0; i < block_rows; ++i)
+      for (t_long i = 0; i < block_rows; ++i)
         {
-          for (i_type_t j = 0; j < block_cols; ++j)
+          for (t_long j = 0; j < block_cols; ++j)
             {
               block_mv_product (i, j, v, r);
             }
@@ -61,19 +59,19 @@ namespace blue_sky
     }
 
   // TODO: 
-  template <class strat_t> int
-  dens_matrix<strat_t>::matrix_vector_product_t (sp_fp_array_t v_, 
-                                                 sp_fp_array_t r_) const
+   int
+  dens_matrix::matrix_vector_product_t (spv_double v_, 
+                                                 spv_double r_) const
     {
-      i_type_t block_rows;
-      i_type_t block_cols;
-      i_type_t clb = calc_block_size < 1 ? (n_rows + n_cols) : calc_block_size; 
+      t_long block_rows;
+      t_long block_cols;
+      t_long clb = calc_block_size < 1 ? (n_rows + n_cols) : calc_block_size; 
 
-      if (n_cols != (i_type_t)r_->size () || n_rows != (i_type_t)v_->size ())
+      if (n_cols != (t_long)r_->size () || n_rows != (t_long)v_->size ())
         return -1;
 
-      fp_type_t *v = &(*v_)[0];
-      fp_type_t *r = &(*r_)[0];
+      t_double *v = &(*v_)[0];
+      t_double *r = &(*r_)[0];
 
       block_rows = n_rows / clb;
       if (n_rows % clb)
@@ -83,9 +81,9 @@ namespace blue_sky
       if (n_cols % clb)
         ++block_cols;
 
-      for (i_type_t i = 0; i < block_rows; ++i)
+      for (t_long i = 0; i < block_rows; ++i)
         {
-          for (i_type_t j = 0; j < block_cols; ++j)
+          for (t_long j = 0; j < block_cols; ++j)
             {
               block_mv_product_t (i, j, v, r);
             }
@@ -93,21 +91,21 @@ namespace blue_sky
       return 0;
     }
           
-  template <class strat_t> int
-  dens_matrix<strat_t>::calc_lin_comb (fp_type_t alpha, 
-                                       fp_type_t beta, 
-                                       sp_fp_array_t u_, 
-                                       sp_fp_array_t v_, 
-                                       sp_fp_array_t r_) const
+   int
+  dens_matrix::calc_lin_comb (t_double alpha, 
+                                       t_double beta, 
+                                       spv_double u_, 
+                                       spv_double v_, 
+                                       spv_double r_) const
     {
-      static const fp_type_t eps = fp_type_t (1.0e-12);
-      i_type_t i;
+      static const t_double eps = t_double (1.0e-12);
+      t_long i;
       int r_code = 0;
 
-      fp_type_t *v = &(*v_)[0];
-      fp_type_t *r = &(*r_)[0];
+      t_double *v = &(*v_)[0];
+      t_double *r = &(*r_)[0];
 
-      memset (r, 0, sizeof (fp_type_t) * n_rows);
+      memset (r, 0, sizeof (t_double) * n_rows);
 
       if (fabs (alpha) > eps)
         {
@@ -123,22 +121,22 @@ namespace blue_sky
       return r_code;
     }
 
-  template <class strat_t> int
-  dens_matrix<strat_t>::init_by_matrix (sp_dens_matrix_iface_t matrix)
+   int
+  dens_matrix::init_by_matrix (sp_dens_matrix_iface_t matrix)
     {
       return init (matrix->get_n_rows (), matrix->get_n_cols (), matrix->get_calc_block_size ());
     }
 
-  template <class strat_t> int
-  dens_matrix<strat_t>::init (const i_type_t new_n_rows, 
-                              const i_type_t new_n_cols, 
-                              const i_type_t block_size)
+   int
+  dens_matrix::init (const t_long new_n_rows, 
+                              const t_long new_n_cols, 
+                              const t_long block_size)
     {
-      npy_intp dims[2];
+      //npy_intp dims[2];
       if (new_n_rows < 1 || new_n_cols < 1)
         return -1;
-      dims[0] = n_rows = new_n_rows;
-      dims[1] = n_cols = new_n_cols;
+      //dims[0] = n_rows = new_n_rows;
+      //dims[1] = n_cols = new_n_cols;
       calc_block_size = block_size;
       values->resize (n_rows * n_cols);
       // TODO: add this method
@@ -149,8 +147,8 @@ namespace blue_sky
       return 0;
     }
 
-  template <class strat_t> int
-  dens_matrix<strat_t>::copy (sp_dens_matrix_iface_t matrix)
+   int
+  dens_matrix::copy (sp_dens_matrix_iface_t matrix)
     {
       if (init (matrix->get_n_rows (), matrix->get_n_cols (), matrix->get_calc_block_size ()))
         return -3;
@@ -160,22 +158,22 @@ namespace blue_sky
                               //                  matrix->get_values ()->numpy.as_ublas ().data ().end ());
        
 
-      //memcpy (&values[0], &(matrix->get_values_const ())[0], n_rows * n_cols * sizeof (fp_storage_type_t));
+      //memcpy (&values[0], &(matrix->get_values_const ())[0], n_rows * n_cols * sizeof (t_float));
       return 0;
     }
 
-  template <class strat_t> void
-  dens_matrix<strat_t>::block_mv_product (i_type_t row_block, 
-                                          i_type_t col_block, 
-                                          const fp_type_t *v, 
-                                          fp_type_t *r) const
+   void
+  dens_matrix::block_mv_product (t_long row_block, 
+                                          t_long col_block, 
+                                          const t_double *v, 
+                                          t_double *r) const
     {
-      i_type_t block_n_rows;
-      i_type_t block_n_cols;
-      const fp_storage_type_t *block;
-      const fp_type_t *block_v;
-      fp_type_t *block_r;
-      i_type_t clb = calc_block_size < 1 ? (n_rows + n_cols) : calc_block_size; 
+      t_long block_n_rows;
+      t_long block_n_cols;
+      const t_float *block;
+      const t_double *block_v;
+      t_double *block_r;
+      t_long clb = calc_block_size < 1 ? (n_rows + n_cols) : calc_block_size; 
 
       // calculate block start position
       //block = &values[row_block * clb * n_cols + col_block * clb];
@@ -193,26 +191,26 @@ namespace blue_sky
       else
         block_n_cols = n_cols - col_block * clb;
 
-      for (i_type_t i = 0; i < block_n_rows; ++i)
+      for (t_long i = 0; i < block_n_rows; ++i)
         {
-          for (i_type_t j = 0; j < block_n_cols; ++j)
+          for (t_long j = 0; j < block_n_cols; ++j)
             {
               block_r[i] += block[i * n_rows + j] * block_v[j];
             }
         }
     }
-  template <class strat_t> void
-  dens_matrix<strat_t>::block_mv_product_t (i_type_t row_block, 
-                                            i_type_t col_block, 
-                                            const fp_type_t *v, 
-                                            fp_type_t *r) const
+   void
+  dens_matrix::block_mv_product_t (t_long row_block, 
+                                            t_long col_block, 
+                                            const t_double *v, 
+                                            t_double *r) const
     {
-      i_type_t block_n_rows;
-      i_type_t block_n_cols;
-      const fp_storage_type_t *block;
-      const fp_type_t *block_v;
-      fp_type_t *block_r;
-      i_type_t clb = calc_block_size < 1 ? (n_rows + n_cols) : calc_block_size; 
+      t_long block_n_rows;
+      t_long block_n_cols;
+      const t_float *block;
+      const t_double *block_v;
+      t_double *block_r;
+      t_long clb = calc_block_size < 1 ? (n_rows + n_cols) : calc_block_size; 
 
       // calculate block start position
       block = &(*values)[0] + row_block * clb * n_cols + col_block * clb;
@@ -229,9 +227,9 @@ namespace blue_sky
       else
         block_n_cols = n_cols - col_block * clb;
 
-      for (i_type_t i = 0; i < block_n_rows; ++i)
+      for (t_long i = 0; i < block_n_rows; ++i)
         {
-          for (i_type_t j = 0; j < block_n_cols; ++j)
+          for (t_long j = 0; j < block_n_cols; ++j)
             {
               block_r[j] += block[i * n_rows + j] * block_v[i];
             }
@@ -239,8 +237,8 @@ namespace blue_sky
     }
 
 #ifdef BSPY_EXPORTING_PLUGIN
-  template <class strat_t> std::string
-  dens_matrix<strat_t>::py_str () const
+  std::string
+  dens_matrix::py_str () const
     {
       stringstream s;
 
@@ -256,14 +254,8 @@ namespace blue_sky
 /////////////////////////////////BS Register
 /////////////////////////////////Stuff//////////////////////////
 
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(dens_matrix, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(dens_matrix, (class));
+  BLUE_SKY_TYPE_STD_CREATE (dens_matrix);
+  BLUE_SKY_TYPE_STD_COPY (dens_matrix);
 
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (dens_matrix<base_strategy_fif>), 1, (dens_matrix_iface <base_strategy_fif> ),  "dens_matrix_fif",      "Dens Matrix class", "Realization of Dens Matricies", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (dens_matrix<base_strategy_did>), 1, (dens_matrix_iface <base_strategy_did> ),  "dens_matrix_did",      "Dens Matrix class", "Realization of Dens Matricies", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (dens_matrix<base_strategy_dif>), 1, (dens_matrix_iface <base_strategy_dif> ),  "dens_matrix_dif",      "Dens Matrix class", "Realization of Dens Matricies", false);
-
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (dens_matrix<base_strategy_flf>), 1, (dens_matrix_iface <base_strategy_flf> ),  "dens_matrix_flf",      "Dens Matrix class", "Realization of Dens Matricies", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (dens_matrix<base_strategy_dld>), 1, (dens_matrix_iface <base_strategy_dld> ),  "dens_matrix_dld",      "Dens Matrix class", "Realization of Dens Matricies", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (dens_matrix<base_strategy_dlf>), 1, (dens_matrix_iface <base_strategy_dlf> ),  "dens_matrix_dlf",      "Dens Matrix class", "Realization of Dens Matricies", false);
+  BLUE_SKY_TYPE_IMPL (dens_matrix, dens_matrix_iface,  "dens_matrix", "Dens Matrix class", "Realization of Dens Matricies");
 }  // blue_sky namespace

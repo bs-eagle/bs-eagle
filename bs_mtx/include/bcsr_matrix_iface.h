@@ -14,31 +14,12 @@ namespace blue_sky
   /** 
    * @brief interface class for block CSR matrix storage and manipulation
    */
-  template <class strat_t>
-  class bcsr_matrix_iface: public matrix_iface<strat_t>
+  class bcsr_matrix_iface: public matrix_iface
     {
 
     public:
-      typedef matrix_iface <strat_t>                            base_t;
-      //typedef typename strat_t::fp_vector_type                  fp_vector_type_t;
-      //typedef typename strat_t::i_vector_type                   i_vector_type_t;
-      //typedef typename strat_t::fp_storage_vector_type          fp_storage_vector_type_t;
-      typedef typename strat_t::fp_type_t                       fp_type_t;
-      typedef typename strat_t::i_type_t                        i_type_t;
-      typedef typename strat_t::fp_storage_type_t               fp_storage_type_t;
-
-      typedef smart_ptr<bs_array<fp_type_t>, true>              sp_fp_array_t;
-      typedef smart_ptr<bs_array<i_type_t>, true>               sp_i_array_t;
-      typedef smart_ptr<bs_array<fp_storage_type_t>, true>      sp_fp_storage_array_t;
-
-      //typedef ndarray<fp_type_t>                                fp_numpy_t;
-      //typedef ndarray<fp_storage_type_t>                        fp_storage_numpy_t;
-      //typedef ndarray<i_type_t>                                 i_numpy_t;
-      //typedef smart_ptr<fp_numpy_t, true>                       sp_fp_array_t;
-      //typedef smart_ptr<i_numpy_t, true>                        sp_i_numpy_t;
-      //typedef smart_ptr<fp_storage_numpy_t, true>               sp_fp_storage_numpy_t;
-
-      typedef bcsr_matrix_iface<strat_t>                        this_t;
+      typedef matrix_iface                                      base_t;
+      typedef bcsr_matrix_iface                                 this_t;
 
       typedef smart_ptr <base_t, true>                          sp_matrix_t;
       typedef smart_ptr <this_t, true>                          sp_bcsr_matrix_t;
@@ -47,9 +28,6 @@ namespace blue_sky
       //-----------------------------------------
       //  METHODS
       //-----------------------------------------
-      //blue-sky class declaration
-      //BLUE_SKY_TYPE_DECL_T(bcsr_matrix_iface);
-
 
     public:
       //! destructor
@@ -64,11 +42,11 @@ namespace blue_sky
       virtual int init_by_matrix (sp_bcsr_matrix_t matrix) = 0;
 
       //! allocate memory n_rows, n_cols, n_block_size, n_non_zeros, cols_ind, rows_ptr, values
-      virtual int init (const i_type_t new_n_rows, const i_type_t new_n_cols, const i_type_t new_n_blok_size,
-                        const i_type_t new_n_non_zeros) = 0;
+      virtual int init (const t_long new_n_rows, const t_long new_n_cols, const t_long new_n_blok_size,
+                        const t_long new_n_non_zeros) = 0;
 
       //! allocate memory n_rows, n_cols, n_block_size, n_non_zeros, cols_ind, rows_ptr
-      virtual int init_struct (const i_type_t new_n_rows, const i_type_t new_n_cols, const i_type_t new_n_non_zeros) = 0;
+      virtual int init_struct (const t_long new_n_rows, const t_long new_n_cols, const t_long new_n_non_zeros) = 0;
 
       /** 
        * @brief initialize matrix by numpy arrays
@@ -83,8 +61,8 @@ namespace blue_sky
        * 
        * @return 0 if success
        */
-      virtual int init_by_arrays (const i_type_t n_rows_, const i_type_t n_cols_, const i_type_t n_block_size_,
-                                  sp_i_array_t rows_, sp_i_array_t cols_, sp_fp_storage_array_t values_, bool make_copy) = 0;
+      virtual int init_by_arrays (const t_long n_rows_, const t_long n_cols_, const t_long n_block_size_,
+                                  spv_long rows_, spv_long cols_, spv_float values_, bool make_copy) = 0;
 
       /** 
        * @brief initialize matrix by raw pointers
@@ -99,25 +77,25 @@ namespace blue_sky
        * 
        * @return 0 if success
        */
-      virtual int init_by_raw_ptr (const i_type_t n_rows_, const i_type_t n_cols_, const i_type_t n_block_size_,
-                                  i_type_t *rows_, i_type_t *cols_, fp_storage_type_t *values_, bool make_copy) = 0;
+      virtual int init_by_raw_ptr (const t_long n_rows_, const t_long n_cols_, const t_long n_block_size_,
+                                  t_long *rows_, t_long *cols_, t_float *values_, bool make_copy) = 0;
 
 
       //! setup n_rows, and allocate memory for rows_ptr
-      virtual int alloc_rows_ptr (const i_type_t new_n_rows) = 0;
+      virtual int alloc_rows_ptr (const t_long new_n_rows) = 0;
 
 
       //! allocate memory for column indexes and set it with default values
-      virtual int alloc_cols_ind (const i_type_t new_n_non_zeros) = 0;
+      virtual int alloc_cols_ind (const t_long new_n_non_zeros) = 0;
 
       //! allocate memory for values and set it with default values
-      virtual int alloc_values (const i_type_t new_n_non_zeros, const i_type_t new_n_blok_size) = 0;
+      virtual int alloc_values (const t_long new_n_non_zeros, const t_long new_n_blok_size) = 0;
 
       //! allocate memory for cols_ind and values
-      virtual int alloc_cols_ind_and_values (const i_type_t new_n_non_zeros, const i_type_t new_n_block_size) = 0;
+      virtual int alloc_cols_ind_and_values (const t_long new_n_non_zeros, const t_long new_n_block_size) = 0;
 
       //! set number of columns
-      virtual void set_n_cols (const i_type_t new_n_cols) = 0;
+      virtual void set_n_cols (const t_long new_n_cols) = 0;
 
       // ------------------------------------------------
       // Data initialization methods
@@ -130,21 +108,21 @@ namespace blue_sky
       // GET matrix private DATA methods
       // ------------------------------------------------
       //! return number of nonzeros elements
-      virtual i_type_t get_n_non_zeros () const = 0;
+      virtual t_long get_n_non_zeros () const = 0;
 
 
       /** 
        * @return smart pointer to the rows_ptr
        */
-      virtual sp_i_array_t get_rows_ptr () = 0;
+      virtual spv_long get_rows_ptr () = 0;
 
       //virtual const i_vector_type_t &get_rows_ptr_const () const = 0;
 
-      virtual sp_i_array_t get_cols_ind () = 0;
+      virtual spv_long get_cols_ind () = 0;
 
       //virtual const i_vector_type_t &get_cols_ind_const () const = 0;
 
-      virtual sp_fp_storage_array_t get_values () = 0;
+      virtual spv_float get_values () = 0;
 
       //virtual const fp_storage_vector_type_t &get_values_const () const = 0;
       

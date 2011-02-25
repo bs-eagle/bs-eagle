@@ -118,12 +118,12 @@ namespace python {
 
   PY_EXPORTER (keyword_manager_exporter, default_exporter)
     .def ("register_keyword", register_keyword <T>)
-    .def ("register_i_pool_keyword", &T::register_i_pool_keyword)
-    .def ("register_fp_pool_keyword", &T::py_register_fp_pool_keyword)
+    //.def ("register_i_pool_keyword", &T::register_i_pool_keyword)
+    //.def ("register_fp_pool_keyword", &T::py_register_fp_pool_keyword)
     .def ("register_keywords", &T::register_plugin_keywords)
     .def ("register_plugin_keywords", &T::register_plugin_keywords)
-    .def ("list_active_keywords", &T::py_list_active_keywords)
-    .def ("list_supported_keywords", &T::py_list_supported_keywords)
+    //.def ("list_active_keywords", &T::py_list_active_keywords)
+    //.def ("list_supported_keywords", &T::py_list_supported_keywords)
     .def ("is_keyword_supported", &T::is_keyword_supported)
     .def ("is_keyword_activated", &T::is_keyword_activated)
   PY_EXPORTER_END;
@@ -145,6 +145,7 @@ namespace python {
     using namespace boost::python;
 
     //strategy_exporter::export_base_ext <keyword_params, keyword_params_exporter, class_type::concrete_class> ("keyword_params");
+	
     strategy_exporter::export_base_ext <keyword_handler_iface, empty_exporter, class_type::abstract_class> ("keyword_handler_iface");
     strategy_exporter::export_class_ext <py_keyword_handler_iface, keyword_handler_iface, keyword_handler_iface_exporter, class_type::concrete_class> ("py_keyword_handler_iface");
     strategy_exporter::export_base <keyword_manager, keyword_manager_exporter> ("keyword_manager");

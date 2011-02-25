@@ -19,33 +19,17 @@ namespace blue_sky
   /** 
    * @brief interface class for block CSR matrix storage and manipulation
    */
-  template <class strat_t>
-  class BS_API_PLUGIN bdiag_matrix: public bdiag_matrix_iface<strat_t>
+  class BS_API_PLUGIN bdiag_matrix: public bdiag_matrix_iface
     {
 
     public:
-      typedef matrix_iface <strat_t>                            base_t;
-      typedef typename strat_t::fp_vector_type                  fp_vector_type_t;
-      typedef typename strat_t::i_vector_type                   i_vector_type_t;
-      typedef typename strat_t::fp_storage_vector_type          fp_storage_vector_type_t;
-      typedef typename strat_t::fp_type_t                       fp_type_t;
-      typedef typename strat_t::i_type_t                        i_type_t;
-      typedef typename strat_t::fp_storage_type_t               fp_storage_type_t;
-
-      typedef bdiag_matrix_iface<strat_t>                       bdiag_matrix_iface_t;
-      typedef bdiag_matrix<strat_t>                             this_t;
+      typedef matrix_iface                                      base_t;
+      typedef bdiag_matrix_iface                                bdiag_matrix_iface_t;
+      typedef bdiag_matrix                                      this_t;
       typedef smart_ptr<bdiag_matrix_iface_t, true>             sp_bdiag_matrix_iface_t;
 
-      typedef bs_array<fp_type_t>                               fp_array_t;
-      typedef bs_array<i_type_t>                                i_array_t;
-      typedef bs_array<fp_storage_type_t>                       fp_storage_array_t;
-
-      typedef smart_ptr<fp_array_t, true>                       sp_fp_array_t;
-      typedef smart_ptr<i_array_t, true>                        sp_i_array_t;
-      typedef smart_ptr<fp_storage_array_t, true>               sp_fp_storage_array_t;
-
       //blue-sky class declaration
-      BLUE_SKY_TYPE_DECL_T(bdiag_matrix);
+      BLUE_SKY_TYPE_DECL (bdiag_matrix);
 
       //! destructor
       virtual ~bdiag_matrix ()
@@ -59,7 +43,7 @@ namespace blue_sky
       //! calculate matrix vector product, v -- input vector, r -- output vector
       //! r += A * v
       //! return 0 if success
-      virtual int matrix_vector_product (sp_fp_array_t v, sp_fp_array_t r) const
+      virtual int matrix_vector_product (spv_double v, spv_double r) const
         {
           return matrix_vector_product_internal <false> (v, r);
         }
@@ -67,40 +51,40 @@ namespace blue_sky
       //! calculate matrix^t vector product, v -- input vector, r -- output vector
       //! r += A^T * v
       //! return 0 if success
-      virtual int matrix_vector_product_t (sp_fp_array_t v, sp_fp_array_t r) const;
+      virtual int matrix_vector_product_t (spv_double v, spv_double r) const;
 
       //! calculate linear combination r = alpha * Au + beta * v
       //! alpha, beta -- scalar
       //! v, u -- input vector
       //! r -- output vector
       //! return 0 if success
-      virtual int calc_lin_comb (fp_type_t alpha, fp_type_t beta, sp_fp_array_t u, sp_fp_array_t v, sp_fp_array_t r) const;
+      virtual int calc_lin_comb (t_double alpha, t_double beta, spv_double u, spv_double v, spv_double r) const;
 
       //! return total amount of allocated memory in bytes
-      virtual fp_type_t get_allocated_memory_in_mbytes () const
+      virtual t_double get_allocated_memory_in_mbytes () const
       {
-        fp_type_t d = 0;
+        t_double d = 0;
         
         d += sizeof (this);
-        d += sizeof (fp_storage_type_t) * diag->size ();
+        d += sizeof (t_float) * diag->size ();
         d /= 1024 * 1024;
         return d;
       }
 
       //! return block size 
-      virtual i_type_t get_n_block_size () const
+      virtual t_long get_n_block_size () const
       {
         return n_block_size;
       }
 
       //! return number of rows in matrix 
-      virtual i_type_t get_n_rows () const 
+      virtual t_long get_n_rows () const 
       {
         return n_rows;
       }
 
       //! return number of cols in matrix (return -1 in number of columns is unknown)
-      virtual i_type_t get_n_cols () const
+      virtual t_long get_n_cols () const
       {
         return n_rows;
       }
@@ -111,10 +95,10 @@ namespace blue_sky
           return true;
         }
       //! initialize vector
-      virtual void init_vector (sp_fp_array_t v) const
+      virtual void init_vector (spv_double v) const
         {
           v->resize (get_n_rows () * get_n_block_size ());
-          memset (&(*v)[0], 0, v->size () * sizeof (fp_type_t));
+          memset (&(*v)[0], 0, v->size () * sizeof (t_double));
 
         }
 
@@ -123,7 +107,7 @@ namespace blue_sky
       //-----------------------------------------
 
       //! allocate memory n_rows, n_cols, n_block_size, n_non_zeros, cols_ind, rows_ptr, values
-      virtual int init (const i_type_t new_n_rows, const i_type_t new_n_block_size)
+      virtual int init (const t_long new_n_rows, const t_long new_n_block_size)
         {
           if (new_n_block_size < 1)
             return -1;
@@ -132,7 +116,7 @@ namespace blue_sky
           n_rows = new_n_rows;
 
           diag->resize (n_rows * n_block_size * n_block_size);
-          memset (&(*diag)[0], 0, diag->size () * sizeof (fp_storage_type_t));
+          memset (&(*diag)[0], 0, diag->size () * sizeof (t_float));
           return 0;
         }
 
@@ -155,7 +139,7 @@ namespace blue_sky
       // GET matrix private DATA methods
       // ------------------------------------------------
 
-      virtual sp_fp_storage_array_t get_diag ()
+      virtual spv_float get_diag ()
         {
           return diag;
         }
@@ -186,7 +170,7 @@ namespace blue_sky
     protected:
 
       template<bool mul_alpha>
-      int matrix_vector_product_internal (sp_fp_array_t v, sp_fp_array_t r, const fp_type_t &alpha = 1.0) const;
+      int matrix_vector_product_internal (spv_double v, spv_double r, const t_double &alpha = 1.0) const;
       
       //__________________________________________
       //  VARIABLES
@@ -194,10 +178,10 @@ namespace blue_sky
     public:
 
     protected:
-      sp_fp_storage_array_t diag;        //!< matrix main diagonal (n_block_size * n_block_size * n_rows)
+      spv_float diag;        //!< matrix main diagonal (n_block_size * n_block_size * n_rows)
 
-      i_type_t                  n_block_size;           //!< size of matrix block
-      i_type_t                  n_rows;                 //!< number of rows in matrix
+      t_long                  n_block_size;           //!< size of matrix block
+      t_long                  n_rows;                 //!< number of rows in matrix
     };
 
 /** 
@@ -210,13 +194,13 @@ namespace blue_sky
  * 
  * @return 0 if success
  */
-template <class strat_t> template<bool mul_alpha> int
-bdiag_matrix<strat_t>::matrix_vector_product_internal (sp_fp_array_t v, 
-                                                       sp_fp_array_t r, 
-                                                       const fp_type_t &alpha) const
+template<bool mul_alpha> int
+bdiag_matrix::matrix_vector_product_internal (spv_double v, 
+                                              spv_double r, 
+                                              const t_double &alpha) const
 {
-  i_type_t i;
-  i_type_t b_sqr = n_block_size * n_block_size;
+  t_long i;
+  t_long b_sqr = n_block_size * n_block_size;
 
   //BS_ASSERT (v.size ());
   //BS_ASSERT (r.size ());
@@ -225,9 +209,9 @@ bdiag_matrix<strat_t>::matrix_vector_product_internal (sp_fp_array_t v,
   // loop through rows
   ////////////////////////////////////////////
 
-  fp_storage_type_t *val   = &(*diag)[0];
-  fp_type_t *v_val         = &(*v)[0];
-  fp_type_t *r_val         = &(*r)[0];
+  t_float *val   = &(*diag)[0];
+  t_double *v_val         = &(*v)[0];
+  t_double *r_val         = &(*r)[0];
 
   if (n_block_size == 1)
     {

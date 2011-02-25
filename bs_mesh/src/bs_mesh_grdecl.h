@@ -15,10 +15,10 @@ namespace blue_sky
   {
 
   template <typename strategy_t>
-  class BS_API_PLUGIN idata;
+  class idata;
 
   template <typename strategy_t>
-  class BS_API_PLUGIN mesh_grdecl_keywords;
+  class mesh_grdecl_keywords;
 
   template<class strategy_t>
   class BS_API_PLUGIN bs_mesh_grdecl : virtual public rs_smesh_iface<strategy_t>
@@ -43,6 +43,9 @@ namespace blue_sky
       typedef typename base_t::sp_bcsr_t                  sp_bcsr_t;
       typedef typename base_t::sp_idata_t                 sp_idata_t;
       typedef typename base_t::point3d_t                  point3d_t;
+
+	  typedef bs_array< typename strategy_t::fp_storage_type_t > fp_storage_array_t;
+	  typedef smart_ptr< fp_storage_array_t >                sp_fp_storage_array_t;
 
       ///////////////////////
       // OWN TYPES
@@ -195,13 +198,21 @@ namespace blue_sky
       {return wrapped.calc_element_center();};
 
     
+	//! init coord & zcorn from (nx, ny, nz, dx, dy, dz)
+	//! return: first -- coord, second -- zcorn
+	static std::pair< sp_fp_storage_array_t, sp_fp_storage_array_t >
+	gen_coord_zcorn(i_type_t nx, i_type_t ny, i_type_t nz, sp_fp_storage_array_t dx, sp_fp_storage_array_t dy, sp_fp_storage_array_t dz) {
+		return wrapped_t::gen_coord_zcorn(nx, ny, nz, dx, dy, dz);
+	}
+
     ////////////////////
     // wrapped class
     ///////////////////
 
     private:
 
-      mesh_grdecl<strategy_t> wrapped;
+		typedef mesh_grdecl< strategy_t > wrapped_t;
+		wrapped_t wrapped;
     };
 
 };//namespace blue_sky

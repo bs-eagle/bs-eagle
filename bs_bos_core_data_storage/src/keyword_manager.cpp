@@ -7,7 +7,6 @@
  *              the BSD License. See LICENSE for more details.
  * */
 #include "bs_bos_core_data_storage_stdafx.h"
-
 #include "keyword_manager.h"
 
 namespace blue_sky
@@ -15,6 +14,11 @@ namespace blue_sky
   //constructors
   template <class strategy_t>
   keyword_manager<strategy_t>::keyword_manager(bs_type_ctor_param /*param*/)
+  {
+  }
+
+  template <class strategy_t>
+  keyword_manager<strategy_t>::~keyword_manager()
   {
   }
 
@@ -208,7 +212,7 @@ namespace blue_sky
 
       return new keyword_manager <strategy_t> (src_ptr);
     }
-    
+
   BLUE_SKY_TYPE_IMPL_T_EXT(1, (keyword_manager <base_strategy_fif>) , 1, (objbase), "keyword_manager_fif", "BOS_Core keyword_manager class", "BOS_Core keyword_manager class", false);
   BLUE_SKY_TYPE_IMPL_T_EXT(1, (keyword_manager <base_strategy_did>) , 1, (objbase), "keyword_manager_did", "BOS_Core keyword_manager class", "BOS_Core keyword_manager class", false);
   BLUE_SKY_TYPE_IMPL_T_EXT(1, (keyword_manager <base_strategy_dif>) , 1, (objbase), "keyword_manager_dif", "BOS_Core keyword_manager class", "BOS_Core keyword_manager class", false);
@@ -220,6 +224,5 @@ namespace blue_sky
   //!TODO: kill next string after debug
   //template class keyword_manager <base_strategy_di>;
   //template class keyword_manager <base_strategy_fi>;
-
 
 }//ns_bs
