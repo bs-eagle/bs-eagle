@@ -7,7 +7,7 @@
 //#include "bs_lsolvers_stdafx.h"
 //#include "bs_kernel.h"
 
-#include "prop.h"
+//#include "prop.h"
 #include "cgs_solver.h"
 #include "gmres_solver.h"
 #include "bicgstab_solver.h"
@@ -16,7 +16,7 @@
 #include "bcsr_ilu_prec.h"
 #include "two_stage_prec.h"
 #include "blu_solver.h"
-#include "py_prop.h"
+//#include "py_prop.h"
 #include "py_iface.h"
 
 using namespace blue_sky;
@@ -32,7 +32,7 @@ namespace blue_sky {
 
     bool res = true;
 
-    res &= BS_KERNEL.register_type(*bs_init.pd_, prop<float, int, std::string, bool>::bs_type()); BS_ASSERT (res);
+    //res &= BS_KERNEL.register_type(*bs_init.pd_, prop<float, int, std::string, bool>::bs_type()); BS_ASSERT (res);
 
     res &= BS_KERNEL.register_type (*bs_init.pd_, cgs_solver::bs_type()); BS_ASSERT (res);
     
@@ -59,7 +59,7 @@ BLUE_SKY_INIT_PY_FUN
 {
   using namespace boost::python;
 
-  python::py_export_prop ();
+  //python::py_export_prop ();
   python::py_export_lsolvers ();
   
 }
