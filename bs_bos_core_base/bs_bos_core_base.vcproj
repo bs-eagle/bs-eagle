@@ -454,6 +454,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\include\conf.h"
+			>
+		</File>
+		<File
 			RelativePath=".\include\data_dimens.h"
 			>
 		</File>

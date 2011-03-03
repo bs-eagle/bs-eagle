@@ -7,11 +7,19 @@
  */
 #include <memory.h>
 #include <iomanip>
+
 #include "bs_kernel.h"
 #include "table.h"
 
+
 using namespace std;
+
+#ifdef BSPY_EXPORTING_PLUGIN
+
+#include <boost/python.hpp>
 using namespace boost::python;
+
+#endif //BSPY_EXPORTING_PLUGIN
 
 
 namespace blue_sky
@@ -41,6 +49,7 @@ namespace blue_sky
       return 0;
     }
 
+#ifdef BSPY_EXPORTING_PLUGIN
   void 
   table::set_col_values (const t_long col, spv_double val)
     {
@@ -105,6 +114,7 @@ namespace blue_sky
       
       return s.str ();
     }
+#endif //BSPY_EXPORTING_PLUGIN
 /////////////////////////////////BS Register
 /////////////////////////////////Stuff//////////////////////////
 

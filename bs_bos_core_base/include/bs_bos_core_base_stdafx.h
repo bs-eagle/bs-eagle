@@ -69,6 +69,7 @@
 #include "force_inline.h"
 #include "bos_report.h"
 
+
 #include "aligned_allocator.h"
 
 #endif // #ifndef BS_BOS_CORE_BASE_PRECOMPILED_HEADERS_H_
