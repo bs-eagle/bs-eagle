@@ -29,6 +29,7 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base<strategy_t>
   {
   private:
 	  struct inner;
+	  st_smart_ptr< inner > pinner_;
   
 //+++++++++++++++++++++++++++++++++++++++++++
 //  INTERNAL TYPE DECLARATION
@@ -95,11 +96,17 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base<strategy_t>
     //! init arrays of properties
     void init_props (const sp_idata_t &idata);
 
+	//! init coord & zcorn via gen_coord_zcorn
+	void init_props(i_type_t nx, i_type_t ny, i_type_t nz, sp_fp_storage_array_t dx, sp_fp_storage_array_t dy, sp_fp_storage_array_t dz);
+
 	//! init coord & zcorn from (nx, ny, nz, dx, dy, dz)
 	//! return: first -- coord, second -- zcorn
 	static std::pair< sp_fp_storage_array_t, sp_fp_storage_array_t >
 	gen_coord_zcorn(i_type_t nx, i_type_t ny, i_type_t nz, sp_fp_storage_array_t dx, sp_fp_storage_array_t dy, sp_fp_storage_array_t dz);
-    
+
+	static std::pair< sp_fp_storage_array_t, sp_fp_storage_array_t >
+	refine_mesh(i_type_t& nx, i_type_t& ny, sp_fp_storage_array_t coord, sp_fp_storage_array_t zcorn, sp_fp_storage_array_t points);
+
     //! get vertex of cube [i,j,k]
     void calc_element (const i_type_t i, const i_type_t j, const i_type_t k, element_t &element) const;
     
@@ -317,8 +324,8 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base<strategy_t>
 
     // TODO: replace with seq_vector
   public:
-    fp_storage_type_t *coord_array;	          //!< COORD array
-    fp_storage_type_t *zcorn_array;				    //!< ZCORN array
+    fp_storage_type_t* coord_array;	          //!< COORD array
+    fp_storage_type_t* zcorn_array;				    //!< ZCORN array
   };
 
 
