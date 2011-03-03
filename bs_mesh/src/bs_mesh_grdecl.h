@@ -205,6 +205,11 @@ namespace blue_sky
 		return wrapped_t::gen_coord_zcorn(nx, ny, nz, dx, dy, dz);
 	}
 
+	static std::pair< sp_fp_storage_array_t, sp_fp_storage_array_t >
+	refine_mesh(i_type_t& nx, i_type_t& ny, sp_fp_storage_array_t coord, sp_fp_storage_array_t zcorn, sp_fp_storage_array_t points) {
+		return wrapped_t::refine_mesh(nx, ny, coord, zcorn, points);
+	}
+
     ////////////////////
     // wrapped class
     ///////////////////
