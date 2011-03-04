@@ -77,6 +77,7 @@
 #include "constants.h"
 #include "shared_vector.h"
 #include "naive_file_reader.h"
+#include "conf.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #endif //#ifndef BS_PVT_PRECOMPILED_HEADERS_H_

@@ -15,14 +15,12 @@ using namespace blue_sky::pvt;
 namespace blue_sky
   {
 
-  template <typename strategy_t>
-  pvt_oil<strategy_t>::pvt_oil (bs_type_ctor_param)
+  pvt_oil::pvt_oil (bs_type_ctor_param)
   {
   }
 
-  template <typename strategy_t>
-  pvt_oil<strategy_t>::pvt_oil (const pvt_oil &pvt)
-  : bs_refcounter (pvt), pvt_dead_oil <strategy_t> (pvt)
+  pvt_oil::pvt_oil (const pvt_oil &pvt)
+  : bs_refcounter (pvt), pvt_dead_oil (pvt)
   {
     if (this != &pvt)
       {
@@ -31,9 +29,8 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   void
-  pvt_oil<strategy_t>::insert_vector (const input_vector_t &vec)
+  pvt_oil::insert_vector (const input_vector_t &vec)
   {
     const int elem_count = 4;
     BS_ASSERT (!(vec.size() % elem_count)) (vec.size ()) (elem_count);
@@ -57,18 +54,16 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   void
-  pvt_oil<strategy_t>::build (item_t atm_p, item_t min_p, item_t max_p, int n_intervals)
+  pvt_oil::build (item_t atm_p, item_t min_p, item_t max_p, int n_intervals)
   {
     int n_points = base_t::build_internal (atm_p, min_p, max_p, n_intervals, true);
 
     build_compressibility (n_points);
   }
 
-  template <typename strategy_t>
   void
-  pvt_oil<strategy_t>::build_compressibility (index_t n_intervals)
+  pvt_oil::build_compressibility (index_t n_intervals)
   {
     if (main_pressure_.empty ())
       return ;
@@ -119,9 +114,8 @@ namespace blue_sky
 
 
 
-  template <typename strategy_t>
   void
-  pvt_oil<strategy_t>::get_compressibility_interval (item_t gor, index_t &j1, index_t &j2, index_t &end_j1, index_t &end_j2)
+  pvt_oil::get_compressibility_interval (item_t gor, index_t &j1, index_t &j2, index_t &end_j1, index_t &end_j2)
   {
     j1 = j2 = -1;
     end_j1 = end_j2 = -2;
@@ -155,9 +149,8 @@ namespace blue_sky
       throw bs_exception ("", "invalid interval");
   }
 
-  template <typename strategy_t>
   void
-  pvt_oil<strategy_t>::check_oil ()
+  pvt_oil::check_oil ()
   {
     BS_ASSERT (main_pressure_.size ());
 
@@ -243,9 +236,8 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   bool
-  pvt_oil<strategy_t>::calc (const bool is_g, const int main_var, const item_t p, const item_t gor,
+  pvt_oil::calc (const bool is_g, const int main_var, const item_t p, const item_t gor,
                              item_t *inv_fvf, item_t *d_inv_fvf, item_t *gor_d_inv_fvf,
                              item_t *inv_visc, item_t *d_inv_visc, item_t *gor_d_inv_visc,
                              item_t *inv_visc_fvf, item_t *d_inv_visc_fvf, item_t *gor_d_inv_visc_fvf,
@@ -269,9 +261,8 @@ namespace blue_sky
         }
     }
 
-  template <typename strategy_t>
   inline bool
-  pvt_oil<strategy_t>::calc_undersaturated_oil (const item_t p, const item_t gor,
+  pvt_oil::calc_undersaturated_oil (const item_t p, const item_t gor,
       item_t *inv_fvf, item_t *d_inv_fvf, item_t *gor_d_inv_fvf,
       item_t *inv_visc, item_t *d_inv_visc, item_t *gor_d_inv_visc,
       item_t *inv_visc_fvf, item_t *d_inv_visc_fvf, item_t *gor_d_inv_visc_fvf,
@@ -376,9 +367,8 @@ namespace blue_sky
       return true;
     }
 
-  template <typename strategy_t>
   void
-  pvt_oil <strategy_t>::print () const
+  pvt_oil::print () const
   {
     BS_ASSERT (pressure_.size () == inv_fvf_.size ());
     BS_ASSERT (inv_fvf_.size ()  == inv_visc_.size ());
@@ -426,8 +416,10 @@ namespace blue_sky
     BOSOUT (section::pvt, level::medium) << "*************************************************************************************************************************" << bs_end;
   }
 
-  template class pvt_oil <base_strategy_fi>;
-  template class pvt_oil <base_strategy_di>;
-  template class pvt_oil <base_strategy_mixi>;
+  BLUE_SKY_TYPE_STD_CREATE (pvt_oil);
+  BLUE_SKY_TYPE_STD_COPY (pvt_oil);
+
+  BLUE_SKY_TYPE_IMPL(pvt_oil,  pvt_dead_oil, "pvt_oil", "Oil PVT calculation class", "Oil PVT calculation");
+
 } // namespace blue_sky
 

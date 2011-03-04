@@ -15,19 +15,17 @@ namespace blue_sky
   /**
    * \brief pvt_oil
    */
-  template <typename strategy_t>
-  class pvt_oil : public pvt_dead_oil <strategy_t>
+  class pvt_oil : public pvt_dead_oil 
     {
     public:
 
-      typedef strategy_t                        pvt_strategy_t;
-      typedef pvt_dead_oil <strategy_t>         base_t;
-      typedef typename base_t::item_t           item_t;
-      typedef typename base_t::index_t          index_t;
-      typedef typename base_t::index_array_t    index_array_t;
-      typedef typename base_t::item_array_t     item_array_t;
-      typedef typename base_t::input_vector_t   input_vector_t;
-      typedef typename base_t::vector_t         vector_t;
+      typedef pvt_dead_oil                      base_t;
+      typedef t_double                          item_t;
+      typedef t_long                            index_t;
+      typedef v_long                            index_array_t;
+      typedef base_t::array_item_t              array_item_t;
+      typedef base_t::input_vector_t            input_vector_t;
+      typedef base_t::vector_t                  vector_t;
 
       /**
        * \brief store values into data

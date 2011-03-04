@@ -15,19 +15,17 @@ namespace blue_sky
   /**
    * \brief pvt_gas
    */
-  template <typename strategy_t>
-  class pvt_gas : public pvt_base <strategy_t>
+  class pvt_gas : public pvt_base 
     {
     public:
 
-      typedef strategy_t                        pvt_strategy_t;
-      typedef pvt_base <strategy_t>             base_t;
-      typedef typename base_t::item_t           item_t;
-      typedef typename base_t::index_t          index_t;
-      typedef typename base_t::index_array_t    index_array_t;
-      typedef typename base_t::item_array_t     item_array_t;
-      typedef typename base_t::input_vector_t   input_vector_t;
-      typedef typename base_t::vector_t         vector_t;
+      typedef pvt_base                 base_t;
+      typedef t_double                 item_t;
+      typedef t_long                   index_t;
+      typedef base_t::array_index_t    array_index_t;
+      typedef base_t::array_item_t     array_item_t;
+      typedef base_t::input_vector_t   input_vector_t;
+      typedef base_t::vector_t         vector_t;
 
       /**
        * \brief store values into data
@@ -39,7 +37,7 @@ namespace blue_sky
       /**
        * \brief generate interpolated data
        */
-      void build (item_t atm_p, item_t min_p, item_t max_p, index_t n_intervals);
+      void build (item_t atm_p, item_t min_p, item_t max_p, t_int n_intervals);
 
       /**
        * \brief calculate interpolated value

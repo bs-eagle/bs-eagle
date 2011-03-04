@@ -15,13 +15,18 @@ using namespace blue_sky::pvt;
 namespace blue_sky
   {
 
-  template <typename strategy_t>
-  pvt_gas<strategy_t>::pvt_gas (bs_type_ctor_param)
+  template <typename item_t, typename main_pressure_t>
+  size_t
+  get_interval (item_t pressure, const main_pressure_t &main_pressure)
+  {
+    return binary_search (pressure, main_pressure, std::less <item_t> ());
+  }
+
+  pvt_gas::pvt_gas (bs_type_ctor_param)
   {
   }
 
-  template <typename strategy_t>
-  pvt_gas<strategy_t>::pvt_gas (const pvt_gas &pvt)
+  pvt_gas::pvt_gas (const pvt_gas &pvt)
   : bs_refcounter (pvt)
   {
     if (this != &pvt)
@@ -31,9 +36,8 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   void
-  pvt_gas<strategy_t>::insert_vector (const input_vector_t &vec)
+  pvt_gas::insert_vector (const input_vector_t &vec)
   {
     const int elem_count = 3;
     BS_ASSERT (!(vec.size() % elem_count)) (vec.size ()) (elem_count);
@@ -55,9 +59,8 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   void
-  pvt_gas<strategy_t>::build (item_t atm_p, item_t min_p, item_t max_p, index_t n_intervals)
+  pvt_gas::build (item_t atm_p, item_t min_p, item_t max_p, t_int n_intervals)
   {
     if (this->init_dependent)
       {
@@ -117,16 +120,9 @@ namespace blue_sky
       }
   }
 
-  template <typename item_t, typename main_pressure_t>
-  size_t
-  get_interval (item_t pressure, const main_pressure_t &main_pressure)
-  {
-    return binary_search (pressure, main_pressure, std::less <item_t> ());
-  }
 
-  template <typename strategy_t>
   void
-  pvt_gas<strategy_t>::check_gas ()
+  pvt_gas::check_gas ()
   {
     this->check_common ();
 
@@ -139,9 +135,8 @@ namespace blue_sky
     check_gas_common (main_pressure_, main_fvf_, main_visc_);
   }
 
-  template <typename strategy_t>
   void
-  pvt_gas<strategy_t>::calc (const item_t p,
+  pvt_gas::calc (const item_t p,
                              item_t *inv_fvf, item_t *d_inv_fvf,
                              item_t *inv_visc, item_t *d_inv_visc,
                              item_t *inv_visc_fvf, item_t *d_inv_visc_fvf) const
@@ -182,9 +177,8 @@ namespace blue_sky
         }
     }
 
-  template <typename strategy_t>
   void
-  pvt_gas <strategy_t>::print () const
+  pvt_gas::print () const
   {
     BS_ASSERT (pressure_.size () == inv_fvf_.size ());
     BS_ASSERT (inv_fvf_.size ()  == inv_visc_.size ());
@@ -223,8 +217,10 @@ namespace blue_sky
     BOSOUT (section::pvt, level::medium) << "*************************************************************************************" << bs_end;
   }
 
-  template class pvt_gas <base_strategy_fi>;
-  template class pvt_gas <base_strategy_di>;
-  template class pvt_gas <base_strategy_mixi>;
+  BLUE_SKY_TYPE_STD_CREATE (pvt_gas);
+  BLUE_SKY_TYPE_STD_COPY (pvt_gas);
+
+  BLUE_SKY_TYPE_IMPL(pvt_gas,  pvt_base, "pvt_gas", "Gas PVT calculation class", "Gas PVT calculation");
+
 } // namespace blue_sky
 

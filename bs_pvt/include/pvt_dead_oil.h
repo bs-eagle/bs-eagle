@@ -15,17 +15,15 @@ namespace blue_sky
   /**
    * \brief
    */
-  template <typename strategy_t>
-  class pvt_dead_oil : public pvt_base <strategy_t>
+  class pvt_dead_oil : public pvt_base 
     {
     public:
 
-      typedef strategy_t                        pvt_strategy_t;
-      typedef pvt_base <strategy_t>             base_t;
-      typedef typename base_t::item_t           item_t;
-      typedef typename strategy_t::index_t      index_t;
-      typedef typename base_t::input_vector_t   input_vector_t;
-      typedef typename base_t::vector_t         vector_t;
+      typedef pvt_base                          base_t;
+      typedef t_double                          item_t;
+      typedef t_int                             index_t;
+      typedef v_double                          input_vector_t;
+      typedef base_t::vector_t                  vector_t;
 
       /**
        * \brief parse line of chars and store values into data

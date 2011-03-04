@@ -35,11 +35,12 @@ namespace python    {
   {
     using namespace boost::python;
 
-    strategy_exporter::export_base <pvt_base, pvt_exporter> ("pvt");
-    strategy_exporter::export_class <pvt_oil, pvt_base, pvt_exporter> ("pvt_oil");
-    strategy_exporter::export_class <pvt_gas, pvt_base, pvt_exporter> ("pvt_gas");
-    strategy_exporter::export_class <pvt_water, pvt_base, pvt_exporter> ("pvt_water");
-    strategy_exporter::export_class <pvt_dead_oil, pvt_base, pvt_exporter> ("pvt_dead_oil");
+    base_exporter<pvt_base, pvt_exporter>::export_class ("pvt_base");
+    class_exporter<pvt_oil, pvt_base, pvt_exporter>::export_class  ("pvt_oil");
+    class_exporter<pvt_gas, pvt_base, pvt_exporter>::export_class ("pvt_gas");
+    class_exporter<pvt_water, pvt_base, pvt_exporter>::export_class ("pvt_water");
+    class_exporter<pvt_dead_oil, pvt_base, pvt_exporter>::export_class ("pvt_dead_oil");
+
   }
 
 } // namespace python

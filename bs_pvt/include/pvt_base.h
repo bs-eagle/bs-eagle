@@ -28,19 +28,19 @@ namespace blue_sky
   /**
    * \brief pvt_base
    */
-  template <typename strategy_t>
   class BS_API_PLUGIN pvt_base : public objbase
     {
     public:
 
-      typedef strategy_t                              pvt_strategy_t;
-      typedef typename strategy_t::item_t							item_t;
-      typedef typename strategy_t::index_t						index_t;
-      typedef typename strategy_t::item_array_t			  item_array_t;
-      typedef typename strategy_t::index_array_t		  index_array_t;
-      typedef shared_vector <double>    		          input_vector_t;
+      typedef t_double                              	item_t;
+      typedef t_long                        			  	index_t;
+      typedef v_double                                array_item_t;
+      typedef v_long                                  array_index_t;
+      typedef smart_ptr <v_double, true>       			  sp_array_item_t;
+      typedef smart_ptr <v_long, true>                sp_array_index_t;
+      typedef v_double                   		          input_vector_t;
 
-      typedef std::vector <item_t>                    vector_t;
+      typedef std::vector <t_double>                  vector_t;
 
       /**
        * \brief constructor
@@ -83,7 +83,7 @@ namespace blue_sky
        * \param n_intervals
        * \return
        */
-      virtual void build (item_t atm_p, item_t min_p, item_t max_p, int n_intervals) = 0;
+      virtual void build (item_t atm_p, item_t min_p, item_t max_p, t_int n_intervals) = 0;
 
       /**
        * \brief
@@ -124,7 +124,7 @@ namespace blue_sky
        * \param n_intervals number of intervals
        * \return
        */
-      void check_interval_numbers (int &n_intervals);
+      void check_interval_numbers (t_int &n_intervals);
 
       void check_common ();
 

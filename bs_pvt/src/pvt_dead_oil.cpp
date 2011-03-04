@@ -15,13 +15,11 @@ using namespace blue_sky::pvt;
 namespace blue_sky
   {
 
-  template <typename strategy_t>
-  pvt_dead_oil<strategy_t>::pvt_dead_oil (bs_type_ctor_param)
+  pvt_dead_oil::pvt_dead_oil (bs_type_ctor_param)
   {
   }
 
-  template <typename strategy_t>
-  pvt_dead_oil<strategy_t>::pvt_dead_oil (const pvt_dead_oil &pvt)
+  pvt_dead_oil::pvt_dead_oil (const pvt_dead_oil &pvt)
   : bs_refcounter (pvt)
   {
     if (this != &pvt)
@@ -33,9 +31,8 @@ namespace blue_sky
   }
 
 
-  template <typename strategy_t>
   void
-  pvt_dead_oil<strategy_t>::insert_vector (const input_vector_t &vec)
+  pvt_dead_oil::insert_vector (const input_vector_t &vec)
   {
     const int elem_count = 3;
     BS_ASSERT (!(vec.size() % elem_count)) (vec.size ()) (elem_count);
@@ -60,9 +57,8 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   int
-  pvt_dead_oil<strategy_t>::build_internal (item_t atm_p, item_t min_p, item_t max_p, int n_intervals, bool is_pvto)
+  pvt_dead_oil::build_internal (item_t atm_p, item_t min_p, item_t max_p, int n_intervals, bool is_pvto)
   {
     check_oil ();
 
@@ -225,16 +221,14 @@ namespace blue_sky
     return n_points;
   }
 
-  template <typename strategy_t>
   void
-  pvt_dead_oil<strategy_t>::build (item_t atm_p, item_t min_p, item_t max_p, int n_intervals)
+  pvt_dead_oil::build (item_t atm_p, item_t min_p, item_t max_p, int n_intervals)
   {
     build_internal (atm_p, min_p, max_p, n_intervals, false);
   }
 
-  template <typename strategy_t>
   void
-  pvt_dead_oil<strategy_t>::check_oil ()
+  pvt_dead_oil::check_oil ()
   {
     base_t::check_common ();
 
@@ -242,9 +236,8 @@ namespace blue_sky
     check_gas_common (main_pressure_, main_fvf_, main_visc_);
   }
 
-  template <typename strategy_t>
   bool
-  pvt_dead_oil<strategy_t>::calc (const bool is_g, const int main_var, const item_t p, const item_t gor,
+  pvt_dead_oil::calc (const bool is_g, const int main_var, const item_t p, const item_t gor,
                                   item_t *inv_fvf, item_t *d_inv_fvf, item_t *gor_d_inv_fvf,
                                   item_t *inv_visc, item_t *d_inv_visc, item_t *gor_d_inv_visc,
                                   item_t *inv_visc_fvf, item_t *d_inv_visc_fvf, item_t *gor_d_inv_visc_fvf,
@@ -258,9 +251,8 @@ namespace blue_sky
                                  gas_oil_ratio, d_gas_oil_ratio, drsdt, dt, old_gas_oil_ratio);
     }
 
-  template <typename strategy_t>
   bool
-  pvt_dead_oil<strategy_t>::calc_saturated_oil (const bool is_g, const int main_var, const item_t p, const item_t gor,
+  pvt_dead_oil::calc_saturated_oil (const bool is_g, const int main_var, const item_t p, const item_t gor,
       item_t *inv_fvf, item_t *d_inv_fvf, item_t *gor_d_inv_fvf,
       item_t *inv_visc, item_t *d_inv_visc, item_t *gor_d_inv_visc,
       item_t *inv_visc_fvf, item_t *d_inv_visc_fvf, item_t *gor_d_inv_visc_fvf,
@@ -311,9 +303,8 @@ namespace blue_sky
       return true;
     }
 
-  template <typename strategy_t>
-  typename pvt_dead_oil<strategy_t>::item_t
-  pvt_dead_oil<strategy_t>::interpolate_and_fix (item_t cell_pbub) const
+  pvt_dead_oil::item_t
+  pvt_dead_oil::interpolate_and_fix (item_t cell_pbub) const
     {
       size_t l = binary_search (cell_pbub, pressure_, std::less <item_t> ());
       size_t n = pressure_.size ();
@@ -343,9 +334,8 @@ namespace blue_sky
         }
     }
 
-  template <typename strategy_t>
-  typename pvt_dead_oil<strategy_t>::item_t
-  pvt_dead_oil<strategy_t>::get_gor_for_pressure (item_t pressure_data) const
+  pvt_dead_oil::item_t
+  pvt_dead_oil::get_gor_for_pressure (item_t pressure_data) const
     {
       if (pressure_data < pressure_.front ())
         {
@@ -357,9 +347,8 @@ namespace blue_sky
       return gor_[i_rs] + (gor_[i_rs + 1] - gor_[i_rs]) / this->get_p_step () * (pressure_data - pressure_[i_rs]);
     }
 
-  template <typename strategy_t>
   void
-  pvt_dead_oil <strategy_t>::print () const
+  pvt_dead_oil::print () const
   {
     BS_ASSERT (pressure_.size () == inv_fvf_.size ());
     BS_ASSERT (inv_fvf_.size ()  == inv_visc_.size ());
@@ -399,9 +388,10 @@ namespace blue_sky
       }
     BOSOUT (section::pvt, level::medium) << "*************************************************************************************" << bs_end;
   }
+  BLUE_SKY_TYPE_STD_CREATE (pvt_dead_oil);
+  BLUE_SKY_TYPE_STD_COPY (pvt_dead_oil);
 
-  template class pvt_dead_oil <base_strategy_fi>;
-  template class pvt_dead_oil <base_strategy_di>;
-  template class pvt_dead_oil <base_strategy_mixi>;
+  BLUE_SKY_TYPE_IMPL(pvt_dead_oil,  pvt_base, "pvt_dead_oil", "Dead Oil PVT calculation class", "Dead Oil PVT calculation");
+
 } // namespace blue_sky
 

@@ -14,7 +14,7 @@
 
 namespace blue_sky
   {
-
+#if 0
   //////////////////////////////////////////////////////////////////////////
   BLUE_SKY_TYPE_STD_CREATE_T_DEF (pvt_dead_oil,(class));
   BLUE_SKY_TYPE_STD_COPY_T_DEF (pvt_dead_oil,(class));
@@ -42,6 +42,7 @@ namespace blue_sky
   BLUE_SKY_TYPE_IMPL_T_EXT (1, (pvt_water<base_strategy_fi>), 1, (pvt_base<base_strategy_fi>), "pvt_water_fi", "pvt_water_fi", "pvt_water_fi", false);
   BLUE_SKY_TYPE_IMPL_T_EXT (1, (pvt_water<base_strategy_di>), 1, (pvt_base<base_strategy_di>), "pvt_water_di", "pvt_water_di", "pvt_water_di", false);
   BLUE_SKY_TYPE_IMPL_T_EXT (1, (pvt_water<base_strategy_mixi>), 1, (pvt_base<base_strategy_mixi>), "pvt_water_mixi", "pvt_water_mixi", "pvt_water_mixi", false);
+#endif 
 
   //////////////////////////////////////////////////////////////////////////
   bool
@@ -49,32 +50,16 @@ namespace blue_sky
   {
     bool res = true;
 
-    res &= BS_KERNEL.register_type (pd, pvt_dead_oil<base_strategy_fi>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, pvt_dead_oil<base_strategy_di>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, pvt_dead_oil<base_strategy_mixi>::bs_type ());
+    res &= BS_KERNEL.register_type (pd, pvt_dead_oil::bs_type ());
     BS_ASSERT (res);
 
-    res &= BS_KERNEL.register_type (pd, pvt_gas<base_strategy_fi>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, pvt_gas<base_strategy_di>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, pvt_gas<base_strategy_mixi>::bs_type ());
+    res &= BS_KERNEL.register_type (pd, pvt_gas::bs_type ());
     BS_ASSERT (res);
 
-    res &= BS_KERNEL.register_type (pd, pvt_oil<base_strategy_fi>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, pvt_oil<base_strategy_di>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, pvt_oil<base_strategy_mixi>::bs_type ());
+    res &= BS_KERNEL.register_type (pd, pvt_oil::bs_type ());
     BS_ASSERT (res);
 
-    res &= BS_KERNEL.register_type (pd, pvt_water<base_strategy_fi>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, pvt_water<base_strategy_di>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, pvt_water<base_strategy_mixi>::bs_type ());
+    res &= BS_KERNEL.register_type (pd, pvt_water::bs_type ());
     BS_ASSERT (res);
 
     return res;
