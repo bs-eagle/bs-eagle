@@ -21,35 +21,36 @@
 
 namespace blue_sky
   {
+    BS_TYPE_IMPL_T_EXT_MEM(bs_array, 2, (calc_model_data, bs_array_shared));
+    BS_TYPE_IMPL_T_EXT_MEM(bs_array, 2, (calc_model_data, vector_traits));
+
   //////////////////////////////////////////////////////////////////////////
 
-  template <typename strategy_t>
-  scale_array_holder<strategy_t>::scale_array_holder (bs_type_ctor_param param /* = NULL */)
+  scale_array_holder::scale_array_holder (bs_type_ctor_param param /* = NULL */)
   {
     data.resize (1);
   }
-  template <typename strategy_t>
-  scale_array_holder<strategy_t>::scale_array_holder (const this_t& s)
+
+  scale_array_holder::scale_array_holder (const this_t& s)
   : bs_refcounter (s), objbase (s)
   {
     BS_ASSERT (false && "NOT IMPL YET");
   }
   //////////////////////////////////////////////////////////////////////////
 
-  template <typename strategy_t>
-  scal_2p_data_holder<strategy_t>::scal_2p_data_holder (bs_type_ctor_param param /* = NULL */)
+  scal_2p_data_holder::scal_2p_data_holder (bs_type_ctor_param param /* = NULL */)
   {
+    data_ = BS_KERNEL.create_object (item_array_t::bs_type ());
   }
-  template <typename strategy_t>
-  scal_2p_data_holder<strategy_t>::scal_2p_data_holder (const this_t& s)
+
+  scal_2p_data_holder::scal_2p_data_holder (const this_t& s)
   : bs_refcounter (s), objbase (s)
   {
     BS_ASSERT (false && "NOT IMPL YET");
   }
 
-  template <typename strategy_t>
   void
-  scal_2p_data_holder<strategy_t>::precalc (scal_region_info_t &info, const scal_region_t &region, scal::data_placement::scal_data_placement_type type, bool is_water)
+  scal_2p_data_holder::precalc (scal_region_info_t &info, const scal_region_t &region, scal::data_placement::scal_data_placement_type type, bool is_water)
   {
     // replace calc_sorp and calc_spr
     precalc_min_index_and_spr (region.Krp, region.Sp, info.Krp_min_greater_zero, info.spr);
@@ -84,27 +85,26 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   void
-  scal_2p_data_holder<strategy_t>::add_spof (const item_array_t &data, bool is_water)
+  scal_2p_data_holder::add_spof (const sp_array_item_t data, bool is_water)
   {
-    BS_ASSERT ((data.size () % 4) == 0) (data.size ());
+    BS_ASSERT ((data->size () % 4) == 0) (data->size ());
 
     scal_region_info_t info;
-    info.So_count   = (int)data.size () / 4;
+    info.So_count   = (int)data->size () / 4;
     info.Sp_count   = info.So_count;
-    info.sp_offset  = (int)data_.size ();
-    info.so_offset  = (int)data_.size ();
+    info.sp_offset  = (int)data_->size ();
+    info.so_offset  = (int)data_->size ();
 
-    data_.resize (data_.size () + info.So_count * 5);
+    data_->resize (data_->size () + info.So_count * 5);
     placement_info_.type = scal::data_placement::spof;
 
 #ifdef _DEBUG
-    item_t *raw_data = &data_[0];
+    item_t *raw_data = &(*data_)[0];
     raw_data;
 #endif
 
-    scal::data_placement::all_regions_t<strategy_t>::place_spof_data (data_, placement_info_, data, is_water);
+    scal::data_placement::all_regions_t::place_spof_data (data_, placement_info_, data, is_water);
     region_.push_back (info);
     precalc (region_.back (), get_region_internal ((int)region_.size () - 1), scal::data_placement::spof, is_water);
     if (!check (get_region_internal ((int)region_.size () - 1), is_water))
@@ -116,25 +116,24 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   void
-  scal_2p_data_holder<strategy_t>::add_spfn (const item_array_t &data, size_t region_index, bool is_water)
+  scal_2p_data_holder::add_spfn (const sp_array_item_t data, size_t region_index, bool is_water)
   {
-    BS_ASSERT ((data.size () % 3) == 0) (data.size ());
+    BS_ASSERT ((data->size () % 3) == 0) (data->size ());
 
     if (placement_info_.type == scal::data_placement::scal_data_placement_null ||
         placement_info_.type == scal::data_placement::spfn_sof3)
       {
         scal_region_info_t info;
         info.So_count   = -1;
-        info.Sp_count   = (int)data.size () / 3;
+        info.Sp_count   = (int)data->size () / 3;
         info.so_offset  = -1;
-        info.sp_offset  = (int)data_.size ();
+        info.sp_offset  = (int)data_->size ();
 
-        data_.resize (data_.size () + data.size ());
+        data_->resize (data_->size () + data->size ());
         placement_info_.type = scal::data_placement::spfn_sof3;
 
-        scal::data_placement::all_regions_t<strategy_t>::place_spfn_data (data_, placement_info_, data, is_water);
+        scal::data_placement::all_regions_t::place_spfn_data (data_, placement_info_, data, is_water);
         region_.push_back (info);
       }
     else if (placement_info_.type == scal::data_placement::sof3_spfn)
@@ -142,11 +141,11 @@ namespace blue_sky
         BS_ASSERT (region_index < region_.size ()) (region_index) (region_.size ());
         scal_region_info_t &info = region_[region_index];
 
-        info.Sp_count   = (int)data.size () / 3;
-        info.sp_offset  = (int)data_.size ();
+        info.Sp_count   = (int)data->size () / 3;
+        info.sp_offset  = (int)data_->size ();
 
-        data_.resize (data_.size () + data.size ());
-        scal::data_placement::all_regions_t<strategy_t>::place_spfn_data (data_, placement_info_, data, is_water);
+        data_->resize (data_->size () + data->size ());
+        scal::data_placement::all_regions_t::place_spfn_data (data_, placement_info_, data, is_water);
         precalc (info, get_region_internal ((int)region_index), scal::data_placement::sof3_spfn, is_water);
         if (!check (get_region_internal ((int)region_index), is_water))
           {
@@ -162,27 +161,26 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   void
-  scal_2p_data_holder<strategy_t>::add_sof3 (const item_array_t &data, size_t region_index, bool is_water)
+  scal_2p_data_holder::add_sof3 (const sp_array_item_t data, size_t region_index, bool is_water)
   {
-    typedef typename strategy_t::index_t  index_t;
+    typedef t_int   index_t;
 
-    BS_ASSERT ((data.size () % 3) == 0) (data.size ());
+    BS_ASSERT ((data->size () % 3) == 0) (data->size ());
 
     if (placement_info_.type == scal::data_placement::scal_data_placement_null ||
         placement_info_.type == scal::data_placement::sof3_spfn)
       {
         scal_region_info_t info;
-        info.So_count   = (int)data.size () / 3;
+        info.So_count   = (int)data->size () / 3;
         info.Sp_count   = -1;
-        info.so_offset  = (int)data_.size ();
+        info.so_offset  = (int)data_->size ();
         info.sp_offset  = -1;
 
-        data_.resize (data_.size () + info.So_count * 2);
+        data_->resize (data_->size () + info.So_count * 2);
         placement_info_.type = scal::data_placement::sof3_spfn;
 
-        scal::data_placement::all_regions_t<strategy_t>::place_sof3_data (data_, placement_info_, data, is_water);
+        scal::data_placement::all_regions_t::place_sof3_data (data_, placement_info_, data, is_water);
         region_.push_back (info);
       }
     else if (placement_info_.type == scal::data_placement::spfn_sof3)
@@ -190,11 +188,11 @@ namespace blue_sky
         BS_ASSERT (region_index < region_.size ()) (region_index) (region_.size ());
         scal_region_info_t &info = region_[region_index];
 
-        info.So_count   = (int)data.size () / 3;
-        info.so_offset  = (int)data_.size ();
+        info.So_count   = (int)data->size () / 3;
+        info.so_offset  = (int)data_->size ();
 
-        data_.resize (data_.size () + info.So_count * 2);
-        scal::data_placement::all_regions_t<strategy_t>::place_sof3_data (data_, placement_info_, data, is_water);
+        data_->resize (data_->size () + info.So_count * 2);
+        scal::data_placement::all_regions_t::place_sof3_data (data_, placement_info_, data, is_water);
         precalc (info, get_region_internal ((index_t)region_index), scal::data_placement::spfn_sof3, is_water);
         if (!check (get_region_internal ((index_t)region_index), is_water))
           {
@@ -210,9 +208,8 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   bool
-  scal_2p_data_holder<strategy_t>::check (const scal_region_t &region, bool is_water)
+  scal_2p_data_holder::check (const scal_region_t &region, bool is_water)
   {
     if (is_water)
       {
@@ -240,9 +237,8 @@ namespace blue_sky
     return true;
   }
 
-  template <typename strategy_t>
   void
-  scal_2p_data_holder<strategy_t>::precalc_min_index_and_spr (const data_vector_t &main, const data_vector_t &slave, int &min_index, item_t &spr)
+  scal_2p_data_holder::precalc_min_index_and_spr (const data_vector_t &main, const data_vector_t &slave, int &min_index, item_t &spr)
   {
     for (int i = 0, found = 0, cnt = (int)main.size (); i < cnt; ++i)
       {
@@ -261,9 +257,8 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   void
-  scal_2p_data_holder<strategy_t>::update_so (const sp_scal_data_t &water_data)
+  scal_2p_data_holder::update_so (const sp_scal_data_t &water_data)
   {
     BS_ERROR (water_data->get_region_info ().size () == region_.size (), "update_so");// (water_data->get_region_info ().size ()) (region_.size ());
 
@@ -281,38 +276,37 @@ namespace blue_sky
   }
 
   //////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
-  struct scal_3p <strategy_t>::scal_3p_impl_base
+  struct scal_3p::scal_3p_impl_base
   {
-    typedef typename strategy_t::item_t       item_t;
-    typedef typename strategy_t::index_t      index_t;
-    typedef scal_3p <strategy_t>              scal_3p_t;
-    typedef typename scal_3p_t::data_array_t  data_array_t;
+    typedef t_double                          item_t;
+    typedef t_long                            index_t;
+    typedef scal_3p                           scal_3p_t;
+    typedef scal_3p_t::sp_data_array_t        sp_data_array_t;
 
     virtual ~scal_3p_impl_base () {}
 
     virtual void
     get_relative_perm (index_t cell_index,
-      const item_array_t &saturation,
-      const index_array_t &sat_regions,
-      item_array_t &relative_perm,
-      item_array_t &s_deriv_relative_perm) const = 0;
+      const sp_array_item_t saturation,
+      const sp_array_index_t sat_regions,
+      sp_array_item_t relative_perm,
+      sp_array_item_t s_deriv_relative_perm) const = 0;
 
     virtual void
     get_capillary (index_t cell_index,
-      const item_array_t &saturation,
-      const index_array_t &sat_regions,
-      const item_array_t &perm,
-      const item_array_t &poro,
-      item_array_t &cap,
-      item_array_t &s_deriv_cap) const = 0;
+      const sp_array_item_t saturation,
+      const sp_array_index_t sat_regions,
+      const sp_array_item_t perm,
+      const sp_array_item_t poro,
+      sp_array_item_t cap,
+      sp_array_item_t s_deriv_cap) const = 0;
 
     virtual void
-    process (const item_array_t &saturation,
-      const index_array_t &sat_regions,
-      const item_array_t &perm,
-      const item_array_t &poro,
-      data_array_t &data) const = 0;
+    process (const sp_array_item_t saturation,
+      const sp_array_index_t sat_regions,
+      const sp_array_item_t perm,
+      const sp_array_item_t poro,
+      sp_data_array_t data) const = 0;
 
     virtual void
     process_init (index_t i, const item_t *pressure, index_t sat_reg, const item_t *perm_array, item_t poro, item_t *sat, item_t *pc_limit) const = 0;
@@ -333,25 +327,28 @@ namespace blue_sky
     is_oil () const = 0;
   };
 
-  template <typename strategy_t, bool is_w, bool is_g, bool is_o, RPO_MODEL_ENUM rpo_model>
-  struct scal_3p_impl : scal_3p <strategy_t>::scal_3p_impl_base
+  template <bool is_w, bool is_g, bool is_o, RPO_MODEL_ENUM rpo_model>
+  struct scal_3p_impl : scal_3p::scal_3p_impl_base
   {
-    typedef typename strategy_t::item_t                   item_t;
-    typedef typename strategy_t::index_t                  index_t;
-    typedef typename strategy_t::index_array_t            index_array_t;
-    typedef typename strategy_t::item_array_t             item_array_t;
-    typedef scal_3p <strategy_t>                          scal_3p_t;
-    typedef typename scal_3p_t::phase_d_t                 phase_d_t;
-    typedef typename scal_3p_t::data_array_t              data_array_t;
-    typedef typename scal_3p_t::data_t                    data_t;
+    typedef t_double                                      item_t;
+    typedef t_long                                        index_t;
+    typedef v_long                                        index_array_t;
+    typedef v_double                                      item_array_t;
+    typedef scal_3p                                       scal_3p_t;
+    typedef scal_3p_t::phase_d_t                          phase_d_t;
+    typedef scal_3p_t::data_array_t                       data_array_t;
+    typedef scal_3p_t::data_t                             data_t;
+    typedef scal_3p_t::sp_array_index_t                   sp_array_index_t;
+    typedef scal_3p_t::sp_array_item_t                    sp_array_item_t;
 
-    typedef typename scal_3p_t::scale_array_holder_t      scale_array_holder_t;
-    typedef typename scal_3p_t::scal_2p_data_holder_t     scal_2p_data_holder_t;
-    typedef typename scal_3p_t::scal_region_t             scal_region_t;
 
-    typedef typename scal_3p_t::sp_scale_array_holder_t   sp_scale_array_holder_t;
-    typedef typename scal_3p_t::sp_scal_2p_data_holder_t  sp_scal_2p_data_holder_t;
-    typedef typename scal_3p_t::sp_jfunction_t            sp_jfunction_t;
+    typedef scal_3p_t::scale_array_holder_t               scale_array_holder_t;
+    typedef scal_3p_t::scal_2p_data_holder_t              scal_2p_data_holder_t;
+    typedef scal_3p_t::scal_region_t                      scal_region_t;
+
+    typedef scal_3p_t::sp_scale_array_holder_t            sp_scale_array_holder_t;
+    typedef scal_3p_t::sp_scal_2p_data_holder_t           sp_scal_2p_data_holder_t;
+    typedef scal_3p_t::sp_jfunction_t                     sp_jfunction_t;
 
     enum {
       n_phases = is_w + is_g + is_o,
@@ -391,89 +388,90 @@ namespace blue_sky
 
     void
     get_relative_perm (index_t cell_index,
-      const item_array_t &saturation,
-      const index_array_t &sat_regions,
-      item_array_t &relative_perm, 
-      item_array_t &s_deriv_relative_perm) const
+      const sp_array_item_t saturation,
+      const sp_array_index_t sat_regions,
+      sp_array_item_t relative_perm, 
+      sp_array_item_t s_deriv_relative_perm) const
     {
-      if (cell_index >= (index_t)sat_regions.size ())
+      if (cell_index >= (index_t)sat_regions->size ())
         {
-          bs_throw_exception (boost::format ("Sat_regions size (%d) smaller than cell_index (%d)") % (index_t)sat_regions.size () % cell_index);
+          bs_throw_exception (boost::format ("Sat_regions size (%d) smaller than cell_index (%d)") % (index_t)sat_regions->size () % cell_index);
         }
 
-      if (cell_index * n_phases >= (index_t)saturation.size ())
+      if (cell_index * n_phases >= (index_t)saturation->size ())
         {
-          bs_throw_exception (boost::format ("Saturation size (%d) smaller than cell_index (%d) * n_phases (%d)") % (index_t)saturation.size () % cell_index % (index_t)n_phases);
+          bs_throw_exception (boost::format ("Saturation size (%d) smaller than cell_index (%d) * n_phases (%d)") % (index_t)saturation->size () % cell_index % (index_t)n_phases);
         }
 
-      if ((index_t)relative_perm.size () != n_phases)
+      if ((index_t)relative_perm->size () != n_phases)
         {
-          bs_throw_exception (boost::format ("Size of relative_perm (%d) should be equal to n_phases (%d)") % (index_t)relative_perm.size () % (index_t)n_phases);
+          bs_throw_exception (boost::format ("Size of relative_perm (%d) should be equal to n_phases (%d)") % (index_t)relative_perm->size () % (index_t)n_phases);
         }
-      if ((index_t)s_deriv_relative_perm.size () != (n_phases * n_phases))
+      if ((index_t)s_deriv_relative_perm->size () != (n_phases * n_phases))
         {
-          bs_throw_exception (boost::format ("Size of s_deriv_relative_perm (%d) should be equal to n_phases * n_phases (%d)") % (index_t)s_deriv_relative_perm.size () % (index_t)(n_phases * n_phases));
+          bs_throw_exception (boost::format ("Size of s_deriv_relative_perm (%d) should be equal to n_phases * n_phases (%d)") % (index_t)s_deriv_relative_perm->size () % (index_t)(n_phases * n_phases));
         }
 
-      index_t sat_reg = sat_regions[cell_index];
-      process (cell_index, &saturation[cell_index * n_phases], sat_reg, &relative_perm[0], &s_deriv_relative_perm[0]);
+      index_t sat_reg = (*sat_regions)[cell_index];
+      process (cell_index, &(*saturation)[cell_index * n_phases], sat_reg, &(*relative_perm)[0], &(*s_deriv_relative_perm)[0]);
     }
 
     void
     get_capillary (index_t cell_index,
-      const item_array_t &saturation,
-      const index_array_t &sat_regions,
-      const item_array_t &perm,
-      const item_array_t &poro,
-      item_array_t &cap,
-      item_array_t &s_deriv_cap) const
+      const sp_array_item_t saturation,
+      const sp_array_index_t sat_regions,
+      const sp_array_item_t perm,
+      const sp_array_item_t poro,
+      sp_array_item_t cap,
+      sp_array_item_t s_deriv_cap) const
     {
-      if (cell_index >= (index_t)sat_regions.size ())
+      if (cell_index >= (index_t)sat_regions->size ())
         {
-          bs_throw_exception (boost::format ("Sat_regions size (%d) smaller than cell_index (%d)") % (index_t)sat_regions.size () % cell_index);
+          bs_throw_exception (boost::format ("Sat_regions size (%d) smaller than cell_index (%d)") % (index_t)sat_regions->size () % cell_index);
         }
 
-      if (cell_index * n_phases >= (index_t)saturation.size ())
+      if (cell_index * n_phases >= (index_t)saturation->size ())
         {
-          bs_throw_exception (boost::format ("Saturation size (%d) smaller than cell_index (%d) * n_phases (%d)") % (index_t)saturation.size () % cell_index % (index_t)n_phases);
+          bs_throw_exception (boost::format ("Saturation size (%d) smaller than cell_index (%d) * n_phases (%d)") % (index_t)saturation->size () % cell_index % (index_t)n_phases);
         }
 
-      if (cell_index * PLANE_ORIENTATION_TOTAL >= (index_t)perm.size ())
+      if (cell_index * PLANE_ORIENTATION_TOTAL >= (index_t)perm->size ())
         {
-          bs_throw_exception (boost::format ("Perm size (%d) smaller than cell_index (%d) * PLANE_ORIENTATION_TOTAL (%d)") % (index_t)perm.size () % cell_index % (index_t)PLANE_ORIENTATION_TOTAL);
+          bs_throw_exception (boost::format ("Perm size (%d) smaller than cell_index (%d) * PLANE_ORIENTATION_TOTAL (%d)") % (index_t)perm->size () % cell_index % (index_t)PLANE_ORIENTATION_TOTAL);
         }
-      if (cell_index >= (index_t)poro.size ())
+      if (cell_index >= (index_t)poro->size ())
         {
-          bs_throw_exception (boost::format ("Poro size (%d) smaller than cell_index (%d)") % (index_t)poro.size () % cell_index);
-        }
-
-      if ((index_t)cap.size () != (n_phases - 1))
-        {
-          bs_throw_exception (boost::format ("Size of cap (%d) should be equal to n_phases - 1 (%d)") % (index_t)cap.size () % (index_t)(n_phases - 1));
-        }
-      if ((index_t)s_deriv_cap.size () != (n_phases - 1))
-        {
-          bs_throw_exception (boost::format ("Size of s_deriv_cap (%d) should be equal to n_phases - 1 (%d)") % (index_t)s_deriv_cap.size () % (index_t)(n_phases - 1));
+          bs_throw_exception (boost::format ("Poro size (%d) smaller than cell_index (%d)") % (index_t)poro->size () % cell_index);
         }
 
-      index_t sat_reg = sat_regions[cell_index];
-      process_capillary (cell_index, &saturation[cell_index * n_phases], sat_reg, &perm[cell_index * PLANE_ORIENTATION_TOTAL], poro[cell_index], &cap[0], &s_deriv_cap[0]);
+      if ((index_t)cap->size () != (n_phases - 1))
+        {
+          bs_throw_exception (boost::format ("Size of cap (%d) should be equal to n_phases - 1 (%d)") % (index_t)cap->size () % (index_t)(n_phases - 1));
+        }
+      if ((index_t)s_deriv_cap->size () != (n_phases - 1))
+        {
+          bs_throw_exception (boost::format ("Size of s_deriv_cap (%d) should be equal to n_phases - 1 (%d)") % (index_t)s_deriv_cap->size () % (index_t)(n_phases - 1));
+        }
+
+      index_t sat_reg = (*sat_regions)[cell_index];
+      process_capillary (cell_index, &(*saturation)[cell_index * n_phases], sat_reg, &(*perm)[cell_index * PLANE_ORIENTATION_TOTAL], (*poro)[cell_index], &(*cap)[0], &(*s_deriv_cap)[0]);
     }
 
     void
-    process (const item_array_t &saturation,
-      const index_array_t &sat_regions,
-      const item_array_t &perm,
-      const item_array_t &poro,
-      data_array_t &data) const
+    process (const sp_array_item_t saturation,
+      const sp_array_index_t sat_regions,
+      const sp_array_item_t perm,
+      const sp_array_item_t poro,
+      sp_data_array_t data) const
     {
-      for (index_t i = 0, cnt = (index_t)data.size (); i < cnt; ++i)
+      data_array_t& data_ = *data;
+      for (index_t i = 0, cnt = (index_t) data_.size (); i < cnt; ++i)
         {
-          data_t &data_i = data[i];
-          index_t sat_reg = sat_regions[i];
+          data_t &data_i = data_[i];
+          index_t sat_reg = (*sat_regions)[i];
 
-          process (i, &saturation[i * n_phases], sat_reg, &data_i.relative_perm[0], &data_i.s_deriv_relative_perm[0]);
-          process_capillary (i, &saturation[i * n_phases], sat_reg, &perm[i * PLANE_ORIENTATION_TOTAL], poro[i], &data_i.cap_pressure[0], &data_i.s_deriv_cap_pressure[0]);
+          process (i, &(*saturation)[i * n_phases], sat_reg, &data_i.relative_perm[0], &data_i.s_deriv_relative_perm[0]);
+          process_capillary (i, &(*saturation)[i * n_phases], sat_reg, &(*perm)[i * PLANE_ORIENTATION_TOTAL], (*poro)[i], &data_i.cap_pressure[0], &data_i.s_deriv_cap_pressure[0]);
         }
     }
 
@@ -570,7 +568,7 @@ namespace blue_sky
     void
     calc_gas_water_zone (index_t cell_index, index_t sat_reg, const item_t *perm_array, item_t poro, item_t pcgw, item_t &sw, item_t &sg) const
     {
-      typename strategy_t::item_array_t pcgw_table;
+      std::vector <item_t> pcgw_table;
       size_t n_table, i_table;
       item_t sat_cell[2], cap_cell[2];
       item_t sw_max, sw_min, swu, swl, s;
@@ -933,8 +931,7 @@ namespace blue_sky
   };
 
   //////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
-  scal_3p<strategy_t>::scal_3p (bs_type_ctor_param param /* = NULL */)
+  scal_3p::scal_3p (bs_type_ctor_param param /* = NULL */)
   : water_data  (BS_KERNEL.create_object (scal_2p_data_holder_t::bs_type ()))
   , gas_data    (BS_KERNEL.create_object (scal_2p_data_holder_t::bs_type ()))
   , water_scale (BS_KERNEL.create_object (scale_array_holder_t::bs_type ()))
@@ -943,40 +940,35 @@ namespace blue_sky
   {
   }
 
-  template <typename strategy_t>
-  scal_3p<strategy_t>::scal_3p (const this_t& s)
+  scal_3p::scal_3p (const this_t& s)
   : bs_refcounter (s), objbase (s)
   {
     bs_throw_exception ("NOT_IMPL_YET");
   }
 
 
-  template <typename strategy_t>
   void
-  scal_3p<strategy_t>::process_init (index_t cell_index, const item_t *pressure, index_t sat_reg, const item_t *perm_array, item_t poro,
+  scal_3p::process_init (index_t cell_index, const item_t *pressure, index_t sat_reg, const item_t *perm_array, item_t poro,
                                      item_t *sat, item_t *pc_limit) const
   {
     impl_->process_init (cell_index, pressure, sat_reg, perm_array, poro, sat, pc_limit);
   }
 
-  template <typename strategy_t>
   void
-  scal_3p<strategy_t>::calc_pcp (index_t cell_index, const item_t sat, index_t sat_reg, item_t cap, item_t &pcp) const
+  scal_3p::calc_pcp (index_t cell_index, const item_t sat, index_t sat_reg, item_t cap, item_t &pcp) const
   {
     impl_->calc_pcp (cell_index, sat, sat_reg, cap, pcp);
   }
 
-  template <typename strategy_t>
   void
-  scal_3p<strategy_t>::calc_gas_water_zone (index_t cell_index, index_t sat_reg, const item_t *perm_array, item_t poro, item_t pcgw,
+  scal_3p::calc_gas_water_zone (index_t cell_index, index_t sat_reg, const item_t *perm_array, item_t poro, item_t pcgw,
       item_t &sw, item_t &sg) const
   {
     impl_->calc_gas_water_zone (cell_index, sat_reg, perm_array, poro, pcgw, sw, sg);
   }
 
-  template <typename strategy_t>
   void
-  scal_3p <strategy_t>::init (bool is_w, bool is_g, bool is_o, const phase_d_t &phase_d, const phase_d_t &sat_d, RPO_MODEL_ENUM r)
+  scal_3p::init (bool is_w, bool is_g, bool is_o, const phase_d_t &phase_d, const phase_d_t &sat_d, RPO_MODEL_ENUM r)
   {
     if (!water_jfunc)
       {
@@ -991,17 +983,17 @@ namespace blue_sky
     if (r == STONE2_MODEL)
       {
         if (is_w && is_g && is_o)
-          impl_ = new scal_3p_impl <strategy_t, true, true, true, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <true, true, true, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
         else if (is_w && is_o)
-          impl_ = new scal_3p_impl <strategy_t, true, false, true, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <true, false, true, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
         else if (is_g && is_o)
-          impl_ = new scal_3p_impl <strategy_t, false, true, true, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <false, true, true, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
         else if (is_w)
-          impl_ = new scal_3p_impl <strategy_t, true, false, false, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <true, false, false, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
         else if (is_g)
-          impl_ = new scal_3p_impl <strategy_t, false, true, false, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <false, true, false, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
         else if (is_o)
-          impl_ = new scal_3p_impl <strategy_t, false, false, true, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <false, false, true, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
         else
           {
             bs_throw_exception ("Unkown phase value");
@@ -1010,17 +1002,17 @@ namespace blue_sky
     else
       {
         if (is_w && is_g && is_o)
-          impl_ = new scal_3p_impl <strategy_t, true, true, true, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <true, true, true, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
         else if (is_w && is_o)
-          impl_ = new scal_3p_impl <strategy_t, true, false, true, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <true, false, true, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
         else if (is_g && is_o)
-          impl_ = new scal_3p_impl <strategy_t, false, true, true, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <false, true, true, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
         else if (is_w)
-          impl_ = new scal_3p_impl <strategy_t, true, false, false, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <true, false, false, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
         else if (is_g)
-          impl_ = new scal_3p_impl <strategy_t, false, true, false, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <false, true, false, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
         else if (is_o)
-          impl_ = new scal_3p_impl <strategy_t, false, false, true, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <false, false, true, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
         else
           {
             bs_throw_exception ("Unkown phase value");
@@ -1032,70 +1024,64 @@ namespace blue_sky
   }
 
 
-  template <typename strategy_t>
   void 
-  scal_3p<strategy_t>::set_water_jfunction (sp_jfunction_t jfunc)
+  scal_3p::set_water_jfunction (sp_jfunction_t jfunc)
   {
     water_jfunc = jfunc;
   }
 
-  template <typename strategy_t>
   void 
-  scal_3p<strategy_t>::set_gas_jfunction (sp_jfunction_t jfunc)
+  scal_3p::set_gas_jfunction (sp_jfunction_t jfunc)
   {
     gas_jfunc = jfunc;
   }
 
-  template <typename strategy_t>
   void
-  scal_3p<strategy_t>::update_gas_data ()
+  scal_3p::update_gas_data ()
   {
     if (impl_->is_water () && impl_->is_gas ())
       gas_data->update_so (water_data);
   }
 
-  template <typename strategy_t>
   void
-  scal_3p <strategy_t>::process (const item_array_t &saturation,
-    const index_array_t &sat_regions,
-    const item_array_t &perm,
-    const item_array_t &poro,
-    data_array_t &data) const
+  scal_3p::process (const sp_array_item_t saturation,
+    const sp_array_index_t sat_regions,
+    const sp_array_item_t perm,
+    const sp_array_item_t poro,
+    sp_data_array_t data) const
   {
     impl_->process (saturation, sat_regions, perm, poro, data);
   }
 
-  template <typename strategy_t>
   void
-  scal_3p <strategy_t>::get_relative_perm (index_t cell_index,
-    const item_array_t &saturation,
-    const index_array_t &sat_regions,
-    item_array_t &relative_perm,
-    item_array_t &s_deriv_relative_perm) const
+  scal_3p::get_relative_perm (index_t cell_index,
+    const sp_array_item_t saturation,
+    const sp_array_index_t sat_regions,
+    sp_array_item_t relative_perm,
+    sp_array_item_t s_deriv_relative_perm) const
   {
     impl_->get_relative_perm (cell_index, saturation, sat_regions, relative_perm, s_deriv_relative_perm);
   }
 
-  template <typename strategy_t>
   void
-  scal_3p <strategy_t>::get_capillary (index_t cell_index,
-    const item_array_t &saturation,
-    const index_array_t &sat_regions,
-    const item_array_t &perm,
-    const item_array_t &poro,
-    item_array_t &cap,
-    item_array_t &s_deriv_cap) const
+  scal_3p::get_capillary (index_t cell_index,
+    const sp_array_item_t saturation,
+    const sp_array_index_t sat_regions,
+    const sp_array_item_t perm,
+    const sp_array_item_t poro,
+    sp_array_item_t cap,
+    sp_array_item_t s_deriv_cap) const
   {
     impl_->get_capillary (cell_index, saturation, sat_regions, perm, poro, cap, s_deriv_cap);
   }
 
-  template <typename strategy_t>
-  scal_3p <strategy_t>::~scal_3p ()
+  scal_3p::~scal_3p ()
   {
     delete impl_;
   }
 
   //////////////////////////////////////////////////////////////////////////
+/*
   BLUE_SKY_TYPE_STD_CREATE_T_DEF(scale_array_holder,(class));
   BLUE_SKY_TYPE_STD_COPY_T_DEF(scale_array_holder,(class));
   BLUE_SKY_TYPE_IMPL_T_EXT(1, (scale_array_holder<base_strategy_fi>), 1, (objbase), "scale_array_holder_fi", "scale_array_holder_fi", "scale_array_holder_fi", false);
@@ -1113,22 +1099,30 @@ namespace blue_sky
   BLUE_SKY_TYPE_IMPL_T_EXT(1, (scal_3p<base_strategy_fi>), 1, (objbase), "scal_3p_fi", "scal_3p_fi", "scal_3p_fi", false);
   BLUE_SKY_TYPE_IMPL_T_EXT(1, (scal_3p<base_strategy_di>), 1, (objbase), "scal_3p_di", "scal_3p_di", "scal_3p_di", false);
   BLUE_SKY_TYPE_IMPL_T_EXT(1, (scal_3p<base_strategy_mixi>), 1, (objbase), "scal_3p_mixi", "scal_3p_mixi", "scal_3p_mixi", false);
+*/
 
+  BLUE_SKY_TYPE_STD_CREATE (scale_array_holder);
+  BLUE_SKY_TYPE_STD_COPY (scale_array_holder);
+
+  BLUE_SKY_TYPE_IMPL(scale_array_holder,  objbase, "scale_array_holder", "scale_array_holder calculation class", "scale_array_holder calculation");
+
+  BLUE_SKY_TYPE_STD_CREATE (scal_2p_data_holder);
+  BLUE_SKY_TYPE_STD_COPY (scal_2p_data_holder);
+
+  BLUE_SKY_TYPE_IMPL(scal_2p_data_holder,  objbase, "scal_2p_data_holder", "scal_2p_data_holder calculation class", "scal_2p_data_holder calculation");
+
+  BLUE_SKY_TYPE_STD_CREATE (scal_3p);
+  BLUE_SKY_TYPE_STD_COPY (scal_3p);
+
+  BLUE_SKY_TYPE_IMPL(scal_3p,  objbase, "scal_3p", "scal_3p calculation class", "scal_3p calculation");
   //////////////////////////////////////////////////////////////////////////
   bool scal_register_types (const blue_sky::plugin_descriptor &pd)
   {
     bool res = true;
 
-    res &= BS_KERNEL.register_type (pd, scale_array_holder<base_strategy_fi>::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, scale_array_holder<base_strategy_di>::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, scale_array_holder<base_strategy_mixi>::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, scal_2p_data_holder<base_strategy_fi>::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, scal_2p_data_holder<base_strategy_di>::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, scal_2p_data_holder<base_strategy_mixi>::bs_type ()); BS_ASSERT (res);
-
-    res &= BS_KERNEL.register_type (pd, scal_3p<base_strategy_fi>::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, scal_3p<base_strategy_di>::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, scal_3p<base_strategy_mixi>::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, scale_array_holder::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, scal_2p_data_holder::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, scal_3p::bs_type ()); BS_ASSERT (res);
 
     return res;
   }

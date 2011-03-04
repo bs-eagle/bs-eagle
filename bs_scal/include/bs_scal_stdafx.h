@@ -81,6 +81,7 @@
 #include "plane_orientation.h"
 #include "write_time_to_log.h"
 #include "locale_keeper.h"
+#include "conf.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #endif //#ifndef BS_SCAL_PRECOMPILED_HEADERS_H_

@@ -75,9 +75,8 @@ namespace blue_sky
           locale_keeper   lkeeper_;
         };
 
-      template <typename strategy_t>
       void
-      save_spof_raw_data (const typename scal_2p_data_holder<strategy_t>::item_array_t &raw_data, const typename scal_2p_data_holder<strategy_t>::region_vector_t &region_info, const std::string &filename)
+      save_spof_raw_data (const scal_2p_data_holder::item_array_t &raw_data, const scal_2p_data_holder::region_vector_t &region_info, const std::string &filename)
       {
         scal_data_saver file (filename);
 
@@ -85,7 +84,7 @@ namespace blue_sky
 
         for (size_t i = 0, cnt = region_info.size (); i < cnt; ++i)
           {
-            const scal_region_info<strategy_t> &region = region_info[i];
+            const scal_region_info<scal_2p_data_holder::item_t> &region = region_info[i];
 
             BS_ASSERT (region.Sp_count == region.So_count) (region.Sp_count) (region.So_count);
             BS_ASSERT (region.sp_offset == region.so_offset) (region.sp_offset) (region.so_offset);
@@ -104,21 +103,20 @@ namespace blue_sky
           }
       }
 
-      template <typename strategy_t>
       void
-      save_spof_data (scal_2p_data_holder<strategy_t> &data, const typename scal_2p_data_holder<strategy_t>::region_vector_t &region_info, const std::string &filename)
+      save_spof_data (scal_2p_data_holder &data, const scal_2p_data_holder::region_vector_t &region_info, const std::string &filename)
       {
         scal_data_saver file (filename);
         file.save_section_name ("SPOF");
 
         for (size_t i = 0, cnt = region_info.size (); i < cnt; ++i)
           {
-            const scal_region_info<strategy_t> &region = region_info[i];
+            const scal_region_info<scal_2p_data_holder::item_t> &region = region_info[i];
 
             BS_ASSERT (region.Sp_count == region.So_count) (region.Sp_count) (region.So_count);
             BS_ASSERT (region.sp_offset == region.so_offset) (region.sp_offset) (region.so_offset);
 
-            const scal_region<strategy_t> &region_data = data.get_region ((typename strategy_t::index_t)i);
+            const scal_region &region_data = data.get_region ((t_int) i);
 
             BS_ASSERT (region_data.Sp.size () == region_data.So.size ()) (region_data.Sp.size ()) (region_data.So.size ());
             BS_ASSERT (region_data.Krp.size () == region_data.Krop.size ()) (region_data.Krp.size ()) (region_data.Krop.size ());
@@ -139,15 +137,14 @@ namespace blue_sky
           }
       }
 
-      template <typename strategy_t>
       void
-      save_spfn_raw_data (const typename scal_2p_data_holder<strategy_t>::item_array_t &raw_data, const typename scal_2p_data_holder<strategy_t>::region_vector_t &region_info, scal_data_saver &file)
+      save_spfn_raw_data (const scal_2p_data_holder::item_array_t &raw_data, const scal_2p_data_holder::region_vector_t &region_info, scal_data_saver &file)
       {
         file.save_section_name ("SPFN");
 
         for (size_t i = 0, cnt = region_info.size (); i < cnt; ++i)
           {
-            const scal_region_info<strategy_t> &region = region_info[i];
+            const scal_region_info<scal_2p_data_holder::item_t> &region = region_info[i];
 
             BS_ASSERT (region.Sp_count != -1) (region.Sp_count);
 
@@ -164,15 +161,14 @@ namespace blue_sky
           }
       }
 
-      template <typename strategy_t>
       void
-      save_sof3_raw_data (const typename scal_2p_data_holder<strategy_t>::item_array_t &raw_data, const typename scal_2p_data_holder<strategy_t>::region_vector_t &region_info, scal_data_saver &file)
+      save_sof3_raw_data (const scal_2p_data_holder::item_array_t &raw_data, const scal_2p_data_holder::region_vector_t &region_info, scal_data_saver &file)
       {
         file.save_section_name ("SOF3");
 
         for (size_t i = 0, cnt = region_info.size (); i < cnt; ++i)
           {
-            const scal_region_info<strategy_t> &region = region_info[i];
+            const scal_region_info<scal_2p_data_holder::item_t> &region = region_info[i];
 
             BS_ASSERT (region.So_count != -1) (region.So_count);
 
@@ -188,19 +184,18 @@ namespace blue_sky
           }
       }
 
-      template <typename strategy_t>
       void
-      save_spfn_data (scal_2p_data_holder<strategy_t> &data, const typename scal_2p_data_holder<strategy_t>::region_vector_t &region_info, scal_data_saver &file)
+      save_spfn_data (scal_2p_data_holder &data, const scal_2p_data_holder::region_vector_t &region_info, scal_data_saver &file)
       {
         file.save_section_name ("SPFN");
 
         for (size_t i = 0, cnt = region_info.size (); i < cnt; ++i)
           {
-            const scal_region_info<strategy_t> &region = region_info[i];
+            const scal_region_info<scal_2p_data_holder::item_t> &region = region_info[i];
 
             BS_ASSERT (region.Sp_count != -1) (region.Sp_count);
 
-            const scal_region<strategy_t> &region_data = data.get_region ((typename strategy_t::index_t)i);
+            const scal_region &region_data = data.get_region ((t_int) i);
 
             BS_ASSERT (region_data.Sp.size () == region_data.Krp.size ()) (region_data.Sp.size ()) (region_data.Krp.size ());
             BS_ASSERT (region_data.Sp.size () == region_data.Pcp.size ()) (region_data.Sp.size ()) (region_data.Pcp.size ());
@@ -218,19 +213,18 @@ namespace blue_sky
           }
       }
 
-      template <typename strategy_t>
       void
-      save_sof3_data (scal_2p_data_holder<strategy_t> &data, const typename scal_2p_data_holder<strategy_t>::region_vector_t &region_info, scal_data_saver &file)
+      save_sof3_data (scal_2p_data_holder &data, const scal_2p_data_holder::region_vector_t &region_info, scal_data_saver &file)
       {
         file.save_section_name ("SOF3");
 
         for (size_t i = 0, cnt = region_info.size (); i < cnt; ++i)
           {
-            const scal_region_info<strategy_t> &region = region_info[i];
+            const scal_region_info<scal_2p_data_holder::item_t> &region = region_info[i];
 
             BS_ASSERT (region.So_count != -1) (region.So_count);
 
-            const scal_region<strategy_t> &region_data = data.get_region ((typename strategy_t::index_t)i);
+            const scal_region &region_data = data.get_region ((t_int) i);
 
             BS_ASSERT (region_data.So.size () == region_data.Krop.size ()) (region_data.So.size ()) (region_data.Krop.size ());
 
@@ -246,42 +240,40 @@ namespace blue_sky
           }
       }
 
-      template <typename strategy_t>
       void
-      save_spfn_sof3_raw_data (const typename scal_2p_data_holder<strategy_t>::item_array_t &raw_data, const typename scal_2p_data_holder<strategy_t>::region_vector_t &region_info, const std::string &filename)
+      save_spfn_sof3_raw_data (const scal_2p_data_holder::item_array_t &raw_data, const scal_2p_data_holder::region_vector_t &region_info, const std::string &filename)
       {
         scal_data_saver file (filename);
 
-        save_spfn_raw_data <strategy_t> (raw_data, region_info, file);
-        save_sof3_raw_data <strategy_t> (raw_data, region_info, file);
-      }
-      template <typename strategy_t>
-      void
-      save_spfn_sof3_data (scal_2p_data_holder<strategy_t> &data, const typename scal_2p_data_holder<strategy_t>::region_vector_t &region_info, const std::string &filename)
-      {
-        scal_data_saver file (filename);
-
-        save_spfn_data <strategy_t> (data, region_info, file);
-        save_sof3_data <strategy_t> (data, region_info, file);
+        save_spfn_raw_data (raw_data, region_info, file);
+        save_sof3_raw_data (raw_data, region_info, file);
       }
 
-      template <typename strategy_t>
       void
-      save_sof3_spfn_raw_data (const typename scal_2p_data_holder<strategy_t>::item_array_t &raw_data, const typename scal_2p_data_holder<strategy_t>::region_vector_t &region_info, const std::string &filename)
+      save_spfn_sof3_data (scal_2p_data_holder &data, const scal_2p_data_holder::region_vector_t &region_info, const std::string &filename)
       {
         scal_data_saver file (filename);
 
-        save_sof3_raw_data <strategy_t> (raw_data, region_info, file);
-        save_spfn_raw_data <strategy_t> (raw_data, region_info, file);
+        save_spfn_data (data, region_info, file);
+        save_sof3_data (data, region_info, file);
       }
-      template <typename strategy_t>
+
       void
-      save_sof3_spfn_data (scal_2p_data_holder<strategy_t> &data, const typename scal_2p_data_holder<strategy_t>::region_vector_t &region_info, const std::string &filename)
+      save_sof3_spfn_raw_data (const scal_2p_data_holder::item_array_t &raw_data, const scal_2p_data_holder::region_vector_t &region_info, const std::string &filename)
       {
         scal_data_saver file (filename);
 
-        save_sof3_data <strategy_t> (data, region_info, file);
-        save_spfn_data <strategy_t> (data, region_info, file);
+        save_sof3_raw_data (raw_data, region_info, file);
+        save_spfn_raw_data (raw_data, region_info, file);
+      }
+
+      void
+      save_sof3_spfn_data (scal_2p_data_holder &data, const scal_2p_data_holder::region_vector_t &region_info, const std::string &filename)
+      {
+        scal_data_saver file (filename);
+
+        save_sof3_data (data, region_info, file);
+        save_spfn_data (data, region_info, file);
       }
 
     } // namespace data_placement

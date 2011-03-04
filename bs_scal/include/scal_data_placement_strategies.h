@@ -94,23 +94,26 @@ private:
           }
         };
 
-      template <typename strategy_t>
       struct all_regions_t
         {
-          typedef scal_2p_data_holder<strategy_t>               scal_2p_data_holder_t;
-          typedef typename strategy_t::item_array_t             data_t;
+          typedef scal_2p_data_holder                           scal_2p_data_holder_t;
+          typedef bs_array <t_double>                           array_item_t;
+          typedef smart_ptr <bs_array <t_double>, true>         sp_array_item_t;
+          
           static void
-          place_spof_data (data_t &dst, scal::data_placement::scal_placement_info &info, const data_t &src, bool is_water)
+          place_spof_data (sp_array_item_t dst, scal::data_placement::scal_placement_info &info, const sp_array_item_t src, bool is_water)
           {
-            size_t size = dst.size () - (5 * (src.size () / 4));
-            size_t src_size = src.size ();
-            for (size_t i = 0, j = 0, cnt = src.size (); i < cnt; i += 4, j += 5)
+            array_item_t &dst_array = *dst;
+            array_item_t &src_array = *src;
+            size_t size = dst->size () - (5 * (src->size () / 4));
+            size_t src_size = src->size ();
+            for (size_t i = 0, j = 0, cnt = src->size (); i < cnt; i += 4, j += 5)
               {
-                dst[size + j + 0] = src[i + 0];
-                dst[size + j + 1] = 1.0 - src[src_size - (i + 4) + 0];
-                dst[size + j + 2] = src[i + 1];
-                dst[size + j + 3] = src[src_size - (i + 4) + 2];
-                dst[size + j + 4] = is_water ? -src[i + 3] : src[i + 3];
+                dst_array[size + j + 0] = src_array[i + 0];
+                dst_array[size + j + 1] = 1.0 - src_array[src_size - (i + 4) + 0];
+                dst_array[size + j + 2] = src_array[i + 1];
+                dst_array[size + j + 3] = src_array[src_size - (i + 4) + 2];
+                dst_array[size + j + 4] = is_water ? -src_array[i + 3] : src_array[i + 3];
               }
 
             info.sp_step      = 5;
@@ -126,14 +129,16 @@ private:
           }
 
           static void
-          place_spfn_data (data_t &dst, scal_placement_info &info, const data_t &src, bool is_water)
+          place_spfn_data (sp_array_item_t dst, scal_placement_info &info, const sp_array_item_t src, bool is_water)
           {
-            size_t size = dst.size () - src.size ();
-            for (size_t i = 0, cnt = src.size (); i < cnt; i += 3)
+            array_item_t &dst_array = *dst;
+            array_item_t &src_array = *src;
+            size_t size = dst->size () - src->size ();
+            for (size_t i = 0, cnt = src->size (); i < cnt; i += 3)
               {
-                dst[size + i + 0] = src[i + 0];
-                dst[size + i + 1] = src[i + 1];
-                dst[size + i + 2] = is_water ? -src[i + 2] : src[i + 2];
+                dst_array[size + i + 0] = src_array[i + 0];
+                dst_array[size + i + 1] = src_array[i + 1];
+                dst_array[size + i + 2] = is_water ? -src_array[i + 2] : src_array[i + 2];
               }
 
             info.sp_step      = 3;
@@ -149,13 +154,15 @@ private:
           }
 
           static void
-          place_sof3_data (data_t &dst, scal_placement_info &info, const data_t &src, bool is_water)
+          place_sof3_data (sp_array_item_t dst, scal_placement_info &info, const sp_array_item_t src, bool is_water)
           {
-            size_t size = dst.size () - src.size ();
-            for (size_t i = 0, j = 0, cnt = src.size (); i < cnt; i += 3, j += 2)
+            array_item_t &dst_array = *dst;
+            array_item_t &src_array = *src;
+            size_t size = dst->size () - src->size ();
+            for (size_t i = 0, j = 0, cnt = src->size (); i < cnt; i += 3, j += 2)
               {
-                dst[size + j + 0] = src[i + 0];
-                dst[size + j + 1] = src[i + (is_water ? 1 : 2)];
+                dst_array[size + j + 0] = src_array[i + 0];
+                dst_array[size + j + 1] = src_array[i + (is_water ? 1 : 2)];
               }
 
             info.sp_step      = 3;
