@@ -19,10 +19,23 @@ struct mesh_grdecl_exporter_plus {
 	typedef typename T::fp_type_t fp_t;
 	typedef typename T::sp_fp_storage_array_t spfp_storarr_t;
 
-	static tuple refine_mesh(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t zcorn, spfp_storarr_t points) {
-		std::pair< spfp_storarr_t, spfp_storarr_t > r = T::refine_mesh(nx, ny, coord, zcorn, points);
+	//BOOST_PYTHON_FUNCTION_OVERLOADS(refine_mesh_overl, refine_mesh, 5, 7)
+
+	static tuple refine_mesh(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t zcorn, spfp_storarr_t points,
+			fp_t m_thresh = DEF_CELL_MERGE_THRESHOLD, fp_t b_thresh = DEF_BAND_THRESHOLD)
+	{
+		std::pair< spfp_storarr_t, spfp_storarr_t > r = T::refine_mesh(nx, ny, coord, zcorn, points, m_thresh, b_thresh);
 		return make_tuple(r.first, r.second, nx, ny);
 	}
+
+	// overloads
+	static tuple refine_mesh1(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t zcorn, spfp_storarr_t points) {
+		return refine_mesh(nx, ny, coord, zcorn, points);
+	}
+	static tuple refine_mesh2(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t zcorn, spfp_storarr_t points, fp_t m_thresh) {
+		return refine_mesh(nx, ny, coord, zcorn, points, m_thresh);
+	}
+	
 
 	template <typename class_t>
 	static class_t &
@@ -32,7 +45,9 @@ struct mesh_grdecl_exporter_plus {
 		mesh_grdecl_exporter<T>::export_class (class__)
 			.def("gen_coord_zcorn", &T::gen_coord_zcorn, args("nx, ny, nz, dx, dy, dz"), "Generate COORD & ZCORN from given dimensions")
 			.staticmethod("gen_coord_zcorn")
-			.def("refine_mesh", &refine_mesh, args("nx, ny, coord, zcorn, points"), "Refine existing mesh in given points")
+			.def("refine_mesh", &refine_mesh, "Refine existing mesh in given points")
+			.def("refine_mesh", &refine_mesh1, "Refine existing mesh in given points")
+			.def("refine_mesh", &refine_mesh2, "Refine existing mesh in given points")
 			//.def("refine_mesh", &T::refine_mesh, args("nx, ny, coord, zcorn, points"), "Refine existing mesh in given points")
 			.staticmethod("refine_mesh")
 			;
