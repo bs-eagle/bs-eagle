@@ -450,7 +450,6 @@ struct mesh_grdecl< strategy_t >::inner {
 			return find_cell(coord, std::min< fp_t >);
 		}
 
-
 		template< class ray_t, class dir_ray_t >
 		static void go(ray_t& ray, fp_t start_point, fp_stor_t d, fp_stor_t a, dir_ray_t dr) {
 			using namespace std;
@@ -561,11 +560,7 @@ struct mesh_grdecl< strategy_t >::inner {
 		if(!coord.size()) return;
 
 		// process coord in both directions
-		// DEBUG
-		BSOUT << "refine_mesh_impl: point = " << point << "; d = " << d << "; a = " << a << bs_end;
-		BSOUT << "refine_mesh_impl: positive ray" << bs_end;
 		proc_ray::go(coord, point, d, a, typename proc_ray::template dir_ray< 1 >());
-		BSOUT << "refine_mesh_impl: negative ray" << bs_end;
 		proc_ray::go(coord, point, d, a, typename proc_ray::template dir_ray< -1 >());
 	}
 
@@ -603,10 +598,6 @@ struct mesh_grdecl< strategy_t >::inner {
 		//y->resize(ny + 1);
 		fp_set y;
 		const int_t ydim_step = 6 * (nx + 1);
-		//dim_iterator a(coord->begin() + 1, ydim_step), b = a;
-		//b += ny + 1;
-		//for(; a != b; ++a)
-		//	y.insert(*a);
 		copy(dim_iterator(coord->begin() + 1, ydim_step), dim_iterator(coord->begin() + 1, ydim_step) + (ny + 1),
 				insert_iterator< fp_set >(y, y.begin()));
 
@@ -624,6 +615,7 @@ struct mesh_grdecl< strategy_t >::inner {
 		// store processed points here
 		fp_set dx_ready, dy_ready;
 		// main cycle
+		int_t cnt = 0;
 		while(pp != p_end) {
 			x_coord = *(pp++); y_coord = *(pp++);
 			dx = *(pp++); dy = *(pp++);
@@ -636,6 +628,9 @@ struct mesh_grdecl< strategy_t >::inner {
 				min_dx = min(min_dx, dx);
 				min_dy = min(min_dx, dy);
 			}
+			// DEBUG
+			BSOUT << "point[" << ++cnt << "] at (" << x_coord << ", " << y_coord << "), dx = " << dx
+			<< ", dy = " << dy << ", ax = " << ax << ", ay = " << ay << bs_end;
 			// process only new points
 			if(dx != 0 && dx_ready.find(x_coord) == dx_ready.end()) {
 				refine_mesh_impl(x, x_coord, dx, ax);
@@ -648,15 +643,15 @@ struct mesh_grdecl< strategy_t >::inner {
 		}
 
 		// DEBUG
-		BSOUT << "refine_mesh: kill_tight_centers(x)" << bs_end;
+		//BSOUT << "refine_mesh: kill_tight_centers(x)" << bs_end;
 		// kill too tight cells in x & y directions
 		while(proc_ray::kill_tight_cells(x, cell_merge_thresh * min_dx)) {}
 		// DEBUG
-		BSOUT << "refine_mesh: kill_tight_centers(y)" << bs_end;
+		//BSOUT << "refine_mesh: kill_tight_centers(y)" << bs_end;
 		while(proc_ray::kill_tight_cells(y, cell_merge_thresh * min_dy)) {}
 
 		// DEBUG
-		BSOUT << "refine_mesh: coord2deltas" << bs_end;
+		//BSOUT << "refine_mesh: coord2deltas" << bs_end;
 		// make deltas from coordinates
 		vector< fp_stor_t > delta_x, delta_y;
 		delta_x.reserve(x.size() - 1); delta_y.reserve(y.size() - 1);
@@ -664,11 +659,9 @@ struct mesh_grdecl< strategy_t >::inner {
 		coord2deltas(y, delta_y);
 
 		// DEBUG
-		BSOUT << "refine_mesh: bands filter in x" << bs_end;
+		BSOUT << "refine_mesh: bands filter" << bs_end;
 		// filter tight bands from grid
 		while(proc_ray::band_filter(delta_x, band_thresh)) {}
-		// DEBUG
-		BSOUT << "refine_mesh: bands filter in y" << bs_end;
 		while(proc_ray::band_filter(delta_y, band_thresh)) {}
 
 
@@ -683,7 +676,7 @@ struct mesh_grdecl< strategy_t >::inner {
 		copy(vzcorn.begin(), vzcorn.end(), rzcorn->begin());
 
 		// DEBUG
-		BSOUT << "refine_mesh: copy delta_x & delta_y to bs_arrays" << bs_end;
+		//BSOUT << "refine_mesh: copy delta_x & delta_y to bs_arrays" << bs_end;
 		// copy delta_x & delta_y to bs_arrays
 		nx = delta_x.size();
 		ny = delta_y.size();
