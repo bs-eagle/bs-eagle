@@ -1618,6 +1618,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\calc_model_data.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\calc_model_data_accessors.h"
 				>
 			</File>
