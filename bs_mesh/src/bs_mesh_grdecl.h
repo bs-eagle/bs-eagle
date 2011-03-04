@@ -10,6 +10,8 @@
 #include "mesh_grdecl.h"
 #include "rs_smesh_iface.h"
 
+#define DEF_CELL_MERGE_THRESHOLD 0.8
+#define DEF_BAND_THRESHOLD 0.2
 
 namespace blue_sky
   {
@@ -206,8 +208,10 @@ namespace blue_sky
 	}
 
 	static std::pair< sp_fp_storage_array_t, sp_fp_storage_array_t >
-	refine_mesh(i_type_t& nx, i_type_t& ny, sp_fp_storage_array_t coord, sp_fp_storage_array_t zcorn, sp_fp_storage_array_t points) {
-		return wrapped_t::refine_mesh(nx, ny, coord, zcorn, points);
+	refine_mesh(i_type_t& nx, i_type_t& ny, sp_fp_storage_array_t coord, sp_fp_storage_array_t zcorn, sp_fp_storage_array_t points,
+			fp_type_t cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, fp_type_t band_thresh = DEF_BAND_THRESHOLD)
+	{
+		return wrapped_t::refine_mesh(nx, ny, coord, zcorn, points, cell_merge_thresh, band_thresh);
 	}
 
     ////////////////////

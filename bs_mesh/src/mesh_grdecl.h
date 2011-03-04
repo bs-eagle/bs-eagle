@@ -23,6 +23,9 @@
 #define HDF5_MAX_SPACE 40 //!< maxinum size of space that we can read from ASCII file
 #endif
 
+#define DEF_CELL_MERGE_THRESHOLD 0.8
+#define DEF_BAND_THRESHOLD 0.2
+
 //! class for basic work with mesh based on ZCORN&COORD and tpfa calculating
 template<class strategy_t>
 class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base<strategy_t>
@@ -105,7 +108,8 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base<strategy_t>
 	gen_coord_zcorn(i_type_t nx, i_type_t ny, i_type_t nz, sp_fp_storage_array_t dx, sp_fp_storage_array_t dy, sp_fp_storage_array_t dz);
 
 	static std::pair< sp_fp_storage_array_t, sp_fp_storage_array_t >
-	refine_mesh(i_type_t& nx, i_type_t& ny, sp_fp_storage_array_t coord, sp_fp_storage_array_t zcorn, sp_fp_storage_array_t points);
+	refine_mesh(i_type_t& nx, i_type_t& ny, sp_fp_storage_array_t coord, sp_fp_storage_array_t zcorn, sp_fp_storage_array_t points,
+			fp_type_t cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, fp_type_t band_thresh = DEF_BAND_THRESHOLD);
 
     //! get vertex of cube [i,j,k]
     void calc_element (const i_type_t i, const i_type_t j, const i_type_t k, element_t &element) const;

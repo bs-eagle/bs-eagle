@@ -6,6 +6,7 @@
 #include "mesh_grdecl.h"
 
 #define BOUND_MERGE_THRESHOLD 0.8
+#define DEFAULT_SMOOTH_RATIO 0.1
 
 using namespace grd_ecl;
 using namespace blue_sky;
@@ -74,13 +75,13 @@ struct mesh_grdecl< strategy_t >::inner {
 		}
 
 		friend slice_iterator operator+(const slice_iterator& lhs, difference_type n) {
-			return lhs.p_ + (n * lhs.step_);
+			return slice_iterator(lhs.p_ + (n * lhs.step_), lhs.step_);
 		}
 		friend slice_iterator operator+(difference_type n, const slice_iterator& lhs) {
-			return lhs.p_ + (n * lhs.step_);
+			return slice_iterator(lhs.p_ + (n * lhs.step_), lhs.step_);
 		}
 		friend slice_iterator operator-(const slice_iterator& lhs, difference_type n) {
-			return lhs.p_ - (n * lhs.step_);
+			return slice_iterator(lhs.p_ - (n * lhs.step_), lhs.step_);
 		}
 
 		slice_iterator& operator++() {
@@ -196,6 +197,8 @@ struct mesh_grdecl< strategy_t >::inner {
 		using namespace std;
 		typedef typename fp_storarr_t::value_type value_t;
 
+		// DEBUG
+		BSOUT << "gen_coord: init stage" << bs_end;
 		// create subscripters
 		typename inner::dim_subscript dxs(*dx);
 		typename inner::dim_subscript dys(*dy);
@@ -208,6 +211,8 @@ struct mesh_grdecl< strategy_t >::inner {
 		spfp_storarr_t coord = BS_KERNEL.create_object(fp_storarr_t::bs_type());
 		if(!coord) return NULL;
 
+		// DEBUG
+		BSOUT << "gen_coord: creation starts..." << bs_end;
 		// fill coord
 		// coord is simple grid
 		coord->init((nx + 1)*(ny + 1)*6, value_t(0));
@@ -222,6 +227,8 @@ struct mesh_grdecl< strategy_t >::inner {
 			}
 			dxs.reset();
 		}
+		// DEBUG
+		BSOUT << "gen_coord: creation finished" << bs_end;
 
 		return coord;
 	}
@@ -262,25 +269,27 @@ struct mesh_grdecl< strategy_t >::inner {
 
 	template< class array_t >
 	static void resize_zcorn(array_t& zcorn, int_t nx, int_t ny, int_t new_nx, int_t new_ny) {
+		using namespace std;
 		typedef typename array_t::iterator v_iterator;
 		typedef typename array_t::value_type value_t;
 		typedef typename array_t::size_type size_t;
 
-		// modify zcorn
-		// reserve memory
-		int_t nz = (zcorn.size() >> 3) / (nx  * ny);
-		zcorn.reserve(new_nx * new_ny * nz * 8);
-		const int_t delta = 4 * (new_nx * new_ny - nx * ny);
-		// process planes
-		value_t z;
-		size_t offset;
-		for(int_t i = 2*nz - 1; i >= 0; --i) {
-			// select plane
-			offset = static_cast< size_t >(i * (nx * ny * 4));
-			// assume that all z-plane values are equal!
-			z = zcorn[offset];
-			for(int_t j = 0; j < delta; ++j)
-				zcorn.insert(zcorn.begin() + offset, z);
+		const int_t nz = (zcorn.size() >> 3) / (nx  * ny);
+		//const int_t delta = 4 * (new_nx * new_ny - nx * ny);
+
+		// cache z-values for each plane
+		const int_t plane_sz = nx * ny * 4;
+		vector< value_t > z_cache(nz * 2);
+		slice_iterator< v_iterator > pz(zcorn.begin(), plane_sz);
+		slice_iterator< v_iterator > pz_end(zcorn.begin(), plane_sz);
+		copy(pz, pz + nz *2, z_cache.begin());
+
+		// refill zcorn with cached values & new plane size
+		const int_t new_plane_sz = (new_nx * new_ny * 4);
+		zcorn.resize(new_nx * new_ny * nz * 8);
+		v_iterator p_newz = zcorn.begin();
+		for(typename vector< value_t >::const_iterator p_cache = z_cache.begin(), end = z_cache.end(); p_cache != end; ++p_cache) {
+			p_newz = fill_n(p_newz, new_plane_sz, *p_cache);
 		}
 	}
 
@@ -356,18 +365,16 @@ struct mesh_grdecl< strategy_t >::inner {
 		resize_zcorn(zcorn, nx, ny, nx, ny + 1);
 	}
 
-	template< class array_t >
-	static spfp_storarr_t coord2deltas(const array_t& src) {
+	template< class ret_array_t, class array_t >
+	static void coord2deltas(const array_t& src, ret_array_t& res) {
 		typedef typename array_t::const_iterator carr_iterator;
 
-		smart_ptr< fp_storarr_t > res = BS_KERNEL.create_object(fp_storarr_t::bs_type());
-		if(src.size() < 2) return res;
-		res->resize(src.size() - 1);
-		typename fp_storarr_t::iterator p_res = res->begin();
+		if(src.size() < 2) return;
+		res.resize(src.size() - 1);
+		typename ret_array_t::iterator p_res = res.begin();
 		carr_iterator a = src.begin(), b = a, end = src.end();
 		for(++b; b != end; ++b)
 			*p_res++ = *b - *a++;
-		return res;
 	}
 
 	struct proc_ray {
@@ -449,7 +456,7 @@ struct mesh_grdecl< strategy_t >::inner {
 			using namespace std;
 			const int_t dir = static_cast< int_t >(dir_ray_t::dir);
 			// find where new point fall to
-			const fp_t max_sz = find_max_cell(ray);
+			const fp_t max_sz = find_max_cell(ray) * 0.5;
 			const fp_t max_front = *dr.last(ray);
 			fp_t cell_sz = d;
 			fp_t wave_front = dr.min(start_point + dir * 0.5 * d, max_front);
@@ -486,6 +493,62 @@ struct mesh_grdecl< strategy_t >::inner {
 			}
 			return merge_cnt;
 		}
+
+		template< class ray_t >
+		static int_t band_filter(ray_t& ray, fp_t smooth_ratio) {
+			typedef typename ray_t::size_type size_t;
+			typedef std::set< size_t, std::greater< size_t > > idx_set;
+			typedef typename idx_set::const_iterator idx_iterator;
+
+			if(ray.size() < 2) return 0;
+
+			// find cells to remove
+			idx_set dying;
+			//std::vector< size_t > dying;
+			//
+			// left to right walk
+			int_t n = 0;
+			for(size_t i = 0; i < ray.size() - 1; ++i) {
+				// dont check dead bands
+				if(dying.find(i) != dying.end()) continue;
+				// main condition
+				if(ray[i] * smooth_ratio > ray[i + 1]) {
+					dying.insert(i + 1);
+					//dying.push_back(i + 1);
+					// check if cell after bound is less than before bound
+					if(i + 2 < ray.size() && ray[i + 2] < ray[i])
+						ray[i + 2] += ray[i + 1];
+					else
+						ray[i] += ray[i + 1];
+					++n;
+				}
+			}
+
+			// right to left walk
+			for(size_t i = ray.size() - 1; i >= 1; --i) {
+				// dont check dead bands
+				if(dying.find(i) != dying.end()) continue;
+				// main condition
+				if(ray[i] * smooth_ratio > ray[i - 1]) {
+					dying.insert(i - 1);
+					//dying.push_back(i + 1);
+					// check if cell after bound is less than before bound
+					if(i - 2 < ray.size() && ray[i - 2] < ray[i])
+						ray[i - 2] += ray[i - 1];
+					else
+						ray[i] += ray[i - 1];
+					++n;
+				}
+			}
+
+			// remove dead cells
+			for(idx_iterator p_id = dying.begin(), end = dying.end(); p_id != end; ++p_id) {
+				ray.erase(ray.begin() + *p_id);
+			}
+			//for(size_t i = 0; i < dying.size(); ++i)
+			//	ray.erase(ray.begin() + i);
+			return n;
+		}
 	};
 
 	template< class ray_t >
@@ -498,16 +561,24 @@ struct mesh_grdecl< strategy_t >::inner {
 		if(!coord.size()) return;
 
 		// process coord in both directions
+		// DEBUG
+		BSOUT << "refine_mesh_impl: point = " << point << "; d = " << d << "; a = " << a << bs_end;
+		BSOUT << "refine_mesh_impl: positive ray" << bs_end;
 		proc_ray::go(coord, point, d, a, typename proc_ray::template dir_ray< 1 >());
+		BSOUT << "refine_mesh_impl: negative ray" << bs_end;
 		proc_ray::go(coord, point, d, a, typename proc_ray::template dir_ray< -1 >());
 	}
 
-	static coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, sp_fp_storage_array_t coord, sp_fp_storage_array_t zcorn, sp_fp_storage_array_t points) {
+	static coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, sp_fp_storage_array_t coord, sp_fp_storage_array_t zcorn,
+			sp_fp_storage_array_t points, fp_t cell_merge_thresh, fp_t band_thresh)
+	{
 		using namespace std;
 
 		typedef typename fp_storvec_t::iterator v_iterator;
 		typedef slice_iterator< v_iterator, 6 > dim_iterator;
 
+		// DEBUG
+		BSOUT << "refine_mesh: init stage" << bs_end;
 		// sanity check
 		if(!coord || !zcorn || !points) return coord_zcorn_pair();
 
@@ -532,22 +603,27 @@ struct mesh_grdecl< strategy_t >::inner {
 		//y->resize(ny + 1);
 		fp_set y;
 		const int_t ydim_step = 6 * (nx + 1);
-		dim_iterator a(coord->begin() + 1, ydim_step), b = a;
-		b += ny + 1;
-		for(; a != b; ++a)
-			y.insert(*a);
-		//copy(dim_iterator(coord->begin() + 1, ydim_step), dim_iterator(coord->begin() + 1, ydim_step) + (ny + 1),
-		//		insert_iterator< fp_set >(y, y.begin()));
+		//dim_iterator a(coord->begin() + 1, ydim_step), b = a;
+		//b += ny + 1;
+		//for(; a != b; ++a)
+		//	y.insert(*a);
+		copy(dim_iterator(coord->begin() + 1, ydim_step), dim_iterator(coord->begin() + 1, ydim_step) + (ny + 1),
+				insert_iterator< fp_set >(y, y.begin()));
 
 		typename fp_storage_array_t::const_iterator pp = points->begin(), p_end = points->end();
 		// make (p_end - p_begin) % 4 = 0
 		p_end -= (p_end - pp) % 6;
 
+		// DEBUG
+		BSOUT << "refine_mesh: points processing starts..." << bs_end;
 		// process points in turn
 		// points array: {(x, y, dx, dy, ax, ay)}
 		fp_stor_t x_coord, y_coord, dx, dy, ax, ay;
-		fp_stor_t min_dx, min_dy;
+		fp_stor_t min_dx = 0, min_dy = 0;
 		bool first_point = true;
+		// store processed points here
+		fp_set dx_ready, dy_ready;
+		// main cycle
 		while(pp != p_end) {
 			x_coord = *(pp++); y_coord = *(pp++);
 			dx = *(pp++); dy = *(pp++);
@@ -560,18 +636,46 @@ struct mesh_grdecl< strategy_t >::inner {
 				min_dx = min(min_dx, dx);
 				min_dy = min(min_dx, dy);
 			}
-			if(dx != 0)
+			// process only new points
+			if(dx != 0 && dx_ready.find(x_coord) == dx_ready.end()) {
 				refine_mesh_impl(x, x_coord, dx, ax);
-			if(dy != 0)
+				dx_ready.insert(x_coord);
+			}
+			if(dy != 0 && dy_ready.find(y_coord) == dy_ready.end()) {
 				refine_mesh_impl(y, y_coord, dy, ay);
+				dy_ready.insert(y_coord);
+			}
 		}
 
+		// DEBUG
+		BSOUT << "refine_mesh: kill_tight_centers(x)" << bs_end;
 		// kill too tight cells in x & y directions
-		while(proc_ray::kill_tight_cells(x, BOUND_MERGE_THRESHOLD * min_dx)) {}
-		while(proc_ray::kill_tight_cells(y, BOUND_MERGE_THRESHOLD * min_dy)) {}
+		while(proc_ray::kill_tight_cells(x, cell_merge_thresh * min_dx)) {}
+		// DEBUG
+		BSOUT << "refine_mesh: kill_tight_centers(y)" << bs_end;
+		while(proc_ray::kill_tight_cells(y, cell_merge_thresh * min_dy)) {}
 
+		// DEBUG
+		BSOUT << "refine_mesh: coord2deltas" << bs_end;
+		// make deltas from coordinates
+		vector< fp_stor_t > delta_x, delta_y;
+		delta_x.reserve(x.size() - 1); delta_y.reserve(y.size() - 1);
+		coord2deltas(x, delta_x);
+		coord2deltas(y, delta_y);
+
+		// DEBUG
+		BSOUT << "refine_mesh: bands filter in x" << bs_end;
+		// filter tight bands from grid
+		while(proc_ray::band_filter(delta_x, band_thresh)) {}
+		// DEBUG
+		BSOUT << "refine_mesh: bands filter in y" << bs_end;
+		while(proc_ray::band_filter(delta_y, band_thresh)) {}
+
+
+		// DEBUG
+		BSOUT << "refine_mesh: update ZCORN" << bs_end;
 		// update zcorn
-		resize_zcorn(vzcorn, nx, ny, x.size() - 1, y.size() - 1);
+		resize_zcorn(vzcorn, nx, ny, delta_x.size(), delta_y.size());
 		// create bs_array from new zcorn
 		spfp_storarr_t rzcorn = BS_KERNEL.create_object(fp_storarr_t::bs_type());
 		if(!rzcorn) return coord_zcorn_pair();
@@ -579,19 +683,18 @@ struct mesh_grdecl< strategy_t >::inner {
 		copy(vzcorn.begin(), vzcorn.end(), rzcorn->begin());
 
 		// DEBUG
-		spfp_storarr_t delta_x = coord2deltas(x);
-		spfp_storarr_t delta_y = coord2deltas(y);
-		// check sum
-		//fp_t sum_x = sum(*delta_x);
-		//fp_t sum_y = sum(*delta_y);
-		nx = x.size() - 1;
-		ny = y.size() - 1;
+		BSOUT << "refine_mesh: copy delta_x & delta_y to bs_arrays" << bs_end;
+		// copy delta_x & delta_y to bs_arrays
+		nx = delta_x.size();
+		ny = delta_y.size();
+		spfp_storarr_t adx = BS_KERNEL.create_object(fp_storarr_t::bs_type()),
+					   ady = BS_KERNEL.create_object(fp_storarr_t::bs_type());
+		adx->resize(delta_x.size()); ady->resize(delta_y.size());
+		copy(delta_x.begin(), delta_x.end(), adx->begin());
+		copy(delta_y.begin(), delta_y.end(), ady->begin());
 
 		// rebuild grid based on processed x_coord & y_coord
-		return coord_zcorn_pair(gen_coord(nx, ny,
-				//coord2deltas(x), coord2deltas(y)),
-				delta_x, delta_y),
-				rzcorn);
+		return coord_zcorn_pair(gen_coord(nx, ny, adx, ady), rzcorn);
 	}
 
 	// hold reference to coord and czron arrays if generated internally
@@ -611,6 +714,8 @@ mesh_grdecl< strategy_t >::gen_coord_zcorn(i_type_t nx, i_type_t ny, i_type_t nz
 	typedef std::pair< sp_fp_storage_array_t, sp_fp_storage_array_t > ret_t;
 	typedef typename fp_storage_array_t::value_type value_t;
 
+	// DEBUG
+	BSOUT << "gen_coord_zcorn: init stage" << bs_end;
 	// create subscripter
 	if(!dx || !dy || !dz) return ret_t(NULL, NULL);
 	if(!dx->size() || !dy->size() || !dz->size()) return ret_t(NULL, NULL);
@@ -627,6 +732,8 @@ mesh_grdecl< strategy_t >::gen_coord_zcorn(i_type_t nx, i_type_t ny, i_type_t nz
 	typename inner::dim_subscript dzs(*dz);
 	zcorn->init(nx*ny*nz*8);
 
+	// DEBUG
+	BSOUT << "gen_coord_zcorn: ZCORN creating starts..." << bs_end;
 	typename fp_storage_array_t::iterator pcd = zcorn->begin();
 	const i_type_t plane_size = nx * ny * 4;
 	fp_storage_type_t z_cache = dzs[0];
@@ -635,14 +742,19 @@ mesh_grdecl< strategy_t >::gen_coord_zcorn(i_type_t nx, i_type_t ny, i_type_t nz
 		z_cache = dzs[iz];
 		pcd = fill_n(pcd, plane_size, z_cache);
 	}
+	// DEBUG
+	BSOUT << "gen_coord_zcorn: ZCORN creating finished" << bs_end;
+	BSOUT << "gen_coord_zcorn: COORD creating starts..." << bs_end;
 
 	return ret_t(inner::gen_coord(nx, ny, dx, dy), zcorn);
 }
 
 template< class strategy_t >
 std::pair< typename mesh_grdecl< strategy_t >::sp_fp_storage_array_t, typename mesh_grdecl< strategy_t >::sp_fp_storage_array_t >
-mesh_grdecl< strategy_t >::refine_mesh(i_type_t& nx, i_type_t& ny, sp_fp_storage_array_t coord, sp_fp_storage_array_t zcorn, sp_fp_storage_array_t points) {
-	return inner::refine_mesh(nx, ny, coord, zcorn, points);
+mesh_grdecl< strategy_t >::refine_mesh(i_type_t& nx, i_type_t& ny, sp_fp_storage_array_t coord, sp_fp_storage_array_t zcorn,
+		sp_fp_storage_array_t points, fp_type_t cell_merge_thresh, fp_type_t band_thresh)
+{
+	return inner::refine_mesh(nx, ny, coord, zcorn, points, cell_merge_thresh, band_thresh);
 }
 
 template< class strategy_t >
