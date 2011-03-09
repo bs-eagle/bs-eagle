@@ -4,6 +4,7 @@
 \date 2008-05-20 */
 #include "bs_mesh_stdafx.h"
 #include "mesh_grdecl.h"
+#include <iterator>
 
 #define BOUND_MERGE_THRESHOLD 0.8
 #define DEFAULT_SMOOTH_RATIO 0.1
@@ -27,8 +28,10 @@ struct mesh_grdecl< strategy_t >::inner {
 	// other typedefs
 	typedef bs_array< fp_stor_t, bs_vector_shared > fp_storvec_t;
 	typedef bs_array< fp_stor_t, bs_array_shared > fp_storarr_t;
+	typedef bs_array< int_t, bs_array_shared > int_arr_t;
 	typedef smart_ptr< fp_storvec_t > spfp_storvec_t;
 	typedef smart_ptr< fp_storarr_t > spfp_storarr_t;
+	typedef smart_ptr< int_arr_t > spi_arr_t;
 	typedef std::pair< spfp_storarr_t, spfp_storarr_t > coord_zcorn_pair;
 	typedef std::set< fp_t > fp_set;
 
@@ -149,6 +152,90 @@ struct mesh_grdecl< strategy_t >::inner {
 	private:
 		iterator_t p_;
 		const difference_type step_;
+	};
+
+	// iterator that jumps over given offset instead of fixed +1
+	template< class iterator_t >
+	class cumsum_iterator : public std::iterator< std::bidirectional_iterator_tag, typename std::iterator_traits< iterator_t >::value_type > {
+		typedef std::iterator_traits< cumsum_iterator > traits_t;
+
+	public:
+		typedef typename traits_t::value_type value_type;
+		typedef typename traits_t::pointer pointer;
+		typedef typename traits_t::reference reference;
+		typedef typename traits_t::difference_type difference_type;
+
+		// set step in compile-time
+		cumsum_iterator() : p_(), sum_(0) {}
+		cumsum_iterator(const iterator_t& i) : p_(i), sum_(0) {}
+		cumsum_iterator(const cumsum_iterator& i) : p_(i.p_), sum_(i.sum_) {}
+
+		cumsum_iterator& operator++() {
+			sum_ += *(++p_);
+			return *this;
+		}
+		cumsum_iterator& operator++(int) {
+			cumsum_iterator tmp = *this;
+			sum_ += *(++p_);
+			return tmp;
+		}
+
+		cumsum_iterator& operator--() {
+			sum_ -= *p_--;
+			return *this;
+		}
+		cumsum_iterator& operator--(int) {
+			cumsum_iterator tmp = *this;
+			sum_ -= *p_--;
+			return tmp;
+		}
+
+		pointer operator->() const {
+			return p_.operator->();
+		}
+		value_type operator*() const {
+			return sum_;
+		}
+
+		cumsum_iterator& operator=(const cumsum_iterator& lhs) {
+			p_ = lhs.p_;
+			sum_ = lhs.sum_;
+			return *this;
+		}
+
+		friend difference_type operator-(const cumsum_iterator& lhs, const cumsum_iterator& rhs) {
+			return lhs.p_ - rhs.p_;
+		}
+
+		bool operator<(const cumsum_iterator& rhs) {
+			return p_ < rhs.p_;
+		}
+		bool operator>(const cumsum_iterator& rhs) {
+			return p_ > rhs.p_;
+		}
+		bool operator<=(const cumsum_iterator& rhs) {
+			return p_ <= rhs.p_;
+		}
+		bool operator>=(const cumsum_iterator& rhs) {
+			return p_ >= rhs.p_;
+		}
+		bool operator==(const cumsum_iterator& rhs) {
+			return p_ == rhs.p_;
+		}
+		bool operator!=(const cumsum_iterator& rhs) {
+			return p_ != rhs.p_;
+		}
+
+		iterator_t& backend() {
+			return p_;
+		}
+		const iterator_t& backend() const {
+			return p_;
+		}
+
+	private:
+		iterator_t p_;
+		value_type sum_;
 	};
 
 	template< class array_t >
@@ -565,7 +652,8 @@ struct mesh_grdecl< strategy_t >::inner {
 	}
 
 	static coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, sp_fp_storage_array_t coord, sp_fp_storage_array_t zcorn,
-			sp_fp_storage_array_t points, fp_t cell_merge_thresh, fp_t band_thresh)
+			sp_fp_storage_array_t points, fp_t cell_merge_thresh, fp_t band_thresh,
+			spi_arr_t hit_idx = NULL)
 	{
 		using namespace std;
 
@@ -664,6 +752,20 @@ struct mesh_grdecl< strategy_t >::inner {
 		while(proc_ray::band_filter(delta_x, band_thresh)) {}
 		while(proc_ray::band_filter(delta_y, band_thresh)) {}
 
+		// find what cells in refined mesh are hit by given points
+		if(hit_idx) {
+			typedef cumsum_iterator< typename vector< fp_stor_t >::iterator > cs_iterator;
+			hit_idx->resize(cnt * 2);
+			typename int_arr_t::iterator p_hit = hit_idx->begin();
+			pp = points->begin();
+			for(int_t i = 0; i < cnt; ++i) {
+				cs_iterator p_id = lower_bound(cs_iterator(delta_x.begin()), cs_iterator(delta_x.end()), *pp++);
+				*p_hit++ = p_id - delta_x.begin() - 1;
+				p_id = lower_bound(cs_iterator(delta_y.begin()), cs_iterator(delta_y.end()), *pp++);
+				*p_hit++ = p_id - delta_y.begin() - 1;
+				pp += 4;
+			}
+		}
 
 		// DEBUG
 		BSOUT << "refine_mesh: update ZCORN" << bs_end;
@@ -745,9 +847,9 @@ mesh_grdecl< strategy_t >::gen_coord_zcorn(i_type_t nx, i_type_t ny, i_type_t nz
 template< class strategy_t >
 std::pair< typename mesh_grdecl< strategy_t >::sp_fp_storage_array_t, typename mesh_grdecl< strategy_t >::sp_fp_storage_array_t >
 mesh_grdecl< strategy_t >::refine_mesh(i_type_t& nx, i_type_t& ny, sp_fp_storage_array_t coord, sp_fp_storage_array_t zcorn,
-		sp_fp_storage_array_t points, fp_type_t cell_merge_thresh, fp_type_t band_thresh)
+		sp_fp_storage_array_t points, sp_i_array_t hit_idx, fp_type_t cell_merge_thresh, fp_type_t band_thresh)
 {
-	return inner::refine_mesh(nx, ny, coord, zcorn, points, cell_merge_thresh, band_thresh);
+	return inner::refine_mesh(nx, ny, coord, zcorn, points, cell_merge_thresh, band_thresh, hit_idx);
 }
 
 template< class strategy_t >
@@ -2233,7 +2335,8 @@ struct build_jacobian_and_flux : boost::noncopyable
                     
                     loop_body.prepare (i, j, k);
                     
-                    if (i + 1 < nx) 
+                    // if X neighbour exists and current element`s X+ plane is not a line
+					if (i + 1 < nx && ((zcorn_array[zcorn_index1[1]] != zcorn_array[zcorn_index1[5]]) || (zcorn_array[zcorn_index1[3]] != zcorn_array[zcorn_index1[7]])))
                       {
                         k_x = last_k_x - 1;
                         
@@ -2256,7 +2359,8 @@ struct build_jacobian_and_flux : boost::noncopyable
                               
                             ext_index2 = ext_index1 + 1 + (k_x - k) * nx * ny;
                             
-                            if (mesh->actnum_array[ext_index2])
+                            // if neighbour active and it`s X- plane is not a line
+							if (mesh->actnum_array[ext_index2] && ((zcorn_array[zcorn_index2[0]] != zcorn_array[zcorn_index2[4]]) || (zcorn_array[zcorn_index2[2]] != zcorn_array[zcorn_index2[6]])))
                               {
                                 loop_body.change_by_x (i + 1, j, k_x, ext_index2, false);
                               }
@@ -2265,7 +2369,8 @@ struct build_jacobian_and_flux : boost::noncopyable
                           }
                       }
                       
-                    if (j + 1 < ny) 
+                    // if Y neighbour exists and current element`s Y+ plane is not a line
+					if (j + 1 < ny && ((zcorn_array[zcorn_index1[2]] != zcorn_array[zcorn_index1[6]]) || (zcorn_array[zcorn_index1[3]] != zcorn_array[zcorn_index1[7]])))
                       {
                         k_y = last_k_y - 1;
                         
@@ -2288,7 +2393,8 @@ struct build_jacobian_and_flux : boost::noncopyable
                               
                             ext_index2 = ext_index1 + ny + (k_y - k) * nx * ny;
                             
-                            if (mesh->actnum_array[ext_index2])
+                            // if neighbour active and it`s Y- plane is not a line
+							if (mesh->actnum_array[ext_index2] && ((zcorn_array[zcorn_index2[0]] != zcorn_array[zcorn_index2[4]]) || (zcorn_array[zcorn_index2[1]] != zcorn_array[zcorn_index2[5]])))
                               {
                                 loop_body.change_by_y (i, j + 1, k_y, ext_index2, false);
                               }

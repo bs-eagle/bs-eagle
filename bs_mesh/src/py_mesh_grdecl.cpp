@@ -18,14 +18,17 @@ struct mesh_grdecl_exporter_plus {
 	typedef typename T::i_type_t int_t;
 	typedef typename T::fp_type_t fp_t;
 	typedef typename T::sp_fp_storage_array_t spfp_storarr_t;
+	typedef typename T::sp_i_array_t spi_arr_t;
+	typedef typename spi_arr_t::pure_pointed_t int_arr_t;
 
 	//BOOST_PYTHON_FUNCTION_OVERLOADS(refine_mesh_overl, refine_mesh, 5, 7)
 
 	static tuple refine_mesh(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t zcorn, spfp_storarr_t points,
 			fp_t m_thresh = DEF_CELL_MERGE_THRESHOLD, fp_t b_thresh = DEF_BAND_THRESHOLD)
 	{
-		std::pair< spfp_storarr_t, spfp_storarr_t > r = T::refine_mesh(nx, ny, coord, zcorn, points, m_thresh, b_thresh);
-		return make_tuple(r.first, r.second, nx, ny);
+		spi_arr_t hit_idx = BS_KERNEL.create_object(int_arr_t::bs_type());
+		std::pair< spfp_storarr_t, spfp_storarr_t > r = T::refine_mesh(nx, ny, coord, zcorn, points, hit_idx, m_thresh, b_thresh);
+		return make_tuple(r.first, r.second, nx, ny, hit_idx);
 	}
 
 	// overloads
