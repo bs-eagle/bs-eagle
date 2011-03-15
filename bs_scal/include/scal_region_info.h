@@ -16,10 +16,10 @@ namespace blue_sky {
   struct scal_region_info
   {
     //typedef typename strategy_t::item_t item_t;
-    int So_count;                                   ///< count of So and Krop components of region
-    int Sp_count;                                   ///< count of Sp and Krp components of region
-    int Krp_min_greater_zero;                       ///< index of item that first greater than zero in Krp
-    int Krop_min_greater_zero;                      ///< index of item that first greater than zero in Krop
+    t_int So_count;                                   ///< count of So and Krop components of region
+    t_int Sp_count;                                   ///< count of Sp and Krp components of region
+    t_int Krp_min_greater_zero;                       ///< index of item that first greater than zero in Krp
+    t_int Krop_min_greater_zero;                      ///< index of item that first greater than zero in Krop
     size_t so_offset;                               ///< offset for so, krop components from begin of allocated memory region
     size_t sp_offset;                               ///< offset for sp, krp and pcp components from begin of allocated memory region
 
