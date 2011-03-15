@@ -8,8 +8,8 @@
 
 #include "rs_smesh_base.h"
 
-template <typename strategy_t>
-rs_smesh_base <strategy_t>::rs_smesh_base ()
+
+rs_smesh_base ::rs_smesh_base ()
 {
   permx_array = 0;
   permy_array = 0;
@@ -20,9 +20,9 @@ rs_smesh_base <strategy_t>::rs_smesh_base ()
 }
 
 
-template <typename strategy_t>
+
 void
-rs_smesh_base <strategy_t>::init_props (const sp_idata_t &idata)
+rs_smesh_base ::init_props (const sp_idata_t &idata)
 {
   base_t::init_props (idata);
   
@@ -30,7 +30,7 @@ rs_smesh_base <strategy_t>::init_props (const sp_idata_t &idata)
   ny = idata->dimens.ny;
   nz = idata->dimens.nz;
   
-  sp_fp_storage_array_t data_array;
+  spv_float data_array;
   
   data_array = idata->get_fp_non_empty_array("PERMX");
   if (data_array->size()) permx_array = &(*data_array)[0];
@@ -51,18 +51,18 @@ rs_smesh_base <strategy_t>::init_props (const sp_idata_t &idata)
   if (data_array && data_array->size()) multz_array = &(*data_array)[0];
 }
 
-template<class strategy_t>
-void rs_smesh_base<strategy_t>::inside_to_XYZ(const i_type_t index, i_type_t &i1,i_type_t &j1, i_type_t &k1) const
+
+void rs_smesh_base::inside_to_XYZ(const t_long index, t_long &i1,t_long &j1, t_long &k1) const
   {
-    i_type_t r_index = (*base_t::base_t::int_to_ext)[index];
+    t_long r_index = (*base_t::base_t::int_to_ext)[index];
     k1 = r_index / (nx*ny);
     j1 = (r_index - k1*nx*ny) / nx;
     i1 = r_index - k1*nx*ny - j1*nx;
   }
 
 /*
-template<class strategy_t>
-int rs_smesh_base<strategy_t>::init_int_to_ext()
+
+int rs_smesh_base::init_int_to_ext()
 {
   
   if (base_t::base_t::ext_to_int.size() == 0)
@@ -74,15 +74,15 @@ int rs_smesh_base<strategy_t>::init_int_to_ext()
     {
       if (base_t::base_t::ext_to_int[i] != -1)
         {
-          base_t::base_t::int_to_ext [base_t::base_t::ext_to_int[i]] = (i_type_t)i;
+          base_t::base_t::int_to_ext [base_t::base_t::ext_to_int[i]] = (t_long)i;
         }
     }
   return 0;  
 }
 */
 
-template<class strategy_t>
-void rs_smesh_base<strategy_t>::check_data() const
+
+void rs_smesh_base::check_data() const
 {
   base_t::check_data ();
   
@@ -101,10 +101,10 @@ void rs_smesh_base<strategy_t>::check_data() const
     bs_throw_exception ("PERMZ array is not initialized");
 }
 
-template<class strategy_t>
-int rs_smesh_base<strategy_t>::get_elems_n_in_layers(const direction d_dir, index_array_t &elem_in_layers) const
+
+int rs_smesh_base::get_elems_n_in_layers(const direction d_dir, stdv_int &elem_in_layers) const
 {
-  i_type_t i_index;
+  t_long i_index;
   if (d_dir == along_dim3)
     {
       elem_in_layers.resize(nz, 0);
@@ -153,4 +153,4 @@ int rs_smesh_base<strategy_t>::get_elems_n_in_layers(const direction d_dir, inde
   return (int) elem_in_layers.size();
 }
 
-BS_INST_STRAT(rs_smesh_base);
+//BS_INST_STRAT(rs_smesh_base);

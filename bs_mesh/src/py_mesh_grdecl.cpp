@@ -3,6 +3,7 @@
 #include "py_mesh_grdecl.h"
 #include "export_python_wrapper.h"
 #include "py_pair_converter.h"
+#include <boost/python/tuple.hpp>
 
 #ifdef BSPY_EXPORTING_PLUGIN
 using namespace boost::python;
@@ -14,6 +15,28 @@ using namespace blue_sky::python;
 // same as grdecl exporter, but also export gen_coord_zcorn
 template <typename T>
 struct mesh_grdecl_exporter_plus {
+	typedef typename T::i_type_t int_t;
+	typedef typename T::fp_type_t fp_t;
+	typedef typename T::sp_fp_storage_array_t spfp_storarr_t;
+
+	//BOOST_PYTHON_FUNCTION_OVERLOADS(refine_mesh_overl, refine_mesh, 5, 7)
+
+	static tuple refine_mesh(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t zcorn, spfp_storarr_t points,
+			fp_t m_thresh = DEF_CELL_MERGE_THRESHOLD, fp_t b_thresh = DEF_BAND_THRESHOLD)
+	{
+		std::pair< spfp_storarr_t, spfp_storarr_t > r = T::refine_mesh(nx, ny, coord, zcorn, points, m_thresh, b_thresh);
+		return make_tuple(r.first, r.second, nx, ny);
+	}
+
+	// overloads
+	static tuple refine_mesh1(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t zcorn, spfp_storarr_t points) {
+		return refine_mesh(nx, ny, coord, zcorn, points);
+	}
+	static tuple refine_mesh2(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t zcorn, spfp_storarr_t points, fp_t m_thresh) {
+		return refine_mesh(nx, ny, coord, zcorn, points, m_thresh);
+	}
+	
+
 	template <typename class_t>
 	static class_t &
 	export_class (class_t &class__) {
@@ -22,7 +45,11 @@ struct mesh_grdecl_exporter_plus {
 		mesh_grdecl_exporter<T>::export_class (class__)
 			.def("gen_coord_zcorn", &T::gen_coord_zcorn, args("nx, ny, nz, dx, dy, dz"), "Generate COORD & ZCORN from given dimensions")
 			.staticmethod("gen_coord_zcorn")
-			//.def ("gen_coord_zcorn", &T::template gen_coord_zcorn< fp_t, fp_t, fp_t>, args("nx, ny, nz, dx, dy, dz"), "Generate COORD & ZCORN from given dimensions")
+			.def("refine_mesh", &refine_mesh, "Refine existing mesh in given points")
+			.def("refine_mesh", &refine_mesh1, "Refine existing mesh in given points")
+			.def("refine_mesh", &refine_mesh2, "Refine existing mesh in given points")
+			//.def("refine_mesh", &T::refine_mesh, args("nx, ny, coord, zcorn, points"), "Refine existing mesh in given points")
+			.staticmethod("refine_mesh")
 			;
 		return class__;
 	}
@@ -44,7 +71,7 @@ namespace blue_sky {
 namespace python {
 
 void py_export_mesh_grdecl () {
-	strategy_exporter::export_class <bs_mesh_grdecl, rs_mesh_iface, mesh_grdecl_exporter_plus> ("mesh_grdecl");
+	//strategy_exporter::export_class <bs_mesh_grdecl, rs_mesh_iface, mesh_grdecl_exporter_plus> ("mesh_grdecl");
 	reg_sparray_pair< float >();
 	reg_sparray_pair< double >();
 }

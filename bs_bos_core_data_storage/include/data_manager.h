@@ -11,7 +11,7 @@
 
 namespace blue_sky {
 
-  template <class strategy_t>
+  
   class BS_API_PLUGIN data_manager: public objbase
     {
     public:
@@ -19,13 +19,11 @@ namespace blue_sky {
       //typedef typename strategy_t::matrix_t       							matrix_t;
       //typedef typename strategy_t::item_array_t   							item_array_t;
       //typedef typename strategy_t::index_array_t  							index_array_t;
-      typedef typename strategy_t::fp_storage_type_t         			fp_storage_type_t;
-      typedef typename strategy_t::i_type_t        							  i_type_t;
 
-      typedef idata<strategy_t>                                 idata_t;
+      typedef idata                                 idata_t;
       typedef smart_ptr <idata_t, true>										      sp_idata ;
       typedef smart_ptr <FRead, true>													  sp_reader_t;
-      typedef keyword_manager<strategy_t>                       keyword_manager_t;
+      typedef keyword_manager                       keyword_manager_t;
       typedef smart_ptr <keyword_manager_t, true>								sp_km_t;
 
       //METHODS

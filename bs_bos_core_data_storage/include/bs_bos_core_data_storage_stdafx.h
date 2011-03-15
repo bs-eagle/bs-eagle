@@ -89,7 +89,7 @@
 #include "vector_assign.h"
 #include "locale_keeper.h"
 #include "interpolation_macro.h"
-#include "naive_file_reader.h"
+//#include "naive_file_reader.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #endif // #ifndef BS_BOS_CORE_DATA_STORAGE_PRECOMPILED_HEADERS_H_

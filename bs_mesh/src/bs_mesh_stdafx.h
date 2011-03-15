@@ -91,7 +91,6 @@
 #include "strategies.h"
 
 #include "auto_value.h"
-//#include "save_seq_vector.h"
 #include "bcsr_matrix_iface.h"
 
 #include "read_class.h"

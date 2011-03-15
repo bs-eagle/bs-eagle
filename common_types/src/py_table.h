@@ -44,6 +44,10 @@ namespace blue_sky
     .def ("__str__",                            &T::py_str)
   PY_EXPORTER_END;                               
 
+  //PY_EXPORTER (py_dummy_exporter, default_exporter)
+                                                 
+  //PY_EXPORTER_END;                               
+                                                 
   //! export matrices to python                  
   void py_export_table ();                    
 

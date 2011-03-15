@@ -44,39 +44,39 @@ namespace blue_sky
     BS_ASSERT(false) (out_s.str());\
     throw bs_exception("Data manager class",out_s.str().c_str());
 
-  template <class strategy_t>
-  data_manager<strategy_t>::~data_manager ()
+  
+  data_manager::~data_manager ()
   {
 
   }
 
-  template <class strategy_t>
-  data_manager<strategy_t>::data_manager(bs_type_ctor_param /*param*/): lkeeper ("C", LC_ALL)
+  
+  data_manager::data_manager(bs_type_ctor_param /*param*/): lkeeper ("C", LC_ALL)
   {
     this->reader = BS_KERNEL.create_object(FRead::bs_type());
-    this->data = BS_KERNEL.create_object(idata<strategy_t>::bs_type());
-    this->km = BS_KERNEL.create_object(keyword_manager<strategy_t>::bs_type());
+    this->data = BS_KERNEL.create_object(idata::bs_type());
+    this->km = BS_KERNEL.create_object(keyword_manager::bs_type());
   }
 
-  template <class strategy_t>
-  data_manager<strategy_t>::data_manager(const data_manager& src)
+  
+  data_manager::data_manager(const data_manager& src)
   : bs_refcounter (src), objbase (src), lkeeper ("C", LC_ALL)
   {
     *this = src;
   }
   
-  template <class strategy_t>
+  
   void
-  data_manager<strategy_t>::init()
+  data_manager::init()
   {
     km->init();
   }
   
-  template <class strategy_t>
+  
   void 
-  data_manager<strategy_t>::read_keyword_file(const std::string filename)
+  data_manager::read_keyword_file(const std::string filename)
   {
-    typename keyword_manager_t::keyword_params_t params;
+    keyword_manager_t::keyword_params_t params;
     params.reader = reader;
     params.data = data;
     params.km = km;
@@ -185,8 +185,8 @@ namespace blue_sky
     }
 
   /*
-  template <class strategy_t>
-  void data_manager<strategy_t>::update_geometry() const
+  
+  void data_manager::update_geometry() const
     {
       int i, ix, iy, iz, n;
       std::ostringstream out_s;
@@ -362,8 +362,8 @@ namespace blue_sky
         }
     }
 */
-  template <class strategy_t>
-  void data_manager<strategy_t>::check_arrays_for_inactive_blocks () const
+  
+  void data_manager::check_arrays_for_inactive_blocks () const
     {
       std::ostringstream out_s;
       int nb = data->dimens.nx * data->dimens.ny * data->dimens.nz;
@@ -373,12 +373,12 @@ namespace blue_sky
       int poro_counter = 0;
       int ntg_counter = 0;
       
-      i_type_t* actnum = &(*data->get_int_non_empty_array ("ACTNUM"))[0];
-      const fp_storage_type_t *permx  = &(*data->get_fp_non_empty_array ("PERMX"))[0];
-      const fp_storage_type_t *permy  = &(*data->get_fp_non_empty_array ("PERMY"))[0];
-      const fp_storage_type_t *permz  = &(*data->get_fp_non_empty_array ("PERMZ"))[0];
-      const fp_storage_type_t *poro   = &(*data->get_fp_non_empty_array ("PORO"))[0];
-      const fp_storage_type_t *ntg    = &(*data->get_fp_array ("NTG"))[0];
+      t_int* actnum = &(*data->get_int_non_empty_array ("ACTNUM"))[0];
+      const t_float *permx  = &(*data->get_fp_non_empty_array ("PERMX"))[0];
+      const t_float *permy  = &(*data->get_fp_non_empty_array ("PERMY"))[0];
+      const t_float *permz  = &(*data->get_fp_non_empty_array ("PERMZ"))[0];
+      const t_float *poro   = &(*data->get_fp_non_empty_array ("PORO"))[0];
+      const t_float *ntg    = &(*data->get_fp_array ("NTG"))[0];
 
       for (int i = 0; i < nb; ++i)
         {
@@ -423,14 +423,8 @@ namespace blue_sky
     }
 
   //bs stuff
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(data_manager, (class))
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(data_manager, (class))
-  BLUE_SKY_TYPE_IMPL_T_SHORT(data_manager<base_strategy_did>, objbase, "BOS_Core data_manager class")
-  BLUE_SKY_TYPE_IMPL_T_SHORT(data_manager<base_strategy_fif>, objbase, "BOS_Core data_manager class")
-  BLUE_SKY_TYPE_IMPL_T_SHORT(data_manager<base_strategy_dif>, objbase, "BOS_Core data_manager class")
-  
-  BLUE_SKY_TYPE_IMPL_T_SHORT(data_manager<base_strategy_dld>, objbase, "BOS_Core data_manager class")
-  BLUE_SKY_TYPE_IMPL_T_SHORT(data_manager<base_strategy_flf>, objbase, "BOS_Core data_manager class")
-  BLUE_SKY_TYPE_IMPL_T_SHORT(data_manager<base_strategy_dlf>, objbase, "BOS_Core data_manager class")
+  BLUE_SKY_TYPE_STD_CREATE(data_manager)
+  BLUE_SKY_TYPE_STD_COPY(data_manager)
 
+  BLUE_SKY_TYPE_IMPL(data_manager, objbase, "data_manager", "BOS_Core data_manager class", "BOS_Core data_manager class")
 }//ns bs

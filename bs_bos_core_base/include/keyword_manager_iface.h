@@ -139,13 +139,13 @@ namespace blue_sky
         shared_handler_t  handle_object;            //<! alternative for handle_function
         handler_t         second_handle_function;   //<! pointer to function
         
-        t_long           index_in_pool;            //<! index in pool (for pooled keywords (pooled==handles by array handlers))
+        t_int           index_in_pool;            //<! index in pool (for pooled keywords (pooled==handles by array handlers))
                                                     //<! -1: insert in imap (int) with available index
                                                     //<! -2: insert in dmap (float) with available index
                                                     //<! -3: invalid_value (because 0 is valid)
-        t_long           int_def_value;            //<! default value (for int pooled keywords (pooled==handles by array handlers))
-        t_float        float_def_value;          //<! default value (for float pooled keywords (pooled==handles by array handlers))
-        int            dimens[6];                //<! dimensions of array (for pooled keywords (pooled==handles by array handlers))
+        t_int         int_def_value;            //<! default value (for int pooled keywords (pooled==handles by array handlers))
+        t_float       float_def_value;          //<! default value (for float pooled keywords (pooled==handles by array handlers))
+        t_int         dimens[6];                //<! dimensions of array (for pooled keywords (pooled==handles by array handlers))
       };
 
       
@@ -160,7 +160,7 @@ namespace blue_sky
       virtual void register_keyword(const std::string &keyword, keyword_handler handler) = 0;
       
       //! registration of active integer pool keyword in factory
-      virtual void register_i_pool_keyword(const std::string &keyword, int *dimens, t_long def_value, handler_t external_handler = 0) = 0;
+      virtual void register_i_pool_keyword(const std::string &keyword, int *dimens, t_int def_value, handler_t external_handler = 0) = 0;
       
       //! registration of active floating point pool keyword in factory
       virtual void register_fp_pool_keyword(const std::string &keyword, int *dimens, t_float def_value, handler_t external_handler = 0) = 0;

@@ -5,18 +5,16 @@
 #include "bs_mesh_stdafx.h"
 
 #include "flux_connections.h"
-#include "strategy_name.h"
 
 
 //! default constructor
-template<typename strategy_t>
-flux_connections<strategy_t>::flux_connections()
+
+flux_connections::flux_connections()
 {
-  std::string mtx_name = "bcsr_matrix_" + tools::strategy_name <strategy_t>::name ();
-  conn_trans = BS_KERNEL.create_object(mtx_name);
-  matrix_block_idx_plus = give_kernel::Instance().create_object(bs_array<i_type_t>::bs_type());
-  matrix_block_idx_minus = give_kernel::Instance().create_object(bs_array<i_type_t>::bs_type());
+  conn_trans = BS_KERNEL.create_object("bcsr_matrix");
+  matrix_block_idx_plus = give_kernel::Instance().create_object(v_long::bs_type());
+  matrix_block_idx_minus = give_kernel::Instance().create_object(v_long::bs_type());
 }
 
 
-BS_INST_STRAT(flux_connections);
+//BS_INST_STRAT(flux_connections);

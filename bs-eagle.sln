@@ -2,6 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_bos_core_data_storage", "bs_bos_core_data_storage\bs_bos_core_data_storage.vcproj", "{3DF8BD9D-CAEF-4081-A1C2-B624E0959A81}"
+	ProjectSection(ProjectDependencies) = postProject
+		{578A43D7-0338-4ED0-A455-666FDA782085} = {578A43D7-0338-4ED0-A455-666FDA782085}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_pvt", "bs_pvt\bs_pvt.vcproj", "{32C5BEFC-9E7D-4341-ACD4-DDDCFEB77652}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -16,11 +19,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_cpr_prec", "..\bs_cpr_pr
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cbos", "..\c_bos_dll\prj\cbos.vcproj", "{1AE152E6-0D70-406E-AAA4-4090BA51D1D9}"
 	ProjectSection(ProjectDependencies) = postProject
-		{32C5BEFC-9E7D-4341-ACD4-DDDCFEB77652} = {32C5BEFC-9E7D-4341-ACD4-DDDCFEB77652}
-		{952339F0-0C05-440C-8168-A8C2C463D3AE} = {952339F0-0C05-440C-8168-A8C2C463D3AE}
-		{6179CF48-524A-4031-993A-FD353AD2A74F} = {6179CF48-524A-4031-993A-FD353AD2A74F}
-		{3DF8BD9D-CAEF-4081-A1C2-B624E0959A81} = {3DF8BD9D-CAEF-4081-A1C2-B624E0959A81}
 		{25D48348-7171-4ED5-8AE9-166C23CAC051} = {25D48348-7171-4ED5-8AE9-166C23CAC051}
+		{3DF8BD9D-CAEF-4081-A1C2-B624E0959A81} = {3DF8BD9D-CAEF-4081-A1C2-B624E0959A81}
+		{6179CF48-524A-4031-993A-FD353AD2A74F} = {6179CF48-524A-4031-993A-FD353AD2A74F}
+		{952339F0-0C05-440C-8168-A8C2C463D3AE} = {952339F0-0C05-440C-8168-A8C2C463D3AE}
+		{32C5BEFC-9E7D-4341-ACD4-DDDCFEB77652} = {32C5BEFC-9E7D-4341-ACD4-DDDCFEB77652}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_mtx", "bs_mtx\bs_mtx.vcproj", "{D588B62C-A1A8-49D2-88AC-FFADACC4545A}"
@@ -28,12 +31,24 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "blue-sky", "..\..\kernel\blue-sky.vcproj", "{7C235C2A-609A-49B4-A89B-AC23530F0F89}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_bos_core_base", "bs_bos_core_base\bs_bos_core_base.vcproj", "{578A43D7-0338-4ED0-A455-666FDA782085}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7C235C2A-609A-49B4-A89B-AC23530F0F89} = {7C235C2A-609A-49B4-A89B-AC23530F0F89}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_mesh", "bs_mesh\bs_mesh.vcproj", "{CE770FDD-686B-48FB-9DFA-B660196BEF89}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3DF8BD9D-CAEF-4081-A1C2-B624E0959A81} = {3DF8BD9D-CAEF-4081-A1C2-B624E0959A81}
+		{D588B62C-A1A8-49D2-88AC-FFADACC4545A} = {D588B62C-A1A8-49D2-88AC-FFADACC4545A}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_bos_core", "bs_bos_core\bs_bos_core.vcproj", "{B096BE31-726C-42A6-AFB0-C6BADE241F0D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bspy_loader", "..\..\python\bspy_loader\bspy_loader.vcproj", "{5FC52CB5-D666-4608-A354-81E3B5DE6035}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common_types", "common_types\common_types.vcproj", "{917136D8-8A55-4319-9A9C-483BB647AC4E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7C235C2A-609A-49B4-A89B-AC23530F0F89} = {7C235C2A-609A-49B4-A89B-AC23530F0F89}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -135,8 +150,8 @@ Global
 		{D588B62C-A1A8-49D2-88AC-FFADACC4545A}.Debug_MPI|Win32.Build.0 = Debug|Win32
 		{D588B62C-A1A8-49D2-88AC-FFADACC4545A}.Debug|Win32.ActiveCfg = Debug|Win32
 		{D588B62C-A1A8-49D2-88AC-FFADACC4545A}.Debug|Win32.Build.0 = Debug|Win32
-		{D588B62C-A1A8-49D2-88AC-FFADACC4545A}.Release_HDF5|Win32.ActiveCfg = Release_WO_Python|Win32
-		{D588B62C-A1A8-49D2-88AC-FFADACC4545A}.Release_HDF5|Win32.Build.0 = Release_WO_Python|Win32
+		{D588B62C-A1A8-49D2-88AC-FFADACC4545A}.Release_HDF5|Win32.ActiveCfg = Release|Win32
+		{D588B62C-A1A8-49D2-88AC-FFADACC4545A}.Release_HDF5|Win32.Build.0 = Release|Win32
 		{D588B62C-A1A8-49D2-88AC-FFADACC4545A}.release_with_debug|Win32.ActiveCfg = Release_WO_Python|Win32
 		{D588B62C-A1A8-49D2-88AC-FFADACC4545A}.release_with_debug|Win32.Build.0 = Release_WO_Python|Win32
 		{D588B62C-A1A8-49D2-88AC-FFADACC4545A}.Release_WO_Python|Win32.ActiveCfg = Release_WO_Python|Win32
@@ -149,8 +164,8 @@ Global
 		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.Debug_MPI|Win32.Build.0 = Debug|Win32
 		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.Debug|Win32.ActiveCfg = Debug|Win32
 		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.Debug|Win32.Build.0 = Debug|Win32
-		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.Release_HDF5|Win32.ActiveCfg = release_with_debug|Win32
-		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.Release_HDF5|Win32.Build.0 = release_with_debug|Win32
+		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.Release_HDF5|Win32.ActiveCfg = Release|Win32
+		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.Release_HDF5|Win32.Build.0 = Release|Win32
 		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.release_with_debug|Win32.ActiveCfg = release_with_debug|Win32
 		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.release_with_debug|Win32.Build.0 = release_with_debug|Win32
 		{7C235C2A-609A-49B4-A89B-AC23530F0F89}.Release_WO_Python|Win32.ActiveCfg = release_with_debug|Win32
@@ -163,8 +178,8 @@ Global
 		{578A43D7-0338-4ED0-A455-666FDA782085}.Debug_MPI|Win32.Build.0 = Debug|Win32
 		{578A43D7-0338-4ED0-A455-666FDA782085}.Debug|Win32.ActiveCfg = Debug|Win32
 		{578A43D7-0338-4ED0-A455-666FDA782085}.Debug|Win32.Build.0 = Debug|Win32
-		{578A43D7-0338-4ED0-A455-666FDA782085}.Release_HDF5|Win32.ActiveCfg = Release_WO_Python|Win32
-		{578A43D7-0338-4ED0-A455-666FDA782085}.Release_HDF5|Win32.Build.0 = Release_WO_Python|Win32
+		{578A43D7-0338-4ED0-A455-666FDA782085}.Release_HDF5|Win32.ActiveCfg = Release|Win32
+		{578A43D7-0338-4ED0-A455-666FDA782085}.Release_HDF5|Win32.Build.0 = Release|Win32
 		{578A43D7-0338-4ED0-A455-666FDA782085}.release_with_debug|Win32.ActiveCfg = Release_WO_Python|Win32
 		{578A43D7-0338-4ED0-A455-666FDA782085}.release_with_debug|Win32.Build.0 = Release_WO_Python|Win32
 		{578A43D7-0338-4ED0-A455-666FDA782085}.Release_WO_Python|Win32.ActiveCfg = Release_WO_Python|Win32
@@ -177,8 +192,8 @@ Global
 		{CE770FDD-686B-48FB-9DFA-B660196BEF89}.Debug_MPI|Win32.Build.0 = Debug|Win32
 		{CE770FDD-686B-48FB-9DFA-B660196BEF89}.Debug|Win32.ActiveCfg = Debug|Win32
 		{CE770FDD-686B-48FB-9DFA-B660196BEF89}.Debug|Win32.Build.0 = Debug|Win32
-		{CE770FDD-686B-48FB-9DFA-B660196BEF89}.Release_HDF5|Win32.ActiveCfg = Release_WO_Python|Win32
-		{CE770FDD-686B-48FB-9DFA-B660196BEF89}.Release_HDF5|Win32.Build.0 = Release_WO_Python|Win32
+		{CE770FDD-686B-48FB-9DFA-B660196BEF89}.Release_HDF5|Win32.ActiveCfg = Release|Win32
+		{CE770FDD-686B-48FB-9DFA-B660196BEF89}.Release_HDF5|Win32.Build.0 = Release|Win32
 		{CE770FDD-686B-48FB-9DFA-B660196BEF89}.release_with_debug|Win32.ActiveCfg = Release_WO_Python|Win32
 		{CE770FDD-686B-48FB-9DFA-B660196BEF89}.release_with_debug|Win32.Build.0 = Release_WO_Python|Win32
 		{CE770FDD-686B-48FB-9DFA-B660196BEF89}.Release_WO_Python|Win32.ActiveCfg = Release_WO_Python|Win32
@@ -213,6 +228,20 @@ Global
 		{5FC52CB5-D666-4608-A354-81E3B5DE6035}.Release_WO_Python|Win32.Build.0 = Release|Win32
 		{5FC52CB5-D666-4608-A354-81E3B5DE6035}.Release|Win32.ActiveCfg = Release|Win32
 		{5FC52CB5-D666-4608-A354-81E3B5DE6035}.Release|Win32.Build.0 = Release|Win32
+		{917136D8-8A55-4319-9A9C-483BB647AC4E}.Debug_HDF5|Win32.ActiveCfg = Debug|Win32
+		{917136D8-8A55-4319-9A9C-483BB647AC4E}.Debug_HDF5|Win32.Build.0 = Debug|Win32
+		{917136D8-8A55-4319-9A9C-483BB647AC4E}.Debug_MPI|Win32.ActiveCfg = Debug|Win32
+		{917136D8-8A55-4319-9A9C-483BB647AC4E}.Debug_MPI|Win32.Build.0 = Debug|Win32
+		{917136D8-8A55-4319-9A9C-483BB647AC4E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{917136D8-8A55-4319-9A9C-483BB647AC4E}.Debug|Win32.Build.0 = Debug|Win32
+		{917136D8-8A55-4319-9A9C-483BB647AC4E}.Release_HDF5|Win32.ActiveCfg = Release|Win32
+		{917136D8-8A55-4319-9A9C-483BB647AC4E}.Release_HDF5|Win32.Build.0 = Release|Win32
+		{917136D8-8A55-4319-9A9C-483BB647AC4E}.release_with_debug|Win32.ActiveCfg = Release|Win32
+		{917136D8-8A55-4319-9A9C-483BB647AC4E}.release_with_debug|Win32.Build.0 = Release|Win32
+		{917136D8-8A55-4319-9A9C-483BB647AC4E}.Release_WO_Python|Win32.ActiveCfg = Release|Win32
+		{917136D8-8A55-4319-9A9C-483BB647AC4E}.Release_WO_Python|Win32.Build.0 = Release|Win32
+		{917136D8-8A55-4319-9A9C-483BB647AC4E}.Release|Win32.ActiveCfg = Release|Win32
+		{917136D8-8A55-4319-9A9C-483BB647AC4E}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

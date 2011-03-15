@@ -5,6 +5,9 @@
 #include "bs_mesh_stdafx.h"
 #include "mesh_grdecl.h"
 
+#define BOUND_MERGE_THRESHOLD 0.8
+#define DEFAULT_SMOOTH_RATIO 0.1
+
 using namespace grd_ecl;
 using namespace blue_sky;
 
@@ -14,12 +17,143 @@ const char filename_hdf5[] = "grid_swap.h5";
   FILE*  fp;
 #endif //BS_MESH_WRITE_TRANSMISS_MATRIX 
 
-template< class strategy_t >
-struct mesh_grdecl< strategy_t >::inner {
+
+struct mesh_grdecl::inner {
+
+  typedef std::pair< spv_float, spv_float > coord_zcorn_pair;
+	typedef std::set< t_double > fp_set;
+
+	typedef v_float::iterator v_iterator;
+	typedef v_float::const_iterator cv_iterator;
+	typedef fp_set::iterator fps_iterator;
+
+	// iterator that jumps over given offset instead of fixed +1
+	template< class iterator_t, int step_size = 1 >
+	class slice_iterator : public std::iterator<
+							typename std::iterator_traits< iterator_t >::iterator_category,
+							typename std::iterator_traits< iterator_t >::value_type,
+							typename std::iterator_traits< iterator_t >::difference_type,
+							typename std::iterator_traits< iterator_t >::pointer,
+							typename std::iterator_traits< iterator_t >::reference
+							>
+	{
+		typedef std::iterator_traits< iterator_t > traits_t;
+
+	public:
+		typedef typename traits_t::value_type value_type;
+		typedef typename traits_t::pointer pointer;
+		typedef typename traits_t::reference reference;
+		typedef typename traits_t::difference_type difference_type;
+
+		// set step in compile-time
+		slice_iterator() : p_(), step_(step_size) {}
+		slice_iterator(const iterator_t& i) : p_(i), step_(step_size) {}
+		slice_iterator(const slice_iterator& i) : p_(i.p_), step_(i.step_) {}
+
+		// set step in runtime
+		slice_iterator(difference_type step) : p_(), step_(step) {}
+		slice_iterator(const iterator_t& i, difference_type step) : p_(i), step_(step) {}
+
+		reference operator[](difference_type i) const {
+			return p_[i * step_];
+		}
+
+		void operator+=(difference_type n) {
+			p_ += n * step_;
+		}
+		void operator-=(difference_type n) {
+			p_ -= n * step_;
+		}
+
+		friend slice_iterator operator+(const slice_iterator& lhs, difference_type n) {
+			return slice_iterator(lhs.p_ + (n * lhs.step_), lhs.step_);
+		}
+		friend slice_iterator operator+(difference_type n, const slice_iterator& lhs) {
+			return slice_iterator(lhs.p_ + (n * lhs.step_), lhs.step_);
+		}
+		friend slice_iterator operator-(const slice_iterator& lhs, difference_type n) {
+			return slice_iterator(lhs.p_ - (n * lhs.step_), lhs.step_);
+		}
+
+		slice_iterator& operator++() {
+			p_ += step_;
+			return *this;
+		}
+		slice_iterator& operator++(int) {
+			slice_iterator tmp = *this;
+			p_ += step_;
+			return tmp;
+		}
+
+		slice_iterator& operator--() {
+			p_ -= step_;
+			return *this;
+		}
+		slice_iterator& operator--(int) {
+			slice_iterator tmp = *this;
+			p_ -= step_;
+			return tmp;
+		}
+
+		pointer operator->() const {
+			return p_.operator->();
+		}
+		reference operator*() const {
+			return *p_;
+		}
+
+		slice_iterator& operator=(const slice_iterator& lhs) {
+			p_ = lhs.p_;
+			return *this;
+		}
+
+		friend difference_type operator-(const slice_iterator& lhs, const slice_iterator& rhs) {
+			return (lhs.p_ - rhs.p_) / lhs.step_;
+		}
+
+		bool operator<(const slice_iterator& rhs) {
+			return p_ < rhs.p_;
+		}
+		bool operator>(const slice_iterator& rhs) {
+			return p_ > rhs.p_;
+		}
+		bool operator<=(const slice_iterator& rhs) {
+			return p_ <= rhs.p_;
+		}
+		bool operator>=(const slice_iterator& rhs) {
+			return p_ >= rhs.p_;
+		}
+		bool operator==(const slice_iterator& rhs) {
+			return p_ == rhs.p_;
+		}
+		bool operator!=(const slice_iterator& rhs) {
+			return p_ != rhs.p_;
+		}
+
+		iterator_t& backend() {
+			return p_;
+		}
+		const iterator_t& backend() const {
+			return p_;
+		}
+
+	private:
+		iterator_t p_;
+		const difference_type step_;
+	};
+
+	template< class array_t >
+	static t_double sum(const array_t& a) {
+		t_double s = 0;
+		for(typename array_t::const_iterator i = a.begin(), end = a.end(); i != end; ++i)
+			s += *i;
+		return s;
+	}
+
 	// helper structure to get dx[i] regardless of whether it given by one number or by array of
 	// numbers
 	struct dim_subscript {
-		dim_subscript(const fp_storage_array_t& dim)
+		dim_subscript(const v_float& dim)
 			: dim_(dim), sum_(0)
 		{
 			if(dim_.size() == 1)
@@ -28,141 +162,627 @@ struct mesh_grdecl< strategy_t >::inner {
 				ss_fcn_ = &dim_subscript::ss_array_dim;
 		}
 
-		fp_storage_type_t ss_const_dim(i_type_t idx) {
-			return static_cast< fp_storage_type_t >(fp_type_t(dim_[0] * idx));
+		t_float ss_const_dim(t_long idx) {
+			return static_cast< t_float >(t_float(dim_[0] * idx));
 		}
 
-		fp_storage_type_t ss_array_dim(i_type_t idx) {
-			fp_type_t tmp = sum_;
+		t_float ss_array_dim(t_long idx) {
+			t_float tmp = sum_;
 			sum_ += dim_[idx];
-			return static_cast< fp_storage_type_t>(tmp);
+			return static_cast< t_float>(tmp);
 		}
 
 		void reset() { sum_ = 0; }
 
-		fp_type_t operator[](i_type_t idx) {
+		t_float operator[](t_long idx) {
 			return (this->*ss_fcn_)(idx);
 		}
 
 	private:
-		const fp_storage_array_t& dim_;
-		fp_storage_type_t (dim_subscript::*ss_fcn_)(i_type_t);
-		fp_type_t sum_;
+		const v_float& dim_;
+		t_float (dim_subscript::*ss_fcn_)(t_long);
+		t_float sum_;
 	};
-};
 
-template<class strategy_t>
-mesh_grdecl<strategy_t>::mesh_grdecl ()
-{
-  zcorn_array = 0;
-  coord_array = 0;
-}
+	static spv_float gen_coord(t_long nx, t_long ny, spv_float dx, spv_float dy) {
+		using namespace std;
+		v_float::value_type value_t;
 
-template< class strategy_t >
-std::pair< typename mesh_grdecl< strategy_t >::sp_fp_storage_array_t, typename mesh_grdecl< strategy_t >::sp_fp_storage_array_t >
-mesh_grdecl< strategy_t >::gen_coord_zcorn(i_type_t nx, i_type_t ny, i_type_t nz, sp_fp_storage_array_t dx, sp_fp_storage_array_t dy, sp_fp_storage_array_t dz) {
-	using namespace std;
-	typedef std::pair< sp_fp_storage_array_t, sp_fp_storage_array_t > ret_t;
-	typedef typename fp_storage_array_t::value_type value_t;
+		// DEBUG
+		BSOUT << "gen_coord: init stage" << bs_end;
+		// create subscripters
+		inner::dim_subscript dxs(*dx);
+		inner::dim_subscript dys(*dy);
 
-	// create subscripters
-	if(!dx || !dy || !dz) return ret_t(NULL, NULL);
-	if(!dx->size() || !dy->size() || !dz->size()) return ret_t(NULL, NULL);
-	typename inner::dim_subscript dxs(*dx);
-	typename inner::dim_subscript dys(*dy);
-	typename inner::dim_subscript dzs(*dz);
+		// if dimension offset is given as array, then size should be taken from array size
+		if(dx->size() > 1) nx = dx->size();
+		if(dy->size() > 1) ny = dy->size();
 
-	// if dimension offset is given as array, then size should be taken from array size
-	if(dx->size() > 1) nx = dx->size();
-	if(dy->size() > 1) ny = dy->size();
-	if(dz->size() > 1) nz = dz->size();
+		// create arrays
+		spv_float coord = BS_KERNEL.create_object(v_float::bs_type());
+		if(!coord) return NULL;
 
-	// create arrays
-	sp_fp_storage_array_t coord = BS_KERNEL.create_object(fp_storage_array_t::bs_type());
-	sp_fp_storage_array_t zcorn = BS_KERNEL.create_object(fp_storage_array_t::bs_type());
-	if(!zcorn || !coord) return ret_t(NULL, NULL);
+		// DEBUG
+		BSOUT << "gen_coord: creation starts..." << bs_end;
+		// fill coord
+		// coord is simple grid
+		coord->resize((nx + 1)*(ny + 1)*6);
+    memset(&(*coord)[0], 0, (nx + 1)*(ny + 1) * 6 * sizeof (t_float));
+		v_float::iterator pcd = coord->begin();
+		for(t_long iy = 0; iy <= ny; ++iy) {
+			t_double cur_y = dys[iy];
+			for(t_long ix = 0; ix <= nx; ++ix) {
+				pcd[0] = pcd[3] = dxs[ix];
+				pcd[1] = pcd[4] = cur_y;
+				pcd[5] = 1; // pcd[2] = 0 from init
+				pcd += 6;
+			}
+			dxs.reset();
+		}
+		// DEBUG
+		BSOUT << "gen_coord: creation finished" << bs_end;
 
-	// fill coord
-	// coord is simple grid
-	coord->init((nx + 1)*(ny + 1)*6, value_t(0));
-	typename fp_storage_array_t::iterator pcd = coord->begin();
-	for(i_type_t iy = 0; iy <= ny; ++iy) {
-		for(i_type_t ix = 0; ix <= nx; ++ix) {
-			pcd[0] = pcd[3] = dxs[ix];
-			pcd[1] = pcd[4] = dys[iy];
-			pcd[5] = 1; // pcd[2] = 0 from init
-			pcd += 6;
+		return coord;
+	}
+
+	void init_minmax(mesh_grdecl& m) const {
+		t_long i, n;
+		t_float *it;
+
+		// init ZCORN
+		m.min_z = *(std::min_element(zcorn_->begin(), zcorn_->end()));
+		m.max_z = *(std::max_element(zcorn_->begin(), zcorn_->end()));
+
+		n = coord_->size();
+
+		m.max_x = m.min_x = m.coord_array[0];
+		m.max_y = m.min_y = m.coord_array[1];
+
+		for (i = 0; i < n; i += 6) {
+			it = m.coord_array + i;
+			// move matching points apart
+			if (it[2] == it[5])
+				it[5] += 1.0f;
+
+			//looking for max&min coordinates
+			if (m.min_x > it[0]) m.min_x = it[0];
+			if (m.min_x > it[3]) m.min_x = it[3];
+
+			if (m.min_y > it[1]) m.min_y = it[1];
+			if (m.min_y > it[4]) m.min_y = it[4];
+
+			if (m.max_x < it[0]) m.max_x = it[0];
+			if (m.max_x < it[3]) m.max_x = it[3];
+
+			if (m.max_y < it[1]) m.max_y = it[1];
+			if (m.max_y < it[4]) m.max_y = it[4];
 		}
 	}
 
-	// fill zcorn
-	// very simple case
-	zcorn->init(nx*ny*nz*8);
-	pcd = zcorn->begin();
-	const i_type_t plane_size = nx * ny * 4;
-	dxs.reset(); dys.reset();
-	fp_storage_type_t z_cache = dzs[0];
-	for(i_type_t iz = 1; iz <= nz; ++iz) {
-		pcd = fill_n(pcd, plane_size, z_cache);
-		z_cache = dzs[iz];
-		pcd = fill_n(pcd, plane_size, z_cache);
+	template< class array_t >
+	static void resize_zcorn(array_t& zcorn, t_long nx, t_long ny, t_long new_nx, t_long new_ny) {
+		using namespace std;
+		typedef typename array_t::iterator v_iterator;
+		typedef typename array_t::value_type value_t;
+		typedef typename array_t::size_type size_t;
+
+		const t_long nz = (zcorn.size() >> 3) / (nx  * ny);
+		//const t_long delta = 4 * (new_nx * new_ny - nx * ny);
+
+		// cache z-values for each plane
+		const t_long plane_sz = nx * ny * 4;
+		vector< value_t > z_cache(nz * 2);
+		slice_iterator< v_iterator > pz(zcorn.begin(), plane_sz);
+		slice_iterator< v_iterator > pz_end(zcorn.begin(), plane_sz);
+		copy(pz, pz + nz *2, z_cache.begin());
+
+		// refill zcorn with cached values & new plane size
+		const t_long new_plane_sz = (new_nx * new_ny * 4);
+		zcorn.resize(new_nx * new_ny * nz * 8);
+		v_iterator p_newz = zcorn.begin();
+		for(typename vector< value_t >::const_iterator p_cache = z_cache.begin(), end = z_cache.end(); p_cache != end; ++p_cache) {
+			fill_n(p_newz, new_plane_sz, *p_cache);
+      p_newz += new_plane_sz;
+		}
+	}
+/*
+	static void insert_column(t_long nx, t_long ny, v_float& coord, v_float& zcorn, t_float where) {
+		using namespace std;
+
+		typedef v_float::iterator v_iterator;
+		typedef slice_iterator< v_iterator, 6 > dim_iterator;
+
+		// reserve mem for insterts
+		coord.reserve((nx + 2)*(ny + 1)*6);
+
+		// find a place to insert
+		dim_iterator pos = lower_bound(dim_iterator(coord.begin()), dim_iterator(coord.begin()) + (nx + 1), where);
+		//if(pos == dim_iterator(coord.begin()) + (nx + 1)) return;
+		t_long ins_offset = pos.backend() - coord.begin();
+
+		// process all rows
+		t_float y, z1, z2;
+		v_iterator vpos;
+		for(t_long i = ny; i >= 0; --i) {
+			// save y and z values
+			vpos = coord.begin() + i*(nx + 1)*6 + ins_offset;
+			if(ins_offset == (nx + 1)*6) {
+				// insert at the boundary
+				y = *(vpos - 5); z1 = *(vpos - 4); z2 = *(vpos - 1);
+			}
+			else {
+				// insert in the beginning/middle of row
+				y = *(vpos + 1); z1 = *(vpos + 2); z2 = *(vpos + 5);
+			}
+			// insert new vector
+			insert_iterator< v_float > ipos(coord, vpos);
+			*ipos++ = where; *ipos++ = y; *ipos++ = z1;
+			*ipos++ = where; *ipos++ = y; *ipos = z2;
+		}
+
+		// update zcorn
+		resize_zcorn(zcorn, nx, ny, nx + 1, ny);
 	}
 
-	return ret_t(coord, zcorn);
+	static void insert_row(t_long nx, t_long ny, v_float& coord, v_float& zcorn, t_float where) {
+		using namespace std;
+		typedef typename v_float::iterator v_iterator;
+		typedef slice_iterator< v_iterator > dim_iterator;
+		const t_long ydim_step = 6 * (nx + 1);
+
+		// reserve mem for insterts
+		coord.reserve((nx + 1)*(ny + 2)*6);
+
+		// find a place to insert
+		const dim_iterator search_end = dim_iterator(coord.begin() + 1, ydim_step) + (ny + 1);
+		dim_iterator pos = lower_bound(dim_iterator(coord.begin() + 1, ydim_step), search_end, where);
+		//if(pos == search_end) return;
+		v_iterator ins_point = pos.backend() - 1;
+
+		// make cache of x values from first row
+		spv_float cache_x = BS_KERNEL.create_object(v_float::bs_type());
+		cache_x->resize(nx + 1);
+		typedef slice_iterator< v_iterator, 3 > hdim_iterator;
+		copy(hdim_iterator(coord.begin()), hdim_iterator(coord.begin() + (nx + 1)*6), cache_x->begin());
+
+		// insert row
+		insert_iterator< v_float > ipos(coord, ins_point);
+		v_iterator p_x = cache_x->begin();
+		t_float z1 = *(coord.begin() + 2), z2 = *(coord.begin() + 5);
+		for(t_long i = 0; i <= nx; ++i) {
+			*ipos++ = *p_x++; *ipos++ = where; *ipos++ = z1;
+			*ipos++ = *p_x++; *ipos++ = where; *ipos++ = z2;
+		}
+
+		// update zcorn
+		resize_zcorn(zcorn, nx, ny, nx, ny + 1);
+	}
+*/
+	template< class ret_array_t, class array_t >
+	static void coord2deltas(const array_t& src, ret_array_t& res) {
+		typedef typename array_t::const_iterator carr_iterator;
+
+		if(src.size() < 2) return;
+		res.resize(src.size() - 1);
+		typename ret_array_t::iterator p_res = res.begin();
+		carr_iterator a = src.begin(), b = a, end = src.end();
+		for(++b; b != end; ++b)
+			*p_res++ = *b - *a++;
+	}
+
+	struct proc_ray {
+		template< t_long direction, class = void >
+		struct dir_ray {
+			enum { dir = direction };
+
+			template< class ray_t >
+			static typename ray_t::iterator end(ray_t& ray) {
+				return ray.end();
+			}
+
+			template< class ray_t >
+			static typename ray_t::iterator last(ray_t& ray) {
+				return --ray.end();
+			}
+
+			template< class ray_t >
+			static typename ray_t::iterator closest_bound(ray_t& ray, t_double v) {
+				return std::upper_bound(ray.begin(), ray.end(), v);
+			}
+
+			static t_double min(t_double f, t_double s) {
+				return std::min(f, s);
+			}
+		};
+
+		template< class unused >
+		struct dir_ray< -1, unused > {
+			enum { dir = -1 };
+
+			template< class ray_t >
+			static typename ray_t::iterator end(ray_t& ray) {
+				return --ray.begin();
+			}
+
+			template< class ray_t >
+			static typename ray_t::iterator last(ray_t& ray) {
+				return ray.begin();
+			}
+
+			template< class ray_t >
+			static typename ray_t::iterator closest_bound(ray_t& ray, t_double v) {
+				return std::upper_bound(ray.begin(), ray.end(), v)--;
+			}
+
+			static t_double min(t_double f, t_double s) {
+				return std::max(f, s);
+			}
+		};
+
+		template< class ray_t, class predicate >
+		static t_double find_cell(ray_t& coord, predicate p) {
+			typedef typename ray_t::iterator ray_iterator;
+			if(coord.size() < 2) return 0;
+			// find max cell size
+			t_double cell_sz = 0;
+			ray_iterator a = coord.begin(), b = a, end = coord.end();
+			for(++b; b != end; ++b) {
+				cell_sz = p(*b - *a++, cell_sz);
+				//if(tmp > max_cell) max_cell = tmp;
+			}
+			return cell_sz;
+		}
+
+		template< class ray_t >
+		static t_double find_max_cell(ray_t& coord) {
+			return find_cell(coord, std::max< t_double >);
+		}
+
+		template< class ray_t >
+		static t_double find_min_cell(ray_t& coord) {
+			return find_cell(coord, std::min< t_double >);
+		}
+
+		template< class ray_t, class dir_ray_t >
+		static void go(ray_t& ray, t_double start_point, t_float d, t_float a, dir_ray_t dr) {
+			using namespace std;
+			const t_long dir = static_cast< t_long >(dir_ray_t::dir);
+			// find where new point fall to
+			const t_double max_sz = find_max_cell(ray) * 0.5;
+			const t_double max_front = *dr.last(ray);
+			t_double cell_sz = d;
+			t_double wave_front = dr.min(start_point + dir * 0.5 * d, max_front);
+
+			// make refined ray
+			// add refinement grid
+			fp_set ref_ray;
+			while(cell_sz <= max_sz && abs(wave_front - max_front) > 0) {
+				ref_ray.insert(wave_front);
+				cell_sz *= a;
+				wave_front = dr.min(wave_front + dir * cell_sz, max_front);
+			}
+
+			// merge refinement with original grid
+			copy(ray.begin(), ray.end(), insert_iterator< fp_set >(ref_ray, ref_ray.begin()));
+			// copy results back
+			ray.clear();
+			copy(ref_ray.begin(), ref_ray.end(), insert_iterator< ray_t >(ray, ray.begin()));
+		}
+
+		template< class ray_t >
+		static t_long kill_tight_cells(ray_t& ray, t_double min_cell_sz) {
+			typedef typename ray_t::iterator ray_iterator;
+
+			if(ray.size() < 2) return 0;
+			t_long merge_cnt = 0;
+			ray_iterator a = ray.begin(), b = a, end = ray.end();
+			for(++b; b != end; ++b) {
+				if(*b - *a < min_cell_sz) {
+					ray.erase(a++);
+					++merge_cnt;
+				}
+				else ++a;
+			}
+			return merge_cnt;
+		}
+
+		template< class ray_t >
+		static t_long band_filter(ray_t& ray, t_double smooth_ratio) {
+			typedef typename ray_t::size_type size_t;
+			typedef std::set< size_t, std::greater< size_t > > idx_set;
+			typedef typename idx_set::const_iterator idx_iterator;
+
+			if(ray.size() < 2) return 0;
+
+			// find cells to remove
+			idx_set dying;
+			//std::vector< size_t > dying;
+			//
+			// left to right walk
+			t_long n = 0;
+			for(size_t i = 0; i < ray.size() - 1; ++i) {
+				// dont check dead bands
+				if(dying.find(i) != dying.end()) continue;
+				// main condition
+				if(ray[i] * smooth_ratio > ray[i + 1]) {
+					dying.insert(i + 1);
+					//dying.push_back(i + 1);
+					// check if cell after bound is less than before bound
+					if(i + 2 < ray.size() && ray[i + 2] < ray[i])
+						ray[i + 2] += ray[i + 1];
+					else
+						ray[i] += ray[i + 1];
+					++n;
+				}
+			}
+
+			// right to left walk
+			for(size_t i = ray.size() - 1; i >= 1; --i) {
+				// dont check dead bands
+				if(dying.find(i) != dying.end()) continue;
+				// main condition
+				if(ray[i] * smooth_ratio > ray[i - 1]) {
+					dying.insert(i - 1);
+					//dying.push_back(i + 1);
+					// check if cell after bound is less than before bound
+					if(i - 2 < ray.size() && ray[i - 2] < ray[i])
+						ray[i - 2] += ray[i - 1];
+					else
+						ray[i] += ray[i - 1];
+					++n;
+				}
+			}
+
+			// remove dead cells
+			for(idx_iterator p_id = dying.begin(), end = dying.end(); p_id != end; ++p_id) {
+				ray.erase(ray.begin() + *p_id);
+			}
+			//for(size_t i = 0; i < dying.size(); ++i)
+			//	ray.erase(ray.begin() + i);
+			return n;
+		}
+	};
+
+	template< class ray_t >
+	static void refine_mesh_impl(ray_t& coord, t_float point, t_float d, t_float a) {
+		using namespace std;
+		typedef typename v_float::iterator v_iterator;
+		typedef typename v_float::const_iterator cv_iterator;
+
+		// sanity check
+		if(!coord.size()) return;
+
+		// process coord in both directions
+		proc_ray::go(coord, point, d, a, typename proc_ray::template dir_ray< 1 >());
+		proc_ray::go(coord, point, d, a, typename proc_ray::template dir_ray< -1 >());
+	}
+
+	static coord_zcorn_pair refine_mesh(t_long& nx, t_long& ny, spv_float coord, spv_float zcorn,
+			spv_float points, t_double cell_merge_thresh, t_double band_thresh)
+	{
+		using namespace std;
+
+		typedef v_float::iterator v_iterator;
+		typedef slice_iterator< v_iterator, 6 > dim_iterator;
+
+		// DEBUG
+		BSOUT << "refine_mesh: init stage" << bs_end;
+		// sanity check
+		if(!coord || !zcorn || !points) return coord_zcorn_pair();
+
+		// convert coord & zcorn to shared vectors
+		//spv_float vcoord = BS_KERNEL.create_object(v_float::bs_type());
+		//if(vcoord) vcoord->init_inplace(coord->get_container());
+		//else return coord_zcorn_pair();
+
+		//spv_float vzcorn = BS_KERNEL.create_object(v_float::bs_type());
+		//if(vzcorn) vzcorn->init_inplace(zcorn->get_container());
+		//else return coord_zcorn_pair();
+
+		vector< t_float > vzcorn(zcorn->begin(), zcorn->end());
+
+		// build x and y coord maps
+		//spv_float x = BS_KERNEL.create_object(v_float::bs_type());
+		fp_set x;
+		copy(dim_iterator(coord->begin()), dim_iterator(coord->begin()) + (nx + 1),
+				insert_iterator< fp_set >(x, x.begin()));
+
+		//spv_float y = BS_KERNEL.create_object(v_float::bs_type());
+		//y->resize(ny + 1);
+		fp_set y;
+		const t_long ydim_step = 6 * (nx + 1);
+		copy(dim_iterator(coord->begin() + 1, ydim_step), dim_iterator(coord->begin() + 1, ydim_step) + (ny + 1),
+				insert_iterator< fp_set >(y, y.begin()));
+
+		v_float::const_iterator pp = points->begin(), p_end = points->end();
+		// make (p_end - p_begin) % 4 = 0
+		p_end -= (p_end - pp) % 6;
+
+		// DEBUG
+		BSOUT << "refine_mesh: points processing starts..." << bs_end;
+		// process points in turn
+		// points array: {(x, y, dx, dy, ax, ay)}
+		t_float x_coord, y_coord, dx, dy, ax, ay;
+		t_float min_dx = 0, min_dy = 0;
+		bool first_point = true;
+		// store processed points here
+		fp_set dx_ready, dy_ready;
+		// main cycle
+		t_long cnt = 0;
+		while(pp != p_end) {
+			x_coord = *(pp++); y_coord = *(pp++);
+			dx = *(pp++); dy = *(pp++);
+			ax = *(pp++); ay = *(pp++);
+			if(first_point) {
+				min_dx = dx; min_dy = dy;
+				first_point = false;
+			}
+			else {
+				min_dx = min(min_dx, dx);
+				min_dy = min(min_dx, dy);
+			}
+			// DEBUG
+			BSOUT << "point[" << ++cnt << "] at (" << x_coord << ", " << y_coord << "), dx = " << dx
+			<< ", dy = " << dy << ", ax = " << ax << ", ay = " << ay << bs_end;
+			// process only new points
+			if(dx != 0 && dx_ready.find(x_coord) == dx_ready.end()) {
+				refine_mesh_impl(x, x_coord, dx, ax);
+				dx_ready.insert(x_coord);
+			}
+			if(dy != 0 && dy_ready.find(y_coord) == dy_ready.end()) {
+				refine_mesh_impl(y, y_coord, dy, ay);
+				dy_ready.insert(y_coord);
+			}
+		}
+
+		// DEBUG
+		//BSOUT << "refine_mesh: kill_tight_centers(x)" << bs_end;
+		// kill too tight cells in x & y directions
+		while(proc_ray::kill_tight_cells(x, cell_merge_thresh * min_dx)) {}
+		// DEBUG
+		//BSOUT << "refine_mesh: kill_tight_centers(y)" << bs_end;
+		while(proc_ray::kill_tight_cells(y, cell_merge_thresh * min_dy)) {}
+
+		// DEBUG
+		//BSOUT << "refine_mesh: coord2deltas" << bs_end;
+		// make deltas from coordinates
+		vector< t_float > delta_x, delta_y;
+		delta_x.reserve(x.size() - 1); delta_y.reserve(y.size() - 1);
+		coord2deltas(x, delta_x);
+		coord2deltas(y, delta_y);
+
+		// DEBUG
+		BSOUT << "refine_mesh: bands filter" << bs_end;
+		// filter tight bands from grid
+		while(proc_ray::band_filter(delta_x, band_thresh)) {}
+		while(proc_ray::band_filter(delta_y, band_thresh)) {}
+
+
+		// DEBUG
+		BSOUT << "refine_mesh: update ZCORN" << bs_end;
+		// update zcorn
+		resize_zcorn(vzcorn, nx, ny, delta_x.size(), delta_y.size());
+		// create bs_array from new zcorn
+		spv_float rzcorn = BS_KERNEL.create_object(v_float::bs_type());
+		if(!rzcorn) return coord_zcorn_pair();
+		rzcorn->resize(vzcorn.size());
+		copy(vzcorn.begin(), vzcorn.end(), rzcorn->begin());
+
+		// DEBUG
+		//BSOUT << "refine_mesh: copy delta_x & delta_y to bs_arrays" << bs_end;
+		// copy delta_x & delta_y to bs_arrays
+		nx = delta_x.size();
+		ny = delta_y.size();
+		spv_float adx = BS_KERNEL.create_object(v_float::bs_type()),
+					   ady = BS_KERNEL.create_object(v_float::bs_type());
+		adx->resize(delta_x.size()); ady->resize(delta_y.size());
+		copy(delta_x.begin(), delta_x.end(), adx->begin());
+		copy(delta_y.begin(), delta_y.end(), ady->begin());
+
+		// rebuild grid based on processed x_coord & y_coord
+		return coord_zcorn_pair(gen_coord(nx, ny, adx, ady), rzcorn);
+	}
+
+	// hold reference to coord and czron arrays if generated internally
+	spv_float coord_;
+	spv_float zcorn_;
+};
+
+
+mesh_grdecl::mesh_grdecl ()
+	: pinner_(new inner), coord_array(0), zcorn_array(0)
+{}
+
+
+std::pair< spv_float, spv_float >
+mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz) {
+	using namespace std;
+	typedef std::pair< spv_float, spv_float > ret_t;
+
+	// DEBUG
+	BSOUT << "gen_coord_zcorn: init stage" << bs_end;
+	// create subscripter
+	if(!dx || !dy || !dz) return ret_t(NULL, NULL);
+	if(!dx->size() || !dy->size() || !dz->size()) return ret_t(NULL, NULL);
+
+	// if dimension offset is given as array, then size should be taken from array size
+	if(dx->size() > 1) nx = t_long(dx->size());
+
+	// create arrays
+	spv_float zcorn = BS_KERNEL.create_object(v_float::bs_type());
+	if(!zcorn) return ret_t(NULL, NULL);
+
+	// fill zcorn
+	// very simple case
+	inner::dim_subscript dzs(*dz);
+	zcorn->init(nx*ny*nz*8);
+
+	// DEBUG
+	BSOUT << "gen_coord_zcorn: ZCORN creating starts..." << bs_end;
+	v_float::iterator pcd = zcorn->begin();
+	const t_long plane_size = nx * ny * 4;
+	t_float z_cache = dzs[0];
+	for(t_long iz = 1; iz <= nz; ++iz) {
+		fill_n(pcd, plane_size + 2 * (iz - 1) * nz, z_cache);
+		z_cache = dzs[iz];
+		fill_n(pcd, plane_size + 2 * (iz - 1) * nz + 1, z_cache);
+	}
+	// DEBUG
+	BSOUT << "gen_coord_zcorn: ZCORN creating finished" << bs_end;
+	BSOUT << "gen_coord_zcorn: COORD creating starts..." << bs_end;
+
+	return ret_t(inner::gen_coord(nx, ny, dx, dy), zcorn);
 }
 
+std::pair<spv_float, spv_float >
+mesh_grdecl::refine_mesh(t_long& nx, t_long& ny, spv_float coord, spv_float zcorn,
+		spv_float points, t_double cell_merge_thresh, t_double band_thresh)
+{
+	return inner::refine_mesh(nx, ny, coord, zcorn, points, cell_merge_thresh, band_thresh);
+}
 
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::init_props(const sp_idata_t &idata)
+void mesh_grdecl::init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz) {
+	// generate COORD & ZCORN
+	std::pair< spv_float, spv_float > cz = gen_coord_zcorn(nx, ny, nz, dx, dy, dz);
+	if(cz.first && cz.first->size()) {
+		pinner_->coord_ = cz.first;
+		coord_array = &pinner_->coord_->ss(0);
+	}
+	if(cz.second && cz.second->size()) {
+		pinner_->zcorn_ = cz.second;
+		zcorn_array = &pinner_->zcorn_->ss(0);
+	}
+
+	// postinit
+	pinner_->init_minmax(*this);
+}
+
+void mesh_grdecl::init_props(const sp_idata_t &idata)
 {
   base_t::init_props (idata);
-  i_type_t i, n;
-  sp_fp_storage_array_t data_array;
-  fp_storage_type_t *it;
+  t_long i, n;
+  spv_float data_array;
+  t_float *it;
   
-  data_array = idata->get_fp_non_empty_array("ZCORN");
-  if (data_array->size()) zcorn_array = &(*data_array)[0];
-  
-
   // init ZCORN
-  min_z = *(std::min_element(data_array->begin(),data_array->end()));
-  max_z = *(std::max_element(data_array->begin(),data_array->end()));
-
+  data_array = idata->get_fp_non_empty_array("ZCORN");
+  if (data_array->size()) {
+	  pinner_->zcorn_ = data_array;
+	  zcorn_array = &(*data_array)[0];
+  }
   // init COORD
   data_array = idata->get_fp_non_empty_array("COORD");
-  if (data_array->size()) coord_array = &(*data_array)[0];
-  
-  n = data_array->size();
+  if (data_array->size()) {
+	  pinner_->coord_ = data_array;
+	  coord_array = &(*data_array)[0];
+  }
 
-  max_x = min_x = coord_array[0];
-  max_y = min_y = coord_array[1];
-
-  for (i = 0; i < n; i += 6)
-    {
-      it = coord_array + i;
-      // move matching points apart
-      if (it[2] == it[5])
-        it[5] += 1.0f;
-
-      //looking for max&min coordinates
-      if (min_x > it[0]) min_x = it[0];
-      if (min_x > it[3]) min_x = it[3];
-
-      if (min_y > it[1]) min_y = it[1];
-      if (min_y > it[4]) min_y = it[4];
-
-      if (max_x < it[0]) max_x = it[0];
-      if (max_x < it[3]) max_x = it[3];
-
-      if (max_y < it[1]) max_y = it[1];
-      if (max_y < it[4]) max_y = it[4];
-
-    }
-
+  // postinit
+  pinner_->init_minmax(*this);
 }
 
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::check_data() const
+
+void mesh_grdecl::check_data() const
 {
   base_t::check_data ();
 
@@ -180,17 +800,17 @@ void mesh_grdecl<strategy_t>::check_data() const
 }
 
 
-template<class strategy_t>
+
 inline void
-mesh_grdecl<strategy_t>::calc_corner_point(const fp_storage_type_t z, const fp_storage_type_t *coord, fpoint3d_t &p)const
+mesh_grdecl::calc_corner_point(const t_float z, const t_float *coord, fpoint3d_t &p)const
   {
     p.z = z;
     /*
-    float temp = (p.z-m_Coord.pStart.z)/(m_Coord.pEnd.z-m_Coord.pStart.z);
+   t_double temp = (p.z-m_Coord.pStart.z)/(m_Coord.pEnd.z-m_Coord.pStart.z);
     p.x = temp *(m_Coord.pEnd.x-m_Coord.pStart.x)+m_Coord.pStart.x;
     p.y = temp *(m_Coord.pEnd.y-m_Coord.pStart.y)+m_Coord.pStart.y;
     */
-    float temp = (p.z - coord[2]) / (coord[5] - coord[2]);
+   t_double temp = (p.z - coord[2]) / (coord[5] - coord[2]);
     p.x = temp *(coord[3] - coord[0]) + coord[0];
     p.y = temp *(coord[4] - coord[1]) + coord[1];
   }
@@ -208,14 +828,14 @@ mesh_grdecl<strategy_t>::calc_corner_point(const fp_storage_type_t z, const fp_s
      *              6 /-------/7
      */
 
-template<class strategy_t>
+
 inline void
-mesh_grdecl<strategy_t>::get_element_zcorn_index (const i_type_t i, const i_type_t j, const i_type_t k, element_zcorn_i_type_t& element)  const
+mesh_grdecl::get_element_zcorn_index (const t_long i, const t_long j, const t_long k, element_zcorn_t_long& element)  const
 {
-  //typename mesh_grdecl<strategy_t>::element_zcorn_i_type_t element;
+  // mesh_grdecl::element_zcorn_t_long element;
   
-  i_type_t index1 = i * 2 + j * 4 * nx + k * 8 * nx * ny;
-  i_type_t index2 = index1 + 4 * nx * ny;
+  t_long index1 = i * 2 + j * 4 * nx + k * 8 * nx * ny;
+  t_long index2 = index1 + 4 * nx * ny;
 
   element[0] = index1;
   element[1] = index1 + 1;
@@ -229,12 +849,12 @@ mesh_grdecl<strategy_t>::get_element_zcorn_index (const i_type_t i, const i_type
 }
 
 //! get element corners index in zcorn_array of block[i,j,k]
-template<class strategy_t>
-typename mesh_grdecl<strategy_t>::plane_zcorn_i_type_t
-mesh_grdecl<strategy_t>::get_plane_zcorn_index (element_zcorn_i_type_t &element, 
+
+mesh_grdecl::plane_zcorn_t_long
+mesh_grdecl::get_plane_zcorn_index (element_zcorn_t_long &element, 
                                                          element_plane_orientation_t orientation)  const
 {
-  typename mesh_grdecl<strategy_t>::plane_zcorn_i_type_t plane;
+   mesh_grdecl::plane_zcorn_t_long plane;
   switch (orientation)
     {
       case x_axis_minus:  //left_cross
@@ -280,11 +900,11 @@ mesh_grdecl<strategy_t>::get_plane_zcorn_index (element_zcorn_i_type_t &element,
   return plane;  
 }
 
-template<class strategy_t>
-typename mesh_grdecl<strategy_t>::element_t
-mesh_grdecl<strategy_t>::calc_element (const i_type_t index) const
+
+ mesh_grdecl::element_t
+mesh_grdecl::calc_element (const t_long index) const
   {
-    i_type_t i, j, k;
+    t_long i, j, k;
     element_t element;
     
     inside_to_XYZ (index, i, j, k);
@@ -292,9 +912,9 @@ mesh_grdecl<strategy_t>::calc_element (const i_type_t index) const
     return element;
   }
 
-template<class strategy_t>
+
 void
-mesh_grdecl<strategy_t>::calc_element (const i_type_t i, const i_type_t j, const i_type_t k, element_t &element) const
+mesh_grdecl::calc_element (const t_long i, const t_long j, const t_long k, element_t &element) const
   {
     corners_t corners;
 
@@ -316,9 +936,9 @@ mesh_grdecl<strategy_t>::calc_element (const i_type_t i, const i_type_t j, const
 
     //define index
 
-    i_type_t index1 = i * 2 + j * 4 * nx + k * 8 * nx * ny;//upper side
-    i_type_t index2 = index1 + 4 * nx * ny;//lower side
-    i_type_t iCOORD = i + j * (nx + 1);
+    t_long index1 = i * 2 + j * 4 * nx + k * 8 * nx * ny;//upper side
+    t_long index2 = index1 + 4 * nx * ny;//lower side
+    t_long iCOORD = i + j * (nx + 1);
 
     calc_corner_point (zcorn_array[index1], &coord_array[iCOORD * 6], corners[0]);
     calc_corner_point (zcorn_array[index1 + 1], &coord_array[(iCOORD + 1) * 6], corners[1]);
@@ -333,16 +953,16 @@ mesh_grdecl<strategy_t>::calc_element (const i_type_t i, const i_type_t j, const
     element.init (corners);
   }
   
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::is_small(const i_type_t i, const i_type_t j, const i_type_t k, fp_type_t eps)  const
+
+bool mesh_grdecl::is_small(const t_long i, const t_long j, const t_long k, t_double eps)  const
   {
     if (k >= nz)
       return false;
 
-    fp_type_t dz1, dz2, dz3, dz4; //height for each coord
+    t_double dz1, dz2, dz3, dz4; //height for each coord
     //define index
-    i_type_t index1 = i*2+j*4*nx+k*8*nx*ny;	//lower side
-    i_type_t index2 = index1+4*nx*ny;			//upper side
+    t_long index1 = i*2+j*4*nx+k*8*nx*ny;	//lower side
+    t_long index2 = index1+4*nx*ny;			//upper side
     dz1 = zcorn_array[index2]-zcorn_array[index1];
     dz2 = zcorn_array[index2+1]-zcorn_array[index1+1];
     dz3 = zcorn_array[index2+2*nx]-zcorn_array[index1+2*nx];
@@ -353,9 +973,9 @@ bool mesh_grdecl<strategy_t>::is_small(const i_type_t i, const i_type_t j, const
     return false;
   }
 
-template<class strategy_t>
+
 void
-mesh_grdecl<strategy_t>::get_plane_crossing_projection_on_all_axis(const plane_t &plane1, const plane_t &plane2, fpoint3d_t &A)const
+mesh_grdecl::get_plane_crossing_projection_on_all_axis(const plane_t &plane1, const plane_t &plane2, fpoint3d_t &A)const
   {
     quadrangle_t quad1, quad2;
 
@@ -388,11 +1008,11 @@ mesh_grdecl<strategy_t>::get_plane_crossing_projection_on_all_axis(const plane_t
      }
   }
 
-template<class strategy_t>
-typename mesh_grdecl<strategy_t>::fp_type_t 
-mesh_grdecl<strategy_t>::get_center_zcorn(const element_zcorn_i_type_t &element)const
+
+t_double 
+mesh_grdecl::get_center_zcorn(const element_zcorn_t_long &element)const
   {
-    fp_type_t res = 0.0;
+    t_double res = 0.0;
     size_t i, n = element.size();
     
     for (i = 0; i < n; i++)
@@ -403,12 +1023,12 @@ mesh_grdecl<strategy_t>::get_center_zcorn(const element_zcorn_i_type_t &element)
 
 
 
-template<class strategy_t>
-int mesh_grdecl<strategy_t>::init_ext_to_int()
+
+int mesh_grdecl::init_ext_to_int()
 {
-  i_type_t *ext_to_int_data, *int_to_ext_data;
+  t_long *ext_to_int_data, *int_to_ext_data;
   write_time_to_log init_time ("Mesh initialization", ""); 
-  item_array_t volumes_temp(n_elements);
+  stdv_float volumes_temp(n_elements);
 
   //tools::save_seq_vector ("actnum.bs.txt").save actnum_array;
   
@@ -425,11 +1045,11 @@ int mesh_grdecl<strategy_t>::init_ext_to_int()
   ext_to_int_data = &(*ext_to_int)[0];
   size_t n_count = 0;
 
-  i_type_t nn_active = 0, i_index; //number of non-active previous cells
-  for (i_type_t i = 0; i < nz; ++i)
+  t_long nn_active = 0, i_index; //number of non-active previous cells
+  for (t_long i = 0; i < nz; ++i)
     {
-      for (i_type_t j = 0; j < ny; ++j)
-        for (i_type_t k = 0; k < nx; ++k, ++n_count)
+      for (t_long j = 0; j < ny; ++j)
+        for (t_long k = 0; k < nx; ++k, ++n_count)
           {
             i_index = k + (nx * j) + (i * nx * ny);
             
@@ -450,7 +1070,7 @@ int mesh_grdecl<strategy_t>::init_ext_to_int()
   
   //fill volume array (except non-active block and using proxy array)
   volumes->resize(n_active_elements);
-  fp_type_t *volumes_data = &(*volumes)[0];
+  t_float *volumes_data = &(*volumes)[0];
   
   for (int i = 0; i < n_active_elements; ++i)
     volumes_data[i] = volumes_temp[int_to_ext_data[i]];
@@ -462,10 +1082,10 @@ int mesh_grdecl<strategy_t>::init_ext_to_int()
   return n_active_elements;
 }
 
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::splice_two_blocks (const i_type_t i, const i_type_t j, const i_type_t k, const i_type_t k1)
+
+void mesh_grdecl::splice_two_blocks (const t_long i, const t_long j, const t_long k, const t_long k1)
 {
-  i_type_t index, index1, index2;
+  t_long index, index1, index2;
 
   index1 = i * 2 + j * 4 * nx + k1 * 8 * nx * ny; //upper side of [i,j,k1]
   index2 = i * 2 + j * 4 * nx + (k1 * 8 + 4) * nx * ny; //lower side of [i,j,k1]
@@ -499,10 +1119,10 @@ void mesh_grdecl<strategy_t>::splice_two_blocks (const i_type_t i, const i_type_
     }
 }
 
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::are_two_blocks_close (const i_type_t i, const i_type_t j, const i_type_t k, const i_type_t k1)
+
+bool mesh_grdecl::are_two_blocks_close (const t_long i, const t_long j, const t_long k, const t_long k1)
 {
-  i_type_t index, index1;
+  t_long index, index1;
   if (k > k1)
     {
       index = i * 2 + j * 4 * nx + k * 8 *nx * ny; //upper side of [i,j,k]
@@ -527,12 +1147,12 @@ bool mesh_grdecl<strategy_t>::are_two_blocks_close (const i_type_t i, const i_ty
     }
 }
 
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::check_adjacency(int shift_zcorn)
+
+bool mesh_grdecl::check_adjacency(int shift_zcorn)
 {
-  i_type_t i, j, k;
-  i_type_t index, zindex, zindex1;
-  i_type_t n_adjacent = 0;
+  t_long i, j, k;
+  t_long index, zindex, zindex1;
+  t_long n_adjacent = 0;
    
   for (i = 0; i < nx; ++i)
     for (j = 0; j < ny; ++j)
@@ -586,15 +1206,15 @@ bool mesh_grdecl<strategy_t>::check_adjacency(int shift_zcorn)
   return (n_adjacent == n_active_elements);
 }
 
-template<class strategy_t>
-int mesh_grdecl<strategy_t>::splicing(item_array_t& volumes_temp)
+
+int mesh_grdecl::splicing(stdv_float& volumes_temp)
 {
-  i_type_t nCount = 0;
-  fp_type_t vol_sum, vol_block;
-  i_type_t i, j, k, k1;
-  i_type_t small_block_top, big_block_top;
-  i_type_t n_inactive_orig, n_inactive_vol, n_incative_splice;
-  i_type_t index;
+  t_long nCount = 0;
+  t_double vol_sum, vol_block;
+  t_long i, j, k, k1;
+  t_long small_block_top, big_block_top;
+  t_long n_inactive_orig, n_inactive_vol, n_incative_splice;
+  t_long index;
   element_t element;
 
 #ifdef _DEBUG
@@ -628,7 +1248,7 @@ int mesh_grdecl<strategy_t>::splicing(item_array_t& volumes_temp)
               }
             calc_element (i, j, k, element);
             vol_block = element.calc_volume ();
-            fp_type_t vol_block_poro = vol_block * poro_array[index];
+            t_double vol_block_poro = vol_block * poro_array[index];
 
             if (vol_block_poro <= minpv)
               {
@@ -729,7 +1349,7 @@ int mesh_grdecl<strategy_t>::splicing(item_array_t& volumes_temp)
         }
   
   
-  i_type_t n_total = n_active_elements + n_inactive_orig;
+  t_long n_total = n_active_elements + n_inactive_orig;
   /*
   if (n_total != nx * ny * nz)
   
@@ -750,18 +1370,18 @@ int mesh_grdecl<strategy_t>::splicing(item_array_t& volumes_temp)
 }
 
 
-template<class strategy_t>
-int mesh_grdecl<strategy_t >::calc_depths ()
+
+int mesh_grdecl::calc_depths ()
 {
   depths->resize(n_active_elements);
-  fp_type_t *depths_data = &(*depths)[0];
-  i_type_t *ext_to_int_data = &(*ext_to_int)[0];
-  i_type_t index = 0;
-  element_zcorn_i_type_t element;
+  t_float *depths_data = &(*depths)[0];
+  t_long *ext_to_int_data = &(*ext_to_int)[0];
+  t_long index = 0;
+  element_zcorn_t_long element;
   
-  for (i_type_t k = 0; k < nz; ++k)
-    for (i_type_t j = 0; j < ny; ++j)
-      for (i_type_t i = 0; i < nx; ++i, ++index)
+  for (t_long k = 0; k < nz; ++k)
+    for (t_long j = 0; j < ny; ++j)
+      for (t_long i = 0; i < nx; ++i, ++index)
         {
           if (actnum_array[index])
             {
@@ -777,12 +1397,12 @@ static int n_tran_calc = 0;
 
 // calculating method have been taken from td eclipse (page 896)
 // calc transmissibility between fully adjacent cells index1 and index2
-template<class strategy_t>
-typename mesh_grdecl<strategy_t>::fp_type_t 
-mesh_grdecl<strategy_t>::calc_tran(const i_type_t ext_index1, const i_type_t ext_index2, const plane_t &plane1, 
+
+t_double 
+mesh_grdecl::calc_tran(const t_long ext_index1, const t_long ext_index2, const plane_t &plane1, 
                                        const fpoint3d_t &center1, const fpoint3d_t &center2, direction d_dir, plane_t* plane2) const
 {
-  fp_type_t tran;
+  t_double tran;
   fpoint3d_t D1, D2, A, plane_contact_center;
   
   n_tran_calc ++;
@@ -837,7 +1457,7 @@ mesh_grdecl<strategy_t>::calc_tran(const i_type_t ext_index1, const i_type_t ext
   
 
 
-  float koef1, koef2 ; //koef = (A,Di)/(Di,Di)
+ t_double koef1, koef2 ; //koef = (A,Di)/(Di,Di)
   
   koef1 = A*D1 / (D1*D1);
   koef2 = A*D2 / (D2*D2);
@@ -869,10 +1489,10 @@ mesh_grdecl<strategy_t>::calc_tran(const i_type_t ext_index1, const i_type_t ext
       return 0;
     }
 
-  fp_type_t Ti, Tj;
+  t_double Ti, Tj;
 
-  fp_type_t ntg_index1 = 1;
-  fp_type_t ntg_index2 = 1;
+  t_double ntg_index1 = 1;
+  t_double ntg_index2 = 1;
   if (ntg_array)
     {
       ntg_index1 = ntg_array[ext_index1];
@@ -915,16 +1535,16 @@ mesh_grdecl<strategy_t>::calc_tran(const i_type_t ext_index1, const i_type_t ext
 
 
 
-template<class strategy_t>
-int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t jacobian,const sp_flux_conn_iface_t flux_conn,
-                                                                  sp_i_array_t boundary_array)
+
+int mesh_grdecl::build_jacobian_and_flux_connections (const sp_bcsr_t jacobian,const sp_flux_conn_iface_t flux_conn,
+                                                                  spv_long boundary_array)
 
 {
   return build_jacobian_and_flux_connections_add_boundary (jacobian, flux_conn, boundary_array);
 }
 
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::get_block_dx_dy_dz (i_type_t n_elem, fp_type_t &dx, fp_type_t &dy, fp_type_t &dz) const
+
+void mesh_grdecl::get_block_dx_dy_dz (t_long n_elem, t_double &dx, t_double &dy, t_double &dz) const
   {
     element_t elem = calc_element(n_elem);
     point3d_t sizes = elem.get_dx_dy_dz (); 
@@ -933,26 +1553,26 @@ void mesh_grdecl<strategy_t>::get_block_dx_dy_dz (i_type_t n_elem, fp_type_t &dx
     dz = sizes[2];
   }
 
-template<class strategy_t>
-float mesh_grdecl<strategy_t>:: get_block_dx(i_type_t n_elem) const
+
+t_double mesh_grdecl:: get_block_dx(t_long n_elem) const
   {
     return calc_element(n_elem).get_dx();
   }
 
-template<class strategy_t>
-float mesh_grdecl<strategy_t>:: get_block_dy(i_type_t n_elem) const
+
+t_double mesh_grdecl:: get_block_dy(t_long n_elem) const
   {
     return calc_element(n_elem).get_dy();
   }
 
-template<class strategy_t>
-float mesh_grdecl<strategy_t>:: get_block_dz(i_type_t n_elem) const
+
+t_double mesh_grdecl:: get_block_dz(t_long n_elem) const
   {
     return calc_element(n_elem).get_dz();
   }
 
-template<class strategy_t>
-float  mesh_grdecl<strategy_t>::get_dtop(i_type_t n_elem) const
+
+t_double  mesh_grdecl::get_dtop(t_long n_elem) const
 {
   element_t elem;
   
@@ -961,19 +1581,19 @@ float  mesh_grdecl<strategy_t>::get_dtop(i_type_t n_elem) const
   return elem.get_center().z - elem.get_dz();
 }
 
-template<class strategy_t>
-boost::python::list mesh_grdecl<strategy_t>::calc_element_tops ()
+
+boost::python::list mesh_grdecl::calc_element_tops ()
 {
   element_t element;
-  sp_fp_array_t tops, prop;
-  sp_i_array_t indexes;
-  i_type_t i, j, k, c, ind, *indexes_data;
-  fp_type_t *tops_data, *prop_data;
+  spv_float tops, prop;
+  spv_long indexes;
+  t_long i, j, k, c, ind, *indexes_data;
+  t_float *tops_data, *prop_data;
   boost::python::list myavi_list;
 
-  tops = give_kernel::Instance().create_object(bs_array<fp_type_t>::bs_type());
-  indexes = give_kernel::Instance().create_object(bs_array<i_type_t>::bs_type());
-  prop = give_kernel::Instance().create_object(bs_array<fp_type_t>::bs_type());
+  tops = give_kernel::Instance().create_object(v_float::bs_type());
+  indexes = give_kernel::Instance().create_object(v_long::bs_type());
+  prop = give_kernel::Instance().create_object(v_float::bs_type());
 
   tops->resize (n_elements * 8 * 3);
   indexes->resize (n_elements * 8);
@@ -1074,17 +1694,17 @@ boost::python::list mesh_grdecl<strategy_t>::calc_element_tops ()
   return myavi_list;
 }
 
-template<class strategy_t>
-boost::python::list mesh_grdecl<strategy_t>::calc_element_center ()
+
+boost::python::list mesh_grdecl::calc_element_center ()
 {
   element_t element;
-  sp_fp_array_t centers, prop;
-  i_type_t i, j, k /*, c */, ind /*, *indexes_data */;
-  fp_type_t *centers_data, *prop_data;
+  spv_float centers, prop;
+  t_long i, j, k /*, c */, ind /*, *indexes_data */;
+  t_float *centers_data, *prop_data;
   boost::python::list myavi_list;
 
-  centers = give_kernel::Instance().create_object(bs_array<fp_type_t>::bs_type());
-  prop = give_kernel::Instance().create_object(bs_array<fp_type_t>::bs_type());
+  centers = give_kernel::Instance().create_object(v_float::bs_type());
+  prop = give_kernel::Instance().create_object(v_float::bs_type());
 
   centers->resize (n_elements * 3);
   prop->resize (n_elements);
@@ -1111,11 +1731,11 @@ boost::python::list mesh_grdecl<strategy_t>::calc_element_center ()
 }
 
 
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::generate_array()
+
+void mesh_grdecl::generate_array()
 {
 #if 0
-  i_type_t n_size = n_elements;
+  t_long n_size = n_elements;
   poro_array->clear();
   ntg_array->clear();
 
@@ -1128,7 +1748,7 @@ void mesh_grdecl<strategy_t>::generate_array()
   multz_array->clear();
 
 
-  for (i_type_t i =0; i < n_size; ++i)
+  for (t_long i =0; i < n_size; ++i)
     {
       poro_array->push_back(0.2f);
       ntg_array->push_back(0.4f);
@@ -1145,31 +1765,26 @@ void mesh_grdecl<strategy_t>::generate_array()
 }
 
 
-template <typename strategy_t, typename loop_t>
+template <typename loop_t>
 struct build_jacobian_rows_class
 {
-  typedef typename strategy_t::i_type_t          i_type_t;
-  typedef typename strategy_t::fp_type_t           fp_type_t;
-  //typedef typename strategy_t::index_array_t    index_array_t;
-  //typedef typename strategy_t::item_array_t     item_array_t;
+  typedef mesh_grdecl                 mesh_t;
+  typedef  mesh_t::plane_t                plane_t;
+  typedef  mesh_t::element_zcorn_t_long  element_zcorn_t_long;
 
-  typedef mesh_grdecl <strategy_t>                mesh_t;
-  typedef typename mesh_t::plane_t                plane_t;
-  typedef typename mesh_t::element_zcorn_i_type_t  element_zcorn_i_type_t;
-
-  build_jacobian_rows_class (mesh_grdecl <strategy_t> *mesh, loop_t *loop, std::set <i_type_t, std::less <i_type_t> > &boundary_set, i_type_t *rows_ptr)
+  build_jacobian_rows_class (mesh_grdecl  *mesh, loop_t *loop, std::set <t_long, std::less <t_long> > &boundary_set, t_long *rows_ptr)
   : mesh (mesh)
   , loop (loop)
   , boundary_set (boundary_set)
   , rows_ptr (rows_ptr)
-  , nx (mesh->nx)
-  , ny (mesh->ny)
-  , nz (mesh->nz)
+  , nx (mesh->get_nx())
+  , ny (mesh->get_ny())
+  , nz (mesh->get_nz())
   {
   }
 
   void
-  prepare (i_type_t i, i_type_t j, i_type_t k)
+  prepare (t_long i, t_long j, t_long k)
   {
     ext_index  = i + j * nx + k * nx * ny;
   }
@@ -1178,10 +1793,10 @@ struct build_jacobian_rows_class
   // that is true, if every cell of a column is fully adjacent to X and Y neighbour
   
   bool
-  check_column_adjacency (i_type_t i, i_type_t j)
+  check_column_adjacency (t_long i, t_long j)
   {
     bool flag = true;
-    i_type_t k, zindex, zindex1, index;
+    t_long k, zindex, zindex1, index;
          
     for (k = 0; k < nz; ++k)
       {
@@ -1230,65 +1845,60 @@ struct build_jacobian_rows_class
   }
 
   void
-  change_by_x (i_type_t i, i_type_t j, i_type_t k, i_type_t ext_index2, bool is_adjacent)
+  change_by_x (t_long i, t_long j, t_long k, t_long ext_index2, bool is_adjacent)
   {
     rows_ptr[mesh->convert_ext_to_int (ext_index) + 1]++;
     rows_ptr[mesh->convert_ext_to_int (ext_index2) + 1]++;
   }
 
   void
-  change_by_y (i_type_t i, i_type_t j, i_type_t k, i_type_t ext_index2, bool is_adjacent)
+  change_by_y (t_long i, t_long j, t_long k, t_long ext_index2, bool is_adjacent)
   {
     rows_ptr[mesh->convert_ext_to_int (ext_index) + 1]++;
     rows_ptr[mesh->convert_ext_to_int (ext_index2) + 1]++;
   }
 
   void
-  change_by_z (i_type_t i, i_type_t j, i_type_t k, i_type_t ext_index2, bool is_adjacent)
+  change_by_z (t_long i, t_long j, t_long k, t_long ext_index2, bool is_adjacent)
   {
     rows_ptr[mesh->convert_ext_to_int (ext_index) + 1]++;
     rows_ptr[mesh->convert_ext_to_int (ext_index2) + 1]++;
   }
 
   void
-  add_boundary (i_type_t external_cell_index)
+  add_boundary (t_long external_cell_index)
   {
     boundary_set.insert (external_cell_index);
   }
 
-  mesh_grdecl <strategy_t>                  *mesh;
+  mesh_grdecl                   *mesh;
   loop_t                                    *loop;
-  std::set <i_type_t, std::less <i_type_t> >  &boundary_set;
-  i_type_t                                   *rows_ptr;
-  i_type_t                                   nx;
-  i_type_t                                   ny;
-  i_type_t                                   nz;
-  i_type_t                                   ext_index;
+  std::set <t_long, std::less <t_long> >  &boundary_set;
+  t_long                                   *rows_ptr;
+  t_long                                   nx;
+  t_long                                   ny;
+  t_long                                   nz;
+  t_long                                   ext_index;
 };
 
-template <typename T, typename L, typename BS, typename RP>
-build_jacobian_rows_class <T, L>
-build_jacobian_rows (mesh_grdecl <T> *mesh, L *l, BS &bs, RP *rp)
+template <typename L, typename BS, typename RP>
+build_jacobian_rows_class <L>
+build_jacobian_rows (mesh_grdecl *mesh, L *l, BS &bs, RP *rp)
 {
-  return build_jacobian_rows_class <T, L> (mesh, l, bs, rp);
+  return build_jacobian_rows_class <L> (mesh, l, bs, rp);
 }
 
-template <typename strategy_t, typename loop_t>
+template <typename loop_t>
 struct build_jacobian_cols_class
 {
-  typedef typename strategy_t::i_type_t          i_type_t;
-  typedef typename strategy_t::fp_type_t         fp_type_t;
-  typedef std::vector<i_type_t>                   index_array_t;
-  typedef typename strategy_t::fp_storage_type_t fp_storage_type_t;
+  typedef mesh_grdecl                 mesh_t;
+  typedef  mesh_t::element_t              element_t;
+  typedef  mesh_t::plane_t                plane_t;
+  typedef  mesh_t::element_zcorn_t_long  element_zcorn_t_long;
 
-  typedef mesh_grdecl <strategy_t>                mesh_t;
-  typedef typename mesh_t::element_t              element_t;
-  typedef typename mesh_t::plane_t                plane_t;
-  typedef typename mesh_t::element_zcorn_i_type_t  element_zcorn_i_type_t;
-
-  build_jacobian_cols_class (mesh_t *mesh, loop_t *loop, i_type_t *rows_ptr, i_type_t *cols_ind,
-    i_type_t *cols_ind_transmis, fp_storage_type_t *values_transmis,
-    i_type_t *matrix_block_idx_minus, i_type_t *matrix_block_idx_plus)
+  build_jacobian_cols_class (mesh_t *mesh, loop_t *loop, t_long *rows_ptr, t_long *cols_ind,
+    t_long *cols_ind_transmis, t_float *values_transmis,
+    t_long *matrix_block_idx_minus, t_long *matrix_block_idx_plus)
   : mesh (mesh)
   , loop (loop)
   , rows_ptr (rows_ptr)
@@ -1302,8 +1912,8 @@ struct build_jacobian_cols_class
   , nz (mesh->nz)
   {
     //curIndex.assign (rows_ptr->begin (), rows_ptr->end ());
-    i_type_t i;
-    i_type_t n = mesh->n_active_elements;
+    t_long i;
+    t_long n = mesh->n_active_elements;
     
     
     rows_ptr_tmp.resize (n);
@@ -1316,7 +1926,7 @@ struct build_jacobian_cols_class
   }
   
   void
-  prepare (i_type_t i, i_type_t j, i_type_t k)
+  prepare (t_long i, t_long j, t_long k)
   {
     ext_index  = i + j * nx + k * nx * ny;
     int_index  = mesh->convert_ext_to_int (ext_index);
@@ -1327,10 +1937,10 @@ struct build_jacobian_cols_class
   
     
   void
-  change_jac_and_flux_conn( const i_type_t ext_index1, const i_type_t ext_index2, fp_type_t tran)
+  change_jac_and_flux_conn( const t_long ext_index1, const t_long ext_index2, t_double tran)
   {
-    i_type_t index1 = mesh->convert_ext_to_int (ext_index);
-    i_type_t index2 = mesh->convert_ext_to_int (ext_index2);
+    t_long index1 = mesh->convert_ext_to_int (ext_index);
+    t_long index2 = mesh->convert_ext_to_int (ext_index2);
     
     cols_ind[rows_ptr_tmp[index1]] = index2;
     cols_ind[rows_ptr_tmp[index2]] = index1;
@@ -1352,20 +1962,20 @@ struct build_jacobian_cols_class
   }
 
   bool
-  check_column_adjacency (i_type_t i, i_type_t j)
+  check_column_adjacency (t_long i, t_long j)
   {
     return loop->is_column_adjacent[i + j * nx];
   }
   
   void
-  add_boundary (i_type_t)
+  add_boundary (t_long)
   {
   }
 
   void
-  change_by_x (i_type_t i, i_type_t j, i_type_t k, i_type_t ext_index2, bool is_adjacent)
+  change_by_x (t_long i, t_long j, t_long k, t_long ext_index2, bool is_adjacent)
   {
-    fp_type_t tran;
+    t_double tran;
     plane_t plane1;
     element_t element2;
     
@@ -1398,9 +2008,9 @@ struct build_jacobian_cols_class
   }
 
   void
-  change_by_y (i_type_t i, i_type_t j, i_type_t k, i_type_t ext_index2, bool is_adjacent)
+  change_by_y (t_long i, t_long j, t_long k, t_long ext_index2, bool is_adjacent)
   {
-    fp_type_t tran;
+    t_double tran;
     
     plane_t plane1;
     element_t element2;
@@ -1431,9 +2041,9 @@ struct build_jacobian_cols_class
   }
 
   void
-  change_by_z (i_type_t i, i_type_t j, i_type_t k, i_type_t ext_index2, bool is_adjacent)
+  change_by_z (t_long i, t_long j, t_long k, t_long ext_index2, bool is_adjacent)
   {
-    fp_type_t tran;
+    t_double tran;
     
     plane_t plane1;
     element_t element2;
@@ -1456,56 +2066,50 @@ struct build_jacobian_cols_class
 
   mesh_t              *mesh;
   loop_t              *loop;
-  i_type_t             *rows_ptr;
-  i_type_t             *cols_ind;
-  i_type_t             *cols_ind_transmis;
-  fp_storage_type_t   *values_transmis;
-  i_type_t             *matrix_block_idx_minus;
-  i_type_t             *matrix_block_idx_plus;
+  t_long             *rows_ptr;
+  t_long             *cols_ind;
+  t_long             *cols_ind_transmis;
+  t_float   *values_transmis;
+  t_long             *matrix_block_idx_minus;
+  t_long             *matrix_block_idx_plus;
 
-  i_type_t             nx;
-  i_type_t             ny;
-  i_type_t             nz;
+  t_long             nx;
+  t_long             ny;
+  t_long             nz;
 
   // points to current column position for each row
   // while adding new columns
-  index_array_t       rows_ptr_tmp; 
+  stdv_long       rows_ptr_tmp; 
 
-  i_type_t             ext_index; // index1
-  i_type_t             int_index; // index_ijk
+  t_long             ext_index; // index1
+  t_long             int_index; // index_ijk
 
   element_t           element;
   fpoint3d            center1;
 
 };
 
-template <typename M, typename L, typename RP, typename CI, typename CT, typename FC>
-build_jacobian_cols_class <M, L>
-build_jacobian_cols (mesh_grdecl <M> *m, L *l, RP *rp, CI *ci, CT &conn_trans, FC &flux_conn)
+template <typename L, typename RP, typename CI, typename CT, typename FC>
+build_jacobian_cols_class <L>
+build_jacobian_cols (mesh_grdecl *m, L *l, RP *rp, CI *ci, CT &conn_trans, FC &flux_conn)
 {
-  return build_jacobian_cols_class <M, L> (m, l, rp, ci,
+  return build_jacobian_cols_class <L> (m, l, rp, ci,
     &(*conn_trans->get_cols_ind ())[0], &(*conn_trans->get_values ())[0],
     &(*flux_conn->get_matrix_block_idx_minus ())[0], &(*flux_conn->get_matrix_block_idx_plus ())[0]);
 }
 
-template <typename strategy_t>
+
 struct build_jacobian_and_flux : boost::noncopyable
 {
-  typedef typename strategy_t::i_type_t          i_type_t;
-  typedef typename strategy_t::fp_type_t         fp_type_t;
-  typedef typename strategy_t::fp_storage_type_t fp_storage_type_t;
-  //typedef typename strategy_t::index_array_t    index_array_t;
-  //typedef typename strategy_t::item_array_t     item_array_t;
+  typedef mesh_grdecl                 mesh_t;
+  typedef  mesh_t::plane_t                plane_t;
+  typedef  mesh_t::element_zcorn_t_long  element_zcorn_t_long;
 
-  typedef mesh_grdecl <strategy_t>                mesh_t;
-  typedef typename mesh_t::plane_t                plane_t;
-  typedef typename mesh_t::element_zcorn_i_type_t  element_zcorn_i_type_t;
-
-  build_jacobian_and_flux (mesh_grdecl <strategy_t> *mesh)
+  build_jacobian_and_flux (mesh_grdecl  *mesh)
   : mesh (mesh)
-  , nx (mesh->nx)
-  , ny (mesh->ny)
-  , nz (mesh->nz)
+  , nx (mesh->get_nx())
+  , ny (mesh->get_ny())
+  , nz (mesh->get_nz())
   , con_num (0)
   {
     is_column_adjacent.assign (nx * ny, true);
@@ -1515,17 +2119,17 @@ struct build_jacobian_and_flux : boost::noncopyable
   void
   cell_loop (loop_body_t loop_body)
   {
-    i_type_t ext_index1, ext_index2;
-    i_type_t last_k_x, last_k_y, k_x, k_y;
+    t_long ext_index1, ext_index2;
+    t_long last_k_x, last_k_y, k_x, k_y;
     bool is_adjacent;
-    i_type_t n_adj_elems = 0, n_non_adj_elems = 0;
+    t_long n_adj_elems = 0, n_non_adj_elems = 0;
     
-    element_zcorn_i_type_t zcorn_index1, zcorn_index2; 
-    fp_storage_type_t *zcorn_array = mesh->zcorn_array;
+    element_zcorn_t_long zcorn_index1, zcorn_index2; 
+    t_float *zcorn_array = mesh->zcorn_array;
 
-    for (i_type_t i = 0; i < nx; ++i)
+    for (t_long i = 0; i < nx; ++i)
       {
-        for (i_type_t j = 0; j < ny; ++j)
+        for (t_long j = 0; j < ny; ++j)
           {
             is_adjacent = loop_body.check_column_adjacency (i, j);
             
@@ -1534,7 +2138,7 @@ struct build_jacobian_and_flux : boost::noncopyable
                 
                 // simple loop
                 
-                for (i_type_t k = 0; k < nz; ++k)
+                for (t_long k = 0; k < nz; ++k)
                   {
                     ext_index1  = i + j * nx + k * nx * ny;
                     
@@ -1585,7 +2189,7 @@ struct build_jacobian_and_flux : boost::noncopyable
                  *              6 /-------/7
                  */
                             
-                for (i_type_t k = 0; k < nz; ++k)
+                for (t_long k = 0; k < nz; ++k)
                   {
                     ext_index1  = i + j * nx + k * nx * ny;
                     
@@ -1685,25 +2289,25 @@ struct build_jacobian_and_flux : boost::noncopyable
     BOSWARN (section::mesh, level::warning)<< boost::format ("MESH_GRDECL: number of tran calcs is %d") % n_tran_calc << bs_end;  
   }
 
-  mesh_grdecl <strategy_t>    *mesh;
-  i_type_t                     nx;
-  i_type_t                     ny;
-  i_type_t                     nz;
+  mesh_grdecl     *mesh;
+  t_long                     nx;
+  t_long                     ny;
+  t_long                     nz;
   shared_vector <bool>        is_column_adjacent;
-  i_type_t                     con_num;
+  t_long                     con_num;
 };
 
 
-template<class strategy_t>
-int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr_t jacobian,
+
+int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr_t jacobian,
                                                                                const sp_flux_conn_iface_t flux_conn,
-                                                                               sp_i_array_t boundary_array)
+                                                                               spv_long boundary_array)
 {
   write_time_to_log init_time ("Mesh transmissibility calculation", ""); 
   
   
-  i_type_t* rows_ptr, *cols_ind;
-  i_type_t i, n_non_zeros;
+  t_long* rows_ptr, *cols_ind;
+  t_long i, n_non_zeros;
   sp_bcsr_t conn_trans;
   
   n_connections = 0;
@@ -1716,9 +2320,9 @@ int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (c
 
   std::vector<bool> is_butting(nx*ny,false);
 
-  std::set<i_type_t, std::less<i_type_t> > boundary_set;
+  std::set<t_long, std::less<t_long> > boundary_set;
 
-  build_jacobian_and_flux <strategy_t> build_jacobian (this);
+  build_jacobian_and_flux  build_jacobian (this);
   
  #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX     
   fp = fopen ("transmiss.out", "w");
@@ -1747,13 +2351,13 @@ int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (c
   conn_trans = flux_conn->get_conn_trans();
   conn_trans->init (n_connections, 2 * n_connections, 1, 2 * n_connections);
 
-  i_type_t *rows_ptr_transmis = &(*conn_trans->get_rows_ptr())[0];
+  t_long *rows_ptr_transmis = &(*conn_trans->get_rows_ptr())[0];
   
   flux_conn->get_matrix_block_idx_minus ()->resize(n_connections * 2);
   flux_conn->get_matrix_block_idx_plus ()->resize(n_connections * 2);
   
-  //i_type_t *matrix_block_idx_minus = &(*flux_conn->get_matrix_block_idx_minus ())[0];
-  //i_type_t *matrix_block_idx_plus = &(*flux_conn->get_matrix_block_idx_plus ())[0];
+  //t_long *matrix_block_idx_minus = &(*flux_conn->get_matrix_block_idx_minus ())[0];
+  //t_long *matrix_block_idx_plus = &(*flux_conn->get_matrix_block_idx_plus ())[0];
 
   if (!n_connections)
     {
@@ -1782,8 +2386,8 @@ int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (c
 }
 
 #ifdef _HDF5_MY
-template<class strategy_t>
-int mesh_grdecl<strategy_t>::create_array_hdf5(const char *dataset_name, H5::H5File &file_hdf5, H5::DataSet **dataset)
+
+int mesh_grdecl::create_array_hdf5(const char *dataset_name, H5::H5File &file_hdf5, H5::DataSet **dataset)
 {
   // creating dataset_coords
   hsize_t dims[] = {0};
@@ -1797,8 +2401,8 @@ int mesh_grdecl<strategy_t>::create_array_hdf5(const char *dataset_name, H5::H5F
   return 0;
 }
 
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::file_open_activs_hdf5(const char* file_name, int is, int js, int ks, int it, int jt, int kt)
+
+bool mesh_grdecl::file_open_activs_hdf5(const char* file_name, int is, int js, int ks, int it, int jt, int kt)
 {
   return true;
   /*
@@ -1846,8 +2450,8 @@ bool mesh_grdecl<strategy_t>::file_open_activs_hdf5(const char* file_name, int i
   */
 }
 
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::file_open_cube_hdf5(const char* file_name, int is, int js, int ks, int it, int jt, int kt)
+
+bool mesh_grdecl::file_open_cube_hdf5(const char* file_name, int is, int js, int ks, int it, int jt, int kt)
 {
   // turn off error printing
   H5E_auto2_t old_func;
@@ -1872,7 +2476,7 @@ bool mesh_grdecl<strategy_t>::file_open_cube_hdf5(const char* file_name, int is,
       H5::DataSpace dataspace_memory_coord(1, dims_memory_coord);
       H5::DataSpace dataspace_file_coord = dataset_coord.getSpace();
       coord_array.clear();
-      vector<fp_type_t> buf_array(6 * (it - is + 2) * (jt - js  + 2));
+      vector<t_double> buf_array(6 * (it - is + 2) * (jt - js  + 2));
       // hyperslab settings
       hsize_t count_coord[] = {jt - js + 2};
       hsize_t start_coord[] = {(is + js * (nx + 1)) * 6};
@@ -1918,8 +2522,8 @@ bool mesh_grdecl<strategy_t>::file_open_cube_hdf5(const char* file_name, int is,
   return true;
 }
 
-template<class strategy_t>
-int mesh_grdecl<strategy_t>::append_array_hdf5(const fp_type_t *arr, size_t arr_length, H5::DataSet *dataset)
+
+int mesh_grdecl::append_array_hdf5(const t_double *arr, size_t arr_length, H5::DataSet *dataset)
 {
   // determine new dimensions of dataset
   hsize_t dims_old[1];
@@ -1941,8 +2545,8 @@ int mesh_grdecl<strategy_t>::append_array_hdf5(const fp_type_t *arr, size_t arr_
   return 0;
 }
 
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::file_open_cube_with_hdf5_swap(const char* file_name)
+
+bool mesh_grdecl::file_open_cube_with_hdf5_swap(const char* file_name)
 {
   try
     {
@@ -2049,8 +2653,8 @@ bool mesh_grdecl<strategy_t>::file_open_cube_with_hdf5_swap(const char* file_nam
 }
 #endif
 
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::file_open_actnum(const char* file_name)
+
+bool mesh_grdecl::file_open_actnum(const char* file_name)
 {
 #if 0
   fstream file(file_name,  ios::in);
@@ -2078,8 +2682,8 @@ bool mesh_grdecl<strategy_t>::file_open_actnum(const char* file_name)
 }
 
 
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::file_open_cube(const char* file_name)
+
+bool mesh_grdecl::file_open_cube(const char* file_name)
 {
   /*
   using namespace std;
@@ -2099,7 +2703,7 @@ bool mesh_grdecl<strategy_t>::file_open_cube(const char* file_name)
   max_x = max_y = -100000;
   min_x = min_y = 1000000;
 
-  i_type_t i_count = 0;
+  t_long i_count = 0;
   const int max_count = 6; //buffer_size
   vector<float> buf_vec(max_count);
   while (!file.eof())
@@ -2159,4 +2763,4 @@ bool mesh_grdecl<strategy_t>::file_open_cube(const char* file_name)
 }
 
 
-BS_INST_STRAT(mesh_grdecl);
+//BS_INST_STRAT(mesh_grdecl);
