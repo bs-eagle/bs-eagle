@@ -37,20 +37,37 @@ namespace blue_sky
 
     if (!this->init_dependent)
       {
-        main_gpr_.clear ();
-        main_pressure_.clear ();
-        main_fvf_.clear ();
-        main_visc_.clear ();
+        //main_gpr_.clear ();
+        //main_pressure_.clear ();
+        //main_fvf_.clear ();
+        //main_visc_.clear ();
 
         base_t::init_dependent = true;
       }
 
-    for (int i = 0, cnt = (int)(vec.size() / elem_count); i < cnt; ++i)
+    t_int n_points = (t_int) vec.size () / elem_count;
+    
+    if (pvt_input_props->init (n_points, PVT_OIL_INPUT_TOTAL))
       {
-        main_gpr_.push_back       (vec[i * elem_count + 0]);
-        main_pressure_.push_back  (vec[i * elem_count + 1]);
-        main_fvf_.push_back       (vec[i * elem_count + 2]);
-        main_visc_.push_back      (vec[i * elem_count + 3]);
+        throw bs_exception ("pvt_oil::insert_vector in table", "Error: initializing table of properties");
+      }
+
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_GPR, "gor");
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_PRESSURE, "pressure");
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_FVF, "fvf");   
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_VISC, "visc");
+
+    vector_t &main_gpr_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_GPR);
+    vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_OIL_INPUT_PRESSURE);
+    vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_FVF);
+    vector_t &main_visc_         = pvt_input_props->get_col_vector (PVT_OIL_INPUT_VISC);
+
+    for (t_int i = 0; i < n_points; ++i)
+      {
+        main_gpr_[i]      = (vec[i * elem_count + 0]);
+        main_pressure_[i] = (vec[i * elem_count + 1]);
+        main_fvf_[i]      = (vec[i * elem_count + 2]);
+        main_visc_[i]     = (vec[i * elem_count + 3]);
       }
   }
 
@@ -65,11 +82,38 @@ namespace blue_sky
   void
   pvt_oil::build_compressibility (index_t n_intervals)
   {
+    vector_t &main_gpr_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_GPR);
+    vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_OIL_INPUT_PRESSURE);
+    vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_FVF);
+    vector_t &main_visc_         = pvt_input_props->get_col_vector (PVT_OIL_INPUT_VISC);
+  
+    vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_OIL_PRESSURE);
+    vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_OIL_INV_FVF);
+    vector_t &inv_visc_     = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC);
+    vector_t &gor_          = pvt_props_table->get_col_vector (PVT_OIL_GOR);
+
     if (main_pressure_.empty ())
       return ;
 
-    compress_fvf_.resize (n_intervals);
-    compress_visc_.resize (n_intervals);
+
+    if (pvt_props_table->add_col_vector ("compress_fvf") != PVT_OIL_COMPRESS_FVF) 
+      {
+        BS_ASSERT (false);
+        throw bs_exception ("pvt_oil::build_compressibility", "Error: initializing vector of fvf compressibility");
+        return;
+      }  
+    if (pvt_props_table->add_col_vector ("compress_visc") != PVT_OIL_COMPRESS_VISC)
+      {
+        BS_ASSERT (false);
+        throw bs_exception ("pvt_oil::build_compressibility", "Error: initializing vector of viscosity compressibility");
+        return;
+      }  
+    
+    vector_t &compress_fvf_     = pvt_props_table->get_col_vector (PVT_OIL_COMPRESS_FVF);
+    vector_t &compress_visc_    = pvt_props_table->get_col_vector (PVT_OIL_COMPRESS_VISC);
+    
+    //compress_fvf_.resize (n_intervals);
+    //compress_visc_.resize (n_intervals);
     for (index_t i = 0; i < n_intervals; ++i)
       {
         index_t j1, j2, end_j1, end_j2;
@@ -117,6 +161,9 @@ namespace blue_sky
   void
   pvt_oil::get_compressibility_interval (item_t gor, index_t &j1, index_t &j2, index_t &end_j1, index_t &end_j2)
   {
+    vector_t &main_gpr_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_GPR);
+    vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_OIL_INPUT_PRESSURE);
+  
     j1 = j2 = -1;
     end_j1 = end_j2 = -2;
     for (index_t i = 0, cnt = (index_t)main_pressure_.size () ; i < cnt - 1; i++)
@@ -152,6 +199,11 @@ namespace blue_sky
   void
   pvt_oil::check_oil ()
   {
+    vector_t &main_gpr_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_GPR);
+    vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_OIL_INPUT_PRESSURE);
+    vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_FVF);
+    vector_t &main_visc_         = pvt_input_props->get_col_vector (PVT_OIL_INPUT_VISC);
+  
     BS_ASSERT (main_pressure_.size ());
 
     base_t::check_common ();
@@ -270,6 +322,13 @@ namespace blue_sky
       const item_t drsdt /* = -1.0 */, const item_t dt /* = 0 */,
       const item_t old_gas_oil_ratio /* = 0 */) const
     {
+      vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_OIL_PRESSURE);
+      vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_OIL_INV_FVF);
+      vector_t &inv_visc_     = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC);
+      vector_t &gor_          = pvt_props_table->get_col_vector (PVT_OIL_GOR);
+      vector_t &compress_fvf_     = pvt_props_table->get_col_vector (PVT_OIL_COMPRESS_FVF);
+      vector_t &compress_visc_    = pvt_props_table->get_col_vector (PVT_OIL_COMPRESS_VISC);
+      
       size_t i = binary_search (gor, gor_, std::less <item_t> ());
       if (i == 0)
         i++;
@@ -370,10 +429,18 @@ namespace blue_sky
   void
   pvt_oil::print () const
   {
+    vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_OIL_PRESSURE);
+    vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_OIL_INV_FVF);
+    vector_t &inv_visc_     = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC);
+    vector_t &inv_visc_fvf_ = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC_FVF);
+    vector_t &gor_          = pvt_props_table->get_col_vector (PVT_OIL_GOR);
+    vector_t &compress_fvf_     = pvt_props_table->get_col_vector (PVT_OIL_COMPRESS_FVF);
+    vector_t &compress_visc_    = pvt_props_table->get_col_vector (PVT_OIL_COMPRESS_VISC);
+
     BS_ASSERT (pressure_.size () == inv_fvf_.size ());
     BS_ASSERT (inv_fvf_.size ()  == inv_visc_.size ());
-    BS_ASSERT (inv_visc_.size () == base_t::inv_visc_fvf_.size ());
-    BS_ASSERT (base_t::inv_visc_fvf_.size () == compress_fvf_.size ());
+    BS_ASSERT (inv_visc_.size () == inv_visc_fvf_.size ());
+    BS_ASSERT (inv_visc_fvf_.size () == compress_fvf_.size ());
     BS_ASSERT (compress_fvf_.size () == compress_visc_.size ());
     BS_ASSERT (compress_visc_.size () == gor_.size ());
     
@@ -406,8 +473,8 @@ namespace blue_sky
           % (inv_fvf_[j])
           % (1.0 / inv_visc_[j])
           % (inv_visc_[j])
-          % (1.0 / base_t::inv_visc_fvf_[j])
-          % (base_t::inv_visc_fvf_[j])
+          % (1.0 / inv_visc_fvf_[j])
+          % (inv_visc_fvf_[j])
           % (compress_fvf_[j])
           % (compress_visc_[j])
           % "*"

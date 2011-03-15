@@ -44,34 +44,63 @@ namespace blue_sky
 
     if (!this->init_dependent)
       {
-        main_pressure_.clear ();
-        main_fvf_.clear ();
-        main_visc_.clear ();
+        //main_pressure_.clear ();
+        //main_fvf_.clear ();
+        //main_visc_.clear ();
 
         this->init_dependent = true;
       }
-
-    for (int i = 0, cnt = (int)(vec.size() / elem_count); i < cnt; ++i)
+    
+    t_int n_points = (t_int) vec.size () / elem_count;
+    
+    if (pvt_input_props->init (n_points, PVT_GAS_INPUT_TOTAL))
       {
-        main_pressure_.push_back  (vec[i * elem_count + 0]);
-        main_fvf_.push_back       (vec[i * elem_count + 1]);
-        main_visc_.push_back      (vec[i * elem_count + 2]);
+        throw bs_exception ("pvt_gas::insert_vector in table", "Error: initializing table of properties");
+      }
+
+    pvt_input_props->set_col_name (PVT_GAS_INPUT_PRESSURE, "pressure");
+    pvt_input_props->set_col_name (PVT_GAS_INPUT_FVF, "fvf");   
+    pvt_input_props->set_col_name (PVT_GAS_INPUT_VISC, "visc");
+
+    vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_GAS_INPUT_PRESSURE);
+    vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_GAS_INPUT_FVF);
+    vector_t &main_visc_         = pvt_input_props->get_col_vector (PVT_GAS_INPUT_VISC);
+
+    for (t_int i = 0; i < n_points; ++i)
+      {
+        main_pressure_[i] =  (vec[i * elem_count + 0]);
+        main_fvf_[i]      =  (vec[i * elem_count + 1]);
+        main_visc_[i]     =  (vec[i * elem_count + 2]);
       }
   }
 
   void
   pvt_gas::build (item_t atm_p, item_t min_p, item_t max_p, t_int n_intervals)
   {
+    vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_GAS_INPUT_PRESSURE);
+    vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_GAS_INPUT_FVF);
+    vector_t &main_visc_         = pvt_input_props->get_col_vector (PVT_GAS_INPUT_VISC);
+  
     if (this->init_dependent)
       {
-        pressure_.assign (n_intervals + 1, 0);
-        inv_fvf_.assign (n_intervals + 1, 0);
-        inv_visc_.assign (n_intervals + 1, 0);
-        inv_visc_fvf_.assign (n_intervals + 1, 0);
-
+        if (pvt_props_table->init (n_intervals, PVT_GAS_TOTAL))
+          {
+            throw bs_exception ("pvt_gas::init table", "Error: initializing table of properties");
+          }
+        
+        pvt_props_table->set_col_name (PVT_GAS_PRESSURE, "pressure");
+        pvt_props_table->set_col_name (PVT_GAS_INV_FVF, "inv_fvf");   
+        pvt_props_table->set_col_name (PVT_GAS_INV_VISC, "inv_visc");
+        pvt_props_table->set_col_name (PVT_GAS_INV_VISC_FVF, "inv_visc_fvf");
+        
         this->init_dependent = false;
       }
 
+    vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_GAS_PRESSURE);
+    vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_GAS_INV_FVF);
+    vector_t &inv_visc_     = pvt_props_table->get_col_vector (PVT_GAS_INV_VISC);
+    vector_t &inv_visc_fvf_ = pvt_props_table->get_col_vector (PVT_GAS_INV_VISC_FVF);
+    
     check_gas ();
     check_pressure_interval (min_p, max_p);
     this->check_interval_numbers (n_intervals);
@@ -124,6 +153,10 @@ namespace blue_sky
   void
   pvt_gas::check_gas ()
   {
+    vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_GAS_INPUT_PRESSURE);
+    vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_GAS_INPUT_FVF);
+    vector_t &main_visc_         = pvt_input_props->get_col_vector (PVT_GAS_INPUT_VISC);
+  
     this->check_common ();
 
     if (main_pressure_.empty ())
@@ -141,6 +174,11 @@ namespace blue_sky
                              item_t *inv_visc, item_t *d_inv_visc,
                              item_t *inv_visc_fvf, item_t *d_inv_visc_fvf) const
     {
+      vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_GAS_PRESSURE);
+      vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_GAS_INV_FVF);
+      vector_t &inv_visc_     = pvt_props_table->get_col_vector (PVT_GAS_INV_VISC);
+      vector_t &inv_visc_fvf_ = pvt_props_table->get_col_vector (PVT_GAS_INV_VISC_FVF);
+    
       item_t idp = 1.0 / this->p_step;
       index_t i = (index_t)((p - pressure_.front ()) * idp);
 
@@ -180,6 +218,11 @@ namespace blue_sky
   void
   pvt_gas::print () const
   {
+    vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_GAS_PRESSURE);
+    vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_GAS_INV_FVF);
+    vector_t &inv_visc_     = pvt_props_table->get_col_vector (PVT_GAS_INV_VISC);
+    vector_t &inv_visc_fvf_ = pvt_props_table->get_col_vector (PVT_GAS_INV_VISC_FVF);
+
     BS_ASSERT (pressure_.size () == inv_fvf_.size ());
     BS_ASSERT (inv_fvf_.size ()  == inv_visc_.size ());
     BS_ASSERT (inv_visc_.size () == inv_visc_fvf_.size ());

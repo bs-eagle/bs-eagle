@@ -40,26 +40,49 @@ namespace blue_sky
     if (!base_t::init_dependent)
       {
         base_t::init_dependent = true;
-
-        main_gpr_.clear ();
-        main_pressure_.clear ();
-        main_fvf_.clear ();
-        main_visc_.clear ();
+        
+        //pvt_input_props->clear ();
+        
+        //main_gpr_.clear ();
+        //main_pressure_.clear ();
+        //main_fvf_.clear ();
+        //main_visc_.clear ();
+      }
+    t_int n_points = (t_int) vec.size () / elem_count;
+    
+    if (pvt_input_props->init (n_points, PVT_OIL_INPUT_TOTAL))
+      {
+        throw bs_exception ("pvt_dead_oil::insert_vector in table", "Error: initializing table of properties");
       }
 
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_GPR, "gor");
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_PRESSURE, "pressure");
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_FVF, "fvf");   
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_VISC, "visc");
+
+    vector_t &main_gpr_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_GPR);
+    vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_OIL_INPUT_PRESSURE);
+    vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_FVF);
+    vector_t &main_visc_         = pvt_input_props->get_col_vector (PVT_OIL_INPUT_VISC);
+     
     BS_ASSERT (main_gpr_.empty ());
-    for (int i = 0, cnt = (int)(vec.size() / elem_count); i < cnt; ++i)
+    for (t_int i = 0; i < n_points; ++i)
       {
-        main_gpr_.push_back       (0.0);
-        main_pressure_.push_back  (vec[i * elem_count + 0]);
-        main_fvf_.push_back       (vec[i * elem_count + 1]);
-        main_visc_.push_back      (vec[i * elem_count + 2]);
+        main_gpr_[i]      = (0.0);
+        main_pressure_[i] = (vec[i * elem_count + 0]);
+        main_fvf_[i]      = (vec[i * elem_count + 1]);
+        main_visc_[i]     = (vec[i * elem_count + 2]);
       }
   }
 
   int
   pvt_dead_oil::build_internal (item_t atm_p, item_t min_p, item_t max_p, int n_intervals, bool is_pvto)
   {
+    vector_t &main_gpr_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_GPR);
+    vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_OIL_INPUT_PRESSURE);
+    vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_FVF);
+    vector_t &main_visc_         = pvt_input_props->get_col_vector (PVT_OIL_INPUT_VISC);
+
     check_oil ();
 
     if (main_pressure_.empty ())
@@ -128,11 +151,22 @@ namespace blue_sky
         n_points += (is_max != false);
       }
 
-    pressure_.assign (n_points, 0);
-    inv_fvf_.assign (n_points, 0);
-    inv_visc_.assign (n_points, 0);
-    inv_visc_fvf_.assign (n_points, 0);
-    gor_.assign (n_points, 0);
+    if (pvt_props_table->init (n_points, PVT_OIL_TOTAL))
+      {
+        throw bs_exception ("pvt_dead_oil::init table", "Error: initializing table of properties");
+      }
+    
+    pvt_props_table->set_col_name (PVT_OIL_PRESSURE, "pressure");
+    pvt_props_table->set_col_name (PVT_OIL_INV_FVF, "inv_fvf");   
+    pvt_props_table->set_col_name (PVT_OIL_INV_VISC, "inv_visc");
+    pvt_props_table->set_col_name (PVT_OIL_INV_VISC_FVF, "inv_visc_fvf");
+    pvt_props_table->set_col_name (PVT_OIL_GOR, "gor");
+    
+    vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_OIL_PRESSURE);
+    vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_OIL_INV_FVF);
+    vector_t &inv_visc_     = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC);
+    vector_t &inv_visc_fvf_ = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC_FVF);
+    vector_t &gor_          = pvt_props_table->get_col_vector (PVT_OIL_GOR);
 
     if (main_pressure_.size () < 2)
       {
@@ -147,7 +181,7 @@ namespace blue_sky
             if (i == 0 && is_min)
               pressure_.front () = min_p;
             else if (i == n_points - 1 && is_max)
-              pressure_.back () = max_p;
+              pressure_.back ()  = max_p;
             else
               pressure_[i] = main_pressure_.front ();
 
@@ -230,6 +264,10 @@ namespace blue_sky
   void
   pvt_dead_oil::check_oil ()
   {
+    vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_OIL_INPUT_PRESSURE);
+    vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_FVF);
+    vector_t &main_visc_         = pvt_input_props->get_col_vector (PVT_OIL_INPUT_VISC);
+  
     base_t::check_common ();
 
     check_oil_common (main_pressure_, main_fvf_, main_visc_);
@@ -260,6 +298,12 @@ namespace blue_sky
       const item_t drsdt /* = -1.0 */, const item_t dt /* = 0 */,
       const item_t old_gas_oil_ratio /* = 0 */) const
     {
+      vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_OIL_PRESSURE);
+      vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_OIL_INV_FVF);
+      vector_t &inv_visc_     = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC);
+      vector_t &inv_visc_fvf_ = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC_FVF);
+      vector_t &gor_          = pvt_props_table->get_col_vector (PVT_OIL_GOR);
+    
       size_t i = binary_search (p, pressure_, std::less <item_t> ());
       if (i == 0)
         ++i;
@@ -306,6 +350,12 @@ namespace blue_sky
   pvt_dead_oil::item_t
   pvt_dead_oil::interpolate_and_fix (item_t cell_pbub) const
     {
+      vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_OIL_PRESSURE);
+      vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_OIL_INV_FVF);
+      vector_t &inv_visc_     = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC);
+      vector_t &inv_visc_fvf_ = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC_FVF);
+      vector_t &gor_          = pvt_props_table->get_col_vector (PVT_OIL_GOR);
+
       size_t l = binary_search (cell_pbub, pressure_, std::less <item_t> ());
       size_t n = pressure_.size ();
       if (n == 1)
@@ -337,6 +387,9 @@ namespace blue_sky
   pvt_dead_oil::item_t
   pvt_dead_oil::get_gor_for_pressure (item_t pressure_data) const
     {
+      vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_OIL_PRESSURE);
+      vector_t &gor_          = pvt_props_table->get_col_vector (PVT_OIL_GOR);
+
       if (pressure_data < pressure_.front ())
         {
           throw bs_exception ("pvt_oil::get_gor_for_pressure", "Invalid pressure data value");
@@ -350,6 +403,12 @@ namespace blue_sky
   void
   pvt_dead_oil::print () const
   {
+    vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_OIL_PRESSURE);
+    vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_OIL_INV_FVF);
+    vector_t &inv_visc_     = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC);
+    vector_t &inv_visc_fvf_ = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC_FVF);
+    vector_t &gor_          = pvt_props_table->get_col_vector (PVT_OIL_GOR);
+
     BS_ASSERT (pressure_.size () == inv_fvf_.size ());
     BS_ASSERT (inv_fvf_.size ()  == inv_visc_.size ());
     BS_ASSERT (inv_visc_.size () == inv_visc_fvf_.size ());

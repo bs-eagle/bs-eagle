@@ -24,7 +24,24 @@ namespace blue_sky
       typedef t_int                             index_t;
       typedef v_double                          input_vector_t;
       typedef base_t::vector_t                  vector_t;
-
+      typedef smart_ptr <v_double, true>        sp_array_item_t;
+      
+      enum {
+         PVT_OIL_INPUT_GPR = 0,
+         PVT_OIL_INPUT_PRESSURE,
+         PVT_OIL_INPUT_FVF,
+         PVT_OIL_INPUT_VISC,
+         PVT_OIL_INPUT_TOTAL
+       };  
+           
+      enum {
+         PVT_OIL_PRESSURE = 0,
+         PVT_OIL_INV_FVF,
+         PVT_OIL_INV_VISC,
+         PVT_OIL_INV_VISC_FVF,
+         PVT_OIL_GOR,
+         PVT_OIL_TOTAL
+      };
       /**
        * \brief parse line of chars and store values into data
        *
@@ -73,14 +90,14 @@ namespace blue_sky
       item_t interpolate_and_fix (item_t cell_pbub) const;
 
       const vector_t &
-      get_pressure () const
+      get_pressure () const 
       {
-        return pressure_;
+        return pvt_props_table->get_col_vector (PVT_OIL_PRESSURE);
       }
       const vector_t &
-      get_gor () const
+      get_gor () const 
       {
-        return gor_;
+        return pvt_props_table->get_col_vector (PVT_OIL_GOR);
       }
 
       virtual void
@@ -120,16 +137,16 @@ namespace blue_sky
     protected:
 
 
-      vector_t  main_gpr_;
-      vector_t  main_pressure_;
-      vector_t  main_fvf_;
-      vector_t  main_visc_;
+//      vector_t  main_gpr_;
+//      vector_t  main_pressure_;
+//      vector_t  main_fvf_;
+//      vector_t  main_visc_;
 
-      vector_t  pressure_;
-      vector_t  inv_fvf_;
-      vector_t  inv_visc_;
-      vector_t  inv_visc_fvf_;
-      vector_t  gor_;
+//      vector_t  pressure_;
+//      vector_t  inv_fvf_;
+//      vector_t  inv_visc_;
+//      vector_t  inv_visc_fvf_;
+//      vector_t  gor_;
 
     public:
 

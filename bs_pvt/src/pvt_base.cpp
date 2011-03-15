@@ -16,6 +16,8 @@ namespace blue_sky
     p_step = 0;
     surface_density = 0;
     init_dependent = true;
+    pvt_input_props = BS_KERNEL.create_object ("table");
+    pvt_props_table = BS_KERNEL.create_object ("table"); 
   }
 
   pvt_base::item_t

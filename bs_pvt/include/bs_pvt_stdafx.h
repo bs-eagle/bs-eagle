@@ -72,12 +72,13 @@
 #include "bos_report.h"
 
 #include "aligned_allocator.h"
-#include "strategies.h"
+//#include "strategies.h"
 
 #include "constants.h"
-#include "shared_vector.h"
-#include "naive_file_reader.h"
+//#include "shared_vector.h"
+//#include "naive_file_reader.h"
 #include "conf.h"
+#include "table_iface.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #endif //#ifndef BS_PVT_PRECOMPILED_HEADERS_H_

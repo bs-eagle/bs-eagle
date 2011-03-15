@@ -43,6 +43,5 @@ BLUE_SKY_INIT_PY_FUN
   //python::py_export_assert ();
   python::py_export_named_pbase ("named_pbase");
   python::export_data_dimens ();
-  python::py_export_strategies ();
 }
 #endif 

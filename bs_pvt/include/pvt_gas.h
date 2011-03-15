@@ -27,6 +27,21 @@ namespace blue_sky
       typedef base_t::input_vector_t   input_vector_t;
       typedef base_t::vector_t         vector_t;
 
+      enum {
+         PVT_GAS_INPUT_PRESSURE = 0,
+         PVT_GAS_INPUT_FVF,
+         PVT_GAS_INPUT_VISC,
+         PVT_GAS_INPUT_TOTAL
+       };  
+
+      enum {
+         PVT_GAS_PRESSURE = 0,
+         PVT_GAS_INV_FVF,
+         PVT_GAS_INV_VISC,
+         PVT_GAS_INV_VISC_FVF,
+         PVT_GAS_TOTAL
+      };
+
       /**
        * \brief store values into data
        *
@@ -64,14 +79,14 @@ namespace blue_sky
 
     private:
 
-      vector_t main_pressure_;
-      vector_t main_fvf_;
-      vector_t main_visc_;
+      //vector_t main_pressure_;
+      //vector_t main_fvf_;
+      //vector_t main_visc_;
 
-      vector_t pressure_;
-      vector_t inv_fvf_;
-      vector_t inv_visc_;
-      vector_t inv_visc_fvf_;
+      //vector_t pressure_;
+      //vector_t inv_fvf_;
+      //vector_t inv_visc_;
+      //vector_t inv_visc_fvf_;
 
     public:
 

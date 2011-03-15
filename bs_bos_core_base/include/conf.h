@@ -9,6 +9,8 @@
 
 #define CONF_7FBMZIFT
 
+#include "bs_array.h"
+
 //! using this type for small data
 #define t_int           int
 
@@ -25,19 +27,19 @@
 #define t_ulong         unsigned long
 
 
-#define v_int          bs_array<t_int>
-#define v_long         bs_array<t_long>
-#define v_uint         bs_array<t_uint>
-#define v_ulong        bs_array<t_ulong>
-#define v_float        bs_array<t_float>
-#define v_double       bs_array<t_double>
+#define v_int          bs_array<t_int> 
+#define v_long         bs_array<t_long> 
+#define v_uint         bs_array<t_uint> 
+#define v_ulong        bs_array<t_ulong> 
+#define v_float        bs_array<t_float> 
+#define v_double       bs_array<t_double> 
 
-#define spv_int          smart_ptr<v_int, true>
-#define spv_long         smart_ptr<v_long, true>
-#define spv_uint         smart_ptr<v_uint, true>
-#define spv_ulong        smart_ptr<v_ulong, true>
-#define spv_float        smart_ptr<v_float, true>
-#define spv_double       smart_ptr<v_double, true>
+#define spv_int          smart_ptr<v_int, true> 
+#define spv_long         smart_ptr<v_long, true> 
+#define spv_uint         smart_ptr<v_uint, true> 
+#define spv_ulong        smart_ptr<v_ulong, true> 
+#define spv_float        smart_ptr<v_float, true> 
+#define spv_double       smart_ptr<v_double, true> 
 
 
 

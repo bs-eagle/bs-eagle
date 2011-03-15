@@ -14,6 +14,8 @@
 #include "bcsr_matrix_tools.h"
 #include "dens_matrix_tools.h"
 #include "dens_matrix.h"
+#include "mbcsr_matrix.h"
+#include "py_mbcsr_matrix.h"
 
 using namespace blue_sky;
 using namespace blue_sky::python;
@@ -40,6 +42,8 @@ namespace blue_sky {
 
     res &= BS_KERNEL.register_type(*bs_init.pd_, jac_matrix::bs_type()); BS_ASSERT (res);
 
+    res &= BS_KERNEL.register_type(*bs_init.pd_, mbcsr_matrix::bs_type()); BS_ASSERT (res);
+
     return res;
   }
 }
@@ -52,6 +56,7 @@ BLUE_SKY_INIT_PY_FUN
 
   python::py_export_matrices ();
   python::py_export_bcsr_matrices ();
+  python::py_export_mbcsr_matrices ();
   python::py_export_dens_matrices ();
   
 }

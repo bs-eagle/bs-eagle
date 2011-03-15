@@ -30,6 +30,7 @@ namespace blue_sky
    */
   class BS_API_PLUGIN pvt_base : public objbase
     {
+      friend class table;
     public:
 
       typedef t_double                              	item_t;
@@ -40,8 +41,8 @@ namespace blue_sky
       typedef smart_ptr <v_long, true>                sp_array_index_t;
       typedef v_double                   		          input_vector_t;
 
-      typedef std::vector <t_double>                  vector_t;
-
+      typedef table_iface::vector_t                   vector_t;
+      typedef smart_ptr<table_iface,true>             sp_table; 
       /**
        * \brief constructor
        */
@@ -144,6 +145,12 @@ namespace blue_sky
 
       //!
       bool init_dependent;
+    public:
+      //! input main pvt properties 
+      sp_table pvt_input_props; 
+      //! pvt properties in table format
+      sp_table pvt_props_table;
+      
     };
 
   //! register all pvt_* types

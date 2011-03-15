@@ -27,6 +27,25 @@ namespace blue_sky
       typedef base_t::input_vector_t            input_vector_t;
       typedef base_t::vector_t                  vector_t;
  
+       enum {
+         PVT_WATER_INPUT_PRESSURE = 0,
+         PVT_WATER_INPUT_FVF,
+         PVT_WATER_INPUT_COMPRESSIBILITY,
+         PVT_WATER_INPUT_VISC,
+         PVT_WATER_INPUT_VISCOSIBILITY,
+         PVT_WATER_INPUT_GPR,
+         PVT_WATER_INPUT_TOTAL
+       };  
+
+ 
+      enum {
+         PVT_WATER_PRESSURE = 0,
+         PVT_WATER_INV_FVF,
+         PVT_WATER_INV_VISC,
+         PVT_WATER_INV_VISC_FVF,
+         PVT_WATER_TOTAL
+      };
+
       /**
        * \brief store values into data
        *
@@ -68,17 +87,17 @@ namespace blue_sky
 
     private:
 
-      vector_t main_pressure_;
-      vector_t main_compressibility_;
-      vector_t main_fvf_;
-      vector_t main_viscosibility_;
-      vector_t main_visc_;
-      vector_t main_gpr_;
+      //vector_t main_pressure_;
+      //vector_t main_compressibility_;
+      //vector_t main_fvf_;
+      //vector_t main_viscosibility_;
+      //vector_t main_visc_;
+      //vector_t main_gpr_;
 
-      vector_t pressure_;
-      vector_t inv_fvf_;
-      vector_t inv_visc_;
-      vector_t inv_visc_fvf_;
+      //vector_t pressure_;
+      //vector_t inv_fvf_;
+      //vector_t inv_visc_;
+      //vector_t inv_visc_fvf_;
 
     public:
 

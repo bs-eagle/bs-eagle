@@ -27,6 +27,12 @@ namespace blue_sky
       typedef base_t::input_vector_t            input_vector_t;
       typedef base_t::vector_t                  vector_t;
 
+      enum {
+         PVT_OIL_COMPRESS_FVF = PVT_OIL_TOTAL,
+         PVT_OIL_COMPRESS_VISC,
+         PVT_OIL_TOTAL_2
+      };
+
       /**
        * \brief store values into data
        *
@@ -103,18 +109,18 @@ namespace blue_sky
 
     public:
 
-      vector_t compress_fvf_;
-      vector_t compress_visc_;
+      //vector_t compress_fvf_;
+      //vector_t compress_visc_;
 
-      using base_t::main_gpr_;
-      using base_t::main_pressure_;
-      using base_t::main_fvf_;
-      using base_t::main_visc_;
+      //using base_t::main_gpr_;
+      //using base_t::main_pressure_;
+      //using base_t::main_fvf_;
+      //using base_t::main_visc_;
 
-      using base_t::pressure_;
-      using base_t::gor_;
-      using base_t::inv_fvf_;
-      using base_t::inv_visc_;
+      //using base_t::pressure_;
+      //using base_t::gor_;
+      //using base_t::inv_fvf_;
+      //using base_t::inv_visc_;
 
     public:
 
