@@ -49,7 +49,7 @@ namespace blue_sky
 
   
   bool
-  keyword_manager ::is_keyword_activated (const std::string &keyword, keyword_params_t &params) const
+  keyword_manager ::is_keyword_activated (const std::string &keyword, keyword_params_t & /*params*/) const
   {
     return handlers.find(keyword) != handlers.end ();
   }
@@ -188,8 +188,8 @@ namespace blue_sky
     }
 
   //bs stuff
-  BLUE_SKY_TYPE_STD_CREATE(keyword_manager, (class))
-  BLUE_SKY_TYPE_STD_COPY(keyword_manager, (class))
+  BLUE_SKY_TYPE_STD_CREATE (keyword_manager)
+  BLUE_SKY_TYPE_STD_COPY (keyword_manager)
   
   BLUE_SKY_TYPE_IMPL(keyword_manager, objbase, "keyword_manager", "BOS_Core keyword_manager class", "BOS_Core keyword_manager class");
 

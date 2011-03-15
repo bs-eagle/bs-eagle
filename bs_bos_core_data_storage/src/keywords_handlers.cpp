@@ -449,7 +449,7 @@ namespace blue_sky
 
     reader->read_line (buf, CHAR_BUF_LEN);
     // Read and convert UNITS to data
-    if (sscanf (buf, "%s %ld", key1, &idata->rock_region) != 2)
+    if (sscanf (buf, "%s %d", key1, &idata->rock_region) != 2)
       {
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
           % reader->get_prefix() % keyword);
@@ -1388,7 +1388,7 @@ namespace blue_sky
   KH_SPEC(PVTW_handler)
   KH_SPEC(PVDG_handler)
   KH_SPEC(ROCK_handler)
-/*  
+  
   KH_SPEC(SWOF_handler)
   KH_SPEC(SGOF_handler)
   KH_SPEC(SWFN_handler)

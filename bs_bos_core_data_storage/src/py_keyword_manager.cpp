@@ -132,9 +132,9 @@ namespace python {
 
   PY_EXPORTER (keyword_params_exporter, empty_exporter)
     .add_property ("reader", make_function (get_reader <T>))
-    .add_property ("data",   make_function (get_data <T>))
-    .add_property ("mesh",   make_function (get_mesh <T>))
-    .add_property ("keyword_manager", make_function (get_keyword_manager <T>))
+    //.add_property ("data",   make_function (get_data <T>))
+    //.add_property ("mesh",   make_function (get_mesh <T>))
+    //.add_property ("keyword_manager", make_function (get_keyword_manager <T>))
   PY_EXPORTER_END;
 
   PY_EXPORTER (keyword_handler_iface_exporter, empty_exporter)

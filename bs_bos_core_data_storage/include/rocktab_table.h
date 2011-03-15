@@ -85,9 +85,9 @@ namespace blue_sky
                        T *dp_truns_m  //!< pressure derivation of transmissibility
                        )
       {
-        std::vector<item_t> &p = this->get_column (0);
-        std::vector<item_t> &phi = this->get_column (1);
-        std::vector<item_t> &truns = this->get_column (2);
+        std::vector<t_double> &p = this->get_column (0);
+        std::vector<t_double> &phi = this->get_column (1);
+        std::vector<t_double> &truns = this->get_column (2);
 
         if (this->n_rows < 1)
           return;
@@ -109,12 +109,12 @@ namespace blue_sky
         else
           {
             t_int iu, im, il;
-            item_t denom;
+            t_double denom;
 
             BINARY_SEARCH (p, pressure, this->n_rows, iu, im, il);
             im = (il - 1);
             iu = il;
-            denom = (item_t) (1.0 / (p[iu] - p[im]));
+            denom = (t_double) (1.0 / (p[iu] - p[im]));
             *dp_phi_m = (phi[iu] - phi[im]) * denom;
             *dp_truns_m = (truns[iu] - truns[im]) * denom;
             *phi_m = phi[im] + *dp_phi_m * (pressure - p[im]);

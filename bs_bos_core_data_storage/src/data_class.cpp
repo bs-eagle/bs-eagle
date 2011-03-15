@@ -62,7 +62,7 @@ namespace blue_sky
   }
 
   
-  idata::idata(bs_type_ctor_param param)
+  idata::idata(bs_type_ctor_param /*param*/)
   : bs_node(bs_node::create_node (new this_t::idata_traits ())),
   rpo_model (0), // RPO_DEFAULT_MODEL
   minimal_pore_volume (DEFAULT_MINIMAL_PORE_VOLUME),
