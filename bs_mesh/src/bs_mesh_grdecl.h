@@ -194,9 +194,9 @@ namespace blue_sky
 		return wrapped_t::gen_coord_zcorn(nx, ny, nz, dx, dy, dz);
 	}
 
-	static std::pair< sp_fp_storage_array_t, sp_fp_storage_array_t >
-	refine_mesh(i_type_t& nx, i_type_t& ny, sp_fp_storage_array_t coord, sp_fp_storage_array_t zcorn, sp_fp_storage_array_t points,
-			fp_type_t cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, fp_type_t band_thresh = DEF_BAND_THRESHOLD)
+	static std::pair< spv_float, spv_float >
+	refine_mesh(t_long& nx, t_long& ny, spv_float coord, spv_float zcorn, spv_float points,
+			t_double cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, t_double band_thresh = DEF_BAND_THRESHOLD)
 	{
 		return wrapped_t::refine_mesh(nx, ny, coord, zcorn, points, cell_merge_thresh, band_thresh);
 	}

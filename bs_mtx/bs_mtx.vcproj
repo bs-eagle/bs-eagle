@@ -324,6 +324,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\mbcsr_matrix.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\mbcsr_matrix.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\py_bcsr.cpp"
 				>
 			</File>
@@ -348,11 +356,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\py_naive_file_reader.cpp"
+				RelativePath=".\src\py_mbcsr_matrix.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\py_save_seq_vector.cpp"
+				RelativePath=".\src\py_mbcsr_matrix.h"
 				>
 			</File>
 		</Filter>
@@ -408,14 +416,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\py_naive_file_reader.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\py_save_seq_vector.h"
-				>
-			</File>
-			<File
 				RelativePath=".\include\read_b_matrix.h"
 				>
 			</File>
@@ -427,34 +427,6 @@
 		<File
 			RelativePath=".\src\main.cpp"
 			>
-		</File>
-		<File
-			RelativePath=".\src\stdafx.cpp"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="1"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="1"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release_WO_Python|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="1"
-				/>
-			</FileConfiguration>
 		</File>
 	</Files>
 	<Globals>

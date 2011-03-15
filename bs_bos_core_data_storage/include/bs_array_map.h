@@ -45,7 +45,7 @@ namespace blue_sky
     typedef index_type                            index_t;
     typedef item_type                             item_t;         //! type of value
     typedef bs_array_map <index_type, item_type>  this_t;         //! type of *this
-    typedef smart_ptr<bs_array <item_t>, true>    sp_bs_array_t;
+    typedef smart_ptr<bs_array <item_t, bs_nparray>, true>    sp_bs_array_t;
 
     //! \brief class of array dimension parameters
     struct array_info
@@ -225,7 +225,7 @@ namespace blue_sky
           dimens[ARRAY_POOL_NY_A] % dimens[ARRAY_POOL_NY_B] % \
           dimens[ARRAY_POOL_NZ_A] % dimens[ARRAY_POOL_NZ_B]);
         }  
-      sp_bs_array_t a = give_kernel::Instance().create_object(bs_array<item_t>::bs_type());
+      sp_bs_array_t a = give_kernel::Instance().create_object(bs_array<item_t, bs_nparray>::bs_type());
       a->resize (nlen);
       a->assign (def_val);
        

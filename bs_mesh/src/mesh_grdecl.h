@@ -85,16 +85,16 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     void init_props (const sp_idata_t &idata);
 
 	//! init coord & zcorn via gen_coord_zcorn
-	void init_props(i_type_t nx, i_type_t ny, i_type_t nz, sp_fp_storage_array_t dx, sp_fp_storage_array_t dy, sp_fp_storage_array_t dz);
+	void init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz);
 
 	//! init coord & zcorn from (nx, ny, nz, dx, dy, dz)
 	//! return: first -- coord, second -- zcorn
 	static std::pair< spv_float, spv_float >
 	gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz);
 
-	static std::pair< sp_fp_storage_array_t, sp_fp_storage_array_t >
-	refine_mesh(i_type_t& nx, i_type_t& ny, sp_fp_storage_array_t coord, sp_fp_storage_array_t zcorn, sp_fp_storage_array_t points,
-			fp_type_t cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, fp_type_t band_thresh = DEF_BAND_THRESHOLD);
+	static std::pair< spv_float, spv_float >
+	refine_mesh(t_long& nx, t_long& ny, spv_float coord, spv_float zcorn, spv_float points,
+			t_double cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, t_double band_thresh = DEF_BAND_THRESHOLD);
 
     //! get vertex of cube [i,j,k]
     void calc_element (const t_long i, const t_long j, const t_long k, element_t &element) const;
