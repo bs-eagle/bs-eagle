@@ -17,13 +17,13 @@ namespace grd_ecl
 
   struct fpoint3d
   {
-    float x,y,z;
+    t_double x,y,z;
 
     fpoint3d()
     {
       x=0.0f,y=0.0f,z=0.0f;
     }
-    fpoint3d(float ax, float ay, float az)
+    fpoint3d(t_double ax, t_double ay, t_double az)
     {
       x = ax;
       y = ay;
@@ -36,7 +36,7 @@ namespace grd_ecl
       z += b.z;
       return *this;
     }
-    fpoint3d& operator *= (const float b)
+    fpoint3d& operator *= (const t_double b)
     {
       x *= b;
       y *= b;
@@ -50,7 +50,7 @@ namespace grd_ecl
       z *= b.z;
       return *this;
     }
-    fpoint3d& operator /= (const float b)
+    fpoint3d& operator /= (const t_double b)
     {
       x /= b;
       y /= b;
@@ -64,7 +64,7 @@ namespace grd_ecl
       return false;
     }
 
-    inline float get_length();
+    inline t_double get_length();
 
     static fpoint3d abs(const fpoint3d &a)
     {
@@ -89,12 +89,12 @@ namespace grd_ecl
     return fpoint3d(a.x-b.x,a.y-b.y,a.z-b.z);
   }
 
-  inline fpoint3d operator / (const fpoint3d &a, const float d)
+  inline fpoint3d operator / (const fpoint3d &a, const t_double d)
   {
     return fpoint3d(a.x/d,a.y/d,a.z/d);
   }
 
-  inline float fpoint3d_mixed_multiplicate(const fpoint3d &a, const fpoint3d &b, const fpoint3d &c)
+  inline t_double fpoint3d_mixed_multiplicate(const fpoint3d &a, const fpoint3d &b, const fpoint3d &c)
   {
     return a.x*b.y*c.z+a.y*b.z*c.x+a.z*b.x*c.y-a.z*b.y*c.x-a.y*b.x*c.z-a.x*b.z*c.y;
   }
@@ -109,53 +109,53 @@ namespace grd_ecl
   inline fpoint3d calc_normal (const fpoint3d &a, const fpoint3d &b, const fpoint3d &c)
   {
     fpoint3d n = (b-a)^(c-a);
-    float len = n.get_length();
+    t_double len = n.get_length();
     n /= len;
     return n;
   }
 
-  inline float fpoint3d::get_length() //get length of radius-vector
+  inline t_double fpoint3d::get_length() //get length of radius-vector
   {
     return sqrt(x*x+y*y+z*z);
   }
 
-  inline float operator *(const fpoint3d &a, const fpoint3d &b)
+  inline t_double operator *(const fpoint3d &a, const fpoint3d &b)
   {
     return a.x*b.x+a.y*b.y+a.z*b.z;
   }
 
   //get cosinus between plane(a,b,c) and d - normal of other plane
-  inline float get_cosinus(const fpoint3d &a, const fpoint3d &b, const fpoint3d &c, const fpoint3d &d)
+  inline t_double get_cosinus(const fpoint3d &a, const fpoint3d &b, const fpoint3d &c, const fpoint3d &d)
   {
     return calc_normal(a,b,c)*d;
   }
 
-  inline float get_len(const fpoint3d &a, const fpoint3d &b)
+  inline t_double get_len(const fpoint3d &a, const fpoint3d &b)
   {
     return sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y) + (a.z-b.z)*(a.z-b.z));
   }
 
-  inline float formula_gerona3d(const fpoint3d &p1, const fpoint3d &p2, const fpoint3d &p3)
+  inline t_double formula_gerona3d(const fpoint3d &p1, const fpoint3d &p2, const fpoint3d &p3)
   {
-    float a = (p2-p1).get_length();
-    float b = (p3-p1).get_length();
-    float c = (p3-p2).get_length();
+    t_double a = (p2-p1).get_length();
+    t_double b = (p3-p1).get_length();
+    t_double c = (p3-p2).get_length();
 
-    float p = (float)(a+b+c)/2;
+    t_double p = (t_double)(a+b+c)/2;
     return sqrtf(p*(p-a)*(p-b)*(p-c));
   }
 
-  inline float find_area_of_side(const fpoint3d &a, const fpoint3d &b, const fpoint3d &c, const fpoint3d &d)
+  inline t_double find_area_of_side(const fpoint3d &a, const fpoint3d &b, const fpoint3d &c, const fpoint3d &d)
   //get square of side (we know the side numeration)
   {
-    float area = formula_gerona3d(a,b,c);
+    t_double area = formula_gerona3d(a,b,c);
     area += formula_gerona3d(c,d,b);
     return area;
   }
   //calc volume of tetraidr
-  inline float calc_tetra_volume(const fpoint3d &a, const fpoint3d &b, const fpoint3d &c, const fpoint3d &d)
+  inline t_double calc_tetra_volume(const fpoint3d &a, const fpoint3d &b, const fpoint3d &c, const fpoint3d &d)
   {
-    float volume = fpoint3d_mixed_multiplicate(d-a,d-b,d-c);
+    t_double volume = fpoint3d_mixed_multiplicate(d-a,d-b,d-c);
     return fabs(volume/6.0f);
   }
 

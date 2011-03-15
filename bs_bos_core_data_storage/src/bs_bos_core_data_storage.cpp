@@ -24,12 +24,9 @@ namespace blue_sky
 
     bool res = true;
 
-    res &= BS_KERNEL.register_type (pd, data_manager <base_strategy_fif>::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, data_manager <base_strategy_did>::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, data_manager::bs_type ()); BS_ASSERT (res);
 
-
-    res &= BS_KERNEL.register_type (pd, idata <base_strategy_fif>::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, idata <base_strategy_did>::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, idata::bs_type ()); BS_ASSERT (res);
     
     res &= BS_KERNEL.register_type(pd, FRead::bs_type()); BS_ASSERT (res);
 

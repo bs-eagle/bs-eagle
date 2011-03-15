@@ -41,10 +41,4 @@ namespace blue_sky
 		return st.empty();
 	}
 
-  template class ar_stack < ar_args <base_strategy_fif> >;
-  template class ar_stack < ar_args <base_strategy_did> >;
-	template class ar_stack < ar_args <base_strategy_dif> >;
-  template class ar_stack < ar_operat <base_strategy_fif> >;
-  template class ar_stack < ar_operat <base_strategy_did> >;
-	template class ar_stack < ar_operat <base_strategy_dif> >;
 }

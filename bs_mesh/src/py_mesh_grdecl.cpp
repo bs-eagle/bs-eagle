@@ -71,7 +71,7 @@ namespace blue_sky {
 namespace python {
 
 void py_export_mesh_grdecl () {
-	strategy_exporter::export_class <bs_mesh_grdecl, rs_mesh_iface, mesh_grdecl_exporter_plus> ("mesh_grdecl");
+	//strategy_exporter::export_class <bs_mesh_grdecl, rs_mesh_iface, mesh_grdecl_exporter_plus> ("mesh_grdecl");
 	reg_sparray_pair< float >();
 	reg_sparray_pair< double >();
 }

@@ -22,13 +22,13 @@ namespace python {
   //{
   //  static 
   //  array_uint8_t
-  //  get_array (py_idata <strategy_t> *self)
+  //  get_array (py_idata  *self)
   //  {
   //    return self->get_int_array (i);
   //  }
   //  static 
   //  void 
-  //  set_array (py_idata <strategy_t> *self, const boost::python::object &obj)
+  //  set_array (py_idata  *self, const boost::python::object &obj)
   //  {
   //    self->set_int_array (i, obj);
   //  }
@@ -38,13 +38,13 @@ namespace python {
   //{
   //  static 
   //  array_float16_t
-  //  get_array (py_idata <strategy_t> *self)
+  //  get_array (py_idata  *self)
   //  {
   //    return self->get_float_array (i);
   //  }
   //  static 
   //  void 
-  //  set_array (py_idata <strategy_t> *self, const boost::python::object &obj)
+  //  set_array (py_idata  *self, const boost::python::object &obj)
   //  {
   //    self->set_float_array (i, obj);
   //  }
@@ -167,10 +167,10 @@ namespace python {
 */    
   PY_EXPORTER_END;
 
-    //template <class strategy_t>
+    //
     //void py_export_idata_t(const char *name)
     //{
-    //  typedef py_idata <strategy_t> T;
+    //  typedef py_idata  T;
 
     //  class_<T, bases<py_bs_node> > idata_export(name);
 
@@ -209,7 +209,7 @@ namespace python {
 
   void py_export_idata()
   {
-    strategy_exporter::export_base<idata, idata_exporter> ("idata");
+    //strategy_exporter::export_base<idata, idata_exporter> ("idata");
   }
 
 } // namespace python

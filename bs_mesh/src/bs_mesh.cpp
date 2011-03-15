@@ -34,17 +34,11 @@ namespace blue_sky
     //res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, mesh_ijk<base_strategy_fif>::bs_type()); BS_ASSERT (res);
     //res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, mesh_ijk<base_strategy_did>::bs_type()); BS_ASSERT (res);
     
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_ijk_keywords<base_strategy_fif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_ijk_keywords<base_strategy_did>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_ijk_keywords<base_strategy_dif>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_ijk_keywords::bs_type()); BS_ASSERT (res);
   
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_mesh_grdecl<base_strategy_fif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_mesh_grdecl<base_strategy_did>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_mesh_grdecl<base_strategy_dif>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_mesh_grdecl::bs_type()); BS_ASSERT (res);
     
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_grdecl_keywords<base_strategy_fif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_grdecl_keywords<base_strategy_did>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_grdecl_keywords<base_strategy_dif>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_grdecl_keywords::bs_type()); BS_ASSERT (res);
     
     //mpi_mesh_grdecl
 #ifdef _MPI_MY
@@ -54,9 +48,7 @@ namespace blue_sky
 #endif
 
     // flux_connections
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_fif>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_did>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_dif>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections::bs_type()); BS_ASSERT (res);
     
     return res;
  }

@@ -2,18 +2,17 @@
 #define ROCKTAB_TABLE_H
 
 #include "interpolation_macro.h"
+#include "conf.h"
 
 namespace blue_sky
   {
   /**
    * @brief table class
    */
-  template <class strategy_t>
+  
   class BS_API_PLUGIN bs_table
     {
 
-      typedef typename strategy_t::fp_type_t   item_t;
-      typedef typename strategy_t::i_type_t  index_t;
       //-------------------------
       // METHODS
       //-------------------------
@@ -23,25 +22,25 @@ namespace blue_sky
       // Destructor
       ~bs_table ();
       // returns number of rows
-      index_t get_num_rows();
+      t_int get_num_rows();
       // returns number of columns
-      index_t get_num_cols();
+      t_int get_num_cols();
 
       // set number of rows in table
-      void set_num_rows (const index_t num_rows);
+      void set_num_rows (const t_int num_rows);
       // adds new column to the table
       void add_column (const std::string &_name);
       // erases all the elements of a list
       void clear();
 
       // returns name of the column with given index
-      const std::string &get_col_name (const index_t col_num);
+      const std::string &get_col_name (const t_int col_num);
 
       //returns name of current column
-      void set_col_name(const index_t col_num, const std::string &new_name);
+      void set_col_name(const t_int col_num, const std::string &new_name);
 
       //returns current data array from column
-      std::vector<item_t> &get_column(const index_t col_num);
+      std::vector<t_float> &get_column(const t_int col_num);
 
 
 
@@ -52,19 +51,17 @@ namespace blue_sky
       struct column
         {
           std::string name;               //!< column name
-          std::vector<item_t> data;       //!< data array stored in one column
+          std::vector<t_float> data;       //!< data array stored in one column
         };
 
       std::vector<column> columns;      //!< list of columns
-      index_t n_rows;                       //!< number of rows
+      t_int n_rows;                       //!< number of rows
     };
 
-  template <class strategy_t>
-  class BS_API_PLUGIN rocktab_table  : public bs_table <strategy_t>
+  
+  class BS_API_PLUGIN rocktab_table  : public bs_table 
     {
     public:
-      typedef typename strategy_t::i_type_t  index_t;
-      typedef typename strategy_t::fp_type_t   item_t;
 
       //! ctor
       rocktab_table();
@@ -111,7 +108,7 @@ namespace blue_sky
           }
         else
           {
-            index_t iu, im, il;
+            t_int iu, im, il;
             item_t denom;
 
             BINARY_SEARCH (p, pressure, this->n_rows, iu, im, il);

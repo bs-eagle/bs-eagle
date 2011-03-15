@@ -56,7 +56,7 @@ namespace blue_sky {
   \ingroup KeywordLanguage
   \brief Main class for read, save and store input information
   */
-  template <class strategy_t>
+  
   class BS_API_PLUGIN idata : public bs_node
     {
     private:
@@ -64,34 +64,25 @@ namespace blue_sky {
 
     public:
       //! typedefs
-      typedef idata<strategy_t>                           this_t;
+      typedef idata                           this_t;
       typedef smart_ptr<this_t , true>                    sp_this_t;
       
-      typedef typename strategy_t::i_type_t               i_type_t;
-      typedef typename strategy_t::fp_storage_type_t      fp_type_t;
-
-      typedef bs_array_map <i_type_t, i_type_t>           amap_i;
-      typedef bs_array_map <i_type_t, fp_type_t>          amap_fp;
+      typedef bs_array_map <t_long, t_int>           amap_i;
+      typedef bs_array_map <t_long, t_float>          amap_fp;
 
       typedef smart_ptr<amap_i>                           sp_amap_i;
       typedef smart_ptr<amap_fp>                          sp_amap_fp;
 
-      typedef typename std::vector <val_vs_depth>         vval_vs_depth;
+      typedef std::vector <val_vs_depth>                  vval_vs_depth;
       
-      typedef bs_array<i_type_t>                          arr_i;
-      typedef bs_array<fp_type_t>                         arr_fp;
-
-      typedef smart_ptr<arr_i, true>                      sp_arr_i;
-      typedef smart_ptr<arr_fp, true>                     sp_arr_fp;
-
       typedef smart_ptr <FRead, true>										  sp_reader_t;
 
       struct pvt_info
         {
-          sp_arr_fp							      main_data_;
+          spv_float							      main_data_;
           auto_value <bool, false>		has_density_;
-          auto_value <fp_type_t>      density_;
-          auto_value <fp_type_t>      molar_density_;
+          auto_value <t_float>      density_;
+          auto_value <t_float>      molar_density_;
         };
 
       typedef std::vector <pvt_info>									  pvt_vector;
@@ -102,8 +93,8 @@ namespace blue_sky {
 				names_map_t names_map_i;
 				names_map_t names_map_fp;
 
-				i_type_t    *dummy_array_i;
-				fp_type_t   *dummy_array_fp;
+				t_int    *dummy_array_i;
+				t_float   *dummy_array_fp;
 
 				arrays_helper ();
 				~arrays_helper ();
@@ -130,8 +121,8 @@ namespace blue_sky {
       void set_defaults_in_pool();
       void set_region (int r_pvt, int r_sat, int r_eql, int r_fip);
 
-      void set_density (sp_arr_fp density);
-      void set_density_internal (const fp_type_t *density);
+      void set_density (spv_float density);
+      void set_density_internal (const t_float *density);
 
       //! return prvd vector
       vval_vs_depth &get_prvd();
@@ -140,13 +131,13 @@ namespace blue_sky {
       //! return pbvd vector
       vval_vs_depth &get_pbvd();
 
-      sp_arr_fp
+      spv_float
       get_rock()
       {
         return rock;
       }
 
-      sp_arr_fp
+      spv_float
       get_p_ref()
       {
         return p_ref;
@@ -171,14 +162,14 @@ namespace blue_sky {
       //int read_arg_func (const sp_reader_t &reader, ar_stack <ar_args_t> &ar, ar_stack <ar_operat_t> &op, char **start_ptr, const char *keyword, int *arguments_count, int flag_brek);
       //int test_token (int prev, int cur);
 
-      sp_arr_i    get_int_non_empty_array (int array_index);
-      sp_arr_fp   get_fp_non_empty_array (int array_index);
+      spv_int    get_int_non_empty_array (int array_index);
+      spv_float   get_fp_non_empty_array (int array_index);
       
-      sp_arr_i    get_int_array (const std::string &array_name);
-      sp_arr_fp   get_fp_array (const std::string &array_name);
+      spv_int    get_int_array (const std::string &array_name);
+      spv_float   get_fp_array (const std::string &array_name);
       
-      sp_arr_i    get_int_non_empty_array (const std::string &array_name);
-      sp_arr_fp   get_fp_non_empty_array (const std::string &array_name);
+      spv_int    get_int_non_empty_array (const std::string &array_name);
+      spv_float   get_fp_non_empty_array (const std::string &array_name);
       
       bool 
       contain (const std::string &array_name) const;
@@ -187,23 +178,23 @@ namespace blue_sky {
 			arrays_helper ahelper;
       int rpo_model;                   //!< 3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)
 
-      fp_type_t minimal_pore_volume;      //!< Minimal pore volume allowed for active cells
-      fp_type_t minimal_splice_volume;    //!< Minimal pore volume allowed for active cells to splice with other cells
-      fp_type_t maximum_splice_thickness; //!< Default maximum thickness allowed between active cells to be coupled
+      t_float minimal_pore_volume;      //!< Minimal pore volume allowed for active cells
+      t_float minimal_splice_volume;    //!< Minimal pore volume allowed for active cells to splice with other cells
+      t_float maximum_splice_thickness; //!< Default maximum thickness allowed between active cells to be coupled
 
       data_dimens dimens;              //!< dimension description
 
-      i_type_t pvt_region;               //!< Number of PVT regions in simulation
-      i_type_t sat_region;               //!< Number of saturation regions in simulation
-      i_type_t eql_region;               //!< Number of equilibrium regions in simulation
-      i_type_t fip_region;               //!< Number of FIP regions in simulation
+      t_int pvt_region;               //!< Number of PVT regions in simulation
+      t_int sat_region;               //!< Number of saturation regions in simulation
+      t_int eql_region;               //!< Number of equilibrium regions in simulation
+      t_int fip_region;               //!< Number of FIP regions in simulation
 
-      i_type_t fi_n_phase;               //!< number of phases if full implicit simulation
-      i_type_t fi_phases;                //!< sizeof (int) bit fields (1 -- phase present, 0 -- do not present)
+      t_int fi_n_phase;               //!< number of phases if full implicit simulation
+      t_int fi_phases;                //!< sizeof (int) bit fields (1 -- phase present, 0 -- do not present)
 
-      i_type_t rock_region;              //!< Number of ROCK regions
+      t_int rock_region;              //!< Number of ROCK regions
 
-      sp_arr_i equil_regions;
+      spv_int equil_regions;
 
       //! \brief class's public data area
       sp_amap_i   i_map;
@@ -216,16 +207,16 @@ namespace blue_sky {
       convert_units input_units_converter;          //!< Input units converter
       convert_units output_units_converter;         //!< Output units converter
 
-      std::vector<rocktab_table <base_strategy_fif> > rocktab;    //!< rocktab tables for all rock regions
+      std::vector<rocktab_table> rocktab;    //!< rocktab tables for all rock regions
 
       //TITLE
       std::string title;
 
       pvt_vector pvto, pvtdo, pvtg, pvtw;
 
-      sp_arr_fp rock;            //!< Array (pvt_region) - compressibility of rock for each region
-      sp_arr_fp equil;
-      sp_arr_fp p_ref;           //!< Array (pvt_region) - reference pressure for compressibility of rock for each region
+      spv_float rock;            //!< Array (pvt_region) - compressibility of rock for each region
+      spv_float equil;
+      spv_float p_ref;           //!< Array (pvt_region) - reference pressure for compressibility of rock for each region
 
       //! pressure points at reference depth used for PRVD keyword content,
       //! and initial pressure initialization

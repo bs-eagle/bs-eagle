@@ -6,23 +6,20 @@
 
 
 #define DEF_SIZE 100
+#include "conf.h"
 
 namespace blue_sky
   {
-  // amap_strategy_xi using here
-  template <typename strategy_t>
   class BS_API_PLUGIN ar_args
     {
     public:
       // typedefs
-      typedef typename strategy_t::fp_type_t         item_t;
-      typedef typename strategy_t::i_type_t        index_t;
       //typedef typename strategy_t::item_array_t   item_array_old_t;
       //typedef bos_array <item_array_old_t>        item_array_t;
       //typedef smart_ptr <item_array_t>            sp_item_array_t;
       //typedef typename strategy_t::index_array_t  index_array_t;
 
-      //typedef ar_args <strategy_t> this_t;
+      //typedef ar_args  this_t;
 
       typedef enum
       {

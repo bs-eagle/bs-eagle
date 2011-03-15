@@ -12,9 +12,9 @@ namespace blue_sky
   class BS_API_PLUGIN ar_stack
     {
       // typedefs
-      //typedef ar_args <strategy_t>  arg_t;
+      //typedef ar_args   arg_t;
       typedef std::stack <ar_smth_t>    stk_t;
-      //typedef ar_stack <strategy_t> this_t;
+      //typedef ar_stack  this_t;
 
     public:
       ar_stack ();

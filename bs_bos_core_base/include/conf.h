@@ -41,6 +41,13 @@
 #define v_float        bs_array<t_float, bs_nparray> 
 #define v_double       bs_array<t_double, bs_nparray> 
 
+#define stdv_int       std::vector<t_int> 
+#define stdv_long      std::vector<t_long> 
+#define stdv_uint      std::vector<t_uint> 
+#define stdv_ulong     std::vector<t_ulong> 
+#define stdv_float     std::vector<t_float> 
+#define stdv_double    std::vector<t_double> 
+
 #define spv_int          smart_ptr<v_int, true> 
 #define spv_long         smart_ptr<v_long, true> 
 #define spv_uint         smart_ptr<v_uint, true> 

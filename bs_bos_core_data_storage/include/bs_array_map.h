@@ -11,6 +11,7 @@
 
 #include "auto_value.h"
 #include <boost/array.hpp>
+#include "conf.h"
 
 namespace blue_sky
   {

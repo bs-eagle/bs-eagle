@@ -16,8 +16,7 @@
 namespace blue_sky
   {
 
-  template <class strategy_t>
-  class BS_API_PLUGIN mpi_mesh_grdecl: public  mesh_grdecl<strategy_t> //public mpi::mpi_user
+  class BS_API_PLUGIN mpi_mesh_grdecl: public  mesh_grdecl //public mpi::mpi_user
     {
 //+++++++++++++++++++++++++++++++++++++++++++
 //  INTERNAL TYPE DECLARATION
@@ -39,7 +38,7 @@ namespace blue_sky
 
     public:
       //typedef smart_ptr<mesh_grdecl<base_strategy_fif>, true> sp_mesh_grdecl_fi;
-      typedef mpi_mesh_grdecl<strategy_t> this_t;
+      typedef mpi_mesh_grdecl this_t;
 
 //-------------------------------------------
 //  METHODS

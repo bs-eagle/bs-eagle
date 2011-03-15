@@ -13,7 +13,7 @@ namespace python {
 
   void py_export_mesh ()
   {
-    strategy_exporter::export_base <rs_mesh_iface, rs_mesh_iface_exporter> ("rs_mesh");
+    //strategy_exporter::export_base <rs_mesh_iface, rs_mesh_iface_exporter> ("rs_mesh");
   }
 
 } // namespace python

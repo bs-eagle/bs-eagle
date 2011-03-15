@@ -14,7 +14,7 @@ namespace python {
 
  /*
   template <typename T, class strategy_t>
-  smart_ptr <idata<strategy_t>, true>
+  smart_ptr <idata, true>
   get_data (T *t)
   {
     return t->data;
@@ -30,7 +30,7 @@ namespace python {
   PY_EXPORTER_END;
   void py_export_data_manager ()
   {
-    strategy_exporter::export_base <data_manager, data_manager_exporter> ("data_manager");
+    //strategy_exporter::export_base <data_manager, data_manager_exporter> ("data_manager");
   }
 
 } // namespace python

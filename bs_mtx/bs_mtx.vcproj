@@ -408,10 +408,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\naive_file_reader.h"
-				>
-			</File>
-			<File
 				RelativePath=".\include\py_naive_file_reader.h"
 				>
 			</File>
