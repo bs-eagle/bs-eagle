@@ -35,7 +35,6 @@ namespace blue_sky
 
       typedef h5_pool_iface                                     base_t;
       typedef h5_pool                                           this_t;
-      typedef long                                              npy_intp;
       typedef std::map<std::string, h5_pair>                    map_t;
       typedef std::pair<std::string, h5_pair>                   pair_t;
 
