@@ -20,11 +20,6 @@ namespace blue_sky
     public:
 
       typedef pvt_base                 base_t;
-      typedef t_double                 item_t;
-      typedef t_long                   index_t;
-      typedef base_t::array_index_t    array_index_t;
-      typedef base_t::array_item_t     array_item_t;
-      typedef base_t::input_vector_t   input_vector_t;
       typedef base_t::vector_t         vector_t;
 
       enum {
@@ -47,12 +42,12 @@ namespace blue_sky
        *
        * \param seq_vector
        */
-      virtual void insert_vector (const input_vector_t &vec);
+      virtual void insert_vector (const v_double &vec);
 
       /**
        * \brief generate interpolated data
        */
-      void build (item_t atm_p, item_t min_p, item_t max_p, t_int n_intervals);
+      void build (t_double atm_p, t_double min_p, t_double max_p, t_long n_intervals);
 
       /**
        * \brief calculate interpolated value
@@ -65,9 +60,9 @@ namespace blue_sky
        * \param[out] inv_visc_fvf
        * \param[out] d_inv_visc_fvf
        */
-      virtual void calc (const item_t p, item_t  *inv_fvf, item_t *d_inv_fvf,
-                         item_t *inv_visc, item_t *d_inv_visc,
-                         item_t *inv_visc_fvf, item_t *d_inv_visc_fvf) const;
+      virtual void calc (const t_double p, t_double  *inv_fvf, t_double *d_inv_fvf,
+                         t_double *inv_visc, t_double *d_inv_visc,
+                         t_double *inv_visc_fvf, t_double *d_inv_visc_fvf) const;
 
       virtual void
       print () const;

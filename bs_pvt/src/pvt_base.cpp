@@ -20,45 +20,45 @@ namespace blue_sky
     pvt_props_table = BS_KERNEL.create_object ("table"); 
   }
 
-  pvt_base::item_t
-  pvt_base::interpolate_and_fix (item_t cell_pbub) const
+  t_double
+  pvt_base::interpolate_and_fix (t_double /*cell_pbub*/) const
     {
       BS_ASSERT (false && "BASE METHOD CALL");
       return 0;
     }
 
-  pvt_base::item_t
+  t_double
   pvt_base::get_p_step () const
     {
       return p_step;
     }
 
-  pvt_base::item_t
+  t_double
   pvt_base::get_surface_density () const
     {
       return surface_density;
     }
 
-  void pvt_base::set_surface_density (item_t density)
+  void pvt_base::set_surface_density (t_double density)
   {
     surface_density = density;
   }
 
   void
-  pvt_base::set_density(item_t density, item_t md)
+  pvt_base::set_density(t_double density, t_double md)
   {
     surface_density = density;
     molar_density = md;
   }
 
-  pvt_base::item_t
-  pvt_base::get_gor_for_pressure (item_t pressure_data) const
+  t_double
+  pvt_base::get_gor_for_pressure (t_double /*pressure_data*/) const
     {
       BS_ASSERT (false && "BASE METHOD CALL");
       return 0;
     }
 
-  void pvt_base::check_pressure_interval (item_t min_p, item_t max_p)
+  void pvt_base::check_pressure_interval (t_double min_p, t_double max_p)
   {
     if (max_p - min_p < 1.0e-12)
       {
@@ -68,7 +68,7 @@ namespace blue_sky
       }
   }
 
-  void pvt_base::check_interval_numbers (t_int &n_intervals)
+  void pvt_base::check_interval_numbers (t_long &n_intervals)
   {
     if (n_intervals < 1)
       {
@@ -89,7 +89,7 @@ namespace blue_sky
 
   void pvt_base::check_gas_common (const vector_t &pressure, const vector_t &fvf, const vector_t &visc)
   {
-    for (index_t i = 1, cnt = (index_t)pressure.size (); i < cnt; ++i)
+    for (t_long i = 1, cnt = (t_long)pressure.size (); i < cnt; ++i)
       {
         if (pressure[i] - pressure[i - 1] < EPS_DIFF)
           {
@@ -98,7 +98,7 @@ namespace blue_sky
         if (fvf[i] - fvf[i - 1] >= 0)
           {
             BOSOUT (section::pvt, level::critical) << "gas: fvf" << bs_end;
-            for (index_t j = 0; j < cnt; ++j)
+            for (t_long j = 0; j < cnt; ++j)
               {
                 BOSOUT (section::pvt, level::critical) << fvf[j] << bs_end;
               }
@@ -108,7 +108,7 @@ namespace blue_sky
         if (visc[i] - visc[i - 1] <= 0)
           {
             BOSOUT (section::pvt, level::critical) << "gas: visc" << bs_end;
-            for (index_t j = 0; j < cnt; ++j)
+            for (t_long j = 0; j < cnt; ++j)
               {
                 BOSOUT (section::pvt, level::critical) << visc[j] << bs_end;
               }
@@ -121,7 +121,7 @@ namespace blue_sky
   void 
   pvt_base::check_oil_common (const vector_t &pressure, const vector_t &fvf, const vector_t &visc)
   {
-    for (index_t i = 0, cnt = (index_t)pressure.size (); i < cnt; ++i)
+    for (t_long i = 0, cnt = (t_long)pressure.size (); i < cnt; ++i)
       {
         if (pressure[i] < 0)
           {
