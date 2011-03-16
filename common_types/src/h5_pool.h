@@ -21,7 +21,8 @@ namespace blue_sky
       hid_t dspace;
       hid_t dtype;
       int n_dims;
-      long dims[10];
+      npy_intp py_dims[10];
+      hsize_t h5_dims[10];
     };
 
   /** 
@@ -130,7 +131,7 @@ namespace blue_sky
       void clear_map ();
       void close_node (h5_pair &p);
       template <class T>
-      void add_node (const std::string &name, const hid_t dset, const hid_t dspace, 
+      map_t::iterator add_node (const std::string &name, const hid_t dset, const hid_t dspace, 
                      const hid_t dtype, const int n_dims, const T *dims);
       static herr_t it_group (hid_t g_id, const char *name, const H5L_info_t *info, 
                               void *op_data); 
