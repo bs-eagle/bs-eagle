@@ -97,8 +97,8 @@ private:
       struct all_regions_t
         {
           typedef scal_2p_data_holder                           scal_2p_data_holder_t;
-          typedef bs_array <t_double>                           array_item_t;
-          typedef smart_ptr <bs_array <t_double>, true>         sp_array_item_t;
+          typedef v_double                                      array_item_t;
+          typedef smart_ptr <v_double, true>                    sp_array_item_t;
           
           static void
           place_spof_data (sp_array_item_t dst, scal::data_placement::scal_placement_info &info, const sp_array_item_t src, bool is_water)
