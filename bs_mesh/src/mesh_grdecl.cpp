@@ -171,12 +171,12 @@ struct mesh_grdecl< strategy_t >::inner {
 		cumsum_iterator(const cumsum_iterator& i) : p_(i.p_), sum_(i.sum_) {}
 
 		cumsum_iterator& operator++() {
-			sum_ += *(++p_);
+			sum_ += *p_++;
 			return *this;
 		}
 		cumsum_iterator& operator++(int) {
 			cumsum_iterator tmp = *this;
-			sum_ += *(++p_);
+			sum_ += *p_++;
 			return tmp;
 		}
 
@@ -755,14 +755,16 @@ struct mesh_grdecl< strategy_t >::inner {
 		// find what cells in refined mesh are hit by given points
 		if(hit_idx) {
 			typedef cumsum_iterator< typename vector< fp_stor_t >::iterator > cs_iterator;
+			typedef typename cs_iterator::difference_type diff_t;
+
 			hit_idx->resize(cnt * 2);
 			typename int_arr_t::iterator p_hit = hit_idx->begin();
 			pp = points->begin();
 			for(int_t i = 0; i < cnt; ++i) {
 				cs_iterator p_id = lower_bound(cs_iterator(delta_x.begin()), cs_iterator(delta_x.end()), *pp++);
-				*p_hit++ = p_id - delta_x.begin() - 1;
+				*p_hit++ = max< diff_t >(p_id - delta_x.begin() - 1, 0);
 				p_id = lower_bound(cs_iterator(delta_y.begin()), cs_iterator(delta_y.end()), *pp++);
-				*p_hit++ = p_id - delta_y.begin() - 1;
+				*p_hit++ = max< diff_t >(p_id - delta_y.begin() - 1, 0);
 				pp += 4;
 			}
 		}
