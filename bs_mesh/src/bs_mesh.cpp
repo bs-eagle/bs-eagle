@@ -62,6 +62,7 @@ BLUE_SKY_INIT_PY_FUN
   python::py_export_mesh ();
   python::py_export_mesh_grdecl ();
   python::py_export_flux_connections ();
+  python::py_export_mesh_grdecl ();
 }
 #endif //BSPY_EXPORT_PLUGIN
 
