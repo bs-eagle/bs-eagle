@@ -1,12 +1,30 @@
 #include "bs_mesh_stdafx.h"
 
-#include "py_mesh_grdecl.h"
+#include "py_rs_mesh.h"
+#include "bs_mesh_grdecl.h"
+
 #include "export_python_wrapper.h"
 #include "py_pair_converter.h"
 #include <boost/python/tuple.hpp>
 
 #ifdef BSPY_EXPORTING_PLUGIN
 using namespace boost::python;
+
+namespace blue_sky { namespace python {
+
+PY_EXPORTER (mesh_grdecl_exporter, rs_mesh_iface_exporter)
+	.def ("get_ext_to_int", &T::get_ext_to_int, args(""), "Return reference to external-to-internal mesh index")
+	.def ("get_int_to_ext", &T::get_int_to_ext, args(""), "Return reference to internal-to-external mesh index")
+	.def ("get_volumes", &T::get_volumes, args(""), "Return reference to volumes vector")
+	.def ("get_dimensions_range", &T::get_dimensions_range, args("dim1_max, dim1_min, dim2_max, dim2_min, dim3_max, dim3_min"), "Get dimensions ranges")
+	.def ("get_element_size", &T::get_element_size, args ("n_elem, dx, dy, dz"), "get elements sizes")
+	.def ("get_element_ijk_to_int", &T::get_element_ijk_to_int, args ("i, j, k"), "get elements sizes")
+	.def ("get_n_active_elements", &T::get_n_active_elements, args (""), "Get elements sizes")
+	.def ("calc_element_tops", &T::calc_element_tops, args (""), "Calc element tops")
+	.def ("calc_element_center", &T::calc_element_center, args (""), "Calc element center");
+PY_EXPORTER_END;
+
+}}  // eof blue_sky::python
 
 namespace {
 using namespace blue_sky;
@@ -68,8 +86,7 @@ void reg_sparray_pair() {
 
 } // eof hidden namespace
 
-namespace blue_sky {
-namespace python {
+namespace blue_sky { namespace python {
 
 void py_export_mesh_grdecl () {
 	class_exporter< bs_mesh_grdecl, rs_mesh_iface, mesh_grdecl_exporter_plus >::export_class ("mesh_grdecl");
@@ -77,6 +94,5 @@ void py_export_mesh_grdecl () {
 	reg_sparray_pair< double >();
 }
 
-} // namespace python
-} // namespace blue_sky
+}} // namespace blue_sky::python
 #endif
