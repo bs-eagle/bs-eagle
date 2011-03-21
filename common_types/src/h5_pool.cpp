@@ -127,8 +127,12 @@ namespace blue_sky
             }
           else
             {
-              // TODO: report error
-              throw;
+              file_id = H5Fcreate (fname_.c_str (), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+              if (file_id < 0)
+                {
+                  // TODO: report error
+                  throw;
+                }
             }
         }
       else 
@@ -185,13 +189,13 @@ namespace blue_sky
       if (group_id <= 0)
         {
           // TODO: report error
-          throw;
+          return spv_float ();
         }
       it = h5_map.find (name);
       if (it == h5_map.end ())
         {
           // TODO: report error
-          throw;
+          return spv_float ();
         }
       n = H5Sget_simple_extent_npoints (it->second.dspace);
 
@@ -209,7 +213,7 @@ namespace blue_sky
       else
         {
           //TODO: print error message
-          throw;
+          return spv_float ();
         }
       return a;
     }
@@ -224,13 +228,13 @@ namespace blue_sky
       if (group_id <= 0)
         {
           // TODO: report error
-          throw;
+          return spv_int ();
         }
       it = h5_map.find (name);
       if (it == h5_map.end ())
         {
           // TODO: report error
-          throw;
+          return spv_int ();
         }
       n = H5Sget_simple_extent_npoints (it->second.dspace);
 
@@ -248,7 +252,7 @@ namespace blue_sky
       else
         {
           //TODO: print error message
-          throw;
+          return spv_int ();
         }
       return a;
     }
