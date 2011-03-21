@@ -127,6 +127,7 @@ namespace detail {
     buffer_t sbuf;
 
     size_t len_array = array.size();
+    item_t *array_data = &(array)[0];
     size_t cb, c, i, j, counter;
     size_t k;
     char *start_ptr, *end_ptr = 0;
@@ -219,7 +220,7 @@ namespace detail {
                     for (j = 0; j < k; ++j, ++pos, ++counter)
                       {
                         if (pos < len_array)
-                          array[pos + offset] = array[c + j + offset];
+                          array_data[pos + offset] = array_data[c + j + offset];
                         else
                           {
                             BOSWARN (section::read_data, level::warning)
@@ -236,7 +237,7 @@ namespace detail {
               {
                 start_ptr = end_ptr;
                 if (pos < len_array)
-                  array[pos+offset] = static_cast <typename array_t::value_type> (detail::convert_helper <item_t>::read (start_ptr, &end_ptr));
+                  array_data[pos+offset] = static_cast <typename array_t::value_type> (detail::convert_helper <item_t>::read (start_ptr, &end_ptr));
                 else
                   {
                     BOSWARN (section::read_data, level::warning)
@@ -258,7 +259,7 @@ namespace detail {
                     for (i = 0; i < detail::convert_helper <item_t>::loop_condition (t); ++i, ++pos, ++counter)
                       {
                         if (pos < len_array)
-                          array[pos+offset] = array[c+offset];
+                          array_data[pos+offset] = array_data[c+offset];
                         else
                           {
                             BOSWARN (section::read_data, level::warning)
@@ -275,7 +276,7 @@ namespace detail {
         else
           {
             if (pos < len_array)
-              array[pos+offset] = t;
+              array_data[pos+offset] = t;
             else
               {
                 BOSWARN (section::read_data, level::warning)

@@ -32,13 +32,13 @@ rs_mesh_base ::init_props (const sp_idata_t &idata)
   spv_float data_array;
   spv_int sp_actnum_array;
   
-  sp_actnum_array = idata->get_int_non_empty_array("ACTNUM");
+  sp_actnum_array = idata->get_i_array("ACTNUM");
   if (sp_actnum_array->size()) actnum_array = &(*sp_actnum_array)[0];
   
   n_elements = static_cast <t_long> (sp_actnum_array->size ());
   n_active_elements =  std::accumulate(sp_actnum_array->begin(), sp_actnum_array->end(),0);
   
-  data_array = idata->get_fp_non_empty_array("PORO");
+  data_array = idata->get_fp_array("PORO");
   if (data_array->size()) poro_array = &(*data_array)[0];
   
   data_array = idata->get_fp_array("NTG");

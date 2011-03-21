@@ -58,17 +58,17 @@ namespace blue_sky
     
     def_value = km->handlers[keyword].int_def_value;
     dimens = km->handlers[keyword].dimens;
-    this_arr = idata->i_map->create_item (keyword, dimens, def_value);
+    this_arr = idata->create_i_array (keyword, dimens, def_value);
     
     
-    t_long nx = 0, ny = 0, nz = 0, ndim = 0;
-    idata->i_map->get_dimens (keyword, nx, ny, nz, ndim);
+    t_long ndim = 0;
+    ndim = this_arr->size();
     if ((len = reader->read_array (keyword, *this_arr)) != (size_t)ndim)
       {
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s") % reader->get_prefix () % keyword);
       }
-    
-    BOSOUT (section::read_data, level::medium) << "Keyword: " << keyword << bs_end;
+    idata->set_i_array (keyword, this_arr);
+    BOSOUT (section::read_data, level::medium) << "int pool keyword: " << keyword << bs_end;
     BOSOUT (section::read_data, level::medium) << "ndim = " << ndim << bs_end;
     
     // launch second handler if any
@@ -91,16 +91,18 @@ namespace blue_sky
     
     def_value = km->handlers[keyword].float_def_value;
     dimens = km->handlers[keyword].dimens;
-    this_arr = idata->fp_map->create_item (keyword, dimens, def_value);
+    this_arr = idata->create_fp_array (keyword, dimens, def_value);
 
-    t_long nx = 0, ny = 0, nz = 0, ndim = 0;
-    idata->fp_map->get_dimens (keyword, nx, ny, nz, ndim);
+    t_long ndim = 0;
+    ndim = this_arr->size();
 
     if ((len = reader->read_array (keyword.c_str(), *this_arr)) != (size_t)ndim)
       {
         bs_throw_exception ((boost::format ("Error in %s: not enough valid arguments for keyword %s") % reader->get_prefix() % keyword).str ());
       }
-    BOSOUT (section::read_data, level::medium) << "Keyword: " << keyword << bs_end;
+    idata->set_fp_array (keyword, this_arr);
+
+    BOSOUT (section::read_data, level::medium) << "fp pool keyword: " << keyword << bs_end;
     BOSOUT (section::read_data, level::medium) << "ndim = " << ndim << bs_end;
     
     // launch second handler if any

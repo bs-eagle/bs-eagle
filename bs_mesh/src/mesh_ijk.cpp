@@ -34,16 +34,16 @@ mesh_ijk ::init_props (const sp_idata_t &idata)
 {
   spv_float data_array;
   
-  data_array = idata->get_fp_non_empty_array("DX");
+  data_array = idata->get_fp_array("DX");
   if (data_array->size()) dx_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_non_empty_array("DY");
+  data_array = idata->get_fp_array("DY");
   if (data_array->size()) dy_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_non_empty_array("DZ");
+  data_array = idata->get_fp_array("DZ");
   if (data_array->size()) dz_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_non_empty_array("TOPS");
+  data_array = idata->get_fp_array("TOPS");
   if (data_array->size()) tops_array = &(*data_array)[0];
   
   base_t::init_props (idata);

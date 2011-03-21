@@ -3,7 +3,6 @@
 
 #ifdef BSPY_EXPORTING_PLUGIN
 //#include "bcsr_matrix.h"
-#include "py_flux_connections.h"
 #include "rs_mesh_iface.h"
 
 #include "export_python_wrapper.h"
