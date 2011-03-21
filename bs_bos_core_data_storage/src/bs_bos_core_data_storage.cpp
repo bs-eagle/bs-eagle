@@ -10,7 +10,6 @@
 #include "py_data_manager.h"
 #include "py_keyword_manager.h"
 #include "py_data_class.h"
-#include "py_bs_array_map.h"
 #include "py_read_class.h"
 
 namespace blue_sky
@@ -40,7 +39,6 @@ BLUE_SKY_INIT_PY_FUN
   using namespace blue_sky;
 
   python::export_FRead ();
-  python::py_export_array_maps ();
   python::py_export_data_manager ();
   python::py_export_idata ();
   python::export_keyword_manager();

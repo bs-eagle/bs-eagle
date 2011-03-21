@@ -99,7 +99,7 @@ namespace blue_sky
         {
         }
         
-        keyword_handler (handler_t handle_function, t_long def_value, int *new_dimens)
+        keyword_handler (handler_t handle_function, t_int def_value, t_int *new_dimens)
           : second_handle_function (handle_function)
           , index_in_pool (-1)
           , int_def_value (def_value)
@@ -112,7 +112,7 @@ namespace blue_sky
             dimens[5] = new_dimens[5];
           }
         
-        keyword_handler (handler_t handle_function, t_float def_value, t_long *new_dimens)
+        keyword_handler (handler_t handle_function, t_float def_value, t_int *new_dimens)
           : second_handle_function (handle_function)
           , index_in_pool (-2)
           , float_def_value (def_value)

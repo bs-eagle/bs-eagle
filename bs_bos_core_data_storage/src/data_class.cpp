@@ -58,7 +58,7 @@ namespace blue_sky
   
   idata::~idata ()
   {
-
+    h5_pool->close_file();
   }
 
   
@@ -75,8 +75,7 @@ namespace blue_sky
   fi_n_phase (0),
   fi_phases (0),
   rock_region (1),
-  i_map (BS_KERNEL.create_object (amap_i::bs_type())),
-  fp_map (BS_KERNEL.create_object (amap_fp::bs_type())),
+  h5_pool (BS_KERNEL.create_object ("h5_pool")),
   init_section (0)
   {
     init();
@@ -85,8 +84,7 @@ namespace blue_sky
   
   idata::idata(const this_t &src)
       : bs_refcounter (src), bs_node(src), 
-      i_map(give_kernel::Instance().create_object_copy(src.i_map)),
-      fp_map(give_kernel::Instance().create_object_copy(src.fp_map))
+      h5_pool(give_kernel::Instance().create_object_copy(src.h5_pool))
       //scal3(give_kernel::Instance().create_object_copy(src.scal3)),
   {
     *this = src;
@@ -96,15 +94,18 @@ namespace blue_sky
   void idata::init()
   {
     //depth.resize((nx+1) * (ny+1) * (nz+1));
-		ahelper.init_names_maps ();
+    h5_pool->open_file ("bs_data_storage.h5", "/pool");
+  }
+
+  void idata::flush_pool()
+  {
+    h5_pool->flush ();
   }
 
   
   idata &idata::operator=(const this_t &src)
   {
-    i_map = src.i_map;
-    fp_map = src.fp_map;
-		ahelper = src.ahelper;
+    h5_pool = src.h5_pool;
     return *this;
   }
 
@@ -239,119 +240,62 @@ namespace blue_sky
       }
   }
   
-	/* 
-			ARRAYS_HELPER methods
-	*/
-
-	
-  idata::arrays_helper::arrays_helper () {
-		dummy_array_i = new t_int [1];
-		dummy_array_fp = new t_float [1];
-	}
-
-	
-  idata::arrays_helper::~arrays_helper () {
-		delete [] dummy_array_i;
-		delete [] dummy_array_fp;
-	}
-
-	
-  void idata::arrays_helper::init_names_maps () {
-		for (int i = MPFANUM; i < ARR_TOTAL_INT; ++i)
-			add_correspondence_i(int_names_table[i], i);
-
-		for (int i = SGL; i < ARR_TOTAL_DOUBLE; ++i)
-		add_correspondence_fp(double_names_table[i], i);
-	}
-	
   
-	void idata::arrays_helper::add_correspondence_i (const std::string &name, int index) {
-		names_map_i[name] = index;
-	}
-	
-	
-	void idata::arrays_helper::add_correspondence_fp (const std::string &name, int index) {
-		names_map_fp[name] = index;
-	}
-
-	
-	int idata::arrays_helper::get_idx_i (const std::string &name) const {
-		names_map_t::const_iterator iter = names_map_i.find (name);
-		if (iter != names_map_i.end ())
-			return iter->second;
-		return -1;
-	}
-	
-	int idata::arrays_helper::get_idx_fp (const std::string &name) const {
-		names_map_t::const_iterator iter = names_map_fp.find (name);
-		if (iter != names_map_fp.end ())
-			return iter->second;
-		return -1;
-	}
-
-  
-  spv_int idata::get_int_array (const std::string & array_name)
+  spv_int idata::get_i_array (const std::string & array_name)
   {
-    spv_int dummy;
-    if (!fp_map->contain (array_name))
-      {
-        return dummy;
-      }
-    else
-      {
-        return (*i_map)[array_name].array;
-      }
+    return h5_pool->get_i_data (array_name);
   }
   
   spv_float idata::get_fp_array (const std::string &array_name)
   {
-    spv_float dummy;
-    if (!fp_map->contain (array_name))
-      {
-        return dummy;
-      }
-    else
-      {
-        return (*fp_map)[array_name].array;
-      }
+    return h5_pool->get_fp_data (array_name);
   }
   
-  
-  spv_int idata::get_int_non_empty_array (const std::string &array_name)
+  int idata::set_i_array (const std::string & array_name,  spv_int array)
   {
-    if (!i_map->contain (array_name))
-      {
-        bs_throw_exception (boost::format ("Integer array %s is not initialized yet!") % array_name);
-      }
-    else
-      {
-        return (*i_map)[array_name].array;
-      }
+    return h5_pool->set_i_data (array_name, array);
   }
   
-  
-  spv_float idata::get_fp_non_empty_array (const std::string &array_name)
+
+  int idata::set_fp_array (const std::string & array_name,  spv_float array)
   {
-    if (!fp_map->contain (array_name))
-      {
-        bs_throw_exception (boost::format ("fp array %s is not initialized yet!") % array_name);
-      }
-    else
-      {
-        return (*fp_map)[array_name].array;
-      }
+    return h5_pool->set_fp_data (array_name, array);
+  }
+
+  spv_int idata::create_i_array (const std::string & array_name,  t_int *array_dimens, t_int def_value)
+  {
+    spv_int new_array;
+    t_long n;
+    npy_intp dims[3];
+
+    dims[0] = array_dimens[ARRAY_POOL_NX_A] * dimens.nx + array_dimens[ARRAY_POOL_NX_B];
+    dims[1] = array_dimens[ARRAY_POOL_NY_A] * dimens.ny + array_dimens[ARRAY_POOL_NY_B];
+    dims[2] = array_dimens[ARRAY_POOL_NZ_A] * dimens.nz + array_dimens[ARRAY_POOL_NZ_B];
+    n = dims[0] * dims[1] * dims[2];
+
+    new_array = BS_KERNEL.create_object (v_int::bs_type ());
+    new_array->resize (n);
+    new_array->reshape (3, dims);
+
+    return new_array;
   }
   
-  
-  bool idata::contain (const std::string &array_name) const
+
+  spv_float idata::create_fp_array (const std::string & array_name,  t_int *array_dimens, t_float def_value)
   {
-    int array_index = ahelper.get_idx_i(array_name);
-    if (array_index >= 0) return true;
-    
-    array_index = ahelper.get_idx_fp(array_name);
-    if (array_index >= 0) return true;
-    
-    return false;    
+    spv_float new_array;
+    t_long n;
+    npy_intp dims[3];
+    dims[0] = array_dimens[ARRAY_POOL_NX_A] * dimens.nx + array_dimens[ARRAY_POOL_NX_B];
+    dims[1] = array_dimens[ARRAY_POOL_NY_A] * dimens.ny + array_dimens[ARRAY_POOL_NY_B];
+    dims[2] = array_dimens[ARRAY_POOL_NZ_A] * dimens.nz + array_dimens[ARRAY_POOL_NZ_B];
+    n = dims[0] * dims[1] * dims[2];
+
+    new_array = BS_KERNEL.create_object (v_float::bs_type ());
+    new_array->resize (n);
+    new_array->reshape (3, dims);
+
+    return new_array;
   }
 
   // create object

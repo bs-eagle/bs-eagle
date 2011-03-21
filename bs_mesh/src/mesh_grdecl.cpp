@@ -874,13 +874,13 @@ void mesh_grdecl::init_props(const sp_idata_t &idata)
   //t_float *it;
   
   // init ZCORN
-  data_array = idata->get_fp_non_empty_array("ZCORN");
+  data_array = idata->get_fp_array("ZCORN");
   if (data_array->size()) {
 	  pinner_->zcorn_ = data_array;
 	  zcorn_array = &(*data_array)[0];
   }
   // init COORD
-  data_array = idata->get_fp_non_empty_array("COORD");
+  data_array = idata->get_fp_array("COORD");
   if (data_array->size()) {
 	  pinner_->coord_ = data_array;
 	  coord_array = &(*data_array)[0];

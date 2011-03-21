@@ -33,7 +33,6 @@
 #define t_uint          unsigned long
 #define t_ulong         unsigned long
 
-
 #define v_int          bs_array<t_int, bs_nparray> 
 #define v_long         bs_array<t_long, bs_nparray> 
 #define v_uint         bs_array<t_uint, bs_nparray> 

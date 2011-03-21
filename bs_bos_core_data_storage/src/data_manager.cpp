@@ -373,11 +373,11 @@ namespace blue_sky
       int poro_counter = 0;
       int ntg_counter = 0;
       
-      t_int* actnum = &(*data->get_int_non_empty_array ("ACTNUM"))[0];
-      const t_float *permx  = &(*data->get_fp_non_empty_array ("PERMX"))[0];
-      const t_float *permy  = &(*data->get_fp_non_empty_array ("PERMY"))[0];
-      const t_float *permz  = &(*data->get_fp_non_empty_array ("PERMZ"))[0];
-      const t_float *poro   = &(*data->get_fp_non_empty_array ("PORO"))[0];
+      t_int* actnum = &(*data->get_i_array ("ACTNUM"))[0];
+      const t_float *permx  = &(*data->get_fp_array ("PERMX"))[0];
+      const t_float *permy  = &(*data->get_fp_array ("PERMY"))[0];
+      const t_float *permz  = &(*data->get_fp_array ("PERMZ"))[0];
+      const t_float *poro   = &(*data->get_fp_array ("PORO"))[0];
       const t_float *ntg    = &(*data->get_fp_array ("NTG"))[0];
 
       for (int i = 0; i < nb; ++i)

@@ -99,8 +99,6 @@ namespace blue_sky
       idata->dimens.nx = itmp[0];
       idata->dimens.ny = itmp[1];
       idata->dimens.nz = itmp[2];
-      idata->fp_map->init (idata->dimens.nx, idata->dimens.ny, idata->dimens.nz);
-      idata->i_map->init (idata->dimens.nx, idata->dimens.ny, idata->dimens.nz);
       
       // Number of nodes
       ndim = idata->dimens.nx * idata->dimens.ny * idata->dimens.nz;

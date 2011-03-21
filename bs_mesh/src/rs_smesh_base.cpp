@@ -32,13 +32,13 @@ rs_smesh_base ::init_props (const sp_idata_t &idata)
   
   spv_float data_array;
   
-  data_array = idata->get_fp_non_empty_array("PERMX");
+  data_array = idata->get_fp_array("PERMX");
   if (data_array->size()) permx_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_non_empty_array("PERMY");
+  data_array = idata->get_fp_array("PERMY");
   if (data_array->size()) permy_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_non_empty_array("PERMZ");
+  data_array = idata->get_fp_array("PERMZ");
   if (data_array->size()) permz_array = &(*data_array)[0];
   
   data_array = idata->get_fp_array("MULTX");
