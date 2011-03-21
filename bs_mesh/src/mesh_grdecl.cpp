@@ -34,9 +34,9 @@ struct mesh_grdecl::inner {
 	typedef std::pair< spfp_storarr_t, spfp_storarr_t > coord_zcorn_pair;
 	typedef std::set< fp_t > fp_set;
 
-	typedef typename fp_storvec_t::iterator v_iterator;
-	typedef typename fp_storvec_t::const_iterator cv_iterator;
-	typedef typename fp_set::iterator fps_iterator;
+	typedef fp_storvec_t::iterator v_iterator;
+	typedef fp_storvec_t::const_iterator cv_iterator;
+	typedef fp_set::iterator fps_iterator;
 
 	// iterator that jumps over given offset instead of fixed +1
 	template< class iterator_t, int step_size = 1 >
@@ -281,13 +281,13 @@ struct mesh_grdecl::inner {
 
 	static spfp_storarr_t gen_coord(int_t nx, int_t ny, spfp_storarr_t dx, spfp_storarr_t dy) {
 		using namespace std;
-		typedef typename fp_storarr_t::value_type value_t;
+		typedef fp_storarr_t::value_type value_t;
 
 		// DEBUG
 		BSOUT << "gen_coord: init stage" << bs_end;
 		// create subscripters
-		typename inner::dim_subscript dxs(*dx);
-		typename inner::dim_subscript dys(*dy);
+		inner::dim_subscript dxs(*dx);
+		inner::dim_subscript dys(*dy);
 
 		// if dimension offset is given as array, then size should be taken from array size
 		if(dx->size() > 1) nx = dx->size();
@@ -302,7 +302,7 @@ struct mesh_grdecl::inner {
 		// fill coord
 		// coord is simple grid
 		coord->init((nx + 1)*(ny + 1)*6, value_t(0));
-		typename fp_storarr_t::iterator pcd = coord->begin();
+		fp_storarr_t::iterator pcd = coord->begin();
 		for(int_t iy = 0; iy <= ny; ++iy) {
 			fp_t cur_y = dys[iy];
 			for(int_t ix = 0; ix <= nx; ++ix) {
@@ -375,14 +375,15 @@ struct mesh_grdecl::inner {
 		zcorn.resize(new_nx * new_ny * nz * 8);
 		v_iterator p_newz = zcorn.begin();
 		for(typename vector< value_t >::const_iterator p_cache = z_cache.begin(), end = z_cache.end(); p_cache != end; ++p_cache) {
-			p_newz = fill_n(p_newz, new_plane_sz, *p_cache);
+			fill_n(p_newz, new_plane_sz, *p_cache);
+      p_newz += new_plane_sz;
 		}
 	}
 
 	static void insert_column(int_t nx, int_t ny, fp_storvec_t& coord, fp_storvec_t& zcorn, fp_stor_t where) {
 		using namespace std;
 
-		typedef typename fp_storvec_t::iterator v_iterator;
+		typedef fp_storvec_t::iterator v_iterator;
 		typedef slice_iterator< v_iterator, 6 > dim_iterator;
 
 		// reserve mem for insterts
@@ -419,7 +420,7 @@ struct mesh_grdecl::inner {
 
 	static void insert_row(int_t nx, int_t ny, fp_storvec_t& coord, fp_storvec_t& zcorn, fp_stor_t where) {
 		using namespace std;
-		typedef typename fp_storvec_t::iterator v_iterator;
+		typedef fp_storvec_t::iterator v_iterator;
 		typedef slice_iterator< v_iterator > dim_iterator;
 		const int_t ydim_step = 6 * (nx + 1);
 
@@ -656,7 +657,7 @@ struct mesh_grdecl::inner {
 	{
 		using namespace std;
 
-		typedef typename fp_storvec_t::iterator v_iterator;
+		typedef fp_storvec_t::iterator v_iterator;
 		typedef slice_iterator< v_iterator, 6 > dim_iterator;
 
 		// DEBUG
@@ -688,7 +689,7 @@ struct mesh_grdecl::inner {
 		copy(dim_iterator(coord->begin() + 1, ydim_step), dim_iterator(coord->begin() + 1, ydim_step) + (ny + 1),
 				insert_iterator< fp_set >(y, y.begin()));
 
-		typename fp_storarr_t::const_iterator pp = points->begin(), p_end = points->end();
+		fp_storarr_t::const_iterator pp = points->begin(), p_end = points->end();
 		// make (p_end - p_begin) % 4 = 0
 		p_end -= (p_end - pp) % 6;
 
@@ -754,10 +755,10 @@ struct mesh_grdecl::inner {
 		// find what cells in refined mesh are hit by given points
 		if(hit_idx) {
 			typedef cumsum_iterator< typename vector< fp_stor_t >::iterator > cs_iterator;
-			typedef typename cs_iterator::difference_type diff_t;
+			typedef cs_iterator::difference_type diff_t;
 
 			hit_idx->resize(cnt * 2);
-			typename int_arr_t::iterator p_hit = hit_idx->begin();
+			int_arr_t::iterator p_hit = hit_idx->begin();
 			pp = points->begin();
 			for(int_t i = 0; i < cnt; ++i) {
 				cs_iterator p_id = lower_bound(cs_iterator(delta_x.begin()), cs_iterator(delta_x.end()), *pp++);
@@ -806,7 +807,7 @@ std::pair< spv_float, spv_float >
 mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz) {
 	using namespace std;
 	typedef std::pair< spv_float, spv_float > ret_t;
-	typedef typename v_float::value_type value_t;
+	typedef v_float::value_type value_t;
 
 	// DEBUG
 	BSOUT << "gen_coord_zcorn: init stage" << bs_end;
@@ -823,18 +824,20 @@ mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_
 
 	// fill zcorn
 	// very simple case
-	typename inner::dim_subscript dzs(*dz);
+	inner::dim_subscript dzs(*dz);
 	zcorn->init(nx*ny*nz*8);
 
 	// DEBUG
 	BSOUT << "gen_coord_zcorn: ZCORN creating starts..." << bs_end;
-	typename v_float::iterator pcd = zcorn->begin();
+	v_float::iterator pcd = zcorn->begin();
 	const t_long plane_size = nx * ny * 4;
 	t_float z_cache = dzs[0];
 	for(t_long iz = 1; iz <= nz; ++iz) {
-		pcd = fill_n(pcd, plane_size, z_cache);
+		fill_n(pcd, plane_size, z_cache);
+    pcd += plane_size;
 		z_cache = dzs[iz];
-		pcd = fill_n(pcd, plane_size, z_cache);
+		fill_n(pcd, plane_size, z_cache);
+    pcd += plane_size;
 	}
 	// DEBUG
 	BSOUT << "gen_coord_zcorn: ZCORN creating finished" << bs_end;
