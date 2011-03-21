@@ -27,7 +27,7 @@ namespace blue_sky
     //*this = src;
   }
   
-  void mesh_ijk_keywords::mesh_ijk_handler(const std::string &keyword, keyword_params_t &params)
+  void mesh_ijk_keywords::mesh_ijk_handler(const std::string & /*keyword*/, keyword_params_t &params)
     {
       sp_idata_t idata (params.data, bs_dynamic_cast ());
       sp_bs_mesh_ijk_t ijk_mesh (BS_KERNEL.create_object (bs_mesh_ijk ::bs_type ()), bs_dynamic_cast());

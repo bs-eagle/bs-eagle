@@ -192,7 +192,7 @@ mesh_ijk::get_center (t_long i, t_long j, t_long k) const
 }
 
 
-int mesh_ijk::splicing(stdv_double& volumes_temp)
+int mesh_ijk::splicing(stdv_double& /*volumes_temp*/)
 {
   int splicing_num = 0;
   BS_ASSERT (false && "NOT IMPL YET");
@@ -411,7 +411,7 @@ void mesh_ijk::set_neigbour_data (const t_long index1, const t_long index1_ext, 
 }
 
 
-int mesh_ijk::find_neighbours(sp_bcsr_t neig_matrix)
+int mesh_ijk::find_neighbours(sp_bcsr_t /*neig_matrix*/)
 {
   return 0;
 }

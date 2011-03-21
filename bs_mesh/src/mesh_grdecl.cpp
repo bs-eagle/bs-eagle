@@ -754,7 +754,7 @@ struct mesh_grdecl::inner {
 
 		// find what cells in refined mesh are hit by given points
 		if(hit_idx) {
-			typedef cumsum_iterator< typename vector< fp_stor_t >::iterator > cs_iterator;
+			typedef cumsum_iterator< vector< fp_stor_t >::iterator > cs_iterator;
 			typedef cs_iterator::difference_type diff_t;
 
 			hit_idx->resize(cnt * 2);
@@ -1957,21 +1957,21 @@ struct build_jacobian_rows_class
   }
 
   void
-  change_by_x (t_long i, t_long j, t_long k, t_long ext_index2, bool is_adjacent)
+  change_by_x (t_long /*i*/, t_long /*j*/, t_long /*k*/, t_long ext_index2, bool /*is_adjacent*/)
   {
     rows_ptr[mesh->convert_ext_to_int (ext_index) + 1]++;
     rows_ptr[mesh->convert_ext_to_int (ext_index2) + 1]++;
   }
 
   void
-  change_by_y (t_long i, t_long j, t_long k, t_long ext_index2, bool is_adjacent)
+  change_by_y (t_long /*i*/, t_long /*j*/, t_long /*k*/, t_long ext_index2, bool /*is_adjacent*/)
   {
     rows_ptr[mesh->convert_ext_to_int (ext_index) + 1]++;
     rows_ptr[mesh->convert_ext_to_int (ext_index2) + 1]++;
   }
 
   void
-  change_by_z (t_long i, t_long j, t_long k, t_long ext_index2, bool is_adjacent)
+  change_by_z (t_long /*i*/, t_long /*j*/, t_long /*k*/, t_long ext_index2, bool /*is_adjacent*/)
   {
     rows_ptr[mesh->convert_ext_to_int (ext_index) + 1]++;
     rows_ptr[mesh->convert_ext_to_int (ext_index2) + 1]++;
@@ -2049,7 +2049,7 @@ struct build_jacobian_cols_class
   
     
   void
-  change_jac_and_flux_conn( const t_long ext_index1, const t_long ext_index2, t_double tran)
+  change_jac_and_flux_conn( const t_long /*ext_index1*/, const t_long ext_index2, t_double tran)
   {
     t_long index1 = mesh->convert_ext_to_int (ext_index);
     t_long index2 = mesh->convert_ext_to_int (ext_index2);
@@ -2153,7 +2153,7 @@ struct build_jacobian_cols_class
   }
 
   void
-  change_by_z (t_long i, t_long j, t_long k, t_long ext_index2, bool is_adjacent)
+  change_by_z (t_long i, t_long j, t_long k, t_long ext_index2, bool /*is_adjacent*/)
   {
     t_double tran;
     
@@ -2412,8 +2412,8 @@ struct build_jacobian_and_flux : boost::noncopyable
 
 
 int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr_t jacobian,
-                                                                               const sp_flux_conn_iface_t flux_conn,
-                                                                               spv_long boundary_array)
+                                                                   const sp_flux_conn_iface_t flux_conn,
+                                                                   spv_long /*boundary_array*/)
 {
   write_time_to_log init_time ("Mesh transmissibility calculation", ""); 
   
@@ -2766,7 +2766,7 @@ bool mesh_grdecl::file_open_cube_with_hdf5_swap(const char* file_name)
 #endif
 
 
-bool mesh_grdecl::file_open_actnum(const char* file_name)
+bool mesh_grdecl::file_open_actnum(const char* /*file_name*/)
 {
 #if 0
   fstream file(file_name,  ios::in);
@@ -2795,7 +2795,7 @@ bool mesh_grdecl::file_open_actnum(const char* file_name)
 
 
 
-bool mesh_grdecl::file_open_cube(const char* file_name)
+bool mesh_grdecl::file_open_cube(const char* /*file_name*/)
 {
   /*
   using namespace std;

@@ -177,7 +177,7 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     /*!	\brief  find neighbours (adjacency matrix)
     	\param neig_matrix - bcsr adjacency matrix
     	\return 0 if success */
-    int find_neighbours(sp_bcsr_t neig_matrix) {return 0;};
+    int find_neighbours(sp_bcsr_t /*neig_matrix*/) {return 0;};
 
     /*! \brief get_block_dx_dy_dz
         \param n_elem - block number

@@ -55,7 +55,7 @@ namespace blue_sky
       keyword_manager->register_keyword ("COORD", keyword_handler (0, def_value, &coord_dimens[0]));  
     }
     
-  void mesh_grdecl_keywords::mesh_grdecl_handler(const std::string &keyword, keyword_params_t &params)
+  void mesh_grdecl_keywords::mesh_grdecl_handler(const std::string & /*keyword*/, keyword_params_t &params)
     {
       sp_idata_t idata (params.data, bs_dynamic_cast ());
       sp_bs_mesh_grdecl_t mesh_grdecl (BS_KERNEL.create_object (bs_mesh_grdecl ::bs_type ()), bs_dynamic_cast ());
