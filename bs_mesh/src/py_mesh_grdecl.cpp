@@ -77,7 +77,7 @@ struct mesh_grdecl_exporter_plus {
 template< class fp_type >
 void reg_sparray_pair() {
 	// register converter from pair of returned arrayes to python list
-	typedef smart_ptr< bs_array< fp_type > > spfp_array;
+	typedef smart_ptr< bs_array< fp_type, bs_nparray > > spfp_array;
 	typedef std::pair< spfp_array, spfp_array > array_pair;
 	typedef bspy_converter< pair_traits< array_pair > > array_pair_converter;
 	array_pair_converter::register_to_py();
