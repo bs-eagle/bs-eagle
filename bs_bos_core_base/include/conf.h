@@ -8,15 +8,13 @@
 #ifndef CONF_7FBMZIFT
 #define CONF_7FBMZIFT
 
+#ifdef BS_ARRAY_DEFAULT_TRAITS
+#undef BS_ARRAY_DEFAULT_TRAITS
+#endif
+#define BS_ARRAY_DEFAULT_TRAITS bs_nparray
+
 #include "bs_nparray.h"
 #include "bs_array.h"
-
-namespace blue_sky {
-
-template< class T >
-struct bs_array_default_traits< T, bs_array_default_traits_tag > : public bs_array_base2traits< T, bs_nparray > {};
-
-}
 
 //! using this type for small data
 typedef int           t_int;
@@ -33,12 +31,12 @@ typedef double        t_double;
 typedef unsigned long               t_uint;
 typedef unsigned long               t_ulong;
 
-typedef blue_sky::bs_array< t_int >           v_int;
-typedef blue_sky::bs_array< t_long >          v_long;
-typedef blue_sky::bs_array< t_uint >          v_uint;
-typedef blue_sky::bs_array< t_ulong >         v_ulong;
-typedef blue_sky::bs_array< t_float >         v_float;
-typedef blue_sky::bs_array< t_double >        v_double;
+typedef blue_sky::bs_array< t_int, blue_sky::bs_nparray >           v_int;
+typedef blue_sky::bs_array< t_long, blue_sky::bs_nparray >          v_long;
+typedef blue_sky::bs_array< t_uint, blue_sky::bs_nparray >          v_uint;
+typedef blue_sky::bs_array< t_ulong, blue_sky::bs_nparray >         v_ulong;
+typedef blue_sky::bs_array< t_float, blue_sky::bs_nparray >         v_float;
+typedef blue_sky::bs_array< t_double, blue_sky::bs_nparray >        v_double;
 
 typedef std::vector< t_int >        stdv_int;
 typedef std::vector< t_long >       stdv_long;
