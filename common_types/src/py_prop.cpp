@@ -23,9 +23,9 @@ namespace python {
 
     //base_exporter <matrix_iface <seq_vector<float>, seq_vector<int> >,   default_exporter>::export_class ("matrix_iface_fi"); 
     //matrix_exporter::export_base <matrix_iface, py_matrix_iface_exporter> ("matrix_iface");
-    base_exporter <prop_iface <float, int, std::string, bool>, py_prop_exporter>::export_class ("prop_iface");
+    base_exporter <prop_iface, py_prop_exporter>::export_class ("prop_iface");
 
-    class_exporter <prop<float, int, std::string, bool>, prop_iface <float, int, std::string, bool>, py_prop_exporter>::export_class ("prop");
+    class_exporter <prop, prop_iface, py_prop_exporter>::export_class ("prop");
 
   }
 

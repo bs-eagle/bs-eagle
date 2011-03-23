@@ -17,6 +17,11 @@
 
 namespace blue_sky
   {
+  const std::string tol_idx = "tolerance";
+  const std::string max_iters_idx = "maxiters";
+  const std::string final_res_idx = "final_residual";
+  const std::string iters_idx = "iters";
+  const std::string success_idx = "is_success";
   /**
   * @brief CGS linear solver
   */
@@ -109,11 +114,6 @@ namespace blue_sky
     protected:
       sp_base_t         prec;         //!< pointer to the preconditioner
       sp_prop_t         prop;         //!< properties for solvers
-      int               tol_idx;
-      int               max_iters_idx;
-      int               final_res_idx;
-      int               iters_idx;
-      int               success_idx;
       spv_double     sp_p;
       spv_double     sp_phat;
       spv_double     sp_v;

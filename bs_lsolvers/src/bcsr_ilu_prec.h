@@ -110,8 +110,6 @@ namespace blue_sky
       sp_prop_t         prop;         //!< properties for solvers
       sp_bcsr_matrix_t  lu_matrix;   //!< pointer to the LU matrix
       
-      int use_internal_matrix_idx;        
-
     private:
 
     };

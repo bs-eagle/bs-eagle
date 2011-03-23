@@ -18,6 +18,7 @@
 namespace blue_sky
   {
 
+  const std::string block_size_idx = "block_size";
   /**
    * \brief BLU solver for dens matrix
    */
@@ -111,7 +112,6 @@ namespace blue_sky
       //-----------------------------------------
     public:
       sp_prop_t         prop;         //!< properties for solvers
-      int block_size_idx;
 
     protected:
 

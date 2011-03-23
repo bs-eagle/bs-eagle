@@ -74,34 +74,20 @@ namespace blue_sky
      void
     bicgstab_solver::init_prop ()
       {
-        tol_idx = prop->get_index_f (std::string ("tolerance"));
-        if (tol_idx < 0)
-          tol_idx = prop->add_property_f (1.0e-4, std::string ("tolerance"), std::string ("Target tolerance for linear solver"));
+        prop->add_property_f (1.0e-4, tol_idx, 
+                              std::string ("Target tolerance for linear solver"));
 
-        final_res_idx = prop->get_index_f (std::string ("final_residual"));
-        if (final_res_idx < 0)
-          final_res_idx = prop->add_property_f (1, std::string ("final_residual"), std::string ("Solution residual"));
+        prop->add_property_f (1, final_res_idx, std::string ("Solution residual"));
 
-        max_iters_idx = prop->get_index_i (std::string ("maxiters"));
-        if (max_iters_idx < 0)
-          max_iters_idx = prop->add_property_i (20, std::string ("maxiters"), std::string ("Maximum allowed number of iterations"));
+        prop->add_property_i (20, max_iters_idx, 
+                              std::string ("Maximum allowed number of iterations"));
 
-        iters_idx = prop->get_index_i (std::string ("iters"));
-        if (iters_idx < 0)
-          iters_idx = prop->add_property_i (0, std::string ("iters"), std::string ("Total number of used solver iterations"));
+        prop->add_property_i (0, iters_idx, 
+                              std::string ("Total number of used solver iterations"));
 
-        success_idx = prop->get_index_b (std::string ("is_success"));
-        if (success_idx < 0)
-          success_idx = prop->add_property_b (false, std::string ("is_success"), std::string ("True if solver successfully convergent"));
+        prop->add_property_b (false, success_idx, 
+                              std::string ("True if solver successfully convergent"));
         
-        if (tol_idx < 0
-            || final_res_idx < 0
-            || max_iters_idx < 0
-            || iters_idx < 0
-            || success_idx < 0)
-          {
-            bs_throw_exception ("Can not regidter some properties");
-          }
       }
     
     int bicgstab_solver::solve (sp_matrix_t matrix, spv_double sp_rhs, spv_double sp_sol)

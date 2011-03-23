@@ -25,7 +25,7 @@ namespace blue_sky {
 
     bool res = true;
 
-    res &= BS_KERNEL.register_type(*bs_init.pd_, prop<float, int, std::string, bool>::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, prop::bs_type()); BS_ASSERT (res);
     res &= BS_KERNEL.register_type(*bs_init.pd_, table::bs_type()); BS_ASSERT (res);
     res &= BS_KERNEL.register_type(*bs_init.pd_, h5_pool::bs_type()); BS_ASSERT (res);
 

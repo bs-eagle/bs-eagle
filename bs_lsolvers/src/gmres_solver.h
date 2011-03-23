@@ -18,10 +18,15 @@
 
 namespace blue_sky
   {
+  const std::string tol_idx = "tolerance";
+  const std::string max_iters_idx = "maxiters";
+  const std::string final_res_idx = "final_residual";
+  const std::string iters_idx = "iters";
+  const std::string m_idx = "m_size";
+  const std::string success_idx = "is_success";
   /**
   * @brief GMRES linear solver
   */
-  
   class BS_API_PLUGIN gmres_solver : public lsolver_iface
     {
 
@@ -116,12 +121,6 @@ namespace blue_sky
       spv_double        sp_rs;
       spv_double        sp_hh;
 
-      int               tol_idx;
-      int               max_iters_idx;
-      int               final_res_idx;
-      int               iters_idx;
-      int               m_idx;
-      int               success_idx;
 
     public:
       BLUE_SKY_TYPE_DECL (gmres_solver);

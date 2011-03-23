@@ -15,8 +15,7 @@
 namespace blue_sky
 {
   
-  template <class t_double, class i_type_t, class s_type_t, class b_type_t>
-  class BS_API_PLUGIN prop : public prop_iface<t_double, i_type_t, s_type_t, b_type_t>
+  class BS_API_PLUGIN prop : public prop_iface
     {
       // ------------------------------------
       // METHODS
@@ -36,19 +35,19 @@ namespace blue_sky
         }
       
       //! add new integer property to the list (return index of the property or < 0 if error occur)
-      virtual void add_property_i (const i_type_t def_value, const std::string &short_name, const std::string &description) 
+      virtual void add_property_i (const t_long def_value, const std::string &short_name, const std::string &description) 
         {
           i_impl.add (def_value, short_name, description);
         }
 
       //! add new string property to the list (return index of the property or < 0 if error occur)
-      virtual void add_property_s (const s_type_t def_value, const std::string &short_name, const std::string &description) 
+      virtual void add_property_s (const std::string def_value, const std::string &short_name, const std::string &description) 
         {
           s_impl.add (def_value, short_name, description);
         }
 
       //! add new string property to the list (return index of the property or < 0 if error occur)
-      virtual void add_property_b (const b_type_t def_value, const std::string &short_name, const std::string &description) 
+      virtual void add_property_b (const bool def_value, const std::string &short_name, const std::string &description) 
         {
           b_impl.add (def_value, short_name, description);
         }
@@ -63,25 +62,25 @@ namespace blue_sky
         }
 
       //! return property value
-      virtual const t_double get_f (const std::string &name) const
+      virtual t_double get_f (const std::string &name) const
         {
           return fp_impl.get (name);
         }
 
       //! return property value
-      virtual const i_type_t get_i (const std::string &name) const
+      virtual t_long get_i (const std::string &name) const
         {
           return i_impl.get (name);
         }
 
       //! return property value
-      virtual const s_type_t get_s (const std::string &name) const
+      virtual std::string get_s (const std::string &name) const
         {
           return s_impl.get (name);
         }
 
       //! return property value
-      virtual const b_type_t get_b (const std::string &name) const
+      virtual bool get_b (const std::string &name) const
         {
           return b_impl.get (name);
         }
@@ -93,19 +92,19 @@ namespace blue_sky
         }
 
       //! set value
-      virtual void set_i (const std::string &name, const i_type_t value)
+      virtual void set_i (const std::string &name, const t_long value)
         {
           i_impl.set (name, value);
         }
 
       //! set value
-      virtual void set_s (const std::string &name, const s_type_t value)
+      virtual void set_s (const std::string &name, const std::string value)
         {
           s_impl.set (name, value);
         }
 
       //! set value
-      virtual void set_b (const std::string &name, const b_type_t value)
+      virtual void set_b (const std::string &name, const bool value)
         {
           b_impl.set (name, value);
         }
@@ -188,11 +187,11 @@ namespace blue_sky
       // ------------------------------
     protected:
       prop_impl <t_double> fp_impl;
-      prop_impl <i_type_t>  i_impl;
-      prop_impl <s_type_t>  s_impl;
-      prop_impl <b_type_t>  b_impl;
+      prop_impl <t_long>  i_impl;
+      prop_impl <std::string>  s_impl;
+      prop_impl <bool>  b_impl;
 
-      BLUE_SKY_TYPE_DECL(prop);
+      BLUE_SKY_TYPE_DECL (prop);
     };
 
 }; //end of blue_sky namespace
