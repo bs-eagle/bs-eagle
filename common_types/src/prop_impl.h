@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <map>
 
 template <class type_t>
 class prop_impl
@@ -27,6 +28,7 @@ class prop_impl
         std::string description;
       };
 
+    typedef std::map<std::string, prop_storage> map_t;
   // ----------------------
   // METHODS
   // ----------------------
@@ -37,7 +39,7 @@ class prop_impl
     ~prop_impl () {};
 
     // add new property
-    int add (const type_t def_value, const std::string &short_name, const std::string &description);
+    void add (const type_t def_value, const std::string &short_name, const std::string &description);
 
     //! clear all
     void clear ()
@@ -45,33 +47,70 @@ class prop_impl
         data.clear ();
       }
 
-    // return property index by name
-    int get_index (const std::string &short_name) const;
-
     //! return property value
-    const type_t get (const int idx) const
+    const type_t get (const std::string &name) const
       {
-        return data[idx].value;
+        typename map_t::const_iterator i;
+
+        i = data.find (name);
+        if (i != data.end ())
+          {
+            return i->second.value;
+          }
+        return type_t ();
       }
 
     //! set value
-    void set (const int idx, const type_t value)
+    void set (const std::string &name, const type_t &value)
       {
-        data[idx].value = value;
-        data[idx].flag = true;
+        
+        typename map_t::iterator i;
+
+        i = data.find (name);
+        if (i != data.end ())
+          {
+            i->second.value = value;
+            i->second.flag = true;
+          }
+        else
+          {
+            //TODO: print error message
+            throw;
+          }
       }
 
-    //! check (return false if property set by default, true otherwise
-    bool check (const int idx) const
+    //! check (return false if property set by default or not exist, true otherwise
+    bool check (const std::string &name) const
       {
-        return data[idx].flag;
+        typename map_t::const_iterator i;
+
+        i = data.find (name);
+        if (i != data.end ())
+          {
+            return i->second.flag;
+          }
+        else
+          {
+            return false;
+          }
       }
 
     //! reset to default value
-    void reset (const int idx)
+    void reset (const std::string  &name)
       {
-        data[idx].value = data[idx].def_value;
-        data[idx].flag = false;
+        typename map_t::iterator i;
+
+        i = data.find (name);
+        if (i != data.end ())
+          {
+            i->second.value = i->second.def_value;
+            i->second.flag = false;
+          }
+        else
+          {
+            //TODO: print error message
+            throw;
+          }
       }
 
     // reset all
@@ -85,7 +124,8 @@ class prop_impl
     // VARIABLES
     // -----------------------------------
   public:
-    std::vector<prop_storage> data;
+    map_t data;
+
 };
 
 #ifdef BSPY_EXPORTING_PLUGIN
@@ -93,22 +133,24 @@ template <class type_t> std::string
 prop_impl<type_t>::py_str () const 
 {
   std::stringstream s;
+  typename map_t::const_iterator i, e;
+  int c = 0;
   s << "+----------------------------------------------------------------------+\n";
   s << "| Index |    Value   |    Short name    |         Description          |\n";
-  for (int i = 0, n = data.size (); i < n; ++i)
+  for (c = 1, i = data.begin (), e = data.end (); i != e; ++i, ++c)
     {
           s << "|";
           s.width (7);
-          s << i; 
+          s << c; 
           s << "|";
           s.width (12);
-          s << get (i);
+          s << i->second.value;
           s << "|";
           s.width (18);
-          s << data[i].short_name;
+          s << i->second.short_name;
           s << "|";
           s.width (30);
-          s << data[i].description << "|\n";
+          s << i->second.description << "|\n";
     }
   s << "+----------------------------------------------------------------------+\n";
   return s.str ();
@@ -123,38 +165,21 @@ prop_impl<type_t>::py_str () const
  * 
  * @return 0 if success
  */
-template <class type_t> int 
+template <class type_t> void 
 prop_impl<type_t>::add (const type_t def_value, const std::string &short_name, const std::string &description)
 {
-  int i;
-
-  data.push_back (prop_storage ());
-  i = data.size () - 1;
-  data[i].def_value = data[i].value = def_value;
-  data[i].flag = false;
-  data[i].short_name = short_name;
-  data[i].description = description;
-
-  return i;
-}
-
-/** 
- * @brief return property index by given name 
- * 
- * @param short_name    -- <INPUT> given name
- * 
- * @return < 0 if can not find given name
- */
-template <class type_t> int 
-prop_impl<type_t>::get_index (const std::string &short_name) const
-{
-  int n = data.size ();
-  for (int i = 0; i < n; ++i)
+  typename map_t::iterator i, e;
+  std::pair<std::string, prop_storage> p;
+  
+  i = data.find (short_name);
+  if (i == data.end ())
     {
-      if (data[i].short_name == short_name)
-        return i;
+      p.second.def_value = p.second.value = def_value;
+      p.second.flag = false;
+      p.second.short_name = short_name;
+      p.second.description = description;
+      data.insert (p);
     }
-  return -1;
 }
 
 /** 
@@ -163,10 +188,11 @@ prop_impl<type_t>::get_index (const std::string &short_name) const
 template <class type_t> void
 prop_impl<type_t>::reset_all ()
 {
-  int n = data.size ();
-  for (int i = 0; i < n; ++i)
+  typename map_t::iterator i, e;
+
+  for (i = data.begin (), e = data.end (); i != e; ++i)
     {
-      reset (i);
+      reset (i->first);
     }
 }
 

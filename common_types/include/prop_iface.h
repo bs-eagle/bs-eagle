@@ -31,79 +31,67 @@ namespace blue_sky
       // ------------------------------------
     public:
       //! add new floating point property to the list (return index of the property or < 0 if error occur)
-      virtual int add_property_f (const fp_type_t def_value, const std::string  &short_name, const std::string  &description) = 0;
+      virtual void add_property_f (const fp_type_t def_value, const std::string  &short_name, const std::string  &description) = 0;
       
       //! add new integer property to the list (return index of the property or < 0 if error occur)
-      virtual int add_property_i (const i_type_t def_value, const std::string  &short_name, const std::string  &description) = 0; 
+      virtual void add_property_i (const i_type_t def_value, const std::string  &short_name, const std::string  &description) = 0; 
 
       //! add new string property to the list (return index of the property or < 0 if error occur)
-      virtual int add_property_s (const s_type_t def_value, const std::string  &short_name, const std::string  &description) = 0; 
+      virtual void add_property_s (const s_type_t def_value, const std::string  &short_name, const std::string  &description) = 0; 
 
       //! add new string property to the list (return index of the property or < 0 if error occur)
-      virtual int add_property_b (const b_type_t def_value, const std::string  &short_name, const std::string  &description) = 0; 
+      virtual void add_property_b (const b_type_t def_value, const std::string  &short_name, const std::string  &description) = 0; 
  
       //! clear all
       virtual void clear () = 0;
 
-      //! return property index by name
-      virtual int get_index_f (const std::string &short_name) const = 0;
-
-      //! return property index by name
-      virtual int get_index_i (const std::string &short_name) const = 0;
-
-      //! return property index by name
-      virtual int get_index_s (const std::string &short_name) const = 0;
-
-      //! return property index by name
-      virtual int get_index_b (const std::string &short_name) const = 0;
+      //! return property value
+      virtual const fp_type_t get_f (const std::string &name) const = 0;
 
       //! return property value
-      virtual const fp_type_t get_f (const int idx) const = 0;
+      virtual const i_type_t get_i (const std::string &name) const = 0;
 
       //! return property value
-      virtual const i_type_t get_i (const int idx) const = 0;
+      virtual const s_type_t get_s (const std::string &name) const = 0;
 
       //! return property value
-      virtual const s_type_t get_s (const int idx) const = 0;
-
-      //! return property value
-      virtual const b_type_t get_b (const int idx) const = 0;
+      virtual const b_type_t get_b (const std::string &name) const = 0;
 
       //! set value
-      virtual void set_f (const int idx, const fp_type_t  value) = 0;
+      virtual void set_f (const std::string &name, const fp_type_t  value) = 0;
 
       //! set value
-      virtual void set_i (const int idx, const i_type_t  value) = 0;
+      virtual void set_i (const std::string &name, const i_type_t  value) = 0;
 
       //! set value
-      virtual void set_s (const int idx, const s_type_t  value) = 0;
+      virtual void set_s (const std::string &name, const s_type_t  value) = 0;
 
       //! set value
-      virtual void set_b (const int idx, const b_type_t  value) = 0;
+      virtual void set_b (const std::string &name, const b_type_t  value) = 0;
 
       //! check (return false if property set by default, true otherwise
-      virtual bool check_f (const int idx) const = 0;
+      virtual bool check_f (const std::string &name) const = 0;
 
       //! check (return false if property set by default, true otherwise
-      virtual bool check_i (const int idx) const = 0;
+      virtual bool check_i (const std::string &name) const = 0;
 
       //! check (return false if property set by default, true otherwise
-      virtual bool check_s (const int idx) const = 0;
+      virtual bool check_s (const std::string &name) const = 0;
 
       //! check (return false if property set by default, true otherwise
-      virtual bool check_b (const int idx) const = 0;
+      virtual bool check_b (const std::string &name) const = 0;
 
       //! reset to default value
-      virtual void reset_f (const int idx) = 0;
+      virtual void reset_f (const std::string &name) = 0;
 
       //! reset to default value
-      virtual void reset_i (const int idx) = 0;
+      virtual void reset_i (const std::string &name) = 0;
 
       //! reset to default value
-      virtual void reset_s (const int idx) = 0;
+      virtual void reset_s (const std::string &name) = 0;
 
       //! reset to default value
-      virtual void reset_b (const int idx) = 0;
+      virtual void reset_b (const std::string &name) = 0;
 
       //! reset all
       virtual void reset_all () = 0;

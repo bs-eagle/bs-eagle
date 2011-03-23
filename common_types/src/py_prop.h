@@ -39,46 +39,38 @@ namespace blue_sky
         args ("default_value", "name", "description"), "Add boolean type property")
     .def ("clear",                              &T::clear, 
         args (""), "Clear all")
-    .def ("get_index_f",                        &T::get_index_f, 
-        args ("property_name"), "Return fp type property index by name")
-    .def ("get_index_i",                        &T::get_index_i, 
-        args ("property_name"), "Return int type property index by name")
-    .def ("get_index_s",                        &T::get_index_s, 
-        args ("property_name"), "Return string type property index by name")
-    .def ("get_index_b",                        &T::get_index_b, 
-        args ("property_name"), "Return boolean type property index by name")
     .def ("get_f",                              &T::get_f, 
-        args ("property_index"), "Return fp type property value by index")
+        args ("property_name"), "Return fp type property value by name")
     .def ("get_i",                              &T::get_i, 
-        args ("property_index"), "Return int type property value by index")
+        args ("property_name"), "Return int type property value by name")
     .def ("get_s",                              &T::get_s, 
-        args ("property_index"), "Return string type property value by index")
+        args ("property_name"), "Return string type property value by name")
     .def ("get_b",                              &T::get_b, 
-        args ("property_index"), "Return boolean type property value by index")
+        args ("property_name"), "Return boolean type property value by name")
     .def ("set_f",                              &T::set_f,
-        args ("property_index", "value"), "Set value by property index")
+        args ("property_name", "value"), "Set value by property name")
     .def ("set_i",                              &T::set_i,
-        args ("property_index", "value"), "Set value by property index")
+        args ("property_name", "value"), "Set value by property name")
     .def ("set_s",                              &T::set_s,
-        args ("property_index", "value"), "Set value by property index")
+        args ("property_name", "value"), "Set value by property name")
     .def ("set_b",                              &T::set_b,
-        args ("property_index", "value"), "Set value by property index")
+        args ("property_name", "value"), "Set value by property name")
     .def ("check_f",                            &T::check_f,
-        args ("property_index"), "Return false if property value set to default")
+        args ("property_name"), "Return false if property value set to default")
     .def ("check_i",                            &T::check_i,
-        args ("property_index"), "Return false if property value set to default")
+        args ("property_name"), "Return false if property value set to default")
     .def ("check_s",                            &T::check_s,
-        args ("property_index"), "Return false if property value set to default")
+        args ("property_name"), "Return false if property value set to default")
     .def ("check_b",                            &T::check_b,
-        args ("property_index"), "Return false if property value set to default")
+        args ("property_name"), "Return false if property value set to default")
     .def ("reset_f",                            &T::reset_f,
-        args ("property_index"), "Reset property value to default")
+        args ("property_name"), "Reset property value to default")
     .def ("reset_i",                            &T::reset_i,
-        args ("property_index"), "Reset property value to default")
+        args ("property_name"), "Reset property value to default")
     .def ("reset_s",                            &T::reset_s,
-        args ("property_index"), "Reset property value to default")
+        args ("property_name"), "Reset property value to default")
     .def ("reset_b",                            &T::reset_b,
-        args ("property_index"), "Reset property value to default")
+        args ("property_name"), "Reset property value to default")
     .def ("reset_all",                          &T::reset_all,
         args (""), "Reset all properties to default")
     .def ("__str__",                            &T::py_str)
