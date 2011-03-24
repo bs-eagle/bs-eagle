@@ -6,13 +6,14 @@
  */
 #ifndef _BDIAG_MATRIX_H
 #define _BDIAG_MATRIX_H
-#include <string>
-#include <sstream>
 
 #include "bdiag_matrix_iface.h"
 
 #include "matrix_macroses.h"
 //#include "bdiag_matrix_impl.h"
+
+#include <string>
+#include <sstream>
 
 namespace blue_sky
 {

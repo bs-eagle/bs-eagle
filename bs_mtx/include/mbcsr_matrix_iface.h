@@ -9,8 +9,8 @@
 
 #define MBCSR_MATRIX_IFACE_DT4R0T39
 
-#include <string>
 #include "bcsr_matrix_iface.h"
+#include <string>
 
 namespace blue_sky
 {

@@ -7,12 +7,13 @@
 #ifndef __BCSR_H
 #define __BCSR_H
 
-#include <vector>
-#include <string>
 #include "matrix_macroses.h"
 
 #include "bcsr_amg_matrix_iface.h"
 //#include "bcsr_matrix_impl.h"
+
+#include <vector>
+#include <string>
 
 namespace blue_sky
 {

@@ -3,11 +3,11 @@
  * @brief 
  * @date 2009-11-24
  */
+#include "bcsr_matrix_tools.h"
+
 #include <time.h>
 #include <stdlib.h>
 #include <map>
-
-#include "bcsr_matrix_tools.h"
 
 //#include "strategies.h"
 
