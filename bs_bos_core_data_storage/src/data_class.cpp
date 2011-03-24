@@ -64,19 +64,8 @@ namespace blue_sky
   
   idata::idata(bs_type_ctor_param /*param*/)
   : bs_node(bs_node::create_node (new this_t::idata_traits ())),
-  rpo_model (0), // RPO_DEFAULT_MODEL
-  minimal_pore_volume (DEFAULT_MINIMAL_PORE_VOLUME),
-  minimal_splice_volume (DEFAULT_MINIMAL_SPLICE_VOLUME),
-  maximum_splice_thickness (DEFAULT_MAXIMUM_SPLICE_THICKNESS),
-  pvt_region (1),
-  sat_region (1),
-  eql_region (1),
-  fip_region (1),
-  fi_n_phase (0),
-  fi_phases (0),
-  rock_region (1),
   h5_pool (BS_KERNEL.create_object ("h5_pool")),
-  init_section (0)
+  props (BS_KERNEL.create_object ("prop"))
   {
     init();
   }
@@ -84,7 +73,8 @@ namespace blue_sky
   
   idata::idata(const this_t &src)
       : bs_refcounter (src), bs_node(src), 
-      h5_pool(give_kernel::Instance().create_object_copy(src.h5_pool))
+      h5_pool(give_kernel::Instance().create_object_copy(src.h5_pool)),
+      props(give_kernel::Instance().create_object_copy(src.props))
       //scal3(give_kernel::Instance().create_object_copy(src.scal3)),
   {
     *this = src;
@@ -95,6 +85,27 @@ namespace blue_sky
   {
     //depth.resize((nx+1) * (ny+1) * (nz+1));
     h5_pool->open_file ("bs_data_storage.h5", "/pool");
+    
+    props->add_property_f (DEFAULT_MINIMAL_PORE_VOLUME, "minimal_pore_volume", "Minimal pore volume allowed for active cells");
+    props->add_property_f (DEFAULT_MINIMAL_SPLICE_VOLUME, "minimal_splice_volume", "Minimal pore volume allowed for active cells to splice with other cells");
+    props->add_property_f (DEFAULT_MAXIMUM_SPLICE_THICKNESS, "maximum_splice_thickness", "Default maximum thickness allowed between active cells to be coupled");
+
+    props->add_property_i (1, "nx", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
+    props->add_property_i (1, "ny", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
+    props->add_property_i (1, "nz", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
+    props->add_property_i (0, "rpo_model", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
+    props->add_property_i (1, "pvt_region", "Number of PVT regions in simulation");
+    props->add_property_i (1, "sat_region", "Number of saturation regions in simulation");
+    props->add_property_i (1, "eql_region", "Number of equilibrium regions in simulation");
+    props->add_property_i (1, "fip_region", "Number of FIP regions in simulation");
+    props->add_property_i (1, "rock_region", "Number of ROCK regions");
+    props->add_property_i (0, "init_section", "flag indicating whether we have init section");
+    
+    props->add_property_s ("", "title", "Current model title");
+    props->add_property_b (0, "oil_phase", "True if oil phase exists");
+    props->add_property_b (0, "water_phase", "True if water phase exists");
+    props->add_property_b (0, "gas_phase", "True if gas phase exists");
+
   }
 
   void idata::flush_pool()
@@ -144,24 +155,12 @@ namespace blue_sky
   */
 
   
-  void idata::set_defaults_in_pool()
-  {
-    //fp_map->create_item (MULTX,  &d_pool_sizes[ARRAY_POOL_TOTAL * MULTX],  d_pool_default_values[MULTX]);
-    //fp_map->create_item (MULTY,  &d_pool_sizes[ARRAY_POOL_TOTAL * MULTY],  d_pool_default_values[MULTY]);
-    //fp_map->create_item (MULTZ,  &d_pool_sizes[ARRAY_POOL_TOTAL * MULTZ],  d_pool_default_values[MULTZ]);
-    //fp_map->create_item (NTG,    &d_pool_sizes[ARRAY_POOL_TOTAL * NTG],    d_pool_default_values[NTG]);
-    //fp_map->create_item (MULTPV, &d_pool_sizes[ARRAY_POOL_TOTAL * MULTPV], d_pool_default_values[MULTPV]);
-    //i_map->create_item ("ACTNUM", &i_pool_sizes[ARRAY_POOL_TOTAL * ACTNUM], i_pool_default_values[ACTNUM]);
-  }
-
-
-  
   void idata::set_region (int r_pvt,int r_sat, int r_eql, int r_fip)
   {
-    this->pvt_region = r_pvt;
-    this->fip_region = r_fip;
-    this->sat_region = r_sat;
-    this->eql_region = r_eql;
+    props->set_i ("pvt_region", r_pvt);
+    props->set_i ("fip_region", r_fip);
+    props->set_i ("sat_region", r_sat);
+    props->set_i ("eql_region", r_eql);
 
     // check
     if (r_pvt <= 0 || r_sat <= 0 || r_eql <= 0 || r_fip <= 0)
@@ -172,11 +171,12 @@ namespace blue_sky
     t_long def_val = -1;
     
     this->rock->resize(r_pvt);
-    this->rock->resize(r_pvt);
+    this->p_ref->resize(r_pvt);
+
     this->rock->assign (def_val);
     this->p_ref->assign (def_val);
 
-    this->equil->resize(EQUIL_TOTAL * eql_region); //!TODO: EQUIL_TOTAL instead of 3
+    this->equil->resize(EQUIL_TOTAL * r_eql); //!TODO: EQUIL_TOTAL instead of 3
 
     this->pvto.resize(r_pvt);
     this->pvtdo.resize(r_pvt);
@@ -215,7 +215,9 @@ namespace blue_sky
     if (!equil->size())
       throw bs_exception("idata.set_density()","EQUIL table has not been initialized yet");
 
-    for (t_int i = 0; i < pvt_region; ++i)
+    t_int n_pvt = props->get_i ("pvt_region");
+
+    for (t_int i = 0; i < n_pvt; ++i)
       {
         idata::pvt_info &pvto__ = pvto[i];
         idata::pvt_info &pvtw__ = pvtw[i];
@@ -268,9 +270,9 @@ namespace blue_sky
     t_long n;
     npy_intp dims[3];
 
-    dims[0] = array_dimens[ARRAY_POOL_NX_A] * dimens.nx + array_dimens[ARRAY_POOL_NX_B];
-    dims[1] = array_dimens[ARRAY_POOL_NY_A] * dimens.ny + array_dimens[ARRAY_POOL_NY_B];
-    dims[2] = array_dimens[ARRAY_POOL_NZ_A] * dimens.nz + array_dimens[ARRAY_POOL_NZ_B];
+    dims[0] = array_dimens[ARRAY_POOL_NX_A] * props->get_i ("nx") + array_dimens[ARRAY_POOL_NX_B];
+    dims[1] = array_dimens[ARRAY_POOL_NY_A] * props->get_i ("ny") + array_dimens[ARRAY_POOL_NY_B];
+    dims[2] = array_dimens[ARRAY_POOL_NZ_A] * props->get_i ("nz") + array_dimens[ARRAY_POOL_NZ_B];
     n = dims[0] * dims[1] * dims[2];
 
     new_array = BS_KERNEL.create_object (v_int::bs_type ());
@@ -286,9 +288,9 @@ namespace blue_sky
     spv_float new_array;
     t_long n;
     npy_intp dims[3];
-    dims[0] = array_dimens[ARRAY_POOL_NX_A] * dimens.nx + array_dimens[ARRAY_POOL_NX_B];
-    dims[1] = array_dimens[ARRAY_POOL_NY_A] * dimens.ny + array_dimens[ARRAY_POOL_NY_B];
-    dims[2] = array_dimens[ARRAY_POOL_NZ_A] * dimens.nz + array_dimens[ARRAY_POOL_NZ_B];
+    dims[0] = array_dimens[ARRAY_POOL_NX_A] * props->get_i ("nx") + array_dimens[ARRAY_POOL_NX_B];
+    dims[1] = array_dimens[ARRAY_POOL_NY_A] * props->get_i ("ny") + array_dimens[ARRAY_POOL_NY_B];
+    dims[2] = array_dimens[ARRAY_POOL_NZ_A] * props->get_i ("nz") + array_dimens[ARRAY_POOL_NZ_B];
     n = dims[0] * dims[1] * dims[2];
 
     new_array = BS_KERNEL.create_object (v_float::bs_type ());

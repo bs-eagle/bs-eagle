@@ -9,11 +9,10 @@
 
 #define MBCSR_MATRIX_I0MLYUKT
 
-#include <map>
-#include <string>
-
 #include "mbcsr_matrix_iface.h"
 
+#include <map>
+#include <string>
 
 namespace blue_sky
 {

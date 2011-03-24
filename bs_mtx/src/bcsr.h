@@ -7,12 +7,13 @@
 #ifndef __BCSR_H
 #define __BCSR_H
 
-#include <vector>
-#include <string>
 #include "matrix_macroses.h"
 
 #include "bcsr_amg_matrix_iface.h"
 //#include "bcsr_matrix_impl.h"
+
+#include <vector>
+#include <string>
 
 namespace blue_sky
 {
@@ -225,7 +226,7 @@ namespace blue_sky
       //! return number of nonzeros elements
       virtual t_long get_n_non_zeros () const
         {
-          int l = rows_ptr->size (); 
+          size_t l = rows_ptr->size (); 
           if (l)
             return (*rows_ptr)[l - 1];
           else

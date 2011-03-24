@@ -290,8 +290,8 @@ struct mesh_grdecl::inner {
 		inner::dim_subscript dys(*dy);
 
 		// if dimension offset is given as array, then size should be taken from array size
-		if(dx->size() > 1) nx = dx->size();
-		if(dy->size() > 1) ny = dy->size();
+		if(dx->size() > 1) nx = (int_t) dx->size();
+		if(dy->size() > 1) ny = (int_t) dy->size();
 
 		// create arrays
 		spfp_storarr_t coord = BS_KERNEL.create_object(fp_storarr_t::bs_type());
@@ -327,7 +327,7 @@ struct mesh_grdecl::inner {
 		m.min_z = *(std::min_element(zcorn_->begin(), zcorn_->end()));
 		m.max_z = *(std::max_element(zcorn_->begin(), zcorn_->end()));
 
-		n = coord_->size();
+		n = (int_t) coord_->size();
 
 		m.max_x = m.min_x = m.coord_array[0];
 		m.max_y = m.min_y = m.coord_array[1];
@@ -360,7 +360,7 @@ struct mesh_grdecl::inner {
 		typedef typename array_t::value_type value_t;
 		typedef typename array_t::size_type size_t;
 
-		const int_t nz = (zcorn.size() >> 3) / (nx  * ny);
+		const int_t nz = (int_t)(zcorn.size() >> 3) / (nx  * ny);
 		//const int_t delta = 4 * (new_nx * new_ny - nx * ny);
 
 		// cache z-values for each plane
@@ -772,7 +772,7 @@ struct mesh_grdecl::inner {
 		// DEBUG
 		BSOUT << "refine_mesh: update ZCORN" << bs_end;
 		// update zcorn
-		resize_zcorn(vzcorn, nx, ny, delta_x.size(), delta_y.size());
+		resize_zcorn(vzcorn, nx, ny, (int_t) delta_x.size(), (int_t) delta_y.size());
 		// create bs_array from new zcorn
 		spfp_storarr_t rzcorn = BS_KERNEL.create_object(fp_storarr_t::bs_type());
 		if(!rzcorn) return coord_zcorn_pair();
@@ -782,8 +782,8 @@ struct mesh_grdecl::inner {
 		// DEBUG
 		//BSOUT << "refine_mesh: copy delta_x & delta_y to bs_arrays" << bs_end;
 		// copy delta_x & delta_y to bs_arrays
-		nx = delta_x.size();
-		ny = delta_y.size();
+		nx = (int_t)  delta_x.size();
+		ny = (int_t)  delta_y.size();
 		spfp_storarr_t adx = BS_KERNEL.create_object(fp_storarr_t::bs_type()),
 					   ady = BS_KERNEL.create_object(fp_storarr_t::bs_type());
 		adx->resize(delta_x.size()); ady->resize(delta_y.size());
@@ -816,7 +816,7 @@ mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_
 	if(!dx->size() || !dy->size() || !dz->size()) return ret_t(NULL, NULL);
 
 	// if dimension offset is given as array, then size should be taken from array size
-	if(dz->size() > 1) nz = dz->size();
+	if(dz->size() > 1) nz = (t_long) dz->size();
 
 	// create zcorn array
 	spv_float zcorn = BS_KERNEL.create_object(v_float::bs_type());

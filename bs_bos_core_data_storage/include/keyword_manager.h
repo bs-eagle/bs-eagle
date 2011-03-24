@@ -11,10 +11,11 @@
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 //#include "scal_3p.h"
+#include BS_STOP_PLUGIN_IMPORT ()
+
 #include "main_def.h"
 #include "read_class.h"
 #include "data_class.h"
-#include BS_STOP_PLUGIN_IMPORT ()
 
 #include "keyword_manager_iface.h"
 #include "date_sim.h"

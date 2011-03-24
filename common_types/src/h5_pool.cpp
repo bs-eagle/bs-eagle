@@ -271,7 +271,7 @@ namespace blue_sky
           throw;
         }
 
-      ndims = data->ndim ();
+      ndims = (t_int) data->ndim ();
       dims = data->dims ();
 
       it = h5_map.find (name);
@@ -358,7 +358,7 @@ namespace blue_sky
           throw;
         }
 
-      ndims = data->ndim ();
+      ndims = (t_int) data->ndim ();
       dims = data->dims ();
 
       it = h5_map.find (name);

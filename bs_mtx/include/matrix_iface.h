@@ -6,13 +6,13 @@
  * @author Oleg Borschuk
  * @date 2009-07-21
  */
-#include <string>
-
 #include "bs_assert.h"
 #include "bs_tree.h"
 #include "smart_ptr.h"
 #include "bs_array.h"
 #include "conf.h"
+
+#include <string>
 
 namespace blue_sky
 {

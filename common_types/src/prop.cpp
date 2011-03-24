@@ -18,7 +18,7 @@ namespace blue_sky
     {
     }
   prop::prop (const prop& rhs) 
-        : bs_refcounter (), prop_iface ()
+        : prop_iface ()
     {
       *this = rhs;
     }

@@ -5,11 +5,10 @@
  * @version 1.0
  * @date 2011-02-27
  */
-#include <vector>
-#include <memory.h>
 #include "mbcsr_matrix.h"
 #include "matrix_macroses.h"
-
+#include <vector>
+#include <memory.h>
 
 namespace blue_sky
   {

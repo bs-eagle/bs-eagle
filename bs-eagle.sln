@@ -3,6 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_bos_core_data_storage", "bs_bos_core_data_storage\bs_bos_core_data_storage.vcproj", "{3DF8BD9D-CAEF-4081-A1C2-B624E0959A81}"
 	ProjectSection(ProjectDependencies) = postProject
+		{917136D8-8A55-4319-9A9C-483BB647AC4E} = {917136D8-8A55-4319-9A9C-483BB647AC4E}
 		{578A43D7-0338-4ED0-A455-666FDA782085} = {578A43D7-0338-4ED0-A455-666FDA782085}
 	EndProjectSection
 EndProject
@@ -27,6 +28,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cbos", "..\c_bos_dll\prj\cb
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_mtx", "bs_mtx\bs_mtx.vcproj", "{D588B62C-A1A8-49D2-88AC-FFADACC4545A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{578A43D7-0338-4ED0-A455-666FDA782085} = {578A43D7-0338-4ED0-A455-666FDA782085}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "blue-sky", "..\..\kernel\blue-sky.vcproj", "{7C235C2A-609A-49B4-A89B-AC23530F0F89}"
 EndProject
@@ -47,7 +51,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bspy_loader", "..\..\python
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common_types", "common_types\common_types.vcproj", "{917136D8-8A55-4319-9A9C-483BB647AC4E}"
 	ProjectSection(ProjectDependencies) = postProject
-		{578A43D7-0338-4ED0-A455-666FDA782085} = {578A43D7-0338-4ED0-A455-666FDA782085}
+		{7C235C2A-609A-49B4-A89B-AC23530F0F89} = {7C235C2A-609A-49B4-A89B-AC23530F0F89}
 	EndProjectSection
 EndProject
 Global
