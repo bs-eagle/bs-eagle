@@ -22,7 +22,7 @@ namespace blue_sky
       // ------------------------------------
     public:
       // destructor
-      ~prop ()
+      virtual ~prop ()
         {}
       // ------------------------------------
       // INTERFACE METHODS

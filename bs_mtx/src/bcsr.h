@@ -226,7 +226,7 @@ namespace blue_sky
       //! return number of nonzeros elements
       virtual t_long get_n_non_zeros () const
         {
-          int l = rows_ptr->size (); 
+          size_t l = rows_ptr->size (); 
           if (l)
             return (*rows_ptr)[l - 1];
           else

@@ -177,6 +177,7 @@ prop_impl<type_t>::add (const type_t def_value, const std::string &short_name, c
       p.second.def_value = p.second.value = def_value;
       p.second.flag = false;
       p.second.short_name = short_name;
+      p.first = short_name;
       p.second.description = description;
       data.insert (p);
     }

@@ -25,9 +25,9 @@ rs_mesh_base ::rs_mesh_base ()
 void
 rs_mesh_base ::init_props (const sp_idata_t &idata)
 {
-  minpv = idata->minimal_pore_volume;
-  minsv = idata->minimal_splice_volume;
-  max_thickness = idata->maximum_splice_thickness;
+  minpv = idata->props->get_f ("minimal_pore_volume");
+  minsv = idata->props->get_f ("minimal_splice_volume");
+  max_thickness = idata->props->get_f ("maximum_splice_thickness");
   
   spv_float data_array;
   spv_int sp_actnum_array;

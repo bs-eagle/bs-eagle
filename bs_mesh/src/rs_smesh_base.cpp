@@ -26,9 +26,9 @@ rs_smesh_base ::init_props (const sp_idata_t &idata)
 {
   base_t::init_props (idata);
   
-  nx = idata->dimens.nx;
-  ny = idata->dimens.ny;
-  nz = idata->dimens.nz;
+  nx = idata->props->get_i("nx");
+  ny = idata->props->get_i("ny");
+  nz = idata->props->get_i("nz");
   
   spv_float data_array;
   

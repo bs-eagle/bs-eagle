@@ -5,6 +5,12 @@
   \brief initial data holder
 	\author Nikonov Maxim
 */
+#include BS_FORCE_PLUGIN_IMPORT ()
+
+#include "pool_iface.h"
+#include "prop_iface.h"
+
+#include BS_STOP_PLUGIN_IMPORT ()
 
 #include "rocktab_table.h"
 #include "prvd_table.h"
@@ -17,7 +23,7 @@
 
 #include "strategies.h"
 #include "bs_tree.h"
-#include "pool_iface.h"
+
 
 namespace blue_sky {
 
@@ -82,6 +88,7 @@ enum   //! indexes for dimension parameters
       
       typedef smart_ptr <FRead, true>										  sp_reader_t;
       typedef smart_ptr <h5_pool_iface, true>							sp_h5_pool_t;
+      typedef smart_ptr <prop_iface, true>							  sp_prop_t;
 
       struct pvt_info
         {
@@ -106,7 +113,6 @@ enum   //! indexes for dimension parameters
       //! \brief Assignment operator
       this_t &operator=(const this_t&);
 
-      void set_defaults_in_pool();
       void set_region (int r_pvt, int r_sat, int r_eql, int r_fip);
 
       void set_density (spv_float density);
@@ -161,8 +167,14 @@ enum   //! indexes for dimension parameters
       int set_fp_array (const std::string & array_name,  spv_float array);
 
     public:
-      int rpo_model;                   //!< 3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)
+      sp_prop_t props;
 
+      
+      
+
+      /*
+
+      int rpo_model;                   //!< 3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)
       t_float minimal_pore_volume;      //!< Minimal pore volume allowed for active cells
       t_float minimal_splice_volume;    //!< Minimal pore volume allowed for active cells to splice with other cells
       t_float maximum_splice_thickness; //!< Default maximum thickness allowed between active cells to be coupled
@@ -179,23 +191,32 @@ enum   //! indexes for dimension parameters
 
       t_int rock_region;              //!< Number of ROCK regions
 
-      spv_int equil_regions;
-
-      //! \brief class's public data area
-      sp_h5_pool_t h5_pool;
 
       auto_value <int> init_section;             //!< flag indicating whether we have init section
       //!< if init_section == 0, cdata::check_sat will not go.
 
+      //TITLE
+      std::string title;
+
+
+      */
+
+      
+      
+
+      //! \brief class's public data area
+      sp_h5_pool_t h5_pool;
+
+      
       convert_units input_units_converter;          //!< Input units converter
       convert_units output_units_converter;         //!< Output units converter
 
       std::vector<rocktab_table> rocktab;    //!< rocktab tables for all rock regions
 
-      //TITLE
-      std::string title;
-
+      
       pvt_vector pvto, pvtdo, pvtg, pvtw;
+
+      spv_int equil_regions;
 
       spv_float rock;            //!< Array (pvt_region) - compressibility of rock for each region
       spv_float equil;
