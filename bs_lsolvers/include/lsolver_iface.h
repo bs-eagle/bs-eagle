@@ -23,6 +23,12 @@
 
 namespace blue_sky
 {
+  const std::string tol_idx = "tolerance";
+  const std::string max_iters_idx = "maxiters";
+  const std::string final_res_idx = "final_residual";
+  const std::string iters_idx = "iters";
+  const std::string success_idx = "is_success";
+
   /** 
    * @brief interface class for linear system solver and preconditioners 
    *    (Ax = b), where A -- matrix, x and b -- vectors,
@@ -41,7 +47,7 @@ namespace blue_sky
       //! this_t
       typedef lsolver_iface                             this_t;
       //! prop 
-      typedef prop_iface<float, int, std::string, bool> prop_t;
+      typedef prop_iface                                prop_t;
       //! short name to smart pointer to this class
       typedef smart_ptr<this_t, true>                   sp_this_t;              
       //! short name to smart pointer to properties holder class

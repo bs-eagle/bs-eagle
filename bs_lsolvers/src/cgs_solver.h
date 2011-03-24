@@ -17,11 +17,6 @@
 
 namespace blue_sky
   {
-  const std::string tol_idx = "tolerance";
-  const std::string max_iters_idx = "maxiters";
-  const std::string final_res_idx = "final_residual";
-  const std::string iters_idx = "iters";
-  const std::string success_idx = "is_success";
   /**
   * @brief CGS linear solver
   */
@@ -37,7 +32,7 @@ namespace blue_sky
       typedef matrix_iface                              matrix_t;
 
       //! prop 
-      typedef prop_iface<float, int, std::string, bool> prop_t;
+      typedef prop_iface                                prop_t;
       
       typedef lsolver_iface                             base_t;         ///< typedef to this type. in child classes used as a short name of base class
       typedef smart_ptr<base_t, true>                   sp_base_t;      ///< short name to smart pointer to this class

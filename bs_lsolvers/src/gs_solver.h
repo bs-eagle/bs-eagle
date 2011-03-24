@@ -16,10 +16,13 @@
 
 namespace blue_sky
   {
+  const std::string invers_idx = "inverse";
+  const std::string cf_type_idx = "cf_type";
+
+
   /**
   * @brief GS linear solver
   */
-  
   class BS_API_PLUGIN gs_solver : public amg_smoother_iface
     {
       //-----------------------------------------
@@ -34,7 +37,7 @@ namespace blue_sky
       typedef bcsr_matrix_iface                         bcsr_t;
       typedef smart_ptr<bcsr_t, true>                   sp_bcsr_t;
       //! prop 
-      typedef prop_iface<float, int, std::string, bool> prop_t;
+      typedef prop_iface                                prop_t;
       //! short name to smart pointer to this class
       typedef smart_ptr<base_t, true>                   sp_base_t;              
       //! short name to smart pointer to properties holder class
@@ -118,13 +121,6 @@ namespace blue_sky
       sp_prop_t         prop;         //!< properties for solvers
       spv_double        sp_r;
 
-      int               tol_idx;
-      int               max_iters_idx;
-      int               final_res_idx;
-      int               iters_idx;
-      int               success_idx;
-      int               invers_idx;
-      int               cf_type_idx;
 
     public:
       BLUE_SKY_TYPE_DECL (gs_solver);
