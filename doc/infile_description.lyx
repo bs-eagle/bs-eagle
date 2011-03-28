@@ -28,13 +28,17 @@
 \pdf_colorlinks true
 \pdf_backref false
 \pdf_pdfusetitle false
-\papersize default
-\use_geometry false
+\papersize a4paper
+\use_geometry true
 \use_amsmath 1
 \use_esint 1
 \cite_engine basic
 \use_bibtopic false
 \paperorientation portrait
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 1cm
+\bottommargin 2cm
 \secnumdepth 3
 \tocdepth 3
 \paragraph_separation indent
@@ -42,7 +46,7 @@
 \quotes_language english
 \papercolumns 1
 \papersides 1
-\paperpagestyle default
+\paperpagestyle fancy
 \tracking_changes false
 \output_changes false
 \author "" 
@@ -53,6 +57,173 @@
 
 \begin_layout Chapter
 Формат входного файла
+\end_layout
+
+\begin_layout Section
+Задание свойств модели
+\end_layout
+
+\begin_layout Subsection
+COMP
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:COMP"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Компонентный состав смеси.
+ За ключевым словом следует одна строка состоящия из трех элементов:
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+WATER
+\series default
+ --- определяет наличие водной фазы в моделе.
+ Допустимые значения:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\series bold
+WATER
+\series default
+ --- в моделе будет присутствовать водная фаза;
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+NOWATER
+\series default
+ --- в моделе водная фаза присутствовать не будет.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+
+\series bold
+OIL
+\series default
+ --- определяет наличие нефтяной фазы в моделе.
+ Допустимые значения:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\series bold
+DOIL
+\series default
+ --- чистая нефть без растворенного газа (Dead oil);
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+OIL
+\series default
+ --- нефть с растворенным газом;
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+NOOIL
+\series default
+ --- в моделе нефтяная фаза присутствовать не будет.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+
+\series bold
+GAS
+\series default
+ --- определяет наличие газовой фазы в моделе.
+ Допустимые значения:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\series bold
+DGAS
+\series default
+ --- чистый газ без паров нефти (Dry gas);
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+GAS
+\series default
+ --- газ с парами нефти;
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+NOGAS
+\series default
+ --- в моделе газовая фаза присутствовать не будет.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+Возможно использование 
+\series bold
+*
+\series default
+ в любой позиции, что означает отсутствие соответствующей фазы.
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Пример:
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+\begin_inset Box ovalbox
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+width "60col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
+COMP
+\end_layout
+
+\begin_layout Plain Layout
+NOWATER OIL DGAS
+\end_layout
+
+\begin_layout Plain Layout
+/
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
 \end_layout
 
 \begin_layout Section
@@ -322,6 +493,19 @@ Type
 \end_layout
 
 \begin_layout Standard
+\begin_inset Box ovalbox
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+width "60col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
 \begin_inset Tabular
 <lyxtabular version="3" rows="4" columns="8">
 <features>
@@ -636,6 +820,11 @@ rada;
 
 \end_layout
 
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 W_SPEC
 \begin_inset CommandInset label
@@ -795,10 +984,25 @@ MD --- абсолютное удлинение (
 
 \end_deeper
 \begin_layout Standard
-Привер файла инклинометрии для вертикальной скважины:
+
+\series bold
+Пример файла инклинометрии для вертикальной скважины:
 \end_layout
 
 \begin_layout Standard
+\begin_inset Box ovalbox
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+width "60col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="4">
 <features>
@@ -1003,6 +1207,11 @@ MD --- абсолютное удлинение (
 
 \end_layout
 
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 W_COMP_F
 \begin_inset CommandInset label
@@ -1071,10 +1280,25 @@ KHMULT --- множитель на койффициент соединения �
 
 \end_deeper
 \begin_layout Standard
-Привер файла перфораций:
+
+\series bold
+Пример файла перфораций:
 \end_layout
 
 \begin_layout Standard
+\begin_inset Box ovalbox
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+width "60col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
 \begin_inset Tabular
 <lyxtabular version="3" rows="2" columns="5">
 <features>
@@ -1178,6 +1402,11 @@ KHMULT --- множитель на койффициент соединения �
 </cell>
 </row>
 </lyxtabular>
+
+\end_inset
+
+
+\end_layout
 
 \end_inset
 
