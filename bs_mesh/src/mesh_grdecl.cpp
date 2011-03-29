@@ -264,7 +264,7 @@ struct mesh_grdecl< strategy_t >::inner {
 
 		fp_storage_type_t ss_array_dim(i_type_t idx) {
 			fp_type_t tmp = sum_;
-			sum_ += dim_[idx];
+			if(idx > 0) sum_ += dim_[idx - 1];
 			return static_cast< fp_storage_type_t>(tmp);
 		}
 
