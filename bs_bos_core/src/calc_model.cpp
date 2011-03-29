@@ -328,7 +328,7 @@ namespace blue_sky
     // initialize scale arrays
     const sp_scale_array_holder_t &gas_scale_ = scal_prop->get_gas_scale ();
     const sp_scale_array_holder_t &water_scale_ = scal_prop->get_water_scale ();
-
+#if 0
     gas_scale_->insert_socr ((*input_data->d_map)[SOGCR].array);
     gas_scale_->insert_scr  ((*input_data->d_map)[SGCR].array);
     gas_scale_->insert_su   ((*input_data->d_map)[SGU].array);
@@ -339,7 +339,19 @@ namespace blue_sky
     water_scale_->insert_su   ((*input_data->d_map)[SWU].array);
     water_scale_->insert_sl   ((*input_data->d_map)[SWL].array);
     water_scale_->insert_pcp  ((*input_data->d_map)[PCW].array);
+#else
+    gas_scale_->set_socr ((*input_data->d_map)[SOGCR].array);
+    gas_scale_->set_scr  ((*input_data->d_map)[SGCR].array);
+    gas_scale_->set_su   ((*input_data->d_map)[SGU].array);
+    gas_scale_->set_sl   ((*input_data->d_map)[SGL].array);
 
+    water_scale_->set_socr ((*input_data->d_map)[SOWCR].array);
+    water_scale_->set_scr  ((*input_data->d_map)[SWCR].array);
+    water_scale_->set_su   ((*input_data->d_map)[SWU].array);
+    water_scale_->set_sl   ((*input_data->d_map)[SWL].array);
+    water_scale_->set_pcp  ((*input_data->d_map)[PCW].array);
+
+#endif
     init_scal ();
 
     // initialize rock grid data

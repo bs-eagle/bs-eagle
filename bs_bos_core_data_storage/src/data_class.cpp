@@ -65,6 +65,7 @@ namespace blue_sky
   idata::idata(bs_type_ctor_param /*param*/)
   : bs_node(bs_node::create_node (new this_t::idata_traits ())),
   rpo_model (0), // RPO_DEFAULT_MODEL
+  is_scalecrs (0),
   minimal_pore_volume (DEFAULT_MINIMAL_PORE_VOLUME),
   minimal_splice_volume (DEFAULT_MINIMAL_SPLICE_VOLUME),
   maximum_splice_thickness (DEFAULT_MAXIMUM_SPLICE_THICKNESS),

@@ -116,7 +116,7 @@
 
 #include "memory_macroses.h"
 #include "macroses.h"
-#include "lu_decomposition.h"
+//#include "lu_decomposition.h"
 #include "debug_macroses.h"
 #include "matrix_macroses.h"
 
@@ -139,8 +139,8 @@
 #include "main_def.h"
 #include "err_num_def.h"
 #include "vector_assign.h"
-#include "save_seq_vector.h"
-#include "jacobian_matrix.h"
+//#include "save_seq_vector.h"
+//#include "jacobian_matrix.h"
 
 #ifdef _HDF5
 //#include "bs_hdf5_storage.h"
@@ -149,7 +149,7 @@
 #include "property_base.h"
 #include "named_pbase_access.h"
 
-#include "linear_solvers.h"
+//#include "linear_solvers.h"
 #include "print_process_memory_info.h"
 #include "write_time_to_log.h"
 

@@ -222,6 +222,14 @@
 				RelativePath=".\src\table.h"
 				>
 			</File>
+			<File
+				RelativePath=".\src\vartype_table.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\vartype_table.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -234,6 +242,10 @@
 			</File>
 			<File
 				RelativePath=".\include\table_iface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\vartype_table_iface.h"
 				>
 			</File>
 		</Filter>

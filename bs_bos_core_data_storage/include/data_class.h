@@ -177,7 +177,8 @@ namespace blue_sky {
     public:
 			arrays_helper ahelper;
       int rpo_model;                   //!< 3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)
-
+      int is_scalecrs;                 //!< use of relative permeability alternative scaling method or not
+      
       t_float minimal_pore_volume;      //!< Minimal pore volume allowed for active cells
       t_float minimal_splice_volume;    //!< Minimal pore volume allowed for active cells to splice with other cells
       t_float maximum_splice_thickness; //!< Default maximum thickness allowed between active cells to be coupled
