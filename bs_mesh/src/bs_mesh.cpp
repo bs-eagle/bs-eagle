@@ -11,8 +11,6 @@
 #include "mesh_grdecl_keywords.h"
 
 #include "py_rs_mesh.h"
-#include "py_mesh_grdecl.h"
-#include "py_flux_connections.h"
 
 namespace blue_sky
 {
@@ -55,6 +53,19 @@ namespace blue_sky
 }//bs
 
 #ifdef BSPY_EXPORTING_PLUGIN
+/*-----------------------------------------------------------------
+ * forward declaration of exporting functions
+ *----------------------------------------------------------------*/
+namespace blue_sky { namespace python {
+
+void py_export_mesh_grdecl();
+void py_export_flux_connections();
+
+}}
+
+/*-----------------------------------------------------------------
+ * callback that make Python bindings
+ *----------------------------------------------------------------*/
 BLUE_SKY_INIT_PY_FUN
 {
   using namespace blue_sky;

@@ -5,8 +5,13 @@
   \brief initial data holder
 	\author Nikonov Maxim
 */
+#include BS_FORCE_PLUGIN_IMPORT ()
 
-#include "bs_array_map.h"
+#include "pool_iface.h"
+#include "prop_iface.h"
+
+#include BS_STOP_PLUGIN_IMPORT ()
+
 #include "rocktab_table.h"
 #include "prvd_table.h"
 #include "read_class.h"
@@ -18,6 +23,7 @@
 
 #include "strategies.h"
 #include "bs_tree.h"
+
 
 namespace blue_sky {
 
@@ -33,6 +39,17 @@ namespace blue_sky {
 
 //! Maximal number of time steps in one TSTEP expression
 #define MAX_TIME_STEPS_DEF      1000
+
+enum   //! indexes for dimension parameters
+  {
+    ARRAY_POOL_NX_A,
+    ARRAY_POOL_NX_B,
+    ARRAY_POOL_NY_A,
+    ARRAY_POOL_NY_B,
+    ARRAY_POOL_NZ_A,
+    ARRAY_POOL_NZ_B,
+    ARRAY_POOL_TOTAL
+  };
 
   /*!
   \brief convert  -- convert 'carray' to UfaSolver format and write it to 'array'
@@ -67,15 +84,11 @@ namespace blue_sky {
       typedef idata                           this_t;
       typedef smart_ptr<this_t , true>                    sp_this_t;
       
-      typedef bs_array_map <t_long, t_int>           amap_i;
-      typedef bs_array_map <t_long, t_float>          amap_fp;
-
-      typedef smart_ptr<amap_i>                           sp_amap_i;
-      typedef smart_ptr<amap_fp>                          sp_amap_fp;
-
       typedef std::vector <val_vs_depth>                  vval_vs_depth;
       
       typedef smart_ptr <FRead, true>										  sp_reader_t;
+      typedef smart_ptr <h5_pool_iface, true>							sp_h5_pool_t;
+      typedef smart_ptr <prop_iface, true>							  sp_prop_t;
 
       struct pvt_info
         {
@@ -87,27 +100,6 @@ namespace blue_sky {
 
       typedef std::vector <pvt_info>									  pvt_vector;
 
-			struct BS_API_PLUGIN arrays_helper {
-				typedef std::map < std::string, int > names_map_t;
-
-				names_map_t names_map_i;
-				names_map_t names_map_fp;
-
-				t_int    *dummy_array_i;
-				t_float   *dummy_array_fp;
-
-				arrays_helper ();
-				~arrays_helper ();
-
-				void init_names_maps ();
-
-				void add_correspondence_i (const std::string &name, int index);
-				void add_correspondence_fp (const std::string &name, int index);
-
-				int get_idx_i (const std::string &name) const;
-				int get_idx_fp (const std::string &name) const;
-			};
-
 		public:
 
       ~idata ();
@@ -115,10 +107,12 @@ namespace blue_sky {
       //! \brief init idata members method
       void init();
 
+      //! \brief flush pool data
+      void flush_pool();
+
       //! \brief Assignment operator
       this_t &operator=(const this_t&);
 
-      void set_defaults_in_pool();
       void set_region (int r_pvt, int r_sat, int r_eql, int r_fip);
 
       void set_density (spv_float density);
@@ -162,23 +156,25 @@ namespace blue_sky {
       //int read_arg_func (const sp_reader_t &reader, ar_stack <ar_args_t> &ar, ar_stack <ar_operat_t> &op, char **start_ptr, const char *keyword, int *arguments_count, int flag_brek);
       //int test_token (int prev, int cur);
 
-      spv_int    get_int_non_empty_array (int array_index);
-      spv_float   get_fp_non_empty_array (int array_index);
       
-      spv_int    get_int_array (const std::string &array_name);
+      spv_int    get_i_array (const std::string &array_name);
       spv_float   get_fp_array (const std::string &array_name);
-      
-      spv_int    get_int_non_empty_array (const std::string &array_name);
-      spv_float   get_fp_non_empty_array (const std::string &array_name);
-      
-      bool 
-      contain (const std::string &array_name) const;
-      
+
+      spv_int create_i_array (const std::string &name, t_int *dimens, t_int def_value = 0);
+      spv_float create_fp_array (const std::string &name, t_int *dimens, t_float def_value = 0);
+
+      int set_i_array (const std::string & array_name,  spv_int array);
+      int set_fp_array (const std::string & array_name,  spv_float array);
+
     public:
-			arrays_helper ahelper;
-      int rpo_model;                   //!< 3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)
-      int is_scalecrs;                 //!< use of relative permeability alternative scaling method or not
+      sp_prop_t props;
+
       
+      
+
+      /*
+
+      int rpo_model;                   //!< 3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)
       t_float minimal_pore_volume;      //!< Minimal pore volume allowed for active cells
       t_float minimal_splice_volume;    //!< Minimal pore volume allowed for active cells to splice with other cells
       t_float maximum_splice_thickness; //!< Default maximum thickness allowed between active cells to be coupled
@@ -195,25 +191,32 @@ namespace blue_sky {
 
       t_int rock_region;              //!< Number of ROCK regions
 
-      spv_int equil_regions;
-
-      //! \brief class's public data area
-      sp_amap_i   i_map;
-      sp_amap_fp  fp_map;
-
 
       auto_value <int> init_section;             //!< flag indicating whether we have init section
       //!< if init_section == 0, cdata::check_sat will not go.
 
+      //TITLE
+      std::string title;
+
+
+      */
+
+      
+      
+
+      //! \brief class's public data area
+      sp_h5_pool_t h5_pool;
+
+      
       convert_units input_units_converter;          //!< Input units converter
       convert_units output_units_converter;         //!< Output units converter
 
       std::vector<rocktab_table> rocktab;    //!< rocktab tables for all rock regions
 
-      //TITLE
-      std::string title;
-
+      
       pvt_vector pvto, pvtdo, pvtg, pvtw;
+
+      spv_int equil_regions;
 
       spv_float rock;            //!< Array (pvt_region) - compressibility of rock for each region
       spv_float equil;

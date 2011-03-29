@@ -1,12 +1,30 @@
 #include "bs_mesh_stdafx.h"
 
-#include "py_mesh_grdecl.h"
+#include "py_rs_mesh.h"
+#include "bs_mesh_grdecl.h"
+
 #include "export_python_wrapper.h"
 #include "py_pair_converter.h"
 #include <boost/python/tuple.hpp>
 
 #ifdef BSPY_EXPORTING_PLUGIN
 using namespace boost::python;
+
+namespace blue_sky { namespace python {
+
+PY_EXPORTER (mesh_grdecl_exporter, rs_mesh_iface_exporter)
+	.def ("get_ext_to_int", &T::get_ext_to_int, args(""), "Return reference to external-to-internal mesh index")
+	.def ("get_int_to_ext", &T::get_int_to_ext, args(""), "Return reference to internal-to-external mesh index")
+	.def ("get_volumes", &T::get_volumes, args(""), "Return reference to volumes vector")
+	.def ("get_dimensions_range", &T::get_dimensions_range, args("dim1_max, dim1_min, dim2_max, dim2_min, dim3_max, dim3_min"), "Get dimensions ranges")
+	.def ("get_element_size", &T::get_element_size, args ("n_elem, dx, dy, dz"), "get elements sizes")
+	.def ("get_element_ijk_to_int", &T::get_element_ijk_to_int, args ("i, j, k"), "get elements sizes")
+	.def ("get_n_active_elements", &T::get_n_active_elements, args (""), "Get elements sizes")
+	.def ("calc_element_tops", &T::calc_element_tops, args (""), "Calc element tops")
+	.def ("calc_element_center", &T::calc_element_center, args (""), "Calc element center");
+PY_EXPORTER_END;
+
+}}  // eof blue_sky::python
 
 namespace {
 using namespace blue_sky;
@@ -15,17 +33,18 @@ using namespace blue_sky::python;
 // same as grdecl exporter, but also export gen_coord_zcorn
 template <typename T>
 struct mesh_grdecl_exporter_plus {
-	typedef typename T::i_type_t int_t;
-	typedef typename T::fp_type_t fp_t;
-	typedef typename T::sp_fp_storage_array_t spfp_storarr_t;
-
-	//BOOST_PYTHON_FUNCTION_OVERLOADS(refine_mesh_overl, refine_mesh, 5, 7)
+	typedef t_long int_t;
+	typedef t_double fp_t;
+	typedef spv_float spfp_storarr_t;
+	typedef spv_long spi_arr_t;
+	typedef typename spi_arr_t::pure_pointed_t int_arr_t;
 
 	static tuple refine_mesh(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t zcorn, spfp_storarr_t points,
 			fp_t m_thresh = DEF_CELL_MERGE_THRESHOLD, fp_t b_thresh = DEF_BAND_THRESHOLD)
 	{
-		std::pair< spfp_storarr_t, spfp_storarr_t > r = T::refine_mesh(nx, ny, coord, zcorn, points, m_thresh, b_thresh);
-		return make_tuple(r.first, r.second, nx, ny);
+		spi_arr_t hit_idx = BS_KERNEL.create_object(int_arr_t::bs_type());
+		std::pair< spfp_storarr_t, spfp_storarr_t > r = T::refine_mesh(nx, ny, coord, zcorn, points, hit_idx, m_thresh, b_thresh);
+		return make_tuple(r.first, r.second, nx, ny, hit_idx);
 	}
 
 	// overloads
@@ -58,7 +77,7 @@ struct mesh_grdecl_exporter_plus {
 template< class fp_type >
 void reg_sparray_pair() {
 	// register converter from pair of returned arrayes to python list
-	typedef smart_ptr< bs_array< fp_type > > spfp_array;
+	typedef smart_ptr< bs_array< fp_type, bs_nparray > > spfp_array;
 	typedef std::pair< spfp_array, spfp_array > array_pair;
 	typedef bspy_converter< pair_traits< array_pair > > array_pair_converter;
 	array_pair_converter::register_to_py();
@@ -67,15 +86,13 @@ void reg_sparray_pair() {
 
 } // eof hidden namespace
 
-namespace blue_sky {
-namespace python {
+namespace blue_sky { namespace python {
 
 void py_export_mesh_grdecl () {
-	//strategy_exporter::export_class <bs_mesh_grdecl, rs_mesh_iface, mesh_grdecl_exporter_plus> ("mesh_grdecl");
-	reg_sparray_pair< float >();
+	class_exporter< bs_mesh_grdecl, rs_mesh_iface, mesh_grdecl_exporter_plus >::export_class ("mesh_grdecl");
+	//reg_sparray_pair< float >();
 	reg_sparray_pair< double >();
 }
 
-} // namespace python
-} // namespace blue_sky
+}} // namespace blue_sky::python
 #endif

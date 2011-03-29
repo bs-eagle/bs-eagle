@@ -34,16 +34,16 @@ mesh_ijk ::init_props (const sp_idata_t &idata)
 {
   spv_float data_array;
   
-  data_array = idata->get_fp_non_empty_array("DX");
+  data_array = idata->get_fp_array("DX");
   if (data_array->size()) dx_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_non_empty_array("DY");
+  data_array = idata->get_fp_array("DY");
   if (data_array->size()) dy_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_non_empty_array("DZ");
+  data_array = idata->get_fp_array("DZ");
   if (data_array->size()) dz_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_non_empty_array("TOPS");
+  data_array = idata->get_fp_array("TOPS");
   if (data_array->size()) tops_array = &(*data_array)[0];
   
   base_t::init_props (idata);
@@ -192,7 +192,7 @@ mesh_ijk::get_center (t_long i, t_long j, t_long k) const
 }
 
 
-int mesh_ijk::splicing(stdv_double& volumes_temp)
+int mesh_ijk::splicing(stdv_double& /*volumes_temp*/)
 {
   int splicing_num = 0;
   BS_ASSERT (false && "NOT IMPL YET");
@@ -411,7 +411,7 @@ void mesh_ijk::set_neigbour_data (const t_long index1, const t_long index1_ext, 
 }
 
 
-int mesh_ijk::find_neighbours(sp_bcsr_t neig_matrix)
+int mesh_ijk::find_neighbours(sp_bcsr_t /*neig_matrix*/)
 {
   return 0;
 }

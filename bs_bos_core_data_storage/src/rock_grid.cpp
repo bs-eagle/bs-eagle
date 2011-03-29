@@ -48,7 +48,7 @@ namespace blue_sky
     comp_const.resize(n_pvt_regions);
     comp_ref_pressure.resize(n_pvt_regions);
 
-    if (input_data->contain("MULTPV"))
+    if (input_data->get_fp_array("MULTPV"))
       {
         multpv.resize(n_elements);
       }
@@ -94,6 +94,8 @@ namespace blue_sky
   int
   rock_grid::init_data (t_long cells_count, const spv_long index_map, const sp_idata &input_data)
   {
+    spv_float fp_array;
+
     if (input_data->get_rock()->size())
       {
         comp_const.assign (input_data->get_rock()->begin(), input_data->get_rock()->end());
@@ -112,24 +114,27 @@ namespace blue_sky
         bs_throw_exception ("p_ref of rock has not been specified");
       }
 
-    convert_arrays(cells_count, index_map, porosity_p_ref, input_data->get_fp_non_empty_array("PORO"));
+    convert_arrays(cells_count, index_map, porosity_p_ref, input_data->get_fp_array("PORO"));
 
     // initialize net to gross
-    if (!input_data->contain("NTG"))
+    fp_array = input_data->get_fp_array ("NTG");
+    if (fp_array)
       {
         net_to_gros.assign(cells_count, 1.0);
       }
     else
       {
-        convert_arrays (cells_count, index_map, net_to_gros, input_data->get_fp_non_empty_array("NTG"));
+        convert_arrays (cells_count, index_map, net_to_gros, fp_array);
       }
 
-    convert_permeability (cells_count, index_map, permeability, input_data->get_fp_non_empty_array("PERMX"), 
-                         input_data->get_fp_non_empty_array("PERMY"), input_data->get_fp_non_empty_array("PERMZ"));
+    convert_permeability (cells_count, index_map, permeability, input_data->get_fp_array("PERMX"), 
+                         input_data->get_fp_array("PERMY"), input_data->get_fp_array("PERMZ"));
 
-    if (input_data->contain("MULTPV"))
+    
+    fp_array = input_data->get_fp_array ("MULTPV");
+    if (fp_array)
       {
-        convert_arrays (cells_count, index_map, multpv, input_data->get_fp_non_empty_array("MULTPV"));
+        convert_arrays (cells_count, index_map, multpv, fp_array);
       }
 
     return 0;

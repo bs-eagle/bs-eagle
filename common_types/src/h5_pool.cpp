@@ -53,7 +53,7 @@ namespace blue_sky
       return 0; 
     }
 
-  template <class T> void 
+  template <class T> h5_pool::map_t::iterator 
   h5_pool::add_node (const std::string &name, const hid_t dset, const hid_t dspace, 
                      const hid_t dtype, const int n_dims, const T *dims)
     {
@@ -67,9 +67,10 @@ namespace blue_sky
       p.second.n_dims = n_dims;
       for (int i = 0; i < n_dims; ++i)
         {
-          p.second.dims[i] = dims[i];
+          p.second.py_dims[i] = (npy_intp)dims[i];
+          p.second.h5_dims[i] = (hsize_t)dims[i];
         }
-      h5_map.insert (p);
+      return h5_map.insert (p).first;
     }
 
   void 
@@ -126,8 +127,12 @@ namespace blue_sky
             }
           else
             {
-              // TODO: report error
-              throw;
+              file_id = H5Fcreate (fname_.c_str (), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+              if (file_id < 0)
+                {
+                  // TODO: report error
+                  throw;
+                }
             }
         }
       else 
@@ -184,19 +189,19 @@ namespace blue_sky
       if (group_id <= 0)
         {
           // TODO: report error
-          throw;
+          return spv_float ();
         }
       it = h5_map.find (name);
       if (it == h5_map.end ())
         {
           // TODO: report error
-          throw;
+          return spv_float ();
         }
       n = H5Sget_simple_extent_npoints (it->second.dspace);
 
       a = BS_KERNEL.create_object (v_float::bs_type ());
       a->resize (n);
-      a->reshape (it->second.n_dims, it->second.dims); 
+      a->reshape (it->second.n_dims, it->second.py_dims); 
       if (sizeof (t_float) == sizeof (float))
         {
           H5Dread (it->second.dset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &(*a)[0]);
@@ -208,7 +213,7 @@ namespace blue_sky
       else
         {
           //TODO: print error message
-          throw;
+          return spv_float ();
         }
       return a;
     }
@@ -223,19 +228,19 @@ namespace blue_sky
       if (group_id <= 0)
         {
           // TODO: report error
-          throw;
+          return spv_int ();
         }
       it = h5_map.find (name);
       if (it == h5_map.end ())
         {
           // TODO: report error
-          throw;
+          return spv_int ();
         }
       n = H5Sget_simple_extent_npoints (it->second.dspace);
 
       a = BS_KERNEL.create_object (v_int::bs_type ());
       a->resize (n);
-      a->reshape (it->second.n_dims, it->second.dims); 
+      a->reshape (it->second.n_dims, it->second.py_dims); 
       if (sizeof (t_int) == sizeof (int))
         {
           H5Dread (it->second.dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &(*a)[0]);
@@ -247,7 +252,7 @@ namespace blue_sky
       else
         {
           //TODO: print error message
-          throw;
+          return spv_int ();
         }
       return a;
     }
@@ -266,7 +271,7 @@ namespace blue_sky
           throw;
         }
 
-      ndims = data->ndim ();
+      ndims = (t_int) data->ndim ();
       dims = data->dims ();
 
       it = h5_map.find (name);
@@ -277,7 +282,7 @@ namespace blue_sky
               int flg = 0;
               for (int i = 0; i < ndims; ++i)
                 {
-                  if (it->second.dims[i] != dims[i])
+                  if (it->second.py_dims[i] != dims[i])
                     {
                       flg = 1;
                       break;
@@ -313,34 +318,29 @@ namespace blue_sky
       {
         printf ("Create %s\n", name.c_str ());
 
-        hsize_t dims2[10];
-
-        for (int i = 0; i < ndims; ++i)
-          {
-            dims2 [i] = (hsize_t)dims[i];
-          }
-        hid_t dspace = H5Screate_simple (ndims, dims2, NULL);
-        hid_t dset;
-        hid_t dtype;
+        map_t::iterator new_it = add_node (name, 0, 0, 0, ndims, dims);
+        
+        new_it->second.dspace = H5Screate_simple (ndims, new_it->second.h5_dims, NULL);
         
         if (sizeof (t_int) == sizeof (int))
           {
-            dtype = H5T_NATIVE_INT;
+            new_it->second.dtype = H5T_NATIVE_INT;
           }
         else if (sizeof (t_int) == sizeof (long))
           {
-            dtype = H5T_NATIVE_LONG;
+            new_it->second.dtype = H5T_NATIVE_LONG;
           }
         else
           {
             //TODO: print error message
             throw;
           }
-        dset = H5Dcreate (group_id, name.c_str (), dtype, dspace,
-                          H5P_DEFAULT);
-        H5Dwrite (dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, 
-                  &(*data)[0]);
-        add_node (name, dset, dspace, dtype, ndims, dims);
+        new_it->second.dset = H5Dcreate (group_id, name.c_str (), 
+                                         new_it->second.dtype, 
+                                         new_it->second.dspace,
+                                         H5P_DEFAULT);
+        H5Dwrite (new_it->second.dset, new_it->second.dtype, 
+                  H5S_ALL, H5S_ALL, H5P_DEFAULT, &(*data)[0]);
       }
       return 0;
     }
@@ -358,7 +358,7 @@ namespace blue_sky
           throw;
         }
 
-      ndims = data->ndim ();
+      ndims = (t_int) data->ndim ();
       dims = data->dims ();
 
       it = h5_map.find (name);
@@ -369,7 +369,7 @@ namespace blue_sky
               int flg = 0;
               for (int i = 0; i < ndims; ++i)
                 {
-                  if (it->second.dims[i] != dims[i])
+                  if (it->second.py_dims[i] != dims[i])
                     {
                       flg = 1;
                       break;
@@ -405,34 +405,29 @@ namespace blue_sky
       {
         printf ("Create %s\n", name.c_str ());
 
-        hsize_t dims2[10];
+        map_t::iterator new_it = add_node (name, 0, 0, 0, ndims, dims);
 
-        for (int i = 0; i < ndims; ++i)
-          {
-            dims2 [i] = (hsize_t)dims[i];
-          }
-        hid_t dspace = H5Screate_simple (ndims, dims2, NULL);
-        hid_t dset;
-        hid_t dtype;
+        new_it->second.dspace = H5Screate_simple (ndims, new_it->second.h5_dims, NULL);
         
         if (sizeof (t_float) == sizeof (float))
           {
-            dtype = H5T_NATIVE_FLOAT;
+            new_it->second.dtype = H5T_NATIVE_FLOAT;
           }
         else if (sizeof (t_float) == sizeof (double))
           {
-            dtype = H5T_NATIVE_DOUBLE;
+            new_it->second.dtype = H5T_NATIVE_DOUBLE;
           }
         else
           {
             //TODO: print error message
             throw;
           }
-        dset = H5Dcreate (group_id, name.c_str (), dtype, dspace,
-                          H5P_DEFAULT);
-        H5Dwrite (dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, 
-                  &(*data)[0]);
-        add_node (name, dset, dspace, dtype, ndims, dims);
+        new_it->second.dset = H5Dcreate (group_id, name.c_str (), 
+                                         new_it->second.dtype, 
+                                         new_it->second.dspace,
+                                         H5P_DEFAULT);
+        H5Dwrite (new_it->second.dset, new_it->second.dtype, 
+                  H5S_ALL, H5S_ALL, H5P_DEFAULT, &(*data)[0]);
       }
       return 0;
     }
@@ -479,9 +474,9 @@ namespace blue_sky
         {
           std::stringstream sdim;
           s << std::setw (15) <<i->first << "\t [";
-          sdim  << i->second.dims[0];
+          sdim  << i->second.py_dims[0];
           for (int j = 1; j < i->second.n_dims; ++j)
-            sdim << ", " <<i->second.dims[j];
+            sdim << ", " <<i->second.py_dims[j];
           s << std::setw (15) << sdim.str () << "]\t";
           dt =  H5Tget_class (i->second.dtype);
           if (dt == H5T_INTEGER)

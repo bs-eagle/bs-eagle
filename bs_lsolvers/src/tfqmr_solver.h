@@ -33,7 +33,7 @@ namespace blue_sky
       //! matrix interface type
       typedef matrix_iface                              matrix_t;
       //! prop 
-      typedef prop_iface<float, int, std::string, bool> prop_t;
+      typedef prop_iface                                prop_t;
       typedef lsolver_iface                             base_t;         ///< typedef to this type. in child classes used as a short name of base class
       typedef smart_ptr<base_t, true>                   sp_base_t;      ///< short name to smart pointer to this class
       typedef smart_ptr<prop_t, true>                   sp_prop_t;      ///< short name to smart pointer to properties holder class
@@ -119,11 +119,6 @@ namespace blue_sky
       spv_double        sp_tmp;
       spv_double        sp_rhat;
       spv_double        sp_y;
-      int               tol_idx;
-      int               max_iters_idx;
-      int               final_res_idx;
-      int               iters_idx;
-      int               success_idx;
 
     public:
       BLUE_SKY_TYPE_DECL (tfqmr_solver);

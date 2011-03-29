@@ -15,11 +15,11 @@ using namespace blue_sky::pvt;
 namespace blue_sky
   {
 
-  template <typename item_t, typename main_pressure_t>
+  template <class t_d, typename main_pressure_t>
   size_t
-  get_interval (item_t pressure, const main_pressure_t &main_pressure)
+  get_interval (t_d pressure, const main_pressure_t &main_pressure)
   {
-    return binary_search (pressure, main_pressure, std::less <item_t> ());
+    return binary_search (pressure, main_pressure, std::less <t_d> ());
   }
 
   pvt_gas::pvt_gas (bs_type_ctor_param)
@@ -37,7 +37,7 @@ namespace blue_sky
   }
 
   void
-  pvt_gas::insert_vector (const input_vector_t &vec)
+  pvt_gas::insert_vector (const v_double &vec)
   {
     const int elem_count = 3;
     BS_ASSERT (!(vec.size() % elem_count)) (vec.size ()) (elem_count);
@@ -75,7 +75,7 @@ namespace blue_sky
   }
 
   void
-  pvt_gas::build (item_t atm_p, item_t min_p, item_t max_p, t_int n_intervals)
+  pvt_gas::build (t_double /*atm_p*/, t_double min_p, t_double max_p, t_long n_intervals)
   {
     vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_GAS_INPUT_PRESSURE);
     vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_GAS_INPUT_FVF);
@@ -105,11 +105,11 @@ namespace blue_sky
     check_pressure_interval (min_p, max_p);
     this->check_interval_numbers (n_intervals);
 
-    this->p_step = (max_p - min_p) / (item_t)n_intervals;
+    this->p_step = (max_p - min_p) / (t_double)n_intervals;
 
     if (main_pressure_.size () < 2)
       {
-        item_t pressure = min_p;
+        t_double pressure = min_p;
         for (int i = 0; i <= n_intervals; ++i, pressure += this->p_step)
           {
             pressure_[i]      = pressure;
@@ -120,12 +120,12 @@ namespace blue_sky
       }
     else
       {
-        item_t pressure = min_p;
+        t_double pressure = min_p;
         for (int i = 0; i <= n_intervals; ++i, pressure += this->p_step)
           {
             size_t j = get_interval (pressure, main_pressure_);
 
-            item_t diff             = 0;
+            t_double diff             = 0;
             pressure_[i]            = pressure;
 
             if (j == 0)
@@ -169,24 +169,24 @@ namespace blue_sky
   }
 
   void
-  pvt_gas::calc (const item_t p,
-                             item_t *inv_fvf, item_t *d_inv_fvf,
-                             item_t *inv_visc, item_t *d_inv_visc,
-                             item_t *inv_visc_fvf, item_t *d_inv_visc_fvf) const
+  pvt_gas::calc (const t_double p,
+                             t_double *inv_fvf, t_double *d_inv_fvf,
+                             t_double *inv_visc, t_double *d_inv_visc,
+                             t_double *inv_visc_fvf, t_double *d_inv_visc_fvf) const
     {
       vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_GAS_PRESSURE);
       vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_GAS_INV_FVF);
       vector_t &inv_visc_     = pvt_props_table->get_col_vector (PVT_GAS_INV_VISC);
-      vector_t &inv_visc_fvf_ = pvt_props_table->get_col_vector (PVT_GAS_INV_VISC_FVF);
+      //vector_t &inv_visc_fvf_ = pvt_props_table->get_col_vector (PVT_GAS_INV_VISC_FVF);
     
-      item_t idp = 1.0 / this->p_step;
-      index_t i = (index_t)((p - pressure_.front ()) * idp);
+      t_double idp = 1.0 / this->p_step;
+      t_long i = (t_long)((p - pressure_.front ()) * idp);
 
       if ((size_t)(i + 1) >= pressure_.size () || p < pressure_.front ())
         {
-          index_t l = 0;
-          if (i + 1 >= (index_t)pressure_.size ())
-            l = (index_t)pressure_.size () - 1;
+          t_long l = 0;
+          if (i + 1 >= (t_long)pressure_.size ())
+            l = (t_long)pressure_.size () - 1;
 
           set_pvt_pointer (inv_fvf, inv_fvf_[l]);
           set_pvt_pointer (inv_visc, inv_visc_[l]);
@@ -197,13 +197,13 @@ namespace blue_sky
         }
       else
         {
-          item_t diff         = (p - pressure_[i]);
+          t_double diff         = (p - pressure_[i]);
 
-          item_t d_inv_fvf_   = (inv_fvf_[i+1] - inv_fvf_[i]) * idp;
-          item_t ifvf_        = inv_fvf_[i] + d_inv_fvf_ * diff;
+          t_double d_inv_fvf_   = (inv_fvf_[i+1] - inv_fvf_[i]) * idp;
+          t_double ifvf_        = inv_fvf_[i] + d_inv_fvf_ * diff;
 
-          item_t d_inv_visc_  = (inv_visc_[i+1] - inv_visc_[i]) * idp;
-          item_t ivisc_       = inv_visc_[i] + d_inv_visc_ * diff;
+          t_double d_inv_visc_  = (inv_visc_[i+1] - inv_visc_[i]) * idp;
+          t_double ivisc_       = inv_visc_[i] + d_inv_visc_ * diff;
 
           set_pvt_pointer (inv_fvf, ifvf_);
           set_pvt_pointer (inv_visc, ivisc_);

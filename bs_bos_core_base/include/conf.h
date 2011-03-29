@@ -6,53 +6,50 @@
  * @date 2011-02-22
  */
 #ifndef CONF_7FBMZIFT
-
 #define CONF_7FBMZIFT
 
-
-//#ifdef BS_ARRAY_DEFAULT_TRAITS
-//#undef BS_ARRAY_DEFAULT_TRAITS
-//#define BS_ARRAY_DEFAULT_TRAITS  bs_nparray
-//#endif //BS_ARRAY_DEFAULT_TRAITS
+#ifdef BS_ARRAY_DEFAULT_TRAITS
+#undef BS_ARRAY_DEFAULT_TRAITS
+#endif
+#define BS_ARRAY_DEFAULT_TRAITS bs_nparray
 
 #include "bs_nparray.h"
 #include "bs_array.h"
 
 //! using this type for small data
-#define t_int           int
+typedef int           t_int;
 
 //! this type should be using for indexing (matrix, arrays, ...)
-#define t_long          long
+typedef long          t_long;
 
 //! this type should be using for single precision elements (matrix, fixed arrays) 
-#define t_float         double
+typedef double        t_float;
 
 //! this type should be using for double precision elements (calculed arrays, arrays of unknowns) 
-#define t_double        double
+typedef double        t_double;
 
-#define t_uint          unsigned long
-#define t_ulong         unsigned long
+typedef unsigned long               t_uint;
+typedef unsigned long               t_ulong;
 
+typedef blue_sky::bs_array< t_int, blue_sky::bs_nparray >           v_int;
+typedef blue_sky::bs_array< t_long, blue_sky::bs_nparray >          v_long;
+typedef blue_sky::bs_array< t_uint, blue_sky::bs_nparray >          v_uint;
+typedef blue_sky::bs_array< t_ulong, blue_sky::bs_nparray >         v_ulong;
+typedef blue_sky::bs_array< t_float, blue_sky::bs_nparray >         v_float;
+typedef blue_sky::bs_array< t_double, blue_sky::bs_nparray >        v_double;
 
-#define v_int          bs_array<t_int, bs_nparray> 
-#define v_long         bs_array<t_long, bs_nparray> 
-#define v_uint         bs_array<t_uint, bs_nparray> 
-#define v_ulong        bs_array<t_ulong, bs_nparray> 
-#define v_float        bs_array<t_float, bs_nparray> 
-#define v_double       bs_array<t_double, bs_nparray> 
+typedef std::vector< t_int >        stdv_int;
+typedef std::vector< t_long >       stdv_long;
+typedef std::vector< t_uint >       stdv_uint;
+typedef std::vector< t_ulong >      stdv_ulong;
+typedef std::vector< t_float >      stdv_float;
+typedef std::vector< t_double >     stdv_double;
 
-#define stdv_int       std::vector<t_int> 
-#define stdv_long      std::vector<t_long> 
-#define stdv_uint      std::vector<t_uint> 
-#define stdv_ulong     std::vector<t_ulong> 
-#define stdv_float     std::vector<t_float> 
-#define stdv_double    std::vector<t_double> 
-
-#define spv_int          smart_ptr<v_int, true> 
-#define spv_long         smart_ptr<v_long, true> 
-#define spv_uint         smart_ptr<v_uint, true> 
-#define spv_ulong        smart_ptr<v_ulong, true> 
-#define spv_float        smart_ptr<v_float, true> 
-#define spv_double       smart_ptr<v_double, true> 
+typedef blue_sky::smart_ptr< v_int >          spv_int;
+typedef blue_sky::smart_ptr< v_long >         spv_long;
+typedef blue_sky::smart_ptr< v_uint >         spv_uint;
+typedef blue_sky::smart_ptr< v_ulong >        spv_ulong;
+typedef blue_sky::smart_ptr< v_float >        spv_float;
+typedef blue_sky::smart_ptr< v_double >       spv_double;
 
 #endif /* end of include guard: CONF_7FBMZIFT */

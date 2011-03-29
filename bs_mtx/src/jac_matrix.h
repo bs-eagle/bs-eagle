@@ -1,13 +1,12 @@
 #ifndef _JAC_MATRIX_H
 #define _JAC_MATRIX_H
 
-#include <string>
-#include <sstream>
-
 #include "jac_matrix_iface.h"
 #include "bdiag_matrix.h"
 #include "bcsr.h"
 
+#include <string>
+#include <sstream>
 
 namespace blue_sky
 {

@@ -36,7 +36,7 @@ namespace blue_sky
       //! bcsr_matrix
       typedef bcsr_matrix_iface                                 bcsr_t;
       //! prop 
-      typedef prop_iface<float, int, std::string, bool>         prop_t;
+      typedef prop_iface                                        prop_t;
       //! short name to smart pointer to this class
       typedef smart_ptr<base_t, true>                           sp_base_t;              
       //! short name to smart pointer to properties holder class

@@ -32,7 +32,7 @@ namespace blue_sky
       typedef matrix_iface                              matrix_t;
 
       //! prop 
-      typedef prop_iface<float, int, std::string, bool> prop_t;
+      typedef prop_iface                                prop_t;
       typedef lsolver_iface                             base_t;         ///< typedef to this type in child classes used as a short name of base class
       typedef smart_ptr<base_t, true>                   sp_base_t;      ///< short name to smart pointer to this class
       typedef smart_ptr<prop_t, true>                   sp_prop_t;      ///< short name to smart pointer to properties holder class
@@ -121,8 +121,6 @@ namespace blue_sky
 
       spv_double        sp_r;
       spv_double        sp_w;
-
-      int               success_idx;
 
     public:
       BLUE_SKY_TYPE_DECL (two_stage_prec);

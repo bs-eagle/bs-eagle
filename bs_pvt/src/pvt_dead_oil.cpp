@@ -32,7 +32,7 @@ namespace blue_sky
 
 
   void
-  pvt_dead_oil::insert_vector (const input_vector_t &vec)
+  pvt_dead_oil::insert_vector (const v_double &vec)
   {
     const int elem_count = 3;
     BS_ASSERT (!(vec.size() % elem_count)) (vec.size ()) (elem_count);
@@ -76,7 +76,7 @@ namespace blue_sky
   }
 
   int
-  pvt_dead_oil::build_internal (item_t atm_p, item_t min_p, item_t max_p, int n_intervals, bool is_pvto)
+  pvt_dead_oil::build_internal (t_double /*atm_p*/, t_double min_p, t_double max_p, t_long /*n_intervals*/, bool is_pvto)
   {
     vector_t &main_gpr_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_GPR);
     vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_OIL_INPUT_PRESSURE);
@@ -88,11 +88,11 @@ namespace blue_sky
     if (main_pressure_.empty ())
       return 0;
 
-    index_t n_points = (index_t)main_pressure_.size ();
+    t_long n_points = (t_long)main_pressure_.size ();
     if (is_pvto)
       {
         n_points = 0;
-        for (index_t i = 0, cnt = (index_t)main_gpr_.size (); i < cnt; ++i)
+        for (t_long i = 0, cnt = (t_long)main_gpr_.size (); i < cnt; ++i)
           {
             if (main_gpr_[i] > -0.5)
               ++n_points;
@@ -100,8 +100,8 @@ namespace blue_sky
       }
 
     bool is_min         = false,      is_max    = false;
-    index_t i_min       = 0,          i_max     = (index_t)main_pressure_.size () - 1;
-    index_t i_next_min  = i_min + 1,  i_pre_max = i_max - 1;
+    t_long i_min       = 0,          i_max     = (t_long)main_pressure_.size () - 1;
+    t_long i_next_min  = i_min + 1,  i_pre_max = i_max - 1;
 
     if (is_pvto)
       {
@@ -117,9 +117,9 @@ namespace blue_sky
             while (main_gpr_[i_next_min] < 0.)
               ++i_next_min;
 
-            if (i_next_min > (index_t)main_pressure_.size () - 1)
+            if (i_next_min > (t_long)main_pressure_.size () - 1)
               {
-                BS_ASSERT (i_next_min <= (index_t)main_pressure_.size () - 1) (i_next_min) (main_pressure_.size ());
+                BS_ASSERT (i_next_min <= (t_long)main_pressure_.size () - 1) (i_next_min) (main_pressure_.size ());
                 throw bs_exception ("pvt_dead_oil::build", "Error: number of Rs values in PVTO should be greater than 1");
               }
           }
@@ -176,7 +176,7 @@ namespace blue_sky
             throw bs_exception ("pvt_dead_oil::build", "Error: number of rows in PVTO should be greater than 1");
           }
 
-        for (index_t i = 0; i < n_points; ++i)
+        for (t_long i = 0; i < n_points; ++i)
           {
             if (i == 0 && is_min)
               pressure_.front () = min_p;
@@ -193,14 +193,14 @@ namespace blue_sky
       }
     else
       {
-        index_t i_rs = 0;
-        for (index_t i = 0; i < n_points; ++i)
+        t_long i_rs = 0;
+        for (t_long i = 0; i < n_points; ++i)
           {
             if ((i == 0 && is_min) || (i == n_points - 1 && is_max))
               {
                 pressure_[i] = i == 0 ? min_p : max_p;
 
-                item_t diff = 0;
+                t_double diff = 0;
 
                 if (i == 0)
                   {
@@ -256,7 +256,7 @@ namespace blue_sky
   }
 
   void
-  pvt_dead_oil::build (item_t atm_p, item_t min_p, item_t max_p, int n_intervals)
+  pvt_dead_oil::build (t_double atm_p, t_double min_p, t_double max_p, t_long n_intervals)
   {
     build_internal (atm_p, min_p, max_p, n_intervals, false);
   }
@@ -275,13 +275,13 @@ namespace blue_sky
   }
 
   bool
-  pvt_dead_oil::calc (const bool is_g, const int main_var, const item_t p, const item_t gor,
-                                  item_t *inv_fvf, item_t *d_inv_fvf, item_t *gor_d_inv_fvf,
-                                  item_t *inv_visc, item_t *d_inv_visc, item_t *gor_d_inv_visc,
-                                  item_t *inv_visc_fvf, item_t *d_inv_visc_fvf, item_t *gor_d_inv_visc_fvf,
-                                  item_t *gas_oil_ratio, item_t *d_gas_oil_ratio,
-                                  const item_t drsdt /* = -1.0 */, const item_t dt /* = 0 */,
-                                  const item_t old_gas_oil_ratio /* = 0  */) const
+  pvt_dead_oil::calc (const bool is_g, const int main_var, const t_double p, const t_double gor,
+                                  t_double *inv_fvf, t_double *d_inv_fvf, t_double *gor_d_inv_fvf,
+                                  t_double *inv_visc, t_double *d_inv_visc, t_double *gor_d_inv_visc,
+                                  t_double *inv_visc_fvf, t_double *d_inv_visc_fvf, t_double *gor_d_inv_visc_fvf,
+                                  t_double *gas_oil_ratio, t_double *d_gas_oil_ratio,
+                                  const t_double drsdt /* = -1.0 */, const t_double dt /* = 0 */,
+                                  const t_double old_gas_oil_ratio /* = 0  */) const
     {
       return calc_saturated_oil (is_g, main_var, p, gor, inv_fvf, d_inv_fvf, gor_d_inv_fvf,
                                  inv_visc, d_inv_visc, gor_d_inv_visc,
@@ -290,13 +290,13 @@ namespace blue_sky
     }
 
   bool
-  pvt_dead_oil::calc_saturated_oil (const bool is_g, const int main_var, const item_t p, const item_t gor,
-      item_t *inv_fvf, item_t *d_inv_fvf, item_t *gor_d_inv_fvf,
-      item_t *inv_visc, item_t *d_inv_visc, item_t *gor_d_inv_visc,
-      item_t *inv_visc_fvf, item_t *d_inv_visc_fvf, item_t *gor_d_inv_visc_fvf,
-      item_t *gas_oil_ratio, item_t *d_gas_oil_ratio,
-      const item_t drsdt /* = -1.0 */, const item_t dt /* = 0 */,
-      const item_t old_gas_oil_ratio /* = 0 */) const
+  pvt_dead_oil::calc_saturated_oil (const bool /*is_g*/, const int /*main_var*/, const t_double p, const t_double /*gor*/,
+      t_double *inv_fvf, t_double *d_inv_fvf, t_double *gor_d_inv_fvf,
+      t_double *inv_visc, t_double *d_inv_visc, t_double *gor_d_inv_visc,
+      t_double *inv_visc_fvf, t_double *d_inv_visc_fvf, t_double *gor_d_inv_visc_fvf,
+      t_double *gas_oil_ratio, t_double *d_gas_oil_ratio,
+      const t_double /*drsdt = -1.0 */, const t_double /*dt = 0 */,
+      const t_double /*old_gas_oil_ratio = 0 */) const
     {
       vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_OIL_PRESSURE);
       vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_OIL_INV_FVF);
@@ -304,7 +304,7 @@ namespace blue_sky
       vector_t &inv_visc_fvf_ = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC_FVF);
       vector_t &gor_          = pvt_props_table->get_col_vector (PVT_OIL_GOR);
     
-      size_t i = binary_search (p, pressure_, std::less <item_t> ());
+      size_t i = binary_search (p, pressure_, std::less <t_double> ());
       if (i == 0)
         ++i;
 
@@ -314,21 +314,21 @@ namespace blue_sky
           return false;
         }
 
-      item_t dp           = pressure_[i] - pressure_[i - 1];
-      item_t idp          = 1.0 / dp;
-      item_t diff_p       = p - pressure_[i - 1];
+      t_double dp           = pressure_[i] - pressure_[i - 1];
+      t_double idp          = 1.0 / dp;
+      t_double diff_p       = p - pressure_[i - 1];
 
-      item_t d_ifvf       = (inv_fvf_[i]          - inv_fvf_[i - 1]) * idp;
-      item_t ifvf         = (inv_fvf_[i - 1]      + d_ifvf * diff_p);
+      t_double d_ifvf       = (inv_fvf_[i]          - inv_fvf_[i - 1]) * idp;
+      t_double ifvf         = (inv_fvf_[i - 1]      + d_ifvf * diff_p);
 
-      item_t d_ivisc      = (inv_visc_[i]         - inv_visc_[i - 1]) * idp;
-      item_t ivisc        = (inv_visc_[i - 1]     + d_ivisc * diff_p);
+      t_double d_ivisc      = (inv_visc_[i]         - inv_visc_[i - 1]) * idp;
+      t_double ivisc        = (inv_visc_[i - 1]     + d_ivisc * diff_p);
 
-      item_t d_ivisc_fvf  = (inv_visc_fvf_[i]     - inv_visc_fvf_[i - 1]) * idp;
-      item_t ivisc_fvf    = (inv_visc_fvf_[i - 1] + d_ivisc_fvf * diff_p);
+      t_double d_ivisc_fvf  = (inv_visc_fvf_[i]     - inv_visc_fvf_[i - 1]) * idp;
+      t_double ivisc_fvf    = (inv_visc_fvf_[i - 1] + d_ivisc_fvf * diff_p);
 
-      item_t d_gor        = (gor_[i] - gor_[i - 1]) * idp;
-      item_t cur_gor      = (gor_[i - 1] + d_gor * diff_p);
+      t_double d_gor        = (gor_[i] - gor_[i - 1]) * idp;
+      t_double cur_gor      = (gor_[i - 1] + d_gor * diff_p);
 
       set_pvt_pointer (inv_fvf, ifvf);
       set_pvt_pointer (inv_visc, ivisc);
@@ -347,16 +347,16 @@ namespace blue_sky
       return true;
     }
 
-  pvt_dead_oil::item_t
-  pvt_dead_oil::interpolate_and_fix (item_t cell_pbub) const
+  t_double
+  pvt_dead_oil::interpolate_and_fix (t_double cell_pbub) const
     {
       vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_OIL_PRESSURE);
-      vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_OIL_INV_FVF);
-      vector_t &inv_visc_     = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC);
-      vector_t &inv_visc_fvf_ = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC_FVF);
+      //vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_OIL_INV_FVF);
+      //vector_t &inv_visc_     = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC);
+      //vector_t &inv_visc_fvf_ = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC_FVF);
       vector_t &gor_          = pvt_props_table->get_col_vector (PVT_OIL_GOR);
 
-      size_t l = binary_search (cell_pbub, pressure_, std::less <item_t> ());
+      size_t l = binary_search (cell_pbub, pressure_, std::less <t_double> ());
       size_t n = pressure_.size ();
       if (n == 1)
         {
@@ -374,8 +374,8 @@ namespace blue_sky
           else if (l == 0)
             l++;
 
-          item_t g2 = gor_[l - 1], g1 = gor_[l];
-          item_t p2 = pressure_[l - 1], p1 = pressure_[l];
+          t_double g2 = gor_[l - 1], g1 = gor_[l];
+          t_double p2 = pressure_[l - 1], p1 = pressure_[l];
           return g2 + (cell_pbub - p2) * (g1 - g2)	/ (p1 - p2);
         }
       else
@@ -384,8 +384,8 @@ namespace blue_sky
         }
     }
 
-  pvt_dead_oil::item_t
-  pvt_dead_oil::get_gor_for_pressure (item_t pressure_data) const
+  t_double
+  pvt_dead_oil::get_gor_for_pressure (t_double pressure_data) const
     {
       vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_OIL_PRESSURE);
       vector_t &gor_          = pvt_props_table->get_col_vector (PVT_OIL_GOR);
@@ -395,7 +395,7 @@ namespace blue_sky
           throw bs_exception ("pvt_oil::get_gor_for_pressure", "Invalid pressure data value");
         }
 
-      index_t i_rs = (index_t) (((pressure_data) - pressure_.front ()) / this->get_p_step ());
+      t_long i_rs = (t_long) (((pressure_data) - pressure_.front ()) / this->get_p_step ());
 
       return gor_[i_rs] + (gor_[i_rs + 1] - gor_[i_rs]) / this->get_p_step () * (pressure_data - pressure_[i_rs]);
     }

@@ -137,10 +137,10 @@ namespace blue_sky
     {                                                                                   \
       if ((ACTNUM))                                                                     \
         {                                                                               \
-          int ix, iy, iz;                                                               \
-          iz = i / (data->dimens.nx * data->dimens.ny);                                 \
-          iy = (i - iz * (data->dimens.nx * data->dimens.ny)) / data->dimens.nx;        \
-          ix = i - iz * (data->dimens.nx * data->dimens.ny) - iy * data->dimens.nx;     \
+          t_long ix, iy, iz;                                                               \
+          iz = i / (nx * ny);                                 \
+          iy = (i - iz * (nx * ny)) / nx;        \
+          ix = i - iz * (nx * ny) - iy * nx;     \
           BOSWARN (section::check_data, level::low)                                     \
             << "blocks[" << (ix + 1) << ", " << (iy + 1) << ", " << (iz + 1)            \
             << "] will be set inactive because of " << #VAL << " = " << VAL << bs_end;  \
@@ -366,21 +366,27 @@ namespace blue_sky
   void data_manager::check_arrays_for_inactive_blocks () const
     {
       std::ostringstream out_s;
-      int nb = data->dimens.nx * data->dimens.ny * data->dimens.nz;
-      int permx_counter = 0;
-      int permy_counter = 0;
-      int permz_counter = 0;
-      int poro_counter = 0;
-      int ntg_counter = 0;
+      t_long i, ix, iy, iz;
+      t_long nx, ny, nz, nb;
+      t_long permx_counter = 0;
+      t_long permy_counter = 0;
+      t_long permz_counter = 0;
+      t_long poro_counter = 0;
+      t_long ntg_counter = 0;
       
-      t_int* actnum = &(*data->get_int_non_empty_array ("ACTNUM"))[0];
-      const t_float *permx  = &(*data->get_fp_non_empty_array ("PERMX"))[0];
-      const t_float *permy  = &(*data->get_fp_non_empty_array ("PERMY"))[0];
-      const t_float *permz  = &(*data->get_fp_non_empty_array ("PERMZ"))[0];
-      const t_float *poro   = &(*data->get_fp_non_empty_array ("PORO"))[0];
+      t_int* actnum = &(*data->get_i_array ("ACTNUM"))[0];
+      const t_float *permx  = &(*data->get_fp_array ("PERMX"))[0];
+      const t_float *permy  = &(*data->get_fp_array ("PERMY"))[0];
+      const t_float *permz  = &(*data->get_fp_array ("PERMZ"))[0];
+      const t_float *poro   = &(*data->get_fp_array ("PORO"))[0];
       const t_float *ntg    = &(*data->get_fp_array ("NTG"))[0];
 
-      for (int i = 0; i < nb; ++i)
+      nx = data->props->get_i("nx");
+      ny = data->props->get_i("ny");
+      nz = data->props->get_i("nz");
+      nb = nx * ny * nz;
+
+      for (i = 0; i < nb; ++i)
         {
           if (!actnum[i])
             {
@@ -389,10 +395,9 @@ namespace blue_sky
 
           if (actnum[i] && permx[i] < DEFAULT_MINIMAL_PERM && permy[i] < DEFAULT_MINIMAL_PERM && permz[i] < DEFAULT_MINIMAL_PERM)
             {
-              int ix, iy, iz;
-              iz = i / (data->dimens.nx * data->dimens.ny);
-              iy = (i - iz * (data->dimens.nx * data->dimens.ny)) / data->dimens.nx;
-              ix = i - iz * (data->dimens.nx * data->dimens.ny) - iy * data->dimens.nx;
+              iz = i / (nx * ny);
+              iy = (i - iz * (nx * ny)) / nx;
+              ix = i - iz * (nx * ny) - iy * nx;
 
               BOSWARN (section::check_data, level::low)
                 << "blocks " << i << " [" << (ix + 1) << ", " << (iy + 1) << ", "

@@ -15,42 +15,41 @@
 namespace blue_sky
 {
   
-  template <class t_double, class i_type_t, class s_type_t, class b_type_t>
-  class BS_API_PLUGIN prop : public prop_iface<t_double, i_type_t, s_type_t, b_type_t>
+  class BS_API_PLUGIN prop : public prop_iface
     {
       // ------------------------------------
       // METHODS
       // ------------------------------------
     public:
       // destructor
-      ~prop ()
+      virtual ~prop ()
         {}
       // ------------------------------------
       // INTERFACE METHODS
       // ------------------------------------
     public:
       //! add new floating point property to the list (return index of the property or < 0 if error occur)
-      virtual int add_property_f (const t_double def_value, const std::string &short_name, const std::string &description)
+      virtual void add_property_f (const t_double def_value, const std::string &short_name, const std::string &description)
         {
-          return fp_impl.add (def_value, short_name, description);
+          fp_impl.add (def_value, short_name, description);
         }
       
       //! add new integer property to the list (return index of the property or < 0 if error occur)
-      virtual int add_property_i (const i_type_t def_value, const std::string &short_name, const std::string &description) 
+      virtual void add_property_i (const t_long def_value, const std::string &short_name, const std::string &description) 
         {
-          return i_impl.add (def_value, short_name, description);
+          i_impl.add (def_value, short_name, description);
         }
 
       //! add new string property to the list (return index of the property or < 0 if error occur)
-      virtual int add_property_s (const s_type_t def_value, const std::string &short_name, const std::string &description) 
+      virtual void add_property_s (const std::string def_value, const std::string &short_name, const std::string &description) 
         {
-          return s_impl.add (def_value, short_name, description);
+          s_impl.add (def_value, short_name, description);
         }
 
       //! add new string property to the list (return index of the property or < 0 if error occur)
-      virtual int add_property_b (const b_type_t def_value, const std::string &short_name, const std::string &description) 
+      virtual void add_property_b (const bool def_value, const std::string &short_name, const std::string &description) 
         {
-          return b_impl.add (def_value, short_name, description);
+          b_impl.add (def_value, short_name, description);
         }
  
       //! clear all
@@ -62,124 +61,100 @@ namespace blue_sky
           b_impl.clear ();
         }
 
-      //! return property index by name
-      virtual int get_index_f (const std::string &short_name) const
+      //! return property value
+      virtual t_double get_f (const std::string &name) const
         {
-          return fp_impl.get_index (short_name);
-        }
-
-      //! return property index by name
-      virtual int get_index_i (const std::string &short_name) const
-        {
-          return i_impl.get_index (short_name);
-        }
-
-      //! return property index by name
-      virtual int get_index_s (const std::string &short_name) const
-        {
-          return s_impl.get_index (short_name);
-        }
-
-      //! return property index by name
-      virtual int get_index_b (const std::string &short_name) const
-        {
-          return b_impl.get_index (short_name);
+          return fp_impl.get (name);
         }
 
       //! return property value
-      virtual const t_double get_f (const int idx) const
+      virtual t_long get_i (const std::string &name) const
         {
-          return fp_impl.get (idx);
+          return i_impl.get (name);
         }
 
       //! return property value
-      virtual const i_type_t get_i (const int idx) const
+      virtual std::string get_s (const std::string &name) const
         {
-          return i_impl.get (idx);
+          return s_impl.get (name);
         }
 
       //! return property value
-      virtual const s_type_t get_s (const int idx) const
+      virtual bool get_b (const std::string &name) const
         {
-          return s_impl.get (idx);
-        }
-
-      //! return property value
-      virtual const b_type_t get_b (const int idx) const
-        {
-          return b_impl.get (idx);
+          return b_impl.get (name);
         }
 
       //! set value
-      virtual void set_f (const int idx, const t_double value)
+      virtual void set_f (const std::string &name, const t_double value)
         {
-          fp_impl.set (idx, value);
+          fp_impl.set (name, value);
         }
 
       //! set value
-      virtual void set_i (const int idx, const i_type_t value)
+      virtual void set_i (const std::string &name, const t_long value)
         {
-          i_impl.set (idx, value);
+          i_impl.set (name, value);
         }
 
       //! set value
-      virtual void set_s (const int idx, const s_type_t value)
+      virtual void set_s (const std::string &name, const std::string value)
         {
-          s_impl.set (idx, value);
+          s_impl.set (name, value);
         }
 
       //! set value
-      virtual void set_b (const int idx, const b_type_t value)
+      virtual void set_b (const std::string &name, const bool value)
         {
-          b_impl.set (idx, value);
+          b_impl.set (name, value);
         }
 
       //! check (return false if property set by default, true otherwise
-      virtual bool check_f (const int idx) const
+      virtual bool check_f (const std::string &name) const
         {
-          return fp_impl.check (idx);
+          return fp_impl.check (name);
         }
 
       //! check (return false if property set by default, true otherwise
-      virtual bool check_i (const int idx) const 
+      virtual bool check_i (const std::string &name) const 
         {
-          return i_impl.check (idx);
+          return i_impl.check (name);
         }
 
       //! check (return false if property set by default, true otherwise
-      virtual bool check_s (const int idx) const
+      virtual bool check_s (const std::string &name) const
         {
-          return s_impl.check (idx);
+          return s_impl.check (name);
         }
 
       //! check (return false if property set by default, true otherwise
-      virtual bool check_b (const int idx) const
+      virtual bool check_b (const std::string &name) const
         {
-          return b_impl.check (idx);
+          return b_impl.check (name);
         }
 
       //! reset to default value
-      virtual void reset_f (const int idx)
+      virtual void reset_f (const std::string &name)
         {
-          fp_impl.reset (idx);
+          fp_impl.reset (name);
         }
 
       //! reset to default value
-      virtual void reset_i (const int idx)
+      virtual void reset_i (const std::string &name)
         {
-          i_impl.reset (idx);
+          i_impl.reset (name);
         }
 
       //! reset to default value
-      virtual void reset_s (const int idx)
+      virtual void reset_s (const std::string &name)
         {
-          s_impl.reset (idx);
+          s_impl.reset (name);
         }
 
       //! reset to default value
-      virtual void reset_b (const int idx)
+      virtual void reset_b (const std::string &name)
         {
-          b_impl.reset (idx);
+          b_impl.reset (name);
         }
 
       //! reset all
@@ -212,11 +187,11 @@ namespace blue_sky
       // ------------------------------
     protected:
       prop_impl <t_double> fp_impl;
-      prop_impl <i_type_t>  i_impl;
-      prop_impl <s_type_t>  s_impl;
-      prop_impl <b_type_t>  b_impl;
+      prop_impl <t_long>  i_impl;
+      prop_impl <std::string>  s_impl;
+      prop_impl <bool>  b_impl;
 
-      BLUE_SKY_TYPE_DECL(prop);
+      BLUE_SKY_TYPE_DECL (prop);
     };
 
 }; //end of blue_sky namespace

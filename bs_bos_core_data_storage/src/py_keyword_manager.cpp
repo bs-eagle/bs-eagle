@@ -10,11 +10,12 @@
 #include "bs_bos_core_data_storage_stdafx.h"
 #include "py_keyword_manager.h"
 #include "keyword_manager.h"
-
-#include BS_FORCE_PLUGIN_IMPORT ()
 #include "read_class.h"
 #include "data_class.h"
 #include "rs_mesh_iface.h"
+
+#include BS_FORCE_PLUGIN_IMPORT ()
+
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #ifdef BSPY_EXPORTING_PLUGIN

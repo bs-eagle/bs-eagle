@@ -9,6 +9,8 @@
 #ifndef BS_EAGLE_DATA_DIMENS_H_
 #define BS_EAGLE_DATA_DIMENS_H_
 
+#include "conf.h"
+
 namespace blue_sky {
 
   /**
@@ -17,11 +19,11 @@ namespace blue_sky {
    * */
   struct data_dimens
   {
-    long long nx;     //!< X dimension
-    long long ny;     //!< Y dimension
-    long long nz;     //!< Z dimension
+    t_long nx;     //!< X dimension
+    t_long ny;     //!< Y dimension
+    t_long nz;     //!< Z dimension
 
-    data_dimens (long long nx = 0, long long ny = 0, long long nz = 0)
+    data_dimens (t_long nx = 0, t_long ny = 0, t_long nz = 0)
     : nx (nx)
     , ny (ny)
     , nz (nz)

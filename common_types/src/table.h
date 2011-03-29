@@ -107,8 +107,8 @@ namespace blue_sky
         {
           if (values.empty ())
             return -1;
-          t_long n_rows = values.front ().size ();
-          t_long size = values.size ();
+          t_long n_rows = (t_long) values.front ().size ();
+          t_long size = (t_long) values.size ();
           
           values.resize (size + 1); 
           col_names.resize (size + 1);
@@ -123,7 +123,7 @@ namespace blue_sky
        */
       virtual t_long get_n_rows () const
         {
-          return values[0].size ();
+          return (t_long) values[0].size ();
         }
       
       /** 
@@ -131,7 +131,7 @@ namespace blue_sky
        */
       virtual t_long get_n_cols () const
         {
-          return values.size ();
+          return (t_long) values.size ();
         }
 
       /** 

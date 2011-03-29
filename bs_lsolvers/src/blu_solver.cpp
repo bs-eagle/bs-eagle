@@ -51,15 +51,8 @@ namespace blue_sky
    void
   blu_solver::init_prop ()
     {
-      block_size_idx = prop->get_index_i (std::string ("block_size"));
-      if (block_size_idx < 0)
-        block_size_idx = prop->add_property_i (true, std::string ("block_size"), 
-                                               std::string ("Size of calculation block"));
-
-      if (block_size_idx < 0)
-        {
-          bs_throw_exception ("Can not regidter some properties");
-        }
+      prop->add_property_i (true, std::string ("block_size"), 
+                            std::string ("Size of calculation block"));
     }
 
   

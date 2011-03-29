@@ -3,11 +3,11 @@
  * @brief 
  * @date 2009-11-24
  */
+#include "dens_matrix_tools.h"
+
 #include <time.h>
 #include <stdlib.h>
 #include <map>
-
-#include "dens_matrix_tools.h"
 
 using namespace std;
 using namespace boost::python;

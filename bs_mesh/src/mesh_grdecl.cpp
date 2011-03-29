@@ -4,6 +4,7 @@
 \date 2008-05-20 */
 #include "bs_mesh_stdafx.h"
 #include "mesh_grdecl.h"
+#include <iterator>
 
 #define BOUND_MERGE_THRESHOLD 0.8
 #define DEFAULT_SMOOTH_RATIO 0.1
@@ -17,14 +18,24 @@ const char filename_hdf5[] = "grid_swap.h5";
   FILE*  fp;
 #endif //BS_MESH_WRITE_TRANSMISS_MATRIX 
 
-
 struct mesh_grdecl::inner {
+	// shorter aliases
+	typedef t_long int_t;
+	typedef t_double fp_t;
+	typedef t_float fp_stor_t;
 
-  typedef std::pair< spv_float, spv_float > coord_zcorn_pair;
-	typedef std::set< t_double > fp_set;
+	// other typedefs
+	typedef bs_array< fp_stor_t, bs_vector_shared > fp_storvec_t;
+	typedef v_float fp_storarr_t;
+	typedef v_long int_arr_t;
+	typedef smart_ptr< fp_storvec_t > spfp_storvec_t;
+	typedef spv_float spfp_storarr_t;
+	typedef spv_long spi_arr_t;
+	typedef std::pair< spfp_storarr_t, spfp_storarr_t > coord_zcorn_pair;
+	typedef std::set< fp_t > fp_set;
 
-	typedef v_float::iterator v_iterator;
-	typedef v_float::const_iterator cv_iterator;
+	typedef fp_storvec_t::iterator v_iterator;
+	typedef fp_storvec_t::const_iterator cv_iterator;
 	typedef fp_set::iterator fps_iterator;
 
 	// iterator that jumps over given offset instead of fixed +1
@@ -142,9 +153,93 @@ struct mesh_grdecl::inner {
 		const difference_type step_;
 	};
 
+	// iterator that jumps over given offset instead of fixed +1
+	template< class iterator_t >
+	class cumsum_iterator : public std::iterator< std::bidirectional_iterator_tag, typename std::iterator_traits< iterator_t >::value_type > {
+		typedef std::iterator_traits< cumsum_iterator > traits_t;
+
+	public:
+		typedef typename traits_t::value_type value_type;
+		typedef typename traits_t::pointer pointer;
+		typedef typename traits_t::reference reference;
+		typedef typename traits_t::difference_type difference_type;
+
+		// set step in compile-time
+		cumsum_iterator() : p_(), sum_(0) {}
+		cumsum_iterator(const iterator_t& i) : p_(i), sum_(0) {}
+		cumsum_iterator(const cumsum_iterator& i) : p_(i.p_), sum_(i.sum_) {}
+
+		cumsum_iterator& operator++() {
+			sum_ += *p_++;
+			return *this;
+		}
+		cumsum_iterator& operator++(int) {
+			cumsum_iterator tmp = *this;
+			sum_ += *p_++;
+			return tmp;
+		}
+
+		cumsum_iterator& operator--() {
+			sum_ -= *p_--;
+			return *this;
+		}
+		cumsum_iterator& operator--(int) {
+			cumsum_iterator tmp = *this;
+			sum_ -= *p_--;
+			return tmp;
+		}
+
+		pointer operator->() const {
+			return p_.operator->();
+		}
+		value_type operator*() const {
+			return sum_;
+		}
+
+		cumsum_iterator& operator=(const cumsum_iterator& lhs) {
+			p_ = lhs.p_;
+			sum_ = lhs.sum_;
+			return *this;
+		}
+
+		friend difference_type operator-(const cumsum_iterator& lhs, const cumsum_iterator& rhs) {
+			return lhs.p_ - rhs.p_;
+		}
+
+		bool operator<(const cumsum_iterator& rhs) {
+			return p_ < rhs.p_;
+		}
+		bool operator>(const cumsum_iterator& rhs) {
+			return p_ > rhs.p_;
+		}
+		bool operator<=(const cumsum_iterator& rhs) {
+			return p_ <= rhs.p_;
+		}
+		bool operator>=(const cumsum_iterator& rhs) {
+			return p_ >= rhs.p_;
+		}
+		bool operator==(const cumsum_iterator& rhs) {
+			return p_ == rhs.p_;
+		}
+		bool operator!=(const cumsum_iterator& rhs) {
+			return p_ != rhs.p_;
+		}
+
+		iterator_t& backend() {
+			return p_;
+		}
+		const iterator_t& backend() const {
+			return p_;
+		}
+
+	private:
+		iterator_t p_;
+		value_type sum_;
+	};
+
 	template< class array_t >
-	static t_double sum(const array_t& a) {
-		t_double s = 0;
+	static fp_t sum(const array_t& a) {
+		fp_t s = 0;
 		for(typename array_t::const_iterator i = a.begin(), end = a.end(); i != end; ++i)
 			s += *i;
 		return s;
@@ -153,7 +248,7 @@ struct mesh_grdecl::inner {
 	// helper structure to get dx[i] regardless of whether it given by one number or by array of
 	// numbers
 	struct dim_subscript {
-		dim_subscript(const v_float& dim)
+		dim_subscript(const fp_storarr_t& dim)
 			: dim_(dim), sum_(0)
 		{
 			if(dim_.size() == 1)
@@ -162,31 +257,31 @@ struct mesh_grdecl::inner {
 				ss_fcn_ = &dim_subscript::ss_array_dim;
 		}
 
-		t_float ss_const_dim(t_long idx) {
-			return static_cast< t_float >(t_float(dim_[0] * idx));
+		fp_stor_t ss_const_dim(int_t idx) {
+			return static_cast< fp_stor_t >(fp_t(dim_[0] * idx));
 		}
 
-		t_float ss_array_dim(t_long idx) {
-			t_float tmp = sum_;
+		fp_stor_t ss_array_dim(int_t idx) {
+			fp_t tmp = sum_;
 			sum_ += dim_[idx];
-			return static_cast< t_float>(tmp);
+			return static_cast< fp_stor_t>(tmp);
 		}
 
 		void reset() { sum_ = 0; }
 
-		t_float operator[](t_long idx) {
+		fp_t operator[](int_t idx) {
 			return (this->*ss_fcn_)(idx);
 		}
 
 	private:
-		const v_float& dim_;
-		t_float (dim_subscript::*ss_fcn_)(t_long);
-		t_float sum_;
+		const fp_storarr_t& dim_;
+		fp_stor_t (dim_subscript::*ss_fcn_)(int_t);
+		fp_t sum_;
 	};
 
-	static spv_float gen_coord(t_long nx, t_long ny, spv_float dx, spv_float dy) {
+	static spfp_storarr_t gen_coord(int_t nx, int_t ny, spfp_storarr_t dx, spfp_storarr_t dy) {
 		using namespace std;
-		v_float::value_type value_t;
+		typedef fp_storarr_t::value_type value_t;
 
 		// DEBUG
 		BSOUT << "gen_coord: init stage" << bs_end;
@@ -195,23 +290,22 @@ struct mesh_grdecl::inner {
 		inner::dim_subscript dys(*dy);
 
 		// if dimension offset is given as array, then size should be taken from array size
-		if(dx->size() > 1) nx = dx->size();
-		if(dy->size() > 1) ny = dy->size();
+		if(dx->size() > 1) nx = (int_t) dx->size();
+		if(dy->size() > 1) ny = (int_t) dy->size();
 
 		// create arrays
-		spv_float coord = BS_KERNEL.create_object(v_float::bs_type());
+		spfp_storarr_t coord = BS_KERNEL.create_object(fp_storarr_t::bs_type());
 		if(!coord) return NULL;
 
 		// DEBUG
 		BSOUT << "gen_coord: creation starts..." << bs_end;
 		// fill coord
 		// coord is simple grid
-		coord->resize((nx + 1)*(ny + 1)*6);
-    memset(&(*coord)[0], 0, (nx + 1)*(ny + 1) * 6 * sizeof (t_float));
-		v_float::iterator pcd = coord->begin();
-		for(t_long iy = 0; iy <= ny; ++iy) {
-			t_double cur_y = dys[iy];
-			for(t_long ix = 0; ix <= nx; ++ix) {
+		coord->init((nx + 1)*(ny + 1)*6, value_t(0));
+		fp_storarr_t::iterator pcd = coord->begin();
+		for(int_t iy = 0; iy <= ny; ++iy) {
+			fp_t cur_y = dys[iy];
+			for(int_t ix = 0; ix <= nx; ++ix) {
 				pcd[0] = pcd[3] = dxs[ix];
 				pcd[1] = pcd[4] = cur_y;
 				pcd[5] = 1; // pcd[2] = 0 from init
@@ -226,14 +320,14 @@ struct mesh_grdecl::inner {
 	}
 
 	void init_minmax(mesh_grdecl& m) const {
-		t_long i, n;
-		t_float *it;
+		int_t i, n;
+		fp_stor_t *it;
 
 		// init ZCORN
 		m.min_z = *(std::min_element(zcorn_->begin(), zcorn_->end()));
 		m.max_z = *(std::max_element(zcorn_->begin(), zcorn_->end()));
 
-		n = coord_->size();
+		n = (int_t) coord_->size();
 
 		m.max_x = m.min_x = m.coord_array[0];
 		m.max_y = m.min_y = m.coord_array[1];
@@ -260,24 +354,24 @@ struct mesh_grdecl::inner {
 	}
 
 	template< class array_t >
-	static void resize_zcorn(array_t& zcorn, t_long nx, t_long ny, t_long new_nx, t_long new_ny) {
+	static void resize_zcorn(array_t& zcorn, int_t nx, int_t ny, int_t new_nx, int_t new_ny) {
 		using namespace std;
 		typedef typename array_t::iterator v_iterator;
 		typedef typename array_t::value_type value_t;
 		typedef typename array_t::size_type size_t;
 
-		const t_long nz = (zcorn.size() >> 3) / (nx  * ny);
-		//const t_long delta = 4 * (new_nx * new_ny - nx * ny);
+		const int_t nz = (int_t)(zcorn.size() >> 3) / (nx  * ny);
+		//const int_t delta = 4 * (new_nx * new_ny - nx * ny);
 
 		// cache z-values for each plane
-		const t_long plane_sz = nx * ny * 4;
+		const int_t plane_sz = nx * ny * 4;
 		vector< value_t > z_cache(nz * 2);
 		slice_iterator< v_iterator > pz(zcorn.begin(), plane_sz);
 		slice_iterator< v_iterator > pz_end(zcorn.begin(), plane_sz);
 		copy(pz, pz + nz *2, z_cache.begin());
 
 		// refill zcorn with cached values & new plane size
-		const t_long new_plane_sz = (new_nx * new_ny * 4);
+		const int_t new_plane_sz = (new_nx * new_ny * 4);
 		zcorn.resize(new_nx * new_ny * nz * 8);
 		v_iterator p_newz = zcorn.begin();
 		for(typename vector< value_t >::const_iterator p_cache = z_cache.begin(), end = z_cache.end(); p_cache != end; ++p_cache) {
@@ -285,11 +379,11 @@ struct mesh_grdecl::inner {
       p_newz += new_plane_sz;
 		}
 	}
-/*
-	static void insert_column(t_long nx, t_long ny, v_float& coord, v_float& zcorn, t_float where) {
+
+	static void insert_column(int_t nx, int_t ny, fp_storvec_t& coord, fp_storvec_t& zcorn, fp_stor_t where) {
 		using namespace std;
 
-		typedef v_float::iterator v_iterator;
+		typedef fp_storvec_t::iterator v_iterator;
 		typedef slice_iterator< v_iterator, 6 > dim_iterator;
 
 		// reserve mem for insterts
@@ -298,12 +392,12 @@ struct mesh_grdecl::inner {
 		// find a place to insert
 		dim_iterator pos = lower_bound(dim_iterator(coord.begin()), dim_iterator(coord.begin()) + (nx + 1), where);
 		//if(pos == dim_iterator(coord.begin()) + (nx + 1)) return;
-		t_long ins_offset = pos.backend() - coord.begin();
+		int_t ins_offset = pos.backend() - coord.begin();
 
 		// process all rows
-		t_float y, z1, z2;
+		fp_stor_t y, z1, z2;
 		v_iterator vpos;
-		for(t_long i = ny; i >= 0; --i) {
+		for(int_t i = ny; i >= 0; --i) {
 			// save y and z values
 			vpos = coord.begin() + i*(nx + 1)*6 + ins_offset;
 			if(ins_offset == (nx + 1)*6) {
@@ -315,7 +409,7 @@ struct mesh_grdecl::inner {
 				y = *(vpos + 1); z1 = *(vpos + 2); z2 = *(vpos + 5);
 			}
 			// insert new vector
-			insert_iterator< v_float > ipos(coord, vpos);
+			insert_iterator< fp_storvec_t > ipos(coord, vpos);
 			*ipos++ = where; *ipos++ = y; *ipos++ = z1;
 			*ipos++ = where; *ipos++ = y; *ipos = z2;
 		}
@@ -324,11 +418,11 @@ struct mesh_grdecl::inner {
 		resize_zcorn(zcorn, nx, ny, nx + 1, ny);
 	}
 
-	static void insert_row(t_long nx, t_long ny, v_float& coord, v_float& zcorn, t_float where) {
+	static void insert_row(int_t nx, int_t ny, fp_storvec_t& coord, fp_storvec_t& zcorn, fp_stor_t where) {
 		using namespace std;
-		typedef typename v_float::iterator v_iterator;
+		typedef fp_storvec_t::iterator v_iterator;
 		typedef slice_iterator< v_iterator > dim_iterator;
-		const t_long ydim_step = 6 * (nx + 1);
+		const int_t ydim_step = 6 * (nx + 1);
 
 		// reserve mem for insterts
 		coord.reserve((nx + 1)*(ny + 2)*6);
@@ -340,16 +434,16 @@ struct mesh_grdecl::inner {
 		v_iterator ins_point = pos.backend() - 1;
 
 		// make cache of x values from first row
-		spv_float cache_x = BS_KERNEL.create_object(v_float::bs_type());
+		spfp_storvec_t cache_x = BS_KERNEL.create_object(fp_storvec_t::bs_type());
 		cache_x->resize(nx + 1);
 		typedef slice_iterator< v_iterator, 3 > hdim_iterator;
 		copy(hdim_iterator(coord.begin()), hdim_iterator(coord.begin() + (nx + 1)*6), cache_x->begin());
 
 		// insert row
-		insert_iterator< v_float > ipos(coord, ins_point);
+		insert_iterator< fp_storvec_t > ipos(coord, ins_point);
 		v_iterator p_x = cache_x->begin();
-		t_float z1 = *(coord.begin() + 2), z2 = *(coord.begin() + 5);
-		for(t_long i = 0; i <= nx; ++i) {
+		fp_stor_t z1 = *(coord.begin() + 2), z2 = *(coord.begin() + 5);
+		for(int_t i = 0; i <= nx; ++i) {
 			*ipos++ = *p_x++; *ipos++ = where; *ipos++ = z1;
 			*ipos++ = *p_x++; *ipos++ = where; *ipos++ = z2;
 		}
@@ -357,7 +451,7 @@ struct mesh_grdecl::inner {
 		// update zcorn
 		resize_zcorn(zcorn, nx, ny, nx, ny + 1);
 	}
-*/
+
 	template< class ret_array_t, class array_t >
 	static void coord2deltas(const array_t& src, ret_array_t& res) {
 		typedef typename array_t::const_iterator carr_iterator;
@@ -371,7 +465,7 @@ struct mesh_grdecl::inner {
 	}
 
 	struct proc_ray {
-		template< t_long direction, class = void >
+		template< int_t direction, class = void >
 		struct dir_ray {
 			enum { dir = direction };
 
@@ -386,11 +480,11 @@ struct mesh_grdecl::inner {
 			}
 
 			template< class ray_t >
-			static typename ray_t::iterator closest_bound(ray_t& ray, t_double v) {
+			static typename ray_t::iterator closest_bound(ray_t& ray, fp_t v) {
 				return std::upper_bound(ray.begin(), ray.end(), v);
 			}
 
-			static t_double min(t_double f, t_double s) {
+			static fp_t min(fp_t f, fp_t s) {
 				return std::min(f, s);
 			}
 		};
@@ -410,21 +504,21 @@ struct mesh_grdecl::inner {
 			}
 
 			template< class ray_t >
-			static typename ray_t::iterator closest_bound(ray_t& ray, t_double v) {
+			static typename ray_t::iterator closest_bound(ray_t& ray, fp_t v) {
 				return std::upper_bound(ray.begin(), ray.end(), v)--;
 			}
 
-			static t_double min(t_double f, t_double s) {
+			static fp_t min(fp_t f, fp_t s) {
 				return std::max(f, s);
 			}
 		};
 
 		template< class ray_t, class predicate >
-		static t_double find_cell(ray_t& coord, predicate p) {
+		static fp_t find_cell(ray_t& coord, predicate p) {
 			typedef typename ray_t::iterator ray_iterator;
 			if(coord.size() < 2) return 0;
 			// find max cell size
-			t_double cell_sz = 0;
+			fp_t cell_sz = 0;
 			ray_iterator a = coord.begin(), b = a, end = coord.end();
 			for(++b; b != end; ++b) {
 				cell_sz = p(*b - *a++, cell_sz);
@@ -434,24 +528,24 @@ struct mesh_grdecl::inner {
 		}
 
 		template< class ray_t >
-		static t_double find_max_cell(ray_t& coord) {
-			return find_cell(coord, std::max< t_double >);
+		static fp_t find_max_cell(ray_t& coord) {
+			return find_cell(coord, std::max< fp_t >);
 		}
 
 		template< class ray_t >
-		static t_double find_min_cell(ray_t& coord) {
-			return find_cell(coord, std::min< t_double >);
+		static fp_t find_min_cell(ray_t& coord) {
+			return find_cell(coord, std::min< fp_t >);
 		}
 
 		template< class ray_t, class dir_ray_t >
-		static void go(ray_t& ray, t_double start_point, t_float d, t_float a, dir_ray_t dr) {
+		static void go(ray_t& ray, fp_t start_point, fp_stor_t d, fp_stor_t a, dir_ray_t dr) {
 			using namespace std;
-			const t_long dir = static_cast< t_long >(dir_ray_t::dir);
+			const int_t dir = static_cast< int_t >(dir_ray_t::dir);
 			// find where new point fall to
-			const t_double max_sz = find_max_cell(ray) * 0.5;
-			const t_double max_front = *dr.last(ray);
-			t_double cell_sz = d;
-			t_double wave_front = dr.min(start_point + dir * 0.5 * d, max_front);
+			const fp_t max_sz = find_max_cell(ray) * 0.5;
+			const fp_t max_front = *dr.last(ray);
+			fp_t cell_sz = d;
+			fp_t wave_front = dr.min(start_point + dir * 0.5 * d, max_front);
 
 			// make refined ray
 			// add refinement grid
@@ -470,11 +564,11 @@ struct mesh_grdecl::inner {
 		}
 
 		template< class ray_t >
-		static t_long kill_tight_cells(ray_t& ray, t_double min_cell_sz) {
+		static int_t kill_tight_cells(ray_t& ray, fp_t min_cell_sz) {
 			typedef typename ray_t::iterator ray_iterator;
 
 			if(ray.size() < 2) return 0;
-			t_long merge_cnt = 0;
+			int_t merge_cnt = 0;
 			ray_iterator a = ray.begin(), b = a, end = ray.end();
 			for(++b; b != end; ++b) {
 				if(*b - *a < min_cell_sz) {
@@ -487,7 +581,7 @@ struct mesh_grdecl::inner {
 		}
 
 		template< class ray_t >
-		static t_long band_filter(ray_t& ray, t_double smooth_ratio) {
+		static int_t band_filter(ray_t& ray, fp_t smooth_ratio) {
 			typedef typename ray_t::size_type size_t;
 			typedef std::set< size_t, std::greater< size_t > > idx_set;
 			typedef typename idx_set::const_iterator idx_iterator;
@@ -499,7 +593,7 @@ struct mesh_grdecl::inner {
 			//std::vector< size_t > dying;
 			//
 			// left to right walk
-			t_long n = 0;
+			int_t n = 0;
 			for(size_t i = 0; i < ray.size() - 1; ++i) {
 				// dont check dead bands
 				if(dying.find(i) != dying.end()) continue;
@@ -544,10 +638,10 @@ struct mesh_grdecl::inner {
 	};
 
 	template< class ray_t >
-	static void refine_mesh_impl(ray_t& coord, t_float point, t_float d, t_float a) {
+	static void refine_mesh_impl(ray_t& coord, fp_stor_t point, fp_stor_t d, fp_stor_t a) {
 		using namespace std;
-		typedef typename v_float::iterator v_iterator;
-		typedef typename v_float::const_iterator cv_iterator;
+		typedef typename fp_storvec_t::iterator v_iterator;
+		typedef typename fp_storvec_t::const_iterator cv_iterator;
 
 		// sanity check
 		if(!coord.size()) return;
@@ -557,12 +651,13 @@ struct mesh_grdecl::inner {
 		proc_ray::go(coord, point, d, a, typename proc_ray::template dir_ray< -1 >());
 	}
 
-	static coord_zcorn_pair refine_mesh(t_long& nx, t_long& ny, spv_float coord, spv_float zcorn,
-			spv_float points, t_double cell_merge_thresh, t_double band_thresh)
+	static coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, spfp_storarr_t coord, spfp_storarr_t zcorn,
+			spfp_storarr_t points, fp_t cell_merge_thresh, fp_t band_thresh,
+			spi_arr_t hit_idx = NULL)
 	{
 		using namespace std;
 
-		typedef v_float::iterator v_iterator;
+		typedef fp_storvec_t::iterator v_iterator;
 		typedef slice_iterator< v_iterator, 6 > dim_iterator;
 
 		// DEBUG
@@ -571,30 +666,30 @@ struct mesh_grdecl::inner {
 		if(!coord || !zcorn || !points) return coord_zcorn_pair();
 
 		// convert coord & zcorn to shared vectors
-		//spv_float vcoord = BS_KERNEL.create_object(v_float::bs_type());
+		//spfp_storvec_t vcoord = BS_KERNEL.create_object(fp_storvec_t::bs_type());
 		//if(vcoord) vcoord->init_inplace(coord->get_container());
 		//else return coord_zcorn_pair();
 
-		//spv_float vzcorn = BS_KERNEL.create_object(v_float::bs_type());
+		//spfp_storvec_t vzcorn = BS_KERNEL.create_object(fp_storvec_t::bs_type());
 		//if(vzcorn) vzcorn->init_inplace(zcorn->get_container());
 		//else return coord_zcorn_pair();
 
-		vector< t_float > vzcorn(zcorn->begin(), zcorn->end());
+		vector< fp_stor_t > vzcorn(zcorn->begin(), zcorn->end());
 
 		// build x and y coord maps
-		//spv_float x = BS_KERNEL.create_object(v_float::bs_type());
+		//spfp_storvec_t x = BS_KERNEL.create_object(fp_storvec_t::bs_type());
 		fp_set x;
 		copy(dim_iterator(coord->begin()), dim_iterator(coord->begin()) + (nx + 1),
 				insert_iterator< fp_set >(x, x.begin()));
 
-		//spv_float y = BS_KERNEL.create_object(v_float::bs_type());
+		//spfp_storvec_t y = BS_KERNEL.create_object(fp_storvec_t::bs_type());
 		//y->resize(ny + 1);
 		fp_set y;
-		const t_long ydim_step = 6 * (nx + 1);
+		const int_t ydim_step = 6 * (nx + 1);
 		copy(dim_iterator(coord->begin() + 1, ydim_step), dim_iterator(coord->begin() + 1, ydim_step) + (ny + 1),
 				insert_iterator< fp_set >(y, y.begin()));
 
-		v_float::const_iterator pp = points->begin(), p_end = points->end();
+		fp_storarr_t::const_iterator pp = points->begin(), p_end = points->end();
 		// make (p_end - p_begin) % 4 = 0
 		p_end -= (p_end - pp) % 6;
 
@@ -602,13 +697,13 @@ struct mesh_grdecl::inner {
 		BSOUT << "refine_mesh: points processing starts..." << bs_end;
 		// process points in turn
 		// points array: {(x, y, dx, dy, ax, ay)}
-		t_float x_coord, y_coord, dx, dy, ax, ay;
-		t_float min_dx = 0, min_dy = 0;
+		fp_stor_t x_coord, y_coord, dx, dy, ax, ay;
+		fp_stor_t min_dx = 0, min_dy = 0;
 		bool first_point = true;
 		// store processed points here
 		fp_set dx_ready, dy_ready;
 		// main cycle
-		t_long cnt = 0;
+		int_t cnt = 0;
 		while(pp != p_end) {
 			x_coord = *(pp++); y_coord = *(pp++);
 			dx = *(pp++); dy = *(pp++);
@@ -646,7 +741,7 @@ struct mesh_grdecl::inner {
 		// DEBUG
 		//BSOUT << "refine_mesh: coord2deltas" << bs_end;
 		// make deltas from coordinates
-		vector< t_float > delta_x, delta_y;
+		vector< fp_stor_t > delta_x, delta_y;
 		delta_x.reserve(x.size() - 1); delta_y.reserve(y.size() - 1);
 		coord2deltas(x, delta_x);
 		coord2deltas(y, delta_y);
@@ -657,13 +752,29 @@ struct mesh_grdecl::inner {
 		while(proc_ray::band_filter(delta_x, band_thresh)) {}
 		while(proc_ray::band_filter(delta_y, band_thresh)) {}
 
+		// find what cells in refined mesh are hit by given points
+		if(hit_idx) {
+			typedef cumsum_iterator< vector< fp_stor_t >::iterator > cs_iterator;
+			typedef cs_iterator::difference_type diff_t;
+
+			hit_idx->resize(cnt * 2);
+			int_arr_t::iterator p_hit = hit_idx->begin();
+			pp = points->begin();
+			for(int_t i = 0; i < cnt; ++i) {
+				cs_iterator p_id = lower_bound(cs_iterator(delta_x.begin()), cs_iterator(delta_x.end()), *pp++);
+				*p_hit++ = max< diff_t >(p_id - delta_x.begin() - 1, 0);
+				p_id = lower_bound(cs_iterator(delta_y.begin()), cs_iterator(delta_y.end()), *pp++);
+				*p_hit++ = max< diff_t >(p_id - delta_y.begin() - 1, 0);
+				pp += 4;
+			}
+		}
 
 		// DEBUG
 		BSOUT << "refine_mesh: update ZCORN" << bs_end;
 		// update zcorn
-		resize_zcorn(vzcorn, nx, ny, delta_x.size(), delta_y.size());
+		resize_zcorn(vzcorn, nx, ny, (int_t) delta_x.size(), (int_t) delta_y.size());
 		// create bs_array from new zcorn
-		spv_float rzcorn = BS_KERNEL.create_object(v_float::bs_type());
+		spfp_storarr_t rzcorn = BS_KERNEL.create_object(fp_storarr_t::bs_type());
 		if(!rzcorn) return coord_zcorn_pair();
 		rzcorn->resize(vzcorn.size());
 		copy(vzcorn.begin(), vzcorn.end(), rzcorn->begin());
@@ -671,10 +782,10 @@ struct mesh_grdecl::inner {
 		// DEBUG
 		//BSOUT << "refine_mesh: copy delta_x & delta_y to bs_arrays" << bs_end;
 		// copy delta_x & delta_y to bs_arrays
-		nx = delta_x.size();
-		ny = delta_y.size();
-		spv_float adx = BS_KERNEL.create_object(v_float::bs_type()),
-					   ady = BS_KERNEL.create_object(v_float::bs_type());
+		nx = (int_t)  delta_x.size();
+		ny = (int_t)  delta_y.size();
+		spfp_storarr_t adx = BS_KERNEL.create_object(fp_storarr_t::bs_type()),
+					   ady = BS_KERNEL.create_object(fp_storarr_t::bs_type());
 		adx->resize(delta_x.size()); ady->resize(delta_y.size());
 		copy(delta_x.begin(), delta_x.end(), adx->begin());
 		copy(delta_y.begin(), delta_y.end(), ady->begin());
@@ -684,20 +795,19 @@ struct mesh_grdecl::inner {
 	}
 
 	// hold reference to coord and czron arrays if generated internally
-	spv_float coord_;
-	spv_float zcorn_;
+	spfp_storarr_t coord_;
+	spfp_storarr_t zcorn_;
 };
-
 
 mesh_grdecl::mesh_grdecl ()
 	: pinner_(new inner), coord_array(0), zcorn_array(0)
 {}
 
-
 std::pair< spv_float, spv_float >
 mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz) {
 	using namespace std;
 	typedef std::pair< spv_float, spv_float > ret_t;
+	typedef v_float::value_type value_t;
 
 	// DEBUG
 	BSOUT << "gen_coord_zcorn: init stage" << bs_end;
@@ -706,9 +816,9 @@ mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_
 	if(!dx->size() || !dy->size() || !dz->size()) return ret_t(NULL, NULL);
 
 	// if dimension offset is given as array, then size should be taken from array size
-	if(dx->size() > 1) nx = t_long(dx->size());
+	if(dz->size() > 1) nz = (t_long) dz->size();
 
-	// create arrays
+	// create zcorn array
 	spv_float zcorn = BS_KERNEL.create_object(v_float::bs_type());
 	if(!zcorn) return ret_t(NULL, NULL);
 
@@ -723,9 +833,11 @@ mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_
 	const t_long plane_size = nx * ny * 4;
 	t_float z_cache = dzs[0];
 	for(t_long iz = 1; iz <= nz; ++iz) {
-		fill_n(pcd, plane_size + 2 * (iz - 1) * nz, z_cache);
+		fill_n(pcd, plane_size, z_cache);
+    pcd += plane_size;
 		z_cache = dzs[iz];
-		fill_n(pcd, plane_size + 2 * (iz - 1) * nz + 1, z_cache);
+		fill_n(pcd, plane_size, z_cache);
+    pcd += plane_size;
 	}
 	// DEBUG
 	BSOUT << "gen_coord_zcorn: ZCORN creating finished" << bs_end;
@@ -734,11 +846,11 @@ mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_
 	return ret_t(inner::gen_coord(nx, ny, dx, dy), zcorn);
 }
 
-std::pair<spv_float, spv_float >
+std::pair< spv_float, spv_float >
 mesh_grdecl::refine_mesh(t_long& nx, t_long& ny, spv_float coord, spv_float zcorn,
-		spv_float points, t_double cell_merge_thresh, t_double band_thresh)
+		spv_float points, spv_long hit_idx, t_double cell_merge_thresh, t_double band_thresh)
 {
-	return inner::refine_mesh(nx, ny, coord, zcorn, points, cell_merge_thresh, band_thresh);
+	return inner::refine_mesh(nx, ny, coord, zcorn, points, cell_merge_thresh, band_thresh, hit_idx);
 }
 
 void mesh_grdecl::init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz) {
@@ -760,18 +872,18 @@ void mesh_grdecl::init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_
 void mesh_grdecl::init_props(const sp_idata_t &idata)
 {
   base_t::init_props (idata);
-  t_long i, n;
   spv_float data_array;
-  t_float *it;
+  //t_long i, n;
+  //t_float *it;
   
   // init ZCORN
-  data_array = idata->get_fp_non_empty_array("ZCORN");
+  data_array = idata->get_fp_array("ZCORN");
   if (data_array->size()) {
 	  pinner_->zcorn_ = data_array;
 	  zcorn_array = &(*data_array)[0];
   }
   // init COORD
-  data_array = idata->get_fp_non_empty_array("COORD");
+  data_array = idata->get_fp_array("COORD");
   if (data_array->size()) {
 	  pinner_->coord_ = data_array;
 	  coord_array = &(*data_array)[0];
@@ -1845,21 +1957,21 @@ struct build_jacobian_rows_class
   }
 
   void
-  change_by_x (t_long i, t_long j, t_long k, t_long ext_index2, bool is_adjacent)
+  change_by_x (t_long /*i*/, t_long /*j*/, t_long /*k*/, t_long ext_index2, bool /*is_adjacent*/)
   {
     rows_ptr[mesh->convert_ext_to_int (ext_index) + 1]++;
     rows_ptr[mesh->convert_ext_to_int (ext_index2) + 1]++;
   }
 
   void
-  change_by_y (t_long i, t_long j, t_long k, t_long ext_index2, bool is_adjacent)
+  change_by_y (t_long /*i*/, t_long /*j*/, t_long /*k*/, t_long ext_index2, bool /*is_adjacent*/)
   {
     rows_ptr[mesh->convert_ext_to_int (ext_index) + 1]++;
     rows_ptr[mesh->convert_ext_to_int (ext_index2) + 1]++;
   }
 
   void
-  change_by_z (t_long i, t_long j, t_long k, t_long ext_index2, bool is_adjacent)
+  change_by_z (t_long /*i*/, t_long /*j*/, t_long /*k*/, t_long ext_index2, bool /*is_adjacent*/)
   {
     rows_ptr[mesh->convert_ext_to_int (ext_index) + 1]++;
     rows_ptr[mesh->convert_ext_to_int (ext_index2) + 1]++;
@@ -1937,7 +2049,7 @@ struct build_jacobian_cols_class
   
     
   void
-  change_jac_and_flux_conn( const t_long ext_index1, const t_long ext_index2, t_double tran)
+  change_jac_and_flux_conn( const t_long /*ext_index1*/, const t_long ext_index2, t_double tran)
   {
     t_long index1 = mesh->convert_ext_to_int (ext_index);
     t_long index2 = mesh->convert_ext_to_int (ext_index2);
@@ -2041,7 +2153,7 @@ struct build_jacobian_cols_class
   }
 
   void
-  change_by_z (t_long i, t_long j, t_long k, t_long ext_index2, bool is_adjacent)
+  change_by_z (t_long i, t_long j, t_long k, t_long ext_index2, bool /*is_adjacent*/)
   {
     t_double tran;
     
@@ -2300,8 +2412,8 @@ struct build_jacobian_and_flux : boost::noncopyable
 
 
 int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr_t jacobian,
-                                                                               const sp_flux_conn_iface_t flux_conn,
-                                                                               spv_long boundary_array)
+                                                                   const sp_flux_conn_iface_t flux_conn,
+                                                                   spv_long /*boundary_array*/)
 {
   write_time_to_log init_time ("Mesh transmissibility calculation", ""); 
   
@@ -2654,7 +2766,7 @@ bool mesh_grdecl::file_open_cube_with_hdf5_swap(const char* file_name)
 #endif
 
 
-bool mesh_grdecl::file_open_actnum(const char* file_name)
+bool mesh_grdecl::file_open_actnum(const char* /*file_name*/)
 {
 #if 0
   fstream file(file_name,  ios::in);
@@ -2683,7 +2795,7 @@ bool mesh_grdecl::file_open_actnum(const char* file_name)
 
 
 
-bool mesh_grdecl::file_open_cube(const char* file_name)
+bool mesh_grdecl::file_open_cube(const char* /*file_name*/)
 {
   /*
   using namespace std;

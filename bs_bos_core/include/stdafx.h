@@ -77,7 +77,6 @@
 #pragma intrinsic (memset, memcpy)
 
 #include "bs_common.h"
-#include BS_FORCE_PLUGIN_IMPORT ()
 #include "smart_ptr.h"
 #include "bs_kernel.h"
 #include "bs_link.h"
@@ -85,7 +84,6 @@
 #include "bs_tree.h"
 #include "bs_exception.h"
 #include "bs_prop_base.h"
-#include BS_STOP_PLUGIN_IMPORT ()
 
 #ifdef BSPY_EXPORTING_PLUGIN
   #include <boost/python.hpp>
@@ -98,12 +96,10 @@
   #include <boost/python/wrapper.hpp>
   #include <boost/python/iterator.hpp>
 
-#include BS_FORCE_PLUGIN_IMPORT ()
   #include "bs_plugin_common.h"
   #include "py_bs_object_base.h"
   #include "py_bs_command.h"
   #include "py_bs_tree.h"
-#include BS_STOP_PLUGIN_IMPORT ()
 #endif
 
 #include BS_FORCE_PLUGIN_IMPORT ()
