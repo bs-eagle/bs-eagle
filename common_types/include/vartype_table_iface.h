@@ -11,6 +11,7 @@
 #include "bs_object_base.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
+#include "conf.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 

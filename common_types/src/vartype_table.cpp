@@ -39,7 +39,7 @@ namespace blue_sky
   
   template <class var_type_t>
   int 
-  vartype_table::init (const t_long n_cols)
+  vartype_table<var_type_t>::init (const t_long n_cols)
     {
       values.clear ();
       values.resize (n_cols);

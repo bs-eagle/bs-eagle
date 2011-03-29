@@ -23,7 +23,7 @@ namespace blue_sky
     
     public: 
 
-      typedef vartype_table_iface::vector_t                  vector_t;
+      typedef vartype_table_iface<var_type_t>::vector_t      vector_t;
       typedef bs_array <var_type_t, bs_nparray>              var_type_array_t;    
       typedef smart_ptr <var_type_array_t, true >            sp_var_type_array_t;
       // ------------------------------------
@@ -109,7 +109,7 @@ namespace blue_sky
           t_long size = values.size ();
           BS_ASSERT (col >= 0 && col < size);
           
-          t_long new_vec_size = new_vector_->size ();
+          t_long new_vec_size = new_vector_.size ();
           values[col].resize (new_vec_size);
           for (t_long i = 0; i < new_vec_size; ++i)
             {
