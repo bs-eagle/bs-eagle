@@ -105,6 +105,7 @@ namespace blue_sky
     props->add_property_b (0, "oil_phase", "True if oil phase exists");
     props->add_property_b (0, "water_phase", "True if water phase exists");
     props->add_property_b (0, "gas_phase", "True if gas phase exists");
+    props->add_property_b (0, "scalecrs", "True if SCALECRS is enabled");
 
   }
 

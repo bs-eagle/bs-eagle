@@ -208,7 +208,6 @@ namespace blue_sky
       static void STONE1_handler                   (const std::string &keyword, keyword_params_t &params);
       static void STONE2_handler                   (const std::string &keyword, keyword_params_t &params);
       static void RELATIVE_PERM_DEFAULT_handler    (const std::string &keyword, keyword_params_t &params);
-      static void SCALECRS_handler                 (const std::string &keyword, keyword_params_t &params);
       static void UNITS_handler                    (const std::string &keyword, keyword_params_t &params);
       static void DIMENS_handler                   (const std::string &keyword, keyword_params_t &params);
       static void ROCKCOMP_handler                 (const std::string &keyword, keyword_params_t &params);
@@ -244,10 +243,12 @@ namespace blue_sky
       static void TSTEP_handler                    (const std::string &keyword, keyword_params_t &params);
       static void TSTEPS_handler                   (const std::string &keyword, keyword_params_t &params);
       */
+      static void SCALECRS_handler                 (const std::string &keyword, keyword_params_t &params);
       static void WELLDIMS_handler                 (const std::string &/*keyword*/, keyword_params_t &/*params*/)
       {
         BOSOUT << "WELLDIMS: NOT_IMPL_YET" << bs_end;
       }
+
     };
 
 }//ns bs

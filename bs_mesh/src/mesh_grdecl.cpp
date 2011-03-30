@@ -263,7 +263,7 @@ struct mesh_grdecl::inner {
 
 		fp_stor_t ss_array_dim(int_t idx) {
 			fp_t tmp = sum_;
-			sum_ += dim_[idx];
+			if(idx > 0) sum_ += dim_[idx - 1];
 			return static_cast< fp_stor_t>(tmp);
 		}
 

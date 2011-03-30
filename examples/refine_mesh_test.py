@@ -10,7 +10,7 @@ dz = numpy.array([1], dtype='d') # Lz
 Nx = 1000
 Ny = 1000
 Nz = 1
-[c, z] = bm.mesh_grdecl_did.gen_coord_zcorn(Nx, Ny, Nz, dx, dy, dz)
+[c, z] = bm.mesh_grdecl.gen_coord_zcorn(Nx, Ny, Nz, dx, dy, dz)
 print 'Source mesh generated!'
 print 'Starting refine...'
 
@@ -35,7 +35,7 @@ p = numpy.reshape(numpy.column_stack([vx, vy, vWx, vWy, vax, vay]), [1, -1]);
 #	], dtype='d')
 
 # generate refined mesh
-[c1, z1, Nx, Ny] = bm.mesh_grdecl_did.refine_mesh(Nx, Ny, c, z, p, 0.8, 0.3)
+[c1, z1, Nx, Ny, hit_idx] = bm.mesh_grdecl.refine_mesh(Nx, Ny, c, z, p)
 print 'refine finisfed!'
 print 'Nx = ', Nx
 print 'Ny = ', Ny
