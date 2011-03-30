@@ -48,7 +48,7 @@ namespace blue_sky
         virtual ~smesh_keywords () {};
         
         //! register active and supported keywords
-        void register_keywords (sp_objbase &km, std::string provider) const;
+        virtual void register_keywords (sp_objbase &km, std::string provider) const;
         
         //! activate supported keywords
         static void activate_keywords (sp_objbase &km);

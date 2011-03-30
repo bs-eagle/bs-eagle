@@ -379,6 +379,7 @@ namespace blue_sky
   {
     KH_READER_DEF
     char buf[CHAR_BUF_LEN] = {0};
+    char key1[CHAR_BUF_LEN];
     sp_idata_t idata (params.data, bs_dynamic_cast ());
 
     for (;;)
@@ -394,18 +395,20 @@ namespace blue_sky
 
         if (!COMPARE_KEYWORD (key1, "YES"))
           {
-            idata->is_scalecrs = 1;
+            idata->props->set_b("scalecrs", 1);
           }
         else if (!COMPARE_KEYWORD (key1, "NO"))  
           {
-            idata->is_scalecrs = 0;
+            idata->props->set_b("scalecrs", 0);
           }
         else
           {
             bs_throw_exception (boost::format ("Error in %s: unknown argument %s for keyword %s")
               % reader->get_prefix () % key1 % keyword);
           }
+      }
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
+
   }
 
   
