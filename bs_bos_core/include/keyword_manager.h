@@ -198,6 +198,7 @@ namespace blue_sky
       static void STONE1_handler                   (const std::string &keyword, keyword_params_t &params);
       static void STONE2_handler                   (const std::string &keyword, keyword_params_t &params);
       static void RELATIVE_PERM_DEFAULT_handler    (const std::string &keyword, keyword_params_t &params);
+      static void SCALECRS_handler                 (const std::string &keyword, keyword_params_t &params);
       static void UNITS_handler                    (const std::string &keyword, keyword_params_t &params);
       static void DIMENS_handler                   (const std::string &keyword, keyword_params_t &params);
       static void ROCKCOMP_handler                 (const std::string &keyword, keyword_params_t &params);
