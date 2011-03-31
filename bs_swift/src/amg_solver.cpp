@@ -8,12 +8,19 @@
 
 #include "amg_solver.h"
 
+#define AMG_N_LEVELS_RESERVE 10
+
 namespace blue_sky
 {
     //! constructor
     amg_solver::amg_solver (bs_type_ctor_param)
-                : amg_solver_iface()
+                : amg_solver_iface(),
+                aver_cop (BS_KERNEL.create_object (v_long::bs_type ()))
     {
+      //
+      A.reserve (AMG_N_LEVELS_RESERVE);
+      S.reserve (AMG_N_LEVELS_RESERVE);
+      P.reserve (AMG_N_LEVELS_RESERVE);
     }
 
     //! copy constructor
@@ -63,7 +70,7 @@ namespace blue_sky
 
     int amg_solver::solve_prec (sp_matrix_t matrix, spv_double rhs, spv_double sol)
     {
-      return solve (matrix, rhs, sol);
+      return 0;//prec->solve (matrix, rhs, sol);
     }
 
     /**
@@ -73,17 +80,43 @@ namespace blue_sky
     *
     * @return 0 if success
     */
-    int amg_solver::setup (sp_matrix_t matrix)
+    int amg_solver::setup (sp_matrix_t matrix_)
     {
-      if (!matrix)
+      if (!matrix_)
         {
           bs_throw_exception ("AMG setup: Passed matrix is null");
         }
 
-      BS_ASSERT (prop);
-      if (prec)
+      sp_bcsr_matrix_t matrix (matrix_, bs_dynamic_cast ());
+
+      if (!matrix)
         {
-          return prec->setup (matrix);
+          bs_throw_exception ("AMG setup: Passed matrix is not BCSR");
+        }
+/*
+      if (matrix->nb)
+        {
+          bs_throw_exception ("AMG setup: Passed matrix is not BCSR");
+        }
+       */
+      BS_ASSERT (prop);
+
+      // matrix on first level
+      A.push_back (matrix);
+
+      for (int level = 0;;++level)
+        {
+          S.push_back (BS_KERNEL.create_object (bcsr_matrix_t::bs_type ()));
+
+          S[level]->init(10,10,1,10);
+
+          // initialize next level matrix
+          A.push_back (BS_KERNEL.create_object (bcsr_matrix_t::bs_type ()));
+
+          if (level > 2)
+            {
+              break;
+            }
         }
 
       return 0;

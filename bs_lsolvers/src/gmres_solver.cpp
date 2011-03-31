@@ -23,7 +23,7 @@ namespace blue_sky
     //  gmres_solver
 
     //! constructor
-    
+
     gmres_solver::gmres_solver (bs_type_ctor_param /*param*/)
       : lsolver_iface ()
     {
@@ -43,7 +43,7 @@ namespace blue_sky
     }
 
     //! copy constructor
-    
+
     gmres_solver::gmres_solver(const gmres_solver &solver)
       : bs_refcounter (), lsolver_iface ()
     {
@@ -52,12 +52,12 @@ namespace blue_sky
     }
 
     //! destructor
-    
+
     gmres_solver::~gmres_solver ()
     {}
 
     //! set solver's properties
-    
+
     void gmres_solver::set_prop (sp_prop_t prop_)
     {
       prop = prop_;
@@ -68,20 +68,20 @@ namespace blue_sky
      void
     gmres_solver::init_prop ()
       {
-        prop->add_property_f (1.0e-4, tol_idx, 
+        prop->add_property_f (1.0e-4, tol_idx,
                               std::string ("Target tolerance for linear solver"));
-        prop->add_property_f (1, final_res_idx, 
+        prop->add_property_f (1, final_res_idx,
                               std::string ("Solution residual"));
-        prop->add_property_i (200, max_iters_idx, 
+        prop->add_property_i (200, max_iters_idx,
                               std::string ("Maximum allowed number of iterations"));
-        prop->add_property_i (0,iters_idx, 
+        prop->add_property_i (0,iters_idx,
                               std::string ("Total number of used solver iterations"));
-        prop->add_property_i (30, m_idx, 
+        prop->add_property_i (30, m_idx,
                               std::string ("Number of vectors used for ortoganalization"));
-        prop->add_property_b (false, success_idx, 
+        prop->add_property_b (false, success_idx,
                               std::string ("True if solver successfully convergent"));
       }
-    
+
     int gmres_solver::solve (sp_matrix_t matrix, spv_double sp_rhs, spv_double sp_sol)
     {
       BS_ASSERT (matrix);
@@ -135,7 +135,7 @@ namespace blue_sky
       sp_rs->assign (0);
       sp_hh->resize ((m + 1) * (m + 1));
       sp_hh->assign (0);
-      
+
       t_double *vec_s          = &(*sp_s)[0];
       t_double *vec_w          = &(*sp_w)[0];
       t_double *vec_r          = &(*sp_r)[0];
@@ -382,10 +382,10 @@ namespace blue_sky
       return 0;
     }
 
-    
+
     int gmres_solver::solve_prec (sp_matrix_t matrix, spv_double rhs, spv_double sol)
     {
-      return solve (matrix, rhs, sol);
+      return prec->solve (matrix, rhs, sol);
     }
 
     /**
@@ -395,7 +395,7 @@ namespace blue_sky
     *
     * @return 0 if success
     */
-     int
+    int
     gmres_solver::setup (sp_matrix_t matrix)
     {
       if (!matrix)

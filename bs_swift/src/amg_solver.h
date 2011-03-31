@@ -9,6 +9,7 @@
  * @date 2011-03-30
  */
 
+#include "bcsr_matrix_iface.h"
 #include "amg_solver_iface.h"
 
 namespace blue_sky
@@ -24,6 +25,7 @@ namespace blue_sky
     public:
       //! matrix interface type
       typedef matrix_iface                              matrix_t;
+      typedef bcsr_matrix_iface                         bcsr_matrix_t;
 
       //! prop
       typedef prop_iface                                prop_t;
@@ -31,8 +33,9 @@ namespace blue_sky
       typedef smart_ptr<base_t, true>                   sp_base_t;      ///< short name to smart pointer to this class
       typedef smart_ptr<prop_t, true>                   sp_prop_t;      ///< short name to smart pointer to properties holder class
 
-      typedef smart_ptr<matrix_t, true>                 sp_matrix_t;    ///< short name to smart pointer on matrix_t
-
+      typedef smart_ptr<matrix_t, true>                 sp_matrix_t;         ///< short name to smart pointer on matrix_t
+      typedef smart_ptr<bcsr_matrix_t, true>            sp_bcsr_matrix_t;    ///< short name to smart pointer on matrix_t
+      typedef std::vector<sp_bcsr_matrix_t>             sp_bcsr_matrix_t_list;
       //-----------------------------------------
       //  METHODS
       //-----------------------------------------
@@ -52,7 +55,7 @@ namespace blue_sky
       //! set preconditioner
       virtual void set_prec (sp_base_t prec_)
         {
-          prec = prec_;
+          //prec = prec_;
         }
 
       virtual void set_prop (sp_prop_t prop_);
@@ -80,11 +83,11 @@ namespace blue_sky
         {
           std::stringstream s;
 
-          s << "AMG linear solver.\n";
-          if (prec)
-            {
-              s << "preconditioned by:\n" << prec->py_str ();
-            }
+          s << "AMG\n";
+          //if (prec)
+          //  {
+          //    s << "preconditioned by:\n" << prec->py_str ();
+          //  }
           s << "Properties:\n";
           s << prop->py_str ();
 
@@ -101,6 +104,11 @@ namespace blue_sky
     protected:
       sp_base_t         prec;         //!< pointer to the preconditioner
       sp_prop_t         prop;         //!< properties for solvers
+      spv_long          aver_cop;     //!< average operator complexity
+
+      sp_bcsr_matrix_t_list A;        //!< coarse level matrices vector
+      sp_bcsr_matrix_t_list S;        //!< coarse level strength matrices vector
+      sp_bcsr_matrix_t_list P;        //!< coarse level prolongation matrices vector
 
       BLUE_SKY_TYPE_DECL (amg_solver);
     };

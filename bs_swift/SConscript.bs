@@ -8,6 +8,7 @@ env = custom_env.Clone ()
 env.Append (CPPPATH = ["include",
     includes["bs_bos_core_base"],
     includes["bs_mtx"],
+    includes["common_types"],
     includes["bs_lsolvers"]
     ] + includes["kernel"])
 
