@@ -106,13 +106,15 @@ namespace blue_sky
 
       for (int level = 0;;++level)
         {
-          S.push_back (BS_KERNEL.create_object (bcsr_matrix_t::bs_type ()));
+          //S.push_back (BS_KERNEL.create_object (bcsr_matrix_t::bs_type ()));
 
-          S[level]->init(10,10,1,10);
+          //S[level]->init(10,10,1,10);
 
           // initialize next level matrix
-          A.push_back (BS_KERNEL.create_object (bcsr_matrix_t::bs_type ()));
+          //A.push_back (BS_KERNEL.create_object (bcsr_matrix_t::bs_type ()));
 
+          //A[level]->init(10,10,1,15);
+          std::cout<<"AMG level = "<<level<<"\n";
           if (level > 2)
             {
               break;

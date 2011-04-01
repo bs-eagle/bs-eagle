@@ -1,8 +1,8 @@
-/** 
+/**
  * @file main.cpp
- * @brief 
- * @author 
- * @version 
+ * @brief
+ * @author
+ * @version
  * @date 2010-03-03
  */
 //#include "amg_stdafx.h"
@@ -25,6 +25,7 @@
 
 #include "py_coarse_iface.h"
 #include "py_pbuild_iface.h"
+#include "py_amg_solver_iface.h"
 
 using namespace blue_sky;
 using namespace blue_sky::python;
@@ -42,15 +43,15 @@ namespace blue_sky {
     //const plugin_descriptor &pd = *bs_init.pd_;
 
     bool res = true;
-   
+
     REG_TYPE (pmis_coarse)
     REG_TYPE (pmis2_coarse)
     REG_TYPE (cljp_coarse)
     REG_TYPE (cljp2_coarse)
     REG_TYPE (ruge_coarse)
-    
+
     REG_TYPE (simple_smbuilder)
-    
+
     REG_TYPE (coarse_tools)
 
     REG_TYPE (direct_pbuild)
@@ -59,7 +60,7 @@ namespace blue_sky {
     REG_TYPE (standart3_pbuild)
 
     //REG_TYPE (amg_solver)
-    
+
     return res;
   }
 }
@@ -70,6 +71,6 @@ BLUE_SKY_INIT_PY_FUN
 
   python::py_export_coarse ();
   python::py_export_pbuild ();
-  
+  python::py_export_amg_solver ();
 }
 #endif

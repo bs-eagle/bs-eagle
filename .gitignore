@@ -30,3 +30,5 @@ blue-sky
 callgrind*
 tags
 *.un~
+*.save
+*.layout
