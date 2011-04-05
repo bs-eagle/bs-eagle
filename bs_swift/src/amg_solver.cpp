@@ -15,12 +15,13 @@ namespace blue_sky
     //! constructor
     amg_solver::amg_solver (bs_type_ctor_param)
                 : amg_solver_iface(),
-                aver_cop (BS_KERNEL.create_object (v_long::bs_type ()))
+                cf (BS_KERNEL.create_object (v_long::bs_type ()))
     {
       //
       A.reserve (AMG_N_LEVELS_RESERVE);
       S.reserve (AMG_N_LEVELS_RESERVE);
       P.reserve (AMG_N_LEVELS_RESERVE);
+      cf.reserve (AMG_N_LEVELS_RESERVE);
     }
 
     //! copy constructor
@@ -68,7 +69,7 @@ namespace blue_sky
       return 0;
     }
 
-    int amg_solver::solve_prec (sp_matrix_t matrix, spv_double rhs, spv_double sol)
+    int amg_solver::solve_prec (sp_matrix_t /*matrix*/, spv_double /*rhs*/, spv_double /*sol*/)
     {
       return 0;//prec->solve (matrix, rhs, sol);
     }
@@ -82,36 +83,50 @@ namespace blue_sky
     */
     int amg_solver::setup (sp_matrix_t matrix_)
     {
+      BS_ASSERT (prop);
+
       if (!matrix_)
         {
           bs_throw_exception ("AMG setup: Passed matrix is null");
         }
 
-      sp_bcsr_matrix_t matrix (matrix_, bs_dynamic_cast ());
-
+      sp_bcsr_t matrix (matrix_, bs_dynamic_cast ());
       if (!matrix)
         {
           bs_throw_exception ("AMG setup: Passed matrix is not BCSR");
         }
-/*
-      if (matrix->nb)
+
+      if (matrix->get_n_block_size () != 1)
         {
-          bs_throw_exception ("AMG setup: Passed matrix is not BCSR");
+          bs_throw_exception ("AMG setup: Passed matrix block size != 1");
         }
-       */
-      BS_ASSERT (prop);
+      if (matrix->get_n_rows () != matrix->get_n_cols ())
+        {
+          bs_throw_exception ("AMG setup: Passed matrix is not square");
+        }
+
+      t_long n = matrix->get_n_rows ();
+      t_long nb = matrix->get_n_block_size ();
 
       // matrix on first level
       A.push_back (matrix);
 
       for (int level = 0;;++level)
         {
-          //S.push_back (BS_KERNEL.create_object (bcsr_matrix_t::bs_type ()));
+          sp_bcsr_t s_matrix = BS_KERNEL.create_object ("bcsr_matrix");
+          BS_ASSERT (s_matrix);
 
+          s_matrix->init (n, n, nb, 20);
+          S.push_back (s_matrix);
+
+          spv_long cf_markers = BS_KERNEL.create_object (v_long::bs_type ());
+          cf.push_back (cf_markers);
           //S[level]->init(10,10,1,10);
 
           // initialize next level matrix
-          //A.push_back (BS_KERNEL.create_object (bcsr_matrix_t::bs_type ()));
+          sp_bcsr_t a_matrix = BS_KERNEL.create_object ("bcsr_matrix");
+          BS_ASSERT (a_matrix);
+          A.push_back (a_matrix);
 
           //A[level]->init(10,10,1,15);
           std::cout<<"AMG level = "<<level<<"\n";

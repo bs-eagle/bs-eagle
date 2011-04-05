@@ -317,6 +317,7 @@
 		<Unit filename="../bs_swift/src/pmis2_coarse.h" />
 		<Unit filename="../bs_swift/src/pmis_coarse.cpp" />
 		<Unit filename="../bs_swift/src/pmis_coarse.h" />
+		<Unit filename="../bs_swift/src/py_amg_solver_iface.cpp" />
 		<Unit filename="../bs_swift/src/py_amg_solver_iface.h" />
 		<Unit filename="../bs_swift/src/py_coarse_iface.cpp" />
 		<Unit filename="../bs_swift/src/py_coarse_iface.h" />

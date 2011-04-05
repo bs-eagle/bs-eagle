@@ -9,7 +9,7 @@
  * @date 2011-03-30
  */
 
-#include "bcsr_matrix_iface.h"
+#include "bcsr_amg_matrix_iface.h"
 #include "amg_solver_iface.h"
 
 namespace blue_sky
@@ -25,17 +25,17 @@ namespace blue_sky
     public:
       //! matrix interface type
       typedef matrix_iface                              matrix_t;
-      typedef bcsr_matrix_iface                         bcsr_matrix_t;
-
+      typedef bcsr_amg_matrix_iface                     bcsr_t;
+      typedef std::vector<spv_long>                     spv_long_vec;   ///< vector of smart pointers to vector<long>
       //! prop
       typedef prop_iface                                prop_t;
       typedef lsolver_iface                             base_t;         ///< typedef to this type. in child classes used as a short name of base class
       typedef smart_ptr<base_t, true>                   sp_base_t;      ///< short name to smart pointer to this class
       typedef smart_ptr<prop_t, true>                   sp_prop_t;      ///< short name to smart pointer to properties holder class
 
-      typedef smart_ptr<matrix_t, true>                 sp_matrix_t;         ///< short name to smart pointer on matrix_t
-      typedef smart_ptr<bcsr_matrix_t, true>            sp_bcsr_matrix_t;    ///< short name to smart pointer on matrix_t
-      typedef std::vector<sp_bcsr_matrix_t>             sp_bcsr_matrix_t_list;
+      typedef smart_ptr<matrix_t, true>                 sp_matrix_t;    ///< short name to smart pointer on matrix_t
+      typedef smart_ptr<bcsr_t, true>                   sp_bcsr_t;      ///< short name to smart pointer on matrix_t
+      typedef std::vector<sp_bcsr_t>                    sp_bcsr_t_vec;  ///< vector of smart pointers to bcsr_amg_matrix_iface
       //-----------------------------------------
       //  METHODS
       //-----------------------------------------
@@ -53,7 +53,7 @@ namespace blue_sky
       virtual int setup (sp_matrix_t matrix);
 
       //! set preconditioner
-      virtual void set_prec (sp_base_t prec_)
+      virtual void set_prec (sp_base_t /*prec_*/)
         {
           //prec = prec_;
         }
@@ -102,13 +102,13 @@ namespace blue_sky
       //-----------------------------------------
     public:
     protected:
-      sp_base_t         prec;         //!< pointer to the preconditioner
-      sp_prop_t         prop;         //!< properties for solvers
-      spv_long          aver_cop;     //!< average operator complexity
+      sp_base_t             prec;         //!< pointer to the preconditioner
+      sp_prop_t             prop;         //!< properties for solvers
+      spv_long_vec          cf;           //!< CF markers
 
-      sp_bcsr_matrix_t_list A;        //!< coarse level matrices vector
-      sp_bcsr_matrix_t_list S;        //!< coarse level strength matrices vector
-      sp_bcsr_matrix_t_list P;        //!< coarse level prolongation matrices vector
+      sp_bcsr_t_vec A;        //!< coarse level matrices vector
+      sp_bcsr_t_vec S;        //!< coarse level strength matrices vector
+      sp_bcsr_t_vec P;        //!< coarse level prolongation matrices vector
 
       BLUE_SKY_TYPE_DECL (amg_solver);
     };
