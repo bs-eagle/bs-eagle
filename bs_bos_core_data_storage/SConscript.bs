@@ -7,11 +7,12 @@ tar_name = "bs_bos_core_data_storage"
 env = custom_env.Clone ()
 env.Append (CPPPATH = ["include",
     includes["bs_bos_core_base"],
-    includes["bs_matrix"],
+    includes["common_types"],
+    includes["bs_mtx"],
 	includes["bs_mesh"]
     ] + includes["kernel"])
 
-libs = ["blue_sky", "bs_bos_core_base", "bs_mtx"]
+libs = ["blue_sky", "bs_bos_core_base"]
 
 if (build_kind == "debug") :
     env.AppendUnique (LIBS = list_suffix (libs, "_d"))

@@ -16,13 +16,12 @@ namespace blue_sky {
    * \brief calc_model data holder, holds calculated
    *        values for each mesh cell
    * */
-  template <typename strategy_t>
   struct calc_model_data
     {
-      typedef calc_model_data<strategy_t>       this_t;
+      typedef calc_model_data                   this_t;
       typedef smart_ptr<this_t, true>           sp_this_t;
-      typedef typename strategy_t::item_t       item_t;
-      typedef typename strategy_t::index_t      index_t;
+      typedef t_double                          item_t;
+      typedef t_long                            index_t;
 
 //#ifdef _DEBUG
       typedef boost::array <item_t, FI_PHASE_TOT>                 item_array_N_t;   //!< type for store N-Phase values

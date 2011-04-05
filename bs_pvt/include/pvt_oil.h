@@ -15,26 +15,25 @@ namespace blue_sky
   /**
    * \brief pvt_oil
    */
-  template <typename strategy_t>
-  class pvt_oil : public pvt_dead_oil <strategy_t>
+  class pvt_oil : public pvt_dead_oil 
     {
     public:
 
-      typedef strategy_t                        pvt_strategy_t;
-      typedef pvt_dead_oil <strategy_t>         base_t;
-      typedef typename base_t::item_t           item_t;
-      typedef typename base_t::index_t          index_t;
-      typedef typename base_t::index_array_t    index_array_t;
-      typedef typename base_t::item_array_t     item_array_t;
-      typedef typename base_t::input_vector_t   input_vector_t;
-      typedef typename base_t::vector_t         vector_t;
+      typedef pvt_dead_oil                      base_t;
+      typedef base_t::vector_t                  vector_t;
+
+      enum {
+         PVT_OIL_COMPRESS_FVF = PVT_OIL_TOTAL,
+         PVT_OIL_COMPRESS_VISC,
+         PVT_OIL_TOTAL_2
+      };
 
       /**
        * \brief store values into data
        *
        * \param seq_vector
        */
-      virtual void insert_vector (const input_vector_t &vec);
+      virtual void insert_vector (const v_double &vec);
 
       /**
        * \brief generate interpolated data
@@ -44,7 +43,7 @@ namespace blue_sky
        * \param max_p maximal value of pressure
        * \param n_intervals number of intervals
        */
-      virtual void build (item_t atm_p, item_t min_p, item_t max_p, int n_intervals);
+      virtual void build (t_double atm_p, t_double min_p, t_double max_p, int n_intervals);
 
       /**
        * \brief calculate interpolated value
@@ -54,13 +53,13 @@ namespace blue_sky
        * \param gor
        */
       virtual bool 
-      calc (const bool is_g, const int main_var, const item_t p, const item_t gor,
-            item_t *inv_fvf, item_t *d_inv_fvf, item_t *gor_d_inv_fvf,
-            item_t *inv_visc, item_t *d_inv_visc, item_t *gor_d_inv_visc,
-            item_t *inv_visc_fvf, item_t *d_inv_visc_fvf, item_t *gor_d_inv_visc_fvf,
-            item_t *gas_oil_ratio, item_t *d_gas_oil_ratio,
-            const item_t drsdt = -1.0, const item_t dt = 0,
-            const item_t old_gas_oil_ratio = 0) const;
+      calc (const bool is_g, const int main_var, const t_double p, const t_double gor,
+            t_double *inv_fvf, t_double *d_inv_fvf, t_double *gor_d_inv_fvf,
+            t_double *inv_visc, t_double *d_inv_visc, t_double *gor_d_inv_visc,
+            t_double *inv_visc_fvf, t_double *d_inv_visc_fvf, t_double *gor_d_inv_visc_fvf,
+            t_double *gas_oil_ratio, t_double *d_gas_oil_ratio,
+            const t_double drsdt = -1.0, const t_double dt = 0,
+            const t_double old_gas_oil_ratio = 0) const;
 
       virtual void
       print () const;
@@ -82,41 +81,41 @@ namespace blue_sky
        * \param end_j1
        * \param end_j2
        */
-      void get_compressibility_interval (item_t gor, index_t &j1, index_t &j2, index_t &end_j1, index_t &end_j2);
+      void get_compressibility_interval (t_double gor, t_long &j1, t_long &j2, t_long &end_j1, t_long &end_j2);
 
       /**
        * \brief generate interpolated data for compressibility
        *
        * \param n_intervals number of interpolation intervals
        */
-      void build_compressibility (index_t n_intervals);
+      void build_compressibility (t_long n_intervals);
 
       /**
        * \brief calc undersaturated oil
        */
       inline bool 
-      calc_undersaturated_oil (const item_t p, const item_t gor,
-                               item_t *inv_fvf, item_t *d_inv_fvf, item_t *gor_d_inv_fvf,
-                               item_t *inv_visc, item_t *d_inv_visc, item_t *gor_d_inv_visc,
-                               item_t *inv_visc_fvf, item_t *d_inv_visc_fvf, item_t *gor_d_inv_visc_fvf,
-                               item_t *gas_oil_ratio, item_t *d_gas_oil_ratio,
-                               const item_t drsdt = -1.0, const item_t dt = 0,
-                               const item_t old_gas_oil_ratio = 0) const;
+      calc_undersaturated_oil (const t_double p, const t_double gor,
+                               t_double *inv_fvf, t_double *d_inv_fvf, t_double *gor_d_inv_fvf,
+                               t_double *inv_visc, t_double *d_inv_visc, t_double *gor_d_inv_visc,
+                               t_double *inv_visc_fvf, t_double *d_inv_visc_fvf, t_double *gor_d_inv_visc_fvf,
+                               t_double *gas_oil_ratio, t_double *d_gas_oil_ratio,
+                               const t_double drsdt = -1.0, const t_double dt = 0,
+                               const t_double old_gas_oil_ratio = 0) const;
 
     public:
 
-      vector_t compress_fvf_;
-      vector_t compress_visc_;
+      //vector_t compress_fvf_;
+      //vector_t compress_visc_;
 
-      using base_t::main_gpr_;
-      using base_t::main_pressure_;
-      using base_t::main_fvf_;
-      using base_t::main_visc_;
+      //using base_t::main_gpr_;
+      //using base_t::main_pressure_;
+      //using base_t::main_fvf_;
+      //using base_t::main_visc_;
 
-      using base_t::pressure_;
-      using base_t::gor_;
-      using base_t::inv_fvf_;
-      using base_t::inv_visc_;
+      //using base_t::pressure_;
+      //using base_t::gor_;
+      //using base_t::inv_fvf_;
+      //using base_t::inv_visc_;
 
     public:
 

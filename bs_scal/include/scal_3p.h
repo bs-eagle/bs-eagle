@@ -12,35 +12,32 @@
 namespace blue_sky
 {
 
-  template <typename strategy_t>
   class BS_API_PLUGIN scal_region;
 
-  template <typename strategy_t>
   class BS_API_PLUGIN scale_array_holder;
 
-  template <typename strategy_t>
   class BS_API_PLUGIN scal_2p_data_holder;
 
-  template <typename strategy_t>
   class BS_API_PLUGIN jfunction;
 
   //////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
   class BS_API_PLUGIN scal_3p : public objbase
     {
     public:
-      typedef scal_3p <strategy_t>											this_t;
+      typedef scal_3p             											this_t;
 
-      typedef typename strategy_t::item_t								item_t;
-      typedef typename strategy_t::index_t							index_t;
-      typedef typename strategy_t::index_array_t        index_array_t;
-      typedef typename strategy_t::item_array_t         item_array_t;
+      typedef t_double                    							item_t;
+      typedef t_long                       							index_t;
+      typedef v_long                                    index_array_t;
+      typedef v_double                                  item_array_t;
+      typedef smart_ptr <index_array_t, true>           sp_array_index_t;
+      typedef smart_ptr <item_array_t, true>            sp_array_item_t;
 
-      typedef scal_region <strategy_t>									scal_region_t;
-      typedef scale_array_holder <strategy_t>						scale_array_holder_t;
-      typedef scal_2p_data_holder <strategy_t>					scal_2p_data_holder_t;
+      typedef scal_region             									scal_region_t;
+      typedef scale_array_holder            						scale_array_holder_t;
+      typedef scal_2p_data_holder              					scal_2p_data_holder_t;
 
-      typedef jfunction <strategy_t>										jfunction_t;
+      typedef jfunction             										jfunction_t;
 
       typedef smart_ptr <jfunction_t, true>							sp_jfunction_t;
       typedef smart_ptr <scale_array_holder_t, true>		sp_scale_array_holder_t;
@@ -48,8 +45,9 @@ namespace blue_sky
       typedef boost::array <index_t, FI_PHASE_TOT>			phase_d_t;
       typedef boost::array <index_t, FI_PHASE_TOT>			sat_d_t;
 
-      typedef calc_model_data <strategy_t>              data_t;
-      typedef shared_vector <data_t>                    data_array_t;
+      typedef calc_model_data                           data_t;
+      typedef bs_array <data_t>                         data_array_t;
+      typedef smart_ptr <data_array_t, true>            sp_data_array_t;
 
       typedef unsigned char															phase_index_t;
       typedef unsigned char															sat_index_t;
@@ -95,26 +93,26 @@ namespace blue_sky
 
       void
       get_relative_perm (index_t cell_index, 
-        const item_array_t &saturation, 
-        const index_array_t &sat_regions, 
-        item_array_t &relative_perm, 
-        item_array_t &s_deriv_relative_perm) const;
+        const sp_array_item_t saturation, 
+        const sp_array_index_t sat_regions, 
+        sp_array_item_t relative_perm, 
+        sp_array_item_t s_deriv_relative_perm) const;
 
         void
         get_capillary (index_t cell_index, 
-          const item_array_t &saturation, 
-          const index_array_t &sat_regions, 
-          const item_array_t &perm, 
-          const item_array_t &poro, 
-          item_array_t &cap, 
-          item_array_t &s_deriv_cap) const;
+          const sp_array_item_t saturation, 
+          const sp_array_index_t sat_regions, 
+          const sp_array_item_t perm, 
+          const sp_array_item_t poro, 
+          sp_array_item_t cap, 
+          sp_array_item_t s_deriv_cap) const;
 
       void
-      process (const item_array_t &saturation, 
-        const index_array_t &sat_regions,
-        const item_array_t &perm,
-        const item_array_t &poro,
-        data_array_t &data) const;
+      process (const sp_array_item_t saturation, 
+        const sp_array_index_t sat_regions,
+        const sp_array_item_t perm,
+        const sp_array_item_t poro,
+        sp_data_array_t data) const;
 
       void
       process_init (index_t cell_index, 
@@ -144,7 +142,7 @@ namespace blue_sky
       void
       init (bool is_w, bool is_g, bool is_o, 
         const phase_d_t &phase_d, const phase_d_t &sat_d,
-        RPO_MODEL_ENUM rpo_model);
+        RPO_MODEL_ENUM rpo_model, bool is_scalecrs_ = false);
 
       void
       set_water_jfunction (sp_jfunction_t jfunc);

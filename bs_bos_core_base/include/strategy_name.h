@@ -10,6 +10,7 @@
 namespace blue_sky {
 namespace tools {
 
+#if 0  
   template <typename strategy_t>
   struct strategy_name
   {
@@ -79,5 +80,6 @@ namespace tools {
 }   // namespace tools
 }   // namespace blue_sky
 
+#endif //0
 
 #endif  // #ifndef BS_BOS_CORE_BASE_STRATEGY_NAME_H_

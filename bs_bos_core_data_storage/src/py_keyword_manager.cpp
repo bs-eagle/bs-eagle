@@ -10,11 +10,12 @@
 #include "bs_bos_core_data_storage_stdafx.h"
 #include "py_keyword_manager.h"
 #include "keyword_manager.h"
-
-#include BS_FORCE_PLUGIN_IMPORT ()
 #include "read_class.h"
 #include "data_class.h"
 #include "rs_mesh_iface.h"
+
+#include BS_FORCE_PLUGIN_IMPORT ()
+
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #ifdef BSPY_EXPORTING_PLUGIN
@@ -23,10 +24,10 @@
 namespace blue_sky {
 namespace python {
 
-  template <typename strategy_t>
-  struct py_keyword_handler_iface_base : keyword_handler_iface <strategy_t>
+  
+  struct py_keyword_handler_iface_base : keyword_handler_iface 
   {
-    typedef keyword_params <strategy_t> keyword_params_t;
+    typedef keyword_params  keyword_params_t;
 
     void 
     handler (const std::string &, keyword_params_t &)
@@ -34,15 +35,15 @@ namespace python {
       bs_throw_exception ("PURE CALL FROM PYTHON");
     }
   };
-  template <typename strategy_t>
-  struct py_keyword_handler_iface : py_keyword_handler_iface_base <strategy_t>, boost::python::wrapper <py_keyword_handler_iface_base <strategy_t> >
+  
+  struct py_keyword_handler_iface : py_keyword_handler_iface_base , boost::python::wrapper <py_keyword_handler_iface_base  >
   {
-    typedef keyword_params <strategy_t> keyword_params_t;
+    typedef keyword_params  keyword_params_t;
 
     py_keyword_handler_iface ()
     {
     }
-    py_keyword_handler_iface (const py_keyword_handler_iface_base <strategy_t> &)
+    py_keyword_handler_iface (const py_keyword_handler_iface_base  &)
     {
     }
 
@@ -71,6 +72,7 @@ namespace python {
     return reader;
   }
 
+  /*
   template <typename T>
   smart_ptr <idata<typename T::strategy_type>, true>
   get_data (T *t)
@@ -115,6 +117,7 @@ namespace python {
 
     return km;
   }
+  */
 
   PY_EXPORTER (keyword_manager_exporter, default_exporter)
     .def ("register_keyword", register_keyword <T>)
@@ -130,9 +133,9 @@ namespace python {
 
   PY_EXPORTER (keyword_params_exporter, empty_exporter)
     .add_property ("reader", make_function (get_reader <T>))
-    .add_property ("data",   make_function (get_data <T>))
-    .add_property ("mesh",   make_function (get_mesh <T>))
-    .add_property ("keyword_manager", make_function (get_keyword_manager <T>))
+    //.add_property ("data",   make_function (get_data <T>))
+    //.add_property ("mesh",   make_function (get_mesh <T>))
+    //.add_property ("keyword_manager", make_function (get_keyword_manager <T>))
   PY_EXPORTER_END;
 
   PY_EXPORTER (keyword_handler_iface_exporter, empty_exporter)
@@ -146,9 +149,11 @@ namespace python {
 
     //strategy_exporter::export_base_ext <keyword_params, keyword_params_exporter, class_type::concrete_class> ("keyword_params");
 	
+    /*
     strategy_exporter::export_base_ext <keyword_handler_iface, empty_exporter, class_type::abstract_class> ("keyword_handler_iface");
     strategy_exporter::export_class_ext <py_keyword_handler_iface, keyword_handler_iface, keyword_handler_iface_exporter, class_type::concrete_class> ("py_keyword_handler_iface");
     strategy_exporter::export_base <keyword_manager, keyword_manager_exporter> ("keyword_manager");
+    */
   }
 
 } // namespace python

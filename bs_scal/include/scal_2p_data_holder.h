@@ -15,27 +15,26 @@ namespace blue_sky {
    * \brief hold scal region data (So, Sp, Krp, Krop)
    * \detail we hold data as a plain memory region and a list of region_info
    * */
-  template <typename strategy_t>
   class BS_API_PLUGIN scal_2p_data_holder : public objbase
   {
   public:
-    typedef typename strategy_t::item_t             item_t;
-    typedef typename strategy_t::index_t            index_t;
+    typedef t_double                                item_t;
+    typedef t_int                                   index_t;
 
-    typedef scal_2p_data_holder<strategy_t>         this_t;
+    typedef scal_2p_data_holder                     this_t;
 
-    typedef scal_region <strategy_t>                scal_region_t;
-    typedef scal_region_info <strategy_t>           scal_region_info_t;
-    typedef data_vector<strategy_t>                 data_vector_t;
-    typedef typename strategy_t::item_array_t       item_array_t;
+    typedef scal_region                             scal_region_t;
+    typedef scal_region_info <item_t>               scal_region_info_t;
+    typedef data_vector <item_t>                    data_vector_t;
+    typedef v_double                                item_array_t;
+    typedef smart_ptr <item_array_t, true>          sp_array_item_t;
     typedef shared_vector <scal_region_info_t>      region_vector_t;
     typedef shared_vector <scal_region_t *>         region_vector_2_t;
-
     typedef smart_ptr <this_t, true>								sp_scal_data_t;
 
-    void add_spof (const item_array_t &data, bool is_water);
-    void add_spfn (const item_array_t &data, size_t region_index, bool is_water);
-    void add_sof3 (const item_array_t &data, size_t region_index, bool is_water);
+    void add_spof (const sp_array_item_t data, bool is_water);
+    void add_spfn (const sp_array_item_t data, size_t region_index, bool is_water);
+    void add_sof3 (const sp_array_item_t data, size_t region_index, bool is_water);
 
     ~scal_2p_data_holder ()
     {
@@ -53,11 +52,12 @@ namespace blue_sky {
     scal_region_t 
     get_region_internal (int index) const
     {
+      item_array_t &data_array = *data_;
       BS_ASSERT (index >= 0 && index < (int)region_.size ());
 
       const scal_region_info_t &info = region_[index];
-      const item_t *sp_mem_reg = &data_[info.sp_offset];
-      const item_t *so_mem_reg = &data_[info.so_offset];
+      const item_t *sp_mem_reg = &data_array[info.sp_offset];
+      const item_t *so_mem_reg = &data_array[info.so_offset];
 
       return scal_region_t (info,
                             data_vector_t (sp_mem_reg + placement_info_.sp_offset,   placement_info_.sp_step,    info.Sp_count),
@@ -71,14 +71,16 @@ namespace blue_sky {
     void
     init_regions ()
     {
+      item_array_t &data_array = *data_;
+
       if (region_2_.size ())
         return ;
 
       for (size_t i = 0, cnt = region_.size (); i < cnt; ++i)
         {
           const scal_region_info_t &info  = region_[i];
-          const item_t *sp_mem_reg        = &data_[info.sp_offset];
-          const item_t *so_mem_reg        = &data_[info.so_offset];
+          const item_t *sp_mem_reg        = &data_array[info.sp_offset];
+          const item_t *so_mem_reg        = &data_array[info.so_offset];
 
         region_2_.push_back (new scal_region_t (info,
                               data_vector_t (sp_mem_reg + placement_info_.sp_offset,   placement_info_.sp_step,    info.Sp_count),
@@ -96,7 +98,7 @@ namespace blue_sky {
       return placement_info_;
     }
 
-    const item_array_t &
+    const sp_array_item_t 
     get_raw_data () const
     {
       return data_;
@@ -130,9 +132,8 @@ namespace blue_sky {
 
   private:
 
-    scal::data_placement::scal_placement_info
-    placement_info_;
-    item_array_t                          data_;
+    scal::data_placement::scal_placement_info    placement_info_;
+    sp_array_item_t                       data_;
     region_vector_t                       region_;
     region_vector_2_t                     region_2_;
 

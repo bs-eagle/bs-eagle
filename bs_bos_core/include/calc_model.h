@@ -611,6 +611,7 @@ namespace blue_sky
       index_array_t                                           rock_regions;                   //!< (n_elements) index of ROCK regions
 
       auto_value <RPO_MODEL_ENUM, RPO_DEFAULT_MODEL>          rpo_model;                      //!< 3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)
+      auto_value <SCALECRS_ENUM, SCALECRS_NO>                 is_scalecrs;                    //!< use of alternative scaling method or not
       sp_scal3p                                               scal_prop;                      //!< scal properties
       sp_rock_grid                                            rock_grid_prop;                 //!< rock and grid properties
 

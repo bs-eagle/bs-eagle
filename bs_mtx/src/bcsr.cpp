@@ -4,7 +4,6 @@
  * @author Oleg Borschuk
  * @date 2009-08-18
  */
-#include "strategies.h"
 
 #include "bcsr.h"
 

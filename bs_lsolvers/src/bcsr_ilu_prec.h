@@ -34,7 +34,7 @@ namespace blue_sky
 
       typedef smart_ptr<matrix_t, true>                         sp_matrix_t;    ///< short name to smart pointer on matrix
 
-      typedef prop_iface<float, int, std::string, bool>         prop_t;
+      typedef prop_iface                                        prop_t;
       typedef smart_ptr<base_t, true>                           sp_base_t;      ///< short name to smart pointer to this class
       typedef smart_ptr<prop_t, true>                           sp_prop_t;      ///< short name to smart pointer to properties holder class
       //! BCSR matrix type
@@ -110,8 +110,6 @@ namespace blue_sky
       sp_prop_t         prop;         //!< properties for solvers
       sp_bcsr_matrix_t  lu_matrix;   //!< pointer to the LU matrix
       
-      int use_internal_matrix_idx;        
-
     private:
 
     };

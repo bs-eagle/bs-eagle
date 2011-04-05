@@ -18,6 +18,9 @@
 
 namespace blue_sky
   {
+
+  const std::string use_internal_matrix = "use_internal_matrix";
+
   /*!
    * \brief constructor
    */
@@ -62,15 +65,8 @@ namespace blue_sky
   void
   bcsr_ilu_prec::init_prop ()
     {
-      use_internal_matrix_idx = prop->get_index_b (std::string ("use_internal_matrix"));
-      if (use_internal_matrix_idx < 0)
-        use_internal_matrix_idx = prop->add_property_b (true, std::string ("use_internal_matrix"), 
-                                                        std::string ("If True preconditioner will copy matrix given in setup method"));
-
-      if (use_internal_matrix_idx < 0)
-        {
-          bs_throw_exception ("Can not regidter some properties");
-        }
+      prop->add_property_b (true, use_internal_matrix, 
+                            std::string ("If True preconditioner will copy matrix given in setup method"));
     }
 
   
@@ -97,7 +93,7 @@ namespace blue_sky
       }
 
     //const item_array_t &values    = ilu.get_values   ();
-    bool ff = prop->get_b (use_internal_matrix_idx);
+    bool ff = prop->get_b (use_internal_matrix);
 
     spv_float spvalues     = ff ? lu_matrix->get_values () : ilu->get_values   ();
     spv_long sp_rows                = ff ? lu_matrix->get_rows_ptr () : ilu->get_rows_ptr ();           
@@ -206,7 +202,7 @@ namespace blue_sky
     t_long n;     
     t_long nb;    
     t_long b_sqr; 
-    bool ff = prop->get_b (use_internal_matrix_idx);
+    bool ff = prop->get_b (use_internal_matrix);
 
 
     sp_bcsr_matrix_t ilu;

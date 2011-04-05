@@ -11,10 +11,11 @@
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 //#include "scal_3p.h"
+#include BS_STOP_PLUGIN_IMPORT ()
+
 #include "main_def.h"
 #include "read_class.h"
 #include "data_class.h"
-#include BS_STOP_PLUGIN_IMPORT ()
 
 #include "keyword_manager_iface.h"
 #include "date_sim.h"
@@ -22,33 +23,28 @@
 namespace blue_sky
 {
 
-  template <class strategy_t>
   class BS_API_PLUGIN keyword_info_base;
 
   /**
    * \class keyword_manager
    * \brief Class-factory which contains a set of handlers for different keywords
    * */
-  template <class strategy_t>
-  class BS_API_PLUGIN keyword_manager: public keyword_manager_iface <strategy_t>
+  class BS_API_PLUGIN keyword_manager: public keyword_manager_iface 
     {
     public:
       //-----------------------------------------
       //  TYPES
       //-----------------------------------------
-      typedef typename strategy_t::i_type_t           i_type_t;
-      typedef typename strategy_t::fp_storage_type_t  fp_type_t;
-      
-      typedef keyword_manager <strategy_t>		        this_t;                 //<! self type
-      typedef keyword_manager_iface <strategy_t>      base_t;
+      typedef keyword_manager 		        this_t;                 //<! self type
+      typedef keyword_manager_iface       base_t;
 
-      typedef idata<strategy_t>  							        idata_t;
+      typedef idata  							        idata_t;
       /*
-      typedef rs_mesh_iface <strategy_t>              mesh_iface_t;
-      typedef rs_smesh_iface <strategy_t>             smesh_iface_t;
+      typedef rs_mesh_iface               mesh_iface_t;
+      typedef rs_smesh_iface              smesh_iface_t;
       */
-      typedef keyword_info_base <strategy_t>          keyword_info_base_t;
-      typedef keyword_params <strategy_t>             keyword_params_t;
+      typedef keyword_info_base           keyword_info_base_t;
+      typedef keyword_params              keyword_params_t;
 
       typedef smart_ptr <this_t, true>							  sp_this_t;              //<! smart pointer to self
       typedef smart_ptr <FRead, true>							    sp_reader_t;            //<! smart pointer to reader
@@ -60,12 +56,10 @@ namespace blue_sky
       typedef smart_ptr <keyword_info_base_t, true>   sp_keyword_info_base_t;
       typedef smart_ptr <objbase, true>               sp_objbase;
       
-      typedef smart_ptr<bs_array <i_type_t>, true>            sp_bs_i_array_t;
-      typedef smart_ptr<bs_array <fp_type_t>, true>           sp_bs_fp_array_t;
 
-      typedef typename base_t::handler_t              handler_t;
-      typedef typename base_t::keyword_handler        keyword_handler;
-      typedef typename base_t::shared_handler_t       shared_handler_t;
+      typedef base_t::handler_t              handler_t;
+      typedef base_t::keyword_handler        keyword_handler;
+      typedef base_t::shared_handler_t       shared_handler_t;
 
 
 
@@ -133,13 +127,13 @@ namespace blue_sky
       register_keyword (const std::string &keyword, const shared_handler_t &handler, bool replace_existing);
       
       //! registration of active integer pool keyword in factory
-      void register_i_pool_keyword(const std::string &keyword, int *dimens, i_type_t def_value, handler_t external_handler = 0);
+      void register_i_pool_keyword(const std::string &keyword, int *dimens, t_int def_value, handler_t external_handler = 0);
       
       //! registration of active floating point pool keyword in factory
-      void register_fp_pool_keyword(const std::string &keyword, int *dimens, fp_type_t def_value, handler_t external_handler = 0);
+      void register_fp_pool_keyword(const std::string &keyword, int *dimens, t_float def_value, handler_t external_handler = 0);
       
       //! python registration of active floating point pool keyword in factory
-      void py_register_fp_pool_keyword (const std::string keyword, boost::python::list dimens, fp_type_t def_value);
+      void py_register_fp_pool_keyword (const std::string keyword, boost::python::list dimens, t_float def_value);
 
       /**
        * \brief  Registers supported keyword by plugins in factory
@@ -249,10 +243,12 @@ namespace blue_sky
       static void TSTEP_handler                    (const std::string &keyword, keyword_params_t &params);
       static void TSTEPS_handler                   (const std::string &keyword, keyword_params_t &params);
       */
+      static void SCALECRS_handler                   (const std::string &keyword, keyword_params_t &params);
       static void WELLDIMS_handler                 (const std::string &/*keyword*/, keyword_params_t &/*params*/)
       {
         BOSOUT << "WELLDIMS: NOT_IMPL_YET" << bs_end;
       }
+
     };
 
 }//ns bs

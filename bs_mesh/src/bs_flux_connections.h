@@ -12,19 +12,14 @@
 namespace blue_sky
   {
     
-    template<typename strategy_t>
-    class BS_API_PLUGIN bs_flux_connections : virtual public flux_connections_iface<strategy_t>
+    class BS_API_PLUGIN bs_flux_connections : public flux_connections_iface
     {
       //+++++++++++++++++++++++++++++++++++++++++++
       //  INTERNAL TYPE DECLARATION
       //===========================================
     public:
-      typedef flux_connections_iface <strategy_t> base_t;
+      typedef flux_connections_iface  base_t;
       
-      
-      typedef typename base_t::sp_i_array_t       sp_i_array_t;
-      typedef typename base_t::sp_bcsr_t          sp_bcsr_t;
-
       //-------------------------------------------
       //  METHODS
       //===========================================
@@ -40,11 +35,11 @@ namespace blue_sky
         { return wrapped.get_conn_trans();};
       
       //! get matrix pointers in positive direction 
-      sp_i_array_t get_matrix_block_idx_plus ()
+      spv_long get_matrix_block_idx_plus ()
         { return wrapped.get_matrix_block_idx_plus();};
       
       //! get matrix pointers in negative direction 
-      sp_i_array_t get_matrix_block_idx_minus ()
+      spv_long get_matrix_block_idx_minus ()
         { return wrapped.get_matrix_block_idx_minus();};
 
     ////////////////////
@@ -52,7 +47,7 @@ namespace blue_sky
     ///////////////////
 
     private:
-      flux_connections<strategy_t> wrapped;
+      flux_connections wrapped;
       
     };
     

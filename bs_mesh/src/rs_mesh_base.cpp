@@ -10,10 +10,10 @@
 
 using namespace blue_sky;
 
-template <typename strategy_t>
-rs_mesh_base <strategy_t>::rs_mesh_base ()
+
+rs_mesh_base ::rs_mesh_base ()
 {
-  depths = give_kernel::Instance().create_object(bs_array<fp_type_t>::bs_type());
+  depths = give_kernel::Instance().create_object(bs_array<t_float>::bs_type());
   actnum_array = 0; 
   poro_array = 0;
   ntg_array = 0;
@@ -21,26 +21,24 @@ rs_mesh_base <strategy_t>::rs_mesh_base ()
   darcy_constant = ph_const.darcy_constant;
 }
 
-template <typename strategy_t>
+
 void
-rs_mesh_base <strategy_t>::init_props (const sp_idata_t &idata)
+rs_mesh_base ::init_props (const sp_idata_t &idata)
 {
-  //base_t::init_props (idata);
+  minpv = idata->props->get_f ("minimal_pore_volume");
+  minsv = idata->props->get_f ("minimal_splice_volume");
+  max_thickness = idata->props->get_f ("maximum_splice_thickness");
   
-  minpv = idata->minimal_pore_volume;
-  minsv = idata->minimal_splice_volume;
-  max_thickness = idata->maximum_splice_thickness;
+  spv_float data_array;
+  spv_int sp_actnum_array;
   
-  sp_fp_storage_array_t data_array;
-  sp_i_array_t sp_actnum_array;
-  
-  sp_actnum_array = idata->get_int_non_empty_array("ACTNUM");
+  sp_actnum_array = idata->get_i_array("ACTNUM");
   if (sp_actnum_array->size()) actnum_array = &(*sp_actnum_array)[0];
   
-  base_t::n_elements = static_cast <i_type_t> (sp_actnum_array->size ());
-  base_t::n_active_elements =  std::accumulate(sp_actnum_array->begin(), sp_actnum_array->end(),0);
+  n_elements = static_cast <t_long> (sp_actnum_array->size ());
+  n_active_elements =  std::accumulate(sp_actnum_array->begin(), sp_actnum_array->end(),0);
   
-  data_array = idata->get_fp_non_empty_array("PORO");
+  data_array = idata->get_fp_array("PORO");
   if (data_array->size()) poro_array = &(*data_array)[0];
   
   data_array = idata->get_fp_array("NTG");
@@ -51,21 +49,21 @@ rs_mesh_base <strategy_t>::init_props (const sp_idata_t &idata)
 }
 
 
-template<class strategy_t>
-int rs_mesh_base<strategy_t>::init_int_to_ext()
+
+int rs_mesh_base::init_int_to_ext()
 {
-  i_type_t *ext_to_int_data, *int_to_ext_data; 
-  i_type_t n_ext = base_t::ext_to_int->size();
+  t_long *ext_to_int_data, *int_to_ext_data; 
+  t_long n_ext = t_long(ext_to_int->size());
   if (n_ext == 0)
     return -1;
     
-  base_t::int_to_ext->resize (base_t::n_active_elements);
-  base_t::int_to_ext->assign(0);
+  int_to_ext->resize (n_active_elements);
+  int_to_ext->assign(0);
   
-  int_to_ext_data = &(*base_t::int_to_ext)[0];
-  ext_to_int_data = &(*base_t::ext_to_int)[0];
+  int_to_ext_data = &(*int_to_ext)[0];
+  ext_to_int_data = &(*ext_to_int)[0];
   
-  for (i_type_t i = 0; i < n_ext; i++)
+  for (t_long i = 0; i < n_ext; i++)
     {
       if (ext_to_int_data[i] != -1)
         {
@@ -75,8 +73,8 @@ int rs_mesh_base<strategy_t>::init_int_to_ext()
   return 0;  
 }
 
-template<class strategy_t>
-void rs_mesh_base<strategy_t>::check_data() const
+
+void rs_mesh_base::check_data() const
 {
   base_t::check_data ();
   
@@ -96,4 +94,4 @@ void rs_mesh_base<strategy_t>::check_data() const
 }
 
 
-BS_INST_STRAT(rs_mesh_base);
+//BS_INST_STRAT(rs_mesh_base);

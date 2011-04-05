@@ -21,14 +21,14 @@ namespace blue_sky
     BS_ASSERT(false) (out_s.str());\
     throw bs_exception("Structured mesh handlers class",out_s.str().c_str());
   
-  template<class strategy_t>
-  smesh_keywords<strategy_t>::smesh_keywords(bs_type_ctor_param)
+  
+  smesh_keywords::smesh_keywords(bs_type_ctor_param)
   {
 
   }
 
-  template<class strategy_t>
-  smesh_keywords<strategy_t>::smesh_keywords(const smesh_keywords<strategy_t>& src)
+  
+  smesh_keywords::smesh_keywords(const smesh_keywords& src)
   : bs_refcounter (src), base_t (src)
   {
     // TODO: BUG:
@@ -36,10 +36,10 @@ namespace blue_sky
     //*this = src;
   }
   
-  template<class strategy_t>
-  void smesh_keywords<strategy_t>::register_keywords (sp_objbase &km, std::string provider) const
+  
+  void smesh_keywords::register_keywords (sp_objbase &km, std::string provider) const
     {
-      smart_ptr <keyword_manager_iface <strategy_t>, true> keyword_manager (km);
+      smart_ptr <keyword_manager_iface , true> keyword_manager (km);
       keyword_manager->register_supported_keyword ("DIMENS", provider);
       keyword_manager->register_supported_keyword ("ACTNUM", provider);
       keyword_manager->register_supported_keyword ("PERMX", provider);
@@ -53,14 +53,14 @@ namespace blue_sky
       keyword_manager->register_supported_keyword ("MULTPV", provider);
     }
   
-  template<class strategy_t>
-  void smesh_keywords<strategy_t>::activate_keywords(sp_objbase &km)
+  
+  void smesh_keywords::activate_keywords(sp_objbase &km)
     {
-      smart_ptr <keyword_manager_iface <strategy_t>, true> keyword_manager (km);
+      smart_ptr <keyword_manager_iface , true> keyword_manager (km);
       keyword_manager->register_keyword ("DIMENS", keyword_handler (&this_t::DIMENS_handler));
-      i_type_t array_dimens[6] = {1,0,1,0,1,0};
-      fp_storage_type_t def_value_zero = 0.0;
-      fp_storage_type_t def_value_one = 1.0;
+      t_int array_dimens[6] = {1,0,1,0,1,0};
+      t_float def_value_zero = 0.0;
+      t_float def_value_one = 1.0;
       
       keyword_manager->register_keyword ("ACTNUM", keyword_handler (0, 1, &array_dimens[0]));
       keyword_manager->register_keyword ("PERMX", keyword_handler (0, def_value_zero, &array_dimens[0]));
@@ -74,12 +74,11 @@ namespace blue_sky
       keyword_manager->register_keyword ("MULTPV", keyword_handler (0, def_value_zero, &array_dimens[0]));
     }  
   
-  template <class strategy_t>
-  void smesh_keywords<strategy_t>::DIMENS_handler(const std::string &keyword, keyword_params_t &params)
+  void smesh_keywords::DIMENS_handler(const std::string &keyword, keyword_params_t &params)
     {
       KH_COMMON_VARIABLES_DEF
-      i_type_t ndim = 0, nblock = 0;
-      boost::array <i_type_t, 3> itmp;
+      t_long ndim = 0, nblock = 0;
+      boost::array <t_long, 3> itmp;
       sp_idata_t idata (params.data, bs_dynamic_cast ());
       sp_reader_t reader (params.reader, bs_dynamic_cast ());
       
@@ -97,35 +96,26 @@ namespace blue_sky
           KH_ASSERT_EXCEPTION
         }
 
-      idata->dimens.nx = itmp[0];
-      idata->dimens.ny = itmp[1];
-      idata->dimens.nz = itmp[2];
-      idata->fp_map->init (idata->dimens.nx, idata->dimens.ny, idata->dimens.nz);
-      idata->i_map->init (idata->dimens.nx, idata->dimens.ny, idata->dimens.nz);
+      idata->props->set_i ("nx", itmp[0]);
+      idata->props->set_i ("ny", itmp[1]);
+      idata->props->set_i ("nz", itmp[2]);
       
       // Number of nodes
-      ndim = idata->dimens.nx * idata->dimens.ny * idata->dimens.nz;
+      ndim = itmp[0] * itmp[1] * itmp[2];
       // Number of blocks
-      nblock = idata->dimens.nx * idata->dimens.ny * idata->dimens.nz;
-      
-      idata->set_defaults_in_pool();
+      nblock = itmp[0] * itmp[1] * itmp[2];
       
       BOSOUT (section::read_data, level::medium) <<
         "Keyword " << keyword <<
-        ": NX = " << idata->dimens.nx <<
-        ", NY = " << idata->dimens.ny <<
-        ", NZ = " << idata->dimens.nz << bs_end;
+        ": NX = " << itmp[0] <<
+        ", NY = " << itmp[1] <<
+        ", NZ = " << itmp[2] << bs_end;
       BOSOUT (section::read_data,level::medium) << keyword << bs_end;
     }
   
   
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF (smesh_keywords, (class))
-  BLUE_SKY_TYPE_STD_COPY_T_DEF (smesh_keywords, (class))
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (smesh_keywords<base_strategy_fif>), 1, (keyword_info_base<base_strategy_fif>), 
-    "BOS Core struct_mesh keyword_info_base_fi", "struct_mesh", "Reservoir sumulator structured struct mesh keywords keywords", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (smesh_keywords<base_strategy_did>), 1, (keyword_info_base<base_strategy_did>), 
-    "BOS_Core struct_mesh keyword_info_base_di", "struct_mesh", "Reservoir sumulator structured struct mesh keywords keywords", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (smesh_keywords<base_strategy_dif>), 1, (keyword_info_base<base_strategy_dif>), 
-    "BOS_Core struct_mesh keyword_info_base_mixi", "struct_mesh", "Reservoir sumulator structured struct mesh keywords keywords", false)
-    
+  BLUE_SKY_TYPE_STD_CREATE (smesh_keywords)
+  BLUE_SKY_TYPE_STD_COPY (smesh_keywords)
+  BLUE_SKY_TYPE_IMPL (smesh_keywords, keyword_info_base,"BOS Core struct_mesh keyword_info_base", "struct_mesh", "Reservoir sumulator structured struct mesh keywords keywords")
+      
 }; //namespace blue_sky

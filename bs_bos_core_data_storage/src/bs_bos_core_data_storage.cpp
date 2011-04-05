@@ -10,7 +10,6 @@
 #include "py_data_manager.h"
 #include "py_keyword_manager.h"
 #include "py_data_class.h"
-#include "py_bs_array_map.h"
 #include "py_read_class.h"
 
 namespace blue_sky
@@ -24,12 +23,9 @@ namespace blue_sky
 
     bool res = true;
 
-    res &= BS_KERNEL.register_type (pd, data_manager <base_strategy_fif>::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, data_manager <base_strategy_did>::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, data_manager::bs_type ()); BS_ASSERT (res);
 
-
-    res &= BS_KERNEL.register_type (pd, idata <base_strategy_fif>::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, idata <base_strategy_did>::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, idata::bs_type ()); BS_ASSERT (res);
     
     res &= BS_KERNEL.register_type(pd, FRead::bs_type()); BS_ASSERT (res);
 
@@ -43,7 +39,6 @@ BLUE_SKY_INIT_PY_FUN
   using namespace blue_sky;
 
   python::export_FRead ();
-  python::py_export_array_maps ();
   python::py_export_data_manager ();
   python::py_export_idata ();
   python::export_keyword_manager();

@@ -10,7 +10,6 @@
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "bos_report.h"
 #include "arrays.h"
-#include "naive_file_reader.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 
@@ -19,8 +18,8 @@ using namespace blue_sky;
 
 #define BLOCK_NUM(i, j, k, nx, ny) (i)+(j)*(nx)+(k)*(nx)*(ny)
 
-template <typename strategy_t>
-mesh_ijk <strategy_t>::mesh_ijk ()
+
+mesh_ijk ::mesh_ijk ()
 {
   dx_array   = 0;
   dy_array   = 0;
@@ -29,34 +28,34 @@ mesh_ijk <strategy_t>::mesh_ijk ()
 }
 
 
-template <typename strategy_t>
+
 void
-mesh_ijk <strategy_t>::init_props (const sp_idata_t &idata)
+mesh_ijk ::init_props (const sp_idata_t &idata)
 {
-  sp_fp_storage_array_t data_array;
+  spv_float data_array;
   
-  data_array = idata->get_fp_non_empty_array("DX");
+  data_array = idata->get_fp_array("DX");
   if (data_array->size()) dx_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_non_empty_array("DY");
+  data_array = idata->get_fp_array("DY");
   if (data_array->size()) dy_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_non_empty_array("DZ");
+  data_array = idata->get_fp_array("DZ");
   if (data_array->size()) dz_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_non_empty_array("TOPS");
+  data_array = idata->get_fp_array("TOPS");
   if (data_array->size()) tops_array = &(*data_array)[0];
   
   base_t::init_props (idata);
 }
 
-template<class strategy_t>
-int mesh_ijk<strategy_t>::init_ext_to_int()
+
+int mesh_ijk::init_ext_to_int()
 {
-  i_type_t *ext_to_int_data, *int_to_ext_data;
+  t_long *ext_to_int_data, *int_to_ext_data;
   calc_shift_arrays();
 
-  item_array_t volumes_temp (n_elements);
+  stdv_double volumes_temp (n_elements);
   int splicing_num = 0;//splicing(volumes_temp);
 
   //make proxy array
@@ -67,11 +66,11 @@ int mesh_ijk<strategy_t>::init_ext_to_int()
   
   size_t n_count = 0;
 
-  i_type_t nn_active = 0, i_index; //number of non-active previous cells
-  for (i_type_t i = 0; i < nz; ++i)
+  t_long nn_active = 0, i_index; //number of non-active previous cells
+  for (t_long i = 0; i < nz; ++i)
     {
-      for (i_type_t j = 0; j < ny; ++j)
-        for (i_type_t k = 0; k < nx; ++k, ++n_count)
+      for (t_long j = 0; j < ny; ++j)
+        for (t_long k = 0; k < nx; ++k, ++n_count)
           {
             i_index = BLOCK_NUM (k, j, i, nx, ny);
 
@@ -91,7 +90,7 @@ int mesh_ijk<strategy_t>::init_ext_to_int()
   
   //fill volume array (except non-active block and using proxy array)
   volumes->resize(n_active_elements);
-  fp_type_t *volumes_data = &(*volumes)[0];
+  t_double *volumes_data = &(*volumes)[0];
   
   for (int i = 0; i < n_active_elements; ++i)
     volumes_data[i] = volumes_temp[int_to_ext_data[i]];
@@ -100,8 +99,8 @@ int mesh_ijk<strategy_t>::init_ext_to_int()
   return splicing_num;
 }
 
-template<class strategy_t>
-void mesh_ijk<strategy_t>::check_data() const
+
+void mesh_ijk::check_data() const
 {
   base_t::check_data ();
 
@@ -122,9 +121,9 @@ void mesh_ijk<strategy_t>::check_data() const
  * \param  i,j,k      - IJK index of block
  * \output cube_vertex - array of 3d-points - 8 block vertexes and block center coordinates
  */
-template<class strategy_t>
+
 grd_ecl::fpoint3d_vector
-mesh_ijk<strategy_t>::calc_element (i_type_t index) const
+mesh_ijk::calc_element (t_long index) const
   {
     grd_ecl::fpoint3d_vector cube_vertex;
     /*
@@ -162,17 +161,17 @@ mesh_ijk<strategy_t>::calc_element (i_type_t index) const
  * \param  index       - index of block in mesh
  * \output cube_vertex - array of 3d-points - 8 block vertexes and block center coordinates
  */
-template<class strategy_t>
+
 grd_ecl::fpoint3d_vector
-mesh_ijk<strategy_t>::calc_element (const i_type_t i, const i_type_t j, const i_type_t k) const
+mesh_ijk::calc_element (const t_long i, const t_long j, const t_long k) const
   {
-    i_type_t index = XYZ_to_inside (i, j, k);
+    t_long index = XYZ_to_inside (i, j, k);
     return calc_element (index);
   }
 
-template <typename strategy_t>
-typename mesh_ijk<strategy_t>::center_t
-mesh_ijk<strategy_t>::get_center (i_type_t n_block) const
+
+mesh_ijk::center_t
+mesh_ijk::get_center (t_long n_block) const
 {
   BS_ASSERT (n_block != -1) (n_block);
   center_t center;
@@ -184,29 +183,29 @@ mesh_ijk<strategy_t>::get_center (i_type_t n_block) const
   return center;
 }  
 
-template <typename strategy_t>
-typename mesh_ijk<strategy_t>::center_t
-mesh_ijk<strategy_t>::get_center (i_type_t i, i_type_t j, i_type_t k) const
+
+mesh_ijk::center_t
+mesh_ijk::get_center (t_long i, t_long j, t_long k) const
 {
-  i_type_t n_block = BLOCK_NUM (i, j, k, nx, ny);
+  t_long n_block = BLOCK_NUM (i, j, k, nx, ny);
   return get_center (n_block);
 }
 
-template<class strategy_t>
-int mesh_ijk<strategy_t>::splicing(item_array_t& volumes_temp)
+
+int mesh_ijk::splicing(stdv_double& /*volumes_temp*/)
 {
   int splicing_num = 0;
   BS_ASSERT (false && "NOT IMPL YET");
-  //for (i_type_t i = 0; i < nx; ++i)
+  //for (t_long i = 0; i < nx; ++i)
   //{
-  //  for (i_type_t j = 0; j < ny; ++j)
+  //  for (t_long j = 0; j < ny; ++j)
   //  {
-  //    for (i_type_t k = 0; k < nz; ++k)
+  //    for (t_long k = 0; k < nz; ++k)
   //    {
   //      int index = i + j*nx + (k+1)*nx*ny;
   //      if ((*actnum_array)[index])
   //      {
-  //        fp_type_t vol = dx_array[index]*dy_array[index]*dz_array[index];
+  //        t_double vol = dx_array[index]*dy_array[index]*dz_array[index];
   //        vol *= (*ntg_array)[index];
   //        if (vol*(*poro_array)[index] < minpv)
   //        {
@@ -221,20 +220,20 @@ int mesh_ijk<strategy_t>::splicing(item_array_t& volumes_temp)
   return splicing_num;
 }
 
-template<class strategy_t>
-int mesh_ijk<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, const sp_flux_conn_iface_t flux_conn,
-    sp_i_array_t boundary_array)
+
+int mesh_ijk::build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, const sp_flux_conn_iface_t flux_conn,
+    spv_long boundary_array)
 {
   n_connections = 0;
   sp_bcsr_t conn_trans;
-  i_type_t n_non_zeros;
-  i_type_t block_idx_ext, block_idx, next_block_idx_ext, conn_idx = 0;
-  i_type_t i, j, k;
+  t_long n_non_zeros;
+  t_long block_idx_ext, block_idx, next_block_idx_ext, conn_idx = 0;
+  t_long i, j, k;
 
   jacobian->init_struct (n_active_elements, n_active_elements, n_active_elements);
 
-  i_type_t *rows_ptr = &(*jacobian->get_rows_ptr())[0];
-  i_type_t *ext_to_int_data = &(*ext_to_int)[0];
+  t_long *rows_ptr = &(*jacobian->get_rows_ptr())[0];
+  t_long *ext_to_int_data = &(*ext_to_int)[0];
   
   for (i = 0; i < n_active_elements + 1; ++i)
     {
@@ -293,7 +292,7 @@ int mesh_ijk<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t j
 
   //create cols_ind
   jacobian->get_cols_ind()->resize (n_non_zeros);
-  i_type_t *cols_ind = &(*jacobian->get_cols_ind())[0];
+  t_long *cols_ind = &(*jacobian->get_cols_ind())[0];
 
   //tran
 
@@ -307,15 +306,15 @@ int mesh_ijk<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t j
   conn_trans = flux_conn->get_conn_trans();
   conn_trans->init (n_connections, n_active_elements, 1, 2 * n_connections);
 
-  i_type_t *rows_ptr_tran = &(*conn_trans->get_rows_ptr())[0];
-  i_type_t *cols_ind_tran = &(*conn_trans->get_cols_ind())[0];
-  fp_storage_type_t *values_tran =  &(*conn_trans->get_values())[0];
+  t_long *rows_ptr_tran = &(*conn_trans->get_rows_ptr())[0];
+  t_long *cols_ind_tran = &(*conn_trans->get_cols_ind())[0];
+  t_double *values_tran =  &(*conn_trans->get_values())[0];
   
   flux_conn->get_matrix_block_idx_plus ()->resize (n_connections * 2);
   flux_conn->get_matrix_block_idx_plus ()->resize (n_connections * 2);
   
-  i_type_t *matrix_block_idx_plus = &(*flux_conn->get_matrix_block_idx_plus ())[0];
-  i_type_t *matrix_block_idx_minus = &(*flux_conn->get_matrix_block_idx_minus ())[0];
+  t_long *matrix_block_idx_plus = &(*flux_conn->get_matrix_block_idx_plus ())[0];
+  t_long *matrix_block_idx_minus = &(*flux_conn->get_matrix_block_idx_minus ())[0];
 
  
 
@@ -323,7 +322,7 @@ int mesh_ijk<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t j
     rows_ptr_tran[i] = i * 2;
 
   //additional array for current index in rows_ptr
-  index_array_t tmp_rows_ptr;
+  stdv_long tmp_rows_ptr;
   tmp_rows_ptr.resize (n_active_elements);
 
   // tmp_rows_ptr point to second value in each row
@@ -380,14 +379,14 @@ int mesh_ijk<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t j
   return 0;
 }
 
-template<class strategy_t>
-void mesh_ijk<strategy_t>::set_neigbour_data (const i_type_t index1, const i_type_t index1_ext, const i_type_t index2_ext, i_type_t &conn_idx,
-                                              const i_type_t *rows_ptr, i_type_t *cols_ind, index_array_t &tmp_rows_ptr,
-                                              i_type_t *m_memory, i_type_t *p_memory,
-                                              i_type_t *cols_ind_tran, fp_storage_type_t *values_tran, direction dir)
+
+void mesh_ijk::set_neigbour_data (const t_long index1, const t_long index1_ext, const t_long index2_ext, t_long &conn_idx,
+                                              const t_long *rows_ptr, t_long *cols_ind, stdv_long &tmp_rows_ptr,
+                                              t_long *m_memory, t_long *p_memory,
+                                              t_long *cols_ind_tran, t_double *values_tran, direction dir)
 {
   //change jacobian
-  i_type_t index2 = (*ext_to_int)[index2_ext];
+  t_long index2 = (*ext_to_int)[index2_ext];
 
   cols_ind[tmp_rows_ptr[index1]] = index2;
   cols_ind[tmp_rows_ptr[index2]] = index1;
@@ -402,7 +401,7 @@ void mesh_ijk<strategy_t>::set_neigbour_data (const i_type_t index1, const i_typ
   tmp_rows_ptr[index2]++;
 
   //change flux_connection
-  fp_type_t tran = calculate_tran(index1_ext, index2_ext, dir);
+  t_double tran = calculate_tran(index1_ext, index2_ext, dir);
 
   cols_ind_tran[conn_idx] = index1;
   cols_ind_tran[conn_idx + 1] = index2;
@@ -411,26 +410,26 @@ void mesh_ijk<strategy_t>::set_neigbour_data (const i_type_t index1, const i_typ
   conn_idx += 2;
 }
 
-template<class strategy_t>
-int mesh_ijk<strategy_t>::find_neighbours(sp_bcsr_t neig_matrix)
+
+int mesh_ijk::find_neighbours(sp_bcsr_t /*neig_matrix*/)
 {
   return 0;
 }
 
 // calculating method have been taken from td eclipse (page 893)
-template<class strategy_t>
-typename mesh_ijk<strategy_t>::fp_type_t mesh_ijk<strategy_t>::calculate_tran(const i_type_t i, const i_type_t j, const  direction d_dir) const
+
+t_double mesh_ijk::calculate_tran(const t_long i, const t_long j, const  direction d_dir) const
   {
-    fp_type_t tran;
-    fp_type_t *depths_data = &(*depths)[0];
-    i_type_t *ext_to_int_data = &(*ext_to_int)[0];
+    t_double tran;
+    t_double *depths_data = &(*depths)[0];
+    t_long *ext_to_int_data = &(*ext_to_int)[0];
 
-    fp_type_t A; //area between i and j block
-    fp_type_t DIPC; //correction of inclination
-    fp_type_t B,DHS,DVS; //additional variable
+    t_double A; //area between i and j block
+    t_double DIPC; //correction of inclination
+    t_double B,DHS,DVS; //additional variable
 
-    fp_type_t ntg_i = 1;
-    fp_type_t ntg_j = 1;
+    t_double ntg_i = 1;
+    t_double ntg_j = 1;
     if (!ntg_array)
       {
         ntg_i = ntg_array[i];
@@ -477,27 +476,27 @@ typename mesh_ijk<strategy_t>::fp_type_t mesh_ijk<strategy_t>::calculate_tran(co
   }
 
 
-template<class strategy_t>
-void mesh_ijk<strategy_t>::get_block_dx_dy_dz(i_type_t n_elem, fp_type_t &dx, fp_type_t &dy, fp_type_t &dz) const
+
+void mesh_ijk::get_block_dx_dy_dz(t_long n_elem, t_double &dx, t_double &dy, t_double &dz) const
   {
     dx = dx_array[n_elem];
     dy = dy_array[n_elem];
     dz = dz_array[n_elem];
   }
 
-template<class strategy_t>
-int mesh_ijk<strategy_t>::calc_depths ()
+
+int mesh_ijk::calc_depths ()
 {
   depths->resize (n_active_elements);
-  fp_type_t *depths_data = &(*depths)[0];
-  i_type_t index; //index of current block
-  i_type_t *ext_to_int_data = &(*ext_to_int)[0];
+  t_double *depths_data = &(*depths)[0];
+  t_long index; //index of current block
+  t_long *ext_to_int_data = &(*ext_to_int)[0];
 
-  for (i_type_t i = 0; i < nx; ++i)
-    for (i_type_t j = 0; j < ny; ++j)
+  for (t_long i = 0; i < nx; ++i)
+    for (t_long j = 0; j < ny; ++j)
       {
-        fp_type_t current_tops = tops_array[i+j*nx]; //tops of current block
-        for (i_type_t k = 0; k < nz; ++k)
+        t_float current_tops = tops_array[i+j*nx]; //tops of current block
+        for (t_long k = 0; k < nz; ++k)
           {
             index = i + j * nx + k * nx * ny;
             if (actnum_array[index])
@@ -508,8 +507,8 @@ int mesh_ijk<strategy_t>::calc_depths ()
   return 0;
 }
 
-template<class strategy_t>
-int mesh_ijk<strategy_t>::calc_shift_arrays()
+
+int mesh_ijk::calc_shift_arrays()
 {
   BS_ASSERT (nx * ny * nz) (nx) (ny) (nz);
   dx_shift_array.assign (nx * ny * nz, 0);
@@ -553,4 +552,4 @@ int mesh_ijk<strategy_t>::calc_shift_arrays()
 }
 
 
-BS_INST_STRAT(mesh_ijk);
+//BS_INST_STRAT(mesh_ijk);

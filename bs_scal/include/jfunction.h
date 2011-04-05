@@ -20,7 +20,6 @@ namespace blue_sky
     JFUNC_PERM_Z,
   };
 
-  template <typename strategy_t>
   class BS_API_PLUGIN jfunction : public objbase
     {
     public:
@@ -31,8 +30,8 @@ namespace blue_sky
       //  init (perm_type);
       //}
 
-      typedef typename strategy_t::item_t item_t;
-      typedef jfunction <strategy_t>      this_t;
+      typedef t_double                    item_t;
+      typedef jfunction                   this_t;
 
       void init (JFUNC_PERM_TYPE_ENUM perm_type_)
       {

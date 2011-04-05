@@ -11,10 +11,10 @@ if ("cfl" in env and env["cfl"] == "1") :
 	env.AppendUnique (CPPDEFINES = ["BS_BOS_CORE_USE_CSR_ILU_CFL_PREC"])
 
 if (build_kind == "debug") :
-    env.AppendUnique (LIBS = ["blue_sky_d", "bs_bos_core_base_d"])
+    env.AppendUnique (LIBS = ["blue_sky_d"])
     lib_name += "_d"
 elif (build_kind == "release") :
-    env.AppendUnique (LIBS = ["blue_sky", "bs_bos_core_base"])
+    env.AppendUnique (LIBS = ["blue_sky"])
 
 bs_mtx = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
 

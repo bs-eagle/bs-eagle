@@ -67,11 +67,11 @@ namespace blue_sky {
   /**
     * \brief interpolate
     *
-    * \param[in] x0 value for interpolate
+    * \param[in] s value for interpolate
     * \param[in] x vector of values X
     * \param[in] y vector of values Y
-    * \param[out] kr return value
-    * \param[out] d_kr
+    * \param[out] cap (capillary) return value
+    * \param[out] d_cap (d_cap/d_s) derivative
     * */
   template <typename item_t, typename data_vector_t, typename comparator_t>
   BS_FORCE_INLINE void

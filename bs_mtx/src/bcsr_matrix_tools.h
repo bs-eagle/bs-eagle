@@ -5,13 +5,12 @@
  * @brief 
  * @date 2009-11-24
  */
-#include <string>
-
 #include "bs_assert.h"
 #include "bs_tree.h"
 
 #include "bcsr_matrix_tools_iface.h"
 
+#include <string>
 
 namespace blue_sky
 {

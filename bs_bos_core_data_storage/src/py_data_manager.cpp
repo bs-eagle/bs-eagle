@@ -12,14 +12,6 @@ using namespace boost::python;
 namespace blue_sky {
 namespace python {
 
- /*
-  template <typename T, class strategy_t>
-  smart_ptr <idata<strategy_t>, true>
-  get_data (T *t)
-  {
-    return t->data;
-  }
-*/
   PY_EXPORTER (data_manager_exporter, default_exporter)
     //.add_property ("data", get_data <T, strategy_t>)
     .def("init", &T::init)
@@ -28,9 +20,10 @@ namespace python {
     .def("get_reader", &T::get_reader)
     .def("get_keyword_manager", &T::get_keyword_manager)
   PY_EXPORTER_END;
+
   void py_export_data_manager ()
   {
-    strategy_exporter::export_base <data_manager, data_manager_exporter> ("data_manager");
+    base_exporter<data_manager, data_manager_exporter>::export_class ("data_manager");
   }
 
 } // namespace python

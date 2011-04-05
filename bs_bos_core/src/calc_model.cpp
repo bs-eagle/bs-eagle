@@ -137,16 +137,33 @@ namespace blue_sky
     BS_ASSERT(input_data);
 
     // set up phases
-    this->n_phases = 0;
-    this->phases = static_cast <FI_PHASE_ENUM> ((int)input_data->fi_phases); // TODO: BUG: bad cast
-
-    for (int i = 0; i < FI_PHASE_TOT; ++i)
+    n_phases = 0;
+    phases = 0;
+    
+    if (input_data->props->get_b ("water_phase"))
       {
-        if (phases & (1 << i))
-          phase_d[i] = n_phases++;
-        else
-          phase_d[i] = -1;
+        phase_d[0] = n_phases++;
+        phases |= 1 << FI_PHASE_WATER;
       }
+    else 
+      phase_d[0] = -1;
+
+    if (input_data->props->get_b ("gas_phase"))
+      {
+        phase_d[1] = n_phases++;
+        phases |= 1 << FI_PHASE_GAS;
+      }
+    else 
+      phase_d[1] = -1;
+
+    if (input_data->props->get_b ("oil_phase"))
+      {
+        phase_d[2] = n_phases++;
+        phases |= 1 << FI_PHASE_OIL;
+      }
+    else 
+      phase_d[2] = -1;
+
     if (n_phases > 1)
       n_sec_vars = 1;
 
@@ -158,7 +175,7 @@ namespace blue_sky
           this->sat_d[i] = -1;
       }
 
-    if (this->n_phases < 1 || this->n_phases != input_data->fi_n_phase)
+    if (this->n_phases < 1)
       {
         BOSERR (section::init_data, level::warning)
         << "phases for full implicit not specified. Use keywords: OIL, WATER, GAS, ..."
@@ -328,7 +345,7 @@ namespace blue_sky
     // initialize scale arrays
     const sp_scale_array_holder_t &gas_scale_ = scal_prop->get_gas_scale ();
     const sp_scale_array_holder_t &water_scale_ = scal_prop->get_water_scale ();
-
+#if 0
     gas_scale_->insert_socr ((*input_data->d_map)[SOGCR].array);
     gas_scale_->insert_scr  ((*input_data->d_map)[SGCR].array);
     gas_scale_->insert_su   ((*input_data->d_map)[SGU].array);
@@ -339,7 +356,19 @@ namespace blue_sky
     water_scale_->insert_su   ((*input_data->d_map)[SWU].array);
     water_scale_->insert_sl   ((*input_data->d_map)[SWL].array);
     water_scale_->insert_pcp  ((*input_data->d_map)[PCW].array);
+#else
+    gas_scale_->set_socr ((*input_data->d_map)[SOGCR].array);
+    gas_scale_->set_scr  ((*input_data->d_map)[SGCR].array);
+    gas_scale_->set_su   ((*input_data->d_map)[SGU].array);
+    gas_scale_->set_sl   ((*input_data->d_map)[SGL].array);
 
+    water_scale_->set_socr ((*input_data->d_map)[SOWCR].array);
+    water_scale_->set_scr  ((*input_data->d_map)[SWCR].array);
+    water_scale_->set_su   ((*input_data->d_map)[SWU].array);
+    water_scale_->set_sl   ((*input_data->d_map)[SWL].array);
+    water_scale_->set_pcp  ((*input_data->d_map)[PCW].array);
+
+#endif
     init_scal ();
 
     // initialize rock grid data

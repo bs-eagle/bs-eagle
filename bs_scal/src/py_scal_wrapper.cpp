@@ -64,10 +64,11 @@ namespace blue_sky
         .value ("z", JFUNC_PERM_Z)
         ;
 
-      strategy_exporter::export_base <jfunction, jfunction_exporter> ("jfunction");
-      strategy_exporter::export_base <scale_array_holder, scale_array_holder_exporter> ("scale_arrays");
-      strategy_exporter::export_base <scal_2p_data_holder, scal_data_holder_exporter> ("scal_data");
-      strategy_exporter::export_base <scal_3p, scal_3p_exporter> ("scal_3p");
+ 
+      base_exporter<jfunction, jfunction_exporter>::export_class ("jfunction");
+      base_exporter<scale_array_holder, scale_array_holder_exporter>::export_class ("scale_arrays");
+      base_exporter<scal_2p_data_holder, scal_data_holder_exporter>::export_class ("scal_data");
+      base_exporter<scal_3p, scal_3p_exporter>::export_class ("scal_3p");
     }
   }
 }

@@ -36,39 +36,39 @@ namespace blue_sky
   size_t len;                                               \
   len = 0;
 
-  template <typename strategy_t>
-  keyword_manager<strategy_t>::~keyword_manager ()
+  
+  keyword_manager::~keyword_manager ()
   {
 
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::int_array_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::int_array_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     sp_this_t km (params.km, bs_dynamic_cast ());
     sp_idata_t idata (params.data, bs_dynamic_cast ());
     
-    sp_bs_i_array_t this_arr;
+    spv_int this_arr;
     
-    i_type_t def_value;
-    int *dimens;
+    t_int def_value;
+    t_int *dimens;
     //!TODO: check sp!
     
     
     def_value = km->handlers[keyword].int_def_value;
     dimens = km->handlers[keyword].dimens;
-    this_arr = idata->i_map->create_item (keyword, dimens, def_value);
+    this_arr = idata->create_i_array (keyword, dimens, def_value);
     
     
-    i_type_t nx = 0, ny = 0, nz = 0, ndim = 0;
-    idata->i_map->get_dimens (keyword, nx, ny, nz, ndim);
+    t_long ndim = 0;
+    ndim = (t_long) this_arr->size();
     if ((len = reader->read_array (keyword, *this_arr)) != (size_t)ndim)
       {
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s") % reader->get_prefix () % keyword);
       }
-    
-    BOSOUT (section::read_data, level::medium) << "Keyword: " << keyword << bs_end;
+    idata->set_i_array (keyword, this_arr);
+    BOSOUT (section::read_data, level::medium) << "int pool keyword: " << keyword << bs_end;
     BOSOUT (section::read_data, level::medium) << "ndim = " << ndim << bs_end;
     
     // launch second handler if any
@@ -76,31 +76,33 @@ namespace blue_sky
       km->handlers[keyword].second_handle_function (keyword, params);
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::float_array_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::float_array_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     sp_this_t km (params.km, bs_dynamic_cast ());
     sp_idata_t idata (params.data, bs_dynamic_cast ());
     
     //!TODO: check sp!
-    sp_bs_fp_array_t this_arr;
+    spv_float this_arr;
     
     int* dimens;
-    fp_type_t def_value;
+    t_float def_value;
     
     def_value = km->handlers[keyword].float_def_value;
     dimens = km->handlers[keyword].dimens;
-    this_arr = idata->fp_map->create_item (keyword, dimens, def_value);
+    this_arr = idata->create_fp_array (keyword, dimens, def_value);
 
-    i_type_t nx = 0, ny = 0, nz = 0, ndim = 0;
-    idata->fp_map->get_dimens (keyword, nx, ny, nz, ndim);
+    t_long ndim = 0;
+    ndim = (t_long) this_arr->size();
 
     if ((len = reader->read_array (keyword.c_str(), *this_arr)) != (size_t)ndim)
       {
         bs_throw_exception ((boost::format ("Error in %s: not enough valid arguments for keyword %s") % reader->get_prefix() % keyword).str ());
       }
-    BOSOUT (section::read_data, level::medium) << "Keyword: " << keyword << bs_end;
+    idata->set_fp_array (keyword, this_arr);
+
+    BOSOUT (section::read_data, level::medium) << "fp pool keyword: " << keyword << bs_end;
     BOSOUT (section::read_data, level::medium) << "ndim = " << ndim << bs_end;
     
     // launch second handler if any
@@ -109,13 +111,13 @@ namespace blue_sky
   }
 
   /*
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::event_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::event_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     char buf[CHAR_BUF_LEN] = {0};
     char key1[CHAR_BUF_LEN] = {0};
-    typedef smart_ptr <event_manager <strategy_t>, true>	sp_event_manager_t;
+    typedef smart_ptr <event_manager , true>	sp_event_manager_t;
     sp_event_manager_t em (params.em, bs_dynamic_cast ());
     sp_this_t km (params.km, bs_dynamic_cast ());
     
@@ -139,54 +141,48 @@ namespace blue_sky
   }
 */
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::TITLE_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::TITLE_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     char buf[CHAR_BUF_LEN] = {0};
     sp_idata_t idata (params.data, bs_dynamic_cast ());
     
     reader->read_line (buf, CHAR_BUF_LEN);
-    idata->title = std::string(buf); // TODO: , len)
+    idata->props->set_s("title", std::string(buf)); // TODO: , len)
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::OIL_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::OIL_handler(const std::string &keyword, keyword_params_t &params)
   {
     sp_idata_t idata (params.data, bs_dynamic_cast ());
-    
-    if (!(idata->fi_phases & (1 << FI_PHASE_OIL)))
-      ++idata->fi_n_phase;
-    idata->fi_phases |= 1 << FI_PHASE_OIL;
+
+    idata->props->set_b("oil_phase", 1);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::WATER_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::WATER_handler(const std::string &keyword, keyword_params_t &params)
   {
     sp_idata_t idata (params.data, bs_dynamic_cast ());
-    
-    if (!(idata->fi_phases & (1 << FI_PHASE_WATER)))
-      ++idata->fi_n_phase;
-    idata->fi_phases |= 1 << FI_PHASE_WATER;
+
+    idata->props->set_b("water_phase", 1);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::GAS_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::GAS_handler(const std::string &keyword, keyword_params_t &params)
   {
     sp_idata_t idata (params.data, bs_dynamic_cast ());
     
-    if (!(idata->fi_phases & (1 << FI_PHASE_GAS)))
-      ++idata->fi_n_phase;
-    idata->fi_phases |= 1 << FI_PHASE_GAS;
+    idata->props->set_b("water_phase", 1);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
 /*
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::PROCESS_PARAMS_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::PROCESS_PARAMS_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     
@@ -202,8 +198,8 @@ namespace blue_sky
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 */
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::REPORTS_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::REPORTS_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     char buf[CHAR_BUF_LEN] = {0};
@@ -276,8 +272,8 @@ namespace blue_sky
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::REPORTFILE_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::REPORTFILE_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     char buf[CHAR_BUF_LEN] = {0};
@@ -314,8 +310,8 @@ namespace blue_sky
       }
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::REPORTSCREEN_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::REPORTSCREEN_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     char buf[CHAR_BUF_LEN] = {0};
@@ -352,35 +348,71 @@ namespace blue_sky
       }
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::STONE1_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::STONE1_handler(const std::string &keyword, keyword_params_t &params)
   {
     sp_idata_t idata (params.data, bs_dynamic_cast ());
     
-    idata->rpo_model = STONE1_MODEL;
+    idata->props->set_i("rpo_model ", STONE1_MODEL);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::STONE2_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::STONE2_handler(const std::string &keyword, keyword_params_t &params)
   {
     sp_idata_t idata (params.data, bs_dynamic_cast ());
     
-    idata->rpo_model = STONE2_MODEL;
+    idata->props->set_i("rpo_model ", STONE2_MODEL);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::RELATIVE_PERM_DEFAULT_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::RELATIVE_PERM_DEFAULT_handler(const std::string &keyword, keyword_params_t &params)
   {
     sp_idata_t idata (params.data, bs_dynamic_cast ());
     
-    idata->rpo_model = RPO_DEFAULT_MODEL;
+    idata->props->set_i("rpo_model ", RPO_DEFAULT_MODEL);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::UNITS_handler(const std::string &keyword, keyword_params_t &params)
+  void keyword_manager::SCALECRS_handler(const std::string &keyword, keyword_params_t &params)
+  {
+    KH_READER_DEF
+    char buf[CHAR_BUF_LEN] = {0};
+    char key1[CHAR_BUF_LEN];
+    sp_idata_t idata (params.data, bs_dynamic_cast ());
+
+    for (;;)
+      {
+        reader->read_line (buf, CHAR_BUF_LEN);
+        if (sscanf (buf, "%s", key1) != 1)
+          {
+            bs_throw_exception (boost::format ("Error in %s: bad string (%s)")
+              % reader->get_prefix() % buf);
+          }
+        if (key1[0] == '/')
+          break;
+
+        if (!COMPARE_KEYWORD (key1, "YES"))
+          {
+            idata->props->set_b("scalecrs", 1);
+          }
+        else if (!COMPARE_KEYWORD (key1, "NO"))  
+          {
+            idata->props->set_b("scalecrs", 0);
+          }
+        else
+          {
+            bs_throw_exception (boost::format ("Error in %s: unknown argument %s for keyword %s")
+              % reader->get_prefix () % key1 % keyword);
+          }
+      }
+    BOSOUT (section::read_data, level::medium) << keyword << bs_end;
+
+  }
+
+  
+  void keyword_manager::UNITS_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     char buf[CHAR_BUF_LEN] = {0};
@@ -439,32 +471,34 @@ namespace blue_sky
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::ROCKCOMP_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::ROCKCOMP_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     char buf[CHAR_BUF_LEN] = {0};
     char key1[CHAR_BUF_LEN] = {0};
     sp_idata_t idata (params.data, bs_dynamic_cast ());
+    t_int rock_region;
 
     reader->read_line (buf, CHAR_BUF_LEN);
     // Read and convert UNITS to data
-    if (sscanf (buf, "%s %ld", key1, &idata->rock_region) != 2)
+    if (sscanf (buf, "%s %d", key1, &rock_region) != 2)
       {
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
           % reader->get_prefix() % keyword);
       }
     // check read data
-    if (idata->rock_region < 1)
+    if (rock_region < 1)
       {
         bs_throw_exception (boost::format ("Error in %s: number of rock regions should be greater than 0 for keyword %s")
           % reader->get_prefix () % keyword);
       }
+    idata->props->set_i ("rock_region", rock_region);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::REGNUM_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::REGNUM_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     sp_idata_t idata (params.data, bs_dynamic_cast ());
@@ -477,23 +511,26 @@ namespace blue_sky
       }
 
     idata->set_region (regions[0], regions[1], regions[2], regions[3]);
+
+    /*
     BS_ASSERT (regions[0] == idata->pvt_region) (regions [0]) (idata->pvt_region);
     BS_ASSERT (regions[1] == idata->sat_region) (regions [1]) (idata->sat_region);
     BS_ASSERT (regions[2] == idata->eql_region) (regions [2]) (idata->eql_region);
     BS_ASSERT (regions[3] == idata->fip_region) (regions [3]) (idata->fip_region);
+   */
 
     BOSOUT (section::read_data, level::medium) <<
     "Keyword " << keyword << ":(" 
-      << idata->pvt_region << ", " << idata->sat_region << ", " 
-      << idata->eql_region << ", " << idata->fip_region << ")" 
+      << regions[0] << ", " << regions[1] << ", " 
+      << regions[2] << ", " << regions[3] << ")" 
       << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::REGDIMS_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::REGDIMS_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    std::vector<i_type_t> itmp;
+    std::vector<t_int> itmp;
     itmp.resize(4);
     sp_idata_t idata (params.data, bs_dynamic_cast ());
     
@@ -508,14 +545,14 @@ namespace blue_sky
 
     BOSOUT (section::read_data, level::medium) <<
     "Keyword " << reader->get_prefix() << ": reading of (" <<
-    idata->pvt_region << ", " << idata->sat_region << ", " <<
-    idata->eql_region << ", " << idata->fip_region << ") is successfully" << bs_end;
+    itmp[0] << ", " << itmp[1] << ", " <<
+    itmp[2] << ", " << itmp[3] << ") is successfully" << bs_end;
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::EQLDIMS_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::EQLDIMS_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     shared_vector <int> itmp;
@@ -528,30 +565,32 @@ namespace blue_sky
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
           % reader->get_prefix() % keyword);
       }
-    idata->eql_region=itmp[0];
-    if (idata->eql_region <= 0)
+    idata->props->set_i("eql_region", itmp[0]);
+    if (itmp[0] <= 0)
       {
         bs_throw_exception (boost::format ("Error in %s: number of equilibrium regions in %s must be positive")
           % reader->get_prefix () % keyword);
       }
 
-    idata->equil->resize(EQUIL_TOTAL * idata->eql_region); //!TODO:EQUIL_TOTAL instead of 3
+    idata->equil->resize(EQUIL_TOTAL * itmp[0]); //!TODO:EQUIL_TOTAL instead of 3
 
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::TABDIMS_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::TABDIMS_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     char buf[CHAR_BUF_LEN] = {0};
     char *strt = 0, *end_ptr = 0;
     sp_idata_t idata (params.data, bs_dynamic_cast ());
+    std::vector<t_int> itmp;
+    itmp.resize(4);
 
     reader->read_line (buf, CHAR_BUF_LEN);
     // read number of saturation tables
     strt = buf;
-    scanf_u (strt, &end_ptr, &idata->sat_region);
+    scanf_u (strt, &end_ptr, &itmp[1]);
     //if (reader->)
     //  {
     //    out_s << "Error in " << reader->get_prefix() << ": can't read number of saturation tables from " << strt;
@@ -561,7 +600,7 @@ namespace blue_sky
 
     strt=end_ptr;
     // read number of PVT tables
-    scanf_u (strt, &end_ptr, &idata->pvt_region);
+    scanf_u (strt, &end_ptr, &itmp[0]);
     //if (reader->)
     //  {
     //    out_s << "Error in " << reader->get_prefix() << ": can't read number of PVT tables from " << strt;
@@ -579,7 +618,7 @@ namespace blue_sky
     //  }
     strt = end_ptr;
     // read number of FIP regions
-    scanf_u (strt, &end_ptr, &idata->fip_region);
+    scanf_u (strt, &end_ptr, &itmp[3]);
     //if (reader->)
     //  {
     //    out_s << "Error in " << reader->get_prefix() << ": can't read the maximum number of FIP regions from " << strt;
@@ -588,20 +627,19 @@ namespace blue_sky
     //  }
 
     // Allocate memory for TABDIMS
-    if (idata->eql_region < 1)
-      idata->eql_region = 1;
+    itmp[2] = idata->props->get_i ("eql_region");
 
-    idata->set_region (idata->pvt_region, idata->fip_region, idata->sat_region, idata->eql_region);
+    idata->set_region(itmp[0],itmp[1],itmp[2],itmp[3]);
 
     BOSOUT (section::read_data, level::medium) <<
     "Keyword " << reader->get_prefix() << ": reading of (" <<
-    idata->pvt_region << ", " << idata->sat_region << ", " <<
-    idata->eql_region << ", " << idata->fip_region << ") is successfully" << bs_end;
+    itmp[1] << ", " << itmp[0] << ", 2*, " <<
+    itmp[3] << ") is successfull" << bs_end;
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::MINPV_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::MINPV_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     shared_vector <double> tmp;
@@ -614,12 +652,12 @@ namespace blue_sky
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
           % reader->get_prefix() % keyword);
       }
-    idata->minimal_pore_volume=tmp[0];
+    idata->props->set_f ("minimal_pore_volume", tmp[0]);
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
   
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::MINSV_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::MINSV_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     shared_vector <double> tmp;
@@ -631,20 +669,21 @@ namespace blue_sky
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
           % reader->get_prefix() % keyword);
       }
-    idata->minimal_splice_volume=tmp[0];
+    idata->props->set_f("minimal_splice_volume", tmp[0]);
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::DENSITY_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::DENSITY_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     sp_idata_t idata (params.data, bs_dynamic_cast ());
-    sp_bs_fp_array_t density;
+    spv_float density;
+    t_long n_pvt_region = idata->props->get_i("pvt_region");
     
-    density->resize (idata->pvt_region*3);
+    density->resize (n_pvt_region * 3);
     
-    for (size_t i = 0; i < idata->pvt_region; i++)
+    for (t_int i = 0; i < n_pvt_region; i++)
       {
         if ((len = reader->read_array (keyword, *density, 3*i, 3)) != 3)
           {
@@ -666,34 +705,35 @@ namespace blue_sky
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::ROCKTAB_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::ROCKTAB_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     sp_idata_t idata (params.data, bs_dynamic_cast ());
+    t_long n_rock_region = idata->props->get_i ("rock_region");
     
-    if (idata->rock_region < 1)
+    if (n_rock_region < 1)
       {
         bs_throw_exception (boost::format ("Error in %s: keyword ROCKCOMP should be used before keyword %s")
           % reader->get_prefix () % keyword);
       }
 
-    idata->rocktab.resize (idata->rock_region);
+    idata->rocktab.resize (n_rock_region);
 
     // Read table for each of region
-    std::vector<fp_type_t> dbuf;
-    for (size_t i = 0; i < idata->rock_region; i++)
+    std::vector<t_float> dbuf;
+    for (t_int i = 0; i < n_rock_region; i++)
       {
-        std::vector <float> &p_col = idata->rocktab[i].get_column (0);
-        std::vector <float> &pvm_col = idata->rocktab[i].get_column (1);
-        std::vector <float> &tm_col = idata->rocktab[i].get_column (2);
+        std::vector <t_float> &p_col = idata->rocktab[i].get_column (0);
+        std::vector <t_float> &pvm_col = idata->rocktab[i].get_column (1);
+        std::vector <t_float> &tm_col = idata->rocktab[i].get_column (2);
 
         if ((len = reader->read_table (keyword, dbuf, 3)) < 1)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
               % reader->get_prefix () % keyword);
           }
-        idata->rocktab[i].set_num_rows (i_type_t (len));
+        idata->rocktab[i].set_num_rows (t_int (len));
         for (size_t j = 0; j < len; ++j)
           {
             p_col[j]      = dbuf[j * 3 + 0];
@@ -704,16 +744,17 @@ namespace blue_sky
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::PVTO_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::PVTO_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     int i;
     int j;
     int lj = 0;
-    fp_type_t dbuf[DOUB_BUF_LEN] = {0};
-    fp_type_t *main_data;
+    t_float dbuf[DOUB_BUF_LEN] = {0};
+    t_float *main_data;
     sp_idata_t idata (params.data, bs_dynamic_cast ());
+    t_long n_pvt_region = idata->props->get_i("pvt_region");
     
     if (!idata->pvto.size())
       {
@@ -722,7 +763,7 @@ namespace blue_sky
       }
 
     // Read table for each of region
-    for (i = 0; i < (int) idata->pvt_region; i++)
+    for (i = 0; i < n_pvt_region; i++)
       {
         lj = 0;
         char buf[CHAR_BUF_LEN] = {0};
@@ -784,11 +825,12 @@ namespace blue_sky
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::PVDO_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::PVDO_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     sp_idata_t idata (params.data, bs_dynamic_cast ());
+    t_long n_pvt_region = idata->props->get_i("pvt_region");
     
     if (!idata->pvtdo.size())
       {
@@ -797,7 +839,7 @@ namespace blue_sky
       }
 
     // Read table for each of region
-    for (size_t i = 0; i < idata->pvt_region; i++)
+    for (t_int i = 0; i < n_pvt_region; i++)
       {
         if ((len = reader->read_table (keyword, *(idata->pvtdo[i].main_data_), 3)) < 1)
           {
@@ -810,11 +852,12 @@ namespace blue_sky
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::PVTW_handler(const std::string &keyword, keyword_params_t &params)/********************************/
+  
+  void keyword_manager::PVTW_handler(const std::string &keyword, keyword_params_t &params)/********************************/
   {
     KH_READER_DEF
     sp_idata_t idata (params.data, bs_dynamic_cast ());
+    t_long n_pvt_region = idata->props->get_i("pvt_region");
     
     if (!idata->pvtw.size())
       {
@@ -823,7 +866,7 @@ namespace blue_sky
       }
 
     // Read table for each of region
-    for (size_t i = 0; i < idata->pvt_region; i++)
+    for (t_int i = 0; i < n_pvt_region; i++)
       {
         //idata->pvtw[i].main_data_.resize(4);
         if ((len = reader->read_table (keyword, *(idata->pvtw[i].main_data_), 4)) < 1)
@@ -838,18 +881,19 @@ namespace blue_sky
           }
       }
 
-    BOSOUT (section::read_data, level::medium) << "pvt_region=" << idata->pvt_region << bs_end;
+    BOSOUT (section::read_data, level::medium) << "pvt_region=" << n_pvt_region << bs_end;
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::PVDG_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::PVDG_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     sp_idata_t idata (params.data, bs_dynamic_cast ());
+    t_long n_pvt_region = idata->props->get_i("pvt_region");
 
     // Read table for each of region
-    for (size_t i = 0; i < idata->pvt_region; i++)
+    for (t_int i = 0; i < n_pvt_region; i++)
       {
         //idata->pvtg[i].main_data_.resize(DOUB_BUF_LEN);
         if ((len = reader->read_table (keyword, *(idata->pvtg[i].main_data_), 3)) < 1)
@@ -865,19 +909,20 @@ namespace blue_sky
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::ROCK_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::ROCK_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     sp_idata_t idata (params.data, bs_dynamic_cast ());
-    boost::array <fp_type_t, 2> dbuf;
-    fp_type_t *p_ref,*rock;
+    boost::array <t_float, 2> dbuf;
+    t_float *p_ref,*rock;
+    t_long n_pvt_region = idata->props->get_i("pvt_region");
     
     p_ref = &(*idata->p_ref)[0];
     rock = &(*idata->rock)[0];
 
     // Compressibility of rock
-    for (size_t i = 0; i < idata->pvt_region; ++i)
+    for (t_int i = 0; i < n_pvt_region; ++i)
       {
         if ((len = reader->read_array (keyword, dbuf)) != 2)
           {
@@ -891,12 +936,12 @@ namespace blue_sky
   }
 
 /*
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::SWOF_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::SWOF_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     typename strategy_t::item_array_t swof;
-    typedef smart_ptr <scal_3p <strategy_t>, true>	sp_scal_3p_t;
+    typedef smart_ptr <scal_3p , true>	sp_scal_3p_t;
     sp_scal_3p_t scal_3p (params.scal_3p);
     sp_idata_t idata (params.data, bs_dynamic_cast ());
 
@@ -915,12 +960,12 @@ namespace blue_sky
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::SGOF_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::SGOF_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     typename strategy_t::item_array_t sgof;
-    typedef smart_ptr <scal_3p <strategy_t>, true>	sp_scal_3p_t;
+    typedef smart_ptr <scal_3p , true>	sp_scal_3p_t;
     sp_scal_3p_t scal_3p (params.scal_3p);
     sp_idata_t idata (params.data, bs_dynamic_cast ());
 
@@ -940,13 +985,13 @@ namespace blue_sky
   }
 
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::SWFN_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::SWFN_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
 
     typename strategy_t::item_array_t swfn;
-    typedef smart_ptr <scal_3p <strategy_t>, true>	sp_scal_3p_t;
+    typedef smart_ptr <scal_3p , true>	sp_scal_3p_t;
     sp_scal_3p_t scal_3p (params.scal_3p);
     sp_idata_t idata (params.data, bs_dynamic_cast ());
 
@@ -966,12 +1011,12 @@ namespace blue_sky
   }
 
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::SGFN_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::SGFN_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     typename strategy_t::item_array_t sgfn;
-    typedef smart_ptr <scal_3p <strategy_t>, true>	sp_scal_3p_t;
+    typedef smart_ptr <scal_3p , true>	sp_scal_3p_t;
     sp_scal_3p_t scal_3p (params.scal_3p);
     sp_idata_t idata (params.data, bs_dynamic_cast ());
 
@@ -991,12 +1036,12 @@ namespace blue_sky
   }
 
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::SOF3_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::SOF3_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     typename strategy_t::item_array_t sof3;
-    typedef smart_ptr <scal_3p <strategy_t>, true>	sp_scal_3p_t;
+    typedef smart_ptr <scal_3p , true>	sp_scal_3p_t;
     sp_scal_3p_t scal_3p (params.scal_3p);
     sp_idata_t idata (params.data, bs_dynamic_cast ());
 
@@ -1016,15 +1061,15 @@ namespace blue_sky
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
   
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::SOF2_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::SOF2_handler(const std::string &keyword, keyword_params_t &params)
   {
     bs_throw_exception ("SOF2 not implemented yet!");
   }
   
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::EQUIL_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::EQUIL_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     char buf[CHAR_BUF_LEN] = {0};
@@ -1137,8 +1182,8 @@ namespace blue_sky
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::PRVD_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::PRVD_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     sp_idata_t idata (params.data, bs_dynamic_cast ());
@@ -1175,8 +1220,8 @@ namespace blue_sky
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::RSVD_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::RSVD_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     sp_idata_t idata (params.data, bs_dynamic_cast ());
@@ -1216,8 +1261,8 @@ namespace blue_sky
   }
 
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::PBVD_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::PBVD_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     sp_idata_t idata (params.data, bs_dynamic_cast ());
@@ -1257,8 +1302,8 @@ namespace blue_sky
   }
 
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::START_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::START_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     char buf[CHAR_BUF_LEN] = {0};
@@ -1278,12 +1323,12 @@ namespace blue_sky
   }
 
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::DATE_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::DATE_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     char buf[CHAR_BUF_LEN] = {0};
-    typedef event_manager <strategy_t> event_manager_t;
+    typedef event_manager  event_manager_t;
     typedef smart_ptr <event_manager_t, true>	sp_event_manager_t;
     sp_event_manager_t em (params.em, bs_dynamic_cast ());
     sp_this_t km (params.km, bs_dynamic_cast ());
@@ -1304,19 +1349,19 @@ namespace blue_sky
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::DATES_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::DATES_handler(const std::string &keyword, keyword_params_t &params)
   {
     DATE_handler(keyword, params);
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::TSTEP_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::TSTEP_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
     shared_vector <double> dtmp;
     dtmp.resize(MAX_TIME_STEPS_DEF);
-    typedef event_manager <strategy_t> event_manager_t;
+    typedef event_manager  event_manager_t;
     typedef smart_ptr <event_manager_t, true>	sp_event_manager_t;
     sp_event_manager_t em (params.em, bs_dynamic_cast ());
     sp_this_t km (params.km, bs_dynamic_cast ());
@@ -1346,25 +1391,15 @@ namespace blue_sky
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::TSTEPS_handler(const std::string &keyword, keyword_params_t &params)
+  
+  void keyword_manager::TSTEPS_handler(const std::string &keyword, keyword_params_t &params)
   {
     TSTEP_handler(keyword, params);
   }
   */
 //bs stuff
-#define KH_SPEC(NAME)\
-  template void keyword_manager <base_strategy_did>::NAME  (const std::string &keyword, keyword_params_t &params);\
-  template void keyword_manager <base_strategy_fif>::NAME  (const std::string &keyword, keyword_params_t &params);\
-  template void keyword_manager <base_strategy_dif>::NAME  (const std::string &keyword, keyword_params_t &params);\
-  template void keyword_manager <base_strategy_dld>::NAME  (const std::string &keyword, keyword_params_t &params);\
-  template void keyword_manager <base_strategy_flf>::NAME  (const std::string &keyword, keyword_params_t &params);\
-  template void keyword_manager <base_strategy_dlf>::NAME  (const std::string &keyword, keyword_params_t &params);
 
-  template keyword_manager<base_strategy_did>::~keyword_manager ();
-  template keyword_manager<base_strategy_fif>::~keyword_manager ();
-  template keyword_manager<base_strategy_dif>::~keyword_manager ();
-
+  /*
   KH_SPEC(int_array_handler)
   KH_SPEC(float_array_handler)
 //  KH_SPEC(event_handler)
@@ -1398,7 +1433,7 @@ namespace blue_sky
   KH_SPEC(PVTW_handler)
   KH_SPEC(PVDG_handler)
   KH_SPEC(ROCK_handler)
-/*  
+  
   KH_SPEC(SWOF_handler)
   KH_SPEC(SGOF_handler)
   KH_SPEC(SWFN_handler)
@@ -1414,8 +1449,9 @@ namespace blue_sky
   KH_SPEC(DATES_handler)
   KH_SPEC(TSTEP_handler)
   KH_SPEC(TSTEPS_handler)
-*/  
-  KH_SPEC(WELLDIMS_handler)
+*/
+
+//  KH_SPEC(WELLDIMS_handler)
 
   //!TODO: kill next string after debug
   //template class keyword_manager <base_strategy_di>;

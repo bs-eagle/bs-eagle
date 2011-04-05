@@ -15,26 +15,38 @@ namespace blue_sky
   /**
    * \brief pvt_water
    */
-  template <typename strategy_t>
-  class pvt_water : public pvt_base <strategy_t>
+  class pvt_water : public pvt_base 
     {
     public:
 
-      typedef strategy_t                        pvt_strategy_t;
-      typedef pvt_base <strategy_t>             base_t;
-      typedef typename base_t::item_t           item_t;
-      typedef typename base_t::index_t          index_t;
-      typedef typename base_t::index_array_t    index_array_t;
-      typedef typename base_t::item_array_t     item_array_t;
-      typedef typename base_t::input_vector_t   input_vector_t;
-      typedef typename base_t::vector_t         vector_t;
+      typedef pvt_base                          base_t;
+      typedef base_t::vector_t                  vector_t;
  
+       enum {
+         PVT_WATER_INPUT_PRESSURE = 0,
+         PVT_WATER_INPUT_FVF,
+         PVT_WATER_INPUT_COMPRESSIBILITY,
+         PVT_WATER_INPUT_VISC,
+         PVT_WATER_INPUT_VISCOSIBILITY,
+         PVT_WATER_INPUT_GPR,
+         PVT_WATER_INPUT_TOTAL
+       };  
+
+ 
+      enum {
+         PVT_WATER_PRESSURE = 0,
+         PVT_WATER_INV_FVF,
+         PVT_WATER_INV_VISC,
+         PVT_WATER_INV_VISC_FVF,
+         PVT_WATER_TOTAL
+      };
+
       /**
        * \brief store values into data
        *
        * \param seq_vector
        */
-      virtual void insert_vector (const input_vector_t &vec);
+      virtual void insert_vector (const v_double &vec);
 
       /**
        * \brief generate interpolated data
@@ -44,7 +56,7 @@ namespace blue_sky
        * \param max_p maximal value of pressure
        * \param n_intervals number of intervals
        */
-      void build (item_t atm_p, item_t min_p, item_t max_p, index_t n_intervals);
+      void build (t_double atm_p, t_double min_p, t_double max_p, t_long n_intervals);
 
       /**
        * \brief calculate interpolated value
@@ -57,9 +69,9 @@ namespace blue_sky
        * \param[out] inv_visc_fvf
        * \param[out] d_inv_visc_fvf
        */
-      virtual void calc (const item_t p, item_t  *inv_fvf, item_t *d_inv_fvf,
-                         item_t *inv_visc, item_t *d_inv_visc,
-                         item_t *inv_visc_fvf, item_t *d_inv_visc_fvf) const;
+      virtual void calc (const t_double p, t_double  *inv_fvf, t_double *d_inv_fvf,
+                         t_double *inv_visc, t_double *d_inv_visc,
+                         t_double *inv_visc_fvf, t_double *d_inv_visc_fvf) const;
 
       virtual void
       print () const;
@@ -70,17 +82,17 @@ namespace blue_sky
 
     private:
 
-      vector_t main_pressure_;
-      vector_t main_compressibility_;
-      vector_t main_fvf_;
-      vector_t main_viscosibility_;
-      vector_t main_visc_;
-      vector_t main_gpr_;
+      //vector_t main_pressure_;
+      //vector_t main_compressibility_;
+      //vector_t main_fvf_;
+      //vector_t main_viscosibility_;
+      //vector_t main_visc_;
+      //vector_t main_gpr_;
 
-      vector_t pressure_;
-      vector_t inv_fvf_;
-      vector_t inv_visc_;
-      vector_t inv_visc_fvf_;
+      //vector_t pressure_;
+      //vector_t inv_fvf_;
+      //vector_t inv_visc_;
+      //vector_t inv_visc_fvf_;
 
     public:
 

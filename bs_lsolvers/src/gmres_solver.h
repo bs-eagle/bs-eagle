@@ -18,10 +18,10 @@
 
 namespace blue_sky
   {
+  const std::string m_idx = "m_size";
   /**
   * @brief GMRES linear solver
   */
-  
   class BS_API_PLUGIN gmres_solver : public lsolver_iface
     {
 
@@ -33,7 +33,7 @@ namespace blue_sky
       typedef matrix_iface                              matrix_t;
 
       //! prop 
-      typedef prop_iface<float, int, std::string, bool> prop_t;
+      typedef prop_iface                                prop_t;
       typedef lsolver_iface                             base_t;         ///< typedef to this type. in child classes used as a short name of base class
       typedef smart_ptr<base_t, true>                   sp_base_t;      ///< short name to smart pointer to this class
       typedef smart_ptr<prop_t, true>                   sp_prop_t;      ///< short name to smart pointer to properties holder class
@@ -116,12 +116,6 @@ namespace blue_sky
       spv_double        sp_rs;
       spv_double        sp_hh;
 
-      int               tol_idx;
-      int               max_iters_idx;
-      int               final_res_idx;
-      int               iters_idx;
-      int               m_idx;
-      int               success_idx;
 
     public:
       BLUE_SKY_TYPE_DECL (gmres_solver);

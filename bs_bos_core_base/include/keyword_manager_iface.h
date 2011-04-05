@@ -7,18 +7,14 @@
 #ifndef KEYWORD_MANAGER_IFACE_H_
 #define KEYWORD_MANAGER_IFACE_H_
 
-// #include BS_FORCE_PLUGIN_IMPORT ()
-// #include "main_def.h"
-// #include BS_STOP_PLUGIN_IMPORT ()
-//
+#include "conf.h"
+
 #include <boost/shared_ptr.hpp>
 
 namespace blue_sky
 {
-  template <typename strategy_t>
   struct keyword_params //: boost::noncopyable
   {
-    typedef strategy_t                    strategy_type;
     typedef smart_ptr <objbase, true>     sp_objbase;
 
     keyword_params ()
@@ -51,10 +47,9 @@ namespace blue_sky
     sp_objbase          scal_3p;
   };
       
-  template <typename strategy_t>
   struct keyword_handler_iface
   {
-    typedef keyword_params <strategy_t> keyword_params_t;
+    typedef keyword_params keyword_params_t;
 
     virtual ~keyword_handler_iface () {}
 
@@ -63,22 +58,20 @@ namespace blue_sky
   };
 
   //! keyword_manager_iface - class-factory which contain a set of handlers for different keywords
-  template <class strategy_t>
+  
   class BS_API_PLUGIN keyword_manager_iface: public objbase
     {
     public:
       //-----------------------------------------
       //  TYPES
       //-----------------------------------------
-      typedef typename strategy_t::i_type_t             i_type_t;
-      typedef typename strategy_t::fp_storage_type_t    fp_storage_type_t;
-
-      typedef keyword_params <strategy_t>             keyword_params_t;
-      typedef keyword_handler_iface <strategy_t>      keyword_handler_iface_t;
+      
+      typedef keyword_params            keyword_params_t;
+      typedef keyword_handler_iface     keyword_handler_iface_t;
 
       typedef smart_ptr <objbase, true>               sp_objbase;
       
-      //! type of pointer to function-handler keyword_manager_iface<strategy_t>::
+      //! type of pointer to function-handler keyword_manager_iface
       typedef void (*handler_t)(const std::string &, keyword_params_t &);
       typedef boost::shared_ptr <keyword_handler_iface_t> shared_handler_t;
 
@@ -99,14 +92,14 @@ namespace blue_sky
         {
         }
 
-        keyword_handler (handler_t handle_function, i_type_t index_in_pool)
+        keyword_handler (handler_t handle_function, t_long index_in_pool)
         : handle_function (handle_function)
         , second_handle_function (0)
         , index_in_pool (index_in_pool)
         {
         }
         
-        keyword_handler (handler_t handle_function, i_type_t def_value, int *new_dimens)
+        keyword_handler (handler_t handle_function, t_int def_value, t_int *new_dimens)
           : second_handle_function (handle_function)
           , index_in_pool (-1)
           , int_def_value (def_value)
@@ -119,7 +112,7 @@ namespace blue_sky
             dimens[5] = new_dimens[5];
           }
         
-        keyword_handler (handler_t handle_function, fp_storage_type_t def_value, i_type_t *new_dimens)
+        keyword_handler (handler_t handle_function, t_float def_value, t_int *new_dimens)
           : second_handle_function (handle_function)
           , index_in_pool (-2)
           , float_def_value (def_value)
@@ -146,13 +139,13 @@ namespace blue_sky
         shared_handler_t  handle_object;            //<! alternative for handle_function
         handler_t         second_handle_function;   //<! pointer to function
         
-        i_type_t           index_in_pool;            //<! index in pool (for pooled keywords (pooled==handles by array handlers))
+        t_int           index_in_pool;            //<! index in pool (for pooled keywords (pooled==handles by array handlers))
                                                     //<! -1: insert in imap (int) with available index
                                                     //<! -2: insert in dmap (float) with available index
                                                     //<! -3: invalid_value (because 0 is valid)
-        i_type_t           int_def_value;            //<! default value (for int pooled keywords (pooled==handles by array handlers))
-        fp_storage_type_t  float_def_value;          //<! default value (for float pooled keywords (pooled==handles by array handlers))
-        int            dimens[6];                //<! dimensions of array (for pooled keywords (pooled==handles by array handlers))
+        t_int         int_def_value;            //<! default value (for int pooled keywords (pooled==handles by array handlers))
+        t_float       float_def_value;          //<! default value (for float pooled keywords (pooled==handles by array handlers))
+        t_int         dimens[6];                //<! dimensions of array (for pooled keywords (pooled==handles by array handlers))
       };
 
       
@@ -167,10 +160,10 @@ namespace blue_sky
       virtual void register_keyword(const std::string &keyword, keyword_handler handler) = 0;
       
       //! registration of active integer pool keyword in factory
-      virtual void register_i_pool_keyword(const std::string &keyword, int *dimens, i_type_t def_value, handler_t external_handler = 0) = 0;
+      virtual void register_i_pool_keyword(const std::string &keyword, int *dimens, t_int def_value, handler_t external_handler = 0) = 0;
       
       //! registration of active floating point pool keyword in factory
-      virtual void register_fp_pool_keyword(const std::string &keyword, int *dimens, fp_storage_type_t def_value, handler_t external_handler = 0) = 0;
+      virtual void register_fp_pool_keyword(const std::string &keyword, int *dimens, t_float def_value, handler_t external_handler = 0) = 0;
       
       //! registration of supported keywords in factory
       virtual void register_supported_keyword(const std::string &keyword, const std::string &provider) = 0;

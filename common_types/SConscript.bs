@@ -1,0 +1,27 @@
+import os
+Import ("*")
+
+lib_name = "common_types"
+tar_name = "common_types"
+
+env = custom_env.Clone ()
+env.Append (CPPPATH = ["include",
+    includes["bs_bos_core_base"]
+    ] + includes["kernel"])
+
+libs = ["blue_sky", "hdf5"]
+
+if (build_kind == "debug") :
+    env.AppendUnique (LIBS = list_suffix (libs, "_d"))
+    lib_name += "_d"
+elif (build_kind == "release") :
+    env.AppendUnique (LIBS = libs)
+
+common_types = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
+
+env.Alias (tar_name, common_types)
+Export ("common_types")
+
+if (env["install"] == 1) :
+    inst_tar = env.Install ("$plugins_prefix", common_types)
+    env.Alias (tar_name, inst_tar)
