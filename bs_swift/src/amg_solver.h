@@ -11,6 +11,9 @@
 
 #include "bcsr_amg_matrix_iface.h"
 #include "amg_solver_iface.h"
+#include "amg_smbuilder_iface.h"
+#include "amg_coarse_iface.h"
+#include "amg_pbuild_iface.h"
 
 namespace blue_sky
   {
@@ -27,12 +30,18 @@ namespace blue_sky
       typedef matrix_iface                              matrix_t;
       typedef bcsr_amg_matrix_iface                     bcsr_t;
       typedef std::vector<spv_long>                     spv_long_vec;   ///< vector of smart pointers to vector<long>
+
       //! prop
       typedef prop_iface                                prop_t;
       typedef lsolver_iface                             base_t;         ///< typedef to this type. in child classes used as a short name of base class
       typedef smart_ptr<base_t, true>                   sp_base_t;      ///< short name to smart pointer to this class
       typedef smart_ptr<prop_t, true>                   sp_prop_t;      ///< short name to smart pointer to properties holder class
 
+      typedef amg_smbuilder_iface                       smbuild_t;
+      typedef amg_coarse_iface                          coarse_t;
+      typedef amg_pbuild_iface                          pbuild_t;
+
+      //!
       typedef smart_ptr<matrix_t, true>                 sp_matrix_t;    ///< short name to smart pointer on matrix_t
       typedef smart_ptr<bcsr_t, true>                   sp_bcsr_t;      ///< short name to smart pointer on matrix_t
       typedef std::vector<sp_bcsr_t>                    sp_bcsr_t_vec;  ///< vector of smart pointers to bcsr_amg_matrix_iface
@@ -78,6 +87,45 @@ namespace blue_sky
           return prop->get_i (iters_idx);
         }
 
+      void set_strength_type (int level, int type)
+        {
+          strength_type->resize (level);
+          (*strength_type)[level] = type;
+        }
+
+      void set_coarse_type (int level, int type)
+        {
+          coarse_type->resize (level);
+          (*coarse_type)[level] = type;
+        }
+
+      void set_interp_type (int level, int type)
+        {
+          interp_type->resize (level);
+          (*interp_type)[level] = type;
+        }
+
+      int get_strength_type (int level)
+        {
+          if (strength_type->empty ())
+            return 0;
+          return (level < strength_type->size ()) ? (*strength_type)[level] : (*strength_type)[strength_type->size () - 1];
+        }
+
+      int get_coarse_type (int level)
+        {
+          if (coarse_type->empty ())
+            return 0;
+          return (level < coarse_type->size ()) ? (*coarse_type)[level] : (*coarse_type)[coarse_type->size () - 1];
+        }
+
+      int get_interp_type (int level)
+        {
+          if (interp_type->empty ())
+            return 0;
+          return (level < interp_type->size ()) ? (*interp_type)[level] : (*interp_type)[interp_type->size () - 1];
+        }
+
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual std::string py_str () const
         {
@@ -105,6 +153,9 @@ namespace blue_sky
       sp_base_t             prec;         //!< pointer to the preconditioner
       sp_prop_t             prop;         //!< properties for solvers
       spv_long_vec          cf;           //!< CF markers
+      spv_int               strength_type;//!<
+      spv_int               coarse_type;  //!<
+      spv_int               interp_type;  //!<
 
       sp_bcsr_t_vec A;        //!< coarse level matrices vector
       sp_bcsr_t_vec S;        //!< coarse level strength matrices vector

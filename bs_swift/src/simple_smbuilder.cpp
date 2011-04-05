@@ -1,27 +1,27 @@
-/** 
+/**
  * @file simple_smbuilder.cpp
- * @brief 
- * @author 
- * @version 
+ * @brief
+ * @author
+ * @version
  * @date 2010-03-09
  */
 #include "simple_smbuilder.h"
 
 namespace blue_sky
 {
-  
-  simple_smbuilder::simple_smbuilder (bs_type_ctor_param) 
+
+  simple_smbuilder::simple_smbuilder (bs_type_ctor_param)
                         : amg_smbuilder_iface ()
     {
     }
-  
+
   simple_smbuilder::simple_smbuilder (const this_t & /*src*/) : bs_refcounter ()
      {
      }
-  
-   int 
-  simple_smbuilder::build (sp_bcsr_t a_matrix, 
-                                   t_double strength_threshold, 
+
+  int
+  simple_smbuilder::build (sp_bcsr_t a_matrix,
+                                   t_double strength_threshold,
                                    t_double max_row_sum,
                                    spv_long sp_s_markers) const
     {

@@ -14,9 +14,11 @@ namespace blue_sky
 {
     //! constructor
     amg_solver::amg_solver (bs_type_ctor_param)
-                : amg_solver_iface(),
-                cf (BS_KERNEL.create_object (v_long::bs_type ()))
+                : amg_solver_iface ()
     {
+      strength_type = BS_KERNEL.create_object (v_int::bs_type ());
+      coarse_type   = BS_KERNEL.create_object (v_int::bs_type ());
+      interp_type   = BS_KERNEL.create_object (v_int::bs_type ());
       //
       A.reserve (AMG_N_LEVELS_RESERVE);
       S.reserve (AMG_N_LEVELS_RESERVE);
@@ -107,6 +109,7 @@ namespace blue_sky
 
       t_long n = matrix->get_n_rows ();
       t_long nb = matrix->get_n_block_size ();
+      int n_levels;
 
       // matrix on first level
       A.push_back (matrix);
@@ -116,26 +119,41 @@ namespace blue_sky
           sp_bcsr_t s_matrix = BS_KERNEL.create_object ("bcsr_matrix");
           BS_ASSERT (s_matrix);
 
-          s_matrix->init (n, n, nb, 20);
+          s_matrix->init (n, n, nb, 0);
           S.push_back (s_matrix);
+/*
+          smbuild_t s_builder;
+          if (get_strength_type (level) == 0)
+            {
+               s_builder = BS_KERNEL.create_object (simple_smbuilder::bs_type ());
+            }
+*/
+          //s_builder->build (matrix, t_double strength_threshold, t_double max_row_sum,
+          //                          spv_long sp_s_markers);
 
           spv_long cf_markers = BS_KERNEL.create_object (v_long::bs_type ());
           cf.push_back (cf_markers);
-          //S[level]->init(10,10,1,10);
 
           // initialize next level matrix
           sp_bcsr_t a_matrix = BS_KERNEL.create_object ("bcsr_matrix");
           BS_ASSERT (a_matrix);
           A.push_back (a_matrix);
 
-          //A[level]->init(10,10,1,15);
           std::cout<<"AMG level = "<<level<<"\n";
           if (level > 2)
             {
+              n_levels = level;
               break;
             }
         }
-
+/*
+      for (int level = 0; level < n_levels; ++level)
+        {
+          std::cout<<"AMG level = "<<level<<
+          " S_n = "<<S[level]->get_n_rows ()<<
+          " S_nnz = "<<S[level]->get_n_non_zeros ()<<"\n";
+        }
+*/
       return 0;
     }
 
