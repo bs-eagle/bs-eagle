@@ -7,6 +7,7 @@
  */
 
 #include "amg_solver.h"
+#include "simple_smbuilder.h"
 
 #define AMG_N_LEVELS_RESERVE 10
 
@@ -21,8 +22,8 @@ namespace blue_sky
       interp_type   = BS_KERNEL.create_object (v_int::bs_type ());
       //
       A.reserve (AMG_N_LEVELS_RESERVE);
-      S.reserve (AMG_N_LEVELS_RESERVE);
       P.reserve (AMG_N_LEVELS_RESERVE);
+      s.reserve (AMG_N_LEVELS_RESERVE);
       cf.reserve (AMG_N_LEVELS_RESERVE);
     }
 
@@ -116,20 +117,20 @@ namespace blue_sky
 
       for (int level = 0;;++level)
         {
-          sp_bcsr_t s_matrix = BS_KERNEL.create_object ("bcsr_matrix");
-          BS_ASSERT (s_matrix);
+          spv_long sp_s_markers = BS_KERNEL.create_object (v_long::bs_type ());
+          BS_ASSERT (sp_s_markers);
 
-          s_matrix->init (n, n, nb, 0);
-          S.push_back (s_matrix);
-/*
-          smbuild_t s_builder;
+          sp_smbuild_t s_builder;
           if (get_strength_type (level) == 0)
             {
+               //simple_smbuilder s_builder;
                s_builder = BS_KERNEL.create_object (simple_smbuilder::bs_type ());
             }
-*/
-          //s_builder->build (matrix, t_double strength_threshold, t_double max_row_sum,
-          //                          spv_long sp_s_markers);
+          t_double strength_threshold = 0.25;
+          t_double max_row_sum = 0.01;
+
+          s_builder->build (matrix, strength_threshold, max_row_sum, sp_s_markers);
+          s.push_back (sp_s_markers);
 
           spv_long cf_markers = BS_KERNEL.create_object (v_long::bs_type ());
           cf.push_back (cf_markers);

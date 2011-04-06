@@ -40,6 +40,9 @@ namespace blue_sky
       typedef amg_smbuilder_iface                       smbuild_t;
       typedef amg_coarse_iface                          coarse_t;
       typedef amg_pbuild_iface                          pbuild_t;
+      typedef smart_ptr<smbuild_t, true>                sp_smbuild_t;
+      typedef smart_ptr<coarse_t, true>                 sp_coarse_t;
+      typedef smart_ptr<pbuild_t, true>                 sp_pbuild_t;
 
       //!
       typedef smart_ptr<matrix_t, true>                 sp_matrix_t;    ///< short name to smart pointer on matrix_t
@@ -152,13 +155,14 @@ namespace blue_sky
     protected:
       sp_base_t             prec;         //!< pointer to the preconditioner
       sp_prop_t             prop;         //!< properties for solvers
+      spv_long_vec          s;            //!< S markers
       spv_long_vec          cf;           //!< CF markers
+
       spv_int               strength_type;//!<
       spv_int               coarse_type;  //!<
       spv_int               interp_type;  //!<
 
       sp_bcsr_t_vec A;        //!< coarse level matrices vector
-      sp_bcsr_t_vec S;        //!< coarse level strength matrices vector
       sp_bcsr_t_vec P;        //!< coarse level prolongation matrices vector
 
       BLUE_SKY_TYPE_DECL (amg_solver);
