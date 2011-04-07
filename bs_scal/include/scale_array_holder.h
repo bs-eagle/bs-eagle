@@ -225,7 +225,7 @@ private:
       void set_krp (const array_t &krp_)
         {
           if (krp_.size ())
-            data_pool->add_col_vector (krp, "KRP", pcp_);
+            data_pool->add_col_vector (krp, "KRP", krp_);
         }
 
       template <typename array_t>
