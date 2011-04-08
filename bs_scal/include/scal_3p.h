@@ -142,7 +142,7 @@ namespace blue_sky
       void
       init (bool is_w, bool is_g, bool is_o, 
         const phase_d_t &phase_d, const phase_d_t &sat_d,
-        RPO_MODEL_ENUM rpo_model);
+        RPO_MODEL_ENUM rpo_model, bool is_scalecrs_ = false);
 
       void
       set_water_jfunction (sp_jfunction_t jfunc);

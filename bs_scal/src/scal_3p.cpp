@@ -29,6 +29,18 @@ namespace blue_sky
   scale_array_holder::scale_array_holder (bs_type_ctor_param param /* = NULL */)
   {
     data.resize (1);
+    data_pool = BS_KERNEL.create_object ("float_type_table");
+    data_pool->init (keyword_total);
+    
+    data_pool->set_col_name (socr, "SOCR");
+    data_pool->set_col_name (scr, "SCR");
+    data_pool->set_col_name (su, "SU");
+    data_pool->set_col_name (sl, "SL");
+    data_pool->set_col_name (pcp, "PCP");
+    data_pool->set_col_name (krp, "KRP");
+    data_pool->set_col_name (krop, "KROP");
+    data_pool->set_col_name (krpr, "KRPR");
+    data_pool->set_col_name (krorp, "KRORP");
   }
 
   scale_array_holder::scale_array_holder (const this_t& s)
@@ -60,29 +72,15 @@ namespace blue_sky
     BOSOUT (section::scal, level::debug) << boost::format ("krp_min: {%d} krop: {%d}") % info.Krp_min_greater_zero % info.Krop_min_greater_zero << bs_end;
 #endif
 
-    // replace calc_krorp and calc_kpr
-    item_t phase_sat = 0;
-    item_t oil_sat = 0;
-
-    using namespace scal::data_placement;
-    if (type == spof)
-      {
-        phase_sat = is_water ? 1.0 - info.sorp : 1.0 - info.sorp - 0;  // TODO: SPOF_SATURATION
-        oil_sat   = is_water ? 1.0 - info.spr : 1.0 - info.spr - 0; // TODO: SPOF_SATURATION
-      }
-    else if (type == spfn_sof3 || type == sof3_spfn)
-      {
-        phase_sat = is_water ? 1.0 - info.sorp : 1.0 - info.sorp - 0;  // TODO: SPFN_SATURATION
-        oil_sat   = is_water ? 1.0 - info.spr : 1.0 - info.spr - 0; // TODO: SPFN_SATURATION
-      }
-
-    interpolate (region.Sp, region.Krp, phase_sat, info.kpr, std::less <item_t> ());
-    interpolate (region.So, region.Krop, oil_sat, info.krorp, std::less <item_t> ());
-
-    if (is_water)
+    if (is_water)  // water-oil system
       {
         info.pcp_max = fabs (region.Pcp.front ());
       }
+    else // gas-oil system
+      {
+        info.pcp_max = fabs (region.Pcp.back ());
+      }
+       
   }
 
   void
@@ -358,13 +356,14 @@ namespace blue_sky
     scal_3p_impl (const sp_scale_array_holder_t &water_scale, const sp_scale_array_holder_t &gas_scale, 
       const sp_scal_2p_data_holder_t &water_data, const sp_scal_2p_data_holder_t &gas_data, 
       const sp_jfunction_t &water_jfunc, const sp_jfunction_t &gas_jfunc,
-      const phase_d_t &phase_d, const phase_d_t &sat_d)
+      const phase_d_t &phase_d, const phase_d_t &sat_d, const bool is_scalecrs_)
     : water_scale (water_scale),
     gas_scale (gas_scale),
     water_data (water_data),
     gas_data (gas_data),
     water_jfunc (water_jfunc),
-    gas_jfunc (gas_jfunc)
+    gas_jfunc (gas_jfunc),
+    is_scalecrs (is_scalecrs_)
     {
       BOOST_STATIC_ASSERT (phase_d_t::static_size == (size_t)FI_PHASE_TOT);
 
@@ -384,6 +383,7 @@ namespace blue_sky
 
       i_s_w = sat_d[FI_PHASE_WATER];
       i_s_g = sat_d[FI_PHASE_GAS];
+      
     }
 
     void
@@ -650,34 +650,12 @@ namespace blue_sky
       if (is_w)
         {
           BS_ASSERT (water_jfunc);
-
-          const scal_region_t &w_region = water_data->get_region (sat_reg);
-          process_capillary (cell_index, sat[i_s_w], *water_scale, w_region, perm, poro, water_jfunc, cap[i_s_w], d_cap ? &d_cap[i_s_w] : 0);
-
-          if (!water_jfunc->valid ())
-            {
-              item_t pcw_max    = w_region.get_pcp_max ();
-              item_t pcw        = water_scale->get_pcp (pcw_max) [cell_index];
-
-              if ((pcw * pcw_max) > EPS_DIFF)
-                {
-                  item_t mult   = pcw / pcw_max;
-                  cap[i_s_w]    = cap[i_s_w] * mult;
-                  if (d_cap)
-                    d_cap[i_s_w]  = d_cap[i_s_w] * mult;
-                }
-            }
-
-          if (n_phases == 2)
-            return ;
+          process_capillary (cell_index, sat[i_s_w], *water_scale, water_data->get_region (sat_reg), perm, poro, water_jfunc, cap[i_s_w], d_cap ? &d_cap[i_s_w] : 0);
         }
       if (is_g)
         {
           BS_ASSERT (gas_jfunc);
           process_capillary (cell_index, sat[i_s_g], *gas_scale, gas_data->get_region (sat_reg), perm, poro, gas_jfunc, cap[i_s_g], d_cap ? &d_cap[i_s_g] : 0);
-
-          if (n_phases == 2)
-            return ;
         }
     }
 
@@ -696,11 +674,11 @@ namespace blue_sky
           item_t sg_min = g_region.get_phase_sat_min ();
           item_t sgl = gas_scale->get_sl (sg_min) [cell_index];
 
-          region.process_2phase (cell_index, sat[i_w], sat[i_o], *water_scale, sg_min, sgl, kr, d_kr, kro, d_kro);
+          region.process_2phase (cell_index, sat[i_w], sat[i_o], *water_scale, sg_min, sgl, kr, d_kr, kro, d_kro, is_scalecrs);
         }
       else
         {
-          region.process_2phase (cell_index, sat[i_w], sat[i_o], *water_scale, 0, 0, kr, d_kr, kro, d_kro);
+          region.process_2phase (cell_index, sat[i_w], sat[i_o], *water_scale, 0, 0, kr, d_kr, kro, d_kro, is_scalecrs);
         }
     }
 
@@ -719,11 +697,11 @@ namespace blue_sky
           item_t sw_min = w_region.get_phase_sat_min ();
           item_t swl = water_scale->get_sl (sw_min) [cell_index];
 
-          region.process_2phase (cell_index, sat[i_g], sat[i_o], *gas_scale, sw_min, swl, kr, d_kr, kro, d_kro);
+          region.process_2phase (cell_index, sat[i_g], sat[i_o], *gas_scale, sw_min, swl, kr, d_kr, kro, d_kro, is_scalecrs);
         }
       else
         {
-          region.process_2phase (cell_index, sat[i_g], sat[i_o], *gas_scale, 0, 0, kr, d_kr, kro, d_kro);
+          region.process_2phase (cell_index, sat[i_g], sat[i_o], *gas_scale, 0, 0, kr, d_kr, kro, d_kro, is_scalecrs);
         }
     }
 
@@ -766,6 +744,8 @@ namespace blue_sky
           // TODO:
           kro         = krow;
           d_krow      = d_krow;
+          d_kroo      = d_krow;
+          d_krog      = d_krog;
         }
     }
 
@@ -780,7 +760,8 @@ namespace blue_sky
       process_gas   (cell_index, sat, sat_reg, krg, d_krgg, krog, d_krow);
 
       scal_region_t region = water_data->get_region (sat_reg);
-      item_t rporw = region.get_krorp ();
+      item_t rporw = region.get_krop_max ();
+      rporw = water_scale->get_krop (rporw) [cell_index];
 
       if (fabs (rporw) > EPS_DIFF)
         {
@@ -828,7 +809,7 @@ namespace blue_sky
 
     void 
     process_capillary (index_t cell_index, item_t sat, const scale_array_holder_t &scale_arrays, const scal_region_t &region,
-      const item_t *perm_array, item_t poro, const sp_jfunction_t &jfunc,
+      const item_t *perm_array, item_t poro, const sp_jfunction_t jfunc,
       item_t &cap, item_t *d_cap) const
     {
       region.process_capillary (cell_index, sat, scale_arrays, cap, d_cap);
@@ -844,13 +825,26 @@ namespace blue_sky
           if (d_cap)
             *d_cap       = *d_cap * mult;
         }
+      else  // jfunc not valid, looking for PCW or PCG
+        {
+          item_t pcp_max    = region.get_pcp_max ();
+          item_t pcp        = scale_arrays.get_pcp (pcp_max) [cell_index];
+
+          if (fabs (pcp_max) > EPS_DIFF)
+            {
+              item_t mult   = pcp / pcp_max;
+              cap = cap * mult;
+              if (d_cap)
+                *d_cap  = *d_cap * mult;
+            }
+        }  
     }
 
     void
     process_init (index_t cell_index, item_t cap, const scale_array_holder_t &scale_arrays,
       const scal_region_t &region,
       const item_t *perm_array, item_t poro, 
-      const sp_jfunction_t &jfunc,
+      const sp_jfunction_t jfunc,
       item_t &sat, item_t &pc_first, item_t &pc_last) const
     {
       BS_ASSERT (jfunc);
@@ -928,6 +922,7 @@ namespace blue_sky
     index_t i_o_w, i_o_g, i_o_o;
 
     index_t i_s_w, i_s_g;
+    bool is_scalecrs;
   };
 
   //////////////////////////////////////////////////////////////////////////
@@ -968,7 +963,7 @@ namespace blue_sky
   }
 
   void
-  scal_3p::init (bool is_w, bool is_g, bool is_o, const phase_d_t &phase_d, const phase_d_t &sat_d, RPO_MODEL_ENUM r)
+  scal_3p::init (bool is_w, bool is_g, bool is_o, const phase_d_t &phase_d, const phase_d_t &sat_d, RPO_MODEL_ENUM r, bool is_scalecrs_)
   {
     if (!water_jfunc)
       {
@@ -983,17 +978,17 @@ namespace blue_sky
     if (r == STONE2_MODEL)
       {
         if (is_w && is_g && is_o)
-          impl_ = new scal_3p_impl <true, true, true, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <true, true, true, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d, is_scalecrs_);
         else if (is_w && is_o)
-          impl_ = new scal_3p_impl <true, false, true, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <true, false, true, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d, is_scalecrs_);
         else if (is_g && is_o)
-          impl_ = new scal_3p_impl <false, true, true, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <false, true, true, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d, is_scalecrs_);
         else if (is_w)
-          impl_ = new scal_3p_impl <true, false, false, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <true, false, false, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d, is_scalecrs_);
         else if (is_g)
-          impl_ = new scal_3p_impl <false, true, false, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <false, true, false, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d, is_scalecrs_);
         else if (is_o)
-          impl_ = new scal_3p_impl <false, false, true, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <false, false, true, STONE2_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d, is_scalecrs_);
         else
           {
             bs_throw_exception ("Unkown phase value");
@@ -1002,17 +997,17 @@ namespace blue_sky
     else
       {
         if (is_w && is_g && is_o)
-          impl_ = new scal_3p_impl <true, true, true, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <true, true, true, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d, is_scalecrs_);
         else if (is_w && is_o)
-          impl_ = new scal_3p_impl <true, false, true, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <true, false, true, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d, is_scalecrs_);
         else if (is_g && is_o)
-          impl_ = new scal_3p_impl <false, true, true, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <false, true, true, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d, is_scalecrs_);
         else if (is_w)
-          impl_ = new scal_3p_impl <true, false, false, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <true, false, false, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d, is_scalecrs_);
         else if (is_g)
-          impl_ = new scal_3p_impl <false, true, false, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <false, true, false, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d, is_scalecrs_);
         else if (is_o)
-          impl_ = new scal_3p_impl <false, false, true, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d);
+          impl_ = new scal_3p_impl <false, false, true, RPO_DEFAULT_MODEL> (water_scale, gas_scale, water_data, gas_data, water_jfunc, gas_jfunc, phase_d, sat_d, is_scalecrs_);
         else
           {
             bs_throw_exception ("Unkown phase value");

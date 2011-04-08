@@ -18,7 +18,7 @@ namespace blue_sky
 
       struct separate_scale_vectors_t
         {
-          typedef shared_vector <float> vector_t;
+          typedef shared_vector <t_float> vector_t;
 
           enum array_name
           {

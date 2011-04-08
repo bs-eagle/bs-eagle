@@ -46,6 +46,12 @@ namespace blue_sky
     STONE2_MODEL
   };
 
+  enum SCALECRS_ENUM
+  {
+    SCALECRS_NO = 0,
+    SCALECRS_YES
+  };
+  
   enum PHASE_ENUM
   {
     PHASE_NULL		= 0,
