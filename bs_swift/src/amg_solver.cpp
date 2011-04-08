@@ -7,10 +7,6 @@
  */
 
 #include "amg_solver.h"
-#include "simple_smbuilder.h"
-#include "pmis2_coarse.h"
-#include "standart2_pbuild.h"
-#include "bcsr_amg_matrix_iface.h"
 
 #define AMG_N_LEVELS_RESERVE 10
 
@@ -33,9 +29,11 @@ namespace blue_sky
       smbuilder.resize (1);
       coarser.resize (1);
       pbuilder.resize (1);
-      smbuilder[0] = BS_KERNEL.create_object (simple_smbuilder::bs_type ());
-      coarser[0] = BS_KERNEL.create_object (pmis2_coarse::bs_type ());
-      pbuilder[0] = BS_KERNEL.create_object (standart2_pbuild::bs_type ());
+      smbuilder[0] = BS_KERNEL.create_object ("simple_smbuilder");
+      coarser[0] = BS_KERNEL.create_object ("pmis2_coarse");
+      pbuilder[0] = BS_KERNEL.create_object ("standart2_pbuild");
+
+      lu_solver = BS_KERNEL.create_object ("blu_solver");
     }
 
     //! copy constructor
@@ -75,6 +73,8 @@ namespace blue_sky
                               std::string ("strength_threshold"));
         prop->add_property_f (0.01, max_row_sum_idx,
                               std::string ("max_row_sum"));
+        prop->add_property_i (100,n_last_level_points_idx,
+                              std::string ("n_last_level_points"));
       }
 
     int amg_solver::solve (sp_matrix_t matrix, spv_double sp_rhs, spv_double sp_sol)
@@ -104,8 +104,10 @@ namespace blue_sky
     {
       //init amg props
       BS_ASSERT (prop);
-      t_double strength_threshold = get_strength_threshold ();
-      t_double max_row_sum = get_max_row_sum ();
+      const t_double strength_threshold = get_strength_threshold ();
+      const t_double max_row_sum = get_max_row_sum ();
+      const t_long n_last_level_points = get_n_last_level_points ();
+      const t_long max_connections = 0;//!
       const bool update = false;//!
 
       if (!matrix_)
@@ -129,7 +131,6 @@ namespace blue_sky
         }
 
       t_long n = matrix->get_n_rows ();
-      t_long nb = matrix->get_n_block_size ();
       int n_levels;
 
       // matrix on first level
@@ -137,6 +138,13 @@ namespace blue_sky
 
       for (int level = 0;;++level)
         {
+          std::cout<<"AMG level = "<<level<<" n_rows = "<< n<<"\n";
+
+          if (n <= n_last_level_points)
+            {
+              return lu_solver->setup (matrix);
+            }
+
           //init tools
           sp_smbuild_t s_builder = get_smbuilder (level);
           sp_coarse_t  coarser   = get_coarser   (level);
@@ -153,19 +161,22 @@ namespace blue_sky
           spv_long sp_cf_markers = BS_KERNEL.create_object (v_long::bs_type ());
           BS_ASSERT (sp_cf_markers);
           cf.push_back (sp_cf_markers);
-          spv_double wksp;//!
+          spv_double sp_measure = BS_KERNEL.create_object (v_double::bs_type ());
+          BS_ASSERT (sp_measure);
 
-          coarser->build (matrix, wksp, sp_cf_markers, sp_s_markers);
-          t_long n_coarse_size = 0;//!
+          t_long n_coarse_size = coarser->build (matrix, sp_measure, sp_cf_markers, sp_s_markers);
 
-
+          if (n_coarse_size == n || n_coarse_size < 1)
+            {
+              n_levels = level;
+              break;
+            }
 
           // build prolongation (interpolation) matrix
           sp_bcsr_t sp_p_matrix = BS_KERNEL.create_object ("bcsr_matrix");
           BS_ASSERT (sp_p_matrix);
           p.push_back (sp_p_matrix);
 
-          const t_long max_connections = 0;//!
           p_builder->build (matrix, n_coarse_size, max_connections,
                             sp_cf_markers, sp_s_markers, sp_p_matrix);
 
@@ -182,12 +193,7 @@ namespace blue_sky
           a_matrix->triple_matrix_product (r_matrix, matrix, sp_p_matrix, update);
           matrix = a_matrix;
 
-          std::cout<<"AMG level = "<<level<<"\n";
-          if (level > 2)
-            {
-              n_levels = level;
-              break;
-            }
+
         }
 /*
       for (int level = 0; level < n_levels; ++level)

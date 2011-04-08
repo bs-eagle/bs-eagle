@@ -40,11 +40,9 @@ namespace blue_sky
       typedef amg_smbuilder_iface                       smbuild_t;
       typedef amg_coarse_iface                          coarse_t;
       typedef amg_pbuild_iface                          pbuild_t;
-
       typedef smart_ptr<smbuild_t, true>                sp_smbuild_t;
       typedef smart_ptr<coarse_t, true>                 sp_coarse_t;
       typedef smart_ptr<pbuild_t, true>                 sp_pbuild_t;
-
       typedef std::vector<sp_smbuild_t>                 vec_sp_smbuild_t;
       typedef std::vector<sp_coarse_t>                  vec_sp_coarse_t;
       typedef std::vector<sp_pbuild_t>                  vec_sp_pbuild_t;
@@ -105,6 +103,12 @@ namespace blue_sky
       virtual t_double get_max_row_sum () const
         {
           return prop->get_f (max_row_sum_idx);
+        }
+
+      //! return n_last_level_points
+      virtual t_double get_n_last_level_points() const
+        {
+          return prop->get_f (n_last_level_points_idx);
         }
 
       //! set strength matrix builder for amg level
@@ -196,6 +200,8 @@ namespace blue_sky
     protected:
       sp_base_t             prec;         //!< pointer to the preconditioner
       sp_prop_t             prop;         //!< properties for solvers
+      sp_base_t             lu_solver;    //!< LU solver for last level
+
       vec_spv_long          s;            //!< S markers
       vec_spv_long          cf;           //!< CF markers
 
