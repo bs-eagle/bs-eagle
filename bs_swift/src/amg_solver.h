@@ -102,7 +102,7 @@ namespace blue_sky
         }
 
       //! return max_row_sum
-      virtual t_double max_row_sum () const
+      virtual t_double get_max_row_sum () const
         {
           return prop->get_f (max_row_sum_idx);
         }
@@ -203,8 +203,8 @@ namespace blue_sky
       vec_sp_coarse_t       coarser;      //!<
       vec_sp_pbuild_t       pbuilder;     //!<
 
-      vec_sp_bcsr_t A;        //!< coarse level matrices vector
-      vec_sp_bcsr_t P;        //!< coarse level prolongation matrices vector
+      vec_sp_bcsr_t a;                    //!< coarse level matrices vector
+      vec_sp_bcsr_t p;                    //!< coarse level prolongation matrices vector
 
       BLUE_SKY_TYPE_DECL (amg_solver);
     };

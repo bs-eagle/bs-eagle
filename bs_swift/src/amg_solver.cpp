@@ -10,6 +10,7 @@
 #include "simple_smbuilder.h"
 #include "pmis2_coarse.h"
 #include "standart2_pbuild.h"
+#include "bcsr_amg_matrix_iface.h"
 
 #define AMG_N_LEVELS_RESERVE 10
 
@@ -20,8 +21,8 @@ namespace blue_sky
                 : amg_solver_iface ()
     {
       //
-      A.reserve (AMG_N_LEVELS_RESERVE);
-      P.reserve (AMG_N_LEVELS_RESERVE);
+      a.reserve (AMG_N_LEVELS_RESERVE);
+      p.reserve (AMG_N_LEVELS_RESERVE);
       s.reserve (AMG_N_LEVELS_RESERVE);
       cf.reserve (AMG_N_LEVELS_RESERVE);
       smbuilder.reserve (AMG_N_LEVELS_RESERVE);
@@ -101,7 +102,11 @@ namespace blue_sky
     */
     int amg_solver::setup (sp_matrix_t matrix_)
     {
+      //init amg props
       BS_ASSERT (prop);
+      t_double strength_threshold = get_strength_threshold ();
+      t_double max_row_sum = get_max_row_sum ();
+      const bool update = false;//!
 
       if (!matrix_)
         {
@@ -128,28 +133,54 @@ namespace blue_sky
       int n_levels;
 
       // matrix on first level
-      A.push_back (matrix);
+      a.push_back (matrix);
 
       for (int level = 0;;++level)
         {
+          //init tools
+          sp_smbuild_t s_builder = get_smbuilder (level);
+          sp_coarse_t  coarser   = get_coarser   (level);
+          sp_pbuild_t  p_builder = get_pbuilder  (level);
+
+          // build strength matrix (fill s_markers)
           spv_long sp_s_markers = BS_KERNEL.create_object (v_long::bs_type ());
           BS_ASSERT (sp_s_markers);
-
-          sp_smbuild_t s_builder = get_smbuilder (level);
-
-          t_double strength_threshold = 0.25;
-          t_double max_row_sum = 0.01;
-
-          s_builder->build (matrix, strength_threshold, max_row_sum, sp_s_markers);
           s.push_back (sp_s_markers);
 
-          spv_long cf_markers = BS_KERNEL.create_object (v_long::bs_type ());
-          cf.push_back (cf_markers);
+          s_builder->build (matrix, strength_threshold, max_row_sum, sp_s_markers);
+
+          // coarse (fill cf_markers)
+          spv_long sp_cf_markers = BS_KERNEL.create_object (v_long::bs_type ());
+          BS_ASSERT (sp_cf_markers);
+          cf.push_back (sp_cf_markers);
+          spv_double wksp;//!
+
+          coarser->build (matrix, wksp, sp_cf_markers, sp_s_markers);
+          t_long n_coarse_size = 0;//!
+
+
+
+          // build prolongation (interpolation) matrix
+          sp_bcsr_t sp_p_matrix = BS_KERNEL.create_object ("bcsr_matrix");
+          BS_ASSERT (sp_p_matrix);
+          p.push_back (sp_p_matrix);
+
+          const t_long max_connections = 0;//!
+          p_builder->build (matrix, n_coarse_size, max_connections,
+                            sp_cf_markers, sp_s_markers, sp_p_matrix);
 
           // initialize next level matrix
           sp_bcsr_t a_matrix = BS_KERNEL.create_object ("bcsr_matrix");
           BS_ASSERT (a_matrix);
-          A.push_back (a_matrix);
+          a.push_back (a_matrix);
+
+          sp_bcsr_t r_matrix = BS_KERNEL.create_object ("bcsr_matrix");
+          BS_ASSERT (r_matrix);
+
+          r_matrix->build_transpose (sp_p_matrix, 0, 0, 0);
+
+          a_matrix->triple_matrix_product (r_matrix, matrix, sp_p_matrix, update);
+          matrix = a_matrix;
 
           std::cout<<"AMG level = "<<level<<"\n";
           if (level > 2)

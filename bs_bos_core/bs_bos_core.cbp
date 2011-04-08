@@ -6,7 +6,6 @@
 		<Option makefile_is_custom="1" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="bs_swift/src/;" />
 		<Build>
 			<Target title="debug">
 				<Option platforms="Unix;" />
@@ -170,9 +169,6 @@
 		<Unit filename="include/wellbore_density_calc.h" />
 		<Unit filename="include/wells_common_const.h" />
 		<Unit filename="include/wells_compute_connection_factors.h" />
-		<Unit filename="py_amg_solver_iface.cpp">
-			<Option virtualFolder="bs_swift/src/" />
-		</Unit>
 		<Unit filename="src/boost_array_adapter.h" />
 		<Unit filename="src/calc_equil.cpp" />
 		<Unit filename="src/calc_model.cpp" />
@@ -296,11 +292,9 @@
 		<Unit filename="../bs_mtx/src/py_mbcsr_matrix.cpp" />
 		<Unit filename="../bs_mtx/src/py_mbcsr_matrix.h" />
 		<Unit filename="../bs_swift/include/amg_coarse_iface.h" />
-		<Unit filename="../bs_swift/include/amg_level_iface.h" />
 		<Unit filename="../bs_swift/include/amg_pbuild_iface.h" />
 		<Unit filename="../bs_swift/include/amg_smbuilder_iface.h" />
 		<Unit filename="../bs_swift/include/amg_solver_iface.h" />
-		<Unit filename="../bs_swift/src/amg_level.h" />
 		<Unit filename="../bs_swift/src/amg_solver.cpp" />
 		<Unit filename="../bs_swift/src/amg_solver.h" />
 		<Unit filename="../bs_swift/src/cljp2_coarse.cpp" />

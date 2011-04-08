@@ -1,6 +1,6 @@
-/** 
+/**
  * @file bcsr.cpp
- * @brief 
+ * @brief
  * @author Oleg Borschuk
  * @date 2009-08-18
  */
@@ -13,7 +13,7 @@ using namespace boost::python;
 
 namespace blue_sky
 {
-  bcsr::bcsr (bs_type_ctor_param) 
+  bcsr::bcsr (bs_type_ctor_param)
         : bcsr_amg_matrix_iface (),
         values (BS_KERNEL.create_object (v_float::bs_type ())),
         cols_ind (BS_KERNEL.create_object (v_long::bs_type ())),
@@ -41,7 +41,7 @@ namespace blue_sky
     t_float *val = &(*values)[0];
     t_double *v = &(*v_)[0];
     t_double *r = &(*r_)[0];
-    
+
     //BS_ASSERT (v.size ());
     //BS_ASSERT (r.size ());
     //BS_ASSERT (v.size () >= r.size ()) (v.size ()) (r.size ());
@@ -72,10 +72,10 @@ namespace blue_sky
   }
 
   int
-  bcsr::calc_lin_comb (t_double alpha, 
-                       t_double beta, 
+  bcsr::calc_lin_comb (t_double alpha,
+                       t_double beta,
                        spv_double u_,
-                       spv_double v_, 
+                       spv_double v_,
                        spv_double r_) const
   {
     static const t_double eps = t_double (1.0e-12);
@@ -126,11 +126,11 @@ namespace blue_sky
     return r_code;
   }
 
-  t_double 
-  bcsr::get_allocated_memory_in_mbytes () const 
+  t_double
+  bcsr::get_allocated_memory_in_mbytes () const
     {
       t_double d = 0;
-      
+
       d += sizeof (this);
       d += sizeof (t_float) * values->size ();
       d += sizeof (t_long) * rows_ptr->size ();
@@ -140,7 +140,7 @@ namespace blue_sky
     }
 
   int
-  bcsr::init (const t_long new_n_rows, 
+  bcsr::init (const t_long new_n_rows,
               const t_long new_n_cols,
               const t_long new_n_block_size,
               const t_long new_n_non_zeros)
@@ -167,7 +167,7 @@ namespace blue_sky
       return -1;
 
     n_rows = new_n_rows;
-    
+
     rows_ptr->resize (n_rows + 1);
     memset (&(*rows_ptr)[0], 0, sizeof (t_long) * (n_rows + 1));
 
@@ -188,7 +188,7 @@ namespace blue_sky
   }
 
   int
-  bcsr::alloc_values (const t_long new_n_non_zeros, 
+  bcsr::alloc_values (const t_long new_n_non_zeros,
                                const t_long new_n_block_size)
   {
     t_long b_sqr = new_n_block_size * new_n_block_size;
@@ -229,8 +229,8 @@ namespace blue_sky
     }
 
   int
-  bcsr::init_struct (const t_long new_n_rows, 
-                     const t_long new_n_cols, 
+  bcsr::init_struct (const t_long new_n_rows,
+                     const t_long new_n_cols,
                      const t_long new_n_non_zeros)
 {
   if (new_n_cols < 1)
@@ -244,12 +244,12 @@ namespace blue_sky
 }
 
   int
-  bcsr::build_transpose_struct (sp_bcsr_matrix_iface_t m, 
+  bcsr::build_transpose_struct (sp_bcsr_matrix_iface_t m,
                                 const t_long rows_offset,
-                                const t_long cols_offset, 
+                                const t_long cols_offset,
                                 const t_long new_n_rows)
   {
-    
+
     t_long i,j;
     t_long row_ind, j1, j2;
     t_long nnz;
@@ -314,12 +314,12 @@ namespace blue_sky
   }
 
   int
-  bcsr::build_transpose (sp_bcsr_matrix_iface_t m, 
+  bcsr::build_transpose (sp_bcsr_matrix_iface_t m,
                          const t_long rows_offset,
-                         const t_long cols_offset, 
+                         const t_long cols_offset,
                          const t_long new_n_rows)
   {
-    
+
     t_long i,j;
     t_long row_ind, j1, j2;
     t_long nnz;
@@ -386,7 +386,7 @@ namespace blue_sky
     return 0;
   }
   int
-  bcsr::triple_matrix_product (sp_bcsr_matrix_iface_t r_matrix, sp_bcsr_matrix_iface_t a_matrix, 
+  bcsr::triple_matrix_product (sp_bcsr_matrix_iface_t r_matrix, sp_bcsr_matrix_iface_t a_matrix,
                                sp_bcsr_matrix_iface_t p_matrix, const bool update)
   {
     t_long i, i1, i2, j;
@@ -400,19 +400,19 @@ namespace blue_sky
     t_long *c_ind;
     t_float *v_ptr;
 
-    t_long *r_rows_ptr = &(*(r_matrix->get_rows_ptr ()))[0]; 
-    t_long *r_cols_ind = &(*(r_matrix->get_cols_ind ()))[0]; 
-    t_float *r_values   = &(*(r_matrix->get_values ()))[0]; 
+    t_long *r_rows_ptr = &(*(r_matrix->get_rows_ptr ()))[0];
+    t_long *r_cols_ind = &(*(r_matrix->get_cols_ind ()))[0];
+    t_float *r_values   = &(*(r_matrix->get_values ()))[0];
     t_long  r_n_rows   = r_matrix->get_n_rows ();
 
-    t_long *a_rows_ptr = &(*(a_matrix->get_rows_ptr ()))[0]; 
-    t_long *a_cols_ind = &(*(a_matrix->get_cols_ind ()))[0]; 
-    t_float *a_values   = &(*(a_matrix->get_values ()))[0]; 
+    t_long *a_rows_ptr = &(*(a_matrix->get_rows_ptr ()))[0];
+    t_long *a_cols_ind = &(*(a_matrix->get_cols_ind ()))[0];
+    t_float *a_values   = &(*(a_matrix->get_values ()))[0];
     t_long  a_n_cols   = a_matrix->get_n_cols ();
 
-    t_long *p_rows_ptr = &(*(p_matrix->get_rows_ptr ()))[0]; 
-    t_long *p_cols_ind = &(*(p_matrix->get_cols_ind ()))[0]; 
-    t_float *p_values   = &(*(p_matrix->get_values ()))[0]; 
+    t_long *p_rows_ptr = &(*(p_matrix->get_rows_ptr ()))[0];
+    t_long *p_cols_ind = &(*(p_matrix->get_cols_ind ()))[0];
+    t_float *p_values   = &(*(p_matrix->get_values ()))[0];
     t_long  p_n_cols   = p_matrix->get_n_cols ();
     t_long block_size  = a_matrix->get_n_block_size ();
 
@@ -682,8 +682,6 @@ namespace blue_sky
             }
         }
     } // end parallel
-    // There is no need in transposed matrix now
-
 
     return 0;
   }
