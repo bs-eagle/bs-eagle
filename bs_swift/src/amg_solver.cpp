@@ -8,6 +8,8 @@
 
 #include "amg_solver.h"
 #include "simple_smbuilder.h"
+#include "pmis2_coarse.h"
+#include "standart2_pbuild.h"
 
 #define AMG_N_LEVELS_RESERVE 10
 
@@ -17,14 +19,22 @@ namespace blue_sky
     amg_solver::amg_solver (bs_type_ctor_param)
                 : amg_solver_iface ()
     {
-      strength_type = BS_KERNEL.create_object (v_int::bs_type ());
-      coarse_type   = BS_KERNEL.create_object (v_int::bs_type ());
-      interp_type   = BS_KERNEL.create_object (v_int::bs_type ());
       //
       A.reserve (AMG_N_LEVELS_RESERVE);
       P.reserve (AMG_N_LEVELS_RESERVE);
       s.reserve (AMG_N_LEVELS_RESERVE);
       cf.reserve (AMG_N_LEVELS_RESERVE);
+      smbuilder.reserve (AMG_N_LEVELS_RESERVE);
+      coarser.reserve (AMG_N_LEVELS_RESERVE);
+      pbuilder.reserve (AMG_N_LEVELS_RESERVE);
+
+      // set default
+      smbuilder.resize (1);
+      coarser.resize (1);
+      pbuilder.resize (1);
+      smbuilder[0] = BS_KERNEL.create_object (simple_smbuilder::bs_type ());
+      coarser[0] = BS_KERNEL.create_object (pmis2_coarse::bs_type ());
+      pbuilder[0] = BS_KERNEL.create_object (standart2_pbuild::bs_type ());
     }
 
     //! copy constructor
@@ -59,6 +69,11 @@ namespace blue_sky
                               std::string ("Total number of used solver iterations"));
         prop->add_property_b (false, success_idx,
                               std::string ("True if solver successfully convergent"));
+        // AMG
+        prop->add_property_f (0.25, strength_threshold_idx,
+                              std::string ("strength_threshold"));
+        prop->add_property_f (0.01, max_row_sum_idx,
+                              std::string ("max_row_sum"));
       }
 
     int amg_solver::solve (sp_matrix_t matrix, spv_double sp_rhs, spv_double sp_sol)
@@ -120,12 +135,8 @@ namespace blue_sky
           spv_long sp_s_markers = BS_KERNEL.create_object (v_long::bs_type ());
           BS_ASSERT (sp_s_markers);
 
-          sp_smbuild_t s_builder;
-          if (get_strength_type (level) == 0)
-            {
-               //simple_smbuilder s_builder;
-               s_builder = BS_KERNEL.create_object (simple_smbuilder::bs_type ());
-            }
+          sp_smbuild_t s_builder = get_smbuilder (level);
+
           t_double strength_threshold = 0.25;
           t_double max_row_sum = 0.01;
 

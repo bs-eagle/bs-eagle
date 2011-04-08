@@ -29,7 +29,7 @@ namespace blue_sky
       //! matrix interface type
       typedef matrix_iface                              matrix_t;
       typedef bcsr_amg_matrix_iface                     bcsr_t;
-      typedef std::vector<spv_long>                     spv_long_vec;   ///< vector of smart pointers to vector<long>
+      typedef std::vector<spv_long>                     vec_spv_long;   ///< vector of smart pointers to vector<long>
 
       //! prop
       typedef prop_iface                                prop_t;
@@ -40,14 +40,19 @@ namespace blue_sky
       typedef amg_smbuilder_iface                       smbuild_t;
       typedef amg_coarse_iface                          coarse_t;
       typedef amg_pbuild_iface                          pbuild_t;
+
       typedef smart_ptr<smbuild_t, true>                sp_smbuild_t;
       typedef smart_ptr<coarse_t, true>                 sp_coarse_t;
       typedef smart_ptr<pbuild_t, true>                 sp_pbuild_t;
 
+      typedef std::vector<sp_smbuild_t>                 vec_sp_smbuild_t;
+      typedef std::vector<sp_coarse_t>                  vec_sp_coarse_t;
+      typedef std::vector<sp_pbuild_t>                  vec_sp_pbuild_t;
+
       //!
       typedef smart_ptr<matrix_t, true>                 sp_matrix_t;    ///< short name to smart pointer on matrix_t
       typedef smart_ptr<bcsr_t, true>                   sp_bcsr_t;      ///< short name to smart pointer on matrix_t
-      typedef std::vector<sp_bcsr_t>                    sp_bcsr_t_vec;  ///< vector of smart pointers to bcsr_amg_matrix_iface
+      typedef std::vector<sp_bcsr_t>                    vec_sp_bcsr_t;  ///< vector of smart pointers to bcsr_amg_matrix_iface
       //-----------------------------------------
       //  METHODS
       //-----------------------------------------
@@ -90,43 +95,79 @@ namespace blue_sky
           return prop->get_i (iters_idx);
         }
 
-      void set_strength_type (int level, int type)
+      //! return strength_threshold
+      virtual t_double get_strength_threshold () const
         {
-          strength_type->resize (level);
-          (*strength_type)[level] = type;
+          return prop->get_f (strength_threshold_idx);
         }
 
-      void set_coarse_type (int level, int type)
+      //! return max_row_sum
+      virtual t_double max_row_sum () const
         {
-          coarse_type->resize (level);
-          (*coarse_type)[level] = type;
+          return prop->get_f (max_row_sum_idx);
         }
 
-      void set_interp_type (int level, int type)
+      //! set strength matrix builder for amg level
+      void set_smbuilder (unsigned int level, sp_smbuild_t sp_smbuilder_iface)
         {
-          interp_type->resize (level);
-          (*interp_type)[level] = type;
+          unsigned int size = smbuilder.size ();
+          //use last smbuilder [size-1]) for [size],..,[level-1]
+          if (size <= level)
+            {
+              smbuilder.resize (level + 1);
+              for (unsigned int i = size; i < level; i++)
+                {
+                  smbuilder[i] = smbuilder[size - 1];
+                }
+            }
+          smbuilder[level] = sp_smbuilder_iface;
         }
 
-      int get_strength_type (int level)
+      //! set coarse type for amg level
+      void set_coarser (unsigned int level, sp_coarse_t sp_coarse_iface)
         {
-          if (strength_type->empty ())
-            return 0;
-          return (level < strength_type->size ()) ? (*strength_type)[level] : (*strength_type)[strength_type->size () - 1];
+          unsigned int size = coarser.size ();
+          //use last coarser [size-1]) for [size],..,[level-1]
+          if (size <= level)
+            {
+              coarser.resize (level + 1);
+              for (unsigned int i = size; i < level; i++)
+                {
+                  coarser[i] = coarser[size - 1];
+                }
+            }
+          coarser[level] = sp_coarse_iface;
         }
 
-      int get_coarse_type (int level)
+      //! set interpolation matrix builder for amg level
+      void set_pbuilder (unsigned int level, sp_pbuild_t sp_pbuilder_iface)
         {
-          if (coarse_type->empty ())
-            return 0;
-          return (level < coarse_type->size ()) ? (*coarse_type)[level] : (*coarse_type)[coarse_type->size () - 1];
+          unsigned int size = pbuilder.size ();
+          //use last pbuilder [size-1]) for [size],..,[level-1]
+          if (size <= level)
+            {
+              pbuilder.resize (level + 1);
+              for (unsigned int i = size; i < level; i++)
+                {
+                  pbuilder[i] = pbuilder[size - 1];
+                }
+            }
+          pbuilder[level] = sp_pbuilder_iface;
         }
 
-      int get_interp_type (int level)
+      sp_smbuild_t get_smbuilder (unsigned int level)
         {
-          if (interp_type->empty ())
-            return 0;
-          return (level < interp_type->size ()) ? (*interp_type)[level] : (*interp_type)[interp_type->size () - 1];
+          return (level < smbuilder.size ()) ? smbuilder[level] : smbuilder[smbuilder.size () - 1];
+        }
+
+      sp_coarse_t get_coarser (unsigned int level)
+        {
+          return (level < coarser.size ()) ? coarser[level] : coarser[coarser.size () - 1];
+        }
+
+      sp_pbuild_t get_pbuilder (unsigned int level)
+        {
+          return (level < pbuilder.size ()) ? pbuilder[level] : pbuilder[pbuilder.size () - 1];
         }
 
 #ifdef BSPY_EXPORTING_PLUGIN
@@ -155,15 +196,15 @@ namespace blue_sky
     protected:
       sp_base_t             prec;         //!< pointer to the preconditioner
       sp_prop_t             prop;         //!< properties for solvers
-      spv_long_vec          s;            //!< S markers
-      spv_long_vec          cf;           //!< CF markers
+      vec_spv_long          s;            //!< S markers
+      vec_spv_long          cf;           //!< CF markers
 
-      spv_int               strength_type;//!<
-      spv_int               coarse_type;  //!<
-      spv_int               interp_type;  //!<
+      vec_sp_smbuild_t      smbuilder;    //!<
+      vec_sp_coarse_t       coarser;      //!<
+      vec_sp_pbuild_t       pbuilder;     //!<
 
-      sp_bcsr_t_vec A;        //!< coarse level matrices vector
-      sp_bcsr_t_vec P;        //!< coarse level prolongation matrices vector
+      vec_sp_bcsr_t A;        //!< coarse level matrices vector
+      vec_sp_bcsr_t P;        //!< coarse level prolongation matrices vector
 
       BLUE_SKY_TYPE_DECL (amg_solver);
     };

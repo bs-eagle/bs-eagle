@@ -1,7 +1,7 @@
-/** 
+/**
  * @file amg_solver_iface.h
  * @brief Algebraic Multi Grid linear system solver interface file
- * @author 
+ * @author
  * @date 2009-12-07
  */
 #ifndef __AMG_SOLVER_IFACE_H
@@ -17,7 +17,10 @@
 
 namespace blue_sky
 {
-  /** 
+  const std::string strength_threshold_idx = "strength_threshold_idx";
+  const std::string max_row_sum_idx = "max_row_sum";
+
+  /**
    * @brief interface class for matrix storage and manipulation
    */
   class amg_solver_iface: public lsolver_iface
@@ -25,19 +28,19 @@ namespace blue_sky
     public:
       typedef amg_solver_iface                                  this_t;
       //! short name to smart pointer to this class
-      typedef smart_ptr<this_t, true>                           sp_this_t;              
+      typedef smart_ptr<this_t, true>                           sp_this_t;
 
       //-----------------------------------------
       //  METHODS
       //-----------------------------------------
-      
+
       //virtual const bcsr_t &get_A (int layer) const = 0;
 
       //virtual const bcsr_t &get_P (int layer) const = 0;
-      
+
       //virtual const fp_vector_type_t &get_rhs (int layer)
 
-      
+
     public:
 
     public:
