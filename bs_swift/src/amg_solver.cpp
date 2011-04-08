@@ -16,6 +16,13 @@ namespace blue_sky
     amg_solver::amg_solver (bs_type_ctor_param)
                 : amg_solver_iface ()
     {
+      prop = BS_KERNEL.create_object ("prop");
+      if (!prop)
+        {
+          bs_throw_exception ("Type (prop) not registered");
+        }
+      init_prop ();
+
       //
       a.reserve (AMG_N_LEVELS_RESERVE);
       p.reserve (AMG_N_LEVELS_RESERVE);
@@ -30,7 +37,7 @@ namespace blue_sky
       coarser.resize (1);
       pbuilder.resize (1);
       smbuilder[0] = BS_KERNEL.create_object ("simple_smbuilder");
-      coarser[0] = BS_KERNEL.create_object ("pmis2_coarse");
+      coarser[0] = BS_KERNEL.create_object ("cljp_coarse");
       pbuilder[0] = BS_KERNEL.create_object ("standart2_pbuild");
 
       lu_solver = BS_KERNEL.create_object ("blu_solver");
@@ -69,21 +76,22 @@ namespace blue_sky
         prop->add_property_b (false, success_idx,
                               std::string ("True if solver successfully convergent"));
         // AMG
-        prop->add_property_f (0.25, strength_threshold_idx,
-                              std::string ("strength_threshold"));
+        prop->add_property_f (0.75, strength_threshold_idx,
+                              std::string ("Threshold for strength matrix"));
         prop->add_property_f (0.01, max_row_sum_idx,
-                              std::string ("max_row_sum"));
-        prop->add_property_i (100,n_last_level_points_idx,
-                              std::string ("n_last_level_points"));
+                              std::string ("Row sum threshold for strength matrix"));
+        prop->add_property_i (100, n_last_level_points_idx,
+                              std::string ("Minimal number of points in coarse grid"));
       }
 
     int amg_solver::solve (sp_matrix_t matrix, spv_double sp_rhs, spv_double sp_sol)
     {
       BS_ASSERT (matrix);
+      BS_ASSERT (prop);
+
       BS_ASSERT (sp_rhs->size ());
       BS_ASSERT (sp_sol->size ());
       BS_ASSERT (sp_rhs->size () == sp_sol->size ()) (sp_rhs->size ()) (sp_sol->size ());
-      BS_ASSERT (prop);
 
       return 0;
     }
@@ -102,8 +110,10 @@ namespace blue_sky
     */
     int amg_solver::setup (sp_matrix_t matrix_)
     {
-      //init amg props
       BS_ASSERT (prop);
+      BS_ASSERT (lu_solver);
+
+      //init amg props
       const t_double strength_threshold = get_strength_threshold ();
       const t_double max_row_sum = get_max_row_sum ();
       const t_long n_last_level_points = get_n_last_level_points ();
@@ -130,56 +140,68 @@ namespace blue_sky
           bs_throw_exception ("AMG setup: Passed matrix is not square");
         }
 
-      t_long n = matrix->get_n_rows ();
       int n_levels;
-
       // matrix on first level
       a.push_back (matrix);
 
       for (int level = 0;;++level)
         {
+          t_long n = matrix->get_n_rows ();
           std::cout<<"AMG level = "<<level<<" n_rows = "<< n<<"\n";
 
           if (n <= n_last_level_points)
             {
-              return lu_solver->setup (matrix);
+              n_levels = level;
+              std::cout<<"LU...";
+              int r_code = lu_solver->setup (matrix);
+              std::cout<<"OK\n";
+              return r_code;
             }
 
           //init tools
           sp_smbuild_t s_builder = get_smbuilder (level);
           sp_coarse_t  coarser   = get_coarser   (level);
           sp_pbuild_t  p_builder = get_pbuilder  (level);
+          BS_ASSERT (s_builder);
+          BS_ASSERT (coarser);
+          BS_ASSERT (p_builder);
+          std::cout<<"strength type: "<<s_builder->py_str ()<<"\n";
+          std::cout<<"coarse   type: "<<coarser->py_str ()<<"\n";
+          std::cout<<"interp   type: "<<p_builder->py_str ()<<"\n";
 
+          std::cout<<"strength...";
           // build strength matrix (fill s_markers)
-          spv_long sp_s_markers = BS_KERNEL.create_object (v_long::bs_type ());
-          BS_ASSERT (sp_s_markers);
-          s.push_back (sp_s_markers);
+          spv_long s_markers = BS_KERNEL.create_object (v_long::bs_type ());
+          BS_ASSERT (s_markers);
+          s.push_back (s_markers);
 
-          s_builder->build (matrix, strength_threshold, max_row_sum, sp_s_markers);
+          s_builder->build (matrix, strength_threshold, max_row_sum, s_markers);
+          std::cout<<"OK\ncoarse...";
 
           // coarse (fill cf_markers)
-          spv_long sp_cf_markers = BS_KERNEL.create_object (v_long::bs_type ());
-          BS_ASSERT (sp_cf_markers);
-          cf.push_back (sp_cf_markers);
-          spv_double sp_measure = BS_KERNEL.create_object (v_double::bs_type ());
-          BS_ASSERT (sp_measure);
+          spv_long cf_markers = BS_KERNEL.create_object (v_long::bs_type ());
+          BS_ASSERT (cf_markers);
+          cf.push_back (cf_markers);
+          spv_double measure = BS_KERNEL.create_object (v_double::bs_type ());
+          BS_ASSERT (measure);
+          measure->resize (n);
 
-          t_long n_coarse_size = coarser->build (matrix, sp_measure, sp_cf_markers, sp_s_markers);
-
+          t_long n_coarse_size = coarser->build (matrix, measure, cf_markers, s_markers);
           if (n_coarse_size == n || n_coarse_size < 1)
             {
+              std::cout<<"coarse failed: n = "<<n<<" n_coarse = "<<n_coarse_size<<"\n";
               n_levels = level;
               break;
             }
-
+          std::cout<<"OK\nbuild P...";
           // build prolongation (interpolation) matrix
-          sp_bcsr_t sp_p_matrix = BS_KERNEL.create_object ("bcsr_matrix");
-          BS_ASSERT (sp_p_matrix);
-          p.push_back (sp_p_matrix);
+          sp_bcsr_t p_matrix = BS_KERNEL.create_object ("bcsr_matrix");
+          BS_ASSERT (p_matrix);
+          p.push_back (p_matrix);
 
           p_builder->build (matrix, n_coarse_size, max_connections,
-                            sp_cf_markers, sp_s_markers, sp_p_matrix);
-
+                            cf_markers, s_markers, p_matrix);
+          std::cout<<"OK\ntriple...";
           // initialize next level matrix
           sp_bcsr_t a_matrix = BS_KERNEL.create_object ("bcsr_matrix");
           BS_ASSERT (a_matrix);
@@ -188,12 +210,11 @@ namespace blue_sky
           sp_bcsr_t r_matrix = BS_KERNEL.create_object ("bcsr_matrix");
           BS_ASSERT (r_matrix);
 
-          r_matrix->build_transpose (sp_p_matrix, 0, 0, 0);
+          r_matrix->build_transpose (p_matrix, 0, 0, 0);
 
-          a_matrix->triple_matrix_product (r_matrix, matrix, sp_p_matrix, update);
+          a_matrix->triple_matrix_product (r_matrix, matrix, p_matrix, update);
           matrix = a_matrix;
-
-
+          std::cout<<"OK\n";
         }
 /*
       for (int level = 0; level < n_levels; ++level)

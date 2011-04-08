@@ -17,6 +17,9 @@
 
 namespace blue_sky
   {
+  const std::string strength_threshold_idx = "strength_threshold_idx";
+  const std::string max_row_sum_idx = "max_row_sum";
+  const std::string n_last_level_points_idx = "n_last_level_points";
 
   class BS_API_PLUGIN amg_solver : public amg_solver_iface
     {
@@ -106,9 +109,9 @@ namespace blue_sky
         }
 
       //! return n_last_level_points
-      virtual t_double get_n_last_level_points() const
+      virtual t_long get_n_last_level_points() const
         {
-          return prop->get_f (n_last_level_points_idx);
+          return prop->get_i (n_last_level_points_idx);
         }
 
       //! set strength matrix builder for amg level

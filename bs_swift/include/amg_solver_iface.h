@@ -17,10 +17,6 @@
 
 namespace blue_sky
 {
-  const std::string strength_threshold_idx = "strength_threshold_idx";
-  const std::string max_row_sum_idx = "max_row_sum";
-  const std::string n_last_level_points_idx = "n_last_level_points";
-
   /**
    * @brief interface class for matrix storage and manipulation
    */
