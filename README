@@ -25,6 +25,7 @@ To build bs-eagle you need:
  6. HDF5 library, recomnded version 1.8.3
     6.1. SZIP, recomnded version 2.1
     6.2. ZLIB, recomnded version 1.2
+7. numpy
 
 Example of BlueSky BuildSystem script placed at 
 examples/scons_env.custom and examples/scons_vars.custom.
