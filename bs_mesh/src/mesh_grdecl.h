@@ -82,7 +82,7 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     //void read_zcorn(const sp_fread_t &r);
     
     //! init arrays of properties
-    void init_props (const sp_idata_t &idata);
+    void init_props (const sp_hdm_t hdm);
 
 	//! init coord & zcorn via gen_coord_zcorn
 	void init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz);

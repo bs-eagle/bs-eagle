@@ -121,18 +121,18 @@ namespace python {
 
   PY_EXPORTER (keyword_manager_exporter, default_exporter)
     .def ("register_keyword", register_keyword <T>)
-    //.def ("register_i_pool_keyword", &T::register_i_pool_keyword)
-    //.def ("register_fp_pool_keyword", &T::py_register_fp_pool_keyword)
+    .def ("register_i_pool_keyword", &T::register_i_pool_keyword)
+    .def ("register_fp_pool_keyword", &T::py_register_fp_pool_keyword)
     .def ("register_keywords", &T::register_plugin_keywords)
     .def ("register_plugin_keywords", &T::register_plugin_keywords)
-    //.def ("list_active_keywords", &T::py_list_active_keywords)
-    //.def ("list_supported_keywords", &T::py_list_supported_keywords)
+    .def ("list_active_keywords", &T::py_list_active_keywords)
+    .def ("list_supported_keywords", &T::py_list_supported_keywords)
     .def ("is_keyword_supported", &T::is_keyword_supported)
     .def ("is_keyword_activated", &T::is_keyword_activated)
   PY_EXPORTER_END;
 
   PY_EXPORTER (keyword_params_exporter, empty_exporter)
-    .add_property ("reader", make_function (get_reader <T>))
+    .add_property ("hdm", make_function (get_reader <T>))
     //.add_property ("data",   make_function (get_data <T>))
     //.add_property ("mesh",   make_function (get_mesh <T>))
     //.add_property ("keyword_manager", make_function (get_keyword_manager <T>))
@@ -146,6 +146,10 @@ namespace python {
   export_keyword_manager ()
   {
     using namespace boost::python;
+
+    //base_exporter<keyword_manager_iface, empty_exporter>::export_class ("keyword_manager_iface");
+    class_exporter<keyword_manager, keyword_manager_iface, keyword_manager_exporter>::export_class ("keyword_manager");
+
 
     //strategy_exporter::export_base_ext <keyword_params, keyword_params_exporter, class_type::concrete_class> ("keyword_params");
 	

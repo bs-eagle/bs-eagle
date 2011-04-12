@@ -18,33 +18,34 @@ rs_mesh_base ::rs_mesh_base ()
   poro_array = 0;
   ntg_array = 0;
   multpv_array = 0;
-  darcy_constant = ph_const.darcy_constant;
+  
 }
 
 
 void
-rs_mesh_base ::init_props (const sp_idata_t &idata)
+rs_mesh_base ::init_props (const sp_hdm_t hdm)
 {
-  minpv = idata->props->get_f ("minimal_pore_volume");
-  minsv = idata->props->get_f ("minimal_splice_volume");
-  max_thickness = idata->props->get_f ("maximum_splice_thickness");
+  minpv = hdm->get_prop ()->get_f ("minimal_pore_volume");
+  minsv = hdm->get_prop ()->get_f ("minimal_splice_volume");
+  max_thickness = hdm->get_prop ()->get_f ("maximum_splice_thickness");
+  darcy_constant = hdm->get_darcy_constant ();
   
   spv_float data_array;
   spv_int sp_actnum_array;
   
-  sp_actnum_array = idata->get_i_array("ACTNUM");
+  sp_actnum_array = hdm->get_pool ()->get_i_data("ACTNUM");
   if (sp_actnum_array->size()) actnum_array = &(*sp_actnum_array)[0];
   
   n_elements = static_cast <t_long> (sp_actnum_array->size ());
   n_active_elements =  std::accumulate(sp_actnum_array->begin(), sp_actnum_array->end(),0);
   
-  data_array = idata->get_fp_array("PORO");
+  data_array = hdm->get_pool ()->get_fp_data("PORO");
   if (data_array->size()) poro_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_array("NTG");
+  data_array = hdm->get_pool ()->get_fp_data("NTG");
   if (data_array && data_array->size()) ntg_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_array("MULTPV");
+  data_array = hdm->get_pool ()->get_fp_data("MULTPV");
   if (data_array && data_array->size()) multpv_array = &(*data_array)[0];
 }
 

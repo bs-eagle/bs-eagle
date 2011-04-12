@@ -3,11 +3,11 @@
 
 #include "bs_bos_core_data_storage_stdafx.h"
 
-#include "data_manager.h"
+#include "hydrodynamic_model.h"
 #include "data_class.h"
 #include "read_class.h"
 
-#include "py_data_manager.h"
+#include "py_hydrodynamic_model.h"
 #include "py_keyword_manager.h"
 #include "py_data_class.h"
 #include "py_read_class.h"
@@ -23,7 +23,7 @@ namespace blue_sky
 
     bool res = true;
 
-    res &= BS_KERNEL.register_type (pd, data_manager::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, hydrodynamic_model::bs_type ()); BS_ASSERT (res);
 
     res &= BS_KERNEL.register_type (pd, idata::bs_type ()); BS_ASSERT (res);
     
@@ -39,7 +39,7 @@ BLUE_SKY_INIT_PY_FUN
   using namespace blue_sky;
 
   python::export_FRead ();
-  python::py_export_data_manager ();
+  python::py_export_hydrodynamic_model ();
   python::py_export_idata ();
   python::export_keyword_manager();
 }

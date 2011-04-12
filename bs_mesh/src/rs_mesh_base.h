@@ -52,7 +52,7 @@ class BS_API_PLUGIN rs_mesh_base : public mesh_base
     virtual ~rs_mesh_base ()	{};
     
     //! init mesh from pool
-    void init_props (const sp_idata_t &idata);
+    void init_props (const sp_hdm_t hdm);
     
     /*   
     //! init mesh from arrays
@@ -102,7 +102,6 @@ class BS_API_PLUGIN rs_mesh_base : public mesh_base
     t_double minsv;	  //!< minimum volume for splicing
     t_double max_thickness;	  //!< maximum thickness between blocks for splicing
     
-    physical_constants ph_const; //!< default physical constants
     t_double darcy_constant; //Darcy coefficient
 
     //smart_ptr on properties

@@ -28,7 +28,7 @@ namespace blue_sky
   bool 
   keyword_manager ::is_keyword_supported (const std::string &keyword, keyword_params_t &params) const
   {
-    sp_reader_t reader (params.reader, bs_dynamic_cast ());
+    sp_reader_t reader = params.hdm->get_reader ();
 
     supported_keywords_t::const_iterator sup_it = supported_keywords.find (keyword);
     if (sup_it == supported_keywords.end ())
@@ -58,7 +58,8 @@ namespace blue_sky
   void keyword_manager::handle_keyword (const std::string &keyword, keyword_params_t &params)
   {
     handlers_t::iterator it = handlers.find(keyword);
-    sp_reader_t reader (params.reader, bs_dynamic_cast ());
+    sp_reader_t reader = params.hdm->get_reader ();
+
     if (it == handlers.end ())
       {
         is_keyword_supported (keyword, params);
@@ -66,9 +67,9 @@ namespace blue_sky
     else
       {
         keyword_handler &handler = it->second;
-        if (handler.handle_function)
+        if (handler.read_handle_function)
           {
-            (*(handler.handle_function)) (keyword, params);
+            (*(handler.read_handle_function)) (keyword, params);
           }
         else if (handler.handle_object)
           {
@@ -84,12 +85,6 @@ namespace blue_sky
     if (it != handlers.end())
       {
         bs_throw_exception(boost::format ("Keyword [%s] registration failed, keyword is already registered") % keyword);
-      }
-    switch (handler.index_in_pool)
-      {
-        case (-1) : handler.handle_function = &this_t::int_array_handler; break;
-        case (-2) : handler.handle_function = &this_t::float_array_handler; break;
-        default : break;
       }
       
     handlers.insert (std::make_pair (keyword, handler));
@@ -125,7 +120,7 @@ namespace blue_sky
         bs_throw_exception(boost::format ("Keyword [%s] registration failed, keyword is already registered") % keyword);
       }
     keyword_handler handler (&this_t::int_array_handler, def_value, dimens);
-    handler.second_handle_function = external_handler;
+    handler.react_handle_function = external_handler;
       
     handlers.insert (std::make_pair (keyword, handler));
     BOSOUT (section::keywords, level::low) << boost::format ("Keyword [%s] registered") % keyword << bs_end;
@@ -133,18 +128,32 @@ namespace blue_sky
   
   //! registration of active floating point pool keyword in factory
   
-  void  keyword_manager::register_fp_pool_keyword(const std::string &keyword, int *dimens, t_float def_value, handler_t external_handler)
+  void  keyword_manager::register_fp_pool_keyword (const std::string &keyword, int *dimens, t_float def_value, handler_t external_handler)
   {
     handlers_t::iterator it = handlers.find(keyword);
     if (it != handlers.end())
       {
         bs_throw_exception(boost::format ("Keyword [%s] registration failed, keyword is already registered") % keyword);
       }
-    keyword_handler handler (&this_t::int_array_handler, def_value, dimens);
-    handler.second_handle_function = external_handler;
+    keyword_handler handler (&this_t::float_array_handler, def_value, dimens);
+    handler.react_handle_function = external_handler;
       
     handlers.insert (std::make_pair (keyword, handler));
     BOSOUT (section::keywords, level::low) << boost::format ("Keyword [%s] registered") % keyword << bs_end;
+  }
+
+  void  keyword_manager::register_prop_keyword (const std::string &keyword, const std::string &format, prop_names_t &prop_names , handler_t external_handler)
+  {
+    handlers_t::iterator it = handlers.find(keyword);
+    if (it != handlers.end())
+      {
+        bs_throw_exception(boost::format ("Keyword [%s] registration failed, keyword is already registered") % keyword);
+      }
+    
+    keyword_handler handler (&this_t::prop_handler, format, prop_names);
+    handler.react_handle_function = external_handler;
+      
+    handlers.insert (std::make_pair (keyword, handler));
   }
   
   
@@ -157,6 +166,8 @@ namespace blue_sky
         }
       register_fp_pool_keyword (keyword, &new_dimens[0], def_value);
     }
+
+  
     
   
   boost::python::list 
