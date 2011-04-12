@@ -6,6 +6,7 @@
  * */
 
 #include "pvt_dead_oil.h"
+#include "fluids.h"
 
 using namespace blue_sky;
 using namespace blue_sky::python;
@@ -21,6 +22,7 @@ namespace blue_sky {
     bool res = true;
 
     res &= BS_KERNEL.register_type(*bs_init.pd_, pvt_dead_oil::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(*bs_init.pd_, fluids::bs_type()); BS_ASSERT (res);
 
     return res;
   }
