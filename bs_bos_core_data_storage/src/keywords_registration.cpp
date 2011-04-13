@@ -20,7 +20,7 @@ namespace blue_sky
     register_keywyfgord(#KWRD, keyword_handler (&this_t::HNDL));
 
 #define REG_KEYWORD(KWRD) \
-    register_keyword(#KWRD, keyword_handler (&this_t::KWRD##_handler));
+    register_keyword(#KWRD, keyword_handler (&this_t::KWRD##_handler, 0));
 
 #define REG_ARRAY_KEYWORD(KWRD,T) \
     register_keyword(#KWRD, keyword_handler (&this_t::T##_array_handler, KWRD));

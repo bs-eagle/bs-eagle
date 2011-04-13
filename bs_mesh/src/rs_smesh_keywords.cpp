@@ -56,7 +56,7 @@ namespace blue_sky
   
   void smesh_keywords::activate_keywords (sp_km_iface_t keyword_manager)
     {
-      //keyword_manager->register_keyword ("DIMENS", keyword_handler (&this_t::DIMENS_handler));
+      //keyword_manager->register_keyword ("DIMENS", keyword_handler (&this_t::DIMENS_reactor));
       std::vector<std::string> names(6);
       t_int array_dimens[6] = {1,0,1,0,1,0};
       t_float def_value_zero = 0.0;
@@ -66,7 +66,7 @@ namespace blue_sky
       names[1] = "ny";
       names[2] = "nz";
 
-      keyword_manager->register_prop_keyword ("DIMENS", "iii", names, &this_t::DIMENS_handler);
+      keyword_manager->register_prop_keyword ("DIMENS", "iii", names, &this_t::DIMENS_reactor);
 
       keyword_manager->register_i_pool_keyword ("ACTNUM", &array_dimens[0], 1, 0);
       keyword_manager->register_fp_pool_keyword ("PERMX", &array_dimens[0], def_value_zero, 0);
@@ -80,7 +80,7 @@ namespace blue_sky
       keyword_manager->register_fp_pool_keyword ("MULTPV", &array_dimens[0], def_value_zero, 0);
     }  
   
-  void smesh_keywords::DIMENS_handler(const std::string &keyword, keyword_params_t &params)
+  void smesh_keywords::DIMENS_reactor(const std::string &keyword, keyword_params_t &params)
     {
       KH_COMMON_VARIABLES_DEF
       t_long ndim = 0, nblock = 0;

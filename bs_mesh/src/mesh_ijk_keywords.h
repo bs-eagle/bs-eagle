@@ -40,7 +40,7 @@ namespace blue_sky
         static void activate_keywords (sp_km_iface_t keyword_manager);
         
         //! main handler instatiates class 
-        static void mesh_ijk_handler (const std::string &keyword, keyword_params_t &params);
+        static void mesh_ijk_reactor (const std::string &keyword, keyword_params_t &params);
         
     }; 
   };//namespace blue_sky

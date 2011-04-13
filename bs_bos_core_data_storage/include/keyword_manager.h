@@ -123,8 +123,11 @@ namespace blue_sky
        * \param  handler Instance of object which implements 
        *                 keyword handler interface
        * */
+
+      /*
       void 
       register_keyword (const std::string &keyword, const shared_handler_t &handler, bool replace_existing);
+      */
       
       //! registration of active integer pool keyword in factory
       void register_i_pool_keyword(const std::string &keyword, int *dimens, t_int def_value, handler_t external_handler = 0);

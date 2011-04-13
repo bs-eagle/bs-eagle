@@ -70,10 +70,6 @@ namespace blue_sky
     idata->set_i_array (keyword, this_arr);
     BOSOUT (section::read_data, level::medium) << "int pool keyword: " << keyword << bs_end;
     BOSOUT (section::read_data, level::medium) << "ndim = " << ndim << bs_end;
-    
-    // launch second handler if any
-    if (km->handlers[keyword].react_handle_function)
-      km->handlers[keyword].react_handle_function (keyword, params);
   }
 
   
@@ -104,10 +100,6 @@ namespace blue_sky
 
     BOSOUT (section::read_data, level::medium) << "fp pool keyword: " << keyword << bs_end;
     BOSOUT (section::read_data, level::medium) << "ndim = " << ndim << bs_end;
-    
-    // launch second handler if any
-    if (km->handlers[keyword].react_handle_function)
-      km->handlers[keyword].react_handle_function (keyword, params);
   }
 
   void keyword_manager::prop_handler(const std::string &keyword, keyword_params_t &params)
@@ -161,10 +153,6 @@ namespace blue_sky
 
 
     BOSOUT (section::read_data, level::medium) << "prop keyword: " << keyword << "(" << format << ")" << bs_end;
-    
-    // launch second handler if any
-    if (km->handlers[keyword].react_handle_function)
-      km->handlers[keyword].react_handle_function (keyword, params);
   }
 
 

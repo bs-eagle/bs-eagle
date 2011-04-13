@@ -40,7 +40,7 @@ namespace blue_sky
         static void activate_keywords (sp_km_iface_t keyword_manager);
         
         //! main handler instatiates class object
-        static void mesh_grdecl_handler (const std::string &keyword, keyword_params_t &params);
+        static void mesh_grdecl_reactor (const std::string &keyword, keyword_params_t &params);
     }; 
   };//namespace blue_sky
 #endif // MESH_GRDECL_KEYS_H

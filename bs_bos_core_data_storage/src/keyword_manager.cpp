@@ -71,10 +71,16 @@ namespace blue_sky
           {
             (*(handler.read_handle_function)) (keyword, params);
           }
+        if (handler.react_handle_function)
+          {
+            (*(handler.react_handle_function)) (keyword, params);
+          }
+        /*
         else if (handler.handle_object)
           {
             handler.handle_object->handler (keyword, params);
           }
+        */
       }
   }
 
@@ -92,6 +98,7 @@ namespace blue_sky
   }
 
   
+/* 
   void
   keyword_manager ::register_keyword (const std::string &keyword, const shared_handler_t &handler, bool replace_existing)
   {
@@ -104,11 +111,12 @@ namespace blue_sky
           bs_throw_exception(boost::format ("Keyword [%s] registration failed, keyword is already registered") % keyword);
       }
 
-    handlers.insert (std::make_pair (keyword, keyword_handler (handler)));
+    handlers.insert (std::make_pair (keyword, keyword_handler (handler, 0)));
     BOSOUT (section::keywords, level::low) << boost::format ("Keyword [%s] registered") % keyword << bs_end;
   }
   
-  
+  */
+
   //! registration of active integer pool keyword in factory
   
   void 

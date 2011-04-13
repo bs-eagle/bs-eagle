@@ -53,7 +53,7 @@ namespace blue_sky
         static void activate_keywords (sp_km_iface_t keyword_manager);
         
         //! mesh dimensions handler 
-        static void DIMENS_handler (const std::string &keyword, keyword_params_t &params);
+        static void DIMENS_reactor (const std::string &keyword, keyword_params_t &params);
     }; 
 };//namespace blue_sky
 #endif // RS_SMESH_KEYS_H

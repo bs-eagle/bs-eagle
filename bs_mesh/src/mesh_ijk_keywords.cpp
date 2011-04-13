@@ -27,7 +27,7 @@ namespace blue_sky
     //*this = src;
   }
   
-  void mesh_ijk_keywords::mesh_ijk_handler(const std::string & /*keyword*/, keyword_params_t &params)
+  void mesh_ijk_keywords::mesh_ijk_reactor(const std::string & /*keyword*/, keyword_params_t &params)
     {
       sp_bs_mesh_ijk_t ijk_mesh (BS_KERNEL.create_object (bs_mesh_ijk ::bs_type ()), bs_dynamic_cast());
       params.hdm->set_mesh (ijk_mesh);
@@ -42,7 +42,7 @@ namespace blue_sky
       if (provider == "")
         {
           provider = "MESH_IJK";
-          keyword_manager->register_keyword ("MESH_IJK", keyword_handler (&this_t::mesh_ijk_handler));
+          keyword_manager->register_keyword ("MESH_IJK", keyword_handler (0, &this_t::mesh_ijk_reactor));
         }
       keyword_manager->register_supported_keyword ("DX", provider);
       keyword_manager->register_supported_keyword ("DY", provider);

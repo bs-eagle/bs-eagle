@@ -36,7 +36,7 @@ namespace blue_sky
       if (provider == "")
         {
           provider = "MESH_GRDECL";
-          keyword_manager->register_keyword ("MESH_GRDECL", keyword_handler (&this_t::mesh_grdecl_handler));
+          keyword_manager->register_keyword ("MESH_GRDECL", keyword_handler (0, &this_t::mesh_grdecl_reactor));
         }
       keyword_manager->register_supported_keyword ("ZCORN", provider);
       keyword_manager->register_supported_keyword ("COORD", provider);
@@ -55,7 +55,7 @@ namespace blue_sky
       keyword_manager->register_fp_pool_keyword ("COORD", &coord_dimens[0], def_value, 0);
     }
     
-  void mesh_grdecl_keywords::mesh_grdecl_handler(const std::string & /*keyword*/, keyword_params_t &params)
+  void mesh_grdecl_keywords::mesh_grdecl_reactor(const std::string & /*keyword*/, keyword_params_t &params)
     {
       sp_bs_mesh_grdecl_t mesh_grdecl (BS_KERNEL.create_object (bs_mesh_grdecl ::bs_type ()), bs_dynamic_cast ());
       params.hdm->set_mesh (mesh_grdecl);

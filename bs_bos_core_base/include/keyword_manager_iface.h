@@ -68,9 +68,9 @@ namespace blue_sky
         {
         }
 
-        keyword_handler (handler_t read_handle_function)
-        : read_handle_function (read_handle_function)
-        , react_handle_function (0)
+        keyword_handler (handler_t reader, handler_t reactor)
+        : read_handle_function (reader)
+        , react_handle_function (reactor)
         {
         }
 
@@ -105,6 +105,7 @@ namespace blue_sky
           {
           }  
 
+        /*       
         keyword_handler (const shared_handler_t &handle_object)
         : read_handle_function (0)
         , handle_object (handle_object)
@@ -113,9 +114,10 @@ namespace blue_sky
         , float_def_value (0)
         {
         }
+        */
 
         handler_t         read_handle_function;          //<! pointer to function
-        shared_handler_t  handle_object;            //<! alternative for read_handle_function
+        //shared_handler_t  handle_object;            //<! alternative for read_handle_function
         handler_t         react_handle_function;   //<! pointer to function
         
         t_int        int_def_value;            //<! default value (for int pooled keywords (pooled==handles by array handlers))
