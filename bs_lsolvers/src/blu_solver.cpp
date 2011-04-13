@@ -48,7 +48,7 @@ namespace blue_sky
     init_prop ();
   }
 
-   void
+  void
   blu_solver::init_prop ()
     {
       prop->add_property_i (true, std::string ("block_size"),
@@ -67,14 +67,18 @@ namespace blue_sky
     t_long nb;
 
     sp_dens_matrix_t lu;
+
     if (dynamic_cast<dens_matrix_iface_t *> (matrix.lock ()))
       {
         lu = matrix;
         BS_ASSERT (lu);
       }
+    else
+      {
+        bs_throw_exception ("LU solve: Passed matrix is not dense");
+      }
 
-
-    spv_float spvalues = lu->get_values   ();
+    spv_float spvalues = lu->get_values ();
     t_float *values = &(*spvalues)[0];
     t_double *sol = &(*sp_sol)[0];
     t_double *rhs = &(*sp_rhs)[0];
@@ -94,7 +98,7 @@ namespace blue_sky
   }
 
 
-  int blu_solver::solve_prec(sp_matrix_t matrix, spv_double rhs, spv_double sol)
+  int blu_solver::solve_prec (sp_matrix_t matrix, spv_double rhs, spv_double sol)
   {
      return solve (matrix, rhs, sol);
   }
@@ -113,17 +117,21 @@ namespace blue_sky
     t_long n;
     t_long nb;
 
-    sp_dens_matrix_t ilu;
+    sp_dens_matrix_t lu;
     if (dynamic_cast<dens_matrix_iface_t *> (matrix.lock ()))
       {
-        ilu = matrix;
-        BS_ASSERT (ilu);
+        lu = matrix;
+        BS_ASSERT (lu);
+      }
+    else
+      {
+        bs_throw_exception ("LU setup: Passed matrix is not dense");
       }
 
-    spv_float values = ilu->get_values   ();
+    spv_float values = lu->get_values ();
 
-    n         = ilu->get_n_rows ();
-    nb        = ilu->get_calc_block_size ();
+    n         = lu->get_n_rows ();
+    nb        = lu->get_calc_block_size ();
     if (nb < 2)
       nb = n;
 

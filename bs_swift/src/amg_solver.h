@@ -10,6 +10,7 @@
  */
 
 #include "bcsr_amg_matrix_iface.h"
+#include "dens_matrix_iface.h"
 #include "amg_solver_iface.h"
 #include "amg_smbuilder_iface.h"
 #include "amg_coarse_iface.h"
@@ -20,6 +21,8 @@ namespace blue_sky
   const std::string strength_threshold_idx = "strength_threshold_idx";
   const std::string max_row_sum_idx = "max_row_sum";
   const std::string n_last_level_points_idx = "n_last_level_points";
+  const std::string n_levels_idx = "n_levels";
+  const std::string cop_idx = "Cop";
 
   class BS_API_PLUGIN amg_solver : public amg_solver_iface
     {
@@ -32,6 +35,7 @@ namespace blue_sky
       //! matrix interface type
       typedef matrix_iface                              matrix_t;
       typedef bcsr_amg_matrix_iface                     bcsr_t;
+      typedef dens_matrix_iface                         dens_matrix_t;
       typedef std::vector<spv_long>                     vec_spv_long;   ///< vector of smart pointers to vector<long>
 
       //! prop
@@ -54,6 +58,7 @@ namespace blue_sky
       typedef smart_ptr<matrix_t, true>                 sp_matrix_t;    ///< short name to smart pointer on matrix_t
       typedef smart_ptr<bcsr_t, true>                   sp_bcsr_t;      ///< short name to smart pointer on matrix_t
       typedef std::vector<sp_bcsr_t>                    vec_sp_bcsr_t;  ///< vector of smart pointers to bcsr_amg_matrix_iface
+      typedef smart_ptr<dens_matrix_t, true>            sp_dens_matrix_t;    ///< short name to smart pointer on matrix_t
       //-----------------------------------------
       //  METHODS
       //-----------------------------------------
@@ -109,9 +114,21 @@ namespace blue_sky
         }
 
       //! return n_last_level_points
-      virtual t_long get_n_last_level_points() const
+      virtual t_long get_n_last_level_points () const
         {
           return prop->get_i (n_last_level_points_idx);
+        }
+
+      //!
+      virtual void set_n_levels (t_long n_levels)
+        {
+          return prop->set_i (n_levels_idx, n_levels);
+        }
+
+      //!
+      virtual void set_cop (t_double cop)
+        {
+          return prop->set_f (cop_idx, cop);
         }
 
       //! set strength matrix builder for amg level
@@ -204,6 +221,7 @@ namespace blue_sky
       sp_base_t             prec;         //!< pointer to the preconditioner
       sp_prop_t             prop;         //!< properties for solvers
       sp_base_t             lu_solver;    //!< LU solver for last level
+      sp_dens_matrix_t      lu_fact;      //!< dense matrix on last level
 
       vec_spv_long          s;            //!< S markers
       vec_spv_long          cf;           //!< CF markers

@@ -41,6 +41,9 @@ namespace blue_sky
       pbuilder[0] = BS_KERNEL.create_object ("standart2_pbuild");
 
       lu_solver = BS_KERNEL.create_object ("blu_solver");
+      lu_fact = BS_KERNEL.create_object ("dens_matrix");
+      BS_ASSERT (lu_fact);
+      BS_ASSERT (lu_solver);
     }
 
     //! copy constructor
@@ -75,13 +78,18 @@ namespace blue_sky
                               std::string ("Total number of used solver iterations"));
         prop->add_property_b (false, success_idx,
                               std::string ("True if solver successfully convergent"));
-        // AMG
+        // AMG input props
         prop->add_property_f (0.75, strength_threshold_idx,
                               std::string ("Threshold for strength matrix"));
         prop->add_property_f (0.01, max_row_sum_idx,
                               std::string ("Row sum threshold for strength matrix"));
         prop->add_property_i (100, n_last_level_points_idx,
                               std::string ("Minimal number of points in coarse grid"));
+        // AMG output props
+        prop->add_property_f (0, cop_idx,
+                              std::string ("Operator compexity"));
+        prop->add_property_i (1, n_levels_idx,
+                              std::string ("Number of multigrid levels"));
       }
 
     int amg_solver::solve (sp_matrix_t matrix, spv_double sp_rhs, spv_double sp_sol)
@@ -139,23 +147,24 @@ namespace blue_sky
         {
           bs_throw_exception ("AMG setup: Passed matrix is not square");
         }
+      if (matrix->get_n_non_zeros () < 1)
+        {
+          bs_throw_exception ("AMG setup: Passed matrix has no nnz elements");
+        }
 
-      int n_levels;
+      t_double cop = matrix->get_n_non_zeros ();
       // matrix on first level
       a.push_back (matrix);
 
-      for (int level = 0;;++level)
+      int level;
+      for (level = 0;;++level)
         {
           t_long n = matrix->get_n_rows ();
           std::cout<<"AMG level = "<<level<<" n_rows = "<< n<<"\n";
 
           if (n <= n_last_level_points)
             {
-              n_levels = level;
-              std::cout<<"LU...";
-              int r_code = lu_solver->setup (matrix);
-              std::cout<<"OK\n";
-              return r_code;
+              break;
             }
 
           //init tools
@@ -190,7 +199,6 @@ namespace blue_sky
           if (n_coarse_size == n || n_coarse_size < 1)
             {
               std::cout<<"coarse failed: n = "<<n<<" n_coarse = "<<n_coarse_size<<"\n";
-              n_levels = level;
               break;
             }
           std::cout<<"OK\nbuild P...";
@@ -214,8 +222,22 @@ namespace blue_sky
 
           a_matrix->triple_matrix_product (r_matrix, matrix, p_matrix, update);
           matrix = a_matrix;
+          cop += matrix->get_n_non_zeros ();
           std::cout<<"OK\n";
         }
+
+      set_n_levels (level);
+      cop /= matrix->get_n_non_zeros ();
+      set_cop (cop);
+
+      std::cout<<"AMG setup OK. n_levels = "<<level<<" Cop = "<<cop<<"\n";
+
+      std::cout<<"LU...";
+      lu_fact->init_by_matrix (matrix);
+      return 0;
+
+      lu_solver->setup (lu_fact);
+      std::cout<<"OK\n";
 /*
       for (int level = 0; level < n_levels; ++level)
         {
