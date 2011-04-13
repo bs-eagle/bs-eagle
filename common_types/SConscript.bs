@@ -9,13 +9,14 @@ env.Append (CPPPATH = ["include",
     includes["bs_bos_core_base"]
     ] + includes["kernel"])
 
-libs = ["blue_sky", "hdf5"]
+libs = ["blue_sky"]
 
 if (build_kind == "debug") :
     env.AppendUnique (LIBS = list_suffix (libs, "_d"))
     lib_name += "_d"
 elif (build_kind == "release") :
     env.AppendUnique (LIBS = libs)
+libs += ["hdf5"]
 
 common_types = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
 
