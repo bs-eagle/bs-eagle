@@ -15,6 +15,7 @@
 #include "amg_smbuilder_iface.h"
 #include "amg_coarse_iface.h"
 #include "amg_pbuild_iface.h"
+#include "amg_smoother_iface.h"
 
 namespace blue_sky
   {
@@ -23,6 +24,8 @@ namespace blue_sky
   const std::string n_last_level_points_idx = "n_last_level_points";
   const std::string n_levels_idx = "n_levels";
   const std::string cop_idx = "Cop";
+  const std::string n_pre_smooth_iters_idx = "n_pre_smooth_iters_idx";
+  const std::string n_post_smooth_iters_idx = "n_post_smooth_iters_idx";
 
   class BS_API_PLUGIN amg_solver : public amg_solver_iface
     {
@@ -37,6 +40,7 @@ namespace blue_sky
       typedef bcsr_amg_matrix_iface                     bcsr_t;
       typedef dens_matrix_iface                         dens_matrix_t;
       typedef std::vector<spv_long>                     vec_spv_long;   ///< vector of smart pointers to vector<long>
+      typedef std::vector<spv_double>                   vec_spv_double; ///< vector of smart pointers to vector<double>
 
       //! prop
       typedef prop_iface                                prop_t;
@@ -47,12 +51,15 @@ namespace blue_sky
       typedef amg_smbuilder_iface                       smbuild_t;
       typedef amg_coarse_iface                          coarse_t;
       typedef amg_pbuild_iface                          pbuild_t;
+      typedef amg_smoother_iface                        smooth_t;
       typedef smart_ptr<smbuild_t, true>                sp_smbuild_t;
       typedef smart_ptr<coarse_t, true>                 sp_coarse_t;
       typedef smart_ptr<pbuild_t, true>                 sp_pbuild_t;
+      typedef smart_ptr<smooth_t, true>                 sp_smooth_t;
       typedef std::vector<sp_smbuild_t>                 vec_sp_smbuild_t;
       typedef std::vector<sp_coarse_t>                  vec_sp_coarse_t;
       typedef std::vector<sp_pbuild_t>                  vec_sp_pbuild_t;
+      typedef std::vector<sp_smooth_t>                  vec_sp_smooth_t;
 
       //!
       typedef smart_ptr<matrix_t, true>                 sp_matrix_t;    ///< short name to smart pointer on matrix_t
@@ -113,10 +120,28 @@ namespace blue_sky
           return prop->get_f (max_row_sum_idx);
         }
 
+      //! return n_pre_smooth_iters
+      virtual t_long get_n_pre_smooth_iters () const
+        {
+          return prop->get_i (n_pre_smooth_iters_idx);
+        }
+
+      //! return n_post_smooth_iters
+      virtual t_long get_n_post_smooth_iters () const
+        {
+          return prop->get_i (n_post_smooth_iters_idx);
+        }
+
       //! return n_last_level_points
       virtual t_long get_n_last_level_points () const
         {
           return prop->get_i (n_last_level_points_idx);
+        }
+
+      //! return n_levels
+      virtual t_long get_n_levels ()
+        {
+          return prop->get_i (n_levels_idx);
         }
 
       //!
@@ -194,6 +219,16 @@ namespace blue_sky
           return (level < pbuilder.size ()) ? pbuilder[level] : pbuilder[pbuilder.size () - 1];
         }
 
+      sp_smooth_t get_pre_smoother (unsigned int level)
+        {
+          return (level < pre_smoother.size ()) ? pre_smoother[level] : pre_smoother[pre_smoother.size () - 1];
+        }
+
+      sp_smooth_t get_post_smoother (unsigned int level)
+        {
+          return (level < post_smoother.size ()) ? post_smoother[level] : post_smoother[post_smoother.size () - 1];
+        }
+
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual std::string py_str () const
         {
@@ -222,16 +257,20 @@ namespace blue_sky
       sp_prop_t             prop;         //!< properties for solvers
       sp_base_t             lu_solver;    //!< LU solver for last level
       sp_dens_matrix_t      lu_fact;      //!< dense matrix on last level
-
-      vec_spv_long          s;            //!< S markers
-      vec_spv_long          cf;           //!< CF markers
+      spv_double            wksp;         //!< temporary vector
 
       vec_sp_smbuild_t      smbuilder;    //!<
       vec_sp_coarse_t       coarser;      //!<
       vec_sp_pbuild_t       pbuilder;     //!<
+      vec_sp_smooth_t       pre_smoother; //!<
+      vec_sp_smooth_t       post_smoother;//!<
 
-      vec_sp_bcsr_t a;                    //!< coarse level matrices vector
-      vec_sp_bcsr_t p;                    //!< coarse level prolongation matrices vector
+      vec_sp_bcsr_t         a;            //!< coarse level matrices vector
+      vec_sp_bcsr_t         p;            //!< coarse level prolongation matrices vector
+      vec_spv_long          s;            //!< S markers
+      vec_spv_long          cf;           //!< CF markers
+      vec_spv_double        rhs;          //!< coarse level rhs vector
+      vec_spv_double        sol;          //!< coarse level sol vector
 
       BLUE_SKY_TYPE_DECL (amg_solver);
     };

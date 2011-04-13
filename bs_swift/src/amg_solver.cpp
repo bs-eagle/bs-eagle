@@ -28,6 +28,8 @@ namespace blue_sky
       p.reserve (AMG_N_LEVELS_RESERVE);
       s.reserve (AMG_N_LEVELS_RESERVE);
       cf.reserve (AMG_N_LEVELS_RESERVE);
+      rhs.reserve (AMG_N_LEVELS_RESERVE);
+      sol.reserve (AMG_N_LEVELS_RESERVE);
       smbuilder.reserve (AMG_N_LEVELS_RESERVE);
       coarser.reserve (AMG_N_LEVELS_RESERVE);
       pbuilder.reserve (AMG_N_LEVELS_RESERVE);
@@ -36,14 +38,20 @@ namespace blue_sky
       smbuilder.resize (1);
       coarser.resize (1);
       pbuilder.resize (1);
+      pre_smoother.resize (1);
+      post_smoother.resize (1);
       smbuilder[0] = BS_KERNEL.create_object ("simple_smbuilder");
       coarser[0] = BS_KERNEL.create_object ("cljp_coarse");
       pbuilder[0] = BS_KERNEL.create_object ("standart2_pbuild");
+      pre_smoother[0] = BS_KERNEL.create_object ("gs_solver");
+      post_smoother[0] = BS_KERNEL.create_object ("gs_solver");
 
       lu_solver = BS_KERNEL.create_object ("blu_solver");
       lu_fact = BS_KERNEL.create_object ("dens_matrix");
+      wksp = BS_KERNEL.create_object (v_double::bs_type ());
       BS_ASSERT (lu_fact);
       BS_ASSERT (lu_solver);
+      BS_ASSERT (wksp);
     }
 
     //! copy constructor
@@ -85,21 +93,105 @@ namespace blue_sky
                               std::string ("Row sum threshold for strength matrix"));
         prop->add_property_i (100, n_last_level_points_idx,
                               std::string ("Minimal number of points in coarse grid"));
+        prop->add_property_i (1, n_pre_smooth_iters_idx,
+                              std::string ("Number of pre-smooth iterations"));
+        prop->add_property_i (1, n_post_smooth_iters_idx,
+                              std::string ("Number of post-smooth iterations"));
         // AMG output props
         prop->add_property_f (0, cop_idx,
                               std::string ("Operator compexity"));
         prop->add_property_i (1, n_levels_idx,
-                              std::string ("Number of multigrid levels"));
+                              std::string ("Number of coarse levels"));
       }
 
-    int amg_solver::solve (sp_matrix_t matrix, spv_double sp_rhs, spv_double sp_sol)
+    int amg_solver::solve (sp_matrix_t matrix_, spv_double sp_rhs, spv_double sp_sol)
     {
-      BS_ASSERT (matrix);
+      BS_ASSERT (matrix_);
       BS_ASSERT (prop);
 
       BS_ASSERT (sp_rhs->size ());
       BS_ASSERT (sp_sol->size ());
       BS_ASSERT (sp_rhs->size () == sp_sol->size ()) (sp_rhs->size ()) (sp_sol->size ());
+
+      sp_bcsr_t matrix (matrix_, bs_dynamic_cast ());
+      if (!matrix)
+        {
+          bs_throw_exception ("AMG solve: Passed matrix is not BCSR");
+        }
+
+      //init amg props
+      const t_long n_levels = get_n_levels ();
+      std::cout<<"n_levels = "<<n_levels<<" a.size = "<<a.size ()<<" p.size = "<<p.size ()<<"\n";
+
+      // rhs and solution on first level
+      rhs.push_back (sp_rhs);
+      sol.push_back (sp_sol);
+
+      int level = 0;
+      for (level = 0; level < n_levels; ++level)
+        {
+          sp_smooth_t pre_smoother = get_pre_smoother (level);
+          t_long n = a[level]->get_n_rows ();
+          sol[level]->resize (n);
+          rhs[level]->resize (n);
+          wksp->resize (n);
+          std::cout<<"AMG solve level = "<<level<<" n_rows = "<<n<<"\n";
+
+          //pre-smooth
+          sp_prop_t smoother_prop;
+          smoother_prop = pre_smoother->get_prop ();
+          smoother_prop->set_b ("inverse", false);
+
+          // smooth C-points
+          smoother_prop->set_i ("cf_type", 1);
+          pre_smoother->smooth (a[level], cf[level], get_n_pre_smooth_iters (),
+                                rhs[level], sol[level]);
+          // smooth F-points
+          smoother_prop->set_i ("cf_type", -1);
+          pre_smoother->smooth (a[level], cf[level], get_n_pre_smooth_iters (),
+                                rhs[level], sol[level]);
+
+          // calculate r = b - Ax
+          if (a[level]->calc_lin_comb (-1.0, 1.0, sol[level], rhs[level], wksp))
+            return -1;
+
+          //set rhs[level + 1]=0
+          std::fill (rhs[level + 1]->begin (), rhs[level + 1]->begin (), 0);
+          // restriction: b^(k+1) = P^T * r
+          if (p[level]->matrix_vector_product_t (wksp, rhs[level + 1]))
+            return -1;
+        }
+
+      std::cout<<"LU solve...";
+      lu_solver->solve (lu_fact, rhs[level], sol[level]);
+      std::cout<<"OK\n";
+
+      for (level = n_levels - 1; level >= 0; --level)
+        {
+          sp_smooth_t post_smoother = get_post_smoother (level);
+          t_long n = a[level]->get_n_rows ();
+          std::cout<<"AMG solve level = "<<level<<" n_rows = "<<n<<"\n";
+
+          //set sol[level + 1]=0
+          std::fill (sol[level + 1]->begin (), sol[level + 1]->begin (), 0);
+          //interpolation x = x + P * e^(k+1)
+          if (p[level]->calc_lin_comb (1.0, 1.0, sol[level + 1], sol[level], sol[level]))
+            return -6;
+
+          //post-smooth
+          sp_prop_t smoother_prop;
+          smoother_prop = post_smoother->get_prop ();
+          smoother_prop->set_b ("inverse", false);
+
+          // smooth F-points
+          smoother_prop->set_i ("cf_type", -1);
+          post_smoother->smooth (a[level], cf[level], get_n_post_smooth_iters (),
+                                rhs[level], sol[level]);
+          // smooth C-points
+          smoother_prop->set_i ("cf_type", 1);
+          post_smoother->smooth (a[level], cf[level], get_n_post_smooth_iters (),
+                                rhs[level], sol[level]);
+        }
 
       return 0;
     }
@@ -111,9 +203,7 @@ namespace blue_sky
 
     /**
     * @brief setup for AMG
-    *
     * @param matrix -- input matrix
-    *
     * @return 0 if success
     */
     int amg_solver::setup (sp_matrix_t matrix_)
@@ -160,7 +250,7 @@ namespace blue_sky
       for (level = 0;;++level)
         {
           t_long n = matrix->get_n_rows ();
-          std::cout<<"AMG level = "<<level<<" n_rows = "<< n<<"\n";
+          std::cout<<"AMG setup level = "<<level<<" n_rows = "<<n<<"\n";
 
           if (n <= n_last_level_points)
             {
@@ -232,10 +322,8 @@ namespace blue_sky
 
       std::cout<<"AMG setup OK. n_levels = "<<level<<" Cop = "<<cop<<"\n";
 
-      std::cout<<"LU...";
+      std::cout<<"LU setup...";
       lu_fact->init_by_matrix (matrix);
-      return 0;
-
       lu_solver->setup (lu_fact);
       std::cout<<"OK\n";
 /*
