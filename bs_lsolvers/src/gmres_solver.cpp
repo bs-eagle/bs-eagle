@@ -80,6 +80,8 @@ namespace blue_sky
                               std::string ("Number of vectors used for ortoganalization"));
         prop->add_property_b (false, success_idx, 
                               std::string ("True if solver successfully convergent"));
+        prop->add_property_i (0, ortonorm_vlen,
+                              std::string ("ORTONORM_VLEN (for JACOBIAN)"));
       }
     
     int gmres_solver::solve (sp_matrix_t matrix, spv_double sp_rhs, spv_double sp_sol)
