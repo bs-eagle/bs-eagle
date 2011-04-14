@@ -9,6 +9,7 @@
 #include "data_class.h"
 #include "keyword_manager.h"
 #include "hydrodynamic_model_iface.h"
+#include "locale_keeper.h"
 #include "rs_mesh_iface.h"
 
 namespace blue_sky {
