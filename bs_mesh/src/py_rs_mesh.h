@@ -11,7 +11,7 @@ namespace blue_sky {
 namespace python {
    
   PY_EXPORTER (rs_mesh_iface_exporter, default_exporter)
-    .def ("init_props", &T::init_props, args("idata"), "Initialize mesh preperties")
+    .def ("init_props", &T::init_props, args("hdm"), "Initialize mesh properties")
     .def ("init_ext_to_int", &T::init_ext_to_int, args(""), "Initialize internal indexation")
     .def ("build_jacobian_and_flux_connections", &T::build_jacobian_and_flux_connections, 
           args("jacobian", "flux_connections", "boundary_array"), "Build jacobian structure, calculate transmissibilities")

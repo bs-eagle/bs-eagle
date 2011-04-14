@@ -131,6 +131,9 @@ namespace blue_sky
       
       //! registration of active floating point pool keyword in factory
       void register_fp_pool_keyword(const std::string &keyword, int *dimens, t_float def_value, handler_t external_handler = 0);
+
+      //! registration of property keyword
+      void register_prop_keyword (const std::string &keyword, const std::string &format, prop_names_t &prop_names , handler_t external_handler = 0);
       
       //! python registration of active floating point pool keyword in factory
       void py_register_fp_pool_keyword (const std::string keyword, boost::python::list dimens, t_float def_value);
@@ -189,6 +192,9 @@ namespace blue_sky
       //! General functions for pooled keyword handle
       static void int_array_handler                (const std::string &keyword, keyword_params_t &params);
       static void float_array_handler              (const std::string &keyword, keyword_params_t &params);
+
+      //! General property keywrod handler
+      static void prop_handler                      (const std::string &keyword, keyword_params_t &params);
       //! Handling of event keywords
       static void event_handler                    (const std::string &keyword, keyword_params_t &params);
       //! Named keywords

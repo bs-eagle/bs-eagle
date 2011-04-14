@@ -6,6 +6,7 @@ tar_name = "bs_bos_core_data_storage"
 
 env = custom_env.Clone ()
 env.Append (CPPPATH = ["include",
+	includes["common_types"],
     includes["bs_bos_core_base"],
     includes["common_types"],
     includes["bs_mtx"],

@@ -18,6 +18,7 @@
 #include "arrays.h"
 #include "arrays_tables.h"
 #include "convert_units.h"
+#include "auto_value.h"
 
 #include "data_dimens.h"
 

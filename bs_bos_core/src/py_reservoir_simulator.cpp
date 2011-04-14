@@ -68,7 +68,7 @@ namespace python {
     .add_property ("reservoir",       make_getter (&T::reservoir_, return_value_policy <copy_non_const_reference> ()))
     .add_property ("mesh",            make_getter (&T::mesh, return_value_policy <copy_non_const_reference> ()))
     .add_property ("event_manager",   make_getter (&T::em, return_value_policy <copy_non_const_reference> ()))
-    .add_property ("data_manager",    make_getter (&T::dm, return_value_policy <copy_non_const_reference> ()))
+    .add_property ("hydrodynamic_model",    make_getter (&T::hdm, return_value_policy <copy_non_const_reference> ()))
     .add_property ("jacobian",        make_getter (&T::jacobian_, return_value_policy <copy_non_const_reference> ()))
     .add_property ("keyword_manager", make_getter (&T::keyword_manager_, return_value_policy <copy_non_const_reference> ()))
   PY_EXPORTER_END;

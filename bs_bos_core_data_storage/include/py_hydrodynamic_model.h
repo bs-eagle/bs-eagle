@@ -5,7 +5,7 @@ namespace blue_sky {
 namespace python {
 
   void
-  py_export_data_manager ();
+  py_export_hydrodynamic_model ();
 
 }	// namespace python
 }	// namespace blue_sky

@@ -22,32 +22,32 @@ rs_smesh_base ::rs_smesh_base ()
 
 
 void
-rs_smesh_base ::init_props (const sp_idata_t &idata)
+rs_smesh_base ::init_props (const sp_hdm_t hdm)
 {
-  base_t::init_props (idata);
+  base_t::init_props (hdm);
   
-  nx = idata->props->get_i("nx");
-  ny = idata->props->get_i("ny");
-  nz = idata->props->get_i("nz");
+  nx = hdm->get_prop ()->get_i("nx");
+  ny = hdm->get_prop ()->get_i("ny");
+  nz = hdm->get_prop ()->get_i("nz");
   
   spv_float data_array;
   
-  data_array = idata->get_fp_array("PERMX");
+  data_array = hdm->get_pool ()->get_fp_data("PERMX");
   if (data_array->size()) permx_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_array("PERMY");
+  data_array = hdm->get_pool ()->get_fp_data("PERMY");
   if (data_array->size()) permy_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_array("PERMZ");
+  data_array = hdm->get_pool ()->get_fp_data("PERMZ");
   if (data_array->size()) permz_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_array("MULTX");
+  data_array = hdm->get_pool ()->get_fp_data("MULTX");
   if (data_array && data_array->size()) multx_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_array("MULTY");
+  data_array = hdm->get_pool ()->get_fp_data("MULTY");
   if (data_array && data_array->size()) multy_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_array("MULTZ");
+  data_array = hdm->get_pool ()->get_fp_data("MULTZ");
   if (data_array && data_array->size()) multz_array = &(*data_array)[0];
 }
 

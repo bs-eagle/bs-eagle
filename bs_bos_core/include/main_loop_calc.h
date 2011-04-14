@@ -129,7 +129,7 @@ namespace blue_sky
           , mesh_ (rs->mesh)
           , jacobian_ (rs->jacobian_)
           , params_ (calc_model_->ts_params)
-          , data_map_ (rs->dm->data)
+          , data_map_ (rs->hdm->data)
           , height_ (0)
           , rho_ (0)
       {
