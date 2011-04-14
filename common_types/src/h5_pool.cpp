@@ -18,6 +18,11 @@ using namespace boost::python;
 
 namespace blue_sky
 {
+  error_h5_no_array::error_h5_no_array (std::string const &array_name)
+  : bs_exception ("error_h5_no_array", array_name)
+  {
+  }
+
   h5_pool::h5_pool (bs_type_ctor_param) 
         : h5_pool_iface ()
     {
@@ -179,8 +184,18 @@ namespace blue_sky
       init_all ();
     }
 
+  spv_float
+  h5_poll::get_fp_data (std::string const &name)
+  {
+    spv_float a = get_fp_data_unsafe (name);
+    if (!a || a->empty ())
+      throw error_h5_no_array (name);
+
+    return a;
+  }
+
   spv_float 
-  h5_pool::get_fp_data (const std::string &name)
+  h5_pool::get_fp_data_unsafe (const std::string &name)
     {
       map_t::iterator it;
       t_long n;
@@ -188,13 +203,11 @@ namespace blue_sky
 
       if (group_id <= 0)
         {
-          // TODO: report error
           return spv_float ();
         }
       it = h5_map.find (name);
       if (it == h5_map.end ())
         {
-          // TODO: report error
           return spv_float ();
         }
       n = H5Sget_simple_extent_npoints (it->second.dspace);
@@ -212,14 +225,23 @@ namespace blue_sky
         }
       else
         {
-          //TODO: print error message
           return spv_float ();
         }
       return a;
     }
 
+  spv_int
+  h5_pool::get_i_data (std::string const &name)
+  {
+    spv_int a = get_i_data_unsafe (name);
+    if (!a || a->empty ())
+      throw error_h5_no_array (name);
+
+    return a;
+  }
+
   spv_int 
-  h5_pool::get_i_data (const std::string &name)
+  h5_pool::get_i_data_unsafe (const std::string &name)
     {
       map_t::iterator it;
       t_long n;

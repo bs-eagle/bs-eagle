@@ -22,6 +22,14 @@
 
 namespace blue_sky
 {
+  /**
+   * @brief raise if no array in H5 pool
+   */
+  class error_h5_no_error : public bs_exception
+  {
+  public:
+    error_h5_no_error (std::string const &array_name);
+  };
 
 /** 
  * @brief 
@@ -61,7 +69,8 @@ class h5_pool_iface : public bs_node
        * 
        * @param name    -- <INPUT> given name of data
        * 
-       * @return smart pointer to the data vector
+       * @return smart pointer to the data vector or
+       * raise exception if no array with name 'name'
        */
       virtual spv_float get_fp_data (const std::string &name) = 0;
 
@@ -70,9 +79,30 @@ class h5_pool_iface : public bs_node
        * 
        * @param name    -- <INPUT> given name of data
        * 
-       * @return smart pointer to the data vector
+       * @return smart pointer to the data vector or
+       * null pointer if no array with name 'name'
+       */
+      virtual spv_float get_fp_data_unsafe (const std::string &name) = 0;
+
+      /** 
+       * @brief read data by name from file and return it as vector
+       * 
+       * @param name    -- <INPUT> given name of data
+       * 
+       * @return smart pointer to the data vector or
+       * raise exception if no array with name 'name'
        */
       virtual spv_int get_i_data (const std::string &name) = 0;
+
+      /** 
+       * @brief read data by name from file and return it as vector
+       * 
+       * @param name    -- <INPUT> given name of data
+       * 
+       * @return smart pointer to the data vector or
+       * null pointer if no array with name 'name'
+       */
+      virtual spv_int get_i_data_unsafe (const std::string &name) = 0;
 
       /** 
        * @brief rewrite existing array in file
