@@ -100,8 +100,8 @@ namespace blue_sky
 
         keyword_handler (handler_t read_handle_function, std::string format, prop_names_t names)
           : read_handle_function (read_handle_function)
-          , prop_format (format)
           , prop_names (names)
+          , prop_format (format)
           {
           }  
 
