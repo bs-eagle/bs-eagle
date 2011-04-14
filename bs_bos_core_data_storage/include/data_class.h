@@ -161,6 +161,9 @@ enum   //! indexes for dimension parameters
       spv_int    get_i_array (const std::string &array_name);
       spv_float   get_fp_array (const std::string &array_name);
 
+      bool contains_i_array (const std::string &array_name);
+      bool contains_fp_array (const std::string &array_name);
+
       spv_int create_i_array (const std::string &name, t_int *dimens, t_int def_value = 0);
       spv_float create_fp_array (const std::string &name, t_int *dimens, t_float def_value = 0);
 
