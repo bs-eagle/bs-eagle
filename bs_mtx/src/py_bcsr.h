@@ -89,10 +89,14 @@ namespace blue_sky
           &T::random_init,
           args ("matrix", "n_rows", "n_block_size", "value_dispertion", "elems_in_row"),
           "Initialize matrix by random values")
+    .def ("gen_2d_laplas",
+          &T::gen_2d_laplas,
+          args ("matrix", "dimension of problem"),
+          "Initialize matrix for 2d laplas problem")
     .def ("dense_init",
           &T::dense_init,
           args ("matrix", "n_rows", "n_block_size", "value_dispertion"),
-          "Initialize matrix by random values (make dense matrix")
+          "Initialize matrix by random values (make dense matrix)")
 
   PY_EXPORTER_END;
 

@@ -128,14 +128,28 @@ namespace blue_sky
       sol.push_back (sp_sol);
 
       int level = 0;
+      spv_double next_level_sol;
+      spv_double next_level_rhs;
+
       for (level = 0; level < n_levels; ++level)
         {
           sp_smooth_t pre_smoother = get_pre_smoother (level);
           t_long n = a[level]->get_n_rows ();
-          sol[level]->resize (n);
-          rhs[level]->resize (n);
           wksp->resize (n);
-          std::cout<<"AMG solve level = "<<level<<" n_rows = "<<n<<"\n";
+
+          // init next level solution and rhs vectors
+          t_long n_coarse_size = a[level + 1]->get_n_rows ();
+          spv_double next_level_sol = BS_KERNEL.create_object (v_double::bs_type ());
+          spv_double next_level_rhs = BS_KERNEL.create_object (v_double::bs_type ());
+          BS_ASSERT (next_level_sol);
+          BS_ASSERT (next_level_rhs);
+          sol.push_back (next_level_sol);
+          rhs.push_back (next_level_rhs);
+          next_level_sol->resize (n_coarse_size);
+          next_level_rhs->resize (n_coarse_size);
+
+          wksp->resize (n);
+          std::cout<<"AMG solve 1 step of V-cycle. level = "<<level<<" n_rows = "<<n<<"\n";
 
           //pre-smooth
           sp_prop_t smoother_prop;
@@ -156,7 +170,7 @@ namespace blue_sky
             return -1;
 
           //set rhs[level + 1]=0
-          std::fill (rhs[level + 1]->begin (), rhs[level + 1]->begin (), 0);
+          rhs[level + 1]->assign (0);
           // restriction: b^(k+1) = P^T * r
           if (p[level]->matrix_vector_product_t (wksp, rhs[level + 1]))
             return -1;
@@ -170,10 +184,10 @@ namespace blue_sky
         {
           sp_smooth_t post_smoother = get_post_smoother (level);
           t_long n = a[level]->get_n_rows ();
-          std::cout<<"AMG solve level = "<<level<<" n_rows = "<<n<<"\n";
+          std::cout<<"AMG solve 2 step of V-cycle. level = "<<level<<" n_rows = "<<n<<"\n";
 
           //set sol[level + 1]=0
-          std::fill (sol[level + 1]->begin (), sol[level + 1]->begin (), 0);
+          sol[level + 1]->assign (0);
           //interpolation x = x + P * e^(k+1)
           if (p[level]->calc_lin_comb (1.0, 1.0, sol[level + 1], sol[level], sol[level]))
             return -6;
@@ -275,12 +289,22 @@ namespace blue_sky
           s.push_back (s_markers);
 
           s_builder->build (matrix, strength_threshold, max_row_sum, s_markers);
+
+          t_long s_nnz = 0;
+          for (t_long ii = 0;ii < s_markers->size();++ii)
+            {
+              if ((*s_markers)[ii] > 0)
+                s_nnz++;
+            }
+          std::cout<<"a_nnz = "<<s_markers->size()<<" s_nnz = "<<s_nnz<<"\n";
+
           std::cout<<"OK\ncoarse...";
 
           // coarse (fill cf_markers)
           spv_long cf_markers = BS_KERNEL.create_object (v_long::bs_type ());
           BS_ASSERT (cf_markers);
           cf.push_back (cf_markers);
+          cf_markers->resize (n);
           spv_double measure = BS_KERNEL.create_object (v_double::bs_type ());
           BS_ASSERT (measure);
           measure->resize (n);
