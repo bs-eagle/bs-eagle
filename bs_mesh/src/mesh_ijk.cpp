@@ -30,23 +30,23 @@ mesh_ijk ::mesh_ijk ()
 
 
 void
-mesh_ijk ::init_props (const sp_idata_t &idata)
+mesh_ijk ::init_props (const sp_hdm_t hdm)
 {
   spv_float data_array;
   
-  data_array = idata->get_fp_array("DX");
+  data_array = hdm->get_pool ()->get_fp_data("DX");
   if (data_array->size()) dx_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_array("DY");
+  data_array = hdm->get_pool ()->get_fp_data("DY");
   if (data_array->size()) dy_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_array("DZ");
+  data_array = hdm->get_pool ()->get_fp_data("DZ");
   if (data_array->size()) dz_array = &(*data_array)[0];
   
-  data_array = idata->get_fp_array("TOPS");
+  data_array = hdm->get_pool ()->get_fp_data("TOPS");
   if (data_array->size()) tops_array = &(*data_array)[0];
   
-  base_t::init_props (idata);
+  base_t::init_props (hdm);
 }
 
 

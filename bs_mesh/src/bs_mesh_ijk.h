@@ -46,8 +46,8 @@ namespace blue_sky
 
 
       //! init mesh properties
-      void init_props (const sp_idata_t &idata)
-        {wrapped.init_props (idata);};
+      void init_props (const sp_hdm_t hdm)
+        {wrapped.init_props (hdm);};
 
       //! initialize int_to_ext indexation
       int init_int_to_ext()

@@ -57,7 +57,7 @@ class BS_API_PLUGIN rs_smesh_base : public rs_mesh_base
     virtual ~rs_smesh_base ()	{};
 
     //! init mesh
-    void init_props (const sp_idata_t &idata);
+    void init_props (const sp_hdm_t hdm);
 
     //! check mesh data
     void check_data() const;

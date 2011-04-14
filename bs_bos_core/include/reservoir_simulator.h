@@ -10,7 +10,7 @@
 #define RESERVOIR_SIMULATOR_H
 
 #include "simulator_events.h"
-#include "data_manager.h"
+#include "hydrodynamic_model.h"
 #include "event_manager.h"
 #include "jacobian.h"
 
@@ -51,8 +51,8 @@ namespace blue_sky
       typedef reservoir_simulator < strategy_t >    this_t;               //!< shortname for this type
       typedef smart_ptr < this_t, true >            sp_this_t;            //!< smart pointer to this_t
 
-      typedef data_manager < strategy_t >           dm_t;                 //!< data_manager type
-      typedef smart_ptr < dm_t, true >              sp_dm_t;              //!< smart_ptr to data_manager type
+      typedef hydrodynamic_model < strategy_t >           dm_t;                 //!< hydrodynamic_model type
+      typedef smart_ptr < dm_t, true >              sp_hdm_t;              //!< smart_ptr to hydrodynamic_model type
 
       typedef rs_mesh_iface < strategy_t >          mesh_iface_t;         //!< rs_mesh_iface type
       typedef smart_ptr < mesh_iface_t, true >      sp_mesh_iface_t;      //!< smart_ptr to rs_mesh_iface type
@@ -100,10 +100,10 @@ namespace blue_sky
       set_mesh (const sp_mesh_iface_t&);
 
       /**
-       * \brief  returns pointer to data_manager instance
+       * \brief  returns pointer to hydrodynamic_model instance
        * */
-      const sp_dm_t &
-      get_data_manager () const;
+      const sp_hdm_t &
+      get_hydrodynamic_model () const;
 
       /**
        * \brief  returns pointer to event_manager instance
@@ -228,7 +228,7 @@ namespace blue_sky
         ((pre_read, (sp_this_t), 1))
       );
 
-      sp_dm_t                 dm;                 //!< pointer to data_manager instance
+      sp_hdm_t                 hdm;                 //!< pointer to hydrodynamic_model instance
       sp_em_t                 em;                 //!< pointer to event_manager instance
       sp_calc_model_t         cm;                 //!< pointer to calc_model instance
       sp_mesh_iface_t         mesh;               //!< pointer to mesh instance

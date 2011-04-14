@@ -88,6 +88,7 @@ namespace blue_sky
 
     //Pool array
     //int
+    /*
     REG_INT_ARRAY_KEYWORD(MPFANUM);
     REG_INT_ARRAY_KEYWORD(EQLNUM);
     REG_INT_ARRAY_KEYWORD(SATNUM);
@@ -130,6 +131,7 @@ namespace blue_sky
     //REG_FLOAT_ARRAY_KEYWORD(TOPS);
     //REG_FLOAT_ARRAY_KEYWORD(MULTPV);
     REG_FLOAT_ARRAY_KEYWORD(SGAS);
+    */
 
     //BS_ASSERT (em);
 

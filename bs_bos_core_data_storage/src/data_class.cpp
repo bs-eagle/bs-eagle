@@ -90,9 +90,9 @@ namespace blue_sky
     props->add_property_f (DEFAULT_MINIMAL_SPLICE_VOLUME, "minimal_splice_volume", "Minimal pore volume allowed for active cells to splice with other cells");
     props->add_property_f (DEFAULT_MAXIMUM_SPLICE_THICKNESS, "maximum_splice_thickness", "Default maximum thickness allowed between active cells to be coupled");
 
-    props->add_property_i (1, "nx", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
-    props->add_property_i (1, "ny", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
-    props->add_property_i (1, "nz", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
+    //props->add_property_i (1, "nx", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
+    //props->add_property_i (1, "ny", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
+    //props->add_property_i (1, "nz", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
     props->add_property_i (0, "rpo_model", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
     props->add_property_i (1, "pvt_region", "Number of PVT regions in simulation");
     props->add_property_i (1, "sat_region", "Number of saturation regions in simulation");
@@ -278,6 +278,7 @@ namespace blue_sky
 
     new_array = BS_KERNEL.create_object (v_int::bs_type ());
     new_array->resize (n);
+    std::fill (new_array->begin (), new_array->end(), def_value);
     new_array->reshape (3, dims);
 
     return new_array;
@@ -296,6 +297,7 @@ namespace blue_sky
 
     new_array = BS_KERNEL.create_object (v_float::bs_type ());
     new_array->resize (n);
+    std::fill (new_array->begin (), new_array->end(), def_value);
     new_array->reshape (3, dims);
 
     return new_array;

@@ -37,7 +37,7 @@ namespace blue_sky
         void register_keywords (sp_objbase &km, std::string provider) const;
         
         //! activate supported keywords
-        static void activate_keywords (sp_objbase &km);
+        static void activate_keywords (sp_km_iface_t keyword_manager);
         
         //! main handler instatiates class 
         static void mesh_ijk_handler (const std::string &keyword, keyword_params_t &params);

@@ -869,21 +869,21 @@ void mesh_grdecl::init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_
 	pinner_->init_minmax(*this);
 }
 
-void mesh_grdecl::init_props(const sp_idata_t &idata)
+void mesh_grdecl::init_props(const sp_hdm_t hdm)
 {
-  base_t::init_props (idata);
+  base_t::init_props (hdm);
   spv_float data_array;
   //t_long i, n;
   //t_float *it;
   
   // init ZCORN
-  data_array = idata->get_fp_array("ZCORN");
+  data_array = hdm->get_pool ()->get_fp_data("ZCORN");
   if (data_array->size()) {
 	  pinner_->zcorn_ = data_array;
 	  zcorn_array = &(*data_array)[0];
   }
   // init COORD
-  data_array = idata->get_fp_array("COORD");
+  data_array = hdm->get_pool ()->get_fp_data("COORD");
   if (data_array->size()) {
 	  pinner_->coord_ = data_array;
 	  coord_array = &(*data_array)[0];

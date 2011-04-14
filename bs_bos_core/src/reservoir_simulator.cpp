@@ -31,7 +31,7 @@ namespace blue_sky
   reservoir_simulator<strategy_t>::reservoir_simulator (bs_type_ctor_param)
       : bs_refcounter ()
       , bs_node (bs_node::create_node()) //new typename this_t::mstatus_traits ()))
-      , dm (give_kernel::Instance().create_object (dm_t::bs_type ()))
+      , hdm (give_kernel::Instance().create_object (dm_t::bs_type ()))
       , em (give_kernel::Instance().create_object (em_t::bs_type ()))
       , cm (give_kernel::Instance().create_object (calc_model_t::bs_type ()))
       , mesh (0)
@@ -45,7 +45,7 @@ namespace blue_sky
     this->add_signal (BS_SIGNAL_RANGE (reservoir_simulator));
     keyword_manager_->init ();//em);
 
-    //bs_node::insert (bs_link::create (dm, "data_manager"), false);
+    //bs_node::insert (bs_link::create (hdm, "hydrodynamic_model"), false);
     //bs_node::insert (bs_link::create (em, "event_manager"), false);
     //bs_node::insert (bs_link::create (cm, "calc_model"), false);
 
@@ -62,7 +62,7 @@ namespace blue_sky
   reservoir_simulator<strategy_t>::reservoir_simulator (const this_t &src)
       : bs_refcounter ()
       , bs_node (src)
-      , dm (src.dm)
+      , hdm (src.hdm)
       , em (src.em)
       , cm (src.cm)
       , mesh (src.mesh)
@@ -204,7 +204,7 @@ namespace blue_sky
   {
     write_time_to_log init_time ("read model and init reservoir simulator", "");
 
-    keyword_params <strategy_t> params (keyword_manager_, dm->reader, dm->data, em, mesh, cm->ts_params, cm->scal_prop);
+    keyword_params <strategy_t> params (keyword_manager_, hdm->reader, hdm->data, em, mesh, cm->ts_params, cm->scal_prop);
     model_filename_ = path;
     pre_read (em); 
     on_pre_read (this);
@@ -221,10 +221,10 @@ namespace blue_sky
   }
 
   template <class strategy_t>
-  const typename reservoir_simulator<strategy_t>::sp_dm_t &
-  reservoir_simulator<strategy_t>::get_data_manager () const
+  const typename reservoir_simulator<strategy_t>::sp_hdm_t &
+  reservoir_simulator<strategy_t>::get_hydrodynamic_model () const
   {
-    return dm;
+    return hdm;
   }
 
   template <class strategy_t>
@@ -778,7 +778,7 @@ namespace blue_sky
     //BOSOUT (section::check_data, level::medium) << " ...[FAIL] - error: " << r << bs_end;
 
     //if (count < 8)
-    //  throw bs_exception ("data_manager", "one of check failed");
+    //  throw bs_exception ("hydrodynamic_model", "one of check failed");
 
     // TODO:
     //BOSOUT << output_time;
@@ -791,9 +791,9 @@ namespace blue_sky
 
     const typename calc_model_t::sp_jacobian_matrix_t &jmatrix (jacobian_->get_jmatrix ());
 
-    dm->check_arrays_for_inactive_blocks();
+    hdm->check_arrays_for_inactive_blocks();
 
-    mesh->init_props (dm->data);
+    mesh->init_props (hdm->data);
     mesh->set_darcy (cm->internal_constants.darcy_constant);
 
     //!TODO:output init_ext_to_int(splicing)
@@ -807,10 +807,10 @@ namespace blue_sky
     //////////////////////////////////////
     // Check input data before units conversion for correct reporting
     // of user errors
-    check_data (mesh, dm->data);
+    check_data (mesh, hdm->data);
 
-    cm->init_main_arrays(dm->data, mesh);
-    cm->init_calcul_arrays (dm->data, mesh);
+    cm->init_main_arrays(hdm->data, mesh);
+    cm->init_calcul_arrays (hdm->data, mesh);
     cm->init_jacobian (jacobian_, mesh);
 
     // calculate planes geometric transmissibility
