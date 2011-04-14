@@ -48,14 +48,10 @@ namespace blue_sky
       typedef smart_ptr<base_t, true>                   sp_base_t;      ///< short name to smart pointer to this class
       typedef smart_ptr<prop_t, true>                   sp_prop_t;      ///< short name to smart pointer to properties holder class
 
-      typedef amg_smbuilder_iface                       smbuild_t;
-      typedef amg_coarse_iface                          coarse_t;
-      typedef amg_pbuild_iface                          pbuild_t;
-      typedef amg_smoother_iface                        smooth_t;
-      typedef smart_ptr<smbuild_t, true>                sp_smbuild_t;
-      typedef smart_ptr<coarse_t, true>                 sp_coarse_t;
-      typedef smart_ptr<pbuild_t, true>                 sp_pbuild_t;
-      typedef smart_ptr<smooth_t, true>                 sp_smooth_t;
+      typedef smart_ptr<amg_smbuilder_iface, true>      sp_smbuild_t;
+      typedef smart_ptr<amg_coarse_iface, true>         sp_coarse_t;
+      typedef smart_ptr<amg_pbuild_iface, true>         sp_pbuild_t;
+      typedef smart_ptr<amg_smoother_iface, true>       sp_smooth_t;
       typedef std::vector<sp_smbuild_t>                 vec_sp_smbuild_t;
       typedef std::vector<sp_coarse_t>                  vec_sp_coarse_t;
       typedef std::vector<sp_pbuild_t>                  vec_sp_pbuild_t;
@@ -202,6 +198,38 @@ namespace blue_sky
                 }
             }
           pbuilder[level] = sp_pbuilder_iface;
+        }
+
+      //! set pre smoothing method for amg level
+      void set_pre_smoother (unsigned int level, sp_smooth_t sp_smooth_iface)
+        {
+          unsigned int size = pre_smoother.size ();
+          //use last pbuilder [size-1]) for [size],..,[level-1]
+          if (size <= level)
+            {
+              pre_smoother.resize (level + 1);
+              for (unsigned int i = size; i < level; i++)
+                {
+                  pre_smoother[i] = pre_smoother[size - 1];
+                }
+            }
+          pre_smoother[level] = sp_smooth_iface;
+        }
+
+      //! set post smoothing method for amg level
+      void set_post_smoother (unsigned int level, sp_smooth_t sp_smooth_iface)
+        {
+          unsigned int size = post_smoother.size ();
+          //use last pbuilder [size-1]) for [size],..,[level-1]
+          if (size <= level)
+            {
+              post_smoother.resize (level + 1);
+              for (unsigned int i = size; i < level; i++)
+                {
+                  post_smoother[i] = post_smoother[size - 1];
+                }
+            }
+          post_smoother[level] = sp_smooth_iface;
         }
 
       sp_smbuild_t get_smbuilder (unsigned int level)
