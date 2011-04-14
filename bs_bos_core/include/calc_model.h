@@ -15,7 +15,7 @@
 #include "prvd_table.h"
 #include "arrays.h"
 #include "rocktab_table.h"
-#include "jacobian_matrix.h"
+#include "jac_matrix_iface.h"
 #include "rs_smesh_iface.h"
 #include "pvt_oil.h"
 #include "pvt_gas.h"
@@ -25,7 +25,6 @@
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #include "fi_params.h"
-#include "well_type_helper.h"
 #include "norm_calc.h"
 #include "shared_vector.h"
 #include "jacobian.h"
@@ -47,20 +46,8 @@ namespace blue_sky
     SMALL_TIME_STEP_CHOP = 256,     //!< solution restoring failed, newton process should be restarted
   };
 
-  template <typename strategy_t>
   class calc_model;
-
-  template <typename strategy_t>
-  class well;
-
-  template <typename strategy_t>
   class reservoir;
-
-  namespace wells
-  {
-    template <typename strategy_t>
-    class connection;
-  }
 
   class well_results_storage;
   class fip_results_storage;
@@ -72,15 +59,19 @@ namespace blue_sky
    * \brief holds temporary data 
    *        (shored on new newton iteration, for example)
    * */
-  template <typename strategy_t>
-  struct BS_API_PLUGIN calc_model_data_tmp_holder
+  struct calc_model_data_tmp_holder
     {
-      typedef typename strategy_t::item_t         item_t;         //!< item type (floating point)
-      typedef typename strategy_t::item_array_t   item_array_t;   //!< type for array of item_t values
+      //!< item type (floating point)
+      typedef t_double item_t;         
+
+      //!< type for array of item_t values
+      typedef v_double item_array_t;   
+
       //! type for array of main_var_type values
-      typedef typename strategy_t::template vec <main_var_type>::type main_var_array_t;
-      typedef calc_model <strategy_t>             calc_model_t;   //!< calc_model type
-      typedef smart_ptr <calc_model_t, true>      sp_calc_model_t;//!< smart_ptr to calc_model type
+      typedef std::vector <main_var_type> main_var_array_t;
+
+      //!< smart_ptr to calc_model type
+      typedef smart_ptr <calc_model, true> sp_calc_model_t;
 
     public:
 
@@ -99,9 +90,9 @@ namespace blue_sky
       restore (sp_calc_model_t &calc_model);
 
     public:
-      item_array_t              pressure;       //!< pressure array
-      item_array_t              saturation_3p;  //!< saturation array (3 phase)
-      item_array_t              gas_oil_ratio;  //!< gas_oil_ratio array
+      stdv_double               pressure;       //!< pressure array
+      stdv_double               saturation_3p;  //!< saturation array (3 phase)
+      stdv_double               gas_oil_ratio;  //!< gas_oil_ratio array
       main_var_array_t          main_var;       //!< main variables
     };
 
@@ -110,66 +101,58 @@ namespace blue_sky
    * \class calc_model
    * \brief holds calculated data and implements some useful functions
    * */
-  template <class strategy_t>
   class BS_API_PLUGIN calc_model : public bs_node
     {
     public:
 
-      typedef strategy_t                                strategy_type;            //!< strategy_type
-
-      typedef calc_model<strategy_t>                    this_t;                   //!< shortname for this type
+      typedef calc_model                                this_t;                   //!< shortname for this type
       typedef smart_ptr<this_t, true>                   sp_this_t;                //!< smart_ptr to this_t type
 
-      typedef jacobian<strategy_t>                      jacobian_t;               //!< jacobian type
+      typedef jacobian                                  jacobian_t;               //!< jacobian type
       typedef smart_ptr <jacobian_t, true>              sp_jacobian_t;            //!< smart_ptr to jacobian type
-      typedef jacobian_matrix <strategy_t>              jacobian_matrix_t;        //!< jacobian_matrix type
+      typedef jac_matrix_iface                          jacobian_matrix_t;        //!< jacobian_matrix type
       typedef smart_ptr <jacobian_matrix_t, true>       sp_jacobian_matrix_t;     //!< smart_ptr to jacobian_matrix type
 
       typedef idata                                     idata_t;                  //!< idata type
       typedef smart_ptr<idata_t, true>                  sp_idata_t;               //!< smart_ptr to idata type
 
-      typedef rs_mesh_iface <strategy_t>                mesh_iface_t;             //!< rs_mesh_iface type
+      typedef rs_mesh_iface                             mesh_iface_t;             //!< rs_mesh_iface type
       typedef smart_ptr <mesh_iface_t, true>            sp_mesh_iface_t;          //!< smart_ptr to rs_mesh_iface
       
-      typedef rs_smesh_iface <strategy_t>               smesh_iface_t;            //!< rs_smesh_iface type
+      typedef rs_smesh_iface                            smesh_iface_t;            //!< rs_smesh_iface type
       typedef smart_ptr <smesh_iface_t, true>           sp_smesh_iface_t;         //!< smart_ptr to rs_smesh_iface
 
-      typedef reservoir <strategy_t>                    reservoir_t;              //!< reservoir type
+      typedef reservoir                                 reservoir_t;              //!< reservoir type
       typedef smart_ptr <reservoir_t, true>             sp_reservoir_t;           //!< smart_ptr to reservoir type
 
-      typedef typename strategy_t::item_array_t         item_array_t;             //!< type for array of item_t values
-      typedef typename strategy_t::index_array_t        index_array_t;            //!< type for array of index_t values
-      typedef typename strategy_t::item_t               item_t;                   //!< item value (floating point)
-      typedef typename strategy_t::index_t              index_t;                  //!< index value (integral type)
+      typedef v_double                                  item_array_t;             //!< type for array of item_t values
+      typedef v_long                                    index_array_t;            //!< type for array of index_t values
+      typedef t_double                                  item_t;                   //!< item value (floating point)
+      typedef t_long                                    index_t;                  //!< index value (integral type)
       
-      typedef typename strategy_t::csr_matrix_t         csr_matrix_t;             //!< shortname for csr_matrix type
+      typedef bcsr_matrix_iface                         csr_matrix_t;             //!< shortname for csr_matrix type
       typedef smart_ptr <csr_matrix_t, true>            sp_csr_matrix_t;          //!< smart_ptr to csr_matrix type
 
-      typedef calc_model_data <strategy_t>              data_t;                   //!< calc_model data, each instance for one mesh cell
-      typedef typename strategy_t::template vec <data_t>::type data_array_t;      //!< array of calc_model_data values, each value for one mesh cell
+      typedef calc_model_data                           data_t;                   //!< calc_model data, each instance for one mesh cell
+      typedef std::vector <data_t>                      data_array_t;      //!< array of calc_model_data values, each value for one mesh cell
 
-      typedef scal_3p<strategy_t>                       scal_3p_t;                //!< scal_3p type
-      typedef scale_array_holder <strategy_t>           scale_array_holder_t;     //!< type of holder of scale arrays
-
-      typedef wells::connection <strategy_t>            connection_t;             //!< base type for well connections
-      typedef well <strategy_t>                         well_t;                   //!< base type for wells
+      typedef scal_3p                                   scal_3p_t;                //!< scal_3p type
+      typedef scale_array_holder                        scale_array_holder_t;     //!< type of holder of scale arrays
 
       typedef smart_ptr< scal_3p_t, true>               sp_scal3p;                //!< smart_ptr to scal_3p type
       typedef smart_ptr <scale_array_holder_t, true>    sp_scale_array_holder_t;  //!< smart_ptr to scale_array_holder type
 
-      typedef smart_ptr< rock_grid< strategy_t >, true> sp_rock_grid;             //!< smart_ptr to rock_grid type
+      typedef smart_ptr< rock_grid, true> sp_rock_grid;             //!< smart_ptr to rock_grid type
       typedef smart_ptr< fi_params, true>               sp_fi_params;             //!< smart_ptr to fi_params type
-      typedef smart_ptr <connection_t, true>            sp_connection_t;          //!< smart_ptr to connection type
-      typedef smart_ptr <well_t, true>                  sp_well_t;                //!< smart_ptr to well type
 
       typedef smart_ptr<well_results_storage, true>     sp_well_results_storage;  //!< smart_ptr to well_results_storage type
       typedef smart_ptr<fip_results_storage, true>      sp_fip_results_storage;   //!< smart_ptr to fip_results_storage type
 
-      typedef pvt_base< strategy_t >                    pvt_base_t;               //!< type of base pvt class
-      typedef pvt_oil < strategy_t >                    pvt_oil_t;                //!< pvt_oil type
-      typedef pvt_dead_oil< strategy_t >                pvt_dead_oil_t;           //!< pvt_dead_oil type
-      typedef pvt_gas< strategy_t >                     pvt_gas_t;                //!< pvt_gas type
-      typedef pvt_water< strategy_t >                   pvt_water_t;              //!< pvt_water type
+      typedef pvt_base                                  pvt_base_t;               //!< type of base pvt class
+      typedef pvt_oil                                   pvt_oil_t;                //!< pvt_oil type
+      typedef pvt_dead_oil                              pvt_dead_oil_t;           //!< pvt_dead_oil type
+      typedef pvt_gas                                   pvt_gas_t;                //!< pvt_gas type
+      typedef pvt_water                                 pvt_water_t;              //!< pvt_water type
 
       typedef smart_ptr <pvt_base_t, true>              sp_pvt_t;                 //!< smart_ptr to pvt_base type
       typedef smart_ptr <pvt_dead_oil_t, true>          sp_pvt_oil;               //!< smart_ptr to pvt_dead_oil type
@@ -183,18 +166,13 @@ namespace blue_sky
       typedef std::vector< sp_pvt_gas >                 sp_pvt_gas_array_t;       //!< type for array of pvt_gas objects
       typedef std::vector< sp_pvt_water >               sp_pvt_water_array_t;     //!< type for array of pvt_water objects
 
-      typedef std::vector< int >                        vec_i;                    //!< vector of int values
+      typedef v_int                                     vec_i;                    //!< vector of int values
 
       typedef boost::array <index_t, FI_PHASE_TOT>      phase_d_t;                //!< type for array of shifts for each phase
       typedef boost::array <index_t, FI_PHASE_TOT>      sat_d_t;                  //!< type for array of shifts for each phase, for saturation
-      typedef norms_storage <strategy_t>                norms_storage_t;          //!< norms_storage type
       typedef boost::array <item_t, FI_PHASE_TOT>       invers_fvf_avgerage_t;    //!< type for store invers_fvf_average value (by phase)
 
-      //! type for array of main_var_type values
-      typedef typename strategy_t::template vec <main_var_type>::type  main_var_array_t;
-
-      //! temporary holder for calc_model data
-      typedef calc_model_data_tmp_holder <strategy_t>   calc_model_data_tmp_holder_t; 
+      typedef std::vector <main_var_type>               main_var_array_t;         //! type for array of main_var_type values
 
     public:
 
@@ -410,7 +388,7 @@ namespace blue_sky
        * \return see restore_solution_return_type for more details
        * */
       restore_solution_return_type
-      restore_solution (const sp_mesh_iface_t &mesh, const sp_jacobian_matrix_t &jacobian_mx);
+      restore_solution (const sp_mesh_iface_t &mesh, const sp_jacobian_t &jacobian);
 
       /**
        * \brief  applies newton correction and multiplies it by given mult (default 1.0)
@@ -421,7 +399,7 @@ namespace blue_sky
        * \return see restore_solution_return_type for more details
        * */
       restore_solution_return_type
-      apply_newton_correction (item_t mult, index_t istart_line_search, const sp_mesh_iface_t &mesh, const sp_jacobian_matrix_t &jacobian_mx);
+      apply_newton_correction (item_t mult, index_t istart_line_search, const sp_mesh_iface_t &mesh, const sp_jacobian_t &jacobian);
 
       /**
        * \brief  calculates multiplier (m) for newton correction vector (J(x0) * w = -F(x0), x1 = x0 + m * w)
@@ -430,7 +408,7 @@ namespace blue_sky
        * \return multiplier value
        * */
       item_t  
-      new_simple_get_cell_solution_mult (const sp_mesh_iface_t &mesh, const sp_jacobian_matrix_t &jacobian_mx);
+      new_simple_get_cell_solution_mult (const sp_mesh_iface_t &mesh, const sp_jacobian_t &jacobian);
 
       /**
        * \brief  returns multiplier for apply_newton_correction function
@@ -439,7 +417,7 @@ namespace blue_sky
        * \return multiplier value
        * */
       item_t  
-      new_simple_get_cell_solution_mult_2 (const sp_mesh_iface_t &mesh, const sp_jacobian_matrix_t &jmatrix) const;
+      new_simple_get_cell_solution_mult_2 (const sp_mesh_iface_t &mesh, const sp_jacobian_t &jacobian) const;
 
       /**
        * \brief  restores solution from Jacobian (jacobian_matrix), 
@@ -449,7 +427,7 @@ namespace blue_sky
        * \return 0 on success
        * */
       int     
-      new_simple_get_cell_solution (const double mult, int istart_linear_search, const sp_mesh_iface_t &msh, const sp_jacobian_matrix_t &jacobian_mx);
+      new_simple_get_cell_solution (const double mult, int istart_linear_search, const sp_mesh_iface_t &msh, const sp_jacobian_t &jacobian);
 
       /**
        * \brief  calculates approximal value of So, Sg, Ro from 
@@ -545,7 +523,7 @@ namespace blue_sky
       main_var_array_t                                        main_variable;                  //!< (n_elements) main variables (Sg or Ro) per each grid block
       auto_value <well_model_var_type, WELL_MODEL_3VAR>       well_model_var_;                //!< well model var type
       auto_value <well_model_type, BLACK_OIL>                 well_model_type_;               //!< well model type
-      norms_storage_t                                         norm;                           //!< norm storage
+      norms_storage                                           norm;                           //!< norm storage
 
       sp_pvt_dead_oil_array_t                                 pvt_oil_array;                  //!< array of pvt_oil objects, length == n_pvt_regions
       sp_pvt_water_array_t                                    pvt_water_array;                //!< array of pvt_water objects, length == n_pvt_regions
@@ -553,16 +531,16 @@ namespace blue_sky
 
       data_array_t                                            data;                           //!< array of calc_model_data, length == n_elements 
 
-      item_array_t                                            workspace;                      //!< obsolete, n_elements * (n_phase)
+      stdv_double                                             workspace;                      //!< obsolete, n_elements * (n_phase)
 
-      calc_model_data_tmp_holder_t                            old_data_;                      //!< calc_model data stored on previous step
-      calc_model_data_tmp_holder_t                            prev_niter_data_;               //!< calc_model data stored on previous newton iteration
+      calc_model_data_tmp_holder                              old_data_;                      //!< calc_model data stored on previous step
+      calc_model_data_tmp_holder                              prev_niter_data_;               //!< calc_model data stored on previous newton iteration
 
       //! pressure on the boundary
-      item_array_t                                            bconn_pressure;                 //!< obsolete
-      item_array_t                                            bconn_saturation;               //!< obsolete
-      item_array_t                                            bconn_gor;                      //!< obsolete
-      index_array_t                                           bconn_mainvar;                  //!< obsolete
+      stdv_double                                             bconn_pressure;                 //!< obsolete
+      stdv_double                                             bconn_saturation;               //!< obsolete
+      stdv_double                                             bconn_gor;                      //!< obsolete
+      stdv_long                                               bconn_mainvar;                  //!< obsolete
 
       auto_value <item_t>                                     linear_search_mult;
       auto_value <bool>                                       lsearch_force_newton_step;      //!< obsolete, force to make newton step in any case
@@ -576,12 +554,9 @@ namespace blue_sky
       auto_value <int>                                        b_o_w;                          //!< obsolete
       auto_value <int>                                        b_o_g;                          //!< obsolete
       auto_value <int>                                        b_o_p;                          //!< obsolete
-      index_array_t                                           iwksp;                          //!< obsolete, n_elements
       auto_value <int>                                        multi_well_in_cell_flag;        //!< obsolete, if != 0 use sorting
 
       auto_value <double>                                     ave_volume;                     //!< average volume
-
-      index_array_t                                           max_norm_counter;               //!< obsolete
 
       //! base parameters
     public:
@@ -589,7 +564,7 @@ namespace blue_sky
       auto_value <size_t>                                     n_comps;                        //!< number of components
       auto_value <size_t>                                     n_phases;                       //!< number of phases
       auto_value <size_t>                                     n_sec_vars;                     //!< number if secondary variables
-      auto_value <FI_PHASE_ENUM>                              phases;                         //!< sizeof (int) bit fields (1 -- phase present, 0 -- do not present)
+      auto_value <size_t>                                     phases;                         //!< sizeof (int) bit fields (1 -- phase present, 0 -- do not present)
       auto_value <size_t>                                     n_HCcomps;                      //!< number of hydrocarbon components (n_comps = n_HCcomps + 1)
       auto_value <size_t>                                     n_HCphases;                     //!< number of hydrocarbon phases (n_phases = n_HCphases + 1)
       auto_value <size_t>                                     n_pri;                          //!< number of primary variables
@@ -605,17 +580,17 @@ namespace blue_sky
 
       physical_constants                                      internal_constants;             //!< physical constants in internal units
 
-      index_array_t                                           pvt_regions;                    //!< (n_elements) index of PVT table for given block zero base
-      index_array_t                                           sat_regions;                    //!< (n_elements) index of SAT table for given block zero base
-      index_array_t                                           fip_regions;                    //!< (n_elements) index of FIP region for cell
-      index_array_t                                           rock_regions;                   //!< (n_elements) index of ROCK regions
+      stdv_long                                               pvt_regions;                    //!< (n_elements) index of PVT table for given block zero base
+      stdv_long                                               sat_regions;                    //!< (n_elements) index of SAT table for given block zero base
+      stdv_long                                               fip_regions;                    //!< (n_elements) index of FIP region for cell
+      stdv_long                                               rock_regions;                   //!< (n_elements) index of ROCK regions
 
       auto_value <RPO_MODEL_ENUM, RPO_DEFAULT_MODEL>          rpo_model;                      //!< 3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)
       auto_value <SCALECRS_ENUM, SCALECRS_NO>                 is_scalecrs;                    //!< use of alternative scaling method or not
       sp_scal3p                                               scal_prop;                      //!< scal properties
       sp_rock_grid                                            rock_grid_prop;                 //!< rock and grid properties
 
-      std::vector<rocktab_table <base_strategy_fi> >          rocktab;                        //!< (rocktab table)
+      std::vector<rocktab_table>                              rocktab;                        //!< (rocktab table)
 
 
       auto_value <double>                                     last_c_norm;                    //!< obsolete
@@ -624,12 +599,12 @@ namespace blue_sky
       sp_fi_params                                            ts_params;                      //!< input model params
       invers_fvf_avgerage_t                                   invers_fvf_average;             //!< (n_phases) 1. / (formation volume factor) for all phases average
 
-      item_array_t                                            plane_flow_rate;                //!< (n_planes * n_phases) flow rates for all planes on current time step
-      item_array_t                                            full_step_plane_flow_rate;      //!< (n_planes * n_phases) total flow rates on time step
+      stdv_double                                             plane_flow_rate;                //!< (n_planes * n_phases) flow rates for all planes on current time step
+      stdv_double                                             full_step_plane_flow_rate;      //!< (n_planes * n_phases) total flow rates on time step
 
-      item_array_t                                            pressure;                       //!< pressure (n_elements)
-      item_array_t                                            saturation_3p;                  //!< (n_phases * n_elements)
-      item_array_t                                            gas_oil_ratio;                  //!< gas_oil_ratio (n_elements)
+      stdv_double                                             pressure;                       //!< pressure (n_elements)
+      stdv_double                                             saturation_3p;                  //!< (n_phases * n_elements)
+      stdv_double                                             gas_oil_ratio;                  //!< gas_oil_ratio (n_elements)
 
       sp_csr_matrix_t                                         mat;                            //!< obsolete
       sp_well_results_storage                                 well_res;                       //!< storage for well results

@@ -23,11 +23,6 @@
 
 namespace blue_sky
   {
-
-  template <typename strategy_t>
-  class well;
-
-  template <typename strategy_t>
   class calc_model;
 
   namespace wells
@@ -102,31 +97,29 @@ namespace blue_sky
      * \class connection
      * \brief Base class for well perforations (well connections)
      * */
-    template <typename strategy_t>
     class BS_API_PLUGIN connection : public objbase
       {
       public:
 
-        typedef connection <strategy_t>                   this_t;
-        typedef smart_ptr <this_t, true>                  sp_this_t;
+        typedef connection                      this_t;
+        typedef smart_ptr <this_t, true>        sp_this_t;
 
-        typedef typename strategy_t::item_array_t         item_array_t;
-        typedef typename strategy_t::item_t               item_t;
-        typedef typename strategy_t::rhs_item_t           rhs_item_t;
-        typedef typename strategy_t::index_t              index_t;
+        typedef v_double                        item_array_t;
+        typedef t_double                        item_t;
+        typedef t_double                        rhs_item_t;
+        typedef t_long                          index_t;
 
-        typedef rate_data <strategy_t>                    rate_data_t;
-        typedef typename rate_data_t::rate_data_inner     rate_data_inner_t;
+        typedef rate_data                       rate_data_t;
+        typedef rate_data_t::rate_data_inner    rate_data_inner_t;
 
-        typedef fi_params                                 params_t;
-        typedef smart_ptr <params_t>                      sp_params_t;
+        typedef fi_params                       params_t;
+        typedef smart_ptr <params_t>            sp_params_t;
 
-        typedef rs_mesh_iface <strategy_t>                mesh_iface_t;
-        typedef smart_ptr <mesh_iface_t, true>            sp_mesh_iface_t;
+        typedef rs_mesh_iface                   mesh_iface_t;
+        typedef smart_ptr <mesh_iface_t, true>  sp_mesh_iface_t;
 
-        typedef connection <strategy_t>                   connection_t;
-        typedef calc_model <strategy_t>                   calc_model_t;
-        typedef well <strategy_t>                         well_t;
+        typedef connection                      connection_t;
+        typedef calc_model                      calc_model_t;
 
       public:
 
@@ -143,8 +136,8 @@ namespace blue_sky
         compute_factors (const physical_constants &internal_constants,
                          const sp_params_t &params,
                          const sp_mesh_iface_t &mesh,
-                         const item_array_t &perm,
-                         const item_array_t &ntg,
+                         const stdv_float &perm,
+                         const stdv_float &ntg,
                          bool ro_calc_flag = false);
 
         /**
@@ -458,10 +451,7 @@ namespace blue_sky
 
       private:
 
-        template <typename strategy_t_x>
         friend struct wells::compute_factors::peaceman_model;
-
-        //template <typename strategy_t_x>
         //friend struct wells::compute_factors::baby_odeh_model;
 
         auto_value <index_t, -1>      i_coord_;                     //!< i coord of connection
@@ -496,7 +486,7 @@ namespace blue_sky
         auto_value <index_t, 0>       iseg_;
       public:
         //! blue-sky type declaration
-        BLUE_SKY_TYPE_DECL_T (connection <strategy_t>);
+        BLUE_SKY_TYPE_DECL (connection);
       };
 
 

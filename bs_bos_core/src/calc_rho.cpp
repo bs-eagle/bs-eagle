@@ -23,8 +23,7 @@ namespace blue_sky
      * \brief  'default' ctor for calc_total_average_rho 
      * \param  param additional ctor params
      * */
-  template <typename strategy_t>
-  calc_total_average_rho <strategy_t>::calc_total_average_rho (bs_type_ctor_param /* param = NULL */)
+  calc_total_average_rho::calc_total_average_rho (bs_type_ctor_param /* param = NULL */)
   {
   }
 
@@ -32,28 +31,25 @@ namespace blue_sky
    * \brief  copy-ctor for calc_total_average_rho
    * \param  rhs calc_total_average_rho instance to be copied
    * */
-  template <typename strategy_t>
-  calc_total_average_rho <strategy_t>::calc_total_average_rho (const calc_total_average_rho &rhs)
+  calc_total_average_rho::calc_total_average_rho (const calc_total_average_rho &rhs)
         : bs_refcounter ()
   {
     *this = rhs;
   }
 
-  template <typename strategy_t>
   void
-  calc_total_average_rho<strategy_t>::calculate (const sp_well_t &well, const sp_calc_model_t &calc_model, 
+  calc_total_average_rho::calculate (const sp_well_t &well, const sp_calc_model_t &calc_model, 
                                                  const sp_mesh_iface_t & /*mesh*/) const
     {
       BS_ASSERT (!well->is_shut ()) (well->name ());
       BS_ASSERT (!well->is_no_connections ()) (well->name ());
 
-      typedef typename well_t::connection_t               connection_t;
-      typedef typename well_t::sp_connection_t            sp_connection_t;
-      typedef typename calc_model_t::data_t               calc_model_data_t;
-      typedef typename calc_model_t::phase_d_t            phase_d_t;
+      typedef well::connection_t               connection_t;
+      typedef well::sp_connection_t            sp_connection_t;
+      typedef calc_model::phase_d_t            phase_d_t;
 
       const phase_d_t &phase_d = calc_model->phase_d;
-      const item_array_t &saturation = calc_model->saturation_3p;
+      const stdv_double &saturation = calc_model->saturation_3p;
 
       bool is_w = calc_model->is_water ();
       bool is_g = calc_model->is_gas ();
@@ -75,7 +71,7 @@ namespace blue_sky
             continue;
 
           index_t n_block = c->n_block ();
-          const calc_model_data_t &data = calc_model->get_data (n_block);
+          const calc_model_data &data = calc_model->get_data (n_block);
 
           if (is_w)
             {
@@ -106,21 +102,16 @@ namespace blue_sky
         }
     }
 
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF (calc_total_average_rho, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF (calc_total_average_rho, (class));
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (calc_total_average_rho<base_strategy_fi>), 1, (objbase), "calc_total_average_fi", "calc_total_average_fi", "calc_total_average_fi", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (calc_total_average_rho<base_strategy_di>), 1, (objbase), "calc_total_average_di", "calc_total_average_di", "calc_total_average_di", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (calc_total_average_rho<base_strategy_mixi>), 1, (objbase), "calc_total_average_mixi", "calc_total_average_mixi", "calc_total_average_mixi", false);
+  BLUE_SKY_TYPE_STD_CREATE (calc_total_average_rho);
+  BLUE_SKY_TYPE_STD_COPY (calc_total_average_rho);
+  BLUE_SKY_TYPE_IMPL (calc_total_average_rho, objbase, "calc_total_average", "calc_total_average", "calc_total_average");
 
   bool
   calc_rho_register_types (const blue_sky::plugin_descriptor &pd)
   {
     bool res = true;
 
-    res &= BS_KERNEL.register_type (pd, calc_total_average_rho <base_strategy_fi>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, calc_total_average_rho <base_strategy_di>::bs_type ());
-    BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, calc_total_average_rho::bs_type ());    BS_ASSERT (res);
 
     return res;
   }

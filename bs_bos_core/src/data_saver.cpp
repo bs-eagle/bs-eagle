@@ -20,21 +20,18 @@
 
 namespace blue_sky {
 
-  template <typename strategy_t>
-  data_saver <strategy_t>::data_saver ()
+  data_saver::data_saver ()
   {
   }
 
-  template <typename strategy_t>
   void
-  data_saver <strategy_t>::open_storage (const std::string &name)
+  data_saver::open_storage (const std::string &name)
   {
     impl_.reset (new impl (name));
   }
 
-  template <typename strategy_t>
   void
-  data_saver <strategy_t>::write_well_results (const sp_calc_model_t &calc_model, 
+  data_saver::write_well_results (const sp_calc_model_t &calc_model, 
     well_iterator_t wb, 
     const well_iterator_t &we, 
     double time)
@@ -43,17 +40,15 @@ namespace blue_sky {
     impl_->write_well_results (calc_model, wb, we, time);
   }
 
-  template <typename strategy_t>
   void
-  data_saver <strategy_t>::write_fip_results (const sp_calc_model_t &calc_model)
+  data_saver::write_fip_results (const sp_calc_model_t &calc_model)
   {
     BS_ASSERT (impl_);
     //! \todo Should be implemented
   }
 
-  template <typename strategy_t>
   void
-  data_saver <strategy_t>::write_calc_model_data (const sp_calc_model_t &calc_model,
+  data_saver::write_calc_model_data (const sp_calc_model_t &calc_model,
     const sp_jmatrix_t &jmx,
     size_t large_time_step_num,
     size_t total_time_step_num,
@@ -63,25 +58,18 @@ namespace blue_sky {
     impl_->write_calc_model_data (calc_model, jmx, large_time_step_num, total_time_step_num, time);
   }
 
-  template <typename strategy_t>
   void
-  data_saver <strategy_t>::write_mesh (const sp_mesh_iface_t &mesh)
+  data_saver::write_mesh (const sp_mesh_iface_t &mesh)
   {
     BS_ASSERT (impl_);
     impl_->write_mesh (mesh);
   }
 
-  template <typename strategy_t>
   void
-  data_saver <strategy_t>::write_starting_date (const boost::posix_time::ptime &date)
+  data_saver::write_starting_date (const boost::posix_time::ptime &date)
   {
     BS_ASSERT (impl_);
     impl_->write_starting_date (date);
   }
-
-  template struct data_saver <base_strategy_fi>;
-  template struct data_saver <base_strategy_di>;
-  template struct data_saver <base_strategy_mixi>;
-
 } // namespace blue_sky
 

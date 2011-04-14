@@ -623,7 +623,7 @@ namespace blue_sky
 
             rs_->on_before_restore_solution ();
             fi_operator.save_prev_niter_vars ();
-            restore_solution_return_type ret_code = calc_model_->restore_solution (fi_operator.mesh_, fi_operator.jmatrix_);
+            restore_solution_return_type ret_code = calc_model_->restore_solution (fi_operator.mesh_, fi_operator.jacobian_);
             if (ret_code == SMALL_TIME_STEP_CHOP)
               {
                 check_time_step ();

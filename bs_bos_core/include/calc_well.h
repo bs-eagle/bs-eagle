@@ -32,21 +32,15 @@ namespace blue_sky
   ///////////////////////////////////////////////////////////////////////////
   // fwd declarations
   class physical_constants;
-
-  template <typename strategy_t>
   class calc_model;
 
   namespace wells
-    {
-    template <typename strategy_t>
+  {
     class connection;
 
     namespace compute_factors
-      {
-      template <typename strategy_t>
+    {
       struct peaceman_model;
-
-      template <typename strategy_t>
       struct baby_odeh_model;
     }
   }
@@ -73,7 +67,6 @@ namespace blue_sky
    * \class well_state
    * \brief Incapsulates state of well
    * */
-  template <typename strategy_t>
   struct well_state
     {
       auto_value <well_state_type, well_open>   state;    //!< Status of well directed by model
@@ -84,44 +77,42 @@ namespace blue_sky
    * \class well
    * \brief Base class for wells
    * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN well : public facility_base<strategy_t>
+  class BS_API_PLUGIN well : public facility_base
     {
     public:
 
-      typedef facility_base <strategy_t>                base_t;
-      typedef well <strategy_t>                         well_t;
-      typedef typename strategy_t::item_array_t         item_array_t;
-      typedef typename strategy_t::rhs_item_array_t     rhs_item_array_t;
-      typedef typename strategy_t::index_array_t        index_array_t;
-      typedef typename strategy_t::index_t              index_t;
-      typedef typename strategy_t::item_t               item_t;
-      typedef typename strategy_t::rhs_item_t           rhs_item_t;
+      typedef facility_base                 base_t;
+      typedef well                          well_t;
+      typedef v_double                      item_array_t;
+      typedef v_double                      rhs_item_array_t;
+      typedef v_long                        index_array_t;
+      typedef t_long                        index_t;
+      typedef t_double                      item_t;
+      typedef t_double                      rhs_item_t;
 
-      typedef rate_data <strategy_t>                    rate_data_t;
-      typedef typename rate_data_t::rate_data_inner     rate_data_inner_t;
-      typedef well_state <strategy_t>                   well_state_t;
+      typedef rate_data                     rate_data_t;
+      typedef rate_data_t::rate_data_inner  rate_data_inner_t;
+      typedef well_state                    well_state_t;
 
-      typedef wells::well_controller <strategy_t>       well_controller_t;
-      typedef wells::well_rate_control <strategy_t>     well_rate_control_t;
-      typedef calc_model <strategy_t>                   calc_model_t;
-      typedef calc_model_data <strategy_t>              calc_model_data_t;
-      typedef wells::connection <strategy_t>            connection_t;
-      typedef rs_mesh_iface <strategy_t>                mesh_iface_t;
-      typedef jacobian_matrix <strategy_t>              jacobian_matrix_t;
+      typedef wells::well_controller        well_controller_t;
+      typedef wells::well_rate_control      well_rate_control_t;
+      typedef calc_model                    calc_model_t;
+      typedef calc_model_data               calc_model_data_t;
+      typedef wells::connection             connection_t;
+      typedef rs_mesh_iface                 mesh_iface_t;
+      typedef jac_matrix_iface              jacobian_matrix_t;
 
-      typedef pvt_oil <strategy_t>                      pvt_oil_t;
-      typedef pvt_dead_oil <strategy_t>                 pvt_dead_oil_t;
-      typedef pvt_gas <strategy_t>                      pvt_gas_t;
-      typedef pvt_water <strategy_t>                    pvt_water_t;
+      typedef pvt_oil                       pvt_oil_t;
+      typedef pvt_dead_oil                  pvt_dead_oil_t;
+      typedef pvt_gas                       pvt_gas_t;
+      typedef pvt_water                     pvt_water_t;
 
-      typedef calc_well_pressure_base <strategy_t>      calc_well_pressure_t;
-      typedef calc_rho_base <strategy_t>                calc_rho_base_t;
-      typedef calc_perf_density_base <strategy_t>       calc_perf_density_t;
-      typedef calc_perf_bhp_base <strategy_t>           calc_perf_bhp_t;
+      typedef calc_well_pressure_base       calc_well_pressure_t;
+      typedef calc_rho_base                 calc_rho_base_t;
+      typedef calc_perf_density_base        calc_perf_density_t;
 
-      typedef connection_iterator <strategy_t>          connection_iterator_t;
-      typedef wells::well_facility_iface <strategy_t>   well_facility_t;
+      typedef connection_iterator           connection_iterator_t;
+      typedef wells::well_facility_iface    well_facility_t;
 
       typedef smart_ptr <well_controller_t, true>       sp_well_controller_t;
       typedef smart_ptr <wells::well_limit_operation, true>     sp_well_limit_operation_t;
@@ -140,7 +131,7 @@ namespace blue_sky
       typedef smart_ptr <calc_well_pressure_t, true>    sp_calc_well_pressure_t;
       typedef smart_ptr <calc_rho_base_t, true>         sp_calc_rho_t;
       typedef smart_ptr <calc_perf_density_t, true>     sp_calc_perf_density_t;
-      typedef smart_ptr <calc_perf_bhp_t, true>         sp_calc_perf_bhp_t;
+      typedef smart_ptr <calc_perf_bhp_base, true>         sp_calc_perf_bhp_t;
 
       typedef smart_ptr <fi_params, true>               sp_params_t;
 
@@ -448,7 +439,7 @@ namespace blue_sky
        * \return True if any connection have valid BHP value otherwise false
        * */
       bool
-      check_connections_bhp (const item_array_t &pressure) const;
+      check_connections_bhp (const stdv_double &pressure) const;
 
       /**
        * \brief  Returns true if well controlled by BHP
@@ -661,7 +652,7 @@ namespace blue_sky
 
     public:
       //! blue-sky type declaration
-      BLUE_SKY_TYPE_DECL_T (well <strategy_t>);
+      BLUE_SKY_TYPE_DECL (well);
 
     protected:
 
@@ -687,8 +678,8 @@ namespace blue_sky
       compute_connection_factor (const physical_constants &internal_constants,
                                  const sp_params_t &params,
                                  const sp_mesh_iface_t &mesh,
-                                 const item_array_t &perm,
-                                 const item_array_t &ntg,
+                                 const stdv_float &perm,
+                                 const stdv_float &ntg,
                                  bool ro_calc_flag);
 
 
@@ -755,15 +746,14 @@ namespace blue_sky
    * \todo  create_connection should be removed because
    *        perforations now created in add_connection
    * */
-  template <typename strategy_t>
   class BS_API_PLUGIN well_factory : public objbase
     {
     public:
 
-      typedef well <strategy_t>                 well_t;
-      typedef wells::connection <strategy_t>    connection_t;
-      typedef smart_ptr <well_t>                sp_well_t;
-      typedef smart_ptr <connection_t, true>    sp_connection_t;
+      typedef well                        well_t;
+      typedef wells::connection           connection_t;
+      typedef smart_ptr <well_t>          sp_well_t;
+      typedef smart_ptr <connection_t>    sp_connection_t;
 
     public:
 
@@ -788,7 +778,7 @@ namespace blue_sky
       create_connection () const;
 
       //! blue-sky type declaration
-      BLUE_SKY_TYPE_DECL_T (well_factory <strategy_t>);
+      BLUE_SKY_TYPE_DECL (well_factory);
     };
 
   /**

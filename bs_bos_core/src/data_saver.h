@@ -6,7 +6,7 @@
 #include "calc_model.h"
 #include "rs_mesh_iface.h"
 #include BS_FORCE_PLUGIN_IMPORT ()
-#include "jacobian_matrix.h"
+#include "jac_matrix_iface.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #include "calc_well.h"
@@ -16,17 +16,16 @@
 
 namespace blue_sky {
 
-  template <typename strategy_t>
   struct BS_API_PLUGIN data_saver
   {
-    typedef typename strategy_t::item_t   item_t;
+    typedef t_double          item_t;
 
-    typedef calc_model <strategy_t>       calc_model_t;
-    typedef rs_mesh_iface <strategy_t>    mesh_iface_t;
-    typedef jacobian_matrix <strategy_t>  jacobian_matrix_t; 
-    typedef facility_manager <strategy_t> facility_manager_t;
+    typedef calc_model        calc_model_t;
+    typedef rs_mesh_iface     mesh_iface_t;
+    typedef jac_matrix_iface  jacobian_matrix_t; 
+    typedef facility_manager  facility_manager_t;
 
-    typedef typename facility_manager_t::well_const_iterator_t      well_iterator_t;
+    typedef facility_manager_t::well_const_iterator_t      well_iterator_t;
 
     typedef smart_ptr <calc_model_t>      sp_calc_model_t;
     typedef smart_ptr <mesh_iface_t>      sp_mesh_iface_t;

@@ -27,8 +27,8 @@ namespace blue_sky
                                            const physical_constants &internal_constants,
                                            const sp_params_t &params,
                                            const sp_mesh_iface_t &mesh,
-                                           const item_array_t &perm,
-                                           const item_array_t &ntg,
+                                           const stdv_float &perm,
+                                           const stdv_float &ntg,
                                            bool ro_calc_flag)
       {
         BS_ASSERT (con.n_block_ >= 0) (con.n_block_);

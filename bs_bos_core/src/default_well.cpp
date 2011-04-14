@@ -26,8 +26,7 @@ namespace wells {
    * \brief  'default' ctor for default_well
    * \param  param Additional params for ctor
    * */
-  template <typename strategy_t>
-  default_well <strategy_t>::default_well (bs_type_ctor_param param /* = NULL */)
+  default_well::default_well (bs_type_ctor_param param /* = NULL */)
   : base_t (param)
   , ww_value (0)
   , bw_value (0)
@@ -40,8 +39,7 @@ namespace wells {
    * \param  well_name Name of well
    * \todo   Obsolete 
    * */
-  template <typename strategy_t>
-  default_well <strategy_t>::default_well (const std::string &well_name)
+  default_well::default_well (const std::string &well_name)
   : base_t (well_name)
   , ww_value (0)
   , bw_value (0)
@@ -54,29 +52,25 @@ namespace wells {
    * \brief  copy-ctor for default_well
    * \param  w Instance of default_well to be copied
    * */
-  template <typename strategy_t>
-  default_well <strategy_t>::default_well (const default_well &w)
-        : bs_refcounter (), well < strategy_t> ()
+  default_well::default_well (const default_well &w)
+        : bs_refcounter (), well ()
   {
     *this = w;
   }
 
-  template <typename strategy_t>
-  typename default_well <strategy_t>::sp_connection_t
-  default_well <strategy_t>::add_primary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
+  typename default_well::sp_connection_t
+  default_well::add_primary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
   {
     return detail::add_connection (i_coord, j_coord, k_coord, n_block, primary_connection_list_, this);
   }
-  template <typename strategy_t>
-  typename default_well <strategy_t>::sp_connection_t
-  default_well <strategy_t>::add_secondary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
+  typename default_well::sp_connection_t
+  default_well::add_secondary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
   {
     return detail::add_connection (i_coord, j_coord, k_coord, n_block, secondary_connection_list_, this);
   }
 
-  template <typename strategy_t>
-  typename default_well <strategy_t>::sp_connection_t
-  default_well <strategy_t>::get_connection_map (index_t n_block) const
+  typename default_well::sp_connection_t
+  default_well::get_connection_map (index_t n_block) const
   {
     for (size_t i = 0, cnt = primary_connection_list_.size (); i < cnt; ++i)
       {
@@ -110,9 +104,8 @@ namespace wells {
 //    return connection_list_[it->second];
   }
 
-  template <typename strategy_t>
   bool
-  default_well <strategy_t>::is_primary_connection (index_t n_block) const
+  default_well::is_primary_connection (index_t n_block) const
   {
     for (size_t i = 0, cnt = primary_connection_list_.size (); i < cnt; ++i)
       {
@@ -123,47 +116,41 @@ namespace wells {
     return false;
   }
 
-  template <typename strategy_t>
   bool
-  default_well <strategy_t>::is_primary_connection (const connection_iterator <strategy_t> &it) const
+  default_well::is_primary_connection (const connection_iterator &it) const
   {
     return it.position () < static_cast <index_t> (primary_connection_list_.size ());
   }
 
-  template <typename strategy_t>
-  connection_iterator <strategy_t>
-  default_well <strategy_t>::connections_begin () const
+  connection_iterator
+  default_well::connections_begin () const
   {
-    return typename base_t::connection_iterator_t (
-      new default_connection_iterator <strategy_t, default_well, default_connection_t> (this, begin_iterator_tag));
+    return base_t::connection_iterator_t (
+      new default_connection_iterator <default_well, default_connection_t> (this, begin_iterator_tag));
   }
 
-  template <typename strategy_t>
-  connection_iterator <strategy_t>
-  default_well <strategy_t>::connections_end () const
+  connection_iterator
+  default_well::connections_end () const
   {
-    return typename base_t::connection_iterator_t (
-      new default_connection_iterator <strategy_t, default_well, default_connection_t> (this, end_iterator_tag));
+    return base_t::connection_iterator_t (
+      new default_connection_iterator <default_well, default_connection_t> (this, end_iterator_tag));
   }
 
-  template <typename strategy_t>
   bool
-  default_well <strategy_t>::is_no_connections () const
+  default_well::is_no_connections () const
   {
     return primary_connection_list_.empty () && 
       secondary_connection_list_.empty ();
   }
 
-  template <typename strategy_t>
   bool
-  default_well <strategy_t>::is_no_primary_connections () const
+  default_well::is_no_primary_connections () const
   {
     return primary_connection_list_.empty ();
   }
 
-  template <typename strategy_t>
-  typename default_well <strategy_t>::sp_connection_t
-  default_well <strategy_t>::get_first_connection () const
+  default_well::sp_connection_t
+  default_well::get_first_connection () const
   {
     if (primary_connection_list_.empty ())
       {
@@ -174,9 +161,8 @@ namespace wells {
   }
 
 
-  template <typename strategy_t>
   void
-  default_well <strategy_t>::restore_solution (double /*dt*/, const item_array_t &p_sol, 
+  default_well::restore_solution (double /*dt*/, const item_array_t &p_sol, 
                                                const item_array_t & /*s_sol*/, index_t block_size)
   {
     BS_ASSERT (!is_no_connections ()) (base_t::name ());
@@ -194,7 +180,7 @@ namespace wells {
     item_t xw = 0;
     item_t ww_bw = (1.0 / ww_value) * bw_value;
 
-    typedef default_connection_iterator_impl <strategy_t, default_well <strategy_t>, default_connection <strategy_t> > iterator_t;
+    typedef default_connection_iterator_impl <default_well, default_connection> iterator_t;
     iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
     for (; !base_t::is_shut () && it != e; ++it)
       {
@@ -287,27 +273,24 @@ namespace wells {
       }
   }
 
-  template <typename strategy_t>
   void
-  default_well <strategy_t>::fill_rows (index_array_t &rows) const
+  default_well::fill_rows (index_array_t &rows) const
   {
-    detail::fill_rows <strategy_t, default_well, default_connection_t> (this, rows);
+    detail::fill_rows <default_well, default_connection_t> (this, rows);
   }
-  template <typename strategy_t>
   void
-  default_well <strategy_t>::fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const
+  default_well::fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const
   {
-    detail::fill_jacobian <strategy_t, default_well, default_connection_t> (this,
+    detail::fill_jacobian <default_well, default_connection_t> (this,
       dt, block_size, rows, cols, values, markers);
   }
 
-  template <typename strategy_t>
   void
-  default_well <strategy_t>::fill_rhs (double dt, index_t n_phases, bool is_g, bool is_o, bool is_w, rhs_item_array_t &rhs) const
+  default_well::fill_rhs (double dt, index_t n_phases, bool is_g, bool is_o, bool is_w, rhs_item_array_t &rhs) const
   {
     item_t wefac = base_t::exploitation_factor_ > 0 ? base_t::exploitation_factor_ * dt : dt;
 
-    typedef default_connection_iterator_impl <strategy_t, default_well <strategy_t>, default_connection <strategy_t> > iterator_t;
+    typedef default_connection_iterator_impl <default_well, default_connection> iterator_t;
     iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
     for (; !base_t::is_shut () && it != e; ++it)
       {
@@ -353,10 +336,9 @@ namespace wells {
       }
   }
 
-  template <typename strategy_t>
   template <bool is_prod>
   void
-  default_well <strategy_t>::calc_rate_and_derivs (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
+  default_well::calc_rate_and_derivs (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
   {
     if (calc_model->n_phases == 3)
       {
@@ -433,13 +415,12 @@ namespace wells {
     //std::cout << "\t\tw = " << t->mobility_value[0] << "\n\t\tg = " << t->mobility_value[1] << "\n\t\to = " << t->mobility_value[2] << std::endl;
   }
 
-  template <typename strategy_t>
   template <bool is_w, bool is_g, bool is_o, bool is_prod>
   void
-  default_well <strategy_t>::calc_rate_and_derivs_concrete (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
+  default_well::calc_rate_and_derivs_concrete (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
   {
 
-    calc_rate_and_derivs_t <strategy_t, is_w, is_g, is_o, is_prod> calc_ (calc_model, jmatrix, this);
+    calc_rate_and_derivs_t <is_w, is_g, is_o, is_prod> calc_ (calc_model, jmatrix, this);
 
     //clear_data ();
     //for (size_t i = 0; i < 10000; ++i)
@@ -487,9 +468,8 @@ namespace wells {
   }
 
 
-  template <typename strategy_t>
   void
-  default_well <strategy_t>::process_internal (bool is_start, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
+  default_well::process_internal (bool is_start, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
   {
     BS_ASSERT (!base_t::is_shut ()) (base_t::name ());
 
@@ -536,9 +516,8 @@ namespace wells {
       }
   }
 
-  template <typename strategy_t>
   void
-  default_well <strategy_t>::process_impl (bool is_start, double /*dt*/, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
+  default_well::process_impl (bool is_start, double /*dt*/, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
   {
     process_internal (is_start, calc_model, mesh, jmatrix);
 
@@ -578,11 +557,10 @@ namespace wells {
       }
   }
 
-  template <typename strategy_t>
   void
-  default_well <strategy_t>::clear_data ()
+  default_well::clear_data ()
   {
-    typedef default_connection_iterator_impl <strategy_t, default_well <strategy_t>, default_connection <strategy_t> > iterator_t;
+    typedef default_connection_iterator_impl <default_well, default_connection> iterator_t;
     iterator_t it (iterator_t (this, begin_iterator_tag)), 
                e (iterator_t (this, end_iterator_tag));
     for (; it != e; ++it)
@@ -596,9 +574,8 @@ namespace wells {
     base_t::clear_data ();
   }
 
-  template <typename strategy_t>
   bool
-  default_well <strategy_t>::check_shut ()
+  default_well::check_shut ()
   {
     open_connections_count_ = 0;
     if (base_t::is_shut ())
@@ -606,7 +583,7 @@ namespace wells {
         return true;
       }
 
-    typedef default_connection_iterator_impl <strategy_t, default_well <strategy_t>, default_connection <strategy_t> > iterator_t;
+    typedef default_connection_iterator_impl <default_well, default_connection> iterator_t;
     iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
     for (; it != e; ++it)
       {
@@ -620,11 +597,9 @@ namespace wells {
   }
 
   //////////////////////////////////////////////////////////////////////////
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF (default_well, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF (default_well, (class));
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (default_well<base_strategy_fi>), 1, (well<base_strategy_fi>), "default_well_seq_fi", "default_well_seq_fi", "default_well_seq_fi", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (default_well<base_strategy_di>), 1, (well<base_strategy_di>), "default_well_seq_di", "default_well_seq_di", "default_well_seq_di", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (default_well<base_strategy_mixi>), 1, (well<base_strategy_mixi>), "default_well_seq_mixi", "default_well_seq_mixi", "default_well_seq_mixi", false);
+  BLUE_SKY_TYPE_STD_CREATE (default_well);
+  BLUE_SKY_TYPE_STD_COPY (default_well);
+  BLUE_SKY_TYPE_IMPL (default_well, well, "default_well_seq", "default_well_seq", "default_well_seq");
   //////////////////////////////////////////////////////////////////////////
 
   bool
@@ -632,13 +607,8 @@ namespace wells {
   {
     bool res = true;
 
-    res &= BS_KERNEL.register_type (pd, default_connection<base_strategy_fi>::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, default_connection<base_strategy_di>::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, default_connection<base_strategy_mixi>::bs_type ()); BS_ASSERT (res);
-
-    res &= BS_KERNEL.register_type (pd, default_well<base_strategy_fi>::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, default_well<base_strategy_di>::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, default_well<base_strategy_mixi>::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, default_connection::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, default_well::bs_type ()); BS_ASSERT (res);
 
     return res;
   }

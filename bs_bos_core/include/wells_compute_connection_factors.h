@@ -9,12 +9,13 @@
 #ifndef BS_WELLS_COMPUTE_CONNECTION_FACTORS_H_
 #define BS_WELLS_COMPUTE_CONNECTION_FACTORS_H_
 
-#include "calc_well.h"
+//#include "calc_well.h"
 
 namespace blue_sky
   {
   namespace wells
     {
+      class connection;
     namespace compute_factors
       {
 
@@ -22,18 +23,17 @@ namespace blue_sky
          * \class peaceman_model
          * \brief Calculates connection factors (peaceman model)
          * */
-      template <typename strategy_t>
       struct peaceman_model
         {
 
-          typedef connection <strategy_t>               connection_t;
-          typedef typename strategy_t::item_t           item_t;
-          typedef typename strategy_t::index_t          index_t;
-          typedef typename strategy_t::item_array_t     item_array_t;
-          typedef smart_ptr <fi_params, true>           sp_params_t;
+          typedef connection                      connection_t;
+          typedef t_double                        item_t;
+          typedef t_long                          index_t;
+          typedef v_double                        item_array_t;
+          typedef smart_ptr <fi_params, true>     sp_params_t;
 
-          typedef rs_mesh_iface <strategy_t>                  mesh_iface_t;
-          typedef smart_ptr <mesh_iface_t, true>              sp_mesh_iface_t;
+          typedef rs_mesh_iface                   mesh_iface_t;
+          typedef smart_ptr <mesh_iface_t, true>  sp_mesh_iface_t;
 
           /**
            * \brief   computes connection factor by peaceman model.
@@ -53,8 +53,8 @@ namespace blue_sky
                    const physical_constants &internal_constants,
                    const sp_params_t &params,
                    const sp_mesh_iface_t &mesh,
-                   const item_array_t &perm,
-                   const item_array_t &ntg,
+                   const stdv_float &perm,
+                   const stdv_float &ntg,
                    bool ro_calc_flag);
 
           static item_t compute_grp_pi_mult (connection_t &connection);

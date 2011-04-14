@@ -12,11 +12,7 @@
 
 namespace blue_sky
   {
-
-  template <typename strategy_t>
   class calc_model;
-
-  template <typename strategy_t>
   class well;
 
   /**
@@ -24,16 +20,15 @@ namespace blue_sky
    * \brief Base class (interface) for well perforation density calculation
    * \todo  Should be renamed to calc_perf_density_iface
    * */
-  template <typename strategy_t>
   class calc_perf_density_base : public objbase
     {
     public:
 
-      typedef typename strategy_t::index_t      index_t;
-      typedef typename strategy_t::item_t       item_t;
+      typedef t_long                            index_t;
+      typedef t_double                          item_t;
 
-      typedef calc_model <strategy_t>           calc_model_t;
-      typedef well <strategy_t>                 well_t;
+      typedef calc_model                        calc_model_t;
+      typedef well                              well_t;
 
       typedef smart_ptr <calc_model_t, true>    sp_calc_model_t;
       typedef smart_ptr <well_t, true>          sp_well_t;

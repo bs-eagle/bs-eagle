@@ -17,10 +17,10 @@ namespace wells {
     end_iterator_tag,
   };
 
-  template <typename strategy_t, typename well_t, typename connection_t>
+  template <typename well_t, typename connection_t>
   struct default_connection_iterator_impl 
   {
-    typedef default_connection_iterator_impl <strategy_t, well_t, connection_t>     this_t;
+    typedef default_connection_iterator_impl <well_t, connection_t>     this_t;
 
     typedef smart_ptr <connection_t>                  sp_connection_t;
     typedef smart_ptr <well_t>                        sp_well_t;
@@ -120,29 +120,29 @@ namespace wells {
       return !operator== (rhs);
     }
 
-    typename strategy_t::index_t
+    t_long
     position () const
     {
       return connection_idx_[0] + connection_idx_[1];
     }
 
   private:
-    well_t                                      *well_;
-    typename strategy_t::index_t                list_idx_;
-    typename strategy_t::index_t                connection_idx_[2];
-    typename well_t::connection_list_t          *connection_list_[2];
+    well_t                        *well_;
+    t_long                        list_idx_;
+    t_long                        connection_idx_[2];
+    typename well_t::connection_list_t     *connection_list_[2];
 
 #ifdef _DEBUG
-    typename strategy_t::index_t                connection_count_[2];
+    t_long                        connection_count_[2];
 #endif
   };
 
-  template <typename strategy_t, typename well_t, typename connection_t>
-  struct default_connection_iterator : connection_iterator <strategy_t>::impl
+  template <typename well_t, typename connection_t>
+  struct default_connection_iterator : connection_iterator::impl
   {
-    typedef typename connection_iterator <strategy_t>::impl   base_t;
-    typedef connection <strategy_t>                           base_connection_t;
-    typedef smart_ptr <base_connection_t>                     sp_base_connection_t;
+    typedef connection_iterator::impl       base_t;
+    typedef connection                      base_connection_t;
+    typedef smart_ptr <base_connection_t>   sp_base_connection_t;
 
   public:
 
@@ -182,14 +182,14 @@ namespace wells {
       return !operator== (rhs);
     }
 
-    virtual typename strategy_t::index_t
+    virtual t_long
     position () const
     {
       return impl_.position ();
     }
 
   private:
-    default_connection_iterator_impl <strategy_t, well_t, connection_t> impl_;
+    default_connection_iterator_impl <well_t, connection_t> impl_;
   };
 
 

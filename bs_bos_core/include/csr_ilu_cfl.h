@@ -12,7 +12,7 @@
 
 
 #include BS_FORCE_PLUGIN_IMPORT ()
-#include "linear_solvers.h"
+#include "lsolver_iface.h"
 #include "csr_ilu_prec.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 

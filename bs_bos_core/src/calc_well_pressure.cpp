@@ -22,8 +22,7 @@ namespace blue_sky
    * \brief  'default' ctor for calc_well_pressure
    * \param  param Additional params for ctor
    * */
-  template <typename strategy_t>
-  calc_well_pressure <strategy_t>::calc_well_pressure (bs_type_ctor_param /*param = NULL */)
+  calc_well_pressure::calc_well_pressure (bs_type_ctor_param /*param = NULL */)
   {
   }
 
@@ -31,16 +30,14 @@ namespace blue_sky
    * \brief  copy-ctor for calc_well_pressure
    * \param  rhs Instance of calc_well_pressure to be copied
    * */
-  template <typename strategy_t>
-  calc_well_pressure <strategy_t>::calc_well_pressure (const calc_well_pressure &rhs)
+  calc_well_pressure::calc_well_pressure (const calc_well_pressure &rhs)
   : bs_refcounter ()
   {
     *this = rhs;
   }
 
-  template <typename strategy_t>
   bool
-  calc_well_pressure<strategy_t>::calculate (sp_well_t &well, const sp_calc_model_t &calc_model) const
+  calc_well_pressure::calculate (sp_well_t &well, const sp_calc_model_t &calc_model) const
     {
       BS_ASSERT (!well->is_shut ()) (well->name ());
 
@@ -80,7 +77,7 @@ namespace blue_sky
        * \param  n_phases
        * \param  gas_oil_ratio
        * */
-      calc_for_rate (const sp_well_t &well, const phase_d_t &phase_d, const sat_d_t &sat_d, index_t n_phases, const item_array_t &gas_oil_ratio)
+      calc_for_rate (const sp_well_t &well, const phase_d_t &phase_d, const sat_d_t &sat_d, index_t n_phases, const stdv_double &gas_oil_ratio)
           : is_prod (well->get_well_controller ()->is_production ())
           , phase_d (phase_d)
           , sat_d (sat_d)
@@ -243,12 +240,11 @@ public:
       index_t n_phases;
       index_t n_block;
 
-      const item_array_t &gas_oil_ratio;
+      const stdv_double &gas_oil_ratio;
     };
 
-  template <typename strategy_t>
   bool
-  calc_well_pressure <strategy_t>::calculate_for_rate (sp_well_t &well, const sp_calc_model_t &calc_model) const
+  calc_well_pressure::calculate_for_rate (sp_well_t &well, const sp_calc_model_t &calc_model) const
     {
       BS_ASSERT (!well->is_shut ()) (well->name ());
 
@@ -327,23 +323,16 @@ public:
     }
 
 
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF (calc_well_pressure, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF (calc_well_pressure, (class));
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (calc_well_pressure<base_strategy_fi>), 1, (objbase), "calc_well_pressure_fi", "calc_well_pressure_fi", "calc_well_pressure_fi", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (calc_well_pressure<base_strategy_di>), 1, (objbase), "calc_well_pressure_di", "calc_well_pressure_di", "calc_well_pressure_di", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (calc_well_pressure<base_strategy_mixi>), 1, (objbase), "calc_well_pressure_mixi", "calc_well_pressure_mixi", "calc_well_pressure_mixi", false);
+  BLUE_SKY_TYPE_STD_CREATE (calc_well_pressure);
+  BLUE_SKY_TYPE_STD_COPY (calc_well_pressure);
+  BLUE_SKY_TYPE_IMPL (calc_well_pressure, objbase, "calc_well_pressure", "calc_well_pressure", "calc_well_pressure");
 
   bool
   calc_well_pressure_register_types (const blue_sky::plugin_descriptor &pd)
   {
     bool res = true;
 
-    res &= BS_KERNEL.register_type (pd, calc_well_pressure <base_strategy_fi>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, calc_well_pressure <base_strategy_di>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, calc_well_pressure <base_strategy_mixi>::bs_type ());
-    BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, calc_well_pressure::bs_type ()); BS_ASSERT (res);
 
     return res;
   }

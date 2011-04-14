@@ -15,25 +15,17 @@
 namespace blue_sky
   {
 
-  template <typename strategy_t>
-  class well;
-
   namespace wells
     {
 
-    template <typename strategy_t>
     class BS_API_PLUGIN well_serializer : public data_serializer
       {
       public:
-
-        typedef well <strategy_t>         well_t;
-        typedef smart_ptr <well_t, true>  sp_well_t;
-
         virtual ~well_serializer () {}
 
         virtual void save (const sp_storage_t &storage, const sp_obj &obj) const;
 
-        BLUE_SKY_TYPE_DECL_T (well_serializer);
+        BLUE_SKY_TYPE_DECL (well_serializer);
       };
 
     //////////////////////////////////////////////////////////////////////////
