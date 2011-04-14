@@ -8,6 +8,7 @@
  */
 
 #include "flux_connections_iface.h"
+#include "hydrodynamic_model_iface.h"
 #include "bs_array.h"
 
 namespace blue_sky
