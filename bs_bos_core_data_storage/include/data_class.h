@@ -66,7 +66,7 @@ enum   //! indexes for dimension parameters
     //typename carray_t::pointed_t::value_type *carray_data = &(*carray)[0];
     
     for (index_t i = 0; i < cells_count; ++i)
-      array[i] = carray[index_map_data[i]];
+      array[i] = (*carray)[index_map_data[i]];
   }
 
   /*!
