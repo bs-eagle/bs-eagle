@@ -63,10 +63,10 @@ enum   //! indexes for dimension parameters
   convert_arrays (index_t cells_count, const sp_index_array_t index_map, array_t &array, const carray_t &carray)
   {
     index_t *index_map_data = &(*index_map)[0];
-    typename carray_t::pointed_t::value_type *carray_data = &(*carray)[0];
+    //typename carray_t::pointed_t::value_type *carray_data = &(*carray)[0];
     
     for (index_t i = 0; i < cells_count; ++i)
-      array[i] = carray_data[index_map_data[i]];
+      array[i] = carray[index_map_data[i]];
   }
 
   /*!
