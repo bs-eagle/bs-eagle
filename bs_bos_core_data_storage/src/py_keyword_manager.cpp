@@ -50,12 +50,12 @@ namespace python {
     WRAP_PURE_METHOD (handler, void, 2, (const std::string &, keyword_params_t &));
   };
 
-  template <typename T>
-  void
-  register_keyword (T *t, const std::string &keyword, const typename T::shared_handler_t &handler, bool replace_existing)
-  {
-    t->register_keyword (keyword, handler, replace_existing);
-  }
+  //template <typename T>
+  //void
+  //register_keyword (T *t, const std::string &keyword, const typename T::shared_handler_t &handler, bool replace_existing)
+  //{
+  //  t->register_keyword (keyword, handler, replace_existing);
+  //}
 
   template <typename T>
   smart_ptr <FRead, true>
@@ -120,7 +120,7 @@ namespace python {
   */
 
   PY_EXPORTER (keyword_manager_exporter, default_exporter)
-    .def ("register_keyword", register_keyword <T>)
+    //.def ("register_keyword", register_keyword <T>)
     .def ("register_i_pool_keyword", &T::register_i_pool_keyword)
     .def ("register_fp_pool_keyword", &T::py_register_fp_pool_keyword)
     .def ("register_keywords", &T::register_plugin_keywords)
@@ -147,8 +147,8 @@ namespace python {
   {
     using namespace boost::python;
 
-    //base_exporter<keyword_manager_iface, empty_exporter>::export_class ("keyword_manager_iface");
-    class_exporter<keyword_manager, keyword_manager_iface, keyword_manager_exporter>::export_class ("keyword_manager");
+    base_exporter<keyword_manager_iface, empty_exporter>::export_class ("keyword_manager_iface");
+    //class_exporter<keyword_manager, keyword_manager_iface, keyword_manager_exporter>::export_class ("keyword_manager");
 
 
     //strategy_exporter::export_base_ext <keyword_params, keyword_params_exporter, class_type::concrete_class> ("keyword_params");
