@@ -7,15 +7,16 @@ tar_name = "bs_bos_core"
 env = custom_env.Clone ()
 env.Append (CPPPATH = ["include",
     includes["bs_bos_core_base"],
-    includes["bs_matrix"],
-    includes["bs_base_linear_solvers"],
-    includes["bs_csr_ilu_prec"],
+    includes["common_types"],
+    includes["bs_mtx"],
+    includes["bs_lsolvers"],
+    #includes["bs_csr_ilu_prec"],
     includes["bs_bos_core_data_storage"],
 #    includes["bs_mesh_mpfa"],
     includes["bs_scal"],
     includes["bs_pvt"],
 	includes["kernel"],
-	includes["bs_mesh"]
+	includes["bs_mesh"],
     ])
 
 libs = ["blue_sky", 
