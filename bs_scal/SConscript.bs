@@ -7,7 +7,8 @@ tar_name = "bs_scal"
 env = custom_env.Clone ()
 env.Append (CPPPATH = ["include",
     includes["bs_bos_core_base"],
-    includes["bs_bos_core"]
+    includes["bs_bos_core"],
+    includes["common_types"],
     ] + includes["kernel"])
 
 libs = ["blue_sky", "bs_bos_core_base", ]

@@ -45,9 +45,8 @@ namespace blue_sky
       typedef boost::array <index_t, FI_PHASE_TOT>			phase_d_t;
       typedef boost::array <index_t, FI_PHASE_TOT>			sat_d_t;
 
-      typedef calc_model_data                           data_t;
-      typedef bs_array <data_t>                         data_array_t;
-      typedef smart_ptr <data_array_t, true>            sp_data_array_t;
+      typedef calc_model_data                               data_t;
+      typedef std::vector <calc_model_data>                 data_array_t;
 
       typedef unsigned char															phase_index_t;
       typedef unsigned char															sat_index_t;
@@ -108,11 +107,11 @@ namespace blue_sky
           sp_array_item_t s_deriv_cap) const;
 
       void
-      process (const sp_array_item_t saturation, 
-        const sp_array_index_t sat_regions,
-        const sp_array_item_t perm,
-        const sp_array_item_t poro,
-        sp_data_array_t data) const;
+      process (const spv_double &saturation, 
+        const spv_long &sat_regions,
+        const stdv_float &perm,
+        const spv_double &poro,
+        data_array_t &data) const;
 
       void
       process_init (index_t cell_index, 
