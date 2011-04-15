@@ -18,7 +18,6 @@
 #include "main_loop_calc.h"
 #include "facility_manager.h"
 #include "keyword_manager.h"
-#include "strategy_name.h"
 
 namespace blue_sky
 {
@@ -27,23 +26,22 @@ namespace blue_sky
    * \brief  'default' ctor for reservoir_simulator
    * \param  param additional params for reservoir_simulator
    * */
-  template <class strategy_t>
-  reservoir_simulator<strategy_t>::reservoir_simulator (bs_type_ctor_param)
+  reservoir_simulator::reservoir_simulator (bs_type_ctor_param)
       : bs_refcounter ()
       , bs_node (bs_node::create_node()) //new typename this_t::mstatus_traits ()))
       , hdm (give_kernel::Instance().create_object (dm_t::bs_type ()))
       , em (give_kernel::Instance().create_object (em_t::bs_type ()))
       , cm (give_kernel::Instance().create_object (calc_model_t::bs_type ()))
-      , mesh (0)
       , reservoir_ (give_kernel::Instance().create_object (reservoir_t::bs_type ()))
       , facility_storage_ (give_kernel::Instance().create_object (facility_storage_t::bs_type ()))
       , jacobian_ (give_kernel::Instance().create_object (jacobian_t::bs_type ()))
-      , keyword_manager_ (BS_KERNEL.create_object (keyword_manager_t::bs_type ()))
       , mloop (0)
       , reservoir_simulator_events_init_ (this)
   {
     this->add_signal (BS_SIGNAL_RANGE (reservoir_simulator));
-    keyword_manager_->init ();//em);
+    
+    // FIXME: should I do init?
+    hdm->get_keyword_manager ()->init ();//em);
 
     //bs_node::insert (bs_link::create (hdm, "hydrodynamic_model"), false);
     //bs_node::insert (bs_link::create (em, "event_manager"), false);
@@ -58,14 +56,12 @@ namespace blue_sky
    * \brief  copy-ctor for reservoir_simulator
    * \param  src source copy of reservoir_simulator
    * */
-  template <class strategy_t>
-  reservoir_simulator<strategy_t>::reservoir_simulator (const this_t &src)
+  reservoir_simulator::reservoir_simulator (const this_t &src)
       : bs_refcounter ()
       , bs_node (src)
       , hdm (src.hdm)
       , em (src.em)
       , cm (src.cm)
-      , mesh (src.mesh)
       , reservoir_ (src.reservoir_)
       , facility_storage_ (src.facility_storage_)
       , jacobian_ (src.jacobian_)
@@ -74,15 +70,14 @@ namespace blue_sky
   {
   }
 
-  template <class strategy_t>
-  reservoir_simulator<strategy_t>::~reservoir_simulator ()
+  reservoir_simulator::~reservoir_simulator ()
   {
   }
 
-  template <class strategy_t>
-  void reservoir_simulator<strategy_t>::set_mesh (const sp_mesh_iface_t &src)
+  void reservoir_simulator::set_mesh (const sp_mesh_iface_t &mesh)
   {
-    this->mesh = src;
+    // FIXME: is set mesh is good idea?
+    this->hdm->set_mesh (mesh);
   }
 
   /**
@@ -133,14 +128,14 @@ namespace blue_sky
    * \param  key_handlers pointer to keyword_manager instance
    * \param  params params that will be passed to each keyword_handler
    * */
-  template <typename keyword_manager_t>
   void
-  read_keyword_file (const std::string &filename, const smart_ptr <keyword_manager_t, true> &key_handlers, typename keyword_manager_t::keyword_params_t &params)
+  read_keyword_file (const std::string &filename, 
+    const smart_ptr <hydrodynamic_model_iface, true> &hdm, 
+    const smart_ptr <event_manager, true> &em)
   {
-    const typename keyword_manager_t::sp_reader_t &l_reader (params.reader);
-    typedef event_manager<typename keyword_manager_t::strategy_type> event_manager_t;
-    typedef smart_ptr <event_manager_t, true> sp_event_manager_t;
-    sp_event_manager_t em (params.em);
+    hydrodynamic_model_iface::sp_reader_t reader = hdm->get_reader ();
+    hydrodynamic_model_iface::sp_km_t keywords = hdm->get_keyword_manager ();
+    keyword_params params (hdm);
     
     char buf[CHAR_BUF_LEN];
     char key[CHAR_BUF_LEN];
@@ -149,15 +144,14 @@ namespace blue_sky
     
     write_time_to_log init_time ("Read model", "");
 
-    l_reader->init (filename, filename);
+    reader->init (filename, filename);
 
     // start of loop for data file reading
     flag = 1;
-
     for (; flag;)
       {
         // reading keyword
-        len = l_reader->read_line (buf, CHAR_BUF_LEN);
+        len = reader->read_line (buf, CHAR_BUF_LEN);
         if (len < 0)              // break if EOF
           {
             switch (len)
@@ -187,77 +181,63 @@ namespace blue_sky
             break;
           }
 
-        key_handlers->handle_keyword (keywrd, params);
+        keywords->handle_keyword (keywrd, params);
       }
   }
 
-  template <class strategy_t>
-  void reservoir_simulator<strategy_t>::simulate (const std::string &path)
+  void reservoir_simulator::simulate (const std::string &path)
   {
     read_keyword_file_and_init (path);
     main_loop();
   }
 
-  template <typename strategy_t>
   void
-  reservoir_simulator <strategy_t>::read_keyword_file_and_init (const std::string &path)
+  reservoir_simulator::read_keyword_file_and_init (const std::string &path)
   {
     write_time_to_log init_time ("read model and init reservoir simulator", "");
 
-    keyword_params <strategy_t> params (keyword_manager_, hdm->reader, hdm->data, em, mesh, cm->ts_params, cm->scal_prop);
+    //keyword_params params (keyword_manager_, hdm->reader, hdm->data, em, mesh, cm->ts_params, cm->scal_prop);
     model_filename_ = path;
     pre_read (em); 
     on_pre_read (this);
-    read_keyword_file(path, keyword_manager_, params);
+    read_keyword_file(path, hdm, em);
     post_read (em);
     on_post_read ();
-    //TODO: make keyword handlers able to change pointers on created objects (like mesh)
-    mesh = sp_mesh_iface_t (params.mesh, bs_dynamic_cast ());
-    if (!mesh)
-       {
-         bs_throw_exception ("Can't down cast params.mesh");
-       }
     init();
   }
 
-  template <class strategy_t>
-  const typename reservoir_simulator<strategy_t>::sp_hdm_t &
-  reservoir_simulator<strategy_t>::get_hydrodynamic_model () const
+  const reservoir_simulator::sp_hdm_t &
+  reservoir_simulator::get_hydrodynamic_model () const
   {
     return hdm;
   }
 
-  template <class strategy_t>
-  const typename reservoir_simulator<strategy_t>::sp_em_t &
-  reservoir_simulator<strategy_t>::get_event_manager () const
+  const reservoir_simulator::sp_em_t &
+  reservoir_simulator::get_event_manager () const
   {
     return em;
   }
 
-  template <class strategy_t>
-  const typename reservoir_simulator<strategy_t>::sp_calc_model_t &
-  reservoir_simulator<strategy_t>::get_calc_model () const
+  const reservoir_simulator::sp_calc_model_t &
+  reservoir_simulator::get_calc_model () const
   {
     return cm;
   }
 
-  template <class strategy_t>
-  const typename reservoir_simulator<strategy_t>::sp_mesh_iface_t &
-  reservoir_simulator<strategy_t>::get_mesh() const
+  const reservoir_simulator::sp_mesh_iface_t &
+  reservoir_simulator::get_mesh() const
   {
-    return mesh;
+    return hdm->get_mesh ();
   }
 
-  template <class strategy_t>
-  const typename reservoir_simulator<strategy_t>::sp_jacobian_t &
-  reservoir_simulator<strategy_t>::get_jacobian () const
+  const reservoir_simulator::sp_jacobian_t &
+  reservoir_simulator::get_jacobian () const
   {
     return jacobian_;
   }
 
-  template <typename strategy_t>
-  const typename reservoir_simulator <strategy_t>::sp_reservoir_t &
-  reservoir_simulator <strategy_t>::get_reservoir () const
+  const reservoir_simulator::sp_reservoir_t &
+  reservoir_simulator::get_reservoir () const
   {
     return reservoir_;
   }
@@ -268,54 +248,53 @@ namespace blue_sky
    * \param  data pointer to data storage (pool)
    * \return may throw exception
    * */
-  template <class strategy_t>
   void 
-  check_sat (const smart_ptr <rs_mesh_iface <strategy_t>, true> &mesh, const smart_ptr <idata, true> &data)
+  check_sat (const smart_ptr <rs_mesh_iface, true> &mesh, const smart_ptr <idata, true> &data)
   {
-    typedef typename strategy_t::index_t        index_t;
-    typedef typename strategy_t::item_t         item_t;
-    typedef typename strategy_t::index_array_t  index_array_t;
-    typedef typename strategy_t::item_array_t   item_array_t;
+    typedef t_long      index_t;
+    typedef t_double    item_t;
+    typedef spv_long    index_array_t;
+    typedef spv_double  item_array_t;
 
-    std::ostringstream out_s;
+    t_long nb = mesh->get_n_active_elements ();
+    const spv_long &original_element_num_ = mesh->get_int_to_ext();
+    const t_long *original_element_num = &(*original_element_num_)[0];
 
-    index_t nb = mesh->get_n_active_elements ();
-    const index_array_t &original_element_num = mesh->get_int_to_ext();
-
-    if (!data->init_section)
+    if (!data->props->get_i ("init_section"))
       {
-        if (!(*data->d_map)[PRESSURE].array.size ())
+        if (!data->contains_fp_array ("PRESSURE"))
           {
             bs_throw_exception ("check_sat: Initial pressure is not specified");
           }
-        if (!(*data->d_map)[SWAT].array.size ())
+        if (!data->contains_fp_array ("SWAT"))
           {
             bs_throw_exception ("check_sat: Initial saturation is not specified");
           }
-        if (!(*data->d_map)[SOIL].array.size ())
+        if (!data->contains_fp_array ("SOIL"))
           {
             BOSWARN (section::check_data, level::warning) << "SOIL is not initialized" << bs_end;
           }
-      }
 
-    if (!data->init_section)
-      {
-        array_float16_t swat = ((*data->d_map)[SWAT].array);
-        array_float16_t soil = ((*data->d_map)[SOIL].array);
+        spv_float swat_ = data->get_fp_array ("SWAT");
+        spv_float soil_ = data->get_fp_array ("SOIL", false);
+
+        t_float *swat = &(*swat_)[0]; 
+        t_float *soil = soil_ && soil_->size () ? &(*soil_)[0] : 0;
+
 
         for (index_t i = 0; i < nb; ++i)
           {
             index_t i_m = original_element_num[i];
 
-            if (soil.size () && (soil[i_m] < -1.e-12 || soil[i_m] > 1 + 1.e-5))
+            if (soil && (soil[i_m] < -1.e-12 || soil[i_m] > 1 + 1.e-5))
               {
                 bs_throw_exception (boost::format ("soil[%d] = %f is out of range") % i_m % soil[i_m]);
               }
-            if (swat.size () && (swat[i_m] < -1.e-12 || swat[i_m]> 1 + 1.e-5))
+            if (swat[i_m] < -1.e-12 || swat[i_m]> 1 + 1.e-5)
               {
                 bs_throw_exception (boost::format ("swat[%d] = %f is out of range") % i_m % swat[i_m]);
               }
-            if (soil.size () && swat.size () && (soil[i_m] + swat[i_m] > 1 + 1.e-5))
+            if (soil && soil[i_m] + swat[i_m] > 1 + 1.e-5)
               {
                 bs_throw_exception (boost::format ("Sum of water saturation and oil saturation for cell %d = %f is out of range")
                   % i_m % (soil[i_m] + swat[i_m]));
@@ -330,31 +309,25 @@ namespace blue_sky
    * \param  data pointer to data storage (pool)
    * \return may throw exception
    * */
-  template <class strategy_t>
   void 
-  check_perm (const smart_ptr <rs_mesh_iface <strategy_t>, true> &mesh, const smart_ptr <idata, true> &data)
+  check_perm (const smart_ptr <rs_mesh_iface, true> &mesh, const smart_ptr <idata, true> &data)
   {
-    typedef typename strategy_t::index_t index_t;
-
-    const smart_ptr <idata, true> &ldata (data);
-    std::ostringstream out_s;
-    index_t nb = mesh->get_n_active_elements ();
-
+    t_long nb = mesh->get_n_active_elements ();
     if (!nb)
       {
         bs_throw_exception ("All dimensions should be greate than 0. Number of active elements = 0.");
       }
-    if (!ldata->contain ("PERMX") || !ldata->contain ("PERMY") || !ldata->contain ("PERMZ"))
+    if (!data->contains_fp_array ("PERMX") || !data->contains_fp_array ("PERMY") || !data->contains_fp_array ("PERMZ"))
       {
-        if (!ldata->contain ("PERMX"))
+        if (!data->contains_fp_array ("PERMX"))
           {
             BOSERR (section::check_data, level::error) << "PERMX is not specified" << bs_end;
           }
-        if (!ldata->contain ("PERMY"))
+        if (!data->contains_fp_array ("PERMY"))
           {
             BOSERR (section::check_data, level::error) << "PERMY is not specified" << bs_end;
           }
-        if (!ldata->contain ("PERMZ"))
+        if (!data->contains_fp_array ("PERMZ"))
           {
             BOSERR (section::check_data, level::error) << "PERMZ is not specified" << bs_end;
           }
@@ -369,14 +342,13 @@ namespace blue_sky
    * \param  data pointer to data storage (pool)
    * \return may throw exception
    * */
-  template <class strategy_t>
   void 
-  check_poro_ntg_multpv (const smart_ptr <rs_mesh_iface <strategy_t>, true> &mesh, const smart_ptr <idata, true> &data)
+  check_poro_ntg_multpv (const smart_ptr <rs_mesh_iface, true> &mesh, const smart_ptr <idata, true> &data)
   {
-    typedef typename strategy_t::index_t index_t;
-    typedef typename strategy_t::item_t item_t;
-    typedef typename strategy_t::index_array_t index_array_t;
-    typedef typename strategy_t::item_array_t item_array_t;
+    typedef t_long index_t;
+    typedef t_double item_t;
+    typedef spv_long index_array_t;
+    typedef spv_double item_array_t;
 
     const index_array_t &original_element_num = mesh->get_int_to_ext();
     index_t nb = mesh->get_n_active_elements ();
@@ -447,12 +419,11 @@ namespace blue_sky
    * \param  data pointer to data storage (pool)
    * \return may throw exception
    * */
-  template <typename strategy_t>
   void 
-  check_num (const smart_ptr <rs_mesh_iface <strategy_t>, true> &mesh, const smart_ptr <idata, true> &data)
+  check_num (const smart_ptr <rs_mesh_iface, true> &mesh, const smart_ptr <idata, true> &data)
   {
-    typedef typename strategy_t::index_t index_t;
-    typedef typename strategy_t::index_array_t index_array_t;
+    typedef t_long index_t;
+    typedef spv_long index_array_t;
 
     index_t nb = mesh->get_n_active_elements ();
 
@@ -530,12 +501,9 @@ namespace blue_sky
    * \param  data pointer to data storage (pool)
    * \return 
    * */
-  template <class strategy_t>
   void 
   check_rock (const smart_ptr <idata, true> &data)
   {
-    typedef typename strategy_t::index_t index_t;
-    std::ostringstream out_s;
     if (!data->rock.size ())
       {
         bs_throw_exception ("ROCK is not specified");
@@ -570,18 +538,10 @@ namespace blue_sky
    * \param  data pointer to data storage (pool)
    * \return may throw exception
    * */
-  template <class strategy_t>
   void 
-  check_geometry (const smart_ptr <rs_mesh_iface <strategy_t>, true> &mesh, const smart_ptr <idata, true> &data)
+  check_geometry (const smart_ptr <rs_mesh_iface, true> &mesh, const smart_ptr <idata, true> &data)
   {
-    typedef typename strategy_t::index_t index_t;
-    typedef typename strategy_t::item_t item_t;
-    typedef typename strategy_t::index_array_t index_array_t;
-    typedef typename strategy_t::item_array_t item_array_t;
-
-    std::ostringstream out_s;
-
-    index_t nb = data->dimens.nx * data->dimens.ny * data->dimens.nz;
+    t_long nb = data->dimens.nx * data->dimens.ny * data->dimens.nz;
     
     if (!nb)
       {
@@ -606,15 +566,13 @@ namespace blue_sky
    * \param  data pointer to data storage (pool)
    * \return may throw exception
    * */
-  template <class strategy_t>
   void 
-  check_equil (const smart_ptr <rs_mesh_iface <strategy_t>, true> &mesh, const smart_ptr <idata, true> &data)
+  check_equil (const smart_ptr <rs_mesh_iface, true> &mesh, const smart_ptr <idata, true> &data)
   {
-    typedef typename strategy_t::index_t index_t;
-    typedef typename strategy_t::item_t item_t;
-    typedef typename strategy_t::index_array_t index_array_t;
+    typedef t_long index_t;
+    typedef t_double item_t;
+    typedef spv_long index_array_t;
 
-    std::ostringstream out_s;
     index_t N_eq = 2; // number of regions (eql + pvt = 2)
     index_t nb = mesh->get_n_active_elements ();
 
@@ -668,14 +626,12 @@ namespace blue_sky
    * \param  data pointer to data storage (pool)
    * \return may throw exception
    * */
-  template <class strategy_t>
   void 
-  check_volume (const smart_ptr <rs_mesh_iface <strategy_t>, true> &mesh, const smart_ptr <idata, true> &/*data*/)
+  check_volume (const smart_ptr <rs_mesh_iface, true> &mesh, const smart_ptr <idata, true> &/*data*/)
   {
-    typedef typename strategy_t::index_t index_t;
-    typedef typename strategy_t::item_array_t item_array_t;
-    const smart_ptr <rs_smesh_iface <strategy_t>, true> s_mesh(mesh, bs_dynamic_cast ());
-    std::ostringstream out_s;
+    typedef t_long index_t;
+    typedef spv_long item_array_t;
+    const smart_ptr <rs_smesh_iface, true> s_mesh(mesh, bs_dynamic_cast ());
     index_t x, y, z;
     
     const item_array_t &mesh_volumes = mesh->get_volumes ();
@@ -750,9 +706,8 @@ namespace blue_sky
    * \param  mesh pointer to mesh instance
    * \param  data pointer to data storage (pool)
    * */
-  template <typename strategy_t>
   void
-  check_data (const smart_ptr <rs_mesh_iface <strategy_t>, true> &mesh, const smart_ptr <idata, true> &data)
+  check_data (const smart_ptr <rs_mesh_iface, true> &mesh, const smart_ptr <idata, true> &data)
   {
     std::ostringstream out_s;
     
@@ -762,14 +717,14 @@ namespace blue_sky
     << "***************************************************************" << bs_end;
 
     size_t count = 0;
-    count += check5 (check_num <strategy_t>,              data, mesh,  "Region numbers check... ", true);
-    count += check5 (check_sat <strategy_t>,              data, mesh,  "Saturation check... ", false);
-    count += check5 (check_geometry <strategy_t>,         data, mesh,  "Geometry check... ", false);
-    count += check5 (check_perm <strategy_t>,             data, mesh,  "Permability check... ", false);
-    count += check5 (check_poro_ntg_multpv <strategy_t>,  data, mesh,  "Porosity and NTG, MULTPV check ... ", false);
-    count += check5 (check_equil <strategy_t>,            data, mesh,  "Equil region numbers check... ", true);
-    count += check5 (check_volume <strategy_t>,           data, mesh,  "Volume check... ", false);
-    count += check3 (check_rock <strategy_t>,             data,        "Rock check... ");
+    count += check5 (check_num,              data, mesh,  "Region numbers check... ", true);
+    count += check5 (check_sat,              data, mesh,  "Saturation check... ", false);
+    count += check5 (check_geometry,         data, mesh,  "Geometry check... ", false);
+    count += check5 (check_perm,             data, mesh,  "Permability check... ", false);
+    count += check5 (check_poro_ntg_multpv,  data, mesh,  "Porosity and NTG, MULTPV check ... ", false);
+    count += check5 (check_equil,            data, mesh,  "Equil region numbers check... ", true);
+    count += check5 (check_volume,           data, mesh,  "Volume check... ", false);
+    count += check3 (check_rock,             data,        "Rock check... ");
 
     //BOSOUT (section::check_data, level::medium) << "Well data check... ";
     //if (!(r = check_wfrictn_keyword_connection_data (msh)))
@@ -785,7 +740,7 @@ namespace blue_sky
   }
 
   template <class strategy_t>
-  void reservoir_simulator<strategy_t>::init ()
+  void reservoir_simulator::init ()
   {
     std::ostringstream out_s;
 
@@ -817,7 +772,7 @@ namespace blue_sky
     cm->rock_grid_prop->init_planes_trans (mesh->get_n_active_elements (), mesh->get_volumes (), cm->ts_params, cm->internal_constants);
 
     typename mesh_iface_t::index_array_t boundary_array;
-    std::string flux_conn_name = "bs_flux_connections_" + tools::strategy_name <strategy_t>::name ();
+    std::string flux_conn_name = "bs_flux_connections_" + tools::strategy_name::name ();
     typename mesh_iface_t::sp_flux_conn_iface_t flux_conn (BS_KERNEL.create_object(flux_conn_name), bs_dynamic_cast ());
     if (!flux_conn)
       {
@@ -837,9 +792,8 @@ namespace blue_sky
     jmatrix->get_irregular_matrix ()->init (N_blocks, N_blocks, N_block_size, 0);
   }
 
-  template <typename strategy_t>
-  typename reservoir_simulator <strategy_t>::main_loop_calc_t *
-  reservoir_simulator <strategy_t>::get_main_loop ()
+  typename reservoir_simulator::main_loop_calc_t *
+  reservoir_simulator::get_main_loop ()
   {
     if (cm->n_phases == 3)
       return new main_loop_calc <strategy_t, true, true, true> (this);
@@ -859,7 +813,7 @@ namespace blue_sky
 
   template <class strategy_t>
   void
-  reservoir_simulator<strategy_t>::main_loop ()
+  reservoir_simulator::main_loop ()
   {
     on_begin (clock ());
     write_time_to_log lllll("main loop time","tss");
@@ -887,17 +841,15 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   void
-  reservoir_simulator <strategy_t>::pre_large_step (const sp_event_base_list_t &event_list)
+  reservoir_simulator::pre_large_step (const sp_event_base_list_t &event_list)
   {
     mloop->apply_events (event_list);
     reservoir_->pre_large_step (cm, mesh);
   }
 
-  template <typename strategy_t>
   std::string
-  reservoir_simulator <strategy_t>::model_filename () const
+  reservoir_simulator::model_filename () const
   {
     return model_filename_;
   }

@@ -375,12 +375,6 @@ namespace blue_sky
     }
 
   void
-  well::reset_init_approx ()
-  {
-    init_approx_is_calc_ = false;
-  }
-
-  void
   well::process_impl (bool, double, const sp_calc_model_t &, const sp_mesh_iface_t &, sp_jmatrix_t &)
   {
     bs_throw_exception ("PURE CALL");
@@ -414,7 +408,7 @@ namespace blue_sky
   }
 
   void
-  well::restore_solution (double /*dt*/, const item_array_t &/*p_sol*/, const item_array_t &/*s_sol*/, index_t /*block_size*/)
+  well::restore_solution (double /*dt*/, const spv_double &/*p_sol*/, const spv_double &/*s_sol*/, index_t /*block_size*/)
   {
     bs_throw_exception ("PURE CALL");
   }
@@ -434,7 +428,6 @@ namespace blue_sky
       calc_model->rock_grid_prop->net_to_gros,
       false);
 
-    reset_init_approx ();
     check_shut ();
     custom_init (calc_model);
   }

@@ -19,14 +19,14 @@ namespace blue_sky
   namespace tools
     {
 
-    template <typename strategy_t, typename array_type, typename accessor_t>
+    template <typename array_type, typename accessor_t>
     struct rr_rw_wr_saver
       {
-        typedef typename strategy_t::item_t                   item_t;
-        typedef typename strategy_t::index_t                  index_t;
-        typedef facility_manager <strategy_t>                 facility_manager_t;
-        typedef wells::connection <strategy_t>                connection_t;
-        typedef typename facility_manager_t::well_iterator_t  well_iterator_t;
+        typedef t_double                   item_t;
+        typedef t_long                  index_t;
+        typedef facility_manager                  facility_manager_t;
+        typedef wells::connection                 connection_t;
+        typedef facility_manager_t::well_iterator_t  well_iterator_t;
         typedef item_t                                        value_type;
         typedef array_type                                    array_t;
 
@@ -35,11 +35,12 @@ namespace blue_sky
         rr_rw_wr_saver (well_iterator_t wb, well_iterator_t we, size_t connection_count)
             : wb_ (wb)
             , we_ (we)
+            , w_ (wb == we ? smart_ptr <well> () : smart_ptr <well> (wb->second, bs_dynamic_cast ()))
             , array_size_ (array_t::static_size)
             , total_connection_count_ (connection_count)
             , accessor_ (accessor_t ())
             , current_connection_ (0)
-            , current_connection_count_ (wb == we ? 0 : (*wb)->get_connection_list ().size ())
+            , current_connection_count_ (w_ ? 0 : w_->get_facility_list ())
             , current_item_ (0)
             , total_item_ (0)
         {
@@ -68,18 +69,23 @@ namespace blue_sky
                     if (wb_ != we_)
                       {
                         current_connection_ = 0;
-                        current_connection_count_ = (*wb_)->get_connection_list ().size ();
+                        // FIXME:
+                        //current_connection_count_ = (*wb_)->get_facility_list ().size ();
+                        w_ = smart_ptr <well> (wb_->second, bs_dynamic_cast ());
+                        if (w_)
+                          current_connection_count_ = w_->get_facility_list ();
                       }
                   }
               }
 
             total_item_++;
             BS_ASSERT (total_item_ <= size ()) (total_item_) (size ());
-            return accessor_ ((*wb_)->get_connection_list ()[current_connection_], current_item_++);
+            return accessor_ (w_->get_facility_list ()[current_connection_], current_item_++);
           }
 
         mutable well_iterator_t   wb_;
         well_iterator_t           we_;
+        mutable smart_ptr <well>  w_;
         size_t                    array_size_;
         size_t                    total_connection_count_;
         accessor_t                accessor_;
@@ -90,15 +96,15 @@ namespace blue_sky
         mutable size_t            total_item_;
       };
 
-    template <typename strategy_t, typename accessor_t>
+    template <typename accessor_t>
     struct connection_member_saver
       {
-        typedef typename strategy_t::item_t     item_t;
-        typedef typename strategy_t::index_t    index_t;
+        typedef t_double     item_t;
+        typedef t_long    index_t;
 
-        typedef facility_manager <strategy_t>   facility_manager_t;
-        typedef wells::connection <strategy_t>  connection_t;
-        typedef typename facility_manager_t::well_iterator_t  well_iterator_t;
+        typedef facility_manager    facility_manager_t;
+        typedef wells::connection   connection_t;
+        typedef facility_manager_t::well_iterator_t  well_iterator_t;
 
         typedef item_t                          value_type;
 
@@ -107,10 +113,11 @@ namespace blue_sky
         connection_member_saver (well_iterator_t wb, well_iterator_t we, size_t array_size)
             : wb_ (wb)
             , we_ (we)
+            , w_ (wb == we ? smart_ptr <well> () : smart_ptr <well> (wb->second, bs_dynamic_cast ()))
             , array_size_ (array_size)
             , accessor_ (accessor_t ())
             , current_connection_ (0)
-            , current_connection_count_ (wb == we ? 0 : (*wb)->get_connection_list ().size ())
+            , current_connection_count_ (w_ ? 0 : w_->get_facility_list ())
             , last_value_ (0)
         {
         }
@@ -136,7 +143,11 @@ namespace blue_sky
                 if (wb_ != we_)
                   {
                     current_connection_ = 0;
-                    current_connection_count_ = (*wb_)->get_connection_list ().size ();
+                    // FIXME:
+                    //current_connection_count_ = (*wb_)->get_facility_list ().size ();
+                    w_ = smart_ptr <well> (wb_->second, bs_dynamic_cast ());
+                    if (w_)
+                      current_connection_count_ = w_->get_facility_list ();
                   }
               }
 
@@ -146,12 +157,13 @@ namespace blue_sky
                 return last_value_;
               }
 
-            last_value_ = accessor_ ((*wb_)->get_connection_list ()[current_connection_++]);
+            last_value_ = accessor_ (w_->get_facility_list ()[current_connection_++]);
             return last_value_;
           }
 
         mutable well_iterator_t       wb_;
         well_iterator_t               we_;
+        smart_ptr <well>              w_;
         size_t                        array_size_;
         accessor_t                    accessor_;
 
@@ -160,18 +172,14 @@ namespace blue_sky
         mutable item_t                last_value_;
       };
 
-    template <typename strategy_t, typename function_t>
+    template <typename function_t>
     struct well_member_saver
       {
-        typedef typename strategy_t::item_t                   item_t;
-        typedef facility_manager <strategy_t>                 facility_manager_t;
-        typedef typename facility_manager_t::well_iterator_t  well_iterator_t;
+        typedef t_double                   item_t;
+        typedef facility_manager                  facility_manager_t;
+        typedef facility_manager_t::well_iterator_t  well_iterator_t;
 
         typedef item_t                                        value_type;
-        typedef well <strategy_t>                             well_t;
-
-        //typedef item_t (well_t::*accessor_t) () const;
-
         typedef function_t                                    accessor_t;
 
         well_member_saver (well_iterator_t wb, well_iterator_t we)

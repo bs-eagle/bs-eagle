@@ -32,39 +32,38 @@ namespace blue_sky {
    *        is_w, is_g, is_o (for water, gas, oil phases)
    * \todo  Describe data members
    * */
-  template <typename strategy_type, bool is_w, bool is_g, bool is_o>
+  template <bool is_w, bool is_g, bool is_o>
   struct fi_operator_impl
   {
-    typedef strategy_type                                   strategy_t;
-    typedef typename strategy_t::item_t                     item_t;
-    typedef typename strategy_t::rhs_item_t                 rhs_item_t;
-    typedef typename strategy_t::index_t                    index_t;
-    typedef typename strategy_t::item_array_t               item_array_t;
-    typedef typename strategy_t::rhs_item_array_t           rhs_item_array_t;
-    typedef typename strategy_t::index_array_t              index_array_t;
-    typedef typename strategy_t::csr_matrix_t               bcsr_matrix_t;
+    typedef t_double                        item_t;
+    typedef t_double                        rhs_item_t;
+    typedef t_long                          index_t;
+    typedef v_double                        item_array_t;
+    typedef v_double                        rhs_item_array_t;
+    typedef v_long                          index_array_t;
+    typedef bcsr_matrix_iface               bcsr_matrix_t;
 
-    typedef calc_model <strategy_t>                         calc_model_t;
-    typedef typename calc_model_t::data_t                   data_t;
-    typedef typename calc_model_t::data_array_t             data_array_t;
-    typedef typename calc_model_t::main_var_array_t         main_var_array_t;
-    typedef norms_storage <strategy_t>                      norms_storage_t;
-    typedef reservoir <strategy_t>                          reservoir_t;
-    typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
-    typedef jacobian <strategy_t>                           jacobian_t;
-    typedef jacobian_matrix <strategy_t>                    jmatrix_t;
+    typedef calc_model                          calc_model_t;
+    typedef calc_model_t::data_t                   data_t;
+    typedef calc_model_t::data_array_t             data_array_t;
+    typedef calc_model_t::main_var_array_t         main_var_array_t;
+    typedef norms_storage                       norms_storage_t;
+    typedef reservoir                         reservoir_t;
+    typedef rs_mesh_iface                     mesh_iface_t;
+    typedef jacobian                          jacobian_t;
+    typedef jac_matrix_iface                   jmatrix_t;
 
-    typedef typename calc_model_t::sp_this_t                sp_calc_model_t;
-    typedef typename calc_model_t::sp_reservoir_t           sp_reservoir_t;
-    typedef typename calc_model_t::sp_jacobian_t            sp_jacobian_t;
-    typedef typename calc_model_t::sp_jacobian_matrix_t     sp_jmatrix_t;
-    typedef typename calc_model_t::sp_mesh_iface_t          sp_mesh_iface_t;
-    typedef typename calc_model_t::sp_rock_grid             sp_rock_grid_prop_t;
+    typedef calc_model_t::sp_this_t                sp_calc_model_t;
+    typedef calc_model_t::sp_reservoir_t           sp_reservoir_t;
+    typedef calc_model_t::sp_jacobian_t            sp_jacobian_t;
+    typedef calc_model_t::sp_jacobian_matrix_t     sp_jmatrix_t;
+    typedef calc_model_t::sp_mesh_iface_t          sp_mesh_iface_t;
+    typedef calc_model_t::sp_rock_grid             sp_rock_grid_prop_t;
     typedef smart_ptr <bcsr_matrix_t, true>                 sp_bcsr_matrix_t;
 
-    typedef typename calc_model_t::sp_pvt_dead_oil_array_t  sp_pvt_dead_oil_array_t;
-    typedef typename calc_model_t::sp_pvt_gas_array_t       sp_pvt_gas_array_t;
-    typedef typename calc_model_t::sp_pvt_water_array_t     sp_pvt_water_array_t;
+    typedef calc_model_t::sp_pvt_dead_oil_array_t  sp_pvt_dead_oil_array_t;
+    typedef calc_model_t::sp_pvt_gas_array_t       sp_pvt_gas_array_t;
+    typedef calc_model_t::sp_pvt_water_array_t     sp_pvt_water_array_t;
 
     enum {
       n_phases = is_w + is_g + is_o,
@@ -88,16 +87,16 @@ namespace blue_sky {
     jacobian_ (jacobian),
     jmatrix_ (jmatrix),
     mesh_ (mesh),
-    trns_matrix_ (jmatrix_->trns_matrix),
+    trns_matrix_ (jmatrix_->get_trns_matrix ()),
     trns_values_ (trns_matrix_->get_values ()),
     trns_rows_ptr_ (trns_matrix_->get_rows_ptr ()),
     trns_cols_ptr_ (trns_matrix_->get_cols_ind ()),
-    reg_matrix_ (jmatrix_->get_regular_matrix ()),
+    reg_matrix_ (jmatrix_->get_flux_matrix ()),
     reg_values_ (reg_matrix_->get_values ()),
     reg_rows_ptr_ (reg_matrix_->get_rows_ptr ()),
     reg_cols_ptr_ (reg_matrix_->get_cols_ind ()),
-    m_array_ (jmatrix_->m_array),
-    p_array_ (jmatrix_->p_array),
+    m_array_ (jmatrix_->get_m_array ()),
+    p_array_ (jmatrix_->get_p_array ()),
     rhs_ (jmatrix_->get_rhs ()),
     sol_ (jmatrix_->get_solution ()),
     flux_rhs_ (jmatrix_->get_rhs_flux ()),
@@ -177,7 +176,8 @@ namespace blue_sky {
           mult = 1.0;
 
           // prepare well jacobian part
-          jmatrix_->init (n_cells_, n_phases, 3, 0, n_sec_vars);
+          // FIXME:
+          //jmatrix_->init (n_cells_, n_phases, 3, 0, n_sec_vars);
 
           if (is_o && is_g)
             {
@@ -292,13 +292,13 @@ namespace blue_sky {
       rhs_item_t *rhs_block     = 0;
       index_t b_sqr         = n_phases * n_phases;
 
-      rhs_item_array_t &main_diag_acc = jmatrix_->get_regular_acc_diag();//get_main_diagonal_accumulative ();
+      spv_float main_diag_acc         = jmatrix_->get_accum_matrix ()->get_diag ();//get_main_diagonal_accumulative ();
       rhs_item_array_t &ss_diag       = jmatrix_->get_ss_diagonal ();
       rhs_item_array_t &sp_diag       = jmatrix_->get_sp_diagonal ();
       rhs_item_array_t &s_rhs         = jmatrix_->get_sec_rhs ();
       rhs_item_array_t &rhs           = jmatrix_->get_rhs ();
 
-      BS_ERROR (!main_diag_acc.empty (), "fi_operator_cells");
+      BS_ERROR (!main_diag_acc->empty (), "fi_operator_cells");
       BS_ERROR (!ss_diag.empty (), "fi_operator_cells");
       BS_ERROR (!sp_diag.empty (), "fi_operator_cells");
       BS_ERROR (!s_rhs.empty (), "fi_operator_cells");
@@ -340,7 +340,7 @@ namespace blue_sky {
       // loop through all cells
       for (i = 0; i < n_cells_; ++i)
         {
-          jac_block   = &main_diag_acc[b_sqr * i];
+          jac_block   = &(*main_diag_acc)[b_sqr * i];
           ss_block    = &ss_diag[n_sec_vars * n_sec_vars * i];
           s_rhs_block = &s_rhs[n_sec_vars * i];
           rhs_block   = &rhs[i * n_phases];
@@ -601,7 +601,7 @@ namespace blue_sky {
               pvt_oil = pvt_oil_array [pvt_reg];
             }
 
-          switch_main_vars <strategy_t>::do_switch (
+          switch_main_vars::do_switch (
             is_w, is_g, is_o,
             d_o, d_g, d_w,
             pvt_oil_array [pvt_reg],
@@ -733,13 +733,13 @@ namespace blue_sky {
     fi_operator_fill ()
     {
       index_t b_sqr                   = n_phases * n_phases;
-      rhs_item_array_t &main_diag_acc = jmatrix_->get_regular_acc_diag();//get_main_diagonal_accumulative ();
+      spv_float main_diag_acc         = jmatrix_->get_accum_matrix ()->get_diag ();//get_main_diagonal_accumulative ();
       rhs_item_array_t &ss_diag       = jmatrix_->get_ss_diagonal ();
       rhs_item_array_t &sp_diag       = jmatrix_->get_sp_diagonal ();
       rhs_item_array_t &s_rhs         = jmatrix_->get_sec_rhs ();
       rhs_item_array_t &rhs           = jmatrix_->get_rhs ();
 
-      BS_ASSERT (!main_diag_acc.empty ());
+      BS_ASSERT (!main_diag_acc->empty ());
       BS_ASSERT (!ss_diag.empty ());
       BS_ASSERT (!sp_diag.empty ());
       BS_ASSERT (!s_rhs.empty ());
@@ -748,7 +748,7 @@ namespace blue_sky {
       // loop through all cells
       for (index_t i = 0; i < n_cells_; ++i)
         {
-          rhs_item_t *jac_block   = &main_diag_acc[b_sqr * i];
+          rhs_item_t *jac_block   = &(*main_diag_acc)[b_sqr * i];
           rhs_item_t *ss_block    = &ss_diag[n_sec_vars * n_sec_vars * i];
           rhs_item_t *sp_block    = &sp_diag[n_sec_vars * n_phases * i];
           rhs_item_t *s_rhs_block = &s_rhs[n_sec_vars * i];
@@ -1387,7 +1387,7 @@ namespace blue_sky {
     rhs_item_array_t              &sp_diag_;
     rhs_item_array_t              &s_rhs_;
 
-    const item_array_t            &depths_;
+    const t_double                *depths_;
 
     index_t                       n_cells_;
     index_t                       n_connections_;
@@ -1405,16 +1405,16 @@ namespace blue_sky {
     index_t                       d_og, d_ow, d_oo;
 
     data_array_t                  &data_;
-    item_array_t                  &saturation_3p_;
-    const item_array_t            &pressure_;
-    item_array_t                  &gas_oil_ratio_;
+    t_double                      *saturation_3p_;
+    const t_double                *pressure_;
+    t_double                      *gas_oil_ratio_;
     main_var_array_t              &main_vars_;
-    const item_array_t            &volume_;
-    const item_array_t            &poro_array_;
-    const item_array_t            &rock_grid_comp_const_;
-    const item_array_t            &rock_grid_comp_ref_pressure_;
-    const index_array_t           &sat_regions_;
-    const index_array_t           &pvt_regions_;
+    const t_double                *volume_;
+    const t_double                *poro_array_;
+    const t_double                *rock_grid_comp_const_;
+    const t_double                *rock_grid_comp_ref_pressure_;
+    const t_long                  *sat_regions_;
+    const t_long                  *pvt_regions_;
 
     const sp_pvt_dead_oil_array_t &pvt_oil_array;                  //!< (n_pvt_regions)
     const sp_pvt_water_array_t    &pvt_water_array;
@@ -1428,7 +1428,7 @@ namespace blue_sky {
     item_t                        s_rhs_norm_;
 
     norms_storage_t               &norm_;
-    rhs_item_array_t              &cfl_;
+    stdv_float              &cfl_;
   };
 
 } // namespace blue_sky

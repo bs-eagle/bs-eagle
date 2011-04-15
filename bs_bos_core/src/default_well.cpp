@@ -162,8 +162,8 @@ namespace wells {
 
 
   void
-  default_well::restore_solution (double /*dt*/, const item_array_t &p_sol, 
-                                               const item_array_t & /*s_sol*/, index_t block_size)
+  default_well::restore_solution (double /*dt*/, const spv_double &p_sol, 
+                                               const spv_double & /*s_sol*/, index_t block_size)
   {
     BS_ASSERT (!is_no_connections ()) (base_t::name ());
 
@@ -188,7 +188,8 @@ namespace wells {
         if (!c->is_shut ())
           {
             const item_wr_block_t &wr = c->get_wr_value ();
-            const item_xr_block_t &xr = shared_array (const_cast <item_t *> (&p_sol[c->n_block () * block_size]), block_size);
+            // FIXME: remove shared_array and vectors
+            const item_xr_block_t &xr = shared_array (const_cast <item_t *> (&(*p_sol)[c->n_block () * block_size]), block_size);
 
             item_t wr_xr = 0;
             for (index_t j = 0; j < block_size; ++j)
@@ -279,7 +280,7 @@ namespace wells {
     detail::fill_rows <default_well, default_connection_t> (this, rows);
   }
   void
-  default_well::fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const
+  default_well::fill_jacobian (double dt, index_t block_size, const spv_long &rows, spv_long &cols, spv_double &values, stdv_long &markers) const
   {
     detail::fill_jacobian <default_well, default_connection_t> (this,
       dt, block_size, rows, cols, values, markers);

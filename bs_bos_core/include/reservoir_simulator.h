@@ -16,79 +16,60 @@
 
 namespace blue_sky
 {
-
-  template <typename strategy_t>
   class reservoir;
-
-  template <typename strategy_t>
   class calc_model;
-
-  template <typename strategy_t>
-  class reservoir;
-
-  template <typename strategy_t>
   struct BS_API_PLUGIN trans_multipliers_calc;
-
-  template <typename strategy_t>
   struct main_loop_calc_base;
-
   class data_storage_interface;
-
-  template <typename strategy_t>
-  class keyword_manager;
 
   /**
    * \class reservoir_simulator
    * \brief main class of reservoir_simulator implementation,
    *        implements bs_node
    * */
-  template <class strategy_t>
   class BS_API_PLUGIN reservoir_simulator : public bs_node
     {
     public:
       // typedefs
       typedef bs_node                               base_t;
-      typedef reservoir_simulator < strategy_t >    this_t;               //!< shortname for this type
+      typedef reservoir_simulator    this_t;               //!< shortname for this type
       typedef smart_ptr < this_t, true >            sp_this_t;            //!< smart pointer to this_t
 
-      typedef hydrodynamic_model < strategy_t >           dm_t;                 //!< hydrodynamic_model type
+      typedef hydrodynamic_model           dm_t;                 //!< hydrodynamic_model type
       typedef smart_ptr < dm_t, true >              sp_hdm_t;              //!< smart_ptr to hydrodynamic_model type
 
-      typedef rs_mesh_iface < strategy_t >          mesh_iface_t;         //!< rs_mesh_iface type
+      typedef rs_mesh_iface          mesh_iface_t;         //!< rs_mesh_iface type
       typedef smart_ptr < mesh_iface_t, true >      sp_mesh_iface_t;      //!< smart_ptr to rs_mesh_iface type
 
-      typedef linear_solver_base < strategy_t >     solver_t;             //!< linear_solver type
+      typedef lsolver_iface     solver_t;             //!< linear_solver type
       typedef smart_ptr < solver_t, true>           sp_solver_t;          //!< smart_ptr to solver_t type
 
-      typedef event_manager <strategy_t>            em_t;                 //!< event_manager type
+      typedef event_manager          em_t;                 //!< event_manager type
       typedef smart_ptr < em_t, true >              sp_em_t;              //!< smart_ptr to event_manager type
-      typedef typename em_t::sp_event_base_list     sp_event_base_list_t; //!< list of scheduled events
+      typedef em_t::sp_event_base_list     sp_event_base_list_t; //!< list of scheduled events
 
-      typedef calc_model < strategy_t >             calc_model_t;         //!< calc_model type
+      typedef calc_model             calc_model_t;         //!< calc_model type
       typedef smart_ptr < calc_model_t, true >      sp_calc_model_t;      //!< smart_ptr to calc_model type
 
-      typedef reservoir <strategy_t>                reservoir_t;          //!< reservoir type
+      typedef reservoir              reservoir_t;          //!< reservoir type
       typedef smart_ptr <reservoir_t, true>         sp_reservoir_t;       //!< smart_ptr to reservoir type
 
       typedef data_storage_interface                facility_storage_t;   //!< facility_storage type
       typedef smart_ptr <facility_storage_t, true>  sp_facility_storage_t;//!< smart_ptr to facility_storage type
 
-      typedef jacobian <strategy_t>                 jacobian_t;           //!< jacobian type
+      typedef jacobian               jacobian_t;           //!< jacobian type
       typedef smart_ptr <jacobian_t, true>          sp_jacobian_t;        //!< smart_ptr to jacobian type
 
-      typedef typename strategy_t::item_t           item_t;               //!< item type
-      typedef typename strategy_t::index_t          index_t;              //!< index type
-      typedef typename strategy_t::item_array_t     item_array_t;         //!< array of items type
-      typedef typename strategy_t::index_array_t    index_array_t;        //!< array of indexes type
+      typedef t_double           item_t;               //!< item type
+      typedef t_long          index_t;              //!< index type
+      typedef v_double     item_array_t;         //!< array of items type
+      typedef v_long    index_array_t;        //!< array of indexes type
 
       //! transmissibility multipliers calculator type
-      typedef trans_multipliers_calc <strategy_t>   trans_multipliers_calc_t; 
-      typedef main_loop_calc_base <strategy_t>      main_loop_calc_t;     //!< base type of main_loop_calc type
+      typedef trans_multipliers_calc trans_multipliers_calc_t; 
+      typedef main_loop_calc_base    main_loop_calc_t;     //!< base type of main_loop_calc type
 
-      typedef keyword_manager <strategy_t>          keyword_manager_t;    //!< keyword_manager type
-      typedef smart_ptr <keyword_manager_t, true >  sp_keyword_manager_t; //!< smart_ptr to keyword_manager type
-
-      typedef jacobian_matrix <strategy_t>          jmatrix_t;            //!< jacobian_matrix type
+      typedef jac_matrix_iface        jmatrix_t;            //!< jacobian_matrix type
       typedef smart_ptr <jmatrix_t, true>           sp_jmatrix_t;         //!< smart_ptr to jacobian_matrix type
 
     public:
@@ -228,14 +209,12 @@ namespace blue_sky
         ((pre_read, (sp_this_t), 1))
       );
 
-      sp_hdm_t                 hdm;                 //!< pointer to hydrodynamic_model instance
+      sp_hdm_t                hdm;                //!< pointer to hydrodynamic_model instance
       sp_em_t                 em;                 //!< pointer to event_manager instance
       sp_calc_model_t         cm;                 //!< pointer to calc_model instance
-      sp_mesh_iface_t         mesh;               //!< pointer to mesh instance
       sp_reservoir_t          reservoir_;         //!< pointer to reservoir instance
       sp_facility_storage_t   facility_storage_;  //!< pointer to facility_storage instance
       sp_jacobian_t           jacobian_;          //!< pointer to jacobian instance
-      sp_keyword_manager_t    keyword_manager_;   //!< pointer to keyword manager instance
       std::string             model_filename_;    //!< name of model file
 
       smart_ptr <main_loop_calc_t, false> mloop;  //!< pointer to main_loop_calc instance

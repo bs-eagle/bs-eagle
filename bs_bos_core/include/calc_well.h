@@ -488,12 +488,6 @@ namespace blue_sky
       }
 
       /**
-       * \brief  Resets init_approx_is_calc_ flag
-       * */
-      void
-      reset_init_approx ();
-
-      /**
        * \brief  Calculates rate and deriv values for well and
        *         well perforations (connections)
        * \param  is_start
@@ -532,7 +526,7 @@ namespace blue_sky
        * \param  markers
        * */
       virtual void
-      fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const
+      fill_jacobian (double dt, index_t block_size, const spv_long &rows, spv_long &cols, spv_double &values, stdv_long &markers) const
       {
         bs_throw_exception ("PURE CALL");
       }
@@ -560,7 +554,7 @@ namespace blue_sky
        * \param  block_size size of one block in vectors
        * */
       virtual void
-      restore_solution (double dt, const item_array_t &p_sol, const item_array_t &s_sol, index_t block_size);
+      restore_solution (double dt, const spv_double &p_sol, const spv_double &s_sol, index_t block_size);
 
       /**
        * \brief  Custom init

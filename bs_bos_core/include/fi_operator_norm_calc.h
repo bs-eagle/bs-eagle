@@ -26,9 +26,9 @@ struct di
   /**
    * \brief Calculates norms
    */
-  template <typename strategy_t, bool is_w, bool is_g, bool is_o>
+  template <bool is_w, bool is_g, bool is_o>
   BS_FORCE_INLINE void
-  fi_operator_impl <strategy_t, is_w, is_g, is_o>::norm_calc ()
+  fi_operator_impl <is_w, is_g, is_o>::norm_calc ()
   {
     double pv = 0;
 
@@ -176,9 +176,9 @@ struct di
    * \param  i Index of cell
    * \param  ns Norms storage
    * */
-  template <class strategy_t, bool is_w, bool is_g, bool is_o>
+  template <bool is_w, bool is_g, bool is_o>
   BS_FORCE_INLINE void 
-  fi_operator_impl <strategy_t, is_w, is_g, is_o>::update_norm_by_cell (index_t i, norms_storage_t &ns)
+  fi_operator_impl <is_w, is_g, is_o>::update_norm_by_cell (index_t i, norms_storage_t &ns)
   {
     double norm_mult, r, d;
 

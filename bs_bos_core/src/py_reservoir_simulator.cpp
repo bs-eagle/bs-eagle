@@ -66,17 +66,15 @@ namespace python {
     .add_property ("jmatrix",         make_function (get_jmatrix <T>))
     .add_property ("calc_model",      make_getter (&T::cm, return_value_policy <copy_non_const_reference> ()))
     .add_property ("reservoir",       make_getter (&T::reservoir_, return_value_policy <copy_non_const_reference> ()))
-    .add_property ("mesh",            make_getter (&T::mesh, return_value_policy <copy_non_const_reference> ()))
     .add_property ("event_manager",   make_getter (&T::em, return_value_policy <copy_non_const_reference> ()))
     .add_property ("hydrodynamic_model",    make_getter (&T::hdm, return_value_policy <copy_non_const_reference> ()))
     .add_property ("jacobian",        make_getter (&T::jacobian_, return_value_policy <copy_non_const_reference> ()))
-    .add_property ("keyword_manager", make_getter (&T::keyword_manager_, return_value_policy <copy_non_const_reference> ()))
   PY_EXPORTER_END;
 
   void 
   py_export_reservoir_simulator()
   {
-    strategy_exporter::export_base <reservoir_simulator, reservoir_simulator_exporter> ("reservoir_simulator");
+      base_exporter <reservoir_simulator, reservoir_simulator_exporter>::export_class ("reservoir_simulator");
   }
 
 } // namespace python

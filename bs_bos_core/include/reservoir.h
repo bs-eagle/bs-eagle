@@ -246,7 +246,7 @@ namespace blue_sky
        * \param  block_size size of one block in vectors
        * */
       void                      
-      restore_wells_solution (double dt, const item_array_t &p_sol, const item_array_t &s_sol, index_t block_size);
+      restore_wells_solution (double dt, const spv_double &p_sol, const spv_double &s_sol, index_t block_size);
 
       /**
        * \brief  for each facility calls process
@@ -439,7 +439,7 @@ namespace blue_sky
 
       sp_event_filter_t                   event_filter_;                      //!< events filter
 
-      index_array_t                       markers_;                           //!< markers, used to build jacobian
+      stdv_long                           markers_;                           //!< markers, used to build jacobian
 
 #ifdef _HDF5
       sp_bs_hdf5_storage                  hdf5;                               //!< pointer to hdf5_storage instance

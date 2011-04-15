@@ -188,7 +188,7 @@ namespace blue_sky
     //get eqlnum array
     eqlnum.resize(n_cells);
     //todo: if zero array
-    convert_arrays (mesh->get_n_active_elements (), mesh->get_int_to_ext (), eqlnum, *l_idata->get_i_array ("EQLNUM"));
+    convert_arrays (mesh->get_n_active_elements (), mesh->get_int_to_ext (), eqlnum, l_idata->get_i_array ("EQLNUM"));
 
     min_depth.resize(n_eql, 0);
     max_depth.resize(n_eql, 0);

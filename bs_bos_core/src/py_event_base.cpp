@@ -40,8 +40,8 @@ namespace python    {
 
   void py_export_events ()
   {
-    strategy_exporter::export_base <event_base, event_base_exporter> ("event_base");
-    strategy_exporter::export_class <py_event_base, event_base, event_base_exporter> ("py_event_base");
+    base_exporter <event_base, event_base_exporter>::export_class ("event_base");
+    class_exporter <py_event_base, event_base, event_base_exporter>::export_class ("py_event_base");
   }
 
 } // namespace python

@@ -68,7 +68,7 @@ namespace wells {
      * \param  block_size size of one block in vectors
      * */
     void
-    restore_solution (double dt, const item_array_t &p_sol, const item_array_t &s_sol, index_t block_size);
+    restore_solution (double dt, const spv_double &p_sol, const spv_double &s_sol, index_t block_size);
 
     /**
      * \brief  Calculates rate and deriv values for well and 
@@ -240,7 +240,7 @@ namespace wells {
      * \param  markers
      * */
     virtual void 
-    fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const;
+    fill_jacobian (double dt, index_t block_size, const spv_long &rows, spv_long &cols, spv_double &values, stdv_long &markers) const;
 
     /**
      * \brief  Fills rhs array with rate values

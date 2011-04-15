@@ -36,13 +36,8 @@ namespace python {
   void
   py_export_jacobian ()
   {
-    export_jacobian <jacobian <base_strategy_fi> >   ("jacobian_fi");
-    export_jacobian <jacobian <base_strategy_di> >   ("jacobian_di");
-    export_jacobian <jacobian <base_strategy_mixi> > ("jacobian_mixi");
-
-    boost::python::register_ptr_to_python <smart_ptr <jacobian <base_strategy_fi>, true> > ();
-    boost::python::register_ptr_to_python <smart_ptr <jacobian <base_strategy_di>, true> > ();
-    boost::python::register_ptr_to_python <smart_ptr <jacobian <base_strategy_mixi>, true> > ();
+    export_jacobian <jacobian> ("jacobian");
+    boost::python::register_ptr_to_python <smart_ptr <jacobian, true> > ();
   }
 
 

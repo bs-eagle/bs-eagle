@@ -31,17 +31,18 @@
 namespace blue_sky {
 namespace python {
 
-    STRATEGY_CLASS_WRAPPER (event_base, py_event_base)
+    CLASS_WRAPPER (event_base, py_event_base)
     {
     public:
-      typedef rs_mesh_iface <strategy_t>        mesh_t;
-      typedef reservoir <strategy_t>            reservoir_t;
+      typedef rs_mesh_iface                     mesh_t;
+      typedef reservoir                         reservoir_t;
       typedef smart_ptr <mesh_t, true>          sp_mesh_iface_t;
       typedef smart_ptr <reservoir_t, true>     sp_reservoir_t;
-      typedef event_base <strategy_t>           base_t;
+      typedef event_base                        base_t;
 
     public:
-      MAKE_ME_HAPPY (py_event_base, py_event_base_base <strategy_t>, "py_event_base");
+
+      BLUE_SKY_TYPE_DECL (py_event_base);
       //WRAPPER_METHOD (apply, void, 3, (const sp_reservoir_t &, const py_mesh_iface_t &, const py_calc_model_t &));
     };
 

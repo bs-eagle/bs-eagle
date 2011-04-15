@@ -70,21 +70,21 @@ namespace blue_sky {
      * \todo  Should be renamed
      * \todo  Describe data members
      * */
-    template <typename strategy_t, bool is_w, bool is_g, bool is_o>
+    template <bool is_w, bool is_g, bool is_o>
     struct mpfa_base_impl
     {
     public:
-      typedef typename strategy_t::item_t             item_t;
-      typedef typename strategy_t::rhs_item_t         rhs_item_t;
-      typedef typename strategy_t::index_t            index_t;
-      typedef typename strategy_t::item_array_t       item_array_t;
-      typedef typename strategy_t::rhs_item_array_t   rhs_item_array_t;
-      typedef typename strategy_t::index_array_t      index_array_t;
+      typedef t_double             item_t;
+      typedef t_double         rhs_item_t;
+      typedef t_long            index_t;
+      typedef spv_double       item_array_t;
+      typedef spv_double   rhs_item_array_t;
+      typedef spv_long      index_array_t;
       typedef boost::array <index_t, FI_PHASE_TOT>    up_cell_array_t;
-      typedef calc_model <strategy_t>                 calc_model_t;
-      typedef typename calc_model_t::data_t           data_t;
-      typedef typename calc_model_t::data_array_t     data_array_t;
-      typedef typename calc_model_t::main_var_array_t main_var_array_t;
+      typedef calc_model                  calc_model_t;
+      typedef calc_model_t::data_t           data_t;
+      typedef calc_model_t::data_array_t     data_array_t;
+      typedef calc_model_t::main_var_array_t main_var_array_t;
 
       enum
         {
@@ -130,7 +130,7 @@ namespace blue_sky {
        * \param  rhs_ RHS part of Jacobian
        * \param  reg_values_ Values of regular part of Jacobian
        * */
-      mpfa_base_impl (const fi_operator_impl <strategy_t, is_w, is_g, is_o> &fi_operator_, rhs_item_array_t &rhs_, rhs_item_array_t &reg_values_)
+      mpfa_base_impl (const fi_operator_impl <is_w, is_g, is_o> &fi_operator_, rhs_item_array_t &rhs_, rhs_item_array_t &reg_values_)
       : d_w (fi_operator_.d_w),
       d_g (fi_operator_.d_g),
       d_o (fi_operator_.d_o),
@@ -706,10 +706,10 @@ namespace blue_sky {
        * */
       struct cfl_info
       {
-        rhs_item_array_t f11_i;
-        rhs_item_array_t f12_i;
-        rhs_item_array_t f21_i;
-        rhs_item_array_t f22_i;
+        stdv_float f11_i;
+        stdv_float f12_i;
+        stdv_float f21_i;
+        stdv_float f22_i;
 
         cfl_info (index_t n_elems)
           {
@@ -743,7 +743,7 @@ namespace blue_sky {
        * \param  saturation_3p
        * */
       void
-      fill_cfl (cfl_info &f, const rhs_item_t *truns, index_t i_cell, index_t j_cell, rhs_item_array_t &cfl, item_array_t &saturation_3p)
+      fill_cfl (cfl_info &f, const rhs_item_t *truns, index_t i_cell, index_t j_cell, stdv_float &cfl, item_array_t &saturation_3p)
       {
 
         int k;
@@ -862,19 +862,19 @@ namespace blue_sky {
       index_t                                 d_o;
       index_t                                 ds_w;
       index_t                                 ds_g;
-      const item_array_t                      &saturation_3p_;
-      const item_array_t                      &pressure_;
-      const item_array_t                      &gas_oil_ratio_;
+      const t_double                            *saturation_3p_;
+      const t_double                            *pressure_;
+      const t_double                            *gas_oil_ratio_;
       const main_var_array_t                  &main_vars_;
       const data_array_t                      &data_;
-      const item_array_t                      &depths_;
+      const t_double                            *depths_;
       item_t                                  gravity_;
       index_t                                 n_sec_vars;
 
-      const rhs_item_array_t                  &sp_diag_;
-      const rhs_item_array_t                  &s_rhs_;
-      rhs_item_array_t                        &reg_values_;
-      rhs_item_array_t                        &rhs_;
+      const t_float                            *sp_diag_;
+      const t_float                            *s_rhs_;
+      t_float                                  *reg_values_;
+      t_float                                  *rhs_;
 
       boost::array <item_t, n_phases>         rho_;
       boost::array <item_t, n_phases>         psi_;
@@ -990,11 +990,11 @@ namespace blue_sky {
    * \param  dt
    * \return True
    * */
-  template <typename strategy_t, bool is_w, bool is_g, bool is_o>
+  template <bool is_w, bool is_g, bool is_o>
   bool
-  fi_operator_impl <strategy_t, is_w, is_g, is_o>::block_connections_mpfa (const item_t &dt)
+  fi_operator_impl <is_w, is_g, is_o>::block_connections_mpfa (const item_t &dt)
   {
-    mpfa::block_connections_mpfa (dt, *this, mpfa::mpfa_base_impl <strategy_t, is_w, is_g, is_o> (*this, flux_rhs_, reg_values_));
+    mpfa::block_connections_mpfa (dt, *this, mpfa::mpfa_base_impl <is_w, is_g, is_o> (*this, flux_rhs_, reg_values_));
     return false;
   }
 

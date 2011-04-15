@@ -56,7 +56,12 @@ namespace blue_sky {
      * \param  markers
      * */
     virtual void 
-    fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const = 0;
+    fill_jacobian (double dt, 
+      index_t         block_size, 
+      const spv_long  &rows, 
+      spv_long        &cols, 
+      spv_double      &values, 
+      stdv_long       &markers) const = 0;
 
     /**
      * \brief  Fills rhs array with rate values
@@ -90,7 +95,7 @@ namespace blue_sky {
      * \param  block_size size of one block in vectors
      * */
     virtual void 
-    restore_solution (double dt, const item_array_t &p_sol, const item_array_t &s_sol, index_t block_size) = 0;
+    restore_solution (double dt, const spv_double &p_sol, const spv_double &s_sol, index_t block_size) = 0;
 
     /**
      * \brief  Performs actions before start of each large step

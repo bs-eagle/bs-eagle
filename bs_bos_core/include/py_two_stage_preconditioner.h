@@ -13,11 +13,6 @@
 #ifdef BSPY_EXPORTING_PLUGIN
 #include "two_stage_preconditioner.h"
 
-#include BS_FORCE_PLUGIN_IMPORT ()
-#include "py_bcsr_matrix.h"
-#include "py_linear_solvers.h"
-#include BS_STOP_PLUGIN_IMPORT ()
-
 namespace blue_sky {
 namespace python {
 

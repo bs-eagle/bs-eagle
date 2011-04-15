@@ -557,6 +557,7 @@ namespace blue_sky
       auto_value <int>                                        multi_well_in_cell_flag;        //!< obsolete, if != 0 use sorting
 
       auto_value <double>                                     ave_volume;                     //!< average volume
+      stdv_long                                               max_norm_counter;
 
       //! base parameters
     public:

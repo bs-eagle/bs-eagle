@@ -14,9 +14,9 @@ namespace blue_sky {
   /**
    * \brief  Calculates fluid volume on previous step
    * */
-  template <class strategy_t, bool is_w, bool is_g, bool is_o>
+  template <bool is_w, bool is_g, bool is_o>
   BS_FORCE_INLINE void
-  fi_operator_impl <strategy_t, is_w, is_g, is_o>::calc_prev_fluid_volume ()
+  fi_operator_impl <is_w, is_g, is_o>::calc_prev_fluid_volume ()
   {
     BS_ASSERT (calc_model_->phase_d[FI_PHASE_WATER] == calc_model_->sat_d[FI_PHASE_WATER]) (calc_model_->phase_d[FI_PHASE_WATER]) (calc_model_->sat_d[FI_PHASE_WATER]);
     BS_ASSERT (calc_model_->phase_d[FI_PHASE_GAS]   == calc_model_->sat_d[FI_PHASE_GAS]) (calc_model_->phase_d[FI_PHASE_GAS]) (calc_model_->sat_d[FI_PHASE_GAS]);

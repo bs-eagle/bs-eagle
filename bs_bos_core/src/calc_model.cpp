@@ -270,7 +270,7 @@ namespace blue_sky
 
         if (input_data->contains_i_array ("ROCKNUM"))
           {
-            convert_arrays(mesh->get_n_active_elements (), mesh->get_int_to_ext (), this->rock_regions, *input_data->get_i_array ("ROCKNUM"));
+            convert_arrays(mesh->get_n_active_elements (), mesh->get_int_to_ext (), this->rock_regions, input_data->get_i_array ("ROCKNUM"));
             FI_DECR_ARRAY (this->rock_regions, 0, mesh->get_n_active_elements(), 1);
           }
         else
@@ -288,7 +288,7 @@ namespace blue_sky
       }
     if (input_data->contains_i_array ("FIPNUM"))
       {
-        convert_arrays(mesh->get_n_active_elements (), mesh->get_int_to_ext (), this->fip_regions, *input_data->get_i_array ("FIPNUM"));
+        convert_arrays(mesh->get_n_active_elements (), mesh->get_int_to_ext (), this->fip_regions, input_data->get_i_array ("FIPNUM"));
         FI_DECR_ARRAY (this->fip_regions, 0, mesh->get_n_active_elements(), 1);
       }
     else
@@ -304,7 +304,7 @@ namespace blue_sky
       }
     if (input_data->contains_i_array ("PVTNUM"))
       {
-        convert_arrays(mesh->get_n_active_elements (), mesh->get_int_to_ext (), this->pvt_regions, *input_data->get_i_array ("PVTNUM"));
+        convert_arrays(mesh->get_n_active_elements (), mesh->get_int_to_ext (), this->pvt_regions, input_data->get_i_array ("PVTNUM"));
         FI_DECR_ARRAY (this->pvt_regions, 0, mesh->get_n_active_elements(), 1);
       }
     else
@@ -320,7 +320,7 @@ namespace blue_sky
       }
     if (input_data->contains_i_array ("SATNUM"))
       {
-        convert_arrays(mesh->get_n_active_elements (), mesh->get_int_to_ext (), this->sat_regions, *input_data->get_i_array ("SATNUM"));
+        convert_arrays(mesh->get_n_active_elements (), mesh->get_int_to_ext (), this->sat_regions, input_data->get_i_array ("SATNUM"));
         FI_DECR_ARRAY (this->sat_regions, 0, mesh->get_n_active_elements(), 1);
       }
     else
@@ -786,7 +786,7 @@ namespace blue_sky
       }
     else if (input_data->contains_fp_array ("PRESSURE"))
       {
-        convert_arrays (mesh->get_n_active_elements (), mesh->get_int_to_ext (), pressure, *input_data->get_fp_array ("PRESSURE"));
+        convert_arrays (mesh->get_n_active_elements (), mesh->get_int_to_ext (), pressure, input_data->get_fp_array ("PRESSURE"));
       }
     else
       {

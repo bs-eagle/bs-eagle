@@ -56,8 +56,6 @@ namespace blue_sky
   class norms_storage
   {
   public:
-    typedef v_double                    item_array_t;
-    typedef v_double                    rhs_item_array_t;
     typedef std::vector <const char *>  name_array_t;
 
   public:
@@ -78,7 +76,7 @@ namespace blue_sky
     // --------------------------------------
   public:
     name_array_t  name;
-    item_array_t  val;
+    stdv_double   val;
     boost::array <t_long, norms::NORMS_COUNTER> idx;
     boost::array <t_long, norms::NORMS_COUNTER> p_flag;
   };
