@@ -44,7 +44,19 @@ if (build_kind == "debug") :
 elif (build_kind == "release") :
     env.AppendUnique (LIBS = libs + boost_libs)
 
-bs_bos_core = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."], ["keyword_manager.cpp", "keywords_handlers.cpp", "keywords_registration.cpp"]).sources)
+excluded = [
+    "keyword_manager.cpp", 
+    "keywords_handlers.cpp", 
+    "keywords_registration.cpp",
+    "two_stage_preconditioner.cpp",
+    "csr_ilu_cfl.cpp",
+    "py_csr_ilu_cfl_prec.cpp",
+    "py_keyword_manager.cpp",
+    "py_table_2d_debug.cpp",
+    "py_two_stage_preconditioner.cpp",
+    ]
+
+bs_bos_core = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."], excluded).sources)
 
 env.Alias (tar_name, bs_bos_core)
 Export ("bs_bos_core")
