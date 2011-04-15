@@ -1,8 +1,8 @@
-/** 
+/**
  * @file standart3_pbuild.cpp
- * @brief 
- * @author 
- * @version 
+ * @brief
+ * @author
+ * @version
  * @date 2010-03-16
  */
 //#include "amg_stdafx.h"
@@ -10,24 +10,24 @@
 
 namespace blue_sky
 {
-  
-  standart3_pbuild::standart3_pbuild (bs_type_ctor_param) 
+
+  standart3_pbuild::standart3_pbuild (bs_type_ctor_param)
                     : amg_pbuild_iface (),
                       sp_cur_connections (BS_KERNEL.create_object (v_long::bs_type ())),
                       sp_cur_connections_markers (BS_KERNEL.create_object (v_long::bs_type ()))
 
     {
     }
-  
-  standart3_pbuild::standart3_pbuild (const this_t & /*src*/) 
+
+  standart3_pbuild::standart3_pbuild (const this_t & /*src*/)
                     : bs_refcounter (),
                       sp_cur_connections (BS_KERNEL.create_object (v_long::bs_type ())),
                       sp_cur_connections_markers (BS_KERNEL.create_object (v_long::bs_type ()))
      {
      }
-  
-   int 
-  standart3_pbuild::build (sp_bcsr_t matrix, 
+
+   int
+  standart3_pbuild::build (sp_bcsr_t matrix,
                            const t_long n_coarse_size,
                            const t_long max_connections,
                            spv_long sp_cf_markers,
@@ -78,11 +78,11 @@ namespace blue_sky
                               cl, cl2, k, match, j_ind, sum_d, sum_c, sum_all, alpha)
     {
 #endif //BUILD_P_STANDART_PARALLEL
-      
+
       sp_cur_connections->resize (max_connections * max_connections);
       sp_cur_connections_markers->resize (max_connections * max_connections);
-      cur_connections_markers = &(*sp_cur_connections_markers)[0]; 
-      cur_connections = &(*sp_cur_connections)[0]; 
+      cur_connections_markers = &(*sp_cur_connections_markers)[0];
+      cur_connections = &(*sp_cur_connections)[0];
       memset (cur_connections, 0, max_connections * max_connections * sizeof (t_long));
       memset (cur_connections_markers, 0, max_connections * max_connections * sizeof (t_long));
 
@@ -380,5 +380,5 @@ namespace blue_sky
   BLUE_SKY_TYPE_STD_CREATE (standart3_pbuild);
   BLUE_SKY_TYPE_STD_COPY (standart3_pbuild);
 
-  BLUE_SKY_TYPE_IMPL (standart3_pbuild, amg_pbuild_iface, "standart3_pbuild", "standart3 prolangation matrix builder class", "Realization of standart3 prolangation matrix builder");
+  BLUE_SKY_TYPE_IMPL (standart3_pbuild, amg_pbuild_iface, "standart3_pbuild", "standart3 prolongation matrix builder class", "Realization of standart3 prolongation matrix builder");
 }  // blue_sky namespace

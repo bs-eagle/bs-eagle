@@ -84,7 +84,10 @@ namespace blue_sky
   PY_EXPORTER (py_matrix_bcsr_tools_exporter, default_exporter)
     .def ("ascii_read_from_csr_format",
           &T::ascii_read_from_csr_format,
-          args ("matrix", "file"), "Read given matrix from ascii format")
+          args ("matrix", "filename"), "Read given matrix from file in ascii format")
+    .def ("ascii_write_to_csr_format",
+          &T::ascii_write_to_csr_format,
+          args ("matrix", "filename", "sort cols flag"), "Write given matrix to file in ascii format")
     .def ("random_init",
           &T::random_init,
           args ("matrix", "n_rows", "n_block_size", "value_dispertion", "elems_in_row"),

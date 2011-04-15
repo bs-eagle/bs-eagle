@@ -151,6 +151,33 @@ namespace blue_sky
         {
           return prop->set_f (cop_idx, cop);
         }
+/*
+      template <class sp_tool_iface> inline
+      void set_tool (std::vector<sp_tool_iface> tools_vec,
+                     const unsigned int level,
+                     const sp_tool_iface new_tool)
+        {
+          unsigned int size = tools_vec.size ();
+          //use last tools_vec [size-1]) for [size],..,[level-1]
+          if (size <= level)
+            {
+              tools_vec.resize (level + 1);
+              for (unsigned int i = size; i < level; i++)
+                {
+                  tools_vec[i] = tools_vec[size - 1];
+                }
+            }
+          tools_vec[level] = new_tool;
+        }
+
+      template <class sp_tool_iface> inline
+      sp_tool_iface get_tool (const std::vector<sp_tool_iface> tools_vec,
+                              const unsigned int level) const
+        {
+          return (level < tools_vec.size ()) ? tools_vec[level] :
+                  tools_vec[tools_vec.size () - 1];
+        }
+*/
 
       //! set strength matrix builder for amg level
       void set_smbuilder (unsigned int level, sp_smbuild_t sp_smbuilder_iface)
@@ -255,6 +282,11 @@ namespace blue_sky
       sp_smooth_t get_post_smoother (unsigned int level)
         {
           return (level < post_smoother.size ()) ? post_smoother[level] : post_smoother[post_smoother.size () - 1];
+        }
+
+      const vec_sp_bcsr_t get_level_matrices () const
+        {
+          return a;
         }
 
 #ifdef BSPY_EXPORTING_PLUGIN

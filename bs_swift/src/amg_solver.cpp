@@ -197,6 +197,11 @@ namespace blue_sky
           wksp->resize (n);
           std::cout<<"AMG solve 1 step of V-cycle. level = "<<level<<" n_rows = "<<n<<"\n";
 
+          // smooth all points
+          pre_smoother->get_prop ()->set_i ("cf_type", 0);
+          pre_smoother->smooth (a[level], NULL, get_n_pre_smooth_iters (),
+                                rhs[level], sol[level]);
+/*
           // smooth C-points
           pre_smoother->get_prop ()->set_i ("cf_type", 1);
           pre_smoother->smooth (a[level], cf[level], get_n_pre_smooth_iters (),
@@ -205,7 +210,7 @@ namespace blue_sky
           pre_smoother->get_prop ()->set_i ("cf_type", -1);
           pre_smoother->smooth (a[level], cf[level], get_n_pre_smooth_iters (),
                                 rhs[level], sol[level]);
-
+*/
           // calculate r = b - Ax
           if (a[level]->calc_lin_comb (-1.0, 1.0, sol[level], rhs[level], wksp))
             return -1;
@@ -234,6 +239,11 @@ namespace blue_sky
           if (p[level]->calc_lin_comb (1.0, 1.0, sol[level + 1], sol[level], sol[level]))
             return -6;
 
+          // smooth all points
+          post_smoother->get_prop ()->set_i ("cf_type", 0);
+          post_smoother->smooth (a[level], NULL, get_n_post_smooth_iters (),
+                                rhs[level], sol[level]);
+/*
           // smooth F-points
           post_smoother->get_prop ()->set_i ("cf_type", -1);
           post_smoother->smooth (a[level], cf[level], get_n_post_smooth_iters (),
@@ -242,6 +252,7 @@ namespace blue_sky
           post_smoother->get_prop ()->set_i ("cf_type", 1);
           post_smoother->smooth (a[level], cf[level], get_n_post_smooth_iters (),
                                 rhs[level], sol[level]);
+*/
         }
 
         if (max_iter > 1)

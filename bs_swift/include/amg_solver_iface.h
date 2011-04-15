@@ -30,11 +30,14 @@ namespace blue_sky
       typedef amg_solver_iface                                  this_t;
       //! short name to smart pointer to this class
       typedef smart_ptr<this_t, true>                           sp_this_t;
+
       typedef smart_ptr<amg_smbuilder_iface, true>              sp_smbuild_t;
       typedef smart_ptr<amg_coarse_iface, true>                 sp_coarse_t;
       typedef smart_ptr<amg_pbuild_iface, true>                 sp_pbuild_t;
       typedef smart_ptr<amg_smoother_iface, true>               sp_smooth_t;
 
+      typedef smart_ptr<bcsr_amg_matrix_iface, true>            sp_bcsr_t;
+      typedef std::vector<sp_bcsr_t>                            vec_sp_bcsr_t;
       //-----------------------------------------
       //  METHODS
       //-----------------------------------------
@@ -50,6 +53,7 @@ namespace blue_sky
       virtual void set_pbuilder (unsigned int level, sp_pbuild_t sp_pbuild_iface) = 0;
       virtual void set_pre_smoother (unsigned int level, sp_smooth_t sp_smooth_iface) = 0;
       virtual void set_post_smoother (unsigned int level, sp_smooth_t sp_smooth_iface) = 0;
+      virtual const vec_sp_bcsr_t get_level_matrices ()  const = 0;
     public:
 
     public:

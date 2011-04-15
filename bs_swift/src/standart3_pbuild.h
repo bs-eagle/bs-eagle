@@ -52,7 +52,7 @@ namespace blue_sky
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual std::string py_str () const
         {
-          return std::string ("Prolongation matrix builder (Standart algorithm).");
+          return std::string ("Prolongation matrix builder (Standart3 algorithm).");
         }
 #endif //BSPY_EXPORTING_PLUGIN
 

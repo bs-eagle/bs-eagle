@@ -1,8 +1,8 @@
-/** 
+/**
  * @file direct_pbuild.cpp
- * @brief 
- * @author 
- * @version 
+ * @brief
+ * @author
+ * @version
  * @date 2010-03-16
  */
 //#include "amg_stdafx.h"
@@ -10,16 +10,16 @@
 
 namespace blue_sky
 {
-  direct_pbuild::direct_pbuild (bs_type_ctor_param) 
+  direct_pbuild::direct_pbuild (bs_type_ctor_param)
                  : amg_pbuild_iface ()
     {
     }
   direct_pbuild::direct_pbuild (const this_t & /*src*/) : bs_refcounter ()
      {
      }
-  
-  int 
-  direct_pbuild::build (sp_bcsr_t matrix, 
+
+  int
+  direct_pbuild::build (sp_bcsr_t matrix,
                        const t_long n_coarse_size,
                        const t_long /*max_connections*/,
                        spv_long sp_cf_markers,
@@ -122,7 +122,7 @@ namespace blue_sky
                 //TODO: print error message
                 return -1;
               }
-            for (j = j1 + 1; j < j2; ++j) // skip diagonal element 
+            for (j = j1 + 1; j < j2; ++j) // skip diagonal element
               {
                 cl = a_cols_ind[j];
                 if (s_markers[j] && cf_markers[cl] > 0)
@@ -182,5 +182,5 @@ namespace blue_sky
   BLUE_SKY_TYPE_STD_CREATE (direct_pbuild);
   BLUE_SKY_TYPE_STD_COPY (direct_pbuild);
 
-  BLUE_SKY_TYPE_IMPL (direct_pbuild, amg_pbuild_iface, "direct_pbuild", "Direct prolangation matrix builder class", "Realization of Direct prolangation matrix builder");
+  BLUE_SKY_TYPE_IMPL (direct_pbuild, amg_pbuild_iface, "direct_pbuild", "Direct prolongation matrix builder class", "Realization of Direct prolongation matrix builder");
 }  // blue_sky namespace

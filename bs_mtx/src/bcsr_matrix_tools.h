@@ -33,7 +33,13 @@ namespace blue_sky
         {};
 
       // read matrix from ascii file
-      virtual int ascii_read_from_csr_format (sp_bcsr_t matrix, const std::string &file_name) const;
+      virtual int ascii_read_from_csr_format (sp_bcsr_t matrix,
+                                              const std::string &file_name) const;
+
+      // write matrix to ascii file
+      virtual int ascii_write_to_csr_format (const sp_bcsr_t matrix,
+                                             const std::string &file_name,
+                                             const bool sort_cols = 0) const;
 
       virtual int random_init (sp_bcsr_t matrix,
                                const t_long new_n_rows,

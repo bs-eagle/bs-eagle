@@ -23,19 +23,28 @@ amg = bs.swift.amg_solver ()
 
 p = amg.get_prop ()
 p.set_i ("maxiters", 20)
-p.set_i ("n_last_level_points", 15)
+p.set_i ("n_last_level_points", 10)
 
 pmis2 = bs.swift.pmis2_coarse ()
 amg.set_coarser (0, pmis2)
+pbuild2 = bs.swift.standart2_pbuild ()
+amg.set_pbuilder (0, pbuild2)
 
-#amg.setup(m)
+#amg as solver
+amg.setup(m)
 #amg.solve(m,rhs,sol)
 #print amg.get_prop()
+m_lev = amg.get_level_matrices ()
+for i in xrange(1, len (m_lev)):
+    fname = "A_" + repr(i) + ".csr"
+    #print m_lev[i].get_n_rows ()
+    t.ascii_write_to_csr_format (m_lev[i], fname, 0)
 
-p.set_i ("maxiters", 1)
-g.set_prec(amg)
-g.setup(m)
-g.solve(m,rhs,sol)
-print g.get_prop()
+#amg as prec
+#p.set_i ("maxiters", 1)
+#g.set_prec(amg)
+#g.setup(m)
+#g.solve(m,rhs,sol)
+#print g.get_prop()
 
 #print sol

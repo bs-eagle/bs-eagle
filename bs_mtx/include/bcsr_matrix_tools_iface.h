@@ -32,7 +32,13 @@ namespace blue_sky
         {};
 
       // read matrix from ascii file
-      virtual int ascii_read_from_csr_format (sp_bcsr_t matrix, const std::string &file_name) const = 0;
+      virtual int ascii_read_from_csr_format (sp_bcsr_t matrix,
+                                              const std::string &file_name) const = 0;
+
+      // write matrix to ascii file
+      virtual int ascii_write_to_csr_format (const sp_bcsr_t matrix,
+                                             const std::string &file_name,
+                                             const bool sort_cols = 0) const = 0;
 
       virtual int random_init (sp_bcsr_t matrix,
                                const t_long new_n_rows,
@@ -40,10 +46,12 @@ namespace blue_sky
                                const t_double rand_value_dispersion,
                                const t_long elems_in_row
                                ) const = 0;
+
+      // generate matrix for two dimensional laplas equation discretization
       virtual int gen_2d_laplas (sp_bcsr_t matrix, const t_long n) const = 0;
+
       virtual int dense_init (sp_bcsr_t matrix, const t_long n_rows, const t_long block_size,
                               const t_double rand_value_dispersion) const = 0;
-      //virtual int gen_2d_laplas (bcsr_t &matrix, const int n) = 0;
     };
 
 
