@@ -244,14 +244,20 @@ namespace blue_sky
   }
   
   
-  spv_int idata::get_i_array (const std::string & array_name)
+  spv_int idata::get_i_array (const std::string & array_name, bool safe = true)
   {
-    return h5_pool->get_i_data (array_name);
+    return safe 
+        ? h5_pool->get_i_data (array_name)
+        : h5_pool->get_i_data_unsafe (array_name)
+        ;
   }
   
-  spv_float idata::get_fp_array (const std::string &array_name)
+  spv_float idata::get_fp_array (const std::string &array_name, bool safe = true)
   {
-    return h5_pool->get_fp_data (array_name);
+    return safe
+        ? h5_pool->get_fp_data (array_name)
+        : h5_pool->get_fp_data_unsafe (array_name)
+        ;
   }
 
   bool

@@ -158,8 +158,8 @@ enum   //! indexes for dimension parameters
       //int test_token (int prev, int cur);
 
       
-      spv_int    get_i_array (const std::string &array_name);
-      spv_float   get_fp_array (const std::string &array_name);
+      spv_int    get_i_array (const std::string &array_name, bool safe = true);
+      spv_float   get_fp_array (const std::string &array_name, bool safe = true);
 
       bool contains_i_array (const std::string &array_name);
       bool contains_fp_array (const std::string &array_name);
