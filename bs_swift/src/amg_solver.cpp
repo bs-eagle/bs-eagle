@@ -7,6 +7,7 @@
  */
 
 #include "amg_solver.h"
+#include "mv_functions.h"
 
 #define AMG_N_LEVELS_RESERVE 10
 
@@ -45,6 +46,9 @@ namespace blue_sky
       pbuilder[0] = BS_KERNEL.create_object ("standart2_pbuild");
       pre_smoother[0] = BS_KERNEL.create_object ("gs_solver");
       post_smoother[0] = BS_KERNEL.create_object ("gs_solver");
+      //set smoother prop
+      pre_smoother[0]->get_prop ()->set_b ("inverse", false);
+      post_smoother[0]->get_prop ()->set_b ("inverse", false);
 
       lu_solver = BS_KERNEL.create_object ("blu_solver");
       lu_fact = BS_KERNEL.create_object ("dens_matrix");
@@ -106,6 +110,7 @@ namespace blue_sky
 
     int amg_solver::solve (sp_matrix_t matrix_, spv_double sp_rhs, spv_double sp_sol)
     {
+      const double epsmac = 1.e-16;
       BS_ASSERT (matrix_);
       BS_ASSERT (prop);
 
@@ -130,10 +135,51 @@ namespace blue_sky
       int level = 0;
       spv_double next_level_sol;
       spv_double next_level_rhs;
+      t_long n = matrix->get_n_rows ();
+      t_double *rhs_ptr = &(*sp_rhs)[0];
+
+      // max_iters>1 -- used as solver
+      // max_iters=1 -- used as preconditioner
+      int max_iter = prop->get_i (max_iters_idx);
+      t_double tol = prop->get_f (tol_idx);
+      prop->set_b (success_idx, false);
+
+      t_double resid = 0.0;
+      t_double denom;
+      if (max_iter > 1)
+        {
+          // calculate initial norm
+          wksp->resize (n);
+          t_double *wksp_ptr = &(*wksp)[0];
+          matrix->calc_lin_comb (-1.0, 1.0, sp_sol, sp_rhs, wksp);
+          t_double b_norm = sqrt (mv_vector_inner_product_n (rhs_ptr, rhs_ptr, n));
+          t_double r_norm = sqrt (mv_vector_inner_product_n (wksp_ptr, wksp_ptr, n));
+          if (b_norm > epsmac)
+            { // convergence criterion |r_i|/|b| <= accuracy if |b| > 0
+              tol *= b_norm;
+              denom = 1.0 / b_norm;
+            }
+          else if (r_norm > epsmac)
+            { // convergence criterion |r_i|/|r0| <= accuracy if |b| = 0
+              tol *= r_norm;
+              denom = 1.0 / r_norm;
+            }
+          else
+            denom = 1.0;
+          resid = r_norm * denom;
+          std::cout<<"n = "<<n<<" b_norm = "<<b_norm<<" r_norm = "<<r_norm
+                   <<" resid = "<<resid<<" tol = "<<tol<<"\n";
+        }
+
+      int iter;
+      for (iter = 0; iter < max_iter && resid > tol; ++iter)
+      {
 
       for (level = 0; level < n_levels; ++level)
         {
           sp_smooth_t pre_smoother = get_pre_smoother (level);
+          BS_ASSERT (pre_smoother);
+
           t_long n = a[level]->get_n_rows ();
           wksp->resize (n);
 
@@ -151,17 +197,12 @@ namespace blue_sky
           wksp->resize (n);
           std::cout<<"AMG solve 1 step of V-cycle. level = "<<level<<" n_rows = "<<n<<"\n";
 
-          //pre-smooth
-          sp_prop_t smoother_prop;
-          smoother_prop = pre_smoother->get_prop ();
-          smoother_prop->set_b ("inverse", false);
-
           // smooth C-points
-          smoother_prop->set_i ("cf_type", 1);
+          pre_smoother->get_prop ()->set_i ("cf_type", 1);
           pre_smoother->smooth (a[level], cf[level], get_n_pre_smooth_iters (),
                                 rhs[level], sol[level]);
           // smooth F-points
-          smoother_prop->set_i ("cf_type", -1);
+          pre_smoother->get_prop ()->set_i ("cf_type", -1);
           pre_smoother->smooth (a[level], cf[level], get_n_pre_smooth_iters (),
                                 rhs[level], sol[level]);
 
@@ -183,6 +224,7 @@ namespace blue_sky
       for (level = n_levels - 1; level >= 0; --level)
         {
           sp_smooth_t post_smoother = get_post_smoother (level);
+          BS_ASSERT (post_smoother);
           t_long n = a[level]->get_n_rows ();
           std::cout<<"AMG solve 2 step of V-cycle. level = "<<level<<" n_rows = "<<n<<"\n";
 
@@ -192,20 +234,32 @@ namespace blue_sky
           if (p[level]->calc_lin_comb (1.0, 1.0, sol[level + 1], sol[level], sol[level]))
             return -6;
 
-          //post-smooth
-          sp_prop_t smoother_prop;
-          smoother_prop = post_smoother->get_prop ();
-          smoother_prop->set_b ("inverse", false);
-
           // smooth F-points
-          smoother_prop->set_i ("cf_type", -1);
+          post_smoother->get_prop ()->set_i ("cf_type", -1);
           post_smoother->smooth (a[level], cf[level], get_n_post_smooth_iters (),
                                 rhs[level], sol[level]);
           // smooth C-points
-          smoother_prop->set_i ("cf_type", 1);
+          post_smoother->get_prop ()->set_i ("cf_type", 1);
           post_smoother->smooth (a[level], cf[level], get_n_post_smooth_iters (),
                                 rhs[level], sol[level]);
         }
+
+        if (max_iter > 1)
+          {
+            // calculate residual norm
+            t_long n = matrix->get_n_rows ();
+            wksp->resize (n);
+            t_double *wksp_ptr = &(*wksp)[0];
+            if (matrix->calc_lin_comb (-1.0, 1.0, sp_sol, sp_rhs, wksp))
+              return -2;
+            resid = sqrt (mv_vector_inner_product_n (wksp_ptr, wksp_ptr, n)) * denom;
+            std::cout<<"AMG Iteration "<<iter + 1<<" resid = "<<resid<<" tol = "<<tol<<"\n";
+          }
+      }//iter loop
+
+      prop->set_i (iters_idx, iter + 1);
+      prop->set_b (success_idx, true);
+      prop->set_f (final_res_idx, resid);
 
       return 0;
     }
@@ -290,6 +344,7 @@ namespace blue_sky
 
           s_builder->build (matrix, strength_threshold, max_row_sum, s_markers);
 
+          //DEBUG
           t_long s_nnz = 0;
           for (t_long ii = 0;ii < s_markers->size();++ii)
             {

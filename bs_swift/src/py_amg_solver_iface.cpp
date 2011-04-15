@@ -21,7 +21,7 @@ namespace python {
   {
     using namespace boost::python;
 
-    base_exporter<amg_solver_iface, py_amg_solver_iface_exporter>::export_class ("amg_solver_iface");
+    class_exporter<amg_solver_iface, lsolver_iface, py_amg_solver_iface_exporter>::export_class ("amg_solver_iface");
     class_exporter<amg_solver, amg_solver_iface, py_amg_solver_iface_exporter>::export_class ("amg_solver");
 
   }

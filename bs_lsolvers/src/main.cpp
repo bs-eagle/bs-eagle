@@ -1,6 +1,6 @@
-/** 
+/**
  * @file main.cpp
- * @brief 
+ * @brief
  * @author Oleg Borschuk
  * @date 2009-08-28
  */
@@ -17,7 +17,7 @@
 #include "two_stage_prec.h"
 #include "blu_solver.h"
 //#include "py_prop.h"
-#include "py_iface.h"
+#include "py_lsolver_iface.h"
 
 using namespace blue_sky;
 using namespace blue_sky::python;
@@ -35,7 +35,7 @@ namespace blue_sky {
     //res &= BS_KERNEL.register_type(*bs_init.pd_, prop<float, int, std::string, bool>::bs_type()); BS_ASSERT (res);
 
     res &= BS_KERNEL.register_type (*bs_init.pd_, cgs_solver::bs_type()); BS_ASSERT (res);
-    
+
     res &= BS_KERNEL.register_type (*bs_init.pd_, gmres_solver::bs_type()); BS_ASSERT (res);
 
     res &= BS_KERNEL.register_type (*bs_init.pd_, bicgstab_solver::bs_type()); BS_ASSERT (res);
@@ -61,6 +61,6 @@ BLUE_SKY_INIT_PY_FUN
 
   //python::py_export_prop ();
   python::py_export_lsolvers ();
-  
+
 }
 #endif

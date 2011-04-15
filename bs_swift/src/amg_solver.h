@@ -19,13 +19,13 @@
 
 namespace blue_sky
   {
-  const std::string strength_threshold_idx = "strength_threshold_idx";
+  const std::string strength_threshold_idx = "strength_threshold";
   const std::string max_row_sum_idx = "max_row_sum";
   const std::string n_last_level_points_idx = "n_last_level_points";
   const std::string n_levels_idx = "n_levels";
   const std::string cop_idx = "Cop";
-  const std::string n_pre_smooth_iters_idx = "n_pre_smooth_iters_idx";
-  const std::string n_post_smooth_iters_idx = "n_post_smooth_iters_idx";
+  const std::string n_pre_smooth_iters_idx = "n_pre_smooth_iters";
+  const std::string n_post_smooth_iters_idx = "n_post_smooth_iters";
 
   class BS_API_PLUGIN amg_solver : public amg_solver_iface
     {

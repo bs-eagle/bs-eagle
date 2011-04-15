@@ -236,6 +236,7 @@
 		<Unit filename="../bs_lsolvers/include/amg_smoother_iface.h" />
 		<Unit filename="../bs_lsolvers/include/lsolver_iface.h" />
 		<Unit filename="../bs_lsolvers/include/mv_functions.h" />
+		<Unit filename="../bs_lsolvers/include/py_lsolver_iface.h" />
 		<Unit filename="../bs_lsolvers/include/two_stage_prec_iface.h" />
 		<Unit filename="../bs_lsolvers/src/bcsr_ilu_prec.cpp" />
 		<Unit filename="../bs_lsolvers/src/bcsr_ilu_prec.h" />
@@ -251,8 +252,7 @@
 		<Unit filename="../bs_lsolvers/src/gs_solver.h" />
 		<Unit filename="../bs_lsolvers/src/lu_decomposition.h" />
 		<Unit filename="../bs_lsolvers/src/main.cpp" />
-		<Unit filename="../bs_lsolvers/src/py_iface.cpp" />
-		<Unit filename="../bs_lsolvers/src/py_iface.h" />
+		<Unit filename="../bs_lsolvers/src/py_lsolver_iface.cpp" />
 		<Unit filename="../bs_lsolvers/src/tfqmr_solver.cpp" />
 		<Unit filename="../bs_lsolvers/src/tfqmr_solver.h" />
 		<Unit filename="../bs_lsolvers/src/two_stage_prec.cpp" />

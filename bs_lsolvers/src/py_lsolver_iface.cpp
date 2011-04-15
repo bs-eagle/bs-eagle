@@ -1,11 +1,11 @@
 /**
-* \file   py_matrix_iface.cpp
+* \file   py_lsolver_iface.vpp
 * \brief  Python wrapper for linear solvers
 * \author Miryanov Sergey
 * \date 2008-04-04
 */
 //#include "bs_lsolvers_stdafx.h"
-#include "py_iface.h"
+#include "py_lsolver_iface.h"
 #include "matrix_iface.h"
 #include "bicgstab_solver.h"
 #include "cgs_solver.h"
