@@ -25,10 +25,10 @@ namespace blue_sky
   /**
    * @brief raise if no array in H5 pool
    */
-  class error_h5_no_error : public bs_exception
+  class error_h5_no_array : public bs_exception
   {
   public:
-    error_h5_no_error (std::string const &array_name);
+    error_h5_no_array (std::string const &array_name);
   };
 
 /** 
