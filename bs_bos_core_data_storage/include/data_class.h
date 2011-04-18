@@ -93,8 +93,8 @@ enum   //! indexes for dimension parameters
 
       struct pvt_info
         {
-          spv_float							      main_data_;
-          auto_value <bool, false>		has_density_;
+          spv_float				    main_data_;
+          auto_value <bool, false>  has_density_;
           auto_value <t_float>      density_;
           auto_value <t_float>      molar_density_;
         };
