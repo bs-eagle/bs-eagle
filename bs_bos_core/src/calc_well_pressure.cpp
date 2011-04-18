@@ -77,7 +77,7 @@ namespace blue_sky
        * \param  n_phases
        * \param  gas_oil_ratio
        * */
-      calc_for_rate (const sp_well_t &well, const phase_d_t &phase_d, const sat_d_t &sat_d, index_t n_phases, const stdv_double &gas_oil_ratio)
+      calc_for_rate (const sp_well_t &well, const phase_d_t &phase_d, const sat_d_t &sat_d, index_t n_phases, const t_double *gas_oil_ratio)
           : is_prod (well->get_well_controller ()->is_production ())
           , phase_d (phase_d)
           , sat_d (sat_d)
@@ -240,7 +240,7 @@ public:
       index_t n_phases;
       index_t n_block;
 
-      const stdv_double &gas_oil_ratio;
+      const t_double *gas_oil_ratio;
     };
 
   bool
@@ -266,7 +266,7 @@ public:
       item_t denom                  = 0;
       item_t prev_depth             = well->get_first_connection ()->connection_depth;
 
-      calc_for_rate <this_t> calc (well, calc_model->phase_d, calc_model->sat_d, calc_model->n_phases, calc_model->gas_oil_ratio);
+      calc_for_rate <this_t> calc (well, calc_model->phase_d, calc_model->sat_d, calc_model->n_phases, &(*calc_model->gas_oil_ratio)[0]);
       typename base_t::well_t::connection_iterator_t it = well->connections_begin (), e = well->connections_end ();
       for (; it != e; ++it)
         {
@@ -285,7 +285,7 @@ public:
           item_t diff_h                   = c->connection_depth - prev_depth;
           prev_depth                      = c->connection_depth;
           calc.gw                         = c->get_fact ();
-          calc.po                         = calc_model->pressure[calc.n_block];
+          calc.po                         = (*calc_model->pressure)[calc.n_block];
           calc.H                          = rho * gravity * diff_h;
 
           BS_ASSERT (main_var != FI_NULL) (main_var);

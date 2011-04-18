@@ -179,11 +179,12 @@ namespace blue_sky
   }
 
   void
-  reservoir::init_rows (index_array_t &rows) const
+  reservoir::init_rows (index_array_t &rows_) const
     {
-      for_each_facility (*facility_list_, closure <void, facility_t, index_array_t &> (&facility_t::fill_rows, rows));
+      for_each_facility (*facility_list_, closure <void, facility_t, index_array_t &> (&facility_t::fill_rows, rows_));
 
       // correct rows values
+      v_long &rows = *rows_;
       for (index_t i = 0, cnt = (index_t)rows.size () - 1; i < cnt; ++i)
         {
           rows[i + 1] += rows[i];
@@ -197,7 +198,7 @@ namespace blue_sky
 
     // FIXME: dereference
     rows->init (n_cells + 1, 0);
-    init_rows (*rows);
+    init_rows (rows);
   }
 
   void

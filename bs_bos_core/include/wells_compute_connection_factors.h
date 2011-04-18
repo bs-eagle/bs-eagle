@@ -29,7 +29,7 @@ namespace blue_sky
           typedef connection                      connection_t;
           typedef t_double                        item_t;
           typedef t_long                          index_t;
-          typedef v_double                        item_array_t;
+          typedef spv_double                      item_array_t;
           typedef smart_ptr <fi_params, true>     sp_params_t;
 
           typedef rs_mesh_iface                   mesh_iface_t;

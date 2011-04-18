@@ -22,9 +22,9 @@ namespace blue_sky {
   class BS_API_PLUGIN facility_base : public objbase
   {
   public:
-    typedef v_long                          index_array_t;
-    typedef v_double                        item_array_t;
-    typedef v_double                        rhs_item_array_t;
+    typedef spv_long                        index_array_t;
+    typedef spv_double                      item_array_t;
+    typedef spv_float                       rhs_item_array_t;
     typedef t_long                          index_t;
 
     typedef rs_mesh_iface                   mesh_iface_t;

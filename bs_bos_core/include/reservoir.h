@@ -55,9 +55,9 @@ namespace blue_sky
 
       typedef t_double                                        item_t;                             //!< item value (floating point)
       typedef t_long                                          index_t;                            //!< index value (integral type)
-      typedef v_double                                        item_array_t;                       //!< type for array of item_t values
-      typedef v_double                                        rhs_item_array_t;                   //!< type for array of rhs_item_t values
-      typedef v_long                                          index_array_t;                      //!< type for array of index_t values
+      typedef spv_double                                      item_array_t;                       //!< type for array of item_t values
+      typedef spv_float                                       rhs_item_array_t;                   //!< type for array of rhs_item_t values
+      typedef spv_long                                        index_array_t;                      //!< type for array of index_t values
 
       typedef facility_base                                   facility_t;                         //!< base type for facilities
       typedef well                                            well_t;                             //!< base type for wells

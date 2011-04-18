@@ -27,8 +27,8 @@ namespace python {
   {
   public:
 
-    typedef t_double item_t;
-    typedef t_double rhs_item_t;
+    typedef t_double  item_t;
+    typedef t_float   rhs_item_t;
 
     typedef wells::connection  wrapped_t;
 

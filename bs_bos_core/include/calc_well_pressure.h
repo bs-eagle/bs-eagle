@@ -62,7 +62,7 @@ namespace blue_sky
     public:
       typedef t_long                    index_t;
       typedef t_double                  item_t;
-      typedef v_double                  item_array_t;
+      typedef spv_double                item_array_t;
 
       typedef calc_well_pressure_base   base_t;
       typedef calc_well_pressure        this_t;

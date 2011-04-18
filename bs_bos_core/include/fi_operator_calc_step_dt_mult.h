@@ -66,14 +66,14 @@ namespace blue_sky {
         if (is_w)
           {
             m_r = max_res * d_mult * calc_model_->invers_fvf_average[d_w];
-            if (rhs_[equ_w] * flux_rhs_[equ_w] <= EPS_DIV
-                && fabs (flux_rhs_[equ_w]) > fabs (rhs_[equ_w])
-                && fabs (flux_rhs_[equ_w] + rhs_[equ_w]) > m_r)
+            if ((*rhs_)[equ_w] * (*flux_rhs_)[equ_w] <= EPS_DIV
+                && fabs ((*flux_rhs_)[equ_w]) > fabs ((*rhs_)[equ_w])
+                && fabs ((*flux_rhs_)[equ_w] + (*rhs_)[equ_w]) > m_r)
               {
-                if (flux_rhs_[equ_w] > 0)
-                  d = (m_r - rhs_[equ_w]) / flux_rhs_[equ_w];
+                if ((*flux_rhs_)[equ_w] > 0)
+                  d = (m_r - (*rhs_)[equ_w]) / (*flux_rhs_)[equ_w];
                 else
-                  d = -(m_r + rhs_[equ_w]) / flux_rhs_[equ_w];
+                  d = -(m_r + (*rhs_)[equ_w]) / (*flux_rhs_)[equ_w];
                 if (d < coef)
                   coef = d;
               }
@@ -81,14 +81,14 @@ namespace blue_sky {
         if (is_g)
           {
             m_r = max_res * d_mult * calc_model_->invers_fvf_average[d_g];
-            if (rhs_[equ_g] * flux_rhs_[equ_g] <= EPS_DIV
-                && fabs (flux_rhs_[equ_g]) > fabs (rhs_[equ_g])
-                && fabs (flux_rhs_[equ_g] + rhs_[equ_g]) > m_r)
+            if ((*rhs_)[equ_g] * (*flux_rhs_)[equ_g] <= EPS_DIV
+                && fabs ((*flux_rhs_)[equ_g]) > fabs ((*rhs_)[equ_g])
+                && fabs ((*flux_rhs_)[equ_g] + (*rhs_)[equ_g]) > m_r)
               {
-                if (flux_rhs_[equ_g] > 0)
-                  d = (m_r - rhs_[equ_g]) / flux_rhs_[equ_g];
+                if ((*flux_rhs_)[equ_g] > 0)
+                  d = (m_r - (*rhs_)[equ_g]) / (*flux_rhs_)[equ_g];
                 else
-                  d = -(m_r + rhs_[equ_g]) / flux_rhs_[equ_g];
+                  d = -(m_r + (*rhs_)[equ_g]) / (*flux_rhs_)[equ_g];
                 if (d < coef)
                   coef = d;
               }
@@ -96,14 +96,14 @@ namespace blue_sky {
         if (is_o)
           {
             m_r = max_res * d_mult * calc_model_->invers_fvf_average[d_o];
-            if (rhs_[equ_o] * flux_rhs_[equ_o] <= EPS_DIV
-                && fabs (flux_rhs_[equ_o]) > fabs (rhs_[equ_o])
-                && fabs (flux_rhs_[equ_o] + rhs_[equ_o]) > m_r)
+            if ((*rhs_)[equ_o] * (*flux_rhs_)[equ_o] <= EPS_DIV
+                && fabs ((*flux_rhs_)[equ_o]) > fabs ((*rhs_)[equ_o])
+                && fabs ((*flux_rhs_)[equ_o] + (*rhs_)[equ_o]) > m_r)
               {
-                if (flux_rhs_[equ_o] > 0)
-                  d = (m_r - rhs_[equ_o]) / flux_rhs_[equ_o];
+                if ((*flux_rhs_)[equ_o] > 0)
+                  d = (m_r - (*rhs_)[equ_o]) / (*flux_rhs_)[equ_o];
                 else
-                  d = -(m_r + rhs_[equ_o]) / flux_rhs_[equ_o];
+                  d = -(m_r + (*rhs_)[equ_o]) / (*flux_rhs_)[equ_o];
                 if (d < coef)
                   coef = d;
               }

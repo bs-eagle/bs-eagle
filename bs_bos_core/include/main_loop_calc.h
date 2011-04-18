@@ -176,7 +176,11 @@ namespace blue_sky
       fi_operator_cells (index_t i)
       {
         sp_jmatrix_t jmatrix = jacobian_->get_jmatrix ();
-        fi_operator_impl <is_w, is_g, is_o> fi_operator_impl_ (calc_model_, reservoir_, mesh_, jacobian_, jmatrix);
+        fi_operator_impl <is_w, is_g, is_o> fi_operator_impl_ (calc_model_, 
+          reservoir_, 
+          mesh_, 
+          jacobian_, 
+          jmatrix);
         fi_operator_impl_.fi_operator_init (i, dt_);
       }
 
@@ -833,7 +837,7 @@ namespace blue_sky
               // calculate pressure and saturation changing
               for (i = n_left; i < n_right; ++i)
                 {
-                  dp = (calc_model_->pressure[i] - calc_model_->old_data_.pressure[i]);
+                  dp = ((*calc_model_->pressure)[i] - (*calc_model_->old_data_.pressure)[i]);
                   if (fabs (dp_max) < fabs(dp))
                     {
                       dp_max = dp;
@@ -847,7 +851,7 @@ namespace blue_sky
               if (calc_model_->n_phases > 1)
                 for (i = n_left; i < n_right; ++i)
                   {
-                    ds = (calc_model_->saturation_3p[i] - calc_model_->old_data_.saturation_3p[i]);
+                    ds = ((*calc_model_->saturation_3p)[i] - (*calc_model_->old_data_.saturation_3p)[i]);
                     if (fabs (ds_max) < fabs(ds))
                       {
                         ds_max = ds;
@@ -866,7 +870,7 @@ namespace blue_sky
 #endif //_MPI
                   for (i = n_left; i < n_right; ++i)
                     {
-                      drs = (calc_model_->old_data_.gas_oil_ratio[i] - calc_model_->gas_oil_ratio[i]);
+                      drs = ((*calc_model_->old_data_.gas_oil_ratio)[i] - (*calc_model_->gas_oil_ratio)[i]);
                       if (fabs(drs_max) < fabs(drs))
                         {
                           drs_max = drs;
