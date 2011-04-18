@@ -14,6 +14,7 @@
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "matrix_iface.h"
+#include "bos_report.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 namespace blue_sky
