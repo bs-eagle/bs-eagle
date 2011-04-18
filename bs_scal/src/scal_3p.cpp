@@ -302,7 +302,7 @@ namespace blue_sky
     process (const sp_array_item_t &saturation,
       const sp_array_index_t &sat_regions,
       const stdv_float &perm,
-      const sp_array_item_t &poro,
+      const stdv_float &poro,
       data_array_t &data) const = 0;
 
     virtual void
@@ -460,7 +460,7 @@ namespace blue_sky
     process (const spv_double &saturation,
       const spv_long &sat_regions,
       const stdv_float &perm,
-      const spv_double &poro,
+      const stdv_float &poro,
       data_array_t &data_) const
     {
       for (index_t i = 0, cnt = (index_t) data_.size (); i < cnt; ++i)
@@ -469,7 +469,7 @@ namespace blue_sky
           index_t sat_reg = (*sat_regions)[i];
 
           process (i, &(*saturation)[i * n_phases], sat_reg, &data_i.relative_perm[0], &data_i.s_deriv_relative_perm[0]);
-          process_capillary (i, &(*saturation)[i * n_phases], sat_reg, &perm[i * PLANE_ORIENTATION_TOTAL], (*poro)[i], &data_i.cap_pressure[0], &data_i.s_deriv_cap_pressure[0]);
+          process_capillary (i, &(*saturation)[i * n_phases], sat_reg, &perm[i * PLANE_ORIENTATION_TOTAL], poro[i], &data_i.cap_pressure[0], &data_i.s_deriv_cap_pressure[0]);
         }
     }
 
@@ -1040,7 +1040,7 @@ namespace blue_sky
   scal_3p::process (const spv_double &saturation,
     const spv_long &sat_regions,
     const stdv_float &perm,
-    const spv_double &poro,
+    const stdv_float &poro,
     data_array_t &data) const
   {
     impl_->process (saturation, sat_regions, perm, poro, data);

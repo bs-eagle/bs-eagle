@@ -110,7 +110,7 @@ namespace blue_sky
       process (const spv_double &saturation, 
         const spv_long &sat_regions,
         const stdv_float &perm,
-        const spv_double &poro,
+        const stdv_float &poro,
         data_array_t &data) const;
 
       void
