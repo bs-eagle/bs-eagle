@@ -623,13 +623,13 @@ namespace blue_sky
         i_original_cell = l_mesh->get_element_int_to_ext (i_cell);
         i_eql = eqlnum[i_cell] - 1;
         if (n_phases > 1)
-          i_sat = sat_regions[i_cell];
+          i_sat = (*sat_regions)[i_cell];
 
         item_t gor = 0;
         item_t *rs_reg = 0;
         if (is_o && is_g)
           {
-            gas_oil_ratio [i_cell] = 0;
+            (*gas_oil_ratio)[i_cell] = 0;
             rs_reg = &rs[i_eql * n_depth];
           }
 
@@ -728,7 +728,7 @@ namespace blue_sky
                 p_oil += p_p[d_o];
                 if (is_g)
                   {
-                    gas_oil_ratio[i_cell] += gor;
+                    (*gas_oil_ratio)[i_cell] += gor;
                   }
               }
             if (is_w)
@@ -749,7 +749,7 @@ namespace blue_sky
             p_oil /= (item_t)n_layer;
             if (is_g)
               {
-                gas_oil_ratio[i_cell] /= (item_t)n_layer;
+                (*gas_oil_ratio)[i_cell] /= (item_t)n_layer;
               }
           }
         if (is_w)
@@ -808,11 +808,11 @@ namespace blue_sky
 
         //set pressure
         if (n_phases > 1 || is_o)
-          pressure[i_cell] = p_oil;
+          (*pressure)[i_cell] = p_oil;
         else if (is_w)
-          pressure[i_cell] = p_water;
+          (*pressure)[i_cell] = p_water;
         else
-          pressure[i_cell] = p_gas;
+          (*pressure)[i_cell] = p_gas;
 
         //set saturation
         if (n_phases > 1)
@@ -823,28 +823,28 @@ namespace blue_sky
                   {
                     s_water = 0.999f;
                   }
-                saturation_3p[n_phases * i_cell + d_w] = (float)s_water;
+                (*saturation_3p)[n_phases * i_cell + d_w] = (float)s_water;
               }
             if (is_g)
-              saturation_3p[n_phases * i_cell + d_g] = (float)s_gas;
+              (*saturation_3p)[n_phases * i_cell + d_g] = (float)s_gas;
 
-            saturation_3p[n_phases * i_cell + d_o] = 1. - (float)s_water - (float)s_gas;
+            (*saturation_3p)[n_phases * i_cell + d_o] = 1. - (float)s_water - (float)s_gas;
           }
 
         //set Rs by new pressure and set main_variable
         if (is_o && is_g)
           {
-            if (saturation_3p[n_phases * i_cell + d_g] < EPS_DIFF && saturation_3p[n_phases * i_cell + d_o] < EPS_DIFF)
+            if ((*saturation_3p)[n_phases * i_cell + d_g] < EPS_DIFF && (*saturation_3p)[n_phases * i_cell + d_o] < EPS_DIFF)
               {
                 //gas_oil_ratio[i_cell] = 0;
                 main_variable[i_cell] = FI_MOMG_VAR;
               }
             else
               {
-                i_pvt = pvt_regions[i_cell];
+                i_pvt = (*pvt_regions)[i_cell];
                 //gas_oil_ratio[i_cell] = pvt_oil_array[i_pvt]->interpolate_and_fix (pressure[i_cell]);
 
-                if (saturation_3p[n_phases * i_cell + d_g] > EPS_DIFF)
+                if ((*saturation_3p)[n_phases * i_cell + d_g] > EPS_DIFF)
                   main_variable[i_cell] = FI_SG_VAR;
                 else
                   main_variable[i_cell] = FI_RO_VAR;

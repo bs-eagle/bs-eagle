@@ -32,10 +32,10 @@ namespace blue_sky
       //-----------------------------------------
       //  TYPES
       //-----------------------------------------
-      typedef t_long            index_t;
-      typedef t_double             item_t;
-      typedef v_long      index_array_t;
-      typedef v_double       item_array_t;
+      typedef t_long                index_t;
+      typedef t_double              item_t;
+      typedef spv_long              index_array_t;
+      typedef spv_double            item_array_t;
 
       typedef keyword_manager 		        this_t;                 //<! self type
       typedef keyword_manager_iface       base_t;

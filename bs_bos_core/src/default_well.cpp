@@ -277,7 +277,7 @@ namespace wells {
   void
   default_well::fill_rows (index_array_t &rows) const
   {
-    detail::fill_rows <default_well, default_connection_t> (this, rows);
+    detail::fill_rows <default_well, default_connection_t> (this, *rows);
   }
   void
   default_well::fill_jacobian (double dt, index_t block_size, const spv_long &rows, spv_long &cols, spv_double &values, stdv_long &markers) const
@@ -287,12 +287,13 @@ namespace wells {
   }
 
   void
-  default_well::fill_rhs (double dt, index_t n_phases, bool is_g, bool is_o, bool is_w, rhs_item_array_t &rhs) const
+  default_well::fill_rhs (double dt, index_t n_phases, bool is_g, bool is_o, bool is_w, rhs_item_array_t &rhs_) const
   {
     item_t wefac = base_t::exploitation_factor_ > 0 ? base_t::exploitation_factor_ * dt : dt;
 
     typedef default_connection_iterator_impl <default_well, default_connection> iterator_t;
     iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);
+    rhs_item_t *rhs = &(*rhs_)[0];
     for (; !base_t::is_shut () && it != e; ++it)
       {
         const sp_connection_t &c = *it;

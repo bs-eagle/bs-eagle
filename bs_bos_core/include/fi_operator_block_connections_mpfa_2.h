@@ -74,12 +74,12 @@ namespace blue_sky {
     struct mpfa_base_impl
     {
     public:
-      typedef t_double             item_t;
-      typedef t_double         rhs_item_t;
+      typedef t_double          item_t;
+      typedef t_float           rhs_item_t;
       typedef t_long            index_t;
-      typedef spv_double       item_array_t;
-      typedef spv_double   rhs_item_array_t;
-      typedef spv_long      index_array_t;
+      typedef spv_double        item_array_t;
+      typedef spv_float         rhs_item_array_t;
+      typedef spv_long          index_array_t;
       typedef boost::array <index_t, FI_PHASE_TOT>    up_cell_array_t;
       typedef calc_model                  calc_model_t;
       typedef calc_model_t::data_t           data_t;
@@ -144,10 +144,10 @@ namespace blue_sky {
       depths_ (fi_operator_.depths_),
       gravity_ (fi_operator_.calc_model_->internal_constants.gravity_constant),
       n_sec_vars (fi_operator_.n_sec_vars),
-      sp_diag_ (fi_operator_.sp_diag_),
-      s_rhs_ (fi_operator_.s_rhs_),
-      reg_values_ (reg_values_),
-      rhs_ (rhs_),
+      sp_diag_ (&(*fi_operator_.sp_diag_)[0]),
+      s_rhs_ (&(*fi_operator_.s_rhs_)[0]),
+      reg_values_ (&(*reg_values_)[0]),
+      rhs_ (&(*rhs_)[0]),
       m_mem (0),
       p_mem (0),
       depth_top (0)
@@ -862,12 +862,12 @@ namespace blue_sky {
       index_t                                 d_o;
       index_t                                 ds_w;
       index_t                                 ds_g;
-      const t_double                            *saturation_3p_;
-      const t_double                            *pressure_;
-      const t_double                            *gas_oil_ratio_;
+      const t_double                          *saturation_3p_;
+      const t_double                          *pressure_;
+      const t_double                          *gas_oil_ratio_;
       const main_var_array_t                  &main_vars_;
       const data_array_t                      &data_;
-      const t_double                            *depths_;
+      const t_float                           *depths_;
       item_t                                  gravity_;
       index_t                                 n_sec_vars;
 
@@ -932,17 +932,17 @@ namespace blue_sky {
       // cycle by connections
       for (index_t con = 0; con < fi_operator.n_connections_; ++con)
         {
-          const index_t row[] = {fi_operator.trns_rows_ptr_[con], fi_operator.trns_rows_ptr_[con + 1]};
+          const index_t row[] = {(*fi_operator.trns_rows_ptr_)[con], (*fi_operator.trns_rows_ptr_)[con + 1]};
           BS_ASSERT (row[1] - row[0] >= 2) (row[0]) (row[1]);
 
-          const index_t *cells = &fi_operator.trns_cols_ptr_[row[0]];
-          const rhs_item_t *truns = &fi_operator.trns_values_[row[0]];
+          const index_t *cells = &(*fi_operator.trns_cols_ptr_)[row[0]];
+          const rhs_item_t *truns = &(*fi_operator.trns_values_)[row[0]];
 
           index_t i   = cells[0];
           index_t j   = cells[1];
 
-          mpfa_.m_mem = &fi_operator.m_array_[row[0]];
-          mpfa_.p_mem = &fi_operator.p_array_[row[0]];
+          mpfa_.m_mem = &(*fi_operator.m_array_)[row[0]];
+          mpfa_.p_mem = &(*fi_operator.p_array_)[row[0]];
 
           mpfa_.compute_rho (cells, row[1] - row[0]);
           mpfa_.compute_psi (truns, cells, row[1] - row[0]);

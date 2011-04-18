@@ -83,12 +83,12 @@ namespace blue_sky
 
       typedef facility_base                 base_t;
       typedef well                          well_t;
-      typedef v_double                      item_array_t;
-      typedef v_double                      rhs_item_array_t;
-      typedef v_long                        index_array_t;
+      typedef spv_double                    item_array_t;
+      typedef spv_float                     rhs_item_array_t;
+      typedef spv_long                      index_array_t;
       typedef t_long                        index_t;
       typedef t_double                      item_t;
-      typedef t_double                      rhs_item_t;
+      typedef t_float                       rhs_item_t;
 
       typedef rate_data                     rate_data_t;
       typedef rate_data_t::rate_data_inner  rate_data_inner_t;
@@ -439,7 +439,7 @@ namespace blue_sky
        * \return True if any connection have valid BHP value otherwise false
        * */
       bool
-      check_connections_bhp (const stdv_double &pressure) const;
+      check_connections_bhp (const spv_double &pressure) const;
 
       /**
        * \brief  Returns true if well controlled by BHP

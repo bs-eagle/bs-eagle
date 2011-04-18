@@ -29,11 +29,11 @@ namespace blue_sky
     {
     public:
       typedef matrix_iface                          matrix_t;             //!< short name to matrix type
-      typedef v_double                              item_array_t;         //!< short name to array type
-      typedef v_double                              rhs_item_array_t;
+      typedef spv_double                            item_array_t;         //!< short name to array type
+      typedef spv_float                             rhs_item_array_t;
       typedef t_double                              item_t;               //!< short name to array item type
       typedef t_long                                index_t;              //!< short name to matrix's index type
-      typedef v_long                                index_array_t;
+      typedef spv_long                              index_array_t;
       typedef rs_mesh_iface                         mesh_iface_t;
       typedef bcsr_matrix_iface                     bcsr_matrix_t;
       typedef lsolver_iface                         linear_solver_base_t;

@@ -49,7 +49,7 @@ namespace blue_sky
       typedef calc_model::phase_d_t            phase_d_t;
 
       const phase_d_t &phase_d = calc_model->phase_d;
-      const stdv_double &saturation = calc_model->saturation_3p;
+      const t_double *saturation = &(*calc_model->saturation_3p)[0];
 
       bool is_w = calc_model->is_water ();
       bool is_g = calc_model->is_gas ();

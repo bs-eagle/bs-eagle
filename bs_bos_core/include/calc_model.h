@@ -61,38 +61,30 @@ namespace blue_sky
    * */
   struct calc_model_data_tmp_holder
     {
-      //!< item type (floating point)
-      typedef t_double item_t;         
-
-      //!< type for array of item_t values
-      typedef v_double item_array_t;   
-
       //! type for array of main_var_type values
       typedef std::vector <main_var_type> main_var_array_t;
 
-      //!< smart_ptr to calc_model type
-      typedef smart_ptr <calc_model, true> sp_calc_model_t;
-
     public:
+      calc_model_data_tmp_holder ();
 
       /**
        * \brief  stores data from calc_model in holder
        * \param  calc_model pointer to calc_model instance
        * */
       void 
-      save (const sp_calc_model_t &calc_model);
+      save (const smart_ptr <calc_model, true> &calc_model);
 
       /**
        * \brief  restores data from holder to calc_model
        * \param  calc_model pointer to calc_model instance
        * */
       void 
-      restore (sp_calc_model_t &calc_model);
+      restore (smart_ptr <calc_model, true> &calc_model);
 
     public:
-      stdv_double               pressure;       //!< pressure array
-      stdv_double               saturation_3p;  //!< saturation array (3 phase)
-      stdv_double               gas_oil_ratio;  //!< gas_oil_ratio array
+      spv_double                pressure;       //!< pressure array
+      spv_double                saturation_3p;  //!< saturation array (3 phase)
+      spv_double                gas_oil_ratio;  //!< gas_oil_ratio array
       main_var_array_t          main_var;       //!< main variables
     };
 
@@ -125,8 +117,8 @@ namespace blue_sky
       typedef reservoir                                 reservoir_t;              //!< reservoir type
       typedef smart_ptr <reservoir_t, true>             sp_reservoir_t;           //!< smart_ptr to reservoir type
 
-      typedef v_double                                  item_array_t;             //!< type for array of item_t values
-      typedef v_long                                    index_array_t;            //!< type for array of index_t values
+      typedef spv_double                                item_array_t;             //!< type for array of item_t values
+      typedef spv_long                                  index_array_t;            //!< type for array of index_t values
       typedef t_double                                  item_t;                   //!< item value (floating point)
       typedef t_long                                    index_t;                  //!< index value (integral type)
       
@@ -581,10 +573,10 @@ namespace blue_sky
 
       physical_constants                                      internal_constants;             //!< physical constants in internal units
 
-      stdv_long                                               pvt_regions;                    //!< (n_elements) index of PVT table for given block zero base
-      stdv_long                                               sat_regions;                    //!< (n_elements) index of SAT table for given block zero base
-      stdv_long                                               fip_regions;                    //!< (n_elements) index of FIP region for cell
-      stdv_long                                               rock_regions;                   //!< (n_elements) index of ROCK regions
+      spv_long                                                pvt_regions;                    //!< (n_elements) index of PVT table for given block zero base
+      spv_long                                                sat_regions;                    //!< (n_elements) index of SAT table for given block zero base
+      spv_long                                                fip_regions;                    //!< (n_elements) index of FIP region for cell
+      spv_long                                                rock_regions;                   //!< (n_elements) index of ROCK regions
 
       auto_value <RPO_MODEL_ENUM, RPO_DEFAULT_MODEL>          rpo_model;                      //!< 3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)
       auto_value <SCALECRS_ENUM, SCALECRS_NO>                 is_scalecrs;                    //!< use of alternative scaling method or not
@@ -603,9 +595,9 @@ namespace blue_sky
       stdv_double                                             plane_flow_rate;                //!< (n_planes * n_phases) flow rates for all planes on current time step
       stdv_double                                             full_step_plane_flow_rate;      //!< (n_planes * n_phases) total flow rates on time step
 
-      stdv_double                                             pressure;                       //!< pressure (n_elements)
-      stdv_double                                             saturation_3p;                  //!< (n_phases * n_elements)
-      stdv_double                                             gas_oil_ratio;                  //!< gas_oil_ratio (n_elements)
+      spv_double                                              pressure;                       //!< pressure (n_elements)
+      spv_double                                              saturation_3p;                  //!< (n_phases * n_elements)
+      spv_double                                              gas_oil_ratio;                  //!< gas_oil_ratio (n_elements)
 
       sp_csr_matrix_t                                         mat;                            //!< obsolete
       sp_well_results_storage                                 well_res;                       //!< storage for well results

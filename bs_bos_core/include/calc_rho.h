@@ -25,7 +25,7 @@ namespace blue_sky
     public:
       typedef t_long                          index_t;
       typedef t_double                        item_t;
-      typedef v_double                        item_array_t;
+      typedef spv_double                      item_array_t;
 
       typedef calc_model                      calc_model_t;
       typedef well                            well_t;
@@ -60,7 +60,7 @@ namespace blue_sky
     public:
       typedef t_long                                index_t;
       typedef t_double                              item_t;
-      typedef v_double                              item_array_t;
+      typedef spv_double                            item_array_t;
 
       typedef calc_model                            calc_model_t;
       typedef well                                  well_t;

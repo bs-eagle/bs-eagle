@@ -21,12 +21,13 @@ env.Append (CPPPATH = ["include",
 
 libs = ["blue_sky", 
      "bs_bos_core_base", 
-     "bs_matrix", 
-     "bs_base_linear_solvers", 
-     "bs_csr_ilu_prec",
+     "bs_mtx",
+     "bs_lsolvers",
+     #"bs_csr_ilu_prec",
      "bs_bos_core_data_storage",
      "bs_scal",
-     "bs_pvt"
+     "bs_pvt",
+     "bs_mesh",
      ]
 
 boost_libs = ["boost_date_time-mt"]

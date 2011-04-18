@@ -104,9 +104,9 @@ namespace blue_sky
         typedef connection                      this_t;
         typedef smart_ptr <this_t, true>        sp_this_t;
 
-        typedef v_double                        item_array_t;
+        typedef spv_double                      item_array_t;
         typedef t_double                        item_t;
-        typedef t_double                        rhs_item_t;
+        typedef t_float                         rhs_item_t;
         typedef t_long                          index_t;
 
         typedef rate_data                       rate_data_t;

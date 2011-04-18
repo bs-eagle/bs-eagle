@@ -60,10 +60,10 @@ namespace blue_sky
       typedef jacobian               jacobian_t;           //!< jacobian type
       typedef smart_ptr <jacobian_t, true>          sp_jacobian_t;        //!< smart_ptr to jacobian type
 
-      typedef t_double           item_t;               //!< item type
-      typedef t_long          index_t;              //!< index type
-      typedef v_double     item_array_t;         //!< array of items type
-      typedef v_long    index_array_t;        //!< array of indexes type
+      typedef t_double          item_t;               //!< item type
+      typedef t_long            index_t;              //!< index type
+      typedef spv_double        item_array_t;         //!< array of items type
+      typedef spv_long          index_array_t;        //!< array of indexes type
 
       //! transmissibility multipliers calculator type
       typedef trans_multipliers_calc trans_multipliers_calc_t; 
@@ -101,7 +101,7 @@ namespace blue_sky
       /**
        * \brief  returns pointer to mesh instance
        * */
-      const sp_mesh_iface_t &
+      sp_mesh_iface_t
       get_mesh () const;
 
       /**
@@ -187,7 +187,18 @@ namespace blue_sky
       std::string
       model_filename () const;
 
-      BLUE_SKY_TYPE_DECL_T(reservoir_simulator)
+      BLUE_SKY_TYPE_DECL (reservoir_simulator)
+
+
+      sp_hdm_t                hdm;                //!< pointer to hydrodynamic_model instance
+      sp_em_t                 em;                 //!< pointer to event_manager instance
+      sp_calc_model_t         cm;                 //!< pointer to calc_model instance
+      sp_reservoir_t          reservoir_;         //!< pointer to reservoir instance
+      sp_facility_storage_t   facility_storage_;  //!< pointer to facility_storage instance
+      sp_jacobian_t           jacobian_;          //!< pointer to jacobian instance
+      std::string             model_filename_;    //!< name of model file
+
+      smart_ptr <main_loop_calc_t, false> mloop;  //!< pointer to main_loop_calc instance
 
       //! storage for event params
       typedef bs_array <std::string> signal_params_t;
@@ -208,16 +219,6 @@ namespace blue_sky
         ((post_read, (), 0))
         ((pre_read, (sp_this_t), 1))
       );
-
-      sp_hdm_t                hdm;                //!< pointer to hydrodynamic_model instance
-      sp_em_t                 em;                 //!< pointer to event_manager instance
-      sp_calc_model_t         cm;                 //!< pointer to calc_model instance
-      sp_reservoir_t          reservoir_;         //!< pointer to reservoir instance
-      sp_facility_storage_t   facility_storage_;  //!< pointer to facility_storage instance
-      sp_jacobian_t           jacobian_;          //!< pointer to jacobian instance
-      std::string             model_filename_;    //!< name of model file
-
-      smart_ptr <main_loop_calc_t, false> mloop;  //!< pointer to main_loop_calc instance
     };
 
   /**

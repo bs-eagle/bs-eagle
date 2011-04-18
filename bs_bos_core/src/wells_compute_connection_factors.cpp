@@ -21,9 +21,8 @@ namespace blue_sky
     namespace compute_factors
       {
 
-      template <typename strategy_t>
       void
-      peaceman_model<strategy_t>::compute (connection_t &con,
+      peaceman_model::compute (connection_t &con,
                                            const physical_constants &internal_constants,
                                            const sp_params_t &params,
                                            const sp_mesh_iface_t &mesh,
@@ -121,9 +120,8 @@ namespace blue_sky
           }
       }
 
-      template <typename strategy_t>
-      typename strategy_t::item_t
-      peaceman_model<strategy_t>::compute_grp_pi_mult (connection_t &con)
+      t_double
+      peaceman_model::compute_grp_pi_mult (connection_t &con)
       {
         return (::log (4.0 * con.fracture_half_length_ / con.diam_) /*+  con.skin_ */) / (::log (4.0) /*+ con.skin_ */);
       }
@@ -264,10 +262,6 @@ namespace blue_sky
       //    }
       //  return result;
       //}
-
-      template struct peaceman_model <base_strategy_fi>;
-      template struct peaceman_model <base_strategy_di>;
-      template struct peaceman_model <base_strategy_mixi>;
 
     } // namespace compute_factors
   } // namespace wells

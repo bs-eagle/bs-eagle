@@ -66,7 +66,7 @@ namespace blue_sky
         << " dtop: " << dtop << bs_end;
 
       sp_connection_t prev_connection;
-      const stdv_double &pressure = calc_model->pressure;
+      const t_double *pressure = &(*calc_model->pressure)[0];
       typename base_t::well_t::connection_iterator_t it = well->connections_begin (), e = well->connections_end ();
       for (; it != e; ++it)
         {

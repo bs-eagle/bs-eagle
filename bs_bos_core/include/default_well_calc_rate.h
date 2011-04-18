@@ -542,10 +542,10 @@ namespace wells {
   template <bool is_w, bool is_g, bool is_o, bool is_production_well>
   struct calc_rate_and_derivs_t
   {
-    typedef t_double                 item_t;
+    typedef t_double              item_t;
     typedef t_long                index_t;
-    typedef v_double           item_array_t;
-    typedef v_double       rhs_item_array_t;
+    typedef spv_double            item_array_t;
+    typedef spv_float             rhs_item_array_t;
 
     typedef default_well                   well_t;
     typedef default_connection             connection_t;
@@ -602,8 +602,8 @@ namespace wells {
     calc_rate_and_derivs_t (const sp_calc_model_t &calc_model, const sp_jmatrix_t &jmatrix, well_t *well)
     : cell_data_ (calc_model->data)
     , main_vars_ (calc_model->main_variable)
-    , pressure_ (calc_model->pressure)
-    , gas_oil_ratio_ (calc_model->gas_oil_ratio)
+    , pressure_ (&(*calc_model->pressure)[0])
+    , gas_oil_ratio_ (&(*calc_model->gas_oil_ratio)[0])
     , invers_fvf_average_ (calc_model->invers_fvf_average)
     , well_rate_ (well->rate_)
     , well_rate_rc_ (well->rate_rc_)
@@ -626,8 +626,8 @@ namespace wells {
 
     const cell_data_t         &cell_data_;
     const main_vars_t         main_vars_;
-    const stdv_double         &pressure_;
-    const stdv_double         &gas_oil_ratio_;
+    const t_double            *pressure_;
+    const t_double            *gas_oil_ratio_;
     const typename calc_model_t::invers_fvf_avgerage_t &invers_fvf_average_;
     rate_data_t               &well_rate_;
     rate_data_t               &well_rate_rc_;

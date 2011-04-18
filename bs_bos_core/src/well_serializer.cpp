@@ -21,18 +21,18 @@ namespace blue_sky
 
     well_serializer::well_serializer (bs_type_ctor_param param /* = NULL */)
     {
-      handled_type_ = well_t::bs_type ();
+      handled_type_ = well::bs_type ();
     }
     well_serializer::well_serializer (const well_serializer& w)
     : bs_refcounter (w), data_serializer (w)
     {
-      handled_type_ = well_t::bs_type ();
+      handled_type_ = well::bs_type ();
     }
 
     void
     well_serializer::save (const sp_storage_t &storage, const sp_obj &obj) const
       {
-        SP (well) w (obj, bs_dynamic_cast ());
+        BS_SP (well) w (obj, bs_dynamic_cast ());
 
         BS_ASSERT (w) (obj->bs_resolve_type ().stype_);
 
@@ -56,7 +56,7 @@ namespace blue_sky
     {
       bool res = true;
 
-      res &= BS_KERNEL.register_type (pd, well_serializer<base_strategy_fi>::bs_type ()); BS_ASSERT (res);
+      res &= BS_KERNEL.register_type (pd, well_serializer::bs_type ()); BS_ASSERT (res);
 
       return res;
     }
