@@ -30,7 +30,10 @@ namespace blue_sky
     .def ("set_pbuilder",         &T::set_pbuilder, args ("level, sp_pbuild_iface"), "Set interpolation matrix build method on amg level")
     .def ("set_presmoother",      &T::set_pre_smoother, args ("level, sp_smooth_iface"), "Set pre smoothing method on amg level")
     .def ("set_postsmoother",     &T::set_post_smoother, args ("level, sp_smooth_iface"), "Set post smoothing method on amg level")
-    .def ("get_level_matrices",   &T::get_level_matrices, args (""), "get vector of matrices on amg levels")
+    .def ("get_matrices",         &T::get_matrices, args (""), "get vector of matrices on amg levels")
+    .def ("get_p_matrices",       &T::get_p_matrices, args (""), "get vector of prolongation matrices on amg levels")
+    .def ("get_cf_markers",       &T::get_cf_markers, args (""), "get vector of cf_markers on amg levels")
+    .def ("get_s_markers",        &T::get_s_markers, args (""), "get vector of s_markers on amg levels")
     //.def ("__str__", &T::py_str)
   PY_EXPORTER_END;
 

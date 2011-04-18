@@ -1,7 +1,7 @@
 /**
  * @file standart3_pbuild.h
- * @brief
- * @author
+ * @brief parallel Stuben's standart interpolation
+ * @author Mark Khait
  * @version
  * @date 2010-03-16
  */

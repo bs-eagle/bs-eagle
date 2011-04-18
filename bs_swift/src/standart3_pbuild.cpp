@@ -1,7 +1,7 @@
 /**
  * @file standart3_pbuild.cpp
- * @brief
- * @author
+ * @brief parallel implementation of Stuben's standart interpolation
+ * @author Mark Khait
  * @version
  * @date 2010-03-16
  */

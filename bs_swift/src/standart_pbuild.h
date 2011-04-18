@@ -1,6 +1,6 @@
 /**
  * @file standart_pbuild.h
- * @brief
+ * @brief implementation of standart interpolation
  * @author
  * @version
  * @date 2010-03-16

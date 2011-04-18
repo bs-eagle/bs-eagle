@@ -357,7 +357,7 @@ namespace blue_sky
 
           //DEBUG
           t_long s_nnz = 0;
-          for (t_long ii = 0;ii < s_markers->size();++ii)
+          for (t_long ii = 0; ii < s_markers->size (); ++ii)
             {
               if ((*s_markers)[ii] > 0)
                 s_nnz++;

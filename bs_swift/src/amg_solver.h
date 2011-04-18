@@ -284,9 +284,24 @@ namespace blue_sky
           return (level < post_smoother.size ()) ? post_smoother[level] : post_smoother[post_smoother.size () - 1];
         }
 
-      const vec_sp_bcsr_t get_level_matrices () const
+      const vec_sp_bcsr_t get_matrices () const
         {
           return a;
+        }
+
+      const vec_sp_bcsr_t get_p_matrices () const
+        {
+          return p;
+        }
+
+      const vec_spv_long get_cf_markers () const
+        {
+          return cf;
+        }
+
+      const vec_spv_long get_s_markers () const
+        {
+          return s;
         }
 
 #ifdef BSPY_EXPORTING_PLUGIN

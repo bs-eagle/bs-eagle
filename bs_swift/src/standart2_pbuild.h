@@ -1,6 +1,6 @@
 /**
  * @file standart2_pbuild.h
- * @brief
+ * @brief Stuben's standart interpolation (extended interpolation, using F-F connections)
  * @author
  * @version
  * @date 2010-03-16
@@ -13,7 +13,7 @@
 namespace blue_sky
 {
   /**
-   * @brief Prolangation matrix builder (Standart algorithm)
+   * @brief Prolongation matrix builder (Stuben's Standart algorithm)
    */
   class BS_API_PLUGIN standart2_pbuild: public amg_pbuild_iface
     {
@@ -29,7 +29,7 @@ namespace blue_sky
     //-----------------------------------------
     public:
       /**
-       * @brief build prolangation matrix
+       * @brief build prolongation matrix
        *
        * @param a_matrix        -- <INPUT> A matrix
        * @param n_coarse_size   -- <INPUT> number of points in coarse grid

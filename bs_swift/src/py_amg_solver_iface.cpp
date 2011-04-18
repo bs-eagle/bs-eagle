@@ -26,9 +26,14 @@ namespace python {
     class_exporter<amg_solver, amg_solver_iface, py_amg_solver_iface_exporter>::export_class ("amg_solver");
 
 	  // register vector of type descriptors <-> Python list converters
-	  typedef bspy_converter< list_traits< std::vector<smart_ptr<bcsr_amg_matrix_iface, true> > > > tdv_converter;
-	  tdv_converter::register_from_py();
-	  tdv_converter::register_to_py();
+	  typedef bspy_converter< list_traits< std::vector<smart_ptr<bcsr_amg_matrix_iface, true> > > > spbcsr_vec_converter;
+	  spbcsr_vec_converter::register_from_py ();
+	  spbcsr_vec_converter::register_to_py ();
+
+	  // register vector of type descriptors <-> Python list converters
+	  typedef bspy_converter< list_traits< std::vector<spv_long> > > spvlong_vec_converter;
+	  spvlong_vec_converter::register_from_py ();
+	  spvlong_vec_converter::register_to_py ();
   }
 
 }	// namespace python

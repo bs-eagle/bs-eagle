@@ -38,7 +38,7 @@ namespace blue_sky
       // write matrix to ascii file
       virtual int ascii_write_to_csr_format (const sp_bcsr_t matrix,
                                              const std::string &file_name,
-                                             const bool sort_cols = 0) const = 0;
+                                             const bool sort_cols) const = 0;
 
       virtual int random_init (sp_bcsr_t matrix,
                                const t_long new_n_rows,

@@ -38,22 +38,22 @@ namespace blue_sky
 
       typedef smart_ptr<bcsr_amg_matrix_iface, true>            sp_bcsr_t;
       typedef std::vector<sp_bcsr_t>                            vec_sp_bcsr_t;
+      typedef std::vector<spv_long>                             vec_spv_long;
+
       //-----------------------------------------
       //  METHODS
       //-----------------------------------------
-
-      //virtual const bcsr_t &get_A (int layer) const = 0;
-
-      //virtual const bcsr_t &get_P (int layer) const = 0;
-
-      //virtual const fp_vector_type_t &get_rhs (int layer)
 
       virtual void set_smbuilder (unsigned int level, sp_smbuild_t sp_smbuild_iface) = 0;
       virtual void set_coarser (unsigned int level, sp_coarse_t sp_coarse_iface) = 0;
       virtual void set_pbuilder (unsigned int level, sp_pbuild_t sp_pbuild_iface) = 0;
       virtual void set_pre_smoother (unsigned int level, sp_smooth_t sp_smooth_iface) = 0;
       virtual void set_post_smoother (unsigned int level, sp_smooth_t sp_smooth_iface) = 0;
-      virtual const vec_sp_bcsr_t get_level_matrices ()  const = 0;
+      virtual const vec_sp_bcsr_t get_matrices () const = 0;
+      virtual const vec_sp_bcsr_t get_p_matrices () const = 0;
+      virtual const vec_spv_long get_cf_markers () const = 0;
+      virtual const vec_spv_long get_s_markers () const = 0;
+
     public:
 
     public:
