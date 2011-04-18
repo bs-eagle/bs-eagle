@@ -185,7 +185,7 @@ namespace blue_sky
     }
 
   spv_float
-  h5_poll::get_fp_data (std::string const &name)
+  h5_pool::get_fp_data (std::string const &name)
   {
     spv_float a = get_fp_data_unsafe (name);
     if (!a || a->empty ())
