@@ -244,7 +244,7 @@ namespace blue_sky
   }
   
   
-  spv_int idata::get_i_array (const std::string & array_name, bool safe = true)
+  spv_int idata::get_i_array (const std::string & array_name, bool safe)
   {
     return safe 
         ? h5_pool->get_i_data (array_name)
@@ -252,7 +252,7 @@ namespace blue_sky
         ;
   }
   
-  spv_float idata::get_fp_array (const std::string &array_name, bool safe = true)
+  spv_float idata::get_fp_array (const std::string &array_name, bool safe)
   {
     return safe
         ? h5_pool->get_fp_data (array_name)
