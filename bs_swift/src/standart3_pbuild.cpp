@@ -333,7 +333,7 @@ namespace blue_sky
 
               jj1 = p_rows_ptr[i];
               jj2 = p_rows_ptr[i + 1];
-              sum_d = a_values[jj1];
+              sum_d = a_values[a_rows_ptr[i]];//diagonal element
               //for (jj = jj1; jj < jj2; ++jj)
               //  sum_c += p_values[jj];
               //sum_all = sum_c;
