@@ -86,13 +86,6 @@ namespace blue_sky
     //depth.resize((nx+1) * (ny+1) * (nz+1));
     h5_pool->open_file ("bs_data_storage.h5", "/pool");
     
-    props->add_property_f (DEFAULT_MINIMAL_PORE_VOLUME, "minimal_pore_volume", "Minimal pore volume allowed for active cells");
-    props->add_property_f (DEFAULT_MINIMAL_SPLICE_VOLUME, "minimal_splice_volume", "Minimal pore volume allowed for active cells to splice with other cells");
-    props->add_property_f (DEFAULT_MAXIMUM_SPLICE_THICKNESS, "maximum_splice_thickness", "Default maximum thickness allowed between active cells to be coupled");
-
-    //props->add_property_i (1, "nx", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
-    //props->add_property_i (1, "ny", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
-    //props->add_property_i (1, "nz", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
     props->add_property_i (0, "rpo_model", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
     props->add_property_i (1, "pvt_region", "Number of PVT regions in simulation");
     props->add_property_i (1, "sat_region", "Number of saturation regions in simulation");

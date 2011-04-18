@@ -685,41 +685,6 @@ namespace blue_sky
   }
 
   
-  void keyword_manager::MINPV_handler(const std::string &keyword, keyword_params_t &params)
-  {
-    KH_READER_DEF
-    shared_vector <double> tmp;
-    tmp.resize(1);
-    sp_idata_t idata = params.hdm->get_data ();
-    
-    
-    if ((len = reader->read_array (keyword, tmp, 0)) != 1)
-      {
-        bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
-          % reader->get_prefix() % keyword);
-      }
-    idata->props->set_f ("minimal_pore_volume", tmp[0]);
-    BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
-  }
-  
-  
-  void keyword_manager::MINSV_handler(const std::string &keyword, keyword_params_t &params)
-  {
-    KH_READER_DEF
-    shared_vector <double> tmp;
-    tmp.resize(1);
-    sp_idata_t idata = params.hdm->get_data ();
-    
-    if ((len = reader->read_array (keyword, tmp, 0)) != 1)
-      {
-        bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
-          % reader->get_prefix() % keyword);
-      }
-    idata->props->set_f("minimal_splice_volume", tmp[0]);
-    BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
-  }
-
-  
   void keyword_manager::DENSITY_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF

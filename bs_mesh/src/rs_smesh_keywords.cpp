@@ -67,6 +67,12 @@ namespace blue_sky
       names[2] = "nz";
 
       keyword_manager->register_prop_keyword ("DIMENS", "iii", names, &this_t::DIMENS_reactor);
+      names[0] = "minimal_pore_volume";
+      keyword_manager->register_prop_keyword ("MINPV", "f", names, 0);
+      names[0] = "minimal_splice_volume";
+      keyword_manager->register_prop_keyword ("MINSV", "f", names, 0);
+      names[0] = "maximum_splice_thickness";
+      keyword_manager->register_prop_keyword ("MAXST", "f", names, 0);
 
       keyword_manager->register_i_pool_keyword ("ACTNUM", &array_dimens[0], 1, 0);
       keyword_manager->register_fp_pool_keyword ("PERMX", &array_dimens[0], def_value_zero, 0);
