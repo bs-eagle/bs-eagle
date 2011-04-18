@@ -75,12 +75,14 @@ namespace blue_sky
   {
     char buf[CHAR_BUF_LEN];
     char key[CHAR_BUF_LEN];
+    keyword_params kp;
     int flag;
     int len;
     
     write_time_to_log init_time ("Read model", "");
 
     reader->init (filename, filename);
+    kp.hdm = this;
 
     // start of loop for data file reading
     flag = 1;
@@ -118,7 +120,7 @@ namespace blue_sky
             break;
           }
 
-        km->handle_keyword (keywrd, this);
+        km->handle_keyword (keywrd, kp);
       }
   }
 
