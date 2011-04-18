@@ -7,7 +7,8 @@ tar_name = "common_types"
 env = custom_env.Clone ()
 env.Append (CPPPATH = ["include",
     includes["bs_bos_core_base"]
-    ] + includes["kernel"])
+    ] + includes["kernel"],
+	CPPDEFINES = 'H5_USE_16_API')
 
 libs = ["blue_sky"]
 
