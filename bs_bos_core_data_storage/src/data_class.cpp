@@ -64,8 +64,8 @@ namespace blue_sky
   
   idata::idata(bs_type_ctor_param /*param*/)
   : bs_node(bs_node::create_node (new this_t::idata_traits ())),
-  h5_pool (BS_KERNEL.create_object ("h5_pool")),
-  props (BS_KERNEL.create_object ("prop"))
+  props (BS_KERNEL.create_object ("prop")),
+  h5_pool (BS_KERNEL.create_object ("h5_pool"))
   {
     init();
   }
@@ -73,8 +73,8 @@ namespace blue_sky
   
   idata::idata(const this_t &src)
       : bs_refcounter (src), bs_node(src), 
-      h5_pool(give_kernel::Instance().create_object_copy(src.h5_pool)),
-      props(give_kernel::Instance().create_object_copy(src.props))
+      props(give_kernel::Instance().create_object_copy(src.props)),
+      h5_pool(give_kernel::Instance().create_object_copy(src.h5_pool))
       //scal3(give_kernel::Instance().create_object_copy(src.scal3)),
   {
     *this = src;
@@ -244,7 +244,7 @@ namespace blue_sky
   }
   
   
-  spv_int idata::get_i_array (const std::string & array_name, bool safe = true)
+  spv_int idata::get_i_array (const std::string & array_name, bool safe)
   {
     return safe 
         ? h5_pool->get_i_data (array_name)
@@ -252,7 +252,7 @@ namespace blue_sky
         ;
   }
   
-  spv_float idata::get_fp_array (const std::string &array_name, bool safe = true)
+  spv_float idata::get_fp_array (const std::string &array_name, bool safe)
   {
     return safe
         ? h5_pool->get_fp_data (array_name)
@@ -285,7 +285,7 @@ namespace blue_sky
     return h5_pool->set_fp_data (array_name, array);
   }
 
-  spv_int idata::create_i_array (const std::string & array_name,  t_int *array_dimens, t_int def_value)
+  spv_int idata::create_i_array (const std::string & /*array_name*/,  t_int *array_dimens, t_int def_value)
   {
     spv_int new_array;
     t_long n;
@@ -305,7 +305,7 @@ namespace blue_sky
   }
   
 
-  spv_float idata::create_fp_array (const std::string & array_name,  t_int *array_dimens, t_float def_value)
+  spv_float idata::create_fp_array (const std::string & /*array_name*/,  t_int *array_dimens, t_float def_value)
   {
     spv_float new_array;
     t_long n;
