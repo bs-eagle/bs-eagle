@@ -71,6 +71,10 @@ namespace blue_sky
     return 0;
   }
 
+  // calculate linear combination with current matrix A:
+  // r = alpha * A * u + beta * v
+  // 1 step: r = beta * v / alpha
+  // 2 step: r += alpha * matrix * u
   int
   bcsr::calc_lin_comb (t_double alpha,
                        t_double beta,

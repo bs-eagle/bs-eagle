@@ -45,16 +45,15 @@ namespace blue_sky
       //  METHODS
       //-----------------------------------------
     public:
-      // destructor
+      //! destructor
       virtual ~gmres_solver ();
 
-
-      // solve
+      //! solve
       virtual int solve (sp_matrix_t matrix, spv_double rhs, spv_double sol);
 
       virtual int solve_prec (sp_matrix_t matrix, spv_double rhs, spv_double sol);
 
-      // setup
+      //! setup
       virtual int setup (sp_matrix_t matrix);
 
       //! set preconditioner
@@ -66,7 +65,7 @@ namespace blue_sky
       virtual void set_prop (sp_prop_t prop_);
 
       //! get properties
-      virtual sp_prop_t get_prop()
+      virtual sp_prop_t get_prop ()
         {
           return prop;
         }

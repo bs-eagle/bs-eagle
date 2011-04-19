@@ -11,7 +11,6 @@
 #include "gmres_solver.h"
 #include "mv_functions.h"
 
-
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "matrix_iface.h"
 #include BS_STOP_PLUGIN_IMPORT ()
@@ -23,7 +22,6 @@ namespace blue_sky
     //  gmres_solver
 
     //! constructor
-
     gmres_solver::gmres_solver (bs_type_ctor_param /*param*/)
       : lsolver_iface ()
     {
@@ -43,7 +41,6 @@ namespace blue_sky
     }
 
     //! copy constructor
-
     gmres_solver::gmres_solver(const gmres_solver &solver)
       : bs_refcounter (), lsolver_iface ()
     {
@@ -52,12 +49,10 @@ namespace blue_sky
     }
 
     //! destructor
-
     gmres_solver::~gmres_solver ()
     {}
 
     //! set solver's properties
-
     void gmres_solver::set_prop (sp_prop_t prop_)
     {
       prop = prop_;
@@ -65,7 +60,8 @@ namespace blue_sky
       init_prop ();
     }
 
-     void
+    //! set properties by default
+    void
     gmres_solver::init_prop ()
       {
         prop->add_property_f (1.0e-4, tol_idx,
@@ -77,11 +73,18 @@ namespace blue_sky
         prop->add_property_i (0,iters_idx,
                               std::string ("Total number of used solver iterations"));
         prop->add_property_i (30, m_idx,
-                              std::string ("Number of vectors used for ortoganalization"));
+                              std::string ("Number of vectors used for ortogonalization"));
         prop->add_property_b (false, success_idx,
                               std::string ("True if solver successfully convergent"));
       }
 
+    /**
+    * @brief solve for GMRES
+    * @param matrix -- input smart pointer to matrix
+    * @param sp_rhs -- input smart pointer to right hand side vector
+    * @param sp_sol -- input smart pointer to solution vector
+    * @return 0 if success
+    */
     int gmres_solver::solve (sp_matrix_t matrix, spv_double sp_rhs, spv_double sp_sol)
     {
       BS_ASSERT (matrix);
@@ -237,9 +240,7 @@ namespace blue_sky
               if (t > epsmac)
                 {
                   t = 1.0 / t;
-
                   scale_vector_n (vec_pi, t, n);
-
                 }
               /* done with modified Gram_schmidt and Arnoldi step.
               update factorization of hh */
@@ -267,7 +268,6 @@ namespace blue_sky
               r_norm = fabs (vec_rs[i]);
               if (r_norm <= tol)
                 break;
-
             }
 
           if (i == m || iter == max_iter)
@@ -345,7 +345,6 @@ namespace blue_sky
             }
 
           /* compute residual vector and continue loop */
-
           for (j = i; j > 0; --j)
             {
               vec_rs[j - 1] = -vec_s[j - 1] * vec_rs[j];
@@ -367,7 +366,8 @@ namespace blue_sky
         }
 
       prop->set_i (iters_idx, iter + 1);
-      prop->set_b (success_idx, true);
+      if (iter < max_iter)
+        prop->set_b (success_idx, true);
 
       if (den_norm > 1.0e-12)
         prop->set_f (final_res_idx, r_norm / den_norm);
@@ -385,11 +385,11 @@ namespace blue_sky
 
     int gmres_solver::solve_prec (sp_matrix_t matrix, spv_double rhs, spv_double sol)
     {
-      return prec->solve (matrix, rhs, sol);
+      return solve (matrix, rhs, sol);
     }
 
     /**
-    * @brief setup for CGS
+    * @brief setup for GMRES
     *
     * @param matrix -- input matrix
     *
@@ -400,7 +400,7 @@ namespace blue_sky
     {
       if (!matrix)
         {
-          bs_throw_exception ("CGS: Passed matrix is null");
+          bs_throw_exception ("GMRES: Passed matrix is null");
         }
 
       BS_ASSERT (prop);

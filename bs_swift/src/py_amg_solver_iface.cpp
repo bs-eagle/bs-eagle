@@ -34,6 +34,11 @@ namespace python {
 	  typedef bspy_converter< list_traits< std::vector<spv_long> > > spvlong_vec_converter;
 	  spvlong_vec_converter::register_from_py ();
 	  spvlong_vec_converter::register_to_py ();
+
+	  // register vector of type descriptors <-> Python list converters
+	  typedef bspy_converter< list_traits< std::vector<spv_double> > > spvdouble_vec_converter;
+	  spvdouble_vec_converter::register_from_py ();
+	  spvdouble_vec_converter::register_to_py ();
   }
 
 }	// namespace python

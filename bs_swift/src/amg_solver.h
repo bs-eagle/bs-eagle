@@ -78,6 +78,12 @@ namespace blue_sky
       // setup
       virtual int setup (sp_matrix_t matrix);
 
+      //! get preconditioner
+      virtual sp_base_t get_prec ()
+        {
+          return NULL;//prec;
+        }
+
       //! set preconditioner
       virtual void set_prec (sp_base_t /*prec_*/)
         {
@@ -302,6 +308,16 @@ namespace blue_sky
       const vec_spv_long get_s_markers () const
         {
           return s;
+        }
+
+      const vec_spv_double get_sol () const
+        {
+          return sol;
+        }
+
+      const vec_spv_double get_rhs () const
+        {
+          return rhs;
         }
 
 #ifdef BSPY_EXPORTING_PLUGIN

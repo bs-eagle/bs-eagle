@@ -126,15 +126,13 @@ namespace blue_sky
 
       //init amg props
       const t_long n_levels = get_n_levels ();
-      std::cout<<"n_levels = "<<n_levels<<" a.size = "<<a.size ()<<" p.size = "<<p.size ()<<"\n";
 
       // rhs and solution on first level
-      rhs.push_back (sp_rhs);
-      sol.push_back (sp_sol);
+      rhs[0] = sp_rhs;
+      sol[0] = sp_sol;
+      sp_sol->assign (0);
 
       int level = 0;
-      spv_double next_level_sol;
-      spv_double next_level_rhs;
       t_long n = matrix->get_n_rows ();
       t_double *rhs_ptr = &(*sp_rhs)[0];
 
@@ -144,8 +142,7 @@ namespace blue_sky
       t_double tol = prop->get_f (tol_idx);
       prop->set_b (success_idx, false);
 
-      t_double resid = 0.0;
-      t_double denom;
+      t_double resid = tol + 1.0;
       if (max_iter > 1)
         {
           // calculate initial norm
@@ -157,116 +154,93 @@ namespace blue_sky
           if (b_norm > epsmac)
             { // convergence criterion |r_i|/|b| <= accuracy if |b| > 0
               tol *= b_norm;
-              denom = 1.0 / b_norm;
             }
           else if (r_norm > epsmac)
             { // convergence criterion |r_i|/|r0| <= accuracy if |b| = 0
               tol *= r_norm;
-              denom = 1.0 / r_norm;
             }
-          else
-            denom = 1.0;
-          resid = r_norm * denom;
+          resid = r_norm;
           std::cout<<"n = "<<n<<" b_norm = "<<b_norm<<" r_norm = "<<r_norm
                    <<" resid = "<<resid<<" tol = "<<tol<<"\n";
         }
 
       int iter;
       for (iter = 0; iter < max_iter && resid > tol; ++iter)
-      {
-
-      for (level = 0; level < n_levels; ++level)
         {
-          sp_smooth_t pre_smoother = get_pre_smoother (level);
-          BS_ASSERT (pre_smoother);
+          for (level = 0; level < n_levels; ++level)
+            {
+              sp_smooth_t pre_smoother = get_pre_smoother (level);
+              BS_ASSERT (pre_smoother);
 
-          t_long n = a[level]->get_n_rows ();
-          wksp->resize (n);
+              t_long n = a[level]->get_n_rows ();
+              wksp->resize (n);
 
-          // init next level solution and rhs vectors
-          t_long n_coarse_size = a[level + 1]->get_n_rows ();
-          spv_double next_level_sol = BS_KERNEL.create_object (v_double::bs_type ());
-          spv_double next_level_rhs = BS_KERNEL.create_object (v_double::bs_type ());
-          BS_ASSERT (next_level_sol);
-          BS_ASSERT (next_level_rhs);
-          sol.push_back (next_level_sol);
-          rhs.push_back (next_level_rhs);
-          next_level_sol->resize (n_coarse_size);
-          next_level_rhs->resize (n_coarse_size);
+              //initial guess on [level + 1] is sol=0
+              sol[level + 1]->assign (0);
 
-          wksp->resize (n);
-          std::cout<<"AMG solve 1 step of V-cycle. level = "<<level<<" n_rows = "<<n<<"\n";
-
-          // smooth all points
-          pre_smoother->get_prop ()->set_i ("cf_type", 0);
-          pre_smoother->smooth (a[level], NULL, get_n_pre_smooth_iters (),
+              // smooth all points
+              pre_smoother->get_prop ()->set_i ("cf_type", 0);
+              pre_smoother->smooth (a[level], NULL, get_n_pre_smooth_iters (),
                                 rhs[level], sol[level]);
 /*
-          // smooth C-points
-          pre_smoother->get_prop ()->set_i ("cf_type", 1);
-          pre_smoother->smooth (a[level], cf[level], get_n_pre_smooth_iters (),
-                                rhs[level], sol[level]);
-          // smooth F-points
-          pre_smoother->get_prop ()->set_i ("cf_type", -1);
-          pre_smoother->smooth (a[level], cf[level], get_n_pre_smooth_iters (),
-                                rhs[level], sol[level]);
+              // smooth C-points
+              pre_smoother->get_prop ()->set_i ("cf_type", 1);
+              pre_smoother->smooth (a[level], cf[level], get_n_pre_smooth_iters (),
+                                    rhs[level], sol[level]);
+              // smooth F-points
+              pre_smoother->get_prop ()->set_i ("cf_type", -1);
+              pre_smoother->smooth (a[level], cf[level], get_n_pre_smooth_iters (),
+                                    rhs[level], sol[level]);
 */
-          // calculate r = b - Ax
-          if (a[level]->calc_lin_comb (-1.0, 1.0, sol[level], rhs[level], wksp))
-            return -1;
+              // calculate r = b - Ax
+              if (a[level]->calc_lin_comb (-1.0, 1.0, sol[level], rhs[level], wksp))
+                return -1;
 
-          //set rhs[level + 1]=0
-          rhs[level + 1]->assign (0);
-          // restriction: b^(k+1) = P^T * r
-          if (p[level]->matrix_vector_product_t (wksp, rhs[level + 1]))
-            return -1;
-        }
+              // restriction: b^(k+1) = P^T * r
+              rhs[level + 1]->assign (0);
+              if (p[level]->matrix_vector_product_t (wksp, rhs[level + 1]))
+                return -1;
+            }
 
-      std::cout<<"LU solve...";
-      lu_solver->solve (lu_fact, rhs[level], sol[level]);
-      std::cout<<"OK\n";
+          lu_solver->solve (lu_fact, rhs[level], sol[level]);
 
-      for (level = n_levels - 1; level >= 0; --level)
-        {
-          sp_smooth_t post_smoother = get_post_smoother (level);
-          BS_ASSERT (post_smoother);
-          t_long n = a[level]->get_n_rows ();
-          std::cout<<"AMG solve 2 step of V-cycle. level = "<<level<<" n_rows = "<<n<<"\n";
+          for (level = n_levels - 1; level >= 0; --level)
+            {
+              sp_smooth_t post_smoother = get_post_smoother (level);
+              BS_ASSERT (post_smoother);
 
-          //set sol[level + 1]=0
-          sol[level + 1]->assign (0);
-          //interpolation x = x + P * e^(k+1)
-          if (p[level]->calc_lin_comb (1.0, 1.0, sol[level + 1], sol[level], sol[level]))
-            return -6;
+              //interpolation x = x + P * e^(k+1)
+              if (p[level]->matrix_vector_product (sol[level + 1], sol[level]))
+                return -6;
 
-          // smooth all points
-          post_smoother->get_prop ()->set_i ("cf_type", 0);
-          post_smoother->smooth (a[level], NULL, get_n_post_smooth_iters (),
-                                rhs[level], sol[level]);
+              // smooth all points
+              post_smoother->get_prop ()->set_i ("cf_type", 0);
+              post_smoother->smooth (a[level], NULL, get_n_post_smooth_iters (),
+                                     rhs[level], sol[level]);
 /*
-          // smooth F-points
-          post_smoother->get_prop ()->set_i ("cf_type", -1);
-          post_smoother->smooth (a[level], cf[level], get_n_post_smooth_iters (),
-                                rhs[level], sol[level]);
-          // smooth C-points
-          post_smoother->get_prop ()->set_i ("cf_type", 1);
-          post_smoother->smooth (a[level], cf[level], get_n_post_smooth_iters (),
-                                rhs[level], sol[level]);
+              // smooth F-points
+              post_smoother->get_prop ()->set_i ("cf_type", -1);
+              post_smoother->smooth (a[level], cf[level], get_n_post_smooth_iters (),
+                                     rhs[level], sol[level]);
+              // smooth C-points
+              post_smoother->get_prop ()->set_i ("cf_type", 1);
+              post_smoother->smooth (a[level], cf[level], get_n_post_smooth_iters (),
+                                     rhs[level], sol[level]);
 */
-        }
+            }
 
-        if (max_iter > 1)
-          {
-            // calculate residual norm
-            t_long n = matrix->get_n_rows ();
-            wksp->resize (n);
-            t_double *wksp_ptr = &(*wksp)[0];
-            if (matrix->calc_lin_comb (-1.0, 1.0, sp_sol, sp_rhs, wksp))
-              return -2;
-            resid = sqrt (mv_vector_inner_product_n (wksp_ptr, wksp_ptr, n)) * denom;
-            std::cout<<"AMG Iteration "<<iter + 1<<" resid = "<<resid<<" tol = "<<tol<<"\n";
-          }
-      }//iter loop
+          if (max_iter > 1)
+            {
+              // calculate residual norm
+              t_long n = matrix->get_n_rows ();
+              wksp->resize (n);
+              t_double *wksp_ptr = &(*wksp)[0];
+              if (matrix->calc_lin_comb (-1.0, 1.0, sp_sol, sp_rhs, wksp))
+                return -2;
+              resid = sqrt (mv_vector_inner_product_n (wksp_ptr, wksp_ptr, n));
+              std::cout<<"AMG Iteration "<<iter + 1<<" resid = "<<resid<<"\n";
+            }
+        }//iter loop
 
       prop->set_i (iters_idx, iter + 1);
       prop->set_b (success_idx, true);
@@ -321,15 +295,23 @@ namespace blue_sky
           bs_throw_exception ("AMG setup: Passed matrix has no nnz elements");
         }
 
-      t_double cop = matrix->get_n_non_zeros ();
+      t_double nnz = matrix->get_n_non_zeros ();
+      t_double cop = nnz;
       // matrix on first level
       a.push_back (matrix);
+      // init first level solution and rhs vector (empty)
+      spv_double first_level_sol = BS_KERNEL.create_object (v_double::bs_type ());
+      spv_double first_level_rhs = BS_KERNEL.create_object (v_double::bs_type ());
+      BS_ASSERT (first_level_sol);
+      BS_ASSERT (first_level_rhs);
+      sol.push_back (first_level_sol);
+      rhs.push_back (first_level_rhs);
 
       int level;
       for (level = 0;;++level)
         {
           t_long n = matrix->get_n_rows ();
-          std::cout<<"AMG setup level = "<<level<<" n_rows = "<<n<<"\n";
+          //std::cout<<"AMG setup level = "<<level<<" n_rows = "<<n<<"\n";
 
           if (n <= n_last_level_points)
             {
@@ -343,11 +325,10 @@ namespace blue_sky
           BS_ASSERT (s_builder);
           BS_ASSERT (coarser);
           BS_ASSERT (p_builder);
-          std::cout<<"strength type: "<<s_builder->py_str ()<<"\n";
-          std::cout<<"coarse   type: "<<coarser->py_str ()<<"\n";
-          std::cout<<"interp   type: "<<p_builder->py_str ()<<"\n";
+          //std::cout<<"strength type: "<<s_builder->py_str ()<<"\n";
+          //std::cout<<"coarse   type: "<<coarser->py_str ()<<"\n";
+          //std::cout<<"interp   type: "<<p_builder->py_str ()<<"\n";
 
-          std::cout<<"strength...";
           // build strength matrix (fill s_markers)
           spv_long s_markers = BS_KERNEL.create_object (v_long::bs_type ());
           BS_ASSERT (s_markers);
@@ -355,16 +336,14 @@ namespace blue_sky
 
           s_builder->build (matrix, strength_threshold, max_row_sum, s_markers);
 
-          //DEBUG
-          t_long s_nnz = 0;
-          for (t_long ii = 0; ii < s_markers->size (); ++ii)
-            {
-              if ((*s_markers)[ii] > 0)
-                s_nnz++;
-            }
-          std::cout<<"a_nnz = "<<s_markers->size()<<" s_nnz = "<<s_nnz<<"\n";
-
-          std::cout<<"OK\ncoarse...";
+          // calc s_nnz
+          //t_long s_nnz = 0;
+          //for (t_long ii = 0; ii < s_markers->size (); ++ii)
+          //  {
+          //    if ((*s_markers)[ii] > 0)
+          //      s_nnz++;
+          //  }
+          //std::cout<<"a_nnz = "<<s_markers->size()<<" s_nnz = "<<s_nnz<<"\n";
 
           // coarse (fill cf_markers)
           spv_long cf_markers = BS_KERNEL.create_object (v_long::bs_type ());
@@ -381,7 +360,7 @@ namespace blue_sky
               std::cout<<"coarse failed: n = "<<n<<" n_coarse = "<<n_coarse_size<<"\n";
               break;
             }
-          std::cout<<"OK\nbuild P...";
+
           // build prolongation (interpolation) matrix
           sp_bcsr_t p_matrix = BS_KERNEL.create_object ("bcsr_matrix");
           BS_ASSERT (p_matrix);
@@ -389,7 +368,7 @@ namespace blue_sky
 
           p_builder->build (matrix, n_coarse_size, max_connections,
                             cf_markers, s_markers, p_matrix);
-          std::cout<<"OK\ntriple...";
+
           // initialize next level matrix
           sp_bcsr_t a_matrix = BS_KERNEL.create_object ("bcsr_matrix");
           BS_ASSERT (a_matrix);
@@ -403,27 +382,25 @@ namespace blue_sky
           a_matrix->triple_matrix_product (r_matrix, matrix, p_matrix, update);
           matrix = a_matrix;
           cop += matrix->get_n_non_zeros ();
-          std::cout<<"OK\n";
+
+          // init next level solution and rhs vectors
+          spv_double next_level_sol = BS_KERNEL.create_object (v_double::bs_type ());
+          spv_double next_level_rhs = BS_KERNEL.create_object (v_double::bs_type ());
+          BS_ASSERT (next_level_sol);
+          BS_ASSERT (next_level_rhs);
+          next_level_sol->resize (n_coarse_size);
+          next_level_rhs->resize (n_coarse_size);
+          sol.push_back (next_level_sol);
+          rhs.push_back (next_level_rhs);
         }
 
       set_n_levels (level);
-      cop /= matrix->get_n_non_zeros ();
+      cop /= nnz;
       set_cop (cop);
 
-      std::cout<<"AMG setup OK. n_levels = "<<level<<" Cop = "<<cop<<"\n";
-
-      std::cout<<"LU setup...";
       lu_fact->init_by_matrix (matrix);
       lu_solver->setup (lu_fact);
-      std::cout<<"OK\n";
-/*
-      for (int level = 0; level < n_levels; ++level)
-        {
-          std::cout<<"AMG level = "<<level<<
-          " S_n = "<<S[level]->get_n_rows ()<<
-          " S_nnz = "<<S[level]->get_n_non_zeros ()<<"\n";
-        }
-*/
+
       return 0;
     }
 

@@ -39,6 +39,7 @@ namespace blue_sky
       typedef smart_ptr<bcsr_amg_matrix_iface, true>            sp_bcsr_t;
       typedef std::vector<sp_bcsr_t>                            vec_sp_bcsr_t;
       typedef std::vector<spv_long>                             vec_spv_long;
+      typedef std::vector<spv_double>                           vec_spv_double;
 
       //-----------------------------------------
       //  METHODS
@@ -53,7 +54,8 @@ namespace blue_sky
       virtual const vec_sp_bcsr_t get_p_matrices () const = 0;
       virtual const vec_spv_long get_cf_markers () const = 0;
       virtual const vec_spv_long get_s_markers () const = 0;
-
+      virtual const vec_spv_double get_sol () const = 0;
+      virtual const vec_spv_double get_rhs () const = 0;
     public:
 
     public:
