@@ -33,7 +33,7 @@ using namespace boost::python;
 namespace blue_sky {
 namespace python {
 
-  reservoir_simulator::sp_jmatrix_t 
+  BS_SP (jac_matrix_iface)
   get_jmatrix (reservoir_simulator *t)
   {
     return t->get_jacobian ()->get_jmatrix ();

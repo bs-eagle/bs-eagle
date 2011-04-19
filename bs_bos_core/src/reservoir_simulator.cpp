@@ -30,11 +30,10 @@ namespace blue_sky
       : bs_refcounter ()
       , bs_node (bs_node::create_node()) //new typename this_t::mstatus_traits ()))
       , hdm (give_kernel::Instance().create_object (dm_t::bs_type ()))
-      , em (give_kernel::Instance().create_object (em_t::bs_type ()))
-      , cm (give_kernel::Instance().create_object (calc_model_t::bs_type ()))
-      , reservoir_ (give_kernel::Instance().create_object (reservoir_t::bs_type ()))
+      , em (give_kernel::Instance().create_object (event_manager::bs_type ()))
+      , cm (give_kernel::Instance().create_object (calc_model::bs_type ()))
+      , reservoir_ (give_kernel::Instance().create_object (reservoir::bs_type ()))
       , facility_storage_ (give_kernel::Instance().create_object (facility_storage_t::bs_type ()))
-      , jacobian_ (give_kernel::Instance().create_object (jacobian_t::bs_type ()))
       , mloop (0)
       , reservoir_simulator_events_init_ (this)
   {
@@ -56,7 +55,7 @@ namespace blue_sky
    * \brief  copy-ctor for reservoir_simulator
    * \param  src source copy of reservoir_simulator
    * */
-  reservoir_simulator::reservoir_simulator (const this_t &src)
+  reservoir_simulator::reservoir_simulator (const reservoir_simulator &src)
       : bs_refcounter ()
       , bs_node (src)
       , hdm (src.hdm)
@@ -258,11 +257,6 @@ namespace blue_sky
   void 
   check_sat (const smart_ptr <rs_mesh_iface, true> &mesh, const smart_ptr <idata, true> &data)
   {
-    typedef t_long      index_t;
-    typedef t_double    item_t;
-    typedef spv_long    index_array_t;
-    typedef spv_double  item_array_t;
-
     t_long nb = mesh->get_n_active_elements ();
     const spv_long &original_element_num_ = mesh->get_int_to_ext();
     const t_long *original_element_num = &(*original_element_num_)[0];
@@ -289,9 +283,9 @@ namespace blue_sky
         t_float *soil = soil_ && soil_->size () ? &(*soil_)[0] : 0;
 
 
-        for (index_t i = 0; i < nb; ++i)
+        for (t_long i = 0; i < nb; ++i)
           {
-            index_t i_m = original_element_num[i];
+            t_long i_m = original_element_num[i];
 
             if (soil && (soil[i_m] < -1.e-12 || soil[i_m] > 1 + 1.e-5))
               {
@@ -352,12 +346,7 @@ namespace blue_sky
   void 
   check_poro_ntg_multpv (const smart_ptr <rs_mesh_iface, true> &mesh, const smart_ptr <idata, true> &data)
   {
-    typedef t_long index_t;
-    typedef t_double item_t;
-    typedef spv_long index_array_t;
-    typedef spv_double item_array_t;
-
-    index_t nb = mesh->get_n_active_elements ();
+    t_long nb = mesh->get_n_active_elements ();
     if (!nb)
       {
         bs_throw_exception ("All dimensions should be greate than 0. Number of active elements = 0.");
@@ -373,11 +362,11 @@ namespace blue_sky
     t_double * ntg = &(*ntg_)[0];
     t_double * multpv = multpv_ ? &(*multpv_)[0] : 0;
 
-    for (index_t i = 0; i < nb; ++i)
+    for (t_long i = 0; i < nb; ++i)
       {
-        index_t i_m = original_element_num[i];
+        t_long i_m = original_element_num[i];
 
-        if (poro[i_m] < (item_t) -COMP_EPSILON || poro[i_m] > (item_t) (1 + COMP_EPSILON))
+        if (poro[i_m] < (t_double) -COMP_EPSILON || poro[i_m] > (t_double) (1 + COMP_EPSILON))
           {
             bs_throw_exception (boost::format ("PORO for node [%d] = %f is out of range")
               % i % poro[i_m]);
@@ -434,10 +423,7 @@ namespace blue_sky
   void 
   check_num (const smart_ptr <rs_mesh_iface, true> &mesh, const smart_ptr <idata, true> &data)
   {
-    typedef t_long index_t;
-    typedef spv_long index_array_t;
-
-    index_t nb = mesh->get_n_active_elements ();
+    t_long nb = mesh->get_n_active_elements ();
     spv_long index_map_ = mesh->get_int_to_ext();
     t_long const *index_map = &(*index_map_)[0];
 
@@ -449,9 +435,9 @@ namespace blue_sky
         t_long eql_region = data->props->get_i ("eql_region");
 
         // FIXME: check nb and array size
-        for (index_t i = 0; i < nb; ++i)
+        for (t_long i = 0; i < nb; ++i)
           {
-            index_t i_m = index_map[i];
+            t_long i_m = index_map[i];
             if (eqlnum[i_m] <= 0 || eqlnum[i_m] > eql_region)
               {
                 bs_throw_exception (boost::format ("Equlibrium region number for node [%d] = %d is out of range")
@@ -468,9 +454,9 @@ namespace blue_sky
         t_long sat_region = data->props->get_i ("sat_region");
 
         // FIXME: check nb and array size
-        for (index_t i = 0; i < nb; ++i)
+        for (t_long i = 0; i < nb; ++i)
           {
-            index_t i_m = index_map[i];
+            t_long i_m = index_map[i];
             if (satnum[i_m] <= 0 || satnum[i_m] > sat_region)
               {
                 bs_throw_exception (boost::format ("Saturation region number for node [%d] = %d is out of range")
@@ -487,9 +473,9 @@ namespace blue_sky
         t_long pvt_region = data->props->get_i ("pvt_region");
 
         // FIXME: check nb and array size
-        for (index_t i = 0; i < nb; ++i)
+        for (t_long i = 0; i < nb; ++i)
           {
-            index_t i_m = index_map[i];
+            t_long i_m = index_map[i];
             if (pvtnum[i_m] <= 0 || pvtnum[i_m] > pvt_region)
               {
                 bs_throw_exception (boost::format ("PVT region number for node [%d] = %d is out of range")
@@ -506,9 +492,9 @@ namespace blue_sky
         t_long fip_region = data->props->get_i ("fip_region");
 
         // FIXME: check nb and array size
-        for (index_t i = 0; i < nb; ++i)
+        for (t_long i = 0; i < nb; ++i)
           {
-            index_t i_m = index_map[i];
+            t_long i_m = index_map[i];
             if (fipnum[i_m] <= 0 || fipnum[i_m] > fip_region)
               {
                 bs_throw_exception (boost::format ("FIP region number for node [%d] = %d is out of range")
@@ -589,12 +575,8 @@ namespace blue_sky
   void 
   check_equil (const smart_ptr <rs_mesh_iface, true> &mesh, const smart_ptr <idata, true> &data)
   {
-    typedef t_long index_t;
-    typedef t_double item_t;
-    typedef spv_long index_array_t;
-
-    index_t N_eq = 2; // number of regions (eql + pvt = 2)
-    index_t eq_reg = N_eq * data->props->get_i ("eql_region");
+    t_long N_eq = 2; // number of regions (eql + pvt = 2)
+    t_long eq_reg = N_eq * data->props->get_i ("eql_region");
     data->equil_regions->init (eq_reg, 0);
 
     if (!data->contains_i_array ("EQLNUM"))
@@ -617,10 +599,10 @@ namespace blue_sky
     //one eql-region must contain only one pvt-region
     spv_long index_map_ = mesh->get_int_to_ext ();
     t_long const *index_map = &(*index_map_)[0];
-    index_t nb = mesh->get_n_active_elements ();
-    for (index_t i = 0; i < nb; ++i)
+    t_long nb = mesh->get_n_active_elements ();
+    for (t_long i = 0; i < nb; ++i)
       {
-        index_t i_m = index_map[i];
+        t_long i_m = index_map[i];
         eq_reg = (eqlnum[i_m] - 1) * N_eq;
         if (equil_regions[eq_reg] == 0)
           {
@@ -760,10 +742,6 @@ namespace blue_sky
   void 
   reservoir_simulator::init ()
   {
-    std::ostringstream out_s;
-
-    const typename calc_model_t::sp_jacobian_matrix_t &jmatrix (jacobian_->get_jmatrix ());
-
     hdm->check_arrays_for_inactive_blocks();
 
     hdm->get_mesh ()->init_props (hdm);
@@ -771,49 +749,29 @@ namespace blue_sky
 
     //!TODO:output init_ext_to_int(splicing)
     hdm->get_mesh ()->init_ext_to_int();
-
-    if (hdm->get_mesh ()->get_n_active_elements() <= 0)
+    t_long n_active_elements = hdm->get_mesh ()->get_n_active_elements ();
+    if (n_active_elements <= 0)
       {
         bs_throw_exception ("Error: No active cells!");
       }
 
-    //////////////////////////////////////
-    // Check input data before units conversion for correct reporting
-    // of user errors
+    // Check input data before units conversion for correct reporting of user errors
     check_data (hdm->get_mesh (), hdm->data);
 
     cm->init_main_arrays(hdm->data, hdm->get_mesh ());
     cm->init_calcul_arrays (hdm->data, hdm->get_mesh ());
-    cm->init_jacobian (jacobian_, hdm->get_mesh ());
-
     // calculate planes geometric transmissibility
-    cm->rock_grid_prop->init_planes_trans (hdm->get_mesh ()->get_n_active_elements (), hdm->mesh->get_volumes (), cm->ts_params, cm->internal_constants);
+    cm->rock_grid_prop->init_planes_trans (n_active_elements, hdm->mesh->get_volumes (), cm->ts_params, cm->internal_constants);
 
-    typename mesh_iface_t::sp_flux_conn_iface_t flux_conn (BS_KERNEL.create_object ("bs_flux_connections"), bs_dynamic_cast ());
-    if (!flux_conn)
-      {
-        bs_throw_exception (boost::format ("Can`t create %s!") % "bs_flux_connections"); 
-      }
-    
-    index_t N_block_size = cm->n_phases;
-    index_t N_blocks = hdm->get_mesh ()->get_n_active_elements ();
+    jacobian_ = BS_KERNEL.create_object (jacobian::bs_type ());
+    jacobian_->init (n_active_elements, cm->n_phases, cm->n_sec_vars);
 
-    spv_long boundary_array;
-    hdm->get_mesh ()->build_jacobian_and_flux_connections (jmatrix->get_flux_matrix(), flux_conn, boundary_array);
-    
-    // FIXME: wrong init?
-    jmatrix->get_flux_matrix()->get_values ()->init (N_block_size, 0);
-    jmatrix->get_flux_matrix ()->get_values()->init (N_block_size * N_block_size * (2* hdm->get_mesh ()->get_n_connections() + hdm->get_mesh ()->get_n_active_elements()), item_t (0));
-
-    // FIXME: jmatrix->m_array, p_array, trns_matrix
-    //jmatrix->m_array = flux_conn->get_matrix_block_idx_minus();
-    //jmatrix->p_array = flux_conn->get_matrix_block_idx_plus ();
-    //jmatrix->trns_matrix = flux_conn->get_conn_trans();
-
-    jmatrix->get_facility_matrix ()->init (N_blocks, N_blocks, N_block_size, 0);
+    smart_ptr <flux_connections_iface> flux_conn = BS_KERNEL.create_object ("bs_flux_connections");
+    spv_long boundary_array = BS_KERNEL.create_object (v_long::bs_type ());
+    hdm->get_mesh ()->build_jacobian_and_flux_connections (jacobian_->get_matrix ("flux"), flux_conn, boundary_array);
   }
 
-  reservoir_simulator::main_loop_calc_t *
+  main_loop_calc_base *
   reservoir_simulator::get_main_loop ()
   {
     if (cm->n_phases == 3)
