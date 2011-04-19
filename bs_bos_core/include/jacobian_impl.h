@@ -27,11 +27,9 @@ namespace blue_sky {
     typedef spv_float                               rhs_item_array_t;
 
     typedef jacobian                                jacobian_t;
-    typedef jac_matrix_iface                        jmatrix_t;
     typedef lsolver_iface                           linear_solver_t;
 
     typedef smart_ptr <jacobian_t, true>            sp_jacobian_t;
-    typedef smart_ptr <jmatrix_t, true>             sp_jmatrix_t;
     typedef smart_ptr <linear_solver_t, true>       sp_linear_solver_t;
     typedef smart_ptr <matrix_t>                    sp_matrix_t;
     typedef smart_ptr <bcsr_matrix_t, true>         sp_bcsr_matrix_t;
@@ -42,22 +40,16 @@ namespace blue_sky {
     /**
      * \brief  ctor
      * \param  jacobian
-     * \param  jmatrix
      * */
-    jacobian_impl (sp_jacobian_t &jacobian, sp_jmatrix_t &jmatrix)
+    jacobian_impl (sp_jacobian_t &jacobian)
     : jacobian_ (jacobian),
-    jmatrix_ (jmatrix),
     solver_ (jacobian_->get_solver ()),
     preconditioner_ (jacobian_->get_prec ()),
-    rhs_ (jmatrix_->get_rhs ()),
-    sol_ (jmatrix_->get_solution ()),
-    regular_matrix_ (jmatrix_->get_flux_matrix ()),
-    irregular_matrix_ (jmatrix_->get_facility_matrix ())
+    rhs_ (jacobian_->get_rhs ()),
+    sol_ (jacobian_->get_solution ()),
+    regular_matrix_ (jacobian_->get_matrix ("flux")),
+    irregular_matrix_ (jacobian_->get_matrix ("facility"))
     {
-      if (!jmatrix_)
-        {
-          bs_throw_exception ("Jacobian matrix is not inited!");
-        }
       if (!solver_)
         {
           bs_throw_exception ("Solver is not inited!");
@@ -76,10 +68,10 @@ namespace blue_sky {
     {
       full_matrix_print ();
 
-      jmatrix_->prepare_matrix ();
+      jacobian_->prepare_matrix ();
 
       OMP_TIME_MEASURE_START(gmres_setup_timer);
-      if (0 != solver_->setup (jmatrix_))
+      if (0 != solver_->setup (jacobian_->get_matrix ()))
         {
           bs_throw_exception ("Internal error: cannot build preconditioner for linear solver.");
         }
@@ -112,7 +104,7 @@ namespace blue_sky {
       //  }
 
       // TODO: BUG
-      working_matrix = jmatrix_->get_prepared_matrix ();
+      working_matrix = jacobian_->get_prepared_matrix ();
       const sp_matrix_t &locked_working_mx (working_matrix);
 
       debug::print_memory_info ("-> jacobian_solver_solve");
@@ -121,7 +113,7 @@ namespace blue_sky {
       debug::print_memory_info ("<- jacobian_solver_solve");
 #endif //_MPI
 
-      jmatrix_->restore_sec_solution ();
+      jacobian_->restore_sec_solution ();
 
       static size_t iter_counter = 0;
       ++iter_counter;
@@ -189,7 +181,6 @@ namespace blue_sky {
   private:
 
     sp_jacobian_t     &jacobian_;           //!< Jacobian
-    sp_jmatrix_t      &jmatrix_;            //!< Jacobian matrix
     sp_solver_t       solver_;              //!< Solver from Jacobian
     sp_solver_t       preconditioner_;      //!< Preconditioner from Jacobian
 

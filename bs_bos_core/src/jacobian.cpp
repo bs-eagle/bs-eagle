@@ -7,21 +7,51 @@
  *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
-
 #include "jacobian.h"
-// FIXME: 
-//#include "two_stage_preconditioner.h"
 
 namespace blue_sky
   {
 
-    /**
-     * \brief  'default' ctor for jacobian
-     * \param  param Additional params for ctor
-     * */
+  /**
+   * \class jacob_traits
+   * \brief For sorting jacobian children
+   * */
+  struct jacob_traits : bs_node::sort_traits
+    {
+      struct jacob_key : bs_node::sort_traits::key_type
+        {
+          virtual bool sort_order (const key_ptr & ) const
+            {
+              return true;
+            }
+        };
+
+      virtual const char * sort_name () const
+        {
+          return "jacob trait";
+        };
+
+      virtual key_ptr key_generator (const sp_link& /*l*/) const
+        {
+          return new jacob_key ();
+        }
+
+      virtual bool accepts (const sp_link& l)
+      {
+        return smart_ptr< jacobian, true >(l->data(), bs_dynamic_cast());
+      }
+    };
+
+  jacobian::~jacobian ()
+  {
+  }
+
+  /**
+   * \brief  'default' ctor for jacobian
+   * \param  param Additional params for ctor
+   * */
   jacobian::jacobian (bs_type_ctor_param /*param*/)
   : bs_node(bs_node::create_node(new jacob_traits))
-  , jm (give_kernel::Instance().create_object(jac_matrix_iface::bs_type()))
   {
   }
 
@@ -31,13 +61,12 @@ namespace blue_sky
    * */
   jacobian::jacobian (const jacobian& src)
   : bs_refcounter (src), bs_node(src)
-  , jm(src.jm)
   {
     *this = src;
   }
 
   void
-  jacobian::setup_solver (const sp_fi_params &ts_params)
+  jacobian::setup_solver (const BS_SP (fi_params) &ts_params)
   {
     solver->get_prop()->set_i (max_iters_idx, ts_params->get_int(fi_params::LIN_ITERS_NUM));
     solver->get_prop()->set_f (tol_idx, ts_params->get_float(fi_params::LIN_SOLV_RESIDUAL));
@@ -45,7 +74,7 @@ namespace blue_sky
   }
 
   void
-  jacobian::setup_preconditioner (const sp_fi_params &ts_params)
+  jacobian::setup_preconditioner (const BS_SP (fi_params) &ts_params)
   {
 //    //set up preconditioner
 //    if (prec_is_cpr_flag)
@@ -66,7 +95,7 @@ namespace blue_sky
   }
 
   int 
-  jacobian::setup_solver_params (well_model_type model_type, int n_phases, const sp_fi_params &ts_params)
+  jacobian::setup_solver_params (well_model_type model_type, int n_phases, const BS_SP (fi_params) &ts_params)
   {
 
     if (!ts_params)
@@ -97,30 +126,16 @@ namespace blue_sky
     return 0;
   }
 
-  const jacobian::sp_lsolver &
+  const BS_SP (lsolver_iface) &
   jacobian::get_solver () const
   {
     return solver;
   }
 
-  const jacobian::sp_lsolver &
+  const BS_SP (lsolver_iface) &
   jacobian::get_prec () const
   {
     return preconditioner;
-  }
-
-  //DEPRICATED
-  void
-  jacobian::begin ()
-  {
-    //this->get_jmatrix()->regular_matrix
-    BS_ASSERT (false && "DEPRECATED");
-  }
-  //DEPRICATED
-  void
-  jacobian::end ()
-  {
-    BS_ASSERT (false && "DEPRECATED");
   }
 
   void
@@ -146,6 +161,13 @@ namespace blue_sky
   {
     // FIXME:
     return BS_SP (bcsr_matrix_iface) ();
+  }
+
+  BS_SP (mbcsr_matrix_iface)
+  jacobian::get_matrix () const
+  {
+    // FIXME:
+    return BS_SP (mbcsr_matrix_iface) ();
   }
 
   BLUE_SKY_TYPE_STD_CREATE (jacobian);

@@ -175,12 +175,10 @@ namespace blue_sky
       inline void
       fi_operator_cells (index_t i)
       {
-        sp_jmatrix_t jmatrix = jacobian_->get_jmatrix ();
         fi_operator_impl <is_w, is_g, is_o> fi_operator_impl_ (calc_model_, 
           reservoir_, 
           mesh_, 
-          jacobian_, 
-          jmatrix);
+          jacobian_); 
         fi_operator_impl_.fi_operator_init (i, dt_);
       }
 
@@ -244,9 +242,8 @@ namespace blue_sky
       {
         setup_jacobian_solver_params ();
 
-        sp_jmatrix_t jmatrix = jacobian_->get_jmatrix ();
-        fi_operator_impl <is_w, is_g, is_o> fi_operator (calc_model_, reservoir_, mesh_, jacobian_, jmatrix);
-        jacobian_impl jacobian_impl_ (jacobian_, jmatrix);
+        fi_operator_impl <is_w, is_g, is_o> fi_operator (calc_model_, reservoir_, mesh_, jacobian_);
+        jacobian_impl jacobian_impl_ (jacobian_);
 
         for (number_of_small_time_steps = 0; current_time_ < large_time_step_end_ - EPS_DIFF; ++number_of_small_time_steps)
           {
@@ -607,7 +604,10 @@ namespace blue_sky
 
             rs_->on_before_restore_solution ();
             fi_operator.save_prev_niter_vars ();
-            restore_solution_return_type ret_code = calc_model_->restore_solution (fi_operator.mesh_, fi_operator.jacobian_);
+            restore_solution_return_type ret_code = calc_model_->restore_solution (fi_operator.mesh_, 
+              fi_operator.jacobian_->get_solution (), 
+              fi_operator.jacobian_->get_sec_solution ());
+
             if (ret_code == SMALL_TIME_STEP_CHOP)
               {
                 check_time_step ();
@@ -617,7 +617,7 @@ namespace blue_sky
                 return max_n_iters + 1;
               }
 
-            reservoir_->restore_wells_solution (dt_, fi_operator.sol_, fi_operator.jmatrix_->get_sec_solution (), calc_model_->n_phases);
+            reservoir_->restore_wells_solution (dt_, fi_operator.sol_, fi_operator.jacobian_->get_sec_solution (), calc_model_->n_phases);
           }
 
         return max_n_iters + 1;
@@ -1124,21 +1124,13 @@ namespace blue_sky
       time_step_end (int total_number_of_time_steps)
       {
         save_data ();
-
         check_limits ();
-
         update_large_time_step_num ();
 
-//        well_data.copy_well_data_to_storage (calc_model_, dt_, reservoir_->get_facility_list ()->wells_begin (), reservoir_->get_facility_list ()->wells_end (), iter_counter, current_time_);
-//
-//#ifdef _HDF5
-//        reservoir_->write_step_to_hdf5 (calc_model_, mesh_, jacobian_->get_jmatrix (), number_of_large_time_steps, total_number_of_time_steps, current_time_);
-//#endif
-        reservoir_->write_step_to_storage (calc_model_, mesh_, jacobian_->get_jmatrix (), number_of_large_time_steps, total_number_of_time_steps, current_time_);
+        reservoir_->write_step_to_storage (calc_model_, mesh_, jacobian_, number_of_large_time_steps, total_number_of_time_steps, current_time_);
 
         BOSOUT (section::main_loop, level::high) << "number_of_large_time_steps: "      << number_of_large_time_steps << bs_end;
         BOSOUT (section::main_loop, level::high) << "number_of_small_time_steps: "      << number_of_small_time_steps << bs_end;
-
         BOSOUT (section::main_loop, level::high) << "number_of_newtonian_iterations: "  << number_of_newtonian_iterations << bs_end;
         BOSOUT (section::main_loop, level::high) << "number_of_linear_iterations: "     << number_of_linear_iterations << bs_end;
         BOSOUT (section::main_loop, level::high) << "number_of_restarts: "              << number_of_restarts << bs_end;

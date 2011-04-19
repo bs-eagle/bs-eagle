@@ -10,7 +10,6 @@
 
 #include "calc_model.h"
 #include "fi_params.h"
-#include "jacobian.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "scal_3p.h"
@@ -1118,21 +1117,21 @@ namespace blue_sky
   }
 
   restore_solution_return_type
-  calc_model::restore_solution (const sp_mesh_iface_t &mesh, const sp_jacobian_t &jacobian)
+  calc_model::restore_solution (const sp_mesh_iface_t &mesh, const spv_double &solution, const spv_double &sec_solution)
   {
-    return apply_newton_correction (1.0, 0, mesh, jacobian);
+    return apply_newton_correction (1.0, 0, mesh, solution, sec_solution);
   }
 
   restore_solution_return_type
-  calc_model::apply_newton_correction (item_t mult, index_t istart_line_search, const sp_mesh_iface_t &mesh, const sp_jacobian_t &jacobian)
+  calc_model::apply_newton_correction (item_t mult, index_t istart_line_search, const sp_mesh_iface_t &mesh, const spv_double &solution, const spv_double &sec_solution)
   {
     //int ret_code = 0;
     static double mult_out = 1.0;   // TODO: WTF
 
     if (!istart_line_search) // calculate multiplier first time only
       {
-        mult_out = new_simple_get_cell_solution_mult_2 (mesh, jacobian);
-        //mult_out = new_simple_get_cell_solution_mult (mesh, jacobian);
+        mult_out = new_simple_get_cell_solution_mult_2 (mesh, solution);
+        //mult_out = new_simple_get_cell_solution_mult (mesh, solution, sec_solution);
 
         //if (fabs (mult_out - mult_out_x) > 0.0)
         //  {
@@ -1152,7 +1151,7 @@ namespace blue_sky
 
     BOSOUT (section::iters, level::low) << "Solution MULT: " << mult_out << bs_end;
     // restore solution
-    if (new_simple_get_cell_solution (mult_out, istart_line_search, mesh, jacobian))
+    if (new_simple_get_cell_solution (mult_out, istart_line_search, mesh, solution, sec_solution))
       {
         BOSERR (section::iters, level::error) << "apply_newton_correction: Couldn't apply newton correction for cells" << bs_end;
         return SMALL_TIME_STEP_FAIL;
@@ -1165,10 +1164,10 @@ namespace blue_sky
 #define IF_LE_REPLACE(ORI,NEW,C,V) if ((ORI) > (NEW)) {(ORI) = (NEW);(C) = (V);}
 
   calc_model::item_t
-  calc_model::new_simple_get_cell_solution_mult_2 (const sp_mesh_iface_t &msh, const sp_jacobian_t &jacobian) const
+  calc_model::new_simple_get_cell_solution_mult_2 (const sp_mesh_iface_t &msh, const spv_double &x_sol_) const
   {
     BS_ASSERT (msh);
-    BS_ASSERT (jacobian);
+    BS_ASSERT (x_sol_);
     BS_ASSERT (!pressure->empty ());
     if (n_phases > 1)
       {
@@ -1187,7 +1186,6 @@ namespace blue_sky
     const int d_g                 = phase_d[FI_PHASE_GAS];
     int condition                 = 0;
     index_t n                     = msh->get_n_active_elements ();
-    const item_array_t &x_sol_    = jacobian->get_solution ();
     const item_t *x_sol           = &(*x_sol_)[0];
     item_t d                      = 0.0;
     item_t t_mult                 = 0.0;
@@ -1307,10 +1305,11 @@ namespace blue_sky
 
   calc_model::item_t
   calc_model::new_simple_get_cell_solution_mult (const sp_mesh_iface_t &msh,
-      const sp_jacobian_t &jacobian)
+      const spv_double &x_sol_, const spv_double &sec_sol_)
   {
     BS_ASSERT (msh);
-    BS_ASSERT (jacobian);
+    BS_ASSERT (x_sol_);
+    BS_ASSERT (sec_sol_);
     BS_ASSERT (pressure->size ());
     if (n_phases > 1)
       {
@@ -1333,8 +1332,6 @@ namespace blue_sky
 
     item_t mult                   = 1.0;
     index_t n                     = msh->get_n_active_elements ();
-    const item_array_t &x_sol_    = jacobian->get_solution ();
-    const item_array_t &sec_sol_  = jacobian->get_sec_solution ();
     const item_t *x_sol           = &(*x_sol_)[0];
     const item_t *sec_sol         = &(*sec_sol_)[0];
 
@@ -1425,10 +1422,12 @@ namespace blue_sky
   int
   calc_model::new_simple_get_cell_solution (const double mult, int istart_linear_search,
       const sp_mesh_iface_t &msh,
-      const sp_jacobian_t &jacobian)
+      const spv_double &x_sol_,
+      const spv_double &sec_sol_)
   {
     BS_ASSERT (msh);
-    BS_ASSERT (jacobian);
+    BS_ASSERT (x_sol_);
+    BS_ASSERT (sec_sol_);
     BS_ASSERT (pressure->size ());
     if (n_phases > 1)
       {
@@ -1491,8 +1490,6 @@ namespace blue_sky
       }
 
     index_t n                     = msh->get_n_active_elements ();
-    const item_array_t &x_sol_    = jacobian->get_solution ();
-    const item_array_t &sec_sol_  = jacobian->get_sec_solution ();
     const item_t *x_sol           = &(*x_sol_)[0];
     const item_t *sec_sol         = &(*sec_sol_)[0];
 

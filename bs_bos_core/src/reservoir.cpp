@@ -178,57 +178,63 @@ namespace blue_sky
     for_each_facility (*facility_list_, closure <void, facility_t> (&facility_t::restart_newton_step));
   }
 
-  void
-  reservoir::init_rows (index_array_t &rows_) const
+  namespace detail
+  {
+    void
+    init_rows (BS_SP (facility_manager) &wells, spv_long &rows, t_long cells)
     {
-      for_each_facility (*facility_list_, closure <void, facility_t, index_array_t &> (&facility_t::fill_rows, rows_));
+      rows->init (cells + 1, 0);
 
-      // correct rows values
-      v_long &rows = *rows_;
-      for (index_t i = 0, cnt = (index_t)rows.size () - 1; i < cnt; ++i)
+      facility_manager::well_const_iterator_t wit = wells->wells_begin ();
+      facility_manager::well_const_iterator_t we = wells->wells_end ();
+      for (; wit != we; ++wit)
         {
-          rows[i + 1] += rows[i];
+          wit->second->fill_rows (rows);
+        }
+
+      v_long &r = *rows;
+      for (size_t i = 0, cnt = r.size () - 1; i < cnt; ++i)
+        {
+          r[i + 1] += r[i];
         }
     }
+  }
 
+  // FIXME: remove, obsolete
   void
   reservoir::init_jacobian (const sp_jmatrix_t &jmx, index_t n_cells)
   {
-    spv_long rows = jmx->get_facility_matrix ()->get_rows_ptr ();
-
-    // FIXME: dereference
-    rows->init (n_cells + 1, 0);
-    init_rows (rows);
   }
 
   void
-  reservoir::end_jacobian (item_t dt, const sp_calc_model_t &calc_model, sp_jacobian_t &jacobian)
+  reservoir::end_jacobian (BS_SP (jacobian) &jacobian, t_double dt, t_long block_size, t_long cells)
   {
-    const sp_jacobian_matrix_t &jmx (jacobian->get_jmatrix ());
+    BS_SP (bcsr_matrix_iface) mx = jacobian->get_matrix ("facility");
 
-    const spv_long &rows    = jmx->get_facility_matrix ()->get_rows_ptr ();
-    spv_long cols           = jmx->get_facility_matrix ()->get_cols_ind ();
-    spv_double values       = jmx->get_facility_matrix ()->get_values ();
+    spv_long rows = mx->get_rows_ptr ();
+    spv_long cols = mx->get_cols_ind ();
+    spv_double values = mx->get_values ();
 
+    blue_sky::detail::init_rows (facility_list_, rows, cells);
     if (rows->empty ())
       return ;
 
-    index_t block_size = calc_model->n_phases;
-    //index_t b_sqr = block_size * block_size;
-    //cols->init (rows->back (), -1);
-    //values->init (rows->back () * b_sqr, 0);
-    //markers_.assign (rows->size (), 0);
-
-    //jmx->get_facility_matrix ()->n_block_size = calc_model->n_phases;
-    //jmx->get_facility_matrix ()->n_rows = (index_t) rows->size () - 1;
-    //jmx->get_facility_matrix ()->n_cols = (index_t) cols->size ();
-
-    // FIXME:
     t_long cols_count = rows->back ();
-    jmx->get_facility_matrix ()->init (rows->size () - 1, cols_count, calc_model->n_phases, 1);
+    cols->init (cols_count, -1);
+    values->init (cols_count * block_size * block_size, 0);
+    markers_.assign (rows->size (), 0);
 
-    for_each_facility (*facility_list_, closure <void, facility_t, double, index_t, const spv_long &, spv_long &, spv_double &, stdv_long &> (&facility_t::fill_jacobian,
-        dt, block_size, rows, cols, values, markers_));
+    mx->set_n_cols ((t_long)cols->size ());
+
+    // FIXME: WTF?? n_rows
+    //mx->n_rows = rows->size () - 1;
+
+    facility_manager::well_const_iterator_t wit = facility_list_->wells_begin ();
+    facility_manager::well_const_iterator_t we = facility_list_->wells_end ();
+    for (; wit != we; ++wit)
+      {
+        wit->second->fill_jacobian (dt, block_size, rows, cols, values, markers_);
+      }
 
 #ifdef _DEBUG
     for (size_t i = 0, cnt = cols->size (); i < cnt; ++i)
@@ -242,10 +248,11 @@ namespace blue_sky
   }
 
   void
-  reservoir::calc_wells (int istart, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
+  reservoir::calc_wells (int istart, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, BS_SP (jacobian) &jacobian)
   {
-    for_each_facility (*facility_list_, closure <void, facility_t, bool, double, const sp_calc_model_t &, const sp_mesh_iface_t &, sp_jmatrix_t &> (&facility_t::process,
-      istart, dt, calc_model, mesh, jmatrix));
+    // FIXME: 
+    //for_each_facility (*facility_list_, closure <void, facility_t, bool, double, const sp_calc_model_t &, const sp_mesh_iface_t &, sp_jmatrix_t &> (&facility_t::process,
+    //  istart, dt, calc_model, mesh, jmatrix));
   }
 
   void
@@ -436,7 +443,7 @@ namespace blue_sky
   void
   reservoir::write_step_to_storage (const sp_calc_model_t &calc_model, 
     const sp_mesh_iface_t &mesh, 
-    const sp_jmatrix_t &jmx, 
+    const BS_SP (jacobian) &jacobian, 
     size_t large_time_step_num, 
     size_t total_time_step_num, 
     double time)
@@ -445,7 +452,7 @@ namespace blue_sky
 
     data_saver_->write_well_results (calc_model, facility_list_->wells_begin (), facility_list_->wells_end (), time);
     data_saver_->write_fip_results  (calc_model);
-    data_saver_->write_calc_model_data (calc_model, jmx, large_time_step_num, total_time_step_num, time);
+    data_saver_->write_calc_model_data (calc_model, jacobian, large_time_step_num, total_time_step_num, time);
   }
   void
   reservoir::write_mesh_to_storage (const sp_mesh_iface_t &mesh)

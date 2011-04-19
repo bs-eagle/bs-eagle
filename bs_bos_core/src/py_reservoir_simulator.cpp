@@ -33,10 +33,10 @@ using namespace boost::python;
 namespace blue_sky {
 namespace python {
 
-  BS_SP (jac_matrix_iface)
-  get_jmatrix (reservoir_simulator *t)
+  BS_SP (bcsr_matrix_iface)
+  get_matrix (reservoir_simulator *t, std::string const &name)
   {
-    return t->get_jacobian ()->get_jmatrix ();
+    return t->get_jacobian ()->get_matrix (name);
   }
 
   reservoir::sp_facility_manager_t
@@ -60,7 +60,7 @@ namespace python {
     .def ("simulate",                 &T::simulate)
     .def ("subscribe",                subscribe)
     .add_property ("facility_list",   make_function (get_facility_list))
-    .add_property ("jmatrix",         make_function (get_jmatrix))
+    .def ("matrix",                   make_function (get_matrix))
     .add_property ("calc_model",      &T::get_calc_model)
     .add_property ("reservoir",       &T::get_reservoir)
     .add_property ("event_manager",   &T::get_event_manager)

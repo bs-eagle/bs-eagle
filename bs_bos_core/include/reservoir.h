@@ -236,7 +236,7 @@ namespace blue_sky
        * \return 
        * */
       void                      
-      end_jacobian (item_t dt, const sp_calc_model_t &calc_model, sp_jacobian_t &jacobian);
+      end_jacobian (BS_SP (jacobian) &jacobian, t_double dt, t_long block_size, t_long cells);
 
       /**
        * \brief  for each facility calls restore_solution
@@ -258,7 +258,11 @@ namespace blue_sky
        * \return 
        * */
       void                      
-      calc_wells (int istart, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix);
+      calc_wells (int istart, 
+        double dt, 
+        const BS_SP (calc_model) &calc_model, 
+        const BS_SP (rs_mesh_iface) &mesh, 
+        BS_SP (jacobian) &jacobian);
 
       /**
        * \brief  for each facility calls fill_rhs
@@ -350,13 +354,18 @@ namespace blue_sky
        * \todo describe
        * */
       void                      
-      write_step_to_hdf5 (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, const sp_jmatrix_t &jmx, int, int, item_t time) const;
+      write_step_to_hdf5 (const sp_calc_model_t &calc_model, 
+        const sp_mesh_iface_t &mesh, 
+        const BS_SP (jacobian) &jmx, 
+        int, 
+        int, 
+        item_t time) const;
 
       /**
        * \todo describe
        * */
       void                      
-      write_mesh_to_hdf5 (const smart_ptr <rs_mesh_iface<strategy_t>, true> &mesh) const;
+      write_mesh_to_hdf5 (const smart_ptr <rs_mesh_iface, true> &mesh) const;
 
       /**
        * \todo describe
@@ -377,7 +386,7 @@ namespace blue_sky
       void
       write_step_to_storage (const sp_calc_model_t &calc_model, 
         const sp_mesh_iface_t &mesh, 
-        const sp_jmatrix_t &jmx, 
+        const BS_SP (jacobian) &jacobian, 
         size_t large_time_step_num, 
         size_t total_time_step_num, 
         double time);

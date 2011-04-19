@@ -37,7 +37,7 @@ namespace blue_sky {
 
     void
     write_calc_model_data (const sp_calc_model_t &/*calc_model*/,
-      const sp_jmatrix_t &/*jmx*/,
+      const BS_SP (jacobian) &/*jmx*/,
       size_t /*large_time_step_num*/,
       size_t /*total_time_step_num*/,
       double /*time*/)

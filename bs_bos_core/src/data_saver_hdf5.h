@@ -179,7 +179,7 @@ namespace blue_sky {
 
     void
     write_calc_model_data (const sp_calc_model_t &calc_model,
-      const sp_jmatrix_t &jmx,
+      const BS_SP (jacobian) &jacobian,
       size_t large_time_step_num,
       size_t total_time_step_num,
       double time)
@@ -231,13 +231,13 @@ namespace blue_sky {
           if (params->get_bool (fi_params::WRITE_CFL_TO_HDF5) 
             && params->get_bool (fi_params::USE_CFL))
             {
-              if (jmx->get_cfl_vector ().empty ())
+              if (jacobian->get_cfl_vector ().empty ())
                 {
-                  jmx->get_cfl_vector ().assign (calc_model->pressure.size (), 0);
+                  jacobian->get_cfl_vector ().assign (calc_model->pressure.size (), 0);
                 }
 
               file["/results/cfl"]
-                .write ("values", jmx->get_cfl_vector ())
+                .write ("values", jacobian->get_cfl_vector ())
                 .write ("dates", hdf5_buffer (time));
             }
         }
