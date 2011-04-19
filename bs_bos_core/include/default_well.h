@@ -34,7 +34,6 @@ namespace wells {
 
       typedef base_t::sp_calc_model_t                   sp_calc_model_t;
       typedef base_t::sp_mesh_iface_t                   sp_mesh_iface_t;
-      typedef base_t::sp_jmatrix_t                      sp_jmatrix_t;
 
       typedef base_t::connection_t                      connection_t;
       typedef default_connection                        default_connection_t;
@@ -77,10 +76,10 @@ namespace wells {
      * \param  dt
      * \param  calc_model
      * \param  mesh
-     * \param  jmatrix
+     * \param  jacobian
      * */
     void
-    process_impl (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix);
+    process_impl (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, BS_SP (jacobian) &jacobian);
 
     /**
      * \brief  Clears well and well perforations data
@@ -96,10 +95,10 @@ namespace wells {
      * \param  dt
      * \param  calc_model
      * \param  mesh
-     * \param  jmatrix
+     * \param  jacobian
      * */
     void
-    process_internal (bool is_start, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix);
+    process_internal (bool is_start, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, BS_SP (jacobian) &jacobian);
 
     /**
      * \brief  Calculates rate and derivs for well perforations,
@@ -107,11 +106,11 @@ namespace wells {
      *         production wells.
      * \param  calc_model
      * \param  mesh
-     * \param  jmatrix
+     * \param  jacobian
      * */
     template <bool is_prod>
     void
-    calc_rate_and_derivs (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix);
+    calc_rate_and_derivs (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, BS_SP (jacobian) &jacobian);
 
     /**
      * \brief  Calculates rate and derivs for well perforations,
@@ -120,11 +119,11 @@ namespace wells {
      *         well). Called from calc_rate_and_derivs.
      * \param  calc_model
      * \param  mesh
-     * \param  jmatrix
+     * \param  jacobian
      * */
     template <bool is_w, bool is_g, bool is_o, bool is_prod>
     void
-    calc_rate_and_derivs_concrete (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix);
+    calc_rate_and_derivs_concrete (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, BS_SP (jacobian) &jacobian);
 
   public:
     /**

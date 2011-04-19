@@ -15,7 +15,6 @@
 #include "prvd_table.h"
 #include "arrays.h"
 #include "rocktab_table.h"
-#include "jac_matrix_iface.h"
 #include "rs_smesh_iface.h"
 #include "pvt_oil.h"
 #include "pvt_gas.h"

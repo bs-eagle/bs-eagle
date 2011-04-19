@@ -202,7 +202,7 @@ namespace blue_sky
 
   // FIXME: remove, obsolete
   void
-  reservoir::init_jacobian (const sp_jmatrix_t &jmx, index_t n_cells)
+  reservoir::init_jacobian (const BS_SP (jacobian) &jacobian, index_t n_cells)
   {
   }
 

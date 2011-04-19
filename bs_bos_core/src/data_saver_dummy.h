@@ -11,14 +11,12 @@ namespace blue_sky {
 
     typedef calc_model        calc_model_t;
     typedef rs_mesh_iface     mesh_iface_t;
-    typedef jac_matrix_iface  jacobian_matrix_t; 
     typedef facility_manager  facility_manager_t;
 
     typedef facility_manager_t::well_const_iterator_t      well_iterator_t;
 
     typedef smart_ptr <calc_model_t>      sp_calc_model_t;
     typedef smart_ptr <mesh_iface_t>      sp_mesh_iface_t;
-    typedef smart_ptr <jacobian_matrix_t> sp_jmatrix_t;
 
     impl (const std::string &/*name*/)
     {

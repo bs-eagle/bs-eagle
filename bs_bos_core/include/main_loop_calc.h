@@ -92,7 +92,6 @@ namespace blue_sky
       typedef reservoir_simulator               reservoir_simulator_t;
       typedef idata                                         idata_t;
       typedef calc_model_t::scal_3p_t              scal_3p_t;
-      typedef jac_matrix_iface                   jmatrix_t;
 
       typedef event_manager_t::sp_event_base_list  sp_event_base_list_t;
       typedef trans_multipliers_calc            trans_multipliers_calc_t;
@@ -108,7 +107,6 @@ namespace blue_sky
       typedef smart_ptr <reservoir_simulator_t, true>       sp_rs_t;
       typedef smart_ptr <idata_t, true>                     sp_idata_t;
       typedef typename calc_model_t::sp_scal3p              sp_scal3p_t;
-      typedef smart_ptr <jmatrix_t, true>                   sp_jmatrix_t;
 
       typedef boost::posix_time::ptime                      ptime;
 

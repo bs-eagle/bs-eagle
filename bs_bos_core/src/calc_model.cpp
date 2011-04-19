@@ -27,7 +27,6 @@
 #include "pvt_gas.h"
 #include "jfunction.h"
 #include "rs_mesh_iface.h"
-#include "jac_matrix_iface.h"
 #include "string_formater.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 

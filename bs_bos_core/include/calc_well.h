@@ -100,7 +100,6 @@ namespace blue_sky
       typedef calc_model_data               calc_model_data_t;
       typedef wells::connection             connection_t;
       typedef rs_mesh_iface                 mesh_iface_t;
-      typedef jac_matrix_iface              jacobian_matrix_t;
 
       typedef pvt_oil                       pvt_oil_t;
       typedef pvt_dead_oil                  pvt_dead_oil_t;
@@ -125,7 +124,6 @@ namespace blue_sky
       typedef smart_ptr <pvt_gas_t, true>               sp_pvt_gas_t;
       typedef smart_ptr <pvt_water_t, true>             sp_pvt_water_t;
 
-      typedef smart_ptr <jacobian_matrix_t, true>       sp_jmatrix_t;
       typedef smart_ptr <connection_t, true>            sp_connection_t;
 
       typedef smart_ptr <calc_well_pressure_t, true>    sp_calc_well_pressure_t;
@@ -494,10 +492,10 @@ namespace blue_sky
        * \param  dt
        * \param  calc_model
        * \param  mesh
-       * \param  jmatrix
+       * \param  jacobian
        * */
       virtual void
-      process (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix);
+      process (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, BS_SP (jacobian) &jacobian);
 
       /**
        * \brief  Clears well and well perforations data
@@ -606,10 +604,10 @@ namespace blue_sky
        * \param  dt
        * \param  calc_model
        * \param  mesh
-       * \param  jmatrix
+       * \param  jacobian
        * */
       virtual void
-      process_impl (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix);
+      process_impl (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, BS_SP (jacobian) &jacobian);
 
       /**
        * \brief  add well facility to facility list

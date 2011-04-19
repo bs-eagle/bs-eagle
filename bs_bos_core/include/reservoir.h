@@ -72,7 +72,6 @@ namespace blue_sky
       typedef calc_model                                      calc_model_t;                       //!< calc_model type
       typedef rs_mesh_iface                                   mesh_iface_t;                       //!< rs_mesh_iface type
       typedef jacobian                                        jacobian_t;                         //!< jacobian type
-      typedef jac_matrix_iface                                jacobian_matrix_t;                  //!< jacobian_matrix type
 
       typedef reservoir_simulator                             reservoir_simulator_t;              //!< reservoir_simulator type
       typedef rate_data                                       rate_data_t;                        //!< type for rate data holder
@@ -90,8 +89,6 @@ namespace blue_sky
       typedef smart_ptr <mesh_iface_t, true>                  sp_mesh_iface_t;                    //!< smart_ptr to rs_mesh_iface type
       typedef smart_ptr <calc_model_t, true>                  sp_calc_model_t;                    //!< smart_ptr to calc_model type
       typedef smart_ptr <jacobian_t, true>                    sp_jacobian_t;                      //!< smart_ptr to jacobian type
-      typedef smart_ptr <jacobian_matrix_t, true>             sp_jacobian_matrix_t;               //!< smart_ptr to jacobian_matrix type
-      typedef smart_ptr <jacobian_matrix_t, true>             sp_jmatrix_t;                       //!< smart_ptr to jacobian_matrix type
 
       typedef smart_ptr <facility_manager_t, true>            sp_facility_manager_t;              //!< smart_ptr to facility_manager type
       typedef smart_ptr <data_storage_interface, true>        sp_storage_t;                       //!< smart_ptr to data_storage_interface type
@@ -226,7 +223,7 @@ namespace blue_sky
        * \param  n_cells number of cells in mesh
        * */
       void                      
-      init_jacobian (const sp_jmatrix_t &jmx, index_t n_cells);
+      init_jacobian (const BS_SP (jacobian) &jacobian, index_t n_cells);
 
       /**
        * \brief  ends building of jacobian
