@@ -11,6 +11,7 @@
 #include <vector>
 #include <sstream>
 #include <map>
+#include <list>
 
 template <class type_t>
 class prop_impl
@@ -29,6 +30,7 @@ class prop_impl
       };
 
     typedef std::map<std::string, prop_storage> map_t;
+    typedef std::list<std::string> list_t;
   // ----------------------
   // METHODS
   // ----------------------
@@ -112,6 +114,45 @@ class prop_impl
             throw;
           }
       }
+    //! return list of avalible names 
+    list_t get_names () const 
+      {
+        typename map_t::const_iterator i, e;
+        list_t l;
+
+        for (i = data.begin (), e = data.end (); i != e; ++i)
+          {
+            l.push_back (i->first);
+          }
+        return l;
+      }
+
+    //! return default value for given name
+    const type_t get_def_val (const std::string &name) const
+      {
+        typename map_t::const_iterator i;
+
+        i = data.find (name);
+        if (i != data.end ())
+          {
+            return i->second.def_value;
+          }
+        return type_t ();
+      }
+
+    //! return default value for given name
+    const std::string get_description (const std::string &name) const
+      {
+        typename map_t::const_iterator i;
+
+        i = data.find (name);
+        if (i != data.end ())
+          {
+            return i->second.description;
+          }
+        return std::string ();
+      }
+
 
     // reset all
     void reset_all ();

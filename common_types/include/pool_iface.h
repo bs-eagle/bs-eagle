@@ -20,6 +20,7 @@
 #include "bs_array.h"
 #include "conf.h"
 
+
 namespace blue_sky
 {
   /**
