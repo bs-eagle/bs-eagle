@@ -83,19 +83,19 @@ namespace blue_sky
       /**
        * \brief  returns pointer to hydrodynamic_model instance
        * */
-      const sp_hdm_t &
+      sp_hdm_t 
       get_hydrodynamic_model () const;
 
       /**
        * \brief  returns pointer to event_manager instance
        * */
-      const sp_em_t &
+      sp_em_t 
       get_event_manager () const;
 
       /**
        * \brief  returns pointer to calc_model instance
        * */
-      const sp_calc_model_t &
+      sp_calc_model_t 
       get_calc_model () const;
 
       /**
@@ -107,14 +107,20 @@ namespace blue_sky
       /**
        * \brief  returns pointer to jacobian instance
        * */
-      const sp_jacobian_t &
+      sp_jacobian_t 
       get_jacobian () const;
 
       /**
        * \brief  returns pointer to reservoir instance
        * */
-      const sp_reservoir_t &
+      sp_reservoir_t 
       get_reservoir () const;
+
+      /**
+       * \brief returns pointer to facility_storage
+       * */
+      smart_ptr <facility_storage_t> 
+      get_facility_storage () const;
 
       /**
        * \brief  inits reservoir simulator
@@ -190,6 +196,7 @@ namespace blue_sky
       BLUE_SKY_TYPE_DECL (reservoir_simulator)
 
 
+    protected:
       sp_hdm_t                hdm;                //!< pointer to hydrodynamic_model instance
       sp_em_t                 em;                 //!< pointer to event_manager instance
       sp_calc_model_t         cm;                 //!< pointer to calc_model instance
@@ -199,6 +206,8 @@ namespace blue_sky
       std::string             model_filename_;    //!< name of model file
 
       smart_ptr <main_loop_calc_t, false> mloop;  //!< pointer to main_loop_calc instance
+
+    public:
 
       //! storage for event params
       typedef bs_array <std::string> signal_params_t;

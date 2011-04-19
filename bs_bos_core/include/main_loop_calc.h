@@ -120,15 +120,15 @@ namespace blue_sky
        * */
       main_loop_calc (const sp_rs_t &rs)
           : rs_ (rs)
-          , calc_model_ (rs->cm)
-          , event_manager_ (rs->em)
+          , calc_model_ (rs->get_calc_model ())
+          , event_manager_ (rs->get_event_manager ())
           , rock_grid_prop_ (calc_model_->rock_grid_prop)
-          , facility_storage_ (rs->facility_storage_)
-          , reservoir_ (rs->reservoir_)
-          , mesh_ (rs->hdm->get_mesh ())
-          , jacobian_ (rs->jacobian_)
+          , facility_storage_ (rs->get_facility_storage ())
+          , reservoir_ (rs->get_reservoir ())
+          , mesh_ (rs->get_hydrodynamic_model ()->get_mesh ())
+          , jacobian_ (rs->get_jacobian ())
           , params_ (calc_model_->ts_params)
-          , data_map_ (rs->hdm->data)
+          , data_map_ (rs->get_hydrodynamic_model ()->get_data ())
           , height_ (0)
           , rho_ (0)
       {
@@ -1173,7 +1173,7 @@ namespace blue_sky
 
         reservoir_->open_storage (path::join (path::dirname (rs_->model_filename ()), "results-v2.h5"));
         reservoir_->write_mesh_to_storage (mesh_);
-        reservoir_->write_starting_date_to_storage (rs_->hdm->get_keyword_manager ()->get_starting_date ());
+        reservoir_->write_starting_date_to_storage (rs_->get_hydrodynamic_model ()->get_keyword_manager ()->get_starting_date ());
       }
 
       /**

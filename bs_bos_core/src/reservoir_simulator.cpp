@@ -206,19 +206,19 @@ namespace blue_sky
     init();
   }
 
-  const reservoir_simulator::sp_hdm_t &
+  reservoir_simulator::sp_hdm_t 
   reservoir_simulator::get_hydrodynamic_model () const
   {
     return hdm;
   }
 
-  const reservoir_simulator::sp_em_t &
+  reservoir_simulator::sp_em_t 
   reservoir_simulator::get_event_manager () const
   {
     return em;
   }
 
-  const reservoir_simulator::sp_calc_model_t &
+  reservoir_simulator::sp_calc_model_t 
   reservoir_simulator::get_calc_model () const
   {
     return cm;
@@ -230,16 +230,23 @@ namespace blue_sky
     return hdm->get_mesh ();
   }
 
-  const reservoir_simulator::sp_jacobian_t &
+  reservoir_simulator::sp_jacobian_t 
   reservoir_simulator::get_jacobian () const
   {
     return jacobian_;
   }
 
-  const reservoir_simulator::sp_reservoir_t &
+  reservoir_simulator::sp_reservoir_t 
   reservoir_simulator::get_reservoir () const
   {
     return reservoir_;
+  }
+
+  // FIXME: WTF facility_storage_t
+  smart_ptr <reservoir_simulator::facility_storage_t> 
+  reservoir_simulator::get_facility_storage () const
+  {
+    return facility_storage_;
   }
 
   /**
