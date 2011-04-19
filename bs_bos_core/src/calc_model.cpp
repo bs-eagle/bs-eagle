@@ -830,13 +830,6 @@ namespace blue_sky
   }
 
   void
-  calc_model::init_jacobian (const sp_jacobian_t &jacobian, const sp_mesh_iface_t &mesh)
-  {
-    write_time_to_log init_time ("Jacobian initialization", "");
-    jacobian->init_jmatrix (mesh->get_n_active_elements (), n_phases, 3, 0, n_sec_vars);
-  }
-
-  void
   calc_model::init_boundary_connections (const sp_idata_t & /*input_data*/, const sp_mesh_iface_t & /*mesh*/)
   {
     // initialize boundary connections

@@ -444,15 +444,6 @@ namespace blue_sky
                             main_var_type &m_var);
 
       /**
-       * \brief  inits jacobian
-       * \param  input_data pointer to idata instance
-       * \param  mesh pointer to mesh instance
-       * */
-      void
-      init_jacobian (const sp_jacobian_t &input_data, const sp_mesh_iface_t &mesh);
-
-
-      /**
        * \brief  returns true if water phase present in model
        * \param  phases phases enum
        * \return true if water phase present in model
