@@ -123,6 +123,31 @@ namespace blue_sky
     BS_ASSERT (false && "DEPRECATED");
   }
 
+  void
+  jacobian::init (t_long elements, t_long phases, t_long secondary)
+  {
+    // FIXME: copied from reservoir_simulator
+    //index_t N_block_size = cm->n_phases;
+    //index_t N_blocks = hdm->get_mesh ()->get_n_active_elements ();
+    //// FIXME: wrong init?
+    //jmatrix->get_flux_matrix()->get_values ()->init (N_block_size, 0);
+    //jmatrix->get_flux_matrix ()->get_values()->init (N_block_size * N_block_size * (2* hdm->get_mesh ()->get_n_connections() + hdm->get_mesh ()->get_n_active_elements()), item_t (0));
+
+    //// FIXME: jmatrix->m_array, p_array, trns_matrix
+    ////jmatrix->m_array = flux_conn->get_matrix_block_idx_minus();
+    ////jmatrix->p_array = flux_conn->get_matrix_block_idx_plus ();
+    ////jmatrix->trns_matrix = flux_conn->get_conn_trans();
+
+    //jmatrix->get_facility_matrix ()->init (N_blocks, N_blocks, N_block_size, 0);
+  }
+
+  BS_SP (bcsr_matrix_iface)
+  jacobian::get_matrix (std::string const &name) const
+  {
+    // FIXME:
+    return BS_SP (bcsr_matrix_iface) ();
+  }
+
   BLUE_SKY_TYPE_STD_CREATE (jacobian);
   BLUE_SKY_TYPE_STD_COPY (jacobian);
 

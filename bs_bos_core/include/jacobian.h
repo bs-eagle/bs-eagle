@@ -50,8 +50,16 @@ namespace blue_sky
 
     public:
 
+      //! initialize jacobian
       void
-      init_jmatrix (t_long, t_long, t_long, t_long, t_long);
+      init (t_long elements, t_long phases, t_long secondary);
+
+      /**
+       * \brief returns matrix by name
+       * \return returns matrix or throw exception if no matrix with name
+       * */
+      BS_SP (bcsr_matrix_iface)
+      get_matrix (std::string const &name) const;
 
       //! set solver
       void 
