@@ -817,39 +817,12 @@ namespace blue_sky
   {
     write_time_to_log init_time ("Calc arrays initialization", "");
     
-    // trans mult
-    //this->truns_mult.resize(mesh->get_n_active_elements());
-    //this->p_deriv_truns_mult.resize(mesh->get_n_active_elements());
-
-    // workspace : 3 phase or 2 phase oil-gas system
-    if (FI_CHK_OIL_GAS(this->phases))
-      workspace.resize(mesh->get_n_active_elements() * (this->n_phases + 1));
-    else // one phase or only water-oil system
-      workspace.resize(mesh->get_n_active_elements() * this->n_phases);
-
-    // well storage
-//    FI_FREE (new_fwell_storage);
-//    new_fwell_storage = new t_well_storage;
-//    if (!new_fwell_storage)
-//      r_code = -1;
-
-//    if (new_fwell_storage->init (get_mesh()->n_elements, ADD_WELLS, ADD_WELLS, n_phases))
-//      // Error message already output
-//      return -1;
-
     if (this->ts_params->get_bool(fi_params::STORE_PANE_FLOW_RATES))
       {
         //TODO: n_planes
         this->plane_flow_rate.resize(mesh->get_n_active_elements() * this->n_phases);
         this->full_step_plane_flow_rate.resize(mesh->get_n_active_elements() * this->n_phases);
       }
-
-//    FI_DOUBLE_ARRAY_REALLOCATOR (bconn_pressure, get_mesh()->n_boundary_connections, r_code);
-//    FI_DOUBLE_ARRAY_REALLOCATOR (bconn_saturation, get_mesh()->n_boundary_connections * (n_phases - 1), r_code);
-//    if (FI_CHK_OIL_GAS (phases)) {
-//      FI_DOUBLE_ARRAY_REALLOCATOR (bconn_gor, get_mesh()->n_boundary_connections, r_code);
-//      FI_INT_ARRAY_REALLOCATOR (bconn_mainvar, get_mesh()->n_boundary_connections, r_code);
-//    }
 
     init_boundary_connections (input_data, mesh);
 
@@ -860,14 +833,7 @@ namespace blue_sky
   calc_model::init_jacobian (const sp_jacobian_t &jacobian, const sp_mesh_iface_t &mesh)
   {
     write_time_to_log init_time ("Jacobian initialization", "");
-    const sp_jacobian_matrix_t &locked_jmatrix (jacobian->get_jmatrix ());
-
-#ifdef _MPI
-    BS_ASSERT (false && "MPI: NOT IMPL YET");
-    this->jacobian_->init_jacobian (input_data->get_mesh(), this->n_phases, this->ts_params, mpi_decomp);
-#else //_MPI
     jacobian->init_jmatrix (mesh->get_n_active_elements (), n_phases, 3, 0, n_sec_vars);
-#endif //_MPI
   }
 
   void

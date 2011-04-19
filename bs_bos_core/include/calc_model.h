@@ -523,8 +523,6 @@ namespace blue_sky
 
       data_array_t                                            data;                           //!< array of calc_model_data, length == n_elements 
 
-      stdv_double                                             workspace;                      //!< obsolete, n_elements * (n_phase)
-
       calc_model_data_tmp_holder                              old_data_;                      //!< calc_model data stored on previous step
       calc_model_data_tmp_holder                              prev_niter_data_;               //!< calc_model data stored on previous newton iteration
 
