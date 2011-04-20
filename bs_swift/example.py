@@ -48,8 +48,7 @@ amg.setup (m)
 amg.solve (m, rhs, sol)
 print amg.get_prop()
 
-
-exit ()
+#exit ()
 
 # amg as prec
 gp = g.get_prop ()

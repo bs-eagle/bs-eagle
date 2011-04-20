@@ -166,8 +166,8 @@ namespace blue_sky
               tol *= r_norm;
             }
           resid = r_norm;
-          std::cout<<"n = "<<n<<" b_norm = "<<b_norm<<" r_norm = "<<r_norm
-                   <<" resid = "<<resid<<" tol = "<<tol<<"\n";
+          //std::cout<<"n = "<<n<<" b_norm = "<<b_norm<<" r_norm = "<<r_norm
+          //         <<" resid = "<<resid<<" tol = "<<tol<<"\n";
         }
 
       int iter;
@@ -244,7 +244,7 @@ namespace blue_sky
               if (matrix->calc_lin_comb (-1.0, 1.0, sp_sol, sp_rhs, wksp))
                 return -2;
               resid = sqrt (mv_vector_inner_product_n (wksp_ptr, wksp_ptr, n));
-              std::cout<<"AMG Iteration "<<iter + 1<<" resid = "<<resid<<"\n";
+              //std::cout<<"AMG Iteration "<<iter + 1<<" resid = "<<resid<<"\n";
             }
         }//iter loop
 
@@ -307,13 +307,10 @@ namespace blue_sky
         {
           // matrix on first level
           a.push_back (matrix);
-          // init first level solution and rhs vector (empty, will be replaced at solve())
-          spv_double first_level_sol = BS_KERNEL.create_object (v_double::bs_type ());
-          spv_double first_level_rhs = BS_KERNEL.create_object (v_double::bs_type ());
-          BS_ASSERT (first_level_sol);
-          BS_ASSERT (first_level_rhs);
-          sol.push_back (first_level_sol);
-          rhs.push_back (first_level_rhs);
+          // first level solution and rhs vectors ptr=null
+          // (will be replaced at solve())
+          sol.push_back (NULL);
+          rhs.push_back (NULL);
         }
       else
         {
@@ -324,7 +321,7 @@ namespace blue_sky
       for (level = 0;;++level)
         {
           t_long n = a[level]->get_n_rows ();
-          std::cout<<"AMG setup level = "<<level<<" n_rows = "<<n<<"\n";
+          //std::cout<<"AMG setup level = "<<level<<" n_rows = "<<n<<"\n";
 
           if (n <= n_last_level_points)
             {
