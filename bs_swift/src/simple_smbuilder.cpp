@@ -19,11 +19,11 @@ namespace blue_sky
      {
      }
 
-  int
+  t_long
   simple_smbuilder::build (sp_bcsr_t a_matrix,
-                                   t_double strength_threshold,
-                                   t_double max_row_sum,
-                                   spv_long sp_s_markers) const
+                           t_double strength_threshold,
+                           t_double max_row_sum,
+                           spv_long sp_s_markers) const
     {
     t_long i, j1, j2, j;
     t_long n, nnz;
@@ -120,7 +120,7 @@ namespace blue_sky
 #ifdef DEBUG
     //BOSOUT (section::amg, level::debug) << "*** OUT: build_strength_matrix" << bs_end;
 #endif //DEBUG
-    return 0;
+    return max_connections;
   }
 /////////////////////////////////BS Register
 /////////////////////////////////Stuff//////////////////////////

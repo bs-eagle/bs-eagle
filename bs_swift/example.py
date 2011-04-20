@@ -35,10 +35,21 @@ pbuild2 = bs.swift.standart2_pbuild ()
 amg.set_pbuilder (0, pbuild2)
 
 # amg as solver
-#amg.setup (m)
-#amg.solve (m, rhs, sol)
-#print amg.get_prop()
-#exit ()
+amg.setup (m)
+amg.solve (m, rhs, sol)
+print amg.get_prop()
+
+n=60
+t.gen_2d_laplas (m, n)
+n = m.get_n_rows ()
+rhs = numpy.ones (n)
+sol = numpy.zeros (n)
+amg.setup (m)
+amg.solve (m, rhs, sol)
+print amg.get_prop()
+
+
+exit ()
 
 # amg as prec
 gp = g.get_prop ()

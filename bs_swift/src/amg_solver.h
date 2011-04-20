@@ -23,6 +23,7 @@ namespace blue_sky
   const std::string max_row_sum_idx = "max_row_sum";
   const std::string n_last_level_points_idx = "n_last_level_points";
   const std::string n_levels_idx = "n_levels";
+  const std::string n_levels_max_idx = "n_levels_max";
   const std::string cop_idx = "Cop";
   const std::string n_pre_smooth_iters_idx = "n_pre_smooth_iters";
   const std::string n_post_smooth_iters_idx = "n_post_smooth_iters";
@@ -110,80 +111,15 @@ namespace blue_sky
           return prop->get_i (iters_idx);
         }
 
-      //! return strength_threshold
-      virtual t_double get_strength_threshold () const
-        {
-          return prop->get_f (strength_threshold_idx);
-        }
-
-      //! return max_row_sum
-      virtual t_double get_max_row_sum () const
-        {
-          return prop->get_f (max_row_sum_idx);
-        }
-
-      //! return n_pre_smooth_iters
-      virtual t_long get_n_pre_smooth_iters () const
-        {
-          return prop->get_i (n_pre_smooth_iters_idx);
-        }
-
-      //! return n_post_smooth_iters
-      virtual t_long get_n_post_smooth_iters () const
-        {
-          return prop->get_i (n_post_smooth_iters_idx);
-        }
-
-      //! return n_last_level_points
-      virtual t_long get_n_last_level_points () const
-        {
-          return prop->get_i (n_last_level_points_idx);
-        }
-
-      //! return n_levels
-      virtual t_long get_n_levels ()
-        {
-          return prop->get_i (n_levels_idx);
-        }
-
-      //!
+      //! store number of AMG setup levels to prop
+      //! store maximal number of AMG levels
       virtual void set_n_levels (t_long n_levels)
         {
-          return prop->set_i (n_levels_idx, n_levels);
+          t_long n_levels_max = prop->get_i (n_levels_max_idx);
+          if (n_levels > n_levels_max)
+            prop->set_i (n_levels_max_idx, n_levels);
+          prop->set_i (n_levels_idx, n_levels);
         }
-
-      //!
-      virtual void set_cop (t_double cop)
-        {
-          return prop->set_f (cop_idx, cop);
-        }
-/*
-      template <class sp_tool_iface> inline
-      void set_tool (std::vector<sp_tool_iface> tools_vec,
-                     const unsigned int level,
-                     const sp_tool_iface new_tool)
-        {
-          unsigned int size = tools_vec.size ();
-          //use last tools_vec [size-1]) for [size],..,[level-1]
-          if (size <= level)
-            {
-              tools_vec.resize (level + 1);
-              for (unsigned int i = size; i < level; i++)
-                {
-                  tools_vec[i] = tools_vec[size - 1];
-                }
-            }
-          tools_vec[level] = new_tool;
-        }
-
-      template <class sp_tool_iface> inline
-      sp_tool_iface get_tool (const std::vector<sp_tool_iface> tools_vec,
-                              const unsigned int level) const
-        {
-          return (level < tools_vec.size ()) ? tools_vec[level] :
-                  tools_vec[tools_vec.size () - 1];
-        }
-*/
 
       //! set strength matrix builder for amg level
       void set_smbuilder (unsigned int level, sp_smbuild_t sp_smbuilder_iface)

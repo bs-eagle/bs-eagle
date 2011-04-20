@@ -125,7 +125,7 @@ namespace blue_sky
         }
 
       //init amg props
-      const t_long n_levels = get_n_levels ();
+      const t_long n_levels = prop->get_i (n_levels_idx);
 
       // rhs and solution on first level
       rhs[0] = sp_rhs;
@@ -180,8 +180,8 @@ namespace blue_sky
 
               // smooth all points
               pre_smoother->get_prop ()->set_i ("cf_type", 0);
-              pre_smoother->smooth (a[level], NULL, get_n_pre_smooth_iters (),
-                                rhs[level], sol[level]);
+              pre_smoother->smooth (a[level], NULL, prop->get_i (n_pre_smooth_iters_idx),
+                                    rhs[level], sol[level]);
 /*
               // smooth C-points
               pre_smoother->get_prop ()->set_i ("cf_type", 1);
@@ -215,7 +215,7 @@ namespace blue_sky
 
               // smooth all points
               post_smoother->get_prop ()->set_i ("cf_type", 0);
-              post_smoother->smooth (a[level], NULL, get_n_post_smooth_iters (),
+              post_smoother->smooth (a[level], NULL, prop->get_i (n_post_smooth_iters_idx),
                                      rhs[level], sol[level]);
 /*
               // smooth F-points
@@ -265,10 +265,9 @@ namespace blue_sky
       BS_ASSERT (lu_solver);
 
       //init amg props
-      const t_double strength_threshold = get_strength_threshold ();
-      const t_double max_row_sum = get_max_row_sum ();
-      const t_long n_last_level_points = get_n_last_level_points ();
-      const t_long max_connections = 0;//!
+      const t_double strength_threshold = prop->get_f (strength_threshold_idx);
+      const t_double max_row_sum = prop->get_f (max_row_sum_idx);
+      const t_long n_last_level_points = prop->get_i (n_last_level_points_idx);
       const bool update = false;//!
 
       if (!matrix_)
@@ -298,8 +297,11 @@ namespace blue_sky
       t_double nnz = matrix->get_n_non_zeros ();
       t_double cop = nnz;
       // matrix on first level
-      a.push_back (matrix);
-      // init first level solution and rhs vector (empty)
+      if (a.empty ())
+        a.push_back (matrix);
+      else
+        a[0] = matrix;
+      // init first level solution and rhs vector (empty, will be replaced at solve())
       spv_double first_level_sol = BS_KERNEL.create_object (v_double::bs_type ());
       spv_double first_level_rhs = BS_KERNEL.create_object (v_double::bs_type ());
       BS_ASSERT (first_level_sol);
@@ -311,14 +313,14 @@ namespace blue_sky
       for (level = 0;;++level)
         {
           t_long n = matrix->get_n_rows ();
-          //std::cout<<"AMG setup level = "<<level<<" n_rows = "<<n<<"\n";
+          std::cout<<"AMG setup level = "<<level<<" n_rows = "<<n<<"\n";
 
           if (n <= n_last_level_points)
             {
               break;
             }
 
-          //init tools
+          // init tools
           sp_smbuild_t s_builder = get_smbuilder (level);
           sp_coarse_t  coarser   = get_coarser   (level);
           sp_pbuild_t  p_builder = get_pbuilder  (level);
@@ -334,7 +336,7 @@ namespace blue_sky
           BS_ASSERT (s_markers);
           s.push_back (s_markers);
 
-          s_builder->build (matrix, strength_threshold, max_row_sum, s_markers);
+          t_long max_conn = s_builder->build (matrix, strength_threshold, max_row_sum, s_markers);
 
           // calc s_nnz
           //t_long s_nnz = 0;
@@ -366,19 +368,16 @@ namespace blue_sky
           BS_ASSERT (p_matrix);
           p.push_back (p_matrix);
 
-          p_builder->build (matrix, n_coarse_size, max_connections,
+          p_builder->build (matrix, n_coarse_size, max_conn,
                             cf_markers, s_markers, p_matrix);
 
           // initialize next level matrix
           sp_bcsr_t a_matrix = BS_KERNEL.create_object ("bcsr_matrix");
           BS_ASSERT (a_matrix);
           a.push_back (a_matrix);
-
           sp_bcsr_t r_matrix = BS_KERNEL.create_object ("bcsr_matrix");
           BS_ASSERT (r_matrix);
-
           r_matrix->build_transpose (p_matrix, 0, 0, 0);
-
           a_matrix->triple_matrix_product (r_matrix, matrix, p_matrix, update);
           matrix = a_matrix;
           cop += matrix->get_n_non_zeros ();
@@ -396,7 +395,7 @@ namespace blue_sky
 
       set_n_levels (level);
       cop /= nnz;
-      set_cop (cop);
+      prop->set_f (cop_idx, cop);
 
       lu_fact->init_by_matrix (matrix);
       lu_solver->setup (lu_fact);
