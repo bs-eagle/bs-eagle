@@ -249,9 +249,9 @@ namespace blue_sky
       return 0;
     }
 
-    int amg_solver::solve_prec (sp_matrix_t /*matrix*/, spv_double /*rhs*/, spv_double /*sol*/)
+    int amg_solver::solve_prec (sp_matrix_t matrix, spv_double rhs, spv_double sol)
     {
-      return 0;//prec->solve (matrix, rhs, sol);
+      return solve (matrix, rhs, sol);
     }
 
     /**
