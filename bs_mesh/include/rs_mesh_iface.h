@@ -8,12 +8,12 @@
  */
 
 #include "flux_connections_iface.h"
+#include "hydrodynamic_model_iface.h"
 #include "bs_array.h"
 
 namespace blue_sky
   {
 
-  class idata;
   class FRead;
 
   class /*BS_API_PLUGIN*/ rs_mesh_iface : public bs_node
@@ -37,8 +37,8 @@ namespace blue_sky
       typedef bcsr_matrix_iface                           csr_matrix_t;
       typedef smart_ptr <csr_matrix_t, true>              sp_bcsr_t;
 
-      typedef idata                                       idata_t;
-      typedef smart_ptr <idata_t, true>                   sp_idata_t;
+      
+      typedef smart_ptr <hydrodynamic_model_iface, true>    sp_hdm_t;
       
       typedef boost::array <t_float, 3>                 point3d_t;
       typedef smart_ptr <FRead, true>										  sp_reader;
@@ -49,7 +49,7 @@ namespace blue_sky
       virtual ~rs_mesh_iface ()	{};
       
       //! init mesh
-      virtual void init_props (const sp_idata_t &idata) = 0;
+      virtual void init_props (const sp_hdm_t hdm) = 0;
 
       //! initialize int_to_ext indexation
       virtual int init_int_to_ext() = 0;

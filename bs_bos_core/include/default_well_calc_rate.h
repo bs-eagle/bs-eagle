@@ -539,25 +539,25 @@ namespace wells {
     };
   }
 
-  template <typename strategy_t, bool is_w, bool is_g, bool is_o, bool is_production_well>
+  template <bool is_w, bool is_g, bool is_o, bool is_production_well>
   struct calc_rate_and_derivs_t
   {
-    typedef typename strategy_t::item_t                 item_t;
-    typedef typename strategy_t::index_t                index_t;
-    typedef typename strategy_t::item_array_t           item_array_t;
-    typedef typename strategy_t::rhs_item_array_t       rhs_item_array_t;
+    typedef t_double              item_t;
+    typedef t_long                index_t;
+    typedef spv_double            item_array_t;
+    typedef spv_float             rhs_item_array_t;
 
-    typedef default_well <strategy_t>                   well_t;
-    typedef default_connection <strategy_t>             connection_t;
-    typedef typename well_t::connection_list_t          connection_list_t;
-    typedef typename well_t::base_t::rate_data_t        rate_data_t;
-    typedef typename rate_data_t::rate_data_inner       rate_data_inner_t;
-    typedef calc_model <strategy_t>                     calc_model_t;
-    typedef calc_model_data <strategy_t>                calc_model_data_t;
-    typedef typename calc_model_t::data_array_t         cell_data_t;
-    typedef typename calc_model_t::main_var_array_t     main_vars_t;
-    typedef typename main_vars_t::value_type            main_var_t;
-    typedef jacobian_matrix <strategy_t>                jmatrix_t;
+    typedef default_well                   well_t;
+    typedef default_connection             connection_t;
+    typedef well_t::connection_list_t          connection_list_t;
+    typedef well_t::base_t::rate_data_t        rate_data_t;
+    typedef rate_data_t::rate_data_inner       rate_data_inner_t;
+    typedef calc_model                     calc_model_t;
+    typedef calc_model_data                calc_model_data_t;
+    typedef calc_model_t::data_array_t         cell_data_t;
+    typedef calc_model_t::main_var_array_t     main_vars_t;
+    typedef main_vars_t::value_type            main_var_t;
+    typedef jac_matrix_iface                jmatrix_t;
 
     typedef smart_ptr <calc_model_t, true>              sp_calc_model_t;
     typedef smart_ptr <jmatrix_t, true>                 sp_jmatrix_t;
@@ -602,8 +602,8 @@ namespace wells {
     calc_rate_and_derivs_t (const sp_calc_model_t &calc_model, const sp_jmatrix_t &jmatrix, well_t *well)
     : cell_data_ (calc_model->data)
     , main_vars_ (calc_model->main_variable)
-    , pressure_ (calc_model->pressure)
-    , gas_oil_ratio_ (calc_model->gas_oil_ratio)
+    , pressure_ (&(*calc_model->pressure)[0])
+    , gas_oil_ratio_ (&(*calc_model->gas_oil_ratio)[0])
     , invers_fvf_average_ (calc_model->invers_fvf_average)
     , well_rate_ (well->rate_)
     , well_rate_rc_ (well->rate_rc_)
@@ -626,8 +626,8 @@ namespace wells {
 
     const cell_data_t         &cell_data_;
     const main_vars_t         main_vars_;
-    const item_array_t        &pressure_;
-    const item_array_t        &gas_oil_ratio_;
+    const t_double            *pressure_;
+    const t_double            *gas_oil_ratio_;
     const typename calc_model_t::invers_fvf_avgerage_t &invers_fvf_average_;
     rate_data_t               &well_rate_;
     rate_data_t               &well_rate_rc_;
@@ -639,8 +639,8 @@ namespace wells {
     wells::injection_type     injection_type_;
     wells::rate_control_type  control_type_;
 
-    const rhs_item_array_t    &sp_diagonal_;
-    const rhs_item_array_t    &sec_rhs_;
+    const spv_double          &sp_diagonal_;
+    const spv_double          &sec_rhs_;
     int                       n_sec_vars_;
 
     item_t                    krow_tetaow;
@@ -697,11 +697,11 @@ namespace wells {
           return ;
         }
 
-      typedef default_connection_iterator_impl <strategy_t, default_well <strategy_t>, default_connection <strategy_t> > iterator_t;
+      typedef default_connection_iterator_impl <default_well, default_connection> iterator_t;
       iterator_t it (well, begin_iterator_tag), e (well, end_iterator_tag);
       for (; it != e; ++it)
         {
-          const typename well_t::sp_default_connection_t &c (*it);
+          const well_t::sp_default_connection_t &c (*it);
           if (!c->is_shut ())
             {
               index_t n_block = c->n_block ();
@@ -794,11 +794,11 @@ namespace wells {
         }
       item_t ww_bw = well->bw_value * inv_ww;
 
-      typedef default_connection_iterator_impl <strategy_t, default_well <strategy_t>, default_connection <strategy_t> > iterator_t;
+      typedef default_connection_iterator_impl <default_well, default_connection> iterator_t;
       iterator_t it (well, begin_iterator_tag), e (well, end_iterator_tag);
       for (; it != e; ++it)
         {
-          const typename well_t::sp_default_connection_t &c (*it);
+          const well_t::sp_default_connection_t &c (*it);
           if (!c->is_shut ())
             {
               update_wr (c, inv_ww); 
@@ -991,7 +991,7 @@ namespace wells {
           if (!is_1p) c->rr_value[wat_sw] = -gw * water_deriv_t::sw (data, this, c->mobility_value);
         }
 
-      m_minus_vv_prod <n_phases>::eliminate (&c->rr_value[b_sqr], &sp_diagonal_[n_block * n_phases], c->rr_value);
+      m_minus_vv_prod <n_phases>::eliminate (&c->rr_value[b_sqr], &(*sp_diagonal_)[n_block * n_phases], c->rr_value);
 
       if (is_rate)
         {
@@ -1045,7 +1045,7 @@ namespace wells {
             }
         }
 
-      v_minus_vs_prod <n_phases>::eliminate (&c->rr_value[b_sqr], sec_rhs_[n_sec_vars_ * n_block], c->rate_value);
+      v_minus_vs_prod <n_phases>::eliminate (&c->rr_value[b_sqr], (*sec_rhs_)[n_sec_vars_ * n_block], c->rate_value);
       //c->ps_value[0] = c->rr_value[b_sqr + 0];
       //c->ps_value[1] = c->rr_value[b_sqr + 1];
       //c->ps_value[2] = c->rr_value[b_sqr + 2];

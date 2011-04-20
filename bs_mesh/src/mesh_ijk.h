@@ -54,7 +54,7 @@ class  mesh_ijk : public rs_smesh_base
     using base_t::XYZ_to_inside;
 
     //! init mesh properties
-    void init_props (const sp_idata_t &data);
+    void init_props (const sp_hdm_t hdm);
 
     //! make indexation - create proxy and non-proxy array using info of minpv
     //! return number of non active blocks (less than mpv)

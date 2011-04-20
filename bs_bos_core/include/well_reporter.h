@@ -20,7 +20,6 @@ namespace blue_sky {
    * \class well_data_printer
    * \brief Prints well information tables
    * */
-  template <typename strategy_t>
   struct BS_API_PLUGIN well_data_printer
   {
     /**
@@ -29,7 +28,7 @@ namespace blue_sky {
      * \param  rs Instance of reservoir_simulator
      * */
     static void
-    print_prod (const smart_ptr <idata, true> &data, const smart_ptr <reservoir <strategy_t>, true> &rs);
+    print_prod (const smart_ptr <idata, true> &data, const smart_ptr <reservoir, true> &rs);
 
     /**
      * \brief  Prints injection information for all wells
@@ -37,7 +36,7 @@ namespace blue_sky {
      * \param  rs Instance of reservoir_simulator
      * */
     static void
-    print_inj  (const smart_ptr <idata, true> &data, const smart_ptr <reservoir <strategy_t>, true> &rs);
+    print_inj  (const smart_ptr <idata, true> &data, const smart_ptr <reservoir, true> &rs);
 
     /**
      * \brief  Prints total production and injection information
@@ -47,7 +46,7 @@ namespace blue_sky {
      * \todo   Rename
      * */
     static void
-    print_total_prod (const smart_ptr <idata, true> &data, const smart_ptr <reservoir <strategy_t>, true> &rs);
+    print_total_prod (const smart_ptr <idata, true> &data, const smart_ptr <reservoir, true> &rs);
   };
   
 

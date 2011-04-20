@@ -64,8 +64,8 @@ namespace blue_sky
   
   idata::idata(bs_type_ctor_param /*param*/)
   : bs_node(bs_node::create_node (new this_t::idata_traits ())),
-  h5_pool (BS_KERNEL.create_object ("h5_pool")),
-  props (BS_KERNEL.create_object ("prop"))
+  props (BS_KERNEL.create_object ("prop")),
+  h5_pool (BS_KERNEL.create_object ("h5_pool"))
   {
     init();
   }
@@ -73,8 +73,8 @@ namespace blue_sky
   
   idata::idata(const this_t &src)
       : bs_refcounter (src), bs_node(src), 
-      h5_pool(give_kernel::Instance().create_object_copy(src.h5_pool)),
-      props(give_kernel::Instance().create_object_copy(src.props))
+      props(give_kernel::Instance().create_object_copy(src.props)),
+      h5_pool(give_kernel::Instance().create_object_copy(src.h5_pool))
       //scal3(give_kernel::Instance().create_object_copy(src.scal3)),
   {
     *this = src;
@@ -86,13 +86,6 @@ namespace blue_sky
     //depth.resize((nx+1) * (ny+1) * (nz+1));
     h5_pool->open_file ("bs_data_storage.h5", "/pool");
     
-    props->add_property_f (DEFAULT_MINIMAL_PORE_VOLUME, "minimal_pore_volume", "Minimal pore volume allowed for active cells");
-    props->add_property_f (DEFAULT_MINIMAL_SPLICE_VOLUME, "minimal_splice_volume", "Minimal pore volume allowed for active cells to splice with other cells");
-    props->add_property_f (DEFAULT_MAXIMUM_SPLICE_THICKNESS, "maximum_splice_thickness", "Default maximum thickness allowed between active cells to be coupled");
-
-    props->add_property_i (1, "nx", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
-    props->add_property_i (1, "ny", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
-    props->add_property_i (1, "nz", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
     props->add_property_i (0, "rpo_model", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
     props->add_property_i (1, "pvt_region", "Number of PVT regions in simulation");
     props->add_property_i (1, "sat_region", "Number of saturation regions in simulation");
@@ -244,14 +237,34 @@ namespace blue_sky
   }
   
   
-  spv_int idata::get_i_array (const std::string & array_name)
+  spv_int idata::get_i_array (const std::string & array_name, bool safe)
   {
-    return h5_pool->get_i_data (array_name);
+    return safe 
+        ? h5_pool->get_i_data (array_name)
+        : h5_pool->get_i_data_unsafe (array_name)
+        ;
   }
   
-  spv_float idata::get_fp_array (const std::string &array_name)
+  spv_float idata::get_fp_array (const std::string &array_name, bool safe)
   {
-    return h5_pool->get_fp_data (array_name);
+    return safe
+        ? h5_pool->get_fp_data (array_name)
+        : h5_pool->get_fp_data_unsafe (array_name)
+        ;
+  }
+
+  bool
+  idata::contains_i_array (const std::string &array_name) 
+  {
+    const spv_int &a = h5_pool->get_i_data_unsafe (array_name);
+    return a && a->size ();
+  }
+
+  bool
+  idata::contains_fp_array (const std::string &array_name)
+  {
+    const spv_float &a = h5_pool->get_fp_data_unsafe (array_name);
+    return a && a->size ();
   }
   
   int idata::set_i_array (const std::string & array_name,  spv_int array)
@@ -265,7 +278,7 @@ namespace blue_sky
     return h5_pool->set_fp_data (array_name, array);
   }
 
-  spv_int idata::create_i_array (const std::string & array_name,  t_int *array_dimens, t_int def_value)
+  spv_int idata::create_i_array (const std::string & /*array_name*/,  t_int *array_dimens, t_int def_value)
   {
     spv_int new_array;
     t_long n;
@@ -278,13 +291,14 @@ namespace blue_sky
 
     new_array = BS_KERNEL.create_object (v_int::bs_type ());
     new_array->resize (n);
+    std::fill (new_array->begin (), new_array->end(), def_value);
     new_array->reshape (3, dims);
 
     return new_array;
   }
   
 
-  spv_float idata::create_fp_array (const std::string & array_name,  t_int *array_dimens, t_float def_value)
+  spv_float idata::create_fp_array (const std::string & /*array_name*/,  t_int *array_dimens, t_float def_value)
   {
     spv_float new_array;
     t_long n;
@@ -296,6 +310,7 @@ namespace blue_sky
 
     new_array = BS_KERNEL.create_object (v_float::bs_type ());
     new_array->resize (n);
+    std::fill (new_array->begin (), new_array->end(), def_value);
     new_array->reshape (3, dims);
 
     return new_array;

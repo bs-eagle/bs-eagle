@@ -54,51 +54,48 @@ namespace blue_sky
     }
   
   
-  void smesh_keywords::activate_keywords(sp_objbase &km)
+  void smesh_keywords::activate_keywords (sp_km_iface_t keyword_manager)
     {
-      smart_ptr <keyword_manager_iface , true> keyword_manager (km);
-      keyword_manager->register_keyword ("DIMENS", keyword_handler (&this_t::DIMENS_handler));
+      //keyword_manager->register_keyword ("DIMENS", keyword_handler (&this_t::DIMENS_reactor));
+      std::vector<std::string> names(6);
       t_int array_dimens[6] = {1,0,1,0,1,0};
       t_float def_value_zero = 0.0;
       t_float def_value_one = 1.0;
       
-      keyword_manager->register_keyword ("ACTNUM", keyword_handler (0, 1, &array_dimens[0]));
-      keyword_manager->register_keyword ("PERMX", keyword_handler (0, def_value_zero, &array_dimens[0]));
-      keyword_manager->register_keyword ("PERMY", keyword_handler (0, def_value_zero, &array_dimens[0]));
-      keyword_manager->register_keyword ("PERMZ", keyword_handler (0, def_value_zero, &array_dimens[0]));
-      keyword_manager->register_keyword ("PORO", keyword_handler (0, def_value_zero, &array_dimens[0]));
-      keyword_manager->register_keyword ("NTG", keyword_handler (0, def_value_one, &array_dimens[0]));
-      keyword_manager->register_keyword ("MULTX", keyword_handler (0, def_value_one, &array_dimens[0]));
-      keyword_manager->register_keyword ("MULTY", keyword_handler (0, def_value_one, &array_dimens[0]));
-      keyword_manager->register_keyword ("MULTZ", keyword_handler (0, def_value_one, &array_dimens[0]));
-      keyword_manager->register_keyword ("MULTPV", keyword_handler (0, def_value_zero, &array_dimens[0]));
+      names[0] = "nx";
+      names[1] = "ny";
+      names[2] = "nz";
+
+      keyword_manager->register_prop_keyword ("DIMENS", "iii", names, &this_t::DIMENS_reactor);
+      names[0] = "minimal_pore_volume";
+      keyword_manager->register_prop_keyword ("MINPV", "f", names, 0);
+      names[0] = "minimal_splice_volume";
+      keyword_manager->register_prop_keyword ("MINSV", "f", names, 0);
+      names[0] = "maximum_splice_thickness";
+      keyword_manager->register_prop_keyword ("MAXST", "f", names, 0);
+
+      keyword_manager->register_i_pool_keyword ("ACTNUM", &array_dimens[0], 1, 0);
+      keyword_manager->register_fp_pool_keyword ("PERMX", &array_dimens[0], def_value_zero, 0);
+      keyword_manager->register_fp_pool_keyword ("PERMY", &array_dimens[0], def_value_zero, 0);
+      keyword_manager->register_fp_pool_keyword ("PERMZ", &array_dimens[0], def_value_zero, 0);
+      keyword_manager->register_fp_pool_keyword ("PORO", &array_dimens[0], def_value_zero, 0);
+      keyword_manager->register_fp_pool_keyword ("NTG", &array_dimens[0], def_value_one, 0);
+      keyword_manager->register_fp_pool_keyword ("MULTX", &array_dimens[0], def_value_one, 0);
+      keyword_manager->register_fp_pool_keyword ("MULTY", &array_dimens[0], def_value_one, 0);
+      keyword_manager->register_fp_pool_keyword ("MULTZ", &array_dimens[0], def_value_one, 0);
+      keyword_manager->register_fp_pool_keyword ("MULTPV", &array_dimens[0], def_value_zero, 0);
     }  
   
-  void smesh_keywords::DIMENS_handler(const std::string &keyword, keyword_params_t &params)
+  void smesh_keywords::DIMENS_reactor(const std::string &keyword, keyword_params_t &params)
     {
       KH_COMMON_VARIABLES_DEF
       t_long ndim = 0, nblock = 0;
       boost::array <t_long, 3> itmp;
-      sp_idata_t idata (params.data, bs_dynamic_cast ());
-      sp_reader_t reader (params.reader, bs_dynamic_cast ());
       
-      if ((len = reader->read_array (keyword, itmp)) != 3)
-        {
-          out_s << "Error in " << reader->get_prefix() << ": not enough valid arguments for keyword " << keyword;
-          //BOSERR << priority(section::read_data,level::err) << out_s << bs_end;
-          KH_ASSERT_EXCEPTION
-        }
 
-      if (itmp[0] <= 0 || itmp[1] <= 0 || itmp[2] <= 0)
-        {
-          out_s << "Error in " << reader->get_prefix() << ": all dimensions in " << keyword << " must be positive";
-          //BOSERR << priority(section::read_data,level::err) << out_s << bs_end;
-          KH_ASSERT_EXCEPTION
-        }
-
-      idata->props->set_i ("nx", itmp[0]);
-      idata->props->set_i ("ny", itmp[1]);
-      idata->props->set_i ("nz", itmp[2]);
+      itmp[0] = params.hdm->get_prop ()->get_i ("nx");
+      itmp[1] = params.hdm->get_prop ()->get_i ("ny");
+      itmp[2] = params.hdm->get_prop ()->get_i ("nz");
       
       // Number of nodes
       ndim = itmp[0] * itmp[1] * itmp[2];

@@ -1,0 +1,32 @@
+import os
+Import ("*")
+
+lib_name = "hdm_fluid"
+tar_name = "hdm_fluid"
+
+env = custom_env.Clone ()
+env.AppendUnique (CPPPATH = ["include",
+    includes["bs_bos_core_base"],
+    includes["common_types"]
+    #includes["bs_scal"]
+    ] + includes["kernel"],
+    CCFLAGS = ["-DBOOST_PYTHON_MAX_ARITY=25"])
+
+libs = ["blue_sky", "bs_bos_core_base"]
+
+if (build_kind == "debug") :
+    env.AppendUnique (LIBS = list_suffix (libs, "_d"))
+    lib_name += "_d"
+elif (build_kind == "release") :
+    env.AppendUnique (LIBS = libs)
+
+hdm_fluid = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
+
+env.Alias (tar_name, hdm_fluid)
+Export ("hdm_fluid")
+
+if (env["install"] == 1) :
+    inst_tar = env.Install ("$plugins_prefix", hdm_fluid)
+    env.Alias (tar_name, inst_tar)
+
+

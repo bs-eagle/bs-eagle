@@ -13,6 +13,7 @@
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "matrix_iface.h"
+#include "bos_report.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 namespace blue_sky
@@ -76,6 +77,8 @@ namespace blue_sky
                               std::string ("Number of vectors used for ortogonalization"));
         prop->add_property_b (false, success_idx,
                               std::string ("True if solver successfully convergent"));
+        prop->add_property_i (0, ortonorm_vlen,
+                              std::string ("ORTONORM_VLEN (for JACOBIAN)"));
       }
 
     /**

@@ -14,22 +14,19 @@
 namespace blue_sky
   {
 
-  template <typename strategy_t>
   class well;
-
   class data_storage_interface;
 
   /**
    * \class facility_manager
    * \brief Facilities manager
    * */
-  template <typename strategy_t>
   class BS_API_PLUGIN facility_manager : public objbase
     {
     public:
 
-      typedef facility_base <strategy_t>                    facility_base_t;
-      typedef well <strategy_t>                             well_t;
+      typedef facility_base                    facility_base_t;
+      typedef well                             well_t;
 
       typedef smart_ptr <facility_base_t>                   sp_facility_t;
       typedef bos_val_table <std::string, sp_facility_t>    facility_map_t;

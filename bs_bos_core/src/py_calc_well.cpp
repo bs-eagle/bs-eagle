@@ -19,11 +19,11 @@ namespace python {
   void
   py_export_calc_well ()
   {
-    strategy_exporter::export_base <well, well_exporter> ("well_seq");
-    strategy_exporter::export_base <wells::connection, connection_exporter> ("connection_seq");
+    base_exporter <well, well_exporter>::export_class ("well_seq");
+    base_exporter <wells::connection, connection_exporter>::export_class ("connection_seq");
 
-    strategy_exporter::export_class <py_well, well, well_exporter> ("py_well_seq");
-    strategy_exporter::export_class <py_connection, wells::connection, connection_exporter> ("py_connection_seq");
+    class_exporter <py_well, well, well_exporter>::export_class ("py_well_seq");
+    class_exporter <py_connection, wells::connection, connection_exporter>::export_class ("py_connection_seq");
   }
 } // namespace python
 } // namespace blue_sky

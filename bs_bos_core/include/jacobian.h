@@ -11,7 +11,8 @@
 
 #include "fi_params.h"
 #include BS_FORCE_PLUGIN_IMPORT ()
-#include "linear_solvers.h"
+#include "jac_matrix_iface.h"
+#include "lsolver_iface.h"
 #include "rs_mesh_iface.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
@@ -24,32 +25,34 @@ namespace blue_sky
    * \class jacobian
    * \brief Incapsulates solving of jacobian matrix
    * */
-  template <class strategy_t>
   class BS_API_PLUGIN jacobian : public bs_node
     {
     public:
-      typedef typename strategy_t::matrix_t                     matrix_t;             //!< short name to matrix type
-      typedef typename strategy_t::item_array_t                 item_array_t;         //!< short name to array type
-      typedef typename strategy_t::rhs_item_array_t             rhs_item_array_t;
-      typedef typename strategy_t::item_t                       item_t;               //!< short name to array item type
-      typedef typename strategy_t::index_t                      index_t;              //!< short name to matrix's index type
-      typedef typename strategy_t::index_array_t                index_array_t;
-      typedef typename strategy_t::barrier_t                    barrier_t;
-      typedef rs_mesh_iface < strategy_t >                      mesh_iface_t;
-      typedef typename strategy_t::csr_matrix_t                 bcsr_matrix_t;
-      typedef linear_solver_base<strategy_t>                    linear_solver_base_t;
+      typedef matrix_iface                          matrix_t;             //!< short name to matrix type
+      typedef spv_double                            item_array_t;         //!< short name to array type
+      typedef spv_float                             rhs_item_array_t;
+      typedef t_double                              item_t;               //!< short name to array item type
+      typedef t_long                                index_t;              //!< short name to matrix's index type
+      typedef spv_long                              index_array_t;
+      typedef rs_mesh_iface                         mesh_iface_t;
+      typedef bcsr_matrix_iface                     bcsr_matrix_t;
+      typedef lsolver_iface                         linear_solver_base_t;
 
-      typedef smart_ptr <matrix_t>                              sp_matrix_t;
-      typedef smart_ptr <bcsr_matrix_t, true>                   sp_bcsr_matrix_t;
-      typedef smart_ptr <jacobian_matrix<strategy_t>, true>     sp_jmatrix;           //!< matrix type
-      typedef smart_ptr <linear_solver_base<strategy_t>, true>  sp_lsolver;           //!< solver & preconditioner type
-      typedef smart_ptr <fi_params, true>                       sp_fi_params;
+      typedef lsolver_iface::sp_matrix_t            sp_matrix_t;
+      typedef smart_ptr <bcsr_matrix_t, true>       sp_bcsr_matrix_t;
+      typedef smart_ptr <jac_matrix_iface, true>    sp_jmatrix;           //!< matrix type
+      typedef smart_ptr <lsolver_iface, true>       sp_lsolver;           //!< solver & preconditioner type
+      typedef smart_ptr <fi_params, true>           sp_fi_params;
 
-      typedef smart_ptr <mesh_iface_t, true>                    sp_mesh_iface_t;
+      typedef smart_ptr <mesh_iface_t, true>        sp_mesh_iface_t;
 
-      typedef jacobian <strategy_t>                             this_t;
+      typedef jacobian                              this_t;
 
     public:
+
+      void
+      init_jmatrix (t_long, t_long, t_long, t_long, t_long);
+
       //! set solver
       void 
       set_solver(const sp_lsolver &s)
@@ -75,6 +78,14 @@ namespace blue_sky
       {
         return jm;
       }
+
+      // TODO: where this vector should be?
+      virtual const item_array_t &
+      get_solution () const;
+
+      // TODO: where this vector should be?
+      virtual const item_array_t &
+      get_sec_solution () const;
 
       //! get solver
       const sp_lsolver &
@@ -143,7 +154,7 @@ namespace blue_sky
         }
 
       //! blue-sky type description
-      BLUE_SKY_TYPE_DECL_T (jacobian);
+      BLUE_SKY_TYPE_DECL (jacobian);
 
     private:
       /**

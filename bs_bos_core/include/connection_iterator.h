@@ -14,17 +14,16 @@
 
 namespace blue_sky {
 
-  template <typename strategy_t>
   struct connection_iterator : 
     std::iterator <
       std::forward_iterator_tag, 
-      smart_ptr <wells::connection <strategy_t> > 
+      smart_ptr <wells::connection> 
     >
   {
-    typedef connection_iterator <strategy_t>  this_t;
-    typedef wells::connection <strategy_t>    connection_t;
+    typedef connection_iterator       this_t;
+    typedef wells::connection         connection_t;
 
-    typedef smart_ptr <connection_t>          sp_connection_t;
+    typedef smart_ptr <connection_t>  sp_connection_t;
 
   public:
 
@@ -90,7 +89,7 @@ namespace blue_sky {
      *         for some auxulliary functions
      * \return Iterator position
      * */
-    typename strategy_t::index_t
+    t_long
     position () const
     {
       BS_ASSERT (impl_);
@@ -116,7 +115,7 @@ namespace blue_sky {
       virtual bool
       operator!= (const boost::shared_ptr <impl> &rhs) const = 0;
 
-      virtual typename strategy_t::index_t
+      virtual t_long
       position () const = 0;
     };
 

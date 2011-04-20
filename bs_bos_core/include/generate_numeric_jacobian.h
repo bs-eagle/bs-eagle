@@ -18,13 +18,11 @@ namespace blue_sky
   namespace xxx
     {
 
-    template <typename strategy_t>
     struct clmn_holder
       {
-        typedef typename strategy_t::index_t  index_t;
-        typedef typename strategy_t::item_t   item_t;
-
-        typedef typename strategy_t::item_array_t item_array_t;
+        typedef t_long      index_t;
+        typedef t_double    item_t;
+        typedef spv_double  item_array_t;
 
         clmn_holder (item_array_t &dst, index_t index, index_t shift, index_t block)
             : dst (dst)
@@ -35,16 +33,17 @@ namespace blue_sky
         }
 
         template <typename op_t>
-        clmn_holder <strategy_t> &
+        clmn_holder &
         operator-= (const op_t &op)
         {
           index_t idx = 0;
+          item_t *dst_ = &(*dst)[0];
           for (index_t i = 0, cnt = (index_t)op.size (), clmn_count = (index_t)op.size () / block; i < clmn_count; ++i)
             {
               index_t i_idx = index * block * block + shift + i * clmn_count * block * block;
               for (index_t j = 0, k = 0; j < block; ++j, ++idx, k += block)
                 {
-                  dst [i_idx + k] -= op[idx];
+                  dst_ [i_idx + k] -= op[idx];
                 }
             }
 
@@ -157,9 +156,9 @@ namespace blue_sky
   } // namespace xxx
 
 
-  template <typename strategy_t, bool is_w, bool is_g, bool is_o>
+  template <bool is_w, bool is_g, bool is_o>
   inline void
-  main_loop_calc <strategy_t, is_w, is_g, is_o>::generate_numeric_jacobian (int /*init*/)
+  main_loop_calc <is_w, is_g, is_o>::generate_numeric_jacobian (int /*init*/)
   {
     throw bs_exception ("generate_numeric_jacobian", "NOT IMPL YET");
     //using namespace xxx;

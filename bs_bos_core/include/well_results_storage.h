@@ -13,6 +13,7 @@
 #include "rate_control_type.h"
 #include "fi_params.h"
 #include "calc_model.h"
+#include "facility_manager.h"
 
 namespace blue_sky
   {
@@ -259,25 +260,18 @@ namespace blue_sky
    * \class save_well_data
    * \brief Saves well and connection data to well_results_storage
    * */
-  template <typename strategy_t>
   struct BS_API_PLUGIN save_well_data
     {
-      typedef calc_model <strategy_t>                                 calc_model_t;
-      typedef typename strategy_t::index_t                            index_t;
+      typedef calc_model::data_array_t                      data_array_t;
+      typedef calc_model::item_t                            item_t;
+      typedef wells::connection                             connection_t;
 
-      typedef typename calc_model_t::data_array_t                     data_array_t;
-      typedef typename calc_model_t::item_t                           item_t;
-      typedef typename calc_model_t::connection_t                     connection_t;
-      typedef typename calc_model_t::well_t                           well_t;
-      typedef typename calc_model_t::strategy_type                    strategy_type;
+      typedef smart_ptr <calc_model, true>                  sp_calc_model_t;
+      typedef smart_ptr <well, true>                        sp_well_t;
+      typedef smart_ptr <connection_t, true>                sp_connection_t;
+      typedef smart_ptr<well_results_storage, true>         sp_well_results_storage;
 
-      typedef smart_ptr <calc_model_t, true>                          sp_calc_model_t;
-      typedef typename calc_model_t::sp_well_t                        sp_well_t;
-      typedef typename calc_model_t::sp_connection_t                  sp_connection_t;
-      typedef smart_ptr<well_results_storage, true>                   sp_well_results_storage;
-
-      typedef typename calc_model_t::reservoir_t::facility_manager_t  facility_manager_t;
-      typedef typename facility_manager_t::well_const_iterator_t      well_iterator_t;
+      typedef facility_manager::well_const_iterator_t       well_iterator_t;
 
 
       /**
@@ -353,7 +347,7 @@ namespace blue_sky
 
             if (write_conn_results_to_hdf5)
               {
-                typename well_t::connection_iterator_t it = ws->connections_begin (), e = ws->connections_end ();
+                well::connection_iterator_t it = ws->connections_begin (), e = ws->connections_end ();
                 for (; it != e; ++it)
                   {
                     const sp_connection_t &ci = *it;

@@ -9,7 +9,6 @@
  * */
 #ifndef BS_JACOBIAN_IMPL_H_
 #define BS_JACOBIAN_IMPL_H_
-#include "solve_helper.h"
 
 namespace blue_sky {
 
@@ -18,19 +17,18 @@ namespace blue_sky {
    * \brief Implementation of jacobian class methods, used to reduce
    *        some overhead
    * */
-  template <typename strategy_t>
   struct jacobian_impl
   {
-    typedef typename strategy_t::item_t             item_t;
-    typedef typename strategy_t::index_t            index_t;
-    typedef typename strategy_t::matrix_t           matrix_t;
-    typedef typename strategy_t::csr_matrix_t       bcsr_matrix_t;
-    typedef typename strategy_t::item_array_t       item_array_t;
-    typedef typename strategy_t::rhs_item_array_t   rhs_item_array_t;
+    typedef t_double                                item_t;
+    typedef t_long                                  index_t;
+    typedef matrix_iface                            matrix_t;
+    typedef bcsr_matrix_iface                       bcsr_matrix_t;
+    typedef spv_double                              item_array_t;
+    typedef spv_float                               rhs_item_array_t;
 
-    typedef jacobian <strategy_t>                   jacobian_t;
-    typedef jacobian_matrix <strategy_t>            jmatrix_t;
-    typedef linear_solver_base <strategy_t>         linear_solver_t;
+    typedef jacobian                                jacobian_t;
+    typedef jac_matrix_iface                        jmatrix_t;
+    typedef lsolver_iface                           linear_solver_t;
 
     typedef smart_ptr <jacobian_t, true>            sp_jacobian_t;
     typedef smart_ptr <jmatrix_t, true>             sp_jmatrix_t;
@@ -53,8 +51,8 @@ namespace blue_sky {
     preconditioner_ (jacobian_->get_prec ()),
     rhs_ (jmatrix_->get_rhs ()),
     sol_ (jmatrix_->get_solution ()),
-    regular_matrix_ (jmatrix_->get_regular_matrix ()),
-    irregular_matrix_ (jmatrix_->get_irregular_matrix ())
+    regular_matrix_ (jmatrix_->get_flux_matrix ()),
+    irregular_matrix_ (jmatrix_->get_facility_matrix ())
     {
       if (!jmatrix_)
         {
@@ -118,7 +116,8 @@ namespace blue_sky {
       const sp_matrix_t &locked_working_mx (working_matrix);
 
       debug::print_memory_info ("-> jacobian_solver_solve");
-      index_t ret_code = solve_helper (&*solver_, &(*locked_working_mx), rhs_, sol_);
+      index_t ret_code = solver_->solve (&(*locked_working_mx), rhs_, sol_);
+      //index_t ret_code = solve_helper (&*solver_, &(*locked_working_mx), rhs_, sol_);
       debug::print_memory_info ("<- jacobian_solver_solve");
 #endif //_MPI
 
@@ -143,9 +142,9 @@ namespace blue_sky {
       ++cur_iter;
 #endif //__FULL_MATRIX_PRINT__
 
-      n_lin_iters = solver_->get_prop()->get_iters();
-      item_t tol = solver_->get_prop()->get_final_resid();
-      if (tol > solver_->get_prop()->get_tolerance())
+      n_lin_iters = solver_->get_prop()->get_i (iters_idx);
+      item_t tol = solver_->get_prop()->get_f (final_res_idx);
+      if (tol > solver_->get_prop()->get_f (tol_idx))
         {
           BOSERR (section::solvers, level::error)
             << "Linear solver failed with tolerance "
@@ -194,11 +193,11 @@ namespace blue_sky {
     sp_solver_t       solver_;              //!< Solver from Jacobian
     sp_solver_t       preconditioner_;      //!< Preconditioner from Jacobian
 
-    rhs_item_array_t  &rhs_;                //!< RHS vector of Jacobian
-    item_array_t      &sol_;                //!< Solution vector of Jacobian
+    rhs_item_array_t  rhs_;                //!< RHS vector of Jacobian
+    item_array_t      sol_;                //!< Solution vector of Jacobian
 
-    sp_matrix_t       regular_matrix_;      //!< Regular part of Jacobian
-    sp_matrix_t       irregular_matrix_;    //!< Irregular part of Jacobian
+    sp_bcsr_matrix_t  regular_matrix_;      //!< Regular part of Jacobian
+    sp_bcsr_matrix_t  irregular_matrix_;    //!< Irregular part of Jacobian
   };
 
 

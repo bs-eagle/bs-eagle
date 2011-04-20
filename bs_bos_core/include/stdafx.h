@@ -149,7 +149,7 @@
 #include "print_process_memory_info.h"
 #include "write_time_to_log.h"
 
-#include "bs_array_map.h"
+//#include "bs_array_map.h"
 #include "interpolation_macro.h"
 #include "rs_mesh_iface.h"
 #include "rs_smesh_iface.h"
@@ -158,9 +158,15 @@
 #include "arrays_tables.h"
 #include "convert_units.h"
 
+// sergey.miryanov - to compile pvt
+#include "table_iface.h"
+
 #include "pvt_water.h"
 #include "pvt_gas.h"
 #include "pvt_oil.h"
+
+// sergey.miryanov - to compile scal
+#include "vartype_table_iface.h"
 
 #include "scal_3p.h"
 #include "scale_array_holder.h"

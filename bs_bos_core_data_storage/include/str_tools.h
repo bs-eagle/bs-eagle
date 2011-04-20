@@ -390,7 +390,7 @@ namespace blue_sky {
       }
 
     // try to read double value from input string
-    double t = (float)strtod (start_ptr, end_ptr);
+    double t = strtod (start_ptr, end_ptr);
     // check reading result
     // if have read nothing return -3
     if (start_ptr == *end_ptr)

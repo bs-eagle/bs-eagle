@@ -18,6 +18,7 @@
 #include "arrays.h"
 #include "arrays_tables.h"
 #include "convert_units.h"
+#include "auto_value.h"
 
 #include "data_dimens.h"
 
@@ -62,10 +63,10 @@ enum   //! indexes for dimension parameters
   convert_arrays (index_t cells_count, const sp_index_array_t index_map, array_t &array, const carray_t &carray)
   {
     index_t *index_map_data = &(*index_map)[0];
-    typename carray_t::pointed_t::value_type *carray_data = &(*carray)[0];
+    //typename carray_t::pointed_t::value_type *carray_data = &(*carray)[0];
     
     for (index_t i = 0; i < cells_count; ++i)
-      array[i] = carray_data[index_map_data[i]];
+      array[i] = (*carray)[index_map_data[i]];
   }
 
   /*!
@@ -92,8 +93,8 @@ enum   //! indexes for dimension parameters
 
       struct pvt_info
         {
-          spv_float							      main_data_;
-          auto_value <bool, false>		has_density_;
+          spv_float				    main_data_;
+          auto_value <bool, false>  has_density_;
           auto_value <t_float>      density_;
           auto_value <t_float>      molar_density_;
         };
@@ -157,8 +158,11 @@ enum   //! indexes for dimension parameters
       //int test_token (int prev, int cur);
 
       
-      spv_int    get_i_array (const std::string &array_name);
-      spv_float   get_fp_array (const std::string &array_name);
+      spv_int    get_i_array (const std::string &array_name, bool safe = true);
+      spv_float   get_fp_array (const std::string &array_name, bool safe = true);
+
+      bool contains_i_array (const std::string &array_name);
+      bool contains_fp_array (const std::string &array_name);
 
       spv_int create_i_array (const std::string &name, t_int *dimens, t_int def_value = 0);
       spv_float create_fp_array (const std::string &name, t_int *dimens, t_float def_value = 0);

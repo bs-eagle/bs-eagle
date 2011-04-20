@@ -20,25 +20,24 @@ namespace wells {
    * \class default_well
    * \brief Default implementation of well
    * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN default_well : public well <strategy_t>
+  class BS_API_PLUGIN default_well : public well 
   {
   public:
-      typedef well <strategy_t>                         base_t;
-      typedef well <strategy_t>                         well_t;
-      typedef typename base_t::item_array_t             item_array_t;
-      typedef typename base_t::rhs_item_array_t         rhs_item_array_t;
-      typedef typename base_t::index_array_t            index_array_t;
-      typedef typename base_t::index_t                  index_t;
-      typedef typename base_t::item_t                   item_t;
-      typedef typename base_t::rhs_item_t               rhs_item_t;
+      typedef well                                      base_t;
+      typedef well                                      well_t;
+      typedef base_t::item_array_t                      item_array_t;
+      typedef base_t::rhs_item_array_t                  rhs_item_array_t;
+      typedef base_t::index_array_t                     index_array_t;
+      typedef base_t::index_t                           index_t;
+      typedef base_t::item_t                            item_t;
+      typedef base_t::rhs_item_t                        rhs_item_t;
 
-      typedef typename base_t::sp_calc_model_t          sp_calc_model_t;
-      typedef typename base_t::sp_mesh_iface_t          sp_mesh_iface_t;
-      typedef typename base_t::sp_jmatrix_t             sp_jmatrix_t;
+      typedef base_t::sp_calc_model_t                   sp_calc_model_t;
+      typedef base_t::sp_mesh_iface_t                   sp_mesh_iface_t;
+      typedef base_t::sp_jmatrix_t                      sp_jmatrix_t;
 
-      typedef typename base_t::connection_t             connection_t;
-      typedef default_connection <strategy_t>           default_connection_t;
+      typedef base_t::connection_t                      connection_t;
+      typedef default_connection                        default_connection_t;
 
       typedef typename base_t::sp_connection_t          sp_connection_t;
       typedef smart_ptr <default_connection_t>          sp_default_connection_t;
@@ -59,7 +58,7 @@ namespace wells {
     default_well (const std::string &well_name);
 
     //! blue-sky type declaration
-    BLUE_SKY_TYPE_DECL_T (default_well <strategy_t>);
+    BLUE_SKY_TYPE_DECL (default_well);
 
     /**
      * \brief  Restores solution
@@ -69,7 +68,7 @@ namespace wells {
      * \param  block_size size of one block in vectors
      * */
     void
-    restore_solution (double dt, const item_array_t &p_sol, const item_array_t &s_sol, index_t block_size);
+    restore_solution (double dt, const spv_double &p_sol, const spv_double &s_sol, index_t block_size);
 
     /**
      * \brief  Calculates rate and deriv values for well and 
@@ -163,7 +162,7 @@ namespace wells {
      *         secondary connections
      * \return Begin iterator
      * */
-    virtual connection_iterator <strategy_t>
+    virtual connection_iterator
     connections_begin () const;
 
     /**
@@ -171,7 +170,7 @@ namespace wells {
      *         secondary connections
      * \return End iterator
      * */
-    virtual connection_iterator <strategy_t>
+    virtual connection_iterator
     connections_end () const;
 
     /**
@@ -213,7 +212,7 @@ namespace wells {
      * \return True if connection is in primary_connection list
      * */
     virtual bool
-    is_primary_connection (const connection_iterator <strategy_t> &it) const;
+    is_primary_connection (const connection_iterator &it) const;
 
     /**
      * \brief  Checks well on shut if not shut fills 
@@ -241,7 +240,7 @@ namespace wells {
      * \param  markers
      * */
     virtual void 
-    fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const;
+    fill_jacobian (double dt, index_t block_size, const spv_long &rows, spv_long &cols, spv_double &values, stdv_long &markers) const;
 
     /**
      * \brief  Fills rhs array with rate values

@@ -17,10 +17,6 @@
 #include "py_data_class.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
-// WTF??
-#include "well_results_storage.h"
-#include "fip_results_storage.h"
-
 #include "export_python_wrapper.h"
 
 using namespace boost::python;
@@ -171,48 +167,31 @@ namespace blue_sky
         ;
     }
 
-    template <template <typename> class T>
+    template <typename T>
     void
     export_pvt_array (const char *name)
     {
-      typedef std::vector <smart_ptr <T <base_strategy_di> > > T_di;
-      typedef std::vector <smart_ptr <T <base_strategy_fi> > > T_fi;
-      typedef std::vector <smart_ptr <T <base_strategy_mixi> > > T_mixi;
+      typedef std::vector <smart_ptr <T> > T_v;
 
-      class_ <T_di> (std::string (std::string (name) + "_di").c_str ())
-        .def ("__getitem__",  get_pvt_item <T_di>)
-        .def ("__len__",      &T_di::size)
-        .def ("__iter__",     get_pvt_iterator <T_di>)
-        ;
-      class_ <T_fi> (std::string (std::string (name) + "_fi").c_str ())
-        .def ("__getitem__",  get_pvt_item <T_fi>)
-        .def ("__len__",      &T_fi::size)
-        .def ("__iter__",     get_pvt_iterator <T_fi>)
-        ;
-      class_ <T_mixi> (std::string (std::string (name) + "_mixi").c_str ())
-        .def ("__getitem__",  get_pvt_item <T_mixi>)
-        .def ("__len__",      &T_mixi::size)
-        .def ("__iter__",     get_pvt_iterator <T_mixi>)
+      class_ <T_v> (name)
+        .def ("__getitem__",  get_pvt_item <T_v>)
+        .def ("__len__",      &T_v::size)
+        .def ("__iter__",     get_pvt_iterator <T_v>)
         ;
 
-      export_pvt_iterator <T_di> ("pvt_array_iter_di");
-      export_pvt_iterator <T_fi> ("pvt_array_iter_fi");
-      export_pvt_iterator <T_mixi> ("pvt_array_iter_mixi");
+      export_pvt_iterator <T_v> ("pvt_array_iter");
     }
 
     void py_export_calc_model()
     {
-      strategy_exporter::export_base_ext <calc_model_data, calc_model_data_exporter, class_type::concrete_class> ("calc_model_data");
-
-      export_calc_model_data_vector <shared_vector <calc_model_data <base_strategy_di> > >   ("calc_model_data_vector_di");
-      export_calc_model_data_vector <shared_vector <calc_model_data <base_strategy_fi> > >   ("calc_model_data_vector_fi");
-      export_calc_model_data_vector <shared_vector <calc_model_data <base_strategy_mixi> > > ("calc_model_data_vector_mixi");
+      base_exporter_nobs <calc_model_data, calc_model_data_exporter, class_type::concrete_class>::export_class ("calc_model_data");
+      export_calc_model_data_vector <shared_vector <calc_model_data> >   ("calc_model_data_vector");
 
       export_pvt_array <pvt_dead_oil> ("pvt_dead_oil_array");
       export_pvt_array <pvt_water> ("pvt_water_array");
       export_pvt_array <pvt_gas> ("pvt_gas");
 
-      strategy_exporter::export_base <calc_model, calc_model_exporter> ("calc_model");
+      base_exporter <calc_model, calc_model_exporter>::export_class ("calc_model");
     }
 
   } //ns python

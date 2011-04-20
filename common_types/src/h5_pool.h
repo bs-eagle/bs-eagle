@@ -74,7 +74,8 @@ namespace blue_sky
        * 
        * @param name    -- <INPUT> given name of data
        * 
-       * @return smart pointer to the data vector
+       * @return smart pointer to the data vector or
+       * raise exception if no array with name 'name'
        */
       virtual spv_float get_fp_data (const std::string &name);
 
@@ -83,9 +84,30 @@ namespace blue_sky
        * 
        * @param name    -- <INPUT> given name of data
        * 
-       * @return smart pointer to the data vector
+       * @return smart pointer to the data vector or
+       * null pointer if no array with name 'name'
+       */
+      virtual spv_float get_fp_data_unsafe (const std::string &name);
+
+      /** 
+       * @brief read data by name from file and return it as vector
+       * 
+       * @param name    -- <INPUT> given name of data
+       * 
+       * @return smart pointer to the data vector or 
+       * raise exception if no array with name 'name'
        */
       virtual spv_int get_i_data (const std::string &name);
+
+      /** 
+       * @brief read data by name from file and return it as vector
+       * 
+       * @param name    -- <INPUT> given name of data
+       * 
+       * @return smart pointer to the data vector or 
+       * null pointer if no array with name 'name'
+       */
+      virtual spv_int get_i_data_unsafe (const std::string &name);
 
       /** 
        * @brief rewrite existing array in file

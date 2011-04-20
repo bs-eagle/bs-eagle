@@ -389,14 +389,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\data_manager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\include\data_manager.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\prvd_table.cpp"
 				>
 			</File>
@@ -423,14 +415,6 @@
 					RelativePath=".\include\py_data_class.h"
 					>
 				</File>
-				<File
-					RelativePath=".\src\py_data_manager.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\py_data_manager.h"
-					>
-				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -441,7 +425,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\keyword_manager.h"
+				RelativePath=".\include\keyword_manager.h"
 				>
 			</File>
 			<File
@@ -460,6 +444,34 @@
 				RelativePath=".\src\py_keyword_manager.h"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="hydrodynamic_model"
+			>
+			<File
+				RelativePath=".\src\hydrodynamic_model.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\hydrodynamic_model.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\hydrodynamic_model_iface.h"
+				>
+			</File>
+			<Filter
+				Name="python"
+				>
+				<File
+					RelativePath=".\src\py_hydrodynamic_model.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\include\py_hydrodynamic_model.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath=".\src\bs_bos_core_data_storage.cpp"

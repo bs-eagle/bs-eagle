@@ -24,8 +24,7 @@ namespace blue_sky
   p_flag[name_idx] = flag;
 
 //! default constructor
-  template <class strategy_t>
-  norms_storage <strategy_t> ::norms_storage ()
+  norms_storage::norms_storage ()
   {
     val.resize (NORMS_COUNTER);
     name.resize (NORMS_COUNTER);
@@ -62,15 +61,13 @@ namespace blue_sky
   }
 
 //! default constructor
-  template <class strategy_t>
-  norms_storage<strategy_t>::~norms_storage ()
+  norms_storage::~norms_storage ()
   {
   }
 
 //! clear all norms
-  template <class strategy_t>
   void
-  norms_storage<strategy_t>::clear ()
+  norms_storage::clear ()
   {
     val.assign (val.size (), 0);
     idx.assign (0);
@@ -104,18 +101,12 @@ namespace blue_sky
   }*/
 
 
-  template <class strategy_t>
-  norms_storage <strategy_t> &
-  norms_storage<strategy_t>::operator= (const norms_storage <strategy_t> &rhs)
+  norms_storage &
+  norms_storage::operator= (const norms_storage &rhs)
   {
     val = rhs.val;
-    //memcpy (idx, rhs.idx, sizeof (int) * NORMS_COUNTER);
     std::copy (rhs.idx.begin(),rhs.idx.end(), idx.begin());
     return *this;
   }
-
-  template class norms_storage <base_strategy_di>;
-  template class norms_storage <base_strategy_fi>;
-  template class norms_storage <base_strategy_mixi>;
 
 } //ns bs

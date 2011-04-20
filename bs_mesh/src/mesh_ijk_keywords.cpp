@@ -27,13 +27,12 @@ namespace blue_sky
     //*this = src;
   }
   
-  void mesh_ijk_keywords::mesh_ijk_handler(const std::string & /*keyword*/, keyword_params_t &params)
+  void mesh_ijk_keywords::mesh_ijk_reactor(const std::string & /*keyword*/, keyword_params_t &params)
     {
-      sp_idata_t idata (params.data, bs_dynamic_cast ());
       sp_bs_mesh_ijk_t ijk_mesh (BS_KERNEL.create_object (bs_mesh_ijk ::bs_type ()), bs_dynamic_cast());
-      params.mesh = sp_mesh_iface_t (ijk_mesh);
-      activate_keywords (params.km);
-      base_t::activate_keywords (params.km);
+      params.hdm->set_mesh (ijk_mesh);
+      activate_keywords (params.hdm->get_keyword_manager());
+      base_t::activate_keywords (params.hdm->get_keyword_manager());
     }
   
   
@@ -43,7 +42,7 @@ namespace blue_sky
       if (provider == "")
         {
           provider = "MESH_IJK";
-          keyword_manager->register_keyword ("MESH_IJK", keyword_handler (&this_t::mesh_ijk_handler));
+          keyword_manager->register_keyword ("MESH_IJK", keyword_handler (0, &this_t::mesh_ijk_reactor));
         }
       keyword_manager->register_supported_keyword ("DX", provider);
       keyword_manager->register_supported_keyword ("DY", provider);
@@ -53,17 +52,16 @@ namespace blue_sky
     }
   
   
-  void mesh_ijk_keywords::activate_keywords (sp_objbase &km)
+  void mesh_ijk_keywords::activate_keywords (sp_km_iface_t keyword_manager)
     {
-      sp_km_iface_t keyword_manager (km, bs_dynamic_cast ());
       t_int dx_dimens[] = {1,0,1,0,1,0};
       t_int tops_dimens[] = {1,0,1,0,0,1};
       t_float def_value = 0.0;
       
-      keyword_manager->register_keyword ("DX", keyword_handler (0, def_value, &dx_dimens[0]));
-      keyword_manager->register_keyword ("DY", keyword_handler (0, def_value, &dx_dimens[0]));
-      keyword_manager->register_keyword ("DZ", keyword_handler (0, def_value, &dx_dimens[0]));
-      keyword_manager->register_keyword ("TOPS", keyword_handler (0, def_value, &tops_dimens[0]));
+      keyword_manager->register_fp_pool_keyword ("DX", &dx_dimens[0], def_value, 0);
+      keyword_manager->register_fp_pool_keyword ("DY", &dx_dimens[0], def_value, 0);
+      keyword_manager->register_fp_pool_keyword ("DZ", &dx_dimens[0], def_value, 0);
+      keyword_manager->register_fp_pool_keyword ("TOPS", &tops_dimens[0], def_value, 0);
     }  
 
     

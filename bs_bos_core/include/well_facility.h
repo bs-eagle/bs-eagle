@@ -11,7 +11,6 @@
 
 namespace blue_sky {
 
-  template <typename strategy_t>
   class well;
 
 namespace wells {
@@ -20,7 +19,6 @@ namespace wells {
    * \class well_facility_iface
    * \brief Base interface for well facilities
    * */
-  template <typename strategy_t>
   struct well_facility_iface : public objbase
   {
     virtual ~well_facility_iface () {}
@@ -30,14 +28,14 @@ namespace wells {
      * \param  well
      * */
     virtual void
-    pre_process (well <strategy_t> *well) = 0;
+    pre_process (well *well) = 0;
 
     /**
      * \brief  Performs actions after well process function
      * \param  well
      * */
     virtual void
-    post_process (well <strategy_t> *well) = 0;
+    post_process (well *well) = 0;
   };
 
 } // namespace wells

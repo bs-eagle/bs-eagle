@@ -19,22 +19,20 @@ namespace blue_sky {
    * \brief Base class (interface) for facilities (wells e.t.c)
    * \todo  Should be renamed to facility_iface
    * */
-  template <typename strategy_t>
   class BS_API_PLUGIN facility_base : public objbase
   {
   public:
-    typedef typename strategy_t::index_array_t    index_array_t;
-    typedef typename strategy_t::item_array_t     item_array_t;
-    typedef typename strategy_t::rhs_item_array_t rhs_item_array_t;
-    typedef typename strategy_t::index_t          index_t;
+    typedef spv_long                        index_array_t;
+    typedef spv_double                      item_array_t;
+    typedef spv_float                       rhs_item_array_t;
+    typedef t_long                          index_t;
 
-    typedef calc_model <strategy_t>               calc_model_t;
-    typedef rs_mesh_iface <strategy_t>            mesh_iface_t;
-    typedef jacobian_matrix <strategy_t>          jmatrix_t;
+    typedef rs_mesh_iface                   mesh_iface_t;
+    typedef jac_matrix_iface                jmatrix_t;
 
-    typedef smart_ptr <calc_model_t, true>        sp_calc_model_t;
-    typedef smart_ptr <mesh_iface_t, true>        sp_mesh_iface_t;
-    typedef smart_ptr <jmatrix_t, true>           sp_jmatrix_t;
+    typedef smart_ptr <calc_model, true>    sp_calc_model_t;
+    typedef smart_ptr <mesh_iface_t, true>  sp_mesh_iface_t;
+    typedef smart_ptr <jmatrix_t, true>     sp_jmatrix_t;
 
   public:
     //! destructor
@@ -58,7 +56,12 @@ namespace blue_sky {
      * \param  markers
      * */
     virtual void 
-    fill_jacobian (double dt, index_t block_size, const index_array_t &rows, index_array_t &cols, rhs_item_array_t &values, index_array_t &markers) const = 0;
+    fill_jacobian (double dt, 
+      index_t         block_size, 
+      const spv_long  &rows, 
+      spv_long        &cols, 
+      spv_double      &values, 
+      stdv_long       &markers) const = 0;
 
     /**
      * \brief  Fills rhs array with rate values
@@ -92,7 +95,7 @@ namespace blue_sky {
      * \param  block_size size of one block in vectors
      * */
     virtual void 
-    restore_solution (double dt, const item_array_t &p_sol, const item_array_t &s_sol, index_t block_size) = 0;
+    restore_solution (double dt, const spv_double &p_sol, const spv_double &s_sol, index_t block_size) = 0;
 
     /**
      * \brief  Performs actions before start of each large step
