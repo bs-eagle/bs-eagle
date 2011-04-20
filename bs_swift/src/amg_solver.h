@@ -244,17 +244,19 @@ namespace blue_sky
     public:
     protected:
       sp_base_t             prec;         //!< pointer to the preconditioner
+
+    private:
       sp_prop_t             prop;         //!< properties for solvers
       sp_base_t             lu_solver;    //!< LU solver for last level
       sp_dens_matrix_t      lu_fact;      //!< dense matrix on last level
       spv_double            wksp;         //!< temporary vector
       sp_bcsr_t             r_matrix;     //!< temporary matrix for transposed p_matrix
 
-      vec_sp_smbuild_t      smbuilder_vec;    //!<
-      vec_sp_coarse_t       coarser_vec;      //!<
-      vec_sp_pbuild_t       pbuilder_vec;     //!<
-      vec_sp_smooth_t       pre_smoother_vec; //!<
-      vec_sp_smooth_t       post_smoother_vec;//!<
+      vec_sp_smbuild_t      smbuilder_vec;    //!< vector of smbuilders on each level
+      vec_sp_coarse_t       coarser_vec;      //!< vector of coarsers on each level
+      vec_sp_pbuild_t       pbuilder_vec;     //!< vector of pbuilders on each level
+      vec_sp_smooth_t       pre_smoother_vec; //!< vector of pre_smoothers on each level
+      vec_sp_smooth_t       post_smoother_vec;//!< vector of post_smoothers on each level
 
       vec_sp_bcsr_t         a;            //!< coarse level matrices vector
       vec_sp_bcsr_t         p;            //!< coarse level prolongation matrices vector
