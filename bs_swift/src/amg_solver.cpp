@@ -31,31 +31,33 @@ namespace blue_sky
       cf.reserve (AMG_N_LEVELS_RESERVE);
       rhs.reserve (AMG_N_LEVELS_RESERVE);
       sol.reserve (AMG_N_LEVELS_RESERVE);
-      smbuilder.reserve (AMG_N_LEVELS_RESERVE);
-      coarser.reserve (AMG_N_LEVELS_RESERVE);
-      pbuilder.reserve (AMG_N_LEVELS_RESERVE);
+      smbuilder_vec.reserve (AMG_N_LEVELS_RESERVE);
+      coarser_vec.reserve (AMG_N_LEVELS_RESERVE);
+      pbuilder_vec.reserve (AMG_N_LEVELS_RESERVE);
+      pre_smoother_vec.reserve (AMG_N_LEVELS_RESERVE);
+      post_smoother_vec.reserve (AMG_N_LEVELS_RESERVE);
 
       // set default
-      smbuilder.resize (1);
-      coarser.resize (1);
-      pbuilder.resize (1);
-      pre_smoother.resize (1);
-      post_smoother.resize (1);
-      smbuilder[0] = BS_KERNEL.create_object ("simple_smbuilder");
-      coarser[0] = BS_KERNEL.create_object ("cljp_coarse");
-      pbuilder[0] = BS_KERNEL.create_object ("standart2_pbuild");
-      pre_smoother[0] = BS_KERNEL.create_object ("gs_solver");
-      post_smoother[0] = BS_KERNEL.create_object ("gs_solver");
+      smbuilder_vec.resize (1);
+      coarser_vec.resize (1);
+      pbuilder_vec.resize (1);
+      pre_smoother_vec.resize (1);
+      post_smoother_vec.resize (1);
+      smbuilder_vec[0] = BS_KERNEL.create_object ("simple_smbuilder");
+      coarser_vec[0] = BS_KERNEL.create_object ("cljp_coarse");
+      pbuilder_vec[0] = BS_KERNEL.create_object ("standart2_pbuild");
+      pre_smoother_vec[0] = BS_KERNEL.create_object ("gs_solver");
+      post_smoother_vec[0] = BS_KERNEL.create_object ("gs_solver");
       //set smoother prop
-      pre_smoother[0]->get_prop ()->set_b ("inverse", false);
-      post_smoother[0]->get_prop ()->set_b ("inverse", false);
+      pre_smoother_vec[0]->get_prop ()->set_b ("inverse", false);
+      post_smoother_vec[0]->get_prop ()->set_b ("inverse", false);
 
       lu_solver = BS_KERNEL.create_object ("blu_solver");
       lu_fact = BS_KERNEL.create_object ("dens_matrix");
       wksp = BS_KERNEL.create_object (v_double::bs_type ());
       r_matrix = BS_KERNEL.create_object ("bcsr_matrix");
-      BS_ASSERT (lu_fact);
       BS_ASSERT (lu_solver);
+      BS_ASSERT (lu_fact);
       BS_ASSERT (wksp);
       BS_ASSERT (r_matrix);
     }
@@ -175,7 +177,7 @@ namespace blue_sky
         {
           for (level = 0; level < n_levels; ++level)
             {
-              sp_smooth_t pre_smoother = get_pre_smoother (level);
+              sp_smooth_t pre_smoother = get_tool (pre_smoother_vec, level);
               BS_ASSERT (pre_smoother);
 
               t_long n = a[level]->get_n_rows ();
@@ -212,7 +214,7 @@ namespace blue_sky
 
           for (level = n_levels - 1; level >= 0; --level)
             {
-              sp_smooth_t post_smoother = get_post_smoother (level);
+              sp_smooth_t post_smoother = get_tool (post_smoother_vec, level);
               BS_ASSERT (post_smoother);
 
               //interpolation x = x + P * e^(k+1)
@@ -329,12 +331,12 @@ namespace blue_sky
             }
 
           // init tools
-          sp_smbuild_t s_builder = get_smbuilder (level);
-          sp_coarse_t  coarser   = get_coarser   (level);
-          sp_pbuild_t  p_builder = get_pbuilder  (level);
-          BS_ASSERT (s_builder);
+          sp_smbuild_t smbuilder = get_tool (smbuilder_vec, level);
+          sp_coarse_t  coarser   = get_tool (coarser_vec, level);
+          sp_pbuild_t  pbuilder = get_tool (pbuilder_vec, level);
+          BS_ASSERT (smbuilder);
           BS_ASSERT (coarser);
-          BS_ASSERT (p_builder);
+          BS_ASSERT (pbuilder);
           //std::cout<<"strength type: "<<s_builder->py_str ()<<"\n";
           //std::cout<<"coarse   type: "<<coarser->py_str ()<<"\n";
           //std::cout<<"interp   type: "<<p_builder->py_str ()<<"\n";
@@ -350,7 +352,7 @@ namespace blue_sky
               cf.push_back (cf_markers);
             }
 
-          t_long max_conn = s_builder->build (a[level], strength_threshold,
+          t_long max_conn = smbuilder->build (a[level], strength_threshold,
                                               max_row_sum, s[level]);
           // calc s_nnz
           //t_long s_nnz = 0;
@@ -393,7 +395,7 @@ namespace blue_sky
             }
 
           // build prolongation (interpolation) matrix
-          p_builder->build (a[level], n_coarse_size, max_conn,
+          pbuilder->build (a[level], n_coarse_size, max_conn,
                             cf[level], s[level], p[level]);
 
           // initialize next level matrix

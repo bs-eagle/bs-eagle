@@ -117,119 +117,34 @@ namespace blue_sky
           return prop->get_i (n_levels_max_idx);
         }
 
-      //! store number of AMG setup levels to prop
-      //! store maximal number of AMG levels
-      virtual void set_n_levels (t_long n_levels)
-        {
-          t_long n_levels_max = prop->get_i (n_levels_max_idx);
-          if (n_levels > n_levels_max)
-            prop->set_i (n_levels_max_idx, n_levels);
-          prop->set_i (n_levels_idx, n_levels);
-        }
-
       //! set strength matrix builder for amg level
       void set_smbuilder (unsigned int level, sp_smbuild_t sp_smbuilder_iface)
         {
-          unsigned int size = smbuilder.size ();
-          //use last smbuilder [size-1]) for [size],..,[level-1]
-          if (size <= level)
-            {
-              smbuilder.resize (level + 1);
-              for (unsigned int i = size; i < level; i++)
-                {
-                  smbuilder[i] = smbuilder[size - 1];
-                }
-            }
-          smbuilder[level] = sp_smbuilder_iface;
+          set_tool (smbuilder_vec, level, sp_smbuilder_iface);
         }
 
       //! set coarse type for amg level
       void set_coarser (unsigned int level, sp_coarse_t sp_coarse_iface)
         {
-          unsigned int size = coarser.size ();
-          //use last coarser [size-1]) for [size],..,[level-1]
-          if (size <= level)
-            {
-              coarser.resize (level + 1);
-              for (unsigned int i = size; i < level; i++)
-                {
-                  coarser[i] = coarser[size - 1];
-                }
-            }
-          coarser[level] = sp_coarse_iface;
+          set_tool (coarser_vec, level, sp_coarse_iface);
         }
 
       //! set interpolation matrix builder for amg level
       void set_pbuilder (unsigned int level, sp_pbuild_t sp_pbuilder_iface)
         {
-          unsigned int size = pbuilder.size ();
-          //use last pbuilder [size-1]) for [size],..,[level-1]
-          if (size <= level)
-            {
-              pbuilder.resize (level + 1);
-              for (unsigned int i = size; i < level; i++)
-                {
-                  pbuilder[i] = pbuilder[size - 1];
-                }
-            }
-          pbuilder[level] = sp_pbuilder_iface;
+          set_tool (pbuilder_vec, level, sp_pbuilder_iface);
         }
 
       //! set pre smoothing method for amg level
       void set_pre_smoother (unsigned int level, sp_smooth_t sp_smooth_iface)
         {
-          unsigned int size = pre_smoother.size ();
-          //use last pbuilder [size-1]) for [size],..,[level-1]
-          if (size <= level)
-            {
-              pre_smoother.resize (level + 1);
-              for (unsigned int i = size; i < level; i++)
-                {
-                  pre_smoother[i] = pre_smoother[size - 1];
-                }
-            }
-          pre_smoother[level] = sp_smooth_iface;
+          set_tool (pre_smoother_vec, level, sp_smooth_iface);
         }
 
       //! set post smoothing method for amg level
       void set_post_smoother (unsigned int level, sp_smooth_t sp_smooth_iface)
         {
-          unsigned int size = post_smoother.size ();
-          //use last pbuilder [size-1]) for [size],..,[level-1]
-          if (size <= level)
-            {
-              post_smoother.resize (level + 1);
-              for (unsigned int i = size; i < level; i++)
-                {
-                  post_smoother[i] = post_smoother[size - 1];
-                }
-            }
-          post_smoother[level] = sp_smooth_iface;
-        }
-
-      sp_smbuild_t get_smbuilder (unsigned int level)
-        {
-          return (level < smbuilder.size ()) ? smbuilder[level] : smbuilder[smbuilder.size () - 1];
-        }
-
-      sp_coarse_t get_coarser (unsigned int level)
-        {
-          return (level < coarser.size ()) ? coarser[level] : coarser[coarser.size () - 1];
-        }
-
-      sp_pbuild_t get_pbuilder (unsigned int level)
-        {
-          return (level < pbuilder.size ()) ? pbuilder[level] : pbuilder[pbuilder.size () - 1];
-        }
-
-      sp_smooth_t get_pre_smoother (unsigned int level)
-        {
-          return (level < pre_smoother.size ()) ? pre_smoother[level] : pre_smoother[pre_smoother.size () - 1];
-        }
-
-      sp_smooth_t get_post_smoother (unsigned int level)
-        {
-          return (level < post_smoother.size ()) ? post_smoother[level] : post_smoother[post_smoother.size () - 1];
+          set_tool (post_smoother_vec, level, sp_smooth_iface);
         }
 
       const vec_sp_bcsr_t get_matrices () const
@@ -281,6 +196,48 @@ namespace blue_sky
 
     protected:
       void init_prop ();
+
+    private:
+      //! store number of AMG setup levels to prop
+      //! store maximal number of AMG levels to prop
+      virtual void set_n_levels (t_long n_levels)
+        {
+          t_long n_levels_max = prop->get_i (n_levels_max_idx);
+          if (n_levels > n_levels_max)
+            prop->set_i (n_levels_max_idx, n_levels);
+          prop->set_i (n_levels_idx, n_levels);
+        }
+
+      //! set tool for amg level
+      //! set tools_vec[level] = new_tool, add (and set =last) elements if need
+      template <class sp_tool_iface> inline
+      void set_tool (std::vector<sp_tool_iface> tools_vec,
+                     const unsigned int level,
+                     const sp_tool_iface new_tool)
+        {
+          unsigned int size = tools_vec.size ();
+          //use last tools_vec [size-1]) for [size],..,[level-1]
+          if (size <= level)
+            {
+              tools_vec.resize (level + 1);
+              for (unsigned int i = size; i < level; i++)
+                {
+                  tools_vec[i] = tools_vec[size - 1];
+                }
+            }
+          tools_vec[level] = new_tool;
+        }
+
+      //! get tool for amg level
+      //! return tools_vec[level] if exist,  else return last: tools_vec[size-1]
+      template <class sp_tool_iface> inline
+      sp_tool_iface get_tool (const std::vector<sp_tool_iface> tools_vec,
+                              const unsigned int level) const
+        {
+          return (level < tools_vec.size ()) ? tools_vec[level] :
+                  tools_vec[tools_vec.size () - 1];
+        }
+
       //-----------------------------------------
       //  VARIABLES
       //-----------------------------------------
@@ -293,11 +250,11 @@ namespace blue_sky
       spv_double            wksp;         //!< temporary vector
       sp_bcsr_t             r_matrix;     //!< temporary matrix for transposed p_matrix
 
-      vec_sp_smbuild_t      smbuilder;    //!<
-      vec_sp_coarse_t       coarser;      //!<
-      vec_sp_pbuild_t       pbuilder;     //!<
-      vec_sp_smooth_t       pre_smoother; //!<
-      vec_sp_smooth_t       post_smoother;//!<
+      vec_sp_smbuild_t      smbuilder_vec;    //!<
+      vec_sp_coarse_t       coarser_vec;      //!<
+      vec_sp_pbuild_t       pbuilder_vec;     //!<
+      vec_sp_smooth_t       pre_smoother_vec; //!<
+      vec_sp_smooth_t       post_smoother_vec;//!<
 
       vec_sp_bcsr_t         a;            //!< coarse level matrices vector
       vec_sp_bcsr_t         p;            //!< coarse level prolongation matrices vector
