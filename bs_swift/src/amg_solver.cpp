@@ -53,9 +53,11 @@ namespace blue_sky
       lu_solver = BS_KERNEL.create_object ("blu_solver");
       lu_fact = BS_KERNEL.create_object ("dens_matrix");
       wksp = BS_KERNEL.create_object (v_double::bs_type ());
+      r_matrix = BS_KERNEL.create_object ("bcsr_matrix");
       BS_ASSERT (lu_fact);
       BS_ASSERT (lu_solver);
       BS_ASSERT (wksp);
+      BS_ASSERT (r_matrix);
     }
 
     //! copy constructor
@@ -104,8 +106,10 @@ namespace blue_sky
         // AMG output props
         prop->add_property_f (0, cop_idx,
                               std::string ("Operator compexity"));
-        prop->add_property_i (1, n_levels_idx,
+        prop->add_property_i (0, n_levels_idx,
                               std::string ("Number of coarse levels"));
+        prop->add_property_i (0, n_levels_max_idx,
+                              std::string ("Maximal number of coarse levels"));
       }
 
     int amg_solver::solve (sp_matrix_t matrix_, spv_double sp_rhs, spv_double sp_sol)
@@ -130,6 +134,8 @@ namespace blue_sky
       // rhs and solution on first level
       rhs[0] = sp_rhs;
       sol[0] = sp_sol;
+
+      //initial guess
       sp_sol->assign (0);
 
       int level = 0;
@@ -296,23 +302,28 @@ namespace blue_sky
 
       t_double nnz = matrix->get_n_non_zeros ();
       t_double cop = nnz;
-      // matrix on first level
-      if (a.empty ())
-        a.push_back (matrix);
+
+      if (a.empty ()) //if setup called first time
+        {
+          // matrix on first level
+          a.push_back (matrix);
+          // init first level solution and rhs vector (empty, will be replaced at solve())
+          spv_double first_level_sol = BS_KERNEL.create_object (v_double::bs_type ());
+          spv_double first_level_rhs = BS_KERNEL.create_object (v_double::bs_type ());
+          BS_ASSERT (first_level_sol);
+          BS_ASSERT (first_level_rhs);
+          sol.push_back (first_level_sol);
+          rhs.push_back (first_level_rhs);
+        }
       else
-        a[0] = matrix;
-      // init first level solution and rhs vector (empty, will be replaced at solve())
-      spv_double first_level_sol = BS_KERNEL.create_object (v_double::bs_type ());
-      spv_double first_level_rhs = BS_KERNEL.create_object (v_double::bs_type ());
-      BS_ASSERT (first_level_sol);
-      BS_ASSERT (first_level_rhs);
-      sol.push_back (first_level_sol);
-      rhs.push_back (first_level_rhs);
+        {
+          a[0] = matrix;
+        }
 
       int level;
       for (level = 0;;++level)
         {
-          t_long n = matrix->get_n_rows ();
+          t_long n = a[level]->get_n_rows ();
           std::cout<<"AMG setup level = "<<level<<" n_rows = "<<n<<"\n";
 
           if (n <= n_last_level_points)
@@ -332,12 +343,18 @@ namespace blue_sky
           //std::cout<<"interp   type: "<<p_builder->py_str ()<<"\n";
 
           // build strength matrix (fill s_markers)
-          spv_long s_markers = BS_KERNEL.create_object (v_long::bs_type ());
-          BS_ASSERT (s_markers);
-          s.push_back (s_markers);
+          if (level >= get_n_levels_max ())
+            {
+              spv_long s_markers = BS_KERNEL.create_object (v_long::bs_type ());
+              BS_ASSERT (s_markers);
+              s.push_back (s_markers);
+              spv_long cf_markers = BS_KERNEL.create_object (v_long::bs_type ());
+              BS_ASSERT (cf_markers);
+              cf.push_back (cf_markers);
+            }
 
-          t_long max_conn = s_builder->build (matrix, strength_threshold, max_row_sum, s_markers);
-
+          t_long max_conn = s_builder->build (a[level], strength_threshold,
+                                              max_row_sum, s[level]);
           // calc s_nnz
           //t_long s_nnz = 0;
           //for (t_long ii = 0; ii < s_markers->size (); ++ii)
@@ -348,58 +365,58 @@ namespace blue_sky
           //std::cout<<"a_nnz = "<<s_markers->size()<<" s_nnz = "<<s_nnz<<"\n";
 
           // coarse (fill cf_markers)
-          spv_long cf_markers = BS_KERNEL.create_object (v_long::bs_type ());
-          BS_ASSERT (cf_markers);
-          cf.push_back (cf_markers);
-          cf_markers->resize (n);
-          spv_double measure = BS_KERNEL.create_object (v_double::bs_type ());
-          BS_ASSERT (measure);
-          measure->resize (n);
+          cf[level]->resize (n);
+          wksp->resize (n);//buffer for measure array
+          t_long n_coarse_size = coarser->build (a[level], wksp, cf[level], s[level]);
 
-          t_long n_coarse_size = coarser->build (matrix, measure, cf_markers, s_markers);
           if (n_coarse_size == n || n_coarse_size < 1)
             {
               std::cout<<"coarse failed: n = "<<n<<" n_coarse = "<<n_coarse_size<<"\n";
               break;
             }
 
-          // build prolongation (interpolation) matrix
-          sp_bcsr_t p_matrix = BS_KERNEL.create_object ("bcsr_matrix");
-          BS_ASSERT (p_matrix);
-          p.push_back (p_matrix);
+          // create objects
+          if (level + 1 >= get_n_levels_max ())
+            {
+              // initialize prolongation matrix
+              sp_bcsr_t p_matrix = BS_KERNEL.create_object ("bcsr_matrix");
+              BS_ASSERT (p_matrix);
+              p.push_back (p_matrix);
+              // initialize next level matrix
+              sp_bcsr_t a_matrix = BS_KERNEL.create_object ("bcsr_matrix");
+              BS_ASSERT (a_matrix);
+              a.push_back (a_matrix);
+              // initialize next level solution and rhs vectors
+              spv_double next_level_sol = BS_KERNEL.create_object (v_double::bs_type ());
+              spv_double next_level_rhs = BS_KERNEL.create_object (v_double::bs_type ());
+              BS_ASSERT (next_level_sol);
+              BS_ASSERT (next_level_rhs);
+              sol.push_back (next_level_sol);
+              rhs.push_back (next_level_rhs);
+            }
 
-          p_builder->build (matrix, n_coarse_size, max_conn,
-                            cf_markers, s_markers, p_matrix);
+          // build prolongation (interpolation) matrix
+          p_builder->build (a[level], n_coarse_size, max_conn,
+                            cf[level], s[level], p[level]);
 
           // initialize next level matrix
-          sp_bcsr_t a_matrix = BS_KERNEL.create_object ("bcsr_matrix");
-          BS_ASSERT (a_matrix);
-          a.push_back (a_matrix);
-          sp_bcsr_t r_matrix = BS_KERNEL.create_object ("bcsr_matrix");
-          BS_ASSERT (r_matrix);
-          r_matrix->build_transpose (p_matrix, 0, 0, 0);
-          a_matrix->triple_matrix_product (r_matrix, matrix, p_matrix, update);
-          matrix = a_matrix;
-          cop += matrix->get_n_non_zeros ();
+          r_matrix->build_transpose (p[level], 0, 0, 0);
+          a[level + 1]->triple_matrix_product (r_matrix, a[level], p[level], update);
 
-          // init next level solution and rhs vectors
-          spv_double next_level_sol = BS_KERNEL.create_object (v_double::bs_type ());
-          spv_double next_level_rhs = BS_KERNEL.create_object (v_double::bs_type ());
-          BS_ASSERT (next_level_sol);
-          BS_ASSERT (next_level_rhs);
-          next_level_sol->resize (n_coarse_size);
-          next_level_rhs->resize (n_coarse_size);
-          sol.push_back (next_level_sol);
-          rhs.push_back (next_level_rhs);
+          sol[level + 1]->resize (n_coarse_size);
+          rhs[level + 1]->resize (n_coarse_size);
+
+          cop += a[level + 1]->get_n_non_zeros ();
         }
 
       set_n_levels (level);
       cop /= nnz;
       prop->set_f (cop_idx, cop);
 
-      lu_fact->init_by_matrix (matrix);
+      // init dense matrix from bcsr on last level
+      // and build LU factorization for it
+      lu_fact->init_by_matrix (a[level]);
       lu_solver->setup (lu_fact);
-
       return 0;
     }
 

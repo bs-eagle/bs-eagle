@@ -22,21 +22,20 @@ namespace blue_sky
     {
     }
 
-   dens_matrix ::dens_matrix (const this_t & /*src*/) : bs_refcounter (),
+  dens_matrix ::dens_matrix (const this_t & /*src*/) : bs_refcounter (),
         values (BS_KERNEL.create_object (v_float::bs_type ()))
-     {
-     }
+    {
+    }
 
   // TODO:
-   int
-  dens_matrix::matrix_vector_product (spv_double v_,
-                                               spv_double r_) const
+  int
+  dens_matrix::matrix_vector_product (spv_double v_, spv_double r_) const
     {
       t_long block_rows;
       t_long block_cols;
       t_long clb = calc_block_size < 1 ? (n_rows + n_cols) : calc_block_size;
 
-      if (n_cols != (t_long)v_->size () || n_rows != (t_long)r_->size ())
+      if (n_cols != (t_long) v_->size () || n_rows != (t_long) r_->size ())
         return -1;
 
       t_double *v = &(*v_)[0];
@@ -61,7 +60,7 @@ namespace blue_sky
     }
 
   // TODO:
-   int
+  int
   dens_matrix::matrix_vector_product_t (spv_double v_,
                                                  spv_double r_) const
     {
@@ -93,7 +92,7 @@ namespace blue_sky
       return 0;
     }
 
-   int
+  int
   dens_matrix::calc_lin_comb (t_double alpha,
                                        t_double beta,
                                        spv_double u_,
@@ -123,9 +122,11 @@ namespace blue_sky
       return r_code;
     }
 
-   int
+  int
   dens_matrix::init_by_matrix (sp_base_t matrix_)
     {
+      BS_ASSERT (matrix_);
+
       typedef smart_ptr<bcsr_matrix_iface, true>  sp_bcsr_matrix_iface;
 
       sp_dens_matrix_iface_t dense_matrix_ (matrix_, bs_dynamic_cast ());
@@ -174,7 +175,7 @@ namespace blue_sky
       return 0;
     }
 
-   int
+  int
   dens_matrix::init (const t_long new_n_rows,
                      const t_long new_n_cols,
                      const t_long block_size)
@@ -187,15 +188,14 @@ namespace blue_sky
       calc_block_size = block_size;
       values->resize (n_rows * n_cols);
       // TODO: add this method
-      values->reshape (2, dims);
-
+      //values->reshape (2, dims);
       //std::fill (values->numpy.as_ublas ().data ().begin (), values->numpy.as_ublas ().data ().end (), 0);
       if (values->size ())
         std::fill (values->begin (), values->end (), 0);
       return 0;
     }
 
-   int
+  int
   dens_matrix::copy (sp_dens_matrix_iface_t matrix)
     {
       if (init (matrix->get_n_rows (), matrix->get_n_cols (), matrix->get_calc_block_size ()))
@@ -210,7 +210,7 @@ namespace blue_sky
       return 0;
     }
 
-   void
+  void
   dens_matrix::block_mv_product (t_long row_block,
                                           t_long col_block,
                                           const t_double *v,
@@ -247,7 +247,8 @@ namespace blue_sky
             }
         }
     }
-   void
+
+  void
   dens_matrix::block_mv_product_t (t_long row_block,
                                             t_long col_block,
                                             const t_double *v,

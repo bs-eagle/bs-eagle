@@ -111,6 +111,12 @@ namespace blue_sky
           return prop->get_i (iters_idx);
         }
 
+      //! return maximal number of AMG levels
+      virtual int get_n_levels_max () const
+        {
+          return prop->get_i (n_levels_max_idx);
+        }
+
       //! store number of AMG setup levels to prop
       //! store maximal number of AMG levels
       virtual void set_n_levels (t_long n_levels)
@@ -285,6 +291,7 @@ namespace blue_sky
       sp_base_t             lu_solver;    //!< LU solver for last level
       sp_dens_matrix_t      lu_fact;      //!< dense matrix on last level
       spv_double            wksp;         //!< temporary vector
+      sp_bcsr_t             r_matrix;     //!< temporary matrix for transposed p_matrix
 
       vec_sp_smbuild_t      smbuilder;    //!<
       vec_sp_coarse_t       coarser;      //!<

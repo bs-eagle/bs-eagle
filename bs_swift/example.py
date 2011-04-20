@@ -39,7 +39,7 @@ amg.setup (m)
 amg.solve (m, rhs, sol)
 print amg.get_prop()
 
-n=60
+n=75
 t.gen_2d_laplas (m, n)
 n = m.get_n_rows ()
 rhs = numpy.ones (n)
