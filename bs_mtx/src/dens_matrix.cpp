@@ -150,13 +150,13 @@ namespace blue_sky
                     bcsr_matrix_->get_n_block_size ()))
              return -3;
 
-          t_long   *rows = &(*bcsr_matrix_->get_rows_ptr ())[0];
-          t_long   *cols = &(*bcsr_matrix_->get_cols_ind ())[0];
-          t_double *vals = &(*bcsr_matrix_->get_values ())[0];
-          t_double *values_ptr = &(*values)[0];
+          t_long  *rows = &(*bcsr_matrix_->get_rows_ptr ())[0];
+          t_long  *cols = &(*bcsr_matrix_->get_cols_ind ())[0];
+          t_float *vals = &(*bcsr_matrix_->get_values ())[0];
+          t_float *values_ptr = &(*values)[0];
 
           // set values zero. then copy matrix values to dense
-          memset (values_ptr, 0, n_rows * n_cols * sizeof (double));
+          memset (values_ptr, 0, n_rows * n_cols * sizeof (t_float));
           for (i = 0; i < n_rows; ++i)
             {
               j1 = rows[i];
