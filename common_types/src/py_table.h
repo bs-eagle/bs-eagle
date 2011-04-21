@@ -29,18 +29,26 @@ namespace blue_sky
   PY_EXPORTER (py_table_exporter, default_exporter)
     .def ("init",                               &T::init, 
         args ("n_rows", "n_cols"), "Initialize table n_rows * n_cols")
+    .def ("clear",                               &T::clear, 
+        args (""), "Clear all")
     .def ("set_col_name",                       &T::set_col_name, 
         args ("col_idx", "name"), "Set name for the col_idx column")
     .def ("get_col_name",                       &T::get_col_name, 
         args ("col_idx"), "Return name of the col_idx column")
     .def ("get_n_rows",                         &T::get_n_rows, 
         args (""), "Return number of rows in table")
-    .def ("get_n_cols",                         &T::get_n_rows, 
+    .def ("get_n_cols",                         &T::get_n_cols, 
         args (""), "Return number of columns in table")
     .def ("set_col_values",                     &T::set_col_values, 
         args ("col_idx", "column"), "Set values of the column col_idx")
     .def ("get_col_values",                     &T::get_col_values, 
         args ("col_idx"), "Return values of the column col_idx")
+    .def ("add_row",                            &T::add_row, 
+        args ("row_idx"), "Insert row at the position row")
+    .def ("get_value",                            &T::get_value, 
+        args ("row_idx", "column_idx"), "Return value at given row and column")
+    .def ("set_value",                            &T::set_value, 
+        args ("row_idx", "column_idx", "value"), "Set value at given row and column")
     .def ("__str__",                            &T::py_str)
   PY_EXPORTER_END;                               
 

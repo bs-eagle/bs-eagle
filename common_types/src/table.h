@@ -24,6 +24,7 @@ namespace blue_sky
     public: 
 
       typedef std::vector <t_double>                  vector_t;
+      typedef std::vector <vector_t>                  table_t;
 
       // ------------------------------------
       // METHODS
@@ -123,7 +124,10 @@ namespace blue_sky
        */
       virtual t_long get_n_rows () const
         {
-          return (t_long) values[0].size ();
+          if (values.size ())
+            return (t_long) values[0].size ();
+          else
+            return 0;
         }
       
       /** 
@@ -141,6 +145,39 @@ namespace blue_sky
         {
           values.clear ();
           col_names.clear ();
+        }
+
+      /** 
+       * @brief add new row to the table at index #row_index
+       * 
+       * @param row_index -- <INPUT> given index of new row
+       *                        if 0 insert row at first
+       *                        if > n_rows add row to the end
+       */
+      virtual void add_row (const t_long row_index);
+
+      /** 
+       * @brief return value at the given #row and #col
+       * 
+       * @param row     -- <INPUT> given row
+       * @param col     -- <INPUT> given column
+       * 
+       */
+      virtual t_double get_value (const t_long row, const t_long col) const
+        {
+          return (values[col])[row];
+        }
+
+      /** 
+       * @brief set new value at given #row and #col
+       * 
+       * @param row     -- <INPUT> given row
+       * @param col     -- <INPUT> given column
+       * @param val     -- <INPUT> given value
+       */
+      virtual void set_value (const t_long row, const t_long col, const t_double val)
+        {
+          (values[col])[row] = val;
         }
 
 #ifdef BSPY_EXPORTING_PLUGIN
@@ -174,7 +211,7 @@ namespace blue_sky
       // ------------------------------
     protected:
       std::vector<std::string> col_names;
-      std::vector<std::vector<t_double> > values;
+      table_t values;
 
       BLUE_SKY_TYPE_DECL (table);
     };
