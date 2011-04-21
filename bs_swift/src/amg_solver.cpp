@@ -44,7 +44,7 @@ namespace blue_sky
       pre_smoother_vec.resize (1);
       post_smoother_vec.resize (1);
       smbuilder_vec[0] = BS_KERNEL.create_object ("simple_smbuilder");
-      coarser_vec[0] = BS_KERNEL.create_object ("cljp_coarse");
+      coarser_vec[0] = BS_KERNEL.create_object ("pmis2_coarse");
       pbuilder_vec[0] = BS_KERNEL.create_object ("standart2_pbuild");
       pre_smoother_vec[0] = BS_KERNEL.create_object ("gs_solver");
       post_smoother_vec[0] = BS_KERNEL.create_object ("gs_solver");
