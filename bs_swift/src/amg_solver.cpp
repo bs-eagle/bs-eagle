@@ -250,7 +250,7 @@ namespace blue_sky
             }
         }//iter loop
 
-      prop->set_i (iters_idx, iter + 1);
+      prop->set_i (iters_idx, iter);
       prop->set_b (success_idx, true);
       prop->set_f (final_res_idx, resid);
 
@@ -323,7 +323,8 @@ namespace blue_sky
       for (level = 0;;++level)
         {
           t_long n = a[level]->get_n_rows ();
-          //std::cout<<"AMG setup level = "<<level<<" n_rows = "<<n<<"\n";
+          //std::cout<<"AMG setup level = "<<level<<" n_rows = "<<n<<
+          //" nnz = "<<a[level]->get_n_non_zeros ()<<"\n";
 
           if (n <= n_last_level_points)
             {
