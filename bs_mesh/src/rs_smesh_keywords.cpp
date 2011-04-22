@@ -58,7 +58,7 @@ namespace blue_sky
     {
       //keyword_manager->register_keyword ("DIMENS", keyword_handler (&this_t::DIMENS_reactor));
       std::vector<std::string> names(6);
-      t_int array_dimens[6] = {1,0,1,0,1,0};
+      npy_intp array_dimens[6] = {1,0,1,0,1,0};
       t_float def_value_zero = 0.0;
       t_float def_value_one = 1.0;
       

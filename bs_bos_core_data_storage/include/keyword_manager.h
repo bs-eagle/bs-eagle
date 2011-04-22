@@ -133,10 +133,10 @@ namespace blue_sky
       */
       
       //! registration of active integer pool keyword in factory
-      void register_i_pool_keyword(const std::string &keyword, int *dimens, t_int def_value, handler_t external_handler = 0);
+      void register_i_pool_keyword(const std::string &keyword, npy_intp *dimens, t_int def_value, handler_t external_handler = 0);
       
       //! registration of active floating point pool keyword in factory
-      void register_fp_pool_keyword(const std::string &keyword, int *dimens, t_float def_value, handler_t external_handler = 0);
+      void register_fp_pool_keyword(const std::string &keyword, npy_intp *dimens, t_float def_value, handler_t external_handler = 0);
 
       //! registration of property keyword
       void register_prop_keyword (const std::string &keyword, const std::string &format, prop_names_t &prop_names , handler_t external_handler = 0);
