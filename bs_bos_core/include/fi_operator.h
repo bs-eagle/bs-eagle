@@ -83,21 +83,21 @@ namespace blue_sky {
     reservoir_ (reservoir),
     jacobian_ (jacobian),
     mesh_ (mesh),
-    //trns_matrix_ (jmatrix_->get_trns_matrix ()),
+    trns_matrix_ (jacobian_->get_matrix ("trns")),
     trns_values_ (trns_matrix_->get_values ()),
     trns_rows_ptr_ (trns_matrix_->get_rows_ptr ()),
     trns_cols_ptr_ (trns_matrix_->get_cols_ind ()),
-    //reg_matrix_ (jmatrix_->get_flux_matrix ()),
-    //reg_values_ (reg_matrix_->get_values ()),
-    //reg_rows_ptr_ (reg_matrix_->get_rows_ptr ()),
-    //reg_cols_ptr_ (reg_matrix_->get_cols_ind ()),
-    //m_array_ (jmatrix_->get_m_array ()),
-    //p_array_ (jmatrix_->get_p_array ()),
-    //rhs_ (jmatrix_->get_rhs ()),
-    //sol_ (jmatrix_->get_solution ()),
-    //flux_rhs_ (jmatrix_->get_rhs_flux ()),
-    //sp_diag_ (jmatrix_->get_sp_diagonal ()),
-    //s_rhs_ (jmatrix_->get_sec_rhs ()),
+    reg_matrix_ (jacobian_->get_matrix ("flux")),
+    reg_values_ (reg_matrix_->get_values ()),
+    reg_rows_ptr_ (reg_matrix_->get_rows_ptr ()),
+    reg_cols_ptr_ (reg_matrix_->get_cols_ind ()),
+    m_array_ (jacobian_->get_m_array ()),
+    p_array_ (jacobian_->get_p_array ()),
+    rhs_ (jacobian_->get_rhs ()),
+    sol_ (jacobian_->get_solution ()),
+    flux_rhs_ (jacobian_->get_rhs_flux ()),
+    sp_diag_ (jacobian_->get_sp_diagonal ()),
+    s_rhs_ (jacobian_->get_sec_rhs ()),
     depths_ (&(*mesh_->get_depths ())[0]),
     n_cells_ (mesh->get_n_active_elements()),
     n_connections_ (mesh_->get_n_connections ()),
@@ -293,7 +293,7 @@ namespace blue_sky {
       rhs_item_t *rhs_block     = 0;
       index_t b_sqr         = n_phases * n_phases;
 
-      spv_float main_diag_acc         = jacobian_->get_accum_matrix ()->get_diag ();//get_main_diagonal_accumulative ();
+      spv_float main_diag_acc         = jacobian_->get_matrix ("accum")->get_values ();//get_main_diagonal_accumulative ();
       rhs_item_array_t ss_diag        = jacobian_->get_ss_diagonal ();
       rhs_item_array_t sp_diag        = jacobian_->get_sp_diagonal ();
       rhs_item_array_t s_rhs          = jacobian_->get_sec_rhs ();
@@ -733,7 +733,7 @@ namespace blue_sky {
     void
     fi_operator_fill ()
     {
-      spv_float main_diag_acc         = jacobian_->get_accum_matrix ()->get_diag ();//get_main_diagonal_accumulative ();
+      spv_float main_diag_acc         = jacobian_->get_matrix ("accum")->get_values ();
       rhs_item_array_t ss_diag        = jacobian_->get_ss_diagonal ();
       rhs_item_array_t sp_diag        = jacobian_->get_sp_diagonal ();
       rhs_item_array_t s_rhs          = jacobian_->get_sec_rhs ();

@@ -21,7 +21,6 @@
 #include "rr_rw_wr_saver.h"
 
 #include "fi_operator.h"
-#include "jacobian_impl.h"
 #include "well_results_storage.h"
 #include "fip_results_storage.h"
 
@@ -241,7 +240,6 @@ namespace blue_sky
         setup_jacobian_solver_params ();
 
         fi_operator_impl <is_w, is_g, is_o> fi_operator (calc_model_, reservoir_, mesh_, jacobian_);
-        jacobian_impl jacobian_impl_ (jacobian_);
 
         for (number_of_small_time_steps = 0; current_time_ < large_time_step_end_ - EPS_DIFF; ++number_of_small_time_steps)
           {
@@ -257,7 +255,7 @@ namespace blue_sky
                   compute_solution_range ();
 
                 rs_->on_small_step_start ();
-                index_t ret_code = compute_small_time_step (fi_operator, jacobian_impl_, num_last_newton_iters_, num_last_lin_iters_);
+                index_t ret_code = compute_small_time_step (fi_operator, num_last_newton_iters_, num_last_lin_iters_);
                 if (ret_code >= 0 && ret_code <= get_newton_iters_num ())
                   {
                     if (!process_well_model ())
@@ -545,16 +543,77 @@ namespace blue_sky
       }
 
       /**
+       * \brief Setups and solves jacobians, also raises related events. Increment nliters if tolerance ok.
+       * \param nliters
+       * \return true if tolerance <= [solver->tolerance, this->get_max_tolerance]
+       * */
+      bool
+      solve_jacobian (t_long &nliters)
+      {
+        spv_int filter = BS_KERNEL.create_object (v_int::bs_type ());
+        BS_SP (bcsr_matrix_iface) m = jacobian_->get_matrix ()->merge (filter);
+        BS_SP (lsolver_iface) solver = jacobian_->get_solver ();
+        rs_->on_before_jacobian_setup ();
+        if (solver->setup (m))
+          {
+            bs_throw_exception ("Can't setup solver");
+          }
+
+        rs_->on_before_jacobian_solve ();
+        t_long solved = solver->solve (m, jacobian_->get_rhs (), jacobian_->get_solution ());
+        t_double tolerance = 0;
+        t_long n_current_liters = 0;
+
+        // FIXME: should we restore secondary solution?
+        jacobian_->restore_sec_solution ();
+
+        bool valid_tolerance = false;
+        if (solved < 0)
+          {
+            BOSERR (section::solvers, level::error) << "Linear solver failed with retcode = " << solved << bs_end;
+            // FIXME: we just return false
+            //tolerance = 10.0f;
+          }
+        else
+          {
+            n_current_liters = solver->get_prop ()->get_i (iters_idx);
+            tolerance = solver->get_prop ()->get_f (final_res_idx);
+            if (tolerance > solver->get_prop ()->get_f (tol_idx))
+              {
+                BOSERR (section::solvers, level::error)
+                  << "Linear solver failed with tolerance "
+                  << tolerance
+                  << bs_end;
+              }
+            else
+              {
+                BOSOUT (section::solvers, level::medium)
+                  << "Linear solver iterations " 
+                  << n_current_liters 
+                  << ", tol = " << tolerance
+                  << ", ret_code = " << solved 
+                  << bs_end;
+
+                valid_tolerance = tolerance <= get_max_tolerance ();
+                if (valid_tolerance)
+                  {
+                    nliters += n_current_liters;
+                  }
+              }
+          }
+
+        return valid_tolerance;
+      }
+
+      /**
        * \brief  Calculates one small step
        * \param  fi_operator Instance of fi_operator_impl
-       * \param  jacobian_impl_
        * \param  nniters
        * \param  nliters
        * \return Number of newton iteration was performed
        * */
       inline index_t
       compute_small_time_step (fi_operator_impl <is_w, is_g, is_o> &fi_operator,
-        jacobian_impl &jacobian_impl_,
         index_t &nniters, index_t &nliters)
       {
         index_t max_n_iters = get_n_max_iters ();
@@ -588,23 +647,16 @@ namespace blue_sky
                 return i;
               }
 
-            rs_->on_before_jacobian_setup ();
-            jacobian_impl_.setup_jacobian ();
-
-            rs_->on_before_jacobian_solve ();
-            index_t n_current_liters = 0;
-            item_t tolerance = jacobian_impl_.solve_jacobian (n_current_liters);
-            if (tolerance > get_max_tolerance ())
+            if (!solve_jacobian (nliters))
               {
                 return max_n_iters + 1;
               }
-            nliters += n_current_liters;
 
             rs_->on_before_restore_solution ();
             fi_operator.save_prev_niter_vars ();
             restore_solution_return_type ret_code = calc_model_->restore_solution (fi_operator.mesh_, 
-              fi_operator.jacobian_->get_solution (), 
-              fi_operator.jacobian_->get_sec_solution ());
+              jacobian_->get_solution (), 
+              jacobian_->get_sec_solution ());
 
             if (ret_code == SMALL_TIME_STEP_CHOP)
               {
@@ -615,7 +667,7 @@ namespace blue_sky
                 return max_n_iters + 1;
               }
 
-            reservoir_->restore_wells_solution (dt_, fi_operator.sol_, fi_operator.jacobian_->get_sec_solution (), calc_model_->n_phases);
+            reservoir_->restore_wells_solution (dt_, fi_operator.sol_, jacobian_->get_sec_solution (), calc_model_->n_phases);
           }
 
         return max_n_iters + 1;
@@ -703,25 +755,25 @@ namespace blue_sky
       {
         jacobian_->setup_solver_params (calc_model_->well_model_type_, calc_model_->n_phases, params_);
       }
-      /**
-       * \brief  Setups Jacobian
-       * */
-      inline void
-      setup_jacobian ()
-      {
-        if (jacobian_->setup ())
-          {
-            throw bs_exception ("compute_small_time_step", "return -1");
-          }
-      }
-      /**
-       * \brief  Solves Jacobian
-       * */
-      inline item_t
-      solve_jacobian (index_t &n)
-      {
-        return jacobian_->solve (n);
-      }
+      ///**
+      // * \brief  Setups Jacobian
+      // * */
+      //inline void
+      //setup_jacobian ()
+      //{
+      //  if (jacobian_->setup ())
+      //    {
+      //      throw bs_exception ("compute_small_time_step", "return -1");
+      //    }
+      //}
+      ///**
+      // * \brief  Solves Jacobian
+      // * */
+      //inline item_t
+      //solve_jacobian (index_t &n)
+      //{
+      //  return jacobian_->solve (n);
+      //}
 
       inline void
       get_min_max_z ()

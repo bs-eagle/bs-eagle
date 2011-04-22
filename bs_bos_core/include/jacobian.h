@@ -57,14 +57,6 @@ namespace blue_sky
         preconditioner = p;
       }
 
-      // FIXME: where this vector should be?
-      virtual spv_double
-      get_solution () const;
-
-      // FIXME: where this vector should be?
-      virtual spv_double
-      get_sec_solution () const;
-
       //! get solver
       const BS_SP (lsolver_iface) &
       get_solver () const;
@@ -85,22 +77,37 @@ namespace blue_sky
       t_double 
       solve (t_long &n_lin_iters);
 
-      // FIXME:
-      void clear_solution ();
-      void summ_rhs ();
-      void mult_flux_part (t_double dt_mult);
-      void prepare_matrix ();
-      void restore_sec_solution ();
-
-      BS_SP (bdiag_matrix_iface) get_accum_matrix ();
       spv_float get_ss_diagonal ();
       spv_float get_sp_diagonal ();
       spv_float get_sec_rhs ();
       spv_float get_rhs ();
-      spv_double get_solution ();
-      spv_double get_cfl_vector ();
+      spv_float get_rhs_flux ();
 
-      BS_SP (bcsr_matrix_iface) get_prepared_matrix ();
+      spv_double get_cfl_vector ();
+      spv_double get_solution ();
+      spv_double get_sec_solution ();
+
+      spv_long get_boundary ();
+      spv_long get_m_array ();
+      spv_long get_p_array ();
+
+      BS_SP (flux_connections_iface)
+      get_flux_connections ();
+
+      /**
+      * @brief restore solution for secondary variables
+      *        Xs = Dss * Bs - Dss * Asp * Xp
+      *        Xs -- (OUTPUT) solution vector for secondary variables
+      *        Dss -- (Ass)^(-1)
+      *        Bs -- rhs vector for secondary variables
+      *        Xp -- solution vector for primary variables
+      */
+      void 
+      restore_sec_solution ();
+
+      void clear_solution ();
+      void summ_rhs ();
+      void mult_flux_part (t_double dt_mult);
 
     public:
       virtual ~jacobian();
@@ -122,11 +129,27 @@ namespace blue_sky
 
     protected:
 
-      BS_SP (mbcsr_matrix_iface)  matrix;
-      BS_SP (lsolver_iface)       solver;                   //!< solver
-      BS_SP (lsolver_iface)       preconditioner;           //!< preconditioner
-      auto_value <int>            solver_is_gmres_flag;     //!< if != 0 solver point to the GMRES solver
-      auto_value <int>            prec_is_cpr_flag;         //!< if != 0 if using CPR precondition
+      BS_SP (mbcsr_matrix_iface)      matrix;
+      BS_SP (flux_connections_iface)  flux_conn;
+      spv_float                       ss_diagonal;
+      spv_float                       sp_diagonal;
+      spv_float                       sec_rhs;
+      spv_float                       rhs;
+      spv_float                       rhs_flux;
+      spv_double                      cfl_vector;
+      spv_double                      solution;
+      spv_double                      sec_solution;
+      spv_long                        boundary;
+      BS_SP (lsolver_iface)           solver;                   //!< solver
+      BS_SP (lsolver_iface)           preconditioner;           //!< preconditioner
+      auto_value <int>                solver_is_gmres_flag;     //!< if != 0 solver point to the GMRES solver
+      auto_value <int>                prec_is_cpr_flag;         //!< if != 0 if using CPR precondition
+
+      // FIXME: we shoudl store number of secondary 
+      // and number of phases variables to properly 
+      // do restore_sec_solution
+      t_long                          phases;
+      t_long                          secondary;
     };
 
 } // namespace blue_sky

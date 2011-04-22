@@ -763,12 +763,13 @@ namespace blue_sky
     // calculate planes geometric transmissibility
     cm->rock_grid_prop->init_planes_trans (n_active_elements, hdm->mesh->get_volumes (), cm->ts_params, cm->internal_constants);
 
+    // now jacobian contains flux_connections and boundary array
     jacobian_ = BS_KERNEL.create_object (jacobian::bs_type ());
     jacobian_->init (n_active_elements, cm->n_phases, cm->n_sec_vars);
 
-    smart_ptr <flux_connections_iface> flux_conn = BS_KERNEL.create_object ("bs_flux_connections");
-    spv_long boundary_array = BS_KERNEL.create_object (v_long::bs_type ());
-    hdm->get_mesh ()->build_jacobian_and_flux_connections (jacobian_->get_matrix ("flux"), flux_conn, boundary_array);
+    hdm->get_mesh ()->build_jacobian_and_flux_connections (jacobian_->get_matrix ("flux"), 
+      jacobian_->get_flux_connections (),
+      jacobian_->get_boundary ());
   }
 
   main_loop_calc_base *
