@@ -90,12 +90,14 @@ namespace blue_sky
     {
       KH_COMMON_VARIABLES_DEF
       t_long ndim = 0, nblock = 0;
-      boost::array <t_long, 3> itmp;
+      t_long itmp[3];
       
 
       itmp[0] = params.hdm->get_prop ()->get_i ("nx");
       itmp[1] = params.hdm->get_prop ()->get_i ("ny");
       itmp[2] = params.hdm->get_prop ()->get_i ("nz");
+      
+      params.hdm->get_pool()->set_pool_dims (itmp, 3);
       
       // Number of nodes
       ndim = itmp[0] * itmp[1] * itmp[2];

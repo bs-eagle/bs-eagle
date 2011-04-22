@@ -66,7 +66,9 @@ namespace blue_sky
   void
   hydrodynamic_model::init()
   {
-    km->init();
+    smart_ptr <hydrodynamic_model_iface, true> hdm = this;
+    
+    km->init(hdm);
   }
   
   

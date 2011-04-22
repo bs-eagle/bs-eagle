@@ -58,6 +58,8 @@ namespace blue_sky
       //! type of pointer to function-handler keyword_manager_iface
       typedef void (*handler_t)(const std::string &, keyword_params_t &);
       typedef boost::shared_ptr <keyword_handler_iface_t> shared_handler_t;
+      
+      typedef smart_ptr <hydrodynamic_model_iface, true>    sp_hdm_t;
 
       //! structure of keyword handler
       struct keyword_handler
@@ -136,7 +138,7 @@ namespace blue_sky
       virtual ~keyword_manager_iface () {};
 
       //! register all plugins keywords 
-      virtual void init() = 0;
+      virtual void init(sp_hdm_t new_hdm) = 0;
       
       //! registration of active keyword in factory
       virtual void register_keyword(const std::string &keyword, keyword_handler handler) = 0;

@@ -131,6 +131,7 @@ namespace blue_sky
     handler.react_handle_function = external_handler;
       
     handlers.insert (std::make_pair (keyword, handler));
+    hdm->get_pool()->declare_i_data (keyword, def_value, 3, dimens, 1);
     BOSOUT (section::keywords, level::low) << boost::format ("Keyword [%s] registered") % keyword << bs_end;
   }
   
@@ -145,8 +146,9 @@ namespace blue_sky
       }
     keyword_handler handler (&this_t::float_array_handler, def_value, dimens);
     handler.react_handle_function = external_handler;
-      
+    
     handlers.insert (std::make_pair (keyword, handler));
+    hdm->get_pool()->declare_fp_data (keyword, def_value, 3, dimens, 1);
     BOSOUT (section::keywords, level::low) << boost::format ("Keyword [%s] registered") % keyword << bs_end;
   }
 

@@ -47,27 +47,24 @@ namespace blue_sky
   {
     KH_READER_DEF
     sp_this_t km = params.hdm->get_keyword_manager ();
-    sp_idata_t idata = params.hdm->get_data ();
+    sp_pool_t pool = params.hdm->get_pool ();
     
     spv_int this_arr;
+    t_long ndim = 0;
     
-    t_int def_value;
-    t_int *dimens;
     //!TODO: check sp!
     
     
-    def_value = km->handlers[keyword].int_def_value;
-    dimens = km->handlers[keyword].dimens;
-    this_arr = idata->create_i_array (keyword, dimens, def_value);
+    this_arr = BS_KERNEL.create_object (v_int::bs_type ());
+    ndim = pool->calc_data_dims (keyword);
+    this_arr->resize (ndim);
     
     
-    t_long ndim = 0;
-    ndim = (t_long) this_arr->size();
     if ((len = reader->read_array (keyword, *this_arr)) != (size_t)ndim)
       {
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s") % reader->get_prefix () % keyword);
       }
-    idata->set_i_array (keyword, this_arr);
+    pool->set_i_data (keyword, this_arr);
     BOSOUT (section::read_data, level::medium) << "int pool keyword: " << keyword << bs_end;
     BOSOUT (section::read_data, level::medium) << "ndim = " << ndim << bs_end;
   }
@@ -77,26 +74,21 @@ namespace blue_sky
   {
     KH_READER_DEF
     sp_this_t km = params.hdm->get_keyword_manager ();
-    sp_idata_t idata = params.hdm->get_data ();
+    sp_pool_t pool = params.hdm->get_pool ();
     
     //!TODO: check sp!
     spv_float this_arr;
-    
-    int* dimens;
-    t_float def_value;
-    
-    def_value = km->handlers[keyword].float_def_value;
-    dimens = km->handlers[keyword].dimens;
-    this_arr = idata->create_fp_array (keyword, dimens, def_value);
-
     t_long ndim = 0;
-    ndim = (t_long) this_arr->size();
+    
+    this_arr = BS_KERNEL.create_object (v_float::bs_type ());
+    ndim = pool->calc_data_dims (keyword);
+    this_arr->resize (ndim);
 
     if ((len = reader->read_array (keyword.c_str(), *this_arr)) != (size_t)ndim)
       {
         bs_throw_exception ((boost::format ("Error in %s: not enough valid arguments for keyword %s") % reader->get_prefix() % keyword).str ());
       }
-    idata->set_fp_array (keyword, this_arr);
+    pool->set_fp_data (keyword, this_arr);
 
     BOSOUT (section::read_data, level::medium) << "fp pool keyword: " << keyword << bs_end;
     BOSOUT (section::read_data, level::medium) << "ndim = " << ndim << bs_end;
