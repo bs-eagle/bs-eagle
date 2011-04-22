@@ -30,7 +30,6 @@
 #include "string_formater.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
-#include "calc_well.h"
 #include "well_results_storage.h"
 #include "fip_results_storage.h"
 
@@ -76,7 +75,8 @@ namespace blue_sky
       , pressure (BS_KERNEL.create_object (v_double::bs_type ()))
       , saturation_3p (BS_KERNEL.create_object (v_double::bs_type ()))
       , gas_oil_ratio (BS_KERNEL.create_object (v_double::bs_type ()))
-      , well_res(BS_KERNEL.create_object(well_results_storage::bs_type()))
+      , well_res (BS_KERNEL.create_object ("well_results_storage"))
+      , fip_res (BS_KERNEL.create_object ("fip_results_storage"))
   {
     init();
   }
@@ -95,7 +95,8 @@ namespace blue_sky
       , pressure (BS_KERNEL.create_object (v_double::bs_type ()))
       , saturation_3p (BS_KERNEL.create_object (v_double::bs_type ()))
       , gas_oil_ratio (BS_KERNEL.create_object (v_double::bs_type ()))
-      , well_res(BS_KERNEL.create_object(well_results_storage::bs_type()))
+      , well_res (BS_KERNEL.create_object ("well_results_storage"))
+      , fip_res (BS_KERNEL.create_object ("fip_results_storage"))
   {
     //*this = src;
   }
