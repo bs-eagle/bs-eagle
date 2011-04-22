@@ -76,7 +76,7 @@ namespace blue_sky
         {
         }
 
-        keyword_handler (handler_t read_handle_function, t_int def_value, t_int *new_dimens)
+        keyword_handler (handler_t read_handle_function, t_int def_value, npy_intp *new_dimens)
           : read_handle_function (read_handle_function)
           , int_def_value (def_value)
           {
@@ -88,7 +88,7 @@ namespace blue_sky
             dimens[5] = new_dimens[5];
           }
         
-        keyword_handler (handler_t read_handle_function, t_float def_value, t_int *new_dimens)
+        keyword_handler (handler_t read_handle_function, t_float def_value, npy_intp *new_dimens)
           : read_handle_function (read_handle_function)
           , float_def_value (def_value)
           {
@@ -124,7 +124,7 @@ namespace blue_sky
         
         t_int        int_def_value;            //<! default value (for int pooled keywords (pooled==handles by array handlers))
         t_float      float_def_value;          //<! default value (for float pooled keywords (pooled==handles by array handlers))
-        t_int        dimens[6];                //<! dimensions of array (for pooled keywords (pooled==handles by array handlers))
+        npy_intp        dimens[6];                //<! dimensions of array (for pooled keywords (pooled==handles by array handlers))
         prop_names_t prop_names;               //<! names of properties for prop keyword
         std::string  prop_format;              //<! format for property keyword
       };
