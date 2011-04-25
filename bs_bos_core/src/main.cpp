@@ -472,4 +472,17 @@ BLUE_SKY_INIT_PY_FUN
 
   //py_export_test_x ();
 }
+#ifdef _DEBUG
+BOOST_PYTHON_MODULE (bs_bos_core_d)
+#else
+BOOST_PYTHON_MODULE (bs_bos_core)
+#endif
+{
+  bs_init_py_subsystem ();
+  std::cout << &BS_KERNEL << std::endl;
+  //bool res = blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ());
+  //if (!res)
+  //  throw "Can't register bs_bos_core types";
+}
+
 #endif //BSPY_EXPORT_PLUGIN

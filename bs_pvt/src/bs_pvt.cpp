@@ -27,4 +27,16 @@ BLUE_SKY_INIT_PY_FUN
 {
   blue_sky::python::py_export_pvt ();
 }
+#ifdef _DEBUG
+BOOST_PYTHON_MODULE (bs_pvt_d)
+#else
+BOOST_PYTHON_MODULE (bs_pvt)
+#endif
+{
+  bs_init_py_subsystem ();
+  std::cout << &BS_KERNEL << std::endl;
+  //bool res = blue_sky::pvt_register_types (*blue_sky::bs_get_plugin_descriptor ());
+  //if (!res)
+  //  throw "Can't register pvt types";
+}
 #endif //BSPY_EXPORT_PLUGIN

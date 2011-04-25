@@ -63,4 +63,13 @@ BLUE_SKY_INIT_PY_FUN
   python::py_export_lsolvers ();
   
 }
+#ifdef _DEBUG
+BOOST_PYTHON_MODULE (bs_lsolvers_d)
+#else
+BOOST_PYTHON_MODULE (bs_lsolvers)
+#endif
+{
+  bs_init_py_subsystem ();
+  std::cout << &BS_KERNEL << std::endl;
+}
 #endif

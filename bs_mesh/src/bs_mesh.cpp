@@ -74,5 +74,14 @@ BLUE_SKY_INIT_PY_FUN
   python::py_export_mesh_grdecl ();
   python::py_export_flux_connections ();
 }
+#ifdef _DEBUG
+BOOST_PYTHON_MODULE (bs_mesh_d)
+#else
+BOOST_PYTHON_MODULE (bs_mesh)
+#endif
+{
+  bs_init_py_subsystem ();
+  std::cout << &BS_KERNEL << std::endl;
+}
 #endif //BSPY_EXPORT_PLUGIN
 

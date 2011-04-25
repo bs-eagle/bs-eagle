@@ -60,6 +60,15 @@ BLUE_SKY_INIT_PY_FUN
   python::py_export_dens_matrices ();
   
 }
+#ifdef _DEBUG
+BOOST_PYTHON_MODULE (bs_mtx_d)
+#else
+BOOST_PYTHON_MODULE (bs_mtx)
+#endif
+{
+  bs_init_py_subsystem ();
+  std::cout << &BS_KERNEL << std::endl;
+}
 #endif
 
 //#endif //0

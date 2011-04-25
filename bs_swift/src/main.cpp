@@ -72,4 +72,13 @@ BLUE_SKY_INIT_PY_FUN
   python::py_export_pbuild ();
   
 }
+#ifdef _DEBUG
+BOOST_PYTHON_MODULE (bs_swift_d)
+#else
+BOOST_PYTHON_MODULE (bs_swift)
+#endif
+{
+  bs_init_py_subsystem ();
+  std::cout << &BS_KERNEL << std::endl;
+}
 #endif

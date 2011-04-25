@@ -34,6 +34,15 @@ BLUE_SKY_INIT_PY_FUN
   using namespace boost::python;
 
 }
+#ifdef _DEBUG
+BOOST_PYTHON_MODULE (hdm_fluid_d)
+#else
+BOOST_PYTHON_MODULE (hdm_fluid)
+#endif
+{
+  bs_init_py_subsystem ();
+  std::cout << &BS_KERNEL << std::endl;
+}
 #endif
 
 //#endif //0

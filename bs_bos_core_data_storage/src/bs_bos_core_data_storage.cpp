@@ -43,4 +43,13 @@ BLUE_SKY_INIT_PY_FUN
   python::py_export_idata ();
   python::export_keyword_manager();
 }
+#ifdef _DEBUG
+BOOST_PYTHON_MODULE (bs_bos_core_data_storage_d)
+#else
+BOOST_PYTHON_MODULE (bs_bos_core_data_storage)
+#endif
+{
+  bs_init_py_subsystem ();
+  std::cout << &BS_KERNEL << std::endl;
+}
 #endif //BSPY_EXPORT_PLUGIN
