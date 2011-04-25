@@ -38,10 +38,8 @@ namespace blue_sky
       , reservoir_simulator_events_init_ (this)
   {
     this->add_signal (BS_SIGNAL_RANGE (reservoir_simulator));
+    hdm->init ();
     
-    // FIXME: should I do init?
-    hdm->get_keyword_manager ()->init ();//em);
-
     //bs_node::insert (bs_link::create (hdm, "hydrodynamic_model"), false);
     //bs_node::insert (bs_link::create (em, "event_manager"), false);
     //bs_node::insert (bs_link::create (cm, "calc_model"), false);
