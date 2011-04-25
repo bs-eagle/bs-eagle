@@ -98,9 +98,6 @@ namespace blue_sky
   well_results_storage::~well_results_storage ()
   {}
 
-  class well_results;
-  class connection_results;
-
   BLUE_SKY_TYPE_STD_CREATE(well_results_storage)
   BLUE_SKY_TYPE_STD_COPY(well_results_storage)
   BLUE_SKY_TYPE_IMPL_SHORT(well_results_storage, objbase, "well_results_storage")

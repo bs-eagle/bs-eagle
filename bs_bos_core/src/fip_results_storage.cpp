@@ -43,8 +43,6 @@ namespace blue_sky
   fip_results_storage::~fip_results_storage ()
   {}
 
-  class fip_results;
-
   BLUE_SKY_TYPE_STD_CREATE (fip_results_storage)
   BLUE_SKY_TYPE_STD_COPY   (fip_results_storage)
   BLUE_SKY_TYPE_IMPL_SHORT (fip_results_storage, objbase, "fip_results_storage")
