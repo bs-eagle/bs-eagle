@@ -24,10 +24,6 @@
 #include "py_reservoir.h"
 #include "py_calc_model.h"
 
-// WTF??
-#include "well_results_storage.h"
-#include "fip_results_storage.h"
-
 namespace blue_sky {
 namespace python {
 
@@ -42,7 +38,7 @@ namespace python {
 
     public:
 
-      BLUE_SKY_TYPE_DECL (py_event_base);
+      CLASS_WRAPPER_DECL (py_event_base);
       //WRAPPER_METHOD (apply, void, 3, (const sp_reservoir_t &, const py_mesh_iface_t &, const py_calc_model_t &));
     };
 
