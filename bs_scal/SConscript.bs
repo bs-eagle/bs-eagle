@@ -11,7 +11,7 @@ env.Append (CPPPATH = ["include",
     includes["common_types"],
     ] + includes["kernel"])
 
-libs = ["blue_sky", "bs_bos_core_base", ]
+libs = ["blue_sky", "bs_bos_core_base", "common_types"]
 
 if (build_kind == "debug") :
     env.AppendUnique (LIBS = list_suffix (libs, "_d"))
