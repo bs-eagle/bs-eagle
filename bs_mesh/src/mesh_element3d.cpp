@@ -57,7 +57,9 @@ void mesh_element3d::init(simple_corners_t new_corners)
 
 
 
-inline void
+// FIXME: in release symbol not found if inlined
+//inline 
+void
 mesh_element3d::get_plane (element_plane_orientation_t orientation, plane_t &plane) const
 {
   switch (orientation)
