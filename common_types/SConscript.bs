@@ -11,7 +11,7 @@ env.Append (CPPPATH = ["include", "src",
 	CPPDEFINES = ["_HDF5", 'H5_USE_16_API'],
     LIBS=["hdf5"])
 
-libs = ["blue_sky", "hdf5"]
+libs = ["blue_sky"]
 
 if (build_kind == "debug") :
     env.AppendUnique (LIBS = list_suffix (libs, "_d"))

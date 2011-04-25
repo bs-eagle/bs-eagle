@@ -49,14 +49,12 @@ namespace blue_sky
       typedef smart_ptr <this_t, true>							  sp_this_t;              //<! smart pointer to self
       typedef smart_ptr <FRead, true>							    sp_reader_t;            //<! smart pointer to reader
       typedef smart_ptr <idata_t, true>						    sp_idata_t;             //<! smart pointr to initial data storage
-      typedef smart_ptr <h5_pool_iface, true>					sp_pool_t;             //<! smart pointr to initial data storage
       /*
       typedef smart_ptr <mesh_iface_t, true >         sp_mesh_iface_t;
       typedef smart_ptr <smesh_iface_t, true >        sp_smesh_iface_t;
       */
       typedef smart_ptr <keyword_info_base_t, true>   sp_keyword_info_base_t;
       typedef smart_ptr <objbase, true>               sp_objbase;
-      
       
 
       typedef base_t::handler_t              handler_t;
@@ -98,10 +96,9 @@ namespace blue_sky
        * \brief  Registers built-in keyword and keywords from plugins
        * */
       void 
-      init(sp_hdm_t new_hdm)
+      init()
       {
         //this->register_keywords();
-        hdm = new_hdm;
         this->register_plugin_keywords();
       }
 
@@ -133,10 +130,10 @@ namespace blue_sky
       */
       
       //! registration of active integer pool keyword in factory
-      void register_i_pool_keyword(const std::string &keyword, npy_intp *dimens, t_int def_value, handler_t external_handler = 0);
+      void register_i_pool_keyword(const std::string &keyword, int *dimens, t_int def_value, handler_t external_handler = 0);
       
       //! registration of active floating point pool keyword in factory
-      void register_fp_pool_keyword(const std::string &keyword, npy_intp *dimens, t_float def_value, handler_t external_handler = 0);
+      void register_fp_pool_keyword(const std::string &keyword, int *dimens, t_float def_value, handler_t external_handler = 0);
 
       //! registration of property keyword
       void register_prop_keyword (const std::string &keyword, const std::string &format, prop_names_t &prop_names , handler_t external_handler = 0);
@@ -260,8 +257,6 @@ namespace blue_sky
       {
         BOSOUT << "WELLDIMS: NOT_IMPL_YET" << bs_end;
       }
-      
-      sp_hdm_t hdm;
 
     };
 
