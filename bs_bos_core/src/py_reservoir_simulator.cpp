@@ -66,6 +66,8 @@ namespace python {
     .add_property ("event_manager",   &T::get_event_manager)
     .add_property ("hydrodynamic_model",    &T::get_hydrodynamic_model)
     .add_property ("jacobian",        &T::get_jacobian)
+    ;
+  reservoir_simulator::python_exporter (class__); // hmm, what changed that I should add this line to old model_loader.py works?
   PY_EXPORTER_END;
 
   void 
