@@ -30,6 +30,9 @@
     }                                               \
   };
 
+#define GET_BY_VALUE(X) \
+  make_getter (X, return_value_policy <return_by_value> ())
+
 namespace blue_sky {
 namespace python {
 
