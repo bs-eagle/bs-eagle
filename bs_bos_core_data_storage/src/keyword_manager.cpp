@@ -120,7 +120,7 @@ namespace blue_sky
   //! registration of active integer pool keyword in factory
   
   void 
-  keyword_manager ::register_i_pool_keyword(const std::string &keyword, int *dimens, t_int def_value, handler_t external_handler)
+  keyword_manager ::register_i_pool_keyword(const std::string &keyword, npy_intp *dimens, t_int def_value, handler_t external_handler)
   {
     handlers_t::iterator it = handlers.find(keyword);
     if (it != handlers.end())
@@ -131,12 +131,13 @@ namespace blue_sky
     handler.react_handle_function = external_handler;
       
     handlers.insert (std::make_pair (keyword, handler));
+    hdm->get_pool()->declare_i_data (keyword, def_value, 3, dimens, 1);
     BOSOUT (section::keywords, level::low) << boost::format ("Keyword [%s] registered") % keyword << bs_end;
   }
   
   //! registration of active floating point pool keyword in factory
   
-  void  keyword_manager::register_fp_pool_keyword (const std::string &keyword, int *dimens, t_float def_value, handler_t external_handler)
+  void  keyword_manager::register_fp_pool_keyword (const std::string &keyword, npy_intp *dimens, t_float def_value, handler_t external_handler)
   {
     handlers_t::iterator it = handlers.find(keyword);
     if (it != handlers.end())
@@ -145,8 +146,9 @@ namespace blue_sky
       }
     keyword_handler handler (&this_t::float_array_handler, def_value, dimens);
     handler.react_handle_function = external_handler;
-      
+    
     handlers.insert (std::make_pair (keyword, handler));
+    hdm->get_pool()->declare_fp_data (keyword, def_value, 3, dimens, 1);
     BOSOUT (section::keywords, level::low) << boost::format ("Keyword [%s] registered") % keyword << bs_end;
   }
 
@@ -167,7 +169,7 @@ namespace blue_sky
   
   void  keyword_manager::py_register_fp_pool_keyword (const std::string keyword, boost::python::list dimens, t_float def_value)
     {
-      int new_dimens[ARRAY_POOL_TOTAL];
+      npy_intp new_dimens[ARRAY_POOL_TOTAL];
       for (int i = 0; i < ARRAY_POOL_TOTAL; i++) 
         {
           new_dimens[i] = boost::python::extract<int>(dimens[i]);

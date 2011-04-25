@@ -21,6 +21,8 @@ namespace blue_sky
       // METHODS
       // ------------------------------------
     public:
+      typedef std::list<std::string> list_t;
+
       // destructor
       virtual ~prop ()
         {}
@@ -181,6 +183,35 @@ namespace blue_sky
           s << b_impl.py_str ();
           return s.str ();
         }
+
+      list_t get_names_i () const
+        {return i_impl.get_names ();}
+      list_t get_names_f () const
+        {return fp_impl.get_names ();}
+      list_t get_names_b () const
+        {return b_impl.get_names ();}
+      list_t get_names_s () const
+        {return s_impl.get_names ();}
+
+      t_double get_def_val_f (const std::string &name) const
+        {return fp_impl.get_def_val (name);}
+      t_long get_def_val_i (const std::string &name) const
+        {return i_impl.get_def_val (name);}
+      bool get_def_val_b (const std::string &name) const
+        {return b_impl.get_def_val (name);}
+      std::string get_def_val_s (const std::string &name) const
+        {return s_impl.get_def_val (name);}
+
+      std::string get_description_f (const std::string &name) const
+        {return fp_impl.get_description (name);}
+      std::string get_description_i (const std::string &name) const
+        {return i_impl.get_description (name);}
+      std::string get_description_b (const std::string &name) const
+        {return b_impl.get_description (name);}
+      std::string get_description_s (const std::string &name) const
+        {return s_impl.get_description (name);}
+
+
 #endif //BSPY_EXPORTING_PLUGIN
       // ------------------------------
       // VARIABLES

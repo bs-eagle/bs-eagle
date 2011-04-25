@@ -47,8 +47,8 @@ namespace blue_sky
   void mesh_grdecl_keywords::activate_keywords(sp_km_iface_t keyword_manager)
     {  
       //sp_km_iface_t keyword_manager (km, bs_dynamic_cast ());
-      t_int zcorn_dimens[6] = {2,0,2,0,2,0};
-      t_int coord_dimens[6] = {1,1,1,1,0,6};
+      npy_intp zcorn_dimens[6] = {2,0,2,0,2,0};
+      npy_intp coord_dimens[6] = {1,1,1,1,0,6};
       t_float def_value = 0.0;
       
       keyword_manager->register_fp_pool_keyword ("ZCORN", &zcorn_dimens[0], def_value, 0);  

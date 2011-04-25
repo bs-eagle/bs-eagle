@@ -1,8 +1,8 @@
-/** 
+/**
  * @file pmis2_coarse.cpp
- * @brief 
- * @author 
- * @version 
+ * @brief
+ * @author
+ * @version
  * @date 2010-03-09
  */
 
@@ -12,7 +12,7 @@
 
 namespace blue_sky
 {
-  pmis2_coarse::pmis2_coarse (bs_type_ctor_param) 
+  pmis2_coarse::pmis2_coarse (bs_type_ctor_param)
                 : amg_coarse_iface (),
                   sp_graph (BS_KERNEL.create_object (v_long::bs_type ()))
     {
@@ -21,9 +21,9 @@ namespace blue_sky
                 sp_graph (BS_KERNEL.create_object (v_long::bs_type ()))
      {
      }
-  
-  t_long pmis2_coarse::build (sp_bcsr_t matrix, 
-                              spv_double sp_meassure_array, 
+
+  t_long pmis2_coarse::build (sp_bcsr_t matrix,
+                              spv_double sp_meassure_array,
                               spv_long sp_cf_markers,
                               spv_long sp_s_markers)
     {
@@ -119,8 +119,8 @@ namespace blue_sky
       while (last_in_graph > 0)
         {
           // select C points
-          coarse_tools::build_independent_set (matrix, 
-                                                sp_graph, 
+          coarse_tools::build_independent_set (matrix,
+                                                sp_graph,
                                                 *p_last_in_graph_thread,
                                                 sp_meassure_array,
                                                 ff,
@@ -173,7 +173,7 @@ namespace blue_sky
           }
 #pragma omp barrier
         }
-#endif //COARSE_PMIS_2_PARALLE
+#endif //COARSE_PMIS_2_PARALLEL
 
     }
     return c_counter;

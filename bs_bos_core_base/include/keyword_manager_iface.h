@@ -58,6 +58,8 @@ namespace blue_sky
       //! type of pointer to function-handler keyword_manager_iface
       typedef void (*handler_t)(const std::string &, keyword_params_t &);
       typedef boost::shared_ptr <keyword_handler_iface_t> shared_handler_t;
+      
+      typedef smart_ptr <hydrodynamic_model_iface, true>    sp_hdm_t;
 
       //! structure of keyword handler
       struct keyword_handler
@@ -74,7 +76,7 @@ namespace blue_sky
         {
         }
 
-        keyword_handler (handler_t read_handle_function, t_int def_value, t_int *new_dimens)
+        keyword_handler (handler_t read_handle_function, t_int def_value, npy_intp *new_dimens)
           : read_handle_function (read_handle_function)
           , int_def_value (def_value)
           {
@@ -86,7 +88,7 @@ namespace blue_sky
             dimens[5] = new_dimens[5];
           }
         
-        keyword_handler (handler_t read_handle_function, t_float def_value, t_int *new_dimens)
+        keyword_handler (handler_t read_handle_function, t_float def_value, npy_intp *new_dimens)
           : read_handle_function (read_handle_function)
           , float_def_value (def_value)
           {
@@ -122,7 +124,7 @@ namespace blue_sky
         
         t_int        int_def_value;            //<! default value (for int pooled keywords (pooled==handles by array handlers))
         t_float      float_def_value;          //<! default value (for float pooled keywords (pooled==handles by array handlers))
-        t_int        dimens[6];                //<! dimensions of array (for pooled keywords (pooled==handles by array handlers))
+        npy_intp        dimens[6];                //<! dimensions of array (for pooled keywords (pooled==handles by array handlers))
         prop_names_t prop_names;               //<! names of properties for prop keyword
         std::string  prop_format;              //<! format for property keyword
       };
@@ -136,16 +138,16 @@ namespace blue_sky
       virtual ~keyword_manager_iface () {};
 
       //! register all plugins keywords 
-      virtual void init() = 0;
+      virtual void init(sp_hdm_t new_hdm) = 0;
       
       //! registration of active keyword in factory
       virtual void register_keyword(const std::string &keyword, keyword_handler handler) = 0;
       
       //! registration of active integer pool keyword in factory
-      virtual void register_i_pool_keyword(const std::string &keyword, int *dimens, t_int def_value, handler_t external_handler = 0) = 0;
+      virtual void register_i_pool_keyword(const std::string &keyword, npy_intp *dimens, t_int def_value, handler_t external_handler = 0) = 0;
       
       //! registration of active floating point pool keyword in factory
-      virtual void register_fp_pool_keyword(const std::string &keyword, int *dimens, t_float def_value, handler_t external_handler = 0) = 0;
+      virtual void register_fp_pool_keyword(const std::string &keyword, npy_intp *dimens, t_float def_value, handler_t external_handler = 0) = 0;
 
       //! registration of active property(-ies) keyword in factory
       virtual void register_prop_keyword(const std::string &keyword, const std::string &format, prop_names_t &prop_names , handler_t external_handler = 0) = 0;

@@ -1,8 +1,8 @@
-/** 
+/**
  * @file cljp_coarse.h
  * @brief implementation of Cleary-Luby-Jones-Plassmann grid coasering method
- * @author 
- * @version 
+ * @author
+ * @version
  * @date 2010-03-10
  */
 #ifndef __CLJP_COARSE_H
@@ -12,7 +12,7 @@
 
 namespace blue_sky
 {
-  /** 
+  /**
    * @brief interface class for block CSR matrix storage and manipulation
    */
   class BS_API_PLUGIN cljp_coarse: public amg_coarse_iface
@@ -28,18 +28,18 @@ namespace blue_sky
     //  METHODS
     //-----------------------------------------
     public:
-      /** 
+      /**
        * @brief build CF markers and Strength matrix
-       * 
+       *
        * @param a_matrix        -- <INPUT> A matrix
-       * @param wksp            -- <INPUT/OUTPUT> workspace 
-       * @param cf_markers      -- <OUTPUT> CF markers 
+       * @param wksp            -- <INPUT/OUTPUT> workspace
+       * @param cf_markers      -- <OUTPUT> CF markers
        * @param s_markers       -- <OUTPUT> non zero elements of Strength matrix
-       * 
+       *
        * @return number of coarse points (n_coarse_size) or < 0 if error occur
        */
-      virtual t_long build (sp_bcsr_t a_matrix, 
-                              spv_double wksp, 
+      virtual t_long build (sp_bcsr_t a_matrix,
+                              spv_double wksp,
                               spv_long cf_markers,
                               spv_long s_markers);
       //! destructor
@@ -49,7 +49,7 @@ namespace blue_sky
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual std::string py_str () const
         {
-          return std::string ("CLJP grid coasering builder.");
+          return std::string ("CLJP grid coarsering builder.");
         }
 #endif //BSPY_EXPORTING_PLUGIN
 
@@ -58,7 +58,7 @@ namespace blue_sky
     //-----------------------------------------
     protected:
       spv_long sp_graph;
-      
+
     };
 }
 

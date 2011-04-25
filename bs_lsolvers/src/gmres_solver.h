@@ -32,7 +32,7 @@ namespace blue_sky
       //! matrix interface type
       typedef matrix_iface                              matrix_t;
 
-      //! prop 
+      //! prop
       typedef prop_iface                                prop_t;
       typedef lsolver_iface                             base_t;         ///< typedef to this type. in child classes used as a short name of base class
       typedef smart_ptr<base_t, true>                   sp_base_t;      ///< short name to smart pointer to this class
@@ -45,16 +45,15 @@ namespace blue_sky
       //  METHODS
       //-----------------------------------------
     public:
-      // destructor
+      //! destructor
       virtual ~gmres_solver ();
 
-
-      // solve
+      //! solve
       virtual int solve (sp_matrix_t matrix, spv_double rhs, spv_double sol);
 
       virtual int solve_prec (sp_matrix_t matrix, spv_double rhs, spv_double sol);
 
-      // setup
+      //! setup
       virtual int setup (sp_matrix_t matrix);
 
       //! set preconditioner
@@ -62,11 +61,11 @@ namespace blue_sky
         {
           prec = prec_;
         }
-      
+
       virtual void set_prop (sp_prop_t prop_);
 
       //! get properties
-      virtual sp_prop_t get_prop() 
+      virtual sp_prop_t get_prop ()
         {
           return prop;
         }
@@ -123,5 +122,5 @@ namespace blue_sky
 
   }	// namespace blue_sky
 
-#endif // #ifndef BS_CGS_LINEAR_SOLVER_H_
+#endif // #ifndef BS_GMRES_LINEAR_SOLVER_H_
 

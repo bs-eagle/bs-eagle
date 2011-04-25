@@ -58,7 +58,7 @@ namespace blue_sky
     {
       //keyword_manager->register_keyword ("DIMENS", keyword_handler (&this_t::DIMENS_reactor));
       std::vector<std::string> names(6);
-      t_int array_dimens[6] = {1,0,1,0,1,0};
+      npy_intp array_dimens[6] = {1,0,1,0,1,0};
       t_float def_value_zero = 0.0;
       t_float def_value_one = 1.0;
       
@@ -90,12 +90,14 @@ namespace blue_sky
     {
       KH_COMMON_VARIABLES_DEF
       t_long ndim = 0, nblock = 0;
-      boost::array <t_long, 3> itmp;
+      t_long itmp[3];
       
 
       itmp[0] = params.hdm->get_prop ()->get_i ("nx");
       itmp[1] = params.hdm->get_prop ()->get_i ("ny");
       itmp[2] = params.hdm->get_prop ()->get_i ("nz");
+      
+      params.hdm->get_pool()->set_pool_dims (itmp, 3);
       
       // Number of nodes
       ndim = itmp[0] * itmp[1] * itmp[2];

@@ -1,8 +1,8 @@
-/** 
+/**
  * @file standart3_pbuild.h
- * @brief 
- * @author 
- * @version 
+ * @brief parallel Stuben's standart interpolation
+ * @author Mark Khait
+ * @version
  * @date 2010-03-16
  */
 #ifndef __STANDART3_PBUILD_H
@@ -12,7 +12,7 @@
 
 namespace blue_sky
 {
-  /** 
+  /**
    * @brief Prolangation matrix builder (Standart algorithm)
    */
   class BS_API_PLUGIN standart3_pbuild: public amg_pbuild_iface
@@ -27,19 +27,19 @@ namespace blue_sky
     //  METHODS
     //-----------------------------------------
     public:
-      /** 
+      /**
        * @brief build prolangation matrix
-       * 
+       *
        * @param a_matrix        -- <INPUT> A matrix
        * @param n_coarse_size   -- <INPUT> number of points in coarse grid
-       * @param max_connections -- <INPUT> maximum allowed connections 
+       * @param max_connections -- <INPUT> maximum allowed connections
        * @param cf_markers      -- <INPUT/OUTPUT> CF markers
        * @param s_markers       -- <INPUT> non zero elements of Strength matrix
        * @param p_matrix        -- <OUTPUT> prolangation matrix
-       * 
-       * @return 
+       *
+       * @return
        */
-      virtual int build (sp_bcsr_t a_matrix, 
+      virtual int build (sp_bcsr_t a_matrix,
                          const t_long n_coarse_size,
                          const t_long max_connections,
                          spv_long sp_cf_markers,
@@ -52,7 +52,7 @@ namespace blue_sky
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual std::string py_str () const
         {
-          return std::string ("Prolangation matrix builder (Standart algorithm).");
+          return std::string ("Prolongation matrix builder (Standart3 algorithm).");
         }
 #endif //BSPY_EXPORTING_PLUGIN
 
@@ -62,7 +62,7 @@ namespace blue_sky
     protected:
       spv_long sp_cur_connections;
       spv_long sp_cur_connections_markers;
-      
+
     };
 }
 #endif //__STANDART3_PBUILD_H

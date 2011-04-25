@@ -54,8 +54,8 @@ namespace blue_sky
   
   void mesh_ijk_keywords::activate_keywords (sp_km_iface_t keyword_manager)
     {
-      t_int dx_dimens[] = {1,0,1,0,1,0};
-      t_int tops_dimens[] = {1,0,1,0,0,1};
+      npy_intp dx_dimens[] = {1,0,1,0,1,0};
+      npy_intp tops_dimens[] = {1,0,1,0,0,1};
       t_float def_value = 0.0;
       
       keyword_manager->register_fp_pool_keyword ("DX", &dx_dimens[0], def_value, 0);

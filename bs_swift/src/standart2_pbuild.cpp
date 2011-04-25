@@ -1,8 +1,8 @@
-/** 
+/**
  * @file standart2_pbuild.cpp
- * @brief 
- * @author 
- * @version 
+ * @brief Stuben's standart interpolation (extended interpolation, using F-F connections)
+ * @author
+ * @version
  * @date 2010-03-16
  */
 //#include "amg_stdafx.h"
@@ -10,21 +10,21 @@
 
 namespace blue_sky
 {
-  
-  standart2_pbuild::standart2_pbuild (bs_type_ctor_param) 
+
+  standart2_pbuild::standart2_pbuild (bs_type_ctor_param)
                     : amg_pbuild_iface (),
                       sp_markers (BS_KERNEL.create_object (v_long::bs_type ()))
     {
     }
-  
-  standart2_pbuild::standart2_pbuild (const this_t & /*src*/) 
+
+  standart2_pbuild::standart2_pbuild (const this_t & /*src*/)
                     : bs_refcounter (),
                       sp_markers (BS_KERNEL.create_object (v_long::bs_type ()))
      {
      }
-  
-   int 
-  standart2_pbuild::build (sp_bcsr_t matrix, 
+
+   int
+  standart2_pbuild::build (sp_bcsr_t matrix,
                            const t_long n_coarse_size,
                            const t_long /*max_connections*/,
                            spv_long sp_cf_markers,
@@ -264,7 +264,7 @@ namespace blue_sky
 
             jj1 = p_rows_ptr[i];
             jj2 = p_rows_ptr[i + 1];
-            sum_d = a_values[jj1];
+            sum_d = a_values[a_rows_ptr[i]];//diagonal element
             //for (jj = jj1; jj < jj2; ++jj)
             //  sum_c += p_values[jj];
             //sum_all = sum_c;
@@ -307,5 +307,5 @@ namespace blue_sky
   BLUE_SKY_TYPE_STD_CREATE (standart2_pbuild);
   BLUE_SKY_TYPE_STD_COPY (standart2_pbuild);
 
-  BLUE_SKY_TYPE_IMPL (standart2_pbuild, amg_pbuild_iface, "standart2_pbuild", "standart2 prolangation matrix builder class", "Realization of standart2 prolangation matrix builder");
+  BLUE_SKY_TYPE_IMPL (standart2_pbuild, amg_pbuild_iface, "standart2_pbuild", "standart2 prolongation matrix builder class", "Realization of standart2 prolongation matrix builder");
 }  // blue_sky namespace

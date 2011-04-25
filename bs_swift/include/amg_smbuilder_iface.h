@@ -1,8 +1,8 @@
-/** 
+/**
  * @file amg_smbuilder_iface.h
- * @brief 
- * @author 
- * @version 
+ * @brief
+ * @author
+ * @version
  * @date 2010-03-09
  */
 #ifndef __AMG_SMBUILDER_IFACE_H
@@ -30,28 +30,28 @@ namespace blue_sky
       //! this_t
       typedef amg_smbuilder_iface                               this_t;
       //! short name to smart pointer to this class
-      typedef smart_ptr<this_t, true>                           sp_this_t;              
+      typedef smart_ptr<this_t, true>                           sp_this_t;
 
-      
+
     //-----------------------------------------
     //  METHODS
     //-----------------------------------------
     public:
 
-      /** 
+      /**
        * @brief build strength matrix Strength matrix
-       * 
+       *
        * @param a_matrix                -- <INPUT> matrix
        * @param strength_threshold      -- <INPUT> strength threshold
        * @param max_row_sum             -- <INPUT>
-       * @param s_markers               -- <OUTPUT> strength matrix 
-       * 
-       * @return 0 if success
+       * @param s_markers               -- <OUTPUT> strength matrix
+       *
+       * @return max_connections
        */
-      virtual int build (sp_bcsr_t a_matrix, 
-                         t_double strength_threshold, 
-                         t_double max_row_sum,
-                         spv_long s_markers) const = 0;
+      virtual t_long build (sp_bcsr_t a_matrix,
+                            t_double strength_threshold,
+                            t_double max_row_sum,
+                            spv_long s_markers) const = 0;
       //! destructor
       virtual ~amg_smbuilder_iface ()
         {}

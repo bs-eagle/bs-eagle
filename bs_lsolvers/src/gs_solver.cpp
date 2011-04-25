@@ -1,6 +1,6 @@
-/** 
+/**
  * @file gs_solver.cpp
- * @brief Gause - Zeidel iterative solver 
+ * @brief Gause - Zeidel iterative solver
  * @date 2009-12-16
  */
 
@@ -23,7 +23,7 @@ namespace blue_sky
     //  gs_solver
 
     //! constructor
-    
+
     gs_solver::gs_solver (bs_type_ctor_param /*param*/)
       : amg_smoother_iface ()
     {
@@ -37,7 +37,7 @@ namespace blue_sky
     }
 
     //! copy constructor
-    
+
     gs_solver::gs_solver(const gs_solver &solver)
       : bs_refcounter (), amg_smoother_iface ()
     {
@@ -46,12 +46,12 @@ namespace blue_sky
     }
 
     //! destructor
-    
+
     gs_solver::~gs_solver ()
     {}
 
     //! set solver's properties
-    
+
     void gs_solver::set_prop (sp_prop_t prop_)
     {
       prop = prop_;
@@ -62,23 +62,23 @@ namespace blue_sky
      void
     gs_solver::init_prop ()
       {
-        prop->add_property_f (1.0e-4, tol_idx, 
+        prop->add_property_f (1.0e-4, tol_idx,
                               std::string ("Target tolerance for linear solver"));
-        prop->add_property_f (1, final_res_idx, 
+        prop->add_property_f (1, final_res_idx,
                               std::string ("Solution residual"));
-        prop->add_property_i (20, max_iters_idx, 
+        prop->add_property_i (20, max_iters_idx,
                               std::string ("Maximum allowed number of iterations"));
-        prop->add_property_i (0, iters_idx, 
+        prop->add_property_i (0, iters_idx,
                               std::string ("Total number of used solver iterations"));
-        prop->add_property_b (false, success_idx, 
+        prop->add_property_b (false, success_idx,
                               std::string ("True if solver successfully convergent"));
-        prop->add_property_b (false, invers_idx, 
+        prop->add_property_b (false, invers_idx,
                               std::string ("If True use inverse main loop"));
-        prop->add_property_i (0, cf_type_idx, 
+        prop->add_property_i (0, cf_type_idx,
                               std::string ("0 -- use all points, -1 -- only negative points, "));
       }
-    
-    int gs_solver::smooth (sp_bcsr_t matrix, spv_long cf_markers, const t_long iter_number, 
+
+    int gs_solver::smooth (sp_bcsr_t matrix, spv_long cf_markers, const t_long iter_number,
                                     spv_double sp_rhs, spv_double sp_sol)
       {
         BS_ASSERT (matrix);
@@ -107,7 +107,7 @@ namespace blue_sky
         t_long *cf_m = 0;
         if (cf)
           cf_m                  = &(*cf_markers)[0];
-        
+
 
 
 #define GAUSS_LOOP                              \
@@ -135,7 +135,7 @@ namespace blue_sky
           for (t_long ii = 0; ii < iter_number; ++ii)
             for (i = 0; i < n; ++i)
               {
-                if ((cf * cf_m[i]) > 0)
+                if ((cf * cf_m[i]) >= 0)
                   {
                     GAUSS_LOOP
                   }
@@ -144,7 +144,7 @@ namespace blue_sky
           for (t_long ii = 0; ii < iter_number; ++ii)
             for (i = n-1; i >= 0; --i)
               {
-                if ((cf * cf_m[i]) > 0)
+                if ((cf * cf_m[i]) >= 0)
                   {
                     GAUSS_LOOP
                   }
@@ -164,7 +164,7 @@ namespace blue_sky
         return 0;
       }
 
-    
+
     int gs_solver::solve (sp_matrix_t matrix, spv_double sp_rhs, spv_double sp_sol)
     {
       BS_ERROR (matrix, "gs_solve");
@@ -221,7 +221,7 @@ namespace blue_sky
       // main loop
       for (iter = 0; iter < max_iter; ++iter)
         {
-          
+
           smooth (bcsr, flags, 1, sp_rhs, sp_sol);
           matrix->calc_lin_comb (-1.0, 1.0, sp_sol, sp_rhs, sp_r);
           r_norm = mv_vector_inner_product_n (r, r, n);
@@ -250,7 +250,7 @@ namespace blue_sky
       return 0;
     }
 
-    
+
     int gs_solver::solve_prec(sp_matrix_t matrix, spv_double rhs, spv_double solution)
     {
       return solve (matrix, rhs, solution);

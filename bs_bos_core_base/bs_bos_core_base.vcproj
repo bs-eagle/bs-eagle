@@ -454,6 +454,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\src\conf.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\include\conf.h"
 			>
 		</File>

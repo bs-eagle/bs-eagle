@@ -67,6 +67,7 @@ BLUE_SKY_INIT_PY_FUN
   //python::py_export_assert ();
   python::py_export_named_pbase ("named_pbase");
   python::export_data_dimens ();
+  python::export_type_helper ();
 }
 #ifdef _DEBUG
 BOOST_PYTHON_MODULE (bs_bos_core_base_d)

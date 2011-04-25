@@ -103,6 +103,33 @@ class table_iface : public objbase
        */
       virtual void clear () = 0;
 
+      /** 
+       * @brief add new row to the table at index #row_index
+       * 
+       * @param row_index -- <INPUT> given index of new row
+       *                        if 0 insert row at first
+       *                        if > n_rows add row to the end
+       */
+      virtual void add_row (const t_long row_index) = 0;
+
+      /** 
+       * @brief return value at the given #row and #col
+       * 
+       * @param row     -- <INPUT> given row
+       * @param col     -- <INPUT> given column
+       * 
+       */
+      virtual t_double get_value (const t_long row, const t_long col) const = 0;
+
+      /** 
+       * @brief set new value at given #row and #col
+       * 
+       * @param row     -- <INPUT> given row
+       * @param col     -- <INPUT> given column
+       * @param val     -- <INPUT> given value
+       */
+      virtual void set_value (const t_long row, const t_long col, const t_double val) = 0;
+
 #ifdef BSPY_EXPORTING_PLUGIN
       /** 
        * @brief python print wrapper
