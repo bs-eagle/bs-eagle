@@ -11,6 +11,7 @@
 #define BS_FACILITY_BASE_H_
 
 #include "calc_model.h"
+#include "jacobian.h"
 
 namespace blue_sky {
 
@@ -28,11 +29,9 @@ namespace blue_sky {
     typedef t_long                          index_t;
 
     typedef rs_mesh_iface                   mesh_iface_t;
-    typedef jac_matrix_iface                jmatrix_t;
 
     typedef smart_ptr <calc_model, true>    sp_calc_model_t;
     typedef smart_ptr <mesh_iface_t, true>  sp_mesh_iface_t;
-    typedef smart_ptr <jmatrix_t, true>     sp_jmatrix_t;
 
   public:
     //! destructor
@@ -82,10 +81,10 @@ namespace blue_sky {
      * \param  dt
      * \param  calc_model
      * \param  mesh
-     * \param  jmatrix
+     * \param  jacobian
      * */
     virtual void 
-    process (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix) = 0;
+    process (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, BS_SP (jacobian) &jacobian) = 0;
 
     /**
      * \brief  Restores solution

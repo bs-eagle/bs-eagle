@@ -375,12 +375,12 @@ namespace blue_sky
     }
 
   void
-  well::process_impl (bool, double, const sp_calc_model_t &, const sp_mesh_iface_t &, sp_jmatrix_t &)
+  well::process_impl (bool, double, const sp_calc_model_t &, const sp_mesh_iface_t &, BS_SP (jacobian) &)
   {
     bs_throw_exception ("PURE CALL");
   }
   void
-  well::process (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
+  well::process (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, BS_SP (jacobian) &jacobian)
   {
     if (is_shut ())
       {
@@ -396,7 +396,7 @@ namespace blue_sky
 #endif
 
     pre_process_facilities ();
-    process_impl (is_start, dt, calc_model, mesh, jmatrix);
+    process_impl (is_start, dt, calc_model, mesh, jacobian);
     post_process_facilities ();
   }
   void

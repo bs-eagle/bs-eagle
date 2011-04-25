@@ -51,12 +51,10 @@ namespace blue_sky {
     typedef reservoir                       reservoir_t;
     typedef rs_mesh_iface                   mesh_iface_t;
     typedef jacobian                        jacobian_t;
-    typedef jac_matrix_iface                jmatrix_t;
 
     typedef calc_model_t::sp_this_t                sp_calc_model_t;
     typedef calc_model_t::sp_reservoir_t           sp_reservoir_t;
     typedef BS_SP (jacobian)                       sp_jacobian_t;
-    typedef BS_SP (jac_matrix_iface)               sp_jmatrix_t;
     typedef calc_model_t::sp_mesh_iface_t          sp_mesh_iface_t;
     typedef calc_model_t::sp_rock_grid             sp_rock_grid_prop_t;
     typedef smart_ptr <bcsr_matrix_t, true>        sp_bcsr_matrix_t;
@@ -78,30 +76,28 @@ namespace blue_sky {
      * \param  reservoir
      * \param  mesh
      * \param  jacobian
-     * \param  jmatrix
      * */
-    fi_operator_impl (sp_calc_model_t &calc_model, sp_reservoir_t &reservoir, const sp_mesh_iface_t &mesh, sp_jacobian_t &jacobian, sp_jmatrix_t &jmatrix)
+    fi_operator_impl (sp_calc_model_t &calc_model, sp_reservoir_t &reservoir, const sp_mesh_iface_t &mesh, sp_jacobian_t &jacobian)
     : calc_model_ (calc_model),
     rock_grid_prop_ (calc_model_->rock_grid_prop),
     reservoir_ (reservoir),
     jacobian_ (jacobian),
-    jmatrix_ (jmatrix),
     mesh_ (mesh),
-    trns_matrix_ (jmatrix_->get_trns_matrix ()),
+    trns_matrix_ (jacobian_->get_matrix ("trns")),
     trns_values_ (trns_matrix_->get_values ()),
     trns_rows_ptr_ (trns_matrix_->get_rows_ptr ()),
     trns_cols_ptr_ (trns_matrix_->get_cols_ind ()),
-    reg_matrix_ (jmatrix_->get_flux_matrix ()),
+    reg_matrix_ (jacobian_->get_matrix ("flux")),
     reg_values_ (reg_matrix_->get_values ()),
     reg_rows_ptr_ (reg_matrix_->get_rows_ptr ()),
     reg_cols_ptr_ (reg_matrix_->get_cols_ind ()),
-    m_array_ (jmatrix_->get_m_array ()),
-    p_array_ (jmatrix_->get_p_array ()),
-    rhs_ (jmatrix_->get_rhs ()),
-    sol_ (jmatrix_->get_solution ()),
-    flux_rhs_ (jmatrix_->get_rhs_flux ()),
-    sp_diag_ (jmatrix_->get_sp_diagonal ()),
-    s_rhs_ (jmatrix_->get_sec_rhs ()),
+    m_array_ (jacobian_->get_m_array ()),
+    p_array_ (jacobian_->get_p_array ()),
+    rhs_ (jacobian_->get_rhs ()),
+    sol_ (jacobian_->get_solution ()),
+    flux_rhs_ (jacobian_->get_rhs_flux ()),
+    sp_diag_ (jacobian_->get_sp_diagonal ()),
+    s_rhs_ (jacobian_->get_sec_rhs ()),
     depths_ (&(*mesh_->get_depths ())[0]),
     n_cells_ (mesh->get_n_active_elements()),
     n_connections_ (mesh_->get_n_connections ()),
@@ -144,7 +140,7 @@ namespace blue_sky {
     mb_error_ ((item_t) calc_model_->ts_params->get_float (fi_params::MASS_BALANS_ERROR)),
     s_rhs_norm_ ((item_t) calc_model_->ts_params->get_float (fi_params::S_RHS_NORM)),
     norm_ (calc_model_->norm),
-    cfl_ (jmatrix_->get_cfl_vector ())
+    cfl_ (jacobian_->get_cfl_vector ())
     {
     }
 
@@ -219,7 +215,7 @@ namespace blue_sky {
           if (update_rhs_after_gauss_elimination)
             {
               // calculate well controls and rates
-              reservoir_->calc_wells (((istart_well_contr == 1) ? 1 : 0), dt, calc_model_, mesh_, jmatrix_);
+              reservoir_->calc_wells (((istart_well_contr == 1) ? 1 : 0), dt, calc_model_, mesh_, jacobian_);
 
               // fill rhs from wells
               reservoir_->fill_rhs_wells (dt, calc_model_, flux_rhs_, update_rhs_after_gauss_elimination);
@@ -229,9 +225,11 @@ namespace blue_sky {
 
           if (update_rhs_after_gauss_elimination)
             {
+              // FIXME: remove, obsolete
+              //reservoir_->init_jacobian (jmatrix_, n_cells_);
+
               // fill jacobian (irregular matrix) by wells
-              reservoir_->init_jacobian (jmatrix_, n_cells_);
-              reservoir_->end_jacobian (dt, calc_model_, jacobian_);
+              reservoir_->end_jacobian (jacobian_, dt, n_phases, n_cells_);
             }
 
           if (check_norm (istart))
@@ -248,8 +246,8 @@ namespace blue_sky {
 
       base_norm = norm_;
 
-      jmatrix_->clear_solution ();        // clear solution vector
-      jmatrix_->summ_rhs ();              // summarize rhs
+      jacobian_->clear_solution ();        // clear solution vector
+      jacobian_->summ_rhs ();              // summarize rhs
 
       return FI_OPERATOR_RETURN_OK;
     }
@@ -295,11 +293,11 @@ namespace blue_sky {
       rhs_item_t *rhs_block     = 0;
       index_t b_sqr         = n_phases * n_phases;
 
-      spv_float main_diag_acc         = jmatrix_->get_accum_matrix ()->get_diag ();//get_main_diagonal_accumulative ();
-      rhs_item_array_t ss_diag        = jmatrix_->get_ss_diagonal ();
-      rhs_item_array_t sp_diag        = jmatrix_->get_sp_diagonal ();
-      rhs_item_array_t s_rhs          = jmatrix_->get_sec_rhs ();
-      rhs_item_array_t rhs            = jmatrix_->get_rhs ();
+      spv_float main_diag_acc         = jacobian_->get_matrix ("accum")->get_values ();//get_main_diagonal_accumulative ();
+      rhs_item_array_t ss_diag        = jacobian_->get_ss_diagonal ();
+      rhs_item_array_t sp_diag        = jacobian_->get_sp_diagonal ();
+      rhs_item_array_t s_rhs          = jacobian_->get_sec_rhs ();
+      rhs_item_array_t rhs            = jacobian_->get_rhs ();
 
       BS_ERROR (!main_diag_acc->empty (), "fi_operator_cells");
       BS_ERROR (!ss_diag->empty (), "fi_operator_cells");
@@ -735,12 +733,11 @@ namespace blue_sky {
     void
     fi_operator_fill ()
     {
-      index_t b_sqr                   = n_phases * n_phases;
-      spv_float main_diag_acc         = jmatrix_->get_accum_matrix ()->get_diag ();//get_main_diagonal_accumulative ();
-      rhs_item_array_t ss_diag        = jmatrix_->get_ss_diagonal ();
-      rhs_item_array_t sp_diag        = jmatrix_->get_sp_diagonal ();
-      rhs_item_array_t s_rhs          = jmatrix_->get_sec_rhs ();
-      rhs_item_array_t rhs            = jmatrix_->get_rhs ();
+      spv_float main_diag_acc         = jacobian_->get_matrix ("accum")->get_values ();
+      rhs_item_array_t ss_diag        = jacobian_->get_ss_diagonal ();
+      rhs_item_array_t sp_diag        = jacobian_->get_sp_diagonal ();
+      rhs_item_array_t s_rhs          = jacobian_->get_sec_rhs ();
+      rhs_item_array_t rhs            = jacobian_->get_rhs ();
 
       BS_ASSERT (!main_diag_acc->empty ());
       BS_ASSERT (!ss_diag->empty ());
@@ -1210,7 +1207,7 @@ namespace blue_sky {
               BOSOUT (section::iters, level::debug) << "check_solution_mult_cell 2, mult = " << mult << bs_end;
 
               restore_prev_niter_vars ();
-              if (calc_model_->apply_newton_correction (mult, 2, mesh_, jacobian_))
+              if (calc_model_->apply_newton_correction (mult, 2, mesh_, jacobian_->get_solution (), jacobian_->get_sec_solution ()))
                 bs_throw_exception ("apply_newton_correction failed");
 
               return true;
@@ -1239,7 +1236,7 @@ namespace blue_sky {
           item_t dt_mult = calc_step_dt_mult (0, (item_t) calc_model_->ts_params->get_float (fi_params::MAX_NORM_ON_FIRST_N));
           if (dt_mult < 0.95)
             {
-              jmatrix_->mult_flux_part (dt_mult);
+              jacobian_->mult_flux_part (dt_mult);
               dt *= dt_mult;
 
               BOSOUT (section::iters, level::medium) << "dT reduced by factor " << dt_mult << ": " << dt << bs_end;
@@ -1260,7 +1257,7 @@ namespace blue_sky {
           item_t dt_mult = calc_step_dt_mult (0, (item_t) calc_model_->ts_params->get_float (fi_params::MAX_NORM_ON_TS));
           if (dt_mult < 0.95)
             {
-              jmatrix_->mult_flux_part (dt_mult);
+              jacobian_->mult_flux_part (dt_mult);
 
               BOSOUT (section::iters, level::medium) << "Use dT " << dt_mult * (dt) << " instead of original dT " << dt << bs_end;
             }
@@ -1368,7 +1365,6 @@ namespace blue_sky {
     const sp_rock_grid_prop_t     &rock_grid_prop_;
     sp_reservoir_t                &reservoir_;
     sp_jacobian_t                 &jacobian_;
-    sp_jmatrix_t                  &jmatrix_;
     const sp_mesh_iface_t         &mesh_;
 
     sp_bcsr_matrix_t              trns_matrix_;

@@ -13,8 +13,9 @@
 #include "calc_well.h"
 #include "well_connection.h"
 #include "calc_model_data_accessors.h"
-#include "reservoir.h"
-#include "facility_manager.h"
+// FIXME:
+//#include "reservoir.h"
+//#include "facility_manager.h"
 
 namespace blue_sky
   {

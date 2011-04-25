@@ -340,31 +340,31 @@ namespace wells {
 
   template <bool is_prod>
   void
-  default_well::calc_rate_and_derivs (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
+  default_well::calc_rate_and_derivs (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, BS_SP (jacobian) &jacobian)
   {
     if (calc_model->n_phases == 3)
       {
-        calc_rate_and_derivs_concrete <true, true, true, is_prod> (calc_model, mesh, jmatrix);
+        calc_rate_and_derivs_concrete <true, true, true, is_prod> (calc_model, mesh, jacobian);
       }
     else if (calc_model->is_water () && calc_model->is_oil ())
       {
-        calc_rate_and_derivs_concrete <true, false, true, is_prod> (calc_model, mesh, jmatrix);
+        calc_rate_and_derivs_concrete <true, false, true, is_prod> (calc_model, mesh, jacobian);
       }
     else if (calc_model->is_gas () && calc_model->is_oil ())
       {
-        calc_rate_and_derivs_concrete <false, true, true, is_prod> (calc_model, mesh, jmatrix);
+        calc_rate_and_derivs_concrete <false, true, true, is_prod> (calc_model, mesh, jacobian);
       }
     else if (calc_model->is_water ())
       {
-        calc_rate_and_derivs_concrete <true, false, false, is_prod> (calc_model, mesh, jmatrix);
+        calc_rate_and_derivs_concrete <true, false, false, is_prod> (calc_model, mesh, jacobian);
       }
     else if (calc_model->is_gas ())
       {
-        calc_rate_and_derivs_concrete <false, true, false, is_prod> (calc_model, mesh, jmatrix);
+        calc_rate_and_derivs_concrete <false, true, false, is_prod> (calc_model, mesh, jacobian);
       }
     else
       {
-        calc_rate_and_derivs_concrete <false, false, true, is_prod> (calc_model, mesh, jmatrix);
+        calc_rate_and_derivs_concrete <false, false, true, is_prod> (calc_model, mesh, jacobian);
       }
   }
 
@@ -419,10 +419,10 @@ namespace wells {
 
   template <bool is_w, bool is_g, bool is_o, bool is_prod>
   void
-  default_well::calc_rate_and_derivs_concrete (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
+  default_well::calc_rate_and_derivs_concrete (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, BS_SP (jacobian) &jacobian)
   {
 
-    calc_rate_and_derivs_t <is_w, is_g, is_o, is_prod> calc_ (calc_model, jmatrix, this);
+    calc_rate_and_derivs_t <is_w, is_g, is_o, is_prod> calc_ (calc_model, jacobian->get_sp_diagonal (), jacobian->get_sec_rhs (), this);
 
     //clear_data ();
     //for (size_t i = 0; i < 10000; ++i)
@@ -471,7 +471,7 @@ namespace wells {
 
 
   void
-  default_well::process_internal (bool is_start, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
+  default_well::process_internal (bool is_start, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, BS_SP (jacobian) &jacobian)
   {
     BS_ASSERT (!base_t::is_shut ()) (base_t::name ());
 
@@ -510,18 +510,18 @@ namespace wells {
 
     if (base_t::well_controller_->is_production ())
       {
-        calc_rate_and_derivs <true> (calc_model, mesh, jmatrix);
+        calc_rate_and_derivs <true> (calc_model, mesh, jacobian);
       }
     else
       {
-        calc_rate_and_derivs <false> (calc_model, mesh, jmatrix);
+        calc_rate_and_derivs <false> (calc_model, mesh, jacobian);
       }
   }
 
   void
-  default_well::process_impl (bool is_start, double /*dt*/, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
+  default_well::process_impl (bool is_start, double /*dt*/, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, BS_SP (jacobian) &jacobian)
   {
-    process_internal (is_start, calc_model, mesh, jmatrix);
+    process_internal (is_start, calc_model, mesh, jacobian);
 
     if (base_t::is_rate ())
       {
@@ -550,7 +550,7 @@ namespace wells {
 #endif
             base_t::bhp_ += bw_ww_dx;
 
-            process_internal (false, calc_model, mesh, jmatrix);
+            process_internal (false, calc_model, mesh, jacobian);
             if (!base_t::is_rate ())
               break;
           }

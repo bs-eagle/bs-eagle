@@ -285,7 +285,7 @@ struct di
         ns.val[norms::L2_ACPV_OIL] += d * d;
       }
 
-  rhs_item_array_t s_rhs = jmatrix_->get_sec_rhs ();
+  rhs_item_array_t s_rhs = jacobian_->get_sec_rhs ();
   for (index_t j = 0, j_cnt = n_sec_vars; j < j_cnt; ++j)
     {
       MAX_AND_INDEX ((*s_rhs)[i * n_sec_vars + j], ns.val[norms::S_RHS], i, ns.idx[norms::S_RHS]);

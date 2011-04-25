@@ -14,6 +14,7 @@
 #include "fi_params.h"
 #include "calc_model.h"
 #include "facility_manager.h"
+#include "calc_well.h"
 
 namespace blue_sky
   {

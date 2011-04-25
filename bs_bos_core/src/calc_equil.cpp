@@ -7,7 +7,6 @@
 #include "stdafx.h"
 
 #include "calc_model.h"
-#include "jacobian.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "data_class.h"
@@ -23,11 +22,6 @@
 #include "plane_orientation.h"
 #include "jfunction.h"
 #include BS_STOP_PLUGIN_IMPORT ()
-
-// FIXME:
-#include "calc_well.h"
-#include "well_results_storage.h"
-#include "fip_results_storage.h"
 
 namespace blue_sky
   {

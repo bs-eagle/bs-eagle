@@ -19,12 +19,10 @@ namespace blue_sky
   bs_flux_connections::bs_flux_connections(const bs_flux_connections& src)
   : bs_refcounter (src)
   {
-    // TODO: BUG:
-    bs_throw_exception ("NOT IMPL YET");
-    //*this = src;
+    wrapped = src.wrapped;
   }
 
-  BLUE_SKY_TYPE_IMPL(bs_flux_connections, objbase, "bs_flux_connections", "Mesh flux connections class", "Mesh flux connections class");
+  BLUE_SKY_TYPE_IMPL(bs_flux_connections, objbase, "flux_connections", "Mesh flux connections class", "Mesh flux connections class");
 
   BLUE_SKY_TYPE_STD_CREATE(bs_flux_connections);
   BLUE_SKY_TYPE_STD_COPY(bs_flux_connections);

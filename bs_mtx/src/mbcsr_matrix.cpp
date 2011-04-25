@@ -132,8 +132,17 @@ namespace blue_sky
 
         if ((t_long)(filter->size ()) != nr)
           {
-            // TODO: FIX
-            throw "Filter size problem";
+            // FIXME: 
+            if (filter->size () == 0)
+              {
+                filter->init (nr, 1);
+                flt = filter->data ();
+              }
+            else
+              {
+                // TODO: FIX
+                throw "Filter size problem";
+              }
           }
         // create matrix
         m = BS_KERNEL.create_object ("bcsr_matrix");

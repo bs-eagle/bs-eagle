@@ -15,7 +15,6 @@
 #include "prvd_table.h"
 #include "arrays.h"
 #include "rocktab_table.h"
-#include "jac_matrix_iface.h"
 #include "rs_smesh_iface.h"
 #include "pvt_oil.h"
 #include "pvt_gas.h"
@@ -27,7 +26,6 @@
 #include "fi_params.h"
 #include "norm_calc.h"
 #include "shared_vector.h"
-#include "jacobian.h"
 
 #include "calc_model_data.h"
 
@@ -99,11 +97,6 @@ namespace blue_sky
 
       typedef calc_model                                this_t;                   //!< shortname for this type
       typedef smart_ptr<this_t, true>                   sp_this_t;                //!< smart_ptr to this_t type
-
-      typedef jacobian                                  jacobian_t;               //!< jacobian type
-      typedef smart_ptr <jacobian_t, true>              sp_jacobian_t;            //!< smart_ptr to jacobian type
-      typedef jac_matrix_iface                          jacobian_matrix_t;        //!< jacobian_matrix type
-      typedef smart_ptr <jacobian_matrix_t, true>       sp_jacobian_matrix_t;     //!< smart_ptr to jacobian_matrix type
 
       typedef idata                                     idata_t;                  //!< idata type
       typedef smart_ptr<idata_t, true>                  sp_idata_t;               //!< smart_ptr to idata type
@@ -380,7 +373,7 @@ namespace blue_sky
        * \return see restore_solution_return_type for more details
        * */
       restore_solution_return_type
-      restore_solution (const sp_mesh_iface_t &mesh, const sp_jacobian_t &jacobian);
+      restore_solution (const sp_mesh_iface_t &mesh, const spv_double &solution, const spv_double &sec_solution);
 
       /**
        * \brief  applies newton correction and multiplies it by given mult (default 1.0)
@@ -391,7 +384,7 @@ namespace blue_sky
        * \return see restore_solution_return_type for more details
        * */
       restore_solution_return_type
-      apply_newton_correction (item_t mult, index_t istart_line_search, const sp_mesh_iface_t &mesh, const sp_jacobian_t &jacobian);
+      apply_newton_correction (item_t mult, index_t istart_line_search, const sp_mesh_iface_t &mesh, const spv_double &solution, const spv_double &sec_solution);
 
       /**
        * \brief  calculates multiplier (m) for newton correction vector (J(x0) * w = -F(x0), x1 = x0 + m * w)
@@ -400,7 +393,7 @@ namespace blue_sky
        * \return multiplier value
        * */
       item_t  
-      new_simple_get_cell_solution_mult (const sp_mesh_iface_t &mesh, const sp_jacobian_t &jacobian);
+      new_simple_get_cell_solution_mult (const sp_mesh_iface_t &mesh, const spv_double &solution, const spv_double &sec_solution);
 
       /**
        * \brief  returns multiplier for apply_newton_correction function
@@ -409,7 +402,7 @@ namespace blue_sky
        * \return multiplier value
        * */
       item_t  
-      new_simple_get_cell_solution_mult_2 (const sp_mesh_iface_t &mesh, const sp_jacobian_t &jacobian) const;
+      new_simple_get_cell_solution_mult_2 (const sp_mesh_iface_t &mesh, const spv_double &solution) const;
 
       /**
        * \brief  restores solution from Jacobian (jacobian_matrix), 
@@ -419,7 +412,7 @@ namespace blue_sky
        * \return 0 on success
        * */
       int     
-      new_simple_get_cell_solution (const double mult, int istart_linear_search, const sp_mesh_iface_t &msh, const sp_jacobian_t &jacobian);
+      new_simple_get_cell_solution (const double mult, int istart_linear_search, const sp_mesh_iface_t &msh, const spv_double &solution, const spv_double &sec_solution);
 
       /**
        * \brief  calculates approximal value of So, Sg, Ro from 
@@ -442,15 +435,6 @@ namespace blue_sky
                             // results
                             item_t &so, item_t &sg, item_t &ro,
                             main_var_type &m_var);
-
-      /**
-       * \brief  inits jacobian
-       * \param  input_data pointer to idata instance
-       * \param  mesh pointer to mesh instance
-       * */
-      void
-      init_jacobian (const sp_jacobian_t &input_data, const sp_mesh_iface_t &mesh);
-
 
       /**
        * \brief  returns true if water phase present in model
@@ -522,8 +506,6 @@ namespace blue_sky
       sp_pvt_gas_array_t                                      pvt_gas_array;                  //!< array of pvt_gas objects, length == n_pvt_regions
 
       data_array_t                                            data;                           //!< array of calc_model_data, length == n_elements 
-
-      stdv_double                                             workspace;                      //!< obsolete, n_elements * (n_phase)
 
       calc_model_data_tmp_holder                              old_data_;                      //!< calc_model data stored on previous step
       calc_model_data_tmp_holder                              prev_niter_data_;               //!< calc_model data stored on previous newton iteration

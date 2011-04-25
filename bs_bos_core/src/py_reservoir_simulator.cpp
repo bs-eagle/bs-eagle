@@ -33,23 +33,20 @@ using namespace boost::python;
 namespace blue_sky {
 namespace python {
 
-  template <typename T>
-  typename T::sp_jmatrix_t 
-  get_jmatrix (T *t)
+  BS_SP (bcsr_matrix_iface)
+  get_matrix (reservoir_simulator *t, std::string const &name)
   {
-    return t->jacobian_->get_jmatrix ();
+    return t->get_jacobian ()->get_matrix (name);
   }
 
-  template <typename T>
-  typename T::reservoir_t::sp_facility_manager_t
-  get_facility_list (T *t)
+  reservoir::sp_facility_manager_t
+  get_facility_list (reservoir_simulator *t)
   {
-    return t->reservoir_->get_facility_list ();
+    return t->get_reservoir ()->get_facility_list ();
   }
 
-  template <typename T>
   bool
-  subscribe (T *t, int signal_code, const python_slot &slot)
+  subscribe (reservoir_simulator *t, int signal_code, const python_slot &slot)
   {
     bool result = t->subscribe (signal_code, slot.spslot);
     result &=     t->subscribe (objbase::on_delete, new blue_sky::tools::py_object_handler (boost::python::detail::wrapper_base_::get_owner (slot)));
@@ -61,14 +58,14 @@ namespace python {
     .def ("init",                     &T::read_keyword_file_and_init)
     .def ("simulate",                 &T::main_loop)
     .def ("simulate",                 &T::simulate)
-    .def ("subscribe",                subscribe <T>)
-    .add_property ("facility_list",   make_function (get_facility_list <T>))
-    .add_property ("jmatrix",         make_function (get_jmatrix <T>))
-    .add_property ("calc_model",      make_getter (&T::cm, return_value_policy <copy_non_const_reference> ()))
-    .add_property ("reservoir",       make_getter (&T::reservoir_, return_value_policy <copy_non_const_reference> ()))
-    .add_property ("event_manager",   make_getter (&T::em, return_value_policy <copy_non_const_reference> ()))
-    .add_property ("hydrodynamic_model",    make_getter (&T::hdm, return_value_policy <copy_non_const_reference> ()))
-    .add_property ("jacobian",        make_getter (&T::jacobian_, return_value_policy <copy_non_const_reference> ()))
+    .def ("subscribe",                subscribe)
+    .add_property ("facility_list",   make_function (get_facility_list))
+    .def ("matrix",                   make_function (get_matrix))
+    .add_property ("calc_model",      &T::get_calc_model)
+    .add_property ("reservoir",       &T::get_reservoir)
+    .add_property ("event_manager",   &T::get_event_manager)
+    .add_property ("hydrodynamic_model",    &T::get_hydrodynamic_model)
+    .add_property ("jacobian",        &T::get_jacobian)
   PY_EXPORTER_END;
 
   void 

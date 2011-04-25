@@ -10,7 +10,6 @@
 
 #include "calc_model.h"
 #include "fi_params.h"
-#include "jacobian.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "scal_3p.h"
@@ -28,11 +27,9 @@
 #include "pvt_gas.h"
 #include "jfunction.h"
 #include "rs_mesh_iface.h"
-#include "jac_matrix_iface.h"
 #include "string_formater.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
-#include "calc_well.h"
 #include "well_results_storage.h"
 #include "fip_results_storage.h"
 
@@ -78,7 +75,8 @@ namespace blue_sky
       , pressure (BS_KERNEL.create_object (v_double::bs_type ()))
       , saturation_3p (BS_KERNEL.create_object (v_double::bs_type ()))
       , gas_oil_ratio (BS_KERNEL.create_object (v_double::bs_type ()))
-      , well_res(BS_KERNEL.create_object(well_results_storage::bs_type()))
+      , well_res (BS_KERNEL.create_object ("well_results_storage"))
+      , fip_res (BS_KERNEL.create_object ("fip_results_storage"))
   {
     init();
   }
@@ -97,7 +95,8 @@ namespace blue_sky
       , pressure (BS_KERNEL.create_object (v_double::bs_type ()))
       , saturation_3p (BS_KERNEL.create_object (v_double::bs_type ()))
       , gas_oil_ratio (BS_KERNEL.create_object (v_double::bs_type ()))
-      , well_res(BS_KERNEL.create_object(well_results_storage::bs_type()))
+      , well_res (BS_KERNEL.create_object ("well_results_storage"))
+      , fip_res (BS_KERNEL.create_object ("fip_results_storage"))
   {
     //*this = src;
   }
@@ -817,26 +816,6 @@ namespace blue_sky
   {
     write_time_to_log init_time ("Calc arrays initialization", "");
     
-    // trans mult
-    //this->truns_mult.resize(mesh->get_n_active_elements());
-    //this->p_deriv_truns_mult.resize(mesh->get_n_active_elements());
-
-    // workspace : 3 phase or 2 phase oil-gas system
-    if (FI_CHK_OIL_GAS(this->phases))
-      workspace.resize(mesh->get_n_active_elements() * (this->n_phases + 1));
-    else // one phase or only water-oil system
-      workspace.resize(mesh->get_n_active_elements() * this->n_phases);
-
-    // well storage
-//    FI_FREE (new_fwell_storage);
-//    new_fwell_storage = new t_well_storage;
-//    if (!new_fwell_storage)
-//      r_code = -1;
-
-//    if (new_fwell_storage->init (get_mesh()->n_elements, ADD_WELLS, ADD_WELLS, n_phases))
-//      // Error message already output
-//      return -1;
-
     if (this->ts_params->get_bool(fi_params::STORE_PANE_FLOW_RATES))
       {
         //TODO: n_planes
@@ -844,30 +823,9 @@ namespace blue_sky
         this->full_step_plane_flow_rate.resize(mesh->get_n_active_elements() * this->n_phases);
       }
 
-//    FI_DOUBLE_ARRAY_REALLOCATOR (bconn_pressure, get_mesh()->n_boundary_connections, r_code);
-//    FI_DOUBLE_ARRAY_REALLOCATOR (bconn_saturation, get_mesh()->n_boundary_connections * (n_phases - 1), r_code);
-//    if (FI_CHK_OIL_GAS (phases)) {
-//      FI_DOUBLE_ARRAY_REALLOCATOR (bconn_gor, get_mesh()->n_boundary_connections, r_code);
-//      FI_INT_ARRAY_REALLOCATOR (bconn_mainvar, get_mesh()->n_boundary_connections, r_code);
-//    }
-
     init_boundary_connections (input_data, mesh);
 
     return 0;
-  }
-
-  void
-  calc_model::init_jacobian (const sp_jacobian_t &jacobian, const sp_mesh_iface_t &mesh)
-  {
-    write_time_to_log init_time ("Jacobian initialization", "");
-    const sp_jacobian_matrix_t &locked_jmatrix (jacobian->get_jmatrix ());
-
-#ifdef _MPI
-    BS_ASSERT (false && "MPI: NOT IMPL YET");
-    this->jacobian_->init_jacobian (input_data->get_mesh(), this->n_phases, this->ts_params, mpi_decomp);
-#else //_MPI
-    jacobian->init_jmatrix (mesh->get_n_active_elements (), n_phases, 3, 0, n_sec_vars);
-#endif //_MPI
   }
 
   void
@@ -1159,21 +1117,21 @@ namespace blue_sky
   }
 
   restore_solution_return_type
-  calc_model::restore_solution (const sp_mesh_iface_t &mesh, const sp_jacobian_t &jacobian)
+  calc_model::restore_solution (const sp_mesh_iface_t &mesh, const spv_double &solution, const spv_double &sec_solution)
   {
-    return apply_newton_correction (1.0, 0, mesh, jacobian);
+    return apply_newton_correction (1.0, 0, mesh, solution, sec_solution);
   }
 
   restore_solution_return_type
-  calc_model::apply_newton_correction (item_t mult, index_t istart_line_search, const sp_mesh_iface_t &mesh, const sp_jacobian_t &jacobian)
+  calc_model::apply_newton_correction (item_t mult, index_t istart_line_search, const sp_mesh_iface_t &mesh, const spv_double &solution, const spv_double &sec_solution)
   {
     //int ret_code = 0;
     static double mult_out = 1.0;   // TODO: WTF
 
     if (!istart_line_search) // calculate multiplier first time only
       {
-        mult_out = new_simple_get_cell_solution_mult_2 (mesh, jacobian);
-        //mult_out = new_simple_get_cell_solution_mult (mesh, jacobian);
+        mult_out = new_simple_get_cell_solution_mult_2 (mesh, solution);
+        //mult_out = new_simple_get_cell_solution_mult (mesh, solution, sec_solution);
 
         //if (fabs (mult_out - mult_out_x) > 0.0)
         //  {
@@ -1193,7 +1151,7 @@ namespace blue_sky
 
     BOSOUT (section::iters, level::low) << "Solution MULT: " << mult_out << bs_end;
     // restore solution
-    if (new_simple_get_cell_solution (mult_out, istart_line_search, mesh, jacobian))
+    if (new_simple_get_cell_solution (mult_out, istart_line_search, mesh, solution, sec_solution))
       {
         BOSERR (section::iters, level::error) << "apply_newton_correction: Couldn't apply newton correction for cells" << bs_end;
         return SMALL_TIME_STEP_FAIL;
@@ -1206,10 +1164,10 @@ namespace blue_sky
 #define IF_LE_REPLACE(ORI,NEW,C,V) if ((ORI) > (NEW)) {(ORI) = (NEW);(C) = (V);}
 
   calc_model::item_t
-  calc_model::new_simple_get_cell_solution_mult_2 (const sp_mesh_iface_t &msh, const sp_jacobian_t &jacobian) const
+  calc_model::new_simple_get_cell_solution_mult_2 (const sp_mesh_iface_t &msh, const spv_double &x_sol_) const
   {
     BS_ASSERT (msh);
-    BS_ASSERT (jacobian);
+    BS_ASSERT (x_sol_);
     BS_ASSERT (!pressure->empty ());
     if (n_phases > 1)
       {
@@ -1228,7 +1186,6 @@ namespace blue_sky
     const int d_g                 = phase_d[FI_PHASE_GAS];
     int condition                 = 0;
     index_t n                     = msh->get_n_active_elements ();
-    const item_array_t &x_sol_    = jacobian->get_solution ();
     const item_t *x_sol           = &(*x_sol_)[0];
     item_t d                      = 0.0;
     item_t t_mult                 = 0.0;
@@ -1348,10 +1305,11 @@ namespace blue_sky
 
   calc_model::item_t
   calc_model::new_simple_get_cell_solution_mult (const sp_mesh_iface_t &msh,
-      const sp_jacobian_t &jacobian)
+      const spv_double &x_sol_, const spv_double &sec_sol_)
   {
     BS_ASSERT (msh);
-    BS_ASSERT (jacobian);
+    BS_ASSERT (x_sol_);
+    BS_ASSERT (sec_sol_);
     BS_ASSERT (pressure->size ());
     if (n_phases > 1)
       {
@@ -1374,8 +1332,6 @@ namespace blue_sky
 
     item_t mult                   = 1.0;
     index_t n                     = msh->get_n_active_elements ();
-    const item_array_t &x_sol_    = jacobian->get_solution ();
-    const item_array_t &sec_sol_  = jacobian->get_sec_solution ();
     const item_t *x_sol           = &(*x_sol_)[0];
     const item_t *sec_sol         = &(*sec_sol_)[0];
 
@@ -1466,10 +1422,12 @@ namespace blue_sky
   int
   calc_model::new_simple_get_cell_solution (const double mult, int istart_linear_search,
       const sp_mesh_iface_t &msh,
-      const sp_jacobian_t &jacobian)
+      const spv_double &x_sol_,
+      const spv_double &sec_sol_)
   {
     BS_ASSERT (msh);
-    BS_ASSERT (jacobian);
+    BS_ASSERT (x_sol_);
+    BS_ASSERT (sec_sol_);
     BS_ASSERT (pressure->size ());
     if (n_phases > 1)
       {
@@ -1532,8 +1490,6 @@ namespace blue_sky
       }
 
     index_t n                     = msh->get_n_active_elements ();
-    const item_array_t &x_sol_    = jacobian->get_solution ();
-    const item_array_t &sec_sol_  = jacobian->get_sec_solution ();
     const item_t *x_sol           = &(*x_sol_)[0];
     const item_t *sec_sol         = &(*sec_sol_)[0];
 

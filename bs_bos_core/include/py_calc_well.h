@@ -49,7 +49,6 @@ namespace python {
   public:
     typedef smart_ptr <calc_model, true >         sp_calc_model_t;
     typedef smart_ptr <rs_mesh_iface, true >      sp_mesh_iface_t;
-    typedef smart_ptr <jac_matrix_iface, true >   sp_jmatrix_t;
 
     typedef well                                  wrapped_t;
 
@@ -57,7 +56,7 @@ namespace python {
 
     CLASS_WRAPPER_DECL (py_well);
 
-    WRAPPER_METHOD (process_impl,     void, 5, (bool, double, const sp_calc_model_t &, const sp_mesh_iface_t &, sp_jmatrix_t &));
+    WRAPPER_METHOD (process_impl,     void, 5, (bool, double, const sp_calc_model_t &, const sp_mesh_iface_t &, smart_ptr <jacobian> &));
     WRAPPER_METHOD (restore_solution, void, 4, (double, const spv_double &, const spv_double &, index_t));
     WRAPPER_METHOD (clear_data,       void, 0, (empty_arg__));
   };

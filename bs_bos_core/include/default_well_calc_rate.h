@@ -557,10 +557,8 @@ namespace wells {
     typedef calc_model_t::data_array_t         cell_data_t;
     typedef calc_model_t::main_var_array_t     main_vars_t;
     typedef main_vars_t::value_type            main_var_t;
-    typedef jac_matrix_iface                jmatrix_t;
 
     typedef smart_ptr <calc_model_t, true>              sp_calc_model_t;
-    typedef smart_ptr <jmatrix_t, true>                 sp_jmatrix_t;
 
     enum
       {
@@ -599,7 +597,7 @@ namespace wells {
           wat_sw = !is_1p ? b_sqr + wat_idx : -1,
         };
 
-    calc_rate_and_derivs_t (const sp_calc_model_t &calc_model, const sp_jmatrix_t &jmatrix, well_t *well)
+    calc_rate_and_derivs_t (const sp_calc_model_t &calc_model, const spv_double &sp_diagonal_, const spv_double &sec_rhs_, well_t *well)
     : cell_data_ (calc_model->data)
     , main_vars_ (calc_model->main_variable)
     , pressure_ (&(*calc_model->pressure)[0])
@@ -613,8 +611,8 @@ namespace wells {
     , d_o (0)
     , injection_type_ (well->get_well_controller ()->injection ())
     , control_type_ (well->get_well_controller ()->get_control_type ())
-    , sp_diagonal_ (jmatrix->get_sp_diagonal ())
-    , sec_rhs_ (jmatrix->get_sec_rhs ())
+    , sp_diagonal_ (sp_diagonal_)
+    , sec_rhs_ (sec_rhs_)
     , n_sec_vars_ (calc_model->n_sec_vars)
     , ww (well->ww_value)
     , wefac (well->exploitation_factor_)
