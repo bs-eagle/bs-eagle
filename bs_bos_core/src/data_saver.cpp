@@ -55,7 +55,7 @@ namespace blue_sky {
     double time)
   {
     BS_ASSERT (impl_);
-    impl_->write_calc_model_data (calc_model, jacobian, large_time_step_num, total_time_step_num, time);
+    impl_->write_calc_model_data (calc_model, jmx, large_time_step_num, total_time_step_num, time);
   }
 
   void
