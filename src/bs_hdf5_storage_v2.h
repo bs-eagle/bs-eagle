@@ -5,6 +5,7 @@
 
 #include "shared_vector.h"
 #include "constants.h"
+#include "conf.h"
 
 #include <boost/type_traits.hpp>
 #include <boost/array.hpp>
@@ -105,6 +106,11 @@ namespace blue_sky {
     {
       enum { static_size = 1, };
     };
+    template <>
+    struct get_size <long>
+    {
+      enum { static_size = 1, };
+    };
 
     template <typename T>
     struct get_type
@@ -141,6 +147,11 @@ namespace blue_sky {
     struct get_type <auto_value <float> >
     {
       typedef float type;
+    };
+    template <>
+    struct get_type <long>
+    {
+      typedef long type;
     };
 
     template <size_t s>
@@ -297,6 +308,34 @@ namespace blue_sky {
   {
     return hdf5::private_::hdf5_buffer__ (T (), &t, 1, 0, 0);
   }
+
+  template <>
+  inline hdf5::private_::hdf5_buffer__ 
+  hdf5_buffer (const spv_double &data)
+  {
+    return hdf5::private_::hdf5_buffer__ (float (), data->data (), data->size (), 0, 0);
+  }
+#if !T_FLOAT_IS_DOUBLE 
+  template <>
+  inline hdf5::private_::hdf5_buffer__ 
+  hdf5_buffer (const spv_float &data)
+  {
+    return hdf5::private_::hdf5_buffer__ (float (), data->data (), data->size (), 0, 0);
+  }
+#endif
+  template <>
+  inline hdf5::private_::hdf5_buffer__ 
+  hdf5_buffer (const spv_long &data)
+  {
+    return hdf5::private_::hdf5_buffer__ (long (), data->data (), data->size (), 0, 0);
+  }
+  template <>
+  inline hdf5::private_::hdf5_buffer__ 
+  hdf5_buffer (const std::vector <main_var_type> &data)
+  {
+    return hdf5::private_::hdf5_buffer__ (int (), &(data[0]), data.size (), 0, 0);
+  }
+
 
   template <typename T>
   inline hdf5::private_::hdf5_value_holder_unary <T>
@@ -588,6 +627,29 @@ namespace blue_sky {
     {
       return write_buffer (dataset, hdf5_buffer (data));
     }
+    hdf5_group_v2 &
+    write (const char *dataset, const spv_double &data)
+    {
+      return write_buffer (dataset, hdf5_buffer (data));
+    }
+#if !T_FLOAT_IS_DOUBLE
+    hdf5_group_v2 &
+    write (const char *dataset, const spv_float &data)
+    {
+      return write_buffer (dataset, hdf5_buffer (data));
+    }
+#endif
+    hdf5_group_v2 &
+    write (const char *dataset, const spv_long &data)
+    {
+      return write_buffer (dataset, hdf5_buffer (data));
+    }
+    hdf5_group_v2 &
+    write (const char *dataset, const std::vector <main_var_type> &data)
+    {
+      return write_buffer (dataset, hdf5_buffer (data));
+    }
+
 
     template <typename T>
     hdf5_group_v2 &

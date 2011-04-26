@@ -100,6 +100,10 @@ namespace blue_sky
   {
     return H5T_NATIVE_UINT;
   }
+  template <> inline const hid_t & get_hdf5_type <long> ()
+  {
+    return H5T_NATIVE_LONG;
+  }
 
   template<typename T> inline const hid_t & get_hdf5_type (const T &)
   {

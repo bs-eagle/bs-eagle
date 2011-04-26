@@ -84,7 +84,7 @@ namespace blue_sky
         printf ("Error: can't create dataset %s while writing hdf5!\n", name.c_str());
         return -1;
       }
-    herr_t status = H5Dwrite(dataset, datatype, NULL, NULL, H5P_DEFAULT, data);
+    herr_t status = H5Dwrite(dataset, datatype, 0, 0, H5P_DEFAULT, data);
     H5Dclose(dataset);
     H5Sclose(dataspace);
     return (int) status;

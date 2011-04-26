@@ -8,7 +8,7 @@ tar_name = "bs_hdf5_storage"
 env = custom_env.Clone ()
 env.Append (CPPPATH = [
     includes["bs_bos_core_base"],
-    includes["bs_matrix"]
+    includes["bs_mtx"]
     ] 
     + includes["kernel"]
     + includes["bs_hdf5_storage"]
@@ -16,7 +16,7 @@ env.Append (CPPPATH = [
 
 libs = ["blue_sky", 
      "bs_bos_core_base", 
-     "bs_matrix"
+     "bs_mtx"
      ]
 
 boost_libs = ["boost_date_time-mt"]

@@ -258,7 +258,7 @@ namespace blue_sky
     {
       hid_t new_group = -1;
       // Check group already exists
-      htri_t status = H5Lexists (location, object_name.c_str(), NULL);
+      htri_t status = H5Lexists (location, object_name.c_str(), 0);
       if (status == 0)  // Create group.
       {
         new_group = H5Gcreate (location, object_name.c_str(), H5P_DEFAULT);
@@ -330,7 +330,7 @@ namespace blue_sky
   int bs_hdf5_storage::write_string_to_hdf5 (const hid_t location, const char *dataset_name, const std::string &str) const
     {
       //check if not already exists
-      htri_t status = H5Lexists (location, dataset_name, NULL);
+      htri_t status = H5Lexists (location, dataset_name, 0);
       if (status == 0)
       {
         // write data for the current well

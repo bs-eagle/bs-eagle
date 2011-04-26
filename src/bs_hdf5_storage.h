@@ -20,7 +20,7 @@ namespace blue_sky
       inline bool 
       is_object_exists (const hid_t &location, const std::string &name) 
       {
-        htri_t status = H5Lexists (location, name.c_str (), NULL);
+        htri_t status = H5Lexists (location, name.c_str (), 0);
         return status > 0;
       }
 
@@ -33,7 +33,7 @@ namespace blue_sky
       object_name (hid_t location, const std::string &path)
       {
         char *name = 0;
-        int name_length = (int) H5Iget_name (location, name, NULL);
+        int name_length = (int) H5Iget_name (location, name, 0);
         if (name_length < 0)
           {
             bs_throw_exception (boost::format ("Can't get HDF5 object name, path: %s") % path);
@@ -58,7 +58,7 @@ namespace blue_sky
       inline hid_t
       open_group (const hid_t location, const char *path) 
       {
-        if (!H5Lexists (location, path, NULL)) // not exist
+        if (!H5Lexists (location, path, 0)) // not exist
           {
             bs_throw_exception (boost::format ("Group %s/%s is not exists") % object_name (location, path) % path);
           }
@@ -81,7 +81,7 @@ namespace blue_sky
       inline hid_t
       open_dataset (const hid_t location, const char *path) 
       {
-        if (!H5Lexists(location, path, NULL)) // not exist
+        if (!H5Lexists(location, path, 0)) // not exist
           {
             bs_throw_exception (boost::format ("Dataset %s/%s is not exists") % object_name (location, path) % path);
           }
@@ -174,8 +174,8 @@ namespace blue_sky
   bs_hdf5_storage::create_group (const hid_t location, const char *group_name) const
   {
     hid_t group;
-    if (!H5Lexists (location, group_name, NULL)) // not exist
-    group = H5Gcreate (location, group_name, NULL);
+    if (!H5Lexists (location, group_name, 0)) // not exist
+    group = H5Gcreate (location, group_name, 0);
     else
       group = H5Gopen (location, group_name);
       if (group < 0)
