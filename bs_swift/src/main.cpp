@@ -19,7 +19,7 @@
 #include "standart2_pbuild.h"
 #include "standart3_pbuild.h"
 
-//#include "amg_solver.h"
+#include "amg_solver.h"
 
 #include "coarse_tools.h"
 
@@ -41,8 +41,6 @@ namespace blue_sky {
   bool
   register_types (plugin_descriptor &pd)
   {
-    //const plugin_descriptor &pd = *bs_init.pd_;
-
     bool res = true;
 
     REG_TYPE (pmis_coarse)
@@ -60,7 +58,7 @@ namespace blue_sky {
     REG_TYPE (standart2_pbuild)
     REG_TYPE (standart3_pbuild)
 
-    //REG_TYPE (amg_solver)
+    REG_TYPE (amg_solver)
 
     return res;
   }
