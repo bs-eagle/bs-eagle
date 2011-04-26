@@ -157,6 +157,9 @@ namespace blue_sky
 
       //! launch keyword handler
       virtual void handle_keyword (const std::string &keyword, keyword_params_t &params) = 0;
+
+      // FIXME:
+      virtual boost::posix_time::ptime get_starting_date () const = 0;
     };
     
 }//ns bs

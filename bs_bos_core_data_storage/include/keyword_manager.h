@@ -170,7 +170,7 @@ namespace blue_sky
        * \return Starting date
        * */
       boost::posix_time::ptime 
-      get_starting_date () {return starting_date;}
+      get_starting_date () const {return starting_date;}
 
       /**
        * \brief  Returns true if keyword supported by plugins
