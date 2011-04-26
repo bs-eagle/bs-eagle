@@ -321,7 +321,7 @@ namespace blue_sky
   void
   reservoir::write_step_to_hdf5 (const sp_calc_model_t &calc_model,
                            const sp_mesh_iface_t &mesh,
-                           const sp_jmatrix_t &jmx, 
+                           const BS_SP (jacobian) &jacobian, 
                            int l_time_step_num, int total_ts_count,
                            item_t time) const
     {
@@ -353,7 +353,7 @@ namespace blue_sky
     {
       if (calc_model->ts_params->get_bool (fi_params::WRITE_PRESSURE_TO_HDF5))
         {
-          copy_to (&calc_model->pressure[mpi_start], &tmp_buf[0], n_elem_local);
+          copy_to (&calc_model->pressure->data ()[mpi_start], &tmp_buf[0], n_elem_local);
           hdf5->add_to_results ("/results/pressure", &tmp_buf[0], n_elem_global, n_elem_local, mpi_offset, time);
         }
 
@@ -361,7 +361,7 @@ namespace blue_sky
         {
           if (calc_model->is_gas () && calc_model->is_oil ())
             {
-              copy_to (&calc_model->gas_oil_ratio[mpi_start], &tmp_buf[0], n_elem_local);
+              copy_to (&calc_model->gas_oil_ratio->data ()[mpi_start], &tmp_buf[0], n_elem_local);
               hdf5->add_to_results ("/results/gor", &tmp_buf[0], n_elem_global, n_elem_local, mpi_offset, time);
             }
         }
@@ -379,12 +379,12 @@ namespace blue_sky
 
               if (calc_model->is_gas ())
                 {
-                  copy_to (&calc_model->saturation_3p[n_phases * mpi_start], &tmp_buf[0], n_phases * n_elem_local, n_phases/*stride*/, d_g/*start*/);
+                  copy_to (&calc_model->saturation_3p->data ()[n_phases * mpi_start], &tmp_buf[0], n_phases * n_elem_local, n_phases/*stride*/, d_g/*start*/);
                   hdf5->add_to_results ("/results/sgas", &tmp_buf[0], n_elem_global, n_elem_local, mpi_offset, time);
                 }
               if (calc_model->is_water ())
                 {
-                  copy_to (&calc_model->saturation_3p[n_phases * mpi_start], &tmp_buf[0], n_phases * n_elem_local, n_phases /*stride*/, d_w/*start*/);
+                  copy_to (&calc_model->saturation_3p->data ()[n_phases * mpi_start], &tmp_buf[0], n_phases * n_elem_local, n_phases /*stride*/, d_w/*start*/);
                   hdf5->add_to_results ("/results/swat", &tmp_buf[0], n_elem_global, n_elem_local, mpi_offset, time);
                 }
             }
@@ -394,12 +394,12 @@ namespace blue_sky
       if (calc_model->ts_params->get_bool (fi_params::WRITE_CFL_TO_HDF5) && 
           calc_model->ts_params->get_bool (fi_params::USE_CFL))
       {
-        if (jmx->get_cfl_vector ().empty ())
+        if (jacobian->get_cfl_vector ()->empty ())
           {
-            jmx->get_cfl_vector ().assign (n_elem_local, 0);
+            jacobian->get_cfl_vector ()->assign (n_elem_local, 0);
           }
 
-        copy_to (&jmx->get_cfl_vector ()[0], &tmp_buf[0], n_elem_local);
+        copy_to (&jacobian->get_cfl_vector ()->data ()[0], &tmp_buf[0], n_elem_local);
         hdf5->add_to_results ("/results/cfl", &tmp_buf[0], n_elem_global, n_elem_local, mpi_offset, time);
       }
 #endif

@@ -41,8 +41,7 @@ namespace blue_sky
      * \param hdf5 File to write to
      * \param mesh
      * */
-    template<class strategy_t>
-    void write_mesh_to_hdf5 (const smart_ptr <bs_hdf5_storage, true> &hdf5, const smart_ptr <rs_smesh_iface<strategy_t>, true> &mesh);
+    void write_mesh_to_hdf5 (const smart_ptr <bs_hdf5_storage, true> &hdf5, const smart_ptr <rs_smesh_iface, true> &mesh);
 
     namespace detail
       {

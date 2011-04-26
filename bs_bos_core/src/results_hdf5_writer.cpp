@@ -139,13 +139,12 @@ namespace blue_sky
 #endif
     }
 
-    template<class strategy_t>
-    void write_mesh_to_hdf5 (const smart_ptr <bs_hdf5_storage, true> &hdf5, const smart_ptr <rs_smesh_iface<strategy_t>, true> &mesh)
+    void write_mesh_to_hdf5 (const smart_ptr <bs_hdf5_storage, true> &hdf5, const smart_ptr <rs_smesh_iface, true> &mesh)
     {
       const int INITIAL_DATA_SIZE = 5;
       int values[INITIAL_DATA_SIZE];
 
-      typename rs_smesh_iface<strategy_t>::index_point3d_t dims = mesh->get_dimens ();
+      rs_smesh_iface::index_point3d_t dims = mesh->get_dimens ();
 
       values[0] = dims[0];
       values[1] = dims[1];
@@ -154,8 +153,8 @@ namespace blue_sky
       values[4] = mesh->get_n_active_elements ();//mesh->n_planes
 
       hdf5->write_array ("/mesh","initial_data", values, 5);
-      hdf5->write_array ("/mesh","original_elements", &(mesh->get_ext_to_int())[0], (int)mesh->get_ext_to_int().size());
-      hdf5->write_array ("/mesh","original_planes", &(mesh->get_ext_to_int())[0], (int)mesh->get_ext_to_int().size());//TODO
+      hdf5->write_array ("/mesh","original_elements", &(mesh->get_ext_to_int()->data ())[0], (int)mesh->get_ext_to_int()->size());
+      hdf5->write_array ("/mesh","original_planes", &(mesh->get_ext_to_int()->data ())[0], (int)mesh->get_ext_to_int()->size());//TODO
     }
 
     namespace detail
@@ -299,10 +298,6 @@ namespace blue_sky
       }
 
     } // namespace detail
-
-    template void write_mesh_to_hdf5 <base_strategy_fi> (const smart_ptr <bs_hdf5_storage, true> &hdf5, const smart_ptr <rs_smesh_iface<base_strategy_fi>, true> &mesh);
-    template void write_mesh_to_hdf5 <base_strategy_di> (const smart_ptr <bs_hdf5_storage, true> &hdf5, const smart_ptr <rs_smesh_iface<base_strategy_di>, true> &mesh);
-    template void write_mesh_to_hdf5 <base_strategy_mixi> (const smart_ptr <bs_hdf5_storage, true> &hdf5, const smart_ptr <rs_smesh_iface<base_strategy_mixi>, true> &mesh);
 
   } // namespace hdf5
 } // namespace blue_sky
