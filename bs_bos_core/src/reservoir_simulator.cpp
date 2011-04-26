@@ -29,7 +29,7 @@ namespace blue_sky
   reservoir_simulator::reservoir_simulator (bs_type_ctor_param)
       : bs_refcounter ()
       , bs_node (bs_node::create_node()) //new typename this_t::mstatus_traits ()))
-      , hdm (give_kernel::Instance().create_object (dm_t::bs_type ()))
+      , hdm_ (give_kernel::Instance().create_object (hdm::bs_type ()))
       , em (give_kernel::Instance().create_object (event_manager::bs_type ()))
       , cm (give_kernel::Instance().create_object (calc_model::bs_type ()))
       , reservoir_ (give_kernel::Instance().create_object (reservoir::bs_type ()))
@@ -38,9 +38,9 @@ namespace blue_sky
       , reservoir_simulator_events_init_ (this)
   {
     this->add_signal (BS_SIGNAL_RANGE (reservoir_simulator));
-    hdm->init ();
+    hdm_->init ();
     
-    //bs_node::insert (bs_link::create (hdm, "hdm"), false);
+    //bs_node::insert (bs_link::create (hdm_, "hdm"), false);
     //bs_node::insert (bs_link::create (em, "event_manager"), false);
     //bs_node::insert (bs_link::create (cm, "calc_model"), false);
 
@@ -56,7 +56,7 @@ namespace blue_sky
   reservoir_simulator::reservoir_simulator (const reservoir_simulator &src)
       : bs_refcounter ()
       , bs_node (src)
-      , hdm (src.hdm)
+      , hdm_ (src.hdm_)
       , em (src.em)
       , cm (src.cm)
       , reservoir_ (src.reservoir_)
@@ -74,7 +74,7 @@ namespace blue_sky
   void reservoir_simulator::set_mesh (const sp_mesh_iface_t &mesh)
   {
     // FIXME: is set mesh is good idea?
-    this->hdm->set_mesh (mesh);
+    this->hdm_->set_mesh (mesh);
   }
 
   /**
@@ -127,12 +127,12 @@ namespace blue_sky
    * */
   void
   read_keyword_file (const std::string &filename, 
-    const smart_ptr <hdm_iface, true> &hdm, 
+    const smart_ptr <hdm_iface, true> &hdm_, 
     const smart_ptr <event_manager, true> &em)
   {
-    hdm_iface::sp_reader_t reader = hdm->get_reader ();
-    hdm_iface::sp_km_t keywords = hdm->get_keyword_manager ();
-    keyword_params params (hdm);
+    hdm_iface::sp_reader_t reader = hdm_->get_reader ();
+    hdm_iface::sp_km_t keywords = hdm_->get_keyword_manager ();
+    keyword_params params (hdm_);
     
     char buf[CHAR_BUF_LEN];
     char key[CHAR_BUF_LEN];
@@ -197,7 +197,7 @@ namespace blue_sky
     model_filename_ = path;
     pre_read (em); 
     on_pre_read (this);
-    read_keyword_file(path, hdm, em);
+    read_keyword_file(path, hdm_, em);
     post_read (em);
     on_post_read ();
     init();
@@ -206,7 +206,7 @@ namespace blue_sky
   reservoir_simulator::sp_hdm_t 
   reservoir_simulator::get_hdm () const
   {
-    return hdm;
+    return hdm_;
   }
 
   reservoir_simulator::sp_em_t 
@@ -224,7 +224,7 @@ namespace blue_sky
   reservoir_simulator::sp_mesh_iface_t
   reservoir_simulator::get_mesh() const
   {
-    return hdm->get_mesh ();
+    return hdm_->get_mesh ();
   }
 
   reservoir_simulator::sp_jacobian_t 
@@ -740,32 +740,32 @@ namespace blue_sky
   void 
   reservoir_simulator::init ()
   {
-    hdm->check_arrays_for_inactive_blocks();
+    hdm_->check_arrays_for_inactive_blocks();
 
-    hdm->get_mesh ()->init_props (hdm);
-    hdm->get_mesh ()->set_darcy (cm->internal_constants.darcy_constant);
+    hdm_->get_mesh ()->init_props (hdm_);
+    hdm_->get_mesh ()->set_darcy (cm->internal_constants.darcy_constant);
 
     //!TODO:output init_ext_to_int(splicing)
-    hdm->get_mesh ()->init_ext_to_int();
-    t_long n_active_elements = hdm->get_mesh ()->get_n_active_elements ();
+    hdm_->get_mesh ()->init_ext_to_int();
+    t_long n_active_elements = hdm_->get_mesh ()->get_n_active_elements ();
     if (n_active_elements <= 0)
       {
         bs_throw_exception ("Error: No active cells!");
       }
 
     // Check input data before units conversion for correct reporting of user errors
-    check_data (hdm->get_mesh (), hdm->data);
+    check_data (hdm_->get_mesh (), hdm_->data);
 
-    cm->init_main_arrays(hdm->data, hdm->get_mesh ());
-    cm->init_calcul_arrays (hdm->data, hdm->get_mesh ());
+    cm->init_main_arrays(hdm_->data, hdm_->get_mesh ());
+    cm->init_calcul_arrays (hdm_->data, hdm_->get_mesh ());
     // calculate planes geometric transmissibility
-    cm->rock_grid_prop->init_planes_trans (n_active_elements, hdm->mesh->get_volumes (), cm->ts_params, cm->internal_constants);
+    cm->rock_grid_prop->init_planes_trans (n_active_elements, hdm_->mesh->get_volumes (), cm->ts_params, cm->internal_constants);
 
     // now jacobian contains flux_connections and boundary array
     jacobian_ = BS_KERNEL.create_object (jacobian::bs_type ());
     jacobian_->init (n_active_elements, cm->n_phases, cm->n_sec_vars);
 
-    hdm->get_mesh ()->build_jacobian_and_flux_connections (jacobian_->get_matrix ("flux"), 
+    hdm_->get_mesh ()->build_jacobian_and_flux_connections (jacobian_->get_matrix ("flux"), 
       jacobian_->get_flux_connections (),
       jacobian_->get_boundary ());
   }
@@ -822,7 +822,7 @@ namespace blue_sky
   reservoir_simulator::pre_large_step (const sp_event_base_list_t &event_list)
   {
     mloop->apply_events (event_list);
-    reservoir_->pre_large_step (cm, hdm->mesh);
+    reservoir_->pre_large_step (cm, hdm_->mesh);
   }
 
   std::string
