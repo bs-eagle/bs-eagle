@@ -265,7 +265,7 @@ namespace blue_sky
   BLUE_SKY_TYPE_STD_CREATE (pvt_water);
   BLUE_SKY_TYPE_STD_COPY (pvt_water);
 
-  BLUE_SKY_TYPE_IMPL(pvt_water,  pvt_water, "pvt_water", "Water PVT calculation class", "Water PVT calculation");
+  BLUE_SKY_TYPE_IMPL(pvt_water,  pvt_base, "pvt_water", "Water PVT calculation class", "Water PVT calculation");
 
 } // namespace blue_sky
 
