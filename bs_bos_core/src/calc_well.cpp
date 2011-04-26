@@ -489,7 +489,7 @@ namespace blue_sky
   }
 
   void
-  well::delete_well_facility (typename well_facility_list_t::iterator iter)
+  well::delete_well_facility (well_facility_list_t::iterator iter)
   {
     well_facility_list_.erase (iter);
   }

@@ -1036,8 +1036,8 @@ namespace blue_sky
       sp_pvt_water_array_t &pvtw,
       const sp_idata_t &idata)
   {
-    typedef typename idata_t::pvt_vector    pvt_vector;
-    typedef typename idata_t::pvt_info      pvt_info;
+    typedef idata_t::pvt_vector    pvt_vector;
+    typedef idata_t::pvt_info      pvt_info;
 
     pvto.resize(this->n_pvt_regions);
     pvtg.resize(this->n_pvt_regions);

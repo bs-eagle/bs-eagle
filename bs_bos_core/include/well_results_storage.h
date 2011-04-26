@@ -270,7 +270,7 @@ namespace blue_sky
       typedef smart_ptr <calc_model, true>                  sp_calc_model_t;
       typedef smart_ptr <well, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                sp_connection_t;
-      typedef smart_ptr<well_results_storage, true>         sp_well_results_storage;
+      typedef smart_ptr <well_results_storage, true>        sp_well_results_storage;
 
       typedef facility_manager::well_const_iterator_t       well_iterator_t;
 

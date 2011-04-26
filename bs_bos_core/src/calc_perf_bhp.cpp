@@ -42,11 +42,11 @@ namespace blue_sky
     {
       BS_ASSERT (!well->is_shut ()) (well->name ());
 
-      typedef typename base_t::well_t::connection_t           connection_t;
-      typedef typename base_t::well_t::sp_connection_t        sp_connection_t;
-      typedef typename base_t::calc_model_t::sat_d_t          sat_d_t;
-      typedef typename base_t::calc_model_t::phase_d_t        phase_d_t;
-      typedef typename base_t::calc_model_t::data_t           calc_model_data_t;
+      typedef base_t::well_t::connection_t           connection_t;
+      typedef base_t::well_t::sp_connection_t        sp_connection_t;
+      typedef base_t::calc_model_t::sat_d_t          sat_d_t;
+      typedef base_t::calc_model_t::phase_d_t        phase_d_t;
+      typedef base_t::calc_model_t::data_t           calc_model_data_t;
 
       if (well->is_no_connections ())
         {
@@ -68,7 +68,7 @@ namespace blue_sky
 
       sp_connection_t prev_connection;
       const t_double *pressure = &(*calc_model->pressure)[0];
-      typename base_t::well_t::connection_iterator_t it = well->connections_begin (), e = well->connections_end ();
+      base_t::well_t::connection_iterator_t it = well->connections_begin (), e = well->connections_end ();
       for (; it != e; ++it)
         {
           const sp_connection_t &c (*it);

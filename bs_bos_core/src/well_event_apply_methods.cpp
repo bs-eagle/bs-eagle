@@ -412,7 +412,7 @@ namespace blue_sky
 
     if (/*(!z1_cell && !z2_cell) || */!i_cell || !j_cell || !k_cell)
       {
-        typename well_t::connection_iterator_t it = well->connections_begin (),
+        well_t::connection_iterator_t it = well->connections_begin (),
                  e = well->connections_end ();
         for (; it != e; ++it)
           {
@@ -423,7 +423,7 @@ namespace blue_sky
     else if (i_cell && j_cell && k_cell)
       {
         index_t n_block = struct_msh->get_element_ijk_to_int (i_cell - 1, j_cell - 1, k_cell - 1);
-        const typename well_t::sp_connection_t &c = well->get_connection_map (n_block);
+        const well_t::sp_connection_t &c = well->get_connection_map (n_block);
         if (c)
           {
             c->mul_perm_mult (perm_mult);

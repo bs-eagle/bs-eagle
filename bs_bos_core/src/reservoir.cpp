@@ -277,8 +277,8 @@ namespace blue_sky
   void
   reservoir::pre_large_step (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh)
   {
-    typename facility_manager_t::well_const_iterator_t wb = facility_list_->wells_begin ();
-    typename facility_manager_t::well_const_iterator_t we = facility_list_->wells_end ();
+    facility_manager_t::well_const_iterator_t wb = facility_list_->wells_begin ();
+    facility_manager_t::well_const_iterator_t we = facility_list_->wells_end ();
     for (; wb != we; ++wb)
       {
         wb->second->pre_large_step (calc_model, mesh);

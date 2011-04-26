@@ -58,18 +58,18 @@ namespace wells {
     *this = w;
   }
 
-  typename default_well::sp_connection_t
+  default_well::sp_connection_t
   default_well::add_primary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
   {
     return detail::add_connection (i_coord, j_coord, k_coord, n_block, primary_connection_list_, this);
   }
-  typename default_well::sp_connection_t
+  default_well::sp_connection_t
   default_well::add_secondary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
   {
     return detail::add_connection (i_coord, j_coord, k_coord, n_block, secondary_connection_list_, this);
   }
 
-  typename default_well::sp_connection_t
+  default_well::sp_connection_t
   default_well::get_connection_map (index_t n_block) const
   {
     for (size_t i = 0, cnt = primary_connection_list_.size (); i < cnt; ++i)

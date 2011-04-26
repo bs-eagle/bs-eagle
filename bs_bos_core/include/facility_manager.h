@@ -35,8 +35,8 @@ namespace blue_sky
 
       typedef smart_ptr <data_storage_interface, true>      sp_storage_t;
 
-      typedef typename facility_map_t::iterator             facility_iterator_t;
-      typedef typename facility_map_t::const_iterator       facility_const_iterator_t;
+      typedef facility_map_t::iterator             facility_iterator_t;
+      typedef facility_map_t::const_iterator       facility_const_iterator_t;
 
       //typedef well_iterator <locked_facility_map_t, facility_iterator_t, locked_well_t>  well_iterator_t;
       typedef facility_iterator_t                           well_iterator_t;
