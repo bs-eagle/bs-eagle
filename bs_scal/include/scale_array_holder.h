@@ -9,6 +9,7 @@
 
 #include "scale_arrays_placement_strategies.h"
 #include "shared_vector.h"
+#include "table_iface.h"
 
 namespace blue_sky
   {
@@ -55,9 +56,8 @@ private:
       typedef void (this_t::*inserter_t) (const shared_vector <float> &);
       typedef shared_vector <t_float>           data_t;
 
-      typedef vartype_table_iface <t_float>              vartype_table_iface_t;
-      typedef vartype_table_iface_t::vector_t            vector_t;
-      typedef smart_ptr<vartype_table_iface_t,true>      sp_vartype_table; 
+      typedef table_iface::vector_t             vector_t;
+      typedef smart_ptr<table_iface,true>       sp_vartype_table; 
 
       enum array_name
         {

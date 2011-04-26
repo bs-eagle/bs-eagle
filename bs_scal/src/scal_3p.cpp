@@ -29,8 +29,8 @@ namespace blue_sky
   scale_array_holder::scale_array_holder (bs_type_ctor_param param /* = NULL */)
   {
     data.resize (1);
-    data_pool = BS_KERNEL.create_object ("float_type_table");
-    data_pool->init (keyword_total);
+    data_pool = BS_KERNEL.create_object ("table");
+    data_pool->init (0, keyword_total);
     
     data_pool->set_col_name (socr, "SOCR");
     data_pool->set_col_name (scr, "SCR");

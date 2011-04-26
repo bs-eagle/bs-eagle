@@ -87,11 +87,13 @@ class table_iface : public objbase
        * @return pointer
        */
       virtual t_long add_col_vector (const std::string &name) = 0;
+
+      virtual void add_col_vector (t_long col, std::string const &name, spv_double array) = 0;
       
       /** 
        * @brief get numver of rows in table
        */
-      virtual t_long get_n_rows () const = 0;
+      virtual t_long get_n_rows (t_long col = 0) const = 0;
       
       /** 
        * @brief get number of columns in table

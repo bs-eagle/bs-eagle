@@ -118,14 +118,31 @@ namespace blue_sky
           set_col_name (size, name);
           return size;
         }
+
+      virtual void 
+      add_col_vector (t_long col, const std::string &name, spv_double new_vector)
+        {
+          t_double *new_vector_ = new_vector->data ();
+          t_long size = values.size ();
+          BS_ASSERT (col >= 0 && col < size);
+          
+          t_long new_vec_size = new_vector->size ();
+          values[col].resize (new_vec_size);
+          for (t_long i = 0; i < new_vec_size; ++i)
+            {
+              values[col][i] = new_vector_[i];
+            } 
+          set_col_name (col, name);
+        }
+
         
       /** 
        * @brief get numver of rows in table
        */
-      virtual t_long get_n_rows () const
+      virtual t_long get_n_rows (t_long col = 0) const
         {
           if (values.size ())
-            return (t_long) values[0].size ();
+            return (t_long) values[col].size ();
           else
             return 0;
         }
