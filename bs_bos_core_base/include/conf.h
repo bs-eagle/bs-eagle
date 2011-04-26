@@ -22,8 +22,16 @@ typedef int           t_int;
 //! this type should be using for indexing (matrix, arrays, ...)
 typedef long          t_long;
 
+#ifndef T_FLOAT_IS_DOUBLE
+#define T_FLOAT_IS_DOUBLE 1
+#endif
+
+#ifdef T_FLOAT_IS_DOUBLE
 //! this type should be using for single precision elements (matrix, fixed arrays) 
 typedef double        t_float;
+#else
+typedef float         t_float;
+#endif
 
 //! this type should be using for double precision elements (calculed arrays, arrays of unknowns) 
 typedef double        t_double;
