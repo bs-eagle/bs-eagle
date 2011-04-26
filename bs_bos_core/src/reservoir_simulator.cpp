@@ -40,7 +40,7 @@ namespace blue_sky
     this->add_signal (BS_SIGNAL_RANGE (reservoir_simulator));
     hdm->init ();
     
-    //bs_node::insert (bs_link::create (hdm, "hydrodynamic_model"), false);
+    //bs_node::insert (bs_link::create (hdm, "hdm"), false);
     //bs_node::insert (bs_link::create (em, "event_manager"), false);
     //bs_node::insert (bs_link::create (cm, "calc_model"), false);
 
@@ -127,11 +127,11 @@ namespace blue_sky
    * */
   void
   read_keyword_file (const std::string &filename, 
-    const smart_ptr <hydrodynamic_model_iface, true> &hdm, 
+    const smart_ptr <hdm_iface, true> &hdm, 
     const smart_ptr <event_manager, true> &em)
   {
-    hydrodynamic_model_iface::sp_reader_t reader = hdm->get_reader ();
-    hydrodynamic_model_iface::sp_km_t keywords = hdm->get_keyword_manager ();
+    hdm_iface::sp_reader_t reader = hdm->get_reader ();
+    hdm_iface::sp_km_t keywords = hdm->get_keyword_manager ();
     keyword_params params (hdm);
     
     char buf[CHAR_BUF_LEN];
@@ -204,7 +204,7 @@ namespace blue_sky
   }
 
   reservoir_simulator::sp_hdm_t 
-  reservoir_simulator::get_hydrodynamic_model () const
+  reservoir_simulator::get_hdm () const
   {
     return hdm;
   }
@@ -731,7 +731,7 @@ namespace blue_sky
     //BOSOUT (section::check_data, level::medium) << " ...[FAIL] - error: " << r << bs_end;
 
     //if (count < 8)
-    //  throw bs_exception ("hydrodynamic_model", "one of check failed");
+    //  throw bs_exception ("hdm", "one of check failed");
 
     // TODO:
     //BOSOUT << output_time;

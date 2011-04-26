@@ -1,8 +1,8 @@
 #ifndef BS_HDM_MODEL_IFACE_H
 #define BS_HDM_MODEL_IFACE_H
 /*!
-\file hydrodynamic_model.h
-\brief class hydrodynamic_model
+\file hdm.h
+\brief class hdm
 \author Morozov Andrey
 */
 
@@ -21,7 +21,7 @@ namespace blue_sky {
   class h5_pool_iface;
   class prop_iface;
 
-  class BS_API_PLUGIN hydrodynamic_model_iface: public objbase
+  class BS_API_PLUGIN hdm_iface: public objbase
     {
     public:
 
@@ -33,7 +33,7 @@ namespace blue_sky {
       typedef smart_ptr <prop_iface, true>							sp_prop_t;
 
       //METHODS
-      virtual ~hydrodynamic_model_iface() {};
+      virtual ~hdm_iface() {};
 
     public:
     

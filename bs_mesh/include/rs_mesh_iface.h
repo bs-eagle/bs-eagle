@@ -8,7 +8,7 @@
  */
 
 #include "flux_connections_iface.h"
-#include "hydrodynamic_model_iface.h"
+#include "hdm_iface.h"
 #include "bs_array.h"
 
 namespace blue_sky
@@ -38,7 +38,7 @@ namespace blue_sky
       typedef smart_ptr <csr_matrix_t, true>              sp_bcsr_t;
 
       
-      typedef smart_ptr <hydrodynamic_model_iface, true>    sp_hdm_t;
+      typedef smart_ptr <hdm_iface, true>    sp_hdm_t;
       
       typedef boost::array <t_float, 3>                 point3d_t;
       typedef smart_ptr <FRead, true>										  sp_reader;

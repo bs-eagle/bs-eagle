@@ -8,7 +8,7 @@
  */
 
 #include "conf.h"
-#include "hydrodynamic_model_iface.h"
+#include "hdm_iface.h"
 
 using namespace blue_sky;
 
@@ -26,7 +26,7 @@ using namespace blue_sky;
       // OWN TYPES
       ///////////////////////
 
-      typedef smart_ptr <hydrodynamic_model_iface, true>    sp_hdm_t;
+      typedef smart_ptr <hdm_iface, true>    sp_hdm_t;
       typedef smart_ptr <bcsr_matrix_iface, true>           sp_bcsr_t;
 
     //-----------------------------------------

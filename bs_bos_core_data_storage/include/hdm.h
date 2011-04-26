@@ -1,21 +1,21 @@
 #ifndef BS_HDM_MODEL_H
 #define BS_HDM_MODEL_H
 /*!
-\file hydrodynamic_model.h
-\brief class hydrodynamic_model
+\file hdm.h
+\brief class hdm
 \author Morozov Andrey
 */
 
 #include "data_class.h"
 #include "keyword_manager.h"
-#include "hydrodynamic_model_iface.h"
+#include "hdm_iface.h"
 #include "locale_keeper.h"
 #include "rs_mesh_iface.h"
 
 namespace blue_sky {
 
   
-  class BS_API_PLUGIN hydrodynamic_model: public hydrodynamic_model_iface
+  class BS_API_PLUGIN hdm: public hdm_iface
     {
     public:
 
@@ -25,7 +25,7 @@ namespace blue_sky {
       typedef smart_ptr <rs_mesh_iface, true>		              sp_mesh_iface_t;
 
       //METHODS
-      ~hydrodynamic_model();
+      ~hdm();
 
     public:
     
@@ -68,7 +68,7 @@ namespace blue_sky {
       
 
     public:
-      BLUE_SKY_TYPE_DECL_T(hydrodynamic_model)
+      BLUE_SKY_TYPE_DECL_T(hdm)
 
     public:
       sp_idata        data;												//!< data storage
