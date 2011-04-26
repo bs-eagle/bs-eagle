@@ -40,7 +40,7 @@ namespace blue_sky
             , total_connection_count_ (connection_count)
             , accessor_ (accessor_t ())
             , current_connection_ (0)
-            , current_connection_count_ (w_ ? 0 : w_->get_facility_list ())
+            , current_connection_count_ (w_ ? 0 : w_->get_facility_list ().size ())
             , current_item_ (0)
             , total_item_ (0)
         {
@@ -73,7 +73,7 @@ namespace blue_sky
                         //current_connection_count_ = (*wb_)->get_facility_list ().size ();
                         w_ = smart_ptr <well> (wb_->second, bs_dynamic_cast ());
                         if (w_)
-                          current_connection_count_ = w_->get_facility_list ();
+                          current_connection_count_ = w_->get_facility_list ().size ();
                       }
                   }
               }
@@ -117,7 +117,7 @@ namespace blue_sky
             , array_size_ (array_size)
             , accessor_ (accessor_t ())
             , current_connection_ (0)
-            , current_connection_count_ (w_ ? 0 : w_->get_facility_list ())
+            , current_connection_count_ (w_ ? 0 : w_->get_facility_list ().size ())
             , last_value_ (0)
         {
         }
@@ -147,7 +147,7 @@ namespace blue_sky
                     //current_connection_count_ = (*wb_)->get_facility_list ().size ();
                     w_ = smart_ptr <well> (wb_->second, bs_dynamic_cast ());
                     if (w_)
-                      current_connection_count_ = w_->get_facility_list ();
+                      current_connection_count_ = w_->get_facility_list ().size ();
                   }
               }
 
