@@ -42,15 +42,15 @@ namespace blue_sky
     {
       BS_ASSERT (!well->is_shut ()) (well->name ());
 
-      typedef typename base_t::well_t                     well_t;
-      typedef typename base_t::calc_model_t               calc_model_t;
-      typedef typename well_t::connection_t               connection_t;
-      typedef typename well_t::sp_connection_t            sp_connection_t;
-      typedef typename well_t::sp_connection_t            sp_connection_t;
+      typedef base_t::well_t                     well_t;
+      typedef base_t::calc_model_t               calc_model_t;
+      typedef well_t::connection_t               connection_t;
+      typedef well_t::sp_connection_t            sp_connection_t;
+      typedef well_t::sp_connection_t            sp_connection_t;
 
       item_t atm_pressure = calc_model->internal_constants.atmospheric_pressure;
 
-      typename well_t::connection_iterator_t it = well->connections_begin (),
+      well_t::connection_iterator_t it = well->connections_begin (),
                e = well->connections_end ();
       for (; it != e; ++it)
         {
@@ -80,12 +80,12 @@ namespace blue_sky
       BS_ASSERT (!well->is_shut ()) (well->name ());
       BS_ASSERT (!well->is_no_connections ()) (well->name ());
 
-      typedef typename base_t::index_t                          index_t;
-      typedef typename base_t::well_t::sp_connection_t          sp_connection_t;
-      typedef typename base_t::calc_model_t::sp_pvt_water       sp_pvt_water_t;
-      typedef typename base_t::calc_model_t::sp_pvt_gas         sp_pvt_gas_t;
-      typedef typename base_t::calc_model_t::sp_pvt_dead_oil    sp_pvt_dead_oil_t;
-      typedef typename base_t::well_t::sp_connection_t          sp_connection_t;
+      typedef base_t::index_t                          index_t;
+      typedef base_t::well_t::sp_connection_t          sp_connection_t;
+      typedef base_t::calc_model_t::sp_pvt_water       sp_pvt_water_t;
+      typedef base_t::calc_model_t::sp_pvt_gas         sp_pvt_gas_t;
+      typedef base_t::calc_model_t::sp_pvt_dead_oil    sp_pvt_dead_oil_t;
+      typedef base_t::well_t::sp_connection_t          sp_connection_t;
 
       item_t gravity_const  = calc_model->internal_constants.gravity_constant;
       index_t n_phases      = calc_model->n_phases;
@@ -136,13 +136,13 @@ namespace blue_sky
       item_t sat_g    = 0;
       item_t sat_o    = 0;
 
-      typename base_t::well_t::sp_well_controller_t well_controller_ = well->get_well_controller ();
+      base_t::well_t::sp_well_controller_t well_controller_ = well->get_well_controller ();
       wells::injection_type injection = well_controller_->injection ();
 
       const rate_data &rate = well->rate ();
 
       sp_connection_t prev_con;
-      typename base_t::well_t::connection_iterator_t it = well->connections_begin (),
+      base_t::well_t::connection_iterator_t it = well->connections_begin (),
                e = well->connections_end ();
       for (; it != e; ++it)
         {

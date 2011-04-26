@@ -63,7 +63,7 @@ namespace blue_sky
       index_t i_g = phase_d[FI_PHASE_GAS];
       index_t i_o = phase_d[FI_PHASE_OIL];
 
-      typename well_t::connection_iterator_t it = well->connections_begin (), 
+      well_t::connection_iterator_t it = well->connections_begin (), 
                e = well->connections_end ();
       for (; it != e; ++it)
         {

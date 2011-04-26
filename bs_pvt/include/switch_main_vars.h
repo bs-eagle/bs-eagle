@@ -110,8 +110,8 @@ private:
       {
         BS_ASSERT (pvt);
 
-        const typename pvt_oil_t::vector_t &pressure_ = pvt->get_pressure ();
-        const typename pvt_oil_t::vector_t &gor_      = pvt->get_gor ();
+        const pvt_oil_t::vector_t &pressure_ = pvt->get_pressure ();
+        const pvt_oil_t::vector_t &gor_      = pvt->get_gor ();
 
         size_t il = 0, iu = 1;
         il = binary_search (p, pressure_, std::less <item_t> ());

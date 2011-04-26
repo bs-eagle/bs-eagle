@@ -170,7 +170,7 @@ namespace blue_sky
 
 
     protected:
-      sp_hdm_t                hdm;                //!< pointer to hdm instance
+      sp_hdm_t                hdm_;                //!< pointer to hdm instance
       sp_em_t                 em;                 //!< pointer to event_manager instance
       sp_calc_model_t         cm;                 //!< pointer to calc_model instance
       sp_reservoir_t          reservoir_;         //!< pointer to reservoir instance

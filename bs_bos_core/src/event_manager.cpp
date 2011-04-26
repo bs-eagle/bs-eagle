@@ -64,7 +64,7 @@ namespace blue_sky
     current_event_ = 0;
   }
 
-  typename event_manager::sp_event_base
+  event_manager::sp_event_base
   event_manager::create_event (const boost::posix_time::ptime &date, const std::string & event_name, const std::string & event_params)
   {
     //boost::regex re_check_type (event_name + "(.*)_" + tools::strategy_name ::name ());

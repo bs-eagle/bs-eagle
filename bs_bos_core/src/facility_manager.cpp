@@ -43,7 +43,7 @@ namespace blue_sky
   facility_manager::sp_well_t
   facility_manager::get_well (const std::string &/*group_name*/, const std::string &well_name) const
     {
-      typename facility_map_t::const_iterator it = facility_list_->find (well_name);
+      facility_map_t::const_iterator it = facility_list_->find (well_name);
       if (it == facility_list_->end ())
         {
           return 0;
@@ -58,7 +58,7 @@ namespace blue_sky
   facility_manager::sp_well_t
   facility_manager::get_well (const std::string &well_name) const
     {
-      typename facility_map_t::const_iterator it = facility_list_->find (well_name);
+      facility_map_t::const_iterator it = facility_list_->find (well_name);
       if (it == facility_list_->end ())
         {
           BS_ASSERT (false && "Can't find well") (well_name);
@@ -82,7 +82,7 @@ namespace blue_sky
   void
   facility_manager::save_data (const sp_storage_t &storage) const
     {
-      typename facility_map_t::const_iterator it = facility_list_->begin (), e = facility_list_->end ();
+      facility_map_t::const_iterator it = facility_list_->begin (), e = facility_list_->end ();
       for (; it != e; ++it)
         {
           storage->save (it->second);

@@ -1321,7 +1321,7 @@ namespace blue_sky {
       print_header (columns);
       reservoir_data.print (columns, data, rs);
 
-      typedef typename reservoir_t::facility_manager_t::well_const_iterator_t  well_iterator_t;
+      typedef reservoir_t::facility_manager_t::well_const_iterator_t  well_iterator_t;
 
       well_iterator_t wb = rs.get_facility_list ()->wells_begin ();
       well_iterator_t we = rs.get_facility_list ()->wells_end ();
