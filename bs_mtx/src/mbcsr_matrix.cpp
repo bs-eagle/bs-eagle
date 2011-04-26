@@ -21,7 +21,7 @@ namespace blue_sky
 
   //! copy constructor
   mbcsr_matrix::mbcsr_matrix (const mbcsr_matrix &matrix)
-        : bs_refcounter ()
+                : bs_refcounter ()
   {
     BS_ASSERT (false && "TEST ME");
 

@@ -96,6 +96,10 @@ namespace blue_sky
           &T::gen_2d_laplas,
           args ("matrix", "dimension of problem"),
           "Initialize matrix for 2d laplas problem")
+    .def ("gen_diagonal",
+          &T::gen_diagonal,
+          args ("matrix", "n_rows", "n_block_size", "value"),
+          "Initialize diagonal matrix")
     .def ("dense_init",
           &T::dense_init,
           args ("matrix", "n_rows", "n_block_size", "value_dispertion"),

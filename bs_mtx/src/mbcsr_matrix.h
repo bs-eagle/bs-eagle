@@ -5,9 +5,8 @@
  * @version 1.0
  * @date 2011-02-27
  */
-#ifndef MBCSR_MATRIX_I0MLYUKT
-
-#define MBCSR_MATRIX_I0MLYUKT
+#ifndef __MBCSR_MATRIX_H
+#define __MBCSR_MATRIX_H
 
 #include "mbcsr_matrix_iface.h"
 
@@ -251,4 +250,4 @@ namespace blue_sky
 
 }//namespace blue_sky
 
-#endif /* end of include guard: MBCSR_MATRIX_I0MLYUKT */
+#endif // __MBCSR_MATRIX_H

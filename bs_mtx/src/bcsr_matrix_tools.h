@@ -50,6 +50,9 @@ namespace blue_sky
 
       virtual int gen_2d_laplas (sp_bcsr_t matrix, const t_long n) const;
 
+      virtual int gen_diagonal (sp_bcsr_t matrix, const t_long n,
+                                const t_long nb, const t_double val) const;
+
       virtual int dense_init (sp_bcsr_t matrix, const t_long n_rows, const t_long block_size,
                               const t_double rand_value_dispersion) const;
     };

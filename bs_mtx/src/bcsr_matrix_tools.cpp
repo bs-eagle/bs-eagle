@@ -363,6 +363,41 @@ bcsr_matrix_tools::gen_2d_laplas (sp_bcsr_t matrix, const t_long n) const
   return 0;
 }
 
+
+int
+bcsr_matrix_tools::gen_diagonal (sp_bcsr_t matrix, const t_long n,
+                                 const t_long nb, const t_double val) const
+{
+  int r_code = 0;
+  t_long i, k;
+  t_long b_sqr = nb * nb;
+
+  r_code = matrix->init (n, n, nb, n * b_sqr);
+  if (r_code)
+    //TODO: print error message
+    return -2;
+
+  t_float *values = &(*(matrix->get_values ()))[0];
+  t_long *rows_ptr = &(*(matrix->get_rows_ptr ()))[0];
+  t_long *cols_ind = &(*(matrix->get_cols_ind ()))[0];
+
+  rows_ptr[0] = 0;
+  for (i = 0; i < n; ++i)
+    {
+      for (k = 0; k < b_sqr; ++k)
+        {
+          if (k % (nb + 1) == 0)
+            values[i * b_sqr + k] = val;
+          else
+            values[i * b_sqr + k] = 0.0;
+        }
+      cols_ind[i] = i;
+      rows_ptr[i + 1] = i + 1;
+    }
+
+  return 0;
+}
+
 int
 bcsr_matrix_tools::dense_init (sp_bcsr_t matrix,
                                const t_long n_rows,
