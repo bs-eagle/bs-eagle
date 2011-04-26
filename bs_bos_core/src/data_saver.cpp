@@ -49,13 +49,13 @@ namespace blue_sky {
 
   void
   data_saver::write_calc_model_data (const sp_calc_model_t &calc_model,
-    const sp_jmatrix_t &jmx,
+    const BS_SP (jacobian) &jacobian,
     size_t large_time_step_num,
     size_t total_time_step_num,
     double time)
   {
     BS_ASSERT (impl_);
-    impl_->write_calc_model_data (calc_model, jmx, large_time_step_num, total_time_step_num, time);
+    impl_->write_calc_model_data (calc_model, jacobian, large_time_step_num, total_time_step_num, time);
   }
 
   void
