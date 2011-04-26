@@ -446,29 +446,29 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="hydrodynamic_model"
+			Name="hdm"
 			>
 			<File
-				RelativePath=".\src\hydrodynamic_model.cpp"
+				RelativePath=".\src\hdm.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\include\hydrodynamic_model.h"
+				RelativePath=".\include\hdm.h"
 				>
 			</File>
 			<File
-				RelativePath=".\include\hydrodynamic_model_iface.h"
+				RelativePath=".\include\hdm_iface.h"
 				>
 			</File>
 			<Filter
 				Name="python"
 				>
 				<File
-					RelativePath=".\src\py_hydrodynamic_model.cpp"
+					RelativePath=".\src\py_hdm.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\include\py_hydrodynamic_model.h"
+					RelativePath=".\include\py_hdm.h"
 					>
 				</File>
 			</Filter>

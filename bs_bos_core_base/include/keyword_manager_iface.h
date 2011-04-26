@@ -8,7 +8,7 @@
 #define KEYWORD_MANAGER_IFACE_H_
 
 #include "conf.h"
-#include "hydrodynamic_model_iface.h"
+#include "hdm_iface.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -16,7 +16,7 @@ namespace blue_sky
 {
   struct keyword_params //: boost::noncopyable
   {
-    typedef smart_ptr <hydrodynamic_model_iface, true>     sp_hdm;
+    typedef smart_ptr <hdm_iface, true>     sp_hdm;
 
     keyword_params ()
     {
@@ -59,7 +59,7 @@ namespace blue_sky
       typedef void (*handler_t)(const std::string &, keyword_params_t &);
       typedef boost::shared_ptr <keyword_handler_iface_t> shared_handler_t;
       
-      typedef smart_ptr <hydrodynamic_model_iface, true>    sp_hdm_t;
+      typedef smart_ptr <hdm_iface, true>    sp_hdm_t;
 
       //! structure of keyword handler
       struct keyword_handler

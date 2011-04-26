@@ -1,6 +1,6 @@
 #include "bs_bos_core_data_storage_stdafx.h"
 
-#include "hydrodynamic_model.h"
+#include "hdm.h"
 #include "main_def.h"
 #include "arrays.h"
 #include "localization.h"
@@ -45,35 +45,35 @@ namespace blue_sky
     throw bs_exception("Hydrodynamic model class",out_s.str().c_str());
 
   
-  hydrodynamic_model::~hydrodynamic_model ()
+  hdm::~hdm ()
   {
 
   }
 
   
-  hydrodynamic_model::hydrodynamic_model(bs_type_ctor_param /*param*/): lkeeper ("C", LC_ALL)
+  hdm::hdm(bs_type_ctor_param /*param*/): lkeeper ("C", LC_ALL)
   {
     this->reader = BS_KERNEL.create_object(FRead::bs_type());
     this->data = BS_KERNEL.create_object(idata::bs_type());
     this->km = BS_KERNEL.create_object(keyword_manager::bs_type());
   }
 
-  hydrodynamic_model::hydrodynamic_model(const hydrodynamic_model& src):lkeeper ("C", LC_ALL)
+  hdm::hdm(const hdm& src):lkeeper ("C", LC_ALL)
   {
     *this = src;
   }
   
   void
-  hydrodynamic_model::init()
+  hdm::init()
   {
-    smart_ptr <hydrodynamic_model_iface, true> hdm = this;
+    smart_ptr <hdm_iface, true> hdm = this;
     
     km->init(hdm);
   }
   
   
   void 
-  hydrodynamic_model::read_keyword_file(const std::string filename)
+  hdm::read_keyword_file(const std::string filename)
   {
     char buf[CHAR_BUF_LEN];
     char key[CHAR_BUF_LEN];
@@ -182,7 +182,7 @@ namespace blue_sky
 
   /*
   
-  void hydrodynamic_model::update_geometry() const
+  void hdm::update_geometry() const
     {
       int i, ix, iy, iz, n;
       std::ostringstream out_s;
@@ -359,7 +359,7 @@ namespace blue_sky
     }
 */
   
-  void hydrodynamic_model::check_arrays_for_inactive_blocks () const
+  void hdm::check_arrays_for_inactive_blocks () const
     {
       std::ostringstream out_s;
       t_long i, ix, iy, iz;
@@ -424,8 +424,8 @@ namespace blue_sky
     }
 
   //bs stuff
-  BLUE_SKY_TYPE_STD_CREATE(hydrodynamic_model)
-  BLUE_SKY_TYPE_STD_COPY(hydrodynamic_model)
+  BLUE_SKY_TYPE_STD_CREATE(hdm)
+  BLUE_SKY_TYPE_STD_COPY(hdm)
 
-  BLUE_SKY_TYPE_IMPL(hydrodynamic_model, objbase, "hydrodynamic_model", "BOS_Core hydrodynamic_model class", "BOS_Core hydrodynamic_model class")
+  BLUE_SKY_TYPE_IMPL(hdm, objbase, "hdm", "BOS_Core hdm class", "BOS_Core hdm class")
 }//ns bs

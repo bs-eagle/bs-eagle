@@ -34,7 +34,7 @@ namespace blue_sky
         typedef keyword_manager_iface      km_iface_t;
         typedef smart_ptr <km_iface_t, true>           sp_km_iface_t;
         
-        typedef smart_ptr <hydrodynamic_model_iface, true>    sp_hdm_t;
+        typedef smart_ptr <hdm_iface, true>    sp_hdm_t;
 
         typedef FRead                                  reader_t;
         typedef smart_ptr <reader_t, true>	           sp_reader_t;

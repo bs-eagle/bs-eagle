@@ -10,7 +10,7 @@
 #define RESERVOIR_SIMULATOR_H
 
 #include "simulator_events.h"
-#include "hydrodynamic_model.h"
+#include "hdm.h"
 #include "event_manager.h"
 #include "jacobian.h"
 
@@ -33,8 +33,8 @@ namespace blue_sky
       typedef bs_node                                 base_t;
       typedef smart_ptr <reservoir_simulator, true >  sp_this_t;
 
-      typedef hydrodynamic_model                      dm_t;                 //!< hydrodynamic_model type
-      typedef smart_ptr <dm_t, true>                  sp_hdm_t;              //!< smart_ptr to hydrodynamic_model type
+      typedef hdm                      dm_t;                 //!< hdm type
+      typedef smart_ptr <dm_t, true>                  sp_hdm_t;              //!< smart_ptr to hdm type
       typedef smart_ptr <rs_mesh_iface, true >        sp_mesh_iface_t;      //!< smart_ptr to rs_mesh_iface type
       typedef smart_ptr <lsolver_iface, true>         sp_solver_t;          //!< smart_ptr to solver_t type
       typedef smart_ptr <event_manager, true >        sp_em_t;              //!< smart_ptr to event_manager type
@@ -54,10 +54,10 @@ namespace blue_sky
       set_mesh (const sp_mesh_iface_t&);
 
       /**
-       * \brief  returns pointer to hydrodynamic_model instance
+       * \brief  returns pointer to hdm instance
        * */
       sp_hdm_t 
-      get_hydrodynamic_model () const;
+      get_hdm () const;
 
       /**
        * \brief  returns pointer to event_manager instance
@@ -170,7 +170,7 @@ namespace blue_sky
 
 
     protected:
-      sp_hdm_t                hdm;                //!< pointer to hydrodynamic_model instance
+      sp_hdm_t                hdm;                //!< pointer to hdm instance
       sp_em_t                 em;                 //!< pointer to event_manager instance
       sp_calc_model_t         cm;                 //!< pointer to calc_model instance
       sp_reservoir_t          reservoir_;         //!< pointer to reservoir instance
