@@ -59,22 +59,34 @@ namespace blue_sky
   }
 
   well::well (bs_type_ctor_param /*param = NULL */)
-      : calc_well_pressure_ (BS_KERNEL.create_object (calc_well_pressure::bs_type (), true))
-      , calc_rho_ (BS_KERNEL.create_object (calc_total_average_rho::bs_type (), true))
-      , calc_perf_density_ (BS_KERNEL.create_object (wellbore_density_calc::bs_type (), true))
-      , calc_perf_bhp_ (BS_KERNEL.create_object (calc_perf_bhp::bs_type (), true))
-      , well_events_init_ (this)
+  : well_events_init_ (this)
+  , i_coord_ (-1)
+  , j_coord_ (-1)
+  , bhp_depth_ (0)
+  , exploitation_factor_ (0)
+  , init_approx_is_calc_ (false)
+  , input_reference_depth_ (0)
+  , calc_well_pressure_ (BS_KERNEL.create_object (calc_well_pressure::bs_type (), true))
+  , calc_rho_ (BS_KERNEL.create_object (calc_total_average_rho::bs_type (), true))
+  , calc_perf_density_ (BS_KERNEL.create_object (wellbore_density_calc::bs_type (), true))
+  , calc_perf_bhp_ (BS_KERNEL.create_object (calc_perf_bhp::bs_type (), true))
   {
     clear_data ();
     bhp_ = 0;
   }
 
   well::well (const std::string &well_name)
-  : calc_well_pressure_ (BS_KERNEL.create_object (calc_well_pressure::bs_type (), true))
+  : well_events_init_ (this)
+  , i_coord_ (-1)
+  , j_coord_ (-1)
+  , bhp_depth_ (0)
+  , exploitation_factor_ (0)
+  , init_approx_is_calc_ (false)
+  , input_reference_depth_ (0)
+  , calc_well_pressure_ (BS_KERNEL.create_object (calc_well_pressure::bs_type (), true))
   , calc_rho_ (BS_KERNEL.create_object (calc_total_average_rho::bs_type (), true))
   , calc_perf_density_ (BS_KERNEL.create_object (wellbore_density_calc::bs_type (), true))
   , calc_perf_bhp_ (BS_KERNEL.create_object (calc_perf_bhp::bs_type (), true))
-  , well_events_init_ (this)
   {
     set_name (well_name);
 
