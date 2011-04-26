@@ -55,9 +55,9 @@ BOOST_PYTHON_MODULE (common_types)
 {
   bs_init_py_subsystem ();
   std::cout << &BS_KERNEL << std::endl;
-  //bool res = blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ());
-  //if (!res)
-  //  throw "Can't register common types";
+  bool res = blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ());
+  if (!res)
+    throw "Can't register common types";
 
 }
 #endif

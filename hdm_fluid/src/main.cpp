@@ -13,18 +13,22 @@ using namespace blue_sky::python;
 using namespace boost::python;
 
 namespace blue_sky {
-  BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("hdm_fluid", "1.0.0", "Fluid representation for hydrodynamic simulator", "Fluid representation for hydrodynamic simulator", "hdm_fluid")
+  BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("hdm_fluid", "1.0.0", "Fluid representation for hydrodynamic simulator", "Fluid representation for hydrodynamic simulator", "hdm_fluid");
+
+  bool
+  register_types (plugin_descriptor &pd)
+  {
+    bool res = true;
+
+    res &= BS_KERNEL.register_type(pd, pvt_dead_oil::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type(pd, fluids::bs_type()); BS_ASSERT (res);
+
+    return res;
+  }
 
   BLUE_SKY_REGISTER_PLUGIN_FUN
   {
-    //const plugin_descriptor &pd = *bs_init.pd_;
-
-    bool res = true;
-
-    res &= BS_KERNEL.register_type(*bs_init.pd_, pvt_dead_oil::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, fluids::bs_type()); BS_ASSERT (res);
-
-    return res;
+    return register_types (*bs_init.pd_);
   }
 }
 //#if 0
@@ -42,6 +46,9 @@ BOOST_PYTHON_MODULE (hdm_fluid)
 {
   bs_init_py_subsystem ();
   std::cout << &BS_KERNEL << std::endl;
+  bool res = blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ());
+  if (!res)
+    throw "Can't register hdm_fluid types";
 }
 #endif
 

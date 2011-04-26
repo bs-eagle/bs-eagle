@@ -20,19 +20,22 @@ using namespace boost::python;
 #endif
 
 namespace blue_sky {
-  BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("bs_bos_core_base", "1.0.0", "BS_BOS_CORE_BASE", "BS_BOS_CORE_BASE", "bs_bos_core_base")
+  BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("bs_bos_core_base", "1.0.0", "BS_BOS_CORE_BASE", "BS_BOS_CORE_BASE", "bs_bos_core_base");
 
-  BLUE_SKY_REGISTER_PLUGIN_FUN
+  bool
+  register_types (const plugin_descriptor &pd)
   {
     init_bos_logs();
-   
-    const plugin_descriptor &pd = *bs_init.pd_;
-
     bool res = true;
     res &= BS_KERNEL.register_type (pd, property_base::bs_type ());
     res &= BS_KERNEL.register_type (pd, named_pbase::bs_type ());
 
     return res;
+  }
+
+  BLUE_SKY_REGISTER_PLUGIN_FUN
+  {
+    return register_types (*bs_init.pd_);
   }
 }
 
@@ -77,5 +80,8 @@ BOOST_PYTHON_MODULE (bs_bos_core_base)
 {
   bs_init_py_subsystem ();
   std::cout << &BS_KERNEL << std::endl;
+  bool res = blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ());
+  if (!res)
+    throw "Can't register bs-bos-core base types";
 }
 #endif 
