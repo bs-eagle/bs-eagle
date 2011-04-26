@@ -158,7 +158,7 @@ def simulate (input_name, is_no_action) :
     if (not is_no_action) :
         try :
             print ("Create reservoir simulator...")
-            rs = bos.reservoir_simulator_di ()
+            rs = bos.reservoir_simulator ()
 
             def on_post_read () :
                 print ("on_post_read")
