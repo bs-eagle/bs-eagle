@@ -22,7 +22,7 @@
 namespace blue_sky
 {
   /**
-   * @brief interface class for matrix storage and manipulation
+   * @brief interface class for amg solver
    */
   class amg_solver_iface: public lsolver_iface
     {

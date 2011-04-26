@@ -134,7 +134,6 @@ namespace blue_sky
     t_long *p_cols_ind = &(*(p_matrix->get_cols_ind ()))[0];
     t_float *p_values = &(*(p_matrix->get_values ()))[0];
 
-    //memset (p_values, 0, sizeof (double) * p_rows_ptr[n]);
     sp_markers->assign (-1);
 
     // fill P matrix

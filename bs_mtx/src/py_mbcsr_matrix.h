@@ -1,4 +1,4 @@
-/** 
+/**
  * @file py_mbcsr_matrix.h
  * @brief python wrapper for #mbcsr_matrix
  * @author Oleg Borschuk
@@ -28,24 +28,24 @@ namespace blue_sky
     {
 
   PY_EXPORTER (py_mbcsr_matrix_iface_exporter, py_matrix_iface_exporter)
-    .def ("get_matrix",                     
+    .def ("get_matrix",
           &T::get_matrix,
           args ("name"), "Return matrix by name")
-    .def ("add_matrix",                               
+    .def ("add_matrix",
           &T::add_matrix,
           args ("name", "matrix"), "Add new matrix to the list (map)")
-    .def ("clear",                        
+    .def ("clear",
           &T::clear,
           args (""), "Clear all")
-    .def ("merge",                     
+    .def ("merge",
           &T::merge,
           args (""), "Merge all matrix")
   PY_EXPORTER_END;
 
-  //! export matrices to python                  
-  void py_export_mbcsr_matrices ();                    
+  //! export matrices to python
+  void py_export_mbcsr_matrices ();
 
-    
+
   } // namespace python
 } // namespace blue_sky
 #endif //

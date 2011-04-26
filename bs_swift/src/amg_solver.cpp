@@ -424,6 +424,6 @@ namespace blue_sky
     BLUE_SKY_TYPE_STD_CREATE (amg_solver);
     BLUE_SKY_TYPE_STD_COPY (amg_solver);
 
-    BLUE_SKY_TYPE_IMPL (amg_solver, amg_solver_iface, "amg_solver", "Algebraic Multigrid linear solver and preconditioner", "Algebraic Multigrid linear solver and preconditioner");
+    BLUE_SKY_TYPE_IMPL (amg_solver, amg_solver_iface, "swift", "Algebraic Multigrid linear solver and preconditioner", "Algebraic Multigrid linear solver and preconditioner");
 
 }  // blue_sky namespace

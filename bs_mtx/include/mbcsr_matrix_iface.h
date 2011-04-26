@@ -1,4 +1,4 @@
-/** 
+/**
  * @file mbcsr_matrix_iface.h
  * @brief Block CSR multi matrix interface class
  * @author Oleg Borschuk
@@ -40,15 +40,15 @@ namespace blue_sky
       //! clear all
       virtual void clear () = 0;
 
-      
-      /** 
+
+      /**
        * @brief merge all matrixies together and apply filter
-       *        filter is a array length n_rows with elements 0 or 1 
-       *        if 0 in the i position than merged matrix i-th row should include 
+       *        filter is a array length n_rows with elements 0 or 1
+       *        if 0 in the i position than merged matrix i-th row should include
        *        only diagonal element, the same for the i-th column
-       * 
+       *
        * @param filter -- <INPUT> array length n_rows, elements should be 0 or 1
-       * 
+       *
        * @return merged BCSR matrix
        */
       virtual sp_bcsr_iface_t merge (spv_int filter) = 0;

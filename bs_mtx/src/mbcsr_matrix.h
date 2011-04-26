@@ -1,4 +1,4 @@
-/** 
+/**
  * @file mbcsr_matrix.h
  * @brief Block CSR multi matrix implementation
  * @author Oleg Borschuk
@@ -16,10 +16,10 @@
 
 namespace blue_sky
 {
-  /** 
+  /**
    * @brief interface class for block CSR matrix storage and manipulation
    */
-  
+
   class BS_API_PLUGIN mbcsr_matrix: public mbcsr_matrix_iface
     {
     public:
@@ -49,10 +49,10 @@ namespace blue_sky
 
         ib = mat_map.begin ();
         ie = mat_map.end ();
-        
+
         for (i = ib; i != ie; ++i)
           {
-            f = f || i->second->matrix_vector_product (v, r);  
+            f = f || i->second->matrix_vector_product (v, r);
           }
         return f;
       }
@@ -67,10 +67,10 @@ namespace blue_sky
 
         ib = mat_map.begin ();
         ie = mat_map.end ();
-        
+
         for (i = ib; i != ie; ++i)
           {
-            f = f || i->second->matrix_vector_product_t (v, r);  
+            f = f || i->second->matrix_vector_product_t (v, r);
           }
         return f;
       }
@@ -90,15 +90,15 @@ namespace blue_sky
 
         ib = mat_map.begin ();
         ie = mat_map.end ();
-        
+
         for (i = ib; i != ie; ++i)
           {
-            f = f + i->second->get_allocated_memory_in_mbytes ();  
+            f = f + i->second->get_allocated_memory_in_mbytes ();
           }
         return f;
       }
 
-      //! return block size 
+      //! return block size
       virtual t_long get_n_block_size () const
       {
         if (mat_map.size ())
@@ -107,8 +107,8 @@ namespace blue_sky
           return 0;
       }
 
-      //! return number of rows in matrix 
-      virtual t_long get_n_rows () const 
+      //! return number of rows in matrix
+      virtual t_long get_n_rows () const
       {
         if (mat_map.size ())
           return mat_map.begin ()->second->get_n_rows ();
@@ -153,10 +153,10 @@ namespace blue_sky
 
           ib = mat_map.begin ();
           ie = mat_map.end ();
-          
+
           for (i = ib; i != ie; ++i)
             {
-              f = f || i->second->internal_check ();  
+              f = f || i->second->internal_check ();
             }
           return f;
         }
@@ -182,7 +182,7 @@ namespace blue_sky
             }
           else if (mat_map.begin ()->second->get_n_rows () != m->get_n_rows ()
                    || mat_map.begin ()->second->get_n_cols () != m->get_n_cols ()
-                   || mat_map.begin ()->second->get_n_block_size () != m->get_n_block_size ()) 
+                   || mat_map.begin ()->second->get_n_block_size () != m->get_n_block_size ())
             {
               // TODO: fix
               throw "Matrix size Error";
@@ -204,15 +204,15 @@ namespace blue_sky
           mat_map.clear ();
         }
 
-      
-      /** 
+
+      /**
        * @brief merge all matrixies together (A = SUM_i (A_i) )and apply filter
-       *        filter is a array length n_rows with elements 0 or 1 
-       *        if 0 in the i position than merged matrix i-th row should include 
+       *        filter is a array length n_rows with elements 0 or 1
+       *        if 0 in the i position than merged matrix i-th row should include
        *        only diagonal element, the same for the i-th column
-       * 
+       *
        * @param filter -- <INPUT> array length n_rows, elements should be 0 or 1
-       * 
+       *
        * @return merged BCSR matrix
        */
       virtual sp_bcsr_iface_t merge (spv_int filter);
@@ -226,7 +226,7 @@ namespace blue_sky
 
           ib = mat_map.begin ();
           ie = mat_map.end ();
-          
+
           for (i = ib, count = 0; i != ie; ++i, ++count)
             {
               s << "Matrix: " << count << " -- " << i->first << std::endl;

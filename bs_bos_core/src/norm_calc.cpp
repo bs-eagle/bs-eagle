@@ -3,7 +3,7 @@
  *      \brief  Calculates norms
  *     \author  Borschuk Oleg
  *       \date  31.01.2008
- *  \copyright  This source code is released under the terms of 
+ *  \copyright  This source code is released under the terms of
  *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
@@ -11,10 +11,6 @@
 
 namespace blue_sky
   {
-
-#ifdef _MPI
-//#define _MPI_DEBUG_NORM
-#endif //_MPI
 
   using namespace norms;
 
@@ -54,10 +50,6 @@ namespace blue_sky
     SET_VALUE (MB_ERR_GAS, 0.0, "Mat. Balance error (gas)", 0);
     SET_VALUE (MB_ERR_WATER, 0.0, "Mat. Balance error (water)", 0);
     SET_VALUE (MB_ERR_OIL, 0.0, "Mat. Balance error (oil)", 0);
-
-#ifdef _MPI_DEBUG_NORM //all norms will be printed
-    memset (p_flag, -1, NORMS_COUNTER * sizeof (int));
-#endif //_MPI
   }
 
 //! default constructor

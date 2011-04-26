@@ -1,4 +1,4 @@
-/** 
+/**
  * @file mbcsr_matrix.cpp
  * @brief Block CSR multi matrix implementation
  * @author Oleg Borschuk
@@ -14,14 +14,14 @@ namespace blue_sky
   {
 
   //! constructor
-  
+
   mbcsr_matrix::mbcsr_matrix (bs_type_ctor_param /*param*/)
   {
   }
 
   //! copy constructor
-  mbcsr_matrix::mbcsr_matrix (const mbcsr_matrix &matrix) 
-        : bs_refcounter () 
+  mbcsr_matrix::mbcsr_matrix (const mbcsr_matrix &matrix)
+        : bs_refcounter ()
   {
     BS_ASSERT (false && "TEST ME");
 
@@ -32,10 +32,10 @@ namespace blue_sky
   }
 
   int
-  mbcsr_matrix::calc_lin_comb (t_double alpha, 
-                               t_double beta, 
+  mbcsr_matrix::calc_lin_comb (t_double alpha,
+                               t_double beta,
                                spv_double u_,
-                               spv_double v_, 
+                               spv_double v_,
                                spv_double r_) const
   {
     static const t_double eps = t_double (1.0e-12);
@@ -104,25 +104,32 @@ namespace blue_sky
     return r_code;
   }
 
-  mbcsr_matrix::sp_bcsr_iface_t 
+  /**
+   * @brief merge matrices in mat_map (assume matrix is square and diagonal element exist)
+   * @param filter -- input flags -- if (filter[i]) use row i
+   * @return smart_ptr to merged matrix
+   */
+
+  mbcsr_matrix::sp_bcsr_iface_t
   mbcsr_matrix::merge (spv_int filter)
   {
     sp_bcsr_iface_t m;
 
     if (mat_map.size ())
-      { 
+      {
         map_t::iterator it, ie, ib;
         t_long nr, nb, b_sqr;
         std::vector<t_long> flg;
         t_long *rows, *i_rows;
         t_long *cols, *i_cols;
         t_float *values, *i_values;
-        t_int *flt;
+        t_int *flt = 0;
         t_long j1, j2, j, cl;
         t_long count;
-       
-        flt = &(*filter)[0];
-        
+
+        if (filter)
+          flt = &(*filter)[0];
+
         ib = mat_map.begin ();
         ie = mat_map.end ();
         nr = ib->second->get_n_rows ();
@@ -130,7 +137,7 @@ namespace blue_sky
         b_sqr = nb * nb;
         flg.resize (nr);
 
-        if ((t_long)(filter->size ()) != nr)
+        if (filter && (t_long)(filter->size ()) != nr)
           {
             // FIXME: 
             if (filter->size () == 0)
@@ -146,11 +153,9 @@ namespace blue_sky
           }
         // create matrix
         m = BS_KERNEL.create_object ("bcsr_matrix");
-
-        m->alloc_rows_ptr (nr);
+        m->init (nr, nr, nb, 0);
         rows = &(*(m->get_rows_ptr ()))[0];
         memset (rows, 0, sizeof (t_long) * (nr + 1));
-
 
         // step 1: init matrix structure
         for (t_long i = 0; i < nr; ++i)
@@ -162,18 +167,19 @@ namespace blue_sky
             // add diagonal into the first place
             flg[i] = count;
             ++count;
-            if (flt[i])
+
+            if (flt && flt[i])
               {
                 for (it = ib; it != ie; ++it)
                   {
-                    i_rows = &(*(it->second->get_rows_ptr ()))[0];  
+                    i_rows = &(*(it->second->get_rows_ptr ()))[0];
                     i_cols = &(*(it->second->get_cols_ind ()))[0];
                     j1 = i_rows[i];
                     j2 = i_rows[i + 1];
                     for (j = j1; j < j2; ++j)
                       {
                         cl = i_cols[j];
-                        if (flt[cl])
+                        if (flt && flt[cl])
                           {
                             // check if element already exist in matrix structure
                             if (flg[cl] < rows[i])
@@ -192,20 +198,22 @@ namespace blue_sky
         for (t_long i = 0; i < nr; ++i)
           flg[i] = -1;
 
-        m->alloc_cols_ind_and_values (count, nb); 
+        m->alloc_cols_ind_and_values (count, nb);
         cols = &(*(m->get_cols_ind ()))[0];
         values = &(*(m->get_values ()))[0];
         count = 0;
         for (t_long i = 0; i < nr; ++i)
           {
             // add diagonal into the first place
+            cols[count] = i;
             flg[i] = count;
             ++count;
-            if (flt[i])
+
+            if (flt && flt[i])
               {
                 for (it = ib; it != ie; ++it)
                   {
-                    i_rows = &(*(it->second->get_rows_ptr ()))[0];  
+                    i_rows = &(*(it->second->get_rows_ptr ()))[0];
                     i_cols = &(*(it->second->get_cols_ind ()))[0];
                     i_values = &(*(it->second->get_values ()))[0];
 
@@ -214,12 +222,13 @@ namespace blue_sky
                     for (j = j1; j < j2; ++j)
                       {
                         cl = i_cols[j];
-                        if (flt[cl])
+                        if (flt && flt[cl])
                           {
                             // check if element already exist in matrix structure
                             if (flg[cl] < rows[i])
                               {
                                 // add new element to the matrix structure
+                                cols[count] = cl;
                                 flg[cl] = count;
                                 memcpy (values + count * b_sqr, i_values + j * b_sqr,
                                         sizeof (t_float) * b_sqr);
