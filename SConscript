@@ -9,11 +9,10 @@ if build_kind == 'init':
 		pass
 
 	includes["kernel"]                      = ["#kernel/include", "#kernel/include/python"]
-	includes["bs_amg_solver"]               = Dir("bs_amg_solver/include")
 	includes["bs_bos_core_base"]            = Dir("bs_bos_core_base/include")
 	includes["bs_bos_core_data_storage"]    = Dir("bs_bos_core_data_storage/include")
 	includes["bs_bos_core"]                 = Dir("bs_bos_core/include")
-	includes["bs_cpr_prec"]                 = Dir("bs_cpr_prec/include")
+	includes["bs_cpr_prec"]                 = Dir("../bs_cpr_prec/include")
 	includes["bs_csr_ilu_prec"]             = Dir("bs_csr_ilu_prec/include")
 	includes["bs_lsolvers"]                 = Dir("bs_lsolvers/include")
 	includes["bs_mesh"]                     = Dir("bs_mesh/include")
