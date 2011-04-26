@@ -696,15 +696,15 @@ namespace blue_sky
 
       std::string                 name_;                      //!< Name of the well
 
-      auto_value <index_t, -1>    i_coord_;                   //!< i coordinate of hell (well head)
-      auto_value <index_t, -1>    j_coord_;                   //!< j coordinate of hell (well head)
+      index_t                     i_coord_;                   //!< i coordinate of hell (well head)
+      index_t                     j_coord_;                   //!< j coordinate of hell (well head)
 
       sp_well_controller_t        well_controller_;           //!< well_controller instance
 
 //  private:
     public:
-      auto_value <item_t, -1>     bhp_depth_;                 //!< BHP reference depth
-      auto_value <item_t, 1>      exploitation_factor_;       //!< Exploitation factor (wefac)
+      item_t                      bhp_depth_;                 //!< BHP reference depth
+      item_t                      exploitation_factor_;       //!< Exploitation factor (wefac)
 
       well_state_t                well_state_;                //!< State of well
       well_state_t                saved_well_state_;          //!< State of well on begin of small (or large) step
@@ -721,8 +721,8 @@ namespace blue_sky
 
     protected:
 
-      auto_value <bool, false>    init_approx_is_calc_;       //!< Flag that specified should initial approximation calculated
-      auto_value <item_t>         input_reference_depth_;     //!< \todo Should be removed
+      bool                        init_approx_is_calc_;       //!< Flag that specified should initial approximation calculated
+      item_t                      input_reference_depth_;     //!< \todo Should be removed
 
       sp_calc_well_pressure_t     calc_well_pressure_;        //!< Instance of object that calculates well pressure
       sp_calc_rho_t               calc_rho_;                  //!< \todo Should be removed
