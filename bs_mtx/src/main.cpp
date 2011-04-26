@@ -7,7 +7,6 @@
 
 #include "bcsr.h"
 #include "bdiag_matrix.h"
-#include "jac_matrix.h"
 #include "py_matrix_iface.h"
 #include "py_bcsr.h"
 #include "py_dens.h"
@@ -31,12 +30,12 @@ namespace blue_sky {
 
     bool res = true;
 
+
     res &= BS_KERNEL.register_type (pd, dens_matrix::bs_type()); BS_ASSERT (res);
     res &= BS_KERNEL.register_type (pd, dens_matrix_tools::bs_type()); BS_ASSERT (res);
     res &= BS_KERNEL.register_type (pd, bcsr::bs_type()); BS_ASSERT (res);
     res &= BS_KERNEL.register_type (pd, bcsr_matrix_tools::bs_type()); BS_ASSERT (res);
     res &= BS_KERNEL.register_type (pd, bdiag_matrix::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, jac_matrix::bs_type()); BS_ASSERT (res);
     res &= BS_KERNEL.register_type (pd, mbcsr_matrix::bs_type()); BS_ASSERT (res);
 
     return res;
@@ -57,7 +56,7 @@ BLUE_SKY_INIT_PY_FUN
   python::py_export_bcsr_matrices ();
   python::py_export_mbcsr_matrices ();
   python::py_export_dens_matrices ();
-  
+
 }
 #ifdef _DEBUG
 BOOST_PYTHON_MODULE (bs_mtx_d)
