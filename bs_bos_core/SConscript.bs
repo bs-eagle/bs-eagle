@@ -55,6 +55,8 @@ excluded = [
     "py_keyword_manager.cpp",
     "py_table_2d_debug.cpp",
     "py_two_stage_preconditioner.cpp",
+    "well_results_storage.cpp",
+    "fip_results_storage.cpp",
     ]
 
 bs_bos_core = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."], excluded).sources)
