@@ -24,6 +24,7 @@ using namespace boost::python;
 namespace blue_sky {
   BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("mx", "1.0.0", "Base matrixes for blue_sky", "Base matrixes for blue_sky", "mx")
 
+  namespace {
   bool
   register_types (const plugin_descriptor &pd)
   {
@@ -40,6 +41,7 @@ namespace blue_sky {
     res &= BS_KERNEL.register_type (pd, mbcsr_matrix::bs_type()); BS_ASSERT (res);
 
     return res;
+  }
   }
   BLUE_SKY_REGISTER_PLUGIN_FUN
   {

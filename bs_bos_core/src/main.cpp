@@ -297,6 +297,7 @@ namespace blue_sky
 //    register_ptr_to_python<smart_ptr <test_i, false> >();
 //  }
 
+  namespace {
   bool
   register_types (const plugin_descriptor &pd)
   {
@@ -361,6 +362,7 @@ namespace blue_sky
     BS_ASSERT (res);
 
     return res;
+  }
   }
 
   BLUE_SKY_REGISTER_PLUGIN_FUN

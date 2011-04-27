@@ -16,6 +16,7 @@ namespace blue_sky
 {
   BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("bs_mesh", "1.0.0", "BS_MESH", "BS_MESH", "bs_mesh");
 
+  namespace {
   bool
   register_types (const plugin_descriptor &pd)
   {
@@ -50,6 +51,7 @@ namespace blue_sky
     res &= BS_KERNEL.register_type(pd, bs_flux_connections::bs_type()); BS_ASSERT (res);
     
     return res;
+  }
   }
 
   BLUE_SKY_REGISTER_PLUGIN_FUN

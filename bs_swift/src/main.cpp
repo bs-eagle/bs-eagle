@@ -38,6 +38,7 @@ using namespace boost::python;
 namespace blue_sky {
   BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("swift", "1.0.0", "AMG linear solver", "Algebraic multi grid linear solver", "swift")
 
+  namespace {
   bool
   register_types (plugin_descriptor &pd)
   {
@@ -63,6 +64,7 @@ namespace blue_sky {
     //REG_TYPE (amg_solver)
 
     return res;
+  }
   }
 
   BLUE_SKY_REGISTER_PLUGIN_FUN

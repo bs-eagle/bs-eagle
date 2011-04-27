@@ -19,9 +19,9 @@ using namespace boost::python;
 namespace blue_sky {
   BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("comm", "1.0.0", "Common data types", "Common data types", "comm")
 
-  template <typename PD>
+  namespace {
   bool 
-  register_types (PD &pd)
+  register_types (const plugin_descriptor &pd)
   {
     bool res = true;
 
@@ -30,6 +30,7 @@ namespace blue_sky {
     res &= BS_KERNEL.register_type (pd, h5_pool::bs_type()); BS_ASSERT (res);
 
     return res;
+  }
   }
 
   BLUE_SKY_REGISTER_PLUGIN_FUN

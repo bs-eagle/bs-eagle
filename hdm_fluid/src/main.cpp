@@ -15,6 +15,7 @@ using namespace boost::python;
 namespace blue_sky {
   BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("hdm_fluid", "1.0.0", "Fluid representation for hydrodynamic simulator", "Fluid representation for hydrodynamic simulator", "hdm_fluid");
 
+  namespace {
   bool
   register_types (plugin_descriptor &pd)
   {
@@ -24,6 +25,7 @@ namespace blue_sky {
     res &= BS_KERNEL.register_type(pd, fluids::bs_type()); BS_ASSERT (res);
 
     return res;
+  }
   }
 
   BLUE_SKY_REGISTER_PLUGIN_FUN

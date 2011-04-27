@@ -26,6 +26,7 @@ using namespace boost::python;
 namespace blue_sky {
   BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("lsolvers", "1.0.0", "Linear solvers for BS", "Linear solvers for BS", "lsolvers");
 
+  namespace {
   bool
   register_types (const plugin_descriptor &pd)
   {
@@ -45,6 +46,7 @@ namespace blue_sky {
     res &= BS_KERNEL.register_type (pd, two_stage_prec::bs_type()); BS_ASSERT (res);
 
     return res;
+  }
   }
 
   BLUE_SKY_REGISTER_PLUGIN_FUN
