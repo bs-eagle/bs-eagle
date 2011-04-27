@@ -39,7 +39,7 @@ namespace blue_sky {
   BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("swift", "1.0.0", "AMG linear solver", "Algebraic multigrid linear solver and preconditioner", "swift")
 
   bool
-  register_types (plugin_descriptor &pd)
+  register_types (const plugin_descriptor &pd)
   {
     bool res = true;
 

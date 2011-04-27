@@ -263,7 +263,6 @@
 		<Unit filename="../bs_mtx/include/bdiag_matrix_iface.h" />
 		<Unit filename="../bs_mtx/include/dens_matrix_iface.h" />
 		<Unit filename="../bs_mtx/include/dens_matrix_tools_iface.h" />
-		<Unit filename="../bs_mtx/include/jac_matrix_iface.h" />
 		<Unit filename="../bs_mtx/include/matrix_iface.h" />
 		<Unit filename="../bs_mtx/include/matrix_sum_spec.h" />
 		<Unit filename="../bs_mtx/include/mbcsr_matrix_iface.h" />
@@ -278,8 +277,6 @@
 		<Unit filename="../bs_mtx/src/dens_matrix.h" />
 		<Unit filename="../bs_mtx/src/dens_matrix_tools.cpp" />
 		<Unit filename="../bs_mtx/src/dens_matrix_tools.h" />
-		<Unit filename="../bs_mtx/src/jac_matrix.cpp" />
-		<Unit filename="../bs_mtx/src/jac_matrix.h" />
 		<Unit filename="../bs_mtx/src/main.cpp" />
 		<Unit filename="../bs_mtx/src/mbcsr_matrix.cpp" />
 		<Unit filename="../bs_mtx/src/mbcsr_matrix.h" />
