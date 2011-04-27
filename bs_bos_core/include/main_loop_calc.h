@@ -21,8 +21,8 @@
 #include "rr_rw_wr_saver.h"
 
 #include "fi_operator.h"
-#include "well_results_storage.h"
-#include "fip_results_storage.h"
+//#include "well_results_storage.h"
+//#include "fip_results_storage.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "scale_array_holder.h"
@@ -1301,7 +1301,7 @@ public:
 
       bool                                    do_calc_prev_fluid_volume_;
 
-      save_well_data                          well_data;
+      //save_well_data                          well_data;
     };
 
 

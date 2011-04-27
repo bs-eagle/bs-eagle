@@ -47,8 +47,8 @@ namespace blue_sky
   class calc_model;
   class reservoir;
 
-  class well_results_storage;
-  class fip_results_storage;
+  //class well_results_storage;
+  //class fip_results_storage;
   ///////////////////////////////////////////////////////////////////////////
 
 
@@ -130,8 +130,8 @@ namespace blue_sky
       typedef smart_ptr< rock_grid, true> sp_rock_grid;             //!< smart_ptr to rock_grid type
       typedef smart_ptr< fi_params, true>               sp_fi_params;             //!< smart_ptr to fi_params type
 
-      typedef smart_ptr<well_results_storage, true>     sp_well_results_storage;  //!< smart_ptr to well_results_storage type
-      typedef smart_ptr<fip_results_storage, true>      sp_fip_results_storage;   //!< smart_ptr to fip_results_storage type
+      //typedef smart_ptr<well_results_storage, true>     sp_well_results_storage;  //!< smart_ptr to well_results_storage type
+      //typedef smart_ptr<fip_results_storage, true>      sp_fip_results_storage;   //!< smart_ptr to fip_results_storage type
 
       typedef pvt_base                                  pvt_base_t;               //!< type of base pvt class
       typedef pvt_oil                                   pvt_oil_t;                //!< pvt_oil type
@@ -582,8 +582,8 @@ namespace blue_sky
       spv_double                                              gas_oil_ratio;                  //!< gas_oil_ratio (n_elements)
 
       sp_csr_matrix_t                                         mat;                            //!< obsolete
-      sp_well_results_storage                                 well_res;                       //!< storage for well results
-      sp_fip_results_storage                                  fip_res;                        //!< storage for fip results
+      //sp_well_results_storage                                 well_res;                       //!< storage for well results
+      //sp_fip_results_storage                                  fip_res;                        //!< storage for fip results
     };
 }
 

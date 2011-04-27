@@ -100,8 +100,8 @@ namespace blue_sky
       void 
       init(sp_hdm_t new_hdm)
       {
-        //this->register_keywords();
         hdm = new_hdm;
+        this->register_keywords();
         this->register_plugin_keywords();
       }
 

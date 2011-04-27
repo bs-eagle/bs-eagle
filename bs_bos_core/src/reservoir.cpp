@@ -337,8 +337,9 @@ namespace blue_sky
   int mpi_start = 0;
 #endif
 
-  hdf5::write_well_results (*hdf5, calc_model->well_res, calc_model->ts_params->get_bool (fi_params::WRITE_CONN_RESULTS_TO_HDF5));
-  hdf5::write_fip_results (*hdf5, calc_model->fip_res);
+  // FIXME: ORLY?
+  //hdf5::write_well_results (*hdf5, calc_model->well_res, calc_model->ts_params->get_bool (fi_params::WRITE_CONN_RESULTS_TO_HDF5));
+  //hdf5::write_fip_results (*hdf5, calc_model->fip_res);
 
   int n_phases = calc_model->n_phases;
   // temporary storage for values, need to extract saturations

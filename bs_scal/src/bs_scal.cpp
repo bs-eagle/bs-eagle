@@ -9,6 +9,7 @@ namespace blue_sky
 {
   BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("bs_scal", "1.0.0", "BS_SCAL", "BS_SCAL", "bs_scal");
 
+  namespace {
   bool
   register_types (const plugin_descriptor &pd)
   {
@@ -17,6 +18,7 @@ namespace blue_sky
     res &= blue_sky::scal_register_types (pd); BS_ASSERT (res);
 
     return res;
+  }
   }
 
 

@@ -19,9 +19,10 @@ using namespace blue_sky::python;
 using namespace boost::python;
 #endif
 
-namespace {
-  using namespace blue_sky;
+namespace blue_sky {
+  BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("bs_bos_core_base", "1.0.0", "BS_BOS_CORE_BASE", "BS_BOS_CORE_BASE", "bs_bos_core_base");
 
+  namespace {
   bool
   register_types (const plugin_descriptor &pd)
   {
@@ -32,10 +33,7 @@ namespace {
 
     return res;
   }
-}
-
-namespace blue_sky {
-  BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("bs_bos_core_base", "1.0.0", "BS_BOS_CORE_BASE", "BS_BOS_CORE_BASE", "bs_bos_core_base");
+  }
 
   BLUE_SKY_REGISTER_PLUGIN_FUN
   {

@@ -52,8 +52,8 @@
 
 #include "prepare_fpu.h"
 
-#include "well_results_storage.h"
-#include "fip_results_storage.h"
+//#include "well_results_storage.h"
+//#include "fip_results_storage.h"
 
 // FIXME:
 //#include "csr_ilu_cfl.h"
@@ -297,6 +297,7 @@ namespace blue_sky
 //    register_ptr_to_python<smart_ptr <test_i, false> >();
 //  }
 
+  namespace {
   bool
   register_types (const plugin_descriptor &pd)
   {
@@ -328,8 +329,8 @@ namespace blue_sky
 //    BS_ASSERT (res);
 //#endif
 
-    res &= BS_KERNEL.register_type (pd, well_results_storage::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, fip_results_storage::bs_type ()); BS_ASSERT (res);
+    //res &= BS_KERNEL.register_type (pd, well_results_storage::bs_type ()); BS_ASSERT (res);
+    //res &= BS_KERNEL.register_type (pd, fip_results_storage::bs_type ()); BS_ASSERT (res);
 
     res &= calc_rho_register_types (pd);            BS_ASSERT (res);
     res &= calc_well_pressure_register_types (pd);  BS_ASSERT (res);
@@ -361,6 +362,7 @@ namespace blue_sky
     BS_ASSERT (res);
 
     return res;
+  }
   }
 
   BLUE_SKY_REGISTER_PLUGIN_FUN

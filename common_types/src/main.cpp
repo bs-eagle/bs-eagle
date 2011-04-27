@@ -19,9 +19,10 @@ using namespace boost::python;
 #define REG_TYPE(S)                     \
     res &= BS_KERNEL.register_type(pd, S::bs_type()); BS_ASSERT (res);
 
-namespace {
-  using namespace blue_sky;
+namespace blue_sky {
+  BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("comm", "1.0.0", "Common data types", "Common data types", "comm")
 
+  namespace {
   bool
   register_types (const plugin_descriptor &pd)
   {
@@ -33,10 +34,7 @@ namespace {
 
     return res;
   }
-}
-
-namespace blue_sky {
-  BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("comm", "1.0.0", "Common data types", "Common data types", "comm")
+  }
 
   BLUE_SKY_REGISTER_PLUGIN_FUN
   {

@@ -93,10 +93,12 @@ enum   //! indexes for dimension parameters
 
       struct pvt_info
         {
-          spv_float				    main_data_;
+          spv_float				          main_data_;
           auto_value <bool, false>  has_density_;
           auto_value <t_float>      density_;
           auto_value <t_float>      molar_density_;
+
+          pvt_info ();
         };
 
       typedef std::vector <pvt_info>									  pvt_vector;
@@ -244,7 +246,7 @@ enum   //! indexes for dimension parameters
       //! array (eql_region)
       vval_vs_depth pbvd;
 
-      BLUE_SKY_TYPE_DECL_T(idata)
+      BLUE_SKY_TYPE_DECL (idata)
     };
 }
 

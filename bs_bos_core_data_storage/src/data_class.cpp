@@ -55,7 +55,11 @@ namespace blue_sky
         }
     };
 
-  
+  idata::pvt_info::pvt_info ()
+  : main_data_ (BS_KERNEL.create_object (v_float::bs_type ()))
+  {
+  }
+
   idata::~idata ()
   {
     h5_pool->close_file();
@@ -65,17 +69,24 @@ namespace blue_sky
   idata::idata(bs_type_ctor_param /*param*/)
   : bs_node(bs_node::create_node (new this_t::idata_traits ())),
   props (BS_KERNEL.create_object ("prop")),
-  h5_pool (BS_KERNEL.create_object ("h5_pool"))
+  h5_pool (BS_KERNEL.create_object ("h5_pool")),
+  equil_regions (BS_KERNEL.create_object (v_int::bs_type ())),
+  rock (BS_KERNEL.create_object (v_float::bs_type ())),
+  p_ref (BS_KERNEL.create_object (v_float::bs_type ())),
+  equil (BS_KERNEL.create_object (v_float::bs_type ()))
   {
     init();
   }
 
   
   idata::idata(const this_t &src)
-      : bs_refcounter (src), bs_node(src), 
-      props(give_kernel::Instance().create_object_copy(src.props)),
-      h5_pool(give_kernel::Instance().create_object_copy(src.h5_pool))
-      //scal3(give_kernel::Instance().create_object_copy(src.scal3)),
+  : bs_refcounter (src), bs_node(src), 
+  props(give_kernel::Instance().create_object_copy(src.props)),
+  h5_pool(give_kernel::Instance().create_object_copy(src.h5_pool))
+  //equil_regions (BS_KERNEL.create_object_copy (src.equil_regions)),
+  //rock (BS_KERNEL.create_object_copy (src.rock)),
+  //p_ref (BS_KERNEL.create_object_copy (src.p_ref)),
+  //equil (BS_KERNEL.create_object_copy (src.equil))
   {
     *this = src;
   }
@@ -99,7 +110,6 @@ namespace blue_sky
     props->add_property_b (0, "water_phase", "True if water phase exists");
     props->add_property_b (0, "gas_phase", "True if gas phase exists");
     props->add_property_b (0, "scalecrs", "True if SCALECRS is enabled");
-
   }
 
   void idata::flush_pool()
@@ -164,18 +174,15 @@ namespace blue_sky
     
     t_long def_val = -1;
     
-    this->rock->resize(r_pvt);
-    this->p_ref->resize(r_pvt);
+    rock->init (r_pvt, def_val);
+    p_ref->init (r_pvt, def_val);
 
-    this->rock->assign (def_val);
-    this->p_ref->assign (def_val);
+    equil->resize (EQUIL_TOTAL * r_eql); //!TODO: EQUIL_TOTAL instead of 3
 
-    this->equil->resize(EQUIL_TOTAL * r_eql); //!TODO: EQUIL_TOTAL instead of 3
-
-    this->pvto.resize(r_pvt);
-    this->pvtdo.resize(r_pvt);
-    this->pvtg.resize(r_pvt);
-    this->pvtw.resize(r_pvt);
+    pvto.resize (r_pvt);
+    pvtdo.resize (r_pvt);
+    pvtg.resize (r_pvt);
+    pvtw.resize (r_pvt);
   }
 
   

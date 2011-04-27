@@ -10,6 +10,7 @@ namespace blue_sky
 {
   BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("bs_pvt", "1.0.0", "BS_PVT", "BS_PVT", "bs_pvt");
 
+  namespace {
   bool
   register_types (const plugin_descriptor &pd)
   {
@@ -18,6 +19,7 @@ namespace blue_sky
     res &= blue_sky::pvt_register_types (pd); BS_ASSERT (res);
 
     return res;
+  }
   }
 
   BLUE_SKY_REGISTER_PLUGIN_FUN

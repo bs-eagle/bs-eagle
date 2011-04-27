@@ -16,6 +16,7 @@ namespace blue_sky
 {
   BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("bs_bos_core_data_storage", "1.0.0", "BS_BOS_CORE_DATA_STORAGE", "BS_BOS_CORE_DATA_STORAGE", "bs_bos_core_data_storage");
 
+  namespace {
   bool
   register_types (const plugin_descriptor &pd)
   {
@@ -28,6 +29,7 @@ namespace blue_sky
     res &= BS_KERNEL.register_type(pd, FRead::bs_type()); BS_ASSERT (res);
 
     return res;
+  }
   }
 
   BLUE_SKY_REGISTER_PLUGIN_FUN
