@@ -13,7 +13,6 @@
 namespace blue_sky
   {
 
-  template <typename strategy_t>
   struct trans_multipliers_calc
     {
       //trans_multipliers_calc (const sp_mesh_iface_t &mesh, const item_array_t &trans_mult, item_array_t &planes_trans)

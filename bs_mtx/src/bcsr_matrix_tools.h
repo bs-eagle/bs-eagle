@@ -1,8 +1,8 @@
 #ifndef __BCSR_MATRIX_TOOLS_H
 #define __BCSR_MATRIX_TOOLS_H
-/** 
+/**
  * @file bcsr_matrix_tools.h
- * @brief 
+ * @brief
  * @date 2009-11-24
  */
 #include "bs_assert.h"
@@ -14,7 +14,7 @@
 
 namespace blue_sky
 {
-  /** 
+  /**
    * @brief interface class for block CSR matrix storage and manipulation
    */
   class bcsr_matrix_tools : public bcsr_matrix_tools_iface
@@ -33,14 +33,26 @@ namespace blue_sky
         {};
 
       // read matrix from ascii file
-      virtual int ascii_read_from_csr_format (sp_bcsr_t matrix, const std::string &file_name) const;
+      virtual int ascii_read_from_csr_format (sp_bcsr_t matrix,
+                                              const std::string &file_name) const;
 
-      virtual int random_init (sp_bcsr_t matrix, 
-                               const t_long new_n_rows, 
+      // write matrix to ascii file
+      virtual int ascii_write_to_csr_format (const sp_bcsr_t matrix,
+                                             const std::string &file_name,
+                                             const bool sort_cols = 0) const;
+
+      virtual int random_init (sp_bcsr_t matrix,
+                               const t_long new_n_rows,
                                const t_long new_n_block_size,
-                               const t_double rand_value_dispersion, 
+                               const t_double rand_value_dispersion,
                                const t_long elems_in_row
                                ) const;
+
+      virtual int gen_2d_laplas (sp_bcsr_t matrix, const t_long n) const;
+
+      virtual int gen_diagonal (sp_bcsr_t matrix, const t_long n,
+                                const t_long nb, const t_double val) const;
+
       virtual int dense_init (sp_bcsr_t matrix, const t_long n_rows, const t_long block_size,
                               const t_double rand_value_dispersion) const;
     };

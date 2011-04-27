@@ -42,6 +42,11 @@ namespace blue_sky
       values.resize (n_cols);
       for (t_long i = 0; i < n_cols; ++i)
         {
+          if (n_rows < 1)
+            values[i].reserve (20);
+          else
+            values[i].reserve (2 * n_rows);
+
           values[i].resize (n_rows);
         }
       col_names.clear ();
@@ -49,6 +54,30 @@ namespace blue_sky
       return 0;
     }
 
+  void 
+  table::add_row (const t_long row_index)
+    {
+      table_t::iterator i, e;
+      t_double v;
+      for (i = values.begin (), e = values.end (); i != e; ++i)
+        {
+          if (row_index == 0)
+            {
+              v = (*i)[0];
+              i->insert (i->begin (), v);
+            }
+          else if (row_index >= (t_long)i->size ())
+            {
+              v = i->back ();
+              i->resize (i->size () + 1, v);
+            }
+          else
+            {
+              v = 0.5 * ((*i)[row_index - 1] + (*i)[row_index]);
+              i->insert (i->begin () + row_index, v);
+            }
+        }
+    }
 #ifdef BSPY_EXPORTING_PLUGIN
   void 
   table::set_col_values (const t_long col, spv_double val)

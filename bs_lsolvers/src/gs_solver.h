@@ -1,6 +1,6 @@
 #ifndef __GS_SOLVER_H
 #define __GS_SOLVER_H
-/** 
+/**
  * @file gs_solver.h
  * @brief GS linear iterative solver
  * @date 2009-12-16
@@ -36,12 +36,12 @@ namespace blue_sky
       //! bcsr_matrix
       typedef bcsr_matrix_iface                         bcsr_t;
       typedef smart_ptr<bcsr_t, true>                   sp_bcsr_t;
-      //! prop 
+      //! prop
       typedef prop_iface                                prop_t;
       //! short name to smart pointer to this class
-      typedef smart_ptr<base_t, true>                   sp_base_t;              
+      typedef smart_ptr<base_t, true>                   sp_base_t;
       //! short name to smart pointer to properties holder class
-      typedef smart_ptr<prop_t, true>                   sp_prop_t;              
+      typedef smart_ptr<prop_t, true>                   sp_prop_t;
 
       typedef smart_ptr<matrix_t, true>                 sp_matrix_t;    ///< short name to smart pointer on matrix_t
 
@@ -58,17 +58,17 @@ namespace blue_sky
 
       virtual int solve_prec (sp_matrix_t matrix, spv_double rhs, spv_double sol);
 
-      /** 
-       * @brief smooth solution (make onlu one iteration)
-       * 
+      /**
+       * @brief smooth solution (make only one iteration)
+       *
        * @param matrix  -- <INPUT> Block CSR matrix
        * @param coarse  -- <INPUT> markers vector
        * @param rhs     -- <INPUT> Right hand side
        * @param sol     -- <INPUT/OUTPUT> solution
-       * 
+       *
        * @return 0 if suceess
        */
-      virtual int smooth (sp_bcsr_t matrix, spv_long coarse, const t_long iter_number, 
+      virtual int smooth (sp_bcsr_t matrix, spv_long coarse, const t_long iter_number,
                           spv_double rhs, spv_double sol);
       // setup
       virtual int setup (sp_matrix_t matrix);
@@ -77,11 +77,11 @@ namespace blue_sky
       virtual void set_prec (sp_base_t /*prec_*/)
         {
         }
-      
+
       virtual void set_prop (sp_prop_t prop_);
 
       //! get properties
-      virtual sp_prop_t get_prop() 
+      virtual sp_prop_t get_prop ()
         {
           return prop;
         }

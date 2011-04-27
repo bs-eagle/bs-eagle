@@ -23,8 +23,7 @@ namespace blue_sky
      * \brief  'default' ctor for wellbore_density_calc
      * \param  param Additional parameters for ctor
      * */
-  template <typename strategy_t>
-  wellbore_density_calc<strategy_t>::wellbore_density_calc (bs_type_ctor_param param /* = NULL */)
+  wellbore_density_calc::wellbore_density_calc (bs_type_ctor_param param /* = NULL */)
   {
 
   }
@@ -32,34 +31,32 @@ namespace blue_sky
    * \brief  copy-ctor for wellbore_density_calc
    * \param  x Instance of wellbore_density_calc to be copied
    * */
-  template <typename strategy_t>
-  wellbore_density_calc<strategy_t>::wellbore_density_calc (const wellbore_density_calc &x)
+  wellbore_density_calc::wellbore_density_calc (const wellbore_density_calc &x)
   : bs_refcounter (x)
   {
 
   }
 
-  template <typename strategy_t>
   void
-  wellbore_density_calc <strategy_t>::calculate (sp_well_t &well, const sp_calc_model_t &calc_model) const
+  wellbore_density_calc::calculate (sp_well_t &well, const sp_calc_model_t &calc_model) const
     {
       BS_ASSERT (!well->is_shut ()) (well->name ());
 
-      typedef typename base_t::well_t                     well_t;
-      typedef typename base_t::calc_model_t               calc_model_t;
-      typedef typename well_t::connection_t               connection_t;
-      typedef typename well_t::sp_connection_t            sp_connection_t;
-      typedef typename well_t::sp_connection_t            sp_connection_t;
+      typedef base_t::well_t                     well_t;
+      typedef base_t::calc_model_t               calc_model_t;
+      typedef well_t::connection_t               connection_t;
+      typedef well_t::sp_connection_t            sp_connection_t;
+      typedef well_t::sp_connection_t            sp_connection_t;
 
       item_t atm_pressure = calc_model->internal_constants.atmospheric_pressure;
 
-      typename well_t::connection_iterator_t it = well->connections_begin (),
+      well_t::connection_iterator_t it = well->connections_begin (),
                e = well->connections_end ();
       for (; it != e; ++it)
         {
           const sp_connection_t &c (*it);
 
-          item_t pbhp = calc_model->pressure[c->n_block ()];
+          item_t pbhp = (*calc_model->pressure)[c->n_block ()];
           if (c->cur_bhp >= atm_pressure)
             {
               pbhp = c->cur_bhp;
@@ -77,19 +74,18 @@ namespace blue_sky
       return ;
     }
 
-  template <typename strategy_t>
   bool
-  wellbore_density_calc <strategy_t>::density_calc (sp_well_t &well, const sp_calc_model_t &calc_model, item_t p_bhp) const
+  wellbore_density_calc::density_calc (sp_well_t &well, const sp_calc_model_t &calc_model, item_t p_bhp) const
     {
       BS_ASSERT (!well->is_shut ()) (well->name ());
       BS_ASSERT (!well->is_no_connections ()) (well->name ());
 
-      typedef typename base_t::index_t                          index_t;
-      typedef typename base_t::well_t::sp_connection_t          sp_connection_t;
-      typedef typename base_t::calc_model_t::sp_pvt_water       sp_pvt_water_t;
-      typedef typename base_t::calc_model_t::sp_pvt_gas         sp_pvt_gas_t;
-      typedef typename base_t::calc_model_t::sp_pvt_dead_oil    sp_pvt_dead_oil_t;
-      typedef typename base_t::well_t::sp_connection_t          sp_connection_t;
+      typedef base_t::index_t                          index_t;
+      typedef base_t::well_t::sp_connection_t          sp_connection_t;
+      typedef base_t::calc_model_t::sp_pvt_water       sp_pvt_water_t;
+      typedef base_t::calc_model_t::sp_pvt_gas         sp_pvt_gas_t;
+      typedef base_t::calc_model_t::sp_pvt_dead_oil    sp_pvt_dead_oil_t;
+      typedef base_t::well_t::sp_connection_t          sp_connection_t;
 
       item_t gravity_const  = calc_model->internal_constants.gravity_constant;
       index_t n_phases      = calc_model->n_phases;
@@ -125,7 +121,7 @@ namespace blue_sky
           else if (well->bhp ())
             ppo = well->bhp ();
           else
-            ppo = calc_model->pressure[first_con->n_block ()];
+            ppo = (*calc_model->pressure)[first_con->n_block ()];
         }
       else
         ppo = p_bhp;
@@ -140,20 +136,20 @@ namespace blue_sky
       item_t sat_g    = 0;
       item_t sat_o    = 0;
 
-      typename base_t::well_t::sp_well_controller_t well_controller_ = well->get_well_controller ();
+      base_t::well_t::sp_well_controller_t well_controller_ = well->get_well_controller ();
       wells::injection_type injection = well_controller_->injection ();
 
-      const rate_data <strategy_t> &rate = well->rate ();
+      const rate_data &rate = well->rate ();
 
       sp_connection_t prev_con;
-      typename base_t::well_t::connection_iterator_t it = well->connections_begin (),
+      base_t::well_t::connection_iterator_t it = well->connections_begin (),
                e = well->connections_end ();
       for (; it != e; ++it)
         {
           const sp_connection_t &con (*it);
 
           index_t n_block   = con->n_block ();
-          index_t n_pvt_reg = calc_model->pvt_regions[n_block];
+          index_t n_pvt_reg = (*calc_model->pvt_regions)[n_block];
           index_t i_w       = n_block * n_phases + d_w;
           index_t i_g       = n_block * n_phases + d_g;
           index_t i_o       = n_block * n_phases + d_o;
@@ -209,7 +205,7 @@ namespace blue_sky
             }
           if (is_o && is_g)
             {
-              rrso = calc_model->gas_oil_ratio[n_block];
+              rrso = (*calc_model->gas_oil_ratio)[n_block];
               if (!pvt_oil->calc (is_g, calc_model->main_variable[n_block],
                                   p_oil, rrso,
                                   &local_invers_fvf[d_o], 0, 0,
@@ -224,7 +220,7 @@ namespace blue_sky
                   else if (well->bhp ())
                     BOSERR (section::wells, level::error) << "well: " << well->bhp () << bs_end;
                   else
-                    BOSERR (section::wells, level::error) << "pressure: " << calc_model->pressure[first_con->n_block ()] << bs_end;
+                    BOSERR (section::wells, level::error) << "pressure: " << (*calc_model->pressure)[first_con->n_block ()] << bs_end;
                   // TODO: BUG:
                   //throw bs_exception ("wellbore_density_calc", "pvt->oil (o && g) can't calc");
                   return false;
@@ -245,7 +241,7 @@ namespace blue_sky
                   else if (well->bhp ())
                     BOSERR (section::wells, level::error) << "well: " << well->bhp () << bs_end;
                   else
-                    BOSERR (section::wells, level::error) << "pressure: " << calc_model->pressure[first_con->n_block ()] << bs_end;
+                    BOSERR (section::wells, level::error) << "pressure: " << (*calc_model->pressure)[first_con->n_block ()] << bs_end;
                   // TODO: BUG:
                   //throw bs_exception ("wellbore_density_calc", "pvt->oil (o) can't calc");
                   return false;
@@ -292,26 +288,26 @@ namespace blue_sky
                     {
                       if (is_w)
                         {
-                          sat_w = calc_model->saturation_3p[i_w];
+                          sat_w = (*calc_model->saturation_3p)[i_w];
                           con->density += sat_w * pvt_water->get_surface_density () * local_invers_fvf[d_w];
                         }
 
                       if (is_g && is_o)
                         {
-                          sat_g = calc_model->saturation_3p[i_g];
-                          sat_o = calc_model->saturation_3p[i_o];
+                          sat_g = (*calc_model->saturation_3p)[i_g];
+                          sat_o = (*calc_model->saturation_3p)[i_o];
                           con->density += sat_g * pvt_gas->get_surface_density () * local_invers_fvf[d_g] +
                                           sat_o * (pvt_oil->get_surface_density () +
-                                                   calc_model->gas_oil_ratio[n_block] * pvt_gas->get_surface_density ()) * local_invers_fvf[d_o];
+                                                   (*calc_model->gas_oil_ratio)[n_block] * pvt_gas->get_surface_density ()) * local_invers_fvf[d_o];
                         }
                       else if (is_o)
                         {
-                          sat_o = calc_model->saturation_3p[i_o];
+                          sat_o = (*calc_model->saturation_3p)[i_o];
                           con->density += sat_o * pvt_oil->get_surface_density () * local_invers_fvf[d_o];
                         }
                       else if (is_g)
                         {
-                          sat_g = calc_model->saturation_3p[i_g];
+                          sat_g = (*calc_model->saturation_3p)[i_g];
                           con->density += sat_g * pvt_gas->get_surface_density () * local_invers_fvf[d_g];
                         }
                     }
@@ -363,11 +359,9 @@ namespace blue_sky
       return true;
     }
 
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF (wellbore_density_calc, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF (wellbore_density_calc, (class));
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (wellbore_density_calc <base_strategy_fi>), 1, (objbase), "wellbore_density_calc_fi", "wellbore_density_calc_fi", "wellbore_density_calc_fi", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (wellbore_density_calc<base_strategy_di>), 1, (objbase), "wellbore_density_calc_di", "wellbore_density_calc_di", "wellbore_density_calc_di", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (wellbore_density_calc<base_strategy_mixi>), 1, (objbase), "wellbore_density_calc_mixi", "wellbore_density_calc_mixi", "wellbore_density_calc_mixi", false);
+  BLUE_SKY_TYPE_STD_CREATE (wellbore_density_calc);
+  BLUE_SKY_TYPE_STD_COPY (wellbore_density_calc);
+  BLUE_SKY_TYPE_IMPL (wellbore_density_calc, objbase, "wellbore_density_calc", "wellbore_density_calc", "wellbore_density_calc");
 
 
 } // namespace blue_sky

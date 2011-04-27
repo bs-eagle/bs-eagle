@@ -20,9 +20,13 @@ namespace blue_sky
       hid_t dset;
       hid_t dspace;
       hid_t dtype;
+      hid_t plist;
       int n_dims;
       npy_intp py_dims[10];
       hsize_t h5_dims[10];
+      hsize_t src_dims[6];  // dims for array are calculated from pool_dims and src_dims: dims[i] = src_dims[2 * i] * pool_dims[i] + src_dims[i + 1]. i = 0..2
+      
+      bool var_dims;         // flag is true if array has variable dimensins depend on pool dimensions.
     };
 
   /** 
@@ -54,6 +58,14 @@ namespace blue_sky
       virtual void open_file (const std::string &fname, const std::string &path);
 
       /** 
+       * @brief set pool dims to calculate each pool array size
+       * 
+       * @param dims    -- <INPUT> dimensions
+       * @param n_dim    -- <INPUT> dimension count (1, 2 or 3)
+       */
+      virtual void set_pool_dims (t_long *dims, int n_dim);
+
+      /** 
        * @brief close file
        */
       virtual void close_file ();
@@ -68,13 +80,25 @@ namespace blue_sky
               H5Fflush (file_id, H5F_SCOPE_LOCAL);
             }
         }
+        
+        
+             
+      /** 
+       * @brief calculate current data dimensions
+       * 
+       * @param name    -- <INPUT> given name of data
+       * 
+       * @return data size 
+       */
+      virtual t_long calc_data_dims (const std::string &name);
 
       /** 
        * @brief read data by name from file and return it as vector
        * 
        * @param name    -- <INPUT> given name of data
        * 
-       * @return smart pointer to the data vector
+       * @return smart pointer to the data vector or
+       * raise exception if no array with name 'name'
        */
       virtual spv_float get_fp_data (const std::string &name);
 
@@ -83,34 +107,97 @@ namespace blue_sky
        * 
        * @param name    -- <INPUT> given name of data
        * 
-       * @return smart pointer to the data vector
+       * @return smart pointer to the data vector or
+       * null pointer if no array with name 'name'
+       */
+      virtual spv_float get_fp_data_unsafe (const std::string &name);
+
+      /** 
+       * @brief read data by name from file and return it as vector
+       * 
+       * @param name    -- <INPUT> given name of data
+       * 
+       * @return smart pointer to the data vector or 
+       * raise exception if no array with name 'name'
        */
       virtual spv_int get_i_data (const std::string &name);
+      
+      /** 
+       * @brief create new or replace existing array in file
+       * 
+       * @param name      -- <INPUT> name of the array
+       * @param def_value -- <INPUT> default value to fill the array 
+       * @param n_dims    -- <INPUT> number of dims 
+       * @param dims      -- <INPUT/OUTPUT> if var_dims = 1, source dimensions / calculated dimensions. if var_dims = 0, then just dimensions
+       * @param var_dims  -- <INPUT> if var_dims = 1, array dimensions depend on pool dimensions. 
+       * 
+       * @return 0 if success
+       */
+       
+      
+      virtual int declare_fp_data (const std::string &name, t_float def_value, int n_dims, npy_intp *dims, int var_dims = 0);
+      
+        /** 
+       * @brief create new or replace existing array in file
+       * 
+       * @param name      -- <INPUT> name of the array
+       * @param def_value -- <INPUT> default value to fill the array 
+       * @param n_dims    -- <INPUT> number of dims 
+       * @param dims      -- <INPUT/OUTPUT> if var_dims = 1, source dimensions / calculated dimensions. if var_dims = 0, then just dimensions
+       * @param var_dims  -- <INPUT> if var_dims = 1, array dimensions depend on pool dimensions. 
+       * 
+       * @return 0 if success
+       */
+       
+      
+      virtual int declare_i_data (const std::string &name, t_int def_value, int n_dims, npy_intp *dims, int var_dims = 0);
+
+      /** 
+       * @brief read data by name from file and return it as vector
+       * 
+       * @param name    -- <INPUT> given name of data
+       * 
+       * @return smart pointer to the data vector or 
+       * null pointer if no array with name 'name'
+       */
+      virtual spv_int get_i_data_unsafe (const std::string &name);
 
       /** 
        * @brief rewrite existing array in file
        * 
        * @param name    -- <INPUT> name of the array
        * @param data    -- <INPUT> smart pointer to the array 
+       * @param src_dims  -- <INPUT> source dimensions to calculate array dimensions using pool_dims 
        * 
        * @return 0 if success
        */
-      virtual int set_fp_data (const std::string &name, spv_float data);
+       
+      virtual int set_fp_data (const std::string &name, spv_float data, t_float def_value = 0);
 
       /** 
        * @brief rewrite existing array in file
        * 
-       * @param name    -- <INPUT> name of the array
-       * @param data    -- <INPUT> smart pointer to the array 
+       * @param name      -- <INPUT> name of the array
+       * @param data      -- <INPUT> smart pointer to the array 
        * 
        * @return 0 if success
        */
-      virtual int set_i_data (const std::string &name, spv_int data);
+      virtual int set_i_data (const std::string &name, spv_int data, t_int def_value = 0);
 
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual std::string py_str () const;
+      virtual boost::python::list py_list_data () const;
 #endif //BSPY_EXPORTING_PLUGIN
-    public:
+    private:
+    
+       /** 
+       * @brief calculate current data dimensions
+       * 
+       * @param it    -- <INPUT> iterator on data
+       * 
+       * @return data size 
+       */
+      virtual t_long calc_data_dims (map_t::iterator it); 
     
     protected:
 
@@ -131,7 +218,7 @@ namespace blue_sky
       void close_node (h5_pair &p);
       template <class T>
       map_t::iterator add_node (const std::string &name, const hid_t dset, const hid_t dspace, 
-                     const hid_t dtype, const int n_dims, const T *dims);
+                     const hid_t dtype, const int n_dims, const T *dims, const bool var_dims = 0);
       static herr_t it_group (hid_t g_id, const char *name, const H5L_info_t *info, 
                               void *op_data); 
 
@@ -149,6 +236,9 @@ namespace blue_sky
 
    protected:
       map_t             h5_map;
+
+      hsize_t           pool_dims[3];
+      t_int             n_pool_dims;
 
       herr_t (*old_func)(hid_t, void*);
       void *old_client_data;

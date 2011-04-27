@@ -15,7 +15,7 @@ namespace blue_sky
   /**
    * \brief pvt_water
    */
-  class pvt_water : public pvt_base 
+  class BS_API_PLUGIN pvt_water : public pvt_base 
     {
     public:
 

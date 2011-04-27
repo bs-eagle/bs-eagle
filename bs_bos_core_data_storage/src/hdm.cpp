@@ -1,6 +1,6 @@
 #include "bs_bos_core_data_storage_stdafx.h"
 
-#include "data_manager.h"
+#include "hdm.h"
 #include "main_def.h"
 #include "arrays.h"
 #include "localization.h"
@@ -42,53 +42,49 @@ namespace blue_sky
   
 #define DM_ASSERT_EXCEPTION \
     BS_ASSERT(false) (out_s.str());\
-    throw bs_exception("Data manager class",out_s.str().c_str());
+    throw bs_exception("Hydrodynamic model class",out_s.str().c_str());
 
   
-  data_manager::~data_manager ()
+  hdm::~hdm ()
   {
 
   }
 
   
-  data_manager::data_manager(bs_type_ctor_param /*param*/): lkeeper ("C", LC_ALL)
+  hdm::hdm(bs_type_ctor_param /*param*/): lkeeper ("C", LC_ALL)
   {
     this->reader = BS_KERNEL.create_object(FRead::bs_type());
     this->data = BS_KERNEL.create_object(idata::bs_type());
     this->km = BS_KERNEL.create_object(keyword_manager::bs_type());
   }
 
-  
-  data_manager::data_manager(const data_manager& src)
-  : bs_refcounter (src), objbase (src), lkeeper ("C", LC_ALL)
+  hdm::hdm(const hdm& src):lkeeper ("C", LC_ALL)
   {
     *this = src;
   }
   
-  
   void
-  data_manager::init()
+  hdm::init()
   {
-    km->init();
+    smart_ptr <hdm_iface, true> hdm = this;
+    
+    km->init(hdm);
   }
   
   
   void 
-  data_manager::read_keyword_file(const std::string filename)
+  hdm::read_keyword_file(const std::string filename)
   {
-    keyword_manager_t::keyword_params_t params;
-    params.reader = reader;
-    params.data = data;
-    params.km = km;
-    
     char buf[CHAR_BUF_LEN];
     char key[CHAR_BUF_LEN];
+    keyword_params kp;
     int flag;
     int len;
     
     write_time_to_log init_time ("Read model", "");
 
     reader->init (filename, filename);
+    kp.hdm = this;
 
     // start of loop for data file reading
     flag = 1;
@@ -126,7 +122,7 @@ namespace blue_sky
             break;
           }
 
-        km->handle_keyword (keywrd, params);
+        km->handle_keyword (keywrd, kp);
       }
   }
 
@@ -186,7 +182,7 @@ namespace blue_sky
 
   /*
   
-  void data_manager::update_geometry() const
+  void hdm::update_geometry() const
     {
       int i, ix, iy, iz, n;
       std::ostringstream out_s;
@@ -363,7 +359,7 @@ namespace blue_sky
     }
 */
   
-  void data_manager::check_arrays_for_inactive_blocks () const
+  void hdm::check_arrays_for_inactive_blocks () const
     {
       std::ostringstream out_s;
       t_long i, ix, iy, iz;
@@ -428,8 +424,8 @@ namespace blue_sky
     }
 
   //bs stuff
-  BLUE_SKY_TYPE_STD_CREATE(data_manager)
-  BLUE_SKY_TYPE_STD_COPY(data_manager)
+  BLUE_SKY_TYPE_STD_CREATE(hdm)
+  BLUE_SKY_TYPE_STD_COPY(hdm)
 
-  BLUE_SKY_TYPE_IMPL(data_manager, objbase, "data_manager", "BOS_Core data_manager class", "BOS_Core data_manager class")
+  BLUE_SKY_TYPE_IMPL(hdm, objbase, "hdm", "BOS_Core hdm class", "BOS_Core hdm class")
 }//ns bs

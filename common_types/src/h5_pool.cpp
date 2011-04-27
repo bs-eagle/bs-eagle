@@ -18,6 +18,11 @@ using namespace boost::python;
 
 namespace blue_sky
 {
+  error_h5_no_array::error_h5_no_array (std::string const &array_name)
+  : bs_exception ("error_h5_no_array", array_name)
+  {
+  }
+
   h5_pool::h5_pool (bs_type_ctor_param) 
         : h5_pool_iface ()
     {
@@ -55,7 +60,7 @@ namespace blue_sky
 
   template <class T> h5_pool::map_t::iterator 
   h5_pool::add_node (const std::string &name, const hid_t dset, const hid_t dspace, 
-                     const hid_t dtype, const int n_dims, const T *dims)
+                     const hid_t dtype, const int n_dims, const T *dims, const bool var_dims)
     {
       pair_t p;
       //printf ("Add node");
@@ -65,10 +70,21 @@ namespace blue_sky
       p.second.dspace = dspace;
       p.second.dtype = dtype;
       p.second.n_dims = n_dims;
-      for (int i = 0; i < n_dims; ++i)
+      p.second.var_dims = var_dims;
+      if (var_dims)
         {
-          p.second.py_dims[i] = (npy_intp)dims[i];
-          p.second.h5_dims[i] = (hsize_t)dims[i];
+          for (int i = 0; i < 6; ++i)
+            {
+              p.second.src_dims[i] = (hsize_t)dims[i];
+            }
+        }
+      else
+        {
+          for (int i = 0; i < n_dims; ++i)
+            {
+              p.second.py_dims[i] = (npy_intp)dims[i];
+              p.second.h5_dims[i] = (hsize_t)dims[i];
+            }
         }
       return h5_map.insert (p).first;
     }
@@ -179,8 +195,67 @@ namespace blue_sky
       init_all ();
     }
 
+  spv_float
+  h5_pool::get_fp_data (std::string const &name)
+  {
+    spv_float a = get_fp_data_unsafe (name);
+    if (!a || a->empty ())
+      throw error_h5_no_array (name);
+
+    return a;
+  }
+  
+  t_long 
+  h5_pool::calc_data_dims (map_t::iterator it)
+  {
+    t_long n, d;
+    t_int old_n_dims;
+    int i, flg;
+    
+    n = 1;
+     
+    if (it->second.var_dims)
+      {
+        flg = 0;
+        old_n_dims = it->second.n_dims;
+        it->second.n_dims = 0;
+        for (i = 0; i < 3; i++)
+          {
+            d = it->second.src_dims[2 * i] * pool_dims[i] + it->second.src_dims[2 * i + 1];
+            if (d)
+              {
+                if (d != it->second.h5_dims[it->second.n_dims])
+                  flg = 1;
+                it->second.h5_dims[it->second.n_dims] = d;
+                it->second.py_dims[it->second.n_dims] = d;
+                it->second.n_dims++;
+                n *= d;
+              }
+          }
+        if (it->second.dset && (flg || (old_n_dims != it->second.n_dims)))
+          {
+            H5Ldelete (group_id, it->first.c_str (), H5P_DEFAULT);
+            close_node (it->second);
+          }
+       }
+     else
+       {
+         for (i = 0; i < it->second.n_dims; i++)
+           n *= it->second.py_dims[i];
+       }
+     return n;   
+  }
+  
+  t_long 
+  h5_pool::calc_data_dims (const std::string &name)
+    {
+      map_t::iterator it;
+      it = h5_map.find (name);
+      return calc_data_dims(it);
+  }
+
   spv_float 
-  h5_pool::get_fp_data (const std::string &name)
+  h5_pool::get_fp_data_unsafe (const std::string &name)
     {
       map_t::iterator it;
       t_long n;
@@ -188,14 +263,22 @@ namespace blue_sky
 
       if (group_id <= 0)
         {
-          // TODO: report error
           return spv_float ();
         }
       it = h5_map.find (name);
       if (it == h5_map.end ())
         {
-          // TODO: report error
           return spv_float ();
+        }
+      if (!it->second.dset)  
+        {
+          calc_data_dims (it);
+          it->second.dspace = H5Screate_simple (it->second.n_dims, it->second.h5_dims, NULL);
+          it->second.dset = H5Dcreate (group_id, name.c_str (), 
+                                           it->second.dtype, 
+                                           it->second.dspace,
+                                           it->second.plist);
+      
         }
       n = H5Sget_simple_extent_npoints (it->second.dspace);
 
@@ -212,14 +295,23 @@ namespace blue_sky
         }
       else
         {
-          //TODO: print error message
           return spv_float ();
         }
       return a;
     }
 
+  spv_int
+  h5_pool::get_i_data (std::string const &name)
+  {
+    spv_int a = get_i_data_unsafe (name);
+    if (!a || a->empty ())
+      throw error_h5_no_array (name);
+
+    return a;
+  }
+
   spv_int 
-  h5_pool::get_i_data (const std::string &name)
+  h5_pool::get_i_data_unsafe (const std::string &name)
     {
       map_t::iterator it;
       t_long n;
@@ -236,6 +328,17 @@ namespace blue_sky
           // TODO: report error
           return spv_int ();
         }
+        
+      if (!it->second.dset)  
+        {
+          calc_data_dims (it);
+          it->second.dspace = H5Screate_simple (it->second.n_dims, it->second.h5_dims, NULL);
+          it->second.dset = H5Dcreate (group_id, name.c_str (), 
+                                           it->second.dtype, 
+                                           it->second.dspace,
+                                           it->second.plist);
+      
+        }  
       n = H5Sget_simple_extent_npoints (it->second.dspace);
 
       a = BS_KERNEL.create_object (v_int::bs_type ());
@@ -256,72 +359,31 @@ namespace blue_sky
         }
       return a;
     }
-
-
+    
+    
   int 
-  h5_pool::set_i_data (const std::string &name, spv_int data)
+  h5_pool::declare_i_data (const std::string &name, t_int def_value, int n_dims, npy_intp *dims, int var_dims)
     {
-      t_int ndims;
-      const npy_intp *dims;
       map_t::iterator it, e;
-
+      hid_t plist;
+      
       if (group_id <= 0)
         {
           // TODO: report error
           throw;
         }
 
-      ndims = (t_int) data->ndim ();
-      dims = data->dims ();
-
       it = h5_map.find (name);
       if (it != h5_map.end ())
         {
-          if (it->second.n_dims == ndims)
-            {
-              int flg = 0;
-              for (int i = 0; i < ndims; ++i)
-                {
-                  if (it->second.py_dims[i] != dims[i])
-                    {
-                      flg = 1;
-                      break;
-                    }
-                }
-              if (!flg)
-                {
-                  //printf ("array OK\n");
-                  if (sizeof (t_int) == sizeof (int))
-                    {
-                      H5Dwrite (it->second.dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, 
-                                H5P_DEFAULT, &(*data)[0]);
-                    }
-                  else if (sizeof (t_int) == sizeof (long))
-                    {
-                      H5Dwrite (it->second.dset, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, 
-                                H5P_DEFAULT, &(*data)[0]);
-                    }
-                  else
-                    {
-                      //TODO: print error message
-                      throw;
-                    }
-                  return 0;
-                }
-            }
-          // erase element 
-          H5Ldelete (group_id, it->first.c_str (), H5P_DEFAULT);
-          close_node (it->second);
           h5_map.erase (it);
         }
       // create new
       {
-        printf ("Create %s\n", name.c_str ());
-
-        map_t::iterator new_it = add_node (name, 0, 0, 0, ndims, dims);
+        printf ("Declare %s\n", name.c_str ());
         
-        new_it->second.dspace = H5Screate_simple (ndims, new_it->second.h5_dims, NULL);
-        
+        map_t::iterator new_it = add_node (name, 0, 0, 0, n_dims, dims, var_dims);
+            
         if (sizeof (t_int) == sizeof (int))
           {
             new_it->second.dtype = H5T_NATIVE_INT;
@@ -335,21 +397,129 @@ namespace blue_sky
             //TODO: print error message
             throw;
           }
-        new_it->second.dset = H5Dcreate (group_id, name.c_str (), 
-                                         new_it->second.dtype, 
-                                         new_it->second.dspace,
-                                         H5P_DEFAULT);
-        H5Dwrite (new_it->second.dset, new_it->second.dtype, 
-                  H5S_ALL, H5S_ALL, H5P_DEFAULT, &(*data)[0]);
+          
+        plist = H5Pcreate (H5P_DATASET_CREATE);
+        H5Pset_fill_value (plist, new_it->second.dtype, &def_value);
+        new_it->second.plist = plist;
+        
       }
       return 0;
     }
-
+    
   int 
-  h5_pool::set_fp_data (const std::string &name, spv_float data)
+  h5_pool::set_i_data (const std::string &name, spv_int data, t_int def_value)
+  {
+    map_t::iterator it;
+    
+    it = h5_map.find (name);
+    
+    if (it != h5_map.end ())
+      {
+        // check size
+        if (calc_data_dims (it) > data->size())
+          return -1;   
+      }
+    else
+      {
+        declare_i_data (name, def_value, (int) data->ndim (), data->dims ());
+        it = h5_map.find (name);
+      }
+      
+    if (!it->second.dset)
+      {
+        it->second.dspace = H5Screate_simple (it->second.n_dims, it->second.h5_dims, NULL);
+        it->second.dset = H5Dcreate (group_id, name.c_str (), 
+                                         it->second.dtype, 
+                                         it->second.dspace,
+                                         it->second.plist);
+      }
+      
+    H5Dwrite (it->second.dset, it->second.dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &(*data)[0]);
+    return 0;
+  }
+  
+  
+  int 
+  h5_pool::declare_fp_data (const std::string &name, t_float def_value, int n_dims, npy_intp *dims, int var_dims)
     {
-      t_int ndims;
+      map_t::iterator it, e;
+      hid_t plist;
+      
+      if (group_id <= 0)
+        {
+          // TODO: report error
+          throw;
+        }
+
+      it = h5_map.find (name);
+      if (it != h5_map.end ())
+        {
+          h5_map.erase (it);
+        }
+      // create new
+      {
+        printf ("Declare %s\n", name.c_str ());
+        map_t::iterator new_it = add_node (name, 0, 0, 0, n_dims, dims, var_dims);
+        if (sizeof (t_float) == sizeof (float))
+          {
+            new_it->second.dtype = H5T_NATIVE_FLOAT;
+          }
+        else if (sizeof (t_float) == sizeof (double))
+          {
+            new_it->second.dtype = H5T_NATIVE_DOUBLE;
+          }
+        else
+          {
+            //TODO: print error message
+            throw;
+          }
+          
+        plist = H5Pcreate (H5P_DATASET_CREATE);  
+        H5Pset_fill_value (plist, new_it->second.dtype, &def_value);
+        new_it->second.plist = plist;
+      }
+      return 0;
+    }
+    
+  int 
+  h5_pool::set_fp_data (const std::string &name, spv_float data, t_float def_value)
+  {
+    map_t::iterator it;
+    
+    it = h5_map.find (name);
+    
+    if (it != h5_map.end ())
+      {
+        // check size
+        if (calc_data_dims (it) > data->size())
+          return 1;   
+      }
+    else
+      {
+        declare_fp_data (name, def_value, (int) data->ndim (), data->dims ());
+        it = h5_map.find (name);
+      }
+      
+    if (!it->second.dset)
+      {
+        it->second.dspace = H5Screate_simple (it->second.n_dims, it->second.h5_dims, NULL);
+        it->second.dset = H5Dcreate (group_id, name.c_str (), 
+                                         it->second.dtype, 
+                                         it->second.dspace,
+                                         it->second.plist);
+      }
+      
+    H5Dwrite (it->second.dset, it->second.dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &(*data)[0]);
+    return 0;
+  }
+    
+  /*
+  int 
+  h5_pool::set_fp_data (const std::string &name, spv_float data, hsize_t *src_dims)
+    {
+      t_int ndims, i;
       const npy_intp *dims;
+      npy_intp new_dims[3];
       map_t::iterator it, e;
 
       if (group_id <= 0)
@@ -358,8 +528,20 @@ namespace blue_sky
           throw;
         }
 
-      ndims = (t_int) data->ndim ();
-      dims = data->dims ();
+      if (src_dims)
+        {
+          ndims = 3;
+          for (i = 0; i < ndims; i++)
+            {
+              new_dims[i] = src_dims[2 * i] * pool_dims[i] + src_dims[2 * i + 1];
+            }
+          dims = new_dims;
+        }
+      else
+        {
+          ndims = (t_int) data->ndim ();
+          dims = data->dims ();
+        }
 
       it = h5_map.find (name);
       if (it != h5_map.end ())
@@ -409,6 +591,16 @@ namespace blue_sky
 
         new_it->second.dspace = H5Screate_simple (ndims, new_it->second.h5_dims, NULL);
         
+        if (src_dims)
+          for (i = 0; i < n_src_dims; i++)
+            {
+              new_it->second.src_dims[i] = src_dims[i];
+            }
+        else
+          {
+            new_it->second.src_dims[0] = -1;
+          }
+            
         if (sizeof (t_float) == sizeof (float))
           {
             new_it->second.dtype = H5T_NATIVE_FLOAT;
@@ -431,6 +623,27 @@ namespace blue_sky
       }
       return 0;
     }
+*/    
+  void 
+  h5_pool::set_pool_dims (t_long *dims, int ndims)
+  {
+    map_t::iterator it, e;
+    int i;
+    e = h5_map.end ();
+    
+    for (i = 0; i < 3; i++)
+      pool_dims[i] = 0;
+      
+    n_pool_dims = ndims;
+    for (i = 0; i < ndims; i++)
+      pool_dims[i] = dims[i];
+    
+    for (it = h5_map.begin (); it != e; ++it)
+      {
+        calc_data_dims (it);
+      }
+  }
+  
 
   void
   h5_pool::mute ()
@@ -468,8 +681,11 @@ namespace blue_sky
       H5T_class_t dt;
 
       e = h5_map.end ();
-      s << "H5_pool: " << h5_map.size () << std::endl;
-      s << "-----------------------------------------------------------\n";
+      s << "H5_pool: " << h5_map.size ()  << "\t [" << pool_dims[0];
+      for (int j = 1; j < n_pool_dims; ++j)
+        s << ", " <<pool_dims[j];
+      s <<  "]" << std::endl;
+      s << "-----------------------------------------------------------------------------------------\n";
       for (i = h5_map.begin (); i != e; ++i)
         {
           std::stringstream sdim;
@@ -485,13 +701,42 @@ namespace blue_sky
             ss = "Float ";
           else
             ss = "Unknown";
-
           s << std::setw (8) << ss << H5Tget_precision (i->second.dtype);
+           
+          if (i->second.dset)
+            s << std::setw (10) << " Created ";
+          else
+            s << std::setw (10) << " Declared ";
+          
+          if (i->second.var_dims)
+            {
+              s << " Variable Dims ";
+              s <<  "[ " << i->second.src_dims[0];
+              for (int j = 1; j < 6; ++j)
+                s << ", " <<i->second.src_dims[j];
+              s << "]\t";
+           }
+          
           s << std::endl;
         }
-      s << "-----------------------------------------------------------\n";
+      s << "-----------------------------------------------------------------------------------------\n";
       return s.str ();
     }
+    
+     
+  
+  boost::python::list 
+  h5_pool::py_list_data() const
+  {
+    map_t::const_iterator i, e;
+    boost::python::list items;
+    
+    e = h5_map.end ();
+    for (i = h5_map.begin (); i != e; ++i)
+      items.append(i->first);
+    return items;
+  }
+    
 #endif //BSPY_EXPORTING_PLUGIN
 /////////////////////////////////BS Register
 /////////////////////////////////Stuff//////////////////////////

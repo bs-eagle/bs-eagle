@@ -15,7 +15,7 @@ namespace blue_sky
   /**
    * \brief
    */
-  class pvt_dead_oil : public pvt_base 
+  class BS_API_PLUGIN pvt_dead_oil : public pvt_base 
     {
     public:
 

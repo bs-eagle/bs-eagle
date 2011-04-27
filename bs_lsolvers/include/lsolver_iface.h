@@ -28,6 +28,7 @@ namespace blue_sky
   const std::string final_res_idx = "final_residual";
   const std::string iters_idx = "iters";
   const std::string success_idx = "is_success";
+  const std::string ortonorm_vlen = "ortonorm_vlen";
 
   /** 
    * @brief interface class for linear system solver and preconditioners 

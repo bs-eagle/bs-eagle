@@ -26,9 +26,9 @@ struct di
   /**
    * \brief Calculates norms
    */
-  template <typename strategy_t, bool is_w, bool is_g, bool is_o>
+  template <bool is_w, bool is_g, bool is_o>
   BS_FORCE_INLINE void
-  fi_operator_impl <strategy_t, is_w, is_g, is_o>::norm_calc ()
+  fi_operator_impl <is_w, is_g, is_o>::norm_calc ()
   {
     double pv = 0;
 
@@ -176,9 +176,9 @@ struct di
    * \param  i Index of cell
    * \param  ns Norms storage
    * */
-  template <class strategy_t, bool is_w, bool is_g, bool is_o>
+  template <bool is_w, bool is_g, bool is_o>
   BS_FORCE_INLINE void 
-  fi_operator_impl <strategy_t, is_w, is_g, is_o>::update_norm_by_cell (index_t i, norms_storage_t &ns)
+  fi_operator_impl <is_w, is_g, is_o>::update_norm_by_cell (index_t i, norms_storage_t &ns)
   {
     double norm_mult, r, d;
 
@@ -221,7 +221,7 @@ struct di
     // water
     if (is_w)
       {
-        r = rhs_[equ_w] + flux_rhs_[equ_w];
+        r = (*rhs_)[equ_w] + (*flux_rhs_)[equ_w];
 
         // mat balanse
         ns.val[norms::MB_ERR_WATER] += r / calc_model_->invers_fvf_average[d_w];
@@ -243,7 +243,7 @@ struct di
     // gas
     if (is_g)
       {
-        r = rhs_[equ_g] + flux_rhs_[equ_g];
+        r = (*rhs_)[equ_g] + (*flux_rhs_)[equ_g];
 
         // mat balanse
         ns.val[norms::MB_ERR_GAS] += r / calc_model_->invers_fvf_average[d_g];
@@ -265,7 +265,7 @@ struct di
     // oil
     if (is_o)
       {
-        r = rhs_[equ_o] + flux_rhs_[equ_o];
+        r = (*rhs_)[equ_o] + (*flux_rhs_)[equ_o];
 
         // mat balanse
         ns.val[norms::MB_ERR_OIL] += r / calc_model_->invers_fvf_average[d_o];
@@ -285,10 +285,10 @@ struct di
         ns.val[norms::L2_ACPV_OIL] += d * d;
       }
 
-  rhs_item_array_t &s_rhs = jmatrix_->get_sec_rhs ();
+  rhs_item_array_t s_rhs = jacobian_->get_sec_rhs ();
   for (index_t j = 0, j_cnt = n_sec_vars; j < j_cnt; ++j)
     {
-      MAX_AND_INDEX (s_rhs[i * n_sec_vars + j], ns.val[norms::S_RHS], i, ns.idx[norms::S_RHS]);
+      MAX_AND_INDEX ((*s_rhs)[i * n_sec_vars + j], ns.val[norms::S_RHS], i, ns.idx[norms::S_RHS]);
     }
   }
 

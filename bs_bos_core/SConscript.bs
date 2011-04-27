@@ -7,25 +7,27 @@ tar_name = "bs_bos_core"
 env = custom_env.Clone ()
 env.Append (CPPPATH = ["include",
     includes["bs_bos_core_base"],
-    includes["bs_matrix"],
-    includes["bs_base_linear_solvers"],
-    includes["bs_csr_ilu_prec"],
+    includes["common_types"],
+    includes["bs_mtx"],
+    includes["bs_lsolvers"],
+    #includes["bs_csr_ilu_prec"],
     includes["bs_bos_core_data_storage"],
 #    includes["bs_mesh_mpfa"],
     includes["bs_scal"],
     includes["bs_pvt"],
 	includes["kernel"],
-	includes["bs_mesh"]
+	includes["bs_mesh"],
     ])
 
 libs = ["blue_sky", 
      "bs_bos_core_base", 
-     "bs_matrix", 
-     "bs_base_linear_solvers", 
-     "bs_csr_ilu_prec",
+     "bs_mtx",
+     "bs_lsolvers",
+     #"bs_csr_ilu_prec",
      "bs_bos_core_data_storage",
      "bs_scal",
-     "bs_pvt"
+     "bs_pvt",
+     "bs_mesh",
      ]
 
 boost_libs = ["boost_date_time-mt"]
@@ -43,7 +45,21 @@ if (build_kind == "debug") :
 elif (build_kind == "release") :
     env.AppendUnique (LIBS = libs + boost_libs)
 
-bs_bos_core = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
+excluded = [
+    "keyword_manager.cpp", 
+    "keywords_handlers.cpp", 
+    "keywords_registration.cpp",
+    "two_stage_preconditioner.cpp",
+    "csr_ilu_cfl.cpp",
+    "py_csr_ilu_cfl_prec.cpp",
+    "py_keyword_manager.cpp",
+    "py_table_2d_debug.cpp",
+    "py_two_stage_preconditioner.cpp",
+    "well_results_storage.cpp",
+    "fip_results_storage.cpp",
+    ]
+
+bs_bos_core = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."], excluded).sources)
 
 env.Alias (tar_name, bs_bos_core)
 Export ("bs_bos_core")

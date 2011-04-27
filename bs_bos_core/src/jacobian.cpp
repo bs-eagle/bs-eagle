@@ -7,28 +7,51 @@
  *              the BSD License. See LICENSE for more details.
  * */
 #include "stdafx.h"
-
 #include "jacobian.h"
-#include BS_FORCE_PLUGIN_IMPORT ()
-#include "setup_preconditioner.h"
-#include BS_STOP_PLUGIN_IMPORT ()
-#include "two_stage_preconditioner.h"
-
-// WTF??
-#include "well_results_storage.h"
-#include "fip_results_storage.h"
 
 namespace blue_sky
   {
 
-    /**
-     * \brief  'default' ctor for jacobian
-     * \param  param Additional params for ctor
-     * */
-  template<class strategy_t>
-  jacobian<strategy_t>::jacobian (bs_type_ctor_param /*param*/)
+  /**
+   * \class jacob_traits
+   * \brief For sorting jacobian children
+   * */
+  struct jacob_traits : bs_node::sort_traits
+    {
+      struct jacob_key : bs_node::sort_traits::key_type
+        {
+          virtual bool sort_order (const key_ptr & ) const
+            {
+              return true;
+            }
+        };
+
+      virtual const char * sort_name () const
+        {
+          return "jacob trait";
+        };
+
+      virtual key_ptr key_generator (const sp_link& /*l*/) const
+        {
+          return new jacob_key ();
+        }
+
+      virtual bool accepts (const sp_link& l)
+      {
+        return smart_ptr< jacobian, true >(l->data(), bs_dynamic_cast());
+      }
+    };
+
+  jacobian::~jacobian ()
+  {
+  }
+
+  /**
+   * \brief  'default' ctor for jacobian
+   * \param  param Additional params for ctor
+   * */
+  jacobian::jacobian (bs_type_ctor_param /*param*/)
   : bs_node(bs_node::create_node(new jacob_traits))
-  , jm (give_kernel::Instance().create_object(jacobian_matrix<strategy_t>::bs_type()))
   {
   }
 
@@ -36,217 +59,22 @@ namespace blue_sky
    * \brief  copy-ctor for jacobian
    * \param  src Instance of jacobian to be copied
    * */
-  template<class strategy_t>
-  jacobian<strategy_t>::jacobian (const jacobian<strategy_t>& src)
+  jacobian::jacobian (const jacobian& src)
   : bs_refcounter (src), bs_node(src)
-  , jm(src.jm)
   {
     *this = src;
   }
 
-  //template <typename strategy_t>
-  //void
-  //jacobian <strategy_t>::create_solver (int n_phases, const sp_fi_params &ts_params)
-  //{
-  //  int p = ts_params->get_int (fi_params::LIN_SOLVER_TYPE);
-
-  //  if (n_phases > 1)
-  //    {
-  //      if (p == FI_LIN_SOLVER_BICGSTAB)
-  //        {
-  //          solver = BS_KERNEL.create_object (bicgstab_solver<strategy_t>::bs_type());
-  //          solver_is_gmres_flag = 0;
-  //        }
-  //      else
-  //        {
-  //          #ifdef _MPI
-  //          BS_ASSERT (false && "MPI: NOT IMPL YET");
-  //          //!solver = give_kernel::Instance().create_object(mpi_gmres_solver<strategy_t>::bs_type());
-  //          #else //_MPI
-  //          solver = BS_KERNEL.create_object (gmres_solver2<strategy_t>::bs_type());
-  //          #endif //_MPI
-  //          solver_is_gmres_flag = 1;
-  //        }
-  //    }
-  //  else
-  //    {
-  //      solver = BS_KERNEL.create_object (amg_solver <strategy_t>::bs_type ());
-  //      smart_ptr <amg_solver <strategy_t> > amg (solver, bs_static_cast ());
-  //      
-  //      amg->amg_prop = BS_KERNEL.create_object (amg_properties::bs_type ());
-  //      amg->set_coarse(BS_KERNEL.create_object (coarse_pmis_2 <strategy_t> ::bs_type ()),true);
-  //      amg->set_interpolator(BS_KERNEL.create_object (interpolator_standart_2 <strategy_t> ::bs_type ()),true);
-
-  //      BS_ASSERT (amg->amg_prop);
-  //      amg->amg_prop->set_int (amg_properties::I_ADAPTIVE_TRESHOLD, 0);
-  //      amg->amg_prop->set_int (amg_properties::I_UPDATE, 0);
-  //      amg->amg_prop->set_float (amg_properties::FP_STRENGHT_THRESHOLD, 0.75);
-  //    }
-
-  //  if (!solver)
-  //    {
-  //      bs_throw_exception ("Can't create solver");
-  //    }
-  //}
-
-//  template <typename strategy_t>
-//  void
-//  jacobian <strategy_t>::create_preconditioner (well_model_type model_type, int n_phases, const sp_fi_params &ts_params)
-//  {
-//    if (n_phases > 1)
-//      {
-//        int p = ts_params->get_int (fi_params::PREC_TYPE);
-//        if (p == FI_LIN_PREC_ILU)
-//          {
-//#ifdef _MPI
-//            BS_ASSERT (false && "MPI: NOT IMPL YET");
-//            //!preconditioner = give_kernel::Instance().create_object(mpi_csr_ilu_prec<strategy_t>::bs_type());
-//#else //_MPI
-//#ifdef ILU_PREC_PARALLEL
-//            preconditioner = give_kernel::Instance().create_object(csr_pilu_prec<strategy_t>::bs_type());
-//#else //ILU_PREC_PARALLEL
-//            preconditioner = give_kernel::Instance().create_object(csr_ilu_prec<strategy_t>::bs_type());
-//            //preconditioner = give_kernel::Instance().create_object(csr_ilu_cfl_prec<strategy_t>::bs_type());
-//#endif //ILU_PREC_PARALLEL
-//#endif //_MPI
-//            prec_is_cpr_flag = 0;
-//          } // if (p == FI_LIN_PREC_ILU)
-//        else if (p == FI_LIN_PREC_CPR_SOR)
-//          {
-//            preconditioner = give_kernel::Instance().create_object(two_stage_preconditioner<strategy_t>::bs_type());
-//            if (!preconditioner)
-//              {
-//                bs_throw_exception ("Can't create preconditioner");
-//              }
-//
-//            prec_is_cpr_flag = 1;
-//#ifdef _MPI
-//            BS_ASSERT (false && "MPI: NOT IMPL YET");
-//            if (model_type == BLACK_OIL)
-//              {
-//                //!static_cast< smart_ptr< two_stage_preconditioner<strategy_t> > >(preconditioner)->
-//                //!set_prec_1 (give_kernel::Instance().create_object(mpi_cpr_preconditioner<strategy_t>::bs_type()));
-//              }
-//            else
-//              {
-//                throw bs_exception ("jacobian::create_preconditioner", "model type not supported");
-//              }
-//            //!static_cast< smart_ptr< two_stage_preconditioner<strategy_t> > >(preconditioner)->
-//            //!set_prec_2 (give_kernel::Instance().create_object(mpi_csr_ilu_prec<strategy_t>::bs_type()));
-//#else // _MPI
-//            if ((model_type == BLACK_OIL) || (model_type == COMPOSIT))
-//              {
-//                sp_obj cpr_prec_raw (give_kernel::Instance().create_object(cpr_preconditioner<strategy_t>::bs_type()));
-//                smart_ptr <cpr_preconditioner <strategy_t> > cpr_prec (cpr_prec_raw, bs_dynamic_cast ());
-//                smart_ptr <two_stage_preconditioner <strategy_t> > prec (preconditioner, bs_dynamic_cast ());
-//                prec->set_prec_1 (cpr_prec.get ());
-//              }
-//            else
-//              {
-//                bs_throw_exception ("Model type not supported");
-//              }
-//            //////////!!!!!!!!!!!!!!!!!!!!!! sor_prec need for mpi_vector
-//            //static_cast< smart_ptr< two_stage_preconditioner<strategy_t> > >(preconditioner)->
-//            //set_prec_2 (give_kernel::Instance().create_object(sor_prec<strategy_t>::bs_type()));
-//#endif // _MPI
-//          } // if (p == FI_LIN_PREC_CPR_SOR)
-//        else
-//          {
-//            BOSOUT (section::solvers, level::debug) << "create preconditioner" << bs_end;
-//            preconditioner = give_kernel::Instance().create_object(two_stage_preconditioner<strategy_t>::bs_type());
-//            if (!preconditioner)
-//              {
-//                bs_throw_exception ("Can't create preconditioner");
-//              }
-//
-//            prec_is_cpr_flag = 1;
-//            smart_ptr <two_stage_preconditioner <strategy_t> > prec (preconditioner, bs_dynamic_cast ());
-//
-//#ifdef _MPI
-//            BS_ASSERT (false && "MPI: NOT IMPL YET");
-//            if (model_type == BLACK_OIL)
-//              {
-//                //!static_cast< smart_ptr< two_stage_preconditioner<strategy_t> > >(preconditioner)->
-//                //!set_prec_1 (give_kernel::Instance().create_object(mpi_cpr_preconditioner<strategy_t>::bs_type()));
-//              }
-//            else
-//              {
-//                throw bs_exception ("jacobian::create_preconditioner", "model type not supported");
-//              }
-//            //!static_cast< smart_ptr< two_stage_preconditioner<strategy_t> > >(preconditioner)->
-//            //!set_prec_2 (give_kernel::Instance().create_object(mpi_csr_ilu_prec<strategy_t>::bs_type()));
-//#else // _MPI
-//            sp_obj cpr_prec_raw (give_kernel::Instance().create_object(cpr_preconditioner<strategy_t>::bs_type()));
-//            smart_ptr <cpr_preconditioner <strategy_t> > cpr_prec (cpr_prec_raw, bs_static_cast ());
-//            BS_ASSERT (cpr_prec_raw);
-//            BS_ASSERT (cpr_prec);
-//
-//            prec->set_prec_1 (cpr_prec.get ());
-//#ifdef ILU_PREC_PARALLEL
-//            static_cast< smart_ptr< two_stage_preconditioner<strategy_t> > >(preconditioner)->
-//            set_prec_2 (give_kernel::Instance().create_object(csr_pilu_prec<strategy_t>::bs_type()));
-//#else // ILU_PREC_PARALLEL
-//#ifdef BS_BOS_CORE_USE_CSR_ILU_CFL_PREC
-//            sp_obj csr_prec_raw (give_kernel::Instance().create_object(csr_ilu_cfl_prec<strategy_t>::bs_type()));
-//            smart_ptr <csr_ilu_cfl_prec <strategy_t> > csr_prec (csr_prec_raw, bs_static_cast ());
-//#else
-//            sp_obj csr_prec_raw (BS_KERNEL.create_object (csr_ilu_prec <strategy_t>::bs_type ()));
-//            smart_ptr <csr_ilu_prec <strategy_t> > csr_prec (csr_prec_raw, bs_static_cast ());
-//#endif
-//            BS_ASSERT (csr_prec_raw);
-//            BS_ASSERT (csr_prec);
-//
-//            prec->set_prec_2 (csr_prec.get ());
-//#endif // ILU_PREC_PARALLEL
-//#endif // _MPI
-//          }
-//      }
-//    else   // if (n_phases > 1) - pressure system
-//      {
-//        int p = ts_params->get_int(fi_params::PREC_TYPE_ONE_PHASE);
-//        if (p == FI_LIN_PREC_ILU)
-//          {
-//#ifdef _MPI
-//            BS_ASSERT (false && "MPI: NOT IMPL YET");
-//            //!preconditioner = give_kernel::Instance().create_object(mpi_csr_ilu_prec<strategy_t>::bs_type());
-//#else // _MPI
-//#ifdef ILU_PREC_PARALLEL
-//            preconditioner = give_kernel::Instance().create_object(csr_pilu_prec<strategy_t>::bs_type());
-//#else // ILU_PREC_PARALLEL
-//            preconditioner = give_kernel::Instance().create_object(csr_ilu_prec<strategy_t>::bs_type());
-//#endif // ILU_PREC_PARALLEL
-//#endif // _MPI
-//            prec_is_cpr_flag = 0;
-//          }
-//        else if (p == FI_LIN_PREC_AMG)
-//          {
-//#ifdef _MPI
-//            BS_ASSERT (false && "MPI: NOT IMPL YET");
-//            //!preconditioner = give_kernel::Instance().create_object(mpi_amg_solver<strategy_t>::bs_type());
-//#else // _MPI
-//            preconditioner = give_kernel::Instance().create_object(amg_solver<strategy_t>::bs_type());
-//
-//#endif // _MPI
-//          }
-//        else
-//          {
-//            throw bs_exception ("jacobian::create_preconditioner", "this preconditioner not supported for 1 phase model");
-//          }
-//      }
-//  }
-
-  template <typename strategy_t>
   void
-  jacobian <strategy_t>::setup_solver (const sp_fi_params &ts_params)
+  jacobian::setup_solver (const BS_SP (fi_params) &ts_params)
   {
-    solver->get_prop()->set_max_iters(ts_params->get_int(fi_params::LIN_ITERS_NUM));
-    solver->get_prop()->set_tolerance(ts_params->get_float(fi_params::LIN_SOLV_RESIDUAL));
+    solver->get_prop()->set_i (max_iters_idx, ts_params->get_int(fi_params::LIN_ITERS_NUM));
+    solver->get_prop()->set_f (tol_idx, ts_params->get_float(fi_params::LIN_SOLV_RESIDUAL));
     //solver->get_prop()->set_matbal_tolerance(ts_params->get_float(fi_params::LIN_SOLV_MATBAL_RESIDUAL));
   }
 
-  template <typename strategy_t>
   void
-  jacobian <strategy_t>::setup_preconditioner (const sp_fi_params &ts_params)
+  jacobian::setup_preconditioner (const BS_SP (fi_params) &ts_params)
   {
 //    //set up preconditioner
 //    if (prec_is_cpr_flag)
@@ -266,24 +94,14 @@ namespace blue_sky
 //      }
   }
 
-  template<class strategy_t>
-  int jacobian<strategy_t>::setup_solver_params (well_model_type model_type, int n_phases, const sp_fi_params &ts_params)
+  int 
+  jacobian::setup_solver_params (well_model_type model_type, int n_phases, const BS_SP (fi_params) &ts_params)
   {
 
     if (!ts_params)
       {
         throw bs_exception("Jacobian::setup_solver_params", "ts_params is not inited!");
       }
-
-    //if (ts_params->check_value (fi_params::LIN_SOLVER_TYPE) && !solver)
-    //  {
-    //    create_solver (n_phases, ts_params);
-    //  }
-
-    //if (ts_params->check_value (fi_params::PREC_TYPE) && !preconditioner)
-    //  {
-    //    create_preconditioner (model_type, n_phases, ts_params);
-    //  }
 
     if (!solver)
       {
@@ -296,8 +114,9 @@ namespace blue_sky
 
     if (solver_is_gmres_flag)
       {
-        static_cast< smart_ptr< gmres_solver2<strategy_t> > >(solver)->m
-        = ts_params->get_int(fi_params::GMRES_ORTONORM_VLEN);
+        solver->get_prop ()->set_i (ortonorm_vlen, ts_params->get_int (fi_params::GMRES_ORTONORM_VLEN));
+        //static_cast< smart_ptr< gmres_solver2<strategy_t> > >(solver)->m
+        //= ts_params->get_int(fi_params::GMRES_ORTONORM_VLEN);
       }
 
     setup_solver (ts_params);
@@ -307,41 +126,267 @@ namespace blue_sky
     return 0;
   }
 
-  template <typename strategy_t>
-  const typename jacobian <strategy_t>::sp_lsolver &
-  jacobian <strategy_t>::get_solver () const
+  const BS_SP (lsolver_iface) &
+  jacobian::get_solver () const
   {
     return solver;
   }
-  template <typename strategy_t>
-  const typename jacobian <strategy_t>::sp_lsolver &
-  jacobian <strategy_t>::get_prec () const
+
+  const BS_SP (lsolver_iface) &
+  jacobian::get_prec () const
   {
     return preconditioner;
   }
 
-  //DEPRICATED
-  template <typename strategy_t>
   void
-  jacobian<strategy_t>::begin ()
+  jacobian::init (t_long elements, t_long phases_, t_long secondary_)
   {
-    //this->get_jmatrix()->regular_matrix
-    BS_ASSERT (false && "NOT IMPL YET");
+    secondary = secondary_;
+    phases = phases_;
+
+    matrix = BS_KERNEL.create_object ("mbcsr_matrix");
+    flux_conn = BS_KERNEL.create_object ("flux_connections");
+
+    BS_SP (bcsr_matrix_iface) flux = BS_KERNEL.create_object ("bcsr_matrix");
+    BS_SP (bcsr_matrix_iface) facility = BS_KERNEL.create_object ("bcsr_matrix");
+    BS_SP (bcsr_matrix_iface) accum = BS_KERNEL.create_object ("bcsr_matrix");
+
+    matrix->add_matrix ("flux", flux);
+    matrix->add_matrix ("facility", facility);
+    matrix->add_matrix ("accum", accum);
+
+    accum->init (elements, elements, phases, elements);
+    t_long *accum_rows = accum->get_rows_ptr ()->data ();
+    t_long *accum_cols = accum->get_cols_ind ()->data ();
+    t_double *accum_vals = accum->get_values ()->data ();
+    // OPENMP
+    for (t_long i = 0; i < elements; ++i)
+      {
+        accum_rows[i] = i;
+        accum_cols[i] = i;
+      }
+    for (t_long i = 0; i < elements * phases; ++i)
+      {
+        accum_vals[i] = 0;
+      }
+
+    rhs = BS_KERNEL.create_object (v_float::bs_type ());
+    rhs_flux = BS_KERNEL.create_object (v_float::bs_type ());
+    sec_rhs = BS_KERNEL.create_object (v_float::bs_type ());
+    ss_diagonal = BS_KERNEL.create_object (v_float::bs_type ());
+    sp_diagonal = BS_KERNEL.create_object (v_float::bs_type ());
+
+    cfl_vector = BS_KERNEL.create_object (v_double::bs_type ());
+    solution = BS_KERNEL.create_object (v_double::bs_type ());
+    sec_solution = BS_KERNEL.create_object (v_double::bs_type ());
+
+    boundary = BS_KERNEL.create_object (v_long::bs_type ());
+
+    rhs->init (elements * phases, 0);
+    rhs_flux->init (elements * phases, 0);
+    cfl_vector->init (elements * phases, 0);
+    solution->init (elements * phases, 0);
+
+    if (secondary > 0)
+      {
+        sec_rhs->init (secondary * phases, 0);
+        ss_diagonal->init (secondary * secondary * phases, 0);
+        sp_diagonal->init (secondary * phases * phases, 0);
+        sec_solution->init (secondary * phases, 0);
+      }
+    else
+      {
+        sec_rhs->init (1, 0);
+        ss_diagonal->init (1, 0);
+        sp_diagonal->init (1, 0);
+        sec_solution->init (1, 0);
+      }
+
+    // FIXME: copied from reservoir_simulator
+    //index_t N_block_size = cm->n_phases;
+    //index_t N_blocks = hdm->get_mesh ()->get_n_active_elements ();
+    //// FIXME: wrong init?
+    //jmatrix->get_flux_matrix()->get_values ()->init (N_block_size, 0);
+    //jmatrix->get_flux_matrix ()->get_values()->init (N_block_size * N_block_size * (2* hdm->get_mesh ()->get_n_connections() + hdm->get_mesh ()->get_n_active_elements()), item_t (0));
+
+    //jmatrix->get_facility_matrix ()->init (N_blocks, N_blocks, N_block_size, 0);
   }
-  //DEPRICATED
-  template <typename strategy_t>
+
+  BS_SP (bcsr_matrix_iface)
+  jacobian::get_matrix (std::string const &name) const
+  {
+    BS_ASSERT (matrix);
+    if (name == "trns") 
+      return flux_conn->get_conn_trans ();
+
+    return matrix->get_matrix (name);
+  }
+
+  BS_SP (mbcsr_matrix_iface)
+  jacobian::get_matrix () const
+  {
+    BS_ASSERT (matrix);
+    return matrix;
+  }
+
+  spv_float
+  jacobian::get_ss_diagonal ()
+  {
+    return ss_diagonal;
+  }
+
+  spv_float
+  jacobian::get_sp_diagonal ()
+  {
+    return sp_diagonal;
+  }
+
+  spv_float
+  jacobian::get_sec_rhs ()
+  {
+    return sec_rhs;
+  }
+
+  spv_float
+  jacobian::get_rhs ()
+  {
+    return rhs;
+  }
+
+  spv_float
+  jacobian::get_rhs_flux ()
+  {
+    return rhs_flux;
+  }
+
+  spv_float
+  jacobian::get_cfl_vector ()
+  {
+    return cfl_vector;
+  }
+
+  spv_double
+  jacobian::get_solution ()
+  {
+    return solution;
+  }
+
+  spv_double
+  jacobian::get_sec_solution ()
+  {
+    return sec_solution;
+  }
+
+  spv_long
+  jacobian::get_boundary ()
+  {
+    return boundary;
+  }
+
+  BS_SP (flux_connections_iface)
+  jacobian::get_flux_connections ()
+  {
+    return flux_conn;
+  }
+
+  spv_long
+  jacobian::get_m_array ()
+  {
+    BS_ASSERT (flux_conn);
+    return flux_conn->get_matrix_block_idx_minus ();
+  }
+
+  spv_long
+  jacobian::get_p_array ()
+  {
+    BS_ASSERT (flux_conn);
+    return flux_conn->get_matrix_block_idx_plus ();
+  }
+
+  // FIXME:
   void
-  jacobian<strategy_t>::end ()
+  jacobian::clear_solution ()
   {
-    BS_ASSERT (false && "NOT IMPL YET");
+    solution->init (0);
   }
 
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(jacobian, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(jacobian, (class));
+  // FIXME:
+  void
+  jacobian::summ_rhs ()
+  {
+    if (rhs->size () != rhs_flux->size ())
+      {
+        bs_throw_exception ("rhs and rhs_flux size mismatch");
+      }
 
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (jacobian<base_strategy_fi>) , 1, (objbase), "jacobian_fi", "Jacobian-float-int", "Jacobian with float items and integer indexes", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (jacobian<base_strategy_di>) , 1, (objbase), "jacobian_di", "Jacobian-double-int", "Jacobian with double items and integer indexes", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (jacobian<base_strategy_mixi>) , 1, (objbase), "jacobian_mixi", "Jacobian-mixi", "Jacobian mixi", false);
+    t_float *rhs_ = rhs->data ();
+    t_float *rhs_flux_ = rhs->data ();
 
+    // OPENMP:
+    for (size_t i = 0, cnt = rhs->size (); i < cnt; ++i)
+      {
+        rhs_[i] += rhs_flux_[i];
+      }
+  }
+
+  // FIXME:
+  void
+  jacobian::mult_flux_part (t_double mult)
+  {
+    spv_double facility = matrix->get_matrix ("facility")->get_values ();
+    spv_double flux     = matrix->get_matrix ("flux")->get_values ();
+    t_double *facility_ = facility->data ();
+    t_double *flux_     = flux->data ();
+    t_float *rhs_flux_  = rhs_flux->data ();
+
+    // FIXME: should we multiply facility?
+    // OPENMP
+    for (size_t i = 0, cnt = facility->size (); i < cnt; ++i)
+      {
+        facility_[i] *= mult;
+      }
+    for (size_t i = 0, cnt = flux->size (); i < cnt; ++i)
+      {
+        flux_[i] *= mult;
+      }
+    for (size_t i = 0, cnt = rhs_flux->size (); i < cnt; ++i)
+      {
+        rhs_flux_[i] *= mult;
+      }
+  }
+
+  // FIXME:
+  void
+  jacobian::restore_sec_solution ()
+  {
+    if (secondary > 0)
+      {
+        if (phases != matrix->get_matrix ("flux")->get_n_block_size ())
+          {
+            bs_throw_exception ("phases and flux block_size mismatch");
+          }
+
+        spv_long rows     = matrix->get_matrix ("flux")->get_rows_ptr ();
+        t_float *sp_diag  = sp_diagonal->data ();
+        t_double *sol     = solution->data ();
+        t_double *sec_sol = sec_solution->data ();
+        t_float *sec_rhs_ = sec_rhs->data ();
+
+        // OPENMP
+        for (t_long i = 0, cnt = (t_long)rows->size (); i < cnt - 1; ++i)
+          {
+            t_float *sp_block   = &sp_diag[secondary * phases * i];
+            t_double *sol_block = &sol[phases * i];
+            sec_sol[i]          = sec_rhs_[i];
+
+            VV_PROD_M (phases, sp_block, sol_block, sec_sol[i]);
+          }
+      }
+  }
+
+  BLUE_SKY_TYPE_STD_CREATE (jacobian);
+  BLUE_SKY_TYPE_STD_COPY (jacobian);
+
+  BLUE_SKY_TYPE_IMPL (jacobian, bs_node, "jacobian", "Jacobian", "Jacobian");
 };
 

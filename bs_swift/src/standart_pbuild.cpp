@@ -1,8 +1,8 @@
-/** 
+/**
  * @file standart_pbuild.cpp
- * @brief 
- * @author 
- * @version 
+ * @brief implementation of standart interpolation
+ * @author
+ * @version
  * @date 2010-03-16
  */
 //#include "amg_stdafx.h"
@@ -10,21 +10,21 @@
 
 namespace blue_sky
 {
-  
-  standart_pbuild::standart_pbuild (bs_type_ctor_param) 
+
+  standart_pbuild::standart_pbuild (bs_type_ctor_param)
                     : amg_pbuild_iface (),
                       sp_markers (BS_KERNEL.create_object (v_long::bs_type ()))
     {
     }
-  
-  standart_pbuild::standart_pbuild (const this_t & /*src*/) 
+
+  standart_pbuild::standart_pbuild (const this_t & /*src*/)
                     : bs_refcounter (),
                       sp_markers (BS_KERNEL.create_object (v_long::bs_type ()))
      {
      }
-  
-   int 
-  standart_pbuild::build (sp_bcsr_t matrix, 
+
+   int
+  standart_pbuild::build (sp_bcsr_t matrix,
                                  const t_long n_coarse_size,
                                  const t_long /*max_connections*/,
                                  spv_long sp_cf_markers,
@@ -236,5 +236,5 @@ namespace blue_sky
   BLUE_SKY_TYPE_STD_CREATE (standart_pbuild);
   BLUE_SKY_TYPE_STD_COPY (standart_pbuild);
 
-  BLUE_SKY_TYPE_IMPL (standart_pbuild, amg_pbuild_iface, "standart_pbuild", "Standart prolangation matrix builder class", "Realization of Standart prolangation matrix builder");
+  BLUE_SKY_TYPE_IMPL (standart_pbuild, amg_pbuild_iface, "standart_pbuild", "Standart prolongation matrix builder class", "Realization of Standart prolongation matrix builder");
 }  // blue_sky namespace

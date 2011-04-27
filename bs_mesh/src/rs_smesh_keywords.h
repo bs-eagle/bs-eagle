@@ -34,9 +34,8 @@ namespace blue_sky
         typedef keyword_manager_iface      km_iface_t;
         typedef smart_ptr <km_iface_t, true>           sp_km_iface_t;
         
-        typedef idata                      idata_t;
-        typedef smart_ptr <idata_t, true>	             sp_idata_t;
-        
+        typedef smart_ptr <hdm_iface, true>    sp_hdm_t;
+
         typedef FRead                                  reader_t;
         typedef smart_ptr <reader_t, true>	           sp_reader_t;
       
@@ -51,10 +50,10 @@ namespace blue_sky
         virtual void register_keywords (sp_objbase &km, std::string provider) const;
         
         //! activate supported keywords
-        static void activate_keywords (sp_objbase &km);
+        static void activate_keywords (sp_km_iface_t keyword_manager);
         
         //! mesh dimensions handler 
-        static void DIMENS_handler (const std::string &keyword, keyword_params_t &params);
+        static void DIMENS_reactor (const std::string &keyword, keyword_params_t &params);
     }; 
 };//namespace blue_sky
 #endif // RS_SMESH_KEYS_H

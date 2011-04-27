@@ -32,7 +32,7 @@ namespace blue_sky
 
 //! macro for defining of common variables
 #define KH_READER_DEF                                       \
-  sp_reader_t reader (params.reader, bs_dynamic_cast ());   \
+  sp_reader_t reader = params.hdm->get_reader ();           \
   size_t len;                                               \
   len = 0;
 
@@ -46,69 +46,99 @@ namespace blue_sky
   void keyword_manager::int_array_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    sp_this_t km (params.km, bs_dynamic_cast ());
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_this_t km = params.hdm->get_keyword_manager ();
+    sp_pool_t pool = params.hdm->get_pool ();
     
-    spv_int this_arr;
+    spv_int this_arr = BS_KERNEL.create_object (v_int::bs_type ());
+    t_long ndim = pool->calc_data_dims (keyword);
+
+    this_arr->resize (ndim);
     
-    t_int def_value;
-    t_int *dimens;
-    //!TODO: check sp!
-    
-    
-    def_value = km->handlers[keyword].int_def_value;
-    dimens = km->handlers[keyword].dimens;
-    this_arr = idata->create_i_array (keyword, dimens, def_value);
-    
-    
-    t_long ndim = 0;
-    ndim = (t_long) this_arr->size();
     if ((len = reader->read_array (keyword, *this_arr)) != (size_t)ndim)
       {
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s") % reader->get_prefix () % keyword);
       }
-    idata->set_i_array (keyword, this_arr);
+    pool->set_i_data (keyword, this_arr);
     BOSOUT (section::read_data, level::medium) << "int pool keyword: " << keyword << bs_end;
     BOSOUT (section::read_data, level::medium) << "ndim = " << ndim << bs_end;
-    
-    // launch second handler if any
-    if (km->handlers[keyword].second_handle_function)
-      km->handlers[keyword].second_handle_function (keyword, params);
   }
 
   
   void keyword_manager::float_array_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    sp_this_t km (params.km, bs_dynamic_cast ());
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_this_t km = params.hdm->get_keyword_manager ();
+    sp_pool_t pool = params.hdm->get_pool ();
     
     //!TODO: check sp!
-    spv_float this_arr;
+    spv_float this_arr = BS_KERNEL.create_object (v_float::bs_type ());
+    t_long ndim = pool->calc_data_dims (keyword);
     
-    int* dimens;
-    t_float def_value;
-    
-    def_value = km->handlers[keyword].float_def_value;
-    dimens = km->handlers[keyword].dimens;
-    this_arr = idata->create_fp_array (keyword, dimens, def_value);
-
-    t_long ndim = 0;
-    ndim = (t_long) this_arr->size();
+    this_arr->resize (ndim);
 
     if ((len = reader->read_array (keyword.c_str(), *this_arr)) != (size_t)ndim)
       {
         bs_throw_exception ((boost::format ("Error in %s: not enough valid arguments for keyword %s") % reader->get_prefix() % keyword).str ());
       }
-    idata->set_fp_array (keyword, this_arr);
+    pool->set_fp_data (keyword, this_arr);
 
     BOSOUT (section::read_data, level::medium) << "fp pool keyword: " << keyword << bs_end;
     BOSOUT (section::read_data, level::medium) << "ndim = " << ndim << bs_end;
-    
-    // launch second handler if any
-    if (km->handlers[keyword].second_handle_function)
-      km->handlers[keyword].second_handle_function (keyword, params);
   }
+
+  void keyword_manager::prop_handler(const std::string &keyword, keyword_params_t &params)
+  {
+    KH_READER_DEF
+    sp_this_t km = params.hdm->get_keyword_manager ();
+    sp_idata_t idata = params.hdm->get_data ();
+    char buf[CHAR_BUF_LEN] = {0};
+    char s_prop[CHAR_BUF_LEN];
+    char *start, *end;
+    
+    t_int i, n, i_prop;
+    t_float f_prop;
+    std::string &format = km->handlers[keyword].prop_format;
+    prop_names_t &names = km->handlers[keyword].prop_names;
+    
+    n = format.length();
+    reader->read_line (buf, CHAR_BUF_LEN);
+    start = buf;
+    for (i = 0; i <n; ++i)
+      {
+        if (format[i] == 'i')
+        {
+          scanf_u (start, &end, &i_prop);
+          idata->props->add_property_i (i_prop, names[i], names[i]);
+        }
+        else if (format[i] == 'f')
+        {
+          scanf_d (start, &end, &f_prop);
+          idata->props->add_property_f (f_prop, names[i], names[i]);
+        }
+        else if (format[i] == 's')
+        {
+          scanf_s (start, &end, s_prop);
+          idata->props->add_property_s (s_prop, names[i], names[i]);
+        }
+        else if (format[i] == 'b')
+        {
+          scanf_s (start, &end, s_prop);
+          if (strcmp (s_prop, "YES") == 0 || strcmp (s_prop, "TRUE") == 0 || strcmp (s_prop, "1") == 0 )
+            idata->props->add_property_b (1, names[i], names[i]);
+          else if (strcmp (s_prop, "NO") == 0 || strcmp (s_prop, "FALSE") == 0 || strcmp (s_prop, "0") == 0 )
+            idata->props->add_property_b (0, names[i], names[i]);
+          else bs_throw_exception ((boost::format ("Error in %s: not enough valid arguments for keyword %s") % reader->get_prefix() % keyword).str ());
+        }
+        else
+           bs_throw_exception ((boost::format ("Error in %s: not enough valid arguments for keyword %s") % reader->get_prefix() % keyword).str ());
+
+        start = end;
+      }
+
+
+    BOSOUT (section::read_data, level::medium) << "prop keyword: " << keyword << "(" << format << ")" << bs_end;
+  }
+
 
   /*
   
@@ -119,7 +149,7 @@ namespace blue_sky
     char key1[CHAR_BUF_LEN] = {0};
     typedef smart_ptr <event_manager , true>	sp_event_manager_t;
     sp_event_manager_t em (params.em, bs_dynamic_cast ());
-    sp_this_t km (params.km, bs_dynamic_cast ());
+    sp_this_t km = params.hdm->get_keyword_manager ();
     
     
     for (;;)
@@ -146,7 +176,7 @@ namespace blue_sky
   {
     KH_READER_DEF
     char buf[CHAR_BUF_LEN] = {0};
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
     
     reader->read_line (buf, CHAR_BUF_LEN);
     idata->props->set_s("title", std::string(buf)); // TODO: , len)
@@ -156,7 +186,7 @@ namespace blue_sky
   
   void keyword_manager::OIL_handler(const std::string &keyword, keyword_params_t &params)
   {
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
 
     idata->props->set_b("oil_phase", 1);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
@@ -165,7 +195,7 @@ namespace blue_sky
   
   void keyword_manager::WATER_handler(const std::string &keyword, keyword_params_t &params)
   {
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
 
     idata->props->set_b("water_phase", 1);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
@@ -174,7 +204,7 @@ namespace blue_sky
   
   void keyword_manager::GAS_handler(const std::string &keyword, keyword_params_t &params)
   {
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
     
     idata->props->set_b("water_phase", 1);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
@@ -351,7 +381,7 @@ namespace blue_sky
   
   void keyword_manager::STONE1_handler(const std::string &keyword, keyword_params_t &params)
   {
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
     
     idata->props->set_i("rpo_model ", STONE1_MODEL);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
@@ -360,7 +390,7 @@ namespace blue_sky
   
   void keyword_manager::STONE2_handler(const std::string &keyword, keyword_params_t &params)
   {
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
     
     idata->props->set_i("rpo_model ", STONE2_MODEL);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
@@ -369,7 +399,7 @@ namespace blue_sky
   
   void keyword_manager::RELATIVE_PERM_DEFAULT_handler(const std::string &keyword, keyword_params_t &params)
   {
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
     
     idata->props->set_i("rpo_model ", RPO_DEFAULT_MODEL);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
@@ -380,7 +410,7 @@ namespace blue_sky
     KH_READER_DEF
     char buf[CHAR_BUF_LEN] = {0};
     char key1[CHAR_BUF_LEN] = {0};
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
 
     for (;;)
       {
@@ -418,7 +448,7 @@ namespace blue_sky
     char buf[CHAR_BUF_LEN] = {0};
     char key1[CHAR_BUF_LEN] = {0};
     char key2[CHAR_BUF_LEN] = {0};
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
     
     reader->read_line (buf, CHAR_BUF_LEN);
     // Read and convert UNITS to data
@@ -477,7 +507,7 @@ namespace blue_sky
     KH_READER_DEF
     char buf[CHAR_BUF_LEN] = {0};
     char key1[CHAR_BUF_LEN] = {0};
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
     t_int rock_region;
 
     reader->read_line (buf, CHAR_BUF_LEN);
@@ -501,7 +531,7 @@ namespace blue_sky
   void keyword_manager::REGNUM_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
 
     boost::array <int, 4> regions;
     if ((len = reader->read_array (keyword, regions)) != regions.size ())
@@ -530,12 +560,10 @@ namespace blue_sky
   void keyword_manager::REGDIMS_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    std::vector<t_int> itmp;
-    itmp.resize(4);
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
     
-
-    if ((len = reader->read_array (keyword, itmp)) != 4)
+    boost::array <int, 4> itmp;
+    if ((len = reader->read_array (keyword, itmp)) != itmp.size ())
       {
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
           % reader->get_prefix() % keyword);
@@ -555,12 +583,10 @@ namespace blue_sky
   void keyword_manager::EQLDIMS_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    shared_vector <int> itmp;
-    itmp.resize(1);
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
     
-
-    if ((len = reader->read_array (keyword, itmp)) != 1)
+    boost::array <int, 1> itmp;
+    if ((len = reader->read_array (keyword, itmp)) != itmp.size ())
       {
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
           % reader->get_prefix() % keyword);
@@ -583,9 +609,8 @@ namespace blue_sky
     KH_READER_DEF
     char buf[CHAR_BUF_LEN] = {0};
     char *strt = 0, *end_ptr = 0;
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
-    std::vector<t_int> itmp;
-    itmp.resize(4);
+    sp_idata_t idata = params.hdm->get_data ();
+    boost::array <int, 4> itmp;
 
     reader->read_line (buf, CHAR_BUF_LEN);
     // read number of saturation tables
@@ -639,46 +664,11 @@ namespace blue_sky
   }
 
   
-  void keyword_manager::MINPV_handler(const std::string &keyword, keyword_params_t &params)
-  {
-    KH_READER_DEF
-    shared_vector <double> tmp;
-    tmp.resize(1);
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
-    
-    
-    if ((len = reader->read_array (keyword, tmp, 0)) != 1)
-      {
-        bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
-          % reader->get_prefix() % keyword);
-      }
-    idata->props->set_f ("minimal_pore_volume", tmp[0]);
-    BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
-  }
-  
-  
-  void keyword_manager::MINSV_handler(const std::string &keyword, keyword_params_t &params)
-  {
-    KH_READER_DEF
-    shared_vector <double> tmp;
-    tmp.resize(1);
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
-    
-    if ((len = reader->read_array (keyword, tmp, 0)) != 1)
-      {
-        bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
-          % reader->get_prefix() % keyword);
-      }
-    idata->props->set_f("minimal_splice_volume", tmp[0]);
-    BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
-  }
-
-  
   void keyword_manager::DENSITY_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
-    spv_float density;
+    sp_idata_t idata = params.hdm->get_data ();
+    spv_float density = BS_KERNEL.create_object (v_float::bs_type ());
     t_long n_pvt_region = idata->props->get_i("pvt_region");
     
     density->resize (n_pvt_region * 3);
@@ -709,7 +699,7 @@ namespace blue_sky
   void keyword_manager::ROCKTAB_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
     t_long n_rock_region = idata->props->get_i ("rock_region");
     
     if (n_rock_region < 1)
@@ -753,7 +743,7 @@ namespace blue_sky
     int lj = 0;
     t_float dbuf[DOUB_BUF_LEN] = {0};
     t_float *main_data;
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
     t_long n_pvt_region = idata->props->get_i("pvt_region");
     
     if (!idata->pvto.size())
@@ -813,7 +803,7 @@ namespace blue_sky
               }
           }
 
-        main_data = &(*idata->pvto[i].main_data_)[0];
+        main_data = idata->pvto[i].main_data_->data ();
         // Rows infill
         for (j = 0; j < lj*4; j++)
           {
@@ -829,7 +819,7 @@ namespace blue_sky
   void keyword_manager::PVDO_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
     t_long n_pvt_region = idata->props->get_i("pvt_region");
     
     if (!idata->pvtdo.size())
@@ -841,7 +831,7 @@ namespace blue_sky
     // Read table for each of region
     for (t_int i = 0; i < n_pvt_region; i++)
       {
-        if ((len = reader->read_table (keyword, *(idata->pvtdo[i].main_data_), 3)) < 1)
+        if ((len = reader->read_table (keyword, (*idata->pvtdo[i].main_data_), 3)) < 1)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
               % reader->get_prefix () % keyword);
@@ -856,7 +846,7 @@ namespace blue_sky
   void keyword_manager::PVTW_handler(const std::string &keyword, keyword_params_t &params)/********************************/
   {
     KH_READER_DEF
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
     t_long n_pvt_region = idata->props->get_i("pvt_region");
     
     if (!idata->pvtw.size())
@@ -869,7 +859,7 @@ namespace blue_sky
     for (t_int i = 0; i < n_pvt_region; i++)
       {
         //idata->pvtw[i].main_data_.resize(4);
-        if ((len = reader->read_table (keyword, *(idata->pvtw[i].main_data_), 4)) < 1)
+        if ((len = reader->read_table (keyword, (*idata->pvtw[i].main_data_), 4)) < 1)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
               % reader->get_prefix () % keyword);
@@ -889,14 +879,14 @@ namespace blue_sky
   void keyword_manager::PVDG_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
     t_long n_pvt_region = idata->props->get_i("pvt_region");
 
     // Read table for each of region
     for (t_int i = 0; i < n_pvt_region; i++)
       {
         //idata->pvtg[i].main_data_.resize(DOUB_BUF_LEN);
-        if ((len = reader->read_table (keyword, *(idata->pvtg[i].main_data_), 3)) < 1)
+        if ((len = reader->read_table (keyword, (*idata->pvtg[i].main_data_), 3)) < 1)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
               % reader->get_prefix () % keyword);
@@ -913,14 +903,12 @@ namespace blue_sky
   void keyword_manager::ROCK_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
     boost::array <t_float, 2> dbuf;
-    t_float *p_ref,*rock;
+    t_float *p_ref = idata->p_ref->data ();
+    t_float*rock = idata->rock->data ();
     t_long n_pvt_region = idata->props->get_i("pvt_region");
     
-    p_ref = &(*idata->p_ref)[0];
-    rock = &(*idata->rock)[0];
-
     // Compressibility of rock
     for (t_int i = 0; i < n_pvt_region; ++i)
       {
@@ -943,7 +931,7 @@ namespace blue_sky
     typename strategy_t::item_array_t swof;
     typedef smart_ptr <scal_3p , true>	sp_scal_3p_t;
     sp_scal_3p_t scal_3p (params.scal_3p);
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
 
     // Read table for each of region
     for (size_t i = 0; i < idata->sat_region; ++i)
@@ -967,7 +955,7 @@ namespace blue_sky
     typename strategy_t::item_array_t sgof;
     typedef smart_ptr <scal_3p , true>	sp_scal_3p_t;
     sp_scal_3p_t scal_3p (params.scal_3p);
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
 
     // Read table for each of region
     for (size_t i = 0; i < idata->sat_region; ++i)
@@ -993,7 +981,7 @@ namespace blue_sky
     typename strategy_t::item_array_t swfn;
     typedef smart_ptr <scal_3p , true>	sp_scal_3p_t;
     sp_scal_3p_t scal_3p (params.scal_3p);
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
 
     // Read table for each of region
     for (size_t i = 0; i < idata->sat_region; ++i)
@@ -1018,7 +1006,7 @@ namespace blue_sky
     typename strategy_t::item_array_t sgfn;
     typedef smart_ptr <scal_3p , true>	sp_scal_3p_t;
     sp_scal_3p_t scal_3p (params.scal_3p);
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
 
     // Read table for each of region
     for (size_t i = 0; i < idata->sat_region; ++i)
@@ -1043,7 +1031,7 @@ namespace blue_sky
     typename strategy_t::item_array_t sof3;
     typedef smart_ptr <scal_3p , true>	sp_scal_3p_t;
     sp_scal_3p_t scal_3p (params.scal_3p);
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
 
     // Read table for each of region
     for (size_t i = 0; i < idata->sat_region; ++i)
@@ -1075,8 +1063,8 @@ namespace blue_sky
     char buf[CHAR_BUF_LEN] = {0};
     boost::array <double, DOUB_BUF_LEN> dbuf;
     char *end_ptr = 0;
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
-    sp_this_t km (params.km, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
+    sp_this_t km = params.hdm->get_keyword_manager ();
 
     //! EQUIL keyword enumerated params
 
@@ -1186,7 +1174,7 @@ namespace blue_sky
   void keyword_manager::PRVD_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
     
     if (idata->eql_region == 0)
       idata->eql_region = 1;
@@ -1224,7 +1212,7 @@ namespace blue_sky
   void keyword_manager::RSVD_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
     
     if (idata->eql_region == 0)
       idata->eql_region = 1;
@@ -1265,7 +1253,7 @@ namespace blue_sky
   void keyword_manager::PBVD_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    sp_idata_t idata (params.data, bs_dynamic_cast ());
+    sp_idata_t idata = params.hdm->get_data ();
     
     if (idata->eql_region == 0)
       idata->eql_region = 1;
@@ -1307,7 +1295,7 @@ namespace blue_sky
   {
     KH_READER_DEF
     char buf[CHAR_BUF_LEN] = {0};
-    sp_this_t km (params.km, bs_dynamic_cast ());
+    sp_this_t km = params.hdm->get_keyword_manager ();
     
     if ((reader->read_line (buf, CHAR_BUF_LEN)) <= 0)
       {
@@ -1331,7 +1319,7 @@ namespace blue_sky
     typedef event_manager  event_manager_t;
     typedef smart_ptr <event_manager_t, true>	sp_event_manager_t;
     sp_event_manager_t em (params.em, bs_dynamic_cast ());
-    sp_this_t km (params.km, bs_dynamic_cast ());
+    sp_this_t km = params.hdm->get_keyword_manager ();
     
     if ((reader->read_line (buf, CHAR_BUF_LEN)) <= 0)
       {
@@ -1364,7 +1352,7 @@ namespace blue_sky
     typedef event_manager  event_manager_t;
     typedef smart_ptr <event_manager_t, true>	sp_event_manager_t;
     sp_event_manager_t em (params.em, bs_dynamic_cast ());
-    sp_this_t km (params.km, bs_dynamic_cast ());
+    sp_this_t km = params.hdm->get_keyword_manager ();
 
     if ((len = reader->read_array (keyword, dtmp)) < 1)
       {

@@ -24,6 +24,7 @@ namespace blue_sky
     public: 
 
       typedef std::vector <t_double>                  vector_t;
+      typedef std::vector <vector_t>                  table_t;
 
       // ------------------------------------
       // METHODS
@@ -117,13 +118,33 @@ namespace blue_sky
           set_col_name (size, name);
           return size;
         }
+
+      virtual void 
+      add_col_vector (t_long col, const std::string &name, spv_double new_vector)
+        {
+          t_double *new_vector_ = new_vector->data ();
+          t_long size = values.size ();
+          BS_ASSERT (col >= 0 && col < size);
+          
+          t_long new_vec_size = new_vector->size ();
+          values[col].resize (new_vec_size);
+          for (t_long i = 0; i < new_vec_size; ++i)
+            {
+              values[col][i] = new_vector_[i];
+            } 
+          set_col_name (col, name);
+        }
+
         
       /** 
        * @brief get numver of rows in table
        */
-      virtual t_long get_n_rows () const
+      virtual t_long get_n_rows (t_long col = 0) const
         {
-          return (t_long) values[0].size ();
+          if (values.size ())
+            return (t_long) values[col].size ();
+          else
+            return 0;
         }
       
       /** 
@@ -141,6 +162,39 @@ namespace blue_sky
         {
           values.clear ();
           col_names.clear ();
+        }
+
+      /** 
+       * @brief add new row to the table at index #row_index
+       * 
+       * @param row_index -- <INPUT> given index of new row
+       *                        if 0 insert row at first
+       *                        if > n_rows add row to the end
+       */
+      virtual void add_row (const t_long row_index);
+
+      /** 
+       * @brief return value at the given #row and #col
+       * 
+       * @param row     -- <INPUT> given row
+       * @param col     -- <INPUT> given column
+       * 
+       */
+      virtual t_double get_value (const t_long row, const t_long col) const
+        {
+          return (values[col])[row];
+        }
+
+      /** 
+       * @brief set new value at given #row and #col
+       * 
+       * @param row     -- <INPUT> given row
+       * @param col     -- <INPUT> given column
+       * @param val     -- <INPUT> given value
+       */
+      virtual void set_value (const t_long row, const t_long col, const t_double val)
+        {
+          (values[col])[row] = val;
         }
 
 #ifdef BSPY_EXPORTING_PLUGIN
@@ -174,7 +228,7 @@ namespace blue_sky
       // ------------------------------
     protected:
       std::vector<std::string> col_names;
-      std::vector<std::vector<t_double> > values;
+      table_t values;
 
       BLUE_SKY_TYPE_DECL (table);
     };

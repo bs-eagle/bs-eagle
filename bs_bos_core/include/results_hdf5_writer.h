@@ -12,8 +12,8 @@
 
 #ifdef _HDF5
 #include "bs_hdf5_storage.h"
-#include "well_results_storage.h"
-#include "fip_results_storage.h"
+//#include "well_results_storage.h"
+//#include "fip_results_storage.h"
 #include "rs_smesh_iface.h"
 
 namespace blue_sky
@@ -21,28 +21,27 @@ namespace blue_sky
   namespace hdf5
     {
 
-    /**
-     * \brief Writes well_results_storage data to hdf5 file
-     * \param hdf5 File to write to
-     * \param wres well_results_storage
-     * \param write_conn_data if true then connections data will be written to file
-     */
-    void write_well_results (const bs_hdf5_storage &hdf5, smart_ptr <well_results_storage> &well_res, bool write_conn_data);
+    ///**
+    // * \brief Writes well_results_storage data to hdf5 file
+    // * \param hdf5 File to write to
+    // * \param wres well_results_storage
+    // * \param write_conn_data if true then connections data will be written to file
+    // */
+    //void write_well_results (const bs_hdf5_storage &hdf5, smart_ptr <well_results_storage> &well_res, bool write_conn_data);
 
-    /**
-     * \brief Writes fip_results_storage data to hdf5 file
-     * \param hdf5 File to write to
-     * \param fres fip_results_storage
-     */
-    void write_fip_results (const bs_hdf5_storage &hdf5, smart_ptr <fip_results_storage> &fip_res);
+    ///**
+    // * \brief Writes fip_results_storage data to hdf5 file
+    // * \param hdf5 File to write to
+    // * \param fres fip_results_storage
+    // */
+    //void write_fip_results (const bs_hdf5_storage &hdf5, smart_ptr <fip_results_storage> &fip_res);
 
     /**
      * \brief Writes mesh data to hdf5 file
      * \param hdf5 File to write to
      * \param mesh
      * */
-    template<class strategy_t>
-    void write_mesh_to_hdf5 (const smart_ptr <bs_hdf5_storage, true> &hdf5, const smart_ptr <rs_smesh_iface<strategy_t>, true> &mesh);
+    void write_mesh_to_hdf5 (const smart_ptr <bs_hdf5_storage, true> &hdf5, const smart_ptr <rs_smesh_iface, true> &mesh);
 
     namespace detail
       {

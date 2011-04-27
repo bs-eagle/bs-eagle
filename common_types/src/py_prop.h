@@ -76,6 +76,33 @@ namespace blue_sky
     .def ("__str__",                            &T::py_str)
   PY_EXPORTER_END;                               
 
+  PY_EXPORTER (py_prop_exporter_2, py_prop_exporter)
+    .def ("get_names_i",                     &T::get_names_i, 
+        args (""), "Return list of names")
+    .def ("get_names_f",                     &T::get_names_f, 
+        args (""), "Return list of names")
+    .def ("get_names_b",                     &T::get_names_b, 
+        args (""), "Return list of names")
+    .def ("get_names_s",                     &T::get_names_s, 
+        args (""), "Return list of names")
+    .def ("get_def_val_i",                   &T::get_def_val_i, 
+        args ("Name"), "Return default value")
+    .def ("get_def_val_f",                   &T::get_def_val_f, 
+        args ("Name"), "Return default value")
+    .def ("get_def_val_b",                   &T::get_def_val_b, 
+        args ("Name"), "Return default value")
+    .def ("get_def_val_s",                   &T::get_def_val_s, 
+        args ("Name"), "Return default value")
+    .def ("get_description_i",                   &T::get_description_i, 
+        args ("Name"), "Return description")
+    .def ("get_description_f",                   &T::get_description_f, 
+        args ("Name"), "Return description")
+    .def ("get_description_b",                   &T::get_description_b, 
+        args ("Name"), "Return description")
+    .def ("get_description_s",                   &T::get_description_s, 
+        args ("Name"), "Return description")
+  PY_EXPORTER_END;                               
+
   PY_EXPORTER (py_dummy_exporter, default_exporter)
                                                  
   PY_EXPORTER_END;                               

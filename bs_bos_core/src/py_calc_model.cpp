@@ -17,10 +17,6 @@
 #include "py_data_class.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
-// WTF??
-#include "well_results_storage.h"
-#include "fip_results_storage.h"
-
 #include "export_python_wrapper.h"
 
 using namespace boost::python;
@@ -51,25 +47,25 @@ namespace blue_sky
     }
 
     PY_EXPORTER (calc_model_exporter, default_exporter)
-      .add_property ("n_phases",    get_n_phases <T>)
-      .add_property ("is_water",    get_is_water <T>)
-      .add_property ("is_gas",      get_is_gas <T>)
-      .add_property ("is_oil",      get_is_oil <T>)
-      .add_property ("params",      get_params <T>)
-      .add_property ("data",        &T::data)
-      .add_property ("saturation",  &T::saturation_3p)
-      .add_property ("pressure",    &T::pressure)
+      .add_property ("n_phases",    GET_BY_VALUE (&T::n_phases))
+      .add_property ("is_water",    &T::is_water)
+      .add_property ("is_gas",      &T::is_gas)
+      .add_property ("is_oil",      &T::is_oil)
+      .add_property ("params",      GET_BY_VALUE (&T::ts_params))
+      .add_property ("data",        GET_BY_VALUE (&T::data))
+      .add_property ("saturation",  GET_BY_VALUE (&T::saturation_3p))
+      .add_property ("pressure",    GET_BY_VALUE (&T::pressure))
       .add_property ("pvt_num",     &T::n_pvt_regions)
       .add_property ("sat_num",     &T::n_sat_regions)
       .add_property ("fip_num",     &T::n_fip_regions)
-      .add_property ("scal",        get_scal_3p <T>)
-      .add_property ("pvt_regions", &T::pvt_regions)
-      .add_property ("sat_regions", &T::sat_regions)
-      .add_property ("fip_regions", &T::fip_regions)
-      .add_property ("rock_regions",&T::rock_regions)
-      .add_property ("pvt_water",   &T::pvt_water_array)
-      .add_property ("pvt_gas",     &T::pvt_gas_array)
-      .add_property ("pvt_oil",     &T::pvt_oil_array)
+      .add_property ("scal",        GET_BY_VALUE (&T::scal_prop))
+      .add_property ("pvt_regions", GET_BY_VALUE (&T::pvt_regions))
+      .add_property ("sat_regions", GET_BY_VALUE (&T::sat_regions))
+      .add_property ("fip_regions", GET_BY_VALUE (&T::fip_regions))
+      .add_property ("rock_regions",GET_BY_VALUE (&T::rock_regions))
+      .add_property ("pvt_water",   GET_BY_VALUE (&T::pvt_water_array))
+      .add_property ("pvt_gas",     GET_BY_VALUE (&T::pvt_gas_array))
+      .add_property ("pvt_oil",     GET_BY_VALUE (&T::pvt_oil_array))
     PY_EXPORTER_END;
 
     PY_EXPORTER (calc_model_data_exporter, empty_exporter)
@@ -171,48 +167,31 @@ namespace blue_sky
         ;
     }
 
-    template <template <typename> class T>
+    template <typename T>
     void
     export_pvt_array (const char *name)
     {
-      typedef std::vector <smart_ptr <T <base_strategy_di> > > T_di;
-      typedef std::vector <smart_ptr <T <base_strategy_fi> > > T_fi;
-      typedef std::vector <smart_ptr <T <base_strategy_mixi> > > T_mixi;
+      typedef std::vector <smart_ptr <T> > T_v;
 
-      class_ <T_di> (std::string (std::string (name) + "_di").c_str ())
-        .def ("__getitem__",  get_pvt_item <T_di>)
-        .def ("__len__",      &T_di::size)
-        .def ("__iter__",     get_pvt_iterator <T_di>)
-        ;
-      class_ <T_fi> (std::string (std::string (name) + "_fi").c_str ())
-        .def ("__getitem__",  get_pvt_item <T_fi>)
-        .def ("__len__",      &T_fi::size)
-        .def ("__iter__",     get_pvt_iterator <T_fi>)
-        ;
-      class_ <T_mixi> (std::string (std::string (name) + "_mixi").c_str ())
-        .def ("__getitem__",  get_pvt_item <T_mixi>)
-        .def ("__len__",      &T_mixi::size)
-        .def ("__iter__",     get_pvt_iterator <T_mixi>)
+      class_ <T_v> (name)
+        .def ("__getitem__",  get_pvt_item <T_v>)
+        .def ("__len__",      &T_v::size)
+        .def ("__iter__",     get_pvt_iterator <T_v>)
         ;
 
-      export_pvt_iterator <T_di> ("pvt_array_iter_di");
-      export_pvt_iterator <T_fi> ("pvt_array_iter_fi");
-      export_pvt_iterator <T_mixi> ("pvt_array_iter_mixi");
+      export_pvt_iterator <T_v> ("pvt_array_iter");
     }
 
     void py_export_calc_model()
     {
-      strategy_exporter::export_base_ext <calc_model_data, calc_model_data_exporter, class_type::concrete_class> ("calc_model_data");
-
-      export_calc_model_data_vector <shared_vector <calc_model_data <base_strategy_di> > >   ("calc_model_data_vector_di");
-      export_calc_model_data_vector <shared_vector <calc_model_data <base_strategy_fi> > >   ("calc_model_data_vector_fi");
-      export_calc_model_data_vector <shared_vector <calc_model_data <base_strategy_mixi> > > ("calc_model_data_vector_mixi");
+      base_exporter_nobs <calc_model_data, calc_model_data_exporter, class_type::concrete_class>::export_class ("calc_model_data");
+      export_calc_model_data_vector <shared_vector <calc_model_data> >   ("calc_model_data_vector");
 
       export_pvt_array <pvt_dead_oil> ("pvt_dead_oil_array");
       export_pvt_array <pvt_water> ("pvt_water_array");
       export_pvt_array <pvt_gas> ("pvt_gas");
 
-      strategy_exporter::export_base <calc_model, calc_model_exporter> ("calc_model");
+      base_exporter <calc_model, calc_model_exporter>::export_class ("calc_model");
     }
 
   } //ns python

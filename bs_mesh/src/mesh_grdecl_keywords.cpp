@@ -36,7 +36,7 @@ namespace blue_sky
       if (provider == "")
         {
           provider = "MESH_GRDECL";
-          keyword_manager->register_keyword ("MESH_GRDECL", keyword_handler (&this_t::mesh_grdecl_handler));
+          keyword_manager->register_keyword ("MESH_GRDECL", keyword_handler (0, &this_t::mesh_grdecl_reactor));
         }
       keyword_manager->register_supported_keyword ("ZCORN", provider);
       keyword_manager->register_supported_keyword ("COORD", provider);
@@ -44,24 +44,23 @@ namespace blue_sky
     }
   
   
-  void mesh_grdecl_keywords::activate_keywords(sp_objbase &km)
+  void mesh_grdecl_keywords::activate_keywords(sp_km_iface_t keyword_manager)
     {  
-      sp_km_iface_t keyword_manager (km, bs_dynamic_cast ());
-      t_int zcorn_dimens[6] = {2,0,2,0,2,0};
-      t_int coord_dimens[6] = {1,1,1,1,0,6};
+      //sp_km_iface_t keyword_manager (km, bs_dynamic_cast ());
+      npy_intp zcorn_dimens[6] = {2,0,2,0,2,0};
+      npy_intp coord_dimens[6] = {1,1,1,1,0,6};
       t_float def_value = 0.0;
       
-      keyword_manager->register_keyword ("ZCORN", keyword_handler (0, def_value, &zcorn_dimens[0]));  
-      keyword_manager->register_keyword ("COORD", keyword_handler (0, def_value, &coord_dimens[0]));  
+      keyword_manager->register_fp_pool_keyword ("ZCORN", &zcorn_dimens[0], def_value, 0);  
+      keyword_manager->register_fp_pool_keyword ("COORD", &coord_dimens[0], def_value, 0);
     }
     
-  void mesh_grdecl_keywords::mesh_grdecl_handler(const std::string & /*keyword*/, keyword_params_t &params)
+  void mesh_grdecl_keywords::mesh_grdecl_reactor(const std::string & /*keyword*/, keyword_params_t &params)
     {
-      sp_idata_t idata (params.data, bs_dynamic_cast ());
       sp_bs_mesh_grdecl_t mesh_grdecl (BS_KERNEL.create_object (bs_mesh_grdecl ::bs_type ()), bs_dynamic_cast ());
-      params.mesh = sp_objbase (mesh_grdecl);
-      activate_keywords (params.km);
-      base_t::activate_keywords (params.km);
+      params.hdm->set_mesh (mesh_grdecl);
+      activate_keywords (params.hdm->get_keyword_manager());
+      base_t::activate_keywords (params.hdm->get_keyword_manager());
     }
   
   BLUE_SKY_TYPE_STD_CREATE (mesh_grdecl_keywords)

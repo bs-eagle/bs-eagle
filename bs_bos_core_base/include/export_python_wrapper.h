@@ -30,6 +30,9 @@
     }                                               \
   };
 
+#define GET_BY_VALUE(X) \
+  make_getter (X, return_value_policy <return_by_value> ())
+
 namespace blue_sky {
 namespace python {
 
@@ -136,6 +139,24 @@ namespace python {
     };
   }
 
+  template <typename class_t, template <typename> class post_exporter = default_exporter, template <typename, typename> class bp_class_type = class_type::concrete_class>
+  struct base_exporter_nobs
+  {
+    typedef bp_class_type <class_t, boost::python::bases <> >   bp_class_type_t;
+    typedef typename bp_class_type_t::bp_class_t                bp_class_t;
+
+    static void 
+    export_class (const std::string &name)
+    {
+      using namespace boost::python;
+
+      bp_class_t class__ = bp_class_type_t::export_class (name.c_str ())
+        ;
+
+      post_exporter <class_t>::export_class (class__);
+      bp_class_type_t::template register_base_ptr <class_t> ();
+    }
+  };
   template <typename class_t, template <typename> class post_exporter = default_exporter, template <typename, typename> class bp_class_type = class_type::blue_sky_class>
   struct base_exporter
   {

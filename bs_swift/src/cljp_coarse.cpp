@@ -1,8 +1,8 @@
-/** 
+/**
  * @file cljp_coarse.cpp
  * @brief implementation of Cleary-Luby-Jones-Plassmann grid coasering method
- * @author 
- * @version 
+ * @author
+ * @version
  * @date 2010-03-10
  */
 #include "cljp_coarse.h"
@@ -12,7 +12,7 @@
 
 namespace blue_sky
 {
-  cljp_coarse::cljp_coarse (bs_type_ctor_param) 
+  cljp_coarse::cljp_coarse (bs_type_ctor_param)
                : amg_coarse_iface (),
                  sp_graph (BS_KERNEL.create_object (v_long::bs_type ()))
     {
@@ -21,10 +21,10 @@ namespace blue_sky
                sp_graph (BS_KERNEL.create_object (v_long::bs_type ()))
      {
      }
-  
-  t_long 
-  cljp_coarse::build (sp_bcsr_t matrix, 
-                      spv_double sp_meassure_array, 
+
+  t_long
+  cljp_coarse::build (sp_bcsr_t matrix,
+                      spv_double sp_meassure_array,
                       spv_long sp_cf_markers,
                       spv_long sp_s_markers)
     {
@@ -55,7 +55,6 @@ namespace blue_sky
       t_double *meassure_array = &(*sp_meassure_array)[0];
       t_long  *cf_markers = &(*sp_cf_markers)[0];
       t_long  *s_markers = &(*sp_s_markers)[0];
-      
 
       // fill meassure array
       for (i = 0; i < n_non_zeros; ++i)
@@ -86,8 +85,8 @@ namespace blue_sky
       // main loop
       for (iter = 0; last_in_graph > 0; ++iter)
         {
-          coarse_tools::build_independent_set (matrix, 
-                                               sp_graph, 
+          coarse_tools::build_independent_set (matrix,
+                                               sp_graph,
                                                last_in_graph,
                                                sp_meassure_array,
                                                ff,
@@ -186,7 +185,6 @@ namespace blue_sky
 #pragma omp critical (cljp)
 #endif //AMG_COARSE_CLJP_PARALLEL
                         cf_markers[cl] = 1;
-
                     }
                 }
             }
@@ -204,6 +202,13 @@ namespace blue_sky
             }
           --ff;
         }
+
+      // return previous values in s_markers
+      for (i = 0; i < n_non_zeros; ++i)
+        {
+          s_markers[i] *= -1;
+        }
+
       return c_counter;
     }
 /////////////////////////////////BS Register

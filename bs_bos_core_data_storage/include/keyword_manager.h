@@ -49,12 +49,14 @@ namespace blue_sky
       typedef smart_ptr <this_t, true>							  sp_this_t;              //<! smart pointer to self
       typedef smart_ptr <FRead, true>							    sp_reader_t;            //<! smart pointer to reader
       typedef smart_ptr <idata_t, true>						    sp_idata_t;             //<! smart pointr to initial data storage
+      typedef smart_ptr <h5_pool_iface, true>					sp_pool_t;             //<! smart pointr to initial data storage
       /*
       typedef smart_ptr <mesh_iface_t, true >         sp_mesh_iface_t;
       typedef smart_ptr <smesh_iface_t, true >        sp_smesh_iface_t;
       */
       typedef smart_ptr <keyword_info_base_t, true>   sp_keyword_info_base_t;
       typedef smart_ptr <objbase, true>               sp_objbase;
+      
       
 
       typedef base_t::handler_t              handler_t;
@@ -96,9 +98,10 @@ namespace blue_sky
        * \brief  Registers built-in keyword and keywords from plugins
        * */
       void 
-      init()
+      init(sp_hdm_t new_hdm)
       {
-        //this->register_keywords();
+        hdm = new_hdm;
+        this->register_keywords();
         this->register_plugin_keywords();
       }
 
@@ -123,14 +126,20 @@ namespace blue_sky
        * \param  handler Instance of object which implements 
        *                 keyword handler interface
        * */
+
+      /*
       void 
       register_keyword (const std::string &keyword, const shared_handler_t &handler, bool replace_existing);
+      */
       
       //! registration of active integer pool keyword in factory
-      void register_i_pool_keyword(const std::string &keyword, int *dimens, t_int def_value, handler_t external_handler = 0);
+      void register_i_pool_keyword(const std::string &keyword, npy_intp *dimens, t_int def_value, handler_t external_handler = 0);
       
       //! registration of active floating point pool keyword in factory
-      void register_fp_pool_keyword(const std::string &keyword, int *dimens, t_float def_value, handler_t external_handler = 0);
+      void register_fp_pool_keyword(const std::string &keyword, npy_intp *dimens, t_float def_value, handler_t external_handler = 0);
+
+      //! registration of property keyword
+      void register_prop_keyword (const std::string &keyword, const std::string &format, prop_names_t &prop_names , handler_t external_handler = 0);
       
       //! python registration of active floating point pool keyword in factory
       void py_register_fp_pool_keyword (const std::string keyword, boost::python::list dimens, t_float def_value);
@@ -164,7 +173,7 @@ namespace blue_sky
        * \return Starting date
        * */
       boost::posix_time::ptime 
-      get_starting_date () {return starting_date;}
+      get_starting_date () const {return starting_date;}
 
       /**
        * \brief  Returns true if keyword supported by plugins
@@ -189,6 +198,9 @@ namespace blue_sky
       //! General functions for pooled keyword handle
       static void int_array_handler                (const std::string &keyword, keyword_params_t &params);
       static void float_array_handler              (const std::string &keyword, keyword_params_t &params);
+
+      //! General property keywrod handler
+      static void prop_handler                      (const std::string &keyword, keyword_params_t &params);
       //! Handling of event keywords
       static void event_handler                    (const std::string &keyword, keyword_params_t &params);
       //! Named keywords
@@ -248,6 +260,8 @@ namespace blue_sky
       {
         BOSOUT << "WELLDIMS: NOT_IMPL_YET" << bs_end;
       }
+      
+      sp_hdm_t hdm;
 
     };
 

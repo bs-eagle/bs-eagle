@@ -1,7 +1,7 @@
 #include "bs_bos_core_data_storage_stdafx.h"
 
-#include "py_data_manager.h"
-#include "data_manager.h"
+#include "py_hdm.h"
+#include "hdm.h"
 #include "py_data_class.h"
 
 #include "export_python_wrapper.h"
@@ -12,18 +12,20 @@ using namespace boost::python;
 namespace blue_sky {
 namespace python {
 
-  PY_EXPORTER (data_manager_exporter, default_exporter)
+  PY_EXPORTER (hdm_exporter, default_exporter)
     //.add_property ("data", get_data <T, strategy_t>)
     .def("init", &T::init)
     .def("read_keyword_file", &T::read_keyword_file)
-    .def("get_data", &T::get_data)
+    .def("get_pool", &T::get_pool)
     .def("get_reader", &T::get_reader)
+    .def("get_mesh", &T::get_mesh)
     .def("get_keyword_manager", &T::get_keyword_manager)
   PY_EXPORTER_END;
 
-  void py_export_data_manager ()
+  void py_export_hdm ()
   {
-    base_exporter<data_manager, data_manager_exporter>::export_class ("data_manager");
+    base_exporter<hdm_iface, empty_exporter>::export_class ("hdm_iface");
+    class_exporter <hdm, hdm_iface, hdm_exporter>::export_class ("hdm");
   }
 
 } // namespace python

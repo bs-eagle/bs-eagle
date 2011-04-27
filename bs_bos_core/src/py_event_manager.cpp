@@ -206,19 +206,11 @@ namespace python {
     boost_ptime_from_python_datetime ();
     to_python_converter <boost::posix_time::ptime, boost_ptime_to_python_datetime> ();
 
-    typedef std::list <smart_ptr <event_base <base_strategy_di> > > event_list_di_t;
-    typedef std::list <smart_ptr <event_base <base_strategy_fi> > > event_list_fi_t;
-    typedef std::list <smart_ptr <event_base <base_strategy_mixi> > > event_list_mixi_t;
+    typedef std::list <smart_ptr <event_base> > event_list_t;
 
-    export_event_list <event_list_di_t> ("event_list_di");
-    export_event_list <event_list_fi_t> ("event_list_fi");
-    export_event_list <event_list_mixi_t> ("event_list_mixi");
-
-    export_event_map <std::map <boost::posix_time::ptime, event_list_di_t> > ("event_map_di");
-    export_event_map <std::map <boost::posix_time::ptime, event_list_fi_t> > ("event_map_fi");
-    export_event_map <std::map <boost::posix_time::ptime, event_list_mixi_t> > ("event_map_mixi");
-
-    strategy_exporter::export_base <event_manager, event_manager_exporter> ("event_manager");
+    export_event_list <event_list_t> ("event_list");
+    export_event_map <std::map <boost::posix_time::ptime, event_list_t> > ("event_map");
+    base_exporter <event_manager, event_manager_exporter>::export_class ("event_manager");
   }
 
 } // namespace python

@@ -87,11 +87,13 @@ class table_iface : public objbase
        * @return pointer
        */
       virtual t_long add_col_vector (const std::string &name) = 0;
+
+      virtual void add_col_vector (t_long col, std::string const &name, spv_double array) = 0;
       
       /** 
        * @brief get numver of rows in table
        */
-      virtual t_long get_n_rows () const = 0;
+      virtual t_long get_n_rows (t_long col = 0) const = 0;
       
       /** 
        * @brief get number of columns in table
@@ -102,6 +104,33 @@ class table_iface : public objbase
        * @brief clear table data 
        */
       virtual void clear () = 0;
+
+      /** 
+       * @brief add new row to the table at index #row_index
+       * 
+       * @param row_index -- <INPUT> given index of new row
+       *                        if 0 insert row at first
+       *                        if > n_rows add row to the end
+       */
+      virtual void add_row (const t_long row_index) = 0;
+
+      /** 
+       * @brief return value at the given #row and #col
+       * 
+       * @param row     -- <INPUT> given row
+       * @param col     -- <INPUT> given column
+       * 
+       */
+      virtual t_double get_value (const t_long row, const t_long col) const = 0;
+
+      /** 
+       * @brief set new value at given #row and #col
+       * 
+       * @param row     -- <INPUT> given row
+       * @param col     -- <INPUT> given column
+       * @param val     -- <INPUT> given value
+       */
+      virtual void set_value (const t_long row, const t_long col, const t_double val) = 0;
 
 #ifdef BSPY_EXPORTING_PLUGIN
       /** 

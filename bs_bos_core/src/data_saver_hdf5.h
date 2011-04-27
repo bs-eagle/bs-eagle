@@ -4,24 +4,22 @@
 #define BS_EAGLE_DATA_SAVER_HDF5_H_
 
 #include "bs_hdf5_storage_v2.h"
+#include "well_results_storage.h"
 
 namespace blue_sky {
 
-  template <typename strategy_t>
-  struct data_saver <strategy_t>::impl
+  struct data_saver::impl
   {
-    typedef typename strategy_t::item_t   item_t;
+    typedef t_double   item_t;
 
-    typedef calc_model <strategy_t>       calc_model_t;
-    typedef rs_mesh_iface <strategy_t>    mesh_iface_t;
-    typedef jacobian_matrix <strategy_t>  jacobian_matrix_t; 
-    typedef facility_manager <strategy_t> facility_manager_t;
+    typedef calc_model        calc_model_t;
+    typedef rs_mesh_iface     mesh_iface_t;
+    typedef facility_manager  facility_manager_t;
 
-    typedef typename facility_manager_t::well_const_iterator_t      well_iterator_t;
+    typedef facility_manager_t::well_const_iterator_t      well_iterator_t;
 
     typedef smart_ptr <calc_model_t>      sp_calc_model_t;
     typedef smart_ptr <mesh_iface_t>      sp_mesh_iface_t;
-    typedef smart_ptr <jacobian_matrix_t> sp_jmatrix_t;
 
     impl (const std::string &name)
     : file_ (name)
@@ -37,8 +35,8 @@ namespace blue_sky {
       bool write_conn_results_to_hdf5 = calc_model->ts_params->get_bool (fi_params::WRITE_CONN_RESULTS_TO_HDF5);
       hdf5_file &file = file_;
 
-      typedef smart_ptr <well <strategy_t> > sp_well_t;
-      typedef typename calc_model_t::sp_connection_t                  sp_connection_t;
+      typedef smart_ptr <well> sp_well_t;
+      typedef smart_ptr <wells::connection> sp_connection_t;
    
       //TODO: groups
       for (well_iterator_t w = wb; w != we; ++w)
@@ -46,7 +44,7 @@ namespace blue_sky {
           sp_well_t ws (w->second, bs_dynamic_cast ());
 
           file["/wells/" + ws->get_name ()]
-            .write ("group", "FIELD")
+            .write ("group", std::string ("FIELD"))
             .write ("d_params", 
               hdf5_pod (-ws->rate ().prod.oil)
                 << -ws->rate ().prod.water 
@@ -72,8 +70,7 @@ namespace blue_sky {
 
           if (write_conn_results_to_hdf5)
             {
-              typedef well <strategy_t> well_t;
-              typename well_t::connection_iterator_t it = ws->connections_begin (), e = ws->connections_end ();
+              well::connection_iterator_t it = ws->connections_begin (), e = ws->connections_end ();
               for (; it != e; ++it)
                 {
                   const sp_connection_t &ci (*it);
@@ -121,23 +118,25 @@ namespace blue_sky {
 
     void
     write_vector (const char *name, 
-      const shared_vector <item_t> &array, 
+      const spv_double &array, 
       double time,
       shared_vector <float> &temp)
     {
-      const size_t array_size = array.size ();
+      const size_t array_size = array->size ();
       if (array_size)
         {
           temp.resize (array_size);
 
-          temp[0]     = array[0];
-          item_t min_ = array[0];
-          item_t max_ = array[0];
+          const t_double *data = array->data ();
+
+          temp[0]     = data[0];
+          item_t min_ = data[0];
+          item_t max_ = data[0];
           for (size_t i = 1, cnt = array_size; i < cnt; ++i)
             {
-              temp[i] = array[i];
-              min_    = (std::min) (min_, array[i]);
-              max_    = (std::max) (max_, array[i]);
+              temp[i] = data[i];
+              min_    = (std::min) (min_, data[i]);
+              max_    = (std::max) (max_, data[i]);
             }
 
           file_[name]
@@ -147,13 +146,13 @@ namespace blue_sky {
     }
     void
     write_vector (const char *name,
-      const shared_vector <item_t> &array,
+      const spv_double &array,
       size_t stride, 
       size_t offset,
       double time,
       shared_vector <float> &temp)
     {
-      const size_t array_size = array.size ();
+      const size_t array_size = array->size ();
       if (array_size)
         {
           temp.resize (array_size);
@@ -161,14 +160,16 @@ namespace blue_sky {
           if (!stride)
             stride = 1;
 
-          temp[0]     = array[offset];
-          item_t min_ = array[offset];
-          item_t max_ = array[offset];
+          const t_double *data = array->data ();
+
+          temp[0]     = data[offset];
+          item_t min_ = data[offset];
+          item_t max_ = data[offset];
           for (size_t i = offset + stride, j = 1; i < array_size; i += stride, ++j)
             {
-              temp[j] = static_cast <item_t> (array[i]);
-              min_    = (std::min) (min_, array[i]);
-              max_    = (std::max) (max_, array[i]);
+              temp[j] = data[i];
+              min_    = (std::min) (min_, data[i]);
+              max_    = (std::max) (max_, data[i]);
             }
 
           file_[name]
@@ -179,7 +180,7 @@ namespace blue_sky {
 
     void
     write_calc_model_data (const sp_calc_model_t &calc_model,
-      const sp_jmatrix_t &jmx,
+      const BS_SP (jacobian) &jacobian,
       size_t large_time_step_num,
       size_t total_time_step_num,
       double time)
@@ -231,13 +232,13 @@ namespace blue_sky {
           if (params->get_bool (fi_params::WRITE_CFL_TO_HDF5) 
             && params->get_bool (fi_params::USE_CFL))
             {
-              if (jmx->get_cfl_vector ().empty ())
+              if (jacobian->get_cfl_vector ()->empty ())
                 {
-                  jmx->get_cfl_vector ().assign (calc_model->pressure.size (), 0);
+                  jacobian->get_cfl_vector ()->init (calc_model->pressure->size (), 0);
                 }
 
               file["/results/cfl"]
-                .write ("values", jmx->get_cfl_vector ())
+                .write ("values", jacobian->get_cfl_vector ())
                 .write ("dates", hdf5_buffer (time));
             }
         }
@@ -246,12 +247,12 @@ namespace blue_sky {
     void
     write_mesh (const sp_mesh_iface_t &mesh)
     {
-      smart_ptr <rs_smesh_iface <strategy_t> > smesh (mesh, bs_dynamic_cast ());
+      smart_ptr <rs_smesh_iface> smesh (mesh, bs_dynamic_cast ());
       if (!smesh)
         {
           bs_throw_exception (boost::format ("Can't cast mesh to structired mesh, %s") % mesh->bs_resolve_type ().stype_);
         }
-      const typename rs_smesh_iface<strategy_t>::index_point3d_t &dims = smesh->get_dimens ();
+      const rs_smesh_iface::index_point3d_t &dims = smesh->get_dimens ();
 
       hdf5_group_v2 group = file_["/mesh"];
 

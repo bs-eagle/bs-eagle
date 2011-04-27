@@ -8,6 +8,7 @@
  */
 
 #include "conf.h"
+#include "hdm_iface.h"
 
 using namespace blue_sky;
 
@@ -25,11 +26,8 @@ using namespace blue_sky;
       // OWN TYPES
       ///////////////////////
 
-      typedef idata                                   idata_t;
-      typedef smart_ptr <idata_t, true>               sp_idata_t;
-      
-      typedef bcsr_matrix_iface                       csr_matrix_t;
-      typedef smart_ptr <csr_matrix_t, true>          sp_bcsr_t;
+      typedef smart_ptr <hdm_iface, true>    sp_hdm_t;
+      typedef smart_ptr <bcsr_matrix_iface, true>           sp_bcsr_t;
 
     //-----------------------------------------
     //  METHODS
@@ -48,7 +46,7 @@ using namespace blue_sky;
       virtual ~mesh_base ()	{};
 
       //! init mesh
-      virtual void init_props (const sp_idata_t &/*idata*/) = 0;
+      virtual void init_props (const sp_hdm_t /*hdm*/) = 0;
       
       //! initialize ext_to_int indexation
       virtual int init_ext_to_int() = 0;

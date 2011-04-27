@@ -1,6 +1,6 @@
-/** 
+/**
  * @file main.cpp
- * @brief 
+ * @brief
  * @author Oleg Borschuk
  * @date 2009-08-28
  */
@@ -17,40 +17,37 @@
 #include "two_stage_prec.h"
 #include "blu_solver.h"
 //#include "py_prop.h"
-#include "py_iface.h"
+#include "py_lsolver_iface.h"
 
 using namespace blue_sky;
 using namespace blue_sky::python;
 using namespace boost::python;
 
 namespace blue_sky {
-  BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("lsolvers", "1.0.0", "Linear solvers for BS", "Linear solvers for BS", "lsolvers")
+  BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("lsolvers", "1.0.0", "Linear solvers for BS", "Linear solvers for BS", "lsolvers");
+
+  namespace {
+  bool
+  register_types (const plugin_descriptor &pd)
+  {
+    bool res = true;
+
+    res &= BS_KERNEL.register_type (pd, cgs_solver::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, gmres_solver::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, bicgstab_solver::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, tfqmr_solver::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, gs_solver::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, bcsr_ilu_prec::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, blu_solver::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, two_stage_prec::bs_type()); BS_ASSERT (res);
+
+    return res;
+  }
+  }
 
   BLUE_SKY_REGISTER_PLUGIN_FUN
   {
-    //const plugin_descriptor &pd = *bs_init.pd_;
-
-    bool res = true;
-
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, prop<float, int, std::string, bool>::bs_type()); BS_ASSERT (res);
-
-    res &= BS_KERNEL.register_type (*bs_init.pd_, cgs_solver::bs_type()); BS_ASSERT (res);
-    
-    res &= BS_KERNEL.register_type (*bs_init.pd_, gmres_solver::bs_type()); BS_ASSERT (res);
-
-    res &= BS_KERNEL.register_type (*bs_init.pd_, bicgstab_solver::bs_type()); BS_ASSERT (res);
-
-    res &= BS_KERNEL.register_type (*bs_init.pd_, tfqmr_solver::bs_type()); BS_ASSERT (res);
-
-    res &= BS_KERNEL.register_type (*bs_init.pd_, gs_solver::bs_type()); BS_ASSERT (res);
-
-    res &= BS_KERNEL.register_type (*bs_init.pd_, bcsr_ilu_prec::bs_type()); BS_ASSERT (res);
-
-    res &= BS_KERNEL.register_type (*bs_init.pd_, blu_solver::bs_type()); BS_ASSERT (res);
-
-    res &= BS_KERNEL.register_type (*bs_init.pd_, two_stage_prec::bs_type()); BS_ASSERT (res);
-
-    return res;
+    return register_types (*bs_init.pd_);
   }
 }
 
@@ -61,6 +58,18 @@ BLUE_SKY_INIT_PY_FUN
 
   //python::py_export_prop ();
   python::py_export_lsolvers ();
-  
+
+}
+#ifdef _DEBUG
+BOOST_PYTHON_MODULE (bs_lsolvers_d)
+#else
+BOOST_PYTHON_MODULE (bs_lsolvers)
+#endif
+{
+  bs_init_py_subsystem ();
+  std::cout << &BS_KERNEL << std::endl;
+  bool res = register_types (*blue_sky::bs_get_plugin_descriptor ());
+  if (!res)
+    throw "Can't register lsolver types";
 }
 #endif

@@ -22,7 +22,6 @@ namespace blue_sky {
     typedef scale_array_holder                scale_array_holder_t;
     typedef scal_region                       this_t;
     typedef scal_region_info <item_t>         scal_region_info_t;
-    typedef t_double                          item_t;
 
     scal_region (const scal_region_info_t &info_,
                  const data_vector <item_t> &Sp_,

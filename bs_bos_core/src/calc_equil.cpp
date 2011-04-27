@@ -7,7 +7,6 @@
 #include "stdafx.h"
 
 #include "calc_model.h"
-#include "jacobian.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "data_class.h"
@@ -24,17 +23,12 @@
 #include "jfunction.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
-// WTF??
-#include "well_results_storage.h"
-#include "fip_results_storage.h"
-
 namespace blue_sky
   {
 
   //! calc pressure on current depth
-  template <class strategy_t>
   int
-  calc_model<strategy_t>::equil_calc_pressure (item_t prev_press, item_t cur_d, item_t h, index_t phase, index_t i_pvt,
+  calc_model::equil_calc_pressure (item_t prev_press, item_t cur_d, item_t h, index_t phase, index_t i_pvt,
       double rs_type, item_t depth_goc, item_t rs_dat,
       val_vs_depth *rsvd, val_vs_depth *pbvd,
       /*output*/ item_t &p, item_t *rs)
@@ -128,9 +122,8 @@ namespace blue_sky
   }
 
   // initialize initial conditions
-  template <class strategy_t>
   int
-  calc_model<strategy_t>::calc_equil (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
+  calc_model::calc_equil (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
   {
     typedef std::vector <float> vector_t;
 
@@ -141,27 +134,27 @@ namespace blue_sky
     index_t i_depth;
     index_t i_eql, i_pvt, i_sat = 0, n_eql;
     index_t i_cell, n_cells;
-    index_array_t eqlnum;
-    item_array_t min_depth, max_depth;
+    stdv_long eqlnum;
+    stdv_double min_depth, max_depth;
     item_t d_depth, h;
     item_t depth_dat, press_dat, rs_dat, depth_woc, press_woc, depth_goc, press_goc;
     index_t il, iu, im;
     item_t prev_d, prev_p, cur_d;
     index_t is_w, is_g, is_o, d_w, d_g, d_o, ds_w, ds_g;
     index_t main_phase;
-    item_array_t depth, press, rs;      // array of depthes, phases pressure, gas oil ratios
+    stdv_double depth, press, rs;      // array of depthes, phases pressure, gas oil ratios
     item_t p_oil, p_water, p_gas;
     item_t p_p[3], s_p[2], pc_limit[2], dcoef;
 
-    const item_array_t &perm = rock_grid_prop->permeability;
-    const item_array_t &poro = rock_grid_prop->porosity_p_ref;
-    typename sp_idata_t::pointed_t::vval_vs_depth &rsvd = l_idata->get_rsvd ();
-    typename sp_idata_t::pointed_t::vval_vs_depth &pbvd = l_idata->get_pbvd ();
-    typename sp_idata_t::pointed_t::vec_i equil_regions = l_idata->equil_regions;
+    const stdv_double &perm = rock_grid_prop->permeability;
+    const stdv_double &poro = rock_grid_prop->porosity_p_ref;
+    idata::vval_vs_depth &rsvd = l_idata->get_rsvd ();
+    idata::vval_vs_depth &pbvd = l_idata->get_pbvd ();
+    const spv_int &equil_regions = l_idata->equil_regions;
     const index_t N_equil = 2;
 
-    BS_ASSERT (equil_regions.size ());
-    BS_ASSERT ((*l_idata->i_map).contain (EQLNUM));
+    BS_ASSERT (equil_regions->size ());
+    BS_ASSERT (l_idata->contains_i_array ("EQLNUM"));
 
     is_w = FI_CHK_WATER (phases);
     is_g = FI_CHK_GAS (phases);
@@ -176,20 +169,20 @@ namespace blue_sky
     item_t depth_top, depth_bottom, depth_center;
     item_t depth_step, layer_center;
     item_t s_water, s_gas;
-    item_array_t press_w, press_g, press_o;
-    array_float16_t swatinit;
-    item_array_t pcw;
+    stdv_double press_w, press_g, press_o;
+    spv_float swatinit;
+    stdv_double pcw;
     bool is_swatinit = false;
 
     //get num of eql regions
-    n_eql = l_idata->eql_region;
+    n_eql = equil_regions->size (); // FIXME: sergey.miryanov: get number of EQUIL regs
     //get num of elements
     n_cells = l_mesh->get_n_active_elements();
 
     //get eqlnum array
     eqlnum.resize(n_cells);
     //todo: if zero array
-    convert_arrays (mesh->get_n_active_elements (), mesh->get_int_to_ext (), eqlnum, (*l_idata->i_map)[EQLNUM].array);
+    convert_arrays (mesh->get_n_active_elements (), mesh->get_int_to_ext (), eqlnum, l_idata->get_i_array ("EQLNUM"));
 
     min_depth.resize(n_eql, 0);
     max_depth.resize(n_eql, 0);
@@ -201,9 +194,9 @@ namespace blue_sky
 
     //set min and max to datum depth
     for (i_eql = 0; i_eql < n_eql; i_eql++)
-      min_depth[i_eql] = max_depth[i_eql] = l_idata->equil[EQUIL_TOTAL * i_eql + EQUIL_DAT_DEPTH];
+      min_depth[i_eql] = max_depth[i_eql] = (*l_idata->equil)[EQUIL_TOTAL * i_eql + EQUIL_DAT_DEPTH];
 
-    const item_array_t &cell_depths = l_mesh->get_depths ();
+    const spv_float &cell_depths = l_mesh->get_depths ();
 
     //get min and max depth in each of eql regions
     for (i_cell = 0; i_cell < n_cells; i_cell++)
@@ -211,8 +204,8 @@ namespace blue_sky
         item_t top_depth = 0., bottom_depth = 0.;
         i_eql = eqlnum[i_cell] - 1;
                 
-        top_depth = cell_depths[i_cell] - 0.5 * l_mesh->get_element_dim3_size (i_cell);
-        bottom_depth = cell_depths[i_cell] + 0.5 * l_mesh->get_element_dim3_size (i_cell);
+        top_depth = (*cell_depths)[i_cell] - 0.5 * l_mesh->get_element_dim3_size (i_cell);
+        bottom_depth = (*cell_depths)[i_cell] + 0.5 * l_mesh->get_element_dim3_size (i_cell);
 
         if (top_depth < min_depth[i_eql])
           min_depth[i_eql] = top_depth;
@@ -227,12 +220,12 @@ namespace blue_sky
     //loop through all eql regions
     for (i_eql = 0; i_eql < n_eql; i_eql++)
       {
-        i_pvt = equil_regions[N_equil * i_eql + 1];    // pvt region for current equil region
+        i_pvt = (*equil_regions)[N_equil * i_eql + 1];    // pvt region for current equil region
 
-        depth_dat = l_idata->equil[EQUIL_TOTAL * i_eql + EQUIL_DAT_DEPTH];
-        depth_woc = l_idata->equil[EQUIL_TOTAL * i_eql + EQUIL_WOC_DEPTH];
-        depth_goc = l_idata->equil[EQUIL_TOTAL * i_eql + EQUIL_GOC_DEPTH];
-        press_dat = l_idata->equil[EQUIL_TOTAL * i_eql + EQUIL_DAT_PRESS];
+        depth_dat = (*l_idata->equil)[EQUIL_TOTAL * i_eql + EQUIL_DAT_DEPTH];
+        depth_woc = (*l_idata->equil)[EQUIL_TOTAL * i_eql + EQUIL_WOC_DEPTH];
+        depth_goc = (*l_idata->equil)[EQUIL_TOTAL * i_eql + EQUIL_GOC_DEPTH];
+        press_dat = (*l_idata->equil)[EQUIL_TOTAL * i_eql + EQUIL_DAT_PRESS];
 
         //set main_phase
         main_phase = FI_PHASE_OIL;
@@ -292,7 +285,7 @@ namespace blue_sky
                 h = cur_d - prev_d;
 
                 if (equil_calc_pressure (prev_p, cur_d, h, main_phase, i_pvt,
-                                         is_g ? l_idata->equil[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
+                                         is_g ? (*l_idata->equil)[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
                                          is_g ? depth_goc : 0, is_g ? rs_dat : 0,
                                          (is_g && rsvd.size ()) ? &rsvd[i_eql] : 0, (is_g && pbvd.size ()) ? &pbvd[i_eql] : 0,
                                          press[i_depth + (i_eql * n_phases + phase_d[main_phase]) * n_depth],
@@ -368,9 +361,9 @@ namespace blue_sky
 
                 //oil pressure at WOC/GOC
                 if (main_phase == FI_PHASE_WATER)
-                  p_temp += l_idata->equil[EQUIL_TOTAL * i_eql + EQUIL_WOC_PRESS];
+                  p_temp += (*l_idata->equil)[EQUIL_TOTAL * i_eql + EQUIL_WOC_PRESS];
                 else
-                  p_temp -= l_idata->equil[EQUIL_TOTAL * i_eql + EQUIL_GOC_PRESS];
+                  p_temp -= (*l_idata->equil)[EQUIL_TOTAL * i_eql + EQUIL_GOC_PRESS];
 
                 //---- calc pressure table of oil -----
                 for (index_t up_down = -1; up_down < 2; up_down += 2)
@@ -391,7 +384,7 @@ namespace blue_sky
                         h = cur_d - prev_d;
 
                         if (equil_calc_pressure (prev_p, cur_d, h, FI_PHASE_OIL, i_pvt,
-                                                 is_g ? l_idata->equil[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
+                                                 is_g ? (*l_idata->equil)[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
                                                  is_g ? depth_goc : 0, is_g ? rs_dat : 0,
                                                  (is_g && rsvd.size ()) ? &rsvd[i_eql] : 0, (is_g && pbvd.size ()) ? &pbvd[i_eql] : 0,
                                                  press[i_depth + (i_eql * n_phases + phase_d[FI_PHASE_OIL]) * n_depth],
@@ -438,7 +431,7 @@ namespace blue_sky
 
                     //calc oil pressure at WOC
                     if (equil_calc_pressure (prev_p, depth_woc, h, FI_PHASE_OIL, i_pvt,
-                                             is_g ? l_idata->equil[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
+                                             is_g ? (*l_idata->equil)[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
                                              is_g ? depth_goc : 0, is_g ? rs_dat : 0,
                                              (is_g && rsvd.size ()) ? &rsvd[i_eql] : 0, (is_g && pbvd.size ()) ? &pbvd[i_eql] : 0,
                                              press_woc, &rs_temp))
@@ -462,7 +455,7 @@ namespace blue_sky
                   }
 
                 //water pressure at WOC
-                press_woc -= l_idata->equil[EQUIL_TOTAL * i_eql + EQUIL_WOC_PRESS];
+                press_woc -= (*l_idata->equil)[EQUIL_TOTAL * i_eql + EQUIL_WOC_PRESS];
 
                 //---- calc pressure table of water -----
                 for (index_t up_down = -1; up_down < 2; up_down += 2)
@@ -527,7 +520,7 @@ namespace blue_sky
 
                     //calc oil pressure at GOC
                     if (equil_calc_pressure (prev_p, depth_goc, h, FI_PHASE_OIL, i_pvt,
-                                             is_g ? l_idata->equil[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
+                                             is_g ? (*l_idata->equil)[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
                                              is_g ? depth_goc : 0, is_g ? rs_dat : 0,
                                              (is_g && rsvd.size ()) ? &rsvd[i_eql] : 0, (is_g && pbvd.size ()) ? &pbvd[i_eql] : 0,
                                              press_goc, &rs_temp))
@@ -551,7 +544,7 @@ namespace blue_sky
                   }
 
                 //gas pressure at GOC
-                press_goc += l_idata->equil[EQUIL_TOTAL * i_eql + EQUIL_GOC_PRESS];
+                press_goc += (*l_idata->equil)[EQUIL_TOTAL * i_eql + EQUIL_GOC_PRESS];
 
                 //---- calc pressure table of gas -----
                 for (index_t up_down = -1; up_down < 2; up_down += 2)
@@ -597,10 +590,10 @@ namespace blue_sky
     //check SWATINIT, JFUNC and PCW
     if (n_phases > 1 && is_w)
       {
-        if ((*l_idata->d_map).contain (SWATINIT))
+        if (l_idata->contains_fp_array ("SWATINIT"))
           {
             is_swatinit = true;
-            swatinit = (*l_idata->d_map)[SWATINIT].array;
+            swatinit = l_idata->get_fp_array ("SWATINIT");
 
             scal_prop->get_water_jfunction ()->set_valid (false);
             scal_prop->get_water_scale ()->remove_pcp ();
@@ -624,27 +617,33 @@ namespace blue_sky
         i_original_cell = l_mesh->get_element_int_to_ext (i_cell);
         i_eql = eqlnum[i_cell] - 1;
         if (n_phases > 1)
-          i_sat = sat_regions[i_cell];
+          i_sat = (*sat_regions)[i_cell];
 
         item_t gor = 0;
         item_t *rs_reg = 0;
         if (is_o && is_g)
           {
-            gas_oil_ratio [i_cell] = 0;
+            (*gas_oil_ratio)[i_cell] = 0;
             rs_reg = &rs[i_eql * n_depth];
           }
 
         if (is_o)
-          press_o.assign (&press[(i_eql * n_phases + phase_d[FI_PHASE_OIL]) * n_depth],
-                          &press[(i_eql * n_phases + phase_d[FI_PHASE_OIL]) * n_depth] + n_depth);
+          {
+            press_o.assign (&press[(i_eql * n_phases + phase_d[FI_PHASE_OIL]) * n_depth],
+                            &press[(i_eql * n_phases + phase_d[FI_PHASE_OIL]) * n_depth] + n_depth);
+          }
         if (is_w)
-          press_w.assign (&press[(i_eql * n_phases + phase_d[FI_PHASE_WATER]) * n_depth],
-                          &press[(i_eql * n_phases + phase_d[FI_PHASE_WATER]) * n_depth] + n_depth);
+          {
+            press_w.assign (&press[(i_eql * n_phases + phase_d[FI_PHASE_WATER]) * n_depth],
+                            &press[(i_eql * n_phases + phase_d[FI_PHASE_WATER]) * n_depth] + n_depth);
+          }
         if (is_g)
-          press_g.assign (&press[(i_eql * n_phases + phase_d[FI_PHASE_GAS]) * n_depth],
-                          &press[(i_eql * n_phases + phase_d[FI_PHASE_GAS]) * n_depth] + n_depth);
+          {
+            press_g.assign (&press[(i_eql * n_phases + phase_d[FI_PHASE_GAS]) * n_depth],
+                            &press[(i_eql * n_phases + phase_d[FI_PHASE_GAS]) * n_depth] + n_depth);
+          }
 
-        depth_center = cell_depths[i_cell];
+        depth_center = (*cell_depths)[i_cell];
         depth_top = depth_center - 0.5 * l_mesh->get_element_dim3_size (i_cell);
         depth_bottom = depth_center + 0.5 * l_mesh->get_element_dim3_size (i_cell);
 
@@ -723,7 +722,7 @@ namespace blue_sky
                 p_oil += p_p[d_o];
                 if (is_g)
                   {
-                    gas_oil_ratio[i_cell] += gor;
+                    (*gas_oil_ratio)[i_cell] += gor;
                   }
               }
             if (is_w)
@@ -744,7 +743,7 @@ namespace blue_sky
             p_oil /= (item_t)n_layer;
             if (is_g)
               {
-                gas_oil_ratio[i_cell] /= (item_t)n_layer;
+                (*gas_oil_ratio)[i_cell] /= (item_t)n_layer;
               }
           }
         if (is_w)
@@ -762,7 +761,7 @@ namespace blue_sky
         item_t smin  = 0, smax = 0, pmax_table = 0;
         if (n_phases > 1 && is_w && is_swatinit)
           {
-            scal_region<strategy_t> scal_water_data = scal_prop->get_water_data ()->get_region (i_sat);
+            const scal_region &scal_water_data = scal_prop->get_water_data ()->get_region (i_sat);
             smin = scal_water_data.get_phase_sat_min ();
             smin = scal_prop->get_water_scale ()->get_sl (smin)[i_cell];
             smax = scal_water_data.get_phase_sat_max ();
@@ -772,16 +771,16 @@ namespace blue_sky
 
         if (n_phases > 1 && is_w && is_swatinit && (p_oil - p_water > 0) && pmax_table > EPS_DIFF/*todo*/)
           {
-            if (swatinit[i_original_cell] < smin)
+            if ((*swatinit)[i_original_cell] < smin)
               s_water = smin;
-            else if (swatinit[i_original_cell] > smax)
+            else if ((*swatinit)[i_original_cell] > smax)
               s_water = smax;
             else
               {
-                s_water = swatinit[i_original_cell];
+                s_water = (*swatinit)[i_original_cell];
 
                 //calc pcw
-                scal_prop->calc_pcp (i_cell, swatinit[i_original_cell], i_sat, p_water - p_oil, pcw[i_cell]);
+                scal_prop->calc_pcp (i_cell, (*swatinit)[i_original_cell], i_sat, p_water - p_oil, pcw[i_cell]);
               }
             //recalc gas saturation
             if (n_phases == 3 && (s_water + s_gas > 1.0))
@@ -803,11 +802,11 @@ namespace blue_sky
 
         //set pressure
         if (n_phases > 1 || is_o)
-          pressure[i_cell] = p_oil;
+          (*pressure)[i_cell] = p_oil;
         else if (is_w)
-          pressure[i_cell] = p_water;
+          (*pressure)[i_cell] = p_water;
         else
-          pressure[i_cell] = p_gas;
+          (*pressure)[i_cell] = p_gas;
 
         //set saturation
         if (n_phases > 1)
@@ -818,28 +817,28 @@ namespace blue_sky
                   {
                     s_water = 0.999f;
                   }
-                saturation_3p[n_phases * i_cell + d_w] = (float)s_water;
+                (*saturation_3p)[n_phases * i_cell + d_w] = (float)s_water;
               }
             if (is_g)
-              saturation_3p[n_phases * i_cell + d_g] = (float)s_gas;
+              (*saturation_3p)[n_phases * i_cell + d_g] = (float)s_gas;
 
-            saturation_3p[n_phases * i_cell + d_o] = 1. - (float)s_water - (float)s_gas;
+            (*saturation_3p)[n_phases * i_cell + d_o] = 1. - (float)s_water - (float)s_gas;
           }
 
         //set Rs by new pressure and set main_variable
         if (is_o && is_g)
           {
-            if (saturation_3p[n_phases * i_cell + d_g] < EPS_DIFF && saturation_3p[n_phases * i_cell + d_o] < EPS_DIFF)
+            if ((*saturation_3p)[n_phases * i_cell + d_g] < EPS_DIFF && (*saturation_3p)[n_phases * i_cell + d_o] < EPS_DIFF)
               {
                 //gas_oil_ratio[i_cell] = 0;
                 main_variable[i_cell] = FI_MOMG_VAR;
               }
             else
               {
-                i_pvt = pvt_regions[i_cell];
+                i_pvt = (*pvt_regions)[i_cell];
                 //gas_oil_ratio[i_cell] = pvt_oil_array[i_pvt]->interpolate_and_fix (pressure[i_cell]);
 
-                if (saturation_3p[n_phases * i_cell + d_g] > EPS_DIFF)
+                if ((*saturation_3p)[n_phases * i_cell + d_g] > EPS_DIFF)
                   main_variable[i_cell] = FI_SG_VAR;
                 else
                   main_variable[i_cell] = FI_RO_VAR;
@@ -853,32 +852,32 @@ namespace blue_sky
     return 0;
   }
 
-  template int
-  calc_model<base_strategy_di>::calc_equil (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
+  //template int
+  //calc_model<base_strategy_di>::calc_equil (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
 
-  template int
-  calc_model<base_strategy_fi>::calc_equil (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
+  //template int
+  //calc_model<base_strategy_fi>::calc_equil (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
 
-  template int
-  calc_model<base_strategy_mixi>::calc_equil (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
+  //template int
+  //calc_model<base_strategy_mixi>::calc_equil (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
 
-  template int
-  calc_model<base_strategy_di>::equil_calc_pressure (item_t prev_press, item_t cur_d, item_t h, index_t phase, index_t i_pvt,
-      double rs_type, item_t depth_goc, item_t rs_dat,
-      val_vs_depth *rsvd, val_vs_depth *pbvd,
-      item_t &p, item_t *rs);
+  //template int
+  //calc_model<base_strategy_di>::equil_calc_pressure (item_t prev_press, item_t cur_d, item_t h, index_t phase, index_t i_pvt,
+  //    double rs_type, item_t depth_goc, item_t rs_dat,
+  //    val_vs_depth *rsvd, val_vs_depth *pbvd,
+  //    item_t &p, item_t *rs);
 
-  template int
-  calc_model<base_strategy_fi>::equil_calc_pressure (item_t prev_press, item_t cur_d, item_t h, index_t phase, index_t i_pvt,
-      double rs_type, item_t depth_goc, item_t rs_dat,
-      val_vs_depth *rsvd, val_vs_depth *pbvd,
-      item_t &p, item_t *rs);
+  //template int
+  //calc_model<base_strategy_fi>::equil_calc_pressure (item_t prev_press, item_t cur_d, item_t h, index_t phase, index_t i_pvt,
+  //    double rs_type, item_t depth_goc, item_t rs_dat,
+  //    val_vs_depth *rsvd, val_vs_depth *pbvd,
+  //    item_t &p, item_t *rs);
 
-  template int
-  calc_model<base_strategy_mixi>::equil_calc_pressure (item_t prev_press, item_t cur_d, item_t h, index_t phase, index_t i_pvt,
-      double rs_type, item_t depth_goc, item_t rs_dat,
-      val_vs_depth *rsvd, val_vs_depth *pbvd,
-      item_t &p, item_t *rs);
+  //template int
+  //calc_model<base_strategy_mixi>::equil_calc_pressure (item_t prev_press, item_t cur_d, item_t h, index_t phase, index_t i_pvt,
+  //    double rs_type, item_t depth_goc, item_t rs_dat,
+  //    val_vs_depth *rsvd, val_vs_depth *pbvd,
+  //    item_t &p, item_t *rs);
 
 
 }//ns bs

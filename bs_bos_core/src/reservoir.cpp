@@ -32,8 +32,7 @@
 namespace blue_sky
   {
 
-  template <class strategy_t>
-  reservoir<strategy_t>::~reservoir ()
+  reservoir::~reservoir ()
   {
 
   }
@@ -43,8 +42,7 @@ namespace blue_sky
    * \brief  copy-ctor for reservoir
    * \param  cl reservoir instance to be copied
    * */
-  template <class strategy_t>
-  reservoir <strategy_t>::reservoir(const reservoir & cl)
+  reservoir::reservoir(const reservoir & cl)
   : bs_refcounter (cl), objbase (cl)
   {
     if (&cl != this)
@@ -56,8 +54,7 @@ namespace blue_sky
    * \brief  'default' reservoir ctor
    * \param  param additional ctor params
    * */
-  template <class strategy_t>
-  reservoir <strategy_t>::reservoir (bs_type_ctor_param /*param*/)
+  reservoir::reservoir (bs_type_ctor_param /*param*/)
   {
     facility_list_                = BS_KERNEL.create_object(facility_manager_t::bs_type(), true);
     well_factory_                 = BS_KERNEL.create_object(well_factory_t::bs_type(), true);
@@ -71,24 +68,21 @@ namespace blue_sky
     data_saver_.reset (new data_saver_t);
   }
 
-  template <typename strategy_t>
-  typename reservoir<strategy_t>::sp_well_t
-  reservoir<strategy_t>::get_well (const std::string &group_name, const std::string &well_name) const
+  reservoir::sp_well_t
+  reservoir::get_well (const std::string &group_name, const std::string &well_name) const
     {
       return facility_list_->get_well (group_name, well_name);
     }
 
-  template <typename strategy_t>
-  typename reservoir<strategy_t>::sp_well_t
-  reservoir<strategy_t>::get_well (const std::string &well_name) const
+  reservoir::sp_well_t
+  reservoir::get_well (const std::string &well_name) const
   {
     return facility_list_->get_well (well_name);
   }
 
 
-  template <typename strategy_t>
-  typename reservoir<strategy_t>::sp_well_t
-  reservoir<strategy_t>::create_well (const std::string &group_name, const std::string &well_name)
+  reservoir::sp_well_t
+  reservoir::create_well (const std::string &group_name, const std::string &well_name)
   {
     sp_well_t w = well_factory_->create_well (group_name, well_name);
     BS_ASSERT (w) (group_name) (well_name);
@@ -102,9 +96,8 @@ namespace blue_sky
   }
 
 
-  template <typename strategy_t>
-  typename reservoir<strategy_t>::sp_well_controller_t
-  reservoir<strategy_t>::create_well_controller (const sp_well_t &owner_well)
+  reservoir::sp_well_controller_t
+  reservoir::create_well_controller (const sp_well_t &owner_well)
   {
     BS_ASSERT (owner_well);
 
@@ -117,9 +110,8 @@ namespace blue_sky
     return wc;
   }
 
-  template <typename strategy_t>
-  typename reservoir<strategy_t>::sp_well_limit_operation_t
-  reservoir<strategy_t>::create_well_limit_operation (const sp_well_t &owner_well, wells::limit_operation_type operation)
+  reservoir::sp_well_limit_operation_t
+  reservoir::create_well_limit_operation (const sp_well_t &owner_well, wells::limit_operation_type operation)
   {
     BS_ASSERT (owner_well);
 
@@ -133,9 +125,8 @@ namespace blue_sky
   }
 
 
-  template <typename strategy_t>
-  typename reservoir<strategy_t>::sp_connection_t
-  reservoir<strategy_t>::create_connection ()
+  reservoir::sp_connection_t
+  reservoir::create_connection ()
   {
     sp_connection_t con = well_factory_->create_connection ();
 
@@ -145,108 +136,110 @@ namespace blue_sky
     return con;
   }
 
-  template <typename strategy_t>
   void
-  reservoir<strategy_t>::save_data (const sp_storage_t &storage) const
+  reservoir::save_data (const sp_storage_t &storage) const
     {
       BS_ASSERT (facility_list_);
       facility_list_->save_data (storage);
     }
 
-  template <typename strategy_t>
-  typename reservoir<strategy_t>::item_t
-  reservoir<strategy_t>::pressure () const
+  reservoir::item_t
+  reservoir::pressure () const
     {
       BS_ASSERT (false && "NOT IMPL YET");
       return 0;
     }
 
-  template <typename strategy_t>
   bool
-  reservoir<strategy_t>::check_limits (const sp_params_t &/*params*/) const
+  reservoir::check_limits (const sp_params_t &/*params*/) const
     {
       BS_ASSERT (false && "NOT IMPL YET");
       return false;
     }
 
-  template <typename strategy_t>
   void
-  reservoir<strategy_t>::pre_small_step ()
+  reservoir::pre_small_step ()
   {
     for_each_facility (*facility_list_, closure <void, facility_t> (&facility_t::pre_small_step));
   }
-  template <typename strategy_t>
   void
-  reservoir<strategy_t>::restart_small_step ()
+  reservoir::restart_small_step ()
   {
     for_each_facility (*facility_list_, closure <void, facility_t> (&facility_t::restart_small_step));
   }
-  template <typename strategy_t>
   void
-  reservoir <strategy_t>::pre_newton_step ()
+  reservoir::pre_newton_step ()
   {
     for_each_facility (*facility_list_, closure <void, facility_t> (&facility_t::pre_newton_step));
   }
-  template <typename strategy_t>
   void
-  reservoir <strategy_t>::restart_newton_step ()
+  reservoir::restart_newton_step ()
   {
     for_each_facility (*facility_list_, closure <void, facility_t> (&facility_t::restart_newton_step));
   }
 
-  template <typename strategy_t>
-  void
-  reservoir<strategy_t>::init_rows (index_array_t &rows) const
+  namespace detail
+  {
+    void
+    init_rows (BS_SP (facility_manager) &wells, spv_long &rows, t_long cells)
     {
-      for_each_facility (*facility_list_, closure <void, facility_t, index_array_t &> (&facility_t::fill_rows, rows));
+      rows->init (cells + 1, 0);
 
-      // correct rows values
-      for (index_t i = 0, cnt = (index_t)rows.size () - 1; i < cnt; ++i)
+      facility_manager::well_const_iterator_t wit = wells->wells_begin ();
+      facility_manager::well_const_iterator_t we = wells->wells_end ();
+      for (; wit != we; ++wit)
         {
-          rows[i + 1] += rows[i];
+          wit->second->fill_rows (rows);
+        }
+
+      v_long &r = *rows;
+      for (size_t i = 0, cnt = r.size () - 1; i < cnt; ++i)
+        {
+          r[i + 1] += r[i];
         }
     }
-
-  template <typename strategy_t>
-  void
-  reservoir<strategy_t>::init_jacobian (const sp_jmatrix_t &jmx, index_t n_cells)
-  {
-    index_array_t &rows = jmx->get_irregular_matrix ()->get_rows_ptr ();
-
-    assign (rows, n_cells + 1, 0);
-    init_rows (rows);
   }
 
-  template <typename strategy_t>
+  // FIXME: remove, obsolete
   void
-  reservoir<strategy_t>::end_jacobian (item_t dt, const sp_calc_model_t &calc_model, sp_jacobian_t &jacobian)
+  reservoir::init_jacobian (const BS_SP (jacobian) &jacobian, index_t n_cells)
   {
-    const sp_jacobian_matrix_t &jmx (jacobian->get_jmatrix ());
+  }
 
-    const index_array_t &rows   = jmx->get_irregular_matrix ()->get_rows_ptr ();
-    index_array_t &cols         = jmx->get_irregular_matrix ()->get_cols_ind ();
-    rhs_item_array_t &values    = jmx->get_irregular_matrix ()->get_values ();
+  void
+  reservoir::end_jacobian (BS_SP (jacobian) &jacobian, t_double dt, t_long block_size, t_long cells)
+  {
+    BS_SP (bcsr_matrix_iface) mx = jacobian->get_matrix ("facility");
 
-    if (rows.empty ())
+    spv_long rows = mx->get_rows_ptr ();
+    spv_long cols = mx->get_cols_ind ();
+    spv_double values = mx->get_values ();
+
+    blue_sky::detail::init_rows (facility_list_, rows, cells);
+    if (rows->empty ())
       return ;
 
-    index_t block_size = calc_model->n_phases;
-    index_t b_sqr = block_size * block_size;
-    cols.assign (rows.back (), -1);
-    values.assign (rows.back () * b_sqr, 0);
-    markers_.assign (rows.size (), 0);
+    t_long cols_count = rows->back ();
+    cols->init (cols_count, -1);
+    values->init (cols_count * block_size * block_size, 0);
+    markers_.assign (rows->size (), 0);
 
-    jmx->get_irregular_matrix ()->n_block_size = calc_model->n_phases;
-    jmx->get_irregular_matrix ()->n_rows = (index_t) rows.size () - 1;
-    jmx->get_irregular_matrix ()->n_cols = (index_t) cols.size ();
+    mx->set_n_cols ((t_long)cols->size ());
 
-    for_each_facility (*facility_list_, closure <void, facility_t, double, index_t, const index_array_t &, index_array_t &, rhs_item_array_t &, index_array_t &> (&facility_t::fill_jacobian,
-        dt, block_size, rows, cols, values, markers_));
+    // FIXME: WTF?? n_rows
+    //mx->n_rows = rows->size () - 1;
+
+    facility_manager::well_const_iterator_t wit = facility_list_->wells_begin ();
+    facility_manager::well_const_iterator_t we = facility_list_->wells_end ();
+    for (; wit != we; ++wit)
+      {
+        wit->second->fill_jacobian (dt, block_size, rows, cols, values, markers_);
+      }
 
 #ifdef _DEBUG
-    for (size_t i = 0, cnt = cols.size (); i < cnt; ++i)
+    for (size_t i = 0, cnt = cols->size (); i < cnt; ++i)
       {
-        if (cols[i] == -1)
+        if ((*cols)[i] == -1)
           {
             bs_throw_exception ("Cols i is negative");
           }
@@ -254,42 +247,38 @@ namespace blue_sky
 #endif
   }
 
-  template <typename strategy_t>
   void
-  reservoir<strategy_t>::calc_wells (int istart, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
+  reservoir::calc_wells (int istart, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, BS_SP (jacobian) &jacobian)
   {
-    for_each_facility (*facility_list_, closure <void, facility_t, bool, double, const sp_calc_model_t &, const sp_mesh_iface_t &, sp_jmatrix_t &> (&facility_t::process,
-      istart, dt, calc_model, mesh, jmatrix));
+    // FIXME: 
+    //for_each_facility (*facility_list_, closure <void, facility_t, bool, double, const sp_calc_model_t &, const sp_mesh_iface_t &, sp_jmatrix_t &> (&facility_t::process,
+    //  istart, dt, calc_model, mesh, jmatrix));
   }
 
-  template <typename strategy_t>
   void
-  reservoir <strategy_t>::fill_rhs_wells (double dt, const sp_calc_model_t &calc_model, rhs_item_array_t &rhs, bool update_after_gauss_elimination) const
+  reservoir::fill_rhs_wells (double dt, const sp_calc_model_t &calc_model, rhs_item_array_t &rhs, bool update_after_gauss_elimination) const
   {
     for_each_facility (*facility_list_, closure <void, facility_t, double, index_t, bool, bool, bool, rhs_item_array_t &> (&facility_t::fill_rhs,
       dt, calc_model->n_phases, calc_model->is_gas (), calc_model->is_oil (), calc_model->is_water (), rhs));
   }
 
-  template <typename strategy_t>
-  typename reservoir<strategy_t>::sp_facility_manager_t
-  reservoir<strategy_t>::get_facility_list () const
+  reservoir::sp_facility_manager_t
+  reservoir::get_facility_list () const
   {
     return facility_list_;
   }
 
-  template <typename strategy_t>
   void
-  reservoir <strategy_t>::restore_wells_solution (double dt, const item_array_t &p_sol, const item_array_t &s_sol, index_t block_size)
+  reservoir::restore_wells_solution (double dt, const spv_double &p_sol, const spv_double &s_sol, index_t block_size)
   {
-    for_each_facility (*facility_list_, closure <void, facility_t, double, const item_array_t &, const item_array_t &, index_t> (&facility_t::restore_solution, dt, p_sol, s_sol, block_size));
+    for_each_facility (*facility_list_, closure <void, facility_t, double, const spv_double &, const spv_double &, index_t> (&facility_t::restore_solution, dt, p_sol, s_sol, block_size));
   }
 
-  template <typename strategy_t>
   void
-  reservoir <strategy_t>::pre_large_step (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh)
+  reservoir::pre_large_step (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh)
   {
-    typename facility_manager_t::well_const_iterator_t wb = facility_list_->wells_begin ();
-    typename facility_manager_t::well_const_iterator_t we = facility_list_->wells_end ();
+    facility_manager_t::well_const_iterator_t wb = facility_list_->wells_begin ();
+    facility_manager_t::well_const_iterator_t we = facility_list_->wells_end ();
     for (; wb != we; ++wb)
       {
         wb->second->pre_large_step (calc_model, mesh);
@@ -298,47 +287,41 @@ namespace blue_sky
   }
 
 
-  template <typename strategy_t>
   void
-  reservoir <strategy_t>::add_filter_well (const std::string &well_name)
+  reservoir::add_filter_well (const std::string &well_name)
   {
     event_filter_->add_filter_well (well_name);
   }
-  template <typename strategy_t>
-  const typename reservoir <strategy_t>::sp_event_filter_t &
-  reservoir <strategy_t>::get_event_filter () const
+  const reservoir::sp_event_filter_t &
+  reservoir::get_event_filter () const
   {
     return event_filter_;
   }
 
 #ifdef _HDF5
-  template <typename strategy_t>
   void
-  reservoir<strategy_t>::write_mesh_to_hdf5 (const smart_ptr <rs_mesh_iface<strategy_t>, true> &mesh) const
+  reservoir::write_mesh_to_hdf5 (const smart_ptr <rs_mesh_iface, true> &mesh) const
     {
-      smart_ptr <rs_smesh_iface<strategy_t>, true> smesh (mesh, bs_dynamic_cast ());
+      smart_ptr <rs_smesh_iface, true> smesh (mesh, bs_dynamic_cast ());
       hdf5::write_mesh_to_hdf5 (hdf5, smesh);
     }
 
-  template <typename strategy_t>
   void
-  reservoir<strategy_t>::open_hdf5_file (const std::string &filename) const
+  reservoir::open_hdf5_file (const std::string &filename) const
     {
       hdf5->lock ()->open (filename.c_str ());
     }
 
-  template <typename strategy_t>
   void
-  reservoir<strategy_t>::close_hdf5_file () const
+  reservoir::close_hdf5_file () const
     {
       hdf5->lock ()->close ();
     }
 
-  template <typename strategy_t>
   void
-  reservoir<strategy_t>::write_step_to_hdf5 (const sp_calc_model_t &calc_model,
+  reservoir::write_step_to_hdf5 (const sp_calc_model_t &calc_model,
                            const sp_mesh_iface_t &mesh,
-                           const sp_jmatrix_t &jmx, 
+                           const BS_SP (jacobian) &jacobian, 
                            int l_time_step_num, int total_ts_count,
                            item_t time) const
     {
@@ -354,8 +337,9 @@ namespace blue_sky
   int mpi_start = 0;
 #endif
 
-  hdf5::write_well_results (*hdf5, calc_model->well_res, calc_model->ts_params->get_bool (fi_params::WRITE_CONN_RESULTS_TO_HDF5));
-  hdf5::write_fip_results (*hdf5, calc_model->fip_res);
+  // FIXME: ORLY?
+  //hdf5::write_well_results (*hdf5, calc_model->well_res, calc_model->ts_params->get_bool (fi_params::WRITE_CONN_RESULTS_TO_HDF5));
+  //hdf5::write_fip_results (*hdf5, calc_model->fip_res);
 
   int n_phases = calc_model->n_phases;
   // temporary storage for values, need to extract saturations
@@ -370,7 +354,7 @@ namespace blue_sky
     {
       if (calc_model->ts_params->get_bool (fi_params::WRITE_PRESSURE_TO_HDF5))
         {
-          copy_to (&calc_model->pressure[mpi_start], &tmp_buf[0], n_elem_local);
+          copy_to (&calc_model->pressure->data ()[mpi_start], &tmp_buf[0], n_elem_local);
           hdf5->add_to_results ("/results/pressure", &tmp_buf[0], n_elem_global, n_elem_local, mpi_offset, time);
         }
 
@@ -378,7 +362,7 @@ namespace blue_sky
         {
           if (calc_model->is_gas () && calc_model->is_oil ())
             {
-              copy_to (&calc_model->gas_oil_ratio[mpi_start], &tmp_buf[0], n_elem_local);
+              copy_to (&calc_model->gas_oil_ratio->data ()[mpi_start], &tmp_buf[0], n_elem_local);
               hdf5->add_to_results ("/results/gor", &tmp_buf[0], n_elem_global, n_elem_local, mpi_offset, time);
             }
         }
@@ -396,12 +380,12 @@ namespace blue_sky
 
               if (calc_model->is_gas ())
                 {
-                  copy_to (&calc_model->saturation_3p[n_phases * mpi_start], &tmp_buf[0], n_phases * n_elem_local, n_phases/*stride*/, d_g/*start*/);
+                  copy_to (&calc_model->saturation_3p->data ()[n_phases * mpi_start], &tmp_buf[0], n_phases * n_elem_local, n_phases/*stride*/, d_g/*start*/);
                   hdf5->add_to_results ("/results/sgas", &tmp_buf[0], n_elem_global, n_elem_local, mpi_offset, time);
                 }
               if (calc_model->is_water ())
                 {
-                  copy_to (&calc_model->saturation_3p[n_phases * mpi_start], &tmp_buf[0], n_phases * n_elem_local, n_phases /*stride*/, d_w/*start*/);
+                  copy_to (&calc_model->saturation_3p->data ()[n_phases * mpi_start], &tmp_buf[0], n_phases * n_elem_local, n_phases /*stride*/, d_w/*start*/);
                   hdf5->add_to_results ("/results/swat", &tmp_buf[0], n_elem_global, n_elem_local, mpi_offset, time);
                 }
             }
@@ -411,12 +395,12 @@ namespace blue_sky
       if (calc_model->ts_params->get_bool (fi_params::WRITE_CFL_TO_HDF5) && 
           calc_model->ts_params->get_bool (fi_params::USE_CFL))
       {
-        if (jmx->get_cfl_vector ().empty ())
+        if (jacobian->get_cfl_vector ()->empty ())
           {
-            jmx->get_cfl_vector ().assign (n_elem_local, 0);
+            jacobian->get_cfl_vector ()->assign (n_elem_local, 0);
           }
 
-        copy_to (&jmx->get_cfl_vector ()[0], &tmp_buf[0], n_elem_local);
+        copy_to (&jacobian->get_cfl_vector ()->data ()[0], &tmp_buf[0], n_elem_local);
         hdf5->add_to_results ("/results/cfl", &tmp_buf[0], n_elem_global, n_elem_local, mpi_offset, time);
       }
 #endif
@@ -457,11 +441,10 @@ namespace blue_sky
     }
 #endif // #ifdef HDF5
 
-  template <typename strategy_t>
   void
-  reservoir <strategy_t>::write_step_to_storage (const sp_calc_model_t &calc_model, 
+  reservoir::write_step_to_storage (const sp_calc_model_t &calc_model, 
     const sp_mesh_iface_t &mesh, 
-    const sp_jmatrix_t &jmx, 
+    const BS_SP (jacobian) &jacobian, 
     size_t large_time_step_num, 
     size_t total_time_step_num, 
     double time)
@@ -470,76 +453,64 @@ namespace blue_sky
 
     data_saver_->write_well_results (calc_model, facility_list_->wells_begin (), facility_list_->wells_end (), time);
     data_saver_->write_fip_results  (calc_model);
-    data_saver_->write_calc_model_data (calc_model, jmx, large_time_step_num, total_time_step_num, time);
+    data_saver_->write_calc_model_data (calc_model, jacobian, large_time_step_num, total_time_step_num, time);
   }
-  template <typename strategy_t>
   void
-  reservoir <strategy_t>::write_mesh_to_storage (const sp_mesh_iface_t &mesh)
+  reservoir::write_mesh_to_storage (const sp_mesh_iface_t &mesh)
   {
     BS_ASSERT (data_saver_);
     data_saver_->write_mesh (mesh);
   }
-  template <typename strategy_t>
   void
-  reservoir <strategy_t>::write_starting_date_to_storage (const boost::posix_time::ptime &date)
+  reservoir::write_starting_date_to_storage (const boost::posix_time::ptime &date)
   {
     BS_ASSERT (data_saver_);
     data_saver_->write_starting_date (date);
   }
 
-  template <typename strategy_t>
   void
-  reservoir <strategy_t>::open_storage (const std::string &name)
+  reservoir::open_storage (const std::string &name)
   {
     BS_ASSERT (data_saver_) (name);
     data_saver_->open_storage (name);
   }
 
-  template <typename strategy_t>
-  typename reservoir <strategy_t>::sp_well_factory_t
-  reservoir <strategy_t>::get_well_factory () const
+  reservoir::sp_well_factory_t
+  reservoir::get_well_factory () const
   {
     return well_factory_;
   }
-  template <typename strategy_t>
-  typename reservoir <strategy_t>::sp_well_controller_factory_t
-  reservoir <strategy_t>::get_well_controller_factory () const
+  reservoir::sp_well_controller_factory_t
+  reservoir::get_well_controller_factory () const
   {
     return well_controller_factory_;
   }
-  template <typename strategy_t>
-  typename reservoir <strategy_t>::sp_well_limit_operation_factory_t
-  reservoir <strategy_t>::get_well_limit_operation_factory () const
+  reservoir::sp_well_limit_operation_factory_t
+  reservoir::get_well_limit_operation_factory () const
   {
     return well_limit_operation_factory_;
   }
 
-  template <typename strategy_t>
   void
-  reservoir <strategy_t>::set_well_factory (const sp_well_factory_t &factory)
+  reservoir::set_well_factory (const sp_well_factory_t &factory)
   {
     well_factory_ = factory;
   }
-  template <typename strategy_t>
   void
-  reservoir <strategy_t>::set_well_controller_factory (const sp_well_controller_factory_t &factory)
+  reservoir::set_well_controller_factory (const sp_well_controller_factory_t &factory)
   {
     well_controller_factory_ = factory;
   }
-  template <typename strategy_t>
   void
-  reservoir <strategy_t>::set_well_limit_operation_factory (const sp_well_limit_operation_factory_t &factory)
+  reservoir::set_well_limit_operation_factory (const sp_well_limit_operation_factory_t &factory)
   {
     well_limit_operation_factory_ = factory;
   }
 
   //bs stuff
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF (reservoir, (class))
-  BLUE_SKY_TYPE_STD_COPY_T_DEF (reservoir, (class))
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (reservoir <base_strategy_fi>), 1, (objbase), "reservior_seq_fi", "", "", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (reservoir <base_strategy_di>), 1, (objbase), "reservior_seq_di", "", "", false)
-
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (reservoir <base_strategy_mixi>), 1, (objbase), "reservior_seq_mixi", "", "", false)
+  BLUE_SKY_TYPE_STD_CREATE (reservoir)
+  BLUE_SKY_TYPE_STD_COPY (reservoir)
+  BLUE_SKY_TYPE_IMPL (reservoir, objbase, "reservior_seq", "reservior_seq", "reservior_seq")
 
 } // namespace blue_sky
 

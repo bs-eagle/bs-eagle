@@ -17,135 +17,134 @@ namespace blue_sky
   namespace hdf5
     {
 
-    void
-    write_fip_results (const bs_hdf5_storage &hdf5, smart_ptr <fip_results_storage> &fres)
-    {
-      if (!fres)
-        {
-          BOSWARN (section::save_data, level::warning) << "Fip results storage is null" << bs_end;
-          return ;
-        }
+//    void
+//    write_fip_results (const bs_hdf5_storage &hdf5, smart_ptr <fip_results_storage> &fres)
+//    {
+//      if (!fres)
+//        {
+//          BOSWARN (section::save_data, level::warning) << "Fip results storage is null" << bs_end;
+//          return ;
+//        }
+//
+//      hid_t group_fip = hdf5.begin_object ("fip");
+//
+//      fip_results_storage::fip_type::iterator iter, e;
+//      for (iter = fres->fip.begin (), e = fres->fip.end (); iter != e; ++iter)
+//        {
+//          char group_name[100];
+//          sprintf (group_name, "%d", (*iter).first);
+//
+//          // group for fip: check if exist, then open, create else
+//          hid_t group = hdf5.begin_object (group_fip, group_name);
+//
+//          // write data for the current fip_results
+//          int dates_size = (int) iter->second.dates.size();
+//          if (dates_size > 0)
+//            {
+//              detail::add_dates (hdf5, group, iter->second.dates);
+//              detail::add_params (hdf5, group, "d_params", iter->second.d_params, dates_size);
+//            }
+//          H5Gclose (group);
+//        }
+//
+//      H5Gclose (group_fip);
+//    }
+//
+//    void
+//    write_well_results (const bs_hdf5_storage &hdf5, smart_ptr <well_results_storage> &wres, bool write_conn_data)
+//    {
+//      if (!wres)
+//        {
+//          BOSWARN (section::save_data, level::warning) << "Well results storage is null" << bs_end;
+//          return ;
+//        }
+//
+//      hid_t group_wells, group_well;
+//      hid_t group_connections, group_connection;
+//
+//#ifdef _MPI
+//      //MPI: each process writes wells/conns to own file
+//      file = &indiv_file;
+//      group_wells = *file;
+//#else
+//      // check if exist, then open, create else
+//      group_wells = hdf5.begin_object ("wells");
+//#endif
+//      well_results_storage::wells_type::iterator iter, e;
+//      for (iter = wres->wells.begin(), e = wres->wells.end(); iter != e; ++iter)
+//        {
+//#ifdef _MPI
+//          // in mpi decomposition we operate with global mesh in each proc
+//          // therefore all wells are present in each proc
+//          // but because other processor's domains are inactive
+//          // connections of wells, which are in those domains not exists
+//          // for writing only own wells we use [well.connections.size() > 0] condition
+//          // but own wells with no connections will be skipped too :(
+//          // we also send param i_need_write to methods for writing connections,
+//          // but it's not neccessary, because loop will be empty ;)
+//          if (!iter->second.connections.size())
+//            {
+//              continue;
+//            }
+//#endif
+//
+//          group_well = hdf5.begin_object (group_wells, iter->first);
+//
+//          // write well's group name
+//          hdf5.write_string_to_hdf5 (group_well, "group", iter->second.group);
+//
+//          int dates_size = (int) iter->second.dates.size();
+//          if (dates_size > 0)
+//            {
+//              detail::add_dates (hdf5, group_well, iter->second.dates);
+//              detail::add_params (hdf5, group_well, "d_params", iter->second.d_params, dates_size);
+//              detail::add_params (hdf5, group_well, "i_params", iter->second.i_params, dates_size);
+//
+//              iter->second.clear ();
+//            }
+//
+//          // write connections data
+//          if (write_conn_data)
+//            {
+//              // group for connection: check if exist, then open, create else
+//              group_connections = hdf5.begin_object (group_well, "connections");
+//
+//              // write connections
+//              char connection_name[100];
+//              well_results::conn_type::iterator iter_conn;
+//              for (iter_conn = iter->second.connections.begin(); iter_conn != iter->second.connections.end(); ++iter_conn)
+//                {
+//                  // create group for connection
+//                  sprintf (connection_name, "%d", iter_conn->first);
+//
+//                  // group for connection: check if exist, then open, create else
+//                  group_connection = hdf5.begin_object (group_connections, connection_name);
+//
+//                  int cdates_size = (int) iter_conn->second.dates.size();
+//                  if (cdates_size > 0)
+//                    {
+//                      detail::add_dates (hdf5, group_connection, iter_conn->second.dates);
+//                      detail::add_params (hdf5, group_connection, "d_params", iter_conn->second.d_params, cdates_size);
+//                      detail::add_params (hdf5, group_connection, "i_params", iter_conn->second.i_params, cdates_size);
+//
+//                      iter_conn->second.clear ();
+//                    }
+//                  H5Gclose (group_connection);
+//                } // conn loop
+//            } // if (write_conn_data)
+//          H5Gclose (group_well);
+//        }//wells loop
+//#ifndef _MPI
+//      H5Gclose (group_wells);
+//#endif
+//    }
 
-      hid_t group_fip = hdf5.begin_object ("fip");
-
-      fip_results_storage::fip_type::iterator iter, e;
-      for (iter = fres->fip.begin (), e = fres->fip.end (); iter != e; ++iter)
-        {
-          char group_name[100];
-          sprintf (group_name, "%d", (*iter).first);
-
-          // group for fip: check if exist, then open, create else
-          hid_t group = hdf5.begin_object (group_fip, group_name);
-
-          // write data for the current fip_results
-          int dates_size = (int) iter->second.dates.size();
-          if (dates_size > 0)
-            {
-              detail::add_dates (hdf5, group, iter->second.dates);
-              detail::add_params (hdf5, group, "d_params", iter->second.d_params, dates_size);
-            }
-          H5Gclose (group);
-        }
-
-      H5Gclose (group_fip);
-    }
-
-    void
-    write_well_results (const bs_hdf5_storage &hdf5, smart_ptr <well_results_storage> &wres, bool write_conn_data)
-    {
-      if (!wres)
-        {
-          BOSWARN (section::save_data, level::warning) << "Well results storage is null" << bs_end;
-          return ;
-        }
-
-      hid_t group_wells, group_well;
-      hid_t group_connections, group_connection;
-
-#ifdef _MPI
-      //MPI: each process writes wells/conns to own file
-      file = &indiv_file;
-      group_wells = *file;
-#else
-      // check if exist, then open, create else
-      group_wells = hdf5.begin_object ("wells");
-#endif
-      well_results_storage::wells_type::iterator iter, e;
-      for (iter = wres->wells.begin(), e = wres->wells.end(); iter != e; ++iter)
-        {
-#ifdef _MPI
-          // in mpi decomposition we operate with global mesh in each proc
-          // therefore all wells are present in each proc
-          // but because other processor's domains are inactive
-          // connections of wells, which are in those domains not exists
-          // for writing only own wells we use [well.connections.size() > 0] condition
-          // but own wells with no connections will be skipped too :(
-          // we also send param i_need_write to methods for writing connections,
-          // but it's not neccessary, because loop will be empty ;)
-          if (!iter->second.connections.size())
-            {
-              continue;
-            }
-#endif
-
-          group_well = hdf5.begin_object (group_wells, iter->first);
-
-          // write well's group name
-          hdf5.write_string_to_hdf5 (group_well, "group", iter->second.group);
-
-          int dates_size = (int) iter->second.dates.size();
-          if (dates_size > 0)
-            {
-              detail::add_dates (hdf5, group_well, iter->second.dates);
-              detail::add_params (hdf5, group_well, "d_params", iter->second.d_params, dates_size);
-              detail::add_params (hdf5, group_well, "i_params", iter->second.i_params, dates_size);
-
-              iter->second.clear ();
-            }
-
-          // write connections data
-          if (write_conn_data)
-            {
-              // group for connection: check if exist, then open, create else
-              group_connections = hdf5.begin_object (group_well, "connections");
-
-              // write connections
-              char connection_name[100];
-              well_results::conn_type::iterator iter_conn;
-              for (iter_conn = iter->second.connections.begin(); iter_conn != iter->second.connections.end(); ++iter_conn)
-                {
-                  // create group for connection
-                  sprintf (connection_name, "%d", iter_conn->first);
-
-                  // group for connection: check if exist, then open, create else
-                  group_connection = hdf5.begin_object (group_connections, connection_name);
-
-                  int cdates_size = (int) iter_conn->second.dates.size();
-                  if (cdates_size > 0)
-                    {
-                      detail::add_dates (hdf5, group_connection, iter_conn->second.dates);
-                      detail::add_params (hdf5, group_connection, "d_params", iter_conn->second.d_params, cdates_size);
-                      detail::add_params (hdf5, group_connection, "i_params", iter_conn->second.i_params, cdates_size);
-
-                      iter_conn->second.clear ();
-                    }
-                  H5Gclose (group_connection);
-                } // conn loop
-            } // if (write_conn_data)
-          H5Gclose (group_well);
-        }//wells loop
-#ifndef _MPI
-      H5Gclose (group_wells);
-#endif
-    }
-
-    template<class strategy_t>
-    void write_mesh_to_hdf5 (const smart_ptr <bs_hdf5_storage, true> &hdf5, const smart_ptr <rs_smesh_iface<strategy_t>, true> &mesh)
+    void write_mesh_to_hdf5 (const smart_ptr <bs_hdf5_storage, true> &hdf5, const smart_ptr <rs_smesh_iface, true> &mesh)
     {
       const int INITIAL_DATA_SIZE = 5;
       int values[INITIAL_DATA_SIZE];
 
-      typename rs_smesh_iface<strategy_t>::index_point3d_t dims = mesh->get_dimens ();
+      rs_smesh_iface::index_point3d_t dims = mesh->get_dimens ();
 
       values[0] = dims[0];
       values[1] = dims[1];
@@ -154,8 +153,8 @@ namespace blue_sky
       values[4] = mesh->get_n_active_elements ();//mesh->n_planes
 
       hdf5->write_array ("/mesh","initial_data", values, 5);
-      hdf5->write_array ("/mesh","original_elements", &(mesh->get_ext_to_int())[0], (int)mesh->get_ext_to_int().size());
-      hdf5->write_array ("/mesh","original_planes", &(mesh->get_ext_to_int())[0], (int)mesh->get_ext_to_int().size());//TODO
+      hdf5->write_array ("/mesh","original_elements", &(mesh->get_ext_to_int()->data ())[0], (int)mesh->get_ext_to_int()->size());
+      hdf5->write_array ("/mesh","original_planes", &(mesh->get_ext_to_int()->data ())[0], (int)mesh->get_ext_to_int()->size());//TODO
     }
 
     namespace detail
@@ -299,10 +298,6 @@ namespace blue_sky
       }
 
     } // namespace detail
-
-    template void write_mesh_to_hdf5 <base_strategy_fi> (const smart_ptr <bs_hdf5_storage, true> &hdf5, const smart_ptr <rs_smesh_iface<base_strategy_fi>, true> &mesh);
-    template void write_mesh_to_hdf5 <base_strategy_di> (const smart_ptr <bs_hdf5_storage, true> &hdf5, const smart_ptr <rs_smesh_iface<base_strategy_di>, true> &mesh);
-    template void write_mesh_to_hdf5 <base_strategy_mixi> (const smart_ptr <bs_hdf5_storage, true> &hdf5, const smart_ptr <rs_smesh_iface<base_strategy_mixi>, true> &mesh);
 
   } // namespace hdf5
 } // namespace blue_sky

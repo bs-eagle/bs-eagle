@@ -55,7 +55,11 @@ namespace blue_sky
         }
     };
 
-  
+  idata::pvt_info::pvt_info ()
+  : main_data_ (BS_KERNEL.create_object (v_float::bs_type ()))
+  {
+  }
+
   idata::~idata ()
   {
     h5_pool->close_file();
@@ -64,18 +68,25 @@ namespace blue_sky
   
   idata::idata(bs_type_ctor_param /*param*/)
   : bs_node(bs_node::create_node (new this_t::idata_traits ())),
+  props (BS_KERNEL.create_object ("prop")),
   h5_pool (BS_KERNEL.create_object ("h5_pool")),
-  props (BS_KERNEL.create_object ("prop"))
+  equil_regions (BS_KERNEL.create_object (v_int::bs_type ())),
+  rock (BS_KERNEL.create_object (v_float::bs_type ())),
+  p_ref (BS_KERNEL.create_object (v_float::bs_type ())),
+  equil (BS_KERNEL.create_object (v_float::bs_type ()))
   {
     init();
   }
 
   
   idata::idata(const this_t &src)
-      : bs_refcounter (src), bs_node(src), 
-      h5_pool(give_kernel::Instance().create_object_copy(src.h5_pool)),
-      props(give_kernel::Instance().create_object_copy(src.props))
-      //scal3(give_kernel::Instance().create_object_copy(src.scal3)),
+  : bs_refcounter (src), bs_node(src), 
+  props(give_kernel::Instance().create_object_copy(src.props)),
+  h5_pool(give_kernel::Instance().create_object_copy(src.h5_pool))
+  //equil_regions (BS_KERNEL.create_object_copy (src.equil_regions)),
+  //rock (BS_KERNEL.create_object_copy (src.rock)),
+  //p_ref (BS_KERNEL.create_object_copy (src.p_ref)),
+  //equil (BS_KERNEL.create_object_copy (src.equil))
   {
     *this = src;
   }
@@ -86,13 +97,6 @@ namespace blue_sky
     //depth.resize((nx+1) * (ny+1) * (nz+1));
     h5_pool->open_file ("bs_data_storage.h5", "/pool");
     
-    props->add_property_f (DEFAULT_MINIMAL_PORE_VOLUME, "minimal_pore_volume", "Minimal pore volume allowed for active cells");
-    props->add_property_f (DEFAULT_MINIMAL_SPLICE_VOLUME, "minimal_splice_volume", "Minimal pore volume allowed for active cells to splice with other cells");
-    props->add_property_f (DEFAULT_MAXIMUM_SPLICE_THICKNESS, "maximum_splice_thickness", "Default maximum thickness allowed between active cells to be coupled");
-
-    props->add_property_i (1, "nx", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
-    props->add_property_i (1, "ny", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
-    props->add_property_i (1, "nz", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
     props->add_property_i (0, "rpo_model", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
     props->add_property_i (1, "pvt_region", "Number of PVT regions in simulation");
     props->add_property_i (1, "sat_region", "Number of saturation regions in simulation");
@@ -106,7 +110,6 @@ namespace blue_sky
     props->add_property_b (0, "water_phase", "True if water phase exists");
     props->add_property_b (0, "gas_phase", "True if gas phase exists");
     props->add_property_b (0, "scalecrs", "True if SCALECRS is enabled");
-
   }
 
   void idata::flush_pool()
@@ -171,18 +174,15 @@ namespace blue_sky
     
     t_long def_val = -1;
     
-    this->rock->resize(r_pvt);
-    this->p_ref->resize(r_pvt);
+    rock->init (r_pvt, def_val);
+    p_ref->init (r_pvt, def_val);
 
-    this->rock->assign (def_val);
-    this->p_ref->assign (def_val);
+    equil->resize (EQUIL_TOTAL * r_eql); //!TODO: EQUIL_TOTAL instead of 3
 
-    this->equil->resize(EQUIL_TOTAL * r_eql); //!TODO: EQUIL_TOTAL instead of 3
-
-    this->pvto.resize(r_pvt);
-    this->pvtdo.resize(r_pvt);
-    this->pvtg.resize(r_pvt);
-    this->pvtw.resize(r_pvt);
+    pvto.resize (r_pvt);
+    pvtdo.resize (r_pvt);
+    pvtg.resize (r_pvt);
+    pvtw.resize (r_pvt);
   }
 
   
@@ -244,14 +244,34 @@ namespace blue_sky
   }
   
   
-  spv_int idata::get_i_array (const std::string & array_name)
+  spv_int idata::get_i_array (const std::string & array_name, bool safe)
   {
-    return h5_pool->get_i_data (array_name);
+    return safe 
+        ? h5_pool->get_i_data (array_name)
+        : h5_pool->get_i_data_unsafe (array_name)
+        ;
   }
   
-  spv_float idata::get_fp_array (const std::string &array_name)
+  spv_float idata::get_fp_array (const std::string &array_name, bool safe)
   {
-    return h5_pool->get_fp_data (array_name);
+    return safe
+        ? h5_pool->get_fp_data (array_name)
+        : h5_pool->get_fp_data_unsafe (array_name)
+        ;
+  }
+
+  bool
+  idata::contains_i_array (const std::string &array_name) 
+  {
+    const spv_int &a = h5_pool->get_i_data_unsafe (array_name);
+    return a && a->size ();
+  }
+
+  bool
+  idata::contains_fp_array (const std::string &array_name)
+  {
+    const spv_float &a = h5_pool->get_fp_data_unsafe (array_name);
+    return a && a->size ();
   }
   
   int idata::set_i_array (const std::string & array_name,  spv_int array)
@@ -265,7 +285,7 @@ namespace blue_sky
     return h5_pool->set_fp_data (array_name, array);
   }
 
-  spv_int idata::create_i_array (const std::string & array_name,  t_int *array_dimens, t_int def_value)
+  spv_int idata::create_i_array (const std::string & /*array_name*/,  t_int *array_dimens, t_int def_value)
   {
     spv_int new_array;
     t_long n;
@@ -278,13 +298,14 @@ namespace blue_sky
 
     new_array = BS_KERNEL.create_object (v_int::bs_type ());
     new_array->resize (n);
+    std::fill (new_array->begin (), new_array->end(), def_value);
     new_array->reshape (3, dims);
 
     return new_array;
   }
   
 
-  spv_float idata::create_fp_array (const std::string & array_name,  t_int *array_dimens, t_float def_value)
+  spv_float idata::create_fp_array (const std::string & /*array_name*/,  t_int *array_dimens, t_float def_value)
   {
     spv_float new_array;
     t_long n;
@@ -296,6 +317,7 @@ namespace blue_sky
 
     new_array = BS_KERNEL.create_object (v_float::bs_type ());
     new_array->resize (n);
+    std::fill (new_array->begin (), new_array->end(), def_value);
     new_array->reshape (3, dims);
 
     return new_array;

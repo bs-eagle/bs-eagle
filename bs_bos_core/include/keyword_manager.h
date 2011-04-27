@@ -20,35 +20,31 @@
 
 namespace blue_sky
 {
-
-  template <class strategy_t>
   class BS_API_PLUGIN keyword_info_base;
 
   /**
    * \class keyword_manager
    * \brief Class-factory which contains a set of handlers for different keywords
    * */
-  template <class strategy_t>
-  class BS_API_PLUGIN keyword_manager: public keyword_manager_iface <strategy_t>
+  class BS_API_PLUGIN keyword_manager: public keyword_manager_iface 
     {
     public:
       //-----------------------------------------
       //  TYPES
       //-----------------------------------------
-      typedef typename strategy_t::index_t            index_t;
-      typedef typename strategy_t::item_t             item_t;
-      typedef typename strategy_t::index_array_t      index_array_t;
-      typedef typename strategy_t::item_array_t       item_array_t;
-      typedef strategy_t                              strategy_type;
+      typedef t_long                index_t;
+      typedef t_double              item_t;
+      typedef spv_long              index_array_t;
+      typedef spv_double            item_array_t;
 
-      typedef keyword_manager <strategy_t>		        this_t;                 //<! self type
-      typedef keyword_manager_iface <strategy_t>      base_t;
+      typedef keyword_manager 		        this_t;                 //<! self type
+      typedef keyword_manager_iface       base_t;
 
       typedef idata             							        idata_t;
-      typedef rs_mesh_iface <strategy_t>              mesh_iface_t;
-      typedef rs_smesh_iface <strategy_t>             smesh_iface_t;
-      typedef keyword_info_base <strategy_t>          keyword_info_base_t;
-      typedef keyword_params <strategy_t>             keyword_params_t;
+      typedef rs_mesh_iface               mesh_iface_t;
+      typedef rs_smesh_iface              smesh_iface_t;
+      typedef keyword_info_base           keyword_info_base_t;
+      typedef keyword_params              keyword_params_t;
 
       typedef smart_ptr <this_t, true>							  sp_this_t;              //<! smart pointer to self
       typedef smart_ptr <FRead, true>							    sp_reader_t;            //<! smart pointer to reader
@@ -59,9 +55,9 @@ namespace blue_sky
       typedef smart_ptr <objbase, true>               sp_objbase;
 
 
-      typedef typename base_t::handler_t              handler_t;
-      typedef typename base_t::keyword_handler        keyword_handler;
-      typedef typename base_t::shared_handler_t       shared_handler_t;
+      typedef base_t::handler_t              handler_t;
+      typedef base_t::keyword_handler        keyword_handler;
+      typedef base_t::shared_handler_t       shared_handler_t;
 
 
 
@@ -85,7 +81,7 @@ namespace blue_sky
       //-----------------------------------------
     public:
       //! blue-sky type declaration
-      BLUE_SKY_TYPE_DECL_T(keyword_manager);
+      BLUE_SKY_TYPE_DECL (keyword_manager);
 
       /**
        * \brief  dtor

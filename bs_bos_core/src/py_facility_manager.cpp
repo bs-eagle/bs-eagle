@@ -77,14 +77,13 @@ namespace python {
     .add_property ("wells", get_wells <T>)
   PY_EXPORTER_END;
 
-  template <typename strategy_t>
   void
   export_well_iterator (const char *name)
   {
-    typedef well_iterator <facility_manager <strategy_t> > T;
+    typedef well_iterator <facility_manager> T;
 
     using namespace boost::python;
-    class_ <T> (name, init <facility_manager <strategy_t> *> ())
+    class_ <T> (name, init <facility_manager *> ())
       .def ("next", &T::next)
       .def ("__iter__", pass_through)
       ;
@@ -92,11 +91,8 @@ namespace python {
 
   void py_export_facility_manager()
   {
-    strategy_exporter::export_base <facility_manager, facility_manager_exporter> ("facility_manager");
-
-    export_well_iterator <base_strategy_fi> ("well_iterator_fi");
-    export_well_iterator <base_strategy_di> ("well_iterator_di");
-    export_well_iterator <base_strategy_mixi> ("well_iterator_mixi");
+    base_exporter <facility_manager, facility_manager_exporter>::export_class ("facility_manager");
+    export_well_iterator ("well_iterator");
   }
 
 } // namespace python

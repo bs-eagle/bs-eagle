@@ -5,11 +5,13 @@ lib_name = "common_types"
 tar_name = "common_types"
 
 env = custom_env.Clone ()
-env.Append (CPPPATH = ["include",
+env.Append (CPPPATH = ["include", "src",
     includes["bs_bos_core_base"]
-    ] + includes["kernel"])
+    ] + includes["kernel"],
+	CPPDEFINES = ["_HDF5", 'H5_USE_16_API'],
+    LIBS=["hdf5"])
 
-libs = ["blue_sky", "hdf5"]
+libs = ["blue_sky"]
 
 if (build_kind == "debug") :
     env.AppendUnique (LIBS = list_suffix (libs, "_d"))

@@ -19,12 +19,10 @@ namespace blue_sky
   namespace wells
     {
 
-    template <typename strategy_type>
     struct type_helper
       {
-        typedef strategy_type                             strategy_t;
-        typedef typename strategy_t::item_t               item_t;
-        typedef typename strategy_t::index_t              index_t;
+        typedef t_double               item_t;
+        typedef t_long              index_t;
 
         typedef boost::array <index_t, FI_PHASE_TOT>      phase_d_t;
         typedef boost::array <index_t, FI_PHASE_TOT>      sat_d_t;
