@@ -53,21 +53,24 @@ rs_mesh_base ::init_props (const sp_hdm_t hdm)
 
 int rs_mesh_base::init_int_to_ext()
 {
-  t_long *ext_to_int_data, *int_to_ext_data; 
   t_long n_ext = t_long(ext_to_int->size());
   if (n_ext == 0)
     return -1;
     
-  int_to_ext->resize (n_active_elements);
-  int_to_ext->assign(0);
+  int_to_ext->init (n_active_elements, 0);
   
-  int_to_ext_data = &(*int_to_ext)[0];
-  ext_to_int_data = &(*ext_to_int)[0];
+  t_long *int_to_ext_data = int_to_ext->data ();
+  t_long *ext_to_int_data = ext_to_int->data ();
   
   for (t_long i = 0; i < n_ext; i++)
     {
       if (ext_to_int_data[i] != -1)
         {
+          if (ext_to_int_data[i] >= n_active_elements)
+            {
+              bs_throw_exception (boost::format ("ext_to_int[%d] >= %d") % i % n_active_elements);
+            }
+        
           int_to_ext_data[ext_to_int_data[i]] = i;
         }
     }
