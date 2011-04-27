@@ -68,7 +68,7 @@ int rs_mesh_base::init_int_to_ext()
         {
           if (ext_to_int_data[i] >= n_active_elements)
             {
-              bs_throw_exception (boost::format ("ext_to_int[%d] >= %d") % i % n_active_elements);
+              bs_throw_exception (boost::format ("ext_to_int[%d] == %d >= %d") % i % ext_to_int_data[i] % n_active_elements);
             }
         
           int_to_ext_data[ext_to_int_data[i]] = i;
