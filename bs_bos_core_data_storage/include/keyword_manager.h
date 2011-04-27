@@ -14,8 +14,6 @@
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #include "main_def.h"
-#include "read_class.h"
-#include "data_class.h"
 
 #include "keyword_manager_iface.h"
 #include "date_sim.h"
@@ -47,13 +45,7 @@ namespace blue_sky
       typedef keyword_params              keyword_params_t;
 
       typedef smart_ptr <this_t, true>							  sp_this_t;              //<! smart pointer to self
-      typedef smart_ptr <FRead, true>							    sp_reader_t;            //<! smart pointer to reader
-      typedef smart_ptr <idata_t, true>						    sp_idata_t;             //<! smart pointr to initial data storage
       typedef smart_ptr <h5_pool_iface, true>					sp_pool_t;             //<! smart pointr to initial data storage
-      /*
-      typedef smart_ptr <mesh_iface_t, true >         sp_mesh_iface_t;
-      typedef smart_ptr <smesh_iface_t, true >        sp_smesh_iface_t;
-      */
       typedef smart_ptr <keyword_info_base_t, true>   sp_keyword_info_base_t;
       typedef smart_ptr <objbase, true>               sp_objbase;
       

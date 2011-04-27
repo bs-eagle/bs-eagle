@@ -8,6 +8,8 @@
  * */
 #include "bs_bos_core_data_storage_stdafx.h"
 #include "keyword_manager.h"
+#include "read_class.h"
+#include "data_class.h"
 
 namespace blue_sky
   {
@@ -28,7 +30,7 @@ namespace blue_sky
   bool 
   keyword_manager ::is_keyword_supported (const std::string &keyword, keyword_params_t &params) const
   {
-    sp_reader_t reader = params.hdm->get_reader ();
+    BS_SP (FRead) reader = params.hdm->get_reader ();
 
     supported_keywords_t::const_iterator sup_it = supported_keywords.find (keyword);
     if (sup_it == supported_keywords.end ())
@@ -58,7 +60,7 @@ namespace blue_sky
   void keyword_manager::handle_keyword (const std::string &keyword, keyword_params_t &params)
   {
     handlers_t::iterator it = handlers.find(keyword);
-    sp_reader_t reader = params.hdm->get_reader ();
+    BS_SP (FRead) reader = params.hdm->get_reader ();
 
     if (it == handlers.end ())
       {

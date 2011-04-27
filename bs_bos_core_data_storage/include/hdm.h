@@ -11,6 +11,7 @@
 #include "hdm_iface.h"
 #include "locale_keeper.h"
 #include "rs_mesh_iface.h"
+#include "read_class.h"
 
 namespace blue_sky {
 
