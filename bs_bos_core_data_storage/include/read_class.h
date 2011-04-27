@@ -291,14 +291,16 @@ namespace detail {
         size_t line_count = 0;
         if (read_array (key, temp, 0, 0, 1) == (size_t)num_col)
           {
+            // FIXME: WTF O_o
             table.resize (table.size () + num_col);
-            std::copy (temp.begin (), temp.end (), table.end ());
+            std::copy (temp.begin (), temp.end (), table.end () - num_col);
             line_count++;
 
             while (this->read_array (key, temp, 0, 0, 0) == (size_t)num_col)
               {
+                // FIXME: WTF
                 table.resize (table.size () + num_col);
-                std::copy (temp.begin (), temp.end (), table.end ());
+                std::copy (temp.begin (), temp.end (), table.end () - num_col);
                 line_count++;
               }
           }
