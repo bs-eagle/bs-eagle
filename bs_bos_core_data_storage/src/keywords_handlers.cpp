@@ -49,16 +49,10 @@ namespace blue_sky
     sp_this_t km = params.hdm->get_keyword_manager ();
     sp_pool_t pool = params.hdm->get_pool ();
     
-    spv_int this_arr;
-    t_long ndim = 0;
-    
-    //!TODO: check sp!
-    
-    
-    this_arr = BS_KERNEL.create_object (v_int::bs_type ());
-    ndim = pool->calc_data_dims (keyword);
+    spv_int this_arr = BS_KERNEL.create_object (v_int::bs_type ());
+    t_long ndim = pool->calc_data_dims (keyword);
+
     this_arr->resize (ndim);
-    
     
     if ((len = reader->read_array (keyword, *this_arr)) != (size_t)ndim)
       {
@@ -77,11 +71,9 @@ namespace blue_sky
     sp_pool_t pool = params.hdm->get_pool ();
     
     //!TODO: check sp!
-    spv_float this_arr;
-    t_long ndim = 0;
+    spv_float this_arr = BS_KERNEL.create_object (v_float::bs_type ());
+    t_long ndim = pool->calc_data_dims (keyword);
     
-    this_arr = BS_KERNEL.create_object (v_float::bs_type ());
-    ndim = pool->calc_data_dims (keyword);
     this_arr->resize (ndim);
 
     if ((len = reader->read_array (keyword.c_str(), *this_arr)) != (size_t)ndim)
@@ -568,12 +560,10 @@ namespace blue_sky
   void keyword_manager::REGDIMS_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    std::vector<t_int> itmp;
-    itmp.resize(4);
     sp_idata_t idata = params.hdm->get_data ();
     
-
-    if ((len = reader->read_array (keyword, itmp)) != 4)
+    boost::array <int, 4> itmp;
+    if ((len = reader->read_array (keyword, itmp)) != itmp.size ())
       {
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
           % reader->get_prefix() % keyword);
@@ -593,12 +583,10 @@ namespace blue_sky
   void keyword_manager::EQLDIMS_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    shared_vector <int> itmp;
-    itmp.resize(1);
     sp_idata_t idata = params.hdm->get_data ();
     
-
-    if ((len = reader->read_array (keyword, itmp)) != 1)
+    boost::array <int, 1> itmp;
+    if ((len = reader->read_array (keyword, itmp)) != itmp.size ())
       {
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
           % reader->get_prefix() % keyword);
@@ -622,8 +610,7 @@ namespace blue_sky
     char buf[CHAR_BUF_LEN] = {0};
     char *strt = 0, *end_ptr = 0;
     sp_idata_t idata = params.hdm->get_data ();
-    std::vector<t_int> itmp;
-    itmp.resize(4);
+    boost::array <int, 4> itmp;
 
     reader->read_line (buf, CHAR_BUF_LEN);
     // read number of saturation tables
@@ -681,7 +668,7 @@ namespace blue_sky
   {
     KH_READER_DEF
     sp_idata_t idata = params.hdm->get_data ();
-    spv_float density;
+    spv_float density = BS_KERNEL.create_object (v_float::bs_type ());
     t_long n_pvt_region = idata->props->get_i("pvt_region");
     
     density->resize (n_pvt_region * 3);
@@ -816,7 +803,7 @@ namespace blue_sky
               }
           }
 
-        main_data = &(*idata->pvto[i].main_data_)[0];
+        main_data = idata->pvto[i].main_data_->data ();
         // Rows infill
         for (j = 0; j < lj*4; j++)
           {
@@ -844,7 +831,7 @@ namespace blue_sky
     // Read table for each of region
     for (t_int i = 0; i < n_pvt_region; i++)
       {
-        if ((len = reader->read_table (keyword, *(idata->pvtdo[i].main_data_), 3)) < 1)
+        if ((len = reader->read_table (keyword, (*idata->pvtdo[i].main_data_), 3)) < 1)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
               % reader->get_prefix () % keyword);
@@ -872,7 +859,7 @@ namespace blue_sky
     for (t_int i = 0; i < n_pvt_region; i++)
       {
         //idata->pvtw[i].main_data_.resize(4);
-        if ((len = reader->read_table (keyword, *(idata->pvtw[i].main_data_), 4)) < 1)
+        if ((len = reader->read_table (keyword, (*idata->pvtw[i].main_data_), 4)) < 1)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
               % reader->get_prefix () % keyword);
@@ -899,7 +886,7 @@ namespace blue_sky
     for (t_int i = 0; i < n_pvt_region; i++)
       {
         //idata->pvtg[i].main_data_.resize(DOUB_BUF_LEN);
-        if ((len = reader->read_table (keyword, *(idata->pvtg[i].main_data_), 3)) < 1)
+        if ((len = reader->read_table (keyword, (*idata->pvtg[i].main_data_), 3)) < 1)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
               % reader->get_prefix () % keyword);
@@ -918,12 +905,10 @@ namespace blue_sky
     KH_READER_DEF
     sp_idata_t idata = params.hdm->get_data ();
     boost::array <t_float, 2> dbuf;
-    t_float *p_ref,*rock;
+    t_float *p_ref = idata->p_ref->data ();
+    t_float*rock = idata->rock->data ();
     t_long n_pvt_region = idata->props->get_i("pvt_region");
     
-    p_ref = &(*idata->p_ref)[0];
-    rock = &(*idata->rock)[0];
-
     // Compressibility of rock
     for (t_int i = 0; i < n_pvt_region; ++i)
       {
