@@ -15,7 +15,7 @@ namespace blue_sky {
    * \brief hold scal region data (So, Sp, Krp, Krop)
    * \detail we hold data as a plain memory region and a list of region_info
    * */
-  class BS_API_PLUGIN scal_2p_data_holder : public objbase
+  class BS_API_PLUGIN scal_2p_data_holder : public scal_2p_data_holder_iface
   {
   public:
     typedef t_double                                item_t;
@@ -32,9 +32,9 @@ namespace blue_sky {
     typedef shared_vector <scal_region_t *>         region_vector_2_t;
     typedef smart_ptr <this_t, true>								sp_scal_data_t;
 
-    void add_spof (const sp_array_item_t data, bool is_water);
-    void add_spfn (const sp_array_item_t data, size_t region_index, bool is_water);
-    void add_sof3 (const sp_array_item_t data, size_t region_index, bool is_water);
+    void add_spof (sp_array_item_t const &data, bool is_water);
+    void add_spfn (sp_array_item_t const &data, t_long region_index, bool is_water);
+    void add_sof3 (sp_array_item_t const &data, t_long region_index, bool is_water);
 
     ~scal_2p_data_holder ()
     {
@@ -42,6 +42,24 @@ namespace blue_sky {
         {
           delete region_2_[i];
         }
+    }
+
+    t_float
+    get_phase_sat_min (t_long region) const
+    {
+      return get_region (region).get_phase_sat_min ();
+    }
+
+    t_float
+    get_phase_sat_max (t_long region) const
+    {
+      return get_region (region).get_phase_sat_max ();
+    }
+
+    t_float
+    get_pcp_max (t_long region) const
+    {
+      return get_region (region).get_pcp_max ();
     }
 
     const scal_region_t &

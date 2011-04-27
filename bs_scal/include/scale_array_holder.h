@@ -46,7 +46,7 @@ private:
 
     };
 
-  class BS_API_PLUGIN scale_array_holder : public objbase
+  class BS_API_PLUGIN scale_array_holder : public scale_array_holder_iface
     {
     public:
       typedef scale_array_holder                this_t;
@@ -112,10 +112,24 @@ private:
       {
         return value_accessor (data_pool->get_col_ptr (scr), 1, data_pool->get_n_rows (scr), value_);
       }
+
+      // FIXME:
+      t_double
+      get_su (t_long cell, t_double value) const
+      {
+        return get_su (value)[cell];
+      }
       ///< max saturation value in SCAL table (NX * NY * NZ)
       value_accessor get_su   (item_t value_) const
       {
         return value_accessor (data_pool->get_col_ptr (su), 1, data_pool->get_n_rows (su), value_);
+      }
+
+      // FIXME:
+      t_double
+      get_sl (t_long cell, t_double value) const
+      {
+        return get_sl (value)[cell];
       }
       ///< min saturation value in SCAL table (NX * NY * NZ)
       value_accessor get_sl   (item_t value_) const
@@ -175,8 +189,8 @@ private:
         if (sl_.size ())
           placement_t::place_data (placement_t::sl, data, sl_, placement_info);
       }
-      template <typename array_t>
-      void insert_pcp (const array_t &pcp_)
+
+      void insert_pcp (const stdv_double &pcp_)
       {
         if (pcp_.size ())
           placement_t::place_data (placement_t::pcp, data, pcp_, placement_info);
@@ -186,64 +200,55 @@ private:
         placement_t::remove_data (placement_t::pcp, data, placement_info);
       }
       
-      template <typename array_t>
-      void set_socr (const array_t &socr_)
+      void set_socr (const spv_float &socr_)
         {
           if (socr_->size ())
             data_pool->add_col_vector (socr, "SOCR", socr_);
         }
 
-      template <typename array_t>
-      void set_scr (const array_t &scr_)
+      void set_scr (const spv_float &scr_)
         {
           if (scr_->size ())
             data_pool->add_col_vector (scr, "SCR", scr_);
         }
 
-      template <typename array_t>
-      void set_su (const array_t &su_)
+      void set_su (const spv_float &su_)
         {
           if (su_->size ())
             data_pool->add_col_vector (su, "SU", su_);
         }
 
-      template <typename array_t>
-      void set_sl (const array_t &sl_)
+      void set_sl (const spv_float &sl_)
         {
           if (sl_->size ())
             data_pool->add_col_vector (sl, "SL", sl_);
         }
 
-      template <typename array_t>
-      void set_pcp (const array_t &pcp_)
+      void set_pcp (const spv_float &pcp_)
         {
           if (pcp_->size ())
             data_pool->add_col_vector (pcp, "PCP", pcp_);
         }
 
-      template <typename array_t>
-      void set_krp (const array_t &krp_)
+      void set_krp (const spv_float &krp_)
         {
           if (krp_->size ())
             data_pool->add_col_vector (krp, "KRP", krp_);
         }
 
-      template <typename array_t>
-      void set_krop (const array_t &krop_)
+      void set_krop (const spv_float &krop_)
         {
           if (krop_->size ())
             data_pool->add_col_vector (krop, "KROP", krop_);
         }
 
-      template <typename array_t>
-      void set_krpr (const array_t &krpr_)
+      void set_krpr (const spv_float &krpr_)
         {
           if (krpr_->size ())
             data_pool->add_col_vector (krpr, "KRPR", krpr_);
         }
 
-      template <typename array_t>
-      void set_krorp (const array_t &krorp_)
+      void set_krorp (const spv_float &krorp_)
         {
           if (krorp_->size ())
             data_pool->add_col_vector (krorp, "KRORP", krorp_);

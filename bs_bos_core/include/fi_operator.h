@@ -18,7 +18,7 @@
 #include "scal_region_info.h"
 #include "scal_region.h"
 #include "scal_2p_data_holder.h"
-#include "scal_3p.h"
+#include "scal_3p_iface.hpp"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #include "calc_model.h"

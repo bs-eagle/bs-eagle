@@ -7,7 +7,7 @@
 #ifndef BS_SCAL_3P_H_
 #define BS_SCAL_3P_H_
 
-#include "calc_model_data.h"
+#include "scal_3p_iface.hpp"
 
 namespace blue_sky
 {
@@ -21,7 +21,7 @@ namespace blue_sky
   class BS_API_PLUGIN jfunction;
 
   //////////////////////////////////////////////////////////////////////////
-  class BS_API_PLUGIN scal_3p : public objbase
+  class BS_API_PLUGIN scal_3p : public scal_3p_iface
     {
     public:
       typedef scal_3p             											this_t;
@@ -57,23 +57,23 @@ namespace blue_sky
 
       ~scal_3p ();
 
-      sp_scale_array_holder_t   
+      BS_SP (scale_array_holder_iface)   
       get_water_scale () const
       {
         return water_scale;
       }
-      sp_scale_array_holder_t
+      BS_SP (scale_array_holder_iface)
       get_gas_scale () const
       {
         return gas_scale;
       }
 
-      sp_scal_2p_data_holder_t
+      BS_SP (scal_2p_data_holder_iface)
       get_water_data () const
       {
         return water_data;
       }
-      sp_scal_2p_data_holder_t
+      BS_SP (scal_2p_data_holder_iface)
       get_gas_data () const
       {
         return gas_data;

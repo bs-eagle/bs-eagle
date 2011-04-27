@@ -168,7 +168,7 @@
 // sergey.miryanov - to compile scal
 #include "vartype_table_iface.h"
 
-#include "scal_3p.h"
+#include "scal_3p_iface.hpp"
 #include "scale_array_holder.h"
 #include "scal_region_info.h"
 #include "scal_region.h"

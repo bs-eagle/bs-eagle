@@ -9,10 +9,6 @@
 #ifndef KEYWORD_MANAGER_H_
 #define KEYWORD_MANAGER_H_
 
-#include BS_FORCE_PLUGIN_IMPORT ()
-//#include "scal_3p.h"
-#include BS_STOP_PLUGIN_IMPORT ()
-
 #include "main_def.h"
 
 #include "keyword_manager_iface.h"

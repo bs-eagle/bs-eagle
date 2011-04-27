@@ -44,7 +44,7 @@ namespace blue_sky
   }
 
   scale_array_holder::scale_array_holder (const this_t& s)
-  : bs_refcounter (s), objbase (s)
+  : bs_refcounter (s), scale_array_holder_iface (s)
   {
     BS_ASSERT (false && "NOT IMPL YET");
   }
@@ -56,7 +56,7 @@ namespace blue_sky
   }
 
   scal_2p_data_holder::scal_2p_data_holder (const this_t& s)
-  : bs_refcounter (s), objbase (s)
+  : bs_refcounter (s), scal_2p_data_holder_iface (s)
   {
     BS_ASSERT (false && "NOT IMPL YET");
   }
@@ -84,7 +84,7 @@ namespace blue_sky
   }
 
   void
-  scal_2p_data_holder::add_spof (const sp_array_item_t data, bool is_water)
+  scal_2p_data_holder::add_spof (sp_array_item_t const &data, bool is_water)
   {
     BS_ASSERT ((data->size () % 4) == 0) (data->size ());
 
@@ -115,7 +115,7 @@ namespace blue_sky
   }
 
   void
-  scal_2p_data_holder::add_spfn (const sp_array_item_t data, size_t region_index, bool is_water)
+  scal_2p_data_holder::add_spfn (sp_array_item_t const &data, t_long region_index, bool is_water)
   {
     BS_ASSERT ((data->size () % 3) == 0) (data->size ());
 
@@ -160,7 +160,7 @@ namespace blue_sky
   }
 
   void
-  scal_2p_data_holder::add_sof3 (const sp_array_item_t data, size_t region_index, bool is_water)
+  scal_2p_data_holder::add_sof3 (sp_array_item_t const &data, t_long region_index, bool is_water)
   {
     typedef t_int   index_t;
 
@@ -934,7 +934,7 @@ namespace blue_sky
   }
 
   scal_3p::scal_3p (const this_t& s)
-  : bs_refcounter (s), objbase (s)
+  : bs_refcounter (s), scal_3p_iface (s)
   {
     bs_throw_exception ("NOT_IMPL_YET");
   }
@@ -1074,40 +1074,17 @@ namespace blue_sky
   }
 
   //////////////////////////////////////////////////////////////////////////
-/*
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(scale_array_holder,(class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(scale_array_holder,(class));
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (scale_array_holder<base_strategy_fi>), 1, (objbase), "scale_array_holder_fi", "scale_array_holder_fi", "scale_array_holder_fi", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (scale_array_holder<base_strategy_di>), 1, (objbase), "scale_array_holder_di", "scale_array_holder_di", "scale_array_holder_di", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (scale_array_holder<base_strategy_mixi>), 1, (objbase), "scale_array_holder_mixi", "scale_array_holder_mixi", "scale_array_holder_mixi", false);
-
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(scal_2p_data_holder,(class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(scal_2p_data_holder,(class));
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (scal_2p_data_holder<base_strategy_fi>), 1, (objbase), "scal_2p_data_holder_fi", "scal_2p_data_holder_fi", "scal_2p_data_holder_fi", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (scal_2p_data_holder<base_strategy_di>), 1, (objbase), "scal_2p_data_holder_di", "scal_2p_data_holder_di", "scal_2p_data_holder_di", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (scal_2p_data_holder<base_strategy_mixi>), 1, (objbase), "scal_2p_data_holder_mixi", "scal_2p_data_holder_mixi", "scal_2p_data_holder_mixi", false);
-
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(scal_3p,(class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(scal_3p,(class));
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (scal_3p<base_strategy_fi>), 1, (objbase), "scal_3p_fi", "scal_3p_fi", "scal_3p_fi", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (scal_3p<base_strategy_di>), 1, (objbase), "scal_3p_di", "scal_3p_di", "scal_3p_di", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (scal_3p<base_strategy_mixi>), 1, (objbase), "scal_3p_mixi", "scal_3p_mixi", "scal_3p_mixi", false);
-*/
-
   BLUE_SKY_TYPE_STD_CREATE (scale_array_holder);
   BLUE_SKY_TYPE_STD_COPY (scale_array_holder);
-
-  BLUE_SKY_TYPE_IMPL(scale_array_holder,  objbase, "scale_array_holder", "scale_array_holder calculation class", "scale_array_holder calculation");
+  BLUE_SKY_TYPE_IMPL(scale_array_holder, scale_array_holder_iface, "scale_array_holder", "scale_array_holder calculation class", "scale_array_holder calculation");
 
   BLUE_SKY_TYPE_STD_CREATE (scal_2p_data_holder);
   BLUE_SKY_TYPE_STD_COPY (scal_2p_data_holder);
-
-  BLUE_SKY_TYPE_IMPL(scal_2p_data_holder,  objbase, "scal_2p_data_holder", "scal_2p_data_holder calculation class", "scal_2p_data_holder calculation");
+  BLUE_SKY_TYPE_IMPL(scal_2p_data_holder, scal_2p_data_holder_iface, "scal_2p_data_holder", "scal_2p_data_holder calculation class", "scal_2p_data_holder calculation");
 
   BLUE_SKY_TYPE_STD_CREATE (scal_3p);
   BLUE_SKY_TYPE_STD_COPY (scal_3p);
-
-  BLUE_SKY_TYPE_IMPL(scal_3p,  objbase, "scal_3p", "scal_3p calculation class", "scal_3p calculation");
+  BLUE_SKY_TYPE_IMPL(scal_3p, scal_3p_iface, "scal_3p", "scal_3p calculation class", "scal_3p calculation");
   //////////////////////////////////////////////////////////////////////////
   bool scal_register_types (const blue_sky::plugin_descriptor &pd)
   {

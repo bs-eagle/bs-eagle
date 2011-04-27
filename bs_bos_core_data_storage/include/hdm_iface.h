@@ -14,17 +14,18 @@ namespace blue_sky {
   class rs_mesh_iface;
   class h5_pool_iface;
   class prop_iface;
+  class scal_3p_iface;
 
   class BS_API_PLUGIN hdm_iface: public objbase
     {
     public:
 
-      typedef smart_ptr <idata, true>							      sp_idata ;
-      typedef smart_ptr <FRead, true>								    sp_reader_t;
-      typedef smart_ptr <keyword_manager_iface, true>		sp_km_t;
-      typedef smart_ptr <rs_mesh_iface, true>		        sp_mesh_iface_t;
-      typedef smart_ptr <h5_pool_iface, true>						sp_h5_pool_t;
-      typedef smart_ptr <prop_iface, true>							sp_prop_t;
+      typedef smart_ptr <idata, true>                       sp_idata ;
+      typedef smart_ptr <FRead, true>                       sp_reader_t;
+      typedef smart_ptr <keyword_manager_iface, true>       sp_km_t;
+      typedef smart_ptr <rs_mesh_iface, true>               sp_mesh_iface_t;
+      typedef smart_ptr <h5_pool_iface, true>               sp_h5_pool_t;
+      typedef smart_ptr <prop_iface, true>                  sp_prop_t;
 
       //METHODS
       virtual ~hdm_iface() {};
@@ -56,6 +57,8 @@ namespace blue_sky {
       virtual sp_prop_t get_prop () = 0;
 
       virtual t_double get_darcy_constant () = 0;
+
+      virtual BS_SP (scal_3p_iface) get_scal () = 0;
 
   
       // SET

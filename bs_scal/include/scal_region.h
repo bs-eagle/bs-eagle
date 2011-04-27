@@ -9,6 +9,7 @@
 
 #include "scal_interpolate.h"
 #include "scal_data_vector.h"
+#include "scal_region_info.h"
 
 namespace blue_sky {
 

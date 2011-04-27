@@ -12,7 +12,7 @@
 #include "fi_params.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
-#include "scal_3p.h"
+#include "scal_3p_iface.hpp"
 #include "scale_array_holder.h"
 #include "scal_region_info.h"
 #include "scal_region.h"
@@ -67,11 +67,11 @@ namespace blue_sky
    * */
   calc_model::calc_model (bs_type_ctor_param /*param*/)
       : bs_refcounter(), bs_node(bs_node::create_node())
-      , scal_prop (BS_KERNEL.create_object (scal_3p_t::bs_type ()))
       , pvt_regions (BS_KERNEL.create_object (v_long::bs_type ()))
       , sat_regions (BS_KERNEL.create_object (v_long::bs_type ()))
       , fip_regions (BS_KERNEL.create_object (v_long::bs_type ()))
       , rock_regions (BS_KERNEL.create_object (v_long::bs_type ()))
+      , scal_prop (BS_KERNEL.create_object ("scal_3p"))
       , pressure (BS_KERNEL.create_object (v_double::bs_type ()))
       , saturation_3p (BS_KERNEL.create_object (v_double::bs_type ()))
       , gas_oil_ratio (BS_KERNEL.create_object (v_double::bs_type ()))
@@ -87,11 +87,11 @@ namespace blue_sky
    * */
   calc_model::calc_model (const this_t & /*src*/)
       : bs_refcounter(), bs_node(bs_node::create_node())
-      , scal_prop (BS_KERNEL.create_object (scal_3p_t::bs_type ()))
       , pvt_regions (BS_KERNEL.create_object (v_long::bs_type ()))
       , sat_regions (BS_KERNEL.create_object (v_long::bs_type ()))
       , fip_regions (BS_KERNEL.create_object (v_long::bs_type ()))
       , rock_regions (BS_KERNEL.create_object (v_long::bs_type ()))
+      , scal_prop (BS_KERNEL.create_object ("scal_3p"))
       , pressure (BS_KERNEL.create_object (v_double::bs_type ()))
       , saturation_3p (BS_KERNEL.create_object (v_double::bs_type ()))
       , gas_oil_ratio (BS_KERNEL.create_object (v_double::bs_type ()))
@@ -356,8 +356,8 @@ namespace blue_sky
                           input_data);
 
     // initialize scale arrays
-    const sp_scale_array_holder_t &gas_scale_ = scal_prop->get_gas_scale ();
-    const sp_scale_array_holder_t &water_scale_ = scal_prop->get_water_scale ();
+    const BS_SP (scale_array_holder_iface) &gas_scale_ = scal_prop->get_gas_scale ();
+    const BS_SP (scale_array_holder_iface) &water_scale_ = scal_prop->get_water_scale ();
 #if 0
     gas_scale_->insert_socr ((*input_data->d_map)[SOGCR].array);
     gas_scale_->insert_scr  ((*input_data->d_map)[SGCR].array);
@@ -1024,8 +1024,8 @@ namespace blue_sky
   void
   calc_model::init_scal ()
   {
-    scal_prop->set_water_jfunction (BS_KERNEL.create_object (scal_3p_t::jfunction_t::bs_type ()));
-    scal_prop->set_gas_jfunction (BS_KERNEL.create_object (scal_3p_t::jfunction_t::bs_type ()));
+    scal_prop->set_water_jfunction (BS_KERNEL.create_object (jfunction::bs_type ()));
+    scal_prop->set_gas_jfunction (BS_KERNEL.create_object (jfunction::bs_type ()));
     scal_prop->init (is_water (), is_gas (), is_oil (), phase_d, sat_d, rpo_model);
     scal_prop->update_gas_data ();
   }

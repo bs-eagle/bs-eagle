@@ -16,16 +16,6 @@
 #include "read_class.h"
 
 
-#include BS_FORCE_PLUGIN_IMPORT ()
-/*
-#include "scal_3p.h"
-#include "scale_array_holder.h"
-#include "scal_region_info.h"
-#include "scal_region.h"
-#include "scal_2p_data_holder.h"
-*/
-#include BS_STOP_PLUGIN_IMPORT ()
-
 namespace blue_sky
   {
   //BS_TYPE_IMPL_T_MEM(bos_array, amap_strategy_fi::item_array_t)

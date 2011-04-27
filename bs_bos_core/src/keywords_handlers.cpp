@@ -12,7 +12,7 @@
 #include "keyword_manager.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
-#include "scal_3p.h"
+#include "scal_3p_iface.hpp"
 #include "scale_array_holder.h"
 #include "scal_region_info.h"
 #include "scal_region.h"

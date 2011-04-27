@@ -10,7 +10,7 @@
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "data_class.h"
-#include "scal_3p.h"
+#include "scal_3p_iface.hpp"
 #include "scale_array_holder.h"
 #include "rock_grid.h"
 #include "scal_region_info.h"
@@ -761,12 +761,15 @@ namespace blue_sky
         item_t smin  = 0, smax = 0, pmax_table = 0;
         if (n_phases > 1 && is_w && is_swatinit)
           {
-            const scal_region &scal_water_data = scal_prop->get_water_data ()->get_region (i_sat);
-            smin = scal_water_data.get_phase_sat_min ();
-            smin = scal_prop->get_water_scale ()->get_sl (smin)[i_cell];
-            smax = scal_water_data.get_phase_sat_max ();
-            smax = scal_prop->get_water_scale ()->get_su (smax)[i_cell];
-            pmax_table = scal_water_data.get_pcp_max ();
+            BS_SP (scal_2p_data_holder_iface) data = scal_prop->get_water_data ();
+
+            smin = data->get_phase_sat_min (i_sat);
+            smin = scal_prop->get_water_scale ()->get_sl (i_cell, smin);
+
+            smax = data->get_phase_sat_max (i_sat);
+            smax = scal_prop->get_water_scale ()->get_su (i_cell, smax);
+
+            pmax_table = data->get_pcp_max (i_sat);
           }
 
         if (n_phases > 1 && is_w && is_swatinit && (p_oil - p_water > 0) && pmax_table > EPS_DIFF/*todo*/)
