@@ -33,6 +33,16 @@ namespace blue_sky
         {};
 
        /** 
+        * @brief 
+        */
+       virtual int init (sp_pool_t sp_pool, sp_prop_t sp_prop)
+         {
+           
+           return 0;
+         }
+
+
+       /** 
         * @brief return number of phases in the model, 
         *        if class non initialized allready or phases non specified
         *        return -1
