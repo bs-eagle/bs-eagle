@@ -1,6 +1,6 @@
-/** 
+/**
  * @file main.cpp
- * @brief 
+ * @brief
  * @author Oleg Borschuk
  * @date 2009-08-28
  */
@@ -16,21 +16,27 @@ using namespace blue_sky;
 using namespace blue_sky::python;
 using namespace boost::python;
 
-namespace blue_sky {
-  BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("comm", "1.0.0", "Common data types", "Common data types", "comm")
+#define REG_TYPE(S)                     \
+    res &= BS_KERNEL.register_type(pd, S::bs_type()); BS_ASSERT (res);
 
-  template <typename PD>
-  bool 
-  register_types (PD &pd)
+namespace {
+  using namespace blue_sky;
+
+  bool
+  register_types (const plugin_descriptor &pd)
   {
     bool res = true;
 
-    res &= BS_KERNEL.register_type (pd, prop::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, table::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, h5_pool::bs_type()); BS_ASSERT (res);
+    REG_TYPE(prop)
+    REG_TYPE(table)
+    REG_TYPE(h5_pool)
 
     return res;
   }
+}
+
+namespace blue_sky {
+  BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("comm", "1.0.0", "Common data types", "Common data types", "comm")
 
   BLUE_SKY_REGISTER_PLUGIN_FUN
   {
@@ -55,7 +61,7 @@ BOOST_PYTHON_MODULE (common_types)
 {
   bs_init_py_subsystem ();
   std::cout << &BS_KERNEL << std::endl;
-  bool res = blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ());
+  bool res = register_types (*blue_sky::bs_get_plugin_descriptor ());
   if (!res)
     throw "Can't register common types";
 

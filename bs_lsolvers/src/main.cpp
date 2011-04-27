@@ -23,17 +23,13 @@ using namespace blue_sky;
 using namespace blue_sky::python;
 using namespace boost::python;
 
-namespace blue_sky {
-  BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("lsolvers", "1.0.0", "Linear solvers for BS", "Linear solvers for BS", "lsolvers");
+namespace {
+  using namespace blue_sky;
 
   bool
   register_types (const plugin_descriptor &pd)
   {
-    //const plugin_descriptor &pd = *bs_init.pd_;
-
     bool res = true;
-
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, prop<float, int, std::string, bool>::bs_type()); BS_ASSERT (res);
 
     res &= BS_KERNEL.register_type (pd, cgs_solver::bs_type()); BS_ASSERT (res);
     res &= BS_KERNEL.register_type (pd, gmres_solver::bs_type()); BS_ASSERT (res);
@@ -46,6 +42,10 @@ namespace blue_sky {
 
     return res;
   }
+}
+
+namespace blue_sky {
+  BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("lsolvers", "1.0.0", "Linear solvers for BS", "Linear solvers for BS", "lsolvers");
 
   BLUE_SKY_REGISTER_PLUGIN_FUN
   {
@@ -70,7 +70,7 @@ BOOST_PYTHON_MODULE (bs_lsolvers)
 {
   bs_init_py_subsystem ();
   std::cout << &BS_KERNEL << std::endl;
-  bool res = blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ());
+  bool res = register_types (*blue_sky::bs_get_plugin_descriptor ());
   if (!res)
     throw "Can't register lsolver types";
 }

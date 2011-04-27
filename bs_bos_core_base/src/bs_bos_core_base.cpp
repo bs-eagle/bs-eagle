@@ -19,8 +19,8 @@ using namespace blue_sky::python;
 using namespace boost::python;
 #endif
 
-namespace blue_sky {
-  BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("bs_bos_core_base", "1.0.0", "BS_BOS_CORE_BASE", "BS_BOS_CORE_BASE", "bs_bos_core_base");
+namespace {
+  using namespace blue_sky;
 
   bool
   register_types (const plugin_descriptor &pd)
@@ -32,6 +32,10 @@ namespace blue_sky {
 
     return res;
   }
+}
+
+namespace blue_sky {
+  BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("bs_bos_core_base", "1.0.0", "BS_BOS_CORE_BASE", "BS_BOS_CORE_BASE", "bs_bos_core_base");
 
   BLUE_SKY_REGISTER_PLUGIN_FUN
   {
@@ -66,7 +70,6 @@ BLUE_SKY_INIT_PY_FUN
   auto_value_to_python <double>::make_known ();
   auto_value_to_python <char>::make_known ();
 
-
   //python::py_export_assert ();
   python::py_export_named_pbase ("named_pbase");
   python::export_data_dimens ();
@@ -80,8 +83,8 @@ BOOST_PYTHON_MODULE (bs_bos_core_base)
 {
   bs_init_py_subsystem ();
   std::cout << &BS_KERNEL << std::endl;
-  bool res = blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ());
+  bool res = register_types (*blue_sky::bs_get_plugin_descriptor ());
   if (!res)
     throw "Can't register bs-bos-core base types";
 }
-#endif 
+#endif
