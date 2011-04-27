@@ -8,11 +8,12 @@ env = custom_env.Clone ()
 env.AppendUnique (CPPPATH = ["include",
     includes["bs_bos_core_base"],
     includes["common_types"],
-    includes["bs_scal"]
+    includes["bs_bos_core_data_storage"],
+    includes["bs_scal"],
     ] + includes["kernel"],
     CCFLAGS = ["-DBOOST_PYTHON_MAX_ARITY=25"])
 
-libs = ["blue_sky", "bs_bos_core_base"]
+libs = ["blue_sky", "bs_bos_core_base", "bs_bos_core_data_storage"]
 
 if (build_kind == "debug") :
     env.AppendUnique (LIBS = list_suffix (libs, "_d"))
