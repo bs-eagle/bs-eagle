@@ -430,49 +430,56 @@ namespace blue_sky
 //}
 
 #ifdef BSPY_EXPORTING_PLUGIN
+namespace {
+  void 
+  init_py_subsystem ()
+  {
+    using namespace boost::python;
+
+    py_export_fi_params ();
+
+  //#ifdef _MPI
+  //  python::py_export_mpi_vector ();
+  //  python::py_export_mpi_csr_matrix ();
+  //#endif
+
+
+    py_export_events ();
+    py_export_event_manager();
+
+    python::py_export_reservoir_simulator ();
+    python::py_export_calc_model ();
+    // we should export enum only for one instance of reservoir simulator
+    //reservoir_simulator<base_strategy_di>::py_export_signals_enum (); //!TODO:
+
+    python::py_export_calc_well ();
+
+    python::py_export_data_storage_interface ();
+
+    python::py_export_jacobian ();
+
+    python::py_export_facility_manager ();
+    python::py_export_reservoir ();
+
+    python::py_export_well_factories ();
+
+  // FIXME:
+  //#ifdef BS_BOS_CORE_USE_CSR_ILU_CFL_PREC
+  //  python::py_export_csr_ilu_cfl_prec ();
+  //#endif
+
+    python::py_export_default_wells ();
+
+    def ("enable_fpu_exceptions", blue_sky::tools::prepare_fpu::enable_exceptions);
+
+    //def ("convert_double_to_float", py_convert_double_to_float <python::py_bcsr_matrix <base_strategy_di::item_array_t, base_strategy_di::index_array_t>, python::py_bcsr_matrix <base_strategy_fi::item_array_t, base_strategy_fi::index_array_t> >);
+
+    //py_export_test_x ();
+  }
+}
 BLUE_SKY_INIT_PY_FUN
 {
-  using namespace boost::python;
-
-  py_export_fi_params ();
-
-//#ifdef _MPI
-//  python::py_export_mpi_vector ();
-//  python::py_export_mpi_csr_matrix ();
-//#endif
-
-
-  py_export_events ();
-  py_export_event_manager();
-
-  python::py_export_reservoir_simulator ();
-  python::py_export_calc_model ();
-  // we should export enum only for one instance of reservoir simulator
-  //reservoir_simulator<base_strategy_di>::py_export_signals_enum (); //!TODO:
-
-  python::py_export_calc_well ();
-
-  python::py_export_data_storage_interface ();
-
-  python::py_export_jacobian ();
-
-  python::py_export_facility_manager ();
-  python::py_export_reservoir ();
-
-  python::py_export_well_factories ();
-
-// FIXME:
-//#ifdef BS_BOS_CORE_USE_CSR_ILU_CFL_PREC
-//  python::py_export_csr_ilu_cfl_prec ();
-//#endif
-
-  python::py_export_default_wells ();
-
-  def ("enable_fpu_exceptions", blue_sky::tools::prepare_fpu::enable_exceptions);
-
-  //def ("convert_double_to_float", py_convert_double_to_float <python::py_bcsr_matrix <base_strategy_di::item_array_t, base_strategy_di::index_array_t>, python::py_bcsr_matrix <base_strategy_fi::item_array_t, base_strategy_fi::index_array_t> >);
-
-  //py_export_test_x ();
+  init_py_subsystem ();
 }
 #ifdef _DEBUG
 BOOST_PYTHON_MODULE (bs_bos_core_d)
@@ -480,7 +487,7 @@ BOOST_PYTHON_MODULE (bs_bos_core_d)
 BOOST_PYTHON_MODULE (bs_bos_core)
 #endif
 {
-  bs_init_py_subsystem ();
+  init_py_subsystem ();
   std::cout << &BS_KERNEL << std::endl;
   bool res = blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ());
   if (!res)

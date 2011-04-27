@@ -52,13 +52,19 @@ namespace blue_sky {
 }
 
 #ifdef BSPY_EXPORTING_PLUGIN
+namespace {
+  void 
+  init_py_subsystem ()
+  {
+    using namespace boost::python;
+
+    //python::py_export_prop ();
+    python::py_export_lsolvers ();
+  }
+}
 BLUE_SKY_INIT_PY_FUN
 {
-  using namespace boost::python;
-
-  //python::py_export_prop ();
-  python::py_export_lsolvers ();
-
+  init_py_subsystem ();
 }
 #ifdef _DEBUG
 BOOST_PYTHON_MODULE (bs_lsolvers_d)
@@ -66,7 +72,7 @@ BOOST_PYTHON_MODULE (bs_lsolvers_d)
 BOOST_PYTHON_MODULE (bs_lsolvers)
 #endif
 {
-  bs_init_py_subsystem ();
+  init_py_subsystem ();
   std::cout << &BS_KERNEL << std::endl;
   bool res = register_types (*blue_sky::bs_get_plugin_descriptor ());
   if (!res)

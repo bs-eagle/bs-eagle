@@ -29,9 +29,16 @@ namespace blue_sky
 }//bs
 
 #ifdef BSPY_EXPORTING_PLUGIN
+namespace {
+  void
+  init_py_subsystem ()
+  {
+    blue_sky::python::py_export_scal ();
+  }
+}
 BLUE_SKY_INIT_PY_FUN
 {
-  blue_sky::python::py_export_scal ();
+  init_py_subsystem ();
 }
 #ifdef _DEBUG
 BOOST_PYTHON_MODULE (bs_scal_d)
@@ -39,7 +46,7 @@ BOOST_PYTHON_MODULE (bs_scal_d)
 BOOST_PYTHON_MODULE (bs_scal)
 #endif
 {
-  bs_init_py_subsystem ();
+  init_py_subsystem ();
   std::cout << &BS_KERNEL << std::endl;
   bool res = blue_sky::scal_register_types (*blue_sky::bs_get_plugin_descriptor ());
   if (!res)

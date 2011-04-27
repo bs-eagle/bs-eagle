@@ -74,13 +74,20 @@ void py_export_flux_connections();
 /*-----------------------------------------------------------------
  * callback that make Python bindings
  *----------------------------------------------------------------*/
+namespace {
+  void
+  init_py_subsystem ()
+  {
+    using namespace blue_sky;
+
+    python::py_export_mesh ();
+    python::py_export_mesh_grdecl ();
+    python::py_export_flux_connections ();
+  }
+}
 BLUE_SKY_INIT_PY_FUN
 {
-  using namespace blue_sky;
-
-  python::py_export_mesh ();
-  python::py_export_mesh_grdecl ();
-  python::py_export_flux_connections ();
+  init_py_subsystem ();
 }
 #ifdef _DEBUG
 BOOST_PYTHON_MODULE (bs_mesh_d)
@@ -88,7 +95,7 @@ BOOST_PYTHON_MODULE (bs_mesh_d)
 BOOST_PYTHON_MODULE (bs_mesh)
 #endif
 {
-  bs_init_py_subsystem ();
+  init_py_subsystem ();
   std::cout << &BS_KERNEL << std::endl;
   bool res = blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ());
   if (!res)

@@ -75,13 +75,20 @@ namespace blue_sky {
   }
 }
 #ifdef BSPY_EXPORTING_PLUGIN
+namespace {
+  void
+  init_py_subsystem ()
+  {
+    using namespace boost::python;
+
+    python::py_export_coarse ();
+    python::py_export_pbuild ();
+    python::py_export_amg_solver ();
+  }
+}
 BLUE_SKY_INIT_PY_FUN
 {
-  using namespace boost::python;
-
-  python::py_export_coarse ();
-  python::py_export_pbuild ();
-  python::py_export_amg_solver ();
+  init_py_subsystem ();
 }
 #ifdef _DEBUG
 BOOST_PYTHON_MODULE (bs_swift_d)
@@ -89,7 +96,7 @@ BOOST_PYTHON_MODULE (bs_swift_d)
 BOOST_PYTHON_MODULE (bs_swift)
 #endif
 {
-  bs_init_py_subsystem ();
+  init_py_subsystem ();
   std::cout << &BS_KERNEL << std::endl;
   bool res = register_types (*blue_sky::bs_get_plugin_descriptor ());
   if (!res)

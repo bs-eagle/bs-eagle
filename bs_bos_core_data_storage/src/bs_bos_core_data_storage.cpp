@@ -39,14 +39,22 @@ namespace blue_sky
 }
 
 #ifdef BSPY_EXPORTING_PLUGIN
+namespace {
+  void
+  init_py_subsystem ()
+  {
+    using namespace blue_sky;
+
+    python::export_FRead ();
+    python::py_export_hdm ();
+    python::py_export_idata ();
+    python::export_keyword_manager();
+  }
+}
+
 BLUE_SKY_INIT_PY_FUN
 {
-  using namespace blue_sky;
-
-  python::export_FRead ();
-  python::py_export_hdm ();
-  python::py_export_idata ();
-  python::export_keyword_manager();
+  init_py_subsystem ();
 }
 #ifdef _DEBUG
 BOOST_PYTHON_MODULE (bs_bos_core_data_storage_d)
@@ -54,7 +62,7 @@ BOOST_PYTHON_MODULE (bs_bos_core_data_storage_d)
 BOOST_PYTHON_MODULE (bs_bos_core_data_storage)
 #endif
 {
-  bs_init_py_subsystem ();
+  init_py_subsystem ();
   std::cout << &BS_KERNEL << std::endl;
   bool res = blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ());
   if (!res)
