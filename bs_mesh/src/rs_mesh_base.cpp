@@ -62,18 +62,36 @@ int rs_mesh_base::init_int_to_ext()
   t_long *int_to_ext_data = int_to_ext->data ();
   t_long *ext_to_int_data = ext_to_int->data ();
   
+  stdv_long wrong;
+  stdv_long wrong_idx;
   for (t_long i = 0; i < n_ext; i++)
     {
       if (ext_to_int_data[i] != -1)
         {
           if (ext_to_int_data[i] >= n_active_elements)
             {
-              bs_throw_exception (boost::format ("ext_to_int[%d] == %d >= %d") % i % ext_to_int_data[i] % n_active_elements);
+              wrong.push_back (ext_to_int_data[i]);
+              wrong_idx.push_back (i);
             }
-        
-          int_to_ext_data[ext_to_int_data[i]] = i;
+          else
+            {
+              int_to_ext_data[ext_to_int_data[i]] = i;
+            }
         }
     }
+
+  if (wrong.size ())
+    {
+      for (size_t i = 0, cnt = wrong.size (); i < cnt; ++i)
+        {
+          BOSERR (section::mesh, level::error) 
+            << boost::format ("ext_to_int[%d] == %s >= %d") % wrong_idx[i] % wrong[i] % n_active_elements 
+            << bs_end;
+        }
+
+      bs_throw_exception ("ext_to_int out of n_active_elements");
+    }
+
   return 0;  
 }
 
