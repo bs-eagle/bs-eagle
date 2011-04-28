@@ -393,6 +393,14 @@
 		<Unit filename="../common_types/src/py_table.h" />
 		<Unit filename="../common_types/src/table.cpp" />
 		<Unit filename="../common_types/src/table.h" />
+		<Unit filename="../hdm_fluid/include/fluids_iface.h" />
+		<Unit filename="../hdm_fluid/include/pvt_iface.h" />
+		<Unit filename="../hdm_fluid/include/pvt_oil_iface.h" />
+		<Unit filename="../hdm_fluid/src/fluids.cpp" />
+		<Unit filename="../hdm_fluid/src/fluids.h" />
+		<Unit filename="../hdm_fluid/src/main.cpp" />
+		<Unit filename="../hdm_fluid/src/pvt_dead_oil.cpp" />
+		<Unit filename="../hdm_fluid/src/pvt_dead_oil.h" />
 		<Unit filename="../../bs_cpr_prec/include/cpr_preconditioner_iface.h" />
 		<Unit filename="../../bs_cpr_prec/src/cpr_preconditioner.cpp" />
 		<Unit filename="../../bs_cpr_prec/src/cpr_preconditioner.h" />
