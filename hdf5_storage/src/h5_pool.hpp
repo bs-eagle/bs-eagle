@@ -1,5 +1,5 @@
 /** 
- * @file h5_pool_ex.hpp
+ * @file h5_pool.hpp
  * @brief implementation of #h5_pool_iface
  * @author Oleg Borschuk
  * @version 1.0
@@ -33,13 +33,13 @@ namespace blue_sky
   /** 
    * @brief interface class for block CSR matrix storage and manipulation
    */
-  class BS_API_PLUGIN h5_pool_ex: public h5_pool_iface
+  class BS_API_PLUGIN h5_pool: public h5_pool_iface
     {
 
     public:
 
       typedef h5_pool_iface                                     base_t;
-      typedef h5_pool_ex                                           this_t;
+      typedef h5_pool                                           this_t;
       typedef std::map<std::string, h5_pair>                    map_t;
       typedef std::pair<std::string, h5_pair>                   pair_t;
 
@@ -47,7 +47,7 @@ namespace blue_sky
     public:
       
       //! destructor
-      virtual ~h5_pool_ex ()
+      virtual ~h5_pool ()
         {};
 
       /** 
@@ -293,7 +293,7 @@ namespace blue_sky
       int mute_flag;
 
       //blue-sky class declaration
-      BLUE_SKY_TYPE_DECL (h5_pool_ex);
+      BLUE_SKY_TYPE_DECL (h5_pool);
     };
 
 }//namespace blue_sky

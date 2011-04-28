@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "py_bs_hdf5_storage.h"
 #include "bos_report.h"
-#include "h5_pool_ex.hpp"
+#include "h5_pool.hpp"
 
 using namespace blue_sky;
 using namespace blue_sky::python;
@@ -18,7 +18,7 @@ namespace blue_sky {
     register_types (plugin_descriptor const &pd)
     {
       bool res = BLUE_SKY_REGISTER_TYPE(pd, bs_hdf5_storage); BS_ASSERT (res);
-      res &= BLUE_SKY_REGISTER_TYPE (pd, h5_pool_ex); BS_ASSERT (res);
+      res &= BLUE_SKY_REGISTER_TYPE (pd, h5_pool); BS_ASSERT (res);
 
       return res;
     }

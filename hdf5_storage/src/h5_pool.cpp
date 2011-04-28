@@ -1,5 +1,5 @@
 /** 
- * @file h5_pool_ex.cpp
+ * @file h5_pool.cpp
  * @brief implementation of #h5_pool_iface
  * @author Oleg Borschuk
  * @version 1.0
@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <iomanip>
 
-#include "h5_pool_ex.hpp"
+#include "h5_pool.hpp"
 #include "h5_helper.h"
 
 #include "hdf5_type.h"
@@ -28,21 +28,21 @@ namespace blue_sky
   {
   }
 
-  h5_pool_ex::h5_pool_ex (bs_type_ctor_param) 
+  h5_pool::h5_pool (bs_type_ctor_param) 
         : h5_pool_iface ()
     {
       init_all ();
       mute_flag = 0;
       
     }
-  h5_pool_ex::h5_pool_ex (const h5_pool_ex & /*src*/) : bs_refcounter ()
+  h5_pool::h5_pool (const h5_pool & /*src*/) : bs_refcounter ()
     {
       init_all ();
       mute_flag = 0;
     }
 
   herr_t 
-  h5_pool_ex::it_group (hid_t g_id, const char *name, const H5L_info_t * /*info*/, void * m)
+  h5_pool::it_group (hid_t g_id, const char *name, const H5L_info_t * /*info*/, void * m)
     {
       hid_t dset = detail::open_dataset (g_id, name);
       hid_t dspace = H5Dget_space (dset);
@@ -59,12 +59,12 @@ namespace blue_sky
 
       hsize_t dims_[10] = {0};
       int n_dims = H5Sget_simple_extent_dims (dspace, dims_, NULL);
-      ((h5_pool_ex *)m)->add_node (name, dset, dspace, dtype, n_dims, dims_);
+      ((h5_pool *)m)->add_node (name, dset, dspace, dtype, n_dims, dims_);
       return 0; 
     }
 
-  template <class T> h5_pool_ex::map_t::iterator 
-  h5_pool_ex::add_node (const std::string &name, const hid_t dset, const hid_t dspace, 
+  template <class T> h5_pool::map_t::iterator 
+  h5_pool::add_node (const std::string &name, const hid_t dset, const hid_t dspace, 
                      const hid_t dtype, const int n_dims, const T *dims, const bool var_dims)
     {
       pair_t p;
@@ -97,11 +97,11 @@ namespace blue_sky
     }
 
   void 
-  h5_pool_ex::fill_map ()
+  h5_pool::fill_map ()
   {
     BS_ASSERT (group_id);
     clear_map ();
-    herr_t r = H5Literate (group_id, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, &(h5_pool_ex::it_group), this); 
+    herr_t r = H5Literate (group_id, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, &(h5_pool::it_group), this); 
     if (r < 0)
       {
         bs_throw_exception (boost::format ("iterate fails"));
@@ -109,7 +109,7 @@ namespace blue_sky
   }
 
   void 
-  h5_pool_ex::close_node (h5_pair &p)
+  h5_pool::close_node (h5_pair &p)
     {
       H5Dclose (p.dset);
       H5Sclose (p.dspace);
@@ -118,7 +118,7 @@ namespace blue_sky
     }
 
   void 
-  h5_pool_ex::clear_map ()
+  h5_pool::clear_map ()
     {
       map_t::iterator i, e;
       e = h5_map.end ();
@@ -130,7 +130,7 @@ namespace blue_sky
 
     }
   void 
-  h5_pool_ex::open_file (const std::string &fname_, const std::string &path_)
+  h5_pool::open_file (const std::string &fname_, const std::string &path_)
     {
       if (file_id)
         {
@@ -177,7 +177,7 @@ namespace blue_sky
     }
   
   void 
-  h5_pool_ex::close_file ()
+  h5_pool::close_file ()
     {
       clear_map ();
       if (group_id > 0)
@@ -192,7 +192,7 @@ namespace blue_sky
     }
 
   t_long 
-  h5_pool_ex::calc_data_dims (map_t::iterator it)
+  h5_pool::calc_data_dims (map_t::iterator it)
   {
     t_long n, d;
     t_int old_n_dims;
@@ -235,7 +235,7 @@ namespace blue_sky
   }
   
   t_long 
-  h5_pool_ex::calc_data_dims (const std::string &name)
+  h5_pool::calc_data_dims (const std::string &name)
     {
       map_t::iterator it;
       it = h5_map.find (name);
@@ -243,7 +243,7 @@ namespace blue_sky
   }
 
   spv_float
-  h5_pool_ex::get_fp_data (std::string const &name)
+  h5_pool::get_fp_data (std::string const &name)
   {
     spv_float a = get_fp_data_unsafe (name);
     if (!a || a->empty ())
@@ -253,7 +253,7 @@ namespace blue_sky
   }
 
   spv_int
-  h5_pool_ex::get_i_data (std::string const &name)
+  h5_pool::get_i_data (std::string const &name)
   {
     spv_int a = get_i_data_unsafe (name);
     if (!a || a->empty ())
@@ -282,7 +282,7 @@ namespace blue_sky
   }
 
   spv_float 
-  h5_pool_ex::get_fp_data_unsafe (const std::string &name)
+  h5_pool::get_fp_data_unsafe (const std::string &name)
   {
     // FIXME: was <=
     if (group_id < 0)
@@ -298,7 +298,7 @@ namespace blue_sky
   }
 
   spv_int 
-  h5_pool_ex::get_i_data_unsafe (const std::string &name)
+  h5_pool::get_i_data_unsafe (const std::string &name)
   {
     // FIXME: was <=
     if (group_id < 0)
@@ -315,7 +315,7 @@ namespace blue_sky
     
     
   void
-  h5_pool_ex::declare_data (std::string const &name, hid_t dtype, void *value, int n_dims, npy_intp *dims, int var_dims)
+  h5_pool::declare_data (std::string const &name, hid_t dtype, void *value, int n_dims, npy_intp *dims, int var_dims)
   {
     if (group_id <= 0)
       {
@@ -351,7 +351,7 @@ namespace blue_sky
   }
 
   h5_pair
-  h5_pool_ex::open_data (std::string const &name)
+  h5_pool::open_data (std::string const &name)
   {
     map_t::iterator it = h5_map.find (name);
     if (it == h5_map.end ())
@@ -399,21 +399,21 @@ namespace blue_sky
   }
 
   int 
-  h5_pool_ex::declare_i_data (const std::string &name, t_int def_value, int n_dims, npy_intp *dims, int var_dims)
+  h5_pool::declare_i_data (const std::string &name, t_int def_value, int n_dims, npy_intp *dims, int var_dims)
   {
     declare_data (name, get_hdf5_type <t_int> (), &def_value, n_dims, dims, var_dims);
     return 0;
   }
 
   int 
-  h5_pool_ex::declare_fp_data (const std::string &name, t_float def_value, int n_dims, npy_intp *dims, int var_dims)
+  h5_pool::declare_fp_data (const std::string &name, t_float def_value, int n_dims, npy_intp *dims, int var_dims)
   {
     declare_data (name, get_hdf5_type <t_float> (), &def_value, n_dims, dims, var_dims);
     return 0;
   }
 
   void
-  h5_pool_ex::set_data (std::string const &name, hid_t dtype, void *data, t_long data_size, int n_dims, npy_intp *dims, void *def_value)
+  h5_pool::set_data (std::string const &name, hid_t dtype, void *data, t_long data_size, int n_dims, npy_intp *dims, void *def_value)
   {
     if (h5_map.find (name) == h5_map.end ())
       {
@@ -434,7 +434,7 @@ namespace blue_sky
   }
     
   int 
-  h5_pool_ex::set_i_data (const std::string &name, spv_int data, t_int def_value)
+  h5_pool::set_i_data (const std::string &name, spv_int data, t_int def_value)
   {
     set_data (name, 
               get_hdf5_type <t_int> (), 
@@ -447,7 +447,7 @@ namespace blue_sky
   }
 
   int 
-  h5_pool_ex::set_fp_data (const std::string &name, spv_float data, t_float def_value)
+  h5_pool::set_fp_data (const std::string &name, spv_float data, t_float def_value)
   {
     set_data (name, 
               get_hdf5_type <t_float> (), 
@@ -460,7 +460,7 @@ namespace blue_sky
   }
     
   void 
-  h5_pool_ex::set_pool_dims (t_long *dims, int ndims)
+  h5_pool::set_pool_dims (t_long *dims, int ndims)
   {
     map_t::iterator it, e;
     int i;
@@ -482,7 +482,7 @@ namespace blue_sky
 
   // FIXME: obsolete
   void
-  h5_pool_ex::mute ()
+  h5_pool::mute ()
     {
       if (!mute_flag)
         {
@@ -498,7 +498,7 @@ namespace blue_sky
 
   // FIXME: obsolete
   void
-  h5_pool_ex::un_mute ()
+  h5_pool::un_mute ()
     {
       if (mute_flag)
         {
@@ -510,7 +510,7 @@ namespace blue_sky
 
 #ifdef BSPY_EXPORTING_PLUGIN
   std::string 
-  h5_pool_ex::py_str () const
+  h5_pool::py_str () const
     {
       std::stringstream s;
       std::string ss; 
@@ -563,7 +563,7 @@ namespace blue_sky
      
   
   boost::python::list 
-  h5_pool_ex::py_list_data() const
+  h5_pool::py_list_data() const
   {
     map_t::const_iterator i, e;
     boost::python::list items;
@@ -578,9 +578,9 @@ namespace blue_sky
 /////////////////////////////////BS Register
 /////////////////////////////////Stuff//////////////////////////
 
-  BLUE_SKY_TYPE_STD_CREATE (h5_pool_ex);
-  BLUE_SKY_TYPE_STD_COPY (h5_pool_ex);
+  BLUE_SKY_TYPE_STD_CREATE (h5_pool);
+  BLUE_SKY_TYPE_STD_COPY (h5_pool);
 
-  BLUE_SKY_TYPE_IMPL (h5_pool_ex, h5_pool_iface, "h5_pool++", "Array pool stored in hdf5 file", "Array pool stored in HDF5 file");
+  BLUE_SKY_TYPE_IMPL (h5_pool, h5_pool_iface, "h5_pool", "Array pool stored in hdf5 file", "Array pool stored in HDF5 file");
 }  // blue_sky namespace
 
