@@ -68,7 +68,10 @@ namespace blue_sky
             }
           else if (row_index >= (t_long)i->size ())
             {
-              v = i->back ();
+              if (i->size () == 0)
+                v = 0;
+              else
+                v = i->back ();
               i->resize (i->size () + 1, v);
             }
           else
