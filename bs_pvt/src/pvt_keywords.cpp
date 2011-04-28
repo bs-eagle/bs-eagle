@@ -22,7 +22,7 @@ namespace blue_sky
     BS_SP (idata) idata = params.hdm->get_data ();
 
     t_long n_pvt_region = idata->props->get_i ("pvt_region");
-    stdv_float density (n_pvt_region);
+    stdv_float density (n_pvt_region * 3);
 
     for (t_long i = 0; i < n_pvt_region; ++i)
       {

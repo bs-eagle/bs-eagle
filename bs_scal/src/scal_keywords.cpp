@@ -26,7 +26,7 @@ namespace blue_sky
     BS_SP (scal_3p_iface) scal = params.hdm->get_scal ();
 
     t_long regions = idata->props->get_i ("sat_region");
-    stdv_float data;
+    stdv_float data (4);
     for (t_long i = 0; i < regions; ++i)
       {
         if (reader->read_table (keyword, data, 4) < 1)
