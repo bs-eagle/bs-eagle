@@ -7,7 +7,7 @@
  */
 
 #include "py_pool.h"
-#include "h5_pool.h"
+#include "h5_pool.hpp"
 
 using namespace boost::python;
 #ifdef BSPY_EXPORTING_PLUGIN

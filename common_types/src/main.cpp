@@ -7,10 +7,8 @@
 
 #include "prop.h"
 #include "table.h"
-#include "h5_pool.h"
 #include "py_prop.h"
 #include "py_table.h"
-#include "py_pool.h"
 
 using namespace blue_sky;
 using namespace blue_sky::python;
@@ -30,7 +28,6 @@ namespace blue_sky {
 
     REG_TYPE(prop)
     REG_TYPE(table)
-    REG_TYPE(h5_pool)
 
     return res;
   }
@@ -51,7 +48,6 @@ namespace {
 
     python::py_export_prop ();
     python::py_export_table ();
-    python::py_export_pool ();
   }
 }
 BLUE_SKY_INIT_PY_FUN

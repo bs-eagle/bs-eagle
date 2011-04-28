@@ -4,6 +4,7 @@
 #include "py_bs_hdf5_storage.h"
 #include "bos_report.h"
 #include "h5_pool.hpp"
+#include "py_pool.h"
 
 using namespace blue_sky;
 using namespace blue_sky::python;
@@ -35,6 +36,7 @@ namespace blue_sky {
     init_py_subsystem ()
     {
       py_export_bs_hdf5_storage ();
+      python::py_export_pool ();
     }
   }
   BLUE_SKY_INIT_PY_FUN
