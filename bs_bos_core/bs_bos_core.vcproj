@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="blue-sky_d.lib bs_bos_core_base_d.lib bs_matrix_d.lib bs_base_linear_solvers_d.lib bs_bos_core_data_storage_d.lib bs_scal_d.lib bs_pvt_d.lib loki_D.lib ws2_32.lib"
+				AdditionalDependencies="blue-sky_d.lib bs_bos_core_base_d.lib bs_base_linear_solvers_d.lib bs_bos_core_data_storage_d.lib bs_scal_d.lib bs_pvt_d.lib loki_D.lib ws2_32.lib"
 				OutputFile="$(ProjectDir)/../../../exe/debug/plugins/$(ProjectName)_d.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/lib&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/debug/&quot;;&quot;$(ProjectDir)/../../../exe/debug/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
@@ -814,42 +814,6 @@
 		<Filter
 			Name="linear solvers"
 			>
-			<File
-				RelativePath=".\src\two_stage_preconditioner.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="2"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\include\two_stage_preconditioner.h"
-				>
-			</File>
-			<Filter
-				Name="python wrappers"
-				>
-				<File
-					RelativePath=".\src\py_two_stage_preconditioner.cpp"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="2"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\include\py_two_stage_preconditioner.h"
-					>
-				</File>
-			</Filter>
 			<Filter
 				Name="mpi"
 				>
@@ -1122,14 +1086,6 @@
 				Name="tables"
 				>
 				<File
-					RelativePath=".\src\py_table_2d_debug.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\py_table_2d_debug.h"
-					>
-				</File>
-				<File
 					RelativePath=".\include\table_2d.h"
 					>
 				</File>
@@ -1235,14 +1191,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\fip_results_storage.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\include\fip_results_storage.h"
-				>
-			</File>
-			<File
 				RelativePath=".\include\main_loop_calc.h"
 				>
 			</File>
@@ -1284,14 +1232,6 @@
 			</File>
 			<File
 				RelativePath=".\include\trans_multipliers.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\well_results_storage.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\include\well_results_storage.h"
 				>
 			</File>
 			<Filter
