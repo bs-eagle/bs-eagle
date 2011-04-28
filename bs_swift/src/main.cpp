@@ -34,18 +34,13 @@ using namespace boost::python;
 #define REG_TYPE(S)                     \
     res &= BS_KERNEL.register_type(pd, S::bs_type()); BS_ASSERT (res);
 
-namespace {
-  using namespace blue_sky;
-
 namespace blue_sky {
   BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("swift", "1.0.0", "AMG linear solver", "Algebraic multi grid linear solver", "swift")
 
   namespace {
   bool
-  register_types (plugin_descriptor &pd)
+  register_types (const plugin_descriptor &pd)
   {
-    //const plugin_descriptor &pd = *bs_init.pd_;
-
     bool res = true;
 
     REG_TYPE (pmis_coarse)
@@ -98,7 +93,7 @@ BOOST_PYTHON_MODULE (bs_swift)
 {
   init_py_subsystem ();
   std::cout << &BS_KERNEL << std::endl;
-  bool res = register_types (*blue_sky::bs_get_plugin_descriptor ());
+  bool res = blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ());
   if (!res)
     throw "Can't register swift types";
 }

@@ -33,7 +33,7 @@ namespace blue_sky {
   {
     return register_types (*bs_init.pd_);
   }
-}
+
 //#if 0
 #ifdef BSPY_EXPORTING_PLUGIN
 namespace {
