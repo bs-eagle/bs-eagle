@@ -24,6 +24,18 @@ namespace blue_sky
         return status > 0;
       }
 
+      /** 
+       * \brief Checks if a file with given name is HDF5 file
+       * \param name name of file
+       * \return True if file if HDF5 file
+       * */
+      inline bool
+      is_hdf5_file (std::string const &name)
+      {
+        htri_t r = H5Fis_hdf5 (name.c_str ());
+        return r > 0;
+      }
+
       /**
        * \brief  Returns object name
        * \param  location HDF5 object id

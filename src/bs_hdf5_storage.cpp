@@ -6,39 +6,12 @@
  */
 
 #include "bs_hdf5_storage.h"
-#include "bs_kernel.h"
-#include "bs_kernel_tools.h"
-#include <stdlib.h>
-#include "py_bs_hdf5_storage.h"
+#include "shared_vector.h"
 #include "bos_report.h"
-
-using namespace blue_sky;
-using namespace blue_sky::python;
-using namespace boost::python;
+#include "bs_kernel_tools.h"
 
 namespace blue_sky
-  {
-
-  BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("bs_hdf5_storage", "1.0.0", "Blue Sky HDF5 storage plugin", "Blue Sky HDF5 storage plugin", "bs_hdf5_storage")
-
-  BLUE_SKY_REGISTER_PLUGIN_FUN
-  {
-    const plugin_descriptor & pd = *bs_init.pd_;
-    bool res = BLUE_SKY_REGISTER_TYPE(pd, bs_hdf5_storage);
-
-    ///res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, bs_hdf5_storage::bs_type());
-    ///BS_ASSERT (res);
-
-    return res;
-  }
-
-#ifdef BSPY_EXPORTING_PLUGIN
-  BLUE_SKY_INIT_PY_FUN
-  {
-    py_export_bs_hdf5_storage ();
-  }
-#endif //BSPY_EXPORTING_PLUGIN
-
+{
   herr_t
   hdf5_walk_handler (unsigned n, const H5E_error2_t *err, void *p)
   {
@@ -123,6 +96,8 @@ namespace blue_sky
     << "Call stack which prevent to error: "
     << kernel_tools::get_backtrace (128)
     << bs_end;
+
+    bs_throw_exception ("HDF5 error");
 
 
     return 0;

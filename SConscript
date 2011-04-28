@@ -8,7 +8,8 @@ tar_name = "bs_hdf5_storage"
 env = custom_env.Clone ()
 env.Append (CPPPATH = [
     includes["bs_bos_core_base"],
-    includes["bs_mtx"]
+    includes["bs_mtx"],
+    includes["common_types"],
     ] 
     + includes["kernel"]
     + includes["bs_hdf5_storage"]
