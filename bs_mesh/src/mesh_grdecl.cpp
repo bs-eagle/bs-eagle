@@ -1145,7 +1145,9 @@ int mesh_grdecl::init_ext_to_int()
 
   //tools::save_seq_vector ("actnum.bs.txt").save actnum_array;
   
-  /* int splicing_num = splicing(volumes_temp); */
+  // FIXME: was commented
+  int splicing_num = splicing(volumes_temp);
+  splicing_num;
   
   //check_adjacency (1);
   //tools::save_seq_vector ("active_blocks.bs.txt").save actnum_array;
