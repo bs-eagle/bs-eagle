@@ -76,21 +76,26 @@ namespace blue_sky
 */    
     REG_KEYWORD(WELLDIMS);
 
+
+    // FIXME: npy_intp
+    // FIXME: move registration to data_class
+    npy_intp dimens[] = {1, 0, 1, 0, 1, 0};
+    register_i_pool_keyword ("MPFANUM", dimens, 1, 0);
+    register_i_pool_keyword ("EQLNUM", dimens, 1, 0);
+    register_i_pool_keyword ("SATNUM", dimens, 1, 0);
+    register_i_pool_keyword ("PVTNUM", dimens, 1, 0);
+    register_i_pool_keyword ("FIPNUM", dimens, 1, 0);
+    register_i_pool_keyword ("BNDNUM", dimens, 2, 0);
+    register_i_pool_keyword ("EOSNUM", dimens, 1, 0);
+    register_i_pool_keyword ("ROCKNUM", dimens, 1, 0);
+
+    register_fp_pool_keyword ("RS", dimens, 0, 0);
+
     //Pool array
     //int
     /*
-    REG_INT_ARRAY_KEYWORD(MPFANUM);
-    REG_INT_ARRAY_KEYWORD(EQLNUM);
-    REG_INT_ARRAY_KEYWORD(SATNUM);
-    REG_INT_ARRAY_KEYWORD(PVTNUM);
-    REG_INT_ARRAY_KEYWORD(FIPNUM);
-    REG_INT_ARRAY_KEYWORD(BNDNUM);
-    REG_INT_ARRAY_KEYWORD(EOSNUM);
-    REG_INT_ARRAY_KEYWORD(ROCKNUM);
     //double
     REG_FLOAT_ARRAY_KEYWORD(PBUB);
-    REG_FLOAT_ARRAY_KEYWORD(RS);
-    REG_FLOAT_ARRAY_KEYWORD(PCW);
     REG_FLOAT_ARRAY_KEYWORD(SWATINIT);
     REG_FLOAT_ARRAY_KEYWORD(SOIL);
     REG_FLOAT_ARRAY_KEYWORD(SWAT);
