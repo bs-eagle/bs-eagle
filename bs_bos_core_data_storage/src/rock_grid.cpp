@@ -48,7 +48,7 @@ namespace blue_sky
     comp_const.resize(n_pvt_regions);
     comp_ref_pressure.resize(n_pvt_regions);
 
-    if (input_data->get_fp_array("MULTPV"))
+    if (input_data->contains_fp_array ("MULTPV"))
       {
         multpv.resize(n_elements);
       }
