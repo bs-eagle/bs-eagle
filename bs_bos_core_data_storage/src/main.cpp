@@ -11,6 +11,8 @@
 #include "py_keyword_manager.h"
 #include "py_data_class.h"
 #include "py_read_class.h"
+#include "equil_keywords.hpp"
+#include "explicit_keywords.hpp"
 
 namespace blue_sky
 {
@@ -27,6 +29,8 @@ namespace blue_sky
     res &= BS_KERNEL.register_type (pd, idata::bs_type ()); BS_ASSERT (res);
     
     res &= BS_KERNEL.register_type(pd, FRead::bs_type()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, equil_keywords::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, explicit_keywords::bs_type ()); BS_ASSERT (res);
 
     return res;
   }

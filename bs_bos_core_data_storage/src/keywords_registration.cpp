@@ -89,18 +89,10 @@ namespace blue_sky
     register_i_pool_keyword ("EOSNUM", dimens, 1, 0);
     register_i_pool_keyword ("ROCKNUM", dimens, 1, 0);
 
-    register_fp_pool_keyword ("RS", dimens, 0, 0);
-
     //Pool array
-    //int
     /*
     //double
-    REG_FLOAT_ARRAY_KEYWORD(PBUB);
     REG_FLOAT_ARRAY_KEYWORD(SWATINIT);
-    REG_FLOAT_ARRAY_KEYWORD(SOIL);
-    REG_FLOAT_ARRAY_KEYWORD(SWAT);
-    REG_FLOAT_ARRAY_KEYWORD(PRESSURE);
-    REG_FLOAT_ARRAY_KEYWORD(SGAS);
     */
 
     //BS_ASSERT (em);
