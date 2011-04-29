@@ -362,28 +362,31 @@ namespace blue_sky
   
   void hdm::check_arrays_for_inactive_blocks () const
     {
-      std::ostringstream out_s;
-      t_long i, ix, iy, iz;
-      t_long nx, ny, nz, nb;
+      spv_int actnum_  = data->get_i_array ("ACTNUM");
+      spv_float permx_ = data->get_fp_array ("PERMX");
+      spv_float permy_ = data->get_fp_array ("PERMY");
+      spv_float permz_ = data->get_fp_array ("PERMZ");
+      spv_float poro_  = data->get_fp_array ("PORO");
+      spv_float ntg_   = data->get_fp_array ("NTG");
+      
+      t_int* actnum = actnum_->data ();
+      const t_float *permx  = permx_->data ();
+      const t_float *permy  = permy_->data ();
+      const t_float *permz  = permz_->data ();
+      const t_float *poro   = poro_->data ();
+      const t_float *ntg    = ntg_->data ();
+
+      t_long nx = data->props->get_i("nx");
+      t_long ny = data->props->get_i("ny");
+      t_long nz = data->props->get_i("nz");
+      t_long nb = nx * ny * nz;
+
       t_long permx_counter = 0;
       t_long permy_counter = 0;
       t_long permz_counter = 0;
       t_long poro_counter = 0;
       t_long ntg_counter = 0;
-      
-      t_int* actnum = &(*data->get_i_array ("ACTNUM"))[0];
-      const t_float *permx  = &(*data->get_fp_array ("PERMX"))[0];
-      const t_float *permy  = &(*data->get_fp_array ("PERMY"))[0];
-      const t_float *permz  = &(*data->get_fp_array ("PERMZ"))[0];
-      const t_float *poro   = &(*data->get_fp_array ("PORO"))[0];
-      const t_float *ntg    = &(*data->get_fp_array ("NTG"))[0];
-
-      nx = data->props->get_i("nx");
-      ny = data->props->get_i("ny");
-      nz = data->props->get_i("nz");
-      nb = nx * ny * nz;
-
-      for (i = 0; i < nb; ++i)
+      for (t_long i = 0; i < nb; ++i)
         {
           if (!actnum[i])
             {
@@ -392,9 +395,9 @@ namespace blue_sky
 
           if (actnum[i] && permx[i] < DEFAULT_MINIMAL_PERM && permy[i] < DEFAULT_MINIMAL_PERM && permz[i] < DEFAULT_MINIMAL_PERM)
             {
-              iz = i / (nx * ny);
-              iy = (i - iz * (nx * ny)) / nx;
-              ix = i - iz * (nx * ny) - iy * nx;
+              t_long iz = i / (nx * ny);
+              t_long iy = (i - iz * (nx * ny)) / nx;
+              t_long ix = i - iz * (nx * ny) - iy * nx;
 
               BOSWARN (section::check_data, level::low)
                 << "blocks " << i << " [" << (ix + 1) << ", " << (iy + 1) << ", "
@@ -406,7 +409,7 @@ namespace blue_sky
             }
 
           CHECK_FOR_TWO_PARAMS (poro[i], actnum[i], DEFAULT_MINIMAL_PORO, poro_counter);
-          if ((*data->get_fp_array ("NTG")).size () != 0)
+          if (ntg_->size () != 0)
             {
               CHECK_FOR_TWO_PARAMS (ntg[i], actnum[i], DEFAULT_MINIMAL_NTG, ntg_counter);
             }
