@@ -48,10 +48,8 @@ namespace blue_sky
     comp_const.resize(n_pvt_regions);
     comp_ref_pressure.resize(n_pvt_regions);
 
-    if (input_data->contains_fp_array ("MULTPV"))
-      {
-        multpv.resize(n_elements);
-      }
+    BS_ASSERT (input_data->contains_fp_array ("MULTPV"));
+    multpv.resize(n_elements);
   }
 
   /*!
@@ -94,8 +92,6 @@ namespace blue_sky
   int
   rock_grid::init_data (t_long cells_count, const spv_long index_map, const sp_idata &input_data)
   {
-    spv_float fp_array;
-
     if (input_data->get_rock()->size())
       {
         comp_const.assign (input_data->get_rock()->begin(), input_data->get_rock()->end());
@@ -115,27 +111,13 @@ namespace blue_sky
       }
 
     convert_arrays(cells_count, index_map, porosity_p_ref, input_data->get_fp_array("PORO"));
+    convert_arrays (cells_count, index_map, net_to_gros, input_data->get_fp_array ("NTG"));
+    convert_arrays (cells_count, index_map, multpv, input_data->get_fp_array ("MULTPV"));
 
-    // initialize net to gross
-    fp_array = input_data->get_fp_array ("NTG");
-    if (fp_array)
-      {
-        net_to_gros.assign(cells_count, 1.0);
-      }
-    else
-      {
-        convert_arrays (cells_count, index_map, net_to_gros, fp_array);
-      }
-
-    convert_permeability (cells_count, index_map, permeability, input_data->get_fp_array("PERMX"), 
-                         input_data->get_fp_array("PERMY"), input_data->get_fp_array("PERMZ"));
-
-    
-    fp_array = input_data->get_fp_array ("MULTPV");
-    if (fp_array)
-      {
-        convert_arrays (cells_count, index_map, multpv, fp_array);
-      }
+    convert_permeability (cells_count, index_map, permeability, 
+                          input_data->get_fp_array("PERMX"), 
+                          input_data->get_fp_array("PERMY"), 
+                          input_data->get_fp_array("PERMZ"));
 
     return 0;
   }
@@ -155,6 +137,7 @@ namespace blue_sky
   int
   rock_grid::init_planes_trans (t_long cells_count, const spv_float mesh_volumes, const sp_fi_params &/*ts_params*/, physical_constants &/*internal_constants*/)
   {
+    // FIXME: net_to_gros don't used in this function
     if (net_to_gros.empty ())
       {
         bs_throw_exception ("net_to_gros is empty");
@@ -164,21 +147,19 @@ namespace blue_sky
         bs_throw_exception ("mesh_volumes is empty");
       }
 
+    // OPENMP
     volume.assign (mesh_volumes->begin (), mesh_volumes->end ());
-    if (!multpv.empty ())
+    if (multpv.size () == volume.size ())
       {
-        if (multpv.size () == volume.size ())
+        for (t_long i = 0; i < cells_count; ++i)
           {
-            for (t_long i = 0; i < cells_count; ++i)
-              {
-                volume[i] *= multpv[i];
-              }
+            volume[i] *= multpv[i];
           }
-        else
-          {
-            bs_throw_exception (boost::format ("Size of multpv not equal with size of volume (multpv: %ld, volume: %ld)") 
-                                % multpv.size () % volume.size ());
-          }
+      }
+    else
+      {
+        bs_throw_exception (boost::format ("Size of multpv not equal with size of volume (multpv: %ld, volume: %ld)") 
+                            % multpv.size () % volume.size ());
       }
 
     return 0;

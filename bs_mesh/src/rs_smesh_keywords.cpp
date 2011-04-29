@@ -83,7 +83,7 @@ namespace blue_sky
       keyword_manager->register_fp_pool_keyword ("MULTX", &array_dimens[0], def_value_one, 0);
       keyword_manager->register_fp_pool_keyword ("MULTY", &array_dimens[0], def_value_one, 0);
       keyword_manager->register_fp_pool_keyword ("MULTZ", &array_dimens[0], def_value_one, 0);
-      keyword_manager->register_fp_pool_keyword ("MULTPV", &array_dimens[0], def_value_zero, 0);
+      keyword_manager->register_fp_pool_keyword ("MULTPV", &array_dimens[0], def_value_one, 0);
     }  
   
   void smesh_keywords::DIMENS_reactor(const std::string &keyword, keyword_params_t &params)
