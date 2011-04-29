@@ -104,13 +104,11 @@ class BS_API_PLUGIN rs_mesh_base : public mesh_base
     
     t_double darcy_constant; //Darcy coefficient
 
-    //smart_ptr on properties
-    t_int *actnum_array;	//!< smart_ptr on actnum array
-    t_float *poro_array;		//!< smart_ptr on poro array
-    t_float *ntg_array; 		//!< smart_ptr on ntg array
-    t_float *multpv_array;	//!< smart_ptr on multpv_array array
-
-    spv_float depths; //!< depths of elements center points
+    spv_int   actnum_array;	//!< smart_ptr on actnum array
+    spv_float poro_array;		//!< smart_ptr on poro array
+    spv_float ntg_array; 		//!< smart_ptr on ntg array
+    spv_float multpv_array;	//!< smart_ptr on multpv_array array
+    spv_float depths;       //!< depths of elements center points
 
   };
 #endif // RS_MESH_BASE_H

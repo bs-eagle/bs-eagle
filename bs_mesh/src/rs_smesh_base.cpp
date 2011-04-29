@@ -11,12 +11,6 @@
 
 rs_smesh_base ::rs_smesh_base ()
 {
-  permx_array = 0;
-  permy_array = 0;
-  permz_array = 0;
-  multx_array = 0;
-  multy_array = 0;
-  multz_array = 0;
 }
 
 
@@ -30,25 +24,12 @@ rs_smesh_base ::init_props (const sp_hdm_t hdm)
   ny = hdm->get_prop ()->get_i("ny");
   nz = hdm->get_prop ()->get_i("nz");
   
-  spv_float data_array;
-  
-  data_array = hdm->get_pool ()->get_fp_data("PERMX");
-  if (data_array->size()) permx_array = &(*data_array)[0];
-  
-  data_array = hdm->get_pool ()->get_fp_data("PERMY");
-  if (data_array->size()) permy_array = &(*data_array)[0];
-  
-  data_array = hdm->get_pool ()->get_fp_data("PERMZ");
-  if (data_array->size()) permz_array = &(*data_array)[0];
-  
-  data_array = hdm->get_pool ()->get_fp_data("MULTX");
-  if (data_array && data_array->size()) multx_array = &(*data_array)[0];
-  
-  data_array = hdm->get_pool ()->get_fp_data("MULTY");
-  if (data_array && data_array->size()) multy_array = &(*data_array)[0];
-  
-  data_array = hdm->get_pool ()->get_fp_data("MULTZ");
-  if (data_array && data_array->size()) multz_array = &(*data_array)[0];
+  permx_array = hdm->get_pool ()->get_fp_data("PERMX");
+  permy_array = hdm->get_pool ()->get_fp_data("PERMY");
+  permz_array = hdm->get_pool ()->get_fp_data("PERMZ");
+  multx_array = hdm->get_pool ()->get_fp_data("MULTX");
+  multy_array = hdm->get_pool ()->get_fp_data("MULTY");
+  multz_array = hdm->get_pool ()->get_fp_data("MULTZ");
 }
 
 
@@ -93,6 +74,7 @@ void rs_smesh_base::check_data() const
   if (nz <= 0)
     bs_throw_exception (boost::format ("nz = %d is out of range")% nz);
     
+  // FIXME: init_props will raise exceptions if no array in hdm
   if (!permx_array)
     bs_throw_exception ("PERMX array is not initialized");
   if (!permy_array)
@@ -105,6 +87,7 @@ void rs_smesh_base::check_data() const
 int rs_smesh_base::get_elems_n_in_layers(const direction d_dir, stdv_int &elem_in_layers) const
 {
   t_long i_index;
+  t_int const *actnum = base_t::actnum_array->data ();
   if (d_dir == along_dim3)
     {
       elem_in_layers.resize(nz, 0);
@@ -113,7 +96,7 @@ int rs_smesh_base::get_elems_n_in_layers(const direction d_dir, stdv_int &elem_i
         {
           for (int j = 0; j < nx*ny; ++j, ++i_index)
             {
-              if (base_t::actnum_array[i_index])
+              if (actnum[i_index])
                 ++elem_in_layers[i];
             }
         }
@@ -128,7 +111,7 @@ int rs_smesh_base::get_elems_n_in_layers(const direction d_dir, stdv_int &elem_i
               i_index = nx*j+i*nx*nz;
               for (int k = 0; k < nx; ++k, ++i_index)
                 {
-                  if (base_t::actnum_array[i_index])
+                  if (actnum[i_index])
                     ++elem_in_layers[i];
                 }
             }
@@ -144,7 +127,7 @@ int rs_smesh_base::get_elems_n_in_layers(const direction d_dir, stdv_int &elem_i
               i_index = ny*j+i*ny*nz;
               for (int k = 0; k < ny; ++k, ++i_index)
                 {
-                  if (base_t::actnum_array[i_index])
+                  if (actnum[i_index])
                     ++elem_in_layers[i];
                 }
             }

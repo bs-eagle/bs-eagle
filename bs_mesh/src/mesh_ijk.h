@@ -81,25 +81,26 @@ class  mesh_ijk : public rs_smesh_base
         \param (return value) dx, dy, dz - size of current block*/
     void get_block_dx_dy_dz(t_long n_elem, t_double &dx, t_double &dy, t_double &dz)const;
 
+    // FIXME:
     t_double get_block_dx(t_long n_elem) const
       {
-        return dx_array[n_elem];
+        return dx_array->data ()[n_elem];
       };
     t_double get_block_dy(t_long n_elem) const
       {
-        return dy_array[n_elem];
+        return dy_array->data ()[n_elem];
       };
     t_double get_block_dz(t_long n_elem) const
       {
-        return dz_array[n_elem];
+        return dz_array->data ()[n_elem];
       };
     t_double get_depth(t_long n_elem) const
       {
-        return (*depths)[n_elem];
+        return depths->data ()[n_elem];
       };
     t_double get_dtop(t_long n_elem) const
       {
-        return (*depths)[n_elem];
+        return depths->data ()[n_elem];
       };
 
     //! get vertexes of cube (index = i+j*nx+k*nx*ny)
@@ -151,8 +152,8 @@ class  mesh_ijk : public rs_smesh_base
   protected:
 
 
-    t_float *dx_array, *dy_array, *dz_array; //geometric properties
-    t_float *tops_array; // layers
+    spv_float dx_array, dy_array, dz_array; //geometric properties
+    spv_float tops_array; // layers
 
     stdv_float dx_shift_array, dy_shift_array, dz_shift_array; //array of shift for each directions
   }; //class mesh_ijk

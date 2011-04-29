@@ -222,12 +222,12 @@ class BS_API_PLUGIN rs_smesh_base : public rs_mesh_base
     t_double min_y, max_y; //!< min&max y coordinates
     t_double min_z, max_z; //!< min&max z coordinates
 
-    t_float *permx_array;	  //!< smart_ptr on permx_array array
-    t_float *permy_array;	  //!< smart_ptr on permy_array array
-    t_float *permz_array;	  //!< smart_ptr on permz_array array
+    spv_float permx_array;	  //!< smart_ptr on permx_array array
+    spv_float permy_array;	  //!< smart_ptr on permy_array array
+    spv_float permz_array;	  //!< smart_ptr on permz_array array
 
-    t_float *multx_array;	  //!< smart_ptr on multx_array array
-    t_float *multy_array;	  //!< smart_ptr on multy_array array
-    t_float *multz_array;	  //!< smart_ptr on multz_array array
+    spv_float multx_array;	  //!< smart_ptr on multx_array array
+    spv_float multy_array;	  //!< smart_ptr on multy_array array
+    spv_float multz_array;	  //!< smart_ptr on multz_array array
   };
 #endif //

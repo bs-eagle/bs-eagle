@@ -21,10 +21,6 @@ using namespace blue_sky;
 
 mesh_ijk ::mesh_ijk ()
 {
-  dx_array   = 0;
-  dy_array   = 0;
-  dz_array   = 0;
-  tops_array = 0;
 }
 
 
@@ -34,17 +30,10 @@ mesh_ijk ::init_props (const sp_hdm_t hdm)
 {
   spv_float data_array;
   
-  data_array = hdm->get_pool ()->get_fp_data("DX");
-  if (data_array->size()) dx_array = &(*data_array)[0];
-  
-  data_array = hdm->get_pool ()->get_fp_data("DY");
-  if (data_array->size()) dy_array = &(*data_array)[0];
-  
-  data_array = hdm->get_pool ()->get_fp_data("DZ");
-  if (data_array->size()) dz_array = &(*data_array)[0];
-  
-  data_array = hdm->get_pool ()->get_fp_data("TOPS");
-  if (data_array->size()) tops_array = &(*data_array)[0];
+  dx_array = hdm->get_pool ()->get_fp_data("DX");
+  dy_array = hdm->get_pool ()->get_fp_data("DY");
+  dz_array = hdm->get_pool ()->get_fp_data("DZ");
+  tops_array = hdm->get_pool ()->get_fp_data("TOPS");
   
   base_t::init_props (hdm);
 }
@@ -55,18 +44,23 @@ int mesh_ijk::init_ext_to_int()
   t_long *ext_to_int_data, *int_to_ext_data;
   calc_shift_arrays();
 
+  // FIXME: splicing
   stdv_double volumes_temp (n_elements);
   int splicing_num = 0;//splicing(volumes_temp);
 
   //make proxy array
   ext_to_int->resize (n_elements);
   ext_to_int->assign(0);
-  ext_to_int_data = &(*ext_to_int)[0];
+  ext_to_int_data = ext_to_int->data ();
   
   
   size_t n_count = 0;
 
   t_long nn_active = 0, i_index; //number of non-active previous cells
+  t_float const *dx = dx_array->data ();
+  t_float const *dy = dy_array->data ();
+  t_float const *dz = dz_array->data ();
+  t_int const *actnum = actnum_array->data ();
   for (t_long i = 0; i < nz; ++i)
     {
       for (t_long j = 0; j < ny; ++j)
@@ -74,9 +68,9 @@ int mesh_ijk::init_ext_to_int()
           {
             i_index = BLOCK_NUM (k, j, i, nx, ny);
 
-            volumes_temp[i_index] = dx_array[i_index] * dy_array[i_index] * dz_array[i_index];
+            volumes_temp[i_index] = dx[i_index] * dy[i_index] * dz[i_index];
 
-            if (!actnum_array[i_index])
+            if (!actnum[i_index])
               {
                 nn_active++;
                 ext_to_int_data[n_count] = -1;
@@ -86,7 +80,7 @@ int mesh_ijk::init_ext_to_int()
           }
     }
   init_int_to_ext();
-  int_to_ext_data = &(*int_to_ext)[0];
+  int_to_ext_data = int_to_ext->data ();
   
   //fill volume array (except non-active block and using proxy array)
   volumes->resize(n_active_elements);
@@ -103,15 +97,6 @@ int mesh_ijk::init_ext_to_int()
 void mesh_ijk::check_data() const
 {
   base_t::check_data ();
-
-  if (!dx_array)
-    bs_throw_exception ("DX array is not initialized");
-  if (!dy_array)
-    bs_throw_exception ("DY array is not initialized");
-  if (!dz_array)
-    bs_throw_exception ("DZ array is not initialized");
-  if (!tops_array)
-    bs_throw_exception ("TOPS array is not initialized");
 }
 
 
@@ -138,16 +123,19 @@ mesh_ijk::calc_element (t_long index) const
      *             6  +-------+7
      */
 
+    t_float const *dx = dx_array->data ();
+    t_float const *dy = dy_array->data ();
+    t_float const *dz = dz_array->data ();
     // upper
-    cube_vertex[0] = fpoint3d (dx_shift_array[index],                dy_shift_array[index],                dz_shift_array[index]);
-    cube_vertex[1] = fpoint3d (dx_shift_array[index] + dx_array[index], dy_shift_array[index],                dz_shift_array[index]);
-    cube_vertex[2] = fpoint3d (dx_shift_array[index],                dy_shift_array[index] + dy_array[index], dz_shift_array[index]);
-    cube_vertex[3] = fpoint3d (dx_shift_array[index] + dx_array[index], dy_shift_array[index] + dy_array[index], dz_shift_array[index]);
+    cube_vertex[0] = fpoint3d (dx_shift_array[index],             dy_shift_array[index],             dz_shift_array[index]);
+    cube_vertex[1] = fpoint3d (dx_shift_array[index] + dx[index], dy_shift_array[index],             dz_shift_array[index]);
+    cube_vertex[2] = fpoint3d (dx_shift_array[index],             dy_shift_array[index] + dy[index], dz_shift_array[index]);
+    cube_vertex[3] = fpoint3d (dx_shift_array[index] + dx[index], dy_shift_array[index] + dy[index], dz_shift_array[index]);
     // lower
-    cube_vertex[4] = fpoint3d (dx_shift_array[index],                dy_shift_array[index],                dz_shift_array[index] + dz_array[index]);
-    cube_vertex[5] = fpoint3d (dx_shift_array[index] + dx_array[index], dy_shift_array[index],                dz_shift_array[index] + dz_array[index]);
-    cube_vertex[6] = fpoint3d (dx_shift_array[index],                dy_shift_array[index] + dy_array[index], dz_shift_array[index] + dz_array[index]);
-    cube_vertex[7] = fpoint3d (dx_shift_array[index] + dx_array[index], dy_shift_array[index] + dy_array[index], dz_shift_array[index] + dz_array[index]);
+    cube_vertex[4] = fpoint3d (dx_shift_array[index],             dy_shift_array[index],             dz_shift_array[index] + dz[index]);
+    cube_vertex[5] = fpoint3d (dx_shift_array[index] + dx[index], dy_shift_array[index],             dz_shift_array[index] + dz[index]);
+    cube_vertex[6] = fpoint3d (dx_shift_array[index],             dy_shift_array[index] + dy[index], dz_shift_array[index] + dz[index]);
+    cube_vertex[7] = fpoint3d (dx_shift_array[index] + dx[index], dy_shift_array[index] + dy[index], dz_shift_array[index] + dz[index]);
     // center
     //cube_vertex[8] = fpoint3d (dx_shift_array[index] + dx_array[index]/2., dy_shift_array[index] + dy_array[index]/2., dz_shift_array[index] + dz_array[index]/2.));
 
@@ -176,9 +164,12 @@ mesh_ijk::get_center (t_long n_block) const
   BS_ASSERT (n_block != -1) (n_block);
   center_t center;
   
-  center[0] = dx_shift_array[n_block] + dx_array[n_block] / 2;
-  center[1] = dy_shift_array[n_block] + dy_array[n_block] / 2;
-  center[2] = dz_shift_array[n_block] + dz_array[n_block] / 2;
+  t_float const *dx = dx_array->data ();
+  t_float const *dy = dy_array->data ();
+  t_float const *dz = dz_array->data ();
+  center[0] = dx_shift_array[n_block] + dx[n_block] / 2;
+  center[1] = dy_shift_array[n_block] + dy[n_block] / 2;
+  center[2] = dz_shift_array[n_block] + dz[n_block] / 2;
 
   return center;
 }  
@@ -245,6 +236,7 @@ int mesh_ijk::build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, con
   //all blocks are butting
   //first step - define and fill rows_ptr
 
+  t_int const *actnum = actnum_array->data ();
   for (i = 0; i < nx; ++i)
     {
       for (j = 0; j < ny; ++j)
@@ -252,26 +244,26 @@ int mesh_ijk::build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, con
           for (k = 0; k < nz; ++k)
             {
               block_idx_ext = BLOCK_NUM(i, j, k, nx, ny);
-              if (!actnum_array[block_idx_ext])//skip non-active cells
+              if (!actnum[block_idx_ext])//skip non-active cells
                 continue;
 
               //look only 3 positive-direction side
               next_block_idx_ext = BLOCK_NUM (i + 1, j, k, nx, ny);
-              if ((i + 1 < nx) && actnum_array[next_block_idx_ext])
+              if ((i + 1 < nx) && actnum[next_block_idx_ext])
                 {
                   rows_ptr[ext_to_int_data[block_idx_ext] + 1]++;
                   rows_ptr[ext_to_int_data[next_block_idx_ext] + 1]++;
                 }
 
               next_block_idx_ext = BLOCK_NUM (i, j + 1, k, nx, ny);
-              if ((j + 1 < ny) && actnum_array[next_block_idx_ext])
+              if ((j + 1 < ny) && actnum[next_block_idx_ext])
                 {
                   rows_ptr[ext_to_int_data[block_idx_ext] + 1]++;
                   rows_ptr[ext_to_int_data[next_block_idx_ext] + 1]++;
                 }
 
               next_block_idx_ext = BLOCK_NUM (i, j, k + 1, nx, ny);
-              if ((k + 1 < nz) && actnum_array[next_block_idx_ext])
+              if ((k + 1 < nz) && actnum[next_block_idx_ext])
                 {
                   rows_ptr[ext_to_int_data[block_idx_ext] + 1]++;
                   rows_ptr[ext_to_int_data[next_block_idx_ext] + 1]++;
@@ -338,7 +330,7 @@ int mesh_ijk::build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, con
             {
               block_idx_ext = BLOCK_NUM (i, j, k, nx, ny);
 
-              if (!actnum_array[block_idx_ext])//skip-non-active cells
+              if (!actnum[block_idx_ext])//skip-non-active cells
                 continue;
 
               block_idx = ext_to_int_data[block_idx_ext];
@@ -348,7 +340,7 @@ int mesh_ijk::build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, con
 
               //look only 3 positive-direction side active blocks
               next_block_idx_ext = BLOCK_NUM (i + 1, j, k, nx, ny);
-              if ((i + 1 < nx) && actnum_array[next_block_idx_ext])
+              if ((i + 1 < nx) && actnum[next_block_idx_ext])
                 {
                   set_neigbour_data (block_idx, block_idx_ext, next_block_idx_ext, conn_idx,
                                      rows_ptr, cols_ind, tmp_rows_ptr,
@@ -357,7 +349,7 @@ int mesh_ijk::build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, con
                 }
 
               next_block_idx_ext = BLOCK_NUM (i, j + 1, k, nx, ny);
-              if ((j+1 < ny) && actnum_array[next_block_idx_ext])//skip non-active
+              if ((j+1 < ny) && actnum[next_block_idx_ext])//skip non-active
                 {
                   set_neigbour_data (block_idx, block_idx_ext, next_block_idx_ext, conn_idx,
                                     rows_ptr, cols_ind, tmp_rows_ptr,
@@ -366,7 +358,7 @@ int mesh_ijk::build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, con
                 }
 
               next_block_idx_ext = BLOCK_NUM (i, j, k + 1, nx, ny);
-              if ((k+1 < nz) && actnum_array[next_block_idx_ext])//skip non-active
+              if ((k+1 < nz) && actnum[next_block_idx_ext])//skip non-active
                 {
                   set_neigbour_data (block_idx, block_idx_ext, next_block_idx_ext, conn_idx,
                                     rows_ptr, cols_ind, tmp_rows_ptr,
@@ -421,55 +413,66 @@ int mesh_ijk::find_neighbours(sp_bcsr_t /*neig_matrix*/)
 t_double mesh_ijk::calculate_tran(const t_long i, const t_long j, const  direction d_dir) const
   {
     t_double tran;
-    t_double *depths_data = &(*depths)[0];
-    t_long *ext_to_int_data = &(*ext_to_int)[0];
+    t_double *depths_data = depths->data ();
+    t_long *ext_to_int_data = ext_to_int->data ();
 
     t_double A; //area between i and j block
     t_double DIPC; //correction of inclination
     t_double B,DHS,DVS; //additional variable
 
+    t_float const *ntg = ntg_array->data ();
+    t_float const *dx = dx_array->data ();
+    t_float const *dy = dy_array->data ();
+    t_float const *dz = dz_array->data ();
+    t_float const *permx = permx_array->data ();
+    t_float const *permy = permy_array->data ();
+    t_float const *permz = permz_array->data ();
+    t_float const *multx = multx_array->data ();
+    t_float const *multy = multy_array->data ();
+    t_float const *multz = multz_array->data ();
+
     t_double ntg_i = 1;
     t_double ntg_j = 1;
     if (!ntg_array)
       {
-        ntg_i = ntg_array[i];
-        ntg_j = ntg_array[j];
+        ntg_i = ntg[i];
+        ntg_j = ntg[j];
       }
 
     if (d_dir == along_dim1) //lengthwise OX
       {
-        A = (dx_array[j] * dy_array[i] * dz_array[i] * ntg_i + dx_array[i] * dy_array[j] * dz_array[j] * ntg_j) / (dx_array[i] + dx_array[j]);
-        B = (dx_array[i] / permx_array[i] + dx_array[j] / permx_array[j]) / 2;
+        A = (dx[j] * dy[i] * dz[i] * ntg_i + dx[i] * dy[j] * dz[j] * ntg_j) / (dx[i] + dx[j]);
+        B = (dx[i] / permx[i] + dx[j] / permx[j]) / 2;
 
-        DHS = ((dx_array[i] + dx_array[j])/2) * ((dx_array[i] + dx_array[j])/2);
+        DHS = ((dx[i] + dx[j])/2) * ((dx[i] + dx[j])/2);
         DVS = (depths_data[ext_to_int_data[i]] - depths_data[ext_to_int_data[j]]) * (depths_data[ext_to_int_data[i]] - depths_data[ext_to_int_data[j]]);
 
         DIPC = DHS / (DHS + DVS);
         tran = darcy_constant * A * DIPC / B;
         if (multx_array)
-          tran *= multx_array[i];
+          tran *= multx[i];
       }
     else if (d_dir == along_dim2) //lengthwise OY
       {
-        A = (dy_array[j] * dx_array[i] * dz_array[i] * ntg_i + dy_array[i] * dx_array[j] * dz_array[j] * ntg_j) / (dy_array[i] + dy_array[j]);
-        B = (dy_array[i] / permy_array[i] + dy_array[j] / permy_array[j]) / 2;
+        A = (dy[j] * dx[i] * dz[i] * ntg_i + dy[i] * dx[j] * dz[j] * ntg_j) / (dy[i] + dy[j]);
+        B = (dy[i] / permy[i] + dy[j] / permy[j]) / 2;
 
-        DHS = ((dy_array[i] + dy_array[j]) / 2) * ((dy_array[i] + dy_array[j]) / 2);
+        DHS = ((dy[i] + dy[j]) / 2) * ((dy[i] + dy[j]) / 2);
         DVS = (depths_data[ext_to_int_data[i]] - depths_data[ext_to_int_data[j]]) * (depths_data[ext_to_int_data[i]] - depths_data[ext_to_int_data[j]]);
 
         DIPC = DHS / (DHS + DVS);
         tran = darcy_constant * A * DIPC / B;
         if (multy_array)
-          tran *= multy_array[i];
+          tran *= multy[i];
       }
     else //lengthwise OZ
       {
-        A = (dz_array[j] * dx_array[i] * dy_array[i] + dz_array[i] * dx_array[j] * dy_array[j]) / (dz_array[i] + dz_array[j]);
-        B = (dz_array[i] / permz_array[i] + dz_array[j] / permz_array[j]) / 2;
+        A = (dz[j] * dx[i] * dy[i] + dz[i] * dx[j] * dy[j]) / (dz[i] + dz[j]);
+        B = (dz[i] / permz[i] + dz[j] / permz[j]) / 2;
 
         tran = darcy_constant * A / B;
         if (multz_array)
-          tran *= multz_array[i];
+          tran *= multz[i];
       }
 
     return tran;
@@ -479,9 +482,9 @@ t_double mesh_ijk::calculate_tran(const t_long i, const t_long j, const  directi
 
 void mesh_ijk::get_block_dx_dy_dz(t_long n_elem, t_double &dx, t_double &dy, t_double &dz) const
   {
-    dx = dx_array[n_elem];
-    dy = dy_array[n_elem];
-    dz = dz_array[n_elem];
+    dx = dx_array->data ()[n_elem];
+    dy = dy_array->data ()[n_elem];
+    dz = dz_array->data ()[n_elem];
   }
 
 
@@ -492,16 +495,19 @@ int mesh_ijk::calc_depths ()
   t_long index; //index of current block
   t_long *ext_to_int_data = &(*ext_to_int)[0];
 
+  t_float const *tops = tops_array->data ();
+  t_int const *actnum = actnum_array->data ();
+  t_float const *dz = dz_array->data ();
   for (t_long i = 0; i < nx; ++i)
     for (t_long j = 0; j < ny; ++j)
       {
-        t_float current_tops = tops_array[i+j*nx]; //tops of current block
+        t_float current_tops = tops[i+j*nx]; //tops of current block
         for (t_long k = 0; k < nz; ++k)
           {
             index = i + j * nx + k * nx * ny;
-            if (actnum_array[index])
-              depths_data[ext_to_int_data[index]] = current_tops + dz_array[index]/2;
-            current_tops += dz_array[index];
+            if (actnum[index])
+              depths_data[ext_to_int_data[index]] = current_tops + dz[index]/2;
+            current_tops += dz[index];
           }
       }
   return 0;
@@ -514,6 +520,10 @@ int mesh_ijk::calc_shift_arrays()
   dx_shift_array.assign (nx * ny * nz, 0);
   dy_shift_array.assign (nx * ny * nz, 0);
 
+  t_float const *dx = dx_array->data ();
+  t_float const *dy = dy_array->data ();
+  t_float const *dz = dz_array->data ();
+
   for (int k = 0; k < nz; ++k)
     {
       //dx_shift_array calculating
@@ -523,7 +533,7 @@ int mesh_ijk::calc_shift_arrays()
           dx_shift_array[index] =  0;
           index++;
           for (int i = 1; i < nx; ++i, ++index)
-            dx_shift_array[index] = dx_shift_array[index-1] + dx_array[index];
+            dx_shift_array[index] = dx_shift_array[index-1] + dx[index];
         }
       //dy_shift_array calculating
       for (int i = 0; i < nx; ++i)
@@ -532,7 +542,7 @@ int mesh_ijk::calc_shift_arrays()
           dy_shift_array[index] = 0;
           index += nx;
           for (int j = 1; j < ny; ++j, index += nx)
-            dy_shift_array[index] = dy_shift_array[index-nx] + dy_array[index];
+            dy_shift_array[index] = dy_shift_array[index-nx] + dy[index];
         }
     }
   dz_shift_array.assign (nx * ny * nz, 0);
@@ -545,7 +555,7 @@ int mesh_ijk::calc_shift_arrays()
           dz_shift_array[index] = 0;
           index += layer_size;
           for (int k = 1; k < nz; ++k, index += layer_size)
-            dz_shift_array[index] = dz_shift_array[index-layer_size] + dz_array[index];
+            dz_shift_array[index] = dz_shift_array[index-layer_size] + dz[index];
         }
     }
   return 0;
