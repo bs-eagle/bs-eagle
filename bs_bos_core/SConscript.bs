@@ -46,15 +46,8 @@ elif (build_kind == "release") :
     env.AppendUnique (LIBS = libs + boost_libs)
 
 excluded = [
-    "keyword_manager.cpp", 
-    "keywords_handlers.cpp", 
-    "keywords_registration.cpp",
-    "two_stage_preconditioner.cpp",
     "csr_ilu_cfl.cpp",
     "py_csr_ilu_cfl_prec.cpp",
-    "py_keyword_manager.cpp",
-    "py_table_2d_debug.cpp",
-    "py_two_stage_preconditioner.cpp",
     "well_results_storage.cpp",
     "fip_results_storage.cpp",
     ]
