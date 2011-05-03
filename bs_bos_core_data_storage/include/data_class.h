@@ -14,7 +14,6 @@
 
 #include "rocktab_table.h"
 #include "prvd_table.h"
-#include "read_class.h"
 #include "arrays.h"
 #include "arrays_tables.h"
 #include "convert_units.h"
@@ -87,7 +86,7 @@ enum   //! indexes for dimension parameters
       
       typedef std::vector <val_vs_depth>                  vval_vs_depth;
       
-      typedef smart_ptr <FRead, true>										  sp_reader_t;
+      //typedef smart_ptr <FRead, true>										  sp_reader_t;
       typedef smart_ptr <h5_pool_iface, true>							sp_h5_pool_t;
       typedef smart_ptr <prop_iface, true>							  sp_prop_t;
 
@@ -106,7 +105,6 @@ enum   //! indexes for dimension parameters
       struct scal_info 
         {
           spv_float          main_data_;
-          auto_value <t_int> keyword_type; 
           
           scal_info ();
         };

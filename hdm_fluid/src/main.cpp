@@ -17,7 +17,7 @@ namespace blue_sky {
 
   namespace {
   bool
-  register_types (plugin_descriptor &pd)
+  register_types (const plugin_descriptor &pd)
   {
     bool res = true;
 
@@ -27,18 +27,25 @@ namespace blue_sky {
     return res;
   }
   }
+}
 
   BLUE_SKY_REGISTER_PLUGIN_FUN
   {
     return register_types (*bs_init.pd_);
   }
-}
+
 //#if 0
 #ifdef BSPY_EXPORTING_PLUGIN
+namespace {
+  void
+  init_py_subsystem ()
+  {
+    using namespace boost::python;
+  }
+}
 BLUE_SKY_INIT_PY_FUN
 {
-  using namespace boost::python;
-
+  init_py_subsystem ();
 }
 #ifdef _DEBUG
 BOOST_PYTHON_MODULE (hdm_fluid_d)
@@ -46,9 +53,9 @@ BOOST_PYTHON_MODULE (hdm_fluid_d)
 BOOST_PYTHON_MODULE (hdm_fluid)
 #endif
 {
-  bs_init_py_subsystem ();
+  init_py_subsystem ();
   std::cout << &BS_KERNEL << std::endl;
-  bool res = blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ());
+  bool res = register_types (*blue_sky::bs_get_plugin_descriptor ());
   if (!res)
     throw "Can't register hdm_fluid types";
 }

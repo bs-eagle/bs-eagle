@@ -6,12 +6,6 @@
 \author Morozov Andrey
 */
 
-/*
-#include "keyword_manager_iface.h"
-#include "data_class.h"
-#include "read_class.h"
-*/
-
 namespace blue_sky {
 
   class keyword_manager_iface;

@@ -5,6 +5,7 @@
 
 #include "pvt_base.h"
 #include "py_pvt.h"
+#include "pvt_keywords.hpp"
 
 namespace blue_sky
 {
@@ -16,7 +17,8 @@ namespace blue_sky
   {
     bool res = true;
 
-    res &= blue_sky::pvt_register_types (pd); BS_ASSERT (res);
+    res &= blue_sky::pvt_register_types (pd); BS_ASSERT (res); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, blue_sky::pvt_keywords::bs_type ()); BS_ASSERT (res);
 
     return res;
   }
@@ -29,9 +31,16 @@ namespace blue_sky
 }//bs
 
 #ifdef BSPY_EXPORTING_PLUGIN
+namespace {
+  void
+  init_py_subsystem ()
+  {
+    blue_sky::python::py_export_pvt ();
+  }
+}
 BLUE_SKY_INIT_PY_FUN
 {
-  blue_sky::python::py_export_pvt ();
+  init_py_subsystem ();
 }
 #ifdef _DEBUG
 BOOST_PYTHON_MODULE (bs_pvt_d)
@@ -39,9 +48,9 @@ BOOST_PYTHON_MODULE (bs_pvt_d)
 BOOST_PYTHON_MODULE (bs_pvt)
 #endif
 {
-  bs_init_py_subsystem ();
+  init_py_subsystem ();
   std::cout << &BS_KERNEL << std::endl;
-  bool res = blue_sky::pvt_register_types (*blue_sky::bs_get_plugin_descriptor ());
+  bool res = blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ());
   if (!res)
     throw "Can't register pvt types";
 }

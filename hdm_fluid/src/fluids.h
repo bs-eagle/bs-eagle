@@ -1,4 +1,4 @@
-/** 
+/**
  * @file fluids.h
  * @brief fluid information storage
  * @author Oleg Borschuk
@@ -13,7 +13,7 @@
 
 namespace blue_sky
 {
-  /** 
+  /**
    * @brief interface class for block CSR matrix storage and manipulation
    */
   class BS_API_PLUGIN fluids: public fluids_iface
@@ -27,13 +27,23 @@ namespace blue_sky
       //blue-sky class declaration
       BLUE_SKY_TYPE_DECL (fluids);
     public:
-      
+
       //! destructor
       virtual ~fluids ()
         {};
 
-       /** 
-        * @brief return number of phases in the model, 
+       /**
+        * @brief
+        */
+       virtual int init (sp_pool_t sp_pool, sp_prop_t sp_prop)
+         {
+           // TODO: ADD
+           return 0;
+         }
+
+
+       /**
+        * @brief return number of phases in the model,
         *        if class non initialized allready or phases non specified
         *        return -1
         */
@@ -42,43 +52,59 @@ namespace blue_sky
            return n_phases;
          }
 
-       /** 
+       /**
         * @brief change the number of PVT regions
-        * 
+        *
         * @param n_regs -- <INPUT> new number of PVT regions
         */
-       virtual void set_n_pvt_regs (const t_long n_regs);
+       virtual void set_n_pvt_regs (const t_long n_regs)
+         {
+           // TODO: ADD
+         }
 
-       /** 
+       /**
         * @brief change the number of SCAL regions
-        * 
+        *
         * @param n_regs -- <INPUT> new number of SCAL regions
         */
-       virtual void set_n_scal_regs (const t_long n_regs);
+       virtual void set_n_scal_regs (const t_long n_regs)
+         {
+           // TODO: ADD
+         }
 
-       /** 
+       /**
         * @brief change the number of EQUIL regions
-        * 
+        *
         * @param n_regs -- <INPUT> new number of EQUIL regions
         */
-       virtual void set_n_equil_regs (const t_long n_regs);
+       virtual void set_n_equil_regs (const t_long n_regs)
+         {
+           // TODO: ADD
+         }
 
-       /** 
-        * @brief make checking of internal state and prepare properties for 
+       /**
+        * @brief make checking of internal state and prepare properties for
         *        calculation process
         *        Call this method before visualizing any fluid property
-        * 
+        *
         * @return 0 if success, < 0 if error occur
         */
-       virtual int update ();
+       virtual int update ()
+         {
+           // TODO: ADD
+         }
 
 
-       /** 
+       /**
         * @brief return number of PVT regions
         */
-       virtual t_long get_n_pvt_regs () const;
+       virtual t_long get_n_pvt_regs () const
+         {
+           // TODO: ADD
+           return 0;
+         }
 
-       /** 
+       /**
         * @brief return number of SCAL regions
         */
        virtual t_long get_n_scal_regs () const
@@ -87,7 +113,7 @@ namespace blue_sky
            return 0;
          }
 
-       /** 
+       /**
         * @brief return number of EQUIL regions
         */
        virtual t_long get_n_equil_regs () const
@@ -96,20 +122,24 @@ namespace blue_sky
            return 0;
          }
 
-       /** 
-        * @brief set phases 
-        * 
+       /**
+        * @brief set phases
+        *
         * @param water  -- <INPUT> 0 -- with out water, 1 -- with water
         * @param oil    -- <INPUT> 0 -- with out oil, 1 -- oil with out desolvet gas,
         *                          2 -- oil with desolved gas
         * @param gas    -- <INPUT> 0 -- with out gas, 1 -- with dry gas only,
         *                          2 -- gas and vaporised oil
-        * 
+        *
         * @return 0 if ok, < 0 if error occur
         */
-       virtual int set_phases (const t_long water, 
-                               const t_long oil, 
-                               const t_long gas);
+       virtual int set_phases (const t_long water,
+                               const t_long oil,
+                               const t_long gas)
+         {
+           // TODO: ADD
+           return 0;
+         }
 
 
 #ifdef BSPY_EXPORTING_PLUGIN
@@ -129,7 +159,7 @@ namespace blue_sky
     protected:
       t_long n_phases;
       t_long phases;
-      
+
 
     };
 

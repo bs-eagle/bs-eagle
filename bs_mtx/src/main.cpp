@@ -49,15 +49,21 @@ namespace {
 }
 //#if 0
 #ifdef BSPY_EXPORTING_PLUGIN
+namespace {
+  void
+  init_py_subsystem ()
+  {
+    using namespace boost::python;
+
+    python::py_export_matrices ();
+    python::py_export_bcsr_matrices ();
+    python::py_export_mbcsr_matrices ();
+    python::py_export_dens_matrices ();
+  }
+}
 BLUE_SKY_INIT_PY_FUN
 {
-  using namespace boost::python;
-
-  python::py_export_matrices ();
-  python::py_export_bcsr_matrices ();
-  python::py_export_mbcsr_matrices ();
-  python::py_export_dens_matrices ();
-
+  init_py_subsystem ();
 }
 
 #ifdef _DEBUG
@@ -66,7 +72,7 @@ BOOST_PYTHON_MODULE (bs_mtx_d)
 BOOST_PYTHON_MODULE (bs_mtx)
 #endif
 {
-  bs_init_py_subsystem ();
+  init_py_subsystem ();
   std::cout << &BS_KERNEL << std::endl;
   bool res = register_types (*blue_sky::bs_get_plugin_descriptor ());
   if (!res)

@@ -58,20 +58,28 @@ struct auto_value_to_python
   }
 };
 
+namespace {
+  void 
+  init_py_subsystem ()
+  {
+    auto_value_to_python <long>::make_known ();
+    auto_value_to_python <unsigned long>::make_known ();
+    auto_value_to_python <int>::make_known ();
+    auto_value_to_python <unsigned int>::make_known ();
+    auto_value_to_python <float>::make_known ();
+    auto_value_to_python <double>::make_known ();
+    auto_value_to_python <char>::make_known ();
+
+    //python::py_export_assert ();
+    python::py_export_named_pbase ("named_pbase");
+    python::export_data_dimens ();
+    python::export_type_helper ();
+  }
+}
+
 BLUE_SKY_INIT_PY_FUN
 {
-  auto_value_to_python <long>::make_known ();
-  auto_value_to_python <unsigned long>::make_known ();
-  auto_value_to_python <int>::make_known ();
-  auto_value_to_python <unsigned int>::make_known ();
-  auto_value_to_python <float>::make_known ();
-  auto_value_to_python <double>::make_known ();
-  auto_value_to_python <char>::make_known ();
-
-  //python::py_export_assert ();
-  python::py_export_named_pbase ("named_pbase");
-  python::export_data_dimens ();
-  python::export_type_helper ();
+  init_py_subsystem ();
 }
 #ifdef _DEBUG
 BOOST_PYTHON_MODULE (bs_bos_core_base_d)
@@ -79,7 +87,7 @@ BOOST_PYTHON_MODULE (bs_bos_core_base_d)
 BOOST_PYTHON_MODULE (bs_bos_core_base)
 #endif
 {
-  bs_init_py_subsystem ();
+  init_py_subsystem ();
   std::cout << &BS_KERNEL << std::endl;
   bool res = register_types (*blue_sky::bs_get_plugin_descriptor ());
   if (!res)

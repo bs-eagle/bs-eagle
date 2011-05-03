@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="blue-sky_d.lib bs_bos_core_base_d.lib bs_matrix_d.lib bs_base_linear_solvers_d.lib bs_bos_core_data_storage_d.lib bs_scal_d.lib bs_pvt_d.lib loki_D.lib ws2_32.lib"
+				AdditionalDependencies="blue-sky_d.lib bs_bos_core_base_d.lib bs_base_linear_solvers_d.lib bs_bos_core_data_storage_d.lib bs_scal_d.lib bs_pvt_d.lib loki_D.lib ws2_32.lib"
 				OutputFile="$(ProjectDir)/../../../exe/debug/plugins/$(ProjectName)_d.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/lib&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/debug/&quot;;&quot;$(ProjectDir)/../../../exe/debug/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
@@ -1187,14 +1187,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\fip_results_storage.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\include\fip_results_storage.h"
-				>
-			</File>
-			<File
 				RelativePath=".\include\main_loop_calc.h"
 				>
 			</File>
@@ -1236,14 +1228,6 @@
 			</File>
 			<File
 				RelativePath=".\include\trans_multipliers.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\well_results_storage.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\include\well_results_storage.h"
 				>
 			</File>
 			<Filter
