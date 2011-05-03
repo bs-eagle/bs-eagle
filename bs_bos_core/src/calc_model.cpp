@@ -72,7 +72,6 @@ namespace blue_sky
       , sat_regions (BS_KERNEL.create_object (v_long::bs_type ()))
       , fip_regions (BS_KERNEL.create_object (v_long::bs_type ()))
       , rock_regions (BS_KERNEL.create_object (v_long::bs_type ()))
-      , scal_prop (BS_KERNEL.create_object ("scal_3p"))
       , pressure (BS_KERNEL.create_object (v_double::bs_type ()))
       , saturation_3p (BS_KERNEL.create_object (v_double::bs_type ()))
       , gas_oil_ratio (BS_KERNEL.create_object (v_double::bs_type ()))
@@ -92,7 +91,6 @@ namespace blue_sky
       , sat_regions (BS_KERNEL.create_object (v_long::bs_type ()))
       , fip_regions (BS_KERNEL.create_object (v_long::bs_type ()))
       , rock_regions (BS_KERNEL.create_object (v_long::bs_type ()))
-      , scal_prop (BS_KERNEL.create_object ("scal_3p"))
       , pressure (BS_KERNEL.create_object (v_double::bs_type ()))
       , saturation_3p (BS_KERNEL.create_object (v_double::bs_type ()))
       , gas_oil_ratio (BS_KERNEL.create_object (v_double::bs_type ()))
@@ -135,7 +133,7 @@ namespace blue_sky
   }
 
   int 
-  calc_model::init_main_arrays (const BS_SP (init_model_iface) &init_model, const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
+  calc_model::init_main_arrays (const BS_SP (init_model_iface) &init_model, const BS_SP (scal_3p_iface) &scal_prop_, const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
   {
 #ifdef _DEBUG
     BOSOUT (section::init_data, level::debug) << "FI DEBUG: begin of init_main_arrays method" << bs_end;
@@ -357,20 +355,10 @@ namespace blue_sky
                           input_data);
 
     // initialize scale arrays
+    scal_prop = scal_prop_;
     const BS_SP (scale_array_holder_iface) &gas_scale_ = scal_prop->get_gas_scale ();
     const BS_SP (scale_array_holder_iface) &water_scale_ = scal_prop->get_water_scale ();
-#if 0
-    gas_scale_->insert_socr ((*input_data->d_map)[SOGCR].array);
-    gas_scale_->insert_scr  ((*input_data->d_map)[SGCR].array);
-    gas_scale_->insert_su   ((*input_data->d_map)[SGU].array);
-    gas_scale_->insert_sl   ((*input_data->d_map)[SGL].array);
 
-    water_scale_->insert_socr ((*input_data->d_map)[SOWCR].array);
-    water_scale_->insert_scr  ((*input_data->d_map)[SWCR].array);
-    water_scale_->insert_su   ((*input_data->d_map)[SWU].array);
-    water_scale_->insert_sl   ((*input_data->d_map)[SWL].array);
-    water_scale_->insert_pcp  ((*input_data->d_map)[PCW].array);
-#else
     gas_scale_->set_socr (input_data->get_fp_array ("SOGCR"));
     gas_scale_->set_scr  (input_data->get_fp_array ("SGCR"));
     gas_scale_->set_su   (input_data->get_fp_array ("SGU"));
@@ -382,8 +370,10 @@ namespace blue_sky
     water_scale_->set_sl   (input_data->get_fp_array ("SWL"));
     water_scale_->set_pcp  (input_data->get_fp_array ("PCW"));
 
-#endif
-    init_scal ();
+    scal_prop->set_water_jfunction (BS_KERNEL.create_object (jfunction::bs_type ()));
+    scal_prop->set_gas_jfunction (BS_KERNEL.create_object (jfunction::bs_type ()));
+    scal_prop->init (is_water (), is_gas (), is_oil (), phase_d, sat_d, rpo_model);
+    scal_prop->update_gas_data ();
 
     // initialize rock grid data
     this->rock_grid_prop->init_data(mesh->get_n_active_elements (), mesh->get_int_to_ext (), input_data);
@@ -534,15 +524,6 @@ namespace blue_sky
       }
     };
 
-  void
-  calc_model::init_scal ()
-  {
-    scal_prop->set_water_jfunction (BS_KERNEL.create_object (jfunction::bs_type ()));
-    scal_prop->set_gas_jfunction (BS_KERNEL.create_object (jfunction::bs_type ()));
-    scal_prop->init (is_water (), is_gas (), is_oil (), phase_d, sat_d, rpo_model);
-    scal_prop->update_gas_data ();
-  }
-
   void 
   calc_model::init_pvt_arrays (sp_pvt_oil_array_t &pvto,
       sp_pvt_gas_array_t &pvtg,
@@ -559,6 +540,8 @@ namespace blue_sky
     for (size_t i = 0; i<this->n_pvt_regions; i++)
       {
         BS_ASSERT (idata->pvto.size ());
+        std::cout << "pvto (" << i << "): " << idata->pvto.back ().main_data_->empty () << std::endl;
+
         if (idata->pvto.back ().main_data_->empty ())
           {
             pvto[i] = BS_KERNEL.create_object (pvt_dead_oil_t::bs_type());

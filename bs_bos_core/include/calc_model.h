@@ -185,7 +185,10 @@ namespace blue_sky
        * \todo   remove return values, throw exceptions instead
        * */
       int 
-      init_main_arrays (const BS_SP (init_model_iface) &init_model, const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
+      init_main_arrays (const BS_SP (init_model_iface) &init_model, 
+        const BS_SP (scal_3p_iface) &scal_prop,
+        const sp_idata_t &input_data, 
+        const sp_mesh_iface_t &mesh);
 
       /**
        * \brief  inits arrays for calculation process
@@ -196,12 +199,6 @@ namespace blue_sky
        * */
       int 
       init_calcul_arrays (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
-
-      /**
-       * \brief  inits scal 
-       * */
-      void 
-      init_scal ();
 
       /**
        * \brief  inits pvt arrays
