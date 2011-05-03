@@ -753,7 +753,7 @@ namespace blue_sky
     // Check input data before units conversion for correct reporting of user errors
     check_data (hdm_->get_mesh (), hdm_->data);
 
-    cm->init_main_arrays(hdm_->data, hdm_->get_mesh ());
+    cm->init_main_arrays(hdm_->get_init_model (), hdm_->get_data (), hdm_->get_mesh ());
     cm->init_calcul_arrays (hdm_->data, hdm_->get_mesh ());
     // calculate planes geometric transmissibility
     cm->rock_grid_prop->init_planes_trans (n_active_elements, hdm_->mesh->get_volumes (), cm->ts_params, cm->internal_constants);

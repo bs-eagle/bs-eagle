@@ -9,6 +9,7 @@
 
 #include "explicit_keywords.hpp"
 #include "keyword_manager_iface.h"
+#include "init_model_iface.hpp"
 #include "read_class.h"
 #include "data_class.h"
 
@@ -72,6 +73,9 @@ namespace blue_sky
     {
       BS_SP (keyword_manager_iface) keyword_manager = params.hdm->get_keyword_manager ();
       BS_ASSERT (keyword_manager);
+
+      BS_SP (init_model_iface) init_model (BS_KERNEL.create_object ("explicit_init_model"), bs_dynamic_cast ());
+      params.hdm->set_init_model (init_model);
 
       // FIXME: npy_intp
       npy_intp dimens[] = {1, 0, 1, 0, 1, 0};

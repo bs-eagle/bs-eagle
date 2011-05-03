@@ -52,6 +52,9 @@
 
 #include "prepare_fpu.h"
 
+#include "explicit_model.hpp"
+#include "equil_model.hpp"
+
 //#include "well_results_storage.h"
 //#include "fip_results_storage.h"
 
@@ -360,6 +363,9 @@ namespace blue_sky
 
     res &= reservoir_simulator_register_types (pd);
     BS_ASSERT (res);
+
+    res &= BS_KERNEL.register_type (pd, explicit_model::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, equil_model::bs_type ()); BS_ASSERT (res);
 
     return res;
   }

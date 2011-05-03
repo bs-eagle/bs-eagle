@@ -46,6 +46,7 @@ namespace blue_sky
 
   class calc_model;
   class reservoir;
+  class init_model_iface;
 
   //class well_results_storage;
   //class fip_results_storage;
@@ -177,13 +178,14 @@ namespace blue_sky
 
       /**
        * \brief  inits main arrays
+       * \param  initialization model
        * \param  input_data pointer to idata instance
        * \param  mesh pointer to mesh instance
        * \return 0 on success otherwise negative integer value
        * \todo   remove return values, throw exceptions instead
        * */
       int 
-      init_main_arrays (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
+      init_main_arrays (const BS_SP (init_model_iface) &init_model, const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
 
       /**
        * \brief  inits arrays for calculation process
@@ -194,80 +196,6 @@ namespace blue_sky
        * */
       int 
       init_calcul_arrays (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
-
-      /**
-       * \brief  inits initial conditions
-       * \param  input_data pointer to idata instance
-       * \param  mesh pointer to mesh instance
-       * \return 0 on success otherwise negative integer value
-       * \todo   remove return values, throw exceptions instead
-       * */
-      int 
-      set_initial_data (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
-
-      /**
-       * \brief  calculates equilibrium
-       * \param  input_data pointer to idata instance
-       * \param  mesh pointer to mesh instance
-       * \return 0 on success otherwise negative integer value
-       * \todo   remove return values, throw exceptions instead
-       * */
-      int 
-      calc_equil (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
-
-      /**
-       * \brief  calculates pressure for equil
-       * \return 0 on success otherwise negative integer value
-       * \todo   remove return values, throw exceptions instead
-       * \param[in]   prev_press preview pressure value
-       * \param[in]   cur_d
-       * \param[in]   h
-       * \param[in]   phase
-       * \param[in]   i_pvt
-       * \param[in]   rs_type
-       * \param[in]   depth_goc
-       * \param[in]   rs_dat
-       * \param[in]   rsvd
-       * \param[in]   pbvd
-       * \param[out]  p
-       * \param[out]  rs
-       * */
-      int 
-      equil_calc_pressure (item_t prev_press, item_t cur_d, item_t h, index_t phase, index_t i_pvt,
-                           double rs_type, item_t depth_goc, item_t rs_dat,
-                           val_vs_depth *rsvd, val_vs_depth *pbvd,
-                           item_t &p, item_t *rs = 0);
-
-      /**
-       * \brief  inits pressure array
-       * \param  input_data pointer to idata instance
-       * \param  mesh pointer to mesh instance
-       * \return 0 on success otherwise negative integer value
-       * \todo   remove return values, throw exceptions instead
-       * */
-      int 
-      init_pressure (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
-
-      /**
-       * \brief  inits saturation array
-       * \param  input_data pointer to idata instance
-       * \param  mesh pointer to mesh instance
-       * \return 0 on success otherwise negative integer value
-       * \todo   remove return values, throw exceptions instead
-       * */
-      int 
-      init_saturation (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
-
-      /**
-       * \brief  inits phases variables (rs) and selest number of phases
-       * \param  input_data pointer to idata instance
-       * \param  mesh pointer to mesh instance
-       * \return 0 on success otherwise negative integer value
-       * \todo   remove return values, throw exceptions instead
-       * */
-      int 
-      init_rs (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
-
 
       /**
        * \brief  inits scal 

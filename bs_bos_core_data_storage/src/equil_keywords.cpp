@@ -9,6 +9,7 @@
 
 #include "equil_keywords.hpp"
 #include "keyword_manager_iface.h"
+#include "init_model_iface.hpp"
 #include "read_class.h"
 #include "data_class.h"
 #include "constants.h"
@@ -238,6 +239,9 @@ namespace blue_sky
     {
       BS_SP (keyword_manager_iface) keyword_manager = params.hdm->get_keyword_manager ();
       BS_ASSERT (keyword_manager);
+
+      BS_SP (init_model_iface) init_model (BS_KERNEL.create_object ("equil_init_model"), bs_dynamic_cast ());
+      params.hdm->set_init_model (init_model);
 
       keyword_manager->register_keyword ("EQUIL", keyword_manager_iface::keyword_handler (EQUIL, 0));
       keyword_manager->register_keyword ("RSVD", keyword_manager_iface::keyword_handler (RSVD, 0));

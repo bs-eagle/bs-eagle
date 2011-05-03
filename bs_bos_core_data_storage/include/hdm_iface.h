@@ -15,6 +15,7 @@ namespace blue_sky {
   class h5_pool_iface;
   class prop_iface;
   class scal_3p_iface;
+  class init_model_iface;
 
   class BS_API_PLUGIN hdm_iface: public objbase
     {
@@ -60,11 +61,14 @@ namespace blue_sky {
 
       virtual BS_SP (scal_3p_iface) get_scal () = 0;
 
+      virtual BS_SP (init_model_iface) get_init_model () = 0;
   
       // SET
 
       // mesh setter
       virtual void set_mesh (sp_mesh_iface_t mesh) = 0;
+
+      virtual void set_init_model (BS_SP (init_model_iface) model) = 0;
       
     };
 
