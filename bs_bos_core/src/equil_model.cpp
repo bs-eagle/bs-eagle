@@ -111,9 +111,7 @@ namespace blue_sky
   {
     const t_long n_depth = 100, n_layer = 10;
     t_long i_depth;
-    t_long i_eql, i_pvt, i_sat = 0, n_eql;
-    t_long i_cell, n_cells;
-    stdv_long eqlnum;
+    t_long i_eql, i_pvt, i_sat = 0;
     stdv_double min_depth, max_depth;
     t_double d_depth, h;
     t_double depth_dat, press_dat, rs_dat, depth_woc, press_woc, depth_goc, press_goc;
@@ -165,12 +163,12 @@ namespace blue_sky
 
 
     //get num of eql regions
-    n_eql = equil_regions->size (); // FIXME: sergey.miryanov: get number of EQUIL regs
+    t_long n_eql = data->props->get_i ("eql_region"); 
     //get num of elements
-    n_cells = mesh->get_n_active_elements();
+    t_long n_cells = mesh->get_n_active_elements();
 
     //get eqlnum array
-    eqlnum.resize(n_cells);
+    stdv_long eqlnum (n_cells);
     //todo: if zero array
     convert_arrays (mesh->get_n_active_elements (), mesh->get_int_to_ext (), eqlnum, data->get_i_array ("EQLNUM"));
 
@@ -188,8 +186,9 @@ namespace blue_sky
 
     const spv_float &cell_depths = mesh->get_depths ();
 
+
     //get min and max depth in each of eql regions
-    for (i_cell = 0; i_cell < n_cells; i_cell++)
+    for (t_long i_cell = 0; i_cell < n_cells; i_cell++)
       {
         t_double top_depth = 0., bottom_depth = 0.;
         i_eql = eqlnum[i_cell] - 1;
@@ -584,7 +583,7 @@ namespace blue_sky
       }
 
     //------------------------------- loop through active cells ----------------------
-    for (i_cell = 0; i_cell < n_cells; i_cell++)
+    for (t_long i_cell = 0; i_cell < n_cells; i_cell++)
       {
         p_oil = 0.;
         p_water = 0.;
@@ -846,11 +845,7 @@ namespace blue_sky
   void
   equil_model::init (BS_SP (calc_model) model, BS_SP (idata) data, BS_SP (rs_mesh_iface) mesh)
   {
-    // FIXME: WTF!!
-    calc_model *x = &(*model);
-    idata *d = &(*data);
-    rs_mesh_iface *m = &(*mesh);
-    calc_equil (x, d, m);
+    calc_equil (model.lock (), data.lock (), mesh.lock ());
   }
 
   BLUE_SKY_TYPE_STD_CREATE (equil_model);
