@@ -72,7 +72,7 @@ namespace blue_sky
   }
 
   void
-  pvt_oil::build (t_double atm_p, t_double min_p, t_double max_p, int n_intervals)
+  pvt_oil::build (t_double atm_p, t_double min_p, t_double max_p, t_long n_intervals)
   {
     int n_points = base_t::build_internal (atm_p, min_p, max_p, n_intervals, true);
 
