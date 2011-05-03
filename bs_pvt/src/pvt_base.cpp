@@ -18,6 +18,9 @@ namespace blue_sky
     init_dependent = true;
     pvt_input_props = BS_KERNEL.create_object ("table");
     pvt_props_table = BS_KERNEL.create_object ("table"); 
+
+    BS_ASSERT (pvt_input_props);
+    BS_ASSERT (pvt_props_table);
   }
 
   t_double
