@@ -9,6 +9,8 @@
 
 #include "explicit_keywords.hpp"
 #include "keyword_manager_iface.h"
+#include "read_class.h"
+#include "data_class.h"
 
 namespace blue_sky 
 {
@@ -24,8 +26,45 @@ namespace blue_sky
   namespace 
   {
     void
-    PRVD (std::string const &, keyword_params &params)
+    PRVD (std::string const &keyword, keyword_params &params)
     {
+      BS_SP (FRead) reader = params.hdm->get_reader ();
+      BS_SP (idata) idata = params.hdm->get_data ();
+      
+      t_long eql_region = idata->props->get_i ("eql_region");
+      if (eql_region == 0)
+        {
+          bs_throw_exception (boost::format ("Error in %s: eql_region == 0 (keyword: %s)")
+            % reader->get_prefix () % keyword);
+        }
+
+      idata->prvd.resize(eql_region);
+
+      // Read table for each of region
+      std::vector <double> dbuf;
+      for (t_long i = 0; i < eql_region; ++i)
+        {
+          t_long len = reader->read_table (keyword, dbuf, 2);
+          if (len < 1)
+            {
+              bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
+                % reader->get_prefix () % keyword);
+            }
+
+          idata->prvd[i].set_table_len (len);
+
+          std::vector <double> &dpt = idata->prvd[i].tdepth();
+          std::vector <double> &prs = idata->prvd[i].tvalues();
+          // Rows infill
+          for (t_long j = 0; j < len; ++j)
+            {
+              dpt[j] = dbuf[j * 2];
+              prs[j] = dbuf[j * 2 + 1];
+            }
+
+          BOSOUT (section::read_data, level::medium) << "len=" << len << " i=" << i << bs_end;
+        }
+      BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
     }
 
     void
