@@ -814,42 +814,6 @@
 		<Filter
 			Name="linear solvers"
 			>
-			<File
-				RelativePath=".\src\two_stage_preconditioner.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="2"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\include\two_stage_preconditioner.h"
-				>
-			</File>
-			<Filter
-				Name="python wrappers"
-				>
-				<File
-					RelativePath=".\src\py_two_stage_preconditioner.cpp"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="2"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\include\py_two_stage_preconditioner.h"
-					>
-				</File>
-			</Filter>
 			<Filter
 				Name="mpi"
 				>
@@ -1121,18 +1085,6 @@
 			<Filter
 				Name="tables"
 				>
-				<File
-					RelativePath=".\src\py_table_2d_debug.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\py_table_2d_debug.h"
-					>
-				</File>
-				<File
-					RelativePath=".\include\table_2d.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="pp"

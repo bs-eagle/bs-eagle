@@ -99,8 +99,8 @@ namespace blue_sky
       void
       copy_fip_data_to_storage (sp_calc_model_t &calc_model, item_t dt)
       {
-        const sp_fip_results_storage &f_res (calc_model->fip_res);
         /*
+        const sp_fip_results_storage &f_res (calc_model->fip_res);
         int i;
         fip_data *fd;
         int fip_region = rsv_status->fip_region;

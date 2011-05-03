@@ -302,6 +302,63 @@ namespace blue_sky
       }
   }
 
+
+  /**
+   * \brief  checks saturation saturation
+   * \param  mesh pointer to mesh instance
+   * \param  data pointer to data storage (pool)
+   * \return may throw exception
+   * */
+  void 
+  check_scal (const smart_ptr <idata, true> &data)
+  {
+    // TODO: check code 
+    typedef idata::scal_vector    scal_vector;
+    typedef idata::scal_info      scal_info;
+
+    bool is_water = data->props->get_b ("water_phase");
+    bool is_gas   = data->props->get_b ("gas_phase");
+    bool is_oil   = data->props->get_b ("oil_phase");
+    
+    if (is_water && is_gas && is_oil)
+      {
+        if (!data->swof.front ().main_data_->empty () && !data->sgof.front ().main_data_->empty ())
+          {
+            data->props->set_i ("scal_family", 0);
+          }
+        else if (!data->swfn.front ().main_data_->empty () && 
+                 !data->sgfn.front ().main_data_->empty () &&
+                 !data->sof3.front ().main_data_->empty ())
+          {
+            data->props->set_i ("scal_family", 1);
+          }         
+      } 
+    else if (is_water && is_oil) 
+      {
+        if (!data->swof.front ().main_data_->empty ())
+          {
+            data->props->set_i ("scal_family", 0);
+          }
+        else if (!data->swfn.front ().main_data_->empty () && 
+                 !data->sof2.front ().main_data_->empty ())         
+          {
+            data->props->set_i ("scal_family", 1);
+          }       
+      }  
+    else if (is_oil && is_gas)
+      {
+        if (!data->sgof.front ().main_data_->empty ())
+          {
+            data->props->set_i ("scal_family", 0);
+          }
+        else if (!data->sgfn.front ().main_data_->empty () && 
+                 !data->sof2.front ().main_data_->empty ())         
+          {
+            data->props->set_i ("scal_family", 1);
+          }       
+      }  
+  }
+
   /**
    * \brief  checks permx, permy, permz
    * \param  mesh pointer to mesh instance
@@ -723,7 +780,8 @@ namespace blue_sky
     count += check5 (check_equil,            data, mesh,  "Equil region numbers check... ", true);
     count += check5 (check_volume,           data, mesh,  "Volume check... ", false);
     count += check3 (check_rock,             data,        "Rock check... ");
-
+    count += check3 (check_scal,             data,        "SCAL check... ");
+    
     //BOSOUT (section::check_data, level::medium) << "Well data check... ";
     //if (!(r = check_wfrictn_keyword_connection_data (msh)))
     //BOSOUT (section::check_data, level::medium) << " ...[ OK ]" << bs_end;

@@ -238,13 +238,13 @@ namespace blue_sky
       static void PVTW_handler                     (const std::string &keyword, keyword_params_t &params);
       static void PVDG_handler                     (const std::string &keyword, keyword_params_t &params);
       static void ROCK_handler                     (const std::string &keyword, keyword_params_t &params);
-      /*
       static void SWOF_handler                     (const std::string &keyword, keyword_params_t &params);
       static void SGOF_handler                     (const std::string &keyword, keyword_params_t &params);
       static void SWFN_handler                     (const std::string &keyword, keyword_params_t &params);
       static void SGFN_handler                     (const std::string &keyword, keyword_params_t &params);
       static void SOF3_handler                     (const std::string &keyword, keyword_params_t &params);
       static void SOF2_handler                     (const std::string &keyword, keyword_params_t &params);
+      /*
       static void EQUIL_handler                    (const std::string &keyword, keyword_params_t &params);
       static void PRVD_handler                     (const std::string &keyword, keyword_params_t &params);
       static void RSVD_handler                     (const std::string &keyword, keyword_params_t &params);

@@ -101,8 +101,18 @@ enum   //! indexes for dimension parameters
           pvt_info ();
         };
 
-      typedef std::vector <pvt_info>									  pvt_vector;
+      typedef std::vector <pvt_info>	pvt_vector;
 
+      struct scal_info 
+        {
+          spv_float          main_data_;
+          auto_value <t_int> keyword_type; 
+          
+          scal_info ();
+        };
+        
+      typedef std::vector <scal_info>  scal_vector;    
+      
 		public:
 
       ~idata ();
@@ -221,7 +231,8 @@ enum   //! indexes for dimension parameters
 
       
       pvt_vector pvto, pvtdo, pvtg, pvtw;
-
+      scal_vector swof, sgof, swfn, sgfn, sof2, sof3;
+      
       spv_int equil_regions;
 
       spv_float rock;            //!< Array (pvt_region) - compressibility of rock for each region

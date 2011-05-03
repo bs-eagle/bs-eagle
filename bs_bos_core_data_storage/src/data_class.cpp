@@ -60,6 +60,11 @@ namespace blue_sky
   {
   }
 
+  idata::scal_info::scal_info ()
+  : main_data_ (BS_KERNEL.create_object (v_float::bs_type ()))
+  {
+  }
+
   idata::~idata ()
   {
     h5_pool->close_file();
@@ -104,6 +109,7 @@ namespace blue_sky
     props->add_property_i (1, "fip_region", "Number of FIP regions in simulation");
     props->add_property_i (1, "rock_region", "Number of ROCK regions");
     props->add_property_i (0, "init_section", "flag indicating whether we have init section");
+    props->add_property_i (0, "scal_family", "flag indicating swof/sgof (0) or swfn/sgfn/sof2/sof3 (1) family");
     
     props->add_property_s ("", "title", "Current model title");
     props->add_property_b (0, "oil_phase", "True if oil phase exists");
@@ -183,6 +189,13 @@ namespace blue_sky
     pvtdo.resize (r_pvt);
     pvtg.resize (r_pvt);
     pvtw.resize (r_pvt);
+    
+    swof.resize (r_sat);
+    sgof.resize (r_sat);
+    swfn.resize (r_sat);
+    sgfn.resize (r_sat);
+    sof2.resize (r_sat);
+    sof3.resize (r_sat);
   }
 
   

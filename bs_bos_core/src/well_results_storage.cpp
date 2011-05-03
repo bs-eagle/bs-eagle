@@ -101,5 +101,5 @@
 //  BLUE_SKY_TYPE_STD_CREATE(well_results_storage)
 //  BLUE_SKY_TYPE_STD_COPY(well_results_storage)
 //  BLUE_SKY_TYPE_IMPL_SHORT(well_results_storage, objbase, "well_results_storage")
-} //blue_sky
+//} //blue_sky
 

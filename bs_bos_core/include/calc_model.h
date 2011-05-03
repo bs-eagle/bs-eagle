@@ -279,7 +279,7 @@ namespace blue_sky
        * \brief  inits scal 
        * */
       void 
-      init_scal ();
+      init_scal (const sp_idata_t &idata);
 
       /**
        * \brief  inits pvt arrays

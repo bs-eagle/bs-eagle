@@ -312,14 +312,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\jac_matrix.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\jac_matrix.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\matrix_impl.h"
 				>
 			</File>

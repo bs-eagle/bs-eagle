@@ -28,6 +28,7 @@
 #include "jfunction.h"
 #include "rs_mesh_iface.h"
 #include "string_formater.h"
+//#include "conf.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 //#include "well_results_storage.h"
@@ -382,7 +383,7 @@ namespace blue_sky
     water_scale_->set_pcp  (input_data->get_fp_array ("PCW"));
 
 #endif
-    init_scal ();
+    init_scal (input_data);
 
     // initialize rock grid data
     this->rock_grid_prop->init_data(mesh->get_n_active_elements (), mesh->get_int_to_ext (), input_data);
@@ -1022,8 +1023,87 @@ namespace blue_sky
     };
 
   void
-  calc_model::init_scal ()
+  calc_model::init_scal (const sp_idata_t &idata)
   {
+    // TODO: check code
+    typedef idata_t::scal_vector    scal_vector;
+    typedef idata_t::scal_info      scal_info;
+    t_int scal_family = idata->props->get_i ("scal_family"); 
+    
+    if (is_water () && is_gas () && is_oil ())
+      {
+        if (scal_family == 0) 
+          {
+            BS_ASSERT (idata->swof.size ());
+            BS_ASSERT (idata->sgof.size ());
+            for (t_long i = 0; i < this->n_sat_regions; i++)
+              {
+                scal_prop->get_water_data ()->add_spof (idata->swof[i].main_data_, true);
+                scal_prop->get_gas_data ()->add_spof (idata->sgof[i].main_data_, false);
+              }
+          }
+        else 
+          {
+            BS_ASSERT (idata->swfn.size ());
+            BS_ASSERT (idata->sgfn.size ());
+            BS_ASSERT (idata->sof3.size ());
+            for (t_long i = 0; i < this->n_sat_regions; i++)
+              {
+                scal_prop->get_water_data ()->add_spfn (idata->swfn[i].main_data_, i, true);
+                scal_prop->get_gas_data ()->add_spfn (idata->sgfn[i].main_data_, i, false);
+                scal_prop->get_water_data ()->add_sof3 (idata->sof3[i].main_data_, i, true);
+                scal_prop->get_gas_data ()->add_sof3 (idata->sof3[i].main_data_, i, false);
+              }
+          }  
+      }
+    else if (is_water () && is_oil ())
+      {
+        if (scal_family == 0) 
+          {
+            BS_ASSERT (idata->swof.size ());
+            for (t_long i = 0; i < this->n_sat_regions; i++)
+              {
+                scal_prop->get_water_data ()->add_spof (idata->swof[i].main_data_, true);
+              }
+            
+          }
+        else 
+          {
+            BS_ASSERT (idata->swfn.size ());
+            BS_ASSERT (idata->sof2.size ());
+            for (t_long i = 0; i < this->n_sat_regions; i++)
+              {
+                scal_prop->get_water_data ()->add_spfn (idata->swfn[i].main_data_, i, true);
+                // TODO : not implemented yet 
+                bs_throw_exception ("SOF2 not implemented yet!");
+                //scal_prop->get_water_data ()->add_sof2 (idata->sof2[i].main_data_, i, true);
+              }
+          }  
+      }
+    else if (is_gas () && is_oil ())
+      {
+        if (scal_family == 0) 
+          {
+            BS_ASSERT (idata->sgof.size ());
+            for (t_long i = 0; i < this->n_sat_regions; i++)
+              {
+                scal_prop->get_gas_data ()->add_spof (idata->sgof[i].main_data_, false);
+              }
+          }
+        else 
+          {
+            BS_ASSERT (idata->sgfn.size ());
+            BS_ASSERT (idata->sof2.size ());
+            for (t_long i = 0; i < this->n_sat_regions; i++)
+              {
+                scal_prop->get_gas_data ()->add_spfn (idata->sgfn[i].main_data_, i, false);
+                // TODO : not implemented yet
+                bs_throw_exception ("SOF2 not implemented yet!");
+                //scal_prop->get_gas_data ()->add_sof2 (idata->sof3[i].main_data_, i, false);
+              }
+          }  
+      }
+      
     scal_prop->set_water_jfunction (BS_KERNEL.create_object (scal_3p_t::jfunction_t::bs_type ()));
     scal_prop->set_gas_jfunction (BS_KERNEL.create_object (scal_3p_t::jfunction_t::bs_type ()));
     scal_prop->init (is_water (), is_gas (), is_oil (), phase_d, sat_d, rpo_model);

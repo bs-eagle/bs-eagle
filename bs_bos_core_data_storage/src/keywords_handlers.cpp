@@ -882,6 +882,12 @@ namespace blue_sky
     sp_idata_t idata = params.hdm->get_data ();
     t_long n_pvt_region = idata->props->get_i("pvt_region");
 
+    if (!idata->pvtg.size())
+      {
+        bs_throw_exception (boost::format ("Error in %s: PVT table for gas has not been initialized yet (keyword: %s)")
+          % reader->get_prefix () % keyword);
+      }
+
     // Read table for each of region
     for (t_int i = 0; i < n_pvt_region; i++)
       {
@@ -923,28 +929,30 @@ namespace blue_sky
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
 
-/*
   
   void keyword_manager::SWOF_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    typename strategy_t::item_array_t swof;
-    typedef smart_ptr <scal_3p , true>	sp_scal_3p_t;
-    sp_scal_3p_t scal_3p (params.scal_3p);
     sp_idata_t idata = params.hdm->get_data ();
+    t_long n_scal_region = idata->props->get_i("scal_region");
 
-    // Read table for each of region
-    for (size_t i = 0; i < idata->sat_region; ++i)
+    if (!idata->swof.size())
       {
-        if ((len = reader->read_table (keyword, swof, 4)) < 1)
+        bs_throw_exception (boost::format ("Error in %s: SWOF table has not been initialized yet (keyword: %s)")
+          % reader->get_prefix () % keyword);
+      }
+  
+    // Read table for each of region
+    for (t_long i = 0; i < n_scal_region; ++i)
+      {
+        if ((len = reader->read_table (keyword, (*idata->swof[i].main_data_), 4)) < 1)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
               % reader->get_prefix () % keyword);
           }
-
-        scal_3p->get_water_data()->add_spof (swof, true);
-        swof.clear ();
+        BOSOUT (section::read_data, level::medium) << "len=" << len << " i=" << i << bs_end;
       }
+    BOSOUT (section::read_data, level::medium) << "scal_region=" << n_scal_region << bs_end;
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
 
@@ -952,23 +960,26 @@ namespace blue_sky
   void keyword_manager::SGOF_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    typename strategy_t::item_array_t sgof;
-    typedef smart_ptr <scal_3p , true>	sp_scal_3p_t;
-    sp_scal_3p_t scal_3p (params.scal_3p);
     sp_idata_t idata = params.hdm->get_data ();
+    t_long n_scal_region = idata->props->get_i("scal_region");
 
-    // Read table for each of region
-    for (size_t i = 0; i < idata->sat_region; ++i)
+    if (!idata->sgof.size())
       {
-        if ((len = reader->read_table (keyword, sgof, 4)) < 1)
+        bs_throw_exception (boost::format ("Error in %s: SGOF table has not been initialized yet (keyword: %s)")
+          % reader->get_prefix () % keyword);
+      }
+  
+    // Read table for each of region
+    for (t_long i = 0; i < n_scal_region; ++i)
+      {
+        if ((len = reader->read_table (keyword, (*idata->sgof[i].main_data_), 4)) < 1)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
               % reader->get_prefix () % keyword);
           }
-
-        scal_3p->get_gas_data()->add_spof (sgof, false);
-        sgof.clear ();
+        BOSOUT (section::read_data, level::medium) << "len=" << len << " i=" << i << bs_end;
       }
+    BOSOUT (section::read_data, level::medium) << "scal_region=" << n_scal_region << bs_end;
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
 
@@ -977,49 +988,53 @@ namespace blue_sky
   void keyword_manager::SWFN_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-
-    typename strategy_t::item_array_t swfn;
-    typedef smart_ptr <scal_3p , true>	sp_scal_3p_t;
-    sp_scal_3p_t scal_3p (params.scal_3p);
     sp_idata_t idata = params.hdm->get_data ();
+    t_long n_scal_region = idata->props->get_i("scal_region");
 
-    // Read table for each of region
-    for (size_t i = 0; i < idata->sat_region; ++i)
+    if (!idata->swfn.size())
       {
-        if ((len = reader->read_table (keyword, swfn, 3)) < 1)
+        bs_throw_exception (boost::format ("Error in %s: SWFN table has not been initialized yet (keyword: %s)")
+          % reader->get_prefix () % keyword);
+      }
+  
+    // Read table for each of region
+    for (t_long i = 0; i < n_scal_region; ++i)
+      {
+        if ((len = reader->read_table (keyword, (*idata->swfn[i].main_data_), 3)) < 1)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
               % reader->get_prefix () % keyword);
           }
-
-        scal_3p->get_water_data()->add_spfn (swfn, i, true);
-        swfn.clear ();
+        BOSOUT (section::read_data, level::medium) << "len=" << len << " i=" << i << bs_end;
       }
+    BOSOUT (section::read_data, level::medium) << "scal_region=" << n_scal_region << bs_end;
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
 
 
-  
   void keyword_manager::SGFN_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    typename strategy_t::item_array_t sgfn;
-    typedef smart_ptr <scal_3p , true>	sp_scal_3p_t;
-    sp_scal_3p_t scal_3p (params.scal_3p);
     sp_idata_t idata = params.hdm->get_data ();
+    t_long n_scal_region = idata->props->get_i("scal_region");
 
-    // Read table for each of region
-    for (size_t i = 0; i < idata->sat_region; ++i)
+    if (!idata->sgfn.size())
       {
-        if ((len = reader->read_table (keyword, sgfn, 3)) < 1)
+        bs_throw_exception (boost::format ("Error in %s: SGFN table has not been initialized yet (keyword: %s)")
+          % reader->get_prefix () % keyword);
+      }
+  
+    // Read table for each of region
+    for (t_long i = 0; i < n_scal_region; ++i)
+      {
+        if ((len = reader->read_table (keyword, (*idata->sgfn[i].main_data_), 3)) < 1)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
               % reader->get_prefix () % keyword);
           }
-
-        scal_3p->get_gas_data()->add_spfn (sgfn, i, false);
-        sgfn.clear ();
+        BOSOUT (section::read_data, level::medium) << "len=" << len << " i=" << i << bs_end;
       }
+    BOSOUT (section::read_data, level::medium) << "scal_region=" << n_scal_region << bs_end;
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
 
@@ -1028,33 +1043,57 @@ namespace blue_sky
   void keyword_manager::SOF3_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
-    typename strategy_t::item_array_t sof3;
-    typedef smart_ptr <scal_3p , true>	sp_scal_3p_t;
-    sp_scal_3p_t scal_3p (params.scal_3p);
     sp_idata_t idata = params.hdm->get_data ();
+    t_long n_scal_region = idata->props->get_i("scal_region");
 
-    // Read table for each of region
-    for (size_t i = 0; i < idata->sat_region; ++i)
+    if (!idata->sof3.size())
       {
-        if ((len = reader->read_table (keyword, sof3, 3)) < 1)
+        bs_throw_exception (boost::format ("Error in %s: SOF3 table has not been initialized yet (keyword: %s)")
+          % reader->get_prefix () % keyword);
+      }
+  
+    // Read table for each of region
+    for (t_long i = 0; i < n_scal_region; ++i)
+      {
+        if ((len = reader->read_table (keyword, (*idata->sof3[i].main_data_), 3)) < 1)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
               % reader->get_prefix () % keyword);
           }
-
-        scal_3p->get_water_data()->add_sof3 (sof3, i, true);
-        scal_3p->get_gas_data()->add_sof3 (sof3, i, false);
-        sof3.clear ();
+        BOSOUT (section::read_data, level::medium) << "len=" << len << " i=" << i << bs_end;
       }
+    BOSOUT (section::read_data, level::medium) << "scal_region=" << n_scal_region << bs_end;
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
   
   
   void keyword_manager::SOF2_handler(const std::string &keyword, keyword_params_t &params)
   {
-    bs_throw_exception ("SOF2 not implemented yet!");
+    KH_READER_DEF
+    sp_idata_t idata = params.hdm->get_data ();
+    t_long n_scal_region = idata->props->get_i("scal_region");
+
+    if (!idata->sof2.size())
+      {
+        bs_throw_exception (boost::format ("Error in %s: SOF3 table has not been initialized yet (keyword: %s)")
+          % reader->get_prefix () % keyword);
+      }
+  
+    // Read table for each of region
+    for (t_long i = 0; i < n_scal_region; ++i)
+      {
+        if ((len = reader->read_table (keyword, (*idata->sof2[i].main_data_), 2)) < 1)
+          {
+            bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
+              % reader->get_prefix () % keyword);
+          }
+        BOSOUT (section::read_data, level::medium) << "len=" << len << " i=" << i << bs_end;
+      }
+    BOSOUT (section::read_data, level::medium) << "scal_region=" << n_scal_region << bs_end;
+    BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
   
+/*
 
   
   void keyword_manager::EQUIL_handler(const std::string &keyword, keyword_params_t &params)
