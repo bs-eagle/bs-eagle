@@ -197,7 +197,7 @@ namespace blue_sky
   {
     BS_SP (idata) idata = params.hdm->get_data ();
     
-    idata->props->set_b("water_phase", 1);
+    idata->props->set_b("gas_phase", 1);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
