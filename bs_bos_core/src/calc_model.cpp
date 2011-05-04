@@ -13,10 +13,10 @@
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "scal_3p_iface.hpp"
-#include "scale_array_holder.h"
-#include "scal_region_info.h"
-#include "scal_region.h"
-#include "scal_2p_data_holder.h"
+//#include "scale_array_holder.h"
+//#include "scal_region_info.h"
+//#include "scal_region.h"
+//#include "scal_2p_data_holder.h"
 #include "rock_grid.h"
 #include "norm_calc.h"
 #include "data_class.h"

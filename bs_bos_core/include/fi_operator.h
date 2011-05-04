@@ -15,9 +15,9 @@
 #include "pvt_water.h"
 #include "pvt_dead_oil.h"
 #include "pvt_gas.h"
-#include "scal_region_info.h"
-#include "scal_region.h"
-#include "scal_2p_data_holder.h"
+//#include "scal_region_info.h"
+//#include "scal_region.h"
+//#include "scal_2p_data_holder.h"
 #include "scal_3p_iface.hpp"
 #include BS_STOP_PLUGIN_IMPORT ()
 

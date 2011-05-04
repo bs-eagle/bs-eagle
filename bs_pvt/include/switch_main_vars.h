@@ -8,6 +8,7 @@
 #define BS_SWITCH_MAIN_VARS_H_
 
 #include "pvt_oil.h"
+#include "scal_interpolate.h"
 
 namespace blue_sky
   {

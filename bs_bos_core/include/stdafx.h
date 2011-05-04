@@ -169,10 +169,10 @@
 #include "vartype_table_iface.h"
 
 #include "scal_3p_iface.hpp"
-#include "scale_array_holder.h"
-#include "scal_region_info.h"
-#include "scal_region.h"
-#include "scal_2p_data_holder.h"
+//#include "scale_array_holder.h"
+//#include "scal_region_info.h"
+//#include "scal_region.h"
+//#include "scal_2p_data_holder.h"
 #include "jfunction.h"
 
 #include "rock_grid.h"
