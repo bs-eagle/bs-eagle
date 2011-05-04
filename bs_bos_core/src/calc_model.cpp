@@ -296,10 +296,11 @@ namespace blue_sky
 
     // initialize fip regions
     this->n_fip_regions = input_data->props->get_i ("fip_region");
-    if (!this->n_fip_regions)
-      {
-        this->n_fip_regions = 1;
-      }
+    // FIXME:
+    //if (!this->n_fip_regions)
+    //  {
+    //    this->n_fip_regions = 1;
+    //  }
     if (input_data->contains_i_array ("FIPNUM"))
       {
         convert_arrays(mesh->get_n_active_elements (), mesh->get_int_to_ext (), *fip_regions, input_data->get_i_array ("FIPNUM"));
@@ -312,10 +313,11 @@ namespace blue_sky
 
     // initialize pvt regions
     this->n_pvt_regions = input_data->props->get_i ("pvt_region");
-    if (!this->n_pvt_regions)
-      {
-        this->n_pvt_regions = 1;
-      }
+    // FIXME:
+    //if (!this->n_pvt_regions)
+    //  {
+    //    this->n_pvt_regions = 1;
+    //  }
     if (input_data->contains_i_array ("PVTNUM"))
       {
         convert_arrays(mesh->get_n_active_elements (), mesh->get_int_to_ext (), *pvt_regions, input_data->get_i_array ("PVTNUM"));
@@ -328,10 +330,11 @@ namespace blue_sky
 
     // initialize sat regions
     this->n_sat_regions = input_data->props->get_i ("sat_region");
-    if (!this->n_sat_regions)
-      {
-        this->n_sat_regions = 1;
-      }
+    // FIXME: no wierd changes of sat_regions
+    //if (!this->n_sat_regions)
+    //  {
+    //    this->n_sat_regions = 1;
+    //  }
     if (input_data->contains_i_array ("SATNUM"))
       {
         convert_arrays(mesh->get_n_active_elements (), mesh->get_int_to_ext (), *sat_regions, input_data->get_i_array ("SATNUM"));
