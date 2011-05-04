@@ -67,8 +67,15 @@ namespace blue_sky {
     {
       return *region_2_[index];
     }
+    scal_region_t &
+    get_region (index_t index)
+    {
+      return *region_2_[index];
+    }
+
+    // returns region from region_ not from region_2_ (region_2_ precalculated)
     scal_region_t 
-    get_region_internal (int index) const
+    get_region_from_info (int index) const
     {
       item_array_t &data_array = *data_;
       BS_ASSERT (index >= 0 && index < (int)region_.size ());

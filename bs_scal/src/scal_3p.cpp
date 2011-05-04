@@ -106,12 +106,13 @@ namespace blue_sky
 
     scal::data_placement::all_regions_t::place_spof_data (data_, placement_info_, data, is_water);
     region_.push_back (info);
-    precalc (region_.back (), get_region_internal ((int)region_.size () - 1), scal::data_placement::spof, is_water);
-    if (!check (get_region_internal ((int)region_.size () - 1), is_water))
+    scal_region_t const &new_region = get_region_from_info (region_.size () - 1);
+    precalc (region_.back (), new_region, scal::data_placement::spof, is_water);
+    if (!check (new_region, is_water))
       {
         //region_.pop_back ();
         //data_.resize (data_.size () - info.So_count * 5);
-        //throw bs_exception ("scal_2p_data_holder::add_spof", "Could not compute residual saturation");
+        throw bs_exception ("scal_2p_data_holder::add_spof", "Could not compute residual saturation");
         // TODO: LOG
       }
   }
@@ -146,12 +147,13 @@ namespace blue_sky
 
         data_->resize (data_->size () + data->size ());
         scal::data_placement::all_regions_t::place_spfn_data (data_, placement_info_, data, is_water);
-        precalc (info, get_region_internal ((int)region_index), scal::data_placement::sof3_spfn, is_water);
-        if (!check (get_region_internal ((int)region_index), is_water))
+        scal_region_t const &new_region = get_region_from_info (region_index);
+        precalc (info, new_region, scal::data_placement::sof3_spfn, is_water);
+        if (!check (new_region, is_water))
           {
             //region_.pop_back ();
             //data_.resize (data_.size () - info.So_count * 5);
-            //throw bs_exception ("scal_2p_data_holder::add_spfn", "Could not compute residual saturation");
+            throw bs_exception ("scal_2p_data_holder::add_spfn", "Could not compute residual saturation");
             // TODO: LOG
           }
       }
@@ -193,12 +195,13 @@ namespace blue_sky
 
         data_->resize (data_->size () + info.So_count * 2);
         scal::data_placement::all_regions_t::place_sof3_data (data_, placement_info_, data, is_water);
-        precalc (info, get_region_internal ((index_t)region_index), scal::data_placement::spfn_sof3, is_water);
-        if (!check (get_region_internal ((index_t)region_index), is_water))
+        scal_region_t const &new_region = get_region_from_info (region_index);
+        precalc (info, new_region, scal::data_placement::spfn_sof3, is_water);
+        if (!check (new_region, is_water))
           {
             //region_.pop_back ();
             //data_.resize (data_.size () - info.So_count * 5);
-            //throw bs_exception ("scal_2p_data_holder::add_sof3", "Could not compute residual saturation");
+            throw bs_exception ("scal_2p_data_holder::add_sof3", "Could not compute residual saturation");
             // TODO: LOG
           }
       }
@@ -264,8 +267,8 @@ namespace blue_sky
 
     for (size_t i = 0, cnt = region_.size (); i < cnt; ++i)
       {
-        scal_region_t gas_region = get_region_internal ((int)i);
-        const scal_region_t &water_region = water_data->get_region_internal ((int)i);
+        scal_region_t gas_region = get_region ((int)i);
+        const scal_region_t &water_region = water_data->get_region ((int)i);
 
         item_t swc = water_region.Sp[0];
         for (size_t j = 0, jcnt = gas_region.Sp.size (); j < jcnt; ++j)
