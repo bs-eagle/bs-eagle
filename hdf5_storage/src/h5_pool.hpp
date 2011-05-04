@@ -186,6 +186,15 @@ namespace blue_sky
        */
       virtual int set_i_data (const std::string &name, spv_int data, t_int def_value = 0);
 
+      /**
+       * @brief returns is data array opened or not
+       *
+       * @param name -- <INPUT> name of the array
+       * @return true if opened or false if not, throws exception 
+       * if no array in pool
+       * */
+      virtual bool is_opened (const std::string &name);
+
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual std::string py_str () const;
       virtual boost::python::list py_list_data () const;

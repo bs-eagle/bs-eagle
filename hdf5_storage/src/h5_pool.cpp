@@ -262,6 +262,19 @@ namespace blue_sky
     return a;
   }
 
+  bool
+  h5_pool::is_opened (std::string const &name)
+  {
+    BS_ASSERT (group_id >= 0);
+    map_t::iterator it = h5_map.find (name);
+    if (it == h5_map.end ())
+      {
+        bs_throw_exception (boost::format ("No array %s in pool") % name);
+      }
+
+    return it->second.dspace != 0;
+  }
+
   template <typename T>
   BS_SP (T)
   get_data (std::string const &name, h5_pair const &p)
