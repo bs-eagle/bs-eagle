@@ -105,6 +105,8 @@ namespace blue_sky
        * @brief clear table data 
        */
       virtual void clear () = 0;
+
+      virtual void remove_col_vector (t_long col) = 0;
 #if 0
 #ifdef BSPY_EXPORTING_PLUGIN
       /** 

@@ -144,6 +144,12 @@ namespace blue_sky
           values.clear ();
           col_names.clear ();
         }
+
+      virtual void remove_col_vector (t_long col)
+      {
+        BS_ASSERT (col >= 0 && col < values.size ());
+        values[col].clear ();
+      }
 #if 0
 #ifdef BSPY_EXPORTING_PLUGIN
       /** 

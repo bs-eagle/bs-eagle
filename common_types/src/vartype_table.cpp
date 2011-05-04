@@ -121,6 +121,6 @@ namespace blue_sky
   BLUE_SKY_TYPE_STD_CREATE_T_DEF(vartype_table, (class));
   BLUE_SKY_TYPE_STD_COPY_T_DEF(vartype_table, (class));
 
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (vartype_table<t_float >), 1,  (vartype_table_iface <t_float>), "float_type_table", "Property storage", "realization of property storage", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT(1, (vartype_table<t_float >), 1,  (vartype_table_iface <t_float>), "float_var_table", "Property storage", "realization of property storage", false);
 
 }  // blue_sky namespace
