@@ -171,6 +171,9 @@ enum   //! indexes for dimension parameters
       int set_i_array (const std::string & array_name,  spv_int array);
       int set_fp_array (const std::string & array_name,  spv_float array);
 
+      bool
+      is_set (std::string const &name);
+
     public:
       sp_prop_t props;
 

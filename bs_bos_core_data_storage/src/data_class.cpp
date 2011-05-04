@@ -285,6 +285,12 @@ namespace blue_sky
     return h5_pool->set_fp_data (array_name, array);
   }
 
+  bool
+  idata::is_set (std::string const &name)
+  {
+    return h5_pool->is_opened (name);
+  }
+
   spv_int idata::create_i_array (const std::string & /*array_name*/,  t_int *array_dimens, t_int def_value)
   {
     spv_int new_array;
