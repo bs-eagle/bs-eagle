@@ -110,10 +110,10 @@ namespace blue_sky {
       item_t so_cr      = get_sorp ();
       item_t s_cr       = get_spr ();
 
-      item_t socr       = scale_arrays.get_socr (so_cr) [cell_index];
-      item_t scr        = scale_arrays.get_scr (s_cr)   [cell_index];
-      item_t su         = scale_arrays.get_su (s_max)   [cell_index];
-      item_t sl         = scale_arrays.get_sl (s_min)   [cell_index];
+      item_t socr       = scale_arrays.get (blue_sky::socr, so_cr) [cell_index];
+      item_t scr        = scale_arrays.get (blue_sky::scr, s_cr)   [cell_index];
+      item_t su         = scale_arrays.get (blue_sky::su, s_max)   [cell_index];
+      item_t sl         = scale_arrays.get (blue_sky::sl, s_min)   [cell_index];
 
       item_t t_so_max   = 1.0 - sl - t_so_sub;
       item_t so_max     = 1.0 - s_min - so_sub;
@@ -173,9 +173,9 @@ namespace blue_sky {
       ////////////////////////////////////////////////////////////
       {
         item_t krp_max = get_krp_max ();
-        item_t t_krp = scale_arrays.get_krp (krp_max) [cell_index];
+        item_t t_krp = scale_arrays.get (blue_sky::krp, krp_max) [cell_index];
       
-        if (scale_arrays.is_prop_valid (scale_array_holder_t::krpr))
+        if (scale_arrays.is_prop_valid (blue_sky::krpr))
           {
             item_t kr_mult = 1.0;
             item_t krp_sr;  
@@ -190,7 +190,7 @@ namespace blue_sky {
               }  
               
             krp_sr = calc_krp (t_sr_phase);
-            t_krpr = scale_arrays.get_krpr (krp_sr) [cell_index]; 
+            t_krpr = scale_arrays.get (blue_sky::krpr, krp_sr) [cell_index]; 
             if (sat < t_sr_phase)
               {
                 kr_mult = t_krpr / krp_sr;
@@ -232,9 +232,9 @@ namespace blue_sky {
       ////////////////////////////////////////////////////////////
       {
         item_t krop_max = get_krop_max ();
-        item_t t_krop = scale_arrays.get_krop (krop_max) [cell_index];
+        item_t t_krop = scale_arrays.get (blue_sky::krop, krop_max) [cell_index];
         
-        if (scale_arrays.is_prop_valid (scale_array_holder_t::krorp))
+        if (scale_arrays.is_prop_valid (blue_sky::krorp))
           {
             item_t krop_mult = 1.0;
             item_t krop_sr;  
@@ -249,7 +249,7 @@ namespace blue_sky {
               }  
               
             krop_sr = calc_krorp (t_sr_oil);
-            t_krorp = scale_arrays.get_krorp (krop_sr) [cell_index]; 
+            t_krorp = scale_arrays.get (blue_sky::krorp, krop_sr) [cell_index]; 
             if (oil_sat < t_sr_oil)
               {
                 krop_mult = t_krorp / krop_sr;
@@ -294,8 +294,11 @@ namespace blue_sky {
       item_t s_max  = get_phase_sat_max ();
       item_t s_min  = get_phase_sat_min ();
 
-      item_t su     = scale_arrays.get_su (s_max) [cell_index];
-      item_t sl     = scale_arrays.get_sl (s_min) [cell_index];
+      const value_accessor &su_ = scale_arrays.get (blue_sky::su, s_max);
+      const value_accessor &sl_ = scale_arrays.get (blue_sky::sl, s_min);
+
+      item_t su     = su_ [cell_index];
+      item_t sl     = sl_ [cell_index];
 
       item_t s      = scale_table (sl, s_min, su, s_max, sat);
       item_t mult   = (s_max - s_min) / (su - sl);
@@ -315,8 +318,8 @@ namespace blue_sky {
       item_t s_max  = get_phase_sat_max ();
       item_t s_min  = get_phase_sat_min ();
 
-      item_t su     = scale_arrays.get_su (s_max) [cell_index];
-      item_t sl     = scale_arrays.get_sl (s_min) [cell_index];
+      item_t su     = scale_arrays.get (blue_sky::su, s_max) [cell_index];
+      item_t sl     = scale_arrays.get (blue_sky::sl, s_min) [cell_index];
 
       sat = scale_not_table (sl, s_min, su, s_max, s);
     }

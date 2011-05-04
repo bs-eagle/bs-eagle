@@ -149,7 +149,7 @@ namespace blue_sky
     t_double s_water, s_gas;
     stdv_double press_w, press_g, press_o;
     spv_float swatinit;
-    stdv_double pcw;
+    spv_float pcw = BS_KERNEL.create_object (v_float::bs_type ());
     bool is_swatinit = false;
 
     BS_SP (scal_3p_iface) scal_prop = model->scal_prop;
@@ -575,11 +575,11 @@ namespace blue_sky
             swatinit = data->get_fp_array ("SWATINIT");
 
             scal_prop->get_water_jfunction ()->set_valid (false);
-            scal_prop->get_water_scale ()->remove_pcp ();
-            pcw.resize (n_cells, 0);
+            scal_prop->get_water_scale ()->remove (pcp);
+            pcw->init (n_cells, 0);
           }
         else if (scal_prop->get_water_jfunction ()->valid ())
-          scal_prop->get_water_scale ()->remove_pcp ();
+          scal_prop->get_water_scale ()->remove (pcp);
       }
 
     //------------------------------- loop through active cells ----------------------
@@ -762,7 +762,7 @@ namespace blue_sky
                 s_water = (*swatinit)[i_original_cell];
 
                 //calc pcw
-                scal_prop->calc_pcp (i_cell, (*swatinit)[i_original_cell], i_sat, p_water - p_oil, pcw[i_cell]);
+                scal_prop->calc_pcp (i_cell, (*swatinit)[i_original_cell], i_sat, p_water - p_oil, pcw->data ()[i_cell]);
               }
             //recalc gas saturation
             if (n_phases == 3 && (s_water + s_gas > 1.0))
@@ -828,8 +828,8 @@ namespace blue_sky
           }
       }
 
-    if (pcw.size ())
-      scal_prop->get_water_scale ()->insert_pcp (pcw);
+    if (pcw->size ())
+      scal_prop->get_water_scale ()->set (pcp, "PCW", pcw);
   }
 
 

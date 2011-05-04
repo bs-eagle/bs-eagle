@@ -362,16 +362,16 @@ namespace blue_sky
     const BS_SP (scale_array_holder_iface) &gas_scale_ = scal_prop->get_gas_scale ();
     const BS_SP (scale_array_holder_iface) &water_scale_ = scal_prop->get_water_scale ();
 
-    gas_scale_->set_socr (input_data->get_fp_array ("SOGCR"));
-    gas_scale_->set_scr  (input_data->get_fp_array ("SGCR"));
-    gas_scale_->set_su   (input_data->get_fp_array ("SGU"));
-    gas_scale_->set_sl   (input_data->get_fp_array ("SGL"));
+    if (input_data->is_set ("SOGCR"))   gas_scale_->set (socr, "SOGCR", input_data->get_fp_array ("SOGCR"));
+    if (input_data->is_set ("SGCR"))    gas_scale_->set (scr, "SGCR", input_data->get_fp_array ("SGCR"));
+    if (input_data->is_set ("SGU"))     gas_scale_->set (su, "SGU", input_data->get_fp_array ("SGU"));
+    if (input_data->is_set ("SGL"))     gas_scale_->set (sl, "SGL", input_data->get_fp_array ("SGL"));
 
-    water_scale_->set_socr (input_data->get_fp_array ("SOWCR"));
-    water_scale_->set_scr  (input_data->get_fp_array ("SWCR"));
-    water_scale_->set_su   (input_data->get_fp_array ("SWU"));
-    water_scale_->set_sl   (input_data->get_fp_array ("SWL"));
-    water_scale_->set_pcp  (input_data->get_fp_array ("PCW"));
+    if (input_data->is_set ("SOWCR"))   water_scale_->set (socr, "SOWCR", input_data->get_fp_array ("SOWCR"));
+    if (input_data->is_set ("SWCR"))    water_scale_->set (scr, "SWCR", input_data->get_fp_array ("SWCR"));
+    if (input_data->is_set ("SWU"))     water_scale_->set (su, "SWU", input_data->get_fp_array ("SWU"));
+    if (input_data->is_set ("SWL"))     water_scale_->set (sl, "SWL", input_data->get_fp_array ("SWL"));
+    if (input_data->is_set ("PCW"))     water_scale_->set (pcp, "PCW", input_data->get_fp_array ("PCW"));
 
     scal_prop->set_water_jfunction (BS_KERNEL.create_object (jfunction::bs_type ()));
     scal_prop->set_gas_jfunction (BS_KERNEL.create_object (jfunction::bs_type ()));

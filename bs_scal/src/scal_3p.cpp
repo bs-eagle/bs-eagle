@@ -28,9 +28,10 @@ namespace blue_sky
 
   scale_array_holder::scale_array_holder (bs_type_ctor_param param /* = NULL */)
   {
-    data.resize (1);
-    data_pool = BS_KERNEL.create_object ("table");
-    data_pool->init (0, keyword_total);
+    data_pool = BS_KERNEL.create_object ("float_var_table");
+    BS_ASSERT (data_pool);
+
+    data_pool->init ( scale_array_name_total);
     
     data_pool->set_col_name (socr, "SOCR");
     data_pool->set_col_name (scr, "SCR");
@@ -41,9 +42,10 @@ namespace blue_sky
     data_pool->set_col_name (krop, "KROP");
     data_pool->set_col_name (krpr, "KRPR");
     data_pool->set_col_name (krorp, "KRORP");
+    BOOST_STATIC_ASSERT (krorp == scale_array_name_total - 1);
   }
 
-  scale_array_holder::scale_array_holder (const this_t& s)
+  scale_array_holder::scale_array_holder (const scale_array_holder& s)
   : bs_refcounter (s), scale_array_holder_iface (s)
   {
     BS_ASSERT (false && "NOT IMPL YET");
@@ -499,7 +501,7 @@ namespace blue_sky
           if (!water_jfunc->valid ())
             {
               item_t pcw_max    = w_region.get_pcp_max ();
-              item_t pcw        = water_scale->get_pcp (pcw_max) [cell_index];
+              item_t pcw        = water_scale->get (pcp, pcw_max) [cell_index];
 
               if ((pcw_max * pcw) > EPS_DIFF)
                 {
@@ -544,8 +546,8 @@ namespace blue_sky
           item_t s_max  = w_region.get_phase_sat_max ();
           item_t s_min  = w_region.get_phase_sat_min ();
 
-          item_t su     = water_scale->get_su (s_max) [cell_index];
-          item_t sl     = water_scale->get_sl (s_min) [cell_index];
+          item_t su     = water_scale->get (blue_sky::su, s_max) [cell_index];
+          item_t sl     = water_scale->get (blue_sky::sl, s_min) [cell_index];
 
           item_t s      = scale_table (sl, s_min, su, s_max, sat);
           //item_t mult   = (s_max - s_min) / (su - sl);
@@ -584,8 +586,8 @@ namespace blue_sky
 
       sw_max  = w_region.get_phase_sat_max ();
       sw_min  = w_region.get_phase_sat_min ();
-      swu     = water_scale->get_su (sw_max) [cell_index];
-      swl     = water_scale->get_sl (sw_min) [cell_index];
+      swu     = water_scale->get (blue_sky::su, sw_max) [cell_index];
+      swl     = water_scale->get (blue_sky::sl, sw_min) [cell_index];
 
       //complete gas-water cap pressure table
       for (i_table = 0; i_table < n_table; i_table++)
@@ -670,7 +672,7 @@ namespace blue_sky
         {
           const scal_region_t &g_region = gas_data->get_region (sat_reg);
           item_t sg_min = g_region.get_phase_sat_min ();
-          item_t sgl = gas_scale->get_sl (sg_min) [cell_index];
+          item_t sgl = gas_scale->get (sl, sg_min) [cell_index];
 
           region.process_2phase (cell_index, sat[i_w], sat[i_o], *water_scale, sg_min, sgl, kr, d_kr, kro, d_kro, is_scalecrs);
         }
@@ -693,7 +695,7 @@ namespace blue_sky
         {
           scal_region_t w_region  = water_data->get_region (sat_reg);
           item_t sw_min = w_region.get_phase_sat_min ();
-          item_t swl = water_scale->get_sl (sw_min) [cell_index];
+          item_t swl = water_scale->get (sl, sw_min) [cell_index];
 
           region.process_2phase (cell_index, sat[i_g], sat[i_o], *gas_scale, sw_min, swl, kr, d_kr, kro, d_kro, is_scalecrs);
         }
@@ -759,7 +761,7 @@ namespace blue_sky
 
       scal_region_t region = water_data->get_region (sat_reg);
       item_t rporw = region.get_krop_max ();
-      rporw = water_scale->get_krop (rporw) [cell_index];
+      rporw = water_scale->get (krop, rporw) [cell_index];
 
       if (fabs (rporw) > EPS_DIFF)
         {
@@ -826,7 +828,7 @@ namespace blue_sky
       else  // jfunc not valid, looking for PCW or PCG
         {
           item_t pcp_max    = region.get_pcp_max ();
-          item_t pcp        = scale_arrays.get_pcp (pcp_max) [cell_index];
+          item_t pcp        = scale_arrays.get (blue_sky::pcp, pcp_max) [cell_index];
 
           if (fabs (pcp_max) > EPS_DIFF)
             {

@@ -14,27 +14,31 @@
 
 namespace blue_sky 
 {
+  enum scale_array_name
+  {
+    socr,
+    scr,
+    su,
+    sl,
+    pcp,
+    krp,
+    krop,
+    krpr,
+    krorp,
+    scale_array_name_total
+  };
+
   class BS_API_PLUGIN scale_array_holder_iface : public objbase
   {
   public:
     virtual ~scale_array_holder_iface () {}
 
-    virtual void remove_pcp () = 0;
-    virtual void insert_pcp (const stdv_double &pcp) = 0;
+    virtual void remove (scale_array_name array) = 0;
 
     virtual t_double get_sl (t_long cell, t_double value) const = 0;
     virtual t_double get_su (t_long cell, t_double value) const = 0;
 
-    virtual void set_socr (const spv_float &socr) = 0;
-    virtual void set_scr (const spv_float &scr) = 0;
-    virtual void set_su (const spv_float &su) = 0;
-    virtual void set_sl (const spv_float &sl) = 0;
-    virtual void set_pcp (const spv_float &pcp) = 0;
-    virtual void set_krp (const spv_float &krp) = 0;
-    virtual void set_krop (const spv_float &krop) = 0;
-    virtual void set_krpr (const spv_float &krpr) = 0;
-    virtual void set_krorp (const spv_float &krorp) = 0;
-
+    virtual void set (scale_array_name array, std::string const &name, spv_float const &data) = 0;
   };
 
   class BS_API_PLUGIN scal_2p_data_holder_iface : public objbase
