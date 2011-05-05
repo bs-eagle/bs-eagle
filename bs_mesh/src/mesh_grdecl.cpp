@@ -153,7 +153,7 @@ struct mesh_grdecl::inner {
 		const difference_type step_;
 	};
 
-	// iterator that jumps over given offset instead of fixed +1
+	// iterator that calc sumulative sum when doing *p
 	template< class iterator_t >
 	class cumsum_iterator : public std::iterator< std::bidirectional_iterator_tag, typename std::iterator_traits< iterator_t >::value_type > {
 		typedef std::iterator_traits< cumsum_iterator > traits_t;
@@ -165,8 +165,8 @@ struct mesh_grdecl::inner {
 		typedef typename traits_t::difference_type difference_type;
 
 		// set step in compile-time
-		cumsum_iterator() : p_(), sum_(0) {}
-		cumsum_iterator(const iterator_t& i) : p_(i), sum_(0) {}
+		cumsum_iterator(value_type offset = 0) : p_(), sum_(offset) {}
+		cumsum_iterator(const iterator_t& i, value_type offset = 0) : p_(i), sum_(offset) {}
 		cumsum_iterator(const cumsum_iterator& i) : p_(i.p_), sum_(i.sum_) {}
 
 		cumsum_iterator& operator++() {
@@ -248,8 +248,8 @@ struct mesh_grdecl::inner {
 	// helper structure to get dx[i] regardless of whether it given by one number or by array of
 	// numbers
 	struct dim_subscript {
-		dim_subscript(const fp_storarr_t& dim)
-			: dim_(dim), sum_(0)
+		dim_subscript(const fp_storarr_t& dim, fp_t offset = .0)
+			: dim_(dim), offset_(offset), sum_(offset)
 		{
 			if(dim_.size() == 1)
 				ss_fcn_ = &dim_subscript::ss_const_dim;
@@ -267,7 +267,7 @@ struct mesh_grdecl::inner {
 			return static_cast< fp_stor_t>(tmp);
 		}
 
-		void reset() { sum_ = 0; }
+		void reset() { sum_ = offset_; }
 
 		fp_t operator[](int_t idx) {
 			return (this->*ss_fcn_)(idx);
@@ -276,18 +276,19 @@ struct mesh_grdecl::inner {
 	private:
 		const fp_storarr_t& dim_;
 		fp_stor_t (dim_subscript::*ss_fcn_)(int_t);
+		const fp_t offset_;
 		fp_t sum_;
 	};
 
-	static spfp_storarr_t gen_coord(int_t nx, int_t ny, spfp_storarr_t dx, spfp_storarr_t dy) {
+	static spfp_storarr_t gen_coord(int_t nx, int_t ny, spfp_storarr_t dx, spfp_storarr_t dy, fp_t x0, fp_t y0) {
 		using namespace std;
 		typedef fp_storarr_t::value_type value_t;
 
 		// DEBUG
 		BSOUT << "gen_coord: init stage" << bs_end;
 		// create subscripters
-		inner::dim_subscript dxs(*dx);
-		inner::dim_subscript dys(*dy);
+		inner::dim_subscript dxs(*dx, x0);
+		inner::dim_subscript dys(*dy, y0);
 
 		// if dimension offset is given as array, then size should be taken from array size
 		if(dx->size() > 1) nx = (int_t) dx->size();
@@ -741,7 +742,6 @@ struct mesh_grdecl::inner {
 		//BSOUT << "refine_mesh: coord2deltas" << bs_end;
 		// make deltas from coordinates
 		vector< fp_stor_t > delta_x, delta_y;
-		delta_x.reserve(x.size() - 1); delta_y.reserve(y.size() - 1);
 		coord2deltas(x, delta_x);
 		coord2deltas(y, delta_y);
 
@@ -760,9 +760,9 @@ struct mesh_grdecl::inner {
 			int_arr_t::iterator p_hit = hit_idx->begin();
 			pp = points->begin();
 			for(int_t i = 0; i < cnt; ++i) {
-				cs_iterator p_id = lower_bound(cs_iterator(delta_x.begin()), cs_iterator(delta_x.end()), *pp++);
+				cs_iterator p_id = lower_bound(cs_iterator(delta_x.begin(), *x.begin()), cs_iterator(delta_x.end(), *x.begin()), *pp++);
 				*p_hit++ = max< diff_t >(p_id - delta_x.begin() - 1, 0);
-				p_id = lower_bound(cs_iterator(delta_y.begin()), cs_iterator(delta_y.end()), *pp++);
+				p_id = lower_bound(cs_iterator(delta_y.begin(), *y.begin()), cs_iterator(delta_y.end(), *y.begin()), *pp++);
 				*p_hit++ = max< diff_t >(p_id - delta_y.begin() - 1, 0);
 				pp += 4;
 			}
@@ -807,7 +807,7 @@ struct mesh_grdecl::inner {
 		copy(vzcorn.begin(), vzcorn.end(), rzcorn->begin());
 
 		// rebuild grid based on processed x_coord & y_coord
-		return coord_zcorn_pair(gen_coord(nx, ny, delta_x, delta_y), rzcorn);
+		return coord_zcorn_pair(gen_coord(nx, ny, delta_x, delta_y, coord->ss(0), coord->ss(1)), rzcorn);
 	}
 
 	// hold reference to coord and czron arrays if generated internally
@@ -820,7 +820,7 @@ mesh_grdecl::mesh_grdecl ()
 {}
 
 std::pair< spv_float, spv_float >
-mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz) {
+mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz, t_float x0, t_float y0, t_float z0) {
 	using namespace std;
 	typedef std::pair< spv_float, spv_float > ret_t;
 	typedef v_float::value_type value_t;
@@ -841,7 +841,7 @@ mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_
 
 	// fill zcorn
 	// very simple case
-	inner::dim_subscript dzs(*dz);
+	inner::dim_subscript dzs(*dz, z0);
 	zcorn->init(nx*ny*nz*8);
 
 	// DEBUG
@@ -851,16 +851,16 @@ mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_
 	t_float z_cache = dzs[0];
 	for(t_long iz = 1; iz <= nz; ++iz) {
 		fill_n(pcd, plane_size, z_cache);
-    pcd += plane_size;
+		pcd += plane_size;
 		z_cache = dzs[iz];
 		fill_n(pcd, plane_size, z_cache);
-    pcd += plane_size;
+		pcd += plane_size;
 	}
 	// DEBUG
 	BSOUT << "gen_coord_zcorn: ZCORN creating finished" << bs_end;
 	BSOUT << "gen_coord_zcorn: COORD creating starts..." << bs_end;
 
-	return ret_t(inner::gen_coord(nx, ny, dx, dy), zcorn);
+	return ret_t(inner::gen_coord(nx, ny, dx, dy, x0, y0), zcorn);
 }
 
 std::pair< spv_float, spv_float >

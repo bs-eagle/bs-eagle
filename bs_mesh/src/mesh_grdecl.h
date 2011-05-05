@@ -88,22 +88,24 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
 	void init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz);
 
 	//! init coord & zcorn from (nx, ny, nz, dx, dy, dz)
+	//! (x0, y0, z0) - beginning of coordinate system (mesh offset)
 	//! return: first -- coord, second -- zcorn
 	static std::pair< spv_float, spv_float >
-	gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz);
+	gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz,
+		t_float x0 = 0, t_float y0 = 0, t_float z0 = 0);
 
 	//! return refined dx and dy for gen_coord_zcorn
 	static std::pair< spv_float, spv_float >
 	refine_mesh_deltas(t_long& nx, t_long& ny, spv_float coord, spv_float points,
-			spv_long hit_idx = NULL,
-			t_double cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, t_double band_thresh = DEF_BAND_THRESHOLD);
+		spv_long hit_idx = NULL,
+		t_double cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, t_double band_thresh = DEF_BAND_THRESHOLD);
 
 	//! refine_mesh = refine_mesh_deltas + gen_coord_zcorn
 	//! return COORD & ZCORN of refined mesh
 	static std::pair< spv_float, spv_float >
 	refine_mesh(t_long& nx, t_long& ny, spv_float coord, spv_float zcorn, spv_float points,
-			spv_long hit_idx = NULL,
-			t_double cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, t_double band_thresh = DEF_BAND_THRESHOLD);
+		spv_long hit_idx = NULL,
+		t_double cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, t_double band_thresh = DEF_BAND_THRESHOLD);
 
     //! get vertex of cube [i,j,k]
     void calc_element (const t_long i, const t_long j, const t_long k, element_t &element) const;
