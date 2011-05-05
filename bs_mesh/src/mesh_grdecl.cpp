@@ -651,7 +651,7 @@ struct mesh_grdecl::inner {
 		proc_ray::go(coord, point, d, a, typename proc_ray::template dir_ray< -1 >());
 	}
 
-	static coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, spfp_storarr_t coord, spfp_storarr_t zcorn,
+	static coord_zcorn_pair refine_mesh_deltas(int_t& nx, int_t& ny, spfp_storarr_t coord,
 			spfp_storarr_t points, fp_t cell_merge_thresh, fp_t band_thresh,
 			spi_arr_t hit_idx = NULL)
 	{
@@ -663,7 +663,7 @@ struct mesh_grdecl::inner {
 		// DEBUG
 		BSOUT << "refine_mesh: init stage" << bs_end;
 		// sanity check
-		if(!coord || !zcorn || !points) return coord_zcorn_pair();
+		if(!coord || !points) return coord_zcorn_pair();
 
 		// convert coord & zcorn to shared vectors
 		//spfp_storvec_t vcoord = BS_KERNEL.create_object(fp_storvec_t::bs_type());
@@ -673,8 +673,6 @@ struct mesh_grdecl::inner {
 		//spfp_storvec_t vzcorn = BS_KERNEL.create_object(fp_storvec_t::bs_type());
 		//if(vzcorn) vzcorn->init_inplace(zcorn->get_container());
 		//else return coord_zcorn_pair();
-
-		vector< fp_stor_t > vzcorn(zcorn->begin(), zcorn->end());
 
 		// build x and y coord maps
 		//spfp_storvec_t x = BS_KERNEL.create_object(fp_storvec_t::bs_type());
@@ -770,16 +768,6 @@ struct mesh_grdecl::inner {
 		}
 
 		// DEBUG
-		BSOUT << "refine_mesh: update ZCORN" << bs_end;
-		// update zcorn
-		resize_zcorn(vzcorn, nx, ny, (int_t) delta_x.size(), (int_t) delta_y.size());
-		// create bs_array from new zcorn
-		spfp_storarr_t rzcorn = BS_KERNEL.create_object(fp_storarr_t::bs_type());
-		if(!rzcorn) return coord_zcorn_pair();
-		rzcorn->resize(vzcorn.size());
-		copy(vzcorn.begin(), vzcorn.end(), rzcorn->begin());
-
-		// DEBUG
 		//BSOUT << "refine_mesh: copy delta_x & delta_y to bs_arrays" << bs_end;
 		// copy delta_x & delta_y to bs_arrays
 		nx = (int_t)  delta_x.size();
@@ -790,8 +778,35 @@ struct mesh_grdecl::inner {
 		copy(delta_x.begin(), delta_x.end(), adx->begin());
 		copy(delta_y.begin(), delta_y.end(), ady->begin());
 
+		return coord_zcorn_pair(adx, ady);
+	}
+
+	static coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, spfp_storarr_t coord, spfp_storarr_t zcorn,
+			spfp_storarr_t points, fp_t cell_merge_thresh, fp_t band_thresh,
+			spi_arr_t hit_idx = NULL)
+	{
+		using namespace std;
+
+		if(!zcorn) return coord_zcorn_pair();
+
+		// refine coord
+		coord_zcorn_pair refine_deltas = refine_mesh_deltas(nx, ny, coord, points, cell_merge_thresh, band_thresh, hit_idx);
+		spfp_storarr_t& delta_x = refine_deltas.first;
+		spfp_storarr_t& delta_y = refine_deltas.second;
+
+		// DEBUG
+		BSOUT << "refine_mesh: update ZCORN" << bs_end;
+		// update zcorn
+		vector< fp_stor_t > vzcorn(zcorn->begin(), zcorn->end());
+		resize_zcorn(vzcorn, nx, ny, (int_t) delta_x->size(), (int_t) delta_y->size());
+		// create bs_array from new zcorn
+		spfp_storarr_t rzcorn = BS_KERNEL.create_object(fp_storarr_t::bs_type());
+		if(!rzcorn) return coord_zcorn_pair();
+		rzcorn->resize(vzcorn.size());
+		copy(vzcorn.begin(), vzcorn.end(), rzcorn->begin());
+
 		// rebuild grid based on processed x_coord & y_coord
-		return coord_zcorn_pair(gen_coord(nx, ny, adx, ady), rzcorn);
+		return coord_zcorn_pair(gen_coord(nx, ny, delta_x, delta_y), rzcorn);
 	}
 
 	// hold reference to coord and czron arrays if generated internally
@@ -844,6 +859,13 @@ mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_
 	BSOUT << "gen_coord_zcorn: COORD creating starts..." << bs_end;
 
 	return ret_t(inner::gen_coord(nx, ny, dx, dy), zcorn);
+}
+
+std::pair< spv_float, spv_float >
+mesh_grdecl::refine_mesh_deltas(t_long& nx, t_long& ny, spv_float coord,
+		spv_float points, spv_long hit_idx, t_double cell_merge_thresh, t_double band_thresh)
+{
+	return inner::refine_mesh_deltas(nx, ny, coord, points, cell_merge_thresh, band_thresh, hit_idx);
 }
 
 std::pair< spv_float, spv_float >
