@@ -88,6 +88,7 @@ struct mesh_grdecl_exporter_plus {
 			.def("refine_mesh", &refine_mesh2, "Refine existing mesh in given points")
 			//.def("refine_mesh", &T::refine_mesh, args("nx, ny, coord, zcorn, points"), "Refine existing mesh in given points")
 			.staticmethod("refine_mesh")
+			.staticmethod("refine_mesh_deltas")
 			;
 		return class__;
 	}
