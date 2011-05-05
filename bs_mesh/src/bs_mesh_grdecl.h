@@ -189,6 +189,14 @@ namespace blue_sky
 	}
 
 	static std::pair< spv_float, spv_float >
+	refine_mesh_deltas(t_long& nx, t_long& ny, spv_float coord, spv_float points,
+			spv_long hit_idx = NULL,
+			t_double cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, t_double band_thresh = DEF_BAND_THRESHOLD)
+	{
+		return wrapped_t::refine_mesh_deltas(nx, ny, coord, points, hit_idx, cell_merge_thresh, band_thresh);
+	}
+
+	static std::pair< spv_float, spv_float >
 	refine_mesh(t_long& nx, t_long& ny, spv_float coord, spv_float zcorn, spv_float points,
 			spv_long hit_idx = NULL,
 			t_double cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, t_double band_thresh = DEF_BAND_THRESHOLD)
