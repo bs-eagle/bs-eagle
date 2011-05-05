@@ -823,6 +823,10 @@ namespace blue_sky
     hdm_->get_mesh ()->build_jacobian_and_flux_connections (jacobian_->get_matrix ("flux"), 
       jacobian_->get_flux_connections (),
       jacobian_->get_boundary ());
+
+    BS_SP (bcsr_matrix_iface) flux = jacobian_->get_matrix ("flux");
+    BS_ASSERT (flux);
+    flux->alloc_values (flux->get_cols_ind ()->size (), cm->n_phases);
   }
 
   main_loop_calc_base *
