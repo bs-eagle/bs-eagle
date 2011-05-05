@@ -184,8 +184,10 @@ namespace blue_sky
 	//! init coord & zcorn from (nx, ny, nz, dx, dy, dz)
 	//! return: first -- coord, second -- zcorn
 	static std::pair< spv_float, spv_float >
-	gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz) {
-		return wrapped_t::gen_coord_zcorn(nx, ny, nz, dx, dy, dz);
+	gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz,
+			t_float x0 = 0, t_float y0 = 0, t_float z0 = 0)
+	{
+		return wrapped_t::gen_coord_zcorn(nx, ny, nz, dx, dy, dz, x0, y0, z0);
 	}
 
 	static std::pair< spv_float, spv_float >

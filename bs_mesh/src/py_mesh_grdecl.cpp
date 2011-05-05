@@ -38,7 +38,25 @@ struct mesh_grdecl_exporter_plus {
 	typedef spv_float spfp_storarr_t;
 	typedef spv_long spi_arr_t;
 	typedef typename spi_arr_t::pure_pointed_t int_arr_t;
+	typedef std::pair< spv_float, spv_float > coord_zcorn_pair;
 
+	// gen_coord_zcorn overloads
+	static coord_zcorn_pair gen_coord_zcorn1(int_t nx, int_t ny, int_t nz, spfp_storarr_t dx, spfp_storarr_t dy, spfp_storarr_t dz,
+			fp_t x0, fp_t y0)
+	{
+		return T::gen_coord_zcorn(nx, ny, nz, dx, dy, dz, x0, y0);
+	}
+	static coord_zcorn_pair gen_coord_zcorn2(int_t nx, int_t ny, int_t nz, spfp_storarr_t dx, spfp_storarr_t dy, spfp_storarr_t dz,
+			fp_t x0)
+	{
+		return T::gen_coord_zcorn(nx, ny, nz, dx, dy, dz, x0);
+	}
+	static coord_zcorn_pair gen_coord_zcorn3(int_t nx, int_t ny, int_t nz, spfp_storarr_t dx, spfp_storarr_t dy, spfp_storarr_t dz)
+	{
+		return T::gen_coord_zcorn(nx, ny, nz, dx, dy, dz);
+	}
+
+	// refine_mesh & refine_meesh_deltas
 	static tuple refine_mesh_deltas(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t points,
 			fp_t m_thresh = DEF_CELL_MERGE_THRESHOLD, fp_t b_thresh = DEF_BAND_THRESHOLD)
 	{
@@ -78,17 +96,20 @@ struct mesh_grdecl_exporter_plus {
 		using namespace boost::python;
 
 		mesh_grdecl_exporter<T>::export_class (class__)
-			.def("gen_coord_zcorn", &T::gen_coord_zcorn, args("nx, ny, nz, dx, dy, dz"), "Generate COORD & ZCORN from given dimensions")
+			.def("gen_coord_zcorn", &T::gen_coord_zcorn, args("nx, ny, nz, dx, dy, dz, x0, y0, z0"), "Generate COORD & ZCORN from given dimensions")
+			.def("gen_coord_zcorn", &gen_coord_zcorn1, args("nx, ny, nz, dx, dy, dz, x0, y0, z0=0"), "Generate COORD & ZCORN from given dimensions")
+			.def("gen_coord_zcorn", &gen_coord_zcorn2, args("nx, ny, nz, dx, dy, dz, x0, y0=0, z0=0"), "Generate COORD & ZCORN from given dimensions")
+			.def("gen_coord_zcorn", &gen_coord_zcorn3, args("nx, ny, nz, dx, dy, dz, x0=0, y0=0, z0=0"), "Generate COORD & ZCORN from given dimensions")
 			.staticmethod("gen_coord_zcorn")
-			.def("refine_mesh_deltas", &refine_mesh_deltas, "Calc dx and dy arrays for refined mesh in given points")
+			.def("refine_mesh_deltas", &T::refine_mesh_deltas, "Calc dx and dy arrays for refined mesh in given points")
 			.def("refine_mesh_deltas", &refine_mesh_deltas1, "Calc dx and dy arrays for refined mesh in given points")
 			.def("refine_mesh_deltas", &refine_mesh_deltas2, "Calc dx and dy arrays for refined mesh in given points")
-			.def("refine_mesh", &refine_mesh, "Refine existing mesh in given points")
+			.staticmethod("refine_mesh_deltas")
+			.def("refine_mesh", &T::refine_mesh, "Refine existing mesh in given points")
 			.def("refine_mesh", &refine_mesh1, "Refine existing mesh in given points")
 			.def("refine_mesh", &refine_mesh2, "Refine existing mesh in given points")
 			//.def("refine_mesh", &T::refine_mesh, args("nx, ny, coord, zcorn, points"), "Refine existing mesh in given points")
 			.staticmethod("refine_mesh")
-			.staticmethod("refine_mesh_deltas")
 			;
 		return class__;
 	}
