@@ -189,10 +189,10 @@ namespace blue_sky
 
     if (secondary > 0)
       {
-        sec_rhs->init (secondary * phases, 0);
-        ss_diagonal->init (secondary * secondary * phases, 0);
-        sp_diagonal->init (secondary * phases * phases, 0);
-        sec_solution->init (secondary * phases, 0);
+        sec_rhs->init (secondary * elements, 0);
+        ss_diagonal->init (secondary * secondary * elements, 0);
+        sp_diagonal->init (secondary * elements * phases, 0);
+        sec_solution->init (secondary * elements, 0);
       }
     else
       {
