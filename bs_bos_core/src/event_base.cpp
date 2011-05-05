@@ -12,6 +12,7 @@
 
 #include "event_base.h"
 #include "str_functor.h"
+#include "data_class.h"
 
 
 using namespace boost::spirit;

@@ -54,6 +54,7 @@
 
 #include "explicit_model.hpp"
 #include "equil_model.hpp"
+#include "event_manager_keywords.hpp"
 
 //#include "well_results_storage.h"
 //#include "fip_results_storage.h"
@@ -308,10 +309,7 @@ namespace blue_sky
 
     //////////////////////////////Events/////////////////////////////////////////////
     res &= event_base_register_types (pd);
-    res &= event_manager_register_types (pd);
-
-    res &= blue_sky::well_events_register_type (pd);
-    BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, event_manager::bs_type ()); BS_ASSERT (res);
 
     //////////////////////////////Linear Solver///////////////////////////////
 // FIXME:
@@ -366,6 +364,8 @@ namespace blue_sky
 
     res &= BS_KERNEL.register_type (pd, explicit_model::bs_type ()); BS_ASSERT (res);
     res &= BS_KERNEL.register_type (pd, equil_model::bs_type ()); BS_ASSERT (res);
+
+    res &= BS_KERNEL.register_type (pd, event_manager_keywords::bs_type ()); BS_ASSERT (res);
 
     return res;
   }

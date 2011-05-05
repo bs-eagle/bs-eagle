@@ -8,9 +8,8 @@
  * */
 #ifndef EVENT_BASE_H_
 #define EVENT_BASE_H_
-#include "data_class.h"
-// WTF??
-#include "data_storage_interface.h"
+
+#include "named_pbase_access.h"
 
 namespace blue_sky
   {
@@ -18,6 +17,8 @@ namespace blue_sky
   class reservoir;
   class calc_model;
   class idata;
+  class rs_mesh_iface;
+  class rs_smesh_iface;
 
   /**
    * \class event_base

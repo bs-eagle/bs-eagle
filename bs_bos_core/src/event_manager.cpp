@@ -9,7 +9,6 @@
 #include "stdafx.h"
 
 #include "event_manager.h"
-#include "well_events.h"
 
 #include <boost/regex.hpp>
 
@@ -37,13 +36,13 @@ namespace blue_sky
    * \param  src source copy of event_manager
    * */
   event_manager::event_manager(const event_manager& src)
-  : bs_refcounter (src), objbase (src)
+  : bs_refcounter (src), event_manager_iface (src)
   {
     *this = src;
   }
 
   void
-  event_manager ::process_event (const date_t &date, const std::string &event_name, const std::string &event_params)
+  event_manager::process_event (const date_t &date, const std::string &event_name, const std::string &event_params)
   {
     if (current_event_)
       {
@@ -59,7 +58,7 @@ namespace blue_sky
       }
   }
   void
-  event_manager ::end_event ()
+  event_manager::end_event ()
   {
     current_event_ = 0;
   }
@@ -100,41 +99,27 @@ namespace blue_sky
     return event;
   }
 
+  void
+  event_manager::set_current_date (date_t const &date)
+  {
+    if (event_list.find (date) != event_list.end ())
+      {
+        event_list.insert (std::make_pair (date, sp_event_base_list ()));
+        current_date_ = date;
+      }
+  }
+
+  event_manager::date_t const &
+  event_manager::get_current_date () const
+  {
+    return current_date_;
+  }
+
 
   //bs stuff
   BLUE_SKY_TYPE_STD_CREATE (event_manager)
   BLUE_SKY_TYPE_STD_COPY (event_manager)
-  BLUE_SKY_TYPE_IMPL (event_manager, objbase, "event_manager_seq", "BOS_Core event_manager class", "BOS_Core event_manager class")
-
-  bool
-  well_events_register_type (const blue_sky::plugin_descriptor &pd)
-  {
-    bool res  = true;
-    res &= BS_KERNEL.register_type (pd, WELSPECS_event::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, WELLCON_event::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, COMPDAT_event::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, WCONPROD_event::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, WCONHIST_event::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, WCONINJE_event::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, WECON_event::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, WECONINJ_event::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, WEFAC_event::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, WELTARG_event::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, WPIMULT_event::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, COMPENSATION_event::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, PERMFRAC_event::bs_type ()); BS_ASSERT (res);
-    return res;
-  }
-
-  bool
-  event_manager_register_types (const plugin_descriptor &pd)
-  {
-    bool res = true;
-
-    res &= BS_KERNEL.register_type (pd, event_manager::bs_type ()); BS_ASSERT (res);
-
-    return true;
-  }
+  BLUE_SKY_TYPE_IMPL (event_manager, event_manager_iface, "event_manager", "BOS_Core event_manager class", "BOS_Core event_manager class")
 
 }//ns bs
 

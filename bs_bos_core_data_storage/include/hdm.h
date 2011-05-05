@@ -14,6 +14,7 @@
 #include "read_class.h"
 #include "scal_3p_iface.hpp"
 #include "init_model_iface.hpp"
+#include "event_manager_iface.hpp"
 
 namespace blue_sky {
 
@@ -62,6 +63,7 @@ namespace blue_sky {
 
       BS_SP (init_model_iface) get_init_model () { return init_model_; }
 
+      BS_SP (event_manager_iface) get_event_manager () { return event_manager_; }
   
       // SET
 
@@ -84,6 +86,7 @@ namespace blue_sky {
       sp_mesh_iface_t           mesh;                       //!< mesh
       BS_SP (scal_3p_iface)     scal_3p_;
       BS_SP (init_model_iface)  init_model_;
+      BS_SP (event_manager_iface) event_manager_;
       locale_keeper             lkeeper;
       physical_constants        ph_const;                //!< default physical constants
     };

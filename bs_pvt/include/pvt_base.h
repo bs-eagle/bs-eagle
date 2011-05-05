@@ -10,7 +10,7 @@
 namespace blue_sky
   {
 
-  namespace pvt
+  namespace pvt_detail
     {
 
     template <typename lhs_t, typename rhs_t>

@@ -57,6 +57,7 @@ namespace blue_sky
     this->data = BS_KERNEL.create_object(idata::bs_type());
     this->km = BS_KERNEL.create_object(keyword_manager::bs_type());
     this->scal_3p_ = BS_KERNEL.create_object ("scal_3p");
+    this->event_manager_ = BS_KERNEL.create_object ("event_manager");
   }
 
   hdm::hdm(const hdm& src):lkeeper ("C", LC_ALL)

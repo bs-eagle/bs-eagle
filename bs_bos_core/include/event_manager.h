@@ -10,6 +10,7 @@
 #define EVENT_MANAGER_H_
 
 #include "event_base.h"
+#include "event_manager_iface.hpp"
 
 namespace blue_sky
   {
@@ -19,7 +20,7 @@ namespace blue_sky
    * \class event_manager
    * \brief class to store events and to manage of them
    * */
-  class BS_API_PLUGIN event_manager : public objbase
+  class BS_API_PLUGIN event_manager : public event_manager_iface
     {
       //-----------------------------------------
       //  TYPES
@@ -69,6 +70,12 @@ namespace blue_sky
       void
       end_event ();
 
+      void
+      set_current_date (date_t const &date);
+
+      date_t const &
+      get_current_date () const;
+
       /**
        * \brief  creats new event or adds event to previous one
        *         and parses event params
@@ -89,23 +96,8 @@ namespace blue_sky
 
     private:
       sp_event_base     current_event_; //!< current processed event
+      date_t            current_date_;
     };
-
-  /**
-   * \brief  registers types of events in blue-sky kernel
-   * \param  pd plugin_descriptor
-   * \return true if all types registered successfully
-   * */
-  bool
-  well_events_register_type (const blue_sky::plugin_descriptor &pd);
-
-  /**
-   * \brief  registers types of event_manager in blue-sky kernel
-   * \param  pd plugin_descriptor
-   * \return true if all types registered successfully
-   * */
-  bool
-  event_manager_register_types (const plugin_descriptor &pd);
 
 }//ns bs
 
