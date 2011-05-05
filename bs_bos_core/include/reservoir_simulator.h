@@ -199,6 +199,8 @@ namespace blue_sky
         ((end, (clock_t), 1))
         ((post_read, (), 0))
         ((pre_read, (sp_this_t), 1))
+        ((before_ready, (), 0))
+        ((after_ready, (), 0))
       );
     };
 
