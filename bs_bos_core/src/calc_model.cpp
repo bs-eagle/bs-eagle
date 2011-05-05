@@ -12,11 +12,11 @@
 #include "fi_params.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
-#include "scal_3p.h"
-#include "scale_array_holder.h"
-#include "scal_region_info.h"
-#include "scal_region.h"
-#include "scal_2p_data_holder.h"
+#include "scal_3p_iface.hpp"
+//#include "scale_array_holder.h"
+//#include "scal_region_info.h"
+//#include "scal_region.h"
+//#include "scal_2p_data_holder.h"
 #include "rock_grid.h"
 #include "norm_calc.h"
 #include "data_class.h"
@@ -28,7 +28,7 @@
 #include "jfunction.h"
 #include "rs_mesh_iface.h"
 #include "string_formater.h"
-//#include "conf.h"
+#include "init_model_iface.hpp"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 //#include "well_results_storage.h"
@@ -68,7 +68,6 @@ namespace blue_sky
    * */
   calc_model::calc_model (bs_type_ctor_param /*param*/)
       : bs_refcounter(), bs_node(bs_node::create_node())
-      , scal_prop (BS_KERNEL.create_object (scal_3p_t::bs_type ()))
       , pvt_regions (BS_KERNEL.create_object (v_long::bs_type ()))
       , sat_regions (BS_KERNEL.create_object (v_long::bs_type ()))
       , fip_regions (BS_KERNEL.create_object (v_long::bs_type ()))
@@ -88,7 +87,6 @@ namespace blue_sky
    * */
   calc_model::calc_model (const this_t & /*src*/)
       : bs_refcounter(), bs_node(bs_node::create_node())
-      , scal_prop (BS_KERNEL.create_object (scal_3p_t::bs_type ()))
       , pvt_regions (BS_KERNEL.create_object (v_long::bs_type ()))
       , sat_regions (BS_KERNEL.create_object (v_long::bs_type ()))
       , fip_regions (BS_KERNEL.create_object (v_long::bs_type ()))
@@ -135,7 +133,7 @@ namespace blue_sky
   }
 
   int 
-  calc_model::init_main_arrays (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
+  calc_model::init_main_arrays (const BS_SP (init_model_iface) &init_model, const BS_SP (scal_3p_iface) &scal_prop_, const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
   {
 #ifdef _DEBUG
     BOSOUT (section::init_data, level::debug) << "FI DEBUG: begin of init_main_arrays method" << bs_end;
@@ -298,10 +296,11 @@ namespace blue_sky
 
     // initialize fip regions
     this->n_fip_regions = input_data->props->get_i ("fip_region");
-    if (!this->n_fip_regions)
-      {
-        this->n_fip_regions = 1;
-      }
+    // FIXME:
+    //if (!this->n_fip_regions)
+    //  {
+    //    this->n_fip_regions = 1;
+    //  }
     if (input_data->contains_i_array ("FIPNUM"))
       {
         convert_arrays(mesh->get_n_active_elements (), mesh->get_int_to_ext (), *fip_regions, input_data->get_i_array ("FIPNUM"));
@@ -314,10 +313,11 @@ namespace blue_sky
 
     // initialize pvt regions
     this->n_pvt_regions = input_data->props->get_i ("pvt_region");
-    if (!this->n_pvt_regions)
-      {
-        this->n_pvt_regions = 1;
-      }
+    // FIXME:
+    //if (!this->n_pvt_regions)
+    //  {
+    //    this->n_pvt_regions = 1;
+    //  }
     if (input_data->contains_i_array ("PVTNUM"))
       {
         convert_arrays(mesh->get_n_active_elements (), mesh->get_int_to_ext (), *pvt_regions, input_data->get_i_array ("PVTNUM"));
@@ -330,10 +330,11 @@ namespace blue_sky
 
     // initialize sat regions
     this->n_sat_regions = input_data->props->get_i ("sat_region");
-    if (!this->n_sat_regions)
-      {
-        this->n_sat_regions = 1;
-      }
+    // FIXME: no wierd changes of sat_regions
+    //if (!this->n_sat_regions)
+    //  {
+    //    this->n_sat_regions = 1;
+    //  }
     if (input_data->contains_i_array ("SATNUM"))
       {
         convert_arrays(mesh->get_n_active_elements (), mesh->get_int_to_ext (), *sat_regions, input_data->get_i_array ("SATNUM"));
@@ -357,38 +358,30 @@ namespace blue_sky
                           input_data);
 
     // initialize scale arrays
-    const sp_scale_array_holder_t &gas_scale_ = scal_prop->get_gas_scale ();
-    const sp_scale_array_holder_t &water_scale_ = scal_prop->get_water_scale ();
-#if 0
-    gas_scale_->insert_socr ((*input_data->d_map)[SOGCR].array);
-    gas_scale_->insert_scr  ((*input_data->d_map)[SGCR].array);
-    gas_scale_->insert_su   ((*input_data->d_map)[SGU].array);
-    gas_scale_->insert_sl   ((*input_data->d_map)[SGL].array);
+    scal_prop = scal_prop_;
+    const BS_SP (scale_array_holder_iface) &gas_scale_ = scal_prop->get_gas_scale ();
+    const BS_SP (scale_array_holder_iface) &water_scale_ = scal_prop->get_water_scale ();
 
-    water_scale_->insert_socr ((*input_data->d_map)[SOWCR].array);
-    water_scale_->insert_scr  ((*input_data->d_map)[SWCR].array);
-    water_scale_->insert_su   ((*input_data->d_map)[SWU].array);
-    water_scale_->insert_sl   ((*input_data->d_map)[SWL].array);
-    water_scale_->insert_pcp  ((*input_data->d_map)[PCW].array);
-#else
-    gas_scale_->set_socr (input_data->get_fp_array ("SOGCR"));
-    gas_scale_->set_scr  (input_data->get_fp_array ("SGCR"));
-    gas_scale_->set_su   (input_data->get_fp_array ("SGU"));
-    gas_scale_->set_sl   (input_data->get_fp_array ("SGL"));
+    if (input_data->is_set ("SOGCR"))   gas_scale_->set (socr, "SOGCR", input_data->get_fp_array ("SOGCR"));
+    if (input_data->is_set ("SGCR"))    gas_scale_->set (scr, "SGCR", input_data->get_fp_array ("SGCR"));
+    if (input_data->is_set ("SGU"))     gas_scale_->set (su, "SGU", input_data->get_fp_array ("SGU"));
+    if (input_data->is_set ("SGL"))     gas_scale_->set (sl, "SGL", input_data->get_fp_array ("SGL"));
 
-    water_scale_->set_socr (input_data->get_fp_array ("SOWCR"));
-    water_scale_->set_scr  (input_data->get_fp_array ("SWCR"));
-    water_scale_->set_su   (input_data->get_fp_array ("SWU"));
-    water_scale_->set_sl   (input_data->get_fp_array ("SWL"));
-    water_scale_->set_pcp  (input_data->get_fp_array ("PCW"));
+    if (input_data->is_set ("SOWCR"))   water_scale_->set (socr, "SOWCR", input_data->get_fp_array ("SOWCR"));
+    if (input_data->is_set ("SWCR"))    water_scale_->set (scr, "SWCR", input_data->get_fp_array ("SWCR"));
+    if (input_data->is_set ("SWU"))     water_scale_->set (su, "SWU", input_data->get_fp_array ("SWU"));
+    if (input_data->is_set ("SWL"))     water_scale_->set (sl, "SWL", input_data->get_fp_array ("SWL"));
+    if (input_data->is_set ("PCW"))     water_scale_->set (pcp, "PCW", input_data->get_fp_array ("PCW"));
 
-#endif
-    init_scal (input_data);
+    scal_prop->set_water_jfunction (BS_KERNEL.create_object (jfunction::bs_type ()));
+    scal_prop->set_gas_jfunction (BS_KERNEL.create_object (jfunction::bs_type ()));
+    scal_prop->init (is_water (), is_gas (), is_oil (), phase_d, sat_d, rpo_model);
+    scal_prop->update_gas_data ();
 
     // initialize rock grid data
     this->rock_grid_prop->init_data(mesh->get_n_active_elements (), mesh->get_int_to_ext (), input_data);
 
-    set_initial_data (input_data, mesh);
+    init_model->init (BS_SP (calc_model) (this), input_data, mesh);
 
 #if 0
     tools::save_seq_vector ("pressure_bs.txt").save (pressure);
@@ -399,415 +392,6 @@ namespace blue_sky
 
     tools::save_seq_vector ("cells_bs.txt").save (mesh->get_int_to_ext ());
 #endif
-
-    return 0;
-  }
-
-  int 
-  calc_model::set_initial_data (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
-  {
-    if (input_data->props->get_i ("init_section"))
-      {
-        //init by equlibrium calculation
-        if (calc_equil (input_data, mesh))
-          return -1;
-      }
-    else
-      {
-        //explicit initialization
-        //pressure
-        if (init_pressure (input_data, mesh))
-          return -1;
-
-        //saturations if need
-        if (n_phases > 1 && init_saturation (input_data, mesh))
-          return -1;
-
-        if (FI_CHK_OIL_GAS (phases) && init_rs (input_data, mesh))
-          return -1;
-      }
-
-    return 0;
-  }
-
-  int 
-  calc_model::init_saturation (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
-  {
-    const index_t d_w = phase_d[FI_PHASE_WATER];
-    const index_t d_o = phase_d[FI_PHASE_OIL];
-    const index_t d_g = phase_d[FI_PHASE_GAS];
-
-    int flag = this->ts_params->get_bool(fi_params::FIX_SOIL_BUG);
-
-    // check number of phases
-    if (this->n_phases < 2)
-      return 0;
-
-    saturation_3p->init (mesh->get_n_active_elements() * this->n_phases, 0);
-
-    if (!input_data)
-      {
-        bs_throw_exception ("idata is not initialized");
-      }
-
-    if (!mesh)
-      {
-        bs_throw_exception ("mesh is not initialized");
-        return -1;
-      }
-
-    const spv_long &original_element_num = mesh->get_int_to_ext();
-    index_t n = mesh->get_n_active_elements();
-
-    // check number of unknowns
-    int un_counter = 0;
-    if (FI_CHK_WATER (this->phases) && !input_data->contains_fp_array ("SWAT"))
-      ++un_counter;
-    if (FI_CHK_OIL (this->phases) && !input_data->contains_fp_array ("SOIL"))
-      ++un_counter;
-    if (FI_CHK_GAS (this->phases) && !input_data->contains_fp_array ("SGAS"))
-      ++un_counter;
-    if (un_counter > 1)
-      {
-        bs_throw_exception ("Not enought phases saturations specified");
-      }
-
-    const spv_double &soil = input_data->get_fp_array ("SOIL");
-    const spv_double &swat = input_data->get_fp_array ("SWAT");
-    const spv_double &sgas = input_data->get_fp_array ("SGAS");
-
-    // 2ph water oil
-    if (this->n_phases == 2 && FI_CHK_WATER (this->phases) && FI_CHK_OIL (this->phases))
-      {
-        if (soil->size () && swat->size ())
-          {
-            BOSWARN (section::init_data, level::warning)
-            << "Oil saturation will ignored in 2 phase water-oil system." << bs_end;
-          }
-        else if (!swat->size () && !soil->size ())
-          {
-            bs_throw_exception ("Water or oil saturation has not been specified");
-          }
-
-        for (index_t i = 0; i < n; ++i)
-          {
-            index_t blk_i = (*original_element_num)[i];
-            if (swat->size ())
-              {
-                if ((*swat)[blk_i] > (item_t)1.0 + EPS_DIFF || (*swat)[blk_i] < -EPS_DIFF)
-                  {
-                    BOSWARN (section::init_data, level::warning) << "Water saturation is out of range" << bs_end;
-                    //saturation[i] = (item_t)1.0;
-                    (*saturation_3p)[i * n_phases + d_w] = (item_t)1.0;
-                    (*saturation_3p)[i * n_phases + d_o] = (item_t)0;
-                  }
-                else
-                  {
-                    //saturation[i] = (*swat)[blk_i];
-                    (*saturation_3p)[i * n_phases + d_w] = (*swat)[blk_i];
-                    (*saturation_3p)[i * n_phases + d_o] = (item_t)1.0 - (*swat)[blk_i];
-                  }
-              }
-            else if (soil->size ())
-              {
-                if ((*soil)[blk_i] > (item_t)1.0 + EPS_DIFF || (*soil)[blk_i] < -EPS_DIFF)
-                  {
-                    BOSWARN (section::init_data, level::warning) << "Oil saturation is out of range" << bs_end;
-                    //saturation[i] = (item_t)1.0;
-                    (*saturation_3p)[i * n_phases + d_w] = (item_t)0;
-                    (*saturation_3p)[i * n_phases + d_o] = (item_t)1.0;
-                  }
-                else
-                  {
-                    //saturation[i] = (item_t)1. - (*swat)[blk_i];
-                    (*saturation_3p)[i * n_phases + d_w] = (item_t)1.0 - (*soil)[blk_i];
-                    (*saturation_3p)[i * n_phases + d_o] = (*soil)[blk_i];
-                  }
-              }
-          }
-      }
-    // 2ph water gas system
-    else if (this->n_phases == 2 && FI_CHK_WATER (this->phases) && FI_CHK_GAS(this->phases))
-      {
-        if (swat->size () && sgas->size ())
-          {
-            BOSWARN (section::init_data, level::warning)
-            << "Gas saturation will be ignored in 2 phase water-gas system." << bs_end;
-          }
-        if (!swat->size () && !sgas->size ())
-          {
-            bs_throw_exception ("Water or gas saturation has not been specified");
-          }
-
-        for (index_t i = 0; i < n; ++i)
-          {
-            index_t blk_i = (*original_element_num)[i];
-            if (swat->size ())
-              {
-                if ((*swat)[blk_i] > (item_t)1.0 + EPS_DIFF || (*swat)[blk_i] < -EPS_DIFF)
-                  {
-                    BOSWARN (section::init_data, level::warning)
-                    << "Water saturation is out of range." << bs_end;
-                    //saturation[i] = (item_t)1.0;
-                    (*saturation_3p)[i * n_phases + d_w] = (item_t)1.0;
-                    (*saturation_3p)[i * n_phases + d_g] = (item_t)0;
-                  }
-                else
-                  {
-                    //saturation[i] = (*swat)[blk_i];
-                    (*saturation_3p)[i * n_phases + d_w] = (*swat)[blk_i];
-                    (*saturation_3p)[i * n_phases + d_g] = (item_t)1.0 - (*swat)[blk_i];
-                  }
-              }
-            else if (sgas->size ())
-              {
-                if ((*sgas)[blk_i] > (item_t)1.0 + EPS_DIFF || (*sgas)[blk_i] < -EPS_DIFF)
-                  {
-                    BOSWARN (section::init_data, level::warning)
-                    << "Gas saturation is out of range." << bs_end;
-                    //saturation[i] = (item_t)1.0;
-                    (*saturation_3p)[i * n_phases + d_w] = (item_t)0;
-                    (*saturation_3p)[i * n_phases + d_g] = (item_t)1.0;
-                  }
-                else
-                  {
-                    //saturation[i] = (item_t)1. - (*sgas)[blk_i];
-                    (*saturation_3p)[i * n_phases + d_g] = (*sgas)[blk_i];
-                    (*saturation_3p)[i * n_phases + d_w] = (item_t)1.0 - (*sgas)[blk_i];
-                  }
-              }
-          }
-      }
-    // 2ph oil gas system
-    else if (this->n_phases == 2 && FI_CHK_OIL (this->phases) && FI_CHK_GAS (this->phases))
-      {
-        if (soil->size () && sgas->size ())
-          {
-            BOSWARN (section::init_data, level::warning)
-            << "Oil saturation will be ignored in 2 phase gas-oil system." << bs_end;
-          }
-        else if (!soil->size () && !sgas->size ())
-          {
-            bs_throw_exception ("Gas or oil saturation has not been specified");
-          }
-
-        for (index_t i = 0; i < n; ++i)
-          {
-            index_t blk_i = (*original_element_num)[i];
-            if (soil->size ())
-              {
-                if ((*soil)[blk_i] > (item_t) + EPS_DIFF || (*soil)[blk_i] < -EPS_DIFF)
-                  {
-                    BOSWARN (section::init_data, level::warning)
-                    << "Oil saturation is out of range." << bs_end;
-                    //saturation[i] = (item_t)0.0;
-                    (*saturation_3p)[i * n_phases + d_g] = (item_t)0;
-                    (*saturation_3p)[i * n_phases + d_o] = (item_t)1.0;
-                  }
-                else
-                  {
-                    //saturation[i] = (item_t)1.0 - (*soil)[blk_i];
-                    (*saturation_3p)[i * n_phases + d_g] = (item_t)1.0 - (*soil)[blk_i];
-                    (*saturation_3p)[i * n_phases + d_o] = (*soil)[blk_i];
-                  }
-              }
-            else if (sgas->size ())
-              {
-                if ((*sgas)[blk_i] > (item_t)1.0 + EPS_DIFF || (*sgas)[blk_i] < -EPS_DIFF)
-                  {
-                    BOSWARN (section::init_data, level::warning)
-                    << "Gas saturation is out of range." << bs_end;
-                    //saturation[i] = (item_t)1.0;
-                    (*saturation_3p)[i * n_phases + d_g] = (item_t)1.0;
-                    (*saturation_3p)[i * n_phases + d_o] = (item_t)0;
-                  }
-                else
-                  {
-                    //saturation[i] = (*sgas)[blk_i];
-                    (*saturation_3p)[i * n_phases + d_o] = (item_t)1.0 - (*sgas)[blk_i];
-                    (*saturation_3p)[i * n_phases + d_g] = (*sgas)[blk_i];
-                  }
-              }
-          }
-      }
-    // 3ph water oil gas system
-    else if (this->n_phases == 3)
-      {
-        if (swat->size () && soil->size () && sgas->size ())
-          {
-            BOSWARN (section::init_data, level::warning)
-            << "Oil saturation will be ignored in 3 phase water-gas-oil system." << bs_end;
-          }
-
-        if (swat->size () && sgas->size ())
-          {
-            for (index_t i = 0; i < n; ++i)
-              {
-                index_t blk_i = (*original_element_num)[i];
-                item_t sw = (*swat)[blk_i];
-                item_t sg = (*sgas)[blk_i];
-                if ((sw + sg) < -EPS_DIFF || (sw + sg) > 1 + EPS_DIFF)
-                  {
-                    bs_throw_exception ("Gas saturation plus water saturation is out of range");
-                  }
-                if (flag && fabs (sw - (item_t)1.0) < (item_t)0.01)
-                  {
-                    sw = static_cast <item_t> (0.99);
-                  }
-
-                (*saturation_3p)[i * n_phases + d_w] = sw;
-                (*saturation_3p)[i * n_phases + d_g] = sg;
-                (*saturation_3p)[i * n_phases + d_o] = (item_t)1.0 - sw - sg;
-              }
-          }
-
-        else if (swat->size () && soil->size ())
-          {
-            for (index_t i = 0; i < n; ++i)
-              {
-                index_t blk_i = (*original_element_num)[i];
-                item_t sw = (*swat)[blk_i];
-                item_t sg = (item_t)1.0 - sw - (*soil)[blk_i];
-                if (sg < -EPS_DIFF || sg > 1 + EPS_DIFF)
-                  {
-                    bs_throw_exception ("Oil saturation plus water saturation is out of range");
-                  }
-                if (flag && fabs(sw - (item_t)1.0) < (item_t)0.001)
-                  {
-                    sw = 0.999f;
-                  }
-
-                (*saturation_3p)[i * n_phases + d_w] = sw;
-                (*saturation_3p)[i * n_phases + d_g] = sg;
-                (*saturation_3p)[i * n_phases + d_o] = (item_t)1.0 - sw - sg;
-              }
-          }
-
-        else if (sgas->size () && soil->size ())
-          {
-            for (index_t i = 0; i < n; ++i)
-              {
-                index_t blk_i = (*original_element_num)[i];
-                item_t sg = (*sgas)[blk_i];
-                item_t sw = (item_t)1.0 - sg - (*soil)[blk_i];
-                if (sw < -EPS_DIFF || sw > 1 + EPS_DIFF)
-                  {
-                    bs_throw_exception ("Oil saturation plus gas saturation is out of range");
-                  }
-                if (flag && fabs(sw - (item_t)1.0) < (item_t)0.01)
-                  {
-                    sw = static_cast <item_t> (0.99);
-                  }
-
-                (*saturation_3p)[i * n_phases + d_w] = sw;
-                (*saturation_3p)[i * n_phases + d_g] = sg;
-                (*saturation_3p)[i * n_phases + d_o] = (item_t)1.0 - sw - sg;
-              }
-          }
-        else if (swat->size ())
-          {
-            for (index_t i = 0; i < n; ++i)
-              {
-                index_t blk_i = (*original_element_num)[i];
-                item_t sw = (*swat)[blk_i];
-                item_t sg = (item_t)0.0;
-                if (sw > 1 + EPS_DIFF || sw < -EPS_DIFF)
-                  {
-                    bs_throw_exception ("Water saturation is out of range");
-                  }
-                if (flag && fabs(sw - (item_t)1.0) < (item_t)0.01)
-                  {
-                    sw = static_cast <item_t> (0.99);
-                  }
-
-                (*saturation_3p)[i * n_phases + d_w] = sw;
-                (*saturation_3p)[i * n_phases + d_g] = sg;
-                (*saturation_3p)[i * n_phases + d_o] = (item_t)1.0 - sw - sg;
-              }
-          }
-
-        else if (soil->size ())
-          {
-            for (index_t i = 0; i < n; ++i)
-              {
-                index_t blk_i = (*original_element_num)[i];
-                item_t sw = (item_t)1.0 - (*soil)[blk_i];
-                item_t sg = (item_t)0.0;
-                if ((*soil)[blk_i] > 1 + EPS_DIFF || (*soil)[blk_i] < -EPS_DIFF)
-                  {
-                    bs_throw_exception ("Oil saturation is out of range");
-                  }
-                if (flag && fabs(sw - (item_t)1.0) < (item_t)0.01)
-                  {
-                    sw = static_cast <item_t> (0.99);
-                  }
-
-                (*saturation_3p)[i * n_phases + d_w] = sw;
-                (*saturation_3p)[i * n_phases + d_g] = sg;
-                (*saturation_3p)[i * n_phases + d_o] = (item_t)1.0 - sw - sg;
-              }
-          }
-
-        else if (sgas->size ())
-          {
-            for (index_t i = 0; i < n; ++i)
-              {
-                index_t blk_i = (*original_element_num)[i];
-                item_t sw = (item_t)1.0 - (*sgas)[blk_i];
-                item_t sg = (*sgas)[blk_i];
-                if (sg > 1 + EPS_DIFF || sg < -EPS_DIFF)
-                  {
-                    bs_throw_exception ("Gas saturation is out of range");
-                  }
-                if (flag && fabs(sw - (item_t)1.0) < (item_t)0.01)
-                  {
-                    sw = static_cast <item_t> (0.99);
-                  }
-
-                (*saturation_3p)[i * n_phases + d_w] = sw;
-                (*saturation_3p)[i * n_phases + d_g] = sg;
-                (*saturation_3p)[i * n_phases + d_o] = (item_t)1.0 - sw - sg;
-              }
-          }
-        else
-          {
-            bs_throw_exception ("None of saturation specified");
-          }
-      }
-
-    return 0;
-  }
-
-  int 
-  calc_model::init_pressure (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
-  {
-    if (input_data->prvd.size())
-      {
-        const spv_float &depths = mesh->get_depths ();
-        index_t n_cells = mesh->get_n_active_elements();
-        if (!input_data->contains_i_array ("EQLNUM"))
-          {
-            spv_int eqlnum = input_data->create_i_array ("EQLNUM", &i_pool_sizes[ARRAY_POOL_TOTAL * EQLNUM], i_pool_default_values[EQLNUM]);
-            eqlnum->assign (1);
-          }
-        spv_int eqlnum = input_data->get_i_array ("EQLNUM");
-
-        //interpolate by depth
-        for (index_t i = 0; i < n_cells; ++i)
-          {
-            index_t i_orig = (*mesh->get_int_to_ext ())[i];
-            index_t i_eql = (*eqlnum)[i_orig] - 1;
-            (*pressure)[i] = input_data->prvd[i_eql].interpolate_linear ((*depths)[i]);
-          }
-      }
-    else if (input_data->contains_fp_array ("PRESSURE"))
-      {
-        convert_arrays (mesh->get_n_active_elements (), mesh->get_int_to_ext (), *pressure, input_data->get_fp_array ("PRESSURE"));
-      }
-    else
-      {
-        bs_throw_exception ("Initial pressure has not been specified");
-      }
 
     return 0;
   }
@@ -874,85 +458,6 @@ namespace blue_sky
 //             scal_prop.bconn_sgu[i] = scal_prop.sgu[i_block];
 //         }
 //     }
-  }
-
-  int 
-  calc_model::init_rs (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
-  {
-    spv_float init_pbub = input_data->get_fp_array ("PBUB");
-    spv_float init_rs   = input_data->get_fp_array ("RS");
-    if (!init_pbub->size () && !init_rs->size ())
-      {
-        bs_throw_exception ("Should be specified init_pbub or init_rs");
-      }
-
-    // main loop through all cells
-    item_t cell_pbub = 0;
-    for (index_t i = 0, cell_count = mesh->get_n_active_elements(); i < cell_count; ++i)
-      {
-        // calculate index of gas saturation and oil PVT prop
-        index_t i_g = FI_PH_IND (i, phase_d[FI_PHASE_GAS], n_phases);
-        index_t i_o = FI_PH_IND (i, phase_d[FI_PHASE_OIL], n_phases);
-        // get cell PVT region index
-        index_t reg = (*pvt_regions)[i];
-
-        // get PVTO for cell
-        sp_pvt_t pvto = pvt_oil_array[reg];
-        if (!pvto)
-          continue;
-
-        // get cell index in original arrays
-        index_t cell_i = (*mesh->get_int_to_ext())[i];
-
-        if ((*saturation_3p)[i_g] < EPS_DIFF && (*saturation_3p)[i_o] < EPS_DIFF)
-          {
-            (*gas_oil_ratio)[i] = 0;
-            main_variable[i] = FI_MOMG_VAR;
-          }
-        // if S_g > 0 --- main var is S_g and system include 3 phases
-        // P_bub = P and Rs = Rs (P_bub)
-        else if ((*saturation_3p)[i_g] > EPS_DIFF)
-          {
-            if (init_pbub->size () && (*init_pbub)[cell_i] < (*pressure)[i])
-              cell_pbub = (*init_pbub)[cell_i];
-            else
-              cell_pbub = (*pressure)[i];
-
-            (*gas_oil_ratio)[i] = pvto->interpolate_and_fix (cell_pbub);
-
-            // set main variable to GAS saturation
-            main_variable[i] = FI_SG_VAR;
-          }
-        else
-          {
-            // if S_g == 0 --- main variable is Rs,
-            // if user specify initial bubble point (PBUB)
-            if (init_pbub->size ())
-              {
-                // initial bubble point can not be greater than cell pressure
-                if ((*init_pbub)[cell_i] < (*pressure)[i])
-                  cell_pbub = (*init_pbub)[cell_i];
-                else
-                  cell_pbub = (*pressure)[i];
-
-                (*gas_oil_ratio)[i] = pvto->interpolate_and_fix (cell_pbub);
-              }
-            // if user specify initial RS
-            else if (init_rs->size ())
-              {
-                (*gas_oil_ratio)[i] = (*init_rs)[cell_i];
-              }
-            else
-              {
-                BS_ASSERT (false && "init_pbub and init_rs is not specified");
-              }
-
-            // set main variable to RS
-            main_variable[i] = FI_RO_VAR;
-          }
-      }
-
-    return 0;
   }
 
   const calc_model &
@@ -1022,94 +527,6 @@ namespace blue_sky
       }
     };
 
-  void
-  calc_model::init_scal (const sp_idata_t &idata)
-  {
-    // TODO: check code
-    typedef idata_t::scal_vector    scal_vector;
-    typedef idata_t::scal_info      scal_info;
-    t_int scal_family = idata->props->get_i ("scal_family"); 
-    
-    if (is_water () && is_gas () && is_oil ())
-      {
-        if (scal_family == 0) 
-          {
-            BS_ASSERT (idata->swof.size ());
-            BS_ASSERT (idata->sgof.size ());
-            for (t_long i = 0; i < this->n_sat_regions; i++)
-              {
-                scal_prop->get_water_data ()->add_spof (idata->swof[i].main_data_, true);
-                scal_prop->get_gas_data ()->add_spof (idata->sgof[i].main_data_, false);
-              }
-          }
-        else 
-          {
-            BS_ASSERT (idata->swfn.size ());
-            BS_ASSERT (idata->sgfn.size ());
-            BS_ASSERT (idata->sof3.size ());
-            for (t_long i = 0; i < this->n_sat_regions; i++)
-              {
-                scal_prop->get_water_data ()->add_spfn (idata->swfn[i].main_data_, i, true);
-                scal_prop->get_gas_data ()->add_spfn (idata->sgfn[i].main_data_, i, false);
-                scal_prop->get_water_data ()->add_sof3 (idata->sof3[i].main_data_, i, true);
-                scal_prop->get_gas_data ()->add_sof3 (idata->sof3[i].main_data_, i, false);
-              }
-          }  
-      }
-    else if (is_water () && is_oil ())
-      {
-        if (scal_family == 0) 
-          {
-            BS_ASSERT (idata->swof.size ());
-            for (t_long i = 0; i < this->n_sat_regions; i++)
-              {
-                scal_prop->get_water_data ()->add_spof (idata->swof[i].main_data_, true);
-              }
-            
-          }
-        else 
-          {
-            BS_ASSERT (idata->swfn.size ());
-            BS_ASSERT (idata->sof2.size ());
-            for (t_long i = 0; i < this->n_sat_regions; i++)
-              {
-                scal_prop->get_water_data ()->add_spfn (idata->swfn[i].main_data_, i, true);
-                // TODO : not implemented yet 
-                bs_throw_exception ("SOF2 not implemented yet!");
-                //scal_prop->get_water_data ()->add_sof2 (idata->sof2[i].main_data_, i, true);
-              }
-          }  
-      }
-    else if (is_gas () && is_oil ())
-      {
-        if (scal_family == 0) 
-          {
-            BS_ASSERT (idata->sgof.size ());
-            for (t_long i = 0; i < this->n_sat_regions; i++)
-              {
-                scal_prop->get_gas_data ()->add_spof (idata->sgof[i].main_data_, false);
-              }
-          }
-        else 
-          {
-            BS_ASSERT (idata->sgfn.size ());
-            BS_ASSERT (idata->sof2.size ());
-            for (t_long i = 0; i < this->n_sat_regions; i++)
-              {
-                scal_prop->get_gas_data ()->add_spfn (idata->sgfn[i].main_data_, i, false);
-                // TODO : not implemented yet
-                bs_throw_exception ("SOF2 not implemented yet!");
-                //scal_prop->get_gas_data ()->add_sof2 (idata->sof3[i].main_data_, i, false);
-              }
-          }  
-      }
-      
-    scal_prop->set_water_jfunction (BS_KERNEL.create_object (scal_3p_t::jfunction_t::bs_type ()));
-    scal_prop->set_gas_jfunction (BS_KERNEL.create_object (scal_3p_t::jfunction_t::bs_type ()));
-    scal_prop->init (is_water (), is_gas (), is_oil (), phase_d, sat_d, rpo_model);
-    scal_prop->update_gas_data ();
-  }
-
   void 
   calc_model::init_pvt_arrays (sp_pvt_oil_array_t &pvto,
       sp_pvt_gas_array_t &pvtg,
@@ -1126,6 +543,8 @@ namespace blue_sky
     for (size_t i = 0; i<this->n_pvt_regions; i++)
       {
         BS_ASSERT (idata->pvto.size ());
+        std::cout << "pvto (" << i << "): " << idata->pvto.back ().main_data_->empty () << std::endl;
+
         if (idata->pvto.back ().main_data_->empty ())
           {
             pvto[i] = BS_KERNEL.create_object (pvt_dead_oil_t::bs_type());

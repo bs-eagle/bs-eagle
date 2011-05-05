@@ -295,6 +295,7 @@ struct mesh_grdecl::inner {
 
 		// create arrays
 		spfp_storarr_t coord = BS_KERNEL.create_object(fp_storarr_t::bs_type());
+    // FIXME: raise exception
 		if(!coord) return NULL;
 
 		// DEBUG
@@ -835,6 +836,7 @@ mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_
 
 	// create zcorn array
 	spv_float zcorn = BS_KERNEL.create_object(v_float::bs_type());
+  // FIXME: raise exception
 	if(!zcorn) return ret_t(NULL, NULL);
 
 	// fill zcorn
@@ -1160,13 +1162,14 @@ mesh_grdecl::get_center_zcorn(const element_zcorn_t_long &element)const
 
 int mesh_grdecl::init_ext_to_int()
 {
-  t_long *ext_to_int_data, *int_to_ext_data;
   write_time_to_log init_time ("Mesh initialization", ""); 
   stdv_float volumes_temp(n_elements);
 
   //tools::save_seq_vector ("actnum.bs.txt").save actnum_array;
   
-  /* int splicing_num = splicing(volumes_temp); */
+  // FIXME: was commented
+  int splicing_num = splicing(volumes_temp);
+  splicing_num;
   
   //check_adjacency (1);
   //tools::save_seq_vector ("active_blocks.bs.txt").save actnum_array;
@@ -1176,18 +1179,19 @@ int mesh_grdecl::init_ext_to_int()
   //make proxy array
   ext_to_int->resize(n_elements);
   ext_to_int->assign(0);
-  ext_to_int_data = &(*ext_to_int)[0];
+  t_long *ext_to_int_data = ext_to_int->data ();
   size_t n_count = 0;
 
-  t_long nn_active = 0, i_index; //number of non-active previous cells
+  t_long nn_active = 0; //number of non-active previous cells
+  t_int const *actnum = actnum_array->data ();
   for (t_long i = 0; i < nz; ++i)
     {
       for (t_long j = 0; j < ny; ++j)
         for (t_long k = 0; k < nx; ++k, ++n_count)
           {
-            i_index = k + (nx * j) + (i * nx * ny);
+            t_long i_index = k + (nx * j) + (i * nx * ny);
             
-            if (!actnum_array[i_index])
+            if (!actnum[i_index])
               {
                 nn_active++;
                 ext_to_int_data[n_count] = -1;
@@ -1200,12 +1204,13 @@ int mesh_grdecl::init_ext_to_int()
   //tools::save_seq_vector ("ext_to_int.bs.txt").save (ext_to_int);
 
   init_int_to_ext();
-  int_to_ext_data = &(*int_to_ext)[0];
+  t_long *int_to_ext_data = int_to_ext->data ();
   
   //fill volume array (except non-active block and using proxy array)
   volumes->resize(n_active_elements);
-  t_float *volumes_data = &(*volumes)[0];
+  t_float *volumes_data = volumes->data ();
   
+  // FIXME: init volumes_temp
   for (int i = 0; i < n_active_elements; ++i)
     volumes_data[i] = volumes_temp[int_to_ext_data[i]];
     
@@ -1284,55 +1289,56 @@ bool mesh_grdecl::are_two_blocks_close (const t_long i, const t_long j, const t_
 
 bool mesh_grdecl::check_adjacency(int shift_zcorn)
 {
-  t_long i, j, k;
-  t_long index, zindex, zindex1;
   t_long n_adjacent = 0;
    
-  for (i = 0; i < nx; ++i)
-    for (j = 0; j < ny; ++j)
-      for (k = 0; k < nz; ++k)
+  t_int const *actnum = actnum_array->data ();
+  t_float *zcorn = pinner_->zcorn_->data ();
+  for (t_long i = 0; i < nx; ++i)
+    for (t_long j = 0; j < ny; ++j)
+      for (t_long k = 0; k < nz; ++k)
         {
           
-          index = i + j * nx + k * nx * ny;
+          t_long index = i + j * nx + k * nx * ny;
           
           
           // miss inactive blocks
-          if (!actnum_array[index])
+          if (!actnum [index])
             {
               continue;
             }
                        
           // check blocks adjacency
-          zindex = i * 2 + j * 4 * nx + k * 8 *nx * ny;
-          zindex1 = zindex + 2; // check next by x
+          t_long zindex = i * 2 + j * 4 * nx + k * 8 *nx * ny;
+          t_long zindex1 = zindex + 2; // check next by x
          
           if (i + 1 == nx ||
-              (zcorn_array[zindex + 1] == zcorn_array[zindex1] &&
-              zcorn_array[zindex +  2 * nx + 1] == zcorn_array[zindex1 +  2 * nx] &&
-              zcorn_array[zindex + 4 * nx * ny + 1] == zcorn_array[zindex1 + 4 * nx * ny ] &&
-              zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == zcorn_array[zindex1 + 4 * nx * ny + 2 * nx]))
+              (zcorn[zindex + 1] == zcorn[zindex1] &&
+              zcorn[zindex +  2 * nx + 1] == zcorn[zindex1 +  2 * nx] &&
+              zcorn[zindex + 4 * nx * ny + 1] == zcorn[zindex1 + 4 * nx * ny ] &&
+              zcorn[zindex + 4 * nx * ny + 2 * nx + 1] == zcorn[zindex1 + 4 * nx * ny + 2 * nx]))
             {
               
               zindex1 = zindex + 4 * nx; // check next by y
               if (j + 1 == ny ||
-                  (zcorn_array[zindex + 2 * nx] == zcorn_array[zindex1] &&
-                  zcorn_array[zindex + 2 * nx + 1] == zcorn_array[zindex1 +  1] &&
-                  zcorn_array[zindex + 4 * nx * ny + 2 * nx] == zcorn_array[zindex1 + 4 * nx * ny] &&
-                  zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == zcorn_array[zindex1+ 4 * nx * ny + 1]))
+                  (zcorn[zindex + 2 * nx] == zcorn[zindex1] &&
+                  zcorn[zindex + 2 * nx + 1] == zcorn[zindex1 +  1] &&
+                  zcorn[zindex + 4 * nx * ny + 2 * nx] == zcorn[zindex1 + 4 * nx * ny] &&
+                  zcorn[zindex + 4 * nx * ny + 2 * nx + 1] == zcorn[zindex1+ 4 * nx * ny + 1]))
                   {
                     n_adjacent++;
                   }
             }
             if (shift_zcorn && (i + j) % 2 == 1)
               {
-                zcorn_array[zindex] += 2;
-                zcorn_array[zindex + 1] += 2;
-                zcorn_array[zindex +  2 * nx] += 2;
-                zcorn_array[zindex +  2 * nx + 1] += 2;
-                zcorn_array[zindex + 4 * nx * ny] += 2;
-                zcorn_array[zindex + 4 * nx * ny + 1] += 2;
-                zcorn_array[zindex + 4 * nx * ny +  2 * nx] += 2;
-                zcorn_array[zindex + 4 * nx * ny +  2 * nx + 1] += 2;
+                // FIXME: precalculate
+                zcorn[zindex] += 2;
+                zcorn[zindex + 1] += 2;
+                zcorn[zindex +  2 * nx] += 2;
+                zcorn[zindex +  2 * nx + 1] += 2;
+                zcorn[zindex + 4 * nx * ny] += 2;
+                zcorn[zindex + 4 * nx * ny + 1] += 2;
+                zcorn[zindex + 4 * nx * ny +  2 * nx] += 2;
+                zcorn[zindex + 4 * nx * ny +  2 * nx + 1] += 2;
               }
        }
   
@@ -1343,35 +1349,31 @@ bool mesh_grdecl::check_adjacency(int shift_zcorn)
 
 int mesh_grdecl::splicing(stdv_float& volumes_temp)
 {
-  t_long nCount = 0;
-  t_double vol_sum, vol_block;
-  t_long i, j, k, k1;
-  t_long small_block_top, big_block_top;
-  t_long n_inactive_orig, n_inactive_vol, n_incative_splice;
-  t_long index;
-  element_t element;
-
 #ifdef _DEBUG
     BS_ASSERT (zcorn_array != 0 && coord_array != 0);
 #endif
 
 
-  n_inactive_orig = 0;
-  n_inactive_vol = 0;
-  n_incative_splice = 0;
+  t_long nCount = 0;
+  t_long n_inactive_orig = 0;
+  t_long n_inactive_vol = 0;
+  t_long n_incative_splice = 0;
 
-  for (i = 0; i < nx; ++i)
-    for (j = 0; j < ny; ++j)
+  // FIXME: how to check ranges?
+  t_int *actnum = actnum_array->data ();
+  t_float const *poro = poro_array->data ();
+  for (t_long i = 0; i < nx; ++i)
+    for (t_long j = 0; j < ny; ++j)
       {
-        small_block_top = -1;
-        big_block_top = -1;
-        vol_sum = 0.0;
-        for (k = 0; k < nz; ++k)
+        t_long small_block_top = -1;
+        t_long big_block_top = -1;
+        t_long vol_sum = 0.0;
+        for (t_long k = 0; k < nz; ++k)
           {
-            index = i + j * nx + k * nx * ny;
+            t_long index = i + j * nx + k * nx * ny;
             
             // miss inactive blocks
-            if (!actnum_array[index])
+            if (!actnum[index])
               {
                 // blocks can`t be spliced across inactive blocks
                 big_block_top = -1;
@@ -1380,14 +1382,16 @@ int mesh_grdecl::splicing(stdv_float& volumes_temp)
                 n_inactive_orig++;
                 continue;
               }
+
+            element_t element;
             calc_element (i, j, k, element);
-            vol_block = element.calc_volume ();
-            t_double vol_block_poro = vol_block * poro_array[index];
+            t_double vol_block = element.calc_volume ();
+            t_double vol_block_poro = vol_block * poro[index];
 
             if (vol_block_poro <= minpv)
               {
                 // block is too small, set as inactive
-                actnum_array[index] = 0;
+                actnum[index] = 0;
                 ++nCount;
                 n_inactive_vol++;
                 // blocks can`t be spliced across inactive blocks
@@ -1410,7 +1414,7 @@ int mesh_grdecl::splicing(stdv_float& volumes_temp)
                     volumes_temp[i + j * nx + big_block_top * nx * ny] += vol_block;
 
                     // make block inactive
-                    actnum_array[index] = 0;
+                    actnum[index] = 0;
                     ++nCount;
                     n_incative_splice++;
                     small_block_top = -1;
@@ -1450,12 +1454,12 @@ int mesh_grdecl::splicing(stdv_float& volumes_temp)
                 if (small_block_top != -1)
                   {
                     // this block absorbes all smaller blocks above
-                    for (k1 = k - 1; k1 >= small_block_top; --k1)
+                    for (t_long k1 = k - 1; k1 >= small_block_top; --k1)
                       {
                         splice_two_blocks (i, j, k, k1);
                         n_incative_splice++;
                         // make small block inactive
-                        actnum_array[i + j * nx + k1 * nx * ny] = 0;
+                        actnum[i + j * nx + k1 * nx * ny] = 0;
                         ++nCount;
                       }
 
@@ -1507,18 +1511,21 @@ int mesh_grdecl::splicing(stdv_float& volumes_temp)
 
 int mesh_grdecl::calc_depths ()
 {
-  depths->resize(n_active_elements);
-  t_float *depths_data = &(*depths)[0];
-  t_long *ext_to_int_data = &(*ext_to_int)[0];
+  depths->resize (n_active_elements);
+
+  t_float *depths_data = depths->data ();
+  t_long const *ext_to_int_data = ext_to_int->data ();
+  t_int const *actnum = actnum_array->data ();
+
   t_long index = 0;
-  element_zcorn_t_long element;
-  
   for (t_long k = 0; k < nz; ++k)
     for (t_long j = 0; j < ny; ++j)
       for (t_long i = 0; i < nx; ++i, ++index)
         {
-          if (actnum_array[index])
+          if (actnum[index])
             {
+              // FIXME: check index and array length
+              element_zcorn_t_long element;
               get_element_zcorn_index(i, j, k, element);
               depths_data[ext_to_int_data[index]] = get_center_zcorn(element);
             }
@@ -1532,6 +1539,7 @@ static int n_tran_calc = 0;
 // calculating method have been taken from td eclipse (page 896)
 // calc transmissibility between fully adjacent cells index1 and index2
 
+// FIXME: ntg_ and etc arrays
 t_double 
 mesh_grdecl::calc_tran(const t_long ext_index1, const t_long ext_index2, const plane_t &plane1, 
                                        const fpoint3d_t &center1, const fpoint3d_t &center2, direction d_dir, plane_t* plane2) const
@@ -1625,37 +1633,38 @@ mesh_grdecl::calc_tran(const t_long ext_index1, const t_long ext_index2, const p
 
   t_double Ti, Tj;
 
+  // FIXME: ntg_array and etc access
   t_double ntg_index1 = 1;
   t_double ntg_index2 = 1;
   if (ntg_array)
     {
-      ntg_index1 = ntg_array[ext_index1];
-      ntg_index2 = ntg_array[ext_index2];
+      ntg_index1 = ntg_array->data ()[ext_index1];
+      ntg_index2 = ntg_array->data ()[ext_index2];
     }
 
   if (d_dir == along_dim1) //lengthwise OX
     {
-      Ti = permx_array[ext_index1]*ntg_index1*koef1;
-      Tj = permx_array[ext_index2]*ntg_index2*koef2;
+      Ti = permx_array->data ()[ext_index1]*ntg_index1*koef1;
+      Tj = permx_array->data ()[ext_index2]*ntg_index2*koef2;
       tran = darcy_constant / (1 / Ti + 1 / Tj);
       if (multx_array)
-        tran *= multx_array[ext_index1];
+        tran *= multx_array->data ()[ext_index1];
     }
   else if (d_dir == along_dim2) //lengthwise OY
     {
-      Ti = permy_array[ext_index1]*ntg_index1*koef1;
-      Tj = permy_array[ext_index2]*ntg_index2*koef2;
+      Ti = permy_array->data ()[ext_index1]*ntg_index1*koef1;
+      Tj = permy_array->data ()[ext_index2]*ntg_index2*koef2;
       tran = darcy_constant / (1 / Ti + 1 / Tj);
       if (multy_array)
-        tran *= multy_array[ext_index1];
+        tran *= multy_array->data ()[ext_index1];
     }
   else //lengthwise OZ
     {
-      Ti = permz_array[ext_index1]*koef1;
-      Tj = permz_array[ext_index2]*koef2;
+      Ti = permz_array->data ()[ext_index1]*koef1;
+      Tj = permz_array->data ()[ext_index2]*koef2;
       tran = darcy_constant / (1 / Ti + 1 / Tj);
       if (multz_array)
-        tran *= multz_array[ext_index1];
+        tran *= multz_array->data ()[ext_index1];
     }
   
   /*
@@ -1739,6 +1748,7 @@ boost::python::list mesh_grdecl::calc_element_tops ()
 
   ind = 0;
    
+  t_float const *poro = poro_array->data ();
   for (i = 0; i < nx; ++i)
 	  for (j = 0; j < ny; ++j)
 		  for (k = 0; k < nz; ++k, ++ind)
@@ -1768,7 +1778,7 @@ boost::python::list mesh_grdecl::calc_element_tops ()
             }
 	*/
 		      calc_element (i, j, k, element);
-			  prop_data[ind] = poro_array[ind];
+			  prop_data[ind] = poro[ind];
 			  for (c = 0; c < 8; ++c)
 				{
 				  tops_data[8 * 3 * ind + 3 * c] = element.get_corners()[c].x;
@@ -1932,12 +1942,14 @@ struct build_jacobian_rows_class
     bool flag = true;
     t_long k, zindex, zindex1, index;
          
+    t_int const *actnum = mesh->actnum_array->data ();
+    t_float const *zcorn = mesh->pinner_->zcorn_->data ();
     for (k = 0; k < nz; ++k)
       {
         index = i + j * nx + k * nx * ny;
          
         // miss inactive blocks
-        if (!mesh->actnum_array[index])
+        if (!actnum[index])
           {
             continue;
           }
@@ -1947,18 +1959,18 @@ struct build_jacobian_rows_class
         zindex1 = zindex + 2; // check next by x
        
         if (i + 1 == nx ||
-            (mesh->zcorn_array[zindex + 1] == mesh->zcorn_array[zindex1] &&
-            mesh->zcorn_array[zindex +  2 * nx + 1] == mesh->zcorn_array[zindex1 +  2 * nx] &&
-            mesh->zcorn_array[zindex + 4 * nx * ny + 1] == mesh->zcorn_array[zindex1 + 4 * nx * ny ] &&
-            mesh->zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == mesh->zcorn_array[zindex1 + 4 * nx * ny + 2 * nx]))
+            (zcorn[zindex + 1] == zcorn[zindex1] &&
+            zcorn[zindex +  2 * nx + 1] == zcorn[zindex1 +  2 * nx] &&
+            zcorn[zindex + 4 * nx * ny + 1] == zcorn[zindex1 + 4 * nx * ny ] &&
+            zcorn[zindex + 4 * nx * ny + 2 * nx + 1] == zcorn[zindex1 + 4 * nx * ny + 2 * nx]))
           {
             
             zindex1 = zindex + 4 * nx; // check next by y
             if (j + 1 == ny ||
-                (mesh->zcorn_array[zindex + 2 * nx] == mesh->zcorn_array[zindex1] &&
-                mesh->zcorn_array[zindex + 2 * nx + 1] == mesh->zcorn_array[zindex1 +  1] &&
-                mesh->zcorn_array[zindex + 4 * nx * ny + 2 * nx] == mesh->zcorn_array[zindex1 + 4 * nx * ny] &&
-                mesh->zcorn_array[zindex + 4 * nx * ny + 2 * nx + 1] == mesh->zcorn_array[zindex1+ 4 * nx * ny + 1]))
+                (zcorn[zindex + 2 * nx] == zcorn[zindex1] &&
+                zcorn[zindex + 2 * nx + 1] == zcorn[zindex1 +  1] &&
+                zcorn[zindex + 4 * nx * ny + 2 * nx] == zcorn[zindex1 + 4 * nx * ny] &&
+                zcorn[zindex + 4 * nx * ny + 2 * nx + 1] == zcorn[zindex1+ 4 * nx * ny + 1]))
                 {
                   // cell is adjacent;
                 }
@@ -2260,6 +2272,7 @@ struct build_jacobian_and_flux : boost::noncopyable
     
     element_zcorn_t_long zcorn_index1, zcorn_index2; 
     t_float *zcorn_array = mesh->zcorn_array;
+    t_int const *actnum = mesh->actnum_array->data ();
 
     for (t_long i = 0; i < nx; ++i)
       {
@@ -2277,7 +2290,7 @@ struct build_jacobian_and_flux : boost::noncopyable
                     ext_index1  = i + j * nx + k * nx * ny;
                     
                     //skip non-active cells
-                    if (!mesh->actnum_array[ext_index1])
+                    if (!actnum[ext_index1])
                       continue;
                       
                     n_adj_elems++;
@@ -2289,17 +2302,17 @@ struct build_jacobian_and_flux : boost::noncopyable
                       
                     loop_body.prepare (i, j, k);
                     
-                    if (i+1 < nx && mesh->actnum_array[ext_index1 + 1])
+                    if (i+1 < nx && actnum[ext_index1 + 1])
                       {
                         loop_body.change_by_x (i + 1, j, k, ext_index1 + 1, true);
                       }
                       
-                    if (j+1 < ny && mesh->actnum_array[ext_index1 + nx])
+                    if (j+1 < ny && actnum[ext_index1 + nx])
                       {
                         loop_body.change_by_y (i, j + 1, k, ext_index1 + nx, true);
                       }
                      
-                    if (k+1 < nz && mesh->actnum_array[ext_index1 + nx * ny])
+                    if (k+1 < nz && actnum[ext_index1 + nx * ny])
                       {
                         loop_body.change_by_z (i, j, k + 1, ext_index1 + nx * ny, true);
                       }
@@ -2328,7 +2341,7 @@ struct build_jacobian_and_flux : boost::noncopyable
                     ext_index1  = i + j * nx + k * nx * ny;
                     
                     //skip non-active cells
-                    if (!mesh->actnum_array[ext_index1])
+                    if (!actnum[ext_index1])
                       continue;
                     
                     n_non_adj_elems++;
@@ -2367,7 +2380,7 @@ struct build_jacobian_and_flux : boost::noncopyable
                             ext_index2 = ext_index1 + 1 + (k_x - k) * nx * ny;
                             
                             // if neighbour active and it`s X- plane is not a line
-							if (mesh->actnum_array[ext_index2] && ((zcorn_array[zcorn_index2[0]] != zcorn_array[zcorn_index2[4]]) || (zcorn_array[zcorn_index2[2]] != zcorn_array[zcorn_index2[6]])))
+							if (actnum[ext_index2] && ((zcorn_array[zcorn_index2[0]] != zcorn_array[zcorn_index2[4]]) || (zcorn_array[zcorn_index2[2]] != zcorn_array[zcorn_index2[6]])))
                               {
                                 loop_body.change_by_x (i + 1, j, k_x, ext_index2, false);
                               }
@@ -2401,7 +2414,7 @@ struct build_jacobian_and_flux : boost::noncopyable
                             ext_index2 = ext_index1 + ny + (k_y - k) * nx * ny;
                             
                             // if neighbour active and it`s Y- plane is not a line
-							if (mesh->actnum_array[ext_index2] && ((zcorn_array[zcorn_index2[0]] != zcorn_array[zcorn_index2[4]]) || (zcorn_array[zcorn_index2[1]] != zcorn_array[zcorn_index2[5]])))
+							if (actnum[ext_index2] && ((zcorn_array[zcorn_index2[0]] != zcorn_array[zcorn_index2[4]]) || (zcorn_array[zcorn_index2[1]] != zcorn_array[zcorn_index2[5]])))
                               {
                                 loop_body.change_by_y (i, j + 1, k_y, ext_index2, false);
                               }
@@ -2410,7 +2423,7 @@ struct build_jacobian_and_flux : boost::noncopyable
                           }
                       }
                       
-                    if (k + 1 < nz && mesh->actnum_array[ext_index1 + nx * ny])
+                    if (k + 1 < nz && actnum[ext_index1 + nx * ny])
                       {
                         loop_body.change_by_z (i, j, k + 1, ext_index1 + nx * ny, true);
                       }    

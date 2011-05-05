@@ -28,9 +28,10 @@ namespace blue_sky
 
   scale_array_holder::scale_array_holder (bs_type_ctor_param param /* = NULL */)
   {
-    data.resize (1);
-    data_pool = BS_KERNEL.create_object ("table");
-    data_pool->init (0, keyword_total);
+    data_pool = BS_KERNEL.create_object ("float_var_table");
+    BS_ASSERT (data_pool);
+
+    data_pool->init ( scale_array_name_total);
     
     data_pool->set_col_name (socr, "SOCR");
     data_pool->set_col_name (scr, "SCR");
@@ -41,10 +42,11 @@ namespace blue_sky
     data_pool->set_col_name (krop, "KROP");
     data_pool->set_col_name (krpr, "KRPR");
     data_pool->set_col_name (krorp, "KRORP");
+    BOOST_STATIC_ASSERT (krorp == scale_array_name_total - 1);
   }
 
-  scale_array_holder::scale_array_holder (const this_t& s)
-  : bs_refcounter (s), objbase (s)
+  scale_array_holder::scale_array_holder (const scale_array_holder& s)
+  : bs_refcounter (s), scale_array_holder_iface (s)
   {
     BS_ASSERT (false && "NOT IMPL YET");
   }
@@ -56,7 +58,7 @@ namespace blue_sky
   }
 
   scal_2p_data_holder::scal_2p_data_holder (const this_t& s)
-  : bs_refcounter (s), objbase (s)
+  : bs_refcounter (s), scal_2p_data_holder_iface (s)
   {
     BS_ASSERT (false && "NOT IMPL YET");
   }
@@ -84,7 +86,7 @@ namespace blue_sky
   }
 
   void
-  scal_2p_data_holder::add_spof (const sp_array_item_t data, bool is_water)
+  scal_2p_data_holder::add_spof (sp_array_item_t const &data, bool is_water)
   {
     BS_ASSERT ((data->size () % 4) == 0) (data->size ());
 
@@ -104,18 +106,19 @@ namespace blue_sky
 
     scal::data_placement::all_regions_t::place_spof_data (data_, placement_info_, data, is_water);
     region_.push_back (info);
-    precalc (region_.back (), get_region_internal ((int)region_.size () - 1), scal::data_placement::spof, is_water);
-    if (!check (get_region_internal ((int)region_.size () - 1), is_water))
+    scal_region_t const &new_region = get_region_from_info (region_.size () - 1);
+    precalc (region_.back (), new_region, scal::data_placement::spof, is_water);
+    if (!check (new_region, is_water))
       {
         //region_.pop_back ();
         //data_.resize (data_.size () - info.So_count * 5);
-        //throw bs_exception ("scal_2p_data_holder::add_spof", "Could not compute residual saturation");
+        throw bs_exception ("scal_2p_data_holder::add_spof", "Could not compute residual saturation");
         // TODO: LOG
       }
   }
 
   void
-  scal_2p_data_holder::add_spfn (const sp_array_item_t data, size_t region_index, bool is_water)
+  scal_2p_data_holder::add_spfn (sp_array_item_t const &data, t_long region_index, bool is_water)
   {
     BS_ASSERT ((data->size () % 3) == 0) (data->size ());
 
@@ -144,12 +147,13 @@ namespace blue_sky
 
         data_->resize (data_->size () + data->size ());
         scal::data_placement::all_regions_t::place_spfn_data (data_, placement_info_, data, is_water);
-        precalc (info, get_region_internal ((int)region_index), scal::data_placement::sof3_spfn, is_water);
-        if (!check (get_region_internal ((int)region_index), is_water))
+        scal_region_t const &new_region = get_region_from_info (region_index);
+        precalc (info, new_region, scal::data_placement::sof3_spfn, is_water);
+        if (!check (new_region, is_water))
           {
             //region_.pop_back ();
             //data_.resize (data_.size () - info.So_count * 5);
-            //throw bs_exception ("scal_2p_data_holder::add_spfn", "Could not compute residual saturation");
+            throw bs_exception ("scal_2p_data_holder::add_spfn", "Could not compute residual saturation");
             // TODO: LOG
           }
       }
@@ -160,7 +164,7 @@ namespace blue_sky
   }
 
   void
-  scal_2p_data_holder::add_sof3 (const sp_array_item_t data, size_t region_index, bool is_water)
+  scal_2p_data_holder::add_sof3 (sp_array_item_t const &data, t_long region_index, bool is_water)
   {
     typedef t_int   index_t;
 
@@ -191,12 +195,13 @@ namespace blue_sky
 
         data_->resize (data_->size () + info.So_count * 2);
         scal::data_placement::all_regions_t::place_sof3_data (data_, placement_info_, data, is_water);
-        precalc (info, get_region_internal ((index_t)region_index), scal::data_placement::spfn_sof3, is_water);
-        if (!check (get_region_internal ((index_t)region_index), is_water))
+        scal_region_t const &new_region = get_region_from_info (region_index);
+        precalc (info, new_region, scal::data_placement::spfn_sof3, is_water);
+        if (!check (new_region, is_water))
           {
             //region_.pop_back ();
             //data_.resize (data_.size () - info.So_count * 5);
-            //throw bs_exception ("scal_2p_data_holder::add_sof3", "Could not compute residual saturation");
+            throw bs_exception ("scal_2p_data_holder::add_sof3", "Could not compute residual saturation");
             // TODO: LOG
           }
       }
@@ -262,8 +267,8 @@ namespace blue_sky
 
     for (size_t i = 0, cnt = region_.size (); i < cnt; ++i)
       {
-        scal_region_t gas_region = get_region_internal ((int)i);
-        const scal_region_t &water_region = water_data->get_region_internal ((int)i);
+        scal_region_t gas_region = get_region ((int)i);
+        const scal_region_t &water_region = water_data->get_region ((int)i);
 
         item_t swc = water_region.Sp[0];
         for (size_t j = 0, jcnt = gas_region.Sp.size (); j < jcnt; ++j)
@@ -499,7 +504,7 @@ namespace blue_sky
           if (!water_jfunc->valid ())
             {
               item_t pcw_max    = w_region.get_pcp_max ();
-              item_t pcw        = water_scale->get_pcp (pcw_max) [cell_index];
+              item_t pcw        = water_scale->get (pcp, pcw_max) [cell_index];
 
               if ((pcw_max * pcw) > EPS_DIFF)
                 {
@@ -544,8 +549,8 @@ namespace blue_sky
           item_t s_max  = w_region.get_phase_sat_max ();
           item_t s_min  = w_region.get_phase_sat_min ();
 
-          item_t su     = water_scale->get_su (s_max) [cell_index];
-          item_t sl     = water_scale->get_sl (s_min) [cell_index];
+          item_t su     = water_scale->get (blue_sky::su, s_max) [cell_index];
+          item_t sl     = water_scale->get (blue_sky::sl, s_min) [cell_index];
 
           item_t s      = scale_table (sl, s_min, su, s_max, sat);
           //item_t mult   = (s_max - s_min) / (su - sl);
@@ -584,8 +589,8 @@ namespace blue_sky
 
       sw_max  = w_region.get_phase_sat_max ();
       sw_min  = w_region.get_phase_sat_min ();
-      swu     = water_scale->get_su (sw_max) [cell_index];
-      swl     = water_scale->get_sl (sw_min) [cell_index];
+      swu     = water_scale->get (blue_sky::su, sw_max) [cell_index];
+      swl     = water_scale->get (blue_sky::sl, sw_min) [cell_index];
 
       //complete gas-water cap pressure table
       for (i_table = 0; i_table < n_table; i_table++)
@@ -670,7 +675,7 @@ namespace blue_sky
         {
           const scal_region_t &g_region = gas_data->get_region (sat_reg);
           item_t sg_min = g_region.get_phase_sat_min ();
-          item_t sgl = gas_scale->get_sl (sg_min) [cell_index];
+          item_t sgl = gas_scale->get (sl, sg_min) [cell_index];
 
           region.process_2phase (cell_index, sat[i_w], sat[i_o], *water_scale, sg_min, sgl, kr, d_kr, kro, d_kro, is_scalecrs);
         }
@@ -693,7 +698,7 @@ namespace blue_sky
         {
           scal_region_t w_region  = water_data->get_region (sat_reg);
           item_t sw_min = w_region.get_phase_sat_min ();
-          item_t swl = water_scale->get_sl (sw_min) [cell_index];
+          item_t swl = water_scale->get (sl, sw_min) [cell_index];
 
           region.process_2phase (cell_index, sat[i_g], sat[i_o], *gas_scale, sw_min, swl, kr, d_kr, kro, d_kro, is_scalecrs);
         }
@@ -759,7 +764,7 @@ namespace blue_sky
 
       scal_region_t region = water_data->get_region (sat_reg);
       item_t rporw = region.get_krop_max ();
-      rporw = water_scale->get_krop (rporw) [cell_index];
+      rporw = water_scale->get (krop, rporw) [cell_index];
 
       if (fabs (rporw) > EPS_DIFF)
         {
@@ -826,7 +831,7 @@ namespace blue_sky
       else  // jfunc not valid, looking for PCW or PCG
         {
           item_t pcp_max    = region.get_pcp_max ();
-          item_t pcp        = scale_arrays.get_pcp (pcp_max) [cell_index];
+          item_t pcp        = scale_arrays.get (blue_sky::pcp, pcp_max) [cell_index];
 
           if (fabs (pcp_max) > EPS_DIFF)
             {
@@ -934,7 +939,7 @@ namespace blue_sky
   }
 
   scal_3p::scal_3p (const this_t& s)
-  : bs_refcounter (s), objbase (s)
+  : bs_refcounter (s), scal_3p_iface (s)
   {
     bs_throw_exception ("NOT_IMPL_YET");
   }
@@ -1074,40 +1079,17 @@ namespace blue_sky
   }
 
   //////////////////////////////////////////////////////////////////////////
-/*
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(scale_array_holder,(class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(scale_array_holder,(class));
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (scale_array_holder<base_strategy_fi>), 1, (objbase), "scale_array_holder_fi", "scale_array_holder_fi", "scale_array_holder_fi", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (scale_array_holder<base_strategy_di>), 1, (objbase), "scale_array_holder_di", "scale_array_holder_di", "scale_array_holder_di", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (scale_array_holder<base_strategy_mixi>), 1, (objbase), "scale_array_holder_mixi", "scale_array_holder_mixi", "scale_array_holder_mixi", false);
-
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(scal_2p_data_holder,(class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(scal_2p_data_holder,(class));
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (scal_2p_data_holder<base_strategy_fi>), 1, (objbase), "scal_2p_data_holder_fi", "scal_2p_data_holder_fi", "scal_2p_data_holder_fi", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (scal_2p_data_holder<base_strategy_di>), 1, (objbase), "scal_2p_data_holder_di", "scal_2p_data_holder_di", "scal_2p_data_holder_di", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (scal_2p_data_holder<base_strategy_mixi>), 1, (objbase), "scal_2p_data_holder_mixi", "scal_2p_data_holder_mixi", "scal_2p_data_holder_mixi", false);
-
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(scal_3p,(class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(scal_3p,(class));
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (scal_3p<base_strategy_fi>), 1, (objbase), "scal_3p_fi", "scal_3p_fi", "scal_3p_fi", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (scal_3p<base_strategy_di>), 1, (objbase), "scal_3p_di", "scal_3p_di", "scal_3p_di", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (scal_3p<base_strategy_mixi>), 1, (objbase), "scal_3p_mixi", "scal_3p_mixi", "scal_3p_mixi", false);
-*/
-
   BLUE_SKY_TYPE_STD_CREATE (scale_array_holder);
   BLUE_SKY_TYPE_STD_COPY (scale_array_holder);
-
-  BLUE_SKY_TYPE_IMPL(scale_array_holder,  objbase, "scale_array_holder", "scale_array_holder calculation class", "scale_array_holder calculation");
+  BLUE_SKY_TYPE_IMPL(scale_array_holder, scale_array_holder_iface, "scale_array_holder", "scale_array_holder calculation class", "scale_array_holder calculation");
 
   BLUE_SKY_TYPE_STD_CREATE (scal_2p_data_holder);
   BLUE_SKY_TYPE_STD_COPY (scal_2p_data_holder);
-
-  BLUE_SKY_TYPE_IMPL(scal_2p_data_holder,  objbase, "scal_2p_data_holder", "scal_2p_data_holder calculation class", "scal_2p_data_holder calculation");
+  BLUE_SKY_TYPE_IMPL(scal_2p_data_holder, scal_2p_data_holder_iface, "scal_2p_data_holder", "scal_2p_data_holder calculation class", "scal_2p_data_holder calculation");
 
   BLUE_SKY_TYPE_STD_CREATE (scal_3p);
   BLUE_SKY_TYPE_STD_COPY (scal_3p);
-
-  BLUE_SKY_TYPE_IMPL(scal_3p,  objbase, "scal_3p", "scal_3p calculation class", "scal_3p calculation");
+  BLUE_SKY_TYPE_IMPL(scal_3p, scal_3p_iface, "scal_3p", "scal_3p calculation class", "scal_3p calculation");
   //////////////////////////////////////////////////////////////////////////
   bool scal_register_types (const blue_sky::plugin_descriptor &pd)
   {

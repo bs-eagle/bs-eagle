@@ -172,6 +172,16 @@ class h5_pool_iface : public bs_node
        */
       virtual int set_i_data (const std::string &name, spv_int data, t_int def_value = 0) = 0;
 
+      /**
+       * @brief returns is data array opened or not
+       *
+       * @param name -- <INPUT> name of the array
+       * @return true if opened or false if not, throws exception 
+       * if no array in pool
+       * */
+      virtual bool is_opened (const std::string &name) = 0;
+
+
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual std::string py_str () const = 0;
       virtual boost::python::list py_list_data () const = 0;

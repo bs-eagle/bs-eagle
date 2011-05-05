@@ -12,6 +12,8 @@
 #include "locale_keeper.h"
 #include "rs_mesh_iface.h"
 #include "read_class.h"
+#include "scal_3p_iface.hpp"
+#include "init_model_iface.hpp"
 
 namespace blue_sky {
 
@@ -56,12 +58,16 @@ namespace blue_sky {
 
       t_double get_darcy_constant () {return ph_const.darcy_constant;};
 
+      BS_SP (scal_3p_iface) get_scal () { return scal_3p_; }
+
+      BS_SP (init_model_iface) get_init_model () { return init_model_; }
 
   
       // SET
 
       void set_mesh (sp_mesh_iface_t new_mesh) {mesh = new_mesh;};
 
+      void set_init_model (BS_SP (init_model_iface) model) { init_model_ = model; }
       
       //CHECK
       void check_arrays_for_inactive_blocks () const;
@@ -69,15 +75,17 @@ namespace blue_sky {
       
 
     public:
-      BLUE_SKY_TYPE_DECL_T(hdm)
+      BLUE_SKY_TYPE_DECL (hdm)
 
     public:
-      sp_idata        data;												//!< data storage
-      sp_reader_t     reader;                     //!< parser
-      sp_km_t         km;                         //!< keyword manager
-      sp_mesh_iface_t mesh;                       //!< mesh
-      locale_keeper   lkeeper;
-      physical_constants ph_const;                //!< default physical constants
+      sp_idata                  data;												//!< data storage
+      sp_reader_t               reader;                     //!< parser
+      sp_km_t                   km;                         //!< keyword manager
+      sp_mesh_iface_t           mesh;                       //!< mesh
+      BS_SP (scal_3p_iface)     scal_3p_;
+      BS_SP (init_model_iface)  init_model_;
+      locale_keeper             lkeeper;
+      physical_constants        ph_const;                //!< default physical constants
     };
 
 } //ns bs

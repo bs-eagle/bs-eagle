@@ -43,7 +43,7 @@ namespace blue_sky
        * \param max_p maximal value of pressure
        * \param n_intervals number of intervals
        */
-      virtual void build (t_double atm_p, t_double min_p, t_double max_p, int n_intervals);
+      virtual void build (t_double atm_p, t_double min_p, t_double max_p, t_long n_intervals);
 
       /**
        * \brief calculate interpolated value

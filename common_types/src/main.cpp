@@ -7,10 +7,9 @@
 
 #include "prop.h"
 #include "table.h"
-#include "h5_pool.h"
 #include "py_prop.h"
 #include "py_table.h"
-#include "py_pool.h"
+#include "vartype_table.h"
 
 using namespace blue_sky;
 using namespace blue_sky::python;
@@ -28,9 +27,9 @@ namespace blue_sky {
   {
     bool res = true;
 
-    REG_TYPE(prop)
-    REG_TYPE(table)
-    REG_TYPE(h5_pool)
+    REG_TYPE (prop)
+    REG_TYPE (table)
+    res &= BS_KERNEL.register_type (pd, vartype_table <t_float>::bs_type ());
 
     return res;
   }
@@ -51,7 +50,7 @@ namespace {
 
     python::py_export_prop ();
     python::py_export_table ();
-    python::py_export_pool ();
+    // FIXME: export vartype table
   }
 }
 BLUE_SKY_INIT_PY_FUN

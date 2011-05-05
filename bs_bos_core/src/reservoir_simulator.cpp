@@ -409,7 +409,7 @@ namespace blue_sky
 
     spv_double poro_ = data->get_fp_array ("PORO");
     spv_double ntg_ = data->get_fp_array ("NTG");
-    spv_double multpv_ = data->get_fp_array ("MULTPV", false);
+    spv_double multpv_ = data->get_fp_array ("MULTPV");
     spv_long original_element_num_ = mesh->get_int_to_ext();
 
     t_long const * original_element_num = &(*original_element_num_)[0];
@@ -449,21 +449,18 @@ namespace blue_sky
             ntg[i_m] = float16_t (COMP_EPSILON);
           }
 
-        if (multpv)
+        if (multpv[i_m] < float16_t (-COMP_EPSILON))
           {
-            if (multpv[i_m] < float16_t (-COMP_EPSILON))
-              {
-                bs_throw_exception (boost::format ("MULTPV for node [%d] = %f is out of range")
-                  % i % multpv[i_m]);
-              }
+            bs_throw_exception (boost::format ("MULTPV for node [%d] = %f is out of range")
+              % i % multpv[i_m]);
+          }
 
-            if (multpv[i_m] < float16_t (COMP_EPSILON))
-              {
-                BOSWARN (section::check_data, level::warning) 
-                  << boost::format ("MULTPV for node [%d] = %f is too small") % i % multpv[i_m] 
-                  << bs_end;
-                multpv[i_m] = float16_t (COMP_EPSILON);
-              }
+        if (multpv[i_m] < float16_t (COMP_EPSILON))
+          {
+            BOSWARN (section::check_data, level::warning) 
+              << boost::format ("MULTPV for node [%d] = %f is too small") % i % multpv[i_m] 
+              << bs_end;
+            multpv[i_m] = float16_t (COMP_EPSILON);
           }
 
       }
@@ -814,7 +811,7 @@ namespace blue_sky
     // Check input data before units conversion for correct reporting of user errors
     check_data (hdm_->get_mesh (), hdm_->data);
 
-    cm->init_main_arrays(hdm_->data, hdm_->get_mesh ());
+    cm->init_main_arrays(hdm_->get_init_model (), hdm_->get_scal (), hdm_->get_data (), hdm_->get_mesh ());
     cm->init_calcul_arrays (hdm_->data, hdm_->get_mesh ());
     // calculate planes geometric transmissibility
     cm->rock_grid_prop->init_planes_trans (n_active_elements, hdm_->mesh->get_volumes (), cm->ts_params, cm->internal_constants);

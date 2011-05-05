@@ -72,7 +72,7 @@ namespace blue_sky
   }
 
   void
-  pvt_oil::build (t_double atm_p, t_double min_p, t_double max_p, int n_intervals)
+  pvt_oil::build (t_double atm_p, t_double min_p, t_double max_p, t_long n_intervals)
   {
     int n_points = base_t::build_internal (atm_p, min_p, max_p, n_intervals, true);
 
@@ -87,33 +87,22 @@ namespace blue_sky
     vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_FVF);
     vector_t &main_visc_         = pvt_input_props->get_col_vector (PVT_OIL_INPUT_VISC);
   
-    //vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_OIL_PRESSURE);
-    //vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_OIL_INV_FVF);
-    //vector_t &inv_visc_     = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC);
-    vector_t &gor_          = pvt_props_table->get_col_vector (PVT_OIL_GOR);
-
     if (main_pressure_.empty ())
       return ;
 
-
     if (pvt_props_table->add_col_vector ("compress_fvf") != PVT_OIL_COMPRESS_FVF) 
       {
-        BS_ASSERT (false);
-        throw bs_exception ("pvt_oil::build_compressibility", "Error: initializing vector of fvf compressibility");
-        return;
+        bs_throw_exception ("Error: initializing vector of fvf compressibility");
       }  
     if (pvt_props_table->add_col_vector ("compress_visc") != PVT_OIL_COMPRESS_VISC)
       {
-        BS_ASSERT (false);
-        throw bs_exception ("pvt_oil::build_compressibility", "Error: initializing vector of viscosity compressibility");
-        return;
+        bs_throw_exception ("Error: initializing vector of viscosity compressibility");
       }  
-    
+
+    vector_t &gor_              = pvt_props_table->get_col_vector (PVT_OIL_GOR);
     vector_t &compress_fvf_     = pvt_props_table->get_col_vector (PVT_OIL_COMPRESS_FVF);
     vector_t &compress_visc_    = pvt_props_table->get_col_vector (PVT_OIL_COMPRESS_VISC);
     
-    //compress_fvf_.resize (n_intervals);
-    //compress_visc_.resize (n_intervals);
     for (t_long i = 0; i < n_intervals; ++i)
       {
         t_long j1, j2, end_j1, end_j2;

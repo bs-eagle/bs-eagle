@@ -4,6 +4,7 @@
 #include "bs_scal_stdafx.h"
 #include "scal_3p.h"
 #include "py_scal_wrapper.h"
+#include "scal_keywords.hpp"
 
 namespace blue_sky
 {
@@ -16,6 +17,7 @@ namespace blue_sky
     bool res = true;
 
     res &= blue_sky::scal_register_types (pd); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, scal_keywords::bs_type ()); BS_ASSERT (res);
 
     return res;
   }
@@ -48,7 +50,7 @@ BOOST_PYTHON_MODULE (bs_scal)
 {
   init_py_subsystem ();
   std::cout << &BS_KERNEL << std::endl;
-  bool res = blue_sky::scal_register_types (*blue_sky::bs_get_plugin_descriptor ());
+  bool res = blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ());
   if (!res)
     throw "Can't register scal types";
 }

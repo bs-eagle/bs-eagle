@@ -103,8 +103,8 @@ private:
           static void
           place_spof_data (sp_array_item_t dst, scal::data_placement::scal_placement_info &info, const sp_array_item_t src, bool is_water)
           {
-            array_item_t &dst_array = *dst;
-            array_item_t &src_array = *src;
+            t_double *dst_array       = dst->data ();
+            t_double const *src_array = src->data ();
             size_t size = dst->size () - (5 * (src->size () / 4));
             size_t src_size = src->size ();
             for (size_t i = 0, j = 0, cnt = src->size (); i < cnt; i += 4, j += 5)

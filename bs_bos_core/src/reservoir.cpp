@@ -24,7 +24,7 @@
 #include "for_each_well.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
-#include "scal_3p.h"
+#include "scal_3p_iface.hpp"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #include "data_saver.h"

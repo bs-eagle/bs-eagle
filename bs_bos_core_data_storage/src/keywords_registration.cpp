@@ -65,11 +65,6 @@ namespace blue_sky
     //REG_KEYWORD(PVDG);
     //REG_KEYWORD(ROCK);
 /*
-    REG_KEYWORD(SWOF);
-    REG_KEYWORD(SGOF);
-    REG_KEYWORD(SWFN);
-    REG_KEYWORD(SGFN);
-    REG_KEYWORD(SOF2);
     REG_KEYWORD(EQUIL);
     REG_KEYWORD(PRVD);
     REG_KEYWORD(RSVD);
@@ -82,34 +77,23 @@ namespace blue_sky
 */    
     REG_KEYWORD(WELLDIMS);
 
+
+    // FIXME: npy_intp
+    // FIXME: move registration to data_class
+    npy_intp dimens[] = {1, 0, 1, 0, 1, 0};
+    register_i_pool_keyword ("MPFANUM", dimens, 1, 0);
+    register_i_pool_keyword ("EQLNUM", dimens, 1, 0);
+    register_i_pool_keyword ("SATNUM", dimens, 1, 0);
+    register_i_pool_keyword ("PVTNUM", dimens, 1, 0);
+    register_i_pool_keyword ("FIPNUM", dimens, 1, 0);
+    register_i_pool_keyword ("BNDNUM", dimens, 2, 0);
+    register_i_pool_keyword ("EOSNUM", dimens, 1, 0);
+    register_i_pool_keyword ("ROCKNUM", dimens, 1, 0);
+
     //Pool array
-    //int
     /*
-    REG_INT_ARRAY_KEYWORD(MPFANUM);
-    REG_INT_ARRAY_KEYWORD(EQLNUM);
-    REG_INT_ARRAY_KEYWORD(SATNUM);
-    REG_INT_ARRAY_KEYWORD(PVTNUM);
-    REG_INT_ARRAY_KEYWORD(FIPNUM);
-    REG_INT_ARRAY_KEYWORD(BNDNUM);
-    REG_INT_ARRAY_KEYWORD(EOSNUM);
-    REG_INT_ARRAY_KEYWORD(ROCKNUM);
     //double
-    REG_FLOAT_ARRAY_KEYWORD(SGL);
-    REG_FLOAT_ARRAY_KEYWORD(SGU);
-    REG_FLOAT_ARRAY_KEYWORD(SOGCR);
-    REG_FLOAT_ARRAY_KEYWORD(SGCR);
-    REG_FLOAT_ARRAY_KEYWORD(SWL);
-    REG_FLOAT_ARRAY_KEYWORD(SWU);
-    REG_FLOAT_ARRAY_KEYWORD(SOWCR);
-    REG_FLOAT_ARRAY_KEYWORD(SWCR);
-    REG_FLOAT_ARRAY_KEYWORD(PBUB);
-    REG_FLOAT_ARRAY_KEYWORD(RS);
-    REG_FLOAT_ARRAY_KEYWORD(PCW);
     REG_FLOAT_ARRAY_KEYWORD(SWATINIT);
-    REG_FLOAT_ARRAY_KEYWORD(SOIL);
-    REG_FLOAT_ARRAY_KEYWORD(SWAT);
-    REG_FLOAT_ARRAY_KEYWORD(PRESSURE);
-    REG_FLOAT_ARRAY_KEYWORD(SGAS);
     */
 
     //BS_ASSERT (em);

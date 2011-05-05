@@ -19,7 +19,7 @@
 #include "pvt_oil.h"
 #include "pvt_gas.h"
 #include "pvt_water.h"
-#include "scal_3p.h"
+#include "scal_3p_iface.hpp"
 #include "rock_grid.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
@@ -46,6 +46,7 @@ namespace blue_sky
 
   class calc_model;
   class reservoir;
+  class init_model_iface;
 
   //class well_results_storage;
   //class fip_results_storage;
@@ -121,12 +122,6 @@ namespace blue_sky
       typedef calc_model_data                           data_t;                   //!< calc_model data, each instance for one mesh cell
       typedef std::vector <data_t>                      data_array_t;      //!< array of calc_model_data values, each value for one mesh cell
 
-      typedef scal_3p                                   scal_3p_t;                //!< scal_3p type
-      typedef scale_array_holder                        scale_array_holder_t;     //!< type of holder of scale arrays
-
-      typedef smart_ptr< scal_3p_t, true>               sp_scal3p;                //!< smart_ptr to scal_3p type
-      typedef smart_ptr <scale_array_holder_t, true>    sp_scale_array_holder_t;  //!< smart_ptr to scale_array_holder type
-
       typedef smart_ptr< rock_grid, true> sp_rock_grid;             //!< smart_ptr to rock_grid type
       typedef smart_ptr< fi_params, true>               sp_fi_params;             //!< smart_ptr to fi_params type
 
@@ -183,13 +178,17 @@ namespace blue_sky
 
       /**
        * \brief  inits main arrays
+       * \param  initialization model
        * \param  input_data pointer to idata instance
        * \param  mesh pointer to mesh instance
        * \return 0 on success otherwise negative integer value
        * \todo   remove return values, throw exceptions instead
        * */
       int 
-      init_main_arrays (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
+      init_main_arrays (const BS_SP (init_model_iface) &init_model, 
+        const BS_SP (scal_3p_iface) &scal_prop,
+        const sp_idata_t &input_data, 
+        const sp_mesh_iface_t &mesh);
 
       /**
        * \brief  inits arrays for calculation process
@@ -200,86 +199,6 @@ namespace blue_sky
        * */
       int 
       init_calcul_arrays (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
-
-      /**
-       * \brief  inits initial conditions
-       * \param  input_data pointer to idata instance
-       * \param  mesh pointer to mesh instance
-       * \return 0 on success otherwise negative integer value
-       * \todo   remove return values, throw exceptions instead
-       * */
-      int 
-      set_initial_data (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
-
-      /**
-       * \brief  calculates equilibrium
-       * \param  input_data pointer to idata instance
-       * \param  mesh pointer to mesh instance
-       * \return 0 on success otherwise negative integer value
-       * \todo   remove return values, throw exceptions instead
-       * */
-      int 
-      calc_equil (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
-
-      /**
-       * \brief  calculates pressure for equil
-       * \return 0 on success otherwise negative integer value
-       * \todo   remove return values, throw exceptions instead
-       * \param[in]   prev_press preview pressure value
-       * \param[in]   cur_d
-       * \param[in]   h
-       * \param[in]   phase
-       * \param[in]   i_pvt
-       * \param[in]   rs_type
-       * \param[in]   depth_goc
-       * \param[in]   rs_dat
-       * \param[in]   rsvd
-       * \param[in]   pbvd
-       * \param[out]  p
-       * \param[out]  rs
-       * */
-      int 
-      equil_calc_pressure (item_t prev_press, item_t cur_d, item_t h, index_t phase, index_t i_pvt,
-                           double rs_type, item_t depth_goc, item_t rs_dat,
-                           val_vs_depth *rsvd, val_vs_depth *pbvd,
-                           item_t &p, item_t *rs = 0);
-
-      /**
-       * \brief  inits pressure array
-       * \param  input_data pointer to idata instance
-       * \param  mesh pointer to mesh instance
-       * \return 0 on success otherwise negative integer value
-       * \todo   remove return values, throw exceptions instead
-       * */
-      int 
-      init_pressure (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
-
-      /**
-       * \brief  inits saturation array
-       * \param  input_data pointer to idata instance
-       * \param  mesh pointer to mesh instance
-       * \return 0 on success otherwise negative integer value
-       * \todo   remove return values, throw exceptions instead
-       * */
-      int 
-      init_saturation (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
-
-      /**
-       * \brief  inits phases variables (rs) and selest number of phases
-       * \param  input_data pointer to idata instance
-       * \param  mesh pointer to mesh instance
-       * \return 0 on success otherwise negative integer value
-       * \todo   remove return values, throw exceptions instead
-       * */
-      int 
-      init_rs (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
-
-
-      /**
-       * \brief  inits scal 
-       * */
-      void 
-      init_scal (const sp_idata_t &idata);
 
       /**
        * \brief  inits pvt arrays
@@ -562,7 +481,7 @@ namespace blue_sky
 
       auto_value <RPO_MODEL_ENUM, RPO_DEFAULT_MODEL>          rpo_model;                      //!< 3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)
       auto_value <SCALECRS_ENUM, SCALECRS_NO>                 is_scalecrs;                    //!< use of alternative scaling method or not
-      sp_scal3p                                               scal_prop;                      //!< scal properties
+      BS_SP (scal_3p_iface)                                   scal_prop;                      //!< scal properties
       sp_rock_grid                                            rock_grid_prop;                 //!< rock and grid properties
 
       std::vector<rocktab_table>                              rocktab;                        //!< (rocktab table)

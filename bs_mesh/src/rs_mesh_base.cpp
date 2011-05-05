@@ -12,15 +12,9 @@ using namespace blue_sky;
 
 
 rs_mesh_base ::rs_mesh_base ()
+: depths (give_kernel::Instance().create_object(v_float::bs_type ()))
 {
-  depths = give_kernel::Instance().create_object(bs_array<t_float>::bs_type());
-  actnum_array = 0; 
-  poro_array = 0;
-  ntg_array = 0;
-  multpv_array = 0;
-  
 }
-
 
 void
 rs_mesh_base ::init_props (const sp_hdm_t hdm)
@@ -30,26 +24,14 @@ rs_mesh_base ::init_props (const sp_hdm_t hdm)
   max_thickness = hdm->get_prop ()->get_f ("maximum_splice_thickness");
   darcy_constant = hdm->get_darcy_constant ();
   
-  spv_float data_array;
-  spv_int sp_actnum_array;
+  actnum_array = hdm->get_pool ()->get_i_data("ACTNUM");
+  poro_array = hdm->get_pool ()->get_fp_data("PORO");
+  ntg_array = hdm->get_pool ()->get_fp_data("NTG");
+  multpv_array = hdm->get_pool ()->get_fp_data("MULTPV");
   
-  sp_actnum_array = hdm->get_pool ()->get_i_data("ACTNUM");
-  if (sp_actnum_array->size()) actnum_array = &(*sp_actnum_array)[0];
-  
-  n_elements = static_cast <t_long> (sp_actnum_array->size ());
-  n_active_elements =  std::accumulate(sp_actnum_array->begin(), sp_actnum_array->end(),0);
-  
-  data_array = hdm->get_pool ()->get_fp_data("PORO");
-  if (data_array->size()) poro_array = &(*data_array)[0];
-  
-  data_array = hdm->get_pool ()->get_fp_data("NTG");
-  if (data_array && data_array->size()) ntg_array = &(*data_array)[0];
-  
-  data_array = hdm->get_pool ()->get_fp_data("MULTPV");
-  if (data_array && data_array->size()) multpv_array = &(*data_array)[0];
+  n_elements = static_cast <t_long> (actnum_array->size ());
+  n_active_elements =  std::accumulate (actnum_array->begin (), actnum_array->end (),0);
 }
-
-
 
 int rs_mesh_base::init_int_to_ext()
 {
@@ -62,18 +44,36 @@ int rs_mesh_base::init_int_to_ext()
   t_long *int_to_ext_data = int_to_ext->data ();
   t_long *ext_to_int_data = ext_to_int->data ();
   
+  stdv_long wrong;
+  stdv_long wrong_idx;
   for (t_long i = 0; i < n_ext; i++)
     {
       if (ext_to_int_data[i] != -1)
         {
           if (ext_to_int_data[i] >= n_active_elements)
             {
-              bs_throw_exception (boost::format ("ext_to_int[%d] == %d >= %d") % i % ext_to_int_data[i] % n_active_elements);
+              wrong.push_back (ext_to_int_data[i]);
+              wrong_idx.push_back (i);
             }
-        
-          int_to_ext_data[ext_to_int_data[i]] = i;
+          else
+            {
+              int_to_ext_data[ext_to_int_data[i]] = i;
+            }
         }
     }
+
+  if (wrong.size ())
+    {
+      for (size_t i = 0, cnt = wrong.size (); i < cnt; ++i)
+        {
+          BOSERR (section::mesh, level::error) 
+            << boost::format ("ext_to_int[%d] == %s >= %d") % wrong_idx[i] % wrong[i] % n_active_elements 
+            << bs_end;
+        }
+
+      bs_throw_exception ("ext_to_int out of n_active_elements");
+    }
+
   return 0;  
 }
 
@@ -89,6 +89,8 @@ void rs_mesh_base::check_data() const
   if (max_thickness < 0)
     bs_throw_exception (boost::format ("max_thickness = %d is out of range")% max_thickness);
     
+  // FIXME: get_fp_data, get_i_data in init_props will raise exception if no such array
+  // maybe we can remove this checks, or don't raise exceptions in init_props
   if (!actnum_array)
     bs_throw_exception ("ACTNUM array is not initialized");
   if (!poro_array)
