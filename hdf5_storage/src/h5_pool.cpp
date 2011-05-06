@@ -612,6 +612,22 @@ namespace blue_sky
       items.append(i->first);
     return items;
   }
+  
+  void 
+  h5_pool::py_set_pool_dims (boost::python::list &dims)
+  {
+    t_long arr_dims[10];
+    t_int i, n_dims = len(dims);
+    
+    if (n_dims > 10)
+      bs_throw_exception (boost::format ("py_set_pool_dims: too big dims number %d!") % n_dims);
+    
+    for (int i = 0; i < n_dims; ++i)
+      {
+        arr_dims[i] = boost::python::extract<int>(dims[i]);
+      }
+    set_pool_dims (arr_dims, n_dims);
+  }
     
 #endif //BSPY_EXPORTING_PLUGIN
 /////////////////////////////////BS Register

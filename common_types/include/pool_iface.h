@@ -194,6 +194,7 @@ class h5_pool_iface : public bs_node
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual std::string py_str () const = 0;
       virtual boost::python::list py_list_data () const = 0;
+      virtual void py_set_pool_dims (boost::python::list &dims) = 0;
 #endif //BSPY_EXPORTING_PLUGIN
   };
 } // end of blue_sky namespace
