@@ -1,3 +1,8 @@
+/// @file coord_zcorn_tools.cpp
+/// @brief COORD & ZCORN generation and refinement tools
+/// @author uentity
+/// @date 2011-05-06
+
 #include "bs_mesh_stdafx.h"
 #include "mesh_grdecl.h"
 #include <iterator>
