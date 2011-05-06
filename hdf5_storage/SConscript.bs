@@ -29,7 +29,7 @@ elif (build_kind == "release") :
     env.AppendUnique (LIBS = libs + boost_libs)
 
 env.AppendUnique (
-        LIBPATH = lib_path["hdf5"],
+        #LIBPATH = lib_path["hdf5"],
         CPPDEFINES = defines["bs_hdf5_storage"],
         LIBS = ["hdf5"]
         )
