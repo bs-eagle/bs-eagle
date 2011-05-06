@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../kernel/include&quot;;&quot;$(ProjectDir)/../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../bs_bos_core/bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core/bs_matrix/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;"
+				AdditionalIncludeDirectories="&quot;$(NUMPY_PATH)/include&quot;;&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../common_types/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;BS_HDF5_STORAGE_EXPORTS;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5;H5_USE_16_API;_HDF5USEDLL_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_EXCEPTION_USE_BOOST_FORMAT"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,10 +61,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="blue-sky_d.lib bs_bos_core_base_d.lib bs_matrix_d.lib loki_D.lib ws2_32.lib hdf5dll.lib"
-				OutputFile="$(ProjectDir)/../../exe/debug/plugins/$(ProjectName)_d.dll"
+				AdditionalDependencies="blue-sky_d.lib loki_D.lib ws2_32.lib hdf5dll.lib"
+				OutputFile="$(ProjectDir)/../../../exe/debug/plugins/$(ProjectName)_d.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/dll&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../exe/debug/&quot;;&quot;$(ProjectDir)/../../exe/debug/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/dll&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/debug/&quot;;&quot;$(ProjectDir)/../../../exe/debug/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
 				IgnoreDefaultLibraryNames="python25_d.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -179,28 +179,72 @@
 	<References>
 	</References>
 	<Files>
-		<File
-			RelativePath=".\src\bs_hdf5_storage.cpp"
+		<Filter
+			Name="hdf5_storage"
 			>
-		</File>
-		<File
-			RelativePath=".\src\bs_hdf5_storage.h"
+			<File
+				RelativePath=".\src\bs_hdf5_storage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\bs_hdf5_storage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\bs_hdf5_storage_v2.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\bs_hdf5_storage_v2.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\hdf5_functions.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\hdf5_hid_holder.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\hdf5_type.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\py_bs_hdf5_storage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\py_bs_hdf5_storage.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="pool"
 			>
-		</File>
-		<File
-			RelativePath=".\src\hdf5_functions.h"
+			<File
+				RelativePath=".\src\h5_pool.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\h5_pool.hpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="python"
 			>
-		</File>
+			<File
+				RelativePath=".\src\py_pool.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\py_pool.h"
+				>
+			</File>
+		</Filter>
 		<File
-			RelativePath=".\src\hdf5_type.h"
-			>
-		</File>
-		<File
-			RelativePath=".\src\py_bs_hdf5_storage.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\src\py_bs_hdf5_storage.h"
+			RelativePath=".\src\main.cpp"
 			>
 		</File>
 	</Files>

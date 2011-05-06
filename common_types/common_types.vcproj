@@ -187,10 +187,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\h5_pool.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\h5_pool.h"
 				>
 			</File>
@@ -212,10 +208,6 @@
 			</File>
 			<File
 				RelativePath=".\src\prop_impl.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\py_pool.cpp"
 				>
 			</File>
 			<File

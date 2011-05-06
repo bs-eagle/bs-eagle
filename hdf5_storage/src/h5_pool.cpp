@@ -136,7 +136,7 @@ namespace blue_sky
         {
           close_file ();
         }
-      if (!file_exists (fname_) or !detail::is_hdf5_file (fname_))
+      if (!file_exists (fname_) || !detail::is_hdf5_file (fname_))
         {
           file_id = H5Fcreate (fname_.c_str (), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
           if (file_id < 0)
