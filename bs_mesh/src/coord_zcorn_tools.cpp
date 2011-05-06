@@ -771,6 +771,74 @@ coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, spfp_storarr_t coord, spfp_st
 	return coord_zcorn_pair(gen_coord(nx, ny, delta_x, delta_y, coord->ss(0), coord->ss(1)), rzcorn);
 }
 
+/*-----------------------------------------------------------------
+ * convert points given in (i, j) format to absolute fp coordinates
+ *----------------------------------------------------------------*/
+spfp_storarr_t point_index2coord(int_t nx, int_t ny, spfp_storarr_t coord, spi_arr_t points_pos, spfp_storarr_t points_param) {
+	using namespace std;
+	typedef slice_iterator< v_iterator, 6 > dim_iterator;
+	typedef int_arr_t::value_type pos_t;
+	const int_t ydim_step = 6 * (nx + 1);
+
+	// create resulting array
+	spfp_storarr_t res = BS_KERNEL.create_object(fp_storarr_t::bs_type());
+	if(!res) return res;
+	const int_t points_num = points_pos->size() >> 1;
+	res->resize(points_num * 6);
+
+	int_arr_t::const_iterator p = points_pos->begin();
+	fp_storarr_t::const_iterator pp = points_param->begin();
+	fp_storarr_t::iterator r = res->begin();
+	pos_t i, j;
+	for(int_t t = 0; t < points_num; ++t) {
+		// points = {(i, j)}
+		i = *p++; j = *p++;
+
+		// find x coordinate
+		dim_iterator px = coord->begin();
+		advance(px, min(nx, i));
+		*r++ = (*(px + 1) + *px) * 0.5;
+
+		// find y coordinate
+		dim_iterator py(coord->begin() + 1, ydim_step);
+		advance(py, min(ny, j));
+		*r++ = (*(py + 1) + *py) * 0.5;
+
+		// fill other points params (dx, dy, ax, ay)
+		copy(pp, pp + 4, r);
+	}
+
+	return res;
+}
+
+/*-----------------------------------------------------------------
+ * refine_mesh_deltas for points given in (i,j) format
+ *----------------------------------------------------------------*/
+coord_zcorn_pair refine_mesh_deltas(int_t& nx, int_t& ny, spfp_storarr_t coord,
+	spi_arr_t points_pos, spfp_storarr_t points_param, fp_t cell_merge_thresh, fp_t band_thresh,
+	spi_arr_t hit_idx = NULL)
+{
+	return refine_mesh_deltas(
+		nx, ny, coord,
+		point_index2coord(nx, ny, coord, points_pos, points_param),
+		cell_merge_thresh, band_thresh, hit_idx
+	);
+}
+
+/*-----------------------------------------------------------------
+ * refine_mesh for points given in (i,j) format
+ *----------------------------------------------------------------*/
+coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, spfp_storarr_t coord, spfp_storarr_t zcorn,
+		spi_arr_t points_pos, spfp_storarr_t points_param, fp_t cell_merge_thresh, fp_t band_thresh,
+		spi_arr_t hit_idx = NULL)
+{
+	return refine_mesh(
+		nx, ny, coord, zcorn,
+		point_index2coord(nx, ny, coord, points_pos, points_param),
+		cell_merge_thresh, band_thresh, hit_idx
+	);
+}
+
 }}  // eof namespace blue_sky::coord_zcorn_tools
 
 /*-----------------------------------------------------------------
@@ -823,6 +891,9 @@ mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_
 	return ret_t(czt::gen_coord(nx, ny, dx, dy, x0, y0), zcorn);
 }
 
+/*-----------------------------------------------------------------
+ * points given in abs coordinates merged with params
+ *----------------------------------------------------------------*/
 std::pair< spv_float, spv_float >
 mesh_grdecl::refine_mesh_deltas(t_long& nx, t_long& ny, spv_float coord,
 		spv_float points, spv_long hit_idx, t_double cell_merge_thresh, t_double band_thresh)
@@ -835,5 +906,26 @@ mesh_grdecl::refine_mesh(t_long& nx, t_long& ny, spv_float coord, spv_float zcor
 		spv_float points, spv_long hit_idx, t_double cell_merge_thresh, t_double band_thresh)
 {
 	return czt::refine_mesh(nx, ny, coord, zcorn, points, cell_merge_thresh, band_thresh, hit_idx);
+}
+
+/*-----------------------------------------------------------------
+ * points given in (i,j) format
+ *----------------------------------------------------------------*/
+std::pair< spv_float, spv_float >
+mesh_grdecl::refine_mesh_deltas(t_long& nx, t_long& ny, spv_float coord,
+		spv_long points_pos, spv_float points_param, spv_long hit_idx,
+		t_double cell_merge_thresh, t_double band_thresh)
+{
+	return czt::refine_mesh_deltas(nx, ny, coord, points_pos, points_param,
+			cell_merge_thresh, band_thresh, hit_idx);
+}
+
+std::pair< spv_float, spv_float >
+mesh_grdecl::refine_mesh(t_long& nx, t_long& ny, spv_float coord, spv_float zcorn,
+		spv_long points_pos, spv_float points_param, spv_long hit_idx,
+		t_double cell_merge_thresh, t_double band_thresh)
+{
+	return czt::refine_mesh(nx, ny, coord, zcorn, points_pos, points_param,
+			cell_merge_thresh, band_thresh, hit_idx);
 }
 

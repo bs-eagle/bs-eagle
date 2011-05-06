@@ -56,7 +56,7 @@ struct mesh_grdecl_exporter_plus {
 		return T::gen_coord_zcorn(nx, ny, nz, dx, dy, dz);
 	}
 
-	// refine_mesh & refine_meesh_deltas
+	// refine_mesh_deltas with overloads
 	static tuple refine_mesh_deltas(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t points,
 			fp_t m_thresh = DEF_CELL_MERGE_THRESHOLD, fp_t b_thresh = DEF_BAND_THRESHOLD)
 	{
@@ -65,6 +65,14 @@ struct mesh_grdecl_exporter_plus {
 		return make_tuple(r.first, r.second, nx, ny, hit_idx);
 	}
 
+	static tuple refine_mesh_deltas1(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t points) {
+		return refine_mesh_deltas(nx, ny, coord, points);
+	}
+	static tuple refine_mesh_deltas2(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t points, fp_t m_thresh) {
+		return refine_mesh_deltas(nx, ny, coord, points, m_thresh);
+	}
+
+	// refine_mesh with overloads
 	static tuple refine_mesh(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t zcorn, spfp_storarr_t points,
 			fp_t m_thresh = DEF_CELL_MERGE_THRESHOLD, fp_t b_thresh = DEF_BAND_THRESHOLD)
 	{
@@ -73,22 +81,60 @@ struct mesh_grdecl_exporter_plus {
 		return make_tuple(r.first, r.second, nx, ny, hit_idx);
 	}
 
-	// refine_mesh_deltas overloads
-	static tuple refine_mesh_deltas1(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t points) {
-		return refine_mesh_deltas(nx, ny, coord, points);
-	}
-	static tuple refine_mesh_deltas2(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t points, fp_t m_thresh) {
-		return refine_mesh_deltas(nx, ny, coord, points, m_thresh);
-	}
-
-	// refine_mesh overloads
 	static tuple refine_mesh1(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t zcorn, spfp_storarr_t points) {
 		return refine_mesh(nx, ny, coord, zcorn, points);
 	}
 	static tuple refine_mesh2(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t zcorn, spfp_storarr_t points, fp_t m_thresh) {
 		return refine_mesh(nx, ny, coord, zcorn, points, m_thresh);
 	}
-	
+
+	// refine_mesh_deltas with overloads
+	// (i,j) points format
+	static tuple refine_mesh_deltas_ij(int_t nx, int_t ny, spfp_storarr_t coord,
+			spi_arr_t points_pos, spfp_storarr_t points_param,
+			fp_t m_thresh = DEF_CELL_MERGE_THRESHOLD, fp_t b_thresh = DEF_BAND_THRESHOLD)
+	{
+		spi_arr_t hit_idx = BS_KERNEL.create_object(int_arr_t::bs_type());
+		std::pair< spfp_storarr_t, spfp_storarr_t > r = T::refine_mesh_deltas(nx, ny, coord, points_pos, points_param,
+				hit_idx, m_thresh, b_thresh);
+		return make_tuple(r.first, r.second, nx, ny, hit_idx);
+	}
+
+	static tuple refine_mesh_deltas_ij1(int_t nx, int_t ny, spfp_storarr_t coord,
+			spi_arr_t points_pos, spfp_storarr_t points_param)
+	{
+		return refine_mesh_deltas_ij(nx, ny, coord, points_pos, points_param);
+	}
+
+	static tuple refine_mesh_deltas_ij2(int_t nx, int_t ny, spfp_storarr_t coord,
+			spi_arr_t points_pos, spfp_storarr_t points_param, fp_t m_thresh)
+	{
+		return refine_mesh_deltas_ij(nx, ny, coord, points_pos, points_param, m_thresh);
+	}
+
+	// refine_mesh with overloads
+	// (i, j) points format
+	static tuple refine_mesh_ij(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t zcorn,
+			spi_arr_t points_pos, spfp_storarr_t points_param,
+			fp_t m_thresh = DEF_CELL_MERGE_THRESHOLD, fp_t b_thresh = DEF_BAND_THRESHOLD)
+	{
+		spi_arr_t hit_idx = BS_KERNEL.create_object(int_arr_t::bs_type());
+		std::pair< spfp_storarr_t, spfp_storarr_t > r = T::refine_mesh(nx, ny, coord, zcorn, points_pos, points_param,
+				hit_idx, m_thresh, b_thresh);
+		return make_tuple(r.first, r.second, nx, ny, hit_idx);
+	}
+
+	static tuple refine_mesh_ij1(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t zcorn,
+			spi_arr_t points_pos, spfp_storarr_t points_param)
+	{
+		return refine_mesh_ij(nx, ny, coord, zcorn, points_pos, points_param);
+	}
+
+	static tuple refine_mesh_ij2(int_t nx, int_t ny, spfp_storarr_t coord, spfp_storarr_t zcorn,
+			spi_arr_t points_pos, spfp_storarr_t points_param, fp_t m_thresh)
+	{
+		return refine_mesh_ij(nx, ny, coord, zcorn, points_pos, points_param, m_thresh);
+	}
 
 	template <typename class_t>
 	static class_t &
@@ -96,19 +142,24 @@ struct mesh_grdecl_exporter_plus {
 		using namespace boost::python;
 
 		mesh_grdecl_exporter<T>::export_class (class__)
-			.def("gen_coord_zcorn", &T::gen_coord_zcorn, args("nx, ny, nz, dx, dy, dz, x0, y0, z0"), "Generate COORD & ZCORN from given dimensions")
-			.def("gen_coord_zcorn", &gen_coord_zcorn1, args("nx, ny, nz, dx, dy, dz, x0, y0, z0=0"), "Generate COORD & ZCORN from given dimensions")
-			.def("gen_coord_zcorn", &gen_coord_zcorn2, args("nx, ny, nz, dx, dy, dz, x0, y0=0, z0=0"), "Generate COORD & ZCORN from given dimensions")
-			.def("gen_coord_zcorn", &gen_coord_zcorn3, args("nx, ny, nz, dx, dy, dz, x0=0, y0=0, z0=0"), "Generate COORD & ZCORN from given dimensions")
+			.def("gen_coord_zcorn", &T::gen_coord_zcorn, "Generate COORD & ZCORN from given dimensions")
+			.def("gen_coord_zcorn", &gen_coord_zcorn1, "Generate COORD & ZCORN from given dimensions")
+			.def("gen_coord_zcorn", &gen_coord_zcorn2, "Generate COORD & ZCORN from given dimensions")
+			.def("gen_coord_zcorn", &gen_coord_zcorn3, "Generate COORD & ZCORN from given dimensions")
 			.staticmethod("gen_coord_zcorn")
-			.def("refine_mesh_deltas", &T::refine_mesh_deltas, "Calc dx and dy arrays for refined mesh in given points")
+			.def("refine_mesh_deltas", &refine_mesh_deltas, "Calc dx and dy arrays for refined mesh in given points")
 			.def("refine_mesh_deltas", &refine_mesh_deltas1, "Calc dx and dy arrays for refined mesh in given points")
 			.def("refine_mesh_deltas", &refine_mesh_deltas2, "Calc dx and dy arrays for refined mesh in given points")
+			.def("refine_mesh_deltas", &refine_mesh_deltas_ij, "Calc dx and dy arrays for refined mesh in given points")
+			.def("refine_mesh_deltas", &refine_mesh_deltas_ij1, "Calc dx and dy arrays for refined mesh in given points")
+			.def("refine_mesh_deltas", &refine_mesh_deltas_ij2, "Calc dx and dy arrays for refined mesh in given points")
 			.staticmethod("refine_mesh_deltas")
-			.def("refine_mesh", &T::refine_mesh, "Refine existing mesh in given points")
+			.def("refine_mesh", &refine_mesh, "Refine existing mesh in given points")
 			.def("refine_mesh", &refine_mesh1, "Refine existing mesh in given points")
 			.def("refine_mesh", &refine_mesh2, "Refine existing mesh in given points")
-			//.def("refine_mesh", &T::refine_mesh, args("nx, ny, coord, zcorn, points"), "Refine existing mesh in given points")
+			.def("refine_mesh", &refine_mesh_ij, "Refine existing mesh in given points")
+			.def("refine_mesh", &refine_mesh_ij1, "Refine existing mesh in given points")
+			.def("refine_mesh", &refine_mesh_ij2, "Refine existing mesh in given points")
 			.staticmethod("refine_mesh")
 			;
 		return class__;
