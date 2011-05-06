@@ -747,6 +747,10 @@ coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, spfp_storarr_t coord, spfp_st
 
 	if(!zcorn) return coord_zcorn_pair();
 
+	// remember old dimesnions for correct zcorn resize
+	int_t old_nx = nx;
+	int_t old_ny = ny;
+
 	// refine coord
 	coord_zcorn_pair refine_deltas = refine_mesh_deltas(nx, ny, coord, points, cell_merge_thresh, band_thresh, hit_idx);
 	spfp_storarr_t& delta_x = refine_deltas.first;
@@ -756,7 +760,7 @@ coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, spfp_storarr_t coord, spfp_st
 	BSOUT << "refine_mesh: update ZCORN" << bs_end;
 	// update zcorn
 	vector< fp_stor_t > vzcorn(zcorn->begin(), zcorn->end());
-	resize_zcorn(vzcorn, nx, ny, (int_t) delta_x->size(), (int_t) delta_y->size());
+	resize_zcorn(vzcorn, old_nx, old_ny, nx, ny);
 	// create bs_array from new zcorn
 	spfp_storarr_t rzcorn = BS_KERNEL.create_object(fp_storarr_t::bs_type());
 	if(!rzcorn) return coord_zcorn_pair();
