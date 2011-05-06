@@ -520,6 +520,32 @@ namespace blue_sky
           mute_flag = 0;
         }
     }
+    
+  std::string
+  h5_pool::get_data_type(const std::string &name) const
+  {
+    map_t::const_iterator i;
+    H5T_class_t dt;
+    
+    // FIXME: was <=
+    if (group_id < 0)
+      {
+        bs_throw_exception (boost::format ("Get data type %s: group not opened") % name);
+      }
+      
+    i = h5_map.find (name);  
+    if (i == h5_map.end ())
+      {
+        bs_throw_exception (boost::format ("Get data type %s: array not found") % name);
+      }
+    dt =  H5Tget_class (i->second.dtype);
+    if (dt == H5T_INTEGER)
+      return "int";
+    else if (dt == H5T_FLOAT)
+      return "float";
+    else
+      return "unknown";
+  }
 
 #ifdef BSPY_EXPORTING_PLUGIN
   std::string 

@@ -194,10 +194,12 @@ namespace blue_sky
        * if no array in pool
        * */
       virtual bool is_opened (const std::string &name);
+      virtual std::string get_data_type (const std::string &name) const;
 
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual std::string py_str () const;
       virtual boost::python::list py_list_data () const;
+      
 #endif //BSPY_EXPORTING_PLUGIN
     private:
     

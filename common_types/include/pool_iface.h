@@ -180,6 +180,15 @@ class h5_pool_iface : public bs_node
        * if no array in pool
        * */
       virtual bool is_opened (const std::string &name) = 0;
+      
+      /**
+       * @brief returns data array type
+       *
+       * @param name -- <INPUT> name of the array
+       * @return string name of type, throws exception 
+       * if no array in pool
+       * */
+      virtual std::string get_data_type(const std::string &name) const = 0;
 
 
 #ifdef BSPY_EXPORTING_PLUGIN
