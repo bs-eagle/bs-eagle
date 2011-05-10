@@ -4,8 +4,7 @@
  * @author Oleg Borschuk
  * @date 2009-08-28
  */
-//#include "bs_lsolvers_stdafx.h"
-//#include "bs_kernel.h"
+#include "lsolvers_stdafx.h"
 
 //#include "prop.h"
 #include "cgs_solver.h"

@@ -4,8 +4,7 @@
  * @date 2009-12-09
  */
 
-#include "bs_kernel.h"
-#include "bs_assert.h"
+#include "lsolvers_stdafx.h"
 
 #include "blu_solver.h"
 

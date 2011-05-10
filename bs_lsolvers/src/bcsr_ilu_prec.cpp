@@ -4,8 +4,7 @@
  * \author Borschuk Oleg
  * \date 2006-11-07
  */
-#include "bs_kernel.h"
-#include "bs_assert.h"
+#include "lsolvers_stdafx.h"
 
 //#include "bs_csr_ilu_prec_stdafx.h"
 #include "bcsr_ilu_prec.h"

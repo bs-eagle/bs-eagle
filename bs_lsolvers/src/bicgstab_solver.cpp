@@ -5,11 +5,7 @@
  * \date 11.02.2009
  * */
 
-#include <memory.h>
-#include <stdlib.h>
-
-#include "bs_kernel.h"
-#include "bs_assert.h"
+#include "lsolvers_stdafx.h"
 
 #include "bicgstab_solver.h"
 #include "mv_functions.h"

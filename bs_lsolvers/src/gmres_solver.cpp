@@ -5,8 +5,7 @@
  * \date 11.02.2009
  * */
 
-#include "bs_kernel.h"
-#include "bs_assert.h"
+#include "lsolvers_stdafx.h"
 
 #include "gmres_solver.h"
 #include "mv_functions.h"
@@ -378,7 +377,7 @@ namespace blue_sky
         prop->set_f (final_res_idx, r_norm);
 
 #ifdef _DEBUG
-      BOSOUT (section::solvers, level::low) << "r_norm = " << r_norm << " r_norm / den_norm = " << r_norm / den_norm << " iter = " << (iter + 1) << bs_end;
+      BOSOUT (section::solvers, level::low) << "r_norm = " << r_norm << " den_norm = " << den_norm << " r_norm / den_norm = " << r_norm / den_norm << " iter = " << (iter + 1) << bs_end;
 #endif
 
       //barrier_t ().barrier (barrier_t::comm_world_v ());

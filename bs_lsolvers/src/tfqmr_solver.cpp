@@ -5,8 +5,7 @@
  * \date 11.02.2009
  * */
 
-#include "bs_kernel.h"
-#include "bs_assert.h"
+#include "lsolvers_stdafx.h"
 
 #include "tfqmr_solver.h"
 #include "mv_functions.h"
