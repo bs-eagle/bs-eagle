@@ -61,12 +61,12 @@ namespace blue_sky
   */
 
   void
-    convert_permeability (t_long cells_count, const spv_long index_map, stdv_float perm, spv_float permx, spv_float permy, spv_float permz)
+  convert_permeability (t_long cells_count, const spv_long index_map, stdv_float &perm, spv_float permx, spv_float permy, spv_float permz)
   {
-    t_long *index_map_data = &(*index_map)[0];
-    t_float *permx_data = &(*permx)[0];
-    t_float *permy_data = &(*permy)[0];
-    t_float *permz_data = &(*permz)[0];
+    t_long *index_map_data = index_map->data ();
+    t_float *permx_data = permx->data ();
+    t_float *permy_data = permy->data ();
+    t_float *permz_data = permz->data ();
     
     for (t_long i = 0; i < cells_count; ++i)
       {

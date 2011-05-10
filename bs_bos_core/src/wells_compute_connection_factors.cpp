@@ -56,7 +56,7 @@ namespace blue_sky
             else
               {
                 BS_ASSERT (denomin > 1.0e-7) (denomin) (coef1) (coef2);
-                throw bs_exception ("well::connection::compute_factors_by_peaceman_model", "Connection factor is equal to zero");
+                bs_throw_exception (boost::format ("Connection factor == 0 for cell: %d") % con.n_block ());
               }
           }
 
@@ -72,7 +72,7 @@ namespace blue_sky
                 if (con.skin_ < ::log (con.diam_ / (2 * con.R0_)) - 2 * PI * dP)
                   {
                     BS_ASSERT (con.skin_ >= ::log (con.diam_ / (2 * con.R0_)) - 2 * PI * dP) (::log (con.diam_ / (2 * con.R0_)) - 2 * PI * dP) (dP);
-                    throw bs_exception ("well::connection::compute_factors_by_peaceman_model", "Wrong value of skin factor for connection");
+                    bs_throw_exception (boost::format ("Wrong value of skin factor for cell: %d") % con.n_block ());
                   }
 
                 con.skin_ += 2 * PI * dP;
@@ -80,7 +80,7 @@ namespace blue_sky
             else
               {
                 BS_ASSERT (false && "FI_PARAMS_B_USE_LOW_SKIN_TRANS_MULT");
-                throw bs_exception ("well::connection::compute_factors_by_peaceman_model", "Wrong value of skin factor for connection");
+                bs_throw_exception (boost::format ("Wrong value of skin factor for cell: %d") % con.n_block ());
               }
           }
 
@@ -116,7 +116,7 @@ namespace blue_sky
 
         if (con.fact_ < -MIN_ZERO_DIFF)
           {
-            bs_throw_exception (boost::format ("Negative value of connection factor %f for connection of well") % con.fact_);
+            bs_throw_exception (boost::format ("Negative value of connection factor %f for cell: %d") % con.fact_ % con.n_block ());
           }
       }
 
