@@ -289,7 +289,7 @@ namespace blue_sky
     std::string time = "dates";
     std::string values = "values";
 
-    if (!H5Lexists (file_id, path.c_str (), NULL)) // if group not exists, create it
+    if (!H5Lexists (file_id, path.c_str (), 0)) // if group not exists, create it
     {
       const hsize_t chunk_dims_value[2] =
           {
