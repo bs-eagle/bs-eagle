@@ -89,7 +89,7 @@ namespace blue_sky
   void
   data_storage_interface::save (const sp_obj &obj) const
     {
-      BS_ASSERT (storage_);
+      // FIXME: Implement storage_
       if (!storage_)
         return ;
 
