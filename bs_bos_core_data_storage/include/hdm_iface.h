@@ -15,6 +15,7 @@ namespace blue_sky {
   class h5_pool_iface;
   class prop_iface;
   class scal_3p_iface;
+  class scal_dummy_iface;
   class init_model_iface;
 
   class BS_API_PLUGIN hdm_iface: public objbase
@@ -60,6 +61,8 @@ namespace blue_sky {
       virtual t_double get_darcy_constant () = 0;
 
       virtual BS_SP (scal_3p_iface) get_scal () = 0;
+      
+      virtual BS_SP (scal_dummy_iface) get_scal_dummy () = 0;
 
       virtual BS_SP (init_model_iface) get_init_model () = 0;
   

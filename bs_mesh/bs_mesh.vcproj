@@ -457,6 +457,14 @@
 				</File>
 			</Filter>
 		</Filter>
+		<Filter
+			Name="gen"
+			>
+			<File
+				RelativePath=".\src\coord_zcorn_tools.cpp"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\src\bs_mesh.cpp"
 			>

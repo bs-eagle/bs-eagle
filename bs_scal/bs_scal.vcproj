@@ -63,7 +63,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="bs_bos_core_base_d.lib bs_bos_core_data_storage_d.lib loki_D.lib ws2_32.lib"
+				AdditionalDependencies="bs_bos_core_base_d.lib loki_D.lib ws2_32.lib"
 				OutputFile="$(ProjectDir)/../../../exe/debug/plugins/$(ProjectName)_d.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/lib&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/debug/&quot;;&quot;$(ProjectDir)/../../../exe/debug/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
@@ -272,6 +272,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\scal_2p_dummy.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\scal_3p.cpp"
 				>
 			</File>
@@ -293,6 +297,10 @@
 			</File>
 			<File
 				RelativePath=".\include\scal_data_vector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\scal_dummy.cpp"
 				>
 			</File>
 			<File
@@ -370,6 +378,10 @@
 		</File>
 		<File
 			RelativePath=".\include\bs_scal_stdafx.h"
+			>
+		</File>
+		<File
+			RelativePath=".\include\scal_dummy_iface.h"
 			>
 		</File>
 		<File

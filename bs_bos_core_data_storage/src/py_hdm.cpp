@@ -17,8 +17,10 @@ namespace python {
     .def("init", &T::init)
     .def("read_keyword_file", &T::read_keyword_file)
     .def("get_pool", &T::get_pool)
+    .def("get_prop", &T::get_prop)
     .def("get_reader", &T::get_reader)
     .def("get_mesh", &T::get_mesh)
+    .def("get_scal", &T::get_scal_dummy)
     .def("get_keyword_manager", &T::get_keyword_manager)
   PY_EXPORTER_END;
 

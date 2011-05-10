@@ -8,6 +8,7 @@
 #define BS_SCAL_3P_H_
 
 #include "scal_3p_iface.hpp"
+#include "jfunction.h"
 
 namespace blue_sky
 {
@@ -18,7 +19,7 @@ namespace blue_sky
 
   class BS_API_PLUGIN scal_2p_data_holder;
 
-  class BS_API_PLUGIN jfunction;
+  //class BS_API_PLUGIN jfunction;
 
   //////////////////////////////////////////////////////////////////////////
   class BS_API_PLUGIN scal_3p : public scal_3p_iface
@@ -167,7 +168,7 @@ namespace blue_sky
 
     public:
 
-      BLUE_SKY_TYPE_DECL_T (scal_3p);
+      BLUE_SKY_TYPE_DECL (scal_3p);
     };
 
   bool scal_register_types (const blue_sky::plugin_descriptor &pd);

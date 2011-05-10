@@ -99,6 +99,13 @@ namespace blue_sky
        * */
       void 
       handle_keyword (const std::string &keyword, keyword_params_t &params);
+      
+       /**
+       * \brief  Handles keyword, call only proper reaclor handler
+       * \return 
+       * */
+      void 
+      handle_keyword_reactor (const std::string &keyword, keyword_params_t &params);
 
       /**
        * \brief  Registers active keyword in factory

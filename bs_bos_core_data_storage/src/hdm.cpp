@@ -68,8 +68,43 @@ namespace blue_sky
   hdm::init()
   {
     smart_ptr <hdm_iface, true> hdm = this;
+    keyword_params kp;
+    int n_pases;
     
+    kp.hdm = this;
+    data->h5_pool->open_file ("hdm_storage.h5", "/pool");
     km->init(hdm);
+    
+    
+    switch (data->props->get_i("mesh"))
+    {
+      case 0:
+        km->handle_keyword_reactor ("MESH_IJK", kp);
+        break;
+      case 1:
+        km->handle_keyword_reactor ("MESH_GRDECL", kp);
+        break;   
+          
+     default:
+        bs_throw_exception ("init: wrong scal choice");  
+    }
+    
+    n_pases = data->props->get_b("oil_phase");
+    n_pases += data->props->get_b("water_phase");
+    n_pases += data->props->get_b("gas_phase");
+    
+    switch (n_pases)
+    {
+      case 2:
+        scal_dummy = BS_KERNEL.create_object ("scal_2p_dummy");
+        break;
+      case 3:
+        scal_dummy = BS_KERNEL.create_object ("scal_3p_dummy");
+        break;   
+          
+     default:
+        bs_throw_exception ("init: wrong scal choice");  
+    }
   }
   
   

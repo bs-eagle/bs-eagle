@@ -31,7 +31,6 @@ namespace blue_sky
     res &= BS_KERNEL.register_type(pd, FRead::bs_type()); BS_ASSERT (res);
     res &= BS_KERNEL.register_type (pd, equil_keywords::bs_type ()); BS_ASSERT (res);
     res &= BS_KERNEL.register_type (pd, explicit_keywords::bs_type ()); BS_ASSERT (res);
-
     return res;
   }
   }
