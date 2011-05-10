@@ -255,6 +255,9 @@ namespace blue_sky
     set_float (MASS_BALANS_ERROR, (1.0e-5));           // maximum allowed mass balans error
     set_float (MAX_NORM_ON_FIRST_N, 1);
     set_float (P_DIMENSION_LESS_SCALE_FACTOR, 0.001);  // scale factor for making pressure dimension less
+
+    // FIXME: set properly value
+    set_float (S_RHS_NORM, 0.01);
   }
 
   const std::string & fi_params::get_params_name (idx_type idx)
