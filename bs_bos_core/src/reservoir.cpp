@@ -81,18 +81,10 @@ namespace blue_sky
   }
 
 
-  reservoir::sp_well_t
-  reservoir::create_well (const std::string &group_name, const std::string &well_name)
+  void
+  reservoir::add_well (BS_SP (well) w)
   {
-    sp_well_t w = well_factory_->create_well (group_name, well_name);
-    BS_ASSERT (w) (group_name) (well_name);
-
-    if (w)
-      {
-        facility_list_->add_well (w);
-      }
-
-    return w;
+    facility_list_->add_well (w);
   }
 
 
@@ -192,8 +184,8 @@ namespace blue_sky
           wit->second->fill_rows (rows);
         }
 
-      v_long &r = *rows;
-      for (size_t i = 0, cnt = r.size () - 1; i < cnt; ++i)
+      t_long *r = rows->data ();
+      for (size_t i = 0, cnt = rows->size () - 1; i < cnt; ++i)
         {
           r[i + 1] += r[i];
         }
@@ -220,6 +212,11 @@ namespace blue_sky
       return ;
 
     t_long cols_count = rows->back ();
+    if (cols_count == 0)
+      {
+        bs_throw_exception ("cols count is 0");
+      }
+
     cols->init (cols_count, -1);
     values->init (cols_count * block_size * block_size, 0);
     markers_.assign (rows->size (), 0);

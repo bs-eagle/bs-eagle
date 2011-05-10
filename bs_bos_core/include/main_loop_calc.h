@@ -44,7 +44,7 @@ namespace blue_sky
   struct main_loop_calc_base
   {
     typedef event_manager event_manager_t;
-    typedef event_manager_t::sp_event_base_list  sp_event_base_list_t;
+    typedef event_manager_t::event_list_t  event_list_t;
 
   public:
     /**
@@ -65,7 +65,7 @@ namespace blue_sky
      * \param  event_list
      * */
     virtual void
-    apply_events (const sp_event_base_list_t &) = 0;
+    apply_events (const event_list_t &) = 0;
   };
 
   /**
@@ -78,9 +78,9 @@ namespace blue_sky
       typedef main_loop_calc_base               base_t;
       typedef main_loop_calc <is_w, is_g, is_o> this_t;
 
-      typedef t_double                   item_t;
-      typedef t_long                  index_t;
-      typedef spv_double             item_array_t;
+      typedef t_double                          item_t;
+      typedef t_long                            index_t;
+      typedef spv_double                        item_array_t;
 
       typedef calc_model                        calc_model_t;
       typedef event_manager                     event_manager_t;
@@ -89,9 +89,9 @@ namespace blue_sky
       typedef rs_mesh_iface                     mesh_iface_t;
       typedef jacobian                          jacobian_t;
       typedef reservoir_simulator               reservoir_simulator_t;
-      typedef idata                                         idata_t;
+      typedef idata                             idata_t;
 
-      typedef event_manager_t::sp_event_base_list  sp_event_base_list_t;
+      typedef event_manager_t::event_list_t     event_list_t;
       typedef trans_multipliers_calc            trans_multipliers_calc_t;
 
       typedef smart_ptr <calc_model_t, true>                sp_calc_model_t;
@@ -182,10 +182,10 @@ namespace blue_sky
        * \param  event_list
        * */
       inline void
-      apply_events (const sp_event_base_list_t &event_list)
+      apply_events (const event_list_t &event_list)
       {
-        typename sp_event_base_list_t::const_iterator it = event_list.begin ();
-        typename sp_event_base_list_t::const_iterator e  = event_list.end ();
+        typename event_list_t::const_iterator it = event_list.begin ();
+        typename event_list_t::const_iterator e  = event_list.end ();
 
         for (; it != e; ++it)
           {
@@ -1144,7 +1144,7 @@ namespace blue_sky
        * \param  event_list
        * */
       inline void
-      iteration (const ptime &current_time, const ptime &next_time, const sp_event_base_list_t &event_list)
+      iteration (const ptime &current_time, const ptime &next_time, const event_list_t &event_list)
       {
         using namespace boost::posix_time;
         BOSOUT (section::main_loop, level::high) << "\nTIMESTEP " << boost::posix_time::to_simple_string (current_time) << "\n" << bs_end;

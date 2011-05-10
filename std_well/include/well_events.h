@@ -96,8 +96,10 @@ namespace blue_sky
        * \param  calc_model
        * */
       virtual void
-      apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
-      const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &data) const;
+      apply_internal (const BS_SP (reservoir) &reservoir, 
+                      const BS_SP (rs_mesh_iface) &msh,
+                      const BS_SP (calc_model) &calc_model, 
+                      const BS_SP (idata) &data) const;
 
     };
 

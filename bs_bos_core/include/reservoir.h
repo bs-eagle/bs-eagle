@@ -134,13 +134,11 @@ namespace blue_sky
       get_well (const std::string &well_name) const;
 
       /**
-       * \brief  creates well with name well_name in group group_name
-       * \param  group_name name of well group
-       * \param  well_name name of well
-       * \return well instance if created successfully otherwise null pointer
+       * \brief  add well to list
+       * \param  well well
        * */
-      sp_well_t                 
-      create_well (const std::string &group_name, const std::string &well_name);
+      void                 
+      add_well (BS_SP (well) well);
 
       /**
        * \brief  creates well_controller for given well

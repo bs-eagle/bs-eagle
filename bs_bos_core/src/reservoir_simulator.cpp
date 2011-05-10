@@ -30,7 +30,6 @@ namespace blue_sky
       : bs_refcounter ()
       , bs_node (bs_node::create_node()) //new typename this_t::mstatus_traits ()))
       , hdm_ (give_kernel::Instance().create_object (hdm::bs_type ()))
-      , em (give_kernel::Instance().create_object (event_manager::bs_type ()))
       , cm (give_kernel::Instance().create_object (calc_model::bs_type ()))
       , reservoir_ (give_kernel::Instance().create_object (reservoir::bs_type ()))
       , facility_storage_ (give_kernel::Instance().create_object (facility_storage_t::bs_type ()))
@@ -41,7 +40,6 @@ namespace blue_sky
     hdm_->init ();
     
     //bs_node::insert (bs_link::create (hdm_, "hdm"), false);
-    //bs_node::insert (bs_link::create (em, "event_manager"), false);
     //bs_node::insert (bs_link::create (cm, "calc_model"), false);
 
     //bs_node::insert (bs_link::create (reservoir_, "reservoir"), false);
@@ -57,7 +55,6 @@ namespace blue_sky
       : bs_refcounter ()
       , bs_node (src)
       , hdm_ (src.hdm_)
-      , em (src.em)
       , cm (src.cm)
       , reservoir_ (src.reservoir_)
       , facility_storage_ (src.facility_storage_)
@@ -81,9 +78,8 @@ namespace blue_sky
    * \brief  actions that should be executed before read of data
    * \param  em pointer to event_manager instance
    * */
-  template <typename sp_em_t>
   void 
-  pre_read (const sp_em_t &/*em*/)
+  pre_read (const BS_SP (event_manager_iface) &/*em*/)
   {
   }
 
@@ -95,28 +91,10 @@ namespace blue_sky
    *          another empty element with date 30 days later than 
    *          previous
    * */
-  template <typename em_t>
   void 
-  post_read (const smart_ptr <em_t, true> &em)
+  post_read (const BS_SP (event_manager_iface) &em)
   {
-    //if last element of event list contains events we add another empty element with date 30 days later than previous
-    if (em->event_list.size ())
-      {
-        if (!(*(--em->event_list.end())).second.empty())
-          {
-            std::list <typename em_t::sp_event_base> tl;
-            em->event_list.insert(std::make_pair((*(--em->event_list.end())).first + boost::posix_time::hours(30*24),tl));
-          }
-      }
-    else
-      {
-        // TODO: BUG:
-        BS_ASSERT (false && "em->event_list.empty () == true");
-
-        std::list <typename em_t::sp_event_base> tl;
-        em->event_list.insert(std::make_pair(boost::gregorian::from_us_string ("01-01-1970"), tl));
-        em->event_list.insert(std::make_pair(boost::gregorian::from_us_string ("01-02-1970"), tl));
-      }
+    em->finalize_events ();
   }
 
   /**
@@ -195,10 +173,10 @@ namespace blue_sky
 
     //keyword_params params (keyword_manager_, hdm->reader, hdm->data, em, mesh, cm->ts_params, cm->scal_prop);
     model_filename_ = path;
-    pre_read (em); 
+    pre_read (hdm_->get_event_manager ()); 
     on_pre_read (this);
-    read_keyword_file(path, hdm_, em);
-    post_read (em);
+    read_keyword_file(path, hdm_, hdm_->get_event_manager ());
+    post_read (hdm_->get_event_manager ());
     on_post_read ();
     init();
   }
@@ -212,7 +190,7 @@ namespace blue_sky
   reservoir_simulator::sp_em_t 
   reservoir_simulator::get_event_manager () const
   {
-    return em;
+    return hdm_->get_event_manager ();
   }
 
   reservoir_simulator::sp_calc_model_t 
@@ -878,7 +856,7 @@ namespace blue_sky
   }
 
   void
-  reservoir_simulator::pre_large_step (const sp_event_base_list_t &event_list)
+  reservoir_simulator::pre_large_step (const event_list_t &event_list)
   {
     mloop->apply_events (event_list);
     reservoir_->pre_large_step (cm, hdm_->mesh);

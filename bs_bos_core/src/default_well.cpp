@@ -601,7 +601,7 @@ namespace wells {
   //////////////////////////////////////////////////////////////////////////
   BLUE_SKY_TYPE_STD_CREATE (default_well);
   BLUE_SKY_TYPE_STD_COPY (default_well);
-  BLUE_SKY_TYPE_IMPL (default_well, well, "default_well_seq", "default_well_seq", "default_well_seq");
+  BLUE_SKY_TYPE_IMPL (default_well, well, "default_well", "default_well", "default_well");
   //////////////////////////////////////////////////////////////////////////
 
   bool

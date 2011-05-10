@@ -37,6 +37,13 @@ namespace blue_sky
     process_event (const date_t &date, const std::string &event_name, const std::string &event_params) = 0;
 
     /**
+     * \brief adds empty event list at the end of date list if last date has events
+     * \return throws exception if date list is empty
+     * */
+    virtual void
+    finalize_events () = 0;
+
+    /**
      * \brief set current date (usualy parsed by DATE, TSTEP keywords)
      * \param date 
      * */

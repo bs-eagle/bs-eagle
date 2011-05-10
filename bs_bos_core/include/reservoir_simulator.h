@@ -37,7 +37,7 @@ namespace blue_sky
       typedef smart_ptr <rs_mesh_iface, true >        sp_mesh_iface_t;      //!< smart_ptr to rs_mesh_iface type
       typedef smart_ptr <lsolver_iface, true>         sp_solver_t;          //!< smart_ptr to solver_t type
       typedef smart_ptr <event_manager, true >        sp_em_t;              //!< smart_ptr to event_manager type
-      typedef event_manager::sp_event_base_list       sp_event_base_list_t; //!< list of scheduled events
+      typedef event_manager::event_list_t             event_list_t;         //!< list of scheduled events
       typedef smart_ptr < calc_model, true >          sp_calc_model_t;      //!< smart_ptr to calc_model type
       typedef smart_ptr <reservoir, true>             sp_reservoir_t;       //!< smart_ptr to reservoir type
       typedef data_storage_interface                  facility_storage_t;   //!< facility_storage type
@@ -157,7 +157,7 @@ namespace blue_sky
        *         executed before start of the step
        * */
       void 
-      pre_large_step (const sp_event_base_list_t &event_list);
+      pre_large_step (const event_list_t &event_list);
 
       /**
        * \brief  returns name of model file
@@ -170,7 +170,6 @@ namespace blue_sky
 
     protected:
       sp_hdm_t                hdm_;               //!< pointer to hdm instance
-      sp_em_t                 em;                 //!< pointer to event_manager instance
       sp_calc_model_t         cm;                 //!< pointer to calc_model instance
       sp_reservoir_t          reservoir_;         //!< pointer to reservoir instance
       sp_facility_storage_t   facility_storage_;  //!< pointer to facility_storage instance

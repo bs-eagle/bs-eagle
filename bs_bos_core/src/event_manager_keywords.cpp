@@ -28,8 +28,9 @@ namespace blue_sky
           % reader->get_prefix () % keyword);
       }
 
-    em->set_current_date (event_manager::date_t (reader->read_date (buf)));
-    BOSOUT (section::read_data, level::medium) << keyword << bs_end;
+    event_manager::date_t date (reader->read_date (buf));
+    em->set_current_date (date);
+    BOSOUT (section::read_data, level::medium) << keyword << " " << date << bs_end;
   }
 
   void

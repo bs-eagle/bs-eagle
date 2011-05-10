@@ -15,6 +15,8 @@
 //using namespace boost::spirit;
 //using namespace boost::gregorian;
 
+namespace pt = boost::posix_time;
+
 namespace blue_sky
   {
 
@@ -66,45 +68,26 @@ namespace blue_sky
   event_manager::sp_event_base
   event_manager::create_event (const boost::posix_time::ptime &date, const std::string & event_name, const std::string & event_params)
   {
-    //boost::regex re_check_type (event_name + "(.*)_" + tools::strategy_name ::name ());
-
-    sp_obj event_object;
-
-    const std::vector <type_tuple> &types = BS_KERNEL.registered_types ();
-    for (size_t i = 0, cnt = types.size (); i < cnt; ++i)
-      {
-        const type_descriptor &td = types[i].td_;
-
-        // FIXME:
-        //if (boost::regex_match (td.stype_.c_str (), re_check_type))
-        if (td.stype_.c_str () == event_name)
-          {
-            event_object = BS_KERNEL.create_object (td);
-            break;
-          }
-      }
-    if (!event_object)
+    BS_SP (event_base) event = BS_KERNEL.create_object (event_name);
+    if (!event)
       {
         bs_throw_exception (boost::format ("Type (%s) not registered (params: %s)") % event_name % event_params);
       }
 
-    sp_event_base event (event_object, bs_static_cast ());
-    if (!event)
-      {
-        bs_throw_exception (boost::format ("Created object for type (%s) can't be casted to event_base (params: %s)") % event_name % event_params);
-      }
-
-    event_list[date].push_back (event);  // TODO: posix_time::ptime
     event->init (event_name, event_params);
+    event_map::iterator it = event_list.find (date);
+    event_list_t &e = it->second;
+
+    e.push_back (event);
     return event;
   }
 
   void
   event_manager::set_current_date (date_t const &date)
   {
-    if (event_list.find (date) != event_list.end ())
+    if (event_list.find (date) == event_list.end ())
       {
-        event_list.insert (std::make_pair (date, sp_event_base_list ()));
+        event_list.insert (std::make_pair (date, event_list_t ()));
         current_date_ = date;
       }
   }
@@ -115,6 +98,20 @@ namespace blue_sky
     return current_date_;
   }
 
+  void
+  event_manager::finalize_events ()
+  {
+    if (event_list.empty ())
+      {
+        bs_throw_exception ("Events list is empty");
+      }
+
+    event_map::reverse_iterator it = event_list.rbegin ();
+    if (it->second.size ())
+      {
+        event_list.insert (std::make_pair (it->first + pt::hours (30 * 24), event_list_t ()));
+      }
+  }
 
   //bs stuff
   BLUE_SKY_TYPE_STD_CREATE (event_manager)

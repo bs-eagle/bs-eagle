@@ -24,6 +24,8 @@ namespace blue_sky
   well_event::apply (const sp_top &top, const sp_mesh_iface_t &mesh,
                            const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &data) const
   {
+    std::cout << "APPLY: " << get_event_name () << std::endl;
+
     if (top->get_event_filter ()->accept_well (get_well_name ()))
       {
         apply_internal (top, mesh, calc_model, data);
@@ -34,8 +36,10 @@ namespace blue_sky
       }
   }
   void
-  well_event::apply_internal (const sp_top &top, const sp_mesh_iface_t &mesh,
-                           const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &data) const
+  well_event::apply_internal (const BS_SP (reservoir) &reservoir, 
+                              const BS_SP (rs_mesh_iface) &mesh,
+                              const BS_SP (calc_model) &calc_model, 
+                              const BS_SP (idata) &data) const
   {
     BS_ASSERT (false && "BASE METHOD CALL");
   }

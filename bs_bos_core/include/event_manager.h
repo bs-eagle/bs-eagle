@@ -30,9 +30,9 @@ namespace blue_sky
       typedef smart_ptr < event_base_t >              sp_event_base;      //!< smart_ptr to event_base type
       typedef event_manager                           self_t;             //!< shortname for this type
       typedef self_t                                  this_t;             //!< shortname for this type
-      typedef std::list < sp_event_base >             sp_event_base_list; //!< list of events
+      typedef std::list < sp_event_base >             event_list_t; //!< list of events
       typedef boost::posix_time::ptime                date_t;             //!< shortname for time
-      typedef std::map <date_t, sp_event_base_list >  event_map;          //!< events map by date
+      typedef std::map <date_t, event_list_t>         event_map;          //!< events map by date
 
       //-----------------------------------------
       //  METHODS
@@ -88,6 +88,12 @@ namespace blue_sky
       create_event(const boost::posix_time::ptime &date, const std::string & event_name, const std::string & event_params);
 
 
+      /**
+       * \brief adds empty event list at the end of date list if last date has events
+       * \return throws exception if date list is empty
+       * */
+      virtual void
+      finalize_events ();
       //-----------------------------------------
       //  VARIABLES
       //-----------------------------------------

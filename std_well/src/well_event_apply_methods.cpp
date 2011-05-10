@@ -44,21 +44,29 @@ namespace blue_sky
   }
   //////////////////////////////////////////////////////////////////////////
   void
-  WELSPECS_event::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
-                              const sp_calc_model_t &/*calc_model*/, const smart_ptr <idata, true> &/*data*/) const
+  WELSPECS_event::apply_internal (const BS_SP (reservoir) &r, 
+                                  const BS_SP (rs_mesh_iface) &/*msh*/,
+                                  const BS_SP (calc_model) &/*calc_model*/, 
+                                  const BS_SP (idata) &/*data*/) const
   {
-    const sp_top &locked (top);
+    const sp_top &reservoir (r);
     // TODO: FIELD
     std::string group_name  = main_params_->get_WELL_GROUP_NAME ("");
     std::string name        = main_params_->get_WELL_NAME ("");
 
     BS_ASSERT (name.size ());
 
-    sp_well_t well = locked->get_well (group_name, name);
+    sp_well_t well = reservoir->get_well (group_name, name);
     if (!well)
       {
-        well = locked->create_well (group_name, name);
-        BS_ERROR (well, "apply_internal");// (group_name) (name);
+        well = BS_KERNEL.create_object ("default_well");
+        if (!well)
+          {
+            bs_throw_exception ("Can't create default_well");
+          }
+
+        well->set_name (name);
+        reservoir->add_well (well);
       }
 
     const sp_well_t &locked_well (well);
@@ -74,16 +82,16 @@ namespace blue_sky
   WELLCON_event::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
                              const sp_calc_model_t &/*calc_model*/, const smart_ptr <idata, true> &/*data*/) const
   {
-    const sp_top &locked (top);
-    sp_well_t well = locked->get_well (main_params_->get_WELL_GROUP_NAME (""), main_params_->get_WELL_NAME (""));
-    if (!well)
-      {
-        well = locked->create_well (main_params_->get_WELL_GROUP_NAME (""), main_params_->get_WELL_NAME (""));
-        if (!well)
-          {
-            bs_throw_exception (boost::format ("Can't create well (name: %s, group: %s)") % main_params_->get_WELL_NAME ("") % main_params_->get_WELL_GROUP_NAME (""));
-          }
-      }
+    //const sp_top &locked (top);
+    //sp_well_t well = locked->get_well (main_params_->get_WELL_GROUP_NAME (""), main_params_->get_WELL_NAME (""));
+    //if (!well)
+    //  {
+    //    well = locked->create_well (main_params_->get_WELL_GROUP_NAME (""), main_params_->get_WELL_NAME (""));
+    //    if (!well)
+    //      {
+    //        bs_throw_exception (boost::format ("Can't create well (name: %s, group: %s)") % main_params_->get_WELL_NAME ("") % main_params_->get_WELL_GROUP_NAME (""));
+    //      }
+    //  }
 
     bs_throw_exception ("NOT IMPL YET");
 
