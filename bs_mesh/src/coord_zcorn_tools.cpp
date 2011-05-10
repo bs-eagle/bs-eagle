@@ -2,6 +2,8 @@
 /// @brief COORD & ZCORN generation and refinement tools
 /// @author uentity
 /// @date 2011-05-06
+/// @copyright This source code is released under the terms of
+///            the BSD License. See LICENSE for more details.
 
 #include "bs_mesh_stdafx.h"
 #include "mesh_grdecl.h"
@@ -258,9 +260,8 @@ struct dim_subscript {
 	}
 
 	fp_stor_t ss_array_dim(int_t idx) {
-		fp_t tmp = sum_;
 		if(idx > 0) sum_ += dim_[idx - 1];
-		return static_cast< fp_stor_t>(tmp);
+		return static_cast< fp_stor_t>(sum_);
 	}
 
 	void reset() { sum_ = offset_; }
