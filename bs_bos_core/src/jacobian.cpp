@@ -307,7 +307,7 @@ namespace blue_sky
   void
   jacobian::clear_solution ()
   {
-    solution->init (0);
+    solution->assign (0);
   }
 
   // FIXME:
