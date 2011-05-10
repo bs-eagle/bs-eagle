@@ -34,7 +34,6 @@ namespace blue_sky
           {
             path += *it;
             htri_t status = H5Lexists (location, path.c_str (), 0);
-            std::cout << "path: " << path << " " << status << std::endl;
             if (status <= 0)
               return false;
 
