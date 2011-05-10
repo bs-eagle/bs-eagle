@@ -141,6 +141,16 @@ namespace blue_sky
         ((I,                "I - location of well head or heel", PT_INT))
         ((J,                "J - location of well head or heel", PT_INT))
         ((BHP_DEPTH,        "", PT_FLOAT))
+        ((PHASE,            "Prefered phase for well", PT_STR))
+        ((RADIUS,           "Drenage radius", PT_FLOAT))
+        ((P8,               "", PT_STR))
+        ((AUTO_SHUT,        "", PT_STR))
+        ((P10,              "", PT_STR))
+        ((P11,              "", PT_INT))
+        ((P12,              "", PT_STR))
+        ((P13,              "", PT_INT))
+        ((P14,              "", PT_STR))
+        ((P15,              "", PT_STR))
       );
 
       //NEXT_LINE_PARAMS (
