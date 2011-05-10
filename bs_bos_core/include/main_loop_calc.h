@@ -1203,14 +1203,14 @@ namespace blue_sky
         dt_ = get_first_ts ();
         save_base_vars ();
 
-#ifdef _HDF5
-        reservoir_->open_hdf5_file (path::join (path::dirname (rs_->model_filename ()), "results.h5"));
-        reservoir_->write_mesh_to_hdf5 (mesh_);
-        boost::gregorian::date start_date = rs_->get_hdm ()->get_keyword_manager ()->get_starting_date ().date ();
-        boost::gregorian::date base_date (1900, 1, 1);
-        double starting_date = (start_date - base_date).days () + 2;
-        reservoir_->get_hdf5_file ()->write_array ("/initial_data", "starting_date", &starting_date, 1);
-#endif
+//#ifdef _HDF5
+//        reservoir_->open_hdf5_file (path::join (path::dirname (rs_->model_filename ()), "results.h5"));
+//        reservoir_->write_mesh_to_hdf5 (mesh_);
+//        boost::gregorian::date start_date = rs_->get_hdm ()->get_keyword_manager ()->get_starting_date ().date ();
+//        boost::gregorian::date base_date (1900, 1, 1);
+//        double starting_date = (start_date - base_date).days () + 2;
+//        reservoir_->get_hdf5_file ()->write_array ("/initial_data", "starting_date", &starting_date, 1);
+//#endif
 
         reservoir_->open_storage (path::join (path::dirname (rs_->model_filename ()), "results-v2.h5"));
         reservoir_->write_mesh_to_storage (mesh_);
