@@ -3,6 +3,10 @@
 #ifndef BS_EAGLE_HDF5_STORAGE_V2_H_
 #define BS_EAGLE_HDF5_STORAGE_V2_H_
 
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
+
 #include "shared_vector.h"
 #include "constants.h"
 #include "conf.h"

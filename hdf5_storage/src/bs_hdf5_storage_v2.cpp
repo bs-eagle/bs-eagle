@@ -123,7 +123,7 @@ namespace blue_sky {
               bs_throw_exception (boost::format ("Can't open file %s") % file.file_name_);
             }
 
-          hid_group_t group = H5Gcreate (file.file_id_, "/results", NULL);
+          hid_group_t group = H5Gcreate (file.file_id_, "/results", 0);
           if (group < 0)
             {
               bs_throw_exception (boost::format ("Can't create group '/results' in file %s") % file.file_name_);
@@ -174,11 +174,7 @@ namespace blue_sky {
 
       if (set_error_context (group_name) && !detail::is_object_exists (file_id, group_name.c_str ()))
         {
-          hid_group_t group = H5Gcreate (file_id, group_name.c_str (), H5P_DEFAULT);
-          if (group < 0)
-            {
-              create_group_hierarchy (file_id, group_name);
-            }
+          create_group_hierarchy (file_id, group_name);
         }
       hid_group_t group = detail::open_group (file_id, group_name.c_str ());
 
@@ -257,11 +253,7 @@ namespace blue_sky {
 
       if (set_error_context (group_name) && !detail::is_object_exists (file_id, group_name.c_str ()))
         {
-          hid_group_t group = H5Gcreate (file_id, group_name.c_str (), H5P_DEFAULT);
-          if (group < 0)
-            {
-              create_group_hierarchy (file_id, group_name);
-            }
+          create_group_hierarchy (file_id, group_name);
         }
       hid_group_t group = detail::open_group (file_id, group_name.c_str ());
 
@@ -397,7 +389,7 @@ namespace blue_sky {
             << bs_end;
         }
 
-      bs_throw_exception ("HDF5 error");
+      bs_throw_exception ("HDF5 error v2");
       return 0;
     }
 

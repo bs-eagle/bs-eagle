@@ -1,10 +1,16 @@
 #ifndef __BS_HDF5_STORAGE_H
 #define __BS_HDF5_STORAGE_H
 
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
+
 #include "bs_abstract_storage.h"//TODO: remove this by #include "bs_object_base.h"
 #include "hdf5_functions.h"
 #include "hdf5.h"
 #include "throw_exception.h"
+
+#include <boost/tokenizer.hpp>
 
 namespace blue_sky
   {
@@ -20,8 +26,22 @@ namespace blue_sky
       inline bool 
       is_object_exists (const hid_t &location, const std::string &name) 
       {
-        htri_t status = H5Lexists (location, name.c_str (), 0);
-        return status > 0;
+        typedef boost::tokenizer <boost::char_separator <char> > tokenizer_t;
+        boost::char_separator <char> s ("/");
+        tokenizer_t t (name, s);
+        std::string path = "";
+        for (tokenizer_t::iterator it = t.begin (), e = t.end (); it != e; ++it)
+          {
+            path += *it;
+            htri_t status = H5Lexists (location, path.c_str (), 0);
+            std::cout << "path: " << path << " " << status << std::endl;
+            if (status <= 0)
+              return false;
+
+            path += "/";
+          }
+
+        return true;
       }
 
       /** 
@@ -225,7 +245,7 @@ namespace blue_sky
     H5Sclose (space);
     // and write it into the file.
     hid_t plist = H5Pcreate (H5P_DATASET_XFER);
-    herr_t status = H5Dwrite (dataset, get_hdf5_type <T> (), NULL, NULL, plist, data);
+    herr_t status = H5Dwrite (dataset, get_hdf5_type <T> (), 0, 0, plist, data);
     status;
     H5Pclose (plist);
     H5Dclose (dataset);

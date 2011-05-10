@@ -5,6 +5,10 @@
  * @version 1.0
  * @date 2011-03-05
 */
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
+
 #include <hdf5.h>
 #include <stdio.h>
 #include <iomanip>
@@ -383,6 +387,7 @@ namespace blue_sky
                 bs_throw_exception (boost::format ("Can't create simple dataspace for dataset %s in group %d") % name % group_id);
               }
 
+            std::cout << "name: " << name << std::endl;
             hid_t dset = H5Dcreate (group_id, name.c_str (), p.dtype, dspace, p.plist);
             if (dset < 0)
               {
