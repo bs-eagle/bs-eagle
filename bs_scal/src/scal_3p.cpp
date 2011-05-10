@@ -7,6 +7,7 @@
 #include "bs_scal_stdafx.h"
 
 #include "scal_3p.h"
+#include "scal_2p_dummy.h"
 #include "scal_data_source.h"
 #include "scal_data_vector.h"
 #include "scale_arrays_placement_strategies.h"
@@ -1098,6 +1099,9 @@ namespace blue_sky
     res &= BS_KERNEL.register_type (pd, scale_array_holder::bs_type ()); BS_ASSERT (res);
     res &= BS_KERNEL.register_type (pd, scal_2p_data_holder::bs_type ()); BS_ASSERT (res);
     res &= BS_KERNEL.register_type (pd, scal_3p::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, scal_2p_dummy::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, scal_3p_dummy::bs_type ()); BS_ASSERT (res);
+
 
     return res;
   }

@@ -10,10 +10,12 @@
  * */
 
 #include "calc_model_data.h"
-#include "jfunction.h"
 
 namespace blue_sky 
 {
+
+  class BS_API_PLUGIN jfunction;
+  
   enum scale_array_name
   {
     socr,
