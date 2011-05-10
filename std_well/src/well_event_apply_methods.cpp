@@ -74,7 +74,7 @@ namespace blue_sky
     BS_ASSERT (main_params_->get_I (0) && main_params_->get_J (0)) (main_params_->get_I (0)) (main_params_->get_J (0));
 
     locked_well->set_coord (main_params_->get_I (), main_params_->get_J ());
-    locked_well->set_bhp_depth (main_params_->get_BHP_DEPTH ());
+    locked_well->set_bhp_depth (main_params_->get_BHP_DEPTH (-1));
   }
 
   //////////////////////////////////////////////////////////////////////////
