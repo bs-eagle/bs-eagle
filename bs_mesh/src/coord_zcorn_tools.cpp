@@ -5,277 +5,16 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
-#include "bs_mesh_stdafx.h"
+#include "coord_zcorn_tools.h"
 #include "mesh_grdecl.h"
-#include <iterator>
 
 #define BOUND_MERGE_THRESHOLD 0.8
 #define DEFAULT_SMOOTH_RATIO 0.1
 
 /*-----------------------------------------------------------------
- * helpers for gen_coord_zcorn & refine_mesh
+ * coord_zcorn_tools implementation
  *----------------------------------------------------------------*/
 namespace blue_sky { namespace coord_zcorn_tools {
-
-// shorter aliases
-typedef t_long int_t;
-typedef t_double fp_t;
-typedef t_float fp_stor_t;
-
-// other typedefs
-typedef bs_array< fp_stor_t, bs_vector_shared > fp_storvec_t;
-typedef v_float fp_storarr_t;
-typedef v_long int_arr_t;
-typedef smart_ptr< fp_storvec_t > spfp_storvec_t;
-typedef spv_float spfp_storarr_t;
-typedef spv_long spi_arr_t;
-typedef std::pair< spfp_storarr_t, spfp_storarr_t > coord_zcorn_pair;
-typedef std::set< fp_t > fp_set;
-
-typedef fp_storvec_t::iterator v_iterator;
-typedef fp_storvec_t::const_iterator cv_iterator;
-typedef fp_set::iterator fps_iterator;
-
-// iterator that jumps over given offset instead of fixed +1
-template< class iterator_t, int step_size = 1 >
-class slice_iterator : public std::iterator<
-						typename std::iterator_traits< iterator_t >::iterator_category,
-						typename std::iterator_traits< iterator_t >::value_type,
-						typename std::iterator_traits< iterator_t >::difference_type,
-						typename std::iterator_traits< iterator_t >::pointer,
-						typename std::iterator_traits< iterator_t >::reference
-						>
-{
-	typedef std::iterator_traits< iterator_t > traits_t;
-
-public:
-	typedef typename traits_t::value_type value_type;
-	typedef typename traits_t::pointer pointer;
-	typedef typename traits_t::reference reference;
-	typedef typename traits_t::difference_type difference_type;
-
-	// set step in compile-time
-	slice_iterator() : p_(), step_(step_size) {}
-	slice_iterator(const iterator_t& i) : p_(i), step_(step_size) {}
-	slice_iterator(const slice_iterator& i) : p_(i.p_), step_(i.step_) {}
-
-	// set step in runtime
-	slice_iterator(difference_type step) : p_(), step_(step) {}
-	slice_iterator(const iterator_t& i, difference_type step) : p_(i), step_(step) {}
-
-	reference operator[](difference_type i) const {
-		return p_[i * step_];
-	}
-
-	void operator+=(difference_type n) {
-		p_ += n * step_;
-	}
-	void operator-=(difference_type n) {
-		p_ -= n * step_;
-	}
-
-	friend slice_iterator operator+(const slice_iterator& lhs, difference_type n) {
-		return slice_iterator(lhs.p_ + (n * lhs.step_), lhs.step_);
-	}
-	friend slice_iterator operator+(difference_type n, const slice_iterator& lhs) {
-		return slice_iterator(lhs.p_ + (n * lhs.step_), lhs.step_);
-	}
-	friend slice_iterator operator-(const slice_iterator& lhs, difference_type n) {
-		return slice_iterator(lhs.p_ - (n * lhs.step_), lhs.step_);
-	}
-
-	slice_iterator& operator++() {
-		p_ += step_;
-		return *this;
-	}
-	slice_iterator& operator++(int) {
-		slice_iterator tmp = *this;
-		p_ += step_;
-		return tmp;
-	}
-
-	slice_iterator& operator--() {
-		p_ -= step_;
-		return *this;
-	}
-	slice_iterator& operator--(int) {
-		slice_iterator tmp = *this;
-		p_ -= step_;
-		return tmp;
-	}
-
-	pointer operator->() const {
-		return p_.operator->();
-	}
-	reference operator*() const {
-		return *p_;
-	}
-
-	slice_iterator& operator=(const slice_iterator& lhs) {
-		p_ = lhs.p_;
-		return *this;
-	}
-
-	friend difference_type operator-(const slice_iterator& lhs, const slice_iterator& rhs) {
-		return (lhs.p_ - rhs.p_) / lhs.step_;
-	}
-
-	bool operator<(const slice_iterator& rhs) {
-		return p_ < rhs.p_;
-	}
-	bool operator>(const slice_iterator& rhs) {
-		return p_ > rhs.p_;
-	}
-	bool operator<=(const slice_iterator& rhs) {
-		return p_ <= rhs.p_;
-	}
-	bool operator>=(const slice_iterator& rhs) {
-		return p_ >= rhs.p_;
-	}
-	bool operator==(const slice_iterator& rhs) {
-		return p_ == rhs.p_;
-	}
-	bool operator!=(const slice_iterator& rhs) {
-		return p_ != rhs.p_;
-	}
-
-	iterator_t& backend() {
-		return p_;
-	}
-	const iterator_t& backend() const {
-		return p_;
-	}
-
-private:
-	iterator_t p_;
-	const difference_type step_;
-};
-
-// iterator that calc sumulative sum when doing *p
-template< class iterator_t >
-class cumsum_iterator : public std::iterator< std::bidirectional_iterator_tag, typename std::iterator_traits< iterator_t >::value_type > {
-	typedef std::iterator_traits< cumsum_iterator > traits_t;
-
-public:
-	typedef typename traits_t::value_type value_type;
-	typedef typename traits_t::pointer pointer;
-	typedef typename traits_t::reference reference;
-	typedef typename traits_t::difference_type difference_type;
-
-	// set step in compile-time
-	cumsum_iterator(value_type offset = 0) : p_(), sum_(offset) {}
-	cumsum_iterator(const iterator_t& i, value_type offset = 0) : p_(i), sum_(offset) {}
-	cumsum_iterator(const cumsum_iterator& i) : p_(i.p_), sum_(i.sum_) {}
-
-	cumsum_iterator& operator++() {
-		sum_ += *p_++;
-		return *this;
-	}
-	cumsum_iterator& operator++(int) {
-		cumsum_iterator tmp = *this;
-		sum_ += *p_++;
-		return tmp;
-	}
-
-	cumsum_iterator& operator--() {
-		sum_ -= *p_--;
-		return *this;
-	}
-	cumsum_iterator& operator--(int) {
-		cumsum_iterator tmp = *this;
-		sum_ -= *p_--;
-		return tmp;
-	}
-
-	pointer operator->() const {
-		return p_.operator->();
-	}
-	value_type operator*() const {
-		return sum_;
-	}
-
-	cumsum_iterator& operator=(const cumsum_iterator& lhs) {
-		p_ = lhs.p_;
-		sum_ = lhs.sum_;
-		return *this;
-	}
-
-	friend difference_type operator-(const cumsum_iterator& lhs, const cumsum_iterator& rhs) {
-		return lhs.p_ - rhs.p_;
-	}
-
-	bool operator<(const cumsum_iterator& rhs) {
-		return p_ < rhs.p_;
-	}
-	bool operator>(const cumsum_iterator& rhs) {
-		return p_ > rhs.p_;
-	}
-	bool operator<=(const cumsum_iterator& rhs) {
-		return p_ <= rhs.p_;
-	}
-	bool operator>=(const cumsum_iterator& rhs) {
-		return p_ >= rhs.p_;
-	}
-	bool operator==(const cumsum_iterator& rhs) {
-		return p_ == rhs.p_;
-	}
-	bool operator!=(const cumsum_iterator& rhs) {
-		return p_ != rhs.p_;
-	}
-
-	iterator_t& backend() {
-		return p_;
-	}
-	const iterator_t& backend() const {
-		return p_;
-	}
-
-private:
-	iterator_t p_;
-	value_type sum_;
-};
-
-template< class array_t >
-static fp_t sum(const array_t& a) {
-	fp_t s = 0;
-	for(typename array_t::const_iterator i = a.begin(), end = a.end(); i != end; ++i)
-		s += *i;
-	return s;
-}
-
-// helper structure to get dx[i] regardless of whether it given by one number or by array of
-// numbers
-struct dim_subscript {
-	dim_subscript(const fp_storarr_t& dim, fp_t offset = .0)
-		: dim_(dim), offset_(offset), sum_(offset)
-	{
-		if(dim_.size() == 1)
-			ss_fcn_ = &dim_subscript::ss_const_dim;
-		else
-			ss_fcn_ = &dim_subscript::ss_array_dim;
-	}
-
-	fp_stor_t ss_const_dim(int_t idx) {
-		return static_cast< fp_stor_t >(fp_t(dim_[0] * idx));
-	}
-
-	fp_stor_t ss_array_dim(int_t idx) {
-		if(idx > 0) sum_ += dim_[idx - 1];
-		return static_cast< fp_stor_t>(sum_);
-	}
-
-	void reset() { sum_ = offset_; }
-
-	fp_t operator[](int_t idx) {
-		return (this->*ss_fcn_)(idx);
-	}
-
-private:
-	const fp_storarr_t& dim_;
-	fp_stor_t (dim_subscript::*ss_fcn_)(int_t);
-	const fp_t offset_;
-	fp_t sum_;
-};
 
 spfp_storarr_t gen_coord(int_t nx, int_t ny, spfp_storarr_t dx, spfp_storarr_t dy, fp_t x0, fp_t y0) {
 	using namespace std;
@@ -316,33 +55,6 @@ spfp_storarr_t gen_coord(int_t nx, int_t ny, spfp_storarr_t dx, spfp_storarr_t d
 	BSOUT << "gen_coord: creation finished" << bs_end;
 
 	return coord;
-}
-
-template< class array_t >
-void resize_zcorn(array_t& zcorn, int_t nx, int_t ny, int_t new_nx, int_t new_ny) {
-	using namespace std;
-	typedef typename array_t::iterator v_iterator;
-	typedef typename array_t::value_type value_t;
-	typedef typename array_t::size_type size_t;
-
-	const int_t nz = (int_t)(zcorn.size() >> 3) / (nx  * ny);
-	//const int_t delta = 4 * (new_nx * new_ny - nx * ny);
-
-	// cache z-values for each plane
-	const int_t plane_sz = nx * ny * 4;
-	vector< value_t > z_cache(nz * 2);
-	slice_iterator< v_iterator > pz(zcorn.begin(), plane_sz);
-	slice_iterator< v_iterator > pz_end(zcorn.begin(), plane_sz);
-	copy(pz, pz + nz *2, z_cache.begin());
-
-	// refill zcorn with cached values & new plane size
-	const int_t new_plane_sz = (new_nx * new_ny * 4);
-	zcorn.resize(new_nx * new_ny * nz * 8);
-	v_iterator p_newz = zcorn.begin();
-	for(typename vector< value_t >::const_iterator p_cache = z_cache.begin(), end = z_cache.end(); p_cache != end; ++p_cache) {
-		fill_n(p_newz, new_plane_sz, *p_cache);
-  p_newz += new_plane_sz;
-	}
 }
 
 void insert_column(int_t nx, int_t ny, fp_storvec_t& coord, fp_storvec_t& zcorn, fp_stor_t where) {
@@ -417,208 +129,9 @@ void insert_row(int_t nx, int_t ny, fp_storvec_t& coord, fp_storvec_t& zcorn, fp
 	resize_zcorn(zcorn, nx, ny, nx, ny + 1);
 }
 
-template< class ret_array_t, class array_t >
-void coord2deltas(const array_t& src, ret_array_t& res) {
-	typedef typename array_t::const_iterator carr_iterator;
-
-	if(src.size() < 2) return;
-	res.resize(src.size() - 1);
-	typename ret_array_t::iterator p_res = res.begin();
-	carr_iterator a = src.begin(), b = a, end = src.end();
-	for(++b; b != end; ++b)
-		*p_res++ = *b - *a++;
-}
-
-struct proc_ray {
-	template< int_t direction, class = void >
-	struct dir_ray {
-		enum { dir = direction };
-
-		template< class ray_t >
-		static typename ray_t::iterator end(ray_t& ray) {
-			return ray.end();
-		}
-
-		template< class ray_t >
-		static typename ray_t::iterator last(ray_t& ray) {
-			return --ray.end();
-		}
-
-		template< class ray_t >
-		static typename ray_t::iterator closest_bound(ray_t& ray, fp_t v) {
-			return std::upper_bound(ray.begin(), ray.end(), v);
-		}
-
-		static fp_t min(fp_t f, fp_t s) {
-			return std::min(f, s);
-		}
-	};
-
-	template< class unused >
-	struct dir_ray< -1, unused > {
-		enum { dir = -1 };
-
-		template< class ray_t >
-		static typename ray_t::iterator end(ray_t& ray) {
-			return --ray.begin();
-		}
-
-		template< class ray_t >
-		static typename ray_t::iterator last(ray_t& ray) {
-			return ray.begin();
-		}
-
-		template< class ray_t >
-		static typename ray_t::iterator closest_bound(ray_t& ray, fp_t v) {
-			return std::upper_bound(ray.begin(), ray.end(), v)--;
-		}
-
-		static fp_t min(fp_t f, fp_t s) {
-			return std::max(f, s);
-		}
-	};
-
-	template< class ray_t, class predicate >
-	static fp_t find_cell(ray_t& coord, predicate p) {
-		typedef typename ray_t::iterator ray_iterator;
-		if(coord.size() < 2) return 0;
-		// find max cell size
-		fp_t cell_sz = 0;
-		ray_iterator a = coord.begin(), b = a, end = coord.end();
-		for(++b; b != end; ++b) {
-			cell_sz = p(*b - *a++, cell_sz);
-			//if(tmp > max_cell) max_cell = tmp;
-		}
-		return cell_sz;
-	}
-
-	template< class ray_t >
-	static fp_t find_max_cell(ray_t& coord) {
-		return find_cell(coord, std::max< fp_t >);
-	}
-
-	template< class ray_t >
-	static fp_t find_min_cell(ray_t& coord) {
-		return find_cell(coord, std::min< fp_t >);
-	}
-
-	template< class ray_t, class dir_ray_t >
-	static void go(ray_t& ray, fp_t start_point, fp_stor_t d, fp_stor_t a, dir_ray_t dr) {
-		using namespace std;
-		const int_t dir = static_cast< int_t >(dir_ray_t::dir);
-		// find where new point fall to
-		const fp_t max_sz = find_max_cell(ray) * 0.5;
-		const fp_t max_front = *dr.last(ray);
-		fp_t cell_sz = d;
-		fp_t wave_front = dr.min(start_point + dir * 0.5 * d, max_front);
-
-		// make refined ray
-		// add refinement grid
-		fp_set ref_ray;
-		while(cell_sz <= max_sz && abs(wave_front - max_front) > 0) {
-			ref_ray.insert(wave_front);
-			cell_sz *= a;
-			wave_front = dr.min(wave_front + dir * cell_sz, max_front);
-		}
-
-		// merge refinement with original grid
-		copy(ray.begin(), ray.end(), insert_iterator< fp_set >(ref_ray, ref_ray.begin()));
-		// copy results back
-		ray.clear();
-		copy(ref_ray.begin(), ref_ray.end(), insert_iterator< ray_t >(ray, ray.begin()));
-	}
-
-	template< class ray_t >
-	static int_t kill_tight_cells(ray_t& ray, fp_t min_cell_sz) {
-		typedef typename ray_t::iterator ray_iterator;
-
-		if(ray.size() < 2) return 0;
-		int_t merge_cnt = 0;
-		ray_iterator a = ray.begin(), b = a, end = ray.end();
-		for(++b; b != end; ++b) {
-			if(*b - *a < min_cell_sz) {
-				ray.erase(a++);
-				++merge_cnt;
-			}
-			else ++a;
-		}
-		return merge_cnt;
-	}
-
-	template< class ray_t >
-	static int_t band_filter(ray_t& ray, fp_t smooth_ratio) {
-		typedef typename ray_t::size_type size_t;
-		typedef std::set< size_t, std::greater< size_t > > idx_set;
-		typedef typename idx_set::const_iterator idx_iterator;
-
-		if(ray.size() < 2) return 0;
-
-		// find cells to remove
-		idx_set dying;
-		//std::vector< size_t > dying;
-		//
-		// left to right walk
-		int_t n = 0;
-		for(size_t i = 0; i < ray.size() - 1; ++i) {
-			// dont check dead bands
-			if(dying.find(i) != dying.end()) continue;
-			// main condition
-			if(ray[i] * smooth_ratio > ray[i + 1]) {
-				dying.insert(i + 1);
-				//dying.push_back(i + 1);
-				// check if cell after bound is less than before bound
-				if(i + 2 < ray.size() && ray[i + 2] < ray[i])
-					ray[i + 2] += ray[i + 1];
-				else
-					ray[i] += ray[i + 1];
-				++n;
-			}
-		}
-
-		// right to left walk
-		for(size_t i = ray.size() - 1; i >= 1; --i) {
-			// dont check dead bands
-			if(dying.find(i) != dying.end()) continue;
-			// main condition
-			if(ray[i] * smooth_ratio > ray[i - 1]) {
-				dying.insert(i - 1);
-				//dying.push_back(i + 1);
-				// check if cell after bound is less than before bound
-				if(i - 2 < ray.size() && ray[i - 2] < ray[i])
-					ray[i - 2] += ray[i - 1];
-				else
-					ray[i] += ray[i - 1];
-				++n;
-			}
-		}
-
-		// remove dead cells
-		for(idx_iterator p_id = dying.begin(), end = dying.end(); p_id != end; ++p_id) {
-			ray.erase(ray.begin() + *p_id);
-		}
-		//for(size_t i = 0; i < dying.size(); ++i)
-		//	ray.erase(ray.begin() + i);
-		return n;
-	}
-};
-
-template< class ray_t >
-void refine_mesh_impl(ray_t& coord, fp_stor_t point, fp_stor_t d, fp_stor_t a) {
-	using namespace std;
-	typedef typename fp_storvec_t::iterator v_iterator;
-	typedef typename fp_storvec_t::const_iterator cv_iterator;
-
-	// sanity check
-	if(!coord.size()) return;
-
-	// process coord in both directions
-	proc_ray::go(coord, point, d, a, typename proc_ray::template dir_ray< 1 >());
-	proc_ray::go(coord, point, d, a, typename proc_ray::template dir_ray< -1 >());
-}
-
 coord_zcorn_pair refine_mesh_deltas(int_t& nx, int_t& ny, spfp_storarr_t coord,
 	spfp_storarr_t points, fp_t cell_merge_thresh, fp_t band_thresh,
-	spi_arr_t hit_idx = NULL)
+	spi_arr_t hit_idx)
 {
 	using namespace std;
 
@@ -747,7 +260,7 @@ coord_zcorn_pair refine_mesh_deltas(int_t& nx, int_t& ny, spfp_storarr_t coord,
 
 coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, spfp_storarr_t coord, spfp_storarr_t zcorn,
 		spfp_storarr_t points, fp_t cell_merge_thresh, fp_t band_thresh,
-		spi_arr_t hit_idx = NULL)
+		spi_arr_t hit_idx)
 {
 	using namespace std;
 
@@ -822,7 +335,7 @@ spfp_storarr_t point_index2coord(int_t nx, int_t ny, spfp_storarr_t coord, spi_a
  *----------------------------------------------------------------*/
 coord_zcorn_pair refine_mesh_deltas(int_t& nx, int_t& ny, spfp_storarr_t coord,
 	spi_arr_t points_pos, spfp_storarr_t points_param, fp_t cell_merge_thresh, fp_t band_thresh,
-	spi_arr_t hit_idx = NULL)
+	spi_arr_t hit_idx)
 {
 	return refine_mesh_deltas(
 		nx, ny, coord,
@@ -836,7 +349,7 @@ coord_zcorn_pair refine_mesh_deltas(int_t& nx, int_t& ny, spfp_storarr_t coord,
  *----------------------------------------------------------------*/
 coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, spfp_storarr_t coord, spfp_storarr_t zcorn,
 		spi_arr_t points_pos, spfp_storarr_t points_param, fp_t cell_merge_thresh, fp_t band_thresh,
-		spi_arr_t hit_idx = NULL)
+		spi_arr_t hit_idx)
 {
 	return refine_mesh(
 		nx, ny, coord, zcorn,
@@ -845,7 +358,155 @@ coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, spfp_storarr_t coord, spfp_st
 	);
 }
 
-}}  // eof namespace blue_sky::coord_zcorn_tools
+BS_API_PLUGIN coord_zcorn_pair refine_mesh_deltas_s(
+	int_t& nx, int_t& ny, fp_stor_t max_dx, fp_stor_t max_dy,
+	fp_stor_t len_x, fp_stor_t len_y, spfp_storarr_t points_pos, spfp_storarr_t points_param)
+{
+	using namespace std;
+
+	typedef fp_storvec_t::iterator v_iterator;
+	typedef slice_iterator< v_iterator, 6 > dim_iterator;
+
+	// DEBUG
+	BSOUT << "refine_mesh: init stage" << bs_end;
+	// sanity check
+	if(!points_pos) return coord_zcorn_pair();
+
+	fp_storarr_t::const_iterator pp = points_pos->begin(), p_end = points_pos->end();
+	// make (p_end - p_begin) % 4 = 0
+	p_end -= (p_end - pp) % 2;
+
+	// DEBUG
+	BSOUT << "refine_mesh: points processing starts..." << bs_end;
+	BSOUT << "len_x = " << len_x << ", len_y = " << len_y << bs_end;
+	// points array: {(x, y}}
+	// first pass - build set of increasing px_coord & py_coord
+	fp_set px_coord, py_coord;
+	while(pp != p_end) {
+		px_coord.insert(*pp++);
+		py_coord.insert(*pp++);
+	}
+
+	// make intial mesh with bounds
+	fp_set x, y;
+	x.insert(0); x.insert(len_x);
+	y.insert(0); y.insert(len_y);
+
+	// if params specified only once - then params is equal for all points
+	fp_stor_t dx, dy, ax, ay;
+	fp_storarr_t::const_iterator p_param = points_param->begin();
+	bool const_params = false;
+	if(points_param->size() == 4) {
+		const_params = true;
+		dx = *(p_param++); dy = *(p_param++);
+		ax = *(p_param++); ay = *(p_param++);
+	}
+
+	// points coord
+	//fp_stor_t x_coord = 0, y_coord = 0;
+	// store processed points here
+	fp_set dx_ready, dy_ready;
+
+	// process points in X direction
+	int_t cnt = 0;
+	fp_set::const_iterator lower = px_coord.begin();
+	fp_set::const_iterator upper = px_coord.begin();
+	++upper;
+	for(fp_set::const_iterator px = px_coord.begin(), end = px_coord.end(); px != end; ++px) {
+		if(!const_params) {
+			dx = *(p_param++); dy = *(p_param++);
+			ax = *(p_param++); ay = *(p_param++);
+		}
+		// DEBUG
+		BSOUT << "point[" << ++cnt << "] at (x = " << *px << "), dx = " << dx
+		<< ", ax = " << ax << bs_end;
+		// process only new points
+		if(dx != 0 && dx_ready.find(*px) == dx_ready.end()) {
+			refine_point_s(x, *px, dx, ax, max_dx, len_x,
+				upper == end ? len_x + (len_x - *px) : *upper,
+				typename proc_ray::dir_ray< 1 >());
+			refine_point_s(x, *px, dx, ax, max_dx, len_x,
+				px == px_coord.begin() ? -*px : *lower,
+				typename proc_ray::dir_ray< -1 >());
+
+			//refine_mesh_impl_s(x, *px, dx, ax, max_dx, len_x);
+			dx_ready.insert(*px);
+		}
+		if(px != px_coord.begin())
+			++lower;
+		++upper;
+	}
+
+	// process points in Y direction
+	cnt = 0;
+	p_param = points_param->begin();
+	lower = py_coord.begin();
+	upper = py_coord.begin(); ++upper;
+	for(fp_set::const_iterator py = py_coord.begin(), end = py_coord.end(); py != end; ++py) {
+		if(!const_params) {
+			dx = *(p_param++); dy = *(p_param++);
+			ax = *(p_param++); ay = *(p_param++);
+		}
+		// DEBUG
+		BSOUT << "point[" << ++cnt << "] at (y = " << *py << "), dy = " << dy
+		<< ", ay = " << ay << bs_end;
+		// process only new points
+		if(dy != 0 && dy_ready.find(*py) == dy_ready.end()) {
+			refine_point_s(y, *py, dy, ay, max_dy, len_y,
+				upper == end ? len_y + (len_y - *py) : *upper,
+				typename proc_ray::dir_ray< 1 >());
+			refine_point_s(y, *py, dy, ay, max_dy, len_y,
+				py == py_coord.begin() ? -*py : *lower,
+				typename proc_ray::dir_ray< -1 >());
+
+			//refine_mesh_impl_s(y, *py, dy, ay, max_dy, len_y);
+			dy_ready.insert(*py);
+		}
+		if(py != py_coord.begin())
+			++lower;
+		++upper;
+	}
+
+	//proc_ray::kill_tight_cells(x, dx);
+	//proc_ray::kill_tight_cells(y, dy);
+
+	// DEBUG
+	//BSOUT << "refine_mesh: coord2deltas" << bs_end;
+	// make deltas from coordinates
+	vector< fp_stor_t > delta_x, delta_y;
+	coord2deltas(x, delta_x);
+	coord2deltas(y, delta_y);
+
+	// DEBUG
+	// check if sum(deltas) = len
+	//BSOUT << "sum(delta_x) = " << accumulate(delta_x.begin(), delta_x.end(), fp_stor_t(0)) << bs_end;
+	//BSOUT << "sum(delta_y) = " << accumulate(delta_y.begin(), delta_y.end(), fp_stor_t(0)) << bs_end;
+
+	//BSOUT << "fill gaps" << bs_end;
+	//fill_gaps(delta_x, max_dx);
+	//fill_gaps(delta_y, max_dy);
+
+	// DEBUG
+	// check if sum(deltas) = len
+	BSOUT << "sum(delta_x) = " << accumulate(delta_x.begin(), delta_x.end(), fp_stor_t(0)) << bs_end;
+	BSOUT << "sum(delta_y) = " << accumulate(delta_y.begin(), delta_y.end(), fp_stor_t(0)) << bs_end;
+
+
+	// DEBUG
+	//BSOUT << "refine_mesh: copy delta_x & delta_y to bs_arrays" << bs_end;
+	// copy delta_x & delta_y to bs_arrays
+	nx = (int_t)  delta_x.size();
+	ny = (int_t)  delta_y.size();
+	spfp_storarr_t adx = BS_KERNEL.create_object(fp_storarr_t::bs_type()),
+				   ady = BS_KERNEL.create_object(fp_storarr_t::bs_type());
+	adx->resize(delta_x.size()); ady->resize(delta_y.size());
+	copy(delta_x.begin(), delta_x.end(), adx->begin());
+	copy(delta_y.begin(), delta_y.end(), ady->begin());
+
+	return coord_zcorn_pair(adx, ady);
+}
+
+}}
 
 /*-----------------------------------------------------------------
  * implementation of bs_mesh::gen_coord_zcorn & refine_mesh
