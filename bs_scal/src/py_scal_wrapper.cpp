@@ -74,8 +74,10 @@ namespace blue_sky
       base_exporter<scale_array_holder, scale_array_holder_exporter>::export_class ("scale_arrays");
       base_exporter<scal_2p_data_holder, scal_data_holder_exporter>::export_class ("scal_data");
       base_exporter<scal_3p, scal_3p_exporter>::export_class ("scal_3p");
-      base_exporter<scal_2p_dummy, scal_dummy_exporter>::export_class ("scal_2p_dummy");
-      base_exporter<scal_3p_dummy, scal_dummy_exporter>::export_class ("scal_3p_dummy");
+      
+      base_exporter <scal_dummy_iface, scal_dummy_exporter>::export_class ("scal_dummy_iface");
+      class_exporter<scal_2p_dummy, scal_dummy_iface, scal_dummy_exporter>::export_class ("scal_2p_dummy");
+      class_exporter<scal_3p_dummy, scal_dummy_iface, scal_dummy_exporter>::export_class ("scal_3p_dummy");
       
     }
   }

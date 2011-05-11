@@ -47,7 +47,9 @@ namespace python    {
     class_exporter<pvt_gas, pvt_base, pvt_exporter>::export_class ("pvt_gas");
     class_exporter<pvt_water, pvt_base, pvt_exporter>::export_class ("pvt_water");
     class_exporter<pvt_dead_oil, pvt_base, pvt_exporter>::export_class ("pvt_dead_oil");
-    base_exporter<pvt_dummy, pvt_dummy_exporter>::export_class ("pvt_dummy");
+    
+    base_exporter <pvt_dummy_iface, pvt_dummy_exporter>::export_class ("pvt_dummy_iface");
+    class_exporter<pvt_dummy, pvt_dummy_iface, pvt_dummy_exporter>::export_class ("pvt_dummy");
 
   }
 
