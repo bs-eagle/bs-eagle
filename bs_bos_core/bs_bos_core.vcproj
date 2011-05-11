@@ -1135,18 +1135,6 @@
 			Name="simulator"
 			>
 			<File
-				RelativePath=".\src\calc_equil.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="2"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\src\calc_model.cpp"
 				>
 				<FileConfiguration
@@ -1416,6 +1404,26 @@
 			</File>
 			<File
 				RelativePath=".\include\timers.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="initialization"
+			>
+			<File
+				RelativePath=".\src\equil_model.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\equil_model.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\explicit_model.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\explicit_model.hpp"
 				>
 			</File>
 		</Filter>

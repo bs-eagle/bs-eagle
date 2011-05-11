@@ -35,6 +35,7 @@ namespace blue_sky {
     void add_spof (sp_array_item_t const &data, bool is_water);
     void add_spfn (sp_array_item_t const &data, t_long region_index, bool is_water);
     void add_sof3 (sp_array_item_t const &data, t_long region_index, bool is_water);
+    void add_sof2 (sp_array_item_t const &data, t_long region_index, bool is_water);
 
     ~scal_2p_data_holder ()
     {

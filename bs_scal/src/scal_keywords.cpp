@@ -16,10 +16,17 @@
 
 namespace blue_sky 
 {
+  enum 
+  {
+    SOF2_KEYWORD_COLUMNS = 2,
+    SOF3_KEYWORD_COLUMNS = 3,
+    SPFN_KEYWORD_COLUMNS = 3,
+    SPOF_KEYWORD_COLUMNS = 4
+  };
   typedef void (*handler_callback) (BS_SP (scal_3p_iface), stdv_float const &, t_long);
 
   void
-  handler (std::string const &keyword, keyword_params &params, handler_callback callback)
+  handler (std::string const &keyword, keyword_params &params, handler_callback callback, const t_int n_columns)
   {
     BS_SP (FRead) reader = params.hdm->get_reader ();
     BS_SP (idata) idata = params.hdm->get_data ();
@@ -29,7 +36,7 @@ namespace blue_sky
     stdv_float data;
     for (t_long i = 0; i < regions; ++i)
       {
-        if (reader->read_table (keyword, data, 4) < 1)
+        if (reader->read_table (keyword, data, n_columns) < 1)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough arguments for keyword %s")
                                 % reader->get_prefix () % keyword);
@@ -80,31 +87,48 @@ namespace blue_sky
   }
 
   void
+  SOF2_callback (BS_SP (scal_3p_iface) scal, stdv_float const &data, t_long i)
+  {
+    spv_float d = BS_KERNEL.create_object (v_float::bs_type ());
+    d->init (data);
+    // TODO: sof2 for 2-phase models only => need check for phases
+    // currently write this table for both water and gas data and use one of them (depends on phase which is present)
+    scal->get_water_data ()->add_sof2 (d, i, true);
+    scal->get_gas_data ()->add_sof2 (d, i, false);
+  }
+  
+ void
   SWOF (std::string const &keyword, keyword_params &params)
   {
-    handler (keyword, params, SWOF_callback);
+    handler (keyword, params, SWOF_callback, SPOF_KEYWORD_COLUMNS);
   }
   void
   SGOF (std::string const &keyword, keyword_params &params)
   {
-    handler (keyword, params, SGOF_callback);
+    handler (keyword, params, SGOF_callback, SPOF_KEYWORD_COLUMNS);
   }
   void
   SWFN (std::string const &keyword, keyword_params &params)
   {
-    handler (keyword, params, SWFN_callback);
+    handler (keyword, params, SWFN_callback, SPFN_KEYWORD_COLUMNS);
   }
   void
   SGFN (std::string const &keyword, keyword_params &params)
   {
-    handler (keyword, params, SGFN_callback);
+    handler (keyword, params, SGFN_callback, SPFN_KEYWORD_COLUMNS);
   }
   void
   SOF3 (std::string const &keyword, keyword_params &params)
   {
-    handler (keyword, params, SOF3_callback);
+    handler (keyword, params, SOF3_callback, SOF3_KEYWORD_COLUMNS);
   }
 
+  void
+  SOF2 (std::string const &keyword, keyword_params &params)
+  {
+    handler (keyword, params, SOF2_callback, SOF2_KEYWORD_COLUMNS);
+  }
+  
   scal_keywords::scal_keywords (bs_type_ctor_param)
   {
   }
@@ -125,6 +149,7 @@ namespace blue_sky
     keyword_manager->register_keyword ("SWFN", keyword_handler (SWFN, 0));
     keyword_manager->register_keyword ("SGFN", keyword_handler (SGFN, 0));
     keyword_manager->register_keyword ("SOF3", keyword_handler (SOF3, 0));
+    keyword_manager->register_keyword ("SOF2", keyword_handler (SOF2, 0));
 
     // FIXME: npy_intp
     npy_intp dimens[] = {1, 0, 1, 0, 1, 0};

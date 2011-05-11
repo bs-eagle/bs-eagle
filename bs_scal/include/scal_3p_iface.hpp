@@ -57,6 +57,9 @@ namespace blue_sky
     virtual void
     add_sof3 (spv_float const &sof3, t_long index, bool is_water) = 0;
 
+    virtual void
+    add_sof2 (spv_float const &sof3, t_long index, bool is_water) = 0;
+    
     virtual t_float
     get_phase_sat_min (t_long region) const = 0;
 

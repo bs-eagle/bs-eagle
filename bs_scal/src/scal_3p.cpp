@@ -124,7 +124,7 @@ namespace blue_sky
     BS_ASSERT ((data->size () % 3) == 0) (data->size ());
 
     if (placement_info_.type == scal::data_placement::scal_data_placement_null ||
-        placement_info_.type == scal::data_placement::spfn_sof3)
+        placement_info_.type == scal::data_placement::spfn_sofX)
       {
         scal_region_info_t info;
         info.So_count   = -1;
@@ -133,12 +133,12 @@ namespace blue_sky
         info.sp_offset  = (int)data_->size ();
 
         data_->resize (data_->size () + data->size ());
-        placement_info_.type = scal::data_placement::spfn_sof3;
+        placement_info_.type = scal::data_placement::spfn_sofX;
 
         scal::data_placement::all_regions_t::place_spfn_data (data_, placement_info_, data, is_water);
         region_.push_back (info);
       }
-    else if (placement_info_.type == scal::data_placement::sof3_spfn)
+    else if (placement_info_.type == scal::data_placement::sofX_spfn)
       {
         BS_ASSERT (region_index < region_.size ()) (region_index) (region_.size ());
         scal_region_info_t &info = region_[region_index];
@@ -149,7 +149,7 @@ namespace blue_sky
         data_->resize (data_->size () + data->size ());
         scal::data_placement::all_regions_t::place_spfn_data (data_, placement_info_, data, is_water);
         scal_region_t const &new_region = get_region_from_info (region_index);
-        precalc (info, new_region, scal::data_placement::sof3_spfn, is_water);
+        precalc (info, new_region, scal::data_placement::sofX_spfn, is_water);
         if (!check (new_region, is_water))
           {
             //region_.pop_back ();
@@ -172,7 +172,7 @@ namespace blue_sky
     BS_ASSERT ((data->size () % 3) == 0) (data->size ());
 
     if (placement_info_.type == scal::data_placement::scal_data_placement_null ||
-        placement_info_.type == scal::data_placement::sof3_spfn)
+        placement_info_.type == scal::data_placement::sofX_spfn)
       {
         scal_region_info_t info;
         info.So_count   = (int)data->size () / 3;
@@ -181,12 +181,12 @@ namespace blue_sky
         info.sp_offset  = -1;
 
         data_->resize (data_->size () + info.So_count * 2);
-        placement_info_.type = scal::data_placement::sof3_spfn;
+        placement_info_.type = scal::data_placement::sofX_spfn;
 
         scal::data_placement::all_regions_t::place_sof3_data (data_, placement_info_, data, is_water);
         region_.push_back (info);
       }
-    else if (placement_info_.type == scal::data_placement::spfn_sof3)
+    else if (placement_info_.type == scal::data_placement::spfn_sofX)
       {
         BS_ASSERT (region_index < region_.size ()) (region_index) (region_.size ());
         scal_region_info_t &info = region_[region_index];
@@ -197,12 +197,60 @@ namespace blue_sky
         data_->resize (data_->size () + info.So_count * 2);
         scal::data_placement::all_regions_t::place_sof3_data (data_, placement_info_, data, is_water);
         scal_region_t const &new_region = get_region_from_info (region_index);
-        precalc (info, new_region, scal::data_placement::spfn_sof3, is_water);
+        precalc (info, new_region, scal::data_placement::spfn_sofX, is_water);
         if (!check (new_region, is_water))
           {
             //region_.pop_back ();
             //data_.resize (data_.size () - info.So_count * 5);
             throw bs_exception ("scal_2p_data_holder::add_sof3", "Could not compute residual saturation");
+            // TODO: LOG
+          }
+      }
+    else
+      {
+        BS_ASSERT (false && "UNSUPPORTED DATA PLACEMENT TYPE") (placement_info_.type);
+      }
+  }
+
+  void
+  scal_2p_data_holder::add_sof2 (sp_array_item_t const &data, t_long region_index, bool is_water)
+  {
+    typedef t_int   index_t;
+
+    BS_ASSERT ((data->size () % 2) == 0) (data->size ());
+
+    if (placement_info_.type == scal::data_placement::scal_data_placement_null ||
+        placement_info_.type == scal::data_placement::sofX_spfn)
+      {
+        scal_region_info_t info;
+        info.So_count   = (int)data->size () / 2;
+        info.Sp_count   = -1;
+        info.so_offset  = (int)data_->size ();
+        info.sp_offset  = -1;
+
+        data_->resize (data_->size () + data->size ());
+        placement_info_.type = scal::data_placement::sofX_spfn;
+
+        scal::data_placement::all_regions_t::place_sof2_data (data_, placement_info_, data);
+        region_.push_back (info);
+      }
+    else if (placement_info_.type == scal::data_placement::spfn_sofX)
+      {
+        BS_ASSERT (region_index < region_.size ()) (region_index) (region_.size ());
+        scal_region_info_t &info = region_[region_index];
+
+        info.So_count   = (int)data->size () / 2;
+        info.so_offset  = (int)data_->size ();
+
+        data_->resize (data_->size () + data->size ());
+        scal::data_placement::all_regions_t::place_sof2_data (data_, placement_info_, data);
+        scal_region_t const &new_region = get_region_from_info (region_index);
+        precalc (info, new_region, scal::data_placement::spfn_sofX, is_water);
+        if (!check (new_region, is_water))
+          {
+            //region_.pop_back ();
+            //data_.resize (data_.size () - info.So_count * 5);
+            throw bs_exception ("scal_2p_data_holder::add_sof2", "Could not compute residual saturation");
             // TODO: LOG
           }
       }
