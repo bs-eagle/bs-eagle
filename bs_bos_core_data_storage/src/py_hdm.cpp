@@ -21,6 +21,7 @@ namespace python {
     .def("get_reader", &T::get_reader)
     .def("get_mesh", &T::get_mesh)
     .def("get_scal", &T::get_scal_dummy)
+    .def("get_pvt", &T::get_pvt_dummy)
     .def("get_keyword_manager", &T::get_keyword_manager)
   PY_EXPORTER_END;
 

@@ -17,6 +17,7 @@
 #include "pvt_gas.h"
 #include "pvt_oil.h"
 #include "pvt_water.h"
+#include "pvt_dummy.h"
 
 #include "export_python_wrapper.h"
 
@@ -29,6 +30,12 @@ namespace python    {
     .def ("get_gor_for_pressure",     &T::get_gor_for_pressure)
     .def ("print",                    &T::print)
   PY_EXPORTER_END;
+  
+     
+    PY_EXPORTER (pvt_dummy_exporter, default_exporter)
+      .def ("get_table", &T::get_table)
+      .def ("get_pvt_type", &T::get_pvt_type)
+    PY_EXPORTER_END;
 
   void
   py_export_pvt ()
@@ -40,6 +47,7 @@ namespace python    {
     class_exporter<pvt_gas, pvt_base, pvt_exporter>::export_class ("pvt_gas");
     class_exporter<pvt_water, pvt_base, pvt_exporter>::export_class ("pvt_water");
     class_exporter<pvt_dead_oil, pvt_base, pvt_exporter>::export_class ("pvt_dead_oil");
+    base_exporter<pvt_dummy, pvt_dummy_exporter>::export_class ("pvt_dummy");
 
   }
 

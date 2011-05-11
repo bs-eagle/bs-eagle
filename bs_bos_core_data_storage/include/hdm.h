@@ -14,6 +14,7 @@
 #include "read_class.h"
 #include "scal_3p_iface.hpp"
 #include "scal_dummy_iface.h"
+#include "pvt_dummy_iface.h"
 #include "init_model_iface.hpp"
 
 namespace blue_sky {
@@ -62,6 +63,8 @@ namespace blue_sky {
       BS_SP (scal_3p_iface) get_scal () { return scal_3p_; }
       
       BS_SP (scal_dummy_iface) get_scal_dummy () { return scal_dummy; }
+      
+      BS_SP (pvt_dummy_iface) get_pvt_dummy () { return pvt_dummy; }
 
       BS_SP (init_model_iface) get_init_model () { return init_model_; }
 
@@ -87,6 +90,7 @@ namespace blue_sky {
       sp_mesh_iface_t           mesh;                       //!< mesh
       BS_SP (scal_3p_iface)     scal_3p_;
       BS_SP (scal_dummy_iface)  scal_dummy;
+      BS_SP (pvt_dummy_iface)   pvt_dummy;
       BS_SP (init_model_iface)  init_model_;
       locale_keeper             lkeeper;
       physical_constants        ph_const;                //!< default physical constants

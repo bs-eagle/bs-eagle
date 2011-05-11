@@ -93,6 +93,8 @@ namespace blue_sky
     n_pases += data->props->get_b("water_phase");
     n_pases += data->props->get_b("gas_phase");
     
+    pvt_dummy = BS_KERNEL.create_object ("pvt_dummy");
+    pvt_dummy->init (n_pases);
     switch (n_pases)
     {
       case 2:

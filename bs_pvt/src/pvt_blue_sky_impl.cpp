@@ -11,6 +11,7 @@
 #include "pvt_gas.h"
 #include "pvt_oil.h"
 #include "pvt_water.h"
+#include "pvt_dummy.h"
 
 namespace blue_sky
   {
@@ -60,6 +61,9 @@ namespace blue_sky
     BS_ASSERT (res);
 
     res &= BS_KERNEL.register_type (pd, pvt_water::bs_type ());
+    BS_ASSERT (res);
+    
+    res &= BS_KERNEL.register_type (pd, pvt_dummy::bs_type ());
     BS_ASSERT (res);
 
     return res;

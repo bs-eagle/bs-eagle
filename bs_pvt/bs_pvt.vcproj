@@ -63,7 +63,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="blue-sky_d.lib bs_bos_core_base_d.lib bs_bos_core_data_storage_d.lib bs_matrix_d.lib loki_D.lib ws2_32.lib"
+				AdditionalDependencies=" loki_D.lib ws2_32.lib"
 				OutputFile="$(ProjectDir)/../../../exe/debug/plugins/$(ProjectName)_d.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/lib&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/debug/&quot;;&quot;$(ProjectDir)/../../../exe/debug/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
@@ -289,6 +289,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\pvt_dummy.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\pvt_dummy.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\pvt_gas.cpp"
 				>
 			</File>
@@ -351,6 +359,10 @@
 		</File>
 		<File
 			RelativePath=".\include\bs_pvt_stdafx.h"
+			>
+		</File>
+		<File
+			RelativePath=".\include\pvt_dummy_iface.h"
 			>
 		</File>
 		<File
