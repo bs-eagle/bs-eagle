@@ -56,6 +56,7 @@ namespace blue_sky
   scal_2p_data_holder::scal_2p_data_holder (bs_type_ctor_param param /* = NULL */)
   {
     data_ = BS_KERNEL.create_object (item_array_t::bs_type ());
+    scal_table_array.clear ();
   }
 
   scal_2p_data_holder::scal_2p_data_holder (const this_t& s)

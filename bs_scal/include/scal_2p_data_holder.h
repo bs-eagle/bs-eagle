@@ -57,6 +57,7 @@ namespace blue_sky {
         {
           delete region_2_[i];
         }
+      scal_table_array.clear ();  
     }
 
     t_float
