@@ -49,7 +49,7 @@ namespace blue_sky
     virtual ~scal_2p_data_holder_iface () {}
 
     virtual void
-    add_spof (spv_float const &swof, bool is_water) = 0;
+    add_spof (spv_float const &swof, t_long index, bool is_water) = 0;
 
     virtual void
     add_spfn (spv_float const &swfn, t_long index, bool is_water) = 0;

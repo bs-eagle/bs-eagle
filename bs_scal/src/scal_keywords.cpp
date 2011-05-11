@@ -48,53 +48,53 @@ namespace blue_sky
   }
 
   void
-  SWOF_callback (BS_SP (scal_3p_iface) scal, stdv_float const &data, t_long)
+  SWOF_callback (BS_SP (scal_3p_iface) scal, stdv_float const &data, t_long region_index)
   {
     spv_float d = BS_KERNEL.create_object (v_float::bs_type ());
     d->init (data);
-    scal->get_water_data ()->add_spof (d, true);
+    scal->get_water_data ()->add_spof (d, region_index, true);
   }
   void
-  SGOF_callback (BS_SP (scal_3p_iface) scal, stdv_float const &data, t_long)
+  SGOF_callback (BS_SP (scal_3p_iface) scal, stdv_float const &data, t_long region_index)
   {
     spv_float d = BS_KERNEL.create_object (v_float::bs_type ());
     d->init (data);
-    scal->get_gas_data ()->add_spof (d, false);
-  }
-
-  void
-  SWFN_callback (BS_SP (scal_3p_iface) scal, stdv_float const &data, t_long i)
-  {
-    spv_float d = BS_KERNEL.create_object (v_float::bs_type ());
-    d->init (data);
-    scal->get_water_data ()->add_spfn (d, i, true);
-  }
-  void
-  SGFN_callback (BS_SP (scal_3p_iface) scal, stdv_float const &data, t_long i)
-  {
-    spv_float d = BS_KERNEL.create_object (v_float::bs_type ());
-    d->init (data);
-    scal->get_gas_data ()->add_spfn (d, i, false);
+    scal->get_gas_data ()->add_spof (d, region_index, false);
   }
 
   void
-  SOF3_callback (BS_SP (scal_3p_iface) scal, stdv_float const &data, t_long i)
+  SWFN_callback (BS_SP (scal_3p_iface) scal, stdv_float const &data, t_long region_index)
   {
     spv_float d = BS_KERNEL.create_object (v_float::bs_type ());
     d->init (data);
-    scal->get_water_data ()->add_sof3 (d, i, true);
-    scal->get_gas_data ()->add_sof3 (d, i, false);
+    scal->get_water_data ()->add_spfn (d, region_index, true);
+  }
+  void
+  SGFN_callback (BS_SP (scal_3p_iface) scal, stdv_float const &data, t_long region_index)
+  {
+    spv_float d = BS_KERNEL.create_object (v_float::bs_type ());
+    d->init (data);
+    scal->get_gas_data ()->add_spfn (d, region_index, false);
   }
 
   void
-  SOF2_callback (BS_SP (scal_3p_iface) scal, stdv_float const &data, t_long i)
+  SOF3_callback (BS_SP (scal_3p_iface) scal, stdv_float const &data, t_long region_index)
+  {
+    spv_float d = BS_KERNEL.create_object (v_float::bs_type ());
+    d->init (data);
+    scal->get_water_data ()->add_sof3 (d, region_index, true);
+    scal->get_gas_data ()->add_sof3 (d, region_index, false);
+  }
+
+  void
+  SOF2_callback (BS_SP (scal_3p_iface) scal, stdv_float const &data, t_long region_index)
   {
     spv_float d = BS_KERNEL.create_object (v_float::bs_type ());
     d->init (data);
     // TODO: sof2 for 2-phase models only => need check for phases
     // currently write this table for both water and gas data and use one of them (depends on phase which is present)
-    scal->get_water_data ()->add_sof2 (d, i, true);
-    scal->get_gas_data ()->add_sof2 (d, i, false);
+    scal->get_water_data ()->add_sof2 (d, region_index, true);
+    scal->get_gas_data ()->add_sof2 (d, region_index, false);
   }
   
  void

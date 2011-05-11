@@ -87,7 +87,7 @@ namespace blue_sky
   }
 
   void
-  scal_2p_data_holder::add_spof (sp_array_item_t const &data, bool is_water)
+  scal_2p_data_holder::add_spof (sp_array_item_t const &data, t_long region_index, bool is_water)
   {
     BS_ASSERT ((data->size () % 4) == 0) (data->size ());
 
@@ -116,6 +116,58 @@ namespace blue_sky
         throw bs_exception ("scal_2p_data_holder::add_spof", "Could not compute residual saturation");
         // TODO: LOG
       }
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+    if (scal_table_array.size ())
+      {
+        BS_ASSERT (region_index >= 0 && region_index < scal_table_array.size ());
+        t_int table_len = (t_int) data->size () / 4;
+        t_double const *data_array = data->data ();
+        
+        spv_double sp = BS_KERNEL.create_object (v_double::bs_type ()); 
+        spv_double so = BS_KERNEL.create_object (v_double::bs_type ()); 
+        spv_double krp = BS_KERNEL.create_object (v_double::bs_type ()); 
+        spv_double krop = BS_KERNEL.create_object (v_double::bs_type ()); 
+        spv_double pcp = BS_KERNEL.create_object (v_double::bs_type ()); 
+        sp->resize (table_len);
+        so->resize (table_len);
+        krp->resize (table_len);
+        krop->resize (table_len);
+        pcp->resize (table_len);
+        
+        t_double *sp_ = &(*sp)[0];
+        t_double *so_ = &(*so)[0];
+        t_double *krp_ = &(*krp)[0];
+        t_double *krop_ = &(*krop)[0];
+        t_double *pcp_ = &(*pcp)[0];
+        
+        for (t_long i = 0; i < table_len; i++)
+          {
+            sp_[i]   = data_array[i + 0];
+            so_[i]   = 1.0 - sp_[i];
+            krp_[i]  = data_array[i + 1];
+            krop_[i] = data_array[i + 2];
+            pcp_[i]  = is_water ? -data_array[i + 3] : data_array[i + 3];
+          }
+        
+        sp_table scal_table = scal_table_array[region_index]; 
+        if (is_water)
+          {
+            scal_table->add_col_vector (SCAL_TABLE_SP, "SW", sp);
+            scal_table->add_col_vector (SCAL_TABLE_SO, "SO", so);
+            scal_table->add_col_vector (SCAL_TABLE_KRP, "KRW", krp);
+            scal_table->add_col_vector (SCAL_TABLE_KROP, "KROW", krop);  
+            scal_table->add_col_vector (SCAL_TABLE_PCP, "PCW", pcp);
+          }
+        else
+          {
+            scal_table->add_col_vector (SCAL_TABLE_SP, "SG", sp);
+            scal_table->add_col_vector (SCAL_TABLE_SO, "SO", so);
+            scal_table->add_col_vector (SCAL_TABLE_KRP, "KRG", krp);
+            scal_table->add_col_vector (SCAL_TABLE_KROP, "KROG", krop);  
+            scal_table->add_col_vector (SCAL_TABLE_PCP, "PCG", pcp);
+          }      
+      }
+    ///////////////////////////////////////////////////////////////////////////////    
   }
 
   void
@@ -162,6 +214,48 @@ namespace blue_sky
       {
         BS_ASSERT (false && "UNSUPPORTED DATA PLACEMENT TYPE") (placement_info_.type);
       }
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+    if (scal_table_array.size ())
+      {
+        BS_ASSERT (region_index >= 0 && region_index < scal_table_array.size ());
+        t_int table_len = (t_int) data->size () / 3;
+        t_double const *data_array = data->data ();
+        
+        spv_double sp = BS_KERNEL.create_object (v_double::bs_type ()); 
+        spv_double krp = BS_KERNEL.create_object (v_double::bs_type ()); 
+        spv_double pcp = BS_KERNEL.create_object (v_double::bs_type ()); 
+        sp->resize (table_len);
+        krp->resize (table_len);
+        pcp->resize (table_len);
+        
+        t_double *sp_ = &(*sp)[0];
+        t_double *krp_ = &(*krp)[0];
+        t_double *pcp_ = &(*pcp)[0];
+        
+        for (t_long i = 0; i < table_len; i++)
+          {
+            sp_[i]   = data_array[i + 0];
+            krp_[i]  = data_array[i + 1];
+            pcp_[i]  = is_water ? -data_array[i + 2] : data_array[i + 2];
+          }
+        
+        sp_table scal_table = scal_table_array[region_index]; 
+        if (is_water)
+          {
+            scal_table->add_col_vector (SCAL_TABLE_SP, "SW", sp);
+            scal_table->add_col_vector (SCAL_TABLE_KRP, "KRW", krp);
+            scal_table->add_col_vector (SCAL_TABLE_PCP, "PCW", pcp);
+          }
+        else
+          {
+            scal_table->add_col_vector (SCAL_TABLE_SP, "SG", sp);
+            scal_table->add_col_vector (SCAL_TABLE_KRP, "KRG", krp);
+            scal_table->add_col_vector (SCAL_TABLE_PCP, "PCG", pcp);
+          }      
+      }
+    ///////////////////////////////////////////////////////////////////////////////    
+      
   }
 
   void
@@ -210,6 +304,41 @@ namespace blue_sky
       {
         BS_ASSERT (false && "UNSUPPORTED DATA PLACEMENT TYPE") (placement_info_.type);
       }
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+    if (scal_table_array.size ())
+      {
+        BS_ASSERT (region_index >= 0 && region_index < scal_table_array.size ());
+        t_int table_len = (t_int) data->size () / 3;
+        t_double const *data_array = data->data ();
+        
+        spv_double so = BS_KERNEL.create_object (v_double::bs_type ()); 
+        spv_double krop = BS_KERNEL.create_object (v_double::bs_type ()); 
+        so->resize (table_len);
+        krop->resize (table_len);
+        
+        t_double *so_ = &(*so)[0];
+        t_double *krop_ = &(*krop)[0];
+        
+        for (t_long i = 0; i < table_len; i++)
+          {
+            so_[i]   = data_array[i + 0];
+            krop_[i] = is_water ? data_array[i + 1] : data_array[i + 2];
+          }
+        
+        sp_table scal_table = scal_table_array[region_index]; 
+        if (is_water)
+          {
+            scal_table->add_col_vector (SCAL_TABLE_SO, "SO", so);
+            scal_table->add_col_vector (SCAL_TABLE_KROP, "KROW", krop);  
+          }
+        else
+          {
+            scal_table->add_col_vector (SCAL_TABLE_SO, "SO", so);
+            scal_table->add_col_vector (SCAL_TABLE_KROP, "KROG", krop);  
+          }      
+      }
+    ///////////////////////////////////////////////////////////////////////////////    
+      
   }
 
   void
@@ -258,6 +387,41 @@ namespace blue_sky
       {
         BS_ASSERT (false && "UNSUPPORTED DATA PLACEMENT TYPE") (placement_info_.type);
       }
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+    if (scal_table_array.size ())
+      {
+        BS_ASSERT (region_index >= 0 && region_index < scal_table_array.size ());
+        t_int table_len = (t_int) data->size () / 2;
+        t_double const *data_array = data->data ();
+        
+        spv_double so = BS_KERNEL.create_object (v_double::bs_type ()); 
+        spv_double krop = BS_KERNEL.create_object (v_double::bs_type ()); 
+        so->resize (table_len);
+        krop->resize (table_len);
+        
+        t_double *so_ = &(*so)[0];
+        t_double *krop_ = &(*krop)[0];
+        
+        for (t_long i = 0; i < table_len; i++)
+          {
+            so_[i]   = data_array[i + 0];
+            krop_[i] = data_array[i + 1];
+          }
+        
+        sp_table scal_table = scal_table_array[region_index]; 
+        if (is_water)
+          {
+            scal_table->add_col_vector (SCAL_TABLE_SO, "SO", so);
+            scal_table->add_col_vector (SCAL_TABLE_KROP, "KROW", krop);  
+          }
+        else
+          {
+            scal_table->add_col_vector (SCAL_TABLE_SO, "SO", so);
+            scal_table->add_col_vector (SCAL_TABLE_KROP, "KROG", krop);  
+          }      
+      }
+    ///////////////////////////////////////////////////////////////////////////////    
+      
   }
 
   bool
@@ -320,11 +484,33 @@ namespace blue_sky
         const scal_region_t &water_region = water_data->get_region ((int)i);
 
         item_t swc = water_region.Sp[0];
-        for (size_t j = 0, jcnt = gas_region.Sp.size (); j < jcnt; ++j)
+        for (size_t j = 0, jcnt = gas_region.So.size (); j < jcnt; ++j)
           {
             gas_region.So[(int)j] -= swc; // TODO: BUG:
           }
       }
+    ////////////////////////////////////////////////////////////////////
+    if (scal_table_array.size ())
+      {
+        BS_ASSERT (scal_table_array.size () == water_data->scal_table_array.size ());
+        t_long n_regions = scal_table_array.size ();
+        for (t_long i = 0; i < n_regions; i++)
+          {
+            sp_table water_scal_table = water_data->scal_table_array[i];
+            item_t swc = water_scal_table->get_value (0, SCAL_TABLE_SP);
+            
+            sp_table gas_scal_table = scal_table_array[i];
+            t_int so_table_len = gas_scal_table->get_n_rows (SCAL_TABLE_SO);
+            BS_ASSERT (so_table_len > 0);
+            t_double *so_ = gas_scal_table->get_col_ptr (SCAL_TABLE_SO);
+            for (t_int j = 0; j < so_table_len; j++)
+              {
+                so_[i] -= swc;
+              }
+          }
+      }
+    ////////////////////////////////////////////////////////////////////
+      
   }
 
   //////////////////////////////////////////////////////////////////////////
