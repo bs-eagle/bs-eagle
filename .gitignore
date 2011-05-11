@@ -32,3 +32,10 @@ tags
 *.un~
 *.save
 *.layout
+*.bat
+*.lib
+*.exp
+*.zip
+*.h5
+*.vcproj?*
+

@@ -97,6 +97,9 @@ namespace blue_sky
     pvt_dummy->init (n_pases);
     switch (n_pases)
     {
+      case 1:
+        bs_throw_exception ("no scal: 1 phase");  
+        break;
       case 2:
         scal_dummy = BS_KERNEL.create_object ("scal_2p_dummy");
         break;
@@ -105,7 +108,7 @@ namespace blue_sky
         break;   
           
      default:
-        bs_throw_exception ("init: wrong scal choice");  
+        bs_throw_exception ("no scal: internal error");  
     }
   }
   
