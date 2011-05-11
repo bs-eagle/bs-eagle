@@ -48,6 +48,25 @@ namespace blue_sky {
     return std::pair<BS_SP( table_iface), BS_SP( table_iface)> (scal_data1, scal_data2);
   }
   
+  boost::python::list
+  scal_2p_dummy::py_get_table () const
+  {
+    boost::python::list items;
+    items.append (scal_data);
+    
+    return items;
+  }
+  
+  boost::python::list
+  scal_3p_dummy::py_get_table () const
+  {
+    boost::python::list items;
+    items.append (scal_data1);
+    items.append (scal_data2);
+    
+    return items;
+  }
+  
    //bs stuff
   BLUE_SKY_TYPE_STD_CREATE(scal_2p_dummy)
   BLUE_SKY_TYPE_STD_COPY(scal_2p_dummy)

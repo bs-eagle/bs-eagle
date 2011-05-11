@@ -35,7 +35,7 @@ namespace blue_sky {
     public:
     
       // initialize data manager
-      virtual void init() = 0;
+      virtual void init(const std::string &model_name) = 0;
       
       // read keyword file 
       virtual void read_keyword_file(const std::string filename) = 0;

@@ -23,6 +23,10 @@ namespace blue_sky {
     std::pair <BS_SP( table_iface), BS_SP( table_iface)>
     get_table () const;
     
+    boost::python::list 
+    py_get_table () const;
+    
+    
     private:
       BS_SP (table_iface) scal_data;
     
@@ -41,6 +45,9 @@ namespace blue_sky {
     
     std::pair <BS_SP( table_iface), BS_SP( table_iface)>
     get_table () const;
+    
+    boost::python::list 
+    py_get_table () const;
     
     private:
       BS_SP (table_iface) scal_data1;

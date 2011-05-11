@@ -23,6 +23,9 @@ class scal_dummy_iface : public objbase
     
     virtual std::pair <BS_SP( table_iface), BS_SP( table_iface)>
     get_table () const = 0;
+    
+    virtual boost::python::list 
+    py_get_table () const = 0;
   
   };
 

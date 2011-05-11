@@ -65,14 +65,14 @@ namespace blue_sky
   }
   
   void
-  hdm::init()
+  hdm::init(const std::string &model_name)
   {
     smart_ptr <hdm_iface, true> hdm = this;
     keyword_params kp;
     int n_pases;
     
     kp.hdm = this;
-    data->h5_pool->open_file ("hdm_storage.h5", "/pool");
+    data->h5_pool->open_file (model_name + ".h5", "/pool");
     km->init(hdm);
     
     

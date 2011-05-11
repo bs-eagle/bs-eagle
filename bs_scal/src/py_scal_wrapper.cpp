@@ -43,7 +43,7 @@ namespace blue_sky
     PY_EXPORTER_END;
     
     PY_EXPORTER (scal_dummy_exporter, default_exporter)
-      .def ("get_table", &T::get_table)
+      .def ("get_table", &T::py_get_table)
     PY_EXPORTER_END;
 
     void py_export_scal ()
