@@ -23,6 +23,7 @@ typedef v_long int_arr_t;
 typedef spv_long spi_arr_t;
 typedef std::set< fp_t > fp_set;
 
+typedef fp_storarr_t::iterator a_iterator;
 typedef fp_storvec_t::iterator v_iterator;
 typedef fp_storvec_t::const_iterator cv_iterator;
 typedef fp_set::iterator fps_iterator;
@@ -144,6 +145,7 @@ private:
 	iterator_t p_;
 	const difference_type step_;
 };
+typedef slice_iterator< a_iterator, 6 > dim_iterator;
 
 // iterator that calc sumulative sum when doing *p
 template< class iterator_t >
@@ -348,6 +350,49 @@ spfp_storarr_t gen_coord(int_t nx, int_t ny, spfp_storarr_t dx, spfp_storarr_t d
 	return coord;
 }
 
+coord_zcorn_pair gen_coord_zcorn(int_t nx, int_t ny, int_t nz, spv_float dx, spv_float dy, spv_float dz, fp_stor_t x0, fp_stor_t y0, fp_stor_t z0) {
+	using namespace std;
+	typedef coord_zcorn_pair ret_t;
+	typedef v_float::value_type value_t;
+
+	// DEBUG
+	BSOUT << "gen_coord_zcorn: init stage" << bs_end;
+	// create subscripter
+	if(!dx || !dy || !dz) return ret_t(NULL, NULL);
+	if(!dx->size() || !dy->size() || !dz->size()) return ret_t(NULL, NULL);
+
+	// if dimension offset is given as array, then size should be taken from array size
+	if(dz->size() > 1) nz = (t_long) dz->size();
+
+	// create zcorn array
+	spv_float zcorn = BS_KERNEL.create_object(v_float::bs_type());
+	// FIXME: raise exception
+	if(!zcorn) return ret_t(NULL, NULL);
+
+	// fill zcorn
+	// very simple case
+	dim_subscript dzs(*dz, z0);
+	zcorn->init(nx*ny*nz*8);
+
+	// DEBUG
+	BSOUT << "gen_coord_zcorn: ZCORN creating starts..." << bs_end;
+	v_float::iterator pcd = zcorn->begin();
+	const t_long plane_size = nx * ny * 4;
+	t_float z_cache = dzs[0];
+	for(t_long iz = 1; iz <= nz; ++iz) {
+		fill_n(pcd, plane_size, z_cache);
+		pcd += plane_size;
+		z_cache = dzs[iz];
+		fill_n(pcd, plane_size, z_cache);
+		pcd += plane_size;
+	}
+	// DEBUG
+	BSOUT << "gen_coord_zcorn: ZCORN creating finished" << bs_end;
+	BSOUT << "gen_coord_zcorn: COORD creating starts..." << bs_end;
+
+	return ret_t(gen_coord(nx, ny, dx, dy, x0, y0), zcorn);
+}
+
 /*-----------------------------------------------------------------
  * helper structure related to first refine_mesh algorithm
  *----------------------------------------------------------------*/
@@ -546,6 +591,91 @@ void refine_mesh_impl(ray_t& coord, fp_stor_t point, fp_stor_t d, fp_stor_t a) {
 	// process coord in both directions
 	proc_ray::go(coord, point, d, a, typename proc_ray::template dir_ray< 1 >());
 	proc_ray::go(coord, point, d, a, typename proc_ray::template dir_ray< -1 >());
+}
+
+/*-----------------------------------------------------------------
+ * convert points given in (i, j) format to absolute fp coordinates
+ *----------------------------------------------------------------*/
+spfp_storarr_t point_index2coord(int_t nx, int_t ny, spfp_storarr_t coord, spi_arr_t points_pos,
+		bool relative = false)
+{
+	using namespace std;
+	typedef slice_iterator< v_iterator, 6 > dim_iterator;
+	typedef int_arr_t::value_type pos_t;
+	const int_t ydim_step = 6 * (nx + 1);
+
+	// (left, top)
+	dim_iterator px(coord->begin());
+	dim_iterator py(coord->begin() + 1, ydim_step);
+	const fp_stor_t x0 = *min_element(px, px + (nx + 1));
+	const fp_stor_t y0 = *min_element(py, py + (ny + 1));
+
+	// create resulting array
+	spfp_storarr_t res = BS_KERNEL.create_object(fp_storarr_t::bs_type());
+	if(!res) return res;
+	const int_t points_num = points_pos->size() >> 1;
+	res->resize(points_num * 2);
+
+	int_arr_t::const_iterator p = points_pos->begin();
+	fp_storarr_t::iterator r = res->begin();
+	pos_t i, j;
+	for(int_t t = 0; t < points_num; ++t) {
+		// points = {(i, j)}
+		i = *p++; j = *p++;
+
+		// find x coordinate
+		dim_iterator px = coord->begin();
+		advance(px, min(nx, i));
+		*r = (*(px + 1) + *px) * 0.5;
+		if(relative) *r -= x0;
+		++r;
+
+		// find y coordinate
+		dim_iterator py(coord->begin() + 1, ydim_step);
+		advance(py, min(ny, j));
+		*r = (*(py + 1) + *py) * 0.5;
+		if(relative) *r -= y0;
+		++r;
+	}
+
+	return res;
+}
+
+spfp_storarr_t point_index2coord(int_t nx, int_t ny, spfp_storarr_t coord, spi_arr_t points_pos, spfp_storarr_t points_param) {
+	using namespace std;
+	typedef slice_iterator< v_iterator, 6 > dim_iterator;
+	typedef int_arr_t::value_type pos_t;
+	const int_t ydim_step = 6 * (nx + 1);
+
+	// create resulting array
+	spfp_storarr_t res = BS_KERNEL.create_object(fp_storarr_t::bs_type());
+	if(!res) return res;
+	const int_t points_num = points_pos->size() >> 1;
+	res->resize(points_num * 6);
+
+	int_arr_t::const_iterator p = points_pos->begin();
+	fp_storarr_t::const_iterator pp = points_param->begin();
+	fp_storarr_t::iterator r = res->begin();
+	pos_t i, j;
+	for(int_t t = 0; t < points_num; ++t) {
+		// points = {(i, j)}
+		i = *p++; j = *p++;
+
+		// find x coordinate
+		dim_iterator px = coord->begin();
+		advance(px, min(nx, i));
+		*r++ = (*(px + 1) + *px) * 0.5;
+
+		// find y coordinate
+		dim_iterator py(coord->begin() + 1, ydim_step);
+		advance(py, min(ny, j));
+		*r++ = (*(py + 1) + *py) * 0.5;
+
+		// fill other points params (dx, dy, ax, ay)
+		copy(pp, pp + 4, r);
+	}
+
+	return res;
 }
 
 /*-----------------------------------------------------------------
@@ -772,9 +902,8 @@ BS_API_PLUGIN coord_zcorn_pair wave_mesh_deltas(
 
 	// DEBUG
 	// check if sum(deltas) = len
-	//BSOUT << "sum(delta_x) = " << accumulate(delta_x.begin(), delta_x.end(), fp_stor_t(0)) << bs_end;
-	//BSOUT << "sum(delta_y) = " << accumulate(delta_y.begin(), delta_y.end(), fp_stor_t(0)) << bs_end;
-
+	BSOUT << "sum(delta_x) = " << accumulate(delta_x.begin(), delta_x.end(), fp_stor_t(0)) << bs_end;
+	BSOUT << "sum(delta_y) = " << accumulate(delta_y.begin(), delta_y.end(), fp_stor_t(0)) << bs_end;
 
 	// copy delta_x & delta_y to bs_arrays
 	nx = (int_t)  delta_x.size();
@@ -786,6 +915,51 @@ BS_API_PLUGIN coord_zcorn_pair wave_mesh_deltas(
 	copy(delta_y.begin(), delta_y.end(), ady->begin());
 
 	return coord_zcorn_pair(adx, ady);
+}
+
+/*-----------------------------------------------------------------
+ * wave_mesh = wave_mesh_deltas + gen_coord_zcorn
+ *----------------------------------------------------------------*/
+coord_zcorn_pair wave_mesh(
+	int_t& nx, int_t& ny, fp_stor_t max_dx, fp_stor_t max_dy,
+	fp_stor_t len_x, fp_stor_t len_y, spfp_storarr_t points_pos, spfp_storarr_t points_param,
+	int_t nz, spfp_storarr_t dz,
+	fp_stor_t x0, fp_stor_t y0, fp_stor_t z0)
+{
+	// refine coord
+	coord_zcorn_pair deltas = wave_mesh_deltas(
+		nx, ny, max_dx, max_dy, len_x, len_y,
+		points_pos, points_param
+	);
+	spfp_storarr_t& dx = deltas.first;
+	spfp_storarr_t& dy = deltas.second;
+
+	return gen_coord_zcorn(nx, ny, nz, dx, dy, dz, x0, y0, z0);
+}
+
+coord_zcorn_pair wave_mesh(
+	spfp_storarr_t coord,
+	int_t& nx, int_t& ny, fp_stor_t max_dx, fp_stor_t max_dy,
+	spi_arr_t points_pos, spfp_storarr_t points_param,
+	int_t nz, spfp_storarr_t dz,
+	fp_stor_t x0, fp_stor_t y0, fp_stor_t z0)
+{
+	using namespace std;
+	// calc field length
+	const int_t ydim_step = 6 * (nx + 1);
+	fp_stor_t len_x, len_y;
+	dim_iterator px(coord->begin());
+	dim_iterator py(coord->begin() + 1, ydim_step);
+	len_x = *max_element(px, px + (nx + 1))
+		- *min_element(px, px + (nx + 1));
+	len_y = *max_element(py, py + (ny + 1))
+		- *min_element(py, py + (ny + 1));
+	// invoke mesh gen
+	return wave_mesh(
+		nx, ny, max_dx, max_dy, len_x, len_y,
+		point_index2coord(nx, ny, coord, points_pos, true),
+		points_param, nz, dz, x0, y0, z0
+	);
 }
 
 //template< class ray_t >
@@ -1004,46 +1178,6 @@ coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, spfp_storarr_t coord, spfp_st
 }
 
 /*-----------------------------------------------------------------
- * convert points given in (i, j) format to absolute fp coordinates
- *----------------------------------------------------------------*/
-spfp_storarr_t point_index2coord(int_t nx, int_t ny, spfp_storarr_t coord, spi_arr_t points_pos, spfp_storarr_t points_param) {
-	using namespace std;
-	typedef slice_iterator< v_iterator, 6 > dim_iterator;
-	typedef int_arr_t::value_type pos_t;
-	const int_t ydim_step = 6 * (nx + 1);
-
-	// create resulting array
-	spfp_storarr_t res = BS_KERNEL.create_object(fp_storarr_t::bs_type());
-	if(!res) return res;
-	const int_t points_num = points_pos->size() >> 1;
-	res->resize(points_num * 6);
-
-	int_arr_t::const_iterator p = points_pos->begin();
-	fp_storarr_t::const_iterator pp = points_param->begin();
-	fp_storarr_t::iterator r = res->begin();
-	pos_t i, j;
-	for(int_t t = 0; t < points_num; ++t) {
-		// points = {(i, j)}
-		i = *p++; j = *p++;
-
-		// find x coordinate
-		dim_iterator px = coord->begin();
-		advance(px, min(nx, i));
-		*r++ = (*(px + 1) + *px) * 0.5;
-
-		// find y coordinate
-		dim_iterator py(coord->begin() + 1, ydim_step);
-		advance(py, min(ny, j));
-		*r++ = (*(py + 1) + *py) * 0.5;
-
-		// fill other points params (dx, dy, ax, ay)
-		copy(pp, pp + 4, r);
-	}
-
-	return res;
-}
-
-/*-----------------------------------------------------------------
  * refine_mesh_deltas for points given in (i,j) format
  *----------------------------------------------------------------*/
 coord_zcorn_pair refine_mesh_deltas(int_t& nx, int_t& ny, spfp_storarr_t coord,
@@ -1159,46 +1293,7 @@ namespace czt = blue_sky::coord_zcorn_tools;
 
 std::pair< spv_float, spv_float >
 mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz, t_float x0, t_float y0, t_float z0) {
-	using namespace std;
-	typedef std::pair< spv_float, spv_float > ret_t;
-	typedef v_float::value_type value_t;
-
-	// DEBUG
-	BSOUT << "gen_coord_zcorn: init stage" << bs_end;
-	// create subscripter
-	if(!dx || !dy || !dz) return ret_t(NULL, NULL);
-	if(!dx->size() || !dy->size() || !dz->size()) return ret_t(NULL, NULL);
-
-	// if dimension offset is given as array, then size should be taken from array size
-	if(dz->size() > 1) nz = (t_long) dz->size();
-
-	// create zcorn array
-	spv_float zcorn = BS_KERNEL.create_object(v_float::bs_type());
-  // FIXME: raise exception
-	if(!zcorn) return ret_t(NULL, NULL);
-
-	// fill zcorn
-	// very simple case
-	czt::dim_subscript dzs(*dz, z0);
-	zcorn->init(nx*ny*nz*8);
-
-	// DEBUG
-	BSOUT << "gen_coord_zcorn: ZCORN creating starts..." << bs_end;
-	v_float::iterator pcd = zcorn->begin();
-	const t_long plane_size = nx * ny * 4;
-	t_float z_cache = dzs[0];
-	for(t_long iz = 1; iz <= nz; ++iz) {
-		fill_n(pcd, plane_size, z_cache);
-		pcd += plane_size;
-		z_cache = dzs[iz];
-		fill_n(pcd, plane_size, z_cache);
-		pcd += plane_size;
-	}
-	// DEBUG
-	BSOUT << "gen_coord_zcorn: ZCORN creating finished" << bs_end;
-	BSOUT << "gen_coord_zcorn: COORD creating starts..." << bs_end;
-
-	return ret_t(czt::gen_coord(nx, ny, dx, dy, x0, y0), zcorn);
+	return czt::gen_coord_zcorn(nx, ny, nz, dx, dy, dz, x0, y0, z0);
 }
 
 /*-----------------------------------------------------------------
