@@ -1,4 +1,4 @@
-/** 
+/**
  * @file pvt_dead_oil.h
  * @brief realization of Dead Oil PVT properties
  * @author Oleg Borschuk
@@ -16,7 +16,7 @@
 
 namespace blue_sky
 {
-  /** 
+  /**
    * @brief interface class for block CSR matrix storage and manipulation
    */
   class BS_API_PLUGIN pvt_dead_oil: public pvt_oil_iface
@@ -29,7 +29,7 @@ namespace blue_sky
       //blue-sky class declaration
       BLUE_SKY_TYPE_DECL (pvt_dead_oil);
     public:
-      
+
       //! destructor
       virtual ~pvt_dead_oil ()
         {};
@@ -38,23 +38,23 @@ namespace blue_sky
       //  pvt_iface METHODS
       //-----------------------------------------
 
-       /** 
-        * @brief check class consistency 
-        * 
+       /**
+        * @brief check class consistency
+        *
         * @return 0 if ok, < 0 error found
         */
        virtual int check () const;
 
-       /** 
+       /**
         * @brief update calculated part of PVT
-        * 
+        *
         * @return 0 if ok, <0 if error occur
         */
        virtual int update ();
 
-       /** 
+       /**
         * @brief return surface density of the phase
-        * 
+        *
         * @param reg    -- <INPUT> region number
         */
        virtual t_double get_surface_density () const
@@ -62,15 +62,45 @@ namespace blue_sky
            return surface_density;
          }
 
-       /** 
+       /**
         * @brief return properties for a given region
-        * 
+        *
         * @param reg    -- <INPUT> given PVT region number
         */
-       virtual sp_prop_t get_properties ()
+       virtual sp_prop_t get_prop ()
          {
            return sp_in_prop;
          }
+
+       /**
+        * @brief check and set new property
+        *
+        * @param new_prop -- <INPUT> given property
+        */
+       virtual void set_prop (sp_prop_t new_prop)
+         {
+           sp_in_prop = new_prop;
+         }
+
+       /**
+        * @brief return table to the input data
+        *
+        */
+       virtual sp_table_t get_table ()
+         {
+           return sp_in_table;
+         }
+
+       /**
+        * @brief check and set given table
+        *
+        * @param new_table -- <INPUT> given table
+        */
+       virtual void set_table (sp_table_t new_table)
+         {
+           sp_in_table = new_table;
+         }
+
 
 
 #ifdef BSPY_EXPORTING_PLUGIN
@@ -92,8 +122,8 @@ namespace blue_sky
     protected:
       // INPUT DATA
       //! Input property storage
-      sp_prop_t         sp_in_prop;             
-      //! Input PVT table 
+      sp_prop_t         sp_in_prop;
+      //! Input PVT table
       sp_table_t        sp_in_table;
 
       // CALULATED DATA
@@ -103,7 +133,7 @@ namespace blue_sky
       t_double          surface_density;
       //! molar density
       t_double          molar_density;
-    
+
     private:
 
 
