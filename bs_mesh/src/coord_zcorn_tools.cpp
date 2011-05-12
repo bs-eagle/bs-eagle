@@ -1065,10 +1065,10 @@ BS_API_PLUGIN coord_zcorn_pair refine_mesh_deltas_s(
 		if(dx != 0 && dx_ready.find(*px) == dx_ready.end()) {
 			refine_point_s(x, *px, dx, ax, max_dx, len_x,
 				upper == end ? len_x + (len_x - *px) : *upper,
-				typename proc_ray::dir_ray< 1 >());
+				proc_ray::dir_ray< 1 >());
 			refine_point_s(x, *px, dx, ax, max_dx, len_x,
 				px == px_coord.begin() ? -*px : *lower,
-				typename proc_ray::dir_ray< -1 >());
+				proc_ray::dir_ray< -1 >());
 
 			//refine_mesh_impl_s(x, *px, dx, ax, max_dx, len_x);
 			dx_ready.insert(*px);
@@ -1095,10 +1095,10 @@ BS_API_PLUGIN coord_zcorn_pair refine_mesh_deltas_s(
 		if(dy != 0 && dy_ready.find(*py) == dy_ready.end()) {
 			refine_point_s(y, *py, dy, ay, max_dy, len_y,
 				upper == end ? len_y + (len_y - *py) : *upper,
-				typename proc_ray::dir_ray< 1 >());
+				proc_ray::dir_ray< 1 >());
 			refine_point_s(y, *py, dy, ay, max_dy, len_y,
 				py == py_coord.begin() ? -*py : *lower,
-				typename proc_ray::dir_ray< -1 >());
+				proc_ray::dir_ray< -1 >());
 
 			//refine_mesh_impl_s(y, *py, dy, ay, max_dy, len_y);
 			dy_ready.insert(*py);
