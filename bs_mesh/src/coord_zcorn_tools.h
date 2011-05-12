@@ -58,7 +58,7 @@ BS_API_PLUGIN coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, spfp_storarr_t 
 		spi_arr_t hit_idx);
 
 
-BS_API_PLUGIN coord_zcorn_pair refine_mesh_deltas_s(
+BS_API_PLUGIN coord_zcorn_pair wave_mesh_deltas(
 	int_t& nx, int_t& ny, fp_stor_t max_dx, fp_stor_t max_dy,
 	fp_stor_t len_x, fp_stor_t len_y, spfp_storarr_t points_pos, spfp_storarr_t points_param);
 
