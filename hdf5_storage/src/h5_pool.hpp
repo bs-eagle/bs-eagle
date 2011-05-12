@@ -257,7 +257,7 @@ namespace blue_sky
        * @return h5_pair, throws bs_exception on error
        * */
       h5_pair
-      open_data (std::string const &name);
+      open_data (std::string const &name, const int h5_write = 0);
 
 
       /** 

@@ -98,7 +98,6 @@ namespace blue_sky
     switch (n_pases)
     {
       case 1:
-        bs_throw_exception ("no scal: 1 phase");  
         break;
       case 2:
         scal_dummy = BS_KERNEL.create_object ("scal_2p_dummy");
@@ -106,9 +105,7 @@ namespace blue_sky
       case 3:
         scal_dummy = BS_KERNEL.create_object ("scal_3p_dummy");
         break;   
-          
-     default:
-        bs_throw_exception ("no scal: internal error");  
+     
     }
   }
   

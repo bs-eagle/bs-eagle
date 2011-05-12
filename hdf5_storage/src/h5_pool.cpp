@@ -279,16 +279,35 @@ namespace blue_sky
   BS_SP (T)
   get_data (std::string const &name, h5_pair const &p)
   {
-    t_long n = H5Sget_simple_extent_npoints (p.dspace);
+    t_long n;
     BS_SP (T) a = BS_KERNEL.create_object (T::bs_type ());
-
+    typename T::value_type def_value;
+    
+    if (p.dset)
+      {
+        n = H5Sget_simple_extent_npoints (p.dspace);
+      }
+    else
+      {
+        n = 1;
+        for (int i = 0; i < p.n_dims; ++i)
+          n *= p.py_dims[i];
+      }   
     a->resize (n);
     a->reshape (p.n_dims, p.py_dims);
-
-    herr_t r = H5Dread (p.dset, get_hdf5_type <typename T::value_type> (), H5S_ALL, H5S_ALL, H5P_DEFAULT, a->data ());
-    if (r < 0)
+    
+    if (p.dset)
       {
-        bs_throw_exception (boost::format ("Can't read data: %s") % name);
+        herr_t r = H5Dread (p.dset, get_hdf5_type <typename T::value_type> (), H5S_ALL, H5S_ALL, H5P_DEFAULT, a->data ());
+        if (r < 0)
+          {
+            bs_throw_exception (boost::format ("Can't read data: %s") % name);
+          }
+      }
+    else
+      {
+        H5Pget_fill_value (p.plist, p.dtype, &def_value);
+        a->assign(def_value);
       }
 
     return a;
@@ -364,7 +383,7 @@ namespace blue_sky
   }
 
   h5_pair
-  h5_pool::open_data (std::string const &name)
+  h5_pool::open_data (std::string const &name, int h5_write)
   {
     map_t::iterator it = h5_map.find (name);
     if (it == h5_map.end ())
@@ -377,20 +396,23 @@ namespace blue_sky
         if (!detail::is_object_exists (group_id, name.c_str ()))
           {
             const h5_pair &p = it->second;
-            hid_t dspace = H5Screate_simple (p.n_dims, p.h5_dims, NULL);
-            if (dspace < 0)
+            if (h5_write)
               {
-                bs_throw_exception (boost::format ("Can't create simple dataspace for dataset %s in group %d") % name % group_id);
-              }
+                hid_t dspace = H5Screate_simple (p.n_dims, p.h5_dims, NULL);
+                if (dspace < 0)
+                  {
+                    bs_throw_exception (boost::format ("Can't create simple dataspace for dataset %s in group %d") % name % group_id);
+                  }
 
-            hid_t dset = H5Dcreate (group_id, name.c_str (), p.dtype, dspace, p.plist);
-            if (dset < 0)
-              {
-                bs_throw_exception (boost::format ("Can't create dataset %s in group %d") % name % group_id);
-              }
+                hid_t dset = H5Dcreate (group_id, name.c_str (), p.dtype, dspace, p.plist);
+                if (dset < 0)
+                  {
+                    bs_throw_exception (boost::format ("Can't create dataset %s in group %d") % name % group_id);
+                  }
 
-            it->second.dspace = dspace;
-            it->second.dset = dset;
+                it->second.dspace = dspace;
+                it->second.dset = dset;
+              }
             calc_data_dims (it);
           }
         else 
@@ -433,7 +455,8 @@ namespace blue_sky
         declare_data (name, dtype, def_value, n_dims, dims);
       }
 
-    const h5_pair &p = open_data (name);
+    const h5_pair &p = open_data (name, 1);
+    
     if (p.size > data_size)
       {
         bs_throw_exception (boost::format ("Size mismatch for %s: %d > %d") % name % p.size % data_size);

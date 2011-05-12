@@ -6,11 +6,15 @@ hdm = bs.bs_bos_core_data_storage.hdm()
 hdm.get_prop().add_property_i (0, "mesh", "mesh type")
 hdm.get_prop().set_i ("mesh", 1)
 
-hdm.init()
+hdm.init("lalala.h5")
 #hdm.read_keyword_file('D:\\projects\\UfaSolver\\tests\\bos\\model.data')
 #hdm.read_keyword_file('G:\\projects\\UfaSolver\\tests\\Frac\\Test2.ppp.files\\bos\\model.data')
-exit()
+
+
 pool = hdm.get_pool()
+pool.py_set_pool_dims ([10, 10, 10])
+act = pool.get_i_data("ACTNUM")
+
 
 mesh = hdm.get_mesh()
 
