@@ -21,7 +21,7 @@ typedef t_double fp_t;
 typedef t_float fp_stor_t;
 typedef spv_float spfp_storarr_t;
 typedef spv_long spi_arr_t;
-typedef typename spi_arr_t::pure_pointed_t int_arr_t;
+typedef spi_arr_t::pure_pointed_t int_arr_t;
 typedef std::pair< spv_float, spv_float > coord_zcorn_pair;
 
 // refine_mesh_deltas with overloads
