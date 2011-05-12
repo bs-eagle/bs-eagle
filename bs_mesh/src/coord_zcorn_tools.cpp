@@ -552,7 +552,7 @@ void refine_mesh_impl(ray_t& coord, fp_stor_t point, fp_stor_t d, fp_stor_t a) {
  * new mesh generation algo based on well points
  *----------------------------------------------------------------*/
 template< class ray_t, class dir_ray_t >
-void refine_point_s(ray_t& ray, fp_t start_point, fp_stor_t d, fp_stor_t a,
+void make_wave(ray_t& ray, fp_t start_point, fp_stor_t d, fp_stor_t a,
 		fp_stor_t max_sz, fp_stor_t field_len, fp_stor_t closest, dir_ray_t dr)
 {
 	using namespace std;
@@ -654,7 +654,7 @@ void fill_gaps(delta_t& d, fp_stor_t cell_sz, fp_stor_t min_sz) {
 	copy(refined_d.begin(), refined_d.end(), insert_iterator< delta_t >(d, d.begin()));
 }
 
-BS_API_PLUGIN coord_zcorn_pair refine_mesh_deltas_s(
+BS_API_PLUGIN coord_zcorn_pair wave_mesh_deltas(
 	int_t& nx, int_t& ny, fp_stor_t max_dx, fp_stor_t max_dy,
 	fp_stor_t len_x, fp_stor_t len_y, spfp_storarr_t points_pos, spfp_storarr_t points_param)
 {
@@ -664,7 +664,7 @@ BS_API_PLUGIN coord_zcorn_pair refine_mesh_deltas_s(
 	typedef slice_iterator< v_iterator, 6 > dim_iterator;
 
 	// DEBUG
-	BSOUT << "refine_mesh: init stage" << bs_end;
+	BSOUT << "wave_mesh_deltas: init stage" << bs_end;
 	// sanity check
 	if(!points_pos) return coord_zcorn_pair();
 
@@ -673,7 +673,7 @@ BS_API_PLUGIN coord_zcorn_pair refine_mesh_deltas_s(
 	p_end -= (p_end - pp) % 2;
 
 	// DEBUG
-	BSOUT << "refine_mesh: points processing starts..." << bs_end;
+	BSOUT << "wave_mesh_deltas: points processing starts..." << bs_end;
 	BSOUT << "len_x = " << len_x << ", len_y = " << len_y << bs_end;
 	// points array: {(x, y}}
 	// first pass - build set of increasing px_coord & py_coord
@@ -718,14 +718,13 @@ BS_API_PLUGIN coord_zcorn_pair refine_mesh_deltas_s(
 		<< ", ax = " << ax << bs_end;
 		// process only new points
 		if(dx != 0 && dx_ready.find(*px) == dx_ready.end()) {
-			refine_point_s(x, *px, dx, ax, max_dx, len_x,
+			make_wave(x, *px, dx, ax, max_dx, len_x,
 				upper == end ? len_x + (len_x - *px) : *upper,
 				proc_ray::dir_ray< 1 >());
-			refine_point_s(x, *px, dx, ax, max_dx, len_x,
+			make_wave(x, *px, dx, ax, max_dx, len_x,
 				px == px_coord.begin() ? -*px : *lower,
 				proc_ray::dir_ray< -1 >());
 
-			//refine_mesh_impl_s(x, *px, dx, ax, max_dx, len_x);
 			dx_ready.insert(*px);
 		}
 		if(px != px_coord.begin())
@@ -748,14 +747,13 @@ BS_API_PLUGIN coord_zcorn_pair refine_mesh_deltas_s(
 		<< ", ay = " << ay << bs_end;
 		// process only new points
 		if(dy != 0 && dy_ready.find(*py) == dy_ready.end()) {
-			refine_point_s(y, *py, dy, ay, max_dy, len_y,
+			make_wave(y, *py, dy, ay, max_dy, len_y,
 				upper == end ? len_y + (len_y - *py) : *upper,
 				proc_ray::dir_ray< 1 >());
-			refine_point_s(y, *py, dy, ay, max_dy, len_y,
+			make_wave(y, *py, dy, ay, max_dy, len_y,
 				py == py_coord.begin() ? -*py : *lower,
 				proc_ray::dir_ray< -1 >());
 
-			//refine_mesh_impl_s(y, *py, dy, ay, max_dy, len_y);
 			dy_ready.insert(*py);
 		}
 		if(py != py_coord.begin())
@@ -763,20 +761,10 @@ BS_API_PLUGIN coord_zcorn_pair refine_mesh_deltas_s(
 		++upper;
 	}
 
-	//proc_ray::kill_tight_cells(x, dx);
-	//proc_ray::kill_tight_cells(y, dy);
-
-	// DEBUG
-	//BSOUT << "refine_mesh: coord2deltas" << bs_end;
 	// make deltas from coordinates
 	vector< fp_stor_t > delta_x, delta_y;
 	coord2deltas(x, delta_x);
 	coord2deltas(y, delta_y);
-
-	// DEBUG
-	// check if sum(deltas) = len
-	//BSOUT << "sum(delta_x) = " << accumulate(delta_x.begin(), delta_x.end(), fp_stor_t(0)) << bs_end;
-	//BSOUT << "sum(delta_y) = " << accumulate(delta_y.begin(), delta_y.end(), fp_stor_t(0)) << bs_end;
 
 	//BSOUT << "fill gaps" << bs_end;
 	fill_gaps(delta_x, max_dx, dx);
@@ -784,12 +772,10 @@ BS_API_PLUGIN coord_zcorn_pair refine_mesh_deltas_s(
 
 	// DEBUG
 	// check if sum(deltas) = len
-	BSOUT << "sum(delta_x) = " << accumulate(delta_x.begin(), delta_x.end(), fp_stor_t(0)) << bs_end;
-	BSOUT << "sum(delta_y) = " << accumulate(delta_y.begin(), delta_y.end(), fp_stor_t(0)) << bs_end;
+	//BSOUT << "sum(delta_x) = " << accumulate(delta_x.begin(), delta_x.end(), fp_stor_t(0)) << bs_end;
+	//BSOUT << "sum(delta_y) = " << accumulate(delta_y.begin(), delta_y.end(), fp_stor_t(0)) << bs_end;
 
 
-	// DEBUG
-	//BSOUT << "refine_mesh: copy delta_x & delta_y to bs_arrays" << bs_end;
 	// copy delta_x & delta_y to bs_arrays
 	nx = (int_t)  delta_x.size();
 	ny = (int_t)  delta_y.size();

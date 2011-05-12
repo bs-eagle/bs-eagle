@@ -24,12 +24,14 @@ typedef spv_long spi_arr_t;
 typedef spi_arr_t::pure_pointed_t int_arr_t;
 typedef std::pair< spv_float, spv_float > coord_zcorn_pair;
 
-// refine_mesh_deltas with overloads
-static tuple refine_mesh_deltas_s(int_t nx, int_t ny, fp_stor_t max_dx, fp_stor_t max_dy,
+// wave_mesh_deltas with overloads
+static tuple wave_mesh_deltas(int_t nx, int_t ny, fp_stor_t max_dx, fp_stor_t max_dy,
 		fp_stor_t len_x, fp_stor_t len_y,
 		spfp_storarr_t points_pos, spfp_storarr_t points_param)
 {
-	std::pair< spfp_storarr_t, spfp_storarr_t > r = czt::refine_mesh_deltas_s(nx, ny, max_dx, max_dy, len_x, len_y, points_pos, points_param);
+	std::pair< spfp_storarr_t, spfp_storarr_t > r = czt::wave_mesh_deltas(
+		nx, ny, max_dx, max_dy, len_x, len_y, points_pos, points_param
+	);
 	return make_tuple(r.first, r.second, nx, ny);
 }
 
@@ -38,7 +40,7 @@ static tuple refine_mesh_deltas_s(int_t nx, int_t ny, fp_stor_t max_dx, fp_stor_
 namespace blue_sky { namespace python {
 
 void py_export_czt() {
-	def("refine_mesh_deltas_s", &refine_mesh_deltas_s);
+	def("wave_mesh_deltas", &wave_mesh_deltas);
 }
 
 }} 	// eof blue_sky::python
