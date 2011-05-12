@@ -307,6 +307,47 @@ void coord2deltas(const array_t& src, ret_array_t& res) {
 		*p_res++ = *b - *a++;
 }
 
+spfp_storarr_t gen_coord(int_t nx, int_t ny, spfp_storarr_t dx, spfp_storarr_t dy, fp_t x0, fp_t y0) {
+	using namespace std;
+	typedef fp_storarr_t::value_type value_t;
+
+	// DEBUG
+	BSOUT << "gen_coord: init stage" << bs_end;
+	// create subscripters
+	dim_subscript dxs(*dx, x0);
+	dim_subscript dys(*dy, y0);
+
+	// if dimension offset is given as array, then size should be taken from array size
+	if(dx->size() > 1) nx = (int_t) dx->size();
+	if(dy->size() > 1) ny = (int_t) dy->size();
+
+	// create arrays
+	spfp_storarr_t coord = BS_KERNEL.create_object(fp_storarr_t::bs_type());
+// FIXME: raise exception
+	if(!coord) return NULL;
+
+	// DEBUG
+	BSOUT << "gen_coord: creation starts..." << bs_end;
+	// fill coord
+	// coord is simple grid
+	coord->init((nx + 1)*(ny + 1)*6, value_t(0));
+	fp_storarr_t::iterator pcd = coord->begin();
+	for(int_t iy = 0; iy <= ny; ++iy) {
+		fp_t cur_y = dys[iy];
+		for(int_t ix = 0; ix <= nx; ++ix) {
+			pcd[0] = pcd[3] = dxs[ix];
+			pcd[1] = pcd[4] = cur_y;
+			pcd[5] = 1; // pcd[2] = 0 from init
+			pcd += 6;
+		}
+		dxs.reset();
+	}
+	// DEBUG
+	BSOUT << "gen_coord: creation finished" << bs_end;
+
+	return coord;
+}
+
 /*-----------------------------------------------------------------
  * helper structure related to first refine_mesh algorithm
  *----------------------------------------------------------------*/
@@ -517,7 +558,7 @@ void refine_point_s(ray_t& ray, fp_t start_point, fp_stor_t d, fp_stor_t a,
 	using namespace std;
 	const int_t dir = static_cast< int_t >(dir_ray_t::dir);
 	// DEBUG
-	BSOUT << dir << ": center " << start_point << "; closest " << closest << bs_end;
+	//BSOUT << dir << ": center " << start_point << "; closest " << closest << bs_end;
 
 	// try to calc, how many wave fronts can we insert
 	const uint_t N_max = uint_t(floor(std::log(max_sz / d) / std::log(a) + 1));
@@ -528,8 +569,8 @@ void refine_point_s(ray_t& ray, fp_t start_point, fp_stor_t d, fp_stor_t a,
 	//N = max< uint_t>(N, 1);
 	// calc tail to half of distance to nearest bound
 	fp_t tail = S - d * std::pow(a, N);
-	//if(tail < d * 0.5 && N > 0)
-	//	--N;
+	if(tail < d * 0.5 && N > 0)
+		--N;
 
 	// refined ray stored here
 	fp_set ref_ray;
@@ -540,8 +581,8 @@ void refine_point_s(ray_t& ray, fp_t start_point, fp_stor_t d, fp_stor_t a,
 	
 	for(uint_t i = 0; i < N; ++i) {
 		wave_front += dir * cell_sz;
-		if(i == N -1 && tail < d * 0.5)
-			wave_front += dir * tail;
+		//if(i == N -1 && tail < d * 0.5)
+		//	wave_front += dir * tail;
 		wave_front = dr.min(wave_front, max_front);
 		if(abs(wave_front - max_front) < 0.000001)
 			break;
@@ -570,7 +611,7 @@ void refine_point_s(ray_t& ray, fp_t start_point, fp_stor_t d, fp_stor_t a,
 }
 
 template< class delta_t >
-void fill_gaps(delta_t& d, fp_stor_t cell_sz) {
+void fill_gaps(delta_t& d, fp_stor_t cell_sz, fp_stor_t min_sz) {
 	using namespace std;
 	typedef typename delta_t::iterator d_iterator;
 	// fill big gaps with cells of given size
@@ -586,8 +627,15 @@ void fill_gaps(delta_t& d, fp_stor_t cell_sz) {
 		// how much cells can we insert?
 		uint_t N = uint_t(floor(*pd * m));
 		fp_t tail = *pd - N * cell_sz;
+		// next if we have only one cell
+		// then put bound exactly between [a; b]
+		if(N == 1) {
+			refined_d.push_back(*pd * 0.5);
+			refined_d.push_back(*pd * 0.5);
+			continue;
+		}
 		// if tail is big - push it as separate cell
-		if(tail > 0.3 * cell_sz) {
+		if(tail > 0.3 * cell_sz && tail >= min_sz) {
 			refined_d.push_back(tail);
 			tail = 0;
 		}
@@ -604,6 +652,154 @@ void fill_gaps(delta_t& d, fp_stor_t cell_sz) {
 	// copy refined delta back
 	d.clear();
 	copy(refined_d.begin(), refined_d.end(), insert_iterator< delta_t >(d, d.begin()));
+}
+
+BS_API_PLUGIN coord_zcorn_pair refine_mesh_deltas_s(
+	int_t& nx, int_t& ny, fp_stor_t max_dx, fp_stor_t max_dy,
+	fp_stor_t len_x, fp_stor_t len_y, spfp_storarr_t points_pos, spfp_storarr_t points_param)
+{
+	using namespace std;
+
+	typedef fp_storvec_t::iterator v_iterator;
+	typedef slice_iterator< v_iterator, 6 > dim_iterator;
+
+	// DEBUG
+	BSOUT << "refine_mesh: init stage" << bs_end;
+	// sanity check
+	if(!points_pos) return coord_zcorn_pair();
+
+	fp_storarr_t::const_iterator pp = points_pos->begin(), p_end = points_pos->end();
+	// make (p_end - p_begin) % 4 = 0
+	p_end -= (p_end - pp) % 2;
+
+	// DEBUG
+	BSOUT << "refine_mesh: points processing starts..." << bs_end;
+	BSOUT << "len_x = " << len_x << ", len_y = " << len_y << bs_end;
+	// points array: {(x, y}}
+	// first pass - build set of increasing px_coord & py_coord
+	fp_set px_coord, py_coord;
+	while(pp != p_end) {
+		px_coord.insert(*pp++);
+		py_coord.insert(*pp++);
+	}
+
+	// make intial mesh with bounds
+	fp_set x, y;
+	x.insert(0); x.insert(len_x);
+	y.insert(0); y.insert(len_y);
+
+	// if params specified only once - then params is equal for all points
+	fp_stor_t dx, dy, ax, ay;
+	fp_storarr_t::const_iterator p_param = points_param->begin();
+	bool const_params = false;
+	if(points_param->size() == 4) {
+		const_params = true;
+		dx = *(p_param++); dy = *(p_param++);
+		ax = *(p_param++); ay = *(p_param++);
+	}
+
+	// points coord
+	//fp_stor_t x_coord = 0, y_coord = 0;
+	// store processed points here
+	fp_set dx_ready, dy_ready;
+
+	// process points in X direction
+	int_t cnt = 0;
+	fp_set::const_iterator lower = px_coord.begin();
+	fp_set::const_iterator upper = px_coord.begin();
+	++upper;
+	for(fp_set::const_iterator px = px_coord.begin(), end = px_coord.end(); px != end; ++px) {
+		if(!const_params) {
+			dx = *(p_param++); dy = *(p_param++);
+			ax = *(p_param++); ay = *(p_param++);
+		}
+		// DEBUG
+		BSOUT << "point[" << ++cnt << "] at (x = " << *px << "), dx = " << dx
+		<< ", ax = " << ax << bs_end;
+		// process only new points
+		if(dx != 0 && dx_ready.find(*px) == dx_ready.end()) {
+			refine_point_s(x, *px, dx, ax, max_dx, len_x,
+				upper == end ? len_x + (len_x - *px) : *upper,
+				proc_ray::dir_ray< 1 >());
+			refine_point_s(x, *px, dx, ax, max_dx, len_x,
+				px == px_coord.begin() ? -*px : *lower,
+				proc_ray::dir_ray< -1 >());
+
+			//refine_mesh_impl_s(x, *px, dx, ax, max_dx, len_x);
+			dx_ready.insert(*px);
+		}
+		if(px != px_coord.begin())
+			++lower;
+		++upper;
+	}
+
+	// process points in Y direction
+	cnt = 0;
+	p_param = points_param->begin();
+	lower = py_coord.begin();
+	upper = py_coord.begin(); ++upper;
+	for(fp_set::const_iterator py = py_coord.begin(), end = py_coord.end(); py != end; ++py) {
+		if(!const_params) {
+			dx = *(p_param++); dy = *(p_param++);
+			ax = *(p_param++); ay = *(p_param++);
+		}
+		// DEBUG
+		BSOUT << "point[" << ++cnt << "] at (y = " << *py << "), dy = " << dy
+		<< ", ay = " << ay << bs_end;
+		// process only new points
+		if(dy != 0 && dy_ready.find(*py) == dy_ready.end()) {
+			refine_point_s(y, *py, dy, ay, max_dy, len_y,
+				upper == end ? len_y + (len_y - *py) : *upper,
+				proc_ray::dir_ray< 1 >());
+			refine_point_s(y, *py, dy, ay, max_dy, len_y,
+				py == py_coord.begin() ? -*py : *lower,
+				proc_ray::dir_ray< -1 >());
+
+			//refine_mesh_impl_s(y, *py, dy, ay, max_dy, len_y);
+			dy_ready.insert(*py);
+		}
+		if(py != py_coord.begin())
+			++lower;
+		++upper;
+	}
+
+	//proc_ray::kill_tight_cells(x, dx);
+	//proc_ray::kill_tight_cells(y, dy);
+
+	// DEBUG
+	//BSOUT << "refine_mesh: coord2deltas" << bs_end;
+	// make deltas from coordinates
+	vector< fp_stor_t > delta_x, delta_y;
+	coord2deltas(x, delta_x);
+	coord2deltas(y, delta_y);
+
+	// DEBUG
+	// check if sum(deltas) = len
+	//BSOUT << "sum(delta_x) = " << accumulate(delta_x.begin(), delta_x.end(), fp_stor_t(0)) << bs_end;
+	//BSOUT << "sum(delta_y) = " << accumulate(delta_y.begin(), delta_y.end(), fp_stor_t(0)) << bs_end;
+
+	//BSOUT << "fill gaps" << bs_end;
+	fill_gaps(delta_x, max_dx, dx);
+	fill_gaps(delta_y, max_dy, dy);
+
+	// DEBUG
+	// check if sum(deltas) = len
+	BSOUT << "sum(delta_x) = " << accumulate(delta_x.begin(), delta_x.end(), fp_stor_t(0)) << bs_end;
+	BSOUT << "sum(delta_y) = " << accumulate(delta_y.begin(), delta_y.end(), fp_stor_t(0)) << bs_end;
+
+
+	// DEBUG
+	//BSOUT << "refine_mesh: copy delta_x & delta_y to bs_arrays" << bs_end;
+	// copy delta_x & delta_y to bs_arrays
+	nx = (int_t)  delta_x.size();
+	ny = (int_t)  delta_y.size();
+	spfp_storarr_t adx = BS_KERNEL.create_object(fp_storarr_t::bs_type()),
+				   ady = BS_KERNEL.create_object(fp_storarr_t::bs_type());
+	adx->resize(delta_x.size()); ady->resize(delta_y.size());
+	copy(delta_x.begin(), delta_x.end(), adx->begin());
+	copy(delta_y.begin(), delta_y.end(), ady->begin());
+
+	return coord_zcorn_pair(adx, ady);
 }
 
 //template< class ray_t >
@@ -657,119 +853,9 @@ void fill_gaps(delta_t& d, fp_stor_t cell_sz) {
 //	}
 //}
 
-spfp_storarr_t gen_coord(int_t nx, int_t ny, spfp_storarr_t dx, spfp_storarr_t dy, fp_t x0, fp_t y0) {
-	using namespace std;
-	typedef fp_storarr_t::value_type value_t;
-
-	// DEBUG
-	BSOUT << "gen_coord: init stage" << bs_end;
-	// create subscripters
-	dim_subscript dxs(*dx, x0);
-	dim_subscript dys(*dy, y0);
-
-	// if dimension offset is given as array, then size should be taken from array size
-	if(dx->size() > 1) nx = (int_t) dx->size();
-	if(dy->size() > 1) ny = (int_t) dy->size();
-
-	// create arrays
-	spfp_storarr_t coord = BS_KERNEL.create_object(fp_storarr_t::bs_type());
-// FIXME: raise exception
-	if(!coord) return NULL;
-
-	// DEBUG
-	BSOUT << "gen_coord: creation starts..." << bs_end;
-	// fill coord
-	// coord is simple grid
-	coord->init((nx + 1)*(ny + 1)*6, value_t(0));
-	fp_storarr_t::iterator pcd = coord->begin();
-	for(int_t iy = 0; iy <= ny; ++iy) {
-		fp_t cur_y = dys[iy];
-		for(int_t ix = 0; ix <= nx; ++ix) {
-			pcd[0] = pcd[3] = dxs[ix];
-			pcd[1] = pcd[4] = cur_y;
-			pcd[5] = 1; // pcd[2] = 0 from init
-			pcd += 6;
-		}
-		dxs.reset();
-	}
-	// DEBUG
-	BSOUT << "gen_coord: creation finished" << bs_end;
-
-	return coord;
-}
-
-void insert_column(int_t nx, int_t ny, fp_storvec_t& coord, fp_storvec_t& zcorn, fp_stor_t where) {
-	using namespace std;
-
-	typedef fp_storvec_t::iterator v_iterator;
-	typedef slice_iterator< v_iterator, 6 > dim_iterator;
-
-	// reserve mem for insterts
-	coord.reserve((nx + 2)*(ny + 1)*6);
-
-	// find a place to insert
-	dim_iterator pos = lower_bound(dim_iterator(coord.begin()), dim_iterator(coord.begin()) + (nx + 1), where);
-	//if(pos == dim_iterator(coord.begin()) + (nx + 1)) return;
-	int_t ins_offset = pos.backend() - coord.begin();
-
-	// process all rows
-	fp_stor_t y, z1, z2;
-	v_iterator vpos;
-	for(int_t i = ny; i >= 0; --i) {
-		// save y and z values
-		vpos = coord.begin() + i*(nx + 1)*6 + ins_offset;
-		if(ins_offset == (nx + 1)*6) {
-			// insert at the boundary
-			y = *(vpos - 5); z1 = *(vpos - 4); z2 = *(vpos - 1);
-		}
-		else {
-			// insert in the beginning/middle of row
-			y = *(vpos + 1); z1 = *(vpos + 2); z2 = *(vpos + 5);
-		}
-		// insert new vector
-		insert_iterator< fp_storvec_t > ipos(coord, vpos);
-		*ipos++ = where; *ipos++ = y; *ipos++ = z1;
-		*ipos++ = where; *ipos++ = y; *ipos = z2;
-	}
-
-	// update zcorn
-	resize_zcorn(zcorn, nx, ny, nx + 1, ny);
-}
-
-void insert_row(int_t nx, int_t ny, fp_storvec_t& coord, fp_storvec_t& zcorn, fp_stor_t where) {
-	using namespace std;
-	typedef fp_storvec_t::iterator v_iterator;
-	typedef slice_iterator< v_iterator > dim_iterator;
-	const int_t ydim_step = 6 * (nx + 1);
-
-	// reserve mem for insterts
-	coord.reserve((nx + 1)*(ny + 2)*6);
-
-	// find a place to insert
-	const dim_iterator search_end = dim_iterator(coord.begin() + 1, ydim_step) + (ny + 1);
-	dim_iterator pos = lower_bound(dim_iterator(coord.begin() + 1, ydim_step), search_end, where);
-	//if(pos == search_end) return;
-	v_iterator ins_point = pos.backend() - 1;
-
-	// make cache of x values from first row
-	spfp_storvec_t cache_x = BS_KERNEL.create_object(fp_storvec_t::bs_type());
-	cache_x->resize(nx + 1);
-	typedef slice_iterator< v_iterator, 3 > hdim_iterator;
-	copy(hdim_iterator(coord.begin()), hdim_iterator(coord.begin() + (nx + 1)*6), cache_x->begin());
-
-	// insert row
-	insert_iterator< fp_storvec_t > ipos(coord, ins_point);
-	v_iterator p_x = cache_x->begin();
-	fp_stor_t z1 = *(coord.begin() + 2), z2 = *(coord.begin() + 5);
-	for(int_t i = 0; i <= nx; ++i) {
-		*ipos++ = *p_x++; *ipos++ = where; *ipos++ = z1;
-		*ipos++ = *p_x++; *ipos++ = where; *ipos++ = z2;
-	}
-
-	// update zcorn
-	resize_zcorn(zcorn, nx, ny, nx, ny + 1);
-}
-
+/*-----------------------------------------------------------------
+ * refine mesh algo based on existing grid
+ *----------------------------------------------------------------*/
 coord_zcorn_pair refine_mesh_deltas(int_t& nx, int_t& ny, spfp_storarr_t coord,
 	spfp_storarr_t points, fp_t cell_merge_thresh, fp_t band_thresh,
 	spi_arr_t hit_idx)
@@ -999,155 +1085,85 @@ coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, spfp_storarr_t coord, spfp_st
 	);
 }
 
-BS_API_PLUGIN coord_zcorn_pair refine_mesh_deltas_s(
-	int_t& nx, int_t& ny, fp_stor_t max_dx, fp_stor_t max_dy,
-	fp_stor_t len_x, fp_stor_t len_y, spfp_storarr_t points_pos, spfp_storarr_t points_param)
-{
+namespace {
+/*-----------------------------------------------------------------
+ * unused deprecated code
+ *----------------------------------------------------------------*/
+void insert_column(int_t nx, int_t ny, fp_storvec_t& coord, fp_storvec_t& zcorn, fp_stor_t where) {
 	using namespace std;
 
 	typedef fp_storvec_t::iterator v_iterator;
 	typedef slice_iterator< v_iterator, 6 > dim_iterator;
 
-	// DEBUG
-	BSOUT << "refine_mesh: init stage" << bs_end;
-	// sanity check
-	if(!points_pos) return coord_zcorn_pair();
+	// reserve mem for insterts
+	coord.reserve((nx + 2)*(ny + 1)*6);
 
-	fp_storarr_t::const_iterator pp = points_pos->begin(), p_end = points_pos->end();
-	// make (p_end - p_begin) % 4 = 0
-	p_end -= (p_end - pp) % 2;
+	// find a place to insert
+	dim_iterator pos = lower_bound(dim_iterator(coord.begin()), dim_iterator(coord.begin()) + (nx + 1), where);
+	//if(pos == dim_iterator(coord.begin()) + (nx + 1)) return;
+	int_t ins_offset = pos.backend() - coord.begin();
 
-	// DEBUG
-	BSOUT << "refine_mesh: points processing starts..." << bs_end;
-	BSOUT << "len_x = " << len_x << ", len_y = " << len_y << bs_end;
-	// points array: {(x, y}}
-	// first pass - build set of increasing px_coord & py_coord
-	fp_set px_coord, py_coord;
-	while(pp != p_end) {
-		px_coord.insert(*pp++);
-		py_coord.insert(*pp++);
+	// process all rows
+	fp_stor_t y, z1, z2;
+	v_iterator vpos;
+	for(int_t i = ny; i >= 0; --i) {
+		// save y and z values
+		vpos = coord.begin() + i*(nx + 1)*6 + ins_offset;
+		if(ins_offset == (nx + 1)*6) {
+			// insert at the boundary
+			y = *(vpos - 5); z1 = *(vpos - 4); z2 = *(vpos - 1);
+		}
+		else {
+			// insert in the beginning/middle of row
+			y = *(vpos + 1); z1 = *(vpos + 2); z2 = *(vpos + 5);
+		}
+		// insert new vector
+		insert_iterator< fp_storvec_t > ipos(coord, vpos);
+		*ipos++ = where; *ipos++ = y; *ipos++ = z1;
+		*ipos++ = where; *ipos++ = y; *ipos = z2;
 	}
 
-	// make intial mesh with bounds
-	fp_set x, y;
-	x.insert(0); x.insert(len_x);
-	y.insert(0); y.insert(len_y);
-
-	// if params specified only once - then params is equal for all points
-	fp_stor_t dx, dy, ax, ay;
-	fp_storarr_t::const_iterator p_param = points_param->begin();
-	bool const_params = false;
-	if(points_param->size() == 4) {
-		const_params = true;
-		dx = *(p_param++); dy = *(p_param++);
-		ax = *(p_param++); ay = *(p_param++);
-	}
-
-	// points coord
-	//fp_stor_t x_coord = 0, y_coord = 0;
-	// store processed points here
-	fp_set dx_ready, dy_ready;
-
-	// process points in X direction
-	int_t cnt = 0;
-	fp_set::const_iterator lower = px_coord.begin();
-	fp_set::const_iterator upper = px_coord.begin();
-	++upper;
-	for(fp_set::const_iterator px = px_coord.begin(), end = px_coord.end(); px != end; ++px) {
-		if(!const_params) {
-			dx = *(p_param++); dy = *(p_param++);
-			ax = *(p_param++); ay = *(p_param++);
-		}
-		// DEBUG
-		BSOUT << "point[" << ++cnt << "] at (x = " << *px << "), dx = " << dx
-		<< ", ax = " << ax << bs_end;
-		// process only new points
-		if(dx != 0 && dx_ready.find(*px) == dx_ready.end()) {
-			refine_point_s(x, *px, dx, ax, max_dx, len_x,
-				upper == end ? len_x + (len_x - *px) : *upper,
-				proc_ray::dir_ray< 1 >());
-			refine_point_s(x, *px, dx, ax, max_dx, len_x,
-				px == px_coord.begin() ? -*px : *lower,
-				proc_ray::dir_ray< -1 >());
-
-			//refine_mesh_impl_s(x, *px, dx, ax, max_dx, len_x);
-			dx_ready.insert(*px);
-		}
-		if(px != px_coord.begin())
-			++lower;
-		++upper;
-	}
-
-	// process points in Y direction
-	cnt = 0;
-	p_param = points_param->begin();
-	lower = py_coord.begin();
-	upper = py_coord.begin(); ++upper;
-	for(fp_set::const_iterator py = py_coord.begin(), end = py_coord.end(); py != end; ++py) {
-		if(!const_params) {
-			dx = *(p_param++); dy = *(p_param++);
-			ax = *(p_param++); ay = *(p_param++);
-		}
-		// DEBUG
-		BSOUT << "point[" << ++cnt << "] at (y = " << *py << "), dy = " << dy
-		<< ", ay = " << ay << bs_end;
-		// process only new points
-		if(dy != 0 && dy_ready.find(*py) == dy_ready.end()) {
-			refine_point_s(y, *py, dy, ay, max_dy, len_y,
-				upper == end ? len_y + (len_y - *py) : *upper,
-				proc_ray::dir_ray< 1 >());
-			refine_point_s(y, *py, dy, ay, max_dy, len_y,
-				py == py_coord.begin() ? -*py : *lower,
-				proc_ray::dir_ray< -1 >());
-
-			//refine_mesh_impl_s(y, *py, dy, ay, max_dy, len_y);
-			dy_ready.insert(*py);
-		}
-		if(py != py_coord.begin())
-			++lower;
-		++upper;
-	}
-
-	//proc_ray::kill_tight_cells(x, dx);
-	//proc_ray::kill_tight_cells(y, dy);
-
-	// DEBUG
-	//BSOUT << "refine_mesh: coord2deltas" << bs_end;
-	// make deltas from coordinates
-	vector< fp_stor_t > delta_x, delta_y;
-	coord2deltas(x, delta_x);
-	coord2deltas(y, delta_y);
-
-	// DEBUG
-	// check if sum(deltas) = len
-	//BSOUT << "sum(delta_x) = " << accumulate(delta_x.begin(), delta_x.end(), fp_stor_t(0)) << bs_end;
-	//BSOUT << "sum(delta_y) = " << accumulate(delta_y.begin(), delta_y.end(), fp_stor_t(0)) << bs_end;
-
-	//BSOUT << "fill gaps" << bs_end;
-	//fill_gaps(delta_x, max_dx);
-	//fill_gaps(delta_y, max_dy);
-
-	// DEBUG
-	// check if sum(deltas) = len
-	BSOUT << "sum(delta_x) = " << accumulate(delta_x.begin(), delta_x.end(), fp_stor_t(0)) << bs_end;
-	BSOUT << "sum(delta_y) = " << accumulate(delta_y.begin(), delta_y.end(), fp_stor_t(0)) << bs_end;
-
-
-	// DEBUG
-	//BSOUT << "refine_mesh: copy delta_x & delta_y to bs_arrays" << bs_end;
-	// copy delta_x & delta_y to bs_arrays
-	nx = (int_t)  delta_x.size();
-	ny = (int_t)  delta_y.size();
-	spfp_storarr_t adx = BS_KERNEL.create_object(fp_storarr_t::bs_type()),
-				   ady = BS_KERNEL.create_object(fp_storarr_t::bs_type());
-	adx->resize(delta_x.size()); ady->resize(delta_y.size());
-	copy(delta_x.begin(), delta_x.end(), adx->begin());
-	copy(delta_y.begin(), delta_y.end(), ady->begin());
-
-	return coord_zcorn_pair(adx, ady);
+	// update zcorn
+	resize_zcorn(zcorn, nx, ny, nx + 1, ny);
 }
 
-}}
+void insert_row(int_t nx, int_t ny, fp_storvec_t& coord, fp_storvec_t& zcorn, fp_stor_t where) {
+	using namespace std;
+	typedef fp_storvec_t::iterator v_iterator;
+	typedef slice_iterator< v_iterator > dim_iterator;
+	const int_t ydim_step = 6 * (nx + 1);
+
+	// reserve mem for insterts
+	coord.reserve((nx + 1)*(ny + 2)*6);
+
+	// find a place to insert
+	const dim_iterator search_end = dim_iterator(coord.begin() + 1, ydim_step) + (ny + 1);
+	dim_iterator pos = lower_bound(dim_iterator(coord.begin() + 1, ydim_step), search_end, where);
+	//if(pos == search_end) return;
+	v_iterator ins_point = pos.backend() - 1;
+
+	// make cache of x values from first row
+	spfp_storvec_t cache_x = BS_KERNEL.create_object(fp_storvec_t::bs_type());
+	cache_x->resize(nx + 1);
+	typedef slice_iterator< v_iterator, 3 > hdim_iterator;
+	copy(hdim_iterator(coord.begin()), hdim_iterator(coord.begin() + (nx + 1)*6), cache_x->begin());
+
+	// insert row
+	insert_iterator< fp_storvec_t > ipos(coord, ins_point);
+	v_iterator p_x = cache_x->begin();
+	fp_stor_t z1 = *(coord.begin() + 2), z2 = *(coord.begin() + 5);
+	for(int_t i = 0; i <= nx; ++i) {
+		*ipos++ = *p_x++; *ipos++ = where; *ipos++ = z1;
+		*ipos++ = *p_x++; *ipos++ = where; *ipos++ = z2;
+	}
+
+	// update zcorn
+	resize_zcorn(zcorn, nx, ny, nx, ny + 1);
+}
+
+}
+
+}}	// eof blue_sky::coord_zcorn_tools
 
 /*-----------------------------------------------------------------
  * implementation of bs_mesh::gen_coord_zcorn & refine_mesh
