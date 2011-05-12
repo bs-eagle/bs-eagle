@@ -32,11 +32,10 @@ tuple wave_mesh_deltas(fp_stor_t max_dx, fp_stor_t max_dy,
 		fp_stor_t len_x, fp_stor_t len_y,
 		spfp_storarr_t points_pos, spfp_storarr_t points_param)
 {
-	int_t nx, ny;
 	coord_zcorn_pair r = czt::wave_mesh_deltas(
-		nx, ny, max_dx, max_dy, len_x, len_y, points_pos, points_param
+		max_dx, max_dy, len_x, len_y, points_pos, points_param
 	);
-	return make_tuple(r.first, r.second, nx, ny);
+	return make_tuple(r.first, r.second);
 }
 
 tuple wave_mesh(
