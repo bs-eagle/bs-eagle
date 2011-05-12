@@ -741,13 +741,16 @@ void make_wave(ray_t& ray, fp_t start_point, fp_stor_t d, fp_stor_t a,
 }
 
 template< class delta_t >
-void fill_gaps(delta_t& d, fp_stor_t cell_sz, fp_stor_t min_sz) {
+void fill_gaps(delta_t& d, fp_stor_t cell_sz, fp_stor_t min_sz,
+		fp_t max_sz_tol = 0.3, bool strict_max_sz = false)
+{
 	using namespace std;
 	typedef typename delta_t::iterator d_iterator;
 	// fill big gaps with cells of given size
 
 	list< fp_stor_t > refined_d;
 	const fp_t m = 1 / cell_sz;
+	fp_t cur_sz;
 	for(d_iterator pd = d.begin(), end = d.end(); pd != end; ++pd) {
 		if(*pd <= cell_sz) {
 			refined_d.push_back(*pd);
@@ -757,25 +760,31 @@ void fill_gaps(delta_t& d, fp_stor_t cell_sz, fp_stor_t min_sz) {
 		// how much cells can we insert?
 		uint_t N = uint_t(floor(*pd * m));
 		fp_t tail = *pd - N * cell_sz;
-		// next if we have only one cell
-		// then put bound exactly between [a; b]
-		if(N == 1) {
-			refined_d.push_back(*pd * 0.5);
-			refined_d.push_back(*pd * 0.5);
-			continue;
+
+		// by default insert cells with size = cell_sz
+		cur_sz = cell_sz;
+		// if we can't make cells larger than cell_sz
+		// or have only one cell
+		// then increase N and make equal regular cells < cell_sz
+		if(N == 1 || strict_max_sz) {
+			++N;
+			cur_sz = *pd / N;
+			tail = 0;
 		}
-		// if tail is big - push it as separate cell
-		if(tail > 0.3 * cell_sz && tail >= min_sz) {
+		else if(tail > max_sz_tol * cell_sz && tail >= min_sz) {
+			// non-strict mode
+			// if tail is relatively big - push it as separate cell
 			refined_d.push_back(tail);
 			tail = 0;
 		}
-		// otherwise spread tail between first & last
+		// fill gap
 		for(uint_t i = 0; i < N; ++i) {
 			if((i == 0 || i == N - 1) && tail > 0) {
-				refined_d.push_back(cell_sz + tail * 0.5);
+				// spread short tail between first & last cell
+				refined_d.push_back(cur_sz + tail * 0.5);
 			}
 			else
-				refined_d.push_back(cell_sz);
+				refined_d.push_back(cur_sz);
 		}
 	}
 
@@ -894,11 +903,6 @@ BS_API_PLUGIN coord_zcorn_pair wave_mesh_deltas_s1(
 	coord2deltas(x, delta_x);
 	coord2deltas(y, delta_y);
 
-	// DEBUG
-	// check if sum(deltas) = len
-	BSOUT << "sum(delta_x) = " << accumulate(delta_x.begin(), delta_x.end(), fp_stor_t(0)) << bs_end;
-	BSOUT << "sum(delta_y) = " << accumulate(delta_y.begin(), delta_y.end(), fp_stor_t(0)) << bs_end;
-
 	// copy delta_x & delta_y to bs_arrays
 	//nx = (int_t)  delta_x.size();
 	//ny = (int_t)  delta_y.size();
@@ -918,8 +922,8 @@ void wave_mesh_deltas_s2(
 	fp_t max_sz_tol, bool strict_max_sz)
 {
 	//BSOUT << "fill gaps" << bs_end;
-	fill_gaps(*dx, cell_dx, min_dx);
-	fill_gaps(*dy, cell_dy, min_dy);
+	fill_gaps(*dx, cell_dx, min_dx, max_sz_tol, strict_max_sz);
+	fill_gaps(*dy, cell_dy, min_dy, max_sz_tol, strict_max_sz);
 }
 
 void wave_mesh_deltas_s2(
@@ -950,6 +954,7 @@ coord_zcorn_pair wave_mesh_deltas(
 	fp_stor_t len_x, fp_stor_t len_y,
 	spfp_storarr_t points_pos, spfp_storarr_t points_param)
 {
+	using namespace std;
 	// call stage 1
 	coord_zcorn_pair res = wave_mesh_deltas_s1(
 		max_dx, max_dy, len_x, len_y,
@@ -960,6 +965,13 @@ coord_zcorn_pair wave_mesh_deltas(
 		max_dx, max_dy, points_param,
 		res.first, res.second
 	);
+
+	// DEBUG
+	// check if sum(deltas) = len
+	BSOUT << "sum(delta_x) = " << accumulate(
+		res.first->begin(), res.first->end(), fp_stor_t(0)) << bs_end;
+	BSOUT << "sum(delta_y) = " << accumulate(
+		res.second->begin(), res.second->end(), fp_stor_t(0)) << bs_end;
 
 	return res;
 }
