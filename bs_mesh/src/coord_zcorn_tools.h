@@ -57,10 +57,23 @@ BS_API_PLUGIN coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, spfp_storarr_t 
 		spi_arr_t points_pos, spfp_storarr_t points_param, fp_t cell_merge_thresh, fp_t band_thresh,
 		spi_arr_t hit_idx);
 
-
 BS_API_PLUGIN coord_zcorn_pair wave_mesh_deltas(
 	int_t& nx, int_t& ny, fp_stor_t max_dx, fp_stor_t max_dy,
 	fp_stor_t len_x, fp_stor_t len_y, spfp_storarr_t points_pos, spfp_storarr_t points_param);
+
+coord_zcorn_pair wave_mesh(
+	int_t& nx, int_t& ny, fp_stor_t max_dx, fp_stor_t max_dy,
+	fp_stor_t len_x, fp_stor_t len_y, spfp_storarr_t points_pos, spfp_storarr_t points_param,
+	int_t nz, spfp_storarr_t dz,
+	fp_stor_t x0 = 0, fp_stor_t y0 = 0, fp_stor_t z0 = 0);
+
+// for points in (i,j) format
+coord_zcorn_pair wave_mesh(
+	spfp_storarr_t coord,
+	int_t& nx, int_t& ny, fp_stor_t max_dx, fp_stor_t max_dy,
+	spi_arr_t points_pos, spfp_storarr_t points_param,
+	int_t nz, spfp_storarr_t dz,
+	fp_stor_t x0 = 0, fp_stor_t y0 = 0, fp_stor_t z0 = 0);
 
 }}  // eof namespace blue_sky::coord_zcorn_tools
 
