@@ -14,6 +14,8 @@
 using namespace boost::python;
 namespace czt = blue_sky::coord_zcorn_tools;
 
+BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_deltas_s2_overl1, wave_mesh_deltas_s2_o1, 6, 8)
+BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_deltas_s2_overl2, wave_mesh_deltas_s2_o2, 5, 7)
 BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_overl, wave_mesh, 8, 11)
 BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_ij_overl, wave_mesh_ij, 9, 12)
 
@@ -22,10 +24,49 @@ namespace {
 typedef t_long int_t;
 typedef t_double fp_t;
 typedef t_float fp_stor_t;
+typedef v_float fp_storarr_t;
 typedef spv_float spfp_storarr_t;
 typedef spv_long spi_arr_t;
 typedef spi_arr_t::pure_pointed_t int_arr_t;
 typedef std::pair< spv_float, spv_float > coord_zcorn_pair;
+
+tuple wave_mesh_deltas_s2_o1(
+	fp_stor_t cell_dx, fp_stor_t cell_dy,
+	fp_stor_t min_dx, fp_stor_t min_dy,
+	spfp_storarr_t dx, spfp_storarr_t dy,
+	fp_t max_sz_tol = 0.3, bool strict_max_sz = false)
+{
+	// Make copies of delta arrays as thay can be referenced by Python
+	spfp_storarr_t dx_cpy = BS_KERNEL.create_object(fp_storarr_t::bs_type());
+	dx_cpy->assign(*dx);
+	spfp_storarr_t dy_cpy = BS_KERNEL.create_object(fp_storarr_t::bs_type());
+	dy_cpy->assign(*dy);
+	// invoke stage 2
+	czt::wave_mesh_deltas_s2(
+		cell_dx, cell_dy, min_dx, min_dy,
+		dx_cpy, dy_cpy, max_sz_tol, strict_max_sz
+	);
+	return make_tuple(dx_cpy, dy_cpy);
+}
+
+tuple wave_mesh_deltas_s2_o2(
+	fp_stor_t cell_dx, fp_stor_t cell_dy,
+	spfp_storarr_t points_param,
+	spfp_storarr_t dx, spfp_storarr_t dy,
+	fp_t max_sz_tol = 0.3, bool strict_max_sz = false)
+{
+	// Make copies of delta arrays as thay can be referenced by Python
+	spfp_storarr_t dx_cpy = BS_KERNEL.create_object(fp_storarr_t::bs_type());
+	dx_cpy->assign(*dx);
+	spfp_storarr_t dy_cpy = BS_KERNEL.create_object(fp_storarr_t::bs_type());
+	dy_cpy->assign(*dy);
+	// invoke stage 2
+	czt::wave_mesh_deltas_s2(
+		cell_dx, cell_dy, points_param,
+		dx, dy, max_sz_tol, strict_max_sz
+	);
+	return make_tuple(dx_cpy, dy_cpy);
+}
 
 // wave_mesh_deltas with overloads
 tuple wave_mesh_deltas(fp_stor_t max_dx, fp_stor_t max_dy,
@@ -73,9 +114,12 @@ tuple wave_mesh_ij(
 namespace blue_sky { namespace python {
 
 void py_export_czt() {
+	def("wave_mesh_deltas_s1", &czt::wave_mesh_deltas_s1);
+	def("wave_mesh_deltas_s2", &wave_mesh_deltas_s2_o1, wave_mesh_deltas_s2_overl1());
+	def("wave_mesh_deltas_s2", &wave_mesh_deltas_s2_o2, wave_mesh_deltas_s2_overl2());
 	def("wave_mesh_deltas", &wave_mesh_deltas);
 	def("wave_mesh", &wave_mesh, wave_mesh_overl());
-	def("wave_meshj", &wave_mesh_ij, wave_mesh_ij_overl());
+	def("wave_mesh", &wave_mesh_ij, wave_mesh_ij_overl());
 }
 
 }} 	// eof blue_sky::python
