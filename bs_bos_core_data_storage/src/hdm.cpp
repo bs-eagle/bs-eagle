@@ -86,16 +86,22 @@ namespace blue_sky
         break;   
           
      default:
-        bs_throw_exception ("init: wrong scal choice");  
+        bs_throw_exception ("init: wrong mesh choice");  
     }
+  }
+  
+  void
+  hdm::init_dummy()
+  {
+    int n_phases; 
     
-    n_pases = data->props->get_b("oil_phase");
-    n_pases += data->props->get_b("water_phase");
-    n_pases += data->props->get_b("gas_phase");
+    n_phases = data->props->get_b("oil_phase");
+    n_phases += data->props->get_b("water_phase");
+    n_phases += data->props->get_b("gas_phase");
     
     pvt_dummy = BS_KERNEL.create_object ("pvt_dummy");
-    pvt_dummy->init (n_pases);
-    switch (n_pases)
+    pvt_dummy->init (n_phases);
+    switch (n_phases)
     {
       case 1:
         break;
@@ -108,7 +114,6 @@ namespace blue_sky
      
     }
   }
-  
   
   void 
   hdm::read_keyword_file(const std::string filename)

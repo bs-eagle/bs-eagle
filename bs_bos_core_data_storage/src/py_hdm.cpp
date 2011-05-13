@@ -15,6 +15,7 @@ namespace python {
   PY_EXPORTER (hdm_exporter, default_exporter)
     //.add_property ("data", get_data <T, strategy_t>)
     .def("init", &T::init)
+    .def("init_dummy", &T::init_dummy)
     .def("read_keyword_file", &T::read_keyword_file)
     .def("get_pool", &T::get_pool)
     .def("get_prop", &T::get_prop)
