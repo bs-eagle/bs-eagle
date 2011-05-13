@@ -120,7 +120,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../kernel/include&quot;;&quot;$(ProjectDir)/../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../bs_bos_core/bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core/bs_matrix/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;"
+				AdditionalIncludeDirectories="&quot;$(NUMPY_PATH)/include&quot;;&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../common_types/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;BS_HDF5_STORAGE_EXPORTS;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5;H5_USE_16_API;_HDF5USEDLL_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_EXCEPTION_USE_BOOST_FORMAT"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -139,10 +139,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="blue-sky.lib bs_bos_core_base.lib bs_matrix.lib loki.lib ws2_32.lib hdf5dll.lib"
-				OutputFile="$(ProjectDir)/../../exe/release/plugins/$(ProjectName).dll"
+				AdditionalDependencies="loki.lib ws2_32.lib hdf5dll.lib"
+				OutputFile="$(ProjectDir)/../../../exe/release/plugins/$(ProjectName).dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/dll&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../exe/release/&quot;;&quot;$(ProjectDir)/../../exe/release/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/dll&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/release/&quot;;&quot;$(ProjectDir)/../../../exe/release/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
 				IgnoreDefaultLibraryNames="python25_d.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"

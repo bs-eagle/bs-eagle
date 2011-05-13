@@ -5,6 +5,7 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
+#include "bs_mesh_stdafx.h"
 #include "coord_zcorn_tools.h"
 #include "export_python_wrapper.h"
 #include "py_pair_converter.h"

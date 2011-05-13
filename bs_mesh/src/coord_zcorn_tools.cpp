@@ -5,11 +5,20 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
+#include "bs_mesh_stdafx.h"
+
 #include "coord_zcorn_tools.h"
 #include "mesh_grdecl.h"
 
 #define BOUND_MERGE_THRESHOLD 0.8
 #define DEFAULT_SMOOTH_RATIO 0.1
+#ifdef _WIN32
+   #define _SECURE_SCL 0
+   #define _HAS_ITERATOR_DEBUGGING 0
+
+   #define _SCL_SECURE_NO_WARNINGS
+   #define _CRT_SECURE_NO_WARNINGS
+#endif
 
 /*-----------------------------------------------------------------
  * coord_zcorn_tools implementation
@@ -698,7 +707,7 @@ void make_wave(ray_t& ray, fp_t start_point, fp_stor_t d, fp_stor_t a,
 	// insert one bound anyway
 	//N = max< uint_t>(N, 1);
 	// calc tail to half of distance to nearest bound
-	fp_t tail = S - d * std::pow(a, N);
+	fp_t tail = S - d * std::pow(a, double(N));
 	if(tail < d * 0.5 && N > 0)
 		--N;
 

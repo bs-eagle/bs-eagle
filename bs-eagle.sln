@@ -3,8 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_scal", "bs_scal\bs_scal.vcproj", "{6179CF48-524A-4031-993A-FD353AD2A74F}"
 	ProjectSection(ProjectDependencies) = postProject
-		{3DF8BD9D-CAEF-4081-A1C2-B624E0959A81} = {3DF8BD9D-CAEF-4081-A1C2-B624E0959A81}
 		{7C235C2A-609A-49B4-A89B-AC23530F0F89} = {7C235C2A-609A-49B4-A89B-AC23530F0F89}
+		{578A43D7-0338-4ED0-A455-666FDA782085} = {578A43D7-0338-4ED0-A455-666FDA782085}
+		{3DF8BD9D-CAEF-4081-A1C2-B624E0959A81} = {3DF8BD9D-CAEF-4081-A1C2-B624E0959A81}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_amg_solver", "..\bs_amg_solver\bs_amg_solver.vcproj", "{952339F0-0C05-440C-8168-A8C2C463D3AE}"
@@ -47,6 +48,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common_types", "common_type
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_hdf5_storage", "hdf5_storage\bs_hdf5_storage.vcproj", "{E7322907-2C9C-4570-A99E-A2F3E56A3D57}"
+	ProjectSection(ProjectDependencies) = postProject
+		{578A43D7-0338-4ED0-A455-666FDA782085} = {578A43D7-0338-4ED0-A455-666FDA782085}
+		{7C235C2A-609A-49B4-A89B-AC23530F0F89} = {7C235C2A-609A-49B4-A89B-AC23530F0F89}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_pvt", "bs_pvt\bs_pvt.vcproj", "{32C5BEFC-9E7D-4341-ACD4-DDDCFEB77652}"
 	ProjectSection(ProjectDependencies) = postProject
