@@ -57,18 +57,41 @@ BS_API_PLUGIN coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, spfp_storarr_t 
 		spi_arr_t points_pos, spfp_storarr_t points_param, fp_t cell_merge_thresh, fp_t band_thresh,
 		spi_arr_t hit_idx);
 
-BS_API_PLUGIN coord_zcorn_pair wave_mesh_deltas(
-	int_t& nx, int_t& ny, fp_stor_t max_dx, fp_stor_t max_dy,
-	fp_stor_t len_x, fp_stor_t len_y, spfp_storarr_t points_pos, spfp_storarr_t points_param);
+/*-----------------------------------------------------------------
+ * points-based deltas generation algorithm
+ *----------------------------------------------------------------*/
+BS_API_PLUGIN coord_zcorn_pair wave_mesh_deltas_s1(
+	fp_stor_t max_dx, fp_stor_t max_dy, fp_stor_t len_x, fp_stor_t len_y,
+	spfp_storarr_t points_pos, spfp_storarr_t points_param);
 
-coord_zcorn_pair wave_mesh(
+BS_API_PLUGIN void wave_mesh_deltas_s2(
+	fp_stor_t cell_dx, fp_stor_t cell_dy,
+	fp_stor_t min_dx, fp_stor_t min_dy,
+	spfp_storarr_t dx, spfp_storarr_t dy,
+	fp_t max_sz_tol = 0.3, bool strict_max_sz = false);
+
+BS_API_PLUGIN void wave_mesh_deltas_s2(
+	fp_stor_t cell_dx, fp_stor_t cell_dy,
+	spfp_storarr_t points_param,
+	spfp_storarr_t dx, spfp_storarr_t dy,
+	fp_t max_sz_tol = 0.3, bool strict_max_sz = false);
+
+BS_API_PLUGIN coord_zcorn_pair wave_mesh_deltas(
+	fp_stor_t max_dx, fp_stor_t max_dy,
+	fp_stor_t len_x, fp_stor_t len_y,
+	spfp_storarr_t points_pos, spfp_storarr_t points_param);
+
+/*-----------------------------------------------------------------
+ * points-based mesh generation algorithm
+ *----------------------------------------------------------------*/
+BS_API_PLUGIN coord_zcorn_pair wave_mesh(
 	int_t& nx, int_t& ny, fp_stor_t max_dx, fp_stor_t max_dy,
 	fp_stor_t len_x, fp_stor_t len_y, spfp_storarr_t points_pos, spfp_storarr_t points_param,
 	int_t nz, spfp_storarr_t dz,
 	fp_stor_t x0 = 0, fp_stor_t y0 = 0, fp_stor_t z0 = 0);
 
 // for points in (i,j) format
-coord_zcorn_pair wave_mesh(
+BS_API_PLUGIN coord_zcorn_pair wave_mesh(
 	spfp_storarr_t coord,
 	int_t& nx, int_t& ny, fp_stor_t max_dx, fp_stor_t max_dy,
 	spi_arr_t points_pos, spfp_storarr_t points_param,
