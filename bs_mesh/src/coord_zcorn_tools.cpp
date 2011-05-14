@@ -899,6 +899,9 @@ BS_API_PLUGIN coord_zcorn_pair wave_mesh_deltas_s1(
 		}
 		if(py != py_coord.begin())
 			++lower;
+#ifdef _WIN32
+		if(upper != end)
+#endif
 		++upper;
 	}
 
