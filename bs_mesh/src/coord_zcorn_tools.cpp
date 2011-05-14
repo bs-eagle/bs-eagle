@@ -5,6 +5,7 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
+#include "bs_mesh_stdafx.h"
 #include "coord_zcorn_tools.h"
 #include "mesh_grdecl.h"
 
@@ -698,7 +699,7 @@ void make_wave(ray_t& ray, fp_t start_point, fp_stor_t d, fp_stor_t a,
 	// insert one bound anyway
 	//N = max< uint_t>(N, 1);
 	// calc tail to half of distance to nearest bound
-	fp_t tail = S - d * std::pow(a, N);
+	fp_t tail = S - d * std::pow(a, double(N));
 	if(tail < d * 0.5 && N > 0)
 		--N;
 
@@ -866,6 +867,9 @@ BS_API_PLUGIN coord_zcorn_pair wave_mesh_deltas_s1(
 		}
 		if(px != px_coord.begin())
 			++lower;
+#ifdef _WIN32
+		if(upper != end)
+#endif
 		++upper;
 	}
 
