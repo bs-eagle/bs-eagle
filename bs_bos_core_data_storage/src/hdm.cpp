@@ -88,6 +88,20 @@ namespace blue_sky
      default:
         bs_throw_exception ("init: wrong mesh choice");  
     }
+    
+    switch (data->props->get_i("init"))
+    {
+      case 0:
+        km->handle_keyword_reactor ("EXPLICIT_MODEL", kp);
+        break;
+      case 1:
+        km->handle_keyword_reactor ("EQUIL_MODEL", kp);
+        break;   
+          
+     default:
+        bs_throw_exception ("init: wrong mesh choice");  
+    }
+    
   }
   
   void
