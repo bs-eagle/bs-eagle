@@ -1329,10 +1329,15 @@ struct build_jacobian_cols_class
         tran = mesh->calc_tran (ext_index, ext_index2, plane1, center1, center2, along_dim1, &plane2);
       }
     
-    if (tran != 0)
+    // FIXME: uncomment
+    //if (tran != 0)
       {
         change_jac_and_flux_conn (ext_index, ext_index2, tran);
       }  
+    //else
+    //  {
+    //    BS_ASSERT (false) (tran) (i) (j) (k) (ext_index) (ext_index2);
+    //  }
    
     #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
         if (ext_index < 1000)
@@ -1363,10 +1368,16 @@ struct build_jacobian_cols_class
         tran = mesh->calc_tran (ext_index, ext_index2, plane1, center1, center2, along_dim2, &plane2);
       }
      
-    if (tran != 0)
+    // FIXME: uncomment
+    //if (tran != 0)
       {
         change_jac_and_flux_conn (ext_index, ext_index2, tran);
       }
+    //else
+    //  {
+    //    BS_ASSERT (false) (tran) (i) (j) (k) (ext_index) (ext_index2);
+    //  }
+
     #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
         if (ext_index < 1000)
           fprintf (fp, " %d [%d;%d;%d] (%lf)", ext_index2, i, j, k, tran);
@@ -1387,10 +1398,16 @@ struct build_jacobian_cols_class
     
     tran = mesh->calc_tran (ext_index, ext_index2, plane1, center1, center2, along_dim3);
          
-    if (tran != 0)
+    // FIXME: uncomment
+    //if (tran != 0)
       {
         change_jac_and_flux_conn (ext_index, ext_index2, tran);
       }
+    //else
+    //  {
+    //    BS_ASSERT (false) (tran) (i) (j) (k) (ext_index) (ext_index2);
+    //  }
+
     #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
         if (ext_index < 1000)
           fprintf (fp, " %d [%d;%d;%d] (%lf)", ext_index2, i, j, k, tran);
