@@ -1450,14 +1450,163 @@ struct build_jacobian_and_flux : boost::noncopyable
 
   template <typename loop_body_t>
   void
+  adjacent_columns (loop_body_t &loop_body, t_int const *actnum, t_long i, t_long j, t_long &n_adj_elems)
+  {
+    for (t_long k = 0; k < nz; ++k)
+      {
+        t_long ext_index1  = i + j * nx + k * nx * ny;
+        
+        //skip non-active cells
+        if (!actnum[ext_index1])
+          continue;
+          
+        n_adj_elems++;
+        
+        #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
+        if (ext_index1 < 1000)
+          fprintf (fp, "\n%d [%d;%d;%d]", ext_index1, i, j, k);
+        #endif //BS_MESH_WRITE_TRANSMISS_MATRIX  
+          
+        loop_body.prepare (i, j, k);
+        
+        if (i+1 < nx && actnum[ext_index1 + 1])
+          {
+            loop_body.change_by_x (i + 1, j, k, ext_index1 + 1, true);
+          }
+          
+        if (j+1 < ny && actnum[ext_index1 + nx])
+          {
+            loop_body.change_by_y (i, j + 1, k, ext_index1 + nx, true);
+          }
+         
+        if (k+1 < nz && actnum[ext_index1 + nx * ny])
+          {
+            loop_body.change_by_z (i, j, k + 1, ext_index1 + nx * ny, true);
+          }
+      }
+  }
+
+  template <typename loop_body_t>
+  void
+  non_adjacent_columns (loop_body_t &loop_body, t_int const *actnum, t_float *zcorn_array, t_long i, t_long j, t_long &n_non_adj_elems)
+  {
+    t_long last_k_x = 0;
+    t_long last_k_y = 0;
+    
+     /*                             X
+     *                    0+-------+1
+     *                    /|     / |
+     *                  /  |   /   |
+     *               2/-------+3   |
+     *              Y |   4+--|----+5
+     *                |   /Z  |   /
+     *                | /     | /
+     *              6 /-------/7
+     */
+                
+    for (t_long k = 0; k < nz; ++k)
+      {
+        t_long ext_index1  = i + j * nx + k * nx * ny;
+        
+        //skip non-active cells
+        if (!actnum[ext_index1])
+          continue;
+        
+        n_non_adj_elems++;
+        
+        #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
+        if (ext_index1 < 1000)
+          fprintf (fp, "\n%d [%d;%d;%d]", ext_index1, i, j, k);
+        #endif //BS_MESH_WRITE_TRANSMISS_MATRIX  
+        
+        element_zcorn_t_long zcorn_index1;
+        mesh->get_element_zcorn_index (i, j, k, zcorn_index1);
+        
+        loop_body.prepare (i, j, k);
+        
+        // if X neighbour exists and current element`s X+ plane is not a line
+        if (i + 1 < nx && ((zcorn_array[zcorn_index1[1]] != zcorn_array[zcorn_index1[5]]) || (zcorn_array[zcorn_index1[3]] != zcorn_array[zcorn_index1[7]])))
+          {
+            t_long k_x = last_k_x - 1;
+            
+            element_zcorn_t_long zcorn_index2;
+            // search first possible neighbour
+            do
+              {
+                k_x++;
+                mesh->get_element_zcorn_index (i + 1, j, k_x, zcorn_index2);
+              }
+            while ((k_x < nz) && ((zcorn_array[zcorn_index1[1]] >= zcorn_array[zcorn_index2[4]]) && (zcorn_array[zcorn_index1[3]] >= zcorn_array[zcorn_index2[6]])));
+            
+            // calc all neihbours
+            while ((k_x < nz) && ((zcorn_array[zcorn_index1[5]] > zcorn_array[zcorn_index2[0]]) || (zcorn_array[zcorn_index1[7]] > zcorn_array[zcorn_index2[2]])))
+              {
+                if ((zcorn_array[zcorn_index1[5]] >= zcorn_array[zcorn_index2[4]]) && (zcorn_array[zcorn_index1[7]] >= zcorn_array[zcorn_index2[6]]))
+                  {
+                    // this (i + 1, j, k_x) neigbour won`t touch next (i, j, k + 1) element
+                    last_k_x = k_x + 1;
+                  }
+                  
+                t_long ext_index2 = ext_index1 + 1 + (k_x - k) * nx * ny;
+                
+                // if neighbour active and it`s X- plane is not a line
+                if (actnum[ext_index2] && ((zcorn_array[zcorn_index2[0]] != zcorn_array[zcorn_index2[4]]) || (zcorn_array[zcorn_index2[2]] != zcorn_array[zcorn_index2[6]])))
+                  {
+                    loop_body.change_by_x (i + 1, j, k_x, ext_index2, false);
+                  }
+                k_x++;
+                mesh->get_element_zcorn_index (i + 1, j, k_x, zcorn_index2);
+              }
+          }
+          
+        // if Y neighbour exists and current element`s Y+ plane is not a line
+        if (j + 1 < ny && ((zcorn_array[zcorn_index1[2]] != zcorn_array[zcorn_index1[6]]) || (zcorn_array[zcorn_index1[3]] != zcorn_array[zcorn_index1[7]])))
+          {
+            t_long k_y = last_k_y - 1;
+            
+            element_zcorn_t_long zcorn_index2;
+            // search first possible neighbour
+            do
+              {
+                k_y++;
+                mesh->get_element_zcorn_index (i, j + 1, k_y, zcorn_index2);
+              }
+            while ((k_y < nz) && ((zcorn_array[zcorn_index1[2]] >= zcorn_array[zcorn_index2[4]]) && (zcorn_array[zcorn_index1[3]] >= zcorn_array[zcorn_index2[5]])));
+            
+            // calc all neighbours
+            while ((k_y < nz) && ((zcorn_array[zcorn_index1[6]] > zcorn_array[zcorn_index2[0]]) || (zcorn_array[zcorn_index1[7]] > zcorn_array[zcorn_index2[1]])))
+              {
+                if ((zcorn_array[zcorn_index1[6]] >= zcorn_array[zcorn_index2[4]]) && (zcorn_array[zcorn_index1[7]] >= zcorn_array[zcorn_index2[5]]))
+                  {
+                    // this (i, j + 1, k_y) neigbour won`t touch next (i, j, k + 1) element
+                    last_k_y = k_y + 1;
+                  }
+                  
+                t_long ext_index2 = ext_index1 + ny + (k_y - k) * nx * ny;
+                
+                // if neighbour active and it`s Y- plane is not a line
+                if (actnum[ext_index2] && ((zcorn_array[zcorn_index2[0]] != zcorn_array[zcorn_index2[4]]) || (zcorn_array[zcorn_index2[1]] != zcorn_array[zcorn_index2[5]])))
+                  {
+                    loop_body.change_by_y (i, j + 1, k_y, ext_index2, false);
+                  }
+                k_y++;
+                mesh->get_element_zcorn_index (i, j + 1, k_y, zcorn_index2);
+              }
+          }
+          
+        if (k + 1 < nz && actnum[ext_index1 + nx * ny])
+          {
+            loop_body.change_by_z (i, j, k + 1, ext_index1 + nx * ny, true);
+          }    
+      }
+  }
+
+  template <typename loop_body_t>
+  void
   cell_loop (loop_body_t loop_body)
   {
-    t_long ext_index1, ext_index2;
-    t_long last_k_x, last_k_y, k_x, k_y;
-    bool is_adjacent;
     t_long n_adj_elems = 0, n_non_adj_elems = 0;
     
-    element_zcorn_t_long zcorn_index1, zcorn_index2; 
     t_float *zcorn_array = mesh->zcorn_array;
     t_int const *actnum = mesh->actnum_array->data ();
 
@@ -1465,156 +1614,15 @@ struct build_jacobian_and_flux : boost::noncopyable
       {
         for (t_long j = 0; j < ny; ++j)
           {
-            is_adjacent = loop_body.check_column_adjacency (i, j);
+            bool is_adjacent = loop_body.check_column_adjacency (i, j);
             
             if (is_adjacent)
               {   
-                
-                // simple loop
-                
-                for (t_long k = 0; k < nz; ++k)
-                  {
-                    ext_index1  = i + j * nx + k * nx * ny;
-                    
-                    //skip non-active cells
-                    if (!actnum[ext_index1])
-                      continue;
-                      
-                    n_adj_elems++;
-                    
-                    #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
-                    if (ext_index1 < 1000)
-                      fprintf (fp, "\n%d [%d;%d;%d]", ext_index1, i, j, k);
-                    #endif //BS_MESH_WRITE_TRANSMISS_MATRIX  
-                      
-                    loop_body.prepare (i, j, k);
-                    
-                    if (i+1 < nx && actnum[ext_index1 + 1])
-                      {
-                        loop_body.change_by_x (i + 1, j, k, ext_index1 + 1, true);
-                      }
-                      
-                    if (j+1 < ny && actnum[ext_index1 + nx])
-                      {
-                        loop_body.change_by_y (i, j + 1, k, ext_index1 + nx, true);
-                      }
-                     
-                    if (k+1 < nz && actnum[ext_index1 + nx * ny])
-                      {
-                        loop_body.change_by_z (i, j, k + 1, ext_index1 + nx * ny, true);
-                      }
-                  }
+                adjacent_columns (loop_body, actnum, i, j, n_adj_elems);
               }
             else
               {
-                // complicated loop
-                
-                last_k_x = 0;
-                last_k_y = 0;
-                
-                 /*                             X
-                 *                    0+-------+1
-                 *                    /|     / |
-                 *                  /  |   /   |
-                 *               2/-------+3   |
-                 *              Y |   4+--|----+5
-                 *                |   /Z  |   /
-                 *                | /     | /
-                 *              6 /-------/7
-                 */
-                            
-                for (t_long k = 0; k < nz; ++k)
-                  {
-                    ext_index1  = i + j * nx + k * nx * ny;
-                    
-                    //skip non-active cells
-                    if (!actnum[ext_index1])
-                      continue;
-                    
-                    n_non_adj_elems++;
-                    
-                    #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX   
-                    if (ext_index1 < 1000)
-                      fprintf (fp, "\n%d [%d;%d;%d]", ext_index1, i, j, k);
-                    #endif //BS_MESH_WRITE_TRANSMISS_MATRIX  
-                    
-                    mesh->get_element_zcorn_index (i, j, k, zcorn_index1);
-                    
-                    loop_body.prepare (i, j, k);
-                    
-                    // if X neighbour exists and current element`s X+ plane is not a line
-					if (i + 1 < nx && ((zcorn_array[zcorn_index1[1]] != zcorn_array[zcorn_index1[5]]) || (zcorn_array[zcorn_index1[3]] != zcorn_array[zcorn_index1[7]])))
-                      {
-                        k_x = last_k_x - 1;
-                        
-                        // search first possible neighbour
-                        do
-                          {
-                            k_x++;
-                            mesh->get_element_zcorn_index (i + 1, j, k_x, zcorn_index2);
-                          }
-                        while ((k_x < nz) && ((zcorn_array[zcorn_index1[1]] >= zcorn_array[zcorn_index2[4]]) && (zcorn_array[zcorn_index1[3]] >= zcorn_array[zcorn_index2[6]])));
-                        
-                        // calc all neihbours
-                        while ((k_x < nz) && ((zcorn_array[zcorn_index1[5]] > zcorn_array[zcorn_index2[0]]) || (zcorn_array[zcorn_index1[7]] > zcorn_array[zcorn_index2[2]])))
-                          {
-                            if ((zcorn_array[zcorn_index1[5]] >= zcorn_array[zcorn_index2[4]]) && (zcorn_array[zcorn_index1[7]] >= zcorn_array[zcorn_index2[6]]))
-                              {
-                                // this (i + 1, j, k_x) neigbour won`t touch next (i, j, k + 1) element
-                                last_k_x = k_x + 1;
-                              }
-                              
-                            ext_index2 = ext_index1 + 1 + (k_x - k) * nx * ny;
-                            
-                            // if neighbour active and it`s X- plane is not a line
-							if (actnum[ext_index2] && ((zcorn_array[zcorn_index2[0]] != zcorn_array[zcorn_index2[4]]) || (zcorn_array[zcorn_index2[2]] != zcorn_array[zcorn_index2[6]])))
-                              {
-                                loop_body.change_by_x (i + 1, j, k_x, ext_index2, false);
-                              }
-                            k_x++;
-                            mesh->get_element_zcorn_index (i + 1, j, k_x, zcorn_index2);
-                          }
-                      }
-                      
-                    // if Y neighbour exists and current element`s Y+ plane is not a line
-					if (j + 1 < ny && ((zcorn_array[zcorn_index1[2]] != zcorn_array[zcorn_index1[6]]) || (zcorn_array[zcorn_index1[3]] != zcorn_array[zcorn_index1[7]])))
-                      {
-                        k_y = last_k_y - 1;
-                        
-                        // search first possible neighbour
-                        do
-                          {
-                            k_y++;
-                            mesh->get_element_zcorn_index (i, j + 1, k_y, zcorn_index2);
-                          }
-                        while ((k_y < nz) && ((zcorn_array[zcorn_index1[2]] >= zcorn_array[zcorn_index2[4]]) && (zcorn_array[zcorn_index1[3]] >= zcorn_array[zcorn_index2[5]])));
-                        
-                        // calc all neighbours
-                        while ((k_y < nz) && ((zcorn_array[zcorn_index1[6]] > zcorn_array[zcorn_index2[0]]) || (zcorn_array[zcorn_index1[7]] > zcorn_array[zcorn_index2[1]])))
-                          {
-                            if ((zcorn_array[zcorn_index1[6]] >= zcorn_array[zcorn_index2[4]]) && (zcorn_array[zcorn_index1[7]] >= zcorn_array[zcorn_index2[5]]))
-                              {
-                                // this (i, j + 1, k_y) neigbour won`t touch next (i, j, k + 1) element
-                                last_k_y = k_y + 1;
-                              }
-                              
-                            ext_index2 = ext_index1 + ny + (k_y - k) * nx * ny;
-                            
-                            // if neighbour active and it`s Y- plane is not a line
-							if (actnum[ext_index2] && ((zcorn_array[zcorn_index2[0]] != zcorn_array[zcorn_index2[4]]) || (zcorn_array[zcorn_index2[1]] != zcorn_array[zcorn_index2[5]])))
-                              {
-                                loop_body.change_by_y (i, j + 1, k_y, ext_index2, false);
-                              }
-                            k_y++;
-                            mesh->get_element_zcorn_index (i, j + 1, k_y, zcorn_index2);
-                          }
-                      }
-                      
-                    if (k + 1 < nz && actnum[ext_index1 + nx * ny])
-                      {
-                        loop_body.change_by_z (i, j, k + 1, ext_index1 + nx * ny, true);
-                      }    
-                  }
+                non_adjacent_columns (loop_body, actnum, zcorn_array, i, j, n_non_adj_elems);
               }
           }
       }
@@ -1640,7 +1648,6 @@ int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr
   write_time_to_log init_time ("Mesh transmissibility calculation", ""); 
   
   
-  t_long* rows_ptr, *cols_ind;
   t_long i, n_non_zeros;
   sp_bcsr_t conn_trans;
   
@@ -1649,7 +1656,8 @@ int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr
   jacobian->get_rows_ptr()->clear();
   jacobian->init_struct(n_active_elements, n_active_elements, n_active_elements);
   
-  rows_ptr = &(*jacobian->get_rows_ptr())[0];
+  t_long *rows_ptr = jacobian->get_rows_ptr()->data ();
+  // FIXME: check size of rows_ptr
   rows_ptr[0] = 0;
 
   std::vector<bool> is_butting(nx*ny,false);
@@ -1677,22 +1685,16 @@ int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr
     
   //create cols_ind
   jacobian->get_cols_ind()->resize(n_non_zeros);
-  cols_ind = &(*jacobian->get_cols_ind())[0];
+  t_long *cols_ind = jacobian->get_cols_ind()->data ();
 
 
   ////////transmis/////////////////////////
-
   conn_trans = flux_conn->get_conn_trans();
   conn_trans->init (n_connections, 2 * n_connections, 1, 2 * n_connections);
 
-  t_long *rows_ptr_transmis = &(*conn_trans->get_rows_ptr())[0];
-  
   flux_conn->get_matrix_block_idx_minus ()->resize(n_connections * 2);
   flux_conn->get_matrix_block_idx_plus ()->resize(n_connections * 2);
   
-  //t_long *matrix_block_idx_minus = &(*flux_conn->get_matrix_block_idx_minus ())[0];
-  //t_long *matrix_block_idx_plus = &(*flux_conn->get_matrix_block_idx_plus ())[0];
-
   if (!n_connections)
     {
       for (i = 0; i < n_non_zeros; ++i)
@@ -1700,6 +1702,7 @@ int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr
       return 0;
     }
 
+  t_long *rows_ptr_transmis = conn_trans->get_rows_ptr()->data ();
   for (i = 0; i < n_connections + 1; ++i)
     rows_ptr_transmis[i] = i * 2;
 
