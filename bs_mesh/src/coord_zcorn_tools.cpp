@@ -247,7 +247,7 @@ struct dim_subscript {
 	}
 
 	fp_stor_t ss_const_dim(int_t idx) {
-		return static_cast< fp_stor_t >(fp_t(dim_[0] * idx));
+		return static_cast< fp_stor_t >(fp_t(offset_ + dim_[0] * idx));
 	}
 
 	fp_stor_t ss_array_dim(int_t idx) {
