@@ -4,7 +4,7 @@
  * \author Mark Khait
  * \date 10.05.2010
  * */
- 
+
 #ifndef BS_PVT_DUMMY_IFACE_H_
 #define BS_PVT_DUMMY_IFACE_H_
 
@@ -12,23 +12,26 @@
 
 namespace blue_sky {
 
-  
+
 class pvt_dummy_iface : public objbase
   {
     public:
-    
-    virtual 
+
+    virtual
     ~pvt_dummy_iface () {}
-    
-    virtual void 
+
+    virtual void
     init (int pvt_type) = 0;
-    
-    virtual BS_SP( table_iface)
+
+    virtual std::list <BS_SP( table_iface)>
     get_table () const = 0;
-    
+
+    virtual boost::python::list
+    py_get_table () const = 0;
+
     virtual int
     get_pvt_type () const = 0;
-  
+
   };
 
 }

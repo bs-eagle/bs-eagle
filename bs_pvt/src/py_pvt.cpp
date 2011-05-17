@@ -3,7 +3,7 @@
  *      \brief  python wrappers for pvt_
  *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
  *       \date  08.05.2008
- *  \copyright  This source code is released under the terms of 
+ *  \copyright  This source code is released under the terms of
  *              the BSD License. See LICENSE for more details.
  * */
 #include "bs_pvt_stdafx.h"
@@ -20,6 +20,7 @@
 #include "pvt_dummy.h"
 
 #include "export_python_wrapper.h"
+#include "py_list_converter.h"
 
 namespace blue_sky  {
 namespace python    {
@@ -30,8 +31,8 @@ namespace python    {
     .def ("get_gor_for_pressure",     &T::get_gor_for_pressure)
     .def ("print",                    &T::print)
   PY_EXPORTER_END;
-  
-     
+
+
     PY_EXPORTER (pvt_dummy_exporter, default_exporter)
       .def ("get_table", &T::get_table)
       .def ("get_pvt_type", &T::get_pvt_type)
@@ -47,10 +48,14 @@ namespace python    {
     class_exporter<pvt_gas, pvt_base, pvt_exporter>::export_class ("pvt_gas");
     class_exporter<pvt_water, pvt_base, pvt_exporter>::export_class ("pvt_water");
     class_exporter<pvt_dead_oil, pvt_base, pvt_exporter>::export_class ("pvt_dead_oil");
-    
+
     base_exporter <pvt_dummy_iface, pvt_dummy_exporter>::export_class ("pvt_dummy_iface");
     class_exporter<pvt_dummy, pvt_dummy_iface, pvt_dummy_exporter>::export_class ("pvt_dummy");
 
+	  // register vector of type descriptors <-> Python list converters
+	  typedef bspy_converter< list_traits< std::list<smart_ptr<table_iface> > > > spv_table_list_converter;
+	  spv_table_list_converter::register_from_py ();
+	  spv_table_list_converter::register_to_py ();
   }
 
 } // namespace python

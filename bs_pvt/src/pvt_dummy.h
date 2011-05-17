@@ -13,26 +13,30 @@
 
 namespace blue_sky {
 
-  
+
   class BS_API_PLUGIN pvt_dummy : public pvt_dummy_iface
   {
     public:
     virtual ~pvt_dummy () {}
-    
+
     void init (int pvt_type);
-    
-    
-    BS_SP( table_iface)
+
+    std::list <BS_SP( table_iface)>
     get_table () const;
-    
+
+    boost::python::list
+    py_get_table () const;
+
     int
     get_pvt_type () const;
-    
-    private:
-      BS_SP (table_iface) pvt_data;
-      int                 pvt_type;
-    
 
+    private:
+      BS_SP (table_iface) oil_table;
+      BS_SP (table_iface) water_table;
+      BS_SP (table_iface) gas_table;
+      BS_SP (table_iface) density_table;
+
+      int                 pvt_type;
 
     public:
     BLUE_SKY_TYPE_DECL (pvt_dummy);
