@@ -333,7 +333,7 @@ spfp_storarr_t gen_coord(int_t nx, int_t ny, spfp_storarr_t dx, spfp_storarr_t d
 	BSOUT << "gen_coord: creation starts..." << bs_end;
 	// fill coord
 	// coord is simple grid
-	coord->init((nx + 1)*(ny + 1)*6, value_t(0));
+	coord->resize((nx + 1)*(ny + 1)*6, value_t(0));
 	fp_storarr_t::iterator pcd = coord->begin();
 	for(int_t iy = 0; iy <= ny; ++iy) {
 		fp_t cur_y = dys[iy];
@@ -373,7 +373,7 @@ coord_zcorn_pair gen_coord_zcorn(int_t nx, int_t ny, int_t nz, spv_float dx, spv
 	// fill zcorn
 	// very simple case
 	dim_subscript dzs(*dz, z0);
-	zcorn->init(nx*ny*nz*8);
+	zcorn->resize(nx * ny * nz * 8);
 
 	// DEBUG
 	BSOUT << "gen_coord_zcorn: ZCORN creating starts..." << bs_end;

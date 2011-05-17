@@ -651,6 +651,18 @@ namespace blue_sky
       }
     set_pool_dims (arr_dims, n_dims);
   }
+  
+  boost::python::list 
+  h5_pool::py_get_pool_dims ()
+  {
+    boost::python::list dims;
+    
+    for (int i = 0; i < n_pool_dims; ++i)
+      {
+        dims.append(pool_dims[i]);
+      }
+    return dims;
+  }
     
 #endif //BSPY_EXPORTING_PLUGIN
 /////////////////////////////////BS Register
