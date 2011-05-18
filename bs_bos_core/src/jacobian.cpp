@@ -320,7 +320,7 @@ namespace blue_sky
       }
 
     t_float *rhs_ = rhs->data ();
-    t_float *rhs_flux_ = rhs->data ();
+    t_float *rhs_flux_ = rhs_flux->data ();
 
     // OPENMP:
     for (size_t i = 0, cnt = rhs->size (); i < cnt; ++i)
