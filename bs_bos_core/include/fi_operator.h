@@ -142,6 +142,7 @@ namespace blue_sky {
     norm_ (calc_model_->norm),
     cfl_ (jacobian_->get_cfl_vector ())
     {
+      BS_ASSERT (rhs_->size ());
     }
 
     /**
@@ -287,124 +288,22 @@ namespace blue_sky {
     void
     fi_operator_cells (index_t istart, const item_t dt)
     {
-      // local declaration
-      index_t i;
-      rhs_item_t *jac_block     = 0;
-      rhs_item_t *rhs_block     = 0;
-      index_t b_sqr         = n_phases * n_phases;
-
-      spv_float main_diag_acc         = jacobian_->get_matrix ("accum")->get_values ();//get_main_diagonal_accumulative ();
-      rhs_item_array_t ss_diag        = jacobian_->get_ss_diagonal ();
-      rhs_item_array_t sp_diag        = jacobian_->get_sp_diagonal ();
-      rhs_item_array_t s_rhs          = jacobian_->get_sec_rhs ();
-      rhs_item_array_t rhs            = jacobian_->get_rhs ();
-
-      BS_ERROR (!main_diag_acc->empty (), "fi_operator_cells");
-      BS_ERROR (!ss_diag->empty (), "fi_operator_cells");
-      BS_ERROR (!sp_diag->empty (), "fi_operator_cells");
-      BS_ERROR (!s_rhs->empty (), "fi_operator_cells");
-      BS_ERROR (!rhs->empty (), "fi_operator_cells");
-
-      index_t switch_to_sg_count = 0;
-      index_t switch_to_ro_count = 0;
-      index_t switch_to_momg_count = 0;
-      item_t total_volume = 0.0;
-      rhs_item_t *ss_block = 0;
-      rhs_item_t *s_rhs_block = 0;
-
-#ifdef _MPI
-      int n_left = 0;///mpi_decomp->get_recv_l ();
-      int n_own = 0;///mpi_decomp->get_n_local_own () + n_left;
-      ///rhs -= n_left * n_phases;
-      double mpi_invers_fvf_average[3];
-      int n_procs;
-#endif //_MPI
-
-#ifdef FI_OPERATOR_CELLS_PARALLEL
-      double invers_fvf_average_w = 0.;
-      double invers_fvf_average_g = 0.;
-      double invers_fvf_average_o = 0.;
-#endif //FI_OPERATOR_CELLS_PARALLEL
-
-
       // set flag to 0 at newton iteration
       calc_model_->lsearch_force_newton_step = 0;
 
-      // set equal to 0
-      assign (calc_model_->invers_fvf_average, 0);
+      boost::array <item_t, FI_PHASE_TOT> &invers_fvf_average = calc_model_->invers_fvf_average;
+      assign (invers_fvf_average, 0);
 
-      // set flag to 0 at newton iteration
-#ifdef FI_OPERATOR_CELLS_PARALLEL
-#pragma omp parallel for private  (jac_block, rhs_block) \
-    reduction (+:invers_fvf_average_w, invers_fvf_average_g, invers_fvf_average_o,total_volume)
-#endif //FI_OPERATOR_CELLS_PARALLEL
       // loop through all cells
-      for (i = 0; i < n_cells_; ++i)
+      item_t total_volume = 0.0;
+      for (t_long i = 0; i < n_cells_; ++i)
         {
-          jac_block   = &(*main_diag_acc)[b_sqr * i];
-          ss_block    = &(*ss_diag)[n_sec_vars * n_sec_vars * i];
-          s_rhs_block = &(*s_rhs)[n_sec_vars * i];
-          rhs_block   = &(*rhs)[i * n_phases];
-#ifdef _MPI
-          BS_ASSERT (false && "MPI: NOT IMPL YET");
-          if ((i < n_left) || (i >= n_own))
-            {
-              ///jac_block = just_double;
-              ///rhs_block = just_double;
-            }
-          else
-            {
-              jac_block -= n_left * b_sqr;
-            }
-#endif //_MPI
-
-          // calculate properties for cell i
-#ifdef FI_OPERATOR_CELLS_PARALLEL
-          fi_operator_cell (istart, dt, i, jac_block, rhs_block,
-                            ss_block, s_rhs_block,
-                            switch_to_sg_count, switch_to_ro_count, switch_to_momg_count,
-                            invers_fvf_average_w, invers_fvf_average_g, invers_fvf_average_o, total_volume);
-#else //FI_OPERATOR_CELLS_PARALLEL
-          fi_operator_cell (istart, dt, i, jac_block, rhs_block,
-                            ss_block, s_rhs_block,
-                            switch_to_sg_count, switch_to_ro_count, switch_to_momg_count,
-                            total_volume);
-#endif //FI_OPERATOR_CELLS_PARALLEL
+          fi_operator_cell (dt, i, total_volume, invers_fvf_average);
         }
 
-#ifdef _MPI
-      BS_ASSERT (false && "MPI: NOT IMPL YET");
-      double mpi_total_volume;
-      MPI_Allreduce (&total_volume, &mpi_total_volume, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-      total_volume = mpi_total_volume;
-
-      MPI_Allreduce (&invers_fvf_average, &mpi_invers_fvf_average, FI_PHASE_TOT, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-      if (is_w)
-        invers_fvf_average[d_w] = mpi_invers_fvf_average[d_w];
-      if (is_g)
-        invers_fvf_average[d_g] = mpi_invers_fvf_average[d_g];
-      if (is_o)
-        invers_fvf_average[d_o] = mpi_invers_fvf_average[d_o];
-
-      ///n_elements = mpi_decomp->get_n_elements ();
-#endif //_MPI
-
-#ifdef FI_OPERATOR_CELLS_PARALLEL
-      if (is_w)
-        invers_fvf_average[d_w] = invers_fvf_average_w / (double) n_elements;
-      if (is_g)
-        invers_fvf_average[d_g] = invers_fvf_average_g / (double) n_elements;
-      if (is_o)
-        invers_fvf_average[d_o] = invers_fvf_average_o / (double) n_elements;
-#else //FI_OPERATOR_CELLS_PARALLEL
-
-      if (is_w)
-        calc_model_->invers_fvf_average[d_w] /= (item_t) n_cells_;
-      if (is_g)
-        calc_model_->invers_fvf_average[d_g] /= (item_t) n_cells_;
-      if (is_o)
-        calc_model_->invers_fvf_average[d_o] /= (item_t) n_cells_;
-#endif //FI_OPERATOR_CELLS_PARALLEL
+      if (is_w) invers_fvf_average[d_w] /= (item_t) n_cells_;
+      if (is_g) invers_fvf_average[d_g] /= (item_t) n_cells_;
+      if (is_o) invers_fvf_average[d_o] /= (item_t) n_cells_;
 
       calc_model_->ave_volume = total_volume / (item_t) n_cells_;
     }
@@ -738,13 +637,11 @@ namespace blue_sky {
       rhs_item_array_t ss_diag        = jacobian_->get_ss_diagonal ();
       rhs_item_array_t sp_diag        = jacobian_->get_sp_diagonal ();
       rhs_item_array_t s_rhs          = jacobian_->get_sec_rhs ();
-      rhs_item_array_t rhs            = jacobian_->get_rhs ();
 
       BS_ASSERT (!main_diag_acc->empty ());
       BS_ASSERT (!ss_diag->empty ());
       BS_ASSERT (!sp_diag->empty ());
       BS_ASSERT (!s_rhs->empty ());
-      BS_ASSERT (!rhs->empty ());
 
       // loop through all cells
       for (index_t i = 0; i < n_cells_; ++i)
@@ -753,7 +650,7 @@ namespace blue_sky {
           rhs_item_t *ss_block    = &(*ss_diag)[n_sec_vars * n_sec_vars * i];
           rhs_item_t *sp_block    = &(*sp_diag)[n_sec_vars * n_phases * i];
           rhs_item_t *s_rhs_block = &(*s_rhs)[n_sec_vars * i];
-          rhs_item_t *rhs_block   = &(*rhs)[i * n_phases];
+          rhs_item_t *rhs_block   = &(*rhs_)[i * n_phases];
 
           index_t i_w = FI_PH_IND (i, d_w, n_phases);
           index_t i_g = FI_PH_IND (i, d_g, n_phases);
@@ -840,61 +737,21 @@ namespace blue_sky {
 
     /**
      * \brief Calculates physical params for cell
-     * \param istart
      * \param dt
-     * \param cell_ind
-     * \param jac_block
-     * \param rhs_block
-     * \param ss_block
-     * \param s_rhs_block
-     * \param switch_to_sg_count
-     * \param switch_to_ro_count
-     * \param switch_to_momg_count
+     * \param i
      * \param total_volume
-     * \todo  Remove obsolete params
      * */
-#ifdef FI_OPERATOR_CELLS_PARALLEL
     inline void
-    fi_operator_cell (index_t istart, const item_t dt,
-        index_t cell_ind, item_t *jac_block,
-        item_t *rhs_block,
-        item_t *ss_block,
-        item_t *s_rhs_block,
-        int &switch_to_sg_count,
-        int &switch_to_ro_count,
-        int &switch_to_momg_count,
-        item_t &invers_fvf_average_w,
-        item_t &invers_fvf_average_g,
-        item_t &invers_fvf_average_o,
-        item_t &total_volume,
-        const sp_mesh_iface_t &mesh)
-#else //FI_OPERATOR_CELLS_PARALLEL
-    inline void
-    fi_operator_cell (index_t /*istart*/, const item_t dt,
-      index_t cell_ind, rhs_item_t * /*jac_block*/,
-      rhs_item_t * /*rhs_block*/,
-        rhs_item_t * /*ss_block*/,
-        rhs_item_t * /*s_rhs_block*/,
-        index_t &/*switch_to_sg_count*/,
-        index_t &/*switch_to_ro_count*/,
-        index_t &/*switch_to_momg_count*/,
-        item_t &total_volume)
-#endif //FI_OPERATOR_CELLS_PARALLEL
-
+    fi_operator_cell (const item_t dt,
+      index_t i, 
+      item_t &total_volume,
+      boost::array <item_t, FI_PHASE_TOT> &invers_fvf_average)
     {
       local_data local_data_;
-      item_t p_water;
-      item_t p_gas;
-      item_t p_oil;
-      index_t i_temp;
-
-#ifdef _MPI
-      int n_left = 0;///mpi_decomp->get_recv_l ();
-      int n_own = 0;///mpi_decomp->get_n_local_own () + n_left;
-#endif //_MPI
-
-      // base constants
-      index_t i = cell_ind;
+      item_t p_water = 0;
+      item_t p_gas = 0;
+      item_t p_oil = 0;
+      index_t i_temp = 0;
 
       item_t gor = 0.0;
       item_t d_gor = 0.0;
@@ -1133,31 +990,9 @@ namespace blue_sky {
             }
         }
 
-#ifdef FI_OPERATOR_CELLS_PARALLEL
-      if (is_w)
-        invers_fvf_average_w += invers_fvf[i_w];
-      if (is_g)
-        invers_fvf_average_g += invers_fvf[i_g];
-      if (is_o)
-        invers_fvf_average_o += invers_fvf[i_o];
-#else //FI_OPERATOR_CELLS_PARALLEL
-
-#ifdef _MPI
-      if (i >= n_left && i < n_own)
-        {
-#endif //_MPI
-          if (is_w)
-            calc_model_->invers_fvf_average[d_w] += data_i.invers_fvf[d_w];
-          if (is_g)
-            calc_model_->invers_fvf_average[d_g] += data_i.invers_fvf[d_g];
-          if (is_o)
-            calc_model_->invers_fvf_average[d_o] += data_i.invers_fvf[d_o];
-#ifdef _MPI
-        }
-#endif //_MPI
-
-#endif //FI_OPERATOR_CELLS_PARALLEL
-
+      if (is_w) invers_fvf_average[d_w] += data_i.invers_fvf[d_w];
+      if (is_g) invers_fvf_average[d_g] += data_i.invers_fvf[d_g];
+      if (is_o) invers_fvf_average[d_o] += data_i.invers_fvf[d_o];
     }
 
     /**
