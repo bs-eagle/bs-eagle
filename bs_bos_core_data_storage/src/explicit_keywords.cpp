@@ -85,12 +85,12 @@ namespace blue_sky
       n_phases += params.hdm->get_prop()->get_b("water_phase");
       n_phases += params.hdm->get_prop()->get_b("gas_phase");
       
-      keyword_manager->register_fp_pool_keyword ("PRESSURE", dimens, 0, 0);
+      keyword_manager->register_fp_pool_keyword ("PRESSURE", dimens, 200.0, 0);
       
       if (n_phases > 1)
         {
           if (params.hdm->get_prop()->get_b("water_phase"))
-            keyword_manager->register_fp_pool_keyword ("SWAT",    dimens, 0, 0);
+            keyword_manager->register_fp_pool_keyword ("SWAT",    dimens, 0.3, 0);
          
           if (params.hdm->get_prop()->get_b("gas_phase"))
             {
