@@ -170,6 +170,7 @@ namespace blue_sky
   void 
   h5_pool::open_file (const std::string &fname_, const std::string &path_)
     {
+      // FIXME:
       if (file_id)
         {
           close_file ();
@@ -320,14 +321,14 @@ namespace blue_sky
   bool
   h5_pool::is_opened (std::string const &name)
   {
-    BS_ASSERT (group_id >= 0);
+    BS_ASSERT (group_id >= 0) (name);
     map_t::iterator it = h5_map.find (name);
     if (it == h5_map.end ())
       {
         bs_throw_exception (boost::format ("No array %s in pool") % name);
       }
 
-    return it->second.dspace != 0;
+    return it->second.dspace >= 0;
   }
 
   template <typename T>
