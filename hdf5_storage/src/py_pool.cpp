@@ -5,6 +5,9 @@
  * @version 1.0
  * @date 2011-03-12
  */
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
 
 #include "py_pool.h"
 #include "h5_pool.hpp"
