@@ -258,8 +258,17 @@ namespace blue_sky
   void
   reservoir::fill_rhs_wells (double dt, const sp_calc_model_t &calc_model, rhs_item_array_t &rhs, bool update_after_gauss_elimination) const
   {
-    for_each_facility (*facility_list_, closure <void, facility_t, double, index_t, bool, bool, bool, rhs_item_array_t &> (&facility_t::fill_rhs,
-      dt, calc_model->n_phases, calc_model->is_gas (), calc_model->is_oil (), calc_model->is_water (), rhs));
+    index_t n_phases = calc_model->n_phases;
+    bool is_g = calc_model->is_gas ();
+    bool is_o = calc_model->is_oil ();
+    bool is_w = calc_model->is_water ();
+
+    facility_manager::well_const_iterator_t wit = facility_list_->wells_begin ();
+    facility_manager::well_const_iterator_t we = facility_list_->wells_end ();
+    for (; wit != we; ++wit)
+      {
+        wit->second->fill_rhs (dt, n_phases, is_g, is_o, is_w, rhs);
+      }
   }
 
   reservoir::sp_facility_manager_t
