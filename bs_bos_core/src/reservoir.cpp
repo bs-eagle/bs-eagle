@@ -247,9 +247,12 @@ namespace blue_sky
   void
   reservoir::calc_wells (int istart, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, BS_SP (jacobian) &jacobian)
   {
-    // FIXME: 
-    //for_each_facility (*facility_list_, closure <void, facility_t, bool, double, const sp_calc_model_t &, const sp_mesh_iface_t &, sp_jmatrix_t &> (&facility_t::process,
-    //  istart, dt, calc_model, mesh, jmatrix));
+    facility_manager::well_const_iterator_t wit = facility_list_->wells_begin ();
+    facility_manager::well_const_iterator_t we = facility_list_->wells_end ();
+    for (; wit != we; ++wit)
+      {
+        wit->second->process (istart, dt, calc_model, mesh, jacobian);
+      }
   }
 
   void
