@@ -199,17 +199,6 @@ namespace blue_sky
       virtual std::string py_str () const;
       virtual boost::python::list py_list_data () const;
 #endif //BSPY_EXPORTING_PLUGIN
-    private:
-    
-       /** 
-       * @brief calculate current data dimensions
-       * 
-       * @param it    -- <INPUT> iterator on data
-       * 
-       * @return data size 
-       */
-      virtual t_long calc_data_dims (map_t::iterator it); 
-    
     protected:
 
       /** 
@@ -273,9 +262,17 @@ namespace blue_sky
       void fill_map ();
       void clear_map ();
       void close_node (h5_pair &p);
+
       template <class T>
-      map_t::iterator add_node (const std::string &name, const hid_t dset, const hid_t dspace, 
-                     const hid_t dtype, const int n_dims, const T *dims, const bool var_dims = 0);
+      map_t::iterator add_node (const std::string &name, 
+                                const hid_t dset, 
+                                const hid_t dspace, 
+                                const hid_t dtype, 
+                                const hid_t plist, 
+                                const int n_dims, 
+                                const T *dims, 
+                                const bool var_dims = 0);
+
       static herr_t it_group (hid_t g_id, const char *name, const H5L_info_t *info, 
                               void *op_data); 
 
