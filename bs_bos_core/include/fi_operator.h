@@ -602,6 +602,7 @@ namespace blue_sky {
               pvt_oil = pvt_oil_array [pvt_reg];
             }
 
+          // FIXME: maybe invalid access to gas_oil_ratio_
           switch_main_vars::do_switch (
             is_w, is_g, is_o,
             d_o, d_g, d_w,
