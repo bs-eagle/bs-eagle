@@ -17,6 +17,14 @@ namespace blue_sky
 
   pvt_dead_oil::pvt_dead_oil (bs_type_ctor_param)
   {
+    if (pvt_input_props->init (0, PVT_OIL_INPUT_TOTAL))
+      {
+        bs_throw_exception ("Error: initializing table of properties");
+      }
+    if (pvt_props_table->init (0, PVT_OIL_TOTAL))
+      {
+        bs_throw_exception ("Error: initializing table of properties");
+      }
   }
 
   pvt_dead_oil::pvt_dead_oil (const pvt_dead_oil &pvt)
@@ -65,7 +73,6 @@ namespace blue_sky
     vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_FVF);
     vector_t &main_visc_         = pvt_input_props->get_col_vector (PVT_OIL_INPUT_VISC);
      
-    BS_ASSERT (main_gpr_.empty ());
     for (t_int i = 0; i < n_points; ++i)
       {
         main_gpr_[i]      = (0.0);

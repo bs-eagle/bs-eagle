@@ -15,6 +15,14 @@ namespace blue_sky
 
   pvt_water::pvt_water (bs_type_ctor_param)
   {
+    if (pvt_input_props->init (0, PVT_WATER_INPUT_TOTAL))
+      {
+        bs_throw_exception ("Error: initializing table of properties");
+      }
+    if (pvt_props_table->init (0, PVT_WATER_TOTAL))
+      {
+        bs_throw_exception ("Error: initializing table of properties");
+      }
   }
 
   pvt_water::pvt_water (const pvt_water &pvt)

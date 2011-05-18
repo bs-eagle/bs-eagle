@@ -24,6 +24,14 @@ namespace blue_sky
 
   pvt_gas::pvt_gas (bs_type_ctor_param)
   {
+    if (pvt_input_props->init (0, PVT_GAS_INPUT_TOTAL))
+      {
+        throw bs_exception ("pvt_gas::insert_vector in table", "Error: initializing table of properties");
+      }
+    if (pvt_props_table->init (0, PVT_GAS_TOTAL))
+      {
+        throw bs_exception ("pvt_gas::init table", "Error: initializing table of properties");
+      }
   }
 
   pvt_gas::pvt_gas (const pvt_gas &pvt)
@@ -52,12 +60,11 @@ namespace blue_sky
       }
     
     t_int n_points = (t_int) vec.size () / elem_count;
-    
     if (pvt_input_props->init (n_points, PVT_GAS_INPUT_TOTAL))
       {
         throw bs_exception ("pvt_gas::insert_vector in table", "Error: initializing table of properties");
       }
-
+    
     pvt_input_props->set_col_name (PVT_GAS_INPUT_PRESSURE, "pressure");
     pvt_input_props->set_col_name (PVT_GAS_INPUT_FVF, "fvf");   
     pvt_input_props->set_col_name (PVT_GAS_INPUT_VISC, "visc");
@@ -222,6 +229,9 @@ namespace blue_sky
     vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_GAS_INV_FVF);
     vector_t &inv_visc_     = pvt_props_table->get_col_vector (PVT_GAS_INV_VISC);
     vector_t &inv_visc_fvf_ = pvt_props_table->get_col_vector (PVT_GAS_INV_VISC_FVF);
+
+    if (pressure_.empty ())
+        return ;
 
     BS_ASSERT (pressure_.size () == inv_fvf_.size ());
     BS_ASSERT (inv_fvf_.size ()  == inv_visc_.size ());

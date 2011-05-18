@@ -17,6 +17,10 @@ namespace blue_sky
 
   pvt_oil::pvt_oil (bs_type_ctor_param)
   {
+    if (pvt_props_table->init (0, PVT_OIL_TOTAL_2))
+      {
+        bs_throw_exception ("Error: initializing table of properties");
+      }
   }
 
   pvt_oil::pvt_oil (const pvt_oil &pvt)
