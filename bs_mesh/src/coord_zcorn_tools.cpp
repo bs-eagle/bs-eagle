@@ -794,6 +794,33 @@ void fill_gaps(delta_t& d, fp_stor_t cell_sz, fp_stor_t min_sz,
 	copy(refined_d.begin(), refined_d.end(), d.begin());
 }
 
+template< class delta_t, class hit_idx_t >
+void find_hit_idx(
+	const delta_t& delta_x, const delta_t& delta_y, hit_idx_t& hit_idx, spfp_storarr_t points_pos,
+	fp_stor_t x0 = 0, fp_stor_t y0 = 0)
+{
+	using namespace std;
+	typedef typename hit_idx_t::iterator hit_iterator;
+	typedef typename delta_t::const_iterator delta_iterator;
+	typedef cumsum_iterator< delta_iterator > cs_iterator;
+	typedef typename cs_iterator::difference_type diff_t;
+
+	uint_t cnt = points_pos->size() >> 1;
+	hit_idx.resize(cnt * 2);
+	hit_iterator p_hit = hit_idx.begin();
+	a_iterator pp = points_pos->begin();
+	for(uint_t i = 0; i < cnt; ++i) {
+		cs_iterator p_id = lower_bound(
+			cs_iterator(delta_x.begin(), x0),
+			cs_iterator(delta_x.end(), x0), *pp++);
+		*p_hit++ = max< diff_t >(p_id - delta_x.begin() - 1, 0);
+		p_id = lower_bound(
+			cs_iterator(delta_y.begin(), y0),
+			cs_iterator(delta_y.end(), y0), *pp++);
+		*p_hit++ = max< diff_t >(p_id - delta_y.begin() - 1, 0);
+	}
+}
+
 BS_API_PLUGIN coord_zcorn_pair wave_mesh_deltas_s1(
 	fp_stor_t max_dx, fp_stor_t max_dy,
 	fp_stor_t len_x, fp_stor_t len_y, spfp_storarr_t points_pos, spfp_storarr_t points_param)
@@ -959,7 +986,8 @@ void wave_mesh_deltas_s2(
 coord_zcorn_pair wave_mesh_deltas(
 	fp_stor_t max_dx, fp_stor_t max_dy,
 	fp_stor_t len_x, fp_stor_t len_y,
-	spfp_storarr_t points_pos, spfp_storarr_t points_param)
+	spfp_storarr_t points_pos, spfp_storarr_t points_param,
+	spi_arr_t hit_idx)
 {
 	using namespace std;
 	// call stage 1
@@ -972,6 +1000,9 @@ coord_zcorn_pair wave_mesh_deltas(
 		max_dx, max_dy, points_param,
 		res.first, res.second
 	);
+	// find hit index if needed
+	if(hit_idx)
+		find_hit_idx(*res.first, *res.second, *hit_idx, points_pos);
 
 	// DEBUG
 	// check if sum(deltas) = len
@@ -1031,57 +1062,6 @@ coord_zcorn_pair wave_mesh(
 		points_param, nz, dz, x0, y0, z0
 	);
 }
-
-//template< class ray_t >
-//void refine_dim_s(ray_t& ray, fp_stor_t min_d, fp_stor_t max_d, fp_stor_t a, fp_stor_t max_front) {
-//	using namespace std;
-//	typedef typename ray_t::const_iterator ray_iterator;
-//
-//	// we can't make cells larger than max_d
-//	const uint_t N_max = uint_t(ceil(log(max_d/min_d) / log(a)));
-//
-//	fp_set ref_ray;
-//	fp_t wave_front = 0, d;
-//	ref_ray.insert(wave_front);
-//	ray_iterator pr = ray.begin(), pr_end = ray.end();
-//	while(wave_front <= max_front) {
-//		// obtain next cut
-//		if(wave_front > *pr) ++pr;
-//		if(pr != pr_end)
-//			d = *pr - wave_front;
-//		else
-//			d = max_front - wave_front;
-//
-//		fp_t c = wave_front + d * 0.5;
-//		if(d < min_d * 0.5) {
-//			wave_front = c + min_d * 0.5;
-//			// both wells inside one cell
-//			ref_ray.insert(c - min_d * 0.5);
-//			ref_ray.insert(wave_front);
-//		}
-//		else if(d <= min_d) {
-//			// bound between wells
-//			ref_ray.insert(c);
-//			wave_front = c;
-//		}
-//		else {
-//			// calc how much bounds can we insert between wells
-//			fp_t S = (d - min_d) * 0.5;
-//			fp_t n = log(S * (a - 1)/a + 1) / log(a);
-//			int_t N = min(uint_t(ceil(n)), N_max);
-//
-//			fp_t bound = min_d * 0.5;
-//			fp_t cell_sz = a;
-//			for(uint_t i = 0; i < N; ++i) {
-//				ref_ray.insert(wave_front + bound);
-//				ref_ray.insert(*pr - bound);
-//				cell_sz *= a;
-//				bound += cell_sz;
-//			}
-//			//wave_front = 
-//		}
-//	}
-//}
 
 /*-----------------------------------------------------------------
  * refine mesh algo based on existing grid
@@ -1184,6 +1164,9 @@ coord_zcorn_pair refine_mesh_deltas(int_t& nx, int_t& ny, spfp_storarr_t coord,
 	while(proc_ray::band_filter(delta_x, band_thresh)) {}
 	while(proc_ray::band_filter(delta_y, band_thresh)) {}
 
+	// find coord mesh offsets
+	fp_stor_t x0 = *min_element(x.begin(), x.end());
+	fp_stor_t y0 = *min_element(y.begin(), y.end());
 	// find what cells in refined mesh are hit by given points
 	if(hit_idx) {
 		typedef cumsum_iterator< vector< fp_stor_t >::iterator > cs_iterator;
@@ -1193,9 +1176,9 @@ coord_zcorn_pair refine_mesh_deltas(int_t& nx, int_t& ny, spfp_storarr_t coord,
 		int_arr_t::iterator p_hit = hit_idx->begin();
 		pp = points->begin();
 		for(int_t i = 0; i < cnt; ++i) {
-			cs_iterator p_id = lower_bound(cs_iterator(delta_x.begin(), *x.begin()), cs_iterator(delta_x.end(), *x.begin()), *pp++);
+			cs_iterator p_id = lower_bound(cs_iterator(delta_x.begin(), x0), cs_iterator(delta_x.end(), x0), *pp++);
 			*p_hit++ = max< diff_t >(p_id - delta_x.begin() - 1, 0);
-			p_id = lower_bound(cs_iterator(delta_y.begin(), *y.begin()), cs_iterator(delta_y.end(), *y.begin()), *pp++);
+			p_id = lower_bound(cs_iterator(delta_y.begin(), y0), cs_iterator(delta_y.end(), y0), *pp++);
 			*p_hit++ = max< diff_t >(p_id - delta_y.begin() - 1, 0);
 			pp += 4;
 		}

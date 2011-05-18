@@ -74,10 +74,12 @@ tuple wave_mesh_deltas(fp_stor_t max_dx, fp_stor_t max_dy,
 		fp_stor_t len_x, fp_stor_t len_y,
 		spfp_storarr_t points_pos, spfp_storarr_t points_param)
 {
+	spi_arr_t hit_idx = BS_KERNEL.create_object(int_arr_t::bs_type());
 	coord_zcorn_pair r = czt::wave_mesh_deltas(
-		max_dx, max_dy, len_x, len_y, points_pos, points_param
+		max_dx, max_dy, len_x, len_y, points_pos, points_param,
+		hit_idx
 	);
-	return make_tuple(r.first, r.second);
+	return make_tuple(r.first, r.second, hit_idx);
 }
 
 tuple wave_mesh(
