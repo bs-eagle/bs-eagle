@@ -55,18 +55,16 @@ namespace blue_sky
    * \class calc_for_rate
    * \brief Calculates BHP for well if well controlled by rate
    * */
-  template <typename calc_well_pressure_t>
   struct calc_for_rate
     {
-      typedef typename calc_well_pressure_t::item_t       item_t;
-      typedef typename calc_well_pressure_t::index_t      index_t;
-      typedef typename calc_well_pressure_t::item_array_t item_array_t;
-      typedef typename calc_well_pressure_t::calc_model_t calc_model_t;
-      typedef typename calc_model_t::data_t               calc_model_data_t;
-      typedef typename calc_model_t::sat_d_t              sat_d_t;
-      typedef typename calc_model_t::phase_d_t            phase_d_t;
+      typedef calc_well_pressure::item_t       item_t;
+      typedef calc_well_pressure::index_t      index_t;
+      typedef calc_well_pressure::item_array_t item_array_t;
+      typedef calc_model::data_t               calc_model_data_t;
+      typedef calc_model::sat_d_t              sat_d_t;
+      typedef calc_model::phase_d_t            phase_d_t;
 
-      typedef typename calc_well_pressure_t::sp_well_t    sp_well_t;
+      typedef calc_well_pressure::sp_well_t    sp_well_t;
 
 
       /**
@@ -266,8 +264,13 @@ public:
       item_t denom                  = 0;
       item_t prev_depth             = well->get_first_connection ()->connection_depth;
 
-      calc_for_rate <this_t> calc (well, calc_model->phase_d, calc_model->sat_d, calc_model->n_phases, &(*calc_model->gas_oil_ratio)[0]);
-      base_t::well_t::connection_iterator_t it = well->connections_begin (), e = well->connections_end ();
+      calc_for_rate calc (well, 
+                          calc_model->phase_d, 
+                          calc_model->sat_d, 
+                          calc_model->n_phases, 
+                          calc_model->is_gas () ? calc_model->gas_oil_ratio->data () : 0);
+
+      well_t::connection_iterator_t it = well->connections_begin (), e = well->connections_end ();
       for (; it != e; ++it)
         {
           const sp_connection_t &c (*it);
@@ -285,7 +288,7 @@ public:
           item_t diff_h                   = c->connection_depth - prev_depth;
           prev_depth                      = c->connection_depth;
           calc.gw                         = c->get_fact ();
-          calc.po                         = (*calc_model->pressure)[calc.n_block];
+          calc.po                         = (*calc_model->pressure)[calc.n_block]; // FIXME: access to pressure
           calc.H                          = rho * gravity * diff_h;
 
           BS_ASSERT (main_var != FI_NULL) (main_var);
