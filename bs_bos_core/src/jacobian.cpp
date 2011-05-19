@@ -162,12 +162,15 @@ namespace blue_sky
     t_long *accum_cols = accum->get_cols_ind ()->data ();
     t_double *accum_vals = accum->get_values ()->data ();
     // OPENMP
-    for (t_long i = 0; i < elements; ++i)
+    for (t_long i = 0; i < elements + 1; ++i)
       {
         accum_rows[i] = i;
+      }
+    for (t_long i = 0; i < elements; ++i)
+      {
         accum_cols[i] = i;
       }
-    for (t_long i = 0; i < elements * phases; ++i)
+    for (t_long i = 0; i < elements * phases * phases; ++i)
       {
         accum_vals[i] = 0;
       }
