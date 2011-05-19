@@ -5,6 +5,11 @@
  * @version 1.0
  * @date 2011-02-27
  */
+// FIXME: move to stdafx
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
+
 #include "mbcsr_matrix.h"
 #include "matrix_macroses.h"
 #include <vector>
