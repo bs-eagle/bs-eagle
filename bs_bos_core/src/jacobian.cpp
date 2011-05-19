@@ -155,6 +155,8 @@ namespace blue_sky
     matrix->add_matrix ("facility", facility);
     matrix->add_matrix ("accum", accum);
 
+    facility->alloc_rows_ptr (elements);
+
     accum->init (elements, elements, phases, elements);
     t_long *accum_rows = accum->get_rows_ptr ()->data ();
     t_long *accum_cols = accum->get_cols_ind ()->data ();
