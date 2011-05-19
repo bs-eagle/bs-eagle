@@ -280,7 +280,12 @@ namespace blue_sky
   void
   reservoir::restore_wells_solution (double dt, const spv_double &p_sol, const spv_double &s_sol, index_t block_size)
   {
-    for_each_facility (*facility_list_, closure <void, facility_t, double, const spv_double &, const spv_double &, index_t> (&facility_t::restore_solution, dt, p_sol, s_sol, block_size));
+    facility_manager::well_const_iterator_t wit = facility_list_->wells_begin ();
+    facility_manager::well_const_iterator_t we = facility_list_->wells_end ();
+    for (; wit != we; ++wit)
+      {
+        wit->second->restore_solution (dt, p_sol, s_sol, block_size);
+      }
   }
 
   void
