@@ -683,36 +683,17 @@ namespace blue_sky
     const int d_g                 = phase_d[FI_PHASE_GAS];
     int condition                 = 0;
     index_t n                     = msh->get_n_active_elements ();
-    const item_t *x_sol           = &(*x_sol_)[0];
+    const item_t *x_sol           = x_sol_->data ();
     item_t d                      = 0.0;
     item_t t_mult                 = 0.0;
 
-#ifdef _MPI
-    BS_ASSERT (false && "MPI: NOT IMPL YET");
-    index_t n_left = mpi_decomp->get_recv_l ();
-    index_t n_right = msh->n_elements - mpi_decomp->get_recv_r ();
-#endif //_MPI
-
-
-#ifdef _MPI
-    BS_ASSERT (false && "MPI: NOT IMPL YET");
-    // calc only internal cells
-    for (index_t i = n_left; i < n_right; ++i)
-#else //_MPI
     // loop through all cells
     for (index_t i = 0; i < n; ++i)
-#endif //_MPI
       {
         // check water saturation
         if (is_w && n_phases > 1)
           {
-
-#ifdef _MPI
-            BS_ASSERT (false && "MPI: NOT IMPL YET");
-            index_t jj = (i - n_left) * n_phases + d_w;
-#else //_MPI
             index_t jj = i * n_phases + d_w;
-#endif //_MPI
 
             if (fabs (x_sol[jj]) > max_s)
               {
@@ -736,20 +717,6 @@ namespace blue_sky
             // check gas oil ratio
             else
               {
-#ifdef _DEBUG
-                //if (fabs (x_sol[jj]) > max_rs)
-                //  {
-                //    printf ("CELL %d, Sw_old %lf, Sg_old %lf, P_old %lf, Rs_old %lf, M_old %d\n",
-                //            i, saturation[i * (n_phases - 1)], saturation[i * (n_phases - 1) + 1],
-                //            pressure[i], gas_oil_ratio[i], main_variable[i]);
-                //    printf ("\tdSw %lf, dSg %lf, dP %lf, dRs %lf\n",
-                //            x_sol[i * n_phases],
-                //            (main_variable[i] == FI_SG_VAR) ? x_sol[i * n_phases + 1] : 0,
-                //            x_sol[i * n_phases + 2],
-                //            (main_variable[i] != FI_SG_VAR) ? x_sol[i * n_phases + 1] : 0);
-                //  }
-#endif
-#if 1
                 if (fabs (x_sol[jj]) > max_rs)
                   {
                     t_mult = max_rs / fabs (x_sol[jj]);
@@ -760,23 +727,14 @@ namespace blue_sky
                     t_mult = (*gas_oil_ratio)[i] / (-x_sol[jj]);
                     IF_LE_REPLACE (mult, t_mult, condition, 4);
                   }
-#endif //0
               }
           }
 #endif
         // check pressure
-#ifdef _MPI
-        BS_ASSERT (false && "MPI: NOT IMPL YET");
-        index_t jj = (i + 1 - n_left) * n_phases - 1;
-#else //_MPI
         index_t jj = (i + 1) * n_phases - 1;
-#endif //_MPI
         d = (*pressure)[i] + x_sol[jj];
         if (d < minimal_pressure)
           {
-#ifdef _DEBUG
-            //printf ("MIN P %d %lf %lf\n", i, pressure[i], x_sol[jj]);
-#endif
             t_mult = ((*pressure)[i] - minimal_pressure) / (-x_sol[jj]);
             IF_LE_REPLACE (mult, t_mult, condition, 5);
           }
@@ -791,9 +749,6 @@ namespace blue_sky
             IF_LE_REPLACE (mult, t_mult, condition, 6);
           }
       }
-#ifdef _MPI
-    if (!mpi_decomp->get_proc_num ())
-#endif
 #ifdef _DEBUG
     //BOSOUT (section::iters, level::debug) << boost::format ("MULT CONDITION %d") % condition << bs_end;
 #endif
@@ -832,14 +787,8 @@ namespace blue_sky
     const item_t *x_sol           = &(*x_sol_)[0];
     const item_t *sec_sol         = &(*sec_sol_)[0];
 
-#ifdef _MPI
-    BS_ASSERT (false && "NOT IMPL YET");
-    index_t n_left = 0;/// = mpi_decomp->get_recv_l ();
-    index_t n_right = n;/// = msh->n_elements - mpi_decomp->get_recv_r ();
-#else
     index_t n_left = 0;
     index_t n_right = n;
-#endif //_MPI
 
     // calc only internal cells
     for (index_t i = n_left; i < n_right; ++i)
@@ -913,7 +862,7 @@ namespace blue_sky
           }
       }
     return mult;
-    return 1.0;//mult;
+    return 1.0; 
   }
 
   int
@@ -990,14 +939,8 @@ namespace blue_sky
     const item_t *x_sol           = &(*x_sol_)[0];
     const item_t *sec_sol         = &(*sec_sol_)[0];
 
-#ifdef _MPI
-    BS_ASSERT (false && "MPI: NOT IMPL YET");
-    index_t n_left = 0;/// = mpi_decomp->get_recv_l ();
-    index_t n_right = n;/// = msh->n_elements - mpi_decomp->get_recv_r ();
-#else
     index_t n_left = 0;
     index_t n_right = n;
-#endif //_MPI
 
     // calc only internal cells
     for (index_t i = n_left; i < n_right; ++i)
