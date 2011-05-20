@@ -140,7 +140,7 @@ namespace blue_sky {
             }
 
           file_[name]
-            .write ("value", temp)
+            .write ("values", temp)
             .write ("dates", hdf5_pod (time) << max_ << min_);
         }
     }
