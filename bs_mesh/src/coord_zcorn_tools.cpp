@@ -1336,6 +1336,15 @@ void insert_row(int_t nx, int_t ny, fp_storvec_t& coord, fp_storvec_t& zcorn, fp
 
 }
 
+spi_arr_t find_hit_idx(
+	spfp_storarr_t dx, spfp_storarr_t dy, spfp_storarr_t points_pos,
+	fp_stor_t x0, fp_stor_t y0)
+{
+	spi_arr_t hit_idx = BS_KERNEL.create_object(int_arr_t::bs_type());
+	find_hit_idx(*dx, *dy, *hit_idx, points_pos, x0, y0);
+	return hit_idx;
+}
+
 }}	// eof blue_sky::coord_zcorn_tools
 
 /*-----------------------------------------------------------------

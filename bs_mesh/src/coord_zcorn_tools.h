@@ -99,5 +99,12 @@ BS_API_PLUGIN coord_zcorn_pair wave_mesh(
 	int_t nz, spfp_storarr_t dz,
 	fp_stor_t x0 = 0, fp_stor_t y0 = 0, fp_stor_t z0 = 0);
 
+/*-----------------------------------------------------------------
+ * find hit index based on given dx, dy
+ *----------------------------------------------------------------*/
+BS_API_PLUGIN spi_arr_t find_hit_idx(
+	spfp_storarr_t dx, spfp_storarr_t dy, spfp_storarr_t points_pos,
+	fp_stor_t x0 = 0, fp_stor_t y0 = 0);
+
 }}  // eof namespace blue_sky::coord_zcorn_tools
 

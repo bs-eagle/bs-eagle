@@ -19,6 +19,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_deltas_s2_overl1, wave_mesh_deltas_s2_
 BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_deltas_s2_overl2, wave_mesh_deltas_s2_o2, 5, 7)
 BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_overl, wave_mesh, 8, 11)
 BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_ij_overl, wave_mesh_ij, 9, 12)
+BOOST_PYTHON_FUNCTION_OVERLOADS(find_hit_idx_overl, czt::find_hit_idx, 3, 5)
 
 namespace {
 
@@ -123,6 +124,7 @@ void py_export_czt() {
 	def("wave_mesh_deltas", &wave_mesh_deltas);
 	def("wave_mesh", &wave_mesh, wave_mesh_overl());
 	def("wave_mesh", &wave_mesh_ij, wave_mesh_ij_overl());
+	def("find_hit_idx", &czt::find_hit_idx, find_hit_idx_overl());
 }
 
 }} 	// eof blue_sky::python
