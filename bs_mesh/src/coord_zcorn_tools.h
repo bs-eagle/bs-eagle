@@ -106,5 +106,9 @@ BS_API_PLUGIN spi_arr_t find_hit_idx(
 	spfp_storarr_t dx, spfp_storarr_t dy, spfp_storarr_t points_pos,
 	fp_stor_t x0 = 0, fp_stor_t y0 = 0);
 
+BS_API_PLUGIN spi_arr_t find_hit_idx(
+	uint_t nx, uint_t ny, spfp_storarr_t coord,
+	spfp_storarr_t points_pos);
+
 }}  // eof namespace blue_sky::coord_zcorn_tools
 

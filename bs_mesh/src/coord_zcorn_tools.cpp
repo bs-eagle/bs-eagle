@@ -25,6 +25,7 @@ typedef spv_long spi_arr_t;
 typedef std::set< fp_t > fp_set;
 
 typedef fp_storarr_t::iterator a_iterator;
+typedef fp_storarr_t::const_iterator ca_iterator;
 typedef fp_storvec_t::iterator v_iterator;
 typedef fp_storvec_t::const_iterator cv_iterator;
 typedef fp_set::iterator fps_iterator;
@@ -79,12 +80,21 @@ public:
 	friend slice_iterator operator-(const slice_iterator& lhs, difference_type n) {
 		return slice_iterator(lhs.p_ - (n * lhs.step_), lhs.step_);
 	}
+	friend difference_type operator-(const slice_iterator& lhs, const slice_iterator& rhs) {
+		return (lhs.p_ - rhs.p_) / lhs.step_;
+	}
+	friend difference_type operator-(const slice_iterator& lhs, const iterator_t& rhs) {
+		return (lhs.p_ - rhs) / lhs.step_;
+	}
+	friend difference_type operator-(const iterator_t& lhs, const slice_iterator& rhs) {
+		return (lhs - rhs.p_) / rhs.step_;
+	}
 
 	slice_iterator& operator++() {
 		p_ += step_;
 		return *this;
 	}
-	slice_iterator& operator++(int) {
+	slice_iterator operator++(int) {
 		slice_iterator tmp = *this;
 		p_ += step_;
 		return tmp;
@@ -94,7 +104,7 @@ public:
 		p_ -= step_;
 		return *this;
 	}
-	slice_iterator& operator--(int) {
+	slice_iterator operator--(int) {
 		slice_iterator tmp = *this;
 		p_ -= step_;
 		return tmp;
@@ -110,10 +120,6 @@ public:
 	slice_iterator& operator=(const slice_iterator& lhs) {
 		p_ = lhs.p_;
 		return *this;
-	}
-
-	friend difference_type operator-(const slice_iterator& lhs, const slice_iterator& rhs) {
-		return (lhs.p_ - rhs.p_) / lhs.step_;
 	}
 
 	bool operator<(const slice_iterator& rhs) {
@@ -142,11 +148,16 @@ public:
 		return p_;
 	}
 
+	difference_type step() const {
+		return step_;
+	}
+
 private:
 	iterator_t p_;
 	const difference_type step_;
 };
 typedef slice_iterator< a_iterator, 6 > dim_iterator;
+typedef slice_iterator< ca_iterator, 6 > cdim_iterator;
 
 // iterator that calc sumulative sum when doing *p
 template< class iterator_t >
@@ -821,7 +832,41 @@ void find_hit_idx(
 	}
 }
 
-BS_API_PLUGIN coord_zcorn_pair wave_mesh_deltas_s1(
+// here we assume that coord are nondescending in X and Y directions
+template< class coord_t, class hit_idx_t >
+void find_hit_idx(uint_t nx, uint_t ny, const coord_t& coord,
+	hit_idx_t& hit_idx, spfp_storarr_t points_pos)
+{
+	using namespace std;
+	typedef typename hit_idx_t::iterator hit_iterator;
+	typedef typename cdim_iterator::difference_type diff_t;
+	const int_t ydim_step = 6 * (nx + 1);
+
+	uint_t cnt = points_pos->size() >> 1;
+	hit_idx.resize(cnt * 2);
+	hit_iterator p_hit = hit_idx.begin();
+	ca_iterator pp = points_pos->begin();
+	for(uint_t i = 0; i < cnt; ++i) {
+		fp_t crd_x = *pp++, crd_y = *pp++;
+		// find x id
+		cdim_iterator p_xid = lower_bound(
+			cdim_iterator(coord.begin()),
+			cdim_iterator(coord.begin()) + (nx + 1), crd_x);
+		*p_hit++ = max< diff_t >((p_xid - coord.begin()) - 1, 0);
+
+		// find y id
+		// lower bound don't work here because step is set in runtime
+		// so use stupid search
+		cdim_iterator p_yid(coord.begin() + 1, ydim_step);
+		for(uint_t i = 0; i <= ny; ++i) {
+			if(*p_yid >= crd_y) break;
+			++p_yid;
+		}
+		*p_hit++ = max< diff_t >((p_yid - (coord.begin() + 1)) - 1, 0);
+	}
+}
+
+coord_zcorn_pair wave_mesh_deltas_s1(
 	fp_stor_t max_dx, fp_stor_t max_dy,
 	fp_stor_t len_x, fp_stor_t len_y, spfp_storarr_t points_pos, spfp_storarr_t points_param)
 {
@@ -1342,6 +1387,15 @@ spi_arr_t find_hit_idx(
 {
 	spi_arr_t hit_idx = BS_KERNEL.create_object(int_arr_t::bs_type());
 	find_hit_idx(*dx, *dy, *hit_idx, points_pos, x0, y0);
+	return hit_idx;
+}
+
+spi_arr_t find_hit_idx(
+	uint_t nx, uint_t ny, spfp_storarr_t coord,
+	spfp_storarr_t points_pos)
+{
+	spi_arr_t hit_idx = BS_KERNEL.create_object(int_arr_t::bs_type());
+	find_hit_idx(nx, ny, *coord, *hit_idx, points_pos);
 	return hit_idx;
 }
 

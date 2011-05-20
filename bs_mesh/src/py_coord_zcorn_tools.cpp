@@ -19,11 +19,12 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_deltas_s2_overl1, wave_mesh_deltas_s2_
 BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_deltas_s2_overl2, wave_mesh_deltas_s2_o2, 5, 7)
 BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_overl, wave_mesh, 8, 11)
 BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_ij_overl, wave_mesh_ij, 9, 12)
-BOOST_PYTHON_FUNCTION_OVERLOADS(find_hit_idx_overl, czt::find_hit_idx, 3, 5)
+BOOST_PYTHON_FUNCTION_OVERLOADS(find_hit_idx_overl, find_hit_idx1, 3, 5)
 
 namespace {
 
 typedef t_long int_t;
+typedef typename czt::uint_t uint_t;
 typedef t_double fp_t;
 typedef t_float fp_stor_t;
 typedef v_float fp_storarr_t;
@@ -113,6 +114,20 @@ tuple wave_mesh_ij(
 	return make_tuple(r.first, r.second, nx, ny);
 }
 
+spi_arr_t find_hit_idx1(
+	spfp_storarr_t dx, spfp_storarr_t dy, spfp_storarr_t points_pos,
+	fp_stor_t x0 = 0, fp_stor_t y0 = 0)
+{
+	return czt::find_hit_idx(dx, dy, points_pos, x0, y0);
+}
+
+spi_arr_t find_hit_idx2(
+	uint_t nx, uint_t ny, spfp_storarr_t coord,
+	spfp_storarr_t points_pos)
+{
+	return czt::find_hit_idx(nx, ny, coord, points_pos);
+}
+
 }
 
 namespace blue_sky { namespace python {
@@ -124,7 +139,8 @@ void py_export_czt() {
 	def("wave_mesh_deltas", &wave_mesh_deltas);
 	def("wave_mesh", &wave_mesh, wave_mesh_overl());
 	def("wave_mesh", &wave_mesh_ij, wave_mesh_ij_overl());
-	def("find_hit_idx", &czt::find_hit_idx, find_hit_idx_overl());
+	def("find_hit_idx", &find_hit_idx1, find_hit_idx_overl());
+	def("find_hit_idx", &find_hit_idx2);
 }
 
 }} 	// eof blue_sky::python
