@@ -139,7 +139,7 @@ namespace blue_sky
       }
     else if (placement_info_.type == scal::data_placement::sof3_spfn)
       {
-        BS_ASSERT (region_index < region_.size ()) (region_index) (region_.size ());
+        BS_ASSERT (region_index < static_cast <t_long> (region_.size ())) (region_index) (region_.size ());
         scal_region_info_t &info = region_[region_index];
 
         info.Sp_count   = (int)data->size () / 3;
@@ -187,7 +187,7 @@ namespace blue_sky
       }
     else if (placement_info_.type == scal::data_placement::spfn_sof3)
       {
-        BS_ASSERT (region_index < region_.size ()) (region_index) (region_.size ());
+        BS_ASSERT (region_index < static_cast <t_long> (region_.size ())) (region_index) (region_.size ());
         scal_region_info_t &info = region_[region_index];
 
         info.So_count   = (int)data->size () / 3;

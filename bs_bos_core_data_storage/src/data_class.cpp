@@ -77,8 +77,8 @@ namespace blue_sky
   h5_pool (BS_KERNEL.create_object ("h5_pool")),
   equil_regions (BS_KERNEL.create_object (v_int::bs_type ())),
   rock (BS_KERNEL.create_object (v_float::bs_type ())),
-  p_ref (BS_KERNEL.create_object (v_float::bs_type ())),
-  equil (BS_KERNEL.create_object (v_float::bs_type ()))
+  equil (BS_KERNEL.create_object (v_float::bs_type ())),
+  p_ref (BS_KERNEL.create_object (v_float::bs_type ()))
   {
     init();
   }

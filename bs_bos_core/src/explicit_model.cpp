@@ -36,7 +36,7 @@ namespace blue_sky
         t_float const *depths = mesh->get_depths ()->data ();
 
         t_double *pressure = model->pressure->data ();
-        if (model->pressure->size () != n_cells)
+        if (static_cast <t_long> (model->pressure->size ()) != n_cells)
           {
             bs_throw_exception (boost::format ("Pressure array size mismatch: %d == %d")
                                 % model->pressure->size () % n_cells);
