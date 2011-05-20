@@ -24,7 +24,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(find_hit_idx_overl, find_hit_idx1, 3, 5)
 namespace {
 
 typedef t_long int_t;
-typedef typename czt::uint_t uint_t;
+typedef czt::uint_t uint_t;
 typedef t_double fp_t;
 typedef t_float fp_stor_t;
 typedef v_float fp_storarr_t;
