@@ -83,12 +83,6 @@ public:
 	friend difference_type operator-(const slice_iterator& lhs, const slice_iterator& rhs) {
 		return (lhs.p_ - rhs.p_) / lhs.step_;
 	}
-	friend difference_type operator-(const slice_iterator& lhs, const iterator_t& rhs) {
-		return (lhs.p_ - rhs) / lhs.step_;
-	}
-	friend difference_type operator-(const iterator_t& lhs, const slice_iterator& rhs) {
-		return (lhs - rhs.p_) / rhs.step_;
-	}
 
 	slice_iterator& operator++() {
 		p_ += step_;
