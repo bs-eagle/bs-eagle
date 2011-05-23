@@ -368,7 +368,9 @@ coord_zcorn_pair gen_coord_zcorn(int_t nx, int_t ny, int_t nz, spv_float dx, spv
 	if(!dx->size() || !dy->size() || !dz->size()) return ret_t(NULL, NULL);
 
 	// if dimension offset is given as array, then size should be taken from array size
-	if(dz->size() > 1) nz = (t_long) dz->size();
+	if(dx->size() > 1) nx = (int_t) dx->size();
+	if(dy->size() > 1) ny = (int_t) dy->size();
+	if(dz->size() > 1) nz = (int_t) dz->size();
 
 	// create zcorn array
 	spv_float zcorn = BS_KERNEL.create_object(v_float::bs_type());
