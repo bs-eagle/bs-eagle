@@ -14,10 +14,7 @@
 #include "event_filter.h"
 #include "jacobian.h"
 
-#ifdef _HDF5
-#include "bs_hdf5_storage.h"
 #include "rs_smesh_iface.h"
-#endif
 
 #include <boost/shared_ptr.hpp>
 
@@ -99,10 +96,6 @@ namespace blue_sky
 
       typedef smart_ptr <fi_params, true>                     sp_params_t;                        //!< smart_ptr to fi_params type
       typedef smart_ptr <event_filter, true>                  sp_event_filter_t;                  //!< smart_ptr to event_filter type
-
-#ifdef _HDF5
-      typedef smart_ptr <bs_hdf5_storage, true>               sp_bs_hdf5_storage;                 //!< smart_ptr to hdf5_storage type
-#endif
 
     public:
 
@@ -332,43 +325,6 @@ namespace blue_sky
       void                      
       set_well_limit_operation_factory (const sp_well_limit_operation_factory_t &factory);
 
-#ifdef _HDF5
-      /**
-       * \todo describe
-       * */
-      void                      
-      open_hdf5_file (const std::string &filename) const;
-
-      /**
-       * \todo describe
-       * */
-      void                      
-      close_hdf5_file () const;
-
-      /**
-       * \todo describe
-       * */
-      void                      
-      write_step_to_hdf5 (const sp_calc_model_t &calc_model, 
-        const sp_mesh_iface_t &mesh, 
-        const BS_SP (jacobian) &jmx, 
-        int, 
-        int, 
-        item_t time) const;
-
-      /**
-       * \todo describe
-       * */
-      void                      
-      write_mesh_to_hdf5 (const smart_ptr <rs_mesh_iface, true> &mesh) const;
-
-      /**
-       * \todo describe
-       * */
-      const smart_ptr<bs_hdf5_storage, true> 
-      get_hdf5_file () const {return hdf5;}
-#endif
-
       /**
        * \brief  Writes data of current time-step to storage (HDF5 for example)
        * \param  calc_model
@@ -444,10 +400,6 @@ namespace blue_sky
       sp_event_filter_t                   event_filter_;                      //!< events filter
 
       stdv_long                           markers_;                           //!< markers, used to build jacobian
-
-#ifdef _HDF5
-      sp_bs_hdf5_storage                  hdf5;                               //!< pointer to hdf5_storage instance
-#endif
 
       boost::shared_ptr <data_saver_t>    data_saver_;
     };
