@@ -3,6 +3,9 @@
  * @brief 
  * @date 2009-11-24
  */
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
 #include "dens_matrix_tools.h"
 
 #include <time.h>

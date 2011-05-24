@@ -4,6 +4,9 @@
  * @author Oleg Borschuk
  * @date 2009-08-18
  */
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
 
 #include "bdiag_matrix.h"
 #include "strategies.h"

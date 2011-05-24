@@ -4,6 +4,10 @@
  * @author Oleg Borschuk
  * @date 2009-08-28
  */
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
+
 #include "bs_kernel.h"
 #include "prop.h"
 
@@ -18,7 +22,7 @@ namespace blue_sky
     {
     }
   prop::prop (const prop& rhs) 
-        : prop_iface ()
+        : bs_refcounter (rhs), prop_iface ()
     {
       *this = rhs;
     }

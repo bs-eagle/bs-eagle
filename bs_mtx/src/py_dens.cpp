@@ -3,6 +3,9 @@
  * @brief 
  * @date 2009-12-09
  */
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
 
 #include "py_dens.h"
 

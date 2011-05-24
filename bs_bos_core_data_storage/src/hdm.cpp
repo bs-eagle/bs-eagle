@@ -60,7 +60,7 @@ namespace blue_sky
     this->event_manager_ = BS_KERNEL.create_object ("event_manager");
   }
 
-  hdm::hdm(const hdm& src):lkeeper ("C", LC_ALL)
+  hdm::hdm(const hdm& src):bs_refcounter (src), lkeeper ("C", LC_ALL)
   {
     *this = src;
   }

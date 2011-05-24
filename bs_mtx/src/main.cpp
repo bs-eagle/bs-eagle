@@ -4,6 +4,9 @@
  * \author Sergey Miryanov
  * \date 23.03.2009
  * */
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
 
 #include "bcsr.h"
 #include "bdiag_matrix.h"

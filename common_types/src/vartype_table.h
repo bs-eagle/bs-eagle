@@ -147,7 +147,7 @@ namespace blue_sky
 
       virtual void remove_col_vector (t_long col)
       {
-        BS_ASSERT (col >= 0 && col < values.size ());
+        BS_ASSERT (col >= 0 && col < static_cast <t_long> (values.size ()));
         values[col].clear ();
       }
 #if 0

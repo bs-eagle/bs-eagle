@@ -5,6 +5,9 @@
  * @version 1.0
  * @date 2011-02-26
  */
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
 #include <memory.h>
 #include <iomanip>
 

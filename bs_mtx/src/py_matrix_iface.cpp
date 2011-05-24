@@ -4,6 +4,9 @@
 * \author Miryanov Sergey
 * \date 2008-04-04
 */
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
 #include "py_matrix_iface.h"
 
 using namespace boost::python;

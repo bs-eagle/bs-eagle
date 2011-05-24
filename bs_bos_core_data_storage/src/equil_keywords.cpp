@@ -6,6 +6,9 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
 
 #include "equil_keywords.hpp"
 #include "keyword_manager_iface.h"
@@ -60,7 +63,7 @@ namespace blue_sky
           bs_throw_exception (boost::format ("Error in %s: eql_region == 0 (keyword: %s)")
             % reader->get_prefix () % keyword);
         }
-      if (idata->equil->size () != eql_region * EQUIL_TOTAL)
+      if (static_cast <t_long> (idata->equil->size ()) != eql_region * EQUIL_TOTAL)
         {
           bs_throw_exception (boost::format ("Error in %s: EQUIL table size mismatch (keyword: %s), %d == %d")
             % reader->get_prefix () % keyword % idata->equil->size () % (eql_region * EQUIL_TOTAL));

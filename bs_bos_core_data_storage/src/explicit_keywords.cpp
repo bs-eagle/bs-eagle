@@ -6,6 +6,9 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
 
 #include "explicit_keywords.hpp"
 #include "keyword_manager_iface.h"

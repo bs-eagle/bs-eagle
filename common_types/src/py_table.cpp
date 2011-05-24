@@ -5,6 +5,9 @@
  * @version 1.0
  * @date 2011-02-26
  */
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
 
 #include "py_table.h"
 #include "table.h"

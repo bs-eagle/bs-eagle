@@ -3,6 +3,9 @@
 * \brief  Python wrapper for BCSR matrices
 * \date 2008-04-04
 */
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
 #include "py_bcsr.h"
 #include "bs_object_base.h"
 

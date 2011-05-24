@@ -3,6 +3,9 @@
  * @brief full matrix
  * @date 2009-12-08
  */
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
 #include <sstream>
 
 #include "dens_matrix.h"

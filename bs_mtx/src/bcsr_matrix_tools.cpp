@@ -3,6 +3,9 @@
  * @brief
  * @date 2009-11-24
  */
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
 #include "bcsr_matrix_tools.h"
 
 #include <time.h>
@@ -146,7 +149,7 @@ bcsr_matrix_tools::ascii_write_to_csr_format (const sp_bcsr_t matrix,
 {
   FILE *fp = 0;
   t_long i, j, j1, j2, jj, jj1, jj2, counter, b_sqr = 0;
-  t_long n_memory_sort_index = 10, n_row_cols, r_code = 0;
+  t_long n_row_cols = 0;
   spv_long sp_sort_index = BS_KERNEL.create_object (v_long::bs_type ());
   BS_ASSERT (sp_sort_index);
   t_long *sort_index = 0;
@@ -165,11 +168,11 @@ bcsr_matrix_tools::ascii_write_to_csr_format (const sp_bcsr_t matrix,
     //TODO: write error message
     return -1;
   fprintf (fp, "// N_ROWS\tN_COLS\tN_NON_ZEROS\tN_BLOCK_SIZE\n");
-  fprintf (fp, "%d\t%d\t%d\t%d\n", n_rows, n_cols, n_nnz, n_block_size);
+  fprintf (fp, "%ld\t%ld\t%ld\t%ld\n", n_rows, n_cols, n_nnz, n_block_size);
 
   fprintf (fp, "// Rows indexes[1..n_rows] (with out 0)\n");
   for (i = 1; i <= n_rows; ++i)
-    fprintf (fp, "%d\n", rows_ptr[i]);
+    fprintf (fp, "%ld\n", rows_ptr[i]);
 
   fprintf (fp, "// END of Rows indexes\n");
 
@@ -178,7 +181,7 @@ bcsr_matrix_tools::ascii_write_to_csr_format (const sp_bcsr_t matrix,
   fprintf (fp, "//COLUMN\tVALUE\n");
   for (i = 0, counter = 0; i < n_rows; ++i)
     {
-      fprintf (fp, "// ROW %d\n", i);
+      fprintf (fp, "// ROW %ld\n", i);
       j1 = rows_ptr[i];
       j2 = rows_ptr[i + 1];
 
@@ -206,7 +209,7 @@ bcsr_matrix_tools::ascii_write_to_csr_format (const sp_bcsr_t matrix,
             }
           for (j = 0; j < n_row_cols; ++j, ++counter)
             {
-              fprintf (fp, "%d", cols_ind[sort_index[j]]);
+              fprintf (fp, "%ld", cols_ind[sort_index[j]]);
               jj1 = sort_index[j] * b_sqr;
               jj2 = jj1 + b_sqr;
                 for (jj = jj1; jj < jj2; ++jj)
@@ -218,7 +221,7 @@ bcsr_matrix_tools::ascii_write_to_csr_format (const sp_bcsr_t matrix,
         {
           for (j = j1; j < j2; ++j, ++counter)
             {
-              fprintf (fp, "%d", cols_ind[j]);
+              fprintf (fp, "%ld", cols_ind[j]);
               jj1 = j * b_sqr;
               jj2 = jj1 + b_sqr;
                 for (jj = jj1; jj < jj2; ++jj)
