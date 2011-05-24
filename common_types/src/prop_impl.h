@@ -13,6 +13,8 @@
 #include <map>
 #include <list>
 
+#include "throw_exception.h"
+
 template <class type_t>
 class prop_impl
 {
@@ -59,7 +61,8 @@ class prop_impl
           {
             return i->second.value;
           }
-        return type_t ();
+        using namespace blue_sky;
+        bs_throw_exception (boost::format ("no property with name: %s") % name);
       }
 
     //! set value
@@ -76,8 +79,8 @@ class prop_impl
           }
         else
           {
-            //TODO: print error message
-            throw;
+            using namespace blue_sky;
+            bs_throw_exception (boost::format ("no property with name: %s") % name);
           }
       }
 
@@ -110,8 +113,8 @@ class prop_impl
           }
         else
           {
-            //TODO: print error message
-            throw;
+            using namespace blue_sky;
+            bs_throw_exception (boost::format ("no property with name: %s") % name);
           }
       }
     //! return list of avalible names 
@@ -150,7 +153,8 @@ class prop_impl
           {
             return i->second.description;
           }
-        return std::string ();
+        using namespace blue_sky;
+        bs_throw_exception (boost::format ("no property with name: %s") % name);
       }
 
 
