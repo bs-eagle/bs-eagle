@@ -1,10 +1,14 @@
-#include "bs_hdf5_storage.h"
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
+
 #include "bs_kernel.h"
 #include <stdlib.h>
-#include "py_bs_hdf5_storage.h"
 #include "bos_report.h"
 #include "h5_pool.hpp"
 #include "py_pool.h"
+
+#include "hdf5_group_impl.hpp"
 
 using namespace blue_sky;
 using namespace blue_sky::python;
@@ -18,8 +22,9 @@ namespace blue_sky {
     bool
     register_types (plugin_descriptor const &pd)
     {
-      bool res = BLUE_SKY_REGISTER_TYPE(pd, bs_hdf5_storage); BS_ASSERT (res);
+      bool res = true; 
       res &= BLUE_SKY_REGISTER_TYPE (pd, h5_pool); BS_ASSERT (res);
+      res &= BLUE_SKY_REGISTER_TYPE (pd, hdf5_group_impl); BS_ASSERT (res);
 
       return res;
     }
@@ -35,7 +40,6 @@ namespace blue_sky {
     void
     init_py_subsystem ()
     {
-      py_export_bs_hdf5_storage ();
       python::py_export_pool ();
     }
   }

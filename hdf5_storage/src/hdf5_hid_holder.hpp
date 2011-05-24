@@ -7,6 +7,8 @@
  *              the BSD License. See LICENSE for more details.
  * */
 
+#include "hdf5.h"
+
 namespace blue_sky {
 namespace detail {
 

@@ -5,16 +5,13 @@
 #include "bs_kernel_tools.h"
 
 #include "hdf5_hid_holder.hpp"
+#include "hdf5_group_impl.hpp"
+#include "hdf5_type_to_hid.hpp"
+#include "hdf5_functions.h"
 
 #include <boost/tokenizer.hpp>
 
 namespace blue_sky {
-
-  hdf5_group_v2
-  hdf5_file::operator[] (const std::string &name)
-  {
-    return hdf5_group_v2 (*this, name);
-  }
 
   namespace detail 
   {
@@ -43,11 +40,27 @@ namespace blue_sky {
     }
   }
 
-  typedef hdf5::private_::hdf5_buffer__ hdf5_buffer_t;
 
-  hdf5_file::~hdf5_file ()
+  struct hdf5_storage_v2
   {
-  }
+  public:
+
+    static hdf5_storage_v2 *
+    instance ();
+
+    hdf5_storage_v2 ();
+    ~hdf5_storage_v2 ();
+
+    struct impl;
+    impl *impl_;
+
+    friend struct hdf5_file;
+    friend struct hdf5_group_v2;
+    friend struct impl;
+  };
+
+
+  typedef hdf5::private_::hdf5_buffer__ hdf5_buffer_t;
 
   struct hdf5_storage_v2::impl 
   {
@@ -57,6 +70,8 @@ namespace blue_sky {
     : grub_call_stack_ (false)
     , error_context_ ("")
     {
+      // we use in hdf5_file int instead of hid_t so we should check both types on eq
+      BOOST_STATIC_ASSERT (sizeof (hid_t) == sizeof (int));
     }
 
     ~impl ()
@@ -98,6 +113,8 @@ namespace blue_sky {
     hid_t
     get_file_id (const std::string &name) const
     {
+      BS_ASSERT (name.size ());
+
       file_id_map_t::const_iterator it = file_map_.find (name);
       if (it == file_map_.end ())
         {
@@ -110,6 +127,8 @@ namespace blue_sky {
     hid_t
     get_file_id (hdf5_file &file)
     {
+      BS_ASSERT (file.file_name_.size ());
+
       if (file.file_id_ < 0)
         {
           file.file_id_ = get_file_id (file.file_name_);
@@ -164,8 +183,9 @@ namespace blue_sky {
                    const std::string &dataset_name, 
                    data_t &buffer)
     {
-      hid_t file_id               = get_file_id (file);
+      BS_ASSERT (group_name.size ()) (dataset_name);
 
+      hid_t file_id               = get_file_id (file);
       const int rank              = 2;
       hsize_t chunk_dimens[rank]  = {buffer.size, 1};
       hsize_t fspace_dimens[rank] = {buffer.size, 0};
@@ -177,6 +197,7 @@ namespace blue_sky {
           create_group_hierarchy (file_id, group_name);
         }
       hid_group_t group = detail::open_group (file_id, group_name.c_str ());
+      BS_ASSERT (group >= 0) (group_name) (dataset_name);
 
       if (set_error_context (dataset_name) && !detail::is_object_exists (group, dataset_name.c_str ()))
         {
@@ -192,7 +213,7 @@ namespace blue_sky {
               bs_throw_exception (boost::format ("Can't create simple dataspace for dataset %s in group %s") % dataset_name % group_name);
             }
 
-          hid_dset_t ds_value = H5Dcreate (group, dataset_name.c_str (), buffer.type, fspace, plist);
+          hid_dset_t ds_value = H5Dcreate (group, dataset_name.c_str (), get_hdf5_type (buffer.type), fspace, plist);
           if (ds_value < 0)
             {
               bs_throw_exception (boost::format ("Can't create dataset %s in group %s") % dataset_name % group_name);
@@ -236,7 +257,7 @@ namespace blue_sky {
           bs_throw_exception (boost::format ("Can't create simple dataspace for dataset %s in group %s") % dataset_name % group_name);
         }
 
-      hid_t status = H5Dwrite (dataset, buffer.type, mspace, fspace, detail::raw_transfer_property (), buffer.data ());
+      hid_t status = H5Dwrite (dataset, get_hdf5_type (buffer.type), mspace, fspace, detail::raw_transfer_property (), buffer.data ());
       if (status < 0)
         {
           bs_throw_exception (boost::format ("Can't write data (dataset %s, group %s)") % dataset_name % group_name);
@@ -249,6 +270,8 @@ namespace blue_sky {
                           const std::string &dataset_name,
                           const std::string &value)
     {
+      BS_ASSERT (group_name.size ()) (dataset_name);
+
       hid_t file_id = get_file_id (file);
 
       if (set_error_context (group_name) && !detail::is_object_exists (file_id, group_name.c_str ()))
@@ -256,6 +279,7 @@ namespace blue_sky {
           create_group_hierarchy (file_id, group_name);
         }
       hid_group_t group = detail::open_group (file_id, group_name.c_str ());
+      BS_ASSERT (group >= 0) (group_name) (dataset_name);
 
       if (set_error_context (dataset_name) && !detail::is_object_exists (group, dataset_name.c_str ()))
         {
@@ -423,33 +447,54 @@ namespace blue_sky {
     return &instance_;
   }
 
-  hdf5_group_v2 &
-  hdf5_group_v2::write_buffer (const char *dataset, const hdf5_buffer_t &buffer)
+  hdf5_group_impl::hdf5_group_impl (bs_type_ctor_param)
+  : file_ ("")
+  , name_ ("")
   {
-    hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (file_, name_, dataset, buffer);
-    return *this;
   }
 
-  hdf5_group_v2 &
-  hdf5_group_v2::write_pod (const char *dataset, const hdf5_pod_t &pod)
+  hdf5_group_impl::hdf5_group_impl (const hdf5_group_impl &src)
+  : bs_refcounter (src)
+  , file_ (src.file_)
+  , name_ (src.name_)
+  {
+  }
+
+  void
+  hdf5_group_impl::init (hdf5_file const &file, std::string const &name)
+  {
+    file_ = file;
+    name_ = name;
+  }
+
+  void
+  hdf5_group_impl::write_buffer (const char *dataset, const hdf5_buffer_t &buffer)
+  {
+    if (buffer.size)
+      hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (file_, name_, dataset, buffer);
+  }
+
+  void
+  hdf5_group_impl::write_pod (const char *dataset, const hdf5_pod_t &pod)
   {
     hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (file_, name_, dataset, pod);
-    return *this;
   }
 
-  hdf5_group_v2 &
-  hdf5_group_v2::write_struct (const char *dataset, const hdf5_struct_t &s)
+  void
+  hdf5_group_impl::write_struct (const char *dataset, const hdf5_struct_t &s)
   {
     hdf5_storage_v2::instance ()->impl_->write_to_hdf5 (file_, name_, dataset, s);
-    return *this;
   }
 
-  hdf5_group_v2 &
-  hdf5_group_v2::write_string (const char *dataset, const std::string &value)
+  void
+  hdf5_group_impl::write_string (const char *dataset, const std::string &value)
   {
     hdf5_storage_v2::instance ()->impl_->write_string_to_hdf5 (file_, name_, dataset, value);
-    return *this;
   }
+
+  BLUE_SKY_TYPE_STD_CREATE (hdf5_group_impl);
+  BLUE_SKY_TYPE_STD_COPY (hdf5_group_impl);
+  BLUE_SKY_TYPE_IMPL (hdf5_group_impl, objbase, "hdf5_group_impl", "hdf5_group_impl", "hdf5_group_impl");
 
 } // namespace blue_sky
 

@@ -17,9 +17,9 @@
 #include "h5_helper.h"
 
 #include "hdf5_type.h"
+#include "hdf5_type_to_hid.hpp"
 #include "hdf5_hid_holder.hpp"
-
-#include "bs_hdf5_storage.h"
+#include "hdf5_functions.h"
 
 #include "bos_report.h"
 
@@ -341,7 +341,7 @@ namespace blue_sky
     a->resize (n);
     a->reshape (p.n_dims, p.py_dims);
 
-    herr_t r = H5Dread (p.dset, get_hdf5_type <typename T::value_type> (), H5S_ALL, H5S_ALL, H5P_DEFAULT, a->data ());
+    herr_t r = H5Dread (p.dset, get_hdf5_type <hdf5_type_helper <typename T::value_type>::type> (), H5S_ALL, H5S_ALL, H5P_DEFAULT, a->data ());
     if (r < 0)
       {
         bs_throw_exception (boost::format ("Can't read data: %s") % name);
@@ -502,14 +502,14 @@ namespace blue_sky
   int 
   h5_pool::declare_i_data (const std::string &name, t_int def_value, int n_dims, npy_intp *dims, int var_dims)
   {
-    declare_data (name, get_hdf5_type <t_int> (), &def_value, n_dims, dims, var_dims);
+    declare_data (name, get_hdf5_type <hdf5_type_helper <t_int>::type> (), &def_value, n_dims, dims, var_dims);
     return 0;
   }
 
   int 
   h5_pool::declare_fp_data (const std::string &name, t_float def_value, int n_dims, npy_intp *dims, int var_dims)
   {
-    declare_data (name, get_hdf5_type <t_float> (), &def_value, n_dims, dims, var_dims);
+    declare_data (name, get_hdf5_type <hdf5_type_helper <t_float>::type> (), &def_value, n_dims, dims, var_dims);
     return 0;
   }
 
@@ -538,7 +538,7 @@ namespace blue_sky
   h5_pool::set_i_data (const std::string &name, spv_int data, t_int def_value)
   {
     set_data (name, 
-              get_hdf5_type <t_int> (), 
+              get_hdf5_type <hdf5_type_helper <t_int>::type> (), 
               data->data (), 
               data->size (), 
               data->ndim (),
@@ -551,7 +551,7 @@ namespace blue_sky
   h5_pool::set_fp_data (const std::string &name, spv_float data, t_float def_value)
   {
     set_data (name, 
-              get_hdf5_type <t_float> (), 
+              get_hdf5_type <hdf5_type_helper <t_float>::type> (), 
               data->data (), 
               data->size (), 
               data->ndim (), 
