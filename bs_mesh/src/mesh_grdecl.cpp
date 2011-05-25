@@ -554,7 +554,7 @@ int mesh_grdecl::splicing(stdv_float& volumes_temp)
       {
         t_long small_block_top = -1;
         t_long big_block_top = -1;
-        t_long vol_sum = 0.0;
+        t_double vol_sum = 0.0;
         for (t_long k = 0; k < nz; ++k)
           {
             t_long index = i + j * nx + k * nx * ny;
