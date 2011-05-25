@@ -344,6 +344,12 @@ namespace blue_sky {
   inline hdf5::private_::hdf5_buffer__ 
   hdf5_buffer (const std::vector <T> &data)
   {
+    return hdf5::private_::hdf5_buffer__ (T (), &(data[0]), data.size (), 0, 0);
+  }
+  template <>
+  inline hdf5::private_::hdf5_buffer__ 
+  hdf5_buffer (const std::vector <main_var_type> &data)
+  {
     return hdf5::private_::hdf5_buffer__ (int (), &(data[0]), data.size (), 0, 0);
   }
 
