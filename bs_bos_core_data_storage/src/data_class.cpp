@@ -116,6 +116,10 @@ namespace blue_sky
     props->add_property_b (0, "water_phase", "True if water phase exists");
     props->add_property_b (0, "gas_phase", "True if gas phase exists");
     props->add_property_b (0, "scalecrs", "True if SCALECRS is enabled");
+
+    props->add_property_f (DEFAULT_MINIMAL_PORE_VOLUME,       "minimal_pore_volume", "Default minimal pore volume allowed for active cells");
+    props->add_property_f (DEFAULT_MINIMAL_SPLICE_VOLUME,     "minimal_splice_volume", "Default minimal pore volume allowed for active cells to splice with other cells");
+    props->add_property_f (DEFAULT_MAXIMUM_SPLICE_THICKNESS,  "maximum_splice_thickness", "Default maximum thickness allowed between active cells to be coupled");
   }
 
   void idata::flush_pool()
