@@ -40,6 +40,7 @@ namespace blue_sky
       .add_property ("gas_data",         &T::get_gas_data)
       .add_property ("water_jfunction",  &T::get_water_jfunction, &T::set_water_jfunction)
       .add_property ("gas_jfunction",    &T::get_gas_jfunction, &T::set_gas_jfunction)
+	  .def ("init_from_scal", &T::init_from_scal)
     PY_EXPORTER_END;
     
     PY_EXPORTER (scal_dummy_exporter, default_exporter)

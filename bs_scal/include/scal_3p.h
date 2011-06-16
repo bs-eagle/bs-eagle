@@ -9,6 +9,7 @@
 
 #include "scal_3p_iface.hpp"
 #include "jfunction.h"
+#include "scal_dummy_iface.h"
 
 namespace blue_sky
 {
@@ -49,6 +50,7 @@ namespace blue_sky
       typedef calc_model_data                               data_t;
       typedef std::vector <calc_model_data>                 data_array_t;
 
+	  typedef smart_ptr <scal_dummy_iface, true>			sp_scal_dummy_iface;
       typedef unsigned char															phase_index_t;
       typedef unsigned char															sat_index_t;
 
@@ -153,6 +155,8 @@ namespace blue_sky
       void
       update_gas_data ();
 
+	  void
+	  init_from_scal(sp_scal_dummy_iface const &scal_data);
     private:
 
       sp_scal_2p_data_holder_t  water_data;

@@ -1314,6 +1314,14 @@ namespace blue_sky
     delete impl_;
   }
 
+  void
+  scal_3p::init_from_scal(sp_scal_dummy_iface const &scal_data)
+  {
+	std::pair <BS_SP( table_iface), BS_SP( table_iface)> tables = scal_data->get_table();
+	water_data->init_regions_from_table(tables.first);
+	if (tables.second)
+		gas_data->init_regions_from_table(tables.second);
+  }
   //////////////////////////////////////////////////////////////////////////
   BLUE_SKY_TYPE_STD_CREATE (scale_array_holder);
   BLUE_SKY_TYPE_STD_COPY (scale_array_holder);

@@ -44,6 +44,14 @@ namespace blue_sky {
         SCAL_TABLE_PCP,
         SCAL_TABLE_TOTAL
       };
+
+	enum
+	{
+		SCAL_TABLE_SP2 = 0,
+		SCAL_TABLE_KRP2,
+		SCAL_TABLE_KROP2,
+		SCAL_TABLE_PCP2
+	};
     
     
     void add_spof (sp_array_item_t const &data, t_long region_index, bool is_water);
@@ -143,6 +151,34 @@ namespace blue_sky {
           scal_table_array[i] = BS_KERNEL.create_object ("table");
         }  
     }
+
+	void init_regions_from_table(sp_table const &scal_table)
+	{
+		if (region_2_.size ())
+			return ;
+		scal_table_array.resize (1);
+		scal_table_array[0] = scal_table;
+		scal_region_info_t info;
+		const item_t *sp_   = scal_table->get_col_ptr (SCAL_TABLE_SP2);
+          //const item_t *so_   = scal_table->get_col_ptr (SCAL_TABLE_SO); 
+        const item_t *krp_  = scal_table->get_col_ptr (SCAL_TABLE_KRP2); 
+        const item_t *krop_ = scal_table->get_col_ptr (SCAL_TABLE_KROP2); 
+        const item_t *pcp_  = scal_table->get_col_ptr (SCAL_TABLE_PCP2); 
+          
+        const t_int sp_table_len = scal_table->get_n_rows (SCAL_TABLE_SP);
+        const t_int so_table_len = sp_table_len;  //scal_table->get_n_rows (SCAL_TABLE_SO);
+        item_t *so_ = new item_t[so_table_len];
+		for (int i = 0; i < sp_table_len; i++)
+			so_[i] = 1.0 - sp_[i];
+
+        region_2_.push_back (new scal_region_t (info,
+                              data_vector_t (sp_,   1, sp_table_len),
+                              data_vector_t (so_,   1, so_table_len),
+                              data_vector_t (krp_,  1, sp_table_len),
+                              data_vector_t (krop_, 1, so_table_len),
+                              data_vector_t (pcp_,  1, sp_table_len)
+                             ));
+	}
 
     void
     init_regions_from_table ()
