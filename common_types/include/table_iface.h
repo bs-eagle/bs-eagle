@@ -23,6 +23,7 @@ class table_iface : public objbase
   {
     public:
       typedef std::vector <t_double>                  vector_t;
+      typedef BS_SP (table_iface)                     sp_table_iface;
 
     public:
       /** 
@@ -30,7 +31,12 @@ class table_iface : public objbase
        */
       virtual ~table_iface ()
         {}
-
+      
+      /*!
+        \brief copy 
+      */
+      virtual int copy (const sp_table_iface a) = 0;
+      
       /** 
        * @brief Initialize or reinitialize table by <n_rows> <n_cols> 
        * 

@@ -35,6 +35,21 @@ namespace blue_sky
       *this = rhs;
     }
 
+  //! copy 
+  int 
+  table::copy (const sp_table_iface a)
+    {
+      clear ();
+      t_long n_cols = a->get_n_cols ();
+      init (a->get_n_rows (), n_cols);
+      for (t_long i = 0; i < n_cols; i++)
+        {
+          set_col_values (i, a->get_col_values (i));
+          set_col_name (i, a->get_col_name (i));
+        }
+      return 0;  
+    } 
+    
   int 
   table::init (const t_long n_rows, const t_long n_cols)
     {

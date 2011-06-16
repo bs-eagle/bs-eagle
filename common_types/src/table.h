@@ -37,6 +37,10 @@ namespace blue_sky
       // INTERFACE METHODS
       // ------------------------------------
     public:
+      /*!
+        \brief copy 
+      */
+      virtual int copy (const sp_table_iface a);
 
       /** 
        * @brief Initialize or reinitialize table by <n_rows> <n_cols> 

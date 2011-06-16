@@ -269,6 +269,18 @@
 			Name="pvt"
 			>
 			<File
+				RelativePath=".\src\pvt_3p.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\pvt_3p.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\pvt_3p_iface.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\pvt_base.cpp"
 				>
 			</File>
