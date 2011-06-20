@@ -115,6 +115,22 @@ namespace blue_sky {
       return write_string (dataset, value);
     }
 
+    hdf5_group_v2 &
+    read (const char *dataset, spv_float &out)
+    {
+      hdf5_buffer_t buffer = hdf5_buffer (out);
+      read_buffer (dataset, buffer);
+      t_float *out_data = out->data ();
+      float *buffer_data = (float *)buffer.data ();
+
+      // FIXME: optimize
+      for (size_t i = 0; i < buffer.size; ++i)
+        {
+          out_data[i] = buffer_data[i];
+        }
+      return *this;
+    }
+
   private:
 
     hdf5_group_v2 &
@@ -145,6 +161,13 @@ namespace blue_sky {
       return *this;
     }
 
+    hdf5_group_v2 &
+    read_buffer (const char *dataset, hdf5_buffer_t &buffer)
+    {
+      impl_->read_buffer (dataset, buffer);
+      return *this;
+    }
+
   private:
     smart_ptr <impl_t> impl_;
   };
@@ -158,9 +181,10 @@ namespace blue_sky {
       return hdf5_group_v2 (*this, name);
     }
 
-    hdf5_file (const std::string &file_name)
+    hdf5_file (const std::string &file_name, bool existing = false)
     : file_id_ (-1)
     , file_name_ (file_name)
+    , existing_ (existing)
     {
     }
 
@@ -168,6 +192,7 @@ namespace blue_sky {
 
     int         file_id_;
     std::string file_name_;
+    bool        existing_;
 
     friend struct hdf5_group_v2;
     friend struct hdf5_storage_v2;

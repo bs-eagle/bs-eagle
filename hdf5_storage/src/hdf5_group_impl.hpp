@@ -36,6 +36,9 @@ namespace blue_sky
     virtual void
     write_string (const char *dataset, const std::string &value);
 
+    virtual void
+    read_buffer (const char *dataset, hdf5_buffer_t &buffer);
+
 
     hdf5_file   file_;
     std::string name_;

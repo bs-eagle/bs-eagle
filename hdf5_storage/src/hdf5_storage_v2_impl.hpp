@@ -581,6 +581,9 @@ namespace blue_sky {
 
       virtual void
       write_string (const char *dataset, std::string const &v) = 0;
+
+      virtual void
+      read_buffer (const char *dataset, hdf5_buffer__ &buffer) = 0;
     };
 
   } // namespace private_

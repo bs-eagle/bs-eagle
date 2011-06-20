@@ -124,6 +124,32 @@ namespace blue_sky {
       return it->second;
     }
 
+    void
+    create_new (hdf5_file &file)
+    {
+      file.file_id_ = H5Fcreate (file.file_name_.c_str (), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+      if (file.file_id_ < 0)
+        {
+          bs_throw_exception (boost::format ("Can't open file %s") % file.file_name_);
+        }
+
+      hid_group_t group = H5Gcreate (file.file_id_, "/results", 0);
+      if (group < 0)
+        {
+          bs_throw_exception (boost::format ("Can't create group '/results' in file %s") % file.file_name_);
+        }
+    }
+
+    void
+    open_existing (hdf5_file &file)
+    {
+      file.file_id_ = H5Fopen (file.file_name_.c_str (), H5F_ACC_RDWR, H5P_DEFAULT);
+      if (file.file_id_ < 0)
+        {
+          bs_throw_exception (boost::format ("Can't open file %s") % file.file_name_);
+        }
+    }
+
     hid_t
     get_file_id (hdf5_file &file)
     {
@@ -136,16 +162,13 @@ namespace blue_sky {
 
       if (file.file_id_ < 0)
         {
-          file.file_id_ = H5Fcreate (file.file_name_.c_str (), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-          if (file.file_id_ < 0)
+          if (file.existing_)
             {
-              bs_throw_exception (boost::format ("Can't open file %s") % file.file_name_);
+              open_existing (file);
             }
-
-          hid_group_t group = H5Gcreate (file.file_id_, "/results", 0);
-          if (group < 0)
+          else
             {
-              bs_throw_exception (boost::format ("Can't create group '/results' in file %s") % file.file_name_);
+              create_new (file);
             }
 
           register_file (file.file_name_, file.file_id_);
@@ -261,6 +284,49 @@ namespace blue_sky {
       if (status < 0)
         {
           bs_throw_exception (boost::format ("Can't write data (dataset %s, group %s)") % dataset_name % group_name);
+        }
+    }
+
+    template <typename data_t>
+    void
+    read_from_hdf5 (hdf5_file &file,
+      const std::string &group_name,
+      const std::string &dataset_name, 
+      data_t &buffer)
+    {
+      BS_ASSERT (group_name.size ()) (dataset_name);
+
+      hid_t file_id = get_file_id (file);
+      if (set_error_context (group_name) && !detail::is_object_exists (file_id, group_name.c_str ()))
+        {
+          bs_throw_exception (boost::format ("Group doesn't exist: %s") % group_name);
+        }
+
+      hid_group_t group = detail::open_group (file_id, group_name.c_str ());
+      BS_ASSERT (group >= 0) (group_name) (dataset_name);
+
+      if (set_error_context (dataset_name) && !detail::is_object_exists (group, dataset_name.c_str ()))
+        {
+          bs_throw_exception (boost::format ("Dataset doesn't exists: %s/%s") % group_name % dataset_name);
+        }
+
+      hid_dset_t dataset = detail::open_dataset (group, dataset_name.c_str ());
+      hid_dspace_t space = H5Dget_space (dataset);
+      if (space < 0)
+        {
+          bs_throw_exception (boost::format ("Can't get space for dataset %s in group %s") % dataset_name % group_name);
+        }
+
+      size_t n = H5Sget_simple_extent_npoints (space);
+      if (n > buffer.size)
+        {
+          bs_throw_exception (boost::format ("Buffer size mismatch for dataset %s/%s: %ld == %ld") % group_name % dataset_name % n % buffer.size);
+        }
+
+      hid_t status = H5Dread (dataset, get_hdf5_type (buffer.type), H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer.data ());
+      if (status < 0)
+        {
+          bs_throw_exception (boost::format ("Can't read data from %s/%s") % group_name % dataset_name);
         }
     }
 
@@ -490,6 +556,12 @@ namespace blue_sky {
   hdf5_group_impl::write_string (const char *dataset, const std::string &value)
   {
     hdf5_storage_v2::instance ()->impl_->write_string_to_hdf5 (file_, name_, dataset, value);
+  }
+
+  void
+  hdf5_group_impl::read_buffer (const char *dataset, hdf5_buffer_t &buffer)
+  {
+    hdf5_storage_v2::instance ()->impl_->read_from_hdf5 (file_, name_, dataset, buffer);
   }
 
   BLUE_SKY_TYPE_STD_CREATE (hdf5_group_impl);
