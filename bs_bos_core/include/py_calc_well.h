@@ -99,7 +99,7 @@ namespace python {
     .add_property ("i_coord",             make_function (detail::get_well_i_coord<T>), make_function (detail::set_well_i_coord<T>))
     .add_property ("j_coord",             make_function (detail::get_well_j_coord<T>), make_function (detail::set_well_j_coord<T>))
     .add_property ("bhp_depth",           &T::get_bhp_depth, &T::set_bhp_depth)
-    .add_property ("exploitation_factor", make_function (detail::get_well_wefac<T>), &T::set_exploitation_factor)
+    .add_property ("wefac",               make_function (detail::get_well_wefac<T>), &T::set_wefac)
     .add_property ("state",               make_function (detail::get_well_state<T>))
     .add_property ("bhp_rate",            &T::bhp)
     .add_property ("is_work",             make_function (detail::get_well_is_work<T>), make_function (detail::set_well_is_work<T>))

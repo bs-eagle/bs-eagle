@@ -280,11 +280,11 @@ namespace blue_sky
 
       /**
        * \brief  Sets exploitation factor (wefac)
-       * \param  exploitation_factor
+       * \param  wefac - exploitation_factor
        * \todo   Should be renamed to wefac
        * */
       void
-      set_exploitation_factor (item_t exploitation_factor);
+      set_wefac (item_t wefac);
 
       /**
        * \brief  Sets well controller
@@ -713,7 +713,7 @@ namespace blue_sky
 //  private:
     public:
       auto_value <item_t, -1>     bhp_depth_;                 //!< BHP reference depth
-      auto_value <item_t, 1>      exploitation_factor_;       //!< Exploitation factor (wefac)
+      auto_value <item_t, 1>      wefac_;       //!< Exploitation factor (wefac)
 
       well_state_t                well_state_;                //!< State of well
       well_state_t                saved_well_state_;          //!< State of well on begin of small (or large) step

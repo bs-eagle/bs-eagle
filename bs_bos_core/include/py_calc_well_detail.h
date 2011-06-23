@@ -51,7 +51,7 @@ namespace detail {
   static typename well_t::item_t
   get_well_wefac (const well_t *well)
   {
-    return well->exploitation_factor_;
+    return well->wefac_;
   }
 
   template <typename well_t>

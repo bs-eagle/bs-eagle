@@ -342,7 +342,7 @@ namespace blue_sky
       return ;
 
     const sp_well_t &locked_well (well);
-    locked_well->set_exploitation_factor (main_params_->get_OPERATION_FACTOR (-1.0));
+    locked_well->set_wefac (main_params_->get_OPERATION_FACTOR (-1.0));
   }
 
   //////////////////////////////////////////////////////////////////////////

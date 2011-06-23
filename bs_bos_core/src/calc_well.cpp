@@ -132,9 +132,9 @@ namespace blue_sky
     check_shut ();
   }
   void
-  well::set_exploitation_factor (item_t exploitation_factor)
+  well::set_wefac (item_t wefac)
   {
-    exploitation_factor_ = exploitation_factor;
+    wefac_ = wefac;
   }
 
   void

@@ -617,7 +617,7 @@ namespace wells {
     , sec_rhs_ (jmatrix->get_sec_rhs ())
     , n_sec_vars_ (calc_model->n_sec_vars)
     , ww (well->ww_value)
-    , wefac (well->exploitation_factor_)
+    , wefac (well->wefac_)
     {
       if (is_w) d_w = calc_model->phase_d[FI_PHASE_WATER];
       if (is_g) d_g = calc_model->phase_d[FI_PHASE_GAS];

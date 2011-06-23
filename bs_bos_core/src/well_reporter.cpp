@@ -564,7 +564,7 @@ namespace blue_sky {
     float
     data (const column_t &c, const data_source_t &ds, float, float) const
     {
-      return ds.exploitation_factor_;
+      return ds.wefac_;
     }
   };
 

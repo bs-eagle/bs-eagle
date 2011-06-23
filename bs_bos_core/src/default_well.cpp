@@ -288,7 +288,7 @@ default_well::restore_solution (double /*dt*/, const item_array_t &p_sol,
   void
   default_well::fill_rhs (double dt, index_t n_phases, bool is_g, bool is_o, bool is_w, rhs_item_array_t &rhs) const
   {
-    item_t wefac = base_t::exploitation_factor_ > 0 ? base_t::exploitation_factor_ * dt : dt;
+    item_t wefac = base_t::wefac_ > 0 ? base_t::wefac_ * dt : dt;
 
     typedef default_connection_iterator_impl <default_well, default_connection> iterator_t;
     iterator_t it (this, begin_iterator_tag), e (this, end_iterator_tag);

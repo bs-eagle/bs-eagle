@@ -50,7 +50,7 @@ namespace blue_sky
         sp_well_t well (wb->second, bs_dynamic_cast ());
 
         bool is_prod    = well->get_well_controller ()->is_production ();
-        item_t wefac    = apply_wefac (1.0, well->exploitation_factor_);
+        item_t wefac    = apply_wefac (1.0, well->wefac_);
         item_t wefac_dt = apply_wefac (dt_, wefac);
 
         //if (well->is_shut () || !well->well_state_.is_work)
