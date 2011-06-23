@@ -18,19 +18,18 @@ namespace blue_sky {
    * \brief Implementation of jacobian class methods, used to reduce
    *        some overhead
    * */
-  template <typename strategy_t>
   struct jacobian_impl
   {
-    typedef typename strategy_t::item_t             item_t;
-    typedef typename strategy_t::index_t            index_t;
-    typedef typename strategy_t::matrix_t           matrix_t;
-    typedef typename strategy_t::csr_matrix_t       bcsr_matrix_t;
-    typedef typename strategy_t::item_array_t       item_array_t;
-    typedef typename strategy_t::rhs_item_array_t   rhs_item_array_t;
+    typedef strategy_t::item_t             item_t;
+    typedef strategy_t::index_t            index_t;
+    typedef strategy_t::matrix_t           matrix_t;
+    typedef strategy_t::csr_matrix_t       bcsr_matrix_t;
+    typedef strategy_t::item_array_t       item_array_t;
+    typedef strategy_t::rhs_item_array_t   rhs_item_array_t;
 
-    typedef jacobian <strategy_t>                   jacobian_t;
-    typedef jacobian_matrix <strategy_t>            jmatrix_t;
-    typedef linear_solver_base <strategy_t>         linear_solver_t;
+    typedef jacobian jacobian_t;
+    typedef jacobian_matrix jmatrix_t;
+    typedef linear_solver_base linear_solver_t;
 
     typedef smart_ptr <jacobian_t, true>            sp_jacobian_t;
     typedef smart_ptr <jmatrix_t, true>             sp_jmatrix_t;

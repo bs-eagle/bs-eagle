@@ -10,13 +10,12 @@
 namespace blue_sky
   {
   // amap_strategy_xi using here
-  template <typename strategy_t>
   class BS_API_PLUGIN ar_args
     {
     public:
       // typedefs
-      typedef typename strategy_t::item_t         item_t;
-      typedef typename strategy_t::index_t        index_t;
+      typedef strategy_t::item_t         item_t;
+      typedef strategy_t::index_t        index_t;
       //typedef typename strategy_t::item_array_t   item_array_old_t;
       //typedef bos_array <item_array_old_t>        item_array_t;
       //typedef smart_ptr <item_array_t>            sp_item_array_t;

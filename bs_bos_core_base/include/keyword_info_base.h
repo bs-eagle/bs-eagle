@@ -14,12 +14,11 @@ namespace blue_sky
 {
   
   //! keyword_register_iface - interface for register plugins keywords
-  template <class strategy_t>
   class BS_API_PLUGIN keyword_info_base: public objbase
     {
       public:
       
-        typedef keyword_manager_iface <strategy_t>     km_t;
+        typedef keyword_manager_iface km_t;
         typedef smart_ptr <objbase, true>              sp_objbase;
         typedef typename km_t::handler_t             handler_t;
         typedef typename km_t::keyword_handler       keyword_handler;

@@ -29,36 +29,62 @@ using namespace boost::python;
 namespace blue_sky {
   BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("bs_mx", "1.0.0", "Base matrixes for blue_sky", "Base matrixes for blue_sky", "bs_mx")
 
+  namespace
+  {
+    bool
+    register_types (plugin_descriptor const &pd)
+    {
+      bool res = true;
+
+      res &= BS_KERNEL.register_type(pd, matrix_base<shared_vector<float>, shared_vector<int> >::bs_type()); BS_ASSERT (res);
+      res &= BS_KERNEL.register_type(pd, matrix_base<shared_vector<double>, shared_vector<int> >::bs_type()); BS_ASSERT (res);
+
+      res &= BS_KERNEL.register_type(pd, bcsr_matrix<shared_vector<float>, shared_vector<int> >::bs_type()); BS_ASSERT (res);
+      res &= BS_KERNEL.register_type(pd, bcsr_matrix<shared_vector<double>, shared_vector<int> >::bs_type()); BS_ASSERT (res);
+
+      res &= blue_sky::jacobian_matrix_register_type (pd); BS_ASSERT (res);
+
+      return res;
+    }
+  }
+
   BLUE_SKY_REGISTER_PLUGIN_FUN
   {
-    const plugin_descriptor &pd = *bs_init.pd_;
-
-    bool res = true;
-
-    res &= BS_KERNEL.register_type(*bs_init.pd_, matrix_base<shared_vector<float>, shared_vector<int> >::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, matrix_base<shared_vector<double>, shared_vector<int> >::bs_type()); BS_ASSERT (res);
-
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_matrix<shared_vector<float>, shared_vector<int> >::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bcsr_matrix<shared_vector<double>, shared_vector<int> >::bs_type()); BS_ASSERT (res);
-
-    res &= blue_sky::jacobian_matrix_register_type (pd); BS_ASSERT (res);
-
-    return res;
+    return register_types (*bs_init.pd_);
   }
 }
 
 #ifdef BSPY_EXPORTING_PLUGIN
+namespace
+{
+  void
+  init_py_subsystem ()
+  {
+    using namespace boost::python;
+
+    python::py_export_naive_file_reader ();
+    python::py_export_save_seq_vector ();
+
+    python::py_export_base_matrices ();
+    python::py_export_jacobian_matrix ();
+
+    python::py_export_read_b_matrix ();
+  }
+}
 BLUE_SKY_INIT_PY_FUN
 {
-  using namespace boost::python;
-
-  python::py_export_naive_file_reader ();
-  python::py_export_save_seq_vector ();
-
-  python::py_export_base_matrices ();
-  python::py_export_jacobian_matrix ();
-
-  python::py_export_read_b_matrix ();
+  init_py_subsystem ();
 }
+#ifdef _DEBUG
+BOOST_PYTHON_MODULE (bs_matrix_d)
+#else
+BOOST_PYTHON_MODULE (bs_matrix)
+#endif
+{
+  init_py_subsystem ();
+  if (!blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ()))
+    bs_throw_exception ("Can't register types");
+}
+
 #endif
 

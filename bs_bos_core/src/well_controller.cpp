@@ -95,16 +95,14 @@ namespace blue_sky
 
     ///////////////////////////////////////////////////////////////////////////
 
-    template <typename strategy_t>
-    well_controller<strategy_t>::well_controller (bs_type_ctor_param param /* = NULL */)
+    well_controller::well_controller (bs_type_ctor_param param /* = NULL */)
     : bhp_ (0)
     , bhp_history_ (0)
     , injection_type_ (injection_none)
     {
     }
 
-    template <typename strategy_t>
-    well_controller<strategy_t>::well_controller (const well_controller<strategy_t> &controller)
+    well_controller::well_controller (const well_controller&controller)
     : bs_refcounter (controller), objbase (controller)
     {
       if (this != &controller)
@@ -114,28 +112,24 @@ namespace blue_sky
         }
     }
 
-    template <typename strategy_t>
-    const typename well_controller<strategy_t>::rate_data_t &
-    well_controller<strategy_t>::rate () const
+    const well_controller::rate_data_t &
+    well_controller::rate () const
       {
         return rate_;
       }
-    template <typename strategy_t>
-    const typename well_controller<strategy_t>::item_t &
-    well_controller<strategy_t>::bhp () const
+    const well_controller::item_t &
+    well_controller::bhp () const
       {
         return bhp_;
       }
-    template <typename strategy_t>
-    const typename well_controller<strategy_t>::item_t &
-    well_controller<strategy_t>::bhp_history () const
+    const well_controller::item_t &
+    well_controller::bhp_history () const
       {
         return bhp_history_;
       }
     ///////////////////////////////////////////////////////////////////////////
-    template <typename strategy_t>
     void
-    well_controller<strategy_t>::set_main_control (const sp_well_t &well, rate_control_type type, bool is_production)
+    well_controller::set_main_control (const sp_well_t &well, rate_control_type type, bool is_production)
     {
       if (is_bhp_control (type))
         {
@@ -161,27 +155,23 @@ namespace blue_sky
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    template <typename strategy_t>
     void
-    well_controller <strategy_t>::set_bhp (item_t value)
+    well_controller::set_bhp (item_t value)
     {
       bhp_ = value;
     }
-    template <typename strategy_t>
     void
-    well_controller <strategy_t>::set_bhp_history (item_t value)
+    well_controller::set_bhp_history (item_t value)
     {
       bhp_history_ = value;
     }
-    template <typename strategy_t>
     void
-    well_controller <strategy_t>::clear_rate ()
+    well_controller::clear_rate ()
     {
       rate_ = 0;
     }
-    template <typename strategy_t>
     void
-    well_controller<strategy_t>::set_rate (rate_value_type type, item_t value)
+    well_controller::set_rate (rate_value_type type, item_t value)
     {
       if (!is_production ())
         {
@@ -240,30 +230,26 @@ namespace blue_sky
         }
     }
 
-    template <typename strategy_t>
     void
-    well_controller<strategy_t>::save_control ()
+    well_controller::save_control ()
     {
       saved_control_ = current_control_;
     }
-    template <typename strategy_t>
     bool
-    well_controller<strategy_t>::restore_control ()
+    well_controller::restore_control ()
     {
       bool flag = current_control_ != saved_control_;
       current_control_ = saved_control_;
 
       return flag;
     }
-    template <typename strategy_t>
     void
-    well_controller<strategy_t>::save_niter_control ()
+    well_controller::save_niter_control ()
     {
       saved_niter_control_ = current_control_;
     }
-    template <typename strategy_t>
     bool
-    well_controller<strategy_t>::restore_niter_control ()
+    well_controller::restore_niter_control ()
     {
       bool flag = current_control_ != saved_niter_control_;
       current_control_ = saved_niter_control_;
@@ -272,9 +258,8 @@ namespace blue_sky
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    template <typename strategy_t>
     bool
-    well_controller<strategy_t>::check (sp_well_t &well)
+    well_controller::check (sp_well_t &well)
     {
       //BOSOUT (section::wells, level::low) << "[" << well->name () << "] " << "limit_bhp: "     << bhp_          << "\twell_bhp: "     << well->bhp ()           << bs_end;
       //BOSOUT (section::wells, level::low) << "[" << well->name () << "] " << "limit_liquid: "  << rate_.liquid   << "\twell_liquid: "  << -well->liquid_rate ()  << bs_end;
@@ -370,28 +355,24 @@ namespace blue_sky
     }
 
     //////////////////////////////////////////////////////////////////////////
-    template <typename strategy_t>
     bool
-    well_controller<strategy_t>::is_bhp () const
+    well_controller::is_bhp () const
       {
         return current_control_.is_bhp;
       }
-    template <typename strategy_t>
     bool
-    well_controller<strategy_t>::is_rate () const
+    well_controller::is_rate () const
       {
         return !current_control_.is_bhp;
       }
-    template <typename strategy_t>
     bool
-    well_controller<strategy_t>::is_production () const
+    well_controller::is_production () const
       {
         return current_control_.is_production;
       }
 
-    template <typename strategy_t>
     bool
-    well_controller <strategy_t>::is_valid_connection_bhp (item_t pressure, item_t bhp) const
+    well_controller::is_valid_connection_bhp (item_t pressure, item_t bhp) const
       {
         item_t diff = pressure - bhp;
         if (is_production ())
@@ -401,9 +382,8 @@ namespace blue_sky
       }
 
 
-    template <typename strategy_t>
     void
-    well_controller<strategy_t>::switch_to_bhp (sp_well_t &well)
+    well_controller::switch_to_bhp (sp_well_t &well)
     {
       BOSOUT (section::wells, level::medium) << "[" << well->name () << "] switch to bhp" << bs_end;
       BOSOUT (section::wells, level::low)    << "\tlimit_bhp: " << bhp_ << "\twell_bhp: " << well->bhp () << bs_end;
@@ -412,60 +392,50 @@ namespace blue_sky
       current_control_.is_bhp = true;
     }
 
-    template <typename strategy_t>
     const injection_type &
-    well_controller<strategy_t>::injection () const
+    well_controller::injection () const
     {
       return injection_type_;
     }
-    template <typename strategy_t>
     void
-    well_controller<strategy_t>::set_injection_type (injection_type type)
+    well_controller::set_injection_type (injection_type type)
     {
       injection_type_ = type;
     }
 
-    template <typename strategy_t>
     rate_control_type
-    well_controller <strategy_t>::get_control_type () const
+    well_controller::get_control_type () const
       {
         return current_control_.control_type;
       }
 
     //////////////////////////////////////////////////////////////////////////
 
-    template <typename strategy_t>
-    well_controller_factory<strategy_t>::well_controller_factory (bs_type_ctor_param param /* = NULL */)
+    well_controller_factory::well_controller_factory (bs_type_ctor_param param /* = NULL */)
     {
 
     }
-    template <typename strategy_t>
-    well_controller_factory<strategy_t>::well_controller_factory (const well_controller_factory &f)
+    well_controller_factory::well_controller_factory (const well_controller_factory &f)
     : bs_refcounter (f), objbase (f)
     {
       *this = f;
     }
 
-    template <typename strategy_t>
-    typename well_controller_factory<strategy_t>::sp_well_controller_t
-    well_controller_factory<strategy_t>::create_controller () const
+    well_controller_factory::sp_well_controller_t
+    well_controller_factory::create_controller () const
     {
       return BS_KERNEL.create_object (well_controller_t::bs_type (), true);
     }
     //////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////////////////////////////////
-    BLUE_SKY_TYPE_STD_CREATE_T_DEF (well_controller, (class));
-    BLUE_SKY_TYPE_STD_COPY_T_DEF (well_controller, (class));
-    BLUE_SKY_TYPE_IMPL_T_EXT (1, (well_controller<base_strategy_fi>), 1, (objbase), "well_controller_seq_fi", "Base class for well controllers", "Base class for well controllers", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT (1, (well_controller<base_strategy_di>), 1, (objbase), "well_controller_seq_di", "Base class for well controllers", "Base class for well controllers", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT (1, (well_controller<base_strategy_mixi>), 1, (objbase), "well_controller_seq_mixi", "Base class for well controllers", "Base class for well controllers", false);
+    BLUE_SKY_TYPE_STD_CREATE (well_controller);
+    BLUE_SKY_TYPE_STD_COPY (well_controller);
+    BLUE_SKY_TYPE_IMPL (well_controller, objbase, "well_controller", "Base class for well controllers", "Base class for well controllers");
 
-    BLUE_SKY_TYPE_STD_CREATE_T_DEF (well_controller_factory, (class));
-    BLUE_SKY_TYPE_STD_COPY_T_DEF (well_controller_factory, (class));
-    BLUE_SKY_TYPE_IMPL_T_EXT (1, (well_controller_factory<base_strategy_fi>), 1, (objbase), "well_controller_factory_seq_fi", "Base class for factory of well controllers", "Base class for factory of well controllers", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT (1, (well_controller_factory<base_strategy_di>), 1, (objbase), "well_controller_factory_seq_di", "Base class for factory of well controllers", "Base class for factory of well controllers", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT (1, (well_controller_factory<base_strategy_mixi>), 1, (objbase), "well_controller_factory_seq_mixi", "Base class for factory of well controllers", "Base class for factory of well controllers", false);
+    BLUE_SKY_TYPE_STD_CREATE (well_controller_factory);
+    BLUE_SKY_TYPE_STD_COPY (well_controller_factory);
+    BLUE_SKY_TYPE_IMPL (well_controller_factory, objbase, "well_controller_factory", "Base class for factory of well controllers", "Base class for factory of well controllers");
     //////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////////////////////////////////
@@ -474,11 +444,7 @@ namespace blue_sky
     {
       bool res = true;
 
-      res &= BS_KERNEL.register_type (pd, well_controller<base_strategy_fi>::bs_type ());
-      BS_ASSERT (res);
-      res &= BS_KERNEL.register_type (pd, well_controller<base_strategy_di>::bs_type ());
-      BS_ASSERT (res);
-      res &= BS_KERNEL.register_type (pd, well_controller<base_strategy_mixi>::bs_type ());
+      res &= BS_KERNEL.register_type (pd, well_controller::bs_type ());
       BS_ASSERT (res);
 
       return res;
@@ -488,11 +454,7 @@ namespace blue_sky
     {
       bool res = true;
 
-      res &= BS_KERNEL.register_type (pd, well_controller_factory<base_strategy_fi>::bs_type ());
-      BS_ASSERT (res);
-      res &= BS_KERNEL.register_type (pd, well_controller_factory<base_strategy_di>::bs_type ());
-      BS_ASSERT (res);
-      res &= BS_KERNEL.register_type (pd, well_controller_factory<base_strategy_mixi>::bs_type ());
+      res &= BS_KERNEL.register_type (pd, well_controller_factory::bs_type ());
       BS_ASSERT (res);
 
       return res;

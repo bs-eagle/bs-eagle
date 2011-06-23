@@ -15,23 +15,17 @@
 namespace blue_sky
   {
 
-  template <typename strategy_t>
   class well;
-
-  template <typename strategy_t>
   class calc_model;
-
-  template <typename strategy_t>
   struct calc_model_data;
 
   /**
    * \class rate_data
    * \brief Stores rate data
    * */
-  template <typename strategy_t>
   struct rate_data
   {
-    typedef typename strategy_t::item_t item_t;
+    typedef strategy_t::item_t item_t;
 
     /**
      * \class rate_data_inner
@@ -105,7 +99,7 @@ namespace blue_sky
      * \param  value
      * \return Reference to this object
      * */
-    rate_data <strategy_t> &
+    rate_data &
     operator= (item_t value)
     {
       prod          = value;
@@ -122,7 +116,7 @@ namespace blue_sky
      * \param  rhs
      * */
     void
-    operator += (const rate_data <strategy_t> &rhs)
+    operator += (const rate_data &rhs)
     {
       prod          += rhs.prod;
       inj           += rhs.inj;
@@ -160,13 +154,8 @@ namespace blue_sky
   namespace wells
     {
 
-    template <typename strategy_t>
     class well_controller;
-
-    template <typename strategy_t>
     class connection;
-
-    template <typename strategy_t>
     class well_rate_control;
 
     ///////////////////////////////////////////////////////////////////////////
@@ -259,22 +248,21 @@ namespace blue_sky
      * \class well_controller
      * \brief Well controller
      * */
-    template <typename strategy_t>
     class BS_API_PLUGIN well_controller : public objbase
       {
       public:
 
-        typedef typename strategy_t::item_t               item_t;
-        typedef typename strategy_t::index_t              index_t;
-        typedef typename strategy_t::item_array_t         item_array_t;
-        typedef typename strategy_t::index_array_t        index_array_t;
-        typedef well <strategy_t>                         well_t;
-        typedef connection <strategy_t>                   connection_t;
-        typedef jacobian_matrix <strategy_t>              jacobian_matrix_t;
-        typedef well_controller <strategy_t>              this_t;
-        typedef calc_model <strategy_t>                   calc_model_t;
+        typedef strategy_t::item_t               item_t;
+        typedef strategy_t::index_t              index_t;
+        typedef strategy_t::item_array_t         item_array_t;
+        typedef strategy_t::index_array_t        index_array_t;
+        typedef well well_t;
+        typedef connection connection_t;
+        typedef jacobian_matrix jacobian_matrix_t;
+        typedef well_controller this_t;
+        typedef calc_model calc_model_t;
 
-        typedef rate_data <strategy_t>                    rate_data_t;
+        typedef rate_data rate_data_t;
 
         typedef smart_ptr <calc_model_t, true>            sp_calc_model_t;
         typedef smart_ptr <jacobian_matrix_t, true>       sp_jmatrix_t;
@@ -284,13 +272,13 @@ namespace blue_sky
         typedef smart_ptr <jacobian_matrix_t, true>       sp_jacobian_matrix_t;
         typedef smart_ptr <this_t, true>                  sp_this_t;
 
-        typedef wells::type_helper <strategy_t>           helper_t;
+        typedef wells::type_helper helper_t;
 
-        typedef typename helper_t::item_rhs_block_t       item_rhs_block_t;
-        typedef typename helper_t::item_ww_block_t        item_ww_block_t;
-        typedef typename helper_t::item_q_rate_t          item_q_rate_t;
-        typedef typename helper_t::item_q_rate_inflow_t   item_q_rate_inflow_t;
-        typedef typename helper_t::item_gas_rate_t        item_gas_rate_t;
+        typedef helper_t::item_rhs_block_t       item_rhs_block_t;
+        typedef helper_t::item_ww_block_t        item_ww_block_t;
+        typedef helper_t::item_q_rate_t          item_q_rate_t;
+        typedef helper_t::item_q_rate_inflow_t   item_q_rate_inflow_t;
+        typedef helper_t::item_gas_rate_t        item_gas_rate_t;
 
       public:
         //! dtor
@@ -441,7 +429,7 @@ namespace blue_sky
         get_control_type () const;
 
         //! blue-sky type declaration
-        BLUE_SKY_TYPE_DECL_T (well_controller);
+        BLUE_SKY_TYPE_DECL (well_controller);
 
       public:
         rate_data_t                     rate_;                //!< Rates
@@ -487,14 +475,13 @@ namespace blue_sky
      * \brief Factory of well_controllers
      * \todo  Obsolete, should be redisigned
      * */
-    template <typename strategy_t>
     class BS_API_PLUGIN well_controller_factory : public objbase
       {
       public:
 
-        typedef calc_model <strategy_t>                       calc_model_t;
-        typedef well_controller <strategy_t>                  well_controller_t;
-        typedef well_rate_control <strategy_t>                well_rate_control_t;
+        typedef calc_model calc_model_t;
+        typedef well_controller well_controller_t;
+        typedef well_rate_control well_rate_control_t;
 
         typedef smart_ptr <calc_model_t, true>                sp_calc_model_t;
         typedef smart_ptr <well_controller_t, true>           sp_well_controller_t;
@@ -513,7 +500,7 @@ namespace blue_sky
         create_controller () const;
 
         //! blue-sky type declaration
-        BLUE_SKY_TYPE_DECL_T (well_controller_factory);
+        BLUE_SKY_TYPE_DECL (well_controller_factory);
       };
 
     /**

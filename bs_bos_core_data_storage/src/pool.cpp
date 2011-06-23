@@ -65,27 +65,27 @@ namespace blue_sky
 
   typedef unsigned char uint8_t;
   typedef float float16_t;
-  BLUE_SKY_TYPE_IMPL_T_EXT (2, (bs_array_map <base_strategy_di::index_t, uint8_t>),   1, (objbase), "bs_array_map_uint8",   "", "", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (2, (bs_array_map <base_strategy_di::index_t, float16_t>), 1, (objbase), "bs_array_map_float16", "", "", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT (2, (bs_array_map <strategy_t::index_t, uint8_t>),   1, (objbase), "bs_array_map_uint8",   "", "", false);
+  BLUE_SKY_TYPE_IMPL_T_EXT (2, (bs_array_map <strategy_t::index_t, float16_t>), 1, (objbase), "bs_array_map_float16", "", "", false);
 
   /*
   	\brief register plugin
    */
   bool register_array_map (const plugin_descriptor& pd)
   {
-    return BS_KERNEL.register_type (pd, bs_array_map <base_strategy_di::index_t, uint8_t>::bs_type ())
-      && BS_KERNEL.register_type (pd, bs_array_map <base_strategy_di::index_t, float16_t>::bs_type ())
+    return BS_KERNEL.register_type (pd, bs_array_map <strategy_t::index_t, uint8_t>::bs_type ())
+      && BS_KERNEL.register_type (pd, bs_array_map <strategy_t::index_t, float16_t>::bs_type ())
       ;
   }
 
   template< > type_descriptor 
-  bos_val_table <int, bs_array_map <base_strategy_di::index_t, uint8_t>::array_info >::bs_type()
+  bos_val_table <int, bs_array_map <strategy_t::index_t, uint8_t>::array_info >::bs_type()
   {
     return td_maker(std::string("_int_map_uint8"));
   }
 
   template< > type_descriptor 
-  bos_val_table <int, bs_array_map <base_strategy_fi::index_t, float16_t>::array_info >::bs_type()
+  bos_val_table <int, bs_array_map <strategy_t::index_t, float16_t>::array_info >::bs_type()
   {
     return td_maker(std::string("_int_map_float16"));
   }

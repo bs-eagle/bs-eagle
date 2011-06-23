@@ -22,8 +22,7 @@ namespace blue_sky
      * \brief  'default' calc_perf_bhp ctor
      * \param  param additional ctor params
      * */
-  template <typename strategy_t>
-  calc_perf_bhp <strategy_t>::calc_perf_bhp(bs_type_ctor_param /*param = NULL */)
+  calc_perf_bhp::calc_perf_bhp(bs_type_ctor_param /*param = NULL */)
   {
 
   }
@@ -31,24 +30,22 @@ namespace blue_sky
    * \brief  copy-ctor for calc_perf_bhp
    * \param  src calc_perf_bhp instance to be copied
    * */
-  template <typename strategy_t>
-  calc_perf_bhp<strategy_t>::calc_perf_bhp(const calc_perf_bhp<strategy_t> & /*x*/)
+  calc_perf_bhp::calc_perf_bhp(const calc_perf_bhp& /*x*/)
         : bs_refcounter ()
   {
 
   }
 
-  template <typename strategy_t>
   void
-  calc_perf_bhp <strategy_t>::calculate (sp_well_t &well, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh) const
+  calc_perf_bhp::calculate (sp_well_t &well, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh) const
     {
       BS_ASSERT (!well->is_shut ()) (well->name ());
 
-      typedef typename base_t::well_t::connection_t           connection_t;
-      typedef typename base_t::well_t::sp_connection_t        sp_connection_t;
-      typedef typename base_t::calc_model_t::sat_d_t          sat_d_t;
-      typedef typename base_t::calc_model_t::phase_d_t        phase_d_t;
-      typedef typename base_t::calc_model_t::data_t           calc_model_data_t;
+      typedef base_t::well_t::connection_t           connection_t;
+      typedef base_t::well_t::sp_connection_t        sp_connection_t;
+      typedef base_t::calc_model_t::sat_d_t          sat_d_t;
+      typedef base_t::calc_model_t::phase_d_t        phase_d_t;
+      typedef base_t::calc_model_t::data_t           calc_model_data_t;
 
       if (well->is_no_connections ())
         {
@@ -102,11 +99,9 @@ namespace blue_sky
         }
     }
 
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF (calc_perf_bhp, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF (calc_perf_bhp, (class));
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (calc_perf_bhp <base_strategy_fi>), 1, (objbase), "calc_perf_bhp_fi", "calc_perf_bhp_fi", "calc_perf_bhp_fi", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (calc_perf_bhp <base_strategy_di>), 1, (objbase), "calc_perf_bhp_di", "calc_perf_bhp_di", "calc_perf_bhp_di", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (calc_perf_bhp <base_strategy_mixi>), 1, (objbase), "calc_perf_bhp_mixi", "calc_perf_bhp_mixi", "calc_perf_bhp_mixi", false);
+  BLUE_SKY_TYPE_STD_CREATE (calc_perf_bhp);
+  BLUE_SKY_TYPE_STD_COPY (calc_perf_bhp);
+  BLUE_SKY_TYPE_IMPL (calc_perf_bhp, objbase, "calc_perf_bhp", "calc_perf_bhp", "calc_perf_bhp");
 
 } // namespace blue_sky
 

@@ -8,9 +8,8 @@
 
 #include "rs_smesh_base.h"
 
-template <typename strategy_t>
 void
-rs_smesh_base <strategy_t>::init_props (const sp_idata_t &idata)
+rs_smesh_base::init_props (const sp_idata_t &idata)
 {
   base_t::init_props (idata);
   
@@ -26,8 +25,7 @@ rs_smesh_base <strategy_t>::init_props (const sp_idata_t &idata)
   sp_multz = idata->get_float_array("MULTZ");
 }
 
-template<class strategy_t>
-void rs_smesh_base<strategy_t>::inside_to_XYZ(const index_t index, index_t &i1,index_t &j1, index_t &k1) const
+void rs_smesh_base::inside_to_XYZ(const index_t index, index_t &i1,index_t &j1, index_t &k1) const
   {
     index_t r_index = base_t::base_t::int_to_ext[index];
     k1 = r_index / (nx*ny);
@@ -35,8 +33,7 @@ void rs_smesh_base<strategy_t>::inside_to_XYZ(const index_t index, index_t &i1,i
     i1 = r_index - k1*nx*ny - j1*nx;
   }
 
-template<class strategy_t>
-int rs_smesh_base<strategy_t>::init_int_to_ext()
+int rs_smesh_base::init_int_to_ext()
 {
   if (base_t::base_t::ext_to_int.size() == 0)
     return -1;
@@ -53,8 +50,7 @@ int rs_smesh_base<strategy_t>::init_int_to_ext()
   return 0;  
 }
 
-template<class strategy_t>
-void rs_smesh_base<strategy_t>::check_data() const
+void rs_smesh_base::check_data() const
 {
   base_t::check_data ();
   
@@ -73,8 +69,7 @@ void rs_smesh_base<strategy_t>::check_data() const
     bs_throw_exception ("PERMZ array is not initialized");
 }
 
-template<class strategy_t>
-int rs_smesh_base<strategy_t>::get_elems_n_in_layers(const direction d_dir, index_array_t &elem_in_layers) const
+int rs_smesh_base::get_elems_n_in_layers(const direction d_dir, index_array_t &elem_in_layers) const
 {
   index_t i_index;
   if (d_dir == along_dim3)
@@ -125,4 +120,21 @@ int rs_smesh_base<strategy_t>::get_elems_n_in_layers(const direction d_dir, inde
   return (int) elem_in_layers.size();
 }
 
-BS_INST_STRAT(rs_smesh_base);
+hdf5_group_v2 &
+rs_smesh_base::save_info (hdf5_group_v2 &group) const
+{
+  return rs_mesh_base::save_info (group);
+}
+
+hdf5_group_v2 &
+rs_smesh_base::save_data (hdf5_group_v2 &group) const
+{
+  return rs_mesh_base::save_data (group)
+    .write ("permx", sp_permx)
+    .write ("permy", sp_permy)
+    .write ("permz", sp_permz)
+    .write ("multx", sp_multx)
+    .write ("multy", sp_multy)
+    .write ("multz", sp_multz)
+    ;
+}

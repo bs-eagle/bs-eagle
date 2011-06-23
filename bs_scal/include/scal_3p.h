@@ -12,35 +12,27 @@
 namespace blue_sky
 {
 
-  template <typename strategy_t>
   class BS_API_PLUGIN scal_region;
-
-  template <typename strategy_t>
   class BS_API_PLUGIN scale_array_holder;
-
-  template <typename strategy_t>
   class BS_API_PLUGIN scal_2p_data_holder;
-
-  template <typename strategy_t>
   class BS_API_PLUGIN jfunction;
 
   //////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
   class BS_API_PLUGIN scal_3p : public objbase
     {
     public:
-      typedef scal_3p <strategy_t>											this_t;
+      typedef scal_3p this_t;
 
-      typedef typename strategy_t::item_t								item_t;
-      typedef typename strategy_t::index_t							index_t;
-      typedef typename strategy_t::index_array_t        index_array_t;
-      typedef typename strategy_t::item_array_t         item_array_t;
+      typedef strategy_t::item_t								item_t;
+      typedef strategy_t::index_t							index_t;
+      typedef strategy_t::index_array_t        index_array_t;
+      typedef strategy_t::item_array_t         item_array_t;
 
-      typedef scal_region <strategy_t>									scal_region_t;
-      typedef scale_array_holder <strategy_t>						scale_array_holder_t;
-      typedef scal_2p_data_holder <strategy_t>					scal_2p_data_holder_t;
+      typedef scal_region scal_region_t;
+      typedef scale_array_holder scale_array_holder_t;
+      typedef scal_2p_data_holder scal_2p_data_holder_t;
 
-      typedef jfunction <strategy_t>										jfunction_t;
+      typedef jfunction jfunction_t;
 
       typedef smart_ptr <jfunction_t, true>							sp_jfunction_t;
       typedef smart_ptr <scale_array_holder_t, true>		sp_scale_array_holder_t;
@@ -48,7 +40,7 @@ namespace blue_sky
       typedef boost::array <index_t, FI_PHASE_TOT>			phase_d_t;
       typedef boost::array <index_t, FI_PHASE_TOT>			sat_d_t;
 
-      typedef calc_model_data <strategy_t>              data_t;
+      typedef calc_model_data data_t;
       typedef shared_vector <data_t>                    data_array_t;
 
       typedef unsigned char															phase_index_t;

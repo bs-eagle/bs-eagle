@@ -22,29 +22,29 @@
 namespace blue_sky {
 namespace python {
 
-  STRATEGY_CLASS_WRAPPER (well_factory, py_well_factory)
+  CLASS_WRAPPER (well_factory, py_well_factory)
   {
   public:
-    typedef smart_ptr <well <strategy_t>, true>               sp_well_t;
-    typedef smart_ptr <wells::connection <strategy_t>, true>  sp_connection_t;
-    typedef well_factory <strategy_t>                         wrapped_t;
+    typedef smart_ptr <well, true>               sp_well_t;
+    typedef smart_ptr <wells::connection, true>  sp_connection_t;
+    typedef well_factory wrapped_t;
   public:
-    STRATEGY_CLASS_WRAPPER_DECL (py_well_factory);
+    CLASS_WRAPPER_DECL (py_well_factory);
     WRAPPER_METHOD_R_CONST (create_well, sp_well_t, 2, (std::string, std::string));
     WRAPPER_METHOD_R_CONST (create_connection, sp_connection_t, 0, (empty_arg__));
   };
 
   using namespace wells;
-  STRATEGY_CLASS_WRAPPER (well_controller_factory, py_well_controller_factory)
+  CLASS_WRAPPER (well_controller_factory, py_well_controller_factory)
   {
   public:
-    typedef smart_ptr <well_controller <strategy_t>, true>    sp_well_controller_t;
-    typedef smart_ptr <well_rate_control <strategy_t>, true>  sp_well_control_t;
-    typedef smart_ptr <calc_model <strategy_t>, true>         sp_calc_model_t;
-    typedef well_controller_factory <strategy_t>              wrapped_t;
+    typedef smart_ptr <well_controller, true>    sp_well_controller_t;
+    typedef smart_ptr <well_rate_control, true>  sp_well_control_t;
+    typedef smart_ptr <calc_model, true>         sp_calc_model_t;
+    typedef well_controller_factory wrapped_t;
 
   public:
-    STRATEGY_CLASS_WRAPPER_DECL (py_well_controller_factory);
+    CLASS_WRAPPER_DECL (py_well_controller_factory);
     WRAPPER_METHOD_R_CONST (create_controller, sp_well_controller_t, 0, (empty_arg__));
   };
 

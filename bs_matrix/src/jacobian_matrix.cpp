@@ -19,8 +19,7 @@ namespace blue_sky
   {
 
   //! constructor
-  template <class strategy_t>
-  jacobian_matrix<strategy_t>::jacobian_matrix (bs_type_ctor_param /*param*/)
+  jacobian_matrix::jacobian_matrix (bs_type_ctor_param /*param*/)
       : regular_matrix (BS_KERNEL.create_object (csr_matrix_t::bs_type ()))
       , irregular_matrix (BS_KERNEL.create_object (csr_matrix_t::bs_type ()))
       , merged_reg_irreg_matrix (BS_KERNEL.create_object (csr_matrix_t::bs_type ()))
@@ -29,8 +28,7 @@ namespace blue_sky
   }
 
   //! copy constructor
-  template <class strategy_t>
-  jacobian_matrix<strategy_t>::jacobian_matrix (const jacobian_matrix &matrix) 
+  jacobian_matrix::jacobian_matrix (const jacobian_matrix &matrix) 
         : bs_refcounter (matrix), base_t (matrix)
   {
     BS_ASSERT (false && "TEST ME");
@@ -55,9 +53,8 @@ namespace blue_sky
   \param N_of_diag_bands -- number of diagonal bands
   \return 0 if success
   */
-  template <class strategy_t>
   void
-  jacobian_matrix <strategy_t>::init (int N_blocks, int N_block_size, int N_of_diag_bands,
+  jacobian_matrix::init (int N_blocks, int N_block_size, int N_of_diag_bands,
                                       const int /*flag_is_line_search*/, const int n_sec)
   {
     BS_ASSERT (N_blocks >= 1 && N_block_size >= 1 && N_of_diag_bands >= 0) (N_blocks) (N_block_size) (N_of_diag_bands);
@@ -122,7 +119,7 @@ namespace blue_sky
 
   //template <class strategy_t>
   //void
-  //jacobian_matrix <strategy_t>::init_regular_matrix(int N_block_size, const sp_mesh_t &mesh)
+  //jacobian_matrix::init_regular_matrix(int N_block_size, const sp_mesh_t &mesh)
   //{
   //  const sp_mesh_t &locked_mesh (mesh);
 
@@ -139,58 +136,58 @@ namespace blue_sky
 
   //template <typename strategy_t>
   //void
-  //jacobian_matrix <strategy_t>::init_irregular_matrix (index_t N_blocks, index_t N_block_size)
+  //jacobian_matrix::init_irregular_matrix (index_t N_blocks, index_t N_block_size)
   //{
   //  // TODO: throw exception
   //  irregular_matrix->init (N_blocks, N_blocks, N_block_size, 0);
   //}
 
 
-  template <class strategy_t> void
-  jacobian_matrix <strategy_t>::read_regular_from_csr_matrix (const char *filename)
+  void
+  jacobian_matrix::read_regular_from_csr_matrix (const char *filename)
   {
     regular_matrix->ascii_read_from_csr_format (filename);
   }
 
-  template <class strategy_t> void
-  jacobian_matrix <strategy_t>::read_regular_from_b_matrix (const char *filename, bool summ_diag)
+  void
+  jacobian_matrix::read_regular_from_b_matrix (const char *filename, bool summ_diag)
   {
     regular_matrix = tools::read_b_matrix_from_file <csr_matrix_t> (filename, summ_diag);
   }
 
-  template <class strategy_t> void
-  jacobian_matrix <strategy_t>::read_rhs_vector (const char *filename)
+  void
+  jacobian_matrix::read_rhs_vector (const char *filename)
   {
     naive_file_reader (filename)
     .locate_section ("RIGHT HAND SIDE")
     .read_list (rhs);
   }
 
-  template <class strategy_t> void
-  jacobian_matrix <strategy_t>::read_rhs_flux_vector (const char *filename)
+  void
+  jacobian_matrix::read_rhs_flux_vector (const char *filename)
   {
     naive_file_reader (filename)
     .locate_section ("RIGHT HAND SIDE FLUX")
     .read_list (rhs_flux);
   }
 
-  template <class strategy_t> void
-  jacobian_matrix <strategy_t>::read_solution_vector (const char *filename)
+  void
+  jacobian_matrix::read_solution_vector (const char *filename)
   {
     naive_file_reader (filename)
     .read_list (solution);
   }
 
-  template <class strategy_t> void
-  jacobian_matrix <strategy_t>::read_acc_diag_from_b_matrix (const char *filename)
+  void
+  jacobian_matrix::read_acc_diag_from_b_matrix (const char *filename)
   {
     naive_file_reader (filename)
     .locate_section ("MAIN DIAGONAL ACCUMULATIVE")
     .read_list (regular_accumulative_diag);
   }
 
-  template <class strategy_t> void
-  jacobian_matrix <strategy_t>::read_irregular_csr_matrix (const char *filename)
+  void
+  jacobian_matrix::read_irregular_csr_matrix (const char *filename)
   {
     BS_ASSERT (!irregular_matrix);
 
@@ -198,125 +195,120 @@ namespace blue_sky
     irregular_matrix->ascii_read_from_csr_format (filename);
   }
 
-  template <class strategy_t>
-  const typename jacobian_matrix<strategy_t>::sp_csr_matrix_t &
-  jacobian_matrix<strategy_t>::get_regular_matrix () const
+  const jacobian_matrix::sp_csr_matrix_t &
+  jacobian_matrix::get_regular_matrix () const
   {
     return regular_matrix;
   }
-  template <class strategy_t>
-  typename jacobian_matrix<strategy_t>::sp_csr_matrix_t
-  jacobian_matrix<strategy_t>::get_regular_matrix ()
+  jacobian_matrix::sp_csr_matrix_t
+  jacobian_matrix::get_regular_matrix ()
   {
     return regular_matrix;
   }
 
-  template <class strategy_t>
-  const typename jacobian_matrix<strategy_t>::sp_csr_matrix_t &
-  jacobian_matrix<strategy_t>::get_irregular_matrix () const
+  const jacobian_matrix::sp_csr_matrix_t &
+  jacobian_matrix::get_irregular_matrix () const
   {
     return irregular_matrix;
   }
-  template <class strategy_t>
-  typename jacobian_matrix<strategy_t>::sp_csr_matrix_t
-  jacobian_matrix<strategy_t>::get_irregular_matrix ()
+  jacobian_matrix::sp_csr_matrix_t
+  jacobian_matrix::get_irregular_matrix ()
   {
     return irregular_matrix;
   }
 
-  template <class strategy_t> const typename jacobian_matrix<strategy_t>::item_array_t &
-  jacobian_matrix<strategy_t>::get_solution () const
+  const jacobian_matrix::item_array_t &
+  jacobian_matrix::get_solution () const
     {
       return solution;
     }
-  template <class strategy_t> typename jacobian_matrix<strategy_t>::item_array_t &
-  jacobian_matrix<strategy_t>::get_solution ()
+  jacobian_matrix::item_array_t &
+  jacobian_matrix::get_solution ()
   {
     return solution;
   }
 
-  template <class strategy_t> const typename jacobian_matrix<strategy_t>::rhs_item_array_t &
-  jacobian_matrix<strategy_t>::get_sec_rhs () const
+  const jacobian_matrix::rhs_item_array_t &
+  jacobian_matrix::get_sec_rhs () const
     {
       return sec_rhs;
     }
-  template <class strategy_t> typename jacobian_matrix<strategy_t>::rhs_item_array_t &
-  jacobian_matrix<strategy_t>::get_sec_rhs ()
+  jacobian_matrix::rhs_item_array_t &
+  jacobian_matrix::get_sec_rhs ()
   {
     return sec_rhs;
   }
 
-  template <class strategy_t> const typename jacobian_matrix<strategy_t>::item_array_t &
-  jacobian_matrix<strategy_t>::get_sec_solution () const
+  const jacobian_matrix::item_array_t &
+  jacobian_matrix::get_sec_solution () const
     {
       return sec_solution;
     }
-  template <class strategy_t> typename jacobian_matrix<strategy_t>::item_array_t &
-  jacobian_matrix<strategy_t>::get_sec_solution ()
+  jacobian_matrix::item_array_t &
+  jacobian_matrix::get_sec_solution ()
   {
     return sec_solution;
   }
 
-  template <class strategy_t> const typename jacobian_matrix<strategy_t>::rhs_item_array_t &
-  jacobian_matrix<strategy_t>::get_ss_diagonal () const
+  const jacobian_matrix::rhs_item_array_t &
+  jacobian_matrix::get_ss_diagonal () const
     {
       return ss_diagonal;
     }
-  template <class strategy_t> typename jacobian_matrix<strategy_t>::rhs_item_array_t &
-  jacobian_matrix<strategy_t>::get_ss_diagonal ()
+  jacobian_matrix::rhs_item_array_t &
+  jacobian_matrix::get_ss_diagonal ()
   {
     return ss_diagonal;
   }
 
-  template <class strategy_t> const typename jacobian_matrix<strategy_t>::rhs_item_array_t &
-  jacobian_matrix<strategy_t>::get_sp_diagonal () const
+  const jacobian_matrix::rhs_item_array_t &
+  jacobian_matrix::get_sp_diagonal () const
     {
       return sp_diagonal;
     }
-  template <class strategy_t> typename jacobian_matrix<strategy_t>::rhs_item_array_t &
-  jacobian_matrix<strategy_t>::get_sp_diagonal ()
+  jacobian_matrix::rhs_item_array_t &
+  jacobian_matrix::get_sp_diagonal ()
   {
     return sp_diagonal;
   }
 
 
-  template <class strategy_t> const typename jacobian_matrix<strategy_t>::rhs_item_array_t &
-  jacobian_matrix<strategy_t>::get_rhs () const
+  const jacobian_matrix::rhs_item_array_t &
+  jacobian_matrix::get_rhs () const
     {
       return rhs;
     }
-  template <class strategy_t> typename jacobian_matrix<strategy_t>::rhs_item_array_t &
-  jacobian_matrix<strategy_t>::get_rhs ()
+  jacobian_matrix::rhs_item_array_t &
+  jacobian_matrix::get_rhs ()
   {
     return rhs;
   }
 
-  template <class strategy_t> const typename jacobian_matrix<strategy_t>::rhs_item_array_t &
-  jacobian_matrix<strategy_t>::get_rhs_flux () const
+  const jacobian_matrix::rhs_item_array_t &
+  jacobian_matrix::get_rhs_flux () const
     {
       return rhs_flux;
     }
-  template <class strategy_t> typename jacobian_matrix<strategy_t>::rhs_item_array_t &
-  jacobian_matrix<strategy_t>::get_rhs_flux ()
+  jacobian_matrix::rhs_item_array_t &
+  jacobian_matrix::get_rhs_flux ()
   {
     return rhs_flux;
   }
 
-  template <class strategy_t> const typename jacobian_matrix<strategy_t>::rhs_item_array_t &
-  jacobian_matrix<strategy_t>::get_regular_acc_diag () const
+  const jacobian_matrix::rhs_item_array_t &
+  jacobian_matrix::get_regular_acc_diag () const
     {
       return regular_accumulative_diag;
     }
-  template <class strategy_t> typename jacobian_matrix<strategy_t>::rhs_item_array_t &
-  jacobian_matrix<strategy_t>::get_regular_acc_diag ()
+  jacobian_matrix::rhs_item_array_t &
+  jacobian_matrix::get_regular_acc_diag ()
   {
     return regular_accumulative_diag;
   }
 
   //! prepare matrix
-  template <class strategy_t>
   void
-  jacobian_matrix<strategy_t>::prepare_matrix ()
+  jacobian_matrix::prepare_matrix ()
   {
     BS_ASSERT (merged_reg_irreg_matrix);
     if (!merged_reg_irreg_matrix)
@@ -357,31 +349,28 @@ namespace blue_sky
     lmx->n_cols       = regular_matrix->n_cols;
   }
 
-  template <typename strategy_t>
-  const typename strategy_t::rhs_item_array_t &
-  jacobian_matrix <strategy_t>::get_prepared_values_wo_acc_diag () const
+  const strategy_t::rhs_item_array_t &
+  jacobian_matrix::get_prepared_values_wo_acc_diag () const
   {
     return prepared_values_wo_acc_diag_;
   }
 
   //! return merged BCSR matrix
-  template <typename strategy_t>
-  typename jacobian_matrix <strategy_t>::sp_matrix_t
-  jacobian_matrix <strategy_t>::get_prepared_matrix () const
+  jacobian_matrix::sp_matrix_t
+  jacobian_matrix::get_prepared_matrix () const
   {
     return merged_reg_irreg_matrix;
   }
   //! return merged BCSR matrix
-  template <typename strategy_t>
-  typename jacobian_matrix <strategy_t>::sp_csr_matrix_t
-  jacobian_matrix <strategy_t>::get_prepared_bcsr_matrix () const
+  jacobian_matrix::sp_csr_matrix_t
+  jacobian_matrix::get_prepared_bcsr_matrix () const
   {
     return merged_reg_irreg_matrix;
   }
 
 
-  template <class strategy_t> void
-  jacobian_matrix<strategy_t>::summ_diag ()
+  void
+  jacobian_matrix::summ_diag ()
   {
     index_t b_sqr = regular_matrix->n_block_size;
     b_sqr = b_sqr * b_sqr;
@@ -409,9 +398,8 @@ namespace blue_sky
   *
   * @return 0 if success
   */
-  template <class strategy_t>
   void
-  jacobian_matrix<strategy_t>::restore_sec_solution ()
+  jacobian_matrix::restore_sec_solution ()
   {
     rhs_item_t *sp_block = 0;
     item_t *sol_block = 0;
@@ -432,9 +420,8 @@ namespace blue_sky
   }
 
   // multiply flux part of matrix
-  template <class strategy_t>
   int
-  jacobian_matrix<strategy_t>::mult_flux_part (const item_t mult)
+  jacobian_matrix::mult_flux_part (const item_t mult)
   {
     static int coef_count = 0;
     ++coef_count;
@@ -461,9 +448,8 @@ namespace blue_sky
     return coef_count;
   }
 
-  template <typename strategy_t>
   void
-  jacobian_matrix<strategy_t>::reset ()
+  jacobian_matrix::reset ()
   {
     BS_ASSERT (this->n_block_size);
     BS_ASSERT (this->n_rows);
@@ -474,17 +460,15 @@ namespace blue_sky
     assign (regular_accumulative_diag, this->n_block_size * this->n_rows, 0);
   }
 
-  template <typename strategy_t>
   void
-  jacobian_matrix <strategy_t>::clear_solution ()
+  jacobian_matrix::clear_solution ()
   {
     BS_ASSERT (solution.size () >= (size_t)base_t::n_block_size * base_t::n_rows) (solution.size ()) (base_t::n_block_size) (base_t::n_rows);
     assign (solution, solution.size (), 0);
   }
 
-  template <typename strategy_t>
   void
-  jacobian_matrix<strategy_t>::summ_rhs ()
+  jacobian_matrix::summ_rhs ()
   {
     BS_ASSERT (rhs.size () >= (size_t)base_t::n_block_size * base_t::n_rows) (rhs.size ()) (base_t::n_block_size) (base_t::n_rows);
     BS_ASSERT (rhs_flux.size () >= (size_t)base_t::n_block_size * base_t::n_rows) (rhs_flux.size ()) (base_t::n_block_size) (base_t::n_rows);
@@ -519,9 +503,8 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   int
-  jacobian_matrix <strategy_t>::matrix_vector_product (const double_array_t &v, float_array_t &r) const
+  jacobian_matrix::matrix_vector_product (const double_array_t &v, float_array_t &r) const
   {
     //matrix_vector_product_free (regular_matrix->n_block_size, regular_matrix->n_rows, regular_diag, v, r);
     regular_matrix->matrix_vector_product (v, r);
@@ -529,9 +512,8 @@ namespace blue_sky
 
     return 0;
   }
-  template <typename strategy_t>
   int
-  jacobian_matrix <strategy_t>::matrix_vector_product (const float_array_t &v, float_array_t &r) const
+  jacobian_matrix::matrix_vector_product (const float_array_t &v, float_array_t &r) const
   {
     //matrix_vector_product_free (regular_matrix->n_block_size, regular_matrix->n_rows, regular_diag, v, r);
     regular_matrix->matrix_vector_product (v, r);
@@ -539,9 +521,8 @@ namespace blue_sky
 
     return 0;
   }
-  template <typename strategy_t>
   int
-  jacobian_matrix <strategy_t>::matrix_vector_product (const double_array_t &v, double_array_t &r) const
+  jacobian_matrix::matrix_vector_product (const double_array_t &v, double_array_t &r) const
   {
     //matrix_vector_product_free (regular_matrix->n_block_size, regular_matrix->n_rows, regular_diag, v, r);
     regular_matrix->matrix_vector_product (v, r);
@@ -550,20 +531,17 @@ namespace blue_sky
     return 0;
   }
 
-  template <typename strategy_t>
-  typename jacobian_matrix <strategy_t>::rhs_item_array_t &
-  jacobian_matrix <strategy_t>::get_cfl_vector ()
+  jacobian_matrix::rhs_item_array_t &
+  jacobian_matrix::get_cfl_vector ()
   {
     return cfl_vector_;
   }
 
   //////////////////////////////////////////////////////////////////////////
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(jacobian_matrix, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(jacobian_matrix, (class));
+  BLUE_SKY_TYPE_STD_CREATE (jacobian_matrix);
+  BLUE_SKY_TYPE_STD_COPY (jacobian_matrix);
 
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (jacobian_matrix<base_strategy_fi>) , 1, (base_strategy_fi::matrix_t), "jacobian_matrix_seq_fi", "Jacobian matrix", "Jacobian matrix", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (jacobian_matrix<base_strategy_di>) , 1, (base_strategy_di::matrix_t), "jacobian_matrix_seq_di", "Jacobian matrix", "Jacobian matrix", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (jacobian_matrix<base_strategy_mixi>) , 1, (base_strategy_mixi::matrix_t), "jacobian_matrix_seq_mixi", "Jacobian matrix", "Jacobian matrix", false);
+  BLUE_SKY_TYPE_IMPL (jacobian_matrix, strategy_t::matrix_t, "jacobian_matrix", "jacobian_matrix", "jacobian_matrix");
 
 
   //////////////////////////////////////////////////////////////////////////
@@ -572,9 +550,7 @@ namespace blue_sky
   {
     bool res = true;
 
-    res &= BS_KERNEL.register_type (pd, jacobian_matrix<base_strategy_fi>::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, jacobian_matrix<base_strategy_di>::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, jacobian_matrix<base_strategy_mixi>::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, jacobian_matrix::bs_type ()); BS_ASSERT (res);
 
     return res;
   }

@@ -539,25 +539,25 @@ namespace wells {
     };
   }
 
-  template <typename strategy_t, bool is_w, bool is_g, bool is_o, bool is_production_well>
+  template <bool is_w, bool is_g, bool is_o, bool is_production_well>
   struct calc_rate_and_derivs_t
   {
-    typedef typename strategy_t::item_t                 item_t;
-    typedef typename strategy_t::index_t                index_t;
-    typedef typename strategy_t::item_array_t           item_array_t;
-    typedef typename strategy_t::rhs_item_array_t       rhs_item_array_t;
+    typedef strategy_t::item_t                 item_t;
+    typedef strategy_t::index_t                index_t;
+    typedef strategy_t::item_array_t           item_array_t;
+    typedef strategy_t::rhs_item_array_t       rhs_item_array_t;
 
-    typedef default_well <strategy_t>                   well_t;
-    typedef default_connection <strategy_t>             connection_t;
-    typedef typename well_t::connection_list_t          connection_list_t;
-    typedef typename well_t::base_t::rate_data_t        rate_data_t;
-    typedef typename rate_data_t::rate_data_inner       rate_data_inner_t;
-    typedef calc_model <strategy_t>                     calc_model_t;
-    typedef calc_model_data <strategy_t>                calc_model_data_t;
-    typedef typename calc_model_t::data_array_t         cell_data_t;
-    typedef typename calc_model_t::main_var_array_t     main_vars_t;
-    typedef typename main_vars_t::value_type            main_var_t;
-    typedef jacobian_matrix <strategy_t>                jmatrix_t;
+    typedef default_well well_t;
+    typedef default_connection connection_t;
+    typedef well_t::connection_list_t          connection_list_t;
+    typedef well_t::base_t::rate_data_t        rate_data_t;
+    typedef rate_data_t::rate_data_inner       rate_data_inner_t;
+    typedef calc_model calc_model_t;
+    typedef calc_model_data calc_model_data_t;
+    typedef calc_model_t::data_array_t         cell_data_t;
+    typedef calc_model_t::main_var_array_t     main_vars_t;
+    typedef main_vars_t::value_type            main_var_t;
+    typedef jacobian_matrix jmatrix_t;
 
     typedef smart_ptr <calc_model_t, true>              sp_calc_model_t;
     typedef smart_ptr <jmatrix_t, true>                 sp_jmatrix_t;
@@ -697,7 +697,7 @@ namespace wells {
           return ;
         }
 
-      typedef default_connection_iterator_impl <strategy_t, default_well <strategy_t>, default_connection <strategy_t> > iterator_t;
+      typedef default_connection_iterator_impl <default_well, default_connection> iterator_t;
       iterator_t it (well, begin_iterator_tag), e (well, end_iterator_tag);
       for (; it != e; ++it)
         {
@@ -794,7 +794,7 @@ namespace wells {
         }
       item_t ww_bw = well->bw_value * inv_ww;
 
-      typedef default_connection_iterator_impl <strategy_t, default_well <strategy_t>, default_connection <strategy_t> > iterator_t;
+      typedef default_connection_iterator_impl <default_well, default_connection> iterator_t;
       iterator_t it (well, begin_iterator_tag), e (well, end_iterator_tag);
       for (; it != e; ++it)
         {

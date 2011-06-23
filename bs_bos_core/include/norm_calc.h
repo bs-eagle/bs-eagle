@@ -53,12 +53,11 @@ namespace blue_sky
   /*!
    * \brief class for storing different norms
    */
-  template <class strategy_t>
   class norms_storage
   {
   public:
-    typedef typename strategy_t::item_array_t         item_array_t;
-    typedef typename strategy_t::rhs_item_array_t     rhs_item_array_t;
+    typedef strategy_t::item_array_t         item_array_t;
+    typedef strategy_t::rhs_item_array_t     rhs_item_array_t;
     typedef shared_vector <const char *>              name_array_t;
 
   public:

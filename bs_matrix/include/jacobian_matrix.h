@@ -12,27 +12,26 @@
 
 namespace blue_sky
 {
-  template <class strategy_t>
-  class BS_API_PLUGIN jacobian_matrix : public strategy_t::matrix_t, public setup_preconditioner <typename strategy_t::matrix_t>
+  class BS_API_PLUGIN jacobian_matrix : public strategy_t::matrix_t, public setup_preconditioner <strategy_t::matrix_t>
     {
       //////////////////////////////////////////////////////////////////////////
       // TYPES
       //////////////////////////////////////////////////////////////////////////
     public:
 
-      typedef typename strategy_t::matrix_t                   matrix_t;
-      typedef typename strategy_t::csr_matrix_t               csr_matrix_t;
+      typedef strategy_t::matrix_t                   matrix_t;
+      typedef strategy_t::csr_matrix_t               csr_matrix_t;
 
-      typedef typename strategy_t::item_array_t               item_array_t;
-      typedef typename strategy_t::rhs_item_array_t           rhs_item_array_t;
-      typedef typename strategy_t::index_array_t              index_array_t;
+      typedef strategy_t::item_array_t               item_array_t;
+      typedef strategy_t::rhs_item_array_t           rhs_item_array_t;
+      typedef strategy_t::index_array_t              index_array_t;
 
-      typedef typename strategy_t::index_t                    index_t;
-      typedef typename strategy_t::item_t                     item_t;
-      typedef typename strategy_t::rhs_item_t                 rhs_item_t;
+      typedef strategy_t::index_t                    index_t;
+      typedef strategy_t::item_t                     item_t;
+      typedef strategy_t::rhs_item_t                 rhs_item_t;
 
-      typedef typename item_array_t::template array <float>::type   float_array_t;
-      typedef typename item_array_t::template array <double>::type  double_array_t;
+      typedef item_array_t::array <float>::type   float_array_t;
+      typedef item_array_t::array <double>::type  double_array_t;
 
       typedef bcsr_matrix<item_array_t, index_array_t>        csr_matrix_2_t;       ///< short name for csr_matrix type (it's fail way today)
       typedef smart_ptr <csr_matrix_2_t, true>                sp_csr_matrix_2_t;
@@ -41,14 +40,14 @@ namespace blue_sky
       typedef smart_ptr <csr_matrix_t, true>                  sp_csr_matrix_t;
 
       typedef matrix_t                                        base_t;
-      typedef jacobian_matrix <strategy_t>                    this_t;
+      typedef jacobian_matrix this_t;
       typedef matrix_t                                        matrix_base_t;
 
       //////////////////////////////////////////////////////////////////////////
       // METHODS
       //////////////////////////////////////////////////////////////////////////
     public:
-      BLUE_SKY_TYPE_DECL_T (jacobian_matrix <strategy_t>);
+      BLUE_SKY_TYPE_DECL (jacobian_matrix);
 
       // initialize matrix, return 0 if success
       void init (int N_blocks, int N_block_size, int N_of_diag_bands, const int, const int n_sec);

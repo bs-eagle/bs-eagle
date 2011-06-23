@@ -70,21 +70,21 @@ namespace blue_sky {
      * \todo  Should be renamed
      * \todo  Describe data members
      * */
-    template <typename strategy_t, bool is_w, bool is_g, bool is_o>
+    template <bool is_w, bool is_g, bool is_o>
     struct mpfa_base_impl
     {
     public:
-      typedef typename strategy_t::item_t             item_t;
-      typedef typename strategy_t::rhs_item_t         rhs_item_t;
-      typedef typename strategy_t::index_t            index_t;
-      typedef typename strategy_t::item_array_t       item_array_t;
-      typedef typename strategy_t::rhs_item_array_t   rhs_item_array_t;
-      typedef typename strategy_t::index_array_t      index_array_t;
+      typedef strategy_t::item_t             item_t;
+      typedef strategy_t::rhs_item_t         rhs_item_t;
+      typedef strategy_t::index_t            index_t;
+      typedef strategy_t::item_array_t       item_array_t;
+      typedef strategy_t::rhs_item_array_t   rhs_item_array_t;
+      typedef strategy_t::index_array_t      index_array_t;
       typedef boost::array <index_t, FI_PHASE_TOT>    up_cell_array_t;
-      typedef calc_model <strategy_t>                 calc_model_t;
-      typedef typename calc_model_t::data_t           data_t;
-      typedef typename calc_model_t::data_array_t     data_array_t;
-      typedef typename calc_model_t::main_var_array_t main_var_array_t;
+      typedef calc_model calc_model_t;
+      typedef calc_model_t::data_t           data_t;
+      typedef calc_model_t::data_array_t     data_array_t;
+      typedef calc_model_t::main_var_array_t main_var_array_t;
 
       enum
         {
@@ -130,7 +130,7 @@ namespace blue_sky {
        * \param  rhs_ RHS part of Jacobian
        * \param  reg_values_ Values of regular part of Jacobian
        * */
-      mpfa_base_impl (const fi_operator_impl <strategy_t, is_w, is_g, is_o> &fi_operator_, rhs_item_array_t &rhs_, rhs_item_array_t &reg_values_)
+      mpfa_base_impl (const fi_operator_impl <is_w, is_g, is_o> &fi_operator_, rhs_item_array_t &rhs_, rhs_item_array_t &reg_values_)
       : d_w (fi_operator_.d_w),
       d_g (fi_operator_.d_g),
       d_o (fi_operator_.d_o),
@@ -990,11 +990,11 @@ namespace blue_sky {
    * \param  dt
    * \return True
    * */
-  template <typename strategy_t, bool is_w, bool is_g, bool is_o>
+  template <bool is_w, bool is_g, bool is_o>
   bool
-  fi_operator_impl <strategy_t, is_w, is_g, is_o>::block_connections_mpfa (const item_t &dt)
+  fi_operator_impl <is_w, is_g, is_o>::block_connections_mpfa (const item_t &dt)
   {
-    mpfa::block_connections_mpfa (dt, *this, mpfa::mpfa_base_impl <strategy_t, is_w, is_g, is_o> (*this, flux_rhs_, reg_values_));
+    mpfa::block_connections_mpfa (dt, *this, mpfa::mpfa_base_impl <is_w, is_g, is_o> (*this, flux_rhs_, reg_values_));
     return false;
   }
 

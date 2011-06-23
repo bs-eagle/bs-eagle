@@ -3,32 +3,27 @@
 
 namespace blue_sky
   {
-	template <typename strategy_t>
-  ar_operat<strategy_t>::ar_operat()
+  ar_operat::ar_operat()
   {
     init();
   }
 
-	template <typename strategy_t>
-  ar_operat<strategy_t>::ar_operat(const std::string &tname)
+  ar_operat::ar_operat(const std::string &tname)
   {
     init ();
     name = tname;
   }
 
-	template <typename strategy_t>
-  ar_operat<strategy_t>::ar_operat(operat_func toper, int tpriority, int tnum_of_arg, const std::string &tname)
+  ar_operat::ar_operat(operat_func toper, int tpriority, int tnum_of_arg, const std::string &tname)
       : oper(toper), priority(tpriority), num_of_arg(tnum_of_arg), name(tname)
   {}
 
-	template <typename strategy_t>
-  ar_operat<strategy_t>::~ar_operat()
+  ar_operat::~ar_operat()
   {
     init();
   }
 
-	template <typename strategy_t>
-  void ar_operat<strategy_t>::init()
+  void ar_operat::init()
   {
     oper = 0;
     priority = 0;
@@ -36,8 +31,7 @@ namespace blue_sky
     name = "";
   }
 
-	template <typename strategy_t>
-  int ar_operat<strategy_t>::set_name (const std::string &tname)
+  int ar_operat::set_name (const std::string &tname)
   {
     if (!tname.length())
       {
@@ -48,26 +42,19 @@ namespace blue_sky
     return 0;
   }
 
-	template <typename strategy_t>
   const std::string &
-  ar_operat<strategy_t>::get_name() const
+  ar_operat::get_name() const
   {
     return name;
   }
 
-	template <typename strategy_t>
-  int ar_operat<strategy_t>::operator==(const std::string &tname) const
+  int ar_operat::operator==(const std::string &tname) const
   {
     return strcmp(name.c_str(),tname.c_str());
   }
 
-	template <typename strategy_t>
-  bool ar_operat<strategy_t>::operator<(const ar_operat &op) const
+  bool ar_operat::operator<(const ar_operat &op) const
   {
     return (name < op.name);
   }
-
-	template class ar_operat <base_strategy_fi>;
-  template class ar_operat <base_strategy_di>;
-	template class ar_operat <base_strategy_mixi>;
 }

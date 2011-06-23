@@ -20,19 +20,18 @@ namespace blue_sky
      * \brief Calculates perforation (well connection) bhp value, 
      *        implements calc_perf_bhp_base interface
      * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN calc_perf_bhp : public calc_perf_bhp_base <strategy_t>
+  class BS_API_PLUGIN calc_perf_bhp : public calc_perf_bhp_base
     {
     public:
 
-      typedef calc_perf_bhp_base <strategy_t>     base_t;
-      typedef calc_perf_bhp <strategy_t>          this_t;
+      typedef calc_perf_bhp_base base_t;
+      typedef calc_perf_bhp this_t;
 
-      typedef typename base_t::sp_calc_model_t    sp_calc_model_t;
-      typedef typename base_t::sp_well_t          sp_well_t;
-      typedef typename base_t::sp_mesh_iface_t    sp_mesh_iface_t;
-      typedef typename base_t::item_t             item_t;
-      typedef typename base_t::index_t            index_t;
+      typedef base_t::sp_calc_model_t    sp_calc_model_t;
+      typedef base_t::sp_well_t          sp_well_t;
+      typedef base_t::sp_mesh_iface_t    sp_mesh_iface_t;
+      typedef base_t::item_t             item_t;
+      typedef base_t::index_t            index_t;
 
     public:
 
@@ -46,7 +45,7 @@ namespace blue_sky
       calculate (sp_well_t &well, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh) const;
 
       //! blue-sky type declaration
-      BLUE_SKY_TYPE_DECL_T (calc_perf_bhp <strategy_t>);
+      BLUE_SKY_TYPE_DECL (calc_perf_bhp);
 
     };
 

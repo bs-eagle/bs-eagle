@@ -25,18 +25,17 @@ namespace blue_sky
    * \class two_stage_preconditioner
    * \brief Class declaration for two stage preconditioner
    * */
-  template <class strategy_t>
-  class BS_API_PLUGIN two_stage_preconditioner: public linear_solver_base<strategy_t>
+  class BS_API_PLUGIN two_stage_preconditioner: public linear_solver_base
     {
     public:
-      typedef linear_solver_base<strategy_t>          base_t;             ///< short name for base class
-      typedef two_stage_preconditioner<strategy_t>    this_t;             ///< short name for this class
-      typedef typename strategy_t::matrix_t           matrix_t;           ///< short name for matrix type
-      typedef typename strategy_t::item_array_t       item_array_t;       ///< short name for array type
-      typedef typename strategy_t::item_t             item_t;             ///< short name for array item type
-      typedef typename strategy_t::rhs_item_t         rhs_item_t;         ///< short name for type of rhs
-      typedef typename strategy_t::rhs_item_array_t   rhs_item_array_t;   ///< short name for rhs array type
-      typedef typename strategy_t::index_t            index_t;            ///< short name for index type
+      typedef linear_solver_base          base_t;             ///< short name for base class
+      typedef two_stage_preconditioner    this_t;             ///< short name for this class
+      typedef strategy_t::matrix_t           matrix_t;           ///< short name for matrix type
+      typedef strategy_t::item_array_t       item_array_t;       ///< short name for array type
+      typedef strategy_t::item_t             item_t;             ///< short name for array item type
+      typedef strategy_t::rhs_item_t         rhs_item_t;         ///< short name for type of rhs
+      typedef strategy_t::rhs_item_array_t   rhs_item_array_t;   ///< short name for rhs array type
+      typedef strategy_t::index_t            index_t;            ///< short name for index type
       typedef item_t                                  fp_type;            ///< short name for array item type
       typedef index_t                                 i_type;             ///< short name for index type
       typedef smart_ptr <base_t, true>                sp_base_t;          ///< short name for smart pointer on base class

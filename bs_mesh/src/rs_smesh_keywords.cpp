@@ -21,14 +21,12 @@ namespace blue_sky
     BS_ASSERT(false) (out_s.str());\
     throw bs_exception("Structured mesh handlers class",out_s.str().c_str());
   
-  template<class strategy_t>
-  smesh_keywords<strategy_t>::smesh_keywords(bs_type_ctor_param)
+  smesh_keywords::smesh_keywords(bs_type_ctor_param)
   {
 
   }
 
-  template<class strategy_t>
-  smesh_keywords<strategy_t>::smesh_keywords(const smesh_keywords<strategy_t>& src)
+  smesh_keywords::smesh_keywords(const smesh_keywords& src)
   : bs_refcounter (src), base_t (src)
   {
     // TODO: BUG:
@@ -36,10 +34,9 @@ namespace blue_sky
     //*this = src;
   }
   
-  template<class strategy_t>
-  void smesh_keywords<strategy_t>::register_keywords (sp_objbase &km, std::string provider) const
+  void smesh_keywords::register_keywords (sp_objbase &km, std::string provider) const
     {
-      smart_ptr <keyword_manager_iface <strategy_t>, true> keyword_manager (km);
+      smart_ptr <keyword_manager_iface, true> keyword_manager (km);
       keyword_manager->register_supported_keyword ("DIMENS", provider);
       keyword_manager->register_supported_keyword ("ACTNUM", provider);
       keyword_manager->register_supported_keyword ("PERMX", provider);
@@ -53,10 +50,9 @@ namespace blue_sky
       keyword_manager->register_supported_keyword ("MULTPV", provider);
     }
   
-  template<class strategy_t>
-  void smesh_keywords<strategy_t>::activate_keywords(sp_objbase &km)
+  void smesh_keywords::activate_keywords(sp_objbase &km)
     {
-      smart_ptr <keyword_manager_iface <strategy_t>, true> keyword_manager (km);
+      smart_ptr <keyword_manager_iface, true> keyword_manager (km);
       keyword_manager->register_keyword ("DIMENS", keyword_handler (&this_t::DIMENS_handler));
       index_t array_dimens[6] = {1,0,1,0,1,0};
       item_t def_value_zero = 0.0;
@@ -74,8 +70,7 @@ namespace blue_sky
       keyword_manager->register_keyword ("MULTPV", keyword_handler (0, def_value_zero, &array_dimens[0]));
     }  
   
-  template <class strategy_t>
-  void smesh_keywords<strategy_t>::DIMENS_handler(const std::string &keyword, keyword_params_t &params)
+  void smesh_keywords::DIMENS_handler(const std::string &keyword, keyword_params_t &params)
     {
       KH_COMMON_VARIABLES_DEF
       index_t ndim = 0, nblock = 0;
@@ -119,13 +114,9 @@ namespace blue_sky
     }
   
   
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF (smesh_keywords, (class))
-  BLUE_SKY_TYPE_STD_COPY_T_DEF (smesh_keywords, (class))
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (smesh_keywords<base_strategy_fi>), 1, (keyword_info_base<base_strategy_fi>), 
-    "BOS Core struct_mesh keyword_info_base_fi", "struct_mesh", "Reservoir sumulator structured struct mesh keywords keywords", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (smesh_keywords<base_strategy_di>), 1, (keyword_info_base<base_strategy_di>), 
-    "BOS_Core struct_mesh keyword_info_base_di", "struct_mesh", "Reservoir sumulator structured struct mesh keywords keywords", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (smesh_keywords<base_strategy_mixi>), 1, (keyword_info_base<base_strategy_mixi>), 
-    "BOS_Core struct_mesh keyword_info_base_mixi", "struct_mesh", "Reservoir sumulator structured struct mesh keywords keywords", false)
+  BLUE_SKY_TYPE_STD_CREATE (smesh_keywords)
+  BLUE_SKY_TYPE_STD_COPY (smesh_keywords)
+  BLUE_SKY_TYPE_IMPL (smesh_keywords, keyword_info_base, 
+    "BOS Core struct_mesh keyword_info_base", "struct_mesh", "Reservoir sumulator structured struct mesh keywords")
     
 }; //namespace blue_sky

@@ -54,11 +54,11 @@ namespace python {
 namespace detail {
 
   template <typename S, typename T, size_t N>
-  mpl::vector <blue_sky::shared_vector <T>, blue_sky::calc_model_data <S> *>
-  get_signature (const blue_sky::detail::boost_array_adapter__ <blue_sky::calc_model_data <S>, T, N> &, 
-    blue_sky::calc_model_data <S> *)
+  mpl::vector <blue_sky::shared_vector <T>, blue_sky::calc_model_data *>
+  get_signature (const blue_sky::detail::boost_array_adapter__ <blue_sky::calc_model_data, T, N> &, 
+    blue_sky::calc_model_data *)
   {
-    return mpl::vector <blue_sky::shared_vector <T>, blue_sky::calc_model_data <S> *> ();
+    return mpl::vector <blue_sky::shared_vector <T>, blue_sky::calc_model_data *> ();
   }
 
 } // namespace detail

@@ -23,8 +23,7 @@ namespace blue_sky
      * \brief  'default' ctor for wellbore_density_calc
      * \param  param Additional parameters for ctor
      * */
-  template <typename strategy_t>
-  wellbore_density_calc<strategy_t>::wellbore_density_calc (bs_type_ctor_param param /* = NULL */)
+  wellbore_density_calc::wellbore_density_calc (bs_type_ctor_param param /* = NULL */)
   {
 
   }
@@ -32,28 +31,26 @@ namespace blue_sky
    * \brief  copy-ctor for wellbore_density_calc
    * \param  x Instance of wellbore_density_calc to be copied
    * */
-  template <typename strategy_t>
-  wellbore_density_calc<strategy_t>::wellbore_density_calc (const wellbore_density_calc &x)
+  wellbore_density_calc::wellbore_density_calc (const wellbore_density_calc &x)
   : bs_refcounter (x)
   {
 
   }
 
-  template <typename strategy_t>
   void
-  wellbore_density_calc <strategy_t>::calculate (sp_well_t &well, const sp_calc_model_t &calc_model) const
+  wellbore_density_calc::calculate (sp_well_t &well, const sp_calc_model_t &calc_model) const
     {
       BS_ASSERT (!well->is_shut ()) (well->name ());
 
-      typedef typename base_t::well_t                     well_t;
-      typedef typename base_t::calc_model_t               calc_model_t;
-      typedef typename well_t::connection_t               connection_t;
-      typedef typename well_t::sp_connection_t            sp_connection_t;
-      typedef typename well_t::sp_connection_t            sp_connection_t;
+      typedef base_t::well_t                     well_t;
+      typedef base_t::calc_model_t               calc_model_t;
+      typedef well_t::connection_t               connection_t;
+      typedef well_t::sp_connection_t            sp_connection_t;
+      typedef well_t::sp_connection_t            sp_connection_t;
 
       item_t atm_pressure = calc_model->internal_constants.atmospheric_pressure;
 
-      typename well_t::connection_iterator_t it = well->connections_begin (),
+      well_t::connection_iterator_t it = well->connections_begin (),
                e = well->connections_end ();
       for (; it != e; ++it)
         {
@@ -77,19 +74,18 @@ namespace blue_sky
       return ;
     }
 
-  template <typename strategy_t>
   bool
-  wellbore_density_calc <strategy_t>::density_calc (sp_well_t &well, const sp_calc_model_t &calc_model, item_t p_bhp) const
+  wellbore_density_calc::density_calc (sp_well_t &well, const sp_calc_model_t &calc_model, item_t p_bhp) const
     {
       BS_ASSERT (!well->is_shut ()) (well->name ());
       BS_ASSERT (!well->is_no_connections ()) (well->name ());
 
-      typedef typename base_t::index_t                          index_t;
-      typedef typename base_t::well_t::sp_connection_t          sp_connection_t;
-      typedef typename base_t::calc_model_t::sp_pvt_water       sp_pvt_water_t;
-      typedef typename base_t::calc_model_t::sp_pvt_gas         sp_pvt_gas_t;
-      typedef typename base_t::calc_model_t::sp_pvt_dead_oil    sp_pvt_dead_oil_t;
-      typedef typename base_t::well_t::sp_connection_t          sp_connection_t;
+      typedef base_t::index_t                          index_t;
+      typedef base_t::well_t::sp_connection_t          sp_connection_t;
+      typedef base_t::calc_model_t::sp_pvt_water       sp_pvt_water_t;
+      typedef base_t::calc_model_t::sp_pvt_gas         sp_pvt_gas_t;
+      typedef base_t::calc_model_t::sp_pvt_dead_oil    sp_pvt_dead_oil_t;
+      typedef base_t::well_t::sp_connection_t          sp_connection_t;
 
       item_t gravity_const  = calc_model->internal_constants.gravity_constant;
       index_t n_phases      = calc_model->n_phases;
@@ -140,13 +136,13 @@ namespace blue_sky
       item_t sat_g    = 0;
       item_t sat_o    = 0;
 
-      typename base_t::well_t::sp_well_controller_t well_controller_ = well->get_well_controller ();
+      base_t::well_t::sp_well_controller_t well_controller_ = well->get_well_controller ();
       wells::injection_type injection = well_controller_->injection ();
 
-      const rate_data <strategy_t> &rate = well->rate ();
+      const rate_data &rate = well->rate ();
 
       sp_connection_t prev_con;
-      typename base_t::well_t::connection_iterator_t it = well->connections_begin (),
+      base_t::well_t::connection_iterator_t it = well->connections_begin (),
                e = well->connections_end ();
       for (; it != e; ++it)
         {
@@ -363,11 +359,9 @@ namespace blue_sky
       return true;
     }
 
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF (wellbore_density_calc, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF (wellbore_density_calc, (class));
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (wellbore_density_calc <base_strategy_fi>), 1, (objbase), "wellbore_density_calc_fi", "wellbore_density_calc_fi", "wellbore_density_calc_fi", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (wellbore_density_calc<base_strategy_di>), 1, (objbase), "wellbore_density_calc_di", "wellbore_density_calc_di", "wellbore_density_calc_di", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (wellbore_density_calc<base_strategy_mixi>), 1, (objbase), "wellbore_density_calc_mixi", "wellbore_density_calc_mixi", "wellbore_density_calc_mixi", false);
+  BLUE_SKY_TYPE_STD_CREATE (wellbore_density_calc);
+  BLUE_SKY_TYPE_STD_COPY (wellbore_density_calc);
+  BLUE_SKY_TYPE_IMPL (wellbore_density_calc, objbase, "wellbore_density_calc", "wellbore_density_calc", "wellbore_density_calc");
 
 
 } // namespace blue_sky

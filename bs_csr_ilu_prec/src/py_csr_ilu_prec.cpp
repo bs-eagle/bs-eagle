@@ -39,7 +39,7 @@ namespace python {
   void
   py_export_csr_ilu_prec ()
   {
-    strategy_exporter::export_class <csr_ilu_prec, linear_solver_base, csr_ilu_exporter> ("csr_ilu_prec_seq");
+    strategy_exporter::export_class <csr_ilu_prec, linear_solver_base, csr_ilu_exporter> ("bcsr_ilu_prec");
   }
 
 } // namespace python

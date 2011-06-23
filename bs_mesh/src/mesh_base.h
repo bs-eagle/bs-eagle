@@ -10,7 +10,6 @@
 
 using namespace blue_sky;
 
-  template<class strategy_t>
   class BS_API_PLUGIN mesh_base
     {
 
@@ -23,10 +22,9 @@ using namespace blue_sky;
       ///////////////////////
       // OWN TYPES
       ///////////////////////
-      typedef typename strategy_t::index_t                index_t;
-
-      typedef typename strategy_t::index_array_t          index_array_t;
-      typedef typename strategy_t::item_array_t           item_array_t;
+      typedef strategy_t::index_t                index_t;
+      typedef strategy_t::index_array_t          index_array_t;
+      typedef strategy_t::item_array_t           item_array_t;
 
       typedef idata                                       idata_t;
       typedef smart_ptr <idata_t, true>                   sp_idata_t;

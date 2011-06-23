@@ -8,12 +8,11 @@ namespace blue_sky
   /**
    * @brief table class
    */
-  template <class strategy_t>
   class BS_API_PLUGIN bs_table
     {
 
-      typedef typename strategy_t::item_t   item_t;
-      typedef typename strategy_t::index_t  index_t;
+      typedef strategy_t::item_t   item_t;
+      typedef strategy_t::index_t  index_t;
       //-------------------------
       // METHODS
       //-------------------------
@@ -59,12 +58,11 @@ namespace blue_sky
       index_t n_rows;                       //!< number of rows
     };
 
-  template <class strategy_t>
-  class BS_API_PLUGIN rocktab_table  : public bs_table <strategy_t>
+  class BS_API_PLUGIN rocktab_table  : public bs_table
     {
     public:
-      typedef typename strategy_t::index_t  index_t;
-      typedef typename strategy_t::item_t   item_t;
+      typedef strategy_t::index_t  index_t;
+      typedef strategy_t::item_t   item_t;
 
       //! ctor
       rocktab_table();

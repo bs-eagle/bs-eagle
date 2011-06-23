@@ -29,7 +29,6 @@ using namespace blue_sky;
 #define N_PLANE_CORNERS 4
     
 
-  template<class strategy_t>
   class mesh_element3d
     {
 
@@ -42,11 +41,11 @@ using namespace blue_sky;
       ///////////////////////
       // OWN TYPES
       ///////////////////////
-      typedef typename strategy_t::index_t                  index_t;
-      typedef typename strategy_t::item_t                   item_t;
+      typedef strategy_t::index_t                  index_t;
+      typedef strategy_t::item_t                   item_t;
 
-      typedef typename strategy_t::index_array_t            index_array_t;
-      typedef typename strategy_t::item_array_t             item_array_t;
+      typedef strategy_t::index_array_t            index_array_t;
+      typedef strategy_t::item_array_t             item_array_t;
       typedef grd_ecl::fpoint3d                             fpoint3d_t;
       
       typedef boost::array <fpoint3d_t, N_ELEMENT_CORNERS>  corners_t;
@@ -81,8 +80,8 @@ using namespace blue_sky;
       ///////////////////////
       
       //! return element corners
-      corners_t 
-      get_corners ()const
+      corners_t const &
+      get_corners () const
       {
         return corners;
       }

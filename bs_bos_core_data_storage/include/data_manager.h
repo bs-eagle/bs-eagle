@@ -10,16 +10,15 @@
 
 namespace blue_sky {
 
-  template <class strategy_t>
   class BS_API_PLUGIN data_manager: public objbase
     {
     public:
       //TYPES
-      typedef typename strategy_t::matrix_t       							matrix_t;
-      typedef typename strategy_t::item_array_t   							item_array_t;
-      typedef typename strategy_t::index_array_t  							index_array_t;
-      typedef typename strategy_t::item_t         							item_t;
-      typedef typename strategy_t::index_t        							index_t;
+      typedef strategy_t::matrix_t       							matrix_t;
+      typedef strategy_t::item_array_t   							item_array_t;
+      typedef strategy_t::index_array_t  							index_array_t;
+      typedef strategy_t::item_t         							item_t;
+      typedef strategy_t::index_t        							index_t;
 
       typedef idata                                             idata_t;
       typedef smart_ptr <idata_t, true>										      sp_idata ;
@@ -34,7 +33,7 @@ namespace blue_sky {
       //void update_geometry() const;
 
     public:
-      BLUE_SKY_TYPE_DECL_T(data_manager)
+      BLUE_SKY_TYPE_DECL (data_manager)
 
     public:
       sp_idata        data;												//!< data storage

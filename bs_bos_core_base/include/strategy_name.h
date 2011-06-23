@@ -10,40 +10,40 @@
 namespace blue_sky {
 namespace tools {
 
-  template <typename strategy_t>
-  struct strategy_name
-  {
-  };
+  //template <typename strategy_t>
+  //struct strategy_name
+  //{
+  //};
 
-  template <>
-  struct strategy_name <base_strategy_di>
-  {
-    static std::string
-    name () 
-    {
-      return "di";
-    }
-  };
+  //template <>
+  //struct strategy_name <base_strategy_di>
+  //{
+  //  static std::string
+  //  name () 
+  //  {
+  //    return "di";
+  //  }
+  //};
 
-  template <>
-  struct strategy_name <base_strategy_fi>
-  {
-    static std::string
-    name () 
-    {
-      return "fi";
-    }
-  };
+  //template <>
+  //struct strategy_name <base_strategy_fi>
+  //{
+  //  static std::string
+  //  name () 
+  //  {
+  //    return "fi";
+  //  }
+  //};
 
-  template <>
-  struct strategy_name <base_strategy_mixi>
-  {
-    static std::string
-    name () 
-    {
-      return "mixi";
-    }
-  };
+  //template <>
+  //struct strategy_name <base_strategy_mixi>
+  //{
+  //  static std::string
+  //  name () 
+  //  {
+  //    return "mixi";
+  //  }
+  //};
 
 }   // namespace tools
 }   // namespace blue_sky

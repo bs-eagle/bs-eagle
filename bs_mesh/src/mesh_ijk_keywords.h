@@ -14,26 +14,25 @@ namespace blue_sky
   {
 
  //! keyword_register_iface - interface for register plugins keywords
-  template <class strategy_t>
-  class BS_API_PLUGIN mesh_ijk_keywords: public smesh_keywords<strategy_t>
+  class BS_API_PLUGIN mesh_ijk_keywords: public smesh_keywords
     {
       public:
-        typedef mesh_ijk_keywords<strategy_t>          this_t;
-        typedef smesh_keywords<strategy_t>             base_t;
-        typedef typename base_t::index_t               index_t;        
-        typedef typename base_t::item_t                item_t;
-        typedef typename base_t::sp_objbase            sp_objbase;
-        typedef typename base_t::keyword_handler       keyword_handler;
-        typedef typename base_t::handler_t             handler_t;
-        typedef typename base_t::idata_t               idata_t;
-        typedef typename base_t::sp_idata_t            sp_idata_t;
-        typedef typename base_t::sp_km_iface_t         sp_km_iface_t;
-        typedef typename base_t::keyword_params_t      keyword_params_t;
+        typedef mesh_ijk_keywords          this_t;
+        typedef smesh_keywords             base_t;
+        typedef base_t::index_t               index_t;        
+        typedef base_t::item_t                item_t;
+        typedef base_t::sp_objbase            sp_objbase;
+        typedef base_t::keyword_handler       keyword_handler;
+        typedef base_t::handler_t             handler_t;
+        typedef base_t::idata_t               idata_t;
+        typedef base_t::sp_idata_t            sp_idata_t;
+        typedef base_t::sp_km_iface_t         sp_km_iface_t;
+        typedef base_t::keyword_params_t      keyword_params_t;
         
-        typedef bs_mesh_ijk <strategy_t>               bs_mesh_ijk_t;
+        typedef bs_mesh_ijk bs_mesh_ijk_t;
         typedef smart_ptr <bs_mesh_ijk_t, true>				 sp_bs_mesh_ijk_t;
         
-        typedef rs_mesh_iface <strategy_t>             rs_mesh_iface_t;
+        typedef rs_mesh_iface rs_mesh_iface_t;
         typedef smart_ptr <rs_mesh_iface_t, true>			 sp_mesh_iface_t;
       
       public:

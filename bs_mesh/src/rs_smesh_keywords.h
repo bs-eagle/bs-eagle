@@ -16,28 +16,27 @@
 namespace blue_sky
   {
 
-  template <class strategy_t>
-  class BS_API_PLUGIN smesh_keywords: public keyword_info_base<strategy_t>
+  class BS_API_PLUGIN smesh_keywords: public keyword_info_base
     {
       public:
       
-        typedef smesh_keywords<strategy_t>             this_t;
-        typedef keyword_info_base<strategy_t>          base_t;
-        typedef typename base_t::sp_objbase            sp_objbase;
-        typedef typename base_t::keyword_handler       keyword_handler;
-        typedef typename base_t::handler_t             handler_t;
-        typedef typename strategy_t::index_t           index_t;
-        typedef typename strategy_t::item_t            item_t;
+        typedef smesh_keywords             this_t;
+        typedef keyword_info_base          base_t;
+        typedef base_t::sp_objbase            sp_objbase;
+        typedef base_t::keyword_handler       keyword_handler;
+        typedef base_t::handler_t             handler_t;
+        typedef strategy_t::index_t           index_t;
+        typedef strategy_t::item_t            item_t;
 
-        typedef keyword_params <strategy_t>            keyword_params_t;
+        typedef keyword_params keyword_params_t;
         
-        typedef rs_mesh_iface <strategy_t>             rs_mesh_iface_t;
+        typedef rs_mesh_iface rs_mesh_iface_t;
         typedef smart_ptr <rs_mesh_iface_t, true>      sp_mesh_iface_t;
         
-        typedef rs_smesh_iface <strategy_t>            rs_smesh_iface_t;
+        typedef rs_smesh_iface rs_smesh_iface_t;
         typedef smart_ptr <rs_smesh_iface_t, true>     sp_smesh_iface_t;
         
-        typedef keyword_manager_iface<strategy_t>      km_iface_t;
+        typedef keyword_manager_iface      km_iface_t;
         typedef smart_ptr <km_iface_t, true>           sp_km_iface_t;
         
         typedef idata                                  idata_t;

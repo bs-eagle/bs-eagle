@@ -27,28 +27,27 @@ namespace blue_sky
    * \brief Builds matrix based on CFL for csr_ilu prec
    *        and solves this matrix
    * */
-  template <class strategy_t>
-  class BS_API_PLUGIN csr_ilu_cfl_prec: public csr_ilu_prec<strategy_t>
+  class BS_API_PLUGIN csr_ilu_cfl_prec: public csr_ilu_prec
     {
       //-------------------------------------
       // TYPES
       //-------------------------------------
 
     public:
-      typedef typename strategy_t::matrix_t                 matrix_t;        //< short name for matrix type
-      typedef typename strategy_t::item_array_t             item_array_t;    //< short name for array
-      typedef typename strategy_t::rhs_item_array_t         rhs_item_array_t;
-      typedef typename strategy_t::item_t                   item_t;          //< short name for array item type
-      typedef typename strategy_t::rhs_item_t               rhs_item_t;
-      typedef typename strategy_t::index_t                  index_t;         //< short name for matrix'es index type
-      typedef typename strategy_t::index_array_t            index_array_t;
-      typedef calc_model <strategy_t>                       calc_model_t;
-      typedef jacobian_matrix <strategy_t>                  jmatrix_t;
-      typedef rs_mesh_iface <strategy_t>                    mesh_iface_t;
-      typedef typename calc_model_t::data_t                 data_t;
-      typedef typename calc_model_t::data_array_t           data_array_t;
+      typedef strategy_t::matrix_t                 matrix_t;        //< short name for matrix type
+      typedef strategy_t::item_array_t             item_array_t;    //< short name for array
+      typedef strategy_t::rhs_item_array_t         rhs_item_array_t;
+      typedef strategy_t::item_t                   item_t;          //< short name for array item type
+      typedef strategy_t::rhs_item_t               rhs_item_t;
+      typedef strategy_t::index_t                  index_t;         //< short name for matrix'es index type
+      typedef strategy_t::index_array_t            index_array_t;
+      typedef calc_model calc_model_t;
+      typedef jacobian_matrix jmatrix_t;
+      typedef rs_mesh_iface mesh_iface_t;
+      typedef calc_model_t::data_t                 data_t;
+      typedef calc_model_t::data_array_t           data_array_t;
 
-      typedef csr_ilu_prec <strategy_t>                     csr_ilu_prec_t;
+      typedef csr_ilu_prec csr_ilu_prec_t;
 
     private:
       typedef bcsr_matrix<rhs_item_array_t, index_array_t>  bcsr_matrix_t;    //< short name for used matrix

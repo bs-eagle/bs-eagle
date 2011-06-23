@@ -18,58 +18,67 @@ namespace blue_sky
 {
   BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("bs_mesh", "1.0.0", "BS_MESH", "BS_MESH", "bs_mesh")
 
-    BLUE_SKY_REGISTER_PLUGIN_FUN
+  namespace 
   {
-    bool res = true;
+    bool
+    register_types (const plugin_descriptor &pd)
+    {
+      bool res = true;
 
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_fi>::bs_type()); BS_ASSERT (res);
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_di>::bs_type()); BS_ASSERT (res);
-    //res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_mixi>::bs_type()); BS_ASSERT (res);
-
-    ////mesh_rs(virtual)
-    //res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, mesh_rs<base_strategy_fi>::bs_type()); BS_ASSERT (res);
-    //res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, mesh_rs<base_strategy_di>::bs_type()); BS_ASSERT (res);
-
-    //  //mesh_ijk
-    //res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, mesh_ijk<base_strategy_fi>::bs_type()); BS_ASSERT (res);
-    //res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, mesh_ijk<base_strategy_di>::bs_type()); BS_ASSERT (res);
-    
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_ijk_keywords<base_strategy_fi>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_ijk_keywords<base_strategy_di>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_ijk_keywords<base_strategy_mixi>::bs_type()); BS_ASSERT (res);
-  
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_mesh_grdecl<base_strategy_fi>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_mesh_grdecl<base_strategy_di>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_mesh_grdecl<base_strategy_mixi>::bs_type()); BS_ASSERT (res);
-    
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_grdecl_keywords<base_strategy_fi>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_grdecl_keywords<base_strategy_di>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mesh_grdecl_keywords<base_strategy_mixi>::bs_type()); BS_ASSERT (res);
-    
-    //mpi_mesh_grdecl
+      //res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections::bs_type()); BS_ASSERT (res);
+      //res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, mesh_rs::bs_type()); BS_ASSERT (res);
+      //res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, mesh_ijk::bs_type()); BS_ASSERT (res);
+      
+      res &= BS_KERNEL.register_type(pd, mesh_ijk_keywords::bs_type()); BS_ASSERT (res);
+      res &= BS_KERNEL.register_type(pd, bs_mesh_grdecl::bs_type()); BS_ASSERT (res);
+      res &= BS_KERNEL.register_type(pd, mesh_grdecl_keywords::bs_type()); BS_ASSERT (res);
+      
+      //mpi_mesh_grdecl
 #ifdef _MPI_MY
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mpi_mesh_grdecl<base_strategy_fi>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mpi_mesh_grdecl<base_strategy_di>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, mpi_mesh_grdecl<base_strategy_mixi>::bs_type()); BS_ASSERT (res);
+      res &= BS_KERNEL.register_type(pd, mpi_mesh_grdecl::bs_type()); BS_ASSERT (res);
 #endif
 
-    // flux_connections
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_fi>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_di>::bs_type()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type(*bs_init.pd_, bs_flux_connections<base_strategy_mixi>::bs_type()); BS_ASSERT (res);
-    
-    return res;
- }
+      // flux_connections
+      res &= BS_KERNEL.register_type(pd, bs_flux_connections::bs_type()); BS_ASSERT (res);
+      
+      return res;
+    }
+  }
+
+  BLUE_SKY_REGISTER_PLUGIN_FUN
+  {
+    return register_types (*bs_init.pd_);
+  }
 }//bs
 
 #ifdef BSPY_EXPORTING_PLUGIN
+namespace 
+{
+  void
+  init_py_subsystem ()
+  {
+    using namespace blue_sky;
+
+    python::py_export_mesh ();
+    python::py_export_mesh_grdecl ();
+    //python::py_export_flux_connections ();
+  }
+}
 BLUE_SKY_INIT_PY_FUN
 {
-  using namespace blue_sky;
-
-  python::py_export_mesh ();
-  python::py_export_mesh_grdecl ();
-  //python::py_export_flux_connections ();
+  init_py_subsystem ();
 }
+
+#ifdef _DEBUG
+BOOST_PYTHON_MODULE (bs_mesh_d)
+#else
+BOOST_PYTHON_MODULE (bs_mesh)
+#endif
+{
+  init_py_subsystem ();
+  if (!blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ()))
+    bs_throw_exception ("Can't register types");
+}
+
 #endif //BSPY_EXPORT_PLUGIN
 

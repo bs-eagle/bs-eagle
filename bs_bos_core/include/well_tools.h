@@ -11,7 +11,7 @@ namespace detail {
   void
   fill_rows (const well_t *well, typename strategy_t::index_array_t &rows)
   {
-    typedef default_connection_iterator_impl <strategy_t, well_t, connection_t> iterator_t;
+    typedef default_connection_iterator_impl <well_t, connection_t> iterator_t;
     iterator_t it (well, begin_iterator_tag), e (well, end_iterator_tag);
     for (; !well->is_shut () && it != e; ++it)
       {
@@ -35,7 +35,7 @@ namespace detail {
     typename strategy_t::index_array_t        &markers)
   {
     typedef typename strategy_t::index_t index_t;
-    typedef default_connection_iterator_impl <strategy_t, well_t, connection_t> iterator_t;
+    typedef default_connection_iterator_impl <well_t, connection_t> iterator_t;
     iterator_t it (well, begin_iterator_tag), e (well, end_iterator_tag);
 
     index_t b_sqr = block_size * block_size;

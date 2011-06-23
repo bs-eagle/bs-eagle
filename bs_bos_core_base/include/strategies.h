@@ -92,21 +92,24 @@ namespace blue_sky
       };
   };
 
-  struct BS_API_PLUGIN base_strategy_di : public base_strategy<double, double, int>
-  {
-  };
-  struct BS_API_PLUGIN base_strategy_fi : public base_strategy<float, float, int>
-  {
-  };
-  struct BS_API_PLUGIN base_strategy_mixi : public base_strategy<float, double, int>
-  {
-  };
-  
+//  struct BS_API_PLUGIN base_strategy_di : public base_strategy<double, double, int>
+//  {
+//  };
+//  struct BS_API_PLUGIN base_strategy_fi : public base_strategy<float, float, int>
+//  {
+//  };
+//  struct BS_API_PLUGIN base_strategy_mixi : public base_strategy<float, double, int>
+//  {
+//  };
+//  
+/*
 #define BS_INST_STRAT(T)  \
   template class T<blue_sky::base_strategy_fi>;     \
   template class T<blue_sky::base_strategy_di>;     \
   template class T<blue_sky::base_strategy_mixi>;
+*/
 
+typedef base_strategy <double, double, int> strategy_t;
 
 #ifdef _MPI
   template <class fp_type, class i_type>

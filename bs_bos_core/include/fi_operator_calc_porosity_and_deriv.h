@@ -23,9 +23,9 @@ namespace blue_sky {
    * \param[out] t_mult  Calculated trunsmissibility multiplier
    * \param[out] dp_t_mult Calculated trunsmissibility multiplier derivative
    * */
-  template <class strategy_t, bool is_w, bool is_g, bool is_o>
+  template <bool is_w, bool is_g, bool is_o>
   BS_FORCE_INLINE void
-  fi_operator_impl <strategy_t, is_w, is_g, is_o>::calc_porosity_and_deriv (index_t i, 
+  fi_operator_impl <is_w, is_g, is_o>::calc_porosity_and_deriv (index_t i, 
                                                           index_t pvt_reg, 
                                                           item_t *poro, 
                                                           item_t *dp_poro,

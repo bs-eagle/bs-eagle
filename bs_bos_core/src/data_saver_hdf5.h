@@ -4,20 +4,20 @@
 #define BS_EAGLE_DATA_SAVER_HDF5_H_
 
 #include "bs_hdf5_storage_v2.h"
+#include "well_results_storage.h"
 
 namespace blue_sky {
 
-  template <typename strategy_t>
-  struct data_saver <strategy_t>::impl
+  struct data_saver::impl
   {
-    typedef typename strategy_t::item_t   item_t;
+    typedef strategy_t::item_t   item_t;
 
-    typedef calc_model <strategy_t>       calc_model_t;
-    typedef rs_mesh_iface <strategy_t>    mesh_iface_t;
-    typedef jacobian_matrix <strategy_t>  jacobian_matrix_t; 
-    typedef facility_manager <strategy_t> facility_manager_t;
+    typedef calc_model calc_model_t;
+    typedef rs_mesh_iface mesh_iface_t;
+    typedef jacobian_matrix jacobian_matrix_t; 
+    typedef facility_manager facility_manager_t;
 
-    typedef typename facility_manager_t::well_const_iterator_t      well_iterator_t;
+    typedef facility_manager_t::well_const_iterator_t      well_iterator_t;
 
     typedef smart_ptr <calc_model_t>      sp_calc_model_t;
     typedef smart_ptr <mesh_iface_t>      sp_mesh_iface_t;
@@ -26,6 +26,18 @@ namespace blue_sky {
     impl (const std::string &name)
     : file_ (name)
     {
+    }
+
+    template <size_t N>
+    std::string concat (boost::array <std::string, N> const &list)
+    {
+      std::string s = "";
+      for (size_t i = 0; i < N; ++i)
+        {
+          s += list[i] + ",";
+        }
+
+      return s;
     }
 
     void
@@ -37,16 +49,47 @@ namespace blue_sky {
       bool write_conn_results_to_hdf5 = calc_model->ts_params->get_bool (fi_params::WRITE_CONN_RESULTS_TO_HDF5);
       hdf5_file &file = file_;
 
-      typedef smart_ptr <well <strategy_t> > sp_well_t;
-      typedef typename calc_model_t::sp_connection_t                  sp_connection_t;
-   
+      typedef smart_ptr <well> sp_well_t;
+      typedef calc_model_t::sp_connection_t                  sp_connection_t;
+
+      boost::array <std::string, 35> d_params_fields = {
+        "prod.oil",
+        "prod.water",
+        "prod.gas",
+        "prod.liquid",
+        "inje.oil" ,
+        "inje.water",
+        "inje.gas",
+        "_", "_", "_", "_", "_", "_", "_",
+        "bhp",
+        "bhp_history",
+        "total.prod.oil",
+        "total.prod.water",
+        "total.prod.gas",
+        "total.prod.liquid",
+        "total.inje.oil",
+        "total.inje.water",
+        "total.inje.gas",
+        "_", "_", "_", "_", "_", "_",
+        "_", "_", "_", "_", "_", "_",
+      };
+
+      boost::array <std::string, 2> i_params_fields = {
+        "_", "status_old",
+      };
+
+      file["/meta/wells"]
+        .write ("d_params", concat (d_params_fields))
+        .write ("i_params", concat (i_params_fields))
+        ;
+
       //TODO: groups
       for (well_iterator_t w = wb; w != we; ++w)
         {
           sp_well_t ws (w->second, bs_dynamic_cast ());
 
           file["/wells/" + ws->get_name ()]
-            .write ("group", "FIELD")
+            .write ("group", std::string ("FIELD"))
             .write ("d_params", 
               hdf5_pod (-ws->rate ().prod.oil)
                 << -ws->rate ().prod.water 
@@ -72,7 +115,7 @@ namespace blue_sky {
 
           if (write_conn_results_to_hdf5)
             {
-              typedef well <strategy_t> well_t;
+              typedef well well_t;
               typename well_t::connection_iterator_t it = ws->connections_begin (), e = ws->connections_end ();
               for (; it != e; ++it)
                 {
@@ -246,21 +289,26 @@ namespace blue_sky {
     void
     write_mesh (const sp_mesh_iface_t &mesh)
     {
-      smart_ptr <rs_smesh_iface <strategy_t> > smesh (mesh, bs_dynamic_cast ());
-      if (!smesh)
-        {
-          bs_throw_exception (boost::format ("Can't cast mesh to structired mesh, %s") % mesh->bs_resolve_type ().stype_);
-        }
-      const typename rs_smesh_iface<strategy_t>::index_point3d_t &dims = smesh->get_dimens ();
+      hdf5_group_v2 mesh_group = file_["/mesh"];
+      hdf5_group_v2 mesh_data_group = file_["/mesh/data"];
 
-      hdf5_group_v2 group = file_["/mesh"];
+      mesh->save_info (mesh_group);
+      mesh->save_data (mesh_data_group);
+      //smart_ptr <rs_smesh_iface > smesh (mesh, bs_dynamic_cast ());
+      //if (!smesh)
+      //  {
+      //    bs_throw_exception (boost::format ("Can't cast mesh to structired mesh, %s") % mesh->bs_resolve_type ().stype_);
+      //  }
+      //const typename rs_smesh_iface::index_point3d_t &dims = smesh->get_dimens ();
 
-      group.write ("initial_data", 
-        hdf5_pod (dims[0]) << dims[1] << dims[2]
-          << smesh->get_n_active_elements () << smesh->get_n_active_elements ());
+      //hdf5_group_v2 group = file_["/mesh"];
 
-      group.write ("original_elements", smesh->get_ext_to_int ());
-      group.write ("original_planes",   smesh->get_ext_to_int ());
+      //group.write ("initial_data", 
+      //  hdf5_pod (dims[0]) << dims[1] << dims[2]
+      //    << smesh->get_n_active_elements () << smesh->get_n_active_elements ());
+
+      //group.write ("original_elements", smesh->get_ext_to_int ());
+      //group.write ("original_planes",   smesh->get_ext_to_int ());
     }
 
     void
@@ -271,6 +319,84 @@ namespace blue_sky {
       double starting_date = (start_date - base_date).days () + 2;
 
       file_["/initial_data"].write ("starting_date", hdf5_pod (starting_date));
+    }
+
+    template <size_t N>
+    shared_vector <strategy_t::item_t>
+    convert (calc_model::data_array_t const &data, boost::array <strategy_t::item_t, N> calc_model_data::*x)
+    {
+      shared_vector <strategy_t::item_t> new_data;
+      for (t_long i = 0, cnt = data.size (); i < cnt; ++i)
+        {
+          calc_model_data const &d = data[i];
+          new_data.insert (new_data.end (), (d.*x).begin (), (d.*x).end ());
+        }
+
+      return new_data;
+    }
+    shared_vector <strategy_t::item_t>
+    convert (calc_model::data_array_t const &data, strategy_t::item_t calc_model_data::*x)
+    {
+      shared_vector <strategy_t::item_t> new_data;
+      for (t_long i = 0, cnt = data.size (); i < cnt; ++i)
+        {
+          calc_model_data const &d = data[i];
+          new_data.insert (new_data.end (), d.*x);
+        }
+
+      return new_data;
+    }
+
+    void
+    write_calc_model_data (const char *name, 
+                           sp_calc_model_t const &cm, 
+                           t_long large_step, 
+                           t_long small_step, 
+                           t_long iteration, 
+                           double time)
+    {
+      char path[1024] = {0};
+      sprintf (path, "/data/%s/%ld/%ld/%ld", name, large_step, small_step, iteration);
+      printf ("WRITE TO %s\n", path);
+
+      calc_model::data_array_t const &data = cm->data;
+
+      file_[path]
+        .write ("cap_pressure",               convert (data, &calc_model_data::cap_pressure))
+        .write ("s_deriv_cap_pressure",       convert (data, &calc_model_data::s_deriv_cap_pressure))
+        .write ("relative_perm",              convert (data, &calc_model_data::relative_perm))
+        .write ("s_deriv_relative_perm",      convert (data, &calc_model_data::s_deriv_relative_perm))
+        .write ("p_deriv_gas_oil_ratio",      convert (data, &calc_model_data::p_deriv_gas_oil_ratio))
+        .write ("invers_fvf",                 convert (data, &calc_model_data::invers_fvf))
+        .write ("p_deriv_invers_fvf",         convert (data, &calc_model_data::p_deriv_invers_fvf))
+        .write ("gor_deriv_invers_fvf",       convert (data, &calc_model_data::gor_deriv_invers_fvf))
+        .write ("invers_visc",                convert (data, &calc_model_data::invers_viscosity))
+        .write ("p_deriv_invers_visc",        convert (data, &calc_model_data::p_deriv_invers_viscosity))
+        .write ("gor_deriv_invers_visc",      convert (data, &calc_model_data::gor_deriv_invers_viscosity))
+        .write ("invers_visc_fvf",            convert (data, &calc_model_data::invers_visc_fvf))
+        .write ("p_deriv_invers_visc_fvf",    convert (data, &calc_model_data::p_deriv_invers_visc_fvf))
+        .write ("gor_deriv_invers_visc_fvf",  convert (data, &calc_model_data::gor_deriv_invers_visc_fvf))
+        .write ("density",                    convert (data, &calc_model_data::density))
+        .write ("p_deriv_density",            convert (data, &calc_model_data::p_deriv_density))
+        .write ("gor_deriv_density",          convert (data, &calc_model_data::gor_deriv_density))
+        .write ("poro",                       convert (data, &calc_model_data::porosity))
+        .write ("p_deriv_poro",               convert (data, &calc_model_data::p_deriv_porosity))
+        .write ("truns_mult",                 convert (data, &calc_model_data::truns_mult))
+        .write ("p_deriv_truns_mult",         convert (data, &calc_model_data::p_deriv_truns_mult))
+        .write ("mob",                        convert (data, &calc_model_data::mobility))
+        .write ("p_deriv_mob",                convert (data, &calc_model_data::p_deriv_mobility))
+        .write ("s_deriv_mob",                convert (data, &calc_model_data::s_deriv_mobility))
+        .write ("prev_fluid_volume",          convert (data, &calc_model_data::prev_fluid_volume))
+        ;
+
+      sprintf (path, "/data/%s/rock_grid/%ld/%ld/%ld", name, large_step, small_step, iteration);
+      file_[path]
+        .write ("ntg", cm->rock_grid_prop->net_to_gros)
+        .write ("poro", cm->rock_grid_prop->porosity_p_ref)
+        .write ("perm", cm->rock_grid_prop->permeability)
+        .write ("volume", cm->rock_grid_prop->volume)
+        .write ("multpv", cm->rock_grid_prop->multpv)
+        ;
     }
 
     hdf5_file file_;

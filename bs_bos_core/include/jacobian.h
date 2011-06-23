@@ -24,30 +24,29 @@ namespace blue_sky
    * \class jacobian
    * \brief Incapsulates solving of jacobian matrix
    * */
-  template <class strategy_t>
   class BS_API_PLUGIN jacobian : public bs_node
     {
     public:
-      typedef typename strategy_t::matrix_t                     matrix_t;             //!< short name to matrix type
-      typedef typename strategy_t::item_array_t                 item_array_t;         //!< short name to array type
-      typedef typename strategy_t::rhs_item_array_t             rhs_item_array_t;
-      typedef typename strategy_t::item_t                       item_t;               //!< short name to array item type
-      typedef typename strategy_t::index_t                      index_t;              //!< short name to matrix's index type
-      typedef typename strategy_t::index_array_t                index_array_t;
-      typedef typename strategy_t::barrier_t                    barrier_t;
-      typedef rs_mesh_iface < strategy_t >                      mesh_iface_t;
-      typedef typename strategy_t::csr_matrix_t                 bcsr_matrix_t;
-      typedef linear_solver_base<strategy_t>                    linear_solver_base_t;
+      typedef strategy_t::matrix_t                     matrix_t;             //!< short name to matrix type
+      typedef strategy_t::item_array_t                 item_array_t;         //!< short name to array type
+      typedef strategy_t::rhs_item_array_t             rhs_item_array_t;
+      typedef strategy_t::item_t                       item_t;               //!< short name to array item type
+      typedef strategy_t::index_t                      index_t;              //!< short name to matrix's index type
+      typedef strategy_t::index_array_t                index_array_t;
+      typedef strategy_t::barrier_t                    barrier_t;
+      typedef rs_mesh_iface mesh_iface_t;
+      typedef strategy_t::csr_matrix_t                 bcsr_matrix_t;
+      typedef linear_solver_base linear_solver_base_t;
 
       typedef smart_ptr <matrix_t>                              sp_matrix_t;
       typedef smart_ptr <bcsr_matrix_t, true>                   sp_bcsr_matrix_t;
-      typedef smart_ptr <jacobian_matrix<strategy_t>, true>     sp_jmatrix;           //!< matrix type
-      typedef smart_ptr <linear_solver_base<strategy_t>, true>  sp_lsolver;           //!< solver & preconditioner type
+      typedef smart_ptr <jacobian_matrix, true>     sp_jmatrix;           //!< matrix type
+      typedef smart_ptr <linear_solver_base, true>  sp_lsolver;           //!< solver & preconditioner type
       typedef smart_ptr <fi_params, true>                       sp_fi_params;
 
       typedef smart_ptr <mesh_iface_t, true>                    sp_mesh_iface_t;
 
-      typedef jacobian <strategy_t>                             this_t;
+      typedef jacobian this_t;
 
     public:
       //! set solver

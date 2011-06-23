@@ -9,11 +9,11 @@
 
 #include "flux_connections_iface.h"
 #include "mesh_base.h"
+#include "bs_hdf5_storage_v2.h"
 
 using namespace blue_sky;
 
-template<class strategy_t>
-class BS_API_PLUGIN rs_mesh_base : public mesh_base<strategy_t>
+class BS_API_PLUGIN rs_mesh_base : public mesh_base
   {
 
   //-----------------------------------------
@@ -24,15 +24,15 @@ class BS_API_PLUGIN rs_mesh_base : public mesh_base<strategy_t>
     ///////////////////////
     // BASE TYPES
     ///////////////////////
-    typedef mesh_base <strategy_t>                      base_t;
+    typedef mesh_base base_t;
 
-    typedef typename base_t::index_t                    index_t;
+    typedef base_t::index_t                    index_t;
 
-    typedef typename base_t::index_array_t              index_array_t;
-    typedef typename base_t::item_array_t               item_array_t;
+    typedef base_t::index_array_t              index_array_t;
+    typedef base_t::item_array_t               item_array_t;
 
-    typedef typename base_t::sp_bcsr_t                  sp_bcsr_t;
-    typedef typename base_t::sp_idata_t                 sp_idata_t;
+    typedef base_t::sp_bcsr_t                  sp_bcsr_t;
+    typedef base_t::sp_idata_t                 sp_idata_t;
     
     ///////////////////////
     // OWN TYPES
@@ -40,7 +40,7 @@ class BS_API_PLUGIN rs_mesh_base : public mesh_base<strategy_t>
 
     typedef typename strategy_t::item_t                 item_t;
     
-    typedef flux_connections_iface<strategy_t>          flux_conn_iface_t;
+    typedef flux_connections_iface          flux_conn_iface_t;
     typedef smart_ptr <flux_conn_iface_t, true>         sp_flux_conn_iface_t;
     
     
@@ -92,6 +92,13 @@ class BS_API_PLUGIN rs_mesh_base : public mesh_base<strategy_t>
     //! allocate jacobian 
     virtual int build_jacobian_and_flux_connections (const sp_bcsr_t &/*jacobian*/, const sp_flux_conn_iface_t &/*flux_conn*/, 
                                                      index_array_t &/*boundary_array*/) = 0;
+
+    // storage interface
+    hdf5_group_v2 &
+    save_info (hdf5_group_v2 &group) const;
+
+    hdf5_group_v2 &
+    save_data (hdf5_group_v2 &group) const;
 
   //-----------------------------------------
   //  VARIABLES

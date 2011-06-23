@@ -11,6 +11,7 @@
 #include "construct_python_object.h"
 #include "python_method_wrapper.h"
 #include "python_class_wrapper.h"
+#include "strategies.h"
 
 #define PY_EXPORTER(exporter_name_, base_exporter_) \
   template <typename T>                             \
@@ -175,44 +176,35 @@ namespace python {
 
   struct strategy_exporter
   {
-    template <template <typename> class class_t, template <typename> class base_t, template <typename> class post_exporter_t>
+    template <class class_t, class base_t, template <typename> class post_exporter_t>
     static void
     export_class (const std::string &name)
     {
       using namespace boost::python;
-
-      class_exporter <class_t <base_strategy_di>,   base_t <base_strategy_di>,   post_exporter_t, class_type::blue_sky_class>::export_class (name + "_di");
-      class_exporter <class_t <base_strategy_fi>,   base_t <base_strategy_fi>,   post_exporter_t, class_type::blue_sky_class>::export_class (name + "_fi");
-      class_exporter <class_t <base_strategy_mixi>, base_t <base_strategy_mixi>, post_exporter_t, class_type::blue_sky_class>::export_class (name + "_mixi");
+      class_exporter <class_t, base_t, post_exporter_t, class_type::blue_sky_class>::export_class (name);
     }
 
-    template <template <typename> class class_t, template <typename> class post_exporter_t>
+    template <class class_t, template <typename> class post_exporter_t>
     static void
     export_base (const std::string &name)
     {
-      base_exporter <class_t <base_strategy_di>,   post_exporter_t, class_type::blue_sky_class>::export_class (name + "_di");
-      base_exporter <class_t <base_strategy_fi>,   post_exporter_t, class_type::blue_sky_class>::export_class (name + "_fi");
-      base_exporter <class_t <base_strategy_mixi>, post_exporter_t, class_type::blue_sky_class>::export_class (name + "_mixi");
+      base_exporter <class_t, post_exporter_t, class_type::blue_sky_class>::export_class (name);
     }
 
-    template <template <typename> class class_t, template <typename> class post_exporter_t, template <typename, typename> class class_type_t>
+    template <class class_t, template <typename> class post_exporter_t, template <typename, typename> class class_type_t>
     static void
     export_base_ext (const std::string &name)
     {
-      base_exporter <class_t <base_strategy_di>,   post_exporter_t, class_type_t>::export_class (name + "_di");
-      base_exporter <class_t <base_strategy_fi>,   post_exporter_t, class_type_t>::export_class (name + "_fi");
-      base_exporter <class_t <base_strategy_mixi>, post_exporter_t, class_type_t>::export_class (name + "_mixi");
+      base_exporter <class_t, post_exporter_t, class_type_t>::export_class (name);
     }
 
-    template <template <typename> class class_t, template <typename> class base_t, template <typename> class post_exporter_t, template <typename, typename> class class_type_t>
+    template <class class_t, class base_t, template <typename> class post_exporter_t, template <typename, typename> class class_type_t>
     static void
     export_class_ext (const std::string &name)
     {
       using namespace boost::python;
 
-      class_exporter <class_t <base_strategy_di>,   base_t <base_strategy_di>,   post_exporter_t, class_type_t>::export_class (name + "_di");
-      class_exporter <class_t <base_strategy_fi>,   base_t <base_strategy_fi>,   post_exporter_t, class_type_t>::export_class (name + "_fi");
-      class_exporter <class_t <base_strategy_mixi>, base_t <base_strategy_mixi>, post_exporter_t, class_type_t>::export_class (name + "_mixi");
+      class_exporter <class_t, base_t, post_exporter_t, class_type_t>::export_class (name);
     }
   };
 

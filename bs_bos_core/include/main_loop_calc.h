@@ -22,8 +22,6 @@
 
 #include "fi_operator.h"
 #include "jacobian_impl.h"
-#include "well_results_storage.h"
-#include "fip_results_storage.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "scale_array_holder.h"
@@ -33,20 +31,21 @@
 
 #include "well_reporter.h"
 
+#include "debug_tools.hpp"
+
 namespace blue_sky
   {
 
-  template <typename strategy_t>
-    /**
-     * \class main_loop_calc_base
-     * \brief Base interface for main_loop calculation
-     *        implementation
-     * \todo  Should be renamed to main_loop_calc_iface
-     * */
+  /**
+   * \class main_loop_calc_base
+   * \brief Base interface for main_loop calculation
+   *        implementation
+   * \todo  Should be renamed to main_loop_calc_iface
+   * */
   struct main_loop_calc_base
   {
-    typedef event_manager <strategy_t>                    event_manager_t;
-    typedef typename event_manager_t::sp_event_base_list  sp_event_base_list_t;
+    typedef event_manager event_manager_t;
+    typedef event_manager_t::sp_event_base_list  sp_event_base_list_t;
 
   public:
     /**
@@ -74,29 +73,30 @@ namespace blue_sky
    * \class main_loop_calc
    * \brief Main calculation loop implementation
    * */
-  template <typename strategy_t, bool is_w, bool is_g, bool is_o>
-  struct main_loop_calc : public main_loop_calc_base <strategy_t>
+  template <bool is_w, bool is_g, bool is_o>
+  struct main_loop_calc : public main_loop_calc_base 
     {
-      typedef main_loop_calc_base <strategy_t>              base_t;
-      typedef main_loop_calc <strategy_t, is_w, is_g, is_o> this_t;
+      typedef main_loop_calc_base base_t;
+      typedef main_loop_calc <is_w, is_g, is_o> this_t;
 
-      typedef typename strategy_t::item_t                   item_t;
-      typedef typename strategy_t::index_t                  index_t;
-      typedef typename strategy_t::item_array_t             item_array_t;
+      typedef strategy_t::item_t                   item_t;
+      typedef strategy_t::index_t                  index_t;
+      typedef strategy_t::item_array_t             item_array_t;
+      typedef strategy_t::rhs_item_array_t         rhs_item_array_t;
 
-      typedef calc_model <strategy_t>                       calc_model_t;
-      typedef event_manager <strategy_t>                    event_manager_t;
-      typedef rock_grid <strategy_t>                        rock_grid_t;
-      typedef reservoir <strategy_t>                        reservoir_t;
-      typedef rs_mesh_iface <strategy_t>                    mesh_iface_t;
-      typedef jacobian <strategy_t>                         jacobian_t;
-      typedef reservoir_simulator <strategy_t>              reservoir_simulator_t;
+      typedef calc_model calc_model_t;
+      typedef event_manager event_manager_t;
+      typedef rock_grid rock_grid_t;
+      typedef reservoir reservoir_t;
+      typedef rs_mesh_iface mesh_iface_t;
+      typedef jacobian jacobian_t;
+      typedef reservoir_simulator reservoir_simulator_t;
       typedef idata                                         idata_t;
-      typedef typename calc_model_t::scal_3p_t              scal_3p_t;
-      typedef jacobian_matrix <strategy_t>                  jmatrix_t;
+      typedef calc_model_t::scal_3p_t              scal_3p_t;
+      typedef jacobian_matrix jmatrix_t;
 
-      typedef typename event_manager_t::sp_event_base_list  sp_event_base_list_t;
-      typedef trans_multipliers_calc <strategy_t>           trans_multipliers_calc_t;
+      typedef event_manager_t::sp_event_base_list  sp_event_base_list_t;
+      typedef trans_multipliers_calc trans_multipliers_calc_t;
 
       typedef smart_ptr <calc_model_t, true>                sp_calc_model_t;
       typedef smart_ptr <event_manager_t, true>             sp_event_manager_t;
@@ -108,7 +108,7 @@ namespace blue_sky
       typedef smart_ptr <data_storage_interface, true>      sp_storage_t;
       typedef smart_ptr <reservoir_simulator_t, true>       sp_rs_t;
       typedef smart_ptr <idata_t, true>                     sp_idata_t;
-      typedef typename calc_model_t::sp_scal3p              sp_scal3p_t;
+      typedef calc_model_t::sp_scal3p              sp_scal3p_t;
       typedef smart_ptr <jmatrix_t, true>                   sp_jmatrix_t;
 
       typedef boost::posix_time::ptime                      ptime;
@@ -177,7 +177,7 @@ namespace blue_sky
       fi_operator_cells (index_t i)
       {
         sp_jmatrix_t jmatrix = jacobian_->get_jmatrix ();
-        fi_operator_impl <strategy_t, is_w, is_g, is_o> fi_operator_impl_ (calc_model_, reservoir_, mesh_, jacobian_, jmatrix);
+        fi_operator_impl <is_w, is_g, is_o> fi_operator_impl_ (calc_model_, reservoir_, mesh_, jacobian_, jmatrix);
         fi_operator_impl_.fi_operator_init (i, dt_);
       }
 
@@ -197,14 +197,15 @@ namespace blue_sky
           }
       }
 
-      /**
-       * \brief  Calls compute_jacobian from reservoir
-       * */
-      inline void
-      compute_jacobian ()
-      {
-        reservoir_->compute_jacobian (calc_model_);
-      }
+      // FIXME: obsolete, remove
+      ///**
+      // * \brief  Calls compute_jacobian from reservoir
+      // * */
+      //inline void
+      //compute_jacobian ()
+      //{
+      //  reservoir_->compute_jacobian (calc_model_);
+      //}
 
       /**
        * \brief  Returns new time-step value
@@ -242,15 +243,16 @@ namespace blue_sky
             }
         }
 
-      /**
-       * \brief  Custom initialization of wells
-       * \param  calc_model
-       * */
-      inline void
-      init_custom_wells (const sp_calc_model_t &calc_model)
-      {
-        reservoir_->init_custom_wells (calc_model);
-      }
+      // FIXME: obsolete, remove
+      ///**
+      // * \brief  Custom initialization of wells
+      // * \param  calc_model
+      // * */
+      //inline void
+      //init_custom_wells (const sp_calc_model_t &calc_model)
+      //{
+      //  reservoir_->init_custom_wells (calc_model);
+      //}
 
       /**
        * \brief  Small-step loop
@@ -261,8 +263,8 @@ namespace blue_sky
         setup_jacobian_solver_params ();
 
         sp_jmatrix_t jmatrix = jacobian_->get_jmatrix ();
-        fi_operator_impl <strategy_t, is_w, is_g, is_o> fi_operator (calc_model_, reservoir_, mesh_, jacobian_, jmatrix);
-        jacobian_impl <strategy_t> jacobian_impl_ (jacobian_, jmatrix);
+        fi_operator_impl <is_w, is_g, is_o> fi_operator (calc_model_, reservoir_, mesh_, jacobian_, jmatrix);
+        jacobian_impl jacobian_impl_ (jacobian_, jmatrix);
 
         for (number_of_small_time_steps = 0; current_time_ < large_time_step_end_ - EPS_DIFF; ++number_of_small_time_steps)
           {
@@ -574,8 +576,8 @@ namespace blue_sky
        * \return Number of newton iteration was performed
        * */
       inline index_t
-      compute_small_time_step (fi_operator_impl <strategy_t, is_w, is_g, is_o> &fi_operator,
-        jacobian_impl <strategy_t> &jacobian_impl_,
+      compute_small_time_step (fi_operator_impl <is_w, is_g, is_o> &fi_operator,
+        jacobian_impl &jacobian_impl_,
         index_t &nniters, index_t &nliters)
       {
         index_t max_n_iters = get_n_max_iters ();
@@ -599,6 +601,7 @@ namespace blue_sky
               generate_numeric_jacobian (init);
 
             rs_->on_before_fi_operator ();
+
             fi_operator_return_type finish_flag = fi_operator.fi_operator (dt_, init, init, number_of_small_time_steps, true, false);
             if (finish_flag == FI_OPERATOR_RETURN_RESTART || i == max_n_iters)
               {
@@ -611,6 +614,18 @@ namespace blue_sky
 
             rs_->on_before_jacobian_setup ();
             jacobian_impl_.setup_jacobian ();
+
+            //BS_SP (typename strategy_t::csr_matrix_t) facility = jacobian_->get_jmatrix ()->get_irregular_matrix ();
+            //BS_SP (typename strategy_t::csr_matrix_t) flux = jacobian_->get_jmatrix ()->get_regular_matrix ();
+            //rhs_item_array_t &accum = jacobian_->get_jmatrix ()->get_regular_acc_diag ();
+
+            //detail::print ("flux, values", flux->get_values (), 4);
+            //detail::print ("facility, values", facility->get_values (), 4);
+            //detail::print ("accum, values", accum, 4);
+
+            //detail::print_diag ("flux, diag", flux->get_rows_ptr (), flux->get_values (), 4);
+            //detail::print ("flux, rhs", jacobian_->get_jmatrix ()->get_rhs_flux (), 2);
+
 
             rs_->on_before_jacobian_solve ();
             index_t n_current_liters = 0;
@@ -1124,9 +1139,9 @@ namespace blue_sky
             rs_->on_large_step_start ();
 
             process_small_steps ();
-            well_data_printer <strategy_t>::print_prod (data_map_, reservoir_);
-            well_data_printer <strategy_t>::print_inj  (data_map_, reservoir_);
-            well_data_printer <strategy_t>::print_total_prod  (data_map_, reservoir_);
+            well_data_printer::print_prod (data_map_, reservoir_);
+            well_data_printer::print_inj  (data_map_, reservoir_);
+            well_data_printer::print_total_prod  (data_map_, reservoir_);
 
             time_step_end ((int)event_list.size ());
           }
@@ -1169,6 +1184,8 @@ namespace blue_sky
       inline void
       ready ()
       {
+        reservoir_->open_storage (path::join (path::dirname (rs_->model_filename ()), "results-v2.h5"));
+
         print_mesh_info ();
         print_pvt_info ();
 
@@ -1178,16 +1195,6 @@ namespace blue_sky
         dt_ = get_first_ts ();
         save_base_vars ();
 
-#ifdef _HDF5
-        reservoir_->open_hdf5_file (path::join (path::dirname (rs_->model_filename ()), "results.h5"));
-        reservoir_->write_mesh_to_hdf5 (mesh_);
-        boost::gregorian::date start_date = rs_->keyword_manager_->get_starting_date ().date ();
-        boost::gregorian::date base_date (1900, 1, 1);
-        double starting_date = (start_date - base_date).days () + 2;
-        reservoir_->get_hdf5_file ()->write_array ("/initial_data", "starting_date", &starting_date, 1);
-#endif
-
-        reservoir_->open_storage (path::join (path::dirname (rs_->model_filename ()), "results-v2.h5"));
         reservoir_->write_mesh_to_storage (mesh_);
         reservoir_->write_starting_date_to_storage (rs_->keyword_manager_->get_starting_date ());
       }
@@ -1198,13 +1205,13 @@ namespace blue_sky
       inline void
       go ()
       {
-        typename event_manager <strategy_t> ::event_map::iterator it = event_manager_->event_list.begin ();
-        typename event_manager <strategy_t> ::event_map::iterator e  = event_manager_->event_list.end ();
+        event_manager::event_map::iterator it = event_manager_->event_list.begin ();
+        event_manager::event_map::iterator e  = event_manager_->event_list.end ();
 
         rs_->on_simulation_start ();
         for (--e; it != e; ++it)
           {
-            typename event_manager <strategy_t> ::event_map::iterator it2 = it;
+            event_manager::event_map::iterator it2 = it;
             ++it2;
 
             iteration (it->first, it2->first, it->second);
@@ -1217,10 +1224,6 @@ namespace blue_sky
       inline void
       end ()
       {
-#ifdef _HDF5
-        reservoir_->close_hdf5_file ();
-#endif
-
         BOSOUT (section::main_loop, level::high) << "TOTAL: " << bs_end;
         BOSOUT (section::main_loop, level::high) << "number_of_large_time_steps: "      << number_of_large_time_steps << bs_end;
         BOSOUT (section::main_loop, level::high) << "number_of_small_time_steps: "      << number_of_small_time_steps << bs_end;
@@ -1233,22 +1236,23 @@ namespace blue_sky
         BOSOUT (section::main_loop, level::high) << "number_of_close_wells_restarts: "  << number_of_close_wells_restarts << bs_end;
       }
 
-      /**
-       * \brief  Resets init_approximation flag
-       * */
-      inline void
-      reset_init_approx ()
-      {
-        reservoir_->reset_init_approx ();
-      }
-      /**
-       * \brief  Reinits wells
-       * */
-      inline void
-      reset_wells ()
-      {
-        reservoir_->reinit_wells (true);
-      }
+      // FIXME: obsolete, remove
+      ///**
+      // * \brief  Resets init_approximation flag
+      // * */
+      //inline void
+      //reset_init_approx ()
+      //{
+      //  reservoir_->reset_init_approx ();
+      //}
+      ///**
+      // * \brief  Reinits wells
+      // * */
+      //inline void
+      //reset_wells ()
+      //{
+      //  reservoir_->reinit_wells (true);
+      //}
 
 public:
       // don't change line order. never.
@@ -1292,7 +1296,7 @@ public:
 
       bool                                    do_calc_prev_fluid_volume_;
 
-      save_well_data <strategy_t>             well_data;
+      //save_well_data well_data;
     };
 
 

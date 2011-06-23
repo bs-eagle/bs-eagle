@@ -17,9 +17,9 @@ namespace blue_sky {
    * \param  max_res
    * \return New dt multiplier
    * */
-  template <class strategy_t, bool is_w, bool is_g, bool is_o>
-  BS_FORCE_INLINE typename strategy_t::item_t
-  fi_operator_impl <strategy_t, is_w, is_g, is_o>::calc_step_dt_mult (item_t prev_mult, item_t max_res)
+  template <bool is_w, bool is_g, bool is_o>
+  BS_FORCE_INLINE strategy_t::item_t
+  fi_operator_impl <is_w, is_g, is_o>::calc_step_dt_mult (item_t prev_mult, item_t max_res)
   {
     item_t coef = 1.0, m_r, d, d_mult;
     index_t i;

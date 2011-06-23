@@ -298,78 +298,76 @@ namespace blue_sky
 //    register_ptr_to_python<smart_ptr <test_i, false> >();
 //  }
 
-
-  BLUE_SKY_REGISTER_PLUGIN_FUN
+  namespace
   {
+    bool
+    register_types (plugin_descriptor const &pd)
+    {
+      bool res = true;
 
-    //bool res = true;
-    const plugin_descriptor & pd = *bs_init.pd_;
+      //////////////////////////////Events/////////////////////////////////////////////
+      res &= event_base_register_types (pd);
+      res &= event_manager_register_types (pd);
 
-    bool res = true;
+      res &= blue_sky::well_events_register_type (pd);
+      BS_ASSERT (res);
+      //////////////////////////////Keywords/////////////////////////////////////////////
+      res &= blue_sky::give_kernel::Instance().register_type(pd, keyword_manager::bs_type());
+      BS_ASSERT (res);
 
-    //////////////////////////////Events/////////////////////////////////////////////
-    res &= event_base_register_types (pd);
-    res &= event_manager_register_types (pd);
-
-    res &= blue_sky::well_events_register_type (pd);
-    BS_ASSERT (res);
-    //////////////////////////////Keywords/////////////////////////////////////////////
-    res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, keyword_manager<base_strategy_di>::bs_type());
-    BS_ASSERT (res);
-    res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, keyword_manager<base_strategy_fi>::bs_type());
-    BS_ASSERT (res);
-
-    //////////////////////////////Linear Solver///////////////////////////////
-    res &= blue_sky::two_stage_prec_register_type (pd);
-    BS_ASSERT (res);
+      //////////////////////////////Linear Solver///////////////////////////////
+      res &= blue_sky::two_stage_prec_register_type (pd);
+      BS_ASSERT (res);
 
 #ifdef BS_BOS_CORE_USE_CSR_ILU_CFL_PREC
-    res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, csr_ilu_cfl_prec<base_strategy_fi>::bs_type());
-    BS_ASSERT (res);
-    res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, csr_ilu_cfl_prec<base_strategy_di>::bs_type());
-    BS_ASSERT (res);
-    res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, csr_ilu_cfl_prec<base_strategy_mixi>::bs_type());
-    BS_ASSERT (res);
+      res &= blue_sky::give_kernel::Instance().register_type(pd, csr_ilu_cfl_prec::bs_type());
+      BS_ASSERT (res);
 #endif
 
 
-//#ifdef _MPI
-//    res &= blue_sky::mpi_csr_matrix_register_type (pd);
-//    BS_ASSERT (res);
-//    res &= blue_sky::mpi_csr_comm_register_type (pd);
-//    BS_ASSERT (res);
-//#endif
+  //#ifdef _MPI
+  //    res &= blue_sky::mpi_csr_matrix_register_type (pd);
+  //    BS_ASSERT (res);
+  //    res &= blue_sky::mpi_csr_comm_register_type (pd);
+  //    BS_ASSERT (res);
+  //#endif
 
-    res &= calc_rho_register_types (pd);            BS_ASSERT (res);
-    res &= calc_well_pressure_register_types (pd);  BS_ASSERT (res);
-    res &= calc_well_register_types (pd);           BS_ASSERT (res);
-    res &= wells::default_well_register_types (pd); BS_ASSERT (res);
+      res &= calc_rho_register_types (pd);            BS_ASSERT (res);
+      res &= calc_well_pressure_register_types (pd);  BS_ASSERT (res);
+      res &= calc_well_register_types (pd);           BS_ASSERT (res);
+      res &= wells::default_well_register_types (pd); BS_ASSERT (res);
 
-    res &= facility_manager_register_type (pd);
-    BS_ASSERT (res);
-    res &= well_factory_register_type (pd);
-    BS_ASSERT (res);
-    res &= wells::well_controller_factory_register_type (pd);
-    BS_ASSERT (res);
-    res &= wells::well_limit_operation_factory_register_type (pd);
-    BS_ASSERT (res);
+      res &= facility_manager_register_type (pd);
+      BS_ASSERT (res);
+      res &= well_factory_register_type (pd);
+      BS_ASSERT (res);
+      res &= wells::well_controller_factory_register_type (pd);
+      BS_ASSERT (res);
+      res &= wells::well_limit_operation_factory_register_type (pd);
+      BS_ASSERT (res);
 
-	#ifdef BSPY_EXPORTING_PLUGIN
-    res &= data_storage_proxy_register_type (pd);
-    BS_ASSERT (res);
-	#endif
+    #ifdef BSPY_EXPORTING_PLUGIN
+      res &= data_storage_proxy_register_type (pd);
+      BS_ASSERT (res);
+    #endif
 
-    res &= data_storage_register_type (pd);
-    BS_ASSERT (res);
-    res &= data_serializer_register_type (pd);
-    BS_ASSERT (res);
-    res &= data_storage_interface_register_type (pd);
-    BS_ASSERT (res);
+      res &= data_storage_register_type (pd);
+      BS_ASSERT (res);
+      res &= data_serializer_register_type (pd);
+      BS_ASSERT (res);
+      res &= data_storage_interface_register_type (pd);
+      BS_ASSERT (res);
 
-    res &= reservoir_simulator_register_types (pd);
-    BS_ASSERT (res);
+      res &= reservoir_simulator_register_types (pd);
+      BS_ASSERT (res);
 
-    return res;
+      return res;
+    }
+  }
+
+  BLUE_SKY_REGISTER_PLUGIN_FUN
+  {
+    return register_types (*bs_init.pd_);
   }
 }//bs
 //
@@ -429,52 +427,71 @@ namespace blue_sky
 //}
 
 #ifdef BSPY_EXPORTING_PLUGIN
-BLUE_SKY_INIT_PY_FUN
+namespace
 {
-  using namespace boost::python;
+  void
+  init_py_subsystem ()
+  {
+    using namespace boost::python;
 
-  py_export_fi_params ();
+    py_export_fi_params ();
 
-//#ifdef _MPI
-//  python::py_export_mpi_vector ();
-//  python::py_export_mpi_csr_matrix ();
-//#endif
+  //#ifdef _MPI
+  //  python::py_export_mpi_vector ();
+  //  python::py_export_mpi_csr_matrix ();
+  //#endif
 
 
-  py_export_two_stage_prec ();
+    py_export_two_stage_prec ();
 
-  py_export_events ();
-  py_export_event_manager();
+    py_export_events ();
+    py_export_event_manager();
 
-  python::py_export_reservoir_simulator ();
-  python::py_export_calc_model ();
-  // we should export enum only for one instance of reservoir simulator
-  //reservoir_simulator<base_strategy_di>::py_export_signals_enum (); //!TODO:
+    python::py_export_reservoir_simulator ();
+    python::py_export_calc_model ();
+    // we should export enum only for one instance of reservoir simulator
+    //reservoir_simulator<base_strategy_di>::py_export_signals_enum (); //!TODO:
 
-  python::py_export_calc_well ();
+    python::py_export_calc_well ();
 
-  python::py_export_data_storage_interface ();
+    python::py_export_data_storage_interface ();
 
-  python::py_export_jacobian ();
+    python::py_export_jacobian ();
 
-  python::py_export_facility_manager ();
-  python::py_export_reservoir ();
+    python::py_export_facility_manager ();
+    python::py_export_reservoir ();
 
-  python::py_export_well_factories ();
+    python::py_export_well_factories ();
 
 #ifdef BS_BOS_CORE_USE_CSR_ILU_CFL_PREC
-  python::py_export_csr_ilu_cfl_prec ();
+    python::py_export_csr_ilu_cfl_prec ();
 #endif
 
-  python::py_export_default_wells ();
+    python::py_export_default_wells ();
 
-  def ("enable_fpu_exceptions", blue_sky::tools::prepare_fpu::enable_exceptions);
+    def ("enable_fpu_exceptions", blue_sky::tools::prepare_fpu::enable_exceptions);
 
-  python::export_keyword_manager ();
+    python::export_keyword_manager ();
 
 
-  //def ("convert_double_to_float", py_convert_double_to_float <python::py_bcsr_matrix <base_strategy_di::item_array_t, base_strategy_di::index_array_t>, python::py_bcsr_matrix <base_strategy_fi::item_array_t, base_strategy_fi::index_array_t> >);
+    //def ("convert_double_to_float", py_convert_double_to_float <python::py_bcsr_matrix <base_strategy_di::item_array_t, base_strategy_di::index_array_t>, python::py_bcsr_matrix <base_strategy_fi::item_array_t, base_strategy_fi::index_array_t> >);
 
-  //py_export_test_x ();
+    //py_export_test_x ();
+  }
 }
+BLUE_SKY_INIT_PY_FUN
+{
+  init_py_subsystem ();
+}
+#ifdef _DEBUG
+BOOST_PYTHON_MODULE (bs_bos_core_d)
+#else
+BOOST_PYTHON_MODULE (bs_bos_core)
+#endif
+{
+  init_py_subsystem ();
+  if (!blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ()))
+    bs_throw_exception ("Can't register types");
+}
+
 #endif //BSPY_EXPORT_PLUGIN

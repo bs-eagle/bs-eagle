@@ -11,61 +11,53 @@
 namespace blue_sky
   {
 
-  template <typename strategy_t>
-  pvt_base<strategy_t>::pvt_base ( )
+  pvt_base::pvt_base ( )
   {
     p_step = 0;
     surface_density = 0;
     init_dependent = true;
   }
 
-  template <typename strategy_t>
-  typename pvt_base<strategy_t>::item_t
-  pvt_base<strategy_t>::interpolate_and_fix (item_t cell_pbub) const
+  pvt_base::item_t
+  pvt_base::interpolate_and_fix (item_t cell_pbub) const
     {
       BS_ASSERT (false && "BASE METHOD CALL");
       return 0;
     }
 
-  template <typename strategy_t>
-  typename pvt_base<strategy_t>::item_t
-  pvt_base<strategy_t>::get_p_step () const
+  pvt_base::item_t
+  pvt_base::get_p_step () const
     {
       return p_step;
     }
 
-  template <typename strategy_t>
-  typename pvt_base<strategy_t>::item_t
-  pvt_base<strategy_t>::get_surface_density () const
+  pvt_base::item_t
+  pvt_base::get_surface_density () const
     {
       return surface_density;
     }
 
-  template <typename strategy_t>
-  void pvt_base<strategy_t>::set_surface_density (item_t density)
+  void pvt_base::set_surface_density (item_t density)
   {
     surface_density = density;
   }
 
-  template <typename strategy_t>
   void
-  pvt_base<strategy_t>::set_density(item_t density, item_t md)
+  pvt_base::set_density(item_t density, item_t md)
   {
     surface_density = density;
     molar_density = md;
   }
 
-  template <typename strategy_t>
-  typename pvt_base<strategy_t>::item_t
-  pvt_base<strategy_t>::get_gor_for_pressure (item_t pressure_data) const
+  pvt_base::item_t
+  pvt_base::get_gor_for_pressure (item_t pressure_data) const
     {
       BS_ASSERT (false && "BASE METHOD CALL");
       return 0;
     }
 
 
-  template <typename strategy_t>
-  void pvt_base<strategy_t>::check_pressure_interval (item_t min_p, item_t max_p)
+  void pvt_base::check_pressure_interval (item_t min_p, item_t max_p)
   {
     if (max_p - min_p < 1.0e-12)
       {
@@ -75,8 +67,7 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
-  void pvt_base<strategy_t>::check_interval_numbers (int &n_intervals)
+  void pvt_base::check_interval_numbers (int &n_intervals)
   {
     if (n_intervals < 1)
       {
@@ -85,8 +76,7 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
-  void pvt_base<strategy_t>::check_common ()
+  void pvt_base::check_common ()
   {
     if (surface_density < 0)
       {
@@ -96,8 +86,7 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
-  void pvt_base<strategy_t>::check_gas_common (const vector_t &pressure, const vector_t &fvf, const vector_t &visc)
+  void pvt_base::check_gas_common (const vector_t &pressure, const vector_t &fvf, const vector_t &visc)
   {
     for (index_t i = 1, cnt = (index_t)pressure.size (); i < cnt; ++i)
       {
@@ -128,9 +117,8 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   void 
-  pvt_base<strategy_t>::check_oil_common (const vector_t &pressure, const vector_t &fvf, const vector_t &visc)
+  pvt_base::check_oil_common (const vector_t &pressure, const vector_t &fvf, const vector_t &visc)
   {
     for (index_t i = 0, cnt = (index_t)pressure.size (); i < cnt; ++i)
       {
@@ -154,9 +142,5 @@ namespace blue_sky
           }
       }
   }
-
-  template class pvt_base <base_strategy_fi>;
-  template class pvt_base <base_strategy_di>;
-  template class pvt_base <base_strategy_mixi>;
 
 } // namespace blue_sky

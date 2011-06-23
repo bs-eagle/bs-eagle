@@ -174,8 +174,7 @@ namespace blue_sky
     {
       using namespace boost::python;
 
-      def ("read_b_matrix_fi", tools::read_b_matrix_from_file <base_strategy_fi::csr_matrix_t>);
-      def ("read_b_matrix_di", tools::read_b_matrix_from_file <base_strategy_di::csr_matrix_t>);
+      def ("read_b_matrix", tools::read_b_matrix_from_file <strategy_t::csr_matrix_t>);
     }
 
   } // namespace python

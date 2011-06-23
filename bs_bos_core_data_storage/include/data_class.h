@@ -207,7 +207,7 @@ namespace blue_sky {
       convert_units input_units_converter;          //!< Input units converter
       convert_units output_units_converter;         //!< Output units converter
 
-      std::vector<rocktab_table <base_strategy_fi> > rocktab;    //!< rocktab tables for all rock regions
+      std::vector<rocktab_table> rocktab;    //!< rocktab tables for all rock regions
 
       //TITLE
       std::string title;

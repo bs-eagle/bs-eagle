@@ -18,7 +18,9 @@ if (build_kind == "debug") :
 elif (build_kind == "release") :
     env.AppendUnique (LIBS = libs)
 
-bs_bos_core_data_storage = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
+excluded = ["ar_stack.cpp", "ar_operat.cpp"]
+
+bs_bos_core_data_storage = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."], excluded).sources)
 
 env.Alias (tar_name, bs_bos_core_data_storage)
 Export ("bs_bos_core_data_storage")

@@ -14,15 +14,14 @@ namespace blue_sky
 
   // TODO: pvt_oil::public
 
-  template <typename strategy_t>
   struct switch_main_vars
     {
       //typedef boost::array <double, PHASE_TOTAL>  sat_3p_t;
-      typedef typename strategy_t::item_t         item_t;
-      typedef typename strategy_t::index_t        index_t;
+      typedef strategy_t::item_t         item_t;
+      typedef strategy_t::index_t        index_t;
 
-      typedef pvt_oil <strategy_t>								pvt_oil_t;
-      typedef pvt_dead_oil <strategy_t>						pvt_dead_oil_t;
+      typedef pvt_oil pvt_oil_t;
+      typedef pvt_dead_oil pvt_dead_oil_t;
 
       typedef smart_ptr <pvt_oil_t, true>         sp_pvt_oil_t;
       typedef smart_ptr <pvt_dead_oil_t, true>    sp_pvt_dead_oil_t;
@@ -111,8 +110,8 @@ private:
       {
         BS_ASSERT (pvt);
 
-        const typename pvt_oil_t::vector_t &pressure_ = pvt->get_pressure ();
-        const typename pvt_oil_t::vector_t &gor_      = pvt->get_gor ();
+        const pvt_oil_t::vector_t &pressure_ = pvt->get_pressure ();
+        const pvt_oil_t::vector_t &gor_      = pvt->get_gor ();
 
         size_t il = 0, iu = 1;
         il = binary_search (p, pressure_, std::less <item_t> ());

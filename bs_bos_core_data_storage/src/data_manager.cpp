@@ -43,21 +43,18 @@ namespace blue_sky
     BS_ASSERT(false) (out_s.str());\
     throw bs_exception("Data manager class",out_s.str().c_str());
 
-  template <class strategy_t>
-  data_manager<strategy_t>::~data_manager ()
+  data_manager::~data_manager ()
   {
 
   }
 
-  template <class strategy_t>
-  data_manager<strategy_t>::data_manager(bs_type_ctor_param /*param*/): lkeeper ("C", LC_ALL)
+  data_manager::data_manager(bs_type_ctor_param /*param*/): lkeeper ("C", LC_ALL)
   {
     this->reader = BS_KERNEL.create_object(FRead::bs_type());
     this->data = BS_KERNEL.create_object(idata::bs_type());
   }
 
-  template <class strategy_t>
-  data_manager<strategy_t>::data_manager(const data_manager& src)
+  data_manager::data_manager(const data_manager& src)
   : bs_refcounter (src), objbase (src), lkeeper ("C", LC_ALL)
   {
     *this = src;
@@ -117,8 +114,7 @@ namespace blue_sky
     }
 
   /*
-  template <class strategy_t>
-  void data_manager<strategy_t>::update_geometry() const
+  void data_manager::update_geometry() const
     {
       int i, ix, iy, iz, n;
       std::ostringstream out_s;
@@ -294,8 +290,7 @@ namespace blue_sky
         }
     }
 */
-  template <class strategy_t>
-  void data_manager<strategy_t>::check_arrays_for_inactive_blocks () const
+  void data_manager::check_arrays_for_inactive_blocks () const
     {
       std::ostringstream out_s;
       int nb = data->dimens.nx * data->dimens.ny * data->dimens.nz;
@@ -355,10 +350,8 @@ namespace blue_sky
     }
 
   //bs stuff
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(data_manager, (class))
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(data_manager, (class))
-  BLUE_SKY_TYPE_IMPL_T_SHORT(data_manager<base_strategy_di>, objbase, "BOS_Core data_manager class")
-  BLUE_SKY_TYPE_IMPL_T_SHORT(data_manager<base_strategy_fi>, objbase, "BOS_Core data_manager class")
-  BLUE_SKY_TYPE_IMPL_T_SHORT(data_manager<base_strategy_mixi>, objbase, "BOS_Core data_manager class")
+  BLUE_SKY_TYPE_STD_CREATE (data_manager)
+  BLUE_SKY_TYPE_STD_COPY (data_manager)
+  BLUE_SKY_TYPE_IMPL (data_manager, objbase, "data_manager", "data_manager", "data_manager")
 
 }//ns bs

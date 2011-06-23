@@ -32,39 +32,38 @@ namespace blue_sky {
    *        is_w, is_g, is_o (for water, gas, oil phases)
    * \todo  Describe data members
    * */
-  template <typename strategy_type, bool is_w, bool is_g, bool is_o>
+  template <bool is_w, bool is_g, bool is_o>
   struct fi_operator_impl
   {
-    typedef strategy_type                                   strategy_t;
-    typedef typename strategy_t::item_t                     item_t;
-    typedef typename strategy_t::rhs_item_t                 rhs_item_t;
-    typedef typename strategy_t::index_t                    index_t;
-    typedef typename strategy_t::item_array_t               item_array_t;
-    typedef typename strategy_t::rhs_item_array_t           rhs_item_array_t;
-    typedef typename strategy_t::index_array_t              index_array_t;
-    typedef typename strategy_t::csr_matrix_t               bcsr_matrix_t;
+    typedef strategy_t::item_t                     item_t;
+    typedef strategy_t::rhs_item_t                 rhs_item_t;
+    typedef strategy_t::index_t                    index_t;
+    typedef strategy_t::item_array_t               item_array_t;
+    typedef strategy_t::rhs_item_array_t           rhs_item_array_t;
+    typedef strategy_t::index_array_t              index_array_t;
+    typedef strategy_t::csr_matrix_t               bcsr_matrix_t;
 
-    typedef calc_model <strategy_t>                         calc_model_t;
-    typedef typename calc_model_t::data_t                   data_t;
-    typedef typename calc_model_t::data_array_t             data_array_t;
-    typedef typename calc_model_t::main_var_array_t         main_var_array_t;
-    typedef norms_storage <strategy_t>                      norms_storage_t;
-    typedef reservoir <strategy_t>                          reservoir_t;
-    typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
-    typedef jacobian <strategy_t>                           jacobian_t;
-    typedef jacobian_matrix <strategy_t>                    jmatrix_t;
+    typedef calc_model calc_model_t;
+    typedef calc_model_t::data_t                   data_t;
+    typedef calc_model_t::data_array_t             data_array_t;
+    typedef calc_model_t::main_var_array_t         main_var_array_t;
+    typedef norms_storage norms_storage_t;
+    typedef reservoir reservoir_t;
+    typedef rs_mesh_iface mesh_iface_t;
+    typedef jacobian jacobian_t;
+    typedef jacobian_matrix jmatrix_t;
 
-    typedef typename calc_model_t::sp_this_t                sp_calc_model_t;
-    typedef typename calc_model_t::sp_reservoir_t           sp_reservoir_t;
-    typedef typename calc_model_t::sp_jacobian_t            sp_jacobian_t;
-    typedef typename calc_model_t::sp_jacobian_matrix_t     sp_jmatrix_t;
-    typedef typename calc_model_t::sp_mesh_iface_t          sp_mesh_iface_t;
-    typedef typename calc_model_t::sp_rock_grid             sp_rock_grid_prop_t;
+    typedef calc_model_t::sp_this_t                sp_calc_model_t;
+    typedef calc_model_t::sp_reservoir_t           sp_reservoir_t;
+    typedef calc_model_t::sp_jacobian_t            sp_jacobian_t;
+    typedef calc_model_t::sp_jacobian_matrix_t     sp_jmatrix_t;
+    typedef calc_model_t::sp_mesh_iface_t          sp_mesh_iface_t;
+    typedef calc_model_t::sp_rock_grid             sp_rock_grid_prop_t;
     typedef smart_ptr <bcsr_matrix_t, true>                 sp_bcsr_matrix_t;
 
-    typedef typename calc_model_t::sp_pvt_dead_oil_array_t  sp_pvt_dead_oil_array_t;
-    typedef typename calc_model_t::sp_pvt_gas_array_t       sp_pvt_gas_array_t;
-    typedef typename calc_model_t::sp_pvt_water_array_t     sp_pvt_water_array_t;
+    typedef calc_model_t::sp_pvt_dead_oil_array_t  sp_pvt_dead_oil_array_t;
+    typedef calc_model_t::sp_pvt_gas_array_t       sp_pvt_gas_array_t;
+    typedef calc_model_t::sp_pvt_water_array_t     sp_pvt_water_array_t;
 
     enum {
       n_phases = is_w + is_g + is_o,
@@ -601,7 +600,7 @@ namespace blue_sky {
               pvt_oil = pvt_oil_array [pvt_reg];
             }
 
-          switch_main_vars <strategy_t>::do_switch (
+          switch_main_vars::do_switch (
             is_w, is_g, is_o,
             d_o, d_g, d_w,
             pvt_oil_array [pvt_reg],

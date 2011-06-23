@@ -14,30 +14,29 @@
 namespace blue_sky {
 namespace mesh_detail {
 
-  template <typename strategy_t>
-  class BS_API_PLUGIN create_mesh
-    {
-    public:
-      typedef rs_mesh_iface <strategy_t>          mesh_iface_t;
-      typedef rs_smesh_iface <strategy_t>         smesh_iface_t;
+  //class BS_API_PLUGIN create_mesh
+  //  {
+  //  public:
+  //    typedef rs_mesh_iface mesh_iface_t;
+  //    typedef rs_smesh_iface smesh_iface_t;
 
-      static smart_ptr <mesh_iface_t, true>  
-      create (const std::string &mesh_name, const smart_ptr <mesh_iface_t, true> &mesh);
+  //    static smart_ptr <mesh_iface_t, true>  
+  //    create (const std::string &mesh_name, const smart_ptr <mesh_iface_t, true> &mesh);
 
-      static smart_ptr <smesh_iface_t, true>
-      get_structured (const smart_ptr <mesh_iface_t, true> &mesh);
-    };
-  
-  template <typename flux_conn_t>
-  class BS_API_PLUGIN create_flux_conn
-  {
-  public:
-    typedef typename flux_conn_t::strategy_type strategy_t;
-    typedef flux_connections_iface <strategy_t> flux_conn_iface_t;
-    
-    static smart_ptr <flux_conn_iface_t, true>  
-    create ();
-  };
+  //    static smart_ptr <smesh_iface_t, true>
+  //    get_structured (const smart_ptr <mesh_iface_t, true> &mesh);
+  //  };
+  //
+  //template <typename flux_conn_t>
+  //class BS_API_PLUGIN create_flux_conn
+  //{
+  //public:
+  //  typedef typename flux_conn_t::strategy_type strategy_t;
+  //  typedef flux_connections_iface flux_conn_iface_t;
+  //  
+  //  static smart_ptr <flux_conn_iface_t, true>  
+  //  create ();
+  //};
 
 } // namespace mesh_detail
 } // namespace blue_sky

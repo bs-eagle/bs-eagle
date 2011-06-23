@@ -17,10 +17,10 @@ namespace wells {
     end_iterator_tag,
   };
 
-  template <typename strategy_t, typename well_t, typename connection_t>
+  template <typename well_t, typename connection_t>
   struct default_connection_iterator_impl 
   {
-    typedef default_connection_iterator_impl <strategy_t, well_t, connection_t>     this_t;
+    typedef default_connection_iterator_impl <well_t, connection_t>     this_t;
 
     typedef smart_ptr <connection_t>                  sp_connection_t;
     typedef smart_ptr <well_t>                        sp_well_t;
@@ -137,11 +137,11 @@ namespace wells {
 #endif
   };
 
-  template <typename strategy_t, typename well_t, typename connection_t>
-  struct default_connection_iterator : connection_iterator <strategy_t>::impl
+  template <typename well_t, typename connection_t>
+  struct default_connection_iterator : connection_iterator::impl
   {
-    typedef typename connection_iterator <strategy_t>::impl   base_t;
-    typedef connection <strategy_t>                           base_connection_t;
+    typedef connection_iterator::impl   base_t;
+    typedef connection base_connection_t;
     typedef smart_ptr <base_connection_t>                     sp_base_connection_t;
 
   public:
@@ -189,7 +189,7 @@ namespace wells {
     }
 
   private:
-    default_connection_iterator_impl <strategy_t, well_t, connection_t> impl_;
+    default_connection_iterator_impl <well_t, connection_t> impl_;
   };
 
 

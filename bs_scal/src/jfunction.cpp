@@ -10,16 +10,14 @@
 namespace blue_sky
   {
 
-  template <typename strategy_t>
-  jfunction<strategy_t>::jfunction(blue_sky::bs_type_ctor_param param)
+  jfunction::jfunction(blue_sky::bs_type_ctor_param param)
       : is_valid (false)
       , perm_type (JFUNC_PERM_XY)
   {
     init (perm_type);
     is_valid = false;
   }
-  template <typename strategy_t>
-  jfunction<strategy_t>::jfunction(const this_t &j)
+  jfunction::jfunction(const this_t &j)
   : bs_refcounter (j), objbase (j)
   {
     st_phase    = j.st_phase;
@@ -32,11 +30,9 @@ namespace blue_sky
   }
 
   //////////////////////////////////////////////////////////////////////////
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(jfunction,(class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(jfunction,(class));
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (jfunction<base_strategy_fi>), 1, (objbase), "jfunction_fi", "jfunction for capillary calculation fi", "jfunction for capillary calculation fi", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (jfunction<base_strategy_di>), 1, (objbase), "jfunction_di", "jfunction for capillary calculation di", "jfunction for capillary calculation di", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (jfunction<base_strategy_mixi>), 1, (objbase), "jfunction_mixi", "jfunction for capillary calculation mixi", "jfunction for capillary calculation mixi", false);
+  BLUE_SKY_TYPE_STD_CREATE (jfunction);
+  BLUE_SKY_TYPE_STD_COPY (jfunction);
+  BLUE_SKY_TYPE_IMPL (jfunction, objbase, "jfunction", "jfunction", "jfunction");
 
 
 } // namespace blue_sky

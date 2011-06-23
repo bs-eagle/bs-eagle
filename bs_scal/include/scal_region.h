@@ -12,25 +12,22 @@
 
 namespace blue_sky {
 
-  template <typename strategy_t>
   class scale_array_holder;
-
-  template <typename strategy_t>
   class scal_region
   {
   public:
     //typedef data_vector <strategy_t>          data_vector_t;
-    typedef scale_array_holder <strategy_t>   scale_array_holder_t;
-    typedef scal_region <strategy_t>          this_t;
-    typedef scal_region_info <strategy_t>     scal_region_info_t;
-    typedef typename strategy_t::item_t       item_t;
+    typedef scale_array_holder scale_array_holder_t;
+    typedef scal_region this_t;
+    typedef scal_region_info scal_region_info_t;
+    typedef strategy_t::item_t       item_t;
 
     scal_region (const scal_region_info_t &info_,
-                 const data_vector <strategy_t> &Sp_,
-                 const data_vector <strategy_t> &So_,
-                 const data_vector <strategy_t> &Krp_,
-                 const data_vector <strategy_t> &Krop_,
-                 const data_vector <strategy_t> &Pcp_
+                 const data_vector &Sp_,
+                 const data_vector &So_,
+                 const data_vector &Krp_,
+                 const data_vector &Krop_,
+                 const data_vector &Pcp_
                 )
       : Sp (Sp_)
       , So (So_)
@@ -146,11 +143,11 @@ namespace blue_sky {
 
   public:
 
-    data_vector <strategy_t> Sp;
-    data_vector <strategy_t> So;
-    data_vector <strategy_t> Krp;
-    data_vector <strategy_t> Krop;
-    data_vector <strategy_t> Pcp;
+    data_vector Sp;
+    data_vector So;
+    data_vector Krp;
+    data_vector Krop;
+    data_vector Pcp;
 
   private:
     const scal_region_info_t &info;

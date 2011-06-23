@@ -198,6 +198,7 @@ namespace blue_sky
       ((print_reports, "PRINT_REPORTS", level::low))  /* Report messages */
       ((app_info,    "APP_INFO",    level::debug))    /* Messages about internal application state (for debug only) */
       ((sys_info,    "SYS_INFO",    level::debug))    /* Messages about external system info */
+      ((h5,          "H5",          level::low))      /* H5 specific messages */
     );
 
   BS_API_PLUGIN 

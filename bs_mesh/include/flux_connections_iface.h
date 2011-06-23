@@ -10,7 +10,6 @@ namespace blue_sky
 {
   
    
-  template<typename strategy_t>
   class BS_API_PLUGIN flux_connections_iface : virtual public objbase
   {
   ///////////////////////////////
@@ -18,9 +17,9 @@ namespace blue_sky
   ///////////////////////////////
   public:
     typedef strategy_t                                  strategy_type;
-    typedef typename strategy_t::index_array_t          index_array_t;
+    typedef strategy_t::index_array_t          index_array_t;
     
-    typedef typename strategy_t::csr_matrix_t           csr_matrix_t;
+    typedef strategy_t::csr_matrix_t           csr_matrix_t;
     typedef smart_ptr <csr_matrix_t, true>              sp_bcsr_t;
 
     //-------------------------------------------

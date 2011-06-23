@@ -13,16 +13,14 @@ namespace blue_sky
   /*!
    * \brief constructor
    */
-  template <class strategy_t>
-  csr_ilu_prec<strategy_t>::csr_ilu_prec (bs_type_ctor_param param)
-      : linear_solver_base <strategy_t> (param)
+  csr_ilu_prec::csr_ilu_prec (bs_type_ctor_param param)
+      : linear_solver_base (param)
       , sp_ilu(BS_KERNEL.create_object(bcsr_matrix_t::bs_type()))
   {
   }
 
-  template <class strat_t>
-  csr_ilu_prec<strat_t>::csr_ilu_prec(const csr_ilu_prec& solver)
-      : bs_refcounter (solver), linear_solver_base <strat_t> (solver)
+  csr_ilu_prec::csr_ilu_prec(const csr_ilu_prec& solver)
+      : bs_refcounter (solver), linear_solver_base (solver)
   {
     if (&solver != this)
       *this = solver;
@@ -31,16 +29,15 @@ namespace blue_sky
   /*!
    * \brief destructor
    */
-  template <class strategy_t>
-  csr_ilu_prec<strategy_t>::~csr_ilu_prec ()
+  csr_ilu_prec::~csr_ilu_prec ()
   {
   }
 
   /**
    * \brief check internal state of preconditioner
    */
-  template <class strategy_t> bool
-  csr_ilu_prec<strategy_t>::check_state_internal ()
+  bool
+  csr_ilu_prec::check_state_internal ()
   {
     BS_ASSERT (sp_ilu);
     if (!sp_ilu)
@@ -67,14 +64,12 @@ namespace blue_sky
   }
 
 
-  template <class strategy_t>
-  int csr_ilu_prec<strategy_t>::solve(matrix_t *matrix, rhs_item_array_t &rhs, item_array_t &sol)
+  int csr_ilu_prec::solve(matrix_t *matrix, rhs_item_array_t &rhs, item_array_t &sol)
   {
     return templ_solve (matrix, rhs, sol);
   }
 
-  template <class strategy_t>
-  int csr_ilu_prec<strategy_t>::solve_prec(matrix_t *matrix, item_array_t &rhs, item_array_t &sol)
+  int csr_ilu_prec::solve_prec(matrix_t *matrix, item_array_t &rhs, item_array_t &sol)
   {
      return templ_solve (matrix, rhs, sol);
   }
@@ -87,9 +82,9 @@ namespace blue_sky
    * \return
    */
   //template <class strategy_t> int
-  //csr_ilu_prec<strategy_t>::solve (matrix_t *matrix, rhs_item_array_t &rhs, item_array_t &sol)
-  template <class strategy_t> template <class rhs_t> int
-  csr_ilu_prec<strategy_t>::templ_solve (matrix_t *matrix, rhs_t &rhs, item_array_t &sol)
+  //csr_ilu_prec::solve (matrix_t *matrix, rhs_item_array_t &rhs, item_array_t &sol)
+  template <class rhs_t> int
+  csr_ilu_prec::templ_solve (matrix_t *matrix, rhs_t &rhs, item_array_t &sol)
   {
     typedef item_t fp_type;
 
@@ -186,8 +181,8 @@ namespace blue_sky
    * \param matrix The BCSR matrix
    * \return 0 is success
    */
-  template <class strategy_t> int
-  csr_ilu_prec<strategy_t>::setup_internal (bcsr_matrix_t *matrix)
+  int
+  csr_ilu_prec::setup_internal (bcsr_matrix_t *matrix)
   {
     BS_ASSERT (matrix);
 
@@ -314,8 +309,8 @@ namespace blue_sky
    * \param matrix Various matrix
    * \return 0 if success
    */
-  template <class strategy_t> int
-  csr_ilu_prec<strategy_t>::setup (matrix_t *matrix_)
+  int
+  csr_ilu_prec::setup (matrix_t *matrix_)
   {
     BS_ASSERT (matrix_);
     if (!matrix_)
@@ -323,7 +318,7 @@ namespace blue_sky
         bs_throw_exception ("CSR_ILU: Passed matrix is null");
       }
 
-    jacobian_matrix <strategy_t> *jmx = dynamic_cast <jacobian_matrix <strategy_t> *> (matrix_);
+    jacobian_matrix *jmx = dynamic_cast <jacobian_matrix *> (matrix_);
     BS_ASSERT (jmx) (bs::type_name (*matrix_));
     if (jmx)
       {
@@ -343,20 +338,16 @@ namespace blue_sky
       }
   }
 
-  template <class strategy_t>
-  typename csr_ilu_prec<strategy_t>::sp_bcsr_matrix_t
-  csr_ilu_prec<strategy_t>::get_ilu_matrix () const
+  csr_ilu_prec::sp_bcsr_matrix_t
+  csr_ilu_prec::get_ilu_matrix () const
   {
     return sp_ilu;
   }
 
   //////////////////////////////////////////////////////////////////////////
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(csr_ilu_prec, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(csr_ilu_prec, (class));
-
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (csr_ilu_prec<base_strategy_fi>) , 1, (linear_solver_base<base_strategy_fi>), "csr_ilu_prec_seq_fi", "CSR ILU Preconditioner", "CSR ILU Preconditioner", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (csr_ilu_prec<base_strategy_di>) , 1, (linear_solver_base<base_strategy_di>), "csr_ilu_prec_seq_di", "CSR ILU Preconditioner", "CSR ILU Preconditioner", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (csr_ilu_prec<base_strategy_mixi>) , 1, (linear_solver_base<base_strategy_mixi>), "csr_ilu_prec_seq_mixi", "CSR ILU Preconditioner", "CSR ILU Preconditioner", false);
+  BLUE_SKY_TYPE_STD_CREATE (csr_ilu_prec);
+  BLUE_SKY_TYPE_STD_COPY (csr_ilu_prec);
+  BLUE_SKY_TYPE_IMPL (csr_ilu_prec, linear_solver_base, "csr_ilu_prec", "csr_ilu_prec", "csr_ilu_prec");
 
   //////////////////////////////////////////////////////////////////////////
   //! register types in kernel
@@ -364,11 +355,7 @@ namespace blue_sky
   {
     bool res = true;
 
-    res &= BS_KERNEL.register_type (pd, csr_ilu_prec<base_strategy_fi>::bs_type ());
-    res &= BS_KERNEL.register_type (pd, csr_ilu_prec<base_strategy_di>::bs_type ());
-    res &= BS_KERNEL.register_type (pd, csr_ilu_prec<base_strategy_mixi>::bs_type ());
-
-
+    res &= BS_KERNEL.register_type (pd, csr_ilu_prec::bs_type ());
 
     return res;
   }

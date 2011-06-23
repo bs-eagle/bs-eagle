@@ -14,22 +14,19 @@
 namespace blue_sky
   {
 
-  template <typename strategy_t>
   class well;
-
   class data_storage_interface;
 
   /**
    * \class facility_manager
    * \brief Facilities manager
    * */
-  template <typename strategy_t>
   class BS_API_PLUGIN facility_manager : public objbase
     {
     public:
 
-      typedef facility_base <strategy_t>                    facility_base_t;
-      typedef well <strategy_t>                             well_t;
+      typedef facility_base facility_base_t;
+      typedef well well_t;
 
       typedef smart_ptr <facility_base_t>                   sp_facility_t;
       typedef bos_val_table <std::string, sp_facility_t>    facility_map_t;
@@ -38,8 +35,8 @@ namespace blue_sky
 
       typedef smart_ptr <data_storage_interface, true>      sp_storage_t;
 
-      typedef typename facility_map_t::iterator             facility_iterator_t;
-      typedef typename facility_map_t::const_iterator       facility_const_iterator_t;
+      typedef facility_map_t::iterator             facility_iterator_t;
+      typedef facility_map_t::const_iterator       facility_const_iterator_t;
 
       //typedef well_iterator <locked_facility_map_t, facility_iterator_t, locked_well_t>  well_iterator_t;
       typedef facility_iterator_t                           well_iterator_t;
@@ -93,7 +90,7 @@ namespace blue_sky
       wells_end () const;
 
       //! blue-sky type declaration
-      BLUE_SKY_TYPE_DECL_T (facility_manager);
+      BLUE_SKY_TYPE_DECL (facility_manager);
 
     private:
 

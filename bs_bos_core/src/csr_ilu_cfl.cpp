@@ -15,17 +15,15 @@ namespace blue_sky
   /*!
   brief constructor
   */
-  template <class strategy_t>
-  csr_ilu_cfl_prec<strategy_t>::csr_ilu_cfl_prec (bs_type_ctor_param param /* = NULL */)
-    : csr_ilu_prec<strategy_t>(param),
+  csr_ilu_cfl_prec::csr_ilu_cfl_prec (bs_type_ctor_param param /* = NULL */)
+    : csr_ilu_prec(param),
     sp_ilu_cfl_(BS_KERNEL.create_object(bcsr_matrix_t::bs_type()))
     {
     }
 
-  template <class strategy_t>
-  csr_ilu_cfl_prec<strategy_t>::csr_ilu_cfl_prec(const csr_ilu_cfl_prec& solver)
+  csr_ilu_cfl_prec::csr_ilu_cfl_prec(const csr_ilu_cfl_prec& solver)
     : bs_refcounter (solver), 
-    csr_ilu_prec <strategy_t> (solver)
+    csr_ilu_prec (solver)
   {
     if (&solver != this)
       *this = solver;
@@ -34,27 +32,25 @@ namespace blue_sky
   /*!
   * \brief destructor
   */
-  template <class strategy_t>
-  csr_ilu_cfl_prec<strategy_t>::~csr_ilu_cfl_prec ()
+  csr_ilu_cfl_prec::~csr_ilu_cfl_prec ()
   {
   }
 
-  template <class strategy_t> int
-  csr_ilu_cfl_prec<strategy_t>::solve (matrix_t * /*matrix*/, rhs_item_array_t &rhs, item_array_t &sol)
+  int
+  csr_ilu_cfl_prec::solve (matrix_t * /*matrix*/, rhs_item_array_t &rhs, item_array_t &sol)
   {
     return this->csr_ilu_prec_t::solve (sp_ilu_cfl_.lock (), rhs, sol);
   }
 
-  template <class strategy_t> int
-  csr_ilu_cfl_prec<strategy_t>::solve_prec (matrix_t * /*matrix*/, item_array_t &rhs, item_array_t &sol)
+  int
+  csr_ilu_cfl_prec::solve_prec (matrix_t * /*matrix*/, item_array_t &rhs, item_array_t &sol)
   {
     return this->csr_ilu_prec_t::solve_prec (sp_ilu_cfl_.lock (), rhs, sol);
   }
 
 
-  template <class strategy_t>
-  typename csr_ilu_cfl_prec<strategy_t>::sp_bcsr_matrix_t
-  csr_ilu_cfl_prec<strategy_t>::create_merged_matrix_for_ilu (jmatrix_t *matrix, const rhs_item_array_t &cfl_vector)
+  csr_ilu_cfl_prec::sp_bcsr_matrix_t
+  csr_ilu_cfl_prec::create_merged_matrix_for_ilu (jmatrix_t *matrix, const rhs_item_array_t &cfl_vector)
   {
    if (!matrix)
       {
@@ -139,14 +135,14 @@ namespace blue_sky
   }
 
 
-  template <class strategy_t> int
-  csr_ilu_cfl_prec<strategy_t>::setup (matrix_t *matrix_)
+  int
+  csr_ilu_cfl_prec::setup (matrix_t *matrix_)
   {
     BS_ASSERT (matrix_);
     if (!matrix_)
       throw bs_exception ("csr_ilu_cfl::setup", "Passed matrix is null");
 
-    jacobian_matrix <strategy_t> *jmx = dynamic_cast <jacobian_matrix <strategy_t> *> (matrix_);
+    jacobian_matrix *jmx = dynamic_cast <jacobian_matrix *> (matrix_);
     BS_ASSERT (jmx) (bs::type_name (*matrix_));
     if (jmx)
       {
@@ -161,12 +157,10 @@ namespace blue_sky
 
 
 //////////////////////////////////////////////////////////////////////////
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(csr_ilu_cfl_prec, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(csr_ilu_cfl_prec, (class));
+  BLUE_SKY_TYPE_STD_CREATE (csr_ilu_cfl_prec);
+  BLUE_SKY_TYPE_STD_COPY (csr_ilu_cfl_prec);
 
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (csr_ilu_cfl_prec<base_strategy_fi>) , 1, (linear_solver_base<base_strategy_fi>), "csr_ilu_cfl_prec_seq_fi", "CSR ILU Preconditioner", "CSR ILU Preconditioner", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (csr_ilu_cfl_prec<base_strategy_di>) , 1, (linear_solver_base<base_strategy_di>), "csr_ilu_cfl_prec_seq_di", "CSR ILU Preconditioner", "CSR ILU Preconditioner", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (csr_ilu_cfl_prec<base_strategy_mixi>) , 1, (linear_solver_base<base_strategy_mixi>), "csr_ilu_cfl_prec_seq_mixi", "CSR ILU Preconditioner", "CSR ILU Preconditioner", false);
+  BLUE_SKY_TYPE_IMPL (csr_ilu_cfl_prec, linear_solver_base, "csr_ilu_cfl_prec", "csr_ilu_cfl_prec", "csr_ilu_cfl_prec");
 
 //////////////////////////////////////////////////////////////////////////
 

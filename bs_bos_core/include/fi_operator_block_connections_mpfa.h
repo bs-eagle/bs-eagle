@@ -14,22 +14,21 @@ namespace blue_sky {
 
   namespace tpfa 
   {
-    template <typename strategy_t>
     struct mpfa_impl 
     {
     public:
-      typedef typename strategy_t::item_t             item_t;
-      typedef typename strategy_t::index_t            index_t;
-      typedef typename strategy_t::item_array_t       item_array_t;
-      typedef typename strategy_t::index_array_t      index_array_t;
+      typedef strategy_t::item_t             item_t;
+      typedef strategy_t::index_t            index_t;
+      typedef strategy_t::item_array_t       item_array_t;
+      typedef strategy_t::index_array_t      index_array_t;
       typedef boost::array <index_t, FI_PHASE_TOT>    up_cell_array_t;
-      typedef calc_model <strategy_t>                 calc_model_t;
-      typedef typename calc_model_t::data_t           data_t;
-      typedef typename calc_model_t::data_array_t     data_array_t;
-      typedef typename calc_model_t::main_var_array_t main_var_array_t;
+      typedef calc_model calc_model_t;
+      typedef calc_model_t::data_t           data_t;
+      typedef calc_model_t::data_array_t     data_array_t;
+      typedef calc_model_t::main_var_array_t main_var_array_t;
 
     public:
-      mpfa_impl (const fi_operator_impl <strategy_t> &fi_operator_, item_array_t &rhs_, item_array_t &reg_values_)
+      mpfa_impl (const fi_operator_impl &fi_operator_, item_array_t &rhs_, item_array_t &reg_values_)
       : fi_operator_ (fi_operator_),
       n_phases (fi_operator_.n_phases),
       is_w (fi_operator_.is_w),
@@ -788,7 +787,7 @@ namespace blue_sky {
 
     public:
 
-      const fi_operator_impl <strategy_t> &fi_operator_;
+      const fi_operator_impl &fi_operator_;
       index_t                               n_phases;
       bool                                  is_w;
       bool                                  is_g;
@@ -808,9 +807,8 @@ namespace blue_sky {
     };
   } // tpfa
 
-  template <typename strategy_t>
   bool
-  fi_operator_impl <strategy_t>::block_connections_mpfa (const item_t &dt)
+  fi_operator_impl::block_connections_mpfa (const item_t &dt)
   {
     //// TODO:
     //// Miryanov: we keep a new version for performance measurement on geostation on large models
@@ -853,7 +851,7 @@ namespace blue_sky {
     item_t sum_cell_pot[FI_PHASE_TOT];
 
     //up_stream
-    typedef tpfa::mpfa_impl <strategy_t> mpfa_impl_t;
+    typedef tpfa::mpfa_impl mpfa_impl_t;
     typename mpfa_impl_t::up_cell_array_t up_cell;    // index of upstream cell
 
     //rhs

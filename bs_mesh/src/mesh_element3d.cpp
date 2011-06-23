@@ -23,15 +23,13 @@ element_plane_orientation_t get_reverse_orientation (element_plane_orientation_t
       }
   }
 
-template<class strategy_t>
-mesh_element3d<strategy_t>::mesh_element3d()
+mesh_element3d::mesh_element3d()
 {
   n_corners = N_ELEMENT_CORNERS;
   n_plane_corners = N_PLANE_CORNERS;
 }
 
-template<class strategy_t>
-void mesh_element3d<strategy_t>::init(simple_corners_t new_corners)
+void mesh_element3d::init(simple_corners_t new_corners)
 {
     /* nodes layout
      *                             X
@@ -56,9 +54,8 @@ void mesh_element3d<strategy_t>::init(simple_corners_t new_corners)
 
 
 
-template<class strategy_t>
 inline void
-mesh_element3d<strategy_t>::get_plane (element_plane_orientation_t orientation, plane_t &plane) const
+mesh_element3d::get_plane (element_plane_orientation_t orientation, plane_t &plane) const
 {
   switch (orientation)
     {
@@ -105,9 +102,8 @@ mesh_element3d<strategy_t>::get_plane (element_plane_orientation_t orientation, 
     }
 }
 
-template<class strategy_t>
-typename mesh_element3d<strategy_t>::fpoint3d_t
-mesh_element3d<strategy_t>::get_center () const
+mesh_element3d::fpoint3d_t
+mesh_element3d::get_center () const
 {
   fpoint3d_t center;
   index_t i;
@@ -122,9 +118,8 @@ mesh_element3d<strategy_t>::get_center () const
 
 
 
-template<class strategy_t>
-typename mesh_element3d<strategy_t>::item_t
-mesh_element3d<strategy_t>::calc_volume()
+mesh_element3d::item_t
+mesh_element3d::calc_volume()
 {
     fpoint3d_t center = get_center ();
     item_t volume = 0.0;
@@ -151,9 +146,8 @@ mesh_element3d<strategy_t>::calc_volume()
     return volume;
 }
 
-template<class strategy_t>
-typename mesh_element3d<strategy_t>::item_t
-mesh_element3d<strategy_t>::get_dx ()
+mesh_element3d::item_t
+mesh_element3d::get_dx ()
 {
   plane_t plane1, plane2;
   
@@ -168,9 +162,8 @@ mesh_element3d<strategy_t>::get_dx ()
   return fabs (dx / n_plane_corners);
 }
 
-template<class strategy_t>
-typename mesh_element3d<strategy_t>::item_t
-mesh_element3d<strategy_t>::get_dy ()
+mesh_element3d::item_t
+mesh_element3d::get_dy ()
 {
   plane_t plane1, plane2;
   
@@ -185,9 +178,8 @@ mesh_element3d<strategy_t>::get_dy ()
   return fabs (dy / n_plane_corners);
 }
 
-template<class strategy_t>
-typename mesh_element3d<strategy_t>::item_t
-mesh_element3d<strategy_t>::get_dz ()
+mesh_element3d::item_t
+mesh_element3d::get_dz ()
 {
   plane_t plane1, plane2;
   
@@ -202,9 +194,8 @@ mesh_element3d<strategy_t>::get_dz ()
   return fabs (dz / n_plane_corners);
 }
 
-template<class strategy_t>
-typename mesh_element3d<strategy_t>::point3d_t
-mesh_element3d<strategy_t>::get_dx_dy_dz () const
+mesh_element3d::point3d_t
+mesh_element3d::get_dx_dy_dz () const
 {
   plane_t plane1, plane2, plane3, plane4, plane5, plane6;
   
@@ -233,5 +224,3 @@ mesh_element3d<strategy_t>::get_dx_dy_dz () const
   return element_size;
 }
 
-
-BS_INST_STRAT(mesh_element3d);

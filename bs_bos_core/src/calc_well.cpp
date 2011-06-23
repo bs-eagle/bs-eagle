@@ -53,30 +53,27 @@ namespace blue_sky
 
 
   //////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
-  well<strategy_t>::~well ()
+  well::~well ()
   {
 
   }
 
-  template <typename strategy_t>
-  well<strategy_t>::well (bs_type_ctor_param /*param = NULL */)
-      : calc_well_pressure_ (BS_KERNEL.create_object (calc_well_pressure <strategy_t>::bs_type (), true))
-      , calc_rho_ (BS_KERNEL.create_object (calc_total_average_rho <strategy_t>::bs_type (), true))
-      , calc_perf_density_ (BS_KERNEL.create_object (wellbore_density_calc <strategy_t>::bs_type (), true))
-      , calc_perf_bhp_ (BS_KERNEL.create_object (calc_perf_bhp <strategy_t>::bs_type (), true))
+  well::well (bs_type_ctor_param /*param = NULL */)
+      : calc_well_pressure_ (BS_KERNEL.create_object (calc_well_pressure::bs_type (), true))
+      , calc_rho_ (BS_KERNEL.create_object (calc_total_average_rho::bs_type (), true))
+      , calc_perf_density_ (BS_KERNEL.create_object (wellbore_density_calc::bs_type (), true))
+      , calc_perf_bhp_ (BS_KERNEL.create_object (calc_perf_bhp::bs_type (), true))
       , well_events_init_ (this)
   {
     clear_data ();
     bhp_ = 0;
   }
 
-  template <typename strategy_t>
-  well <strategy_t>::well (const std::string &well_name)
-  : calc_well_pressure_ (BS_KERNEL.create_object (calc_well_pressure <strategy_t>::bs_type (), true))
-  , calc_rho_ (BS_KERNEL.create_object (calc_total_average_rho <strategy_t>::bs_type (), true))
-  , calc_perf_density_ (BS_KERNEL.create_object (wellbore_density_calc <strategy_t>::bs_type (), true))
-  , calc_perf_bhp_ (BS_KERNEL.create_object (calc_perf_bhp <strategy_t>::bs_type (), true))
+  well::well (const std::string &well_name)
+  : calc_well_pressure_ (BS_KERNEL.create_object (calc_well_pressure::bs_type (), true))
+  , calc_rho_ (BS_KERNEL.create_object (calc_total_average_rho::bs_type (), true))
+  , calc_perf_density_ (BS_KERNEL.create_object (wellbore_density_calc::bs_type (), true))
+  , calc_perf_bhp_ (BS_KERNEL.create_object (calc_perf_bhp::bs_type (), true))
   , well_events_init_ (this)
   {
     set_name (well_name);
@@ -85,39 +82,34 @@ namespace blue_sky
     bhp_ = 0;
   }
 
-  template <typename strategy_t>
-  well<strategy_t>::well (const well &w)
+  well::well (const well &w)
         : bs_refcounter ()
         , well_events_init_ (w.well_events_init_)
   {
     *this = w;
   }
 
-  template <typename strategy_t>
   const std::string &
-  well <strategy_t>::name () const
+  well::name () const
   {
     return name_;
   }
 
   ///////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
   void
-  well<strategy_t>::set_coord (index_t i_coord, index_t j_coord)
+  well::set_coord (index_t i_coord, index_t j_coord)
   {
     i_coord_ = i_coord;
     j_coord_ = j_coord;
   }
-  template <typename strategy_t>
   void
-  well<strategy_t>::set_bhp_depth (item_t bhp_depth)
+  well::set_bhp_depth (item_t bhp_depth)
   {
     bhp_depth_ = bhp_depth;
   }
-  template <typename strategy_t>
   void
-  well<strategy_t>::set_state (well_state_type state, const sp_calc_model_t &calc_model)
+  well::set_state (well_state_type state, const sp_calc_model_t &calc_model)
   {
     well_state_.state = state;
     if (state == well_shut)
@@ -139,69 +131,59 @@ namespace blue_sky
 
     check_shut ();
   }
-  template <typename strategy_t>
   void
-  well<strategy_t>::set_exploitation_factor (item_t exploitation_factor)
+  well::set_exploitation_factor (item_t exploitation_factor)
   {
     exploitation_factor_ = exploitation_factor;
   }
 
-  template <typename strategy_t>
   void
-  well<strategy_t>::set_controller (sp_well_controller_t controller)
+  well::set_controller (sp_well_controller_t controller)
   {
     well_controller_ = controller;
   }
-  template <typename strategy_t>
   void
-  well<strategy_t>::set_limit_operation (sp_well_limit_operation_t limit_operation)
+  well::set_limit_operation (sp_well_limit_operation_t limit_operation)
   {
     well_limit_operation_ = limit_operation;
   }
-  template <typename strategy_t>
-  typename well<strategy_t>::sp_well_controller_t
-  well<strategy_t>::get_controller () const
+  well::sp_well_controller_t
+  well::get_controller () const
     {
       return well_controller_;
     }
-  template <typename strategy_t>
-  typename well<strategy_t>::sp_well_limit_operation_t
-  well<strategy_t>::get_limit_operation () const
+  well::sp_well_limit_operation_t
+  well::get_limit_operation () const
     {
       return well_limit_operation_;
     }
 #if 0
-  template <typename strategy_t>
-  typename well<strategy_t>::ijk_filter_t
-  well<strategy_t>::filter_connections (index_t /*i_coord*/, index_t /*j_coord*/, index_t /*k*/,
+  well::ijk_filter_t
+  well::filter_connections (index_t /*i_coord*/, index_t /*j_coord*/, index_t /*k*/,
                                         index_t /*z1*/, index_t /*z2*/)
   {
     return ijk_filter_t (connection_list_, ijk_pred_t (0));  // TODO:
   }
-  template <typename strategy_t>
-  typename well<strategy_t>::ijk1k2_filter_t
-  well<strategy_t>::filter_connections (index_t /*i_coord*/, index_t /*j_coord*/, index_t /*kw1*/,
+  well::ijk1k2_filter_t
+  well::filter_connections (index_t /*i_coord*/, index_t /*j_coord*/, index_t /*kw1*/,
                                         index_t /*kw2*/)
   {
     return ijk1k2_filter_t (connection_list_, ijk1k2_pred_t (0));  // TODO:
   }
 #endif //0
-  template <typename strategy_t>
   const std::string &
-  well<strategy_t>::get_name () const
+  well::get_name () const
     {
       return name_;
     }
-  template <typename strategy_t>
   void
-  well<strategy_t>::set_name (const std::string &name)
+  well::set_name (const std::string &name)
   {
     name_ = name;
   }
 
-  template <typename strategy_t>
   void
-  well<strategy_t>::compute_connection_factor (const physical_constants &internal_constants,
+  well::compute_connection_factor (const physical_constants &internal_constants,
       const sp_params_t &params,
       const sp_mesh_iface_t &mesh,
       const item_array_t &perm,
@@ -220,9 +202,8 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   bool
-  well<strategy_t>::fi_check_limits () const
+  well::fi_check_limits () const
     {
       BS_ASSERT (well_limit_operation_);
       if (!well_limit_operation_)
@@ -234,9 +215,8 @@ namespace blue_sky
       return well_limit_operation_->fi_check_limits ();
     }
 
-  template <typename strategy_t>
   bool
-  well <strategy_t>::check_connections_bhp (const item_array_t &pressure) const
+  well::check_connections_bhp (const item_array_t &pressure) const
     {
       BS_ASSERT (!is_shut ()) (name ());
       if (is_no_connections ())
@@ -270,9 +250,8 @@ namespace blue_sky
       return false;
     }
 
-  template <typename strategy_t>
   void
-  well<strategy_t>::shut_well (const sp_calc_model_t &calc_model)
+  well::shut_well (const sp_calc_model_t &calc_model)
   {
 #ifdef _DEBUG
     BOSOUT (section::wells, level::debug) << boost::format ("[%s]: shut") % name () << bs_end;
@@ -294,16 +273,14 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   bool
-  well <strategy_t>::is_shut () const
+  well::is_shut () const
     {
       return well_state_.state == well_shut;
     }
 
-  template <typename strategy_t>
-  typename well<strategy_t>::item_t
-  well<strategy_t>::get_reference_depth (const sp_mesh_iface_t &mesh) const
+  well::item_t
+  well::get_reference_depth (const sp_mesh_iface_t &mesh) const
   {
     BS_ASSERT (!is_no_connections ()) (name ());
 
@@ -325,47 +302,41 @@ namespace blue_sky
     return input_reference_depth_ > 0 ? input_reference_depth_ : dtop;
   }
 
-  template <typename strategy_t>
-  typename well<strategy_t>::item_t
-  well<strategy_t>::get_reference_pressure () const
+  well::item_t
+  well::get_reference_pressure () const
     {
       return bhp_;
     }
 
-  template <typename strategy_t>
   void
-  well<strategy_t>::set_bhp (item_t bhp)
+  well::set_bhp (item_t bhp)
   {
     bhp_ = bhp;
   }
 
-  template <typename strategy_t>
   bool
-  well<strategy_t>::is_bhp () const
+  well::is_bhp () const
     {
       BS_ASSERT (well_controller_);
       return well_controller_->is_bhp ();
     }
-  template <typename strategy_t>
   bool
-  well<strategy_t>::is_rate () const
+  well::is_rate () const
     {
       BS_ASSERT (well_controller_);
       return well_controller_->is_rate ();
     }
 
-  template <typename strategy_t>
-  const typename well<strategy_t>::sp_well_controller_t &
-  well<strategy_t>::get_well_controller () const
+  const well::sp_well_controller_t &
+  well::get_well_controller () const
     {
       return well_controller_;
     }
 
   //////////////////////////////////////////////////////////////////////////
 
-  template <typename strategy_t>
-  typename well<strategy_t>::item_t
-  well <strategy_t>::get_input_rate () const
+  well::item_t
+  well::get_input_rate () const
     {
       BS_ASSERT (well_controller_);
       using namespace wells;
@@ -403,22 +374,19 @@ namespace blue_sky
       return 0;
     }
 
-  template <typename strategy_t>
   void
-  well <strategy_t>::reset_init_approx ()
+  well::reset_init_approx ()
   {
     init_approx_is_calc_ = false;
   }
 
-  template <typename strategy_t>
   void
-  well<strategy_t>::process_impl (bool, double, const sp_calc_model_t &, const sp_mesh_iface_t &, sp_jmatrix_t &)
+  well::process_impl (bool, double, const sp_calc_model_t &, const sp_mesh_iface_t &, sp_jmatrix_t &)
   {
     bs_throw_exception ("PURE CALL");
   }
-  template <typename strategy_t>
   void
-  well<strategy_t>::process (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
+  well::process (bool is_start, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix)
   {
     if (is_shut ())
       {
@@ -437,31 +405,27 @@ namespace blue_sky
     process_impl (is_start, dt, calc_model, mesh, jmatrix);
     post_process_facilities ();
   }
-  template <typename strategy_t>
   void
-  well <strategy_t>::clear_data ()
+  well::clear_data ()
   {
     rate_     = 0;
     rate_rc_  = 0;
     gor_      = 0;
   }
 
-  template <typename strategy_t>
   void
-  well <strategy_t>::restore_solution (double /*dt*/, const item_array_t &/*p_sol*/, const item_array_t &/*s_sol*/, index_t /*block_size*/)
+  well::restore_solution (double /*dt*/, const item_array_t &/*p_sol*/, const item_array_t &/*s_sol*/, index_t /*block_size*/)
   {
     bs_throw_exception ("PURE CALL");
   }
 
-  template <typename strategy_t>
   void
-  well <strategy_t>::custom_init (const sp_calc_model_t &/*mdl*/)
+  well::custom_init (const sp_calc_model_t &/*mdl*/)
   {
   }
 
-  template <typename strategy_t>
   void
-  well <strategy_t>::pre_large_step (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh)
+  well::pre_large_step (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh)
   {
     compute_connection_factor (calc_model->internal_constants,
       calc_model->ts_params,
@@ -474,36 +438,32 @@ namespace blue_sky
     check_shut ();
     custom_init (calc_model);
   }
-  template <typename strategy_t>
   void
-  well<strategy_t>::pre_small_step ()
+  well::pre_small_step ()
   {
     BS_ASSERT (well_controller_);
 
     saved_well_state_ = well_state_;
     well_controller_->save_control ();
   }
-  template <typename strategy_t>
   void
-  well<strategy_t>::pre_newton_step ()
+  well::pre_newton_step ()
   {
     BS_ASSERT (well_controller_);
 
     saved_niter_well_state_ = well_state_;
     well_controller_->save_niter_control ();
   }
-  template <typename strategy_t>
   void
-  well<strategy_t>::restart_small_step ()
+  well::restart_small_step ()
   {
     BS_ASSERT (well_controller_);
 
     well_state_ = saved_well_state_;
     init_approx_is_calc_ = well_controller_->restore_control ();
   }
-  template <typename strategy_t>
   void
-  well<strategy_t>::restart_newton_step ()
+  well::restart_newton_step ()
   {
     BS_ASSERT (well_controller_);
 
@@ -511,9 +471,8 @@ namespace blue_sky
     init_approx_is_calc_ = well_controller_->restore_niter_control ();
   }
 
-  template <typename strategy_t>
   void
-  well <strategy_t>::pre_process_facilities ()
+  well::pre_process_facilities ()
   {
     for (size_t i = 0, cnt = well_facility_list_.size (); i < cnt; ++i)
       {
@@ -521,9 +480,8 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   void
-  well <strategy_t>::post_process_facilities ()
+  well::post_process_facilities ()
   {
     for (size_t i = 0, cnt = well_facility_list_.size (); i < cnt; ++i)
       {
@@ -531,26 +489,22 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   void
-  well <strategy_t>::add_well_facility (const sp_well_facility_t &facility)
+  well::add_well_facility (const sp_well_facility_t &facility)
   {
     well_facility_list_.push_back (facility);
   }
 
-  template <typename strategy_t>
   void
-  well <strategy_t>::delete_well_facility (typename well_facility_list_t::iterator iter)
+  well::delete_well_facility (typename well_facility_list_t::iterator iter)
   {
     well_facility_list_.erase (iter);
   }
 
   //////////////////////////////////////////////////////////////////////////
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF (well, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF (well, (class));
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (well<base_strategy_fi>), 1, (facility_base<base_strategy_fi>), "well_seq_fi", "well_seq_fi", "well_seq_fi", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (well<base_strategy_di>), 1, (facility_base<base_strategy_di>), "well_seq_di", "well_seq_di", "well_seq_di", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (well<base_strategy_mixi>), 1, (facility_base<base_strategy_mixi>), "well_seq_mixi", "well_seq_mixi", "well_seq_mixi", false);
+  BLUE_SKY_TYPE_STD_CREATE (well);
+  BLUE_SKY_TYPE_STD_COPY (well);
+  BLUE_SKY_TYPE_IMPL (well, facility_base, "well", "well", "well");
   //////////////////////////////////////////////////////////////////////////
 
 
@@ -560,12 +514,8 @@ namespace blue_sky
   {
     bool res = true;
 
-    res &= BS_KERNEL.register_type (pd, wells::connection<base_strategy_fi>::bs_type ());    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, wells::connection<base_strategy_di>::bs_type ());    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, wells::connection<base_strategy_mixi>::bs_type ());    BS_ASSERT (res);
-
-    res &= BS_KERNEL.register_type (pd, well<base_strategy_fi>::bs_type ());    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, well<base_strategy_di>::bs_type ());    BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, wells::connection::bs_type ());    BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, well::bs_type ());    BS_ASSERT (res);
 
     return res;
   }

@@ -32,8 +32,7 @@ namespace blue_sky
 
 
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::register_keywords()//const sp_event_manager_t &em)
+  void keyword_manager::register_keywords()//const sp_event_manager_t &em)
   {
     //Keywords
     REG_KEYWORD(TITLE);
@@ -130,7 +129,7 @@ namespace blue_sky
 
     //BS_ASSERT (em);
 
-    const type_descriptor &event_td = event_base <strategy_t>::bs_type ();
+    const type_descriptor &event_td = event_base::bs_type ();
     const std::vector <type_tuple> &types = BS_KERNEL.registered_types ();
     for (size_t i = 0, cnt = types.size (); i < cnt; ++i)
       {
@@ -149,12 +148,11 @@ namespace blue_sky
       }
   }
   
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::register_plugin_keywords()
+  void keyword_manager::register_plugin_keywords()
   {
     const std::vector <type_tuple> &types = BS_KERNEL.registered_types ();
     sp_keyword_info_base_t keywords;
-    const type_descriptor &keyword_info_td = keyword_info_base <strategy_t>::bs_type ();
+    const type_descriptor &keyword_info_td = keyword_info_base::bs_type ();
     sp_objbase keyword_manager (this);
     
     for (size_t i = 0, cnt = types.size (); i < cnt; ++i)
@@ -176,14 +174,5 @@ namespace blue_sky
           }
       }
   }
-
-  //!TODO: kill next string after debug
-  template void keyword_manager <base_strategy_di>::register_keywords();//const sp_event_manager_t &em);
-  template void keyword_manager <base_strategy_fi>::register_keywords();//const sp_event_manager_t &em);
-  template void keyword_manager <base_strategy_mixi>::register_keywords();//const sp_event_manager_t &em);
-  
-  template void keyword_manager <base_strategy_di>::register_plugin_keywords();
-  template void keyword_manager <base_strategy_fi>::register_plugin_keywords();
-  template void keyword_manager <base_strategy_mixi>::register_plugin_keywords();
  
 }//ns_bs

@@ -11,8 +11,7 @@
 #include "flux_connections_iface.h"
 
 //! class for basic work with mesh based on IJK and tpfa calculating
-template<class strategy_t>
-class  mesh_ijk : public rs_smesh_base<strategy_t>
+class  mesh_ijk : public rs_smesh_base
   {
 //+++++++++++++++++++++++++++++++++++++++++++
 //  INTERNAL TYPE DECLARATION
@@ -21,24 +20,24 @@ class  mesh_ijk : public rs_smesh_base<strategy_t>
     ///////////////////////
     // BASE TYPES
     ///////////////////////
-    typedef rs_smesh_base <strategy_t>                  base_t;
+    typedef rs_smesh_base base_t;
 
-    typedef typename base_t::index_t                    index_t;
-    typedef typename base_t::item_t                     item_t;
+    typedef base_t::index_t                    index_t;
+    typedef base_t::item_t                     item_t;
 
-    typedef typename base_t::index_array_t              index_array_t;
-    typedef typename base_t::item_array_t               item_array_t;
+    typedef base_t::index_array_t              index_array_t;
+    typedef base_t::item_array_t               item_array_t;
 
-    typedef typename base_t::sp_bcsr_t                  sp_bcsr_t;
-    typedef typename base_t::sp_idata_t                 sp_idata_t;
-    typedef typename base_t::sp_flux_conn_iface_t       sp_flux_conn_iface_t;
+    typedef base_t::sp_bcsr_t                  sp_bcsr_t;
+    typedef base_t::sp_idata_t                 sp_idata_t;
+    typedef base_t::sp_flux_conn_iface_t       sp_flux_conn_iface_t;
 
     ///////////////////////
     // OWN TYPES
     ///////////////////////
     typedef grd_ecl::fpoint3d                           fpoint3d;
     typedef std::vector<grd_ecl::fpoint2d>              g_fpoint2d_vector;
-    typedef typename strategy_t::rhs_item_array_t       rhs_item_array_t;
+    typedef strategy_t::rhs_item_array_t       rhs_item_array_t;
     typedef boost::array <item_t, 3>                    center_t;
 
 //-------------------------------------------

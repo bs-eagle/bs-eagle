@@ -975,12 +975,11 @@ namespace blue_sky {
    * \class prod_printer
    * \brief Incapsulates data to print production info
    * */
-  template <typename strategy_t>
   struct prod_printer
   {
-    typedef reservoir <strategy_t>                reservoir_t;
-    typedef well <strategy_t>                     well_t;
-    typedef wells::connection <strategy_t>        connection_t;
+    typedef reservoir reservoir_t;
+    typedef well well_t;
+    typedef wells::connection connection_t;
     typedef smart_ptr <idata, true>               sp_data_t;
 
     DECL_COLUMN_HOLDER (prod_columns_holder_t, 13, 
@@ -1109,12 +1108,11 @@ namespace blue_sky {
    * \class inj_printer
    * \brief Incapsulates data to print injection info
    * */
-  template <typename strategy_t>
   struct inj_printer
   {
-    typedef reservoir <strategy_t>                reservoir_t;
-    typedef well <strategy_t>                     well_t;
-    typedef wells::connection <strategy_t>        connection_t;
+    typedef reservoir reservoir_t;
+    typedef well well_t;
+    typedef wells::connection connection_t;
     typedef smart_ptr <idata, true>               sp_data_t;
 
     DECL_COLUMN_HOLDER (inj_columns_holder_t, 10,
@@ -1224,12 +1222,11 @@ namespace blue_sky {
    * \brief Incapsulates data to print total
    *        production and injection info
    * */
-  template <typename strategy_t>
   struct prod_total_printer
   {
-    typedef reservoir <strategy_t>                reservoir_t;
-    typedef well <strategy_t>                     well_t;
-    typedef wells::connection <strategy_t>        connection_t;
+    typedef reservoir reservoir_t;
+    typedef well well_t;
+    typedef wells::connection connection_t;
     typedef smart_ptr <idata, true>               sp_data_t;
     typedef smart_ptr <well_t, true>              sp_well_t;
 
@@ -1337,11 +1334,10 @@ namespace blue_sky {
     }
   };
 
-  template <typename strategy_t>
   void
-  well_data_printer <strategy_t>::print_prod (const smart_ptr <idata, true> &data, const smart_ptr <reservoir <strategy_t>, true> &rs)
+  well_data_printer::print_prod (const smart_ptr <idata, true> &data, const smart_ptr <reservoir, true> &rs)
   {
-    static prod_printer <strategy_t> prod_printer_ (data, rs);
+    static prod_printer prod_printer_ (data, rs);
 
     BOSOUT (section::print_reports, level::highest) <<
       "    PRODUCTION REPORT\n"
@@ -1350,11 +1346,10 @@ namespace blue_sky {
     detail::print_well_data (prod_printer_, data, *rs, detail::is_prod ());
   }
 
-  template <typename strategy_t>
   void
-  well_data_printer <strategy_t>::print_inj (const smart_ptr <idata, true> &data, const smart_ptr <reservoir <strategy_t>, true> &rs)
+  well_data_printer::print_inj (const smart_ptr <idata, true> &data, const smart_ptr <reservoir, true> &rs)
   {
-    static inj_printer <strategy_t> inj_printer_ (data, rs);
+    static inj_printer inj_printer_ (data, rs);
 
     BOSOUT (section::print_reports, level::highest) <<
       "    INJECTOR REPORT\n"
@@ -1363,11 +1358,10 @@ namespace blue_sky {
     detail::print_well_data (inj_printer_, data, *rs, detail::is_inj ());
   }
 
-  template <typename strategy_t>
   void
-  well_data_printer <strategy_t>::print_total_prod (const smart_ptr <idata, true> &data, const smart_ptr <reservoir <strategy_t>, true> &rs)
+  well_data_printer::print_total_prod (const smart_ptr <idata, true> &data, const smart_ptr <reservoir, true> &rs)
   {
-    static prod_total_printer <strategy_t> prod_total_printer_ (data, rs);
+    static prod_total_printer prod_total_printer_ (data, rs);
 
     BOSOUT (section::print_reports, level::highest) <<
       "    CUMULATIVE INJECTION/PRODUCTION TOTAL\n"
@@ -1375,10 +1369,6 @@ namespace blue_sky {
       << bs_end;
     prod_total_printer_.print (data, *rs);
   }
-
-  template struct well_data_printer <base_strategy_fi>;
-  template struct well_data_printer <base_strategy_di>;
-  template struct well_data_printer <base_strategy_mixi>;
 
 } // namespace blue_sky
 

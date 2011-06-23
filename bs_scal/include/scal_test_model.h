@@ -12,13 +12,12 @@ namespace blue_sky
   namespace scal
     {
 
-    template <typename strategy_t>
     class BS_API_PLUGIN test_model : public objbase
       {
 
       public:
-        typedef typename strategy_t::item_t item_t;
-        typedef test_model <strategy_t>     this_t;
+        typedef strategy_t::item_t item_t;
+        typedef test_model this_t;
 
         void init (int n_phases, int cell_count);
 
@@ -34,7 +33,7 @@ namespace blue_sky
 
       private:
 
-        typedef typename strategy_t::item_array_t vector_t;
+        typedef strategy_t::item_array_t vector_t;
 
         int         n_phases;
         int         cell_count;

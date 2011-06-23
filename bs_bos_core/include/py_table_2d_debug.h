@@ -19,11 +19,10 @@ namespace blue_sky
   namespace python
     {
 
-    template <typename strategy_t>
     class py_data_row
       {
       public:
-        typedef table::data_row<strategy_t>  data_row_t;
+        typedef table::data_row  data_row_t;
 
         py_data_row ()
         {
@@ -47,11 +46,10 @@ namespace blue_sky
 
       };
 
-    template <typename strategy_t>
     class py_data_group
       {
       public:
-        typedef table::data_group<strategy_t>  data_group_t;
+        typedef table::data_group  data_group_t;
 
         py_data_group ()
             : group (0, 0, 0)
@@ -74,9 +72,9 @@ namespace blue_sky
             return group.get_columns_count ();
           }
 
-        py_data_row<strategy_t> get_row (int row_index) const
+        py_data_row get_row (int row_index) const
           {
-            return py_data_row<strategy_t> (group.get_row (row_index));
+            return py_data_row (group.get_row (row_index));
           }
 
       private:
@@ -86,11 +84,10 @@ namespace blue_sky
 
       };
 
-    template <typename strategy_t>
     class py_table_2d
       {
       public:
-        typedef table::table_2d<strategy_t>  table_2d_t;
+        typedef table::table_2d  table_2d_t;
 
         py_table_2d ()
             : data (0)
@@ -109,9 +106,9 @@ namespace blue_sky
             return data.get_groups_count ();
           }
 
-        py_data_group<strategy_t> get_data_group (int group_index)
+        py_data_group get_data_group (int group_index)
         {
-          return py_data_group<strategy_t> (data.get_data_group (group_index));
+          return py_data_group (data.get_data_group (group_index));
         }
 
       private:

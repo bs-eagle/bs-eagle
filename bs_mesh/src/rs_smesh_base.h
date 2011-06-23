@@ -9,6 +9,7 @@
 
 #include "flux_connections.h"
 #include "rs_mesh_base.h"
+#include "bs_hdf5_storage_v2.h"
 
 using namespace blue_sky;
 
@@ -21,8 +22,7 @@ using namespace blue_sky;
   };
 
 
-template<class strategy_t>
-class BS_API_PLUGIN rs_smesh_base : public rs_mesh_base<strategy_t>
+class BS_API_PLUGIN rs_smesh_base : public rs_mesh_base
   {
 
 
@@ -34,23 +34,23 @@ class BS_API_PLUGIN rs_smesh_base : public rs_mesh_base<strategy_t>
     ///////////////////////
     // BASE TYPES
     ///////////////////////
-    typedef rs_mesh_base <strategy_t>                   base_t;
+    typedef rs_mesh_base base_t;
 
-    typedef typename base_t::index_t                    index_t;
-    typedef typename base_t::item_t                     item_t;
+    typedef base_t::index_t                    index_t;
+    typedef base_t::item_t                     item_t;
 
-    typedef typename base_t::index_array_t              index_array_t;
-    typedef typename base_t::item_array_t               item_array_t;
+    typedef base_t::index_array_t              index_array_t;
+    typedef base_t::item_array_t               item_array_t;
 
-    typedef typename base_t::sp_bcsr_t                  sp_bcsr_t;
-    typedef typename base_t::sp_idata_t                 sp_idata_t;
-    typedef typename base_t::sp_flux_conn_iface_t       sp_flux_conn_iface_t;
+    typedef base_t::sp_bcsr_t                  sp_bcsr_t;
+    typedef base_t::sp_idata_t                 sp_idata_t;
+    typedef base_t::sp_flux_conn_iface_t       sp_flux_conn_iface_t;
 
     ///////////////////////
     // OWN TYPES
     ///////////////////////
 
-    typedef rs_smesh_base <strategy_t>                        this_t;
+    typedef rs_smesh_base this_t;
     typedef boost::array <index_t, 3>                   index_point3d_t;
     typedef std::pair<index_t, index_t>                 elem_index;
     //typedef boost::array <grd_ecl::fpoint3d, 8>         fpoint3d_vector;
@@ -213,6 +213,13 @@ class BS_API_PLUGIN rs_smesh_base : public rs_mesh_base<strategy_t>
         static boost::array <item_t, 3> dummy;
         return dummy;
       }
+
+    // storage interface
+    hdf5_group_v2 &
+    save_info (hdf5_group_v2 &group) const;
+
+    hdf5_group_v2 &
+    save_data (hdf5_group_v2 &group) const;
 
 //-------------------------------------------
 //  VARIABLES

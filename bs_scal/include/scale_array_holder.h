@@ -68,17 +68,16 @@ private:
     };
 #endif
 
-  template <typename strategy_t>
   class BS_API_PLUGIN scale_array_holder : public objbase
     {
     public:
-      typedef scale_array_holder<strategy_t>  this_t;
+      typedef scale_array_holder  this_t;
 
-      typedef typename strategy_t::item_t     item_t;
-      typedef typename strategy_t::item_array_t vector_t;
+      typedef strategy_t::item_t     item_t;
+      typedef strategy_t::item_array_t vector_t;
       typedef void (this_t::*inserter_t) (const shared_vector <float> &);
-      typedef typename strategy_t::template vec <float> vec_t;
-      typedef typename vec_t::type             data_t;
+      typedef strategy_t::vec <float> vec_t;
+      typedef vec_t::type             data_t;
 
     public:
       ///< critical oil saturation (NX * NY * NZ)
@@ -151,7 +150,7 @@ private:
       scal::data_placement::scale_array_placement_info placement_info;
     public:
 
-      BLUE_SKY_TYPE_DECL_T (scale_array_holder);
+      BLUE_SKY_TYPE_DECL (scale_array_holder);
     };
 
 

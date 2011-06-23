@@ -16,32 +16,24 @@ namespace blue_sky
   {
 
   //////////////////////////////////////////////////////////////////////////
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF (pvt_dead_oil,(class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF (pvt_dead_oil,(class));
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (pvt_dead_oil<base_strategy_fi>), 1, (pvt_base<base_strategy_fi>), "pvt_dead_oil_fi", "pvt_dead_oil_fi", "pvt_dead_oil_fi", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (pvt_dead_oil<base_strategy_di>), 1, (pvt_base<base_strategy_di>), "pvt_dead_oil_di", "pvt_dead_oil_di", "pvt_dead_oil_di", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (pvt_dead_oil<base_strategy_mixi>), 1, (pvt_base<base_strategy_mixi>), "pvt_dead_oil_mixi", "pvt_dead_oil_mixi", "pvt_dead_oil_mixi", false);
+  BLUE_SKY_TYPE_STD_CREATE (pvt_dead_oil);
+  BLUE_SKY_TYPE_STD_COPY (pvt_dead_oil);
+  BLUE_SKY_TYPE_IMPL (pvt_dead_oil, pvt_base, "pvt_dead_oil", "pvt_dead_oil", "pvt_dead_oil");
 
   //////////////////////////////////////////////////////////////////////////
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF (pvt_gas,(class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF (pvt_gas,(class));
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (pvt_gas<base_strategy_fi>), 1, (pvt_base<base_strategy_fi>), "pvt_gas_fi", "pvt_gas_fi", "pvt_gas_fi", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (pvt_gas<base_strategy_di>), 1, (pvt_base<base_strategy_di>), "pvt_gas_di", "pvt_gas_di", "pvt_gas_di", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (pvt_gas<base_strategy_mixi>), 1, (pvt_base<base_strategy_mixi>), "pvt_gas_mixi", "pvt_gas_mixi", "pvt_gas_mixi", false);
+  BLUE_SKY_TYPE_STD_CREATE (pvt_gas);
+  BLUE_SKY_TYPE_STD_COPY (pvt_gas);
+  BLUE_SKY_TYPE_IMPL (pvt_gas, pvt_base, "pvt_gas", "pvt_gas", "pvt_gas");
 
   //////////////////////////////////////////////////////////////////////////
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF (pvt_oil,(class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF (pvt_oil,(class));
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (pvt_oil<base_strategy_fi>), 1, (pvt_base<base_strategy_fi>), "pvt_oil_fi", "pvt_oil_fi", "pvt_oil_fi", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (pvt_oil<base_strategy_di>), 1, (pvt_base<base_strategy_di>), "pvt_oil_di", "pvt_oil_di", "pvt_oil_di", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (pvt_oil<base_strategy_mixi>), 1, (pvt_base<base_strategy_mixi>), "pvt_oil_mixi", "pvt_oil_mixi", "pvt_oil_mixi", false);
+  BLUE_SKY_TYPE_STD_CREATE (pvt_oil);
+  BLUE_SKY_TYPE_STD_COPY (pvt_oil);
+  BLUE_SKY_TYPE_IMPL (pvt_oil, pvt_base, "pvt_oil", "pvt_oil", "pvt_oil");
 
   //////////////////////////////////////////////////////////////////////////
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF (pvt_water,(class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF (pvt_water,(class));
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (pvt_water<base_strategy_fi>), 1, (pvt_base<base_strategy_fi>), "pvt_water_fi", "pvt_water_fi", "pvt_water_fi", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (pvt_water<base_strategy_di>), 1, (pvt_base<base_strategy_di>), "pvt_water_di", "pvt_water_di", "pvt_water_di", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (pvt_water<base_strategy_mixi>), 1, (pvt_base<base_strategy_mixi>), "pvt_water_mixi", "pvt_water_mixi", "pvt_water_mixi", false);
+  BLUE_SKY_TYPE_STD_CREATE (pvt_water);
+  BLUE_SKY_TYPE_STD_COPY (pvt_water);
+  BLUE_SKY_TYPE_IMPL (pvt_water, pvt_base, "pvt_water", "pvt_water", "pvt_water");
 
   //////////////////////////////////////////////////////////////////////////
   bool
@@ -49,33 +41,10 @@ namespace blue_sky
   {
     bool res = true;
 
-    res &= BS_KERNEL.register_type (pd, pvt_dead_oil<base_strategy_fi>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, pvt_dead_oil<base_strategy_di>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, pvt_dead_oil<base_strategy_mixi>::bs_type ());
-    BS_ASSERT (res);
-
-    res &= BS_KERNEL.register_type (pd, pvt_gas<base_strategy_fi>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, pvt_gas<base_strategy_di>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, pvt_gas<base_strategy_mixi>::bs_type ());
-    BS_ASSERT (res);
-
-    res &= BS_KERNEL.register_type (pd, pvt_oil<base_strategy_fi>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, pvt_oil<base_strategy_di>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, pvt_oil<base_strategy_mixi>::bs_type ());
-    BS_ASSERT (res);
-
-    res &= BS_KERNEL.register_type (pd, pvt_water<base_strategy_fi>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, pvt_water<base_strategy_di>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, pvt_water<base_strategy_mixi>::bs_type ());
-    BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, pvt_dead_oil::bs_type ());  BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, pvt_gas::bs_type ());       BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, pvt_oil::bs_type ());       BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, pvt_water::bs_type ());     BS_ASSERT (res);
 
     return res;
   }

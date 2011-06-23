@@ -10,26 +10,19 @@
 #define EVENT_BASE_H_
 #include "data_class.h"
 // WTF??
-#include "well_results_storage.h"
-#include "fip_results_storage.h"
 #include "data_storage_interface.h"
 
 namespace blue_sky
   {
 
-  template <typename strategy_t>
   class reservoir;
-
-  template <typename strategy_t>
   class calc_model;
-
   class idata;
 
   /**
    * \class event_base
    * \brief Base class for model events
    * */
-  template <typename strategy_t>
   class BS_API_PLUGIN event_base : public objbase
     {
       //-----------------------------------------
@@ -37,17 +30,17 @@ namespace blue_sky
       //-----------------------------------------
     public:
       //TODO:change objbase to reservoir
-      typedef reservoir <strategy_t>          reservoir_t;
-      typedef rs_mesh_iface <strategy_t>      mesh_iface_t;
-      typedef calc_model <strategy_t>         calc_model_t;
+      typedef reservoir reservoir_t;
+      typedef rs_mesh_iface mesh_iface_t;
+      typedef calc_model calc_model_t;
 
       typedef smart_ptr <mesh_iface_t , true> sp_mesh_iface_t;
       typedef smart_ptr <reservoir_t, true>   sp_top;
       typedef smart_ptr <calc_model_t, true>  sp_calc_model_t;
       typedef smart_ptr <named_pbase, true>   sp_named_pbase;
 
-      typedef event_base <strategy_t>         self_t;
-      typedef self_t                          this_t;
+      typedef event_base self_t;
+      typedef self_t     this_t;
 
       typedef named_pbase::ndt_t              ndt_t;
       typedef named_pbase::named_pbase_idxs   named_pbase_idxs;

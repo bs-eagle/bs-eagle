@@ -20,34 +20,29 @@ namespace blue_sky
     //  tfqmr_solver
 
     //! constructor
-    template <class strat_t>
-    tfqmr_solver<strat_t>::tfqmr_solver (bs_type_ctor_param param)
-      : linear_solver_base<strat_t> (param)
+    tfqmr_solver::tfqmr_solver (bs_type_ctor_param param)
+      : linear_solver_base (param)
     {}
 
     //! copy constructor
-    template <class strat_t>
-    tfqmr_solver<strat_t>::tfqmr_solver(const tfqmr_solver &solver)
-      : bs_refcounter (), linear_solver_base<strat_t> (solver)
+    tfqmr_solver::tfqmr_solver(const tfqmr_solver &solver)
+      : bs_refcounter (), linear_solver_base (solver)
     {
       if (&solver != this)
         *this = solver;
     }
 
     //! destructor
-    template <class strat_t>
-    tfqmr_solver<strat_t>::~tfqmr_solver ()
+    tfqmr_solver::~tfqmr_solver ()
     {}
 
 
-    template <class strat_t>
-    int tfqmr_solver<strat_t>::solve(matrix_t *matrix, rhs_item_array_t &rhs, item_array_t &solution)
+    int tfqmr_solver::solve(matrix_t *matrix, rhs_item_array_t &rhs, item_array_t &solution)
     {
       return templ_solve (matrix, rhs, solution);
     }
 
-    template <class strat_t>
-    int tfqmr_solver<strat_t>::solve_prec(matrix_t *matrix, item_array_t &rhs, item_array_t &solution)
+    int tfqmr_solver::solve_prec(matrix_t *matrix, item_array_t &rhs, item_array_t &solution)
     {
       return templ_solve (matrix, rhs, solution);
     }
@@ -63,8 +58,8 @@ namespace blue_sky
     *
     * \return 0 if success
     */
-    template <class strat_t> template <class rhs_t>
-    int tfqmr_solver<strat_t>::templ_solve(matrix_t *matrix1, rhs_t &rhs, item_array_t &solution)
+    template <class rhs_t>
+    int tfqmr_solver::templ_solve(matrix_t *matrix1, rhs_t &rhs, item_array_t &solution)
     {
       BOSOUT (section::solvers, level::debug) << "TFQMR\n" << bs_end;
       typedef item_t fp_type;
@@ -322,8 +317,8 @@ namespace blue_sky
     *
     * @return 0 if success
     */
-    template <class strat_t> int
-    tfqmr_solver<strat_t>::setup (matrix_t *matrix)
+    int
+    tfqmr_solver::setup (matrix_t *matrix)
     {
       if (!matrix)
         {
@@ -340,12 +335,9 @@ namespace blue_sky
     }
 
     //////////////////////////////////////////////////////////////////////////
-    BLUE_SKY_TYPE_STD_CREATE_T_DEF(tfqmr_solver, (class));
-    BLUE_SKY_TYPE_STD_COPY_T_DEF(tfqmr_solver, (class));
-
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (tfqmr_solver<base_strategy_fi>) , 1, (linear_solver_base<base_strategy_fi>), "tfqmr_solver_base_fi", "tfqmr linear solver", "TFQMR linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (tfqmr_solver<base_strategy_di>) , 1, (linear_solver_base<base_strategy_di>), "tfqmr_solver_base_di", "tfqmr linear solver", "TFQMR linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (tfqmr_solver<base_strategy_mixi>) , 1, (linear_solver_base<base_strategy_mixi>), "tfqmr_solver_base_mixi", "TFQMR linear solver", "TFQMR linear solver", false);
+    BLUE_SKY_TYPE_STD_CREATE (tfqmr_solver);
+    BLUE_SKY_TYPE_STD_COPY (tfqmr_solver);
+    BLUE_SKY_TYPE_IMPL (tfqmr_solver, linear_solver_base, "tfqmr_solver", "tfqmr_solver", "tfqmr_solver");
 
 
   }

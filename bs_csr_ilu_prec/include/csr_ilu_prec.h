@@ -17,24 +17,23 @@ namespace blue_sky
   /**
    * \brief ILU preconditioner for CSR matrix
    */
-  template <class strategy_t>
-  class BS_API_PLUGIN csr_ilu_prec: public linear_solver_base<strategy_t>
+  class BS_API_PLUGIN csr_ilu_prec: public linear_solver_base
     {
       //-----------------------------------------
       // TYPES
       //-----------------------------------------
     public:
-      typedef typename strategy_t::matrix_t       matrix_t;       ///< short name to matrix type
-      typedef typename strategy_t::item_array_t   item_array_t;   ///< short name to array type
-      typedef typename strategy_t::index_array_t  index_array_t;
-      typedef typename strategy_t::item_t         item_t;         ///< short name to array item type
-      typedef typename strategy_t::index_t        index_t;        ///< short name to matrix's index type
+      typedef strategy_t::matrix_t       matrix_t;       ///< short name to matrix type
+      typedef strategy_t::item_array_t   item_array_t;   ///< short name to array type
+      typedef strategy_t::index_array_t  index_array_t;
+      typedef strategy_t::item_t         item_t;         ///< short name to array item type
+      typedef strategy_t::index_t        index_t;        ///< short name to matrix's index type
 
-      typedef typename strategy_t::rhs_item_t	  rhs_item_t;     ///< short name for type of rhs
-      typedef typename strategy_t::rhs_item_array_t	rhs_item_array_t;   ///< short name for rhs array type
+      typedef strategy_t::rhs_item_t	  rhs_item_t;     ///< short name for type of rhs
+      typedef strategy_t::rhs_item_array_t	rhs_item_array_t;   ///< short name for rhs array type
 
-      typedef linear_solver_base<strategy_t>      this_t;         ///< typedef to this type
-      typedef linear_solver_base<strategy_t>      base_t;         ///< typedef to this type. in child classes used as a short name of base class
+      typedef linear_solver_base      this_t;         ///< typedef to this type
+      typedef linear_solver_base      base_t;         ///< typedef to this type. in child classes used as a short name of base class
       typedef smart_ptr<this_t, true>             sp_this_t;      ///< short name to smart pointer to this class
       typedef smart_ptr<linear_solver_prop, true> sp_prop_t;      ///< short name to smart pointer to properties holder class
 

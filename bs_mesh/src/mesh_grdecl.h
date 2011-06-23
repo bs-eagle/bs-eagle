@@ -24,8 +24,7 @@
 #endif
 
 //! class for basic work with mesh based on ZCORN&COORD and tpfa calculating
-template<class strategy_t>
-class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base<strategy_t>
+class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
   {
   
 //+++++++++++++++++++++++++++++++++++++++++++
@@ -35,17 +34,17 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base<strategy_t>
     ///////////////////////
     // BASE TYPES
     ///////////////////////
-    typedef rs_smesh_base <strategy_t>                  base_t;
+    typedef rs_smesh_base base_t;
 
-    typedef typename base_t::index_t                    index_t;
-    typedef typename base_t::item_t                     item_t;
+    typedef base_t::index_t                    index_t;
+    typedef base_t::item_t                     item_t;
 
-    typedef typename base_t::index_array_t              index_array_t;
-    typedef typename base_t::item_array_t               item_array_t;
+    typedef base_t::index_array_t              index_array_t;
+    typedef base_t::item_array_t               item_array_t;
 
-    typedef typename base_t::sp_bcsr_t                  sp_bcsr_t;
-    typedef typename base_t::sp_idata_t                 sp_idata_t;
-    typedef typename base_t::sp_flux_conn_iface_t       sp_flux_conn_iface_t;
+    typedef base_t::sp_bcsr_t                  sp_bcsr_t;
+    typedef base_t::sp_idata_t                 sp_idata_t;
+    typedef base_t::sp_flux_conn_iface_t       sp_flux_conn_iface_t;
     
     //typedef typename base_t::i_map_t                    i_map_t;
     //typedef typename base_t::d_map_t                    d_map_t;
@@ -54,21 +53,21 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base<strategy_t>
     // OWN TYPES
     ///////////////////////
 
-    typedef mesh_element3d <strategy_t>                 element_t;
+    typedef mesh_element3d element_t;
     typedef smart_ptr <element_t, true>                 sp_element_t;
-    typedef typename element_t::corners_t               corners_t;
-    typedef typename element_t::plane_t                 plane_t;
+    typedef element_t::corners_t               corners_t;
+    typedef element_t::plane_t                 plane_t;
 
-    typedef typename grd_ecl::fpoint3d                  fpoint3d_t;
-    typedef typename grd_ecl::fpoint2d                  fpoint2d_t;
-    typedef typename grd_ecl::quadrangle_t              quadrangle_t;
+    typedef grd_ecl::fpoint3d                  fpoint3d_t;
+    typedef grd_ecl::fpoint2d                  fpoint2d_t;
+    typedef grd_ecl::quadrangle_t              quadrangle_t;
     
-    typedef typename boost::array <index_t, 8>          element_zcorn_index_t;
-    typedef typename boost::array <index_t, 4>          plane_zcorn_index_t;
+    typedef boost::array <index_t, 8>          element_zcorn_index_t;
+    typedef boost::array <index_t, 4>          plane_zcorn_index_t;
     typedef boost::array <item_t, 3>                    point3d_t;
 
-    typedef typename strategy_t::rhs_item_array_t       rhs_item_array_t;
-    typedef typename array_float16_t::value_type        pool_item_t;
+    typedef strategy_t::rhs_item_array_t       rhs_item_array_t;
+    typedef array_float16_t::value_type        pool_item_t;
 
     typedef blue_sky::smart_ptr <blue_sky::FRead, true> sp_fread_t;
 
@@ -274,6 +273,9 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base<strategy_t>
                           const fpoint3d_t &center1, const fpoint3d_t &center2, direction d_dir, plane_t *plane2  = 0) const;                          
 
 
+      hdf5_group_v2 &
+      save_data (hdf5_group_v2 &group) const;
+
 //-------------------------------------------
 //  VARIABLES
 //===========================================
@@ -316,6 +318,8 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base<strategy_t>
   public:
     array_float16_t coord_array;	          //!< COORD array
     array_float16_t zcorn_array;				    //!< ZCORN array
+  protected:
+    item_array_t volumes_temp;
   };
 
 

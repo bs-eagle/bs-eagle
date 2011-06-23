@@ -33,9 +33,6 @@
 #include "string_formater.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
-#include "well_results_storage.h"
-#include "fip_results_storage.h"
-
 /////////////////////////////////////////////////////////////////////////////
 //! if ORI < NEW than ORI = NEW
 #define IF_LE_REPLACE(ORI,NEW,C,V) if ((ORI) > (NEW)) {(ORI) = (NEW);(C) = (V);}
@@ -68,11 +65,9 @@ namespace blue_sky
    * \brief  'default' ctor for calc_model
    * \param  param additional params for calc_model
    * */
-  template <class strategy_t>
-  calc_model<strategy_t>::calc_model (bs_type_ctor_param /*param*/)
+  calc_model::calc_model (bs_type_ctor_param /*param*/)
       : bs_refcounter(), bs_node(bs_node::create_node())
       , scal_prop (BS_KERNEL.create_object (scal_3p_t::bs_type ()))
-      , well_res(BS_KERNEL.create_object(well_results_storage::bs_type()))
   {
     init();
   }
@@ -81,25 +76,21 @@ namespace blue_sky
    * \brief  copy-ctor for calc_model
    * \param  src calc_model instance
    * */
-  template <class strategy_t>
-  calc_model<strategy_t>::calc_model (const this_t & /*src*/)
+  calc_model::calc_model (const this_t & /*src*/)
       : bs_refcounter(), bs_node(bs_node::create_node())
       , scal_prop (BS_KERNEL.create_object (scal_3p_t::bs_type ()))
-      , well_res(BS_KERNEL.create_object(well_results_storage::bs_type()))
   {
     //*this = src;
   }
 
-  template <class strategy_t>
-  calc_model<strategy_t>::~calc_model()
+  calc_model::~calc_model()
   {
   }
 
 
 
 
-  template <class strategy_t>
-  void calc_model<strategy_t>::init()
+  void calc_model::init()
   {
     n_comps = 0;
     n_phases = 0;
@@ -122,12 +113,11 @@ namespace blue_sky
     last_c_norm = 0;
     approx_flag = 0;
 
-    rock_grid_prop = BS_KERNEL.create_object (rock_grid< strategy_t >::bs_type ());
+    rock_grid_prop = BS_KERNEL.create_object (rock_grid::bs_type ());
     ts_params = BS_KERNEL.create_object (fi_params::bs_type ());
   }
 
-  template <class strategy_t>
-  int calc_model<strategy_t>::init_main_arrays (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
+  int calc_model::init_main_arrays (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
   {
 #ifdef _DEBUG
     BOSOUT (section::init_data, level::debug) << "FI DEBUG: begin of init_main_arrays method" << bs_end;
@@ -360,8 +350,7 @@ namespace blue_sky
     return 0;
   }
 
-  template <class strategy_t>
-  int calc_model<strategy_t>::set_initial_data (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
+  int calc_model::set_initial_data (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
   {
     if (input_data->init_section)
       {
@@ -387,8 +376,7 @@ namespace blue_sky
     return 0;
   }
 
-  template <class strategy_t>
-  int calc_model<strategy_t>::init_saturation (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
+  int calc_model::init_saturation (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
   {
     const index_t d_w = phase_d[FI_PHASE_WATER];
     const index_t d_o = phase_d[FI_PHASE_OIL];
@@ -736,8 +724,7 @@ namespace blue_sky
     return 0;
   }
 
-  template <class strategy_t>
-  int calc_model<strategy_t>::init_pressure (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
+  int calc_model::init_pressure (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
   {
     if (input_data->prvd.size())
       {
@@ -771,8 +758,7 @@ namespace blue_sky
     return 0;
   }
 
-  template <class strategy_t>
-  int calc_model<strategy_t>::init_calcul_arrays (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
+  int calc_model::init_calcul_arrays (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
   {
     write_time_to_log init_time ("Calc arrays initialization", "");
     
@@ -817,9 +803,8 @@ namespace blue_sky
     return 0;
   }
 
-  template <typename strategy_t>
   void
-  calc_model <strategy_t>::init_jacobian (const sp_jacobian_t &jacobian, const sp_mesh_iface_t &mesh)
+  calc_model::init_jacobian (const sp_jacobian_t &jacobian, const sp_mesh_iface_t &mesh)
   {
     write_time_to_log init_time ("Jacobian initialization", "");
     const sp_jacobian_matrix_t &locked_jmatrix (jacobian->get_jmatrix ());
@@ -832,9 +817,8 @@ namespace blue_sky
 #endif //_MPI
   }
 
-  template <typename strategy_t>
   void
-  calc_model <strategy_t>::init_boundary_connections (const sp_idata_t & /*input_data*/, const sp_mesh_iface_t & /*mesh*/)
+  calc_model::init_boundary_connections (const sp_idata_t & /*input_data*/, const sp_mesh_iface_t & /*mesh*/)
   {
     // initialize boundary connections
     // for (int i = 0; i < get_mesh()->n_boundary_connections; ++i) {
@@ -880,8 +864,7 @@ namespace blue_sky
 //     }
   }
 
-  template <class strategy_t>
-  int calc_model<strategy_t>::init_rs (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
+  int calc_model::init_rs (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
   {
     array_float16_t init_pbub = (*input_data->d_map)[PBUB].array;
     array_float16_t init_rs   = (*input_data->d_map)[RS].array;
@@ -959,8 +942,7 @@ namespace blue_sky
     return 0;
   }
 
-  template <class strategy_t>
-  const calc_model<strategy_t> &calc_model<strategy_t>::operator=(const this_t &src)
+  const calc_model&calc_model::operator=(const this_t &src)
   {
     n_comps = src.n_comps;
     n_phases = src.n_phases;
@@ -997,8 +979,6 @@ namespace blue_sky
     rock_grid_prop = give_kernel::Instance().create_object_copy(src.rock_grid_prop);
 
     ts_params = give_kernel::Instance().create_object_copy(src.ts_params);
-
-    mat = give_kernel::Instance().create_object_copy(src.mat);
     return *this;
   }
 
@@ -1026,9 +1006,8 @@ namespace blue_sky
       }
     };
 
-  template <typename strategy_t>
   void
-  calc_model<strategy_t>::init_scal ()
+  calc_model::init_scal ()
   {
     scal_prop->set_water_jfunction (BS_KERNEL.create_object (scal_3p_t::jfunction_t::bs_type ()));
     scal_prop->set_gas_jfunction (BS_KERNEL.create_object (scal_3p_t::jfunction_t::bs_type ()));
@@ -1036,8 +1015,7 @@ namespace blue_sky
     scal_prop->update_gas_data ();
   }
 
-  template <typename strategy_t>
-  void calc_model<strategy_t>::init_pvt_arrays (sp_pvt_oil_array_t &pvto,
+  void calc_model::init_pvt_arrays (sp_pvt_oil_array_t &pvto,
       sp_pvt_gas_array_t &pvtg,
       sp_pvt_water_array_t &pvtw,
       const sp_idata_t &idata)
@@ -1099,9 +1077,8 @@ namespace blue_sky
 
   }
 
-  template <typename strategy_t>
-  typename strategy_t::item_t
-  calc_model<strategy_t>::get_initial_rho (item_t height) const
+  strategy_t::item_t
+  calc_model::get_initial_rho (item_t height) const
     {
       BS_ASSERT (!pvt_oil_array.empty ());
 
@@ -1111,30 +1088,26 @@ namespace blue_sky
       return density * gravity * height;
     }
 
-  template <typename strategy_t>
   void
-  calc_model<strategy_t>::update_min_pressure_range (item_t min_range)
+  calc_model::update_min_pressure_range (item_t min_range)
   {
     this->ts_params->set_float (fi_params::PVT_PRESSURE_RANGE_MIN, min_range);
   }
 
-  template <typename strategy_t>
   void
-  calc_model<strategy_t>::update_max_pressure_range (item_t max_range)
+  calc_model::update_max_pressure_range (item_t max_range)
   {
     this->ts_params->set_float (fi_params::PVT_PRESSURE_RANGE_MAX, max_range);
   }
 
-  template <typename strategy_t>
   restore_solution_return_type
-  calc_model<strategy_t>::restore_solution (const sp_mesh_iface_t &mesh, const sp_jacobian_matrix_t &jacobian)
+  calc_model::restore_solution (const sp_mesh_iface_t &mesh, const sp_jacobian_matrix_t &jacobian)
   {
     return apply_newton_correction (1.0, 0, mesh, jacobian);
   }
 
-  template <typename strategy_t>
   restore_solution_return_type
-  calc_model<strategy_t>::apply_newton_correction (item_t mult, index_t istart_line_search, const sp_mesh_iface_t &mesh, const sp_jacobian_matrix_t &jacobian)
+  calc_model::apply_newton_correction (item_t mult, index_t istart_line_search, const sp_mesh_iface_t &mesh, const sp_jacobian_matrix_t &jacobian)
   {
     //int ret_code = 0;
     static double mult_out = 1.0;   // TODO: WTF
@@ -1174,9 +1147,8 @@ namespace blue_sky
 //! if ORI < NEW than ORI = NEW
 #define IF_LE_REPLACE(ORI,NEW,C,V) if ((ORI) > (NEW)) {(ORI) = (NEW);(C) = (V);}
 
-  template <typename strategy_t>
-  typename strategy_t::item_t
-  calc_model <strategy_t>::new_simple_get_cell_solution_mult_2 (const sp_mesh_iface_t &msh, const sp_jacobian_matrix_t &jmatrix) const
+  strategy_t::item_t
+  calc_model::new_simple_get_cell_solution_mult_2 (const sp_mesh_iface_t &msh, const sp_jacobian_matrix_t &jmatrix) const
   {
     BS_ASSERT (msh);
     BS_ASSERT (jmatrix);
@@ -1315,9 +1287,8 @@ namespace blue_sky
     return mult;
   }
 
-  template <typename strategy_t>
-  typename calc_model<strategy_t>::item_t
-  calc_model<strategy_t>::new_simple_get_cell_solution_mult (const sp_mesh_iface_t &msh,
+  calc_model::item_t
+  calc_model::new_simple_get_cell_solution_mult (const sp_mesh_iface_t &msh,
       const sp_jacobian_matrix_t &jacobian)
   {
     BS_ASSERT (msh);
@@ -1433,9 +1404,8 @@ namespace blue_sky
     return 1.0;//mult;
   }
 
-  template <typename strategy_t>
   int
-  calc_model<strategy_t>::new_simple_get_cell_solution (const double mult, int istart_linear_search,
+  calc_model::new_simple_get_cell_solution (const double mult, int istart_linear_search,
       const sp_mesh_iface_t &msh,
       const sp_jacobian_matrix_t &jacobian)
   {
@@ -1683,9 +1653,8 @@ namespace blue_sky
     return 0;
   }
 
-  template <typename strategy_t>
   int
-  calc_model<strategy_t>::calc_approx_so_sg_ro (const item_t mo_in, const item_t mg_in, const item_t poro,
+  calc_model::calc_approx_so_sg_ro (const item_t mo_in, const item_t mg_in, const item_t poro,
       const item_t ifvf_o, const item_t ifvf_g, const item_t max_ro,
       // results
       item_t &so, item_t &sg, item_t &ro,
@@ -1762,47 +1731,39 @@ namespace blue_sky
     return 0;
   }
 
-  template <typename strategy_t>
   bool
-  calc_model <strategy_t>::is_water () const
+  calc_model::is_water () const
     {
       return FI_CHK_WATER (phases);
     }
-  template <typename strategy_t>
   bool
-  calc_model <strategy_t>::is_gas () const
+  calc_model::is_gas () const
     {
       return FI_CHK_GAS (phases);
     }
-  template <typename strategy_t>
   bool
-  calc_model <strategy_t>::is_oil () const
+  calc_model::is_oil () const
     {
       return FI_CHK_OIL (phases);
     }
-  template <typename strategy_t>
-  typename calc_model<strategy_t>::index_t
-  calc_model <strategy_t>::water_shift () const
+  calc_model::index_t
+  calc_model::water_shift () const
     {
       return phase_d[FI_PHASE_WATER];
     }
-  template <typename strategy_t>
-  typename calc_model<strategy_t>::index_t
-  calc_model <strategy_t>::gas_shift () const
+  calc_model::index_t
+  calc_model::gas_shift () const
     {
       return phase_d[FI_PHASE_GAS];
     }
-  template <typename strategy_t>
-  typename calc_model<strategy_t>::index_t
-  calc_model <strategy_t>::oil_shift () const
+  calc_model::index_t
+  calc_model::oil_shift () const
     {
       return phase_d[FI_PHASE_OIL];
     }
 
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(calc_model, (class)); //(class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(calc_model, (class)); //(class));
+  BLUE_SKY_TYPE_STD_CREATE (calc_model);
+  BLUE_SKY_TYPE_STD_COPY (calc_model);
 
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (calc_model<base_strategy_fi>) , 1, (bs_node), "calc_model_fi", "calc_model_base-float-int", "Calc_model_base with float items and integer indexes", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (calc_model<base_strategy_di>) , 1, (bs_node), "calc_model_di", "calc_model_base-double-int", "Calc_model_base with double items and integer indexes", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (calc_model<base_strategy_mixi>) , 1, (bs_node), "calc_model_mixi", "calc_model_base-mix-int", "Calc_model_base with double items and integer indexes", false);
+  BLUE_SKY_TYPE_IMPL (calc_model, bs_node, "calc_model", "calc_model", "Calc_model");
 }

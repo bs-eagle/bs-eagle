@@ -14,27 +14,23 @@
 namespace blue_sky
   {
 
-  template <typename strategy_t>
   class event_base;
-
-  template <typename strategy_t>
   class reservoir;
 
   /**
    * \class event_manager
    * \brief class to store events and to manage of them
    * */
-  template <typename strategy_t>
   class BS_API_PLUGIN event_manager : public objbase
     {
       //-----------------------------------------
       //  TYPES
       //-----------------------------------------
     public:
-      typedef event_base <strategy_t>                 event_base_t;       //!< event_base type
+      typedef event_base event_base_t;       //!< event_base type
       typedef smart_ptr < event_base_t >              sp_event_base;      //!< smart_ptr to event_base type
-      typedef reservoir <strategy_t>                  sp_top;             //!< reservoir type
-      typedef event_manager<strategy_t>               self_t;             //!< shortname for this type
+      typedef reservoir sp_top;             //!< reservoir type
+      typedef event_manager self_t;             //!< shortname for this type
       typedef self_t                                  this_t;             //!< shortname for this type
       typedef std::list < sp_event_base >             sp_event_base_list; //!< list of events
       typedef boost::posix_time::ptime                date_t;             //!< shortname for time

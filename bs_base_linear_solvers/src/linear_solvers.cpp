@@ -163,22 +163,19 @@ namespace blue_sky
   //  linear_solver_base
 
   //! constructor
-  template <class strategy_t>
-  linear_solver_base<strategy_t>::linear_solver_base (bs_type_ctor_param /*param*/, bs_node::sp_node node)
+  linear_solver_base::linear_solver_base (bs_type_ctor_param /*param*/, bs_node::sp_node node)
   :bs_node (node)
   {
     init();
   }
 
-  template <class strategy_t>
-  linear_solver_base<strategy_t>::linear_solver_base (bs_type_ctor_param)
+  linear_solver_base::linear_solver_base (bs_type_ctor_param)
   :  bs_node(bs_node::create_node (new solver_trait ()))
   {
     init();
   }
 
-  template <class strategy_t>
-  void linear_solver_base<strategy_t>::init()
+  void linear_solver_base::init()
   {
     prop = BS_KERNEL.create_object (linear_solver_prop::bs_type ());
     BS_ASSERT (prop);
@@ -190,8 +187,7 @@ namespace blue_sky
     //bs_node::insert (prop_link, false);
   }
 
-  template <class strategy_t>
-  linear_solver_base<strategy_t>::linear_solver_base (const linear_solver_base &solver)
+  linear_solver_base::linear_solver_base (const linear_solver_base &solver)
         : bs_refcounter (), bs_node ()
   {
     if (&solver != this)
@@ -199,8 +195,7 @@ namespace blue_sky
   }
 
   //! destructor
-  template <class strategy_t>
-  linear_solver_base<strategy_t>::~linear_solver_base ()
+  linear_solver_base::~linear_solver_base ()
   {
     //prec = 0;
     //prop = 0;
@@ -210,38 +205,33 @@ namespace blue_sky
   //  gmres2_solver
 
   //! constructor
-  template <class strat_t>
-  gmres_solver2<strat_t>::gmres_solver2 (bs_type_ctor_param param)
-  : linear_solver_base<strat_t> (param)
+  gmres_solver2::gmres_solver2 (bs_type_ctor_param param)
+  : linear_solver_base (param)
   {
     m = 30;
   }
 
   //! copy constructor
-  template <class strat_t>
-  gmres_solver2<strat_t>::gmres_solver2(const gmres_solver2 &solver)
-        : bs_refcounter (), linear_solver_base<strat_t> (solver)
+  gmres_solver2::gmres_solver2(const gmres_solver2 &solver)
+        : bs_refcounter (), linear_solver_base (solver)
   {
     if (&solver != this)
       *this = solver;
   }
 
   //! destructor
-  template <class strat_t>
-  gmres_solver2<strat_t>::~gmres_solver2 ()
+  gmres_solver2::~gmres_solver2 ()
   {
     m = 30;
   }
 
 
-   template <class strat_t>
-   int gmres_solver2<strat_t>::solve(matrix_t *matrix, rhs_item_array_t &rhs, item_array_t &solution)
+   int gmres_solver2::solve(matrix_t *matrix, rhs_item_array_t &rhs, item_array_t &solution)
    {
      return templ_solve (matrix, rhs, solution);
    }
 
-   template <class strat_t>
-   int gmres_solver2<strat_t>::solve_prec(matrix_t *matrix, item_array_t &rhs, item_array_t &solution)
+   int gmres_solver2::solve_prec(matrix_t *matrix, item_array_t &rhs, item_array_t &solution)
    {
      return templ_solve (matrix, rhs, solution);
    }
@@ -256,11 +246,11 @@ namespace blue_sky
   *
   * @return 0 if success
   */
-  template <class strat_t> template <class rhs_t> int
-  gmres_solver2<strat_t>::templ_solve (matrix_t *matrix, rhs_t &rhs, item_array_t &solution)
+  template <class rhs_t> int
+  gmres_solver2::templ_solve (matrix_t *matrix, rhs_t &rhs, item_array_t &solution)
   {
     //tools::save_seq_vector ("rhs_new").save (rhs);
-    typedef typename strat_t::item_t fp_type;
+    typedef strategy_t::item_t fp_type;
 
     BS_ASSERT (matrix);
     BS_ASSERT (rhs.size ());
@@ -538,8 +528,8 @@ namespace blue_sky
   *
   * @return 0 if success
   */
-  template <class strat_t> int
-  gmres_solver2<strat_t>::setup (matrix_t *matrix)
+  int
+  gmres_solver2::setup (matrix_t *matrix)
   {
     BS_ASSERT (matrix);
     if (!matrix)
@@ -560,35 +550,30 @@ namespace blue_sky
   //  bicgstab_solver
 
   //! constructor
-  template <class strat_t>
-  bicgstab_solver<strat_t>::bicgstab_solver (bs_type_ctor_param param)
-      : linear_solver_base<strat_t> (param)
+  bicgstab_solver::bicgstab_solver (bs_type_ctor_param param)
+      : linear_solver_base (param)
   {}
 
   //! copy constructor
-  template <class strat_t>
-  bicgstab_solver<strat_t>::bicgstab_solver(const bicgstab_solver &solver)
-      : bs_refcounter (), linear_solver_base<strat_t> (solver)
+  bicgstab_solver::bicgstab_solver(const bicgstab_solver &solver)
+      : bs_refcounter (), linear_solver_base (solver)
   {
     if (&solver != this)
       *this = solver;
   }
 
   //! destructor
-  template <class strat_t>
-  bicgstab_solver<strat_t>::~bicgstab_solver ()
+  bicgstab_solver::~bicgstab_solver ()
   {}
 
 
 
-  template <class strat_t>
-  int bicgstab_solver<strat_t>::solve(matrix_t *matrix, rhs_item_array_t &rhs, item_array_t &solution)
+  int bicgstab_solver::solve(matrix_t *matrix, rhs_item_array_t &rhs, item_array_t &solution)
   {
     return templ_solve (matrix, rhs, solution);
   }
 
-  template <class strat_t>
-  int bicgstab_solver<strat_t>::solve_prec(matrix_t *matrix, item_array_t &rhs, item_array_t &solution)
+  int bicgstab_solver::solve_prec(matrix_t *matrix, item_array_t &rhs, item_array_t &solution)
   {
      return templ_solve (matrix, rhs, solution);
   }
@@ -602,8 +587,8 @@ namespace blue_sky
   *
   * \return 0 if success
   */
-  template <class strat_t> template <class rhs_t> int
-  bicgstab_solver<strat_t>::templ_solve (matrix_t *matrix, rhs_t &rhs, item_array_t &solution)
+  template <class rhs_t> int
+  bicgstab_solver::templ_solve (matrix_t *matrix, rhs_t &rhs, item_array_t &solution)
   {
     typedef item_t fp_type;
 
@@ -838,8 +823,8 @@ namespace blue_sky
   *
   * @return 0 if success
   */
-  template <class strat_t> int
-  bicgstab_solver<strat_t>::setup (matrix_t *matrix)
+  int
+  bicgstab_solver::setup (matrix_t *matrix)
   {
     BS_ASSERT (matrix);
     if (!matrix)
@@ -862,35 +847,18 @@ namespace blue_sky
   BLUE_SKY_TYPE_IMPL(linear_solver_prop, objbase, "linear_solver_prop", "Property for linear solvers", "Property for linear solvers");
 
   //////////////////////////////////////////////////////////////////////////
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(linear_solver_base, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(linear_solver_base, (class));
-
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (linear_solver_base<base_strategy_fi>) , 1, (objbase), "linear_solver_base_fi", "linear solver", "linear solver", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (linear_solver_base<base_strategy_di>) , 1, (objbase), "linear_solver_base_di", "linear solver", "linear solver", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (linear_solver_base<base_strategy_mixi>) , 1, (objbase), "linear_solver_base_mixi", "linear solver", "linear solver", false);
-
-#ifdef _MPI
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (linear_solver_base<mpi_strategy_di>) , 1, (objbase), "linear_solver_mpi_di", "linear solver", "linear solver", false);
-#endif
+  BLUE_SKY_TYPE_STD_CREATE (linear_solver_base);
+  BLUE_SKY_TYPE_STD_COPY (linear_solver_base);
+  BLUE_SKY_TYPE_IMPL (linear_solver_base, objbase, "linear_solver_base", "linear_solver_base", "linear_solver_base");
   //////////////////////////////////////////////////////////////////////////
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(gmres_solver2, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(gmres_solver2, (class));
+  BLUE_SKY_TYPE_STD_CREATE (gmres_solver2);
+  BLUE_SKY_TYPE_STD_COPY (gmres_solver2);
+  BLUE_SKY_TYPE_IMPL (gmres_solver2, linear_solver_base, "gmres_solver2", "gmres_solver2", "gmres_solver2");
 
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (gmres_solver2<base_strategy_fi>) , 1, (linear_solver_base<base_strategy_fi>), "gmres_solver2_base_fi", "GMRES linear solver", "GMRES linear solver", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (gmres_solver2<base_strategy_di>) , 1, (linear_solver_base<base_strategy_di>), "gmres_solver2_base_di", "GMRES linear solver", "GMRES linear solver", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (gmres_solver2<base_strategy_mixi>) , 1, (linear_solver_base<base_strategy_mixi>), "gmres_solver2_base_mixi", "GMRES linear solver", "GMRES linear solver", false);
-
-#ifdef _MPI
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (gmres_solver2<mpi_strategy_di>) , 1, (linear_solver_base<mpi_strategy_di>), "gmres_solver2_mpi_di", "GMRES linear solver", "GMRES linear solver", false);
-#endif
   //////////////////////////////////////////////////////////////////////////
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(bicgstab_solver, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(bicgstab_solver, (class));
-
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bicgstab_solver<base_strategy_fi>) , 1, (linear_solver_base<base_strategy_fi>), "bicgstab_solver_base_fi", "BiCG linear solver", "BiCG linear solver", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bicgstab_solver<base_strategy_di>) , 1, (linear_solver_base<base_strategy_di>), "bicgstab_solver_base_di", "BiCG linear solver", "BiCG linear solver", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (bicgstab_solver<base_strategy_mixi>) , 1, (linear_solver_base<base_strategy_mixi>), "bicgstab_solver_base_mixi", "BiCG linear solver", "BiCG linear solver", false);
-
+  BLUE_SKY_TYPE_STD_CREATE (bicgstab_solver);
+  BLUE_SKY_TYPE_STD_COPY (bicgstab_solver);
+  BLUE_SKY_TYPE_IMPL (bicgstab_solver, linear_solver_base, "bicgstab_solver", "bicgstab_solver", "bicgstab_solver");
   //////////////////////////////////////////////////////////////////////////
   // register types
 
@@ -907,35 +875,9 @@ namespace blue_sky
   {
     bool res = true;
 
-    res &= BS_KERNEL.register_type (pd, linear_solver_base<base_strategy_di>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, linear_solver_base<base_strategy_fi>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, linear_solver_base<base_strategy_mixi>::bs_type ());
-    BS_ASSERT (res);
-
-
-    res &= BS_KERNEL.register_type (pd, gmres_solver2<base_strategy_di>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, gmres_solver2<base_strategy_fi>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, gmres_solver2<base_strategy_mixi>::bs_type ());
-    BS_ASSERT (res);
-
-
-
-#ifdef _MPI
-    res &= BS_KERNEL.register_type (pd, gmres_solver2<mpi_strategy_di>::bs_type ());
-#endif
-
-    res &= BS_KERNEL.register_type (pd, bicgstab_solver<base_strategy_di>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, bicgstab_solver<base_strategy_fi>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, bicgstab_solver<base_strategy_mixi>::bs_type ());
-    BS_ASSERT (res);
-
-
+    res &= BS_KERNEL.register_type (pd, linear_solver_base::bs_type ());  BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, gmres_solver2::bs_type ());       BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, bicgstab_solver::bs_type ());     BS_ASSERT (res);
 
     return res;
   }

@@ -17,22 +17,21 @@ namespace blue_sky
   namespace table
     {
 
-    template <typename strategy_t> class data_group;
-    template <typename strategy_t> class data_row;
-    template <typename strategy_t> class table_2d;
-    template <typename strategy_t> class data_row_push_back;
+    class data_group;
+    class data_row;
+    class table_2d;
+    class data_row_push_back;
 
-    template <typename strategy_t>
     class data_row
       {
       public:
-        typedef typename strategy_t::item_t        item_t;
-        typedef typename strategy_t::item_array_t  item_array_t;
+        typedef strategy_t::item_t        item_t;
+        typedef strategy_t::item_array_t  item_array_t;
 
-        typedef data_row <strategy_t>              this_t;
+        typedef data_row this_t;
 
       private:
-        friend class data_group <strategy_t>;
+        friend class data_group;
 
         data_row (item_t *data_ptr, int columns_count)
             : data_ptr (data_ptr)
@@ -104,19 +103,18 @@ namespace blue_sky
 
       };
 
-    template <typename strategy_t>
     class data_group
       {
       public:
-        typedef typename strategy_t::item_t        item_t;
-        typedef typename strategy_t::item_array_t  item_array_t;
+        typedef strategy_t::item_t        item_t;
+        typedef strategy_t::item_array_t  item_array_t;
 
-        typedef data_group<strategy_t>             this_t;
-        typedef data_row<strategy_t>               data_row_t;
+        typedef data_group             this_t;
+        typedef data_row               data_row_t;
 
       private:
 
-        friend class table_2d <strategy_t>;
+        friend class table_2d;
 
       public:
         data_group (item_t *data_ptr = 0, int rows_count = 0, int columns_count = 0)
@@ -191,17 +189,16 @@ namespace blue_sky
 
       };
 
-    template <typename strategy_t>
     class data_row_push_back
       {
       public:
-        typedef typename strategy_t::item_t        item_t;
-        typedef typename strategy_t::item_array_t  item_array_t;
+        typedef strategy_t::item_t        item_t;
+        typedef strategy_t::item_array_t  item_array_t;
 
-        typedef data_row_push_back <strategy_t>    this_t;
+        typedef data_row_push_back this_t;
 
       private:
-        friend class table_2d <strategy_t>;
+        friend class table_2d;
 
         data_row_push_back (item_t *data_ptr, int columns_count)
             : data_ptr (data_ptr)
@@ -232,18 +229,17 @@ namespace blue_sky
 
       };
 
-    template <typename strategy_t>
     class table_2d
       {
       public:
 
-        typedef typename strategy_t::item_t        item_t;
-        typedef typename strategy_t::item_array_t  item_array_t;
+        typedef strategy_t::item_t        item_t;
+        typedef strategy_t::item_array_t  item_array_t;
 
-        typedef typename strategy_t::item_t        index_t;
+        typedef strategy_t::item_t        index_t;
 
-        typedef data_group <strategy_t>            data_group_t;
-        typedef data_row_push_back <strategy_t>    data_row_push_back_t;
+        typedef data_group data_group_t;
+        typedef data_row_push_back data_row_push_back_t;
 
         table_2d (int group_count)
             : rows_count (0)

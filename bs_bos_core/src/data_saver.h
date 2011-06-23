@@ -13,20 +13,20 @@
 #include "facility_manager.h"
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include "conf.h"
 
 namespace blue_sky {
 
-  template <typename strategy_t>
   struct BS_API_PLUGIN data_saver
   {
-    typedef typename strategy_t::item_t   item_t;
+    typedef strategy_t::item_t   item_t;
 
-    typedef calc_model <strategy_t>       calc_model_t;
-    typedef rs_mesh_iface <strategy_t>    mesh_iface_t;
-    typedef jacobian_matrix <strategy_t>  jacobian_matrix_t; 
-    typedef facility_manager <strategy_t> facility_manager_t;
+    typedef calc_model calc_model_t;
+    typedef rs_mesh_iface mesh_iface_t;
+    typedef jacobian_matrix jacobian_matrix_t; 
+    typedef facility_manager facility_manager_t;
 
-    typedef typename facility_manager_t::well_const_iterator_t      well_iterator_t;
+    typedef facility_manager_t::well_const_iterator_t      well_iterator_t;
 
     typedef smart_ptr <calc_model_t>      sp_calc_model_t;
     typedef smart_ptr <mesh_iface_t>      sp_mesh_iface_t;
@@ -90,6 +90,14 @@ namespace blue_sky {
      * */
     void
     write_starting_date (const boost::posix_time::ptime &date);
+
+    void
+    write_calc_model_data (const char *name, 
+                           sp_calc_model_t const &cm, 
+                           t_long large_step, 
+                           t_long small_step, 
+                           t_long iteration, 
+                           double time);
 
   private:
 

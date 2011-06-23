@@ -15,8 +15,7 @@
 namespace blue_sky
   {
   // Special blue-sky objbase class implementations
-  template <class strategy_t/*, class mtrx_fp_type*/>
-  rock_grid<strategy_t /*,mtrx_fp_type*/>::rock_grid (bs_type_ctor_param /*param*/)
+  rock_grid::rock_grid (bs_type_ctor_param /*param*/)
       : bs_refcounter(), objbase()
   {
     n_elements = 0;
@@ -25,22 +24,19 @@ namespace blue_sky
     //n_boundary_planes = 0;
   }
 
-  template <class strategy_t/*, class mtrx_fp_type*/>
-  rock_grid<strategy_t /*,mtrx_fp_type*/>::rock_grid (const rock_grid& prop)
+  rock_grid::rock_grid (const rock_grid& prop)
       : bs_refcounter(), objbase(prop)
   {
     if (&prop != this)
       *this = prop;
   }
 
-  template <class strategy_t/*, class mtrx_fp_type*/>
-  rock_grid<strategy_t /*,mtrx_fp_type*/>::~rock_grid ()
+  rock_grid::~rock_grid ()
   {
   }
 
   // init rock_grid
-  template <class strategy_t>
-  void rock_grid<strategy_t>::init (const sp_idata &input_data, index_t n_els, index_t n_pvt_regs)
+  void rock_grid::init (const sp_idata &input_data, index_t n_els, index_t n_pvt_regs)
   {
     n_elements = n_els;
     n_pvt_regions = n_pvt_regs;
@@ -89,9 +85,8 @@ namespace blue_sky
   }
 
   // init data
-  template <class strategy_t>
   int
-  rock_grid<strategy_t>::init_data (index_t cells_count, const index_array_t &index_map, const sp_idata &input_data)
+  rock_grid::init_data (index_t cells_count, const index_array_t &index_map, const sp_idata &input_data)
   {
     if (input_data->get_rock().size())
       {
@@ -145,9 +140,8 @@ namespace blue_sky
   *
   * \return 0 if success
   */
-  template <class strategy_t>
   int
-  rock_grid<strategy_t>::init_planes_trans (index_t cells_count, const item_array_t &mesh_volumes, const sp_fi_params &/*ts_params*/, physical_constants &/*internal_constants*/)
+  rock_grid::init_planes_trans (index_t cells_count, const item_array_t &mesh_volumes, const sp_fi_params &/*ts_params*/, physical_constants &/*internal_constants*/)
   {
     if (net_to_gros.empty ())
       {
@@ -179,9 +173,7 @@ namespace blue_sky
   }
 
 
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(rock_grid,(class))
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(rock_grid,(class))
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (rock_grid<base_strategy_fi>), 1, (objbase), "rock_grid_fi", "rock_grid_fi_i class", "rock grid fi i", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (rock_grid<base_strategy_di>), 1, (objbase), "rock_grid_di", "rock_grid_di class", "rock grid di i", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (rock_grid<base_strategy_mixi>), 1, (objbase), "rock_grid_mixi", "rock_grid_di class", "rock grid mixi i", false)
+  BLUE_SKY_TYPE_STD_CREATE (rock_grid)
+  BLUE_SKY_TYPE_STD_COPY (rock_grid)
+  BLUE_SKY_TYPE_IMPL (rock_grid, objbase, "rock_grid", "rock_grid", "rock_grid")
 }

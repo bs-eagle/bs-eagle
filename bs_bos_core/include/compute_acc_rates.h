@@ -18,25 +18,25 @@ namespace blue_sky
    * \brief  Calculates total rates for well and 
    *         rate and total rate for reservoir
    * */
-  template <typename strategy_t, bool is_w, bool is_g, bool is_o>
+  template <bool is_w, bool is_g, bool is_o>
   inline void
-  main_loop_calc <strategy_t, is_w, is_g, is_o>::compute_acc_rates ()
+  main_loop_calc <is_w, is_g, is_o>::compute_acc_rates ()
   {
-    typedef typename calc_model_t::strategy_type                                    strategy_type;
-    typedef typename calc_model_t::well_t                                           well_t;
-    typedef typename calc_model_t::reservoir_t::facility_manager_t::well_const_iterator_t well_iterator_t;
+    typedef calc_model_t::strategy_type                                    strategy_type;
+    typedef calc_model_t::well_t                                           well_t;
+    typedef calc_model_t::reservoir_t::facility_manager_t::well_const_iterator_t well_iterator_t;
 
-    typedef typename calc_model_t::sp_well_t                                        sp_well_t;
+    typedef calc_model_t::sp_well_t                                        sp_well_t;
 
     well_iterator_t wb = reservoir_->get_facility_list ()->wells_begin ();
     well_iterator_t we = reservoir_->get_facility_list ()->wells_end ();
 
-    typename reservoir_t::rate_data_t &rs_rate          = reservoir_->rate_;
-    typename reservoir_t::rate_data_t &rs_rate_rc       = reservoir_->rate_rc_;
-    typename reservoir_t::rate_data_t &rs_rate_wefac    = reservoir_->rate_wefac_;
-    typename reservoir_t::rate_data_t &rs_rate_rc_wefac = reservoir_->rate_rc_wefac_;
-    typename reservoir_t::rate_data_t &rs_rate_initial  = reservoir_->rate_initial_;
-    typename reservoir_t::rate_data_t &rs_rate_total    = reservoir_->rate_total_;
+    reservoir_t::rate_data_t &rs_rate          = reservoir_->rate_;
+    reservoir_t::rate_data_t &rs_rate_rc       = reservoir_->rate_rc_;
+    reservoir_t::rate_data_t &rs_rate_wefac    = reservoir_->rate_wefac_;
+    reservoir_t::rate_data_t &rs_rate_rc_wefac = reservoir_->rate_rc_wefac_;
+    reservoir_t::rate_data_t &rs_rate_initial  = reservoir_->rate_initial_;
+    reservoir_t::rate_data_t &rs_rate_total    = reservoir_->rate_total_;
 
     rs_rate           = 0;
     rs_rate_rc        = 0;

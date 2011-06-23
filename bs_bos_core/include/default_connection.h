@@ -20,19 +20,18 @@ namespace wells {
    * \class default_connection
    * \brief Default implementation of well connection
    * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN default_connection : public connection <strategy_t>
+  class BS_API_PLUGIN default_connection : public connection 
   {
   public:
 
-    typedef connection <strategy_t>             base_t;
-    typedef typename base_t::item_t             item_t;
-    typedef typename base_t::rhs_item_t         rhs_item_t;
+    typedef connection base_t;
+    typedef base_t::item_t             item_t;
+    typedef base_t::rhs_item_t         rhs_item_t;
 
   public:
 
     //! blue-sky type declaration
-    BLUE_SKY_TYPE_DECL_T (default_connection <strategy_t>);
+    BLUE_SKY_TYPE_DECL (default_connection);
 
     /**
      * \brief  Clears data

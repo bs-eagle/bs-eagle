@@ -8,16 +8,14 @@
 #include "bs_mesh_stdafx.h"
 #include "mesh_base.h"
 
-template<class strategy_t>
-mesh_base<strategy_t>::mesh_base()
+mesh_base::mesh_base()
 {
   n_elements = 0;
   n_active_elements = 0;
   n_connections = 0;
 }
 
-template<class strategy_t>
-void mesh_base<strategy_t>::check_data() const
+void mesh_base::check_data() const
 {
   if (n_elements <= 0)
     bs_throw_exception (boost::format ("n_elements = %d is out of range")% n_elements);
@@ -32,8 +30,4 @@ void mesh_base<strategy_t>::check_data() const
   if (!ext_to_int.size ())
     bs_throw_exception ("ext_to_int array is not initialized");
 }
-
-
-BS_INST_STRAT(mesh_base);
-
 

@@ -23,18 +23,18 @@
 namespace blue_sky {
 namespace python {
 
-  STRATEGY_CLASS_WRAPPER (wells::connection, py_connection)
+  CLASS_WRAPPER (wells::connection, py_connection)
   {
   public:
 
-    typedef typename strategy_t::item_t     item_t;
-    typedef typename strategy_t::rhs_item_t rhs_item_t;
+    typedef strategy_t::item_t     item_t;
+    typedef strategy_t::rhs_item_t rhs_item_t;
 
-    typedef wells::connection <strategy_t>  wrapped_t;
+    typedef wells::connection wrapped_t;
 
   public:
 
-    STRATEGY_CLASS_WRAPPER_DECL (py_connection);
+    CLASS_WRAPPER_DECL (py_connection);
 
     WRAPPER_METHOD (clear_data, void, 0, (empty_arg__));
     WRAPPER_METHOD_R (get_rw_value, shared_vector <item_t>, 0, (empty_arg__));
@@ -44,25 +44,25 @@ namespace python {
     WRAPPER_METHOD_R (get_rate_value, shared_vector <rhs_item_t>, 0, (empty_arg__));
   };
 
-  STRATEGY_CLASS_WRAPPER (well, py_well)
+  CLASS_WRAPPER (well, py_well)
   {
   public:
 
-    typedef typename strategy_t::index_t                      index_t;
-    typedef typename strategy_t::item_t                       item_t;
-    typedef typename strategy_t::rhs_item_t                   rhs_item_t;
-    typedef typename strategy_t::item_array_t                 item_array_t;
-    typedef typename strategy_t::rhs_item_array_t             rhs_item_array_t;
+    typedef strategy_t::index_t                      index_t;
+    typedef strategy_t::item_t                       item_t;
+    typedef strategy_t::rhs_item_t                   rhs_item_t;
+    typedef strategy_t::item_array_t                 item_array_t;
+    typedef strategy_t::rhs_item_array_t             rhs_item_array_t;
 
-    typedef smart_ptr <calc_model <strategy_t>, true >        sp_calc_model_t;
-    typedef smart_ptr <rs_mesh_iface <strategy_t>, true >           sp_mesh_iface_t;
-    typedef smart_ptr <jacobian_matrix <strategy_t>, true >   sp_jmatrix_t;
+    typedef smart_ptr <calc_model, true >        sp_calc_model_t;
+    typedef smart_ptr <rs_mesh_iface, true >           sp_mesh_iface_t;
+    typedef smart_ptr <jacobian_matrix, true >   sp_jmatrix_t;
 
-    typedef well <strategy_t>                                 wrapped_t;
+    typedef well wrapped_t;
 
   public:
 
-    STRATEGY_CLASS_WRAPPER_DECL (py_well);
+    CLASS_WRAPPER_DECL (py_well);
 
     WRAPPER_METHOD (process_impl,     void, 5, (bool, double, const sp_calc_model_t &, const sp_mesh_iface_t &, sp_jmatrix_t &));
     WRAPPER_METHOD (restore_solution, void, 4, (double, const item_array_t &, const item_array_t &, index_t));

@@ -22,10 +22,9 @@
 namespace blue_sky {
 namespace python {
 
-  template <typename strategy_t>
-  struct py_keyword_handler_iface_base : keyword_handler_iface <strategy_t>
+  struct py_keyword_handler_iface_base : keyword_handler_iface 
   {
-    typedef keyword_params <strategy_t> keyword_params_t;
+    typedef keyword_params keyword_params_t;
 
     void 
     handler (const std::string &, keyword_params_t &)
@@ -33,15 +32,14 @@ namespace python {
       bs_throw_exception ("PURE CALL FROM PYTHON");
     }
   };
-  template <typename strategy_t>
-  struct py_keyword_handler_iface : py_keyword_handler_iface_base <strategy_t>, boost::python::wrapper <py_keyword_handler_iface_base <strategy_t> >
+  struct py_keyword_handler_iface : py_keyword_handler_iface_base, boost::python::wrapper <py_keyword_handler_iface_base>
   {
-    typedef keyword_params <strategy_t> keyword_params_t;
+    typedef keyword_params keyword_params_t;
 
     py_keyword_handler_iface ()
     {
     }
-    py_keyword_handler_iface (const py_keyword_handler_iface_base <strategy_t> &)
+    py_keyword_handler_iface (const py_keyword_handler_iface_base &)
     {
     }
 
@@ -86,10 +84,10 @@ namespace python {
   }
 
   template <typename T>
-  smart_ptr <rs_mesh_iface <typename T::strategy_type>, true>
+  smart_ptr <rs_mesh_iface, true>
   get_mesh (T *t)
   {
-    typedef smart_ptr <rs_mesh_iface <typename T::strategy_type>, true> sp_mesh_t;
+    typedef smart_ptr <rs_mesh_iface, true> sp_mesh_t;
     sp_mesh_t mesh (t->mesh, bs_dynamic_cast ());
 
     if (!mesh)
@@ -101,10 +99,10 @@ namespace python {
   }
 
   template <typename T>
-  smart_ptr <keyword_manager <typename T::strategy_type>, true>
+  smart_ptr <keyword_manager, true>
   get_keyword_manager (T *t)
   {
-    typedef smart_ptr <keyword_manager <typename T::strategy_type>, true> sp_keyword_manager_t;
+    typedef smart_ptr <keyword_manager, true> sp_keyword_manager_t;
     sp_keyword_manager_t km (t->km, bs_dynamic_cast ());
 
     if (!km)

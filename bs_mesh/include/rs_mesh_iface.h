@@ -8,6 +8,7 @@
  */
 
 #include "flux_connections_iface.h"
+#include "bs_hdf5_storage_v2.h"
 
 namespace blue_sky
   {
@@ -15,7 +16,6 @@ namespace blue_sky
   class idata;
   class FRead;
 
-  template<class strategy_t>
   class /*BS_API_PLUGIN*/ rs_mesh_iface : virtual public objbase
     {
 //+++++++++++++++++++++++++++++++++++++++++++
@@ -28,19 +28,19 @@ namespace blue_sky
       
       typedef strategy_t                                  strategy_type;
       
-      typedef rs_mesh_iface <strategy_t>                  this_t;
+      typedef rs_mesh_iface this_t;
       typedef smart_ptr <this_t, true>                    sp_this_t;
         
-      typedef typename strategy_t::index_t                index_t;
-      typedef typename strategy_t::item_t                 item_t;
+      typedef strategy_t::index_t                index_t;
+      typedef strategy_t::item_t                 item_t;
       
-      typedef typename strategy_t::index_array_t          index_array_t;
-      typedef typename strategy_t::item_array_t           item_array_t;
+      typedef strategy_t::index_array_t          index_array_t;
+      typedef strategy_t::item_array_t           item_array_t;
       
-      typedef flux_connections_iface<strategy_t>          flux_conn_iface_t;
+      typedef flux_connections_iface          flux_conn_iface_t;
       typedef smart_ptr <flux_conn_iface_t, true>         sp_flux_conn_iface_t;
       
-      typedef typename strategy_t::csr_matrix_t           csr_matrix_t;
+      typedef strategy_t::csr_matrix_t           csr_matrix_t;
       typedef smart_ptr <csr_matrix_t, true>              sp_bcsr_t;
 
       typedef idata                                       idata_t;
@@ -120,6 +120,13 @@ namespace blue_sky
       //! allocate jacobian 
       virtual int build_jacobian_and_flux_connections (const sp_bcsr_t &jacobian, const sp_flux_conn_iface_t &flux_conn, index_array_t &boundary_array) = 0;
 
+      //! saves mesh info like dims and ext->int array
+      virtual hdf5_group_v2 &
+      save_info (hdf5_group_v2 &group) const = 0;
+
+      //! saves mesh data (e.g. internal arrays like actnum, volumes)
+      virtual hdf5_group_v2 &
+      save_data (hdf5_group_v2 &group) const = 0;
     };
 
 };//namespace blue_sky

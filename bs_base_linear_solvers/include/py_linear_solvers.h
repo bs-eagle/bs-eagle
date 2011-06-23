@@ -32,16 +32,16 @@ namespace python {
   /**
    * \brief python wrapper for most linear solvers
    */
-  STRATEGY_CLASS_WRAPPER (linear_solver_base, py_linear_solver)
+  CLASS_WRAPPER (linear_solver_base, py_linear_solver)
   {
   public:
-    typedef linear_solver_base <strategy_t>                   linear_solver_base_t;
+    typedef linear_solver_base linear_solver_base_t;
 
-    typedef typename strategy_t::matrix_t                     matrix_t;     ///< short name for matrix type from wrapped type
-    typedef typename strategy_t::item_array_t                 item_array_t;      ///< short name for array type from wrapped type
-    typedef typename strategy_t::index_array_t                index_array_t;
-    typedef typename strategy_t::rhs_item_t	                  rhs_item_t;     ///< short name for type of rhs
-    typedef typename strategy_t::rhs_item_array_t             rhs_item_array_t;   ///< short name for rhs array type
+    typedef strategy_t::matrix_t                     matrix_t;     ///< short name for matrix type from wrapped type
+    typedef strategy_t::item_array_t                 item_array_t;      ///< short name for array type from wrapped type
+    typedef strategy_t::index_array_t                index_array_t;
+    typedef strategy_t::rhs_item_t	                  rhs_item_t;     ///< short name for type of rhs
+    typedef strategy_t::rhs_item_array_t             rhs_item_array_t;   ///< short name for rhs array type
 
     typedef py_matrix_base <rhs_item_array_t, index_array_t>  py_matrix_t;
 
@@ -50,11 +50,11 @@ namespace python {
     typedef smart_ptr<linear_solver_prop, true>               sp_prop_t;      ///< short name to smart pointer to properties holder class
 
     typedef linear_solver_base_t                              wrapped_t;
-    typedef py_linear_solver_base <strategy_t>                base_t;
+    typedef py_linear_solver_base base_t;
 
   public:
 
-    STRATEGY_CLASS_WRAPPER_DECL (py_linear_solver);
+    CLASS_WRAPPER_DECL (py_linear_solver);
 
     WRAPPER_METHOD_R (setup, int, 1, (matrix_t *));
     WRAPPER_METHOD_R (solve, int, 3, (matrix_t *, rhs_item_array_t &, item_array_t &));
@@ -72,20 +72,20 @@ namespace python {
   };
 
 #define WRAP_STD_SOLVER(name_, py_name_)                                                  \
-  STRATEGY_CLASS_WRAPPER (name_, py_name_)                                                \
+  CLASS_WRAPPER (name_, py_name_)                                                \
   {                                                                                       \
   public:                                                                                 \
                                                                                           \
-    typedef typename strategy_t::matrix_t                 matrix_t;                       \
-    typedef typename strategy_t::item_array_t             item_array_t;                   \
-    typedef typename strategy_t::rhs_item_array_t         rhs_item_array_t;               \
+    typedef strategy_t::matrix_t           matrix_t;                       \
+    typedef strategy_t::item_array_t       item_array_t;                   \
+    typedef strategy_t::rhs_item_array_t   rhs_item_array_t;               \
                                                                                           \
-    typedef name_ <strategy_t>                            wrapped_t;                      \
-    typedef BOOST_PP_CAT (py_name_, _base) <strategy_t>   base_t;                         \
+    typedef name_                          wrapped_t;                      \
+    typedef BOOST_PP_CAT (py_name_, _base) base_t;                         \
                                                                                           \
   public:                                                                                 \
                                                                                           \
-    STRATEGY_CLASS_WRAPPER_DECL (py_name_);                                               \
+    CLASS_WRAPPER_DECL (py_name_);                                               \
                                                                                           \
     WRAPPER_METHOD_R (setup, int, 1, (matrix_t *));                                       \
     WRAPPER_METHOD_R (solve, int, 3, (matrix_t *, rhs_item_array_t &, item_array_t &));   \

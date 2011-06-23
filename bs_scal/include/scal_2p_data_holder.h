@@ -15,19 +15,18 @@ namespace blue_sky {
    * \brief hold scal region data (So, Sp, Krp, Krop)
    * \detail we hold data as a plain memory region and a list of region_info
    * */
-  template <typename strategy_t>
   class BS_API_PLUGIN scal_2p_data_holder : public objbase
   {
   public:
-    typedef typename strategy_t::item_t             item_t;
-    typedef typename strategy_t::index_t            index_t;
+    typedef strategy_t::item_t             item_t;
+    typedef strategy_t::index_t            index_t;
 
-    typedef scal_2p_data_holder<strategy_t>         this_t;
+    typedef scal_2p_data_holder this_t;
 
-    typedef scal_region <strategy_t>                scal_region_t;
-    typedef scal_region_info <strategy_t>           scal_region_info_t;
-    typedef data_vector<strategy_t>                 data_vector_t;
-    typedef typename strategy_t::item_array_t       item_array_t;
+    typedef scal_region scal_region_t;
+    typedef scal_region_info scal_region_info_t;
+    typedef data_vector data_vector_t;
+    typedef strategy_t::item_array_t       item_array_t;
     typedef shared_vector <scal_region_info_t>      region_vector_t;
     typedef shared_vector <scal_region_t *>         region_vector_2_t;
 

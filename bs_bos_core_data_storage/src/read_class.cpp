@@ -192,7 +192,7 @@ namespace blue_sky
   {
     using namespace boost::spirit;
 
-    tm temp_date = {0};
+    tm temp_date = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     //Date parsing
     // d.m.y

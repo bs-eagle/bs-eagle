@@ -94,11 +94,10 @@ private:
           }
         };
 
-      template <typename strategy_t>
       struct all_regions_t
         {
-          typedef scal_2p_data_holder<strategy_t>               scal_2p_data_holder_t;
-          typedef typename strategy_t::item_array_t             data_t;
+          typedef scal_2p_data_holder               scal_2p_data_holder_t;
+          typedef strategy_t::item_array_t             data_t;
           static void
           place_spof_data (data_t &dst, scal::data_placement::scal_placement_info &info, const data_t &src, bool is_water)
           {

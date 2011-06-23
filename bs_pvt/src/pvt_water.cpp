@@ -13,13 +13,11 @@ using namespace blue_sky::pvt;
 namespace blue_sky
   {
 
-  template <typename strategy_t>
-  pvt_water<strategy_t>::pvt_water (bs_type_ctor_param)
+  pvt_water::pvt_water (bs_type_ctor_param)
   {
   }
 
-  template <typename strategy_t>
-  pvt_water<strategy_t>::pvt_water (const pvt_water &pvt)
+  pvt_water::pvt_water (const pvt_water &pvt)
   : bs_refcounter (pvt)
   {
     if (this != &pvt)
@@ -29,9 +27,8 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   void
-  pvt_water<strategy_t>::insert_vector (const input_vector_t &vec)
+  pvt_water::insert_vector (const input_vector_t &vec)
   {
     const int elem_count = 4;
     BS_ASSERT (!(vec.size() % elem_count)) (vec.size ()) (elem_count);
@@ -60,9 +57,8 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   void
-  pvt_water<strategy_t>::build (item_t atm_p, item_t min_p, item_t max_p, index_t n_intervals)
+  pvt_water::build (item_t atm_p, item_t min_p, item_t max_p, index_t n_intervals)
   {
     BS_ASSERT (n_intervals > 0) (n_intervals);
     if (base_t::init_dependent)
@@ -94,9 +90,8 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   void
-  pvt_water<strategy_t>::check_water ()
+  pvt_water::check_water ()
   {
     this->check_common ();
 
@@ -127,9 +122,8 @@ namespace blue_sky
       }
   }
 
-  template <typename strategy_t>
   void
-  pvt_water<strategy_t>::calc (const item_t p,
+  pvt_water::calc (const item_t p,
                                item_t *inv_fvf, item_t *d_inv_fvf,
                                item_t *inv_visc, item_t *d_inv_visc,
                                item_t *inv_visc_fvf, item_t *d_inv_visc_fvf) const
@@ -175,9 +169,8 @@ namespace blue_sky
         }
     }
 
-  template <typename strategy_t>
   void
-  pvt_water <strategy_t>::print () const
+  pvt_water::print () const
   {
     BS_ASSERT (pressure_.size () == inv_fvf_.size ());
     BS_ASSERT (inv_fvf_.size ()  == inv_visc_.size ());
@@ -216,8 +209,5 @@ namespace blue_sky
     BOSOUT (section::pvt, level::medium) << "*************************************************************************************" << bs_end;
   }
 
-  template class pvt_water <base_strategy_fi>;
-  template class pvt_water <base_strategy_di>;
-  template class pvt_water <base_strategy_mixi>;
 } // namespace blue_sky
 

@@ -12,12 +12,11 @@ const char filename_hdf5[] = "grid_swap.h5";
 
 #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX  
   FILE*  fp;
-#endif BS_MESH_WRITE_TRANSMISS_MATRIX 
+#endif //BS_MESH_WRITE_TRANSMISS_MATRIX 
 
 
-template<class strategy_t>
 inline void
-mesh_grdecl<strategy_t>::calc_corner_point(const pool_item_t z, const pool_item_t *coord, fpoint3d_t &p)const
+mesh_grdecl::calc_corner_point(const pool_item_t z, const pool_item_t *coord, fpoint3d_t &p)const
   {
     p.z = z;
     /*
@@ -43,11 +42,10 @@ mesh_grdecl<strategy_t>::calc_corner_point(const pool_item_t z, const pool_item_
      *              6 /-------/7
      */
 
-template<class strategy_t>
 inline void
-mesh_grdecl<strategy_t>::get_element_zcorn_index(index_t i, index_t j, index_t k, element_zcorn_index_t& element)  const
+mesh_grdecl::get_element_zcorn_index(index_t i, index_t j, index_t k, element_zcorn_index_t& element)  const
 {
-  //typename mesh_grdecl<strategy_t>::element_zcorn_index_t element;
+  //typename mesh_grdecl::element_zcorn_index_t element;
   
   index_t index1 = i * 2 + j * 4 * nx + k * 8 * nx * ny;
   index_t index2 = index1 + 4 * nx * ny;
@@ -64,12 +62,11 @@ mesh_grdecl<strategy_t>::get_element_zcorn_index(index_t i, index_t j, index_t k
 }
 
 //! get element corners index in zcorn_array of block[i,j,k]
-template<class strategy_t>
-typename mesh_grdecl<strategy_t>::plane_zcorn_index_t
-mesh_grdecl<strategy_t>::get_plane_zcorn_index (element_zcorn_index_t element, 
+mesh_grdecl::plane_zcorn_index_t
+mesh_grdecl::get_plane_zcorn_index (element_zcorn_index_t element, 
                                                          element_plane_orientation_t orientation)  const
 {
-  typename mesh_grdecl<strategy_t>::plane_zcorn_index_t plane;
+  typename mesh_grdecl::plane_zcorn_index_t plane;
   switch (orientation)
     {
       case x_axis_minus:  //left_cross
@@ -112,11 +109,12 @@ mesh_grdecl<strategy_t>::get_plane_zcorn_index (element_zcorn_index_t element,
       default:
         bs_throw_exception ("Invalid orientation!");;
     }
+
+  return plane;
 }
 
-template<class strategy_t>
-typename mesh_grdecl<strategy_t>::element_t
-mesh_grdecl<strategy_t>::calc_element (const index_t index) const
+mesh_grdecl::element_t
+mesh_grdecl::calc_element (const index_t index) const
   {
     index_t i, j, k;
     element_t element;
@@ -126,9 +124,8 @@ mesh_grdecl<strategy_t>::calc_element (const index_t index) const
     return element;
   }
 
-template<class strategy_t>
 void
-mesh_grdecl<strategy_t>::calc_element (const index_t i, const index_t j, const index_t k, element_t &element) const
+mesh_grdecl::calc_element (const index_t i, const index_t j, const index_t k, element_t &element) const
   {
     corners_t corners;
 
@@ -167,8 +164,7 @@ mesh_grdecl<strategy_t>::calc_element (const index_t i, const index_t j, const i
     element.init (corners);
   }
   
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::is_small(const index_t i, const index_t j, const index_t k, item_t eps)  const
+bool mesh_grdecl::is_small(const index_t i, const index_t j, const index_t k, item_t eps)  const
   {
     if (k >= nz)
       return false;
@@ -187,9 +183,8 @@ bool mesh_grdecl<strategy_t>::is_small(const index_t i, const index_t j, const i
     return false;
   }
 
-template<class strategy_t>
 void
-mesh_grdecl<strategy_t>::get_plane_crossing_projection_on_all_axis(const plane_t &plane1, const plane_t &plane2, fpoint3d_t &A)const
+mesh_grdecl::get_plane_crossing_projection_on_all_axis(const plane_t &plane1, const plane_t &plane2, fpoint3d_t &A)const
   {
     quadrangle_t quad1, quad2;
 
@@ -222,9 +217,8 @@ mesh_grdecl<strategy_t>::get_plane_crossing_projection_on_all_axis(const plane_t
      }
   }
 
-template<class strategy_t>
-typename mesh_grdecl<strategy_t>::item_t 
-mesh_grdecl<strategy_t>::get_center_zcorn(const element_zcorn_index_t &element)const
+mesh_grdecl::item_t 
+mesh_grdecl::get_center_zcorn(const element_zcorn_index_t &element)const
   {
     item_t res = 0.0;
     size_t i, n = element.size();
@@ -237,12 +231,11 @@ mesh_grdecl<strategy_t>::get_center_zcorn(const element_zcorn_index_t &element)c
 
 
 
-template<class strategy_t>
-int mesh_grdecl<strategy_t>::init_ext_to_int()
+int mesh_grdecl::init_ext_to_int()
 {
  
   write_time_to_log init_time ("Mesh initialization", ""); 
-  item_array_t volumes_temp(n_elements);
+  volumes_temp.resize (n_elements);
 
   //tools::save_seq_vector ("actnum.bs.txt").save sp_actnum;
   
@@ -291,8 +284,7 @@ int mesh_grdecl<strategy_t>::init_ext_to_int()
   return n_active_elements;
 }
 
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::splice_two_blocks (const index_t i, const index_t j, const index_t k, const index_t k1)
+void mesh_grdecl::splice_two_blocks (const index_t i, const index_t j, const index_t k, const index_t k1)
 {
   index_t index, index1, index2;
 
@@ -328,8 +320,7 @@ void mesh_grdecl<strategy_t>::splice_two_blocks (const index_t i, const index_t 
     }
 }
 
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::are_two_blocks_close (const index_t i, const index_t j, const index_t k, const index_t k1)
+bool mesh_grdecl::are_two_blocks_close (const index_t i, const index_t j, const index_t k, const index_t k1)
 {
   index_t index, index1;
   if (k > k1)
@@ -356,8 +347,7 @@ bool mesh_grdecl<strategy_t>::are_two_blocks_close (const index_t i, const index
     }
 }
 
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::check_adjacency(int shift_zcorn)
+bool mesh_grdecl::check_adjacency(int shift_zcorn)
 {
    index_t i, j, k;
    index_t index, zindex, zindex1;
@@ -416,8 +406,7 @@ bool mesh_grdecl<strategy_t>::check_adjacency(int shift_zcorn)
   return (n_adjacent == n_active_elements);
 }
 
-template<class strategy_t>
-int mesh_grdecl<strategy_t>::splicing(item_array_t& volumes_temp)
+int mesh_grdecl::splicing(item_array_t& volumes_temp)
 {
   index_t nCount = 0;
   item_t vol_sum, vol_block;
@@ -583,8 +572,7 @@ int mesh_grdecl<strategy_t>::splicing(item_array_t& volumes_temp)
 }
 
 
-template<class strategy_t>
-int mesh_grdecl<strategy_t >::calc_depths ()
+int mesh_grdecl::calc_depths ()
 {
   depths.resize(n_active_elements,0);
   index_t index = 0;
@@ -607,9 +595,8 @@ static int n_tran_calc = 0;
 
 // calculating method have been taken from td eclipse (page 896)
 // calc transmissibility between fully adjacent cells index1 and index2
-template<class strategy_t>
-typename mesh_grdecl<strategy_t>::item_t 
-mesh_grdecl<strategy_t>::calc_tran(const index_t ext_index1, const index_t ext_index2, const plane_t &plane1, 
+mesh_grdecl::item_t 
+mesh_grdecl::calc_tran(const index_t ext_index1, const index_t ext_index2, const plane_t &plane1, 
                                        const fpoint3d_t &center1, const fpoint3d_t &center2, direction d_dir, plane_t* plane2) const
 {
   item_t tran;
@@ -745,16 +732,14 @@ mesh_grdecl<strategy_t>::calc_tran(const index_t ext_index1, const index_t ext_i
 
 
 
-template<class strategy_t>
-int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections (const sp_bcsr_t &jacobian,const sp_flux_conn_iface_t & flux_conn,
+int mesh_grdecl::build_jacobian_and_flux_connections (const sp_bcsr_t &jacobian,const sp_flux_conn_iface_t & flux_conn,
                                                                   index_array_t &boundary_array)
 
 {
   return build_jacobian_and_flux_connections_add_boundary (jacobian, flux_conn, boundary_array);
 }
 
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::init_props(const sp_idata_t &idata)
+void mesh_grdecl::init_props(const sp_idata_t &idata)
 {
   base_t::init_props (idata);
 
@@ -794,8 +779,7 @@ void mesh_grdecl<strategy_t>::init_props(const sp_idata_t &idata)
 
 }
 
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::check_data() const
+void mesh_grdecl::check_data() const
 {
   base_t::check_data ();
 
@@ -812,8 +796,7 @@ void mesh_grdecl<strategy_t>::check_data() const
     bs_throw_exception ("ZCORN array is not initialized");
 }
 
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::get_block_dx_dy_dz (index_t n_elem, item_t &dx, item_t &dy, item_t &dz) const
+void mesh_grdecl::get_block_dx_dy_dz (index_t n_elem, item_t &dx, item_t &dy, item_t &dz) const
   {
     const element_t &elem = calc_element(n_elem);
     point3d_t sizes = elem.get_dx_dy_dz (); 
@@ -822,26 +805,22 @@ void mesh_grdecl<strategy_t>::get_block_dx_dy_dz (index_t n_elem, item_t &dx, it
     dz = sizes[2];
   }
 
-template<class strategy_t>
-float mesh_grdecl<strategy_t>:: get_block_dx(index_t n_elem) const
+float mesh_grdecl:: get_block_dx(index_t n_elem) const
   {
     return calc_element(n_elem).get_dx();
   }
 
-template<class strategy_t>
-float mesh_grdecl<strategy_t>:: get_block_dy(index_t n_elem) const
+float mesh_grdecl:: get_block_dy(index_t n_elem) const
   {
     return calc_element(n_elem).get_dy();
   }
 
-template<class strategy_t>
-float mesh_grdecl<strategy_t>:: get_block_dz(index_t n_elem) const
+float mesh_grdecl:: get_block_dz(index_t n_elem) const
   {
     return calc_element(n_elem).get_dz();
   }
 
-template<class strategy_t>
-float  mesh_grdecl<strategy_t>::get_dtop(index_t n_elem) const
+float  mesh_grdecl::get_dtop(index_t n_elem) const
 {
   element_t elem;
   
@@ -850,8 +829,7 @@ float  mesh_grdecl<strategy_t>::get_dtop(index_t n_elem) const
   return elem.get_center().z - elem.get_dz();
 }
 
-template<class strategy_t>
-void mesh_grdecl<strategy_t>::generate_array()
+void mesh_grdecl::generate_array()
 {
 #if 0
   index_t n_size = n_elements;
@@ -884,19 +862,19 @@ void mesh_grdecl<strategy_t>::generate_array()
 }
 
 
-template <typename strategy_t, typename loop_t>
+template <typename loop_t>
 struct build_jacobian_rows_class
 {
-  typedef typename strategy_t::index_t          index_t;
-  typedef typename strategy_t::item_t           item_t;
-  typedef typename strategy_t::index_array_t    index_array_t;
-  typedef typename strategy_t::item_array_t     item_array_t;
+  typedef strategy_t::index_t          index_t;
+  typedef strategy_t::item_t           item_t;
+  typedef strategy_t::index_array_t    index_array_t;
+  typedef strategy_t::item_array_t     item_array_t;
 
-  typedef mesh_grdecl <strategy_t>                mesh_t;
-  typedef typename mesh_t::plane_t                plane_t;
-  typedef typename mesh_t::element_zcorn_index_t  element_zcorn_index_t;
+  typedef mesh_grdecl mesh_t;
+  typedef mesh_t::plane_t                plane_t;
+  typedef mesh_t::element_zcorn_index_t  element_zcorn_index_t;
 
-  build_jacobian_rows_class (mesh_grdecl <strategy_t> *mesh, loop_t *loop, std::set <index_t, std::less <index_t> > &boundary_set, index_array_t *rows_ptr)
+  build_jacobian_rows_class (mesh_grdecl*mesh, loop_t *loop, std::set <index_t, std::less <index_t> > &boundary_set, index_array_t *rows_ptr)
   : mesh (mesh)
   , loop (loop)
   , boundary_set (boundary_set)
@@ -995,7 +973,7 @@ struct build_jacobian_rows_class
     boundary_set.insert (external_cell_index);
   }
 
-  mesh_grdecl <strategy_t>                  *mesh;
+  mesh_grdecl*mesh;
   loop_t                                    *loop;
   std::set <index_t, std::less <index_t> >  &boundary_set;
   index_array_t                             *rows_ptr;
@@ -1005,26 +983,26 @@ struct build_jacobian_rows_class
   index_t                                   ext_index;
 };
 
-template <typename T, typename L, typename BS, typename RP>
-build_jacobian_rows_class <T, L>
-build_jacobian_rows (mesh_grdecl <T> *mesh, L *l, BS &bs, RP *rp)
+template <typename L, typename BS, typename RP>
+build_jacobian_rows_class <L>
+build_jacobian_rows (mesh_grdecl *mesh, L *l, BS &bs, RP *rp)
 {
-  return build_jacobian_rows_class <T, L> (mesh, l, bs, rp);
+  return build_jacobian_rows_class <L> (mesh, l, bs, rp);
 }
 
-template <typename strategy_t, typename loop_t>
+template <typename loop_t>
 struct build_jacobian_cols_class
 {
-  typedef typename strategy_t::index_t          index_t;
-  typedef typename strategy_t::item_t           item_t;
-  typedef typename strategy_t::index_array_t    index_array_t;
-  typedef typename strategy_t::item_array_t     item_array_t;
-  typedef typename strategy_t::rhs_item_array_t rhs_item_array_t;
+  typedef strategy_t::index_t          index_t;
+  typedef strategy_t::item_t           item_t;
+  typedef strategy_t::index_array_t    index_array_t;
+  typedef strategy_t::item_array_t     item_array_t;
+  typedef strategy_t::rhs_item_array_t rhs_item_array_t;
 
-  typedef mesh_grdecl <strategy_t>                mesh_t;
-  typedef typename mesh_t::element_t              element_t;
-  typedef typename mesh_t::plane_t                plane_t;
-  typedef typename mesh_t::element_zcorn_index_t  element_zcorn_index_t;
+  typedef mesh_grdecl mesh_t;
+  typedef mesh_t::element_t              element_t;
+  typedef mesh_t::plane_t                plane_t;
+  typedef mesh_t::element_zcorn_index_t  element_zcorn_index_t;
 
   build_jacobian_cols_class (mesh_t *mesh, loop_t *loop, index_array_t *rows_ptr, index_array_t *cols_ind,
     index_array_t &cols_ind_transmis, rhs_item_array_t &values_transmis,
@@ -1228,28 +1206,27 @@ struct build_jacobian_cols_class
 
 };
 
-template <typename M, typename L, typename RP, typename CI, typename CT, typename FC>
-build_jacobian_cols_class <M, L>
-build_jacobian_cols (mesh_grdecl <M> *m, L *l, RP *rp, CI *ci, CT &conn_trans, FC &flux_conn)
+template <typename L, typename RP, typename CI, typename CT, typename FC>
+build_jacobian_cols_class <L>
+build_jacobian_cols (mesh_grdecl *m, L *l, RP *rp, CI *ci, CT &conn_trans, FC &flux_conn)
 {
-  return build_jacobian_cols_class <M, L> (m, l, rp, ci,
+  return build_jacobian_cols_class <L> (m, l, rp, ci,
     conn_trans->get_cols_ind (), conn_trans->get_values (),
     flux_conn->get_matrix_block_idx_minus (), flux_conn->get_matrix_block_idx_plus ());
 }
 
-template <typename strategy_t>
 struct build_jacobian_and_flux : boost::noncopyable
 {
-  typedef typename strategy_t::index_t          index_t;
-  typedef typename strategy_t::item_t           item_t;
-  typedef typename strategy_t::index_array_t    index_array_t;
-  typedef typename strategy_t::item_array_t     item_array_t;
+  typedef strategy_t::index_t          index_t;
+  typedef strategy_t::item_t           item_t;
+  typedef strategy_t::index_array_t    index_array_t;
+  typedef strategy_t::item_array_t     item_array_t;
 
-  typedef mesh_grdecl <strategy_t>                mesh_t;
-  typedef typename mesh_t::plane_t                plane_t;
-  typedef typename mesh_t::element_zcorn_index_t  element_zcorn_index_t;
+  typedef mesh_grdecl mesh_t;
+  typedef mesh_t::plane_t                plane_t;
+  typedef mesh_t::element_zcorn_index_t  element_zcorn_index_t;
 
-  build_jacobian_and_flux (mesh_grdecl <strategy_t> *mesh)
+  build_jacobian_and_flux (mesh_grdecl*mesh)
   : mesh (mesh)
   , nx (mesh->nx)
   , ny (mesh->ny)
@@ -1436,7 +1413,7 @@ struct build_jacobian_and_flux : boost::noncopyable
     BOSWARN (section::mesh, level::warning)<< boost::format ("MESH_GRDECL: number of tran calcs is %d") % n_tran_calc << bs_end;  
   }
 
-  mesh_grdecl <strategy_t>    *mesh;
+  mesh_grdecl*mesh;
   index_t                     nx;
   index_t                     ny;
   index_t                     nz;
@@ -1445,8 +1422,7 @@ struct build_jacobian_and_flux : boost::noncopyable
 };
 
 
-template<class strategy_t>
-int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr_t &jacobian,
+int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr_t &jacobian,
                                                                                const sp_flux_conn_iface_t &flux_conn,
                                                                                index_array_t &boundary_array)
 {
@@ -1468,11 +1444,11 @@ int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (c
 
   std::set<index_t, std::less<index_t> > boundary_set;
 
-  build_jacobian_and_flux <strategy_t> build_jacobian (this);
+  build_jacobian_and_flux build_jacobian (this);
   
  #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX     
   fp = fopen ("transmiss.out", "w");
- #endif BS_MESH_WRITE_TRANSMISS_MATRIX   
+ #endif //BS_MESH_WRITE_TRANSMISS_MATRIX   
 
   //first step - define and fill - rows_ptr (jacobian)
   build_jacobian.cell_loop (build_jacobian_rows (this, &build_jacobian, boundary_set, rows_ptr));
@@ -1526,14 +1502,13 @@ int mesh_grdecl<strategy_t>::build_jacobian_and_flux_connections_add_boundary (c
   #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX  
     fflush (fp);
     fclose (fp);
-  #endif BS_MESH_WRITE_TRANSMISS_MATRIX 
+  #endif //BS_MESH_WRITE_TRANSMISS_MATRIX 
 
   return (int) boundary_array.size();
 }
 
 #ifdef _HDF5_MY
-template<class strategy_t>
-int mesh_grdecl<strategy_t>::create_array_hdf5(const char *dataset_name, H5::H5File &file_hdf5, H5::DataSet **dataset)
+int mesh_grdecl::create_array_hdf5(const char *dataset_name, H5::H5File &file_hdf5, H5::DataSet **dataset)
 {
   // creating dataset_coords
   hsize_t dims[] = {0};
@@ -1547,8 +1522,7 @@ int mesh_grdecl<strategy_t>::create_array_hdf5(const char *dataset_name, H5::H5F
   return 0;
 }
 
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::file_open_activs_hdf5(const char* file_name, int is, int js, int ks, int it, int jt, int kt)
+bool mesh_grdecl::file_open_activs_hdf5(const char* file_name, int is, int js, int ks, int it, int jt, int kt)
 {
   return true;
   /*
@@ -1596,8 +1570,7 @@ bool mesh_grdecl<strategy_t>::file_open_activs_hdf5(const char* file_name, int i
   */
 }
 
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::file_open_cube_hdf5(const char* file_name, int is, int js, int ks, int it, int jt, int kt)
+bool mesh_grdecl::file_open_cube_hdf5(const char* file_name, int is, int js, int ks, int it, int jt, int kt)
 {
   // turn off error printing
   H5E_auto2_t old_func;
@@ -1668,8 +1641,7 @@ bool mesh_grdecl<strategy_t>::file_open_cube_hdf5(const char* file_name, int is,
   return true;
 }
 
-template<class strategy_t>
-int mesh_grdecl<strategy_t>::append_array_hdf5(const item_t *arr, size_t arr_length, H5::DataSet *dataset)
+int mesh_grdecl::append_array_hdf5(const item_t *arr, size_t arr_length, H5::DataSet *dataset)
 {
   // determine new dimensions of dataset
   hsize_t dims_old[1];
@@ -1691,8 +1663,7 @@ int mesh_grdecl<strategy_t>::append_array_hdf5(const item_t *arr, size_t arr_len
   return 0;
 }
 
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::file_open_cube_with_hdf5_swap(const char* file_name)
+bool mesh_grdecl::file_open_cube_with_hdf5_swap(const char* file_name)
 {
   try
     {
@@ -1799,8 +1770,7 @@ bool mesh_grdecl<strategy_t>::file_open_cube_with_hdf5_swap(const char* file_nam
 }
 #endif
 
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::file_open_actnum(const char* file_name)
+bool mesh_grdecl::file_open_actnum(const char* file_name)
 {
 #if 0
   fstream file(file_name,  ios::in);
@@ -1828,8 +1798,7 @@ bool mesh_grdecl<strategy_t>::file_open_actnum(const char* file_name)
 }
 
 
-template<class strategy_t>
-bool mesh_grdecl<strategy_t>::file_open_cube(const char* file_name)
+bool mesh_grdecl::file_open_cube(const char* file_name)
 {
   /*
   using namespace std;
@@ -1908,5 +1877,52 @@ bool mesh_grdecl<strategy_t>::file_open_cube(const char* file_name)
   return false;
 }
 
+hdf5_group_v2 &
+mesh_grdecl::save_data (hdf5_group_v2 &group) const
+{
+  item_array_t centers_x (nx * ny * nz);
+  item_array_t centers_y (nx * ny * nz);
+  item_array_t centers_z (nx * ny * nz);
+  item_array_t corners;
 
-BS_INST_STRAT(mesh_grdecl);
+  for (index_t i = 0, idx = 0; i < nx; ++i)
+    for (index_t j = 0; j < ny; ++j)
+      for (index_t k = 0; k < nz; ++k, ++idx)
+        {
+          element_t element;
+          calc_element (i, j, k, element);
+          centers_x[idx] = element.get_center ().x;
+          centers_y[idx] = element.get_center ().y;
+          centers_z[idx] = element.get_center ().z;
+
+          corners.push_back (element.get_corners ()[0].x);
+          corners.push_back (element.get_corners ()[0].y);
+          corners.push_back (element.get_corners ()[0].z);
+          corners.push_back (element.get_corners ()[1].x);
+          corners.push_back (element.get_corners ()[1].y);
+          corners.push_back (element.get_corners ()[1].z);
+          corners.push_back (element.get_corners ()[2].x);
+          corners.push_back (element.get_corners ()[2].y);
+          corners.push_back (element.get_corners ()[2].z);
+          corners.push_back (element.get_corners ()[3].x);
+          corners.push_back (element.get_corners ()[3].y);
+          corners.push_back (element.get_corners ()[3].z);
+          corners.push_back (element.get_corners ()[4].x);
+          corners.push_back (element.get_corners ()[4].y);
+          corners.push_back (element.get_corners ()[4].z);
+          corners.push_back (element.get_corners ()[5].x);
+          corners.push_back (element.get_corners ()[5].y);
+          corners.push_back (element.get_corners ()[5].z);
+        }
+
+
+  return base_t::save_data (group)
+    .write ("grdecl_zcorn", zcorn_array)
+    .write ("grdecl_coord", coord_array)
+    .write ("volume_temp", volumes_temp)
+    .write ("centers_x", centers_x)
+    .write ("centers_y", centers_y)
+    .write ("centers_z", centers_z)
+    .write ("corners", corners)
+    ;
+}

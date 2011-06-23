@@ -16,11 +16,8 @@ namespace blue_sky
 
   class idata;
 
-  template <typename strategy_t>
   class BS_API_PLUGIN mesh_grdecl_keywords;
-
-  template<class strategy_t>
-  class BS_API_PLUGIN bs_mesh_grdecl : virtual public rs_smesh_iface<strategy_t>
+  class BS_API_PLUGIN bs_mesh_grdecl : virtual public rs_smesh_iface
     {
 
     ///////////////////////////////
@@ -30,18 +27,18 @@ namespace blue_sky
       ///////////////////////
       // BASE TYPES
       ///////////////////////
-      typedef rs_smesh_iface<strategy_t>                  base_t;
+      typedef rs_smesh_iface base_t;
 
-      typedef typename base_t::index_t                    index_t;
-      typedef typename base_t::item_t                     item_t;
+      typedef base_t::index_t                    index_t;
+      typedef base_t::item_t                     item_t;
 
-      typedef typename base_t::index_array_t              index_array_t;
-      typedef typename base_t::item_array_t               item_array_t;
+      typedef base_t::index_array_t              index_array_t;
+      typedef base_t::item_array_t               item_array_t;
 
-      typedef typename base_t::sp_flux_conn_iface_t       sp_flux_conn_iface_t;
-      typedef typename base_t::sp_bcsr_t                  sp_bcsr_t;
-      typedef typename base_t::sp_idata_t                 sp_idata_t;
-      typedef typename base_t::point3d_t                  point3d_t;
+      typedef base_t::sp_flux_conn_iface_t       sp_flux_conn_iface_t;
+      typedef base_t::sp_bcsr_t                  sp_bcsr_t;
+      typedef base_t::sp_idata_t                 sp_idata_t;
+      typedef base_t::point3d_t                  point3d_t;
 
       ///////////////////////
       // OWN TYPES
@@ -140,7 +137,7 @@ namespace blue_sky
 
       //! return coords of block vertexes by IJK indexes
       grd_ecl::fpoint3d_vector calc_element (const index_t i, const index_t j, const index_t k) const
-        { typename mesh_grdecl<strategy_t>::element_t element;
+        { typename mesh_grdecl::element_t element;
           wrapped.calc_element (i, j, k, element);
           return element.get_corners ();};
 
@@ -187,13 +184,27 @@ namespace blue_sky
         {return wrapped.build_jacobian_and_flux_connections (jacobian, flux_conn, boundary_array);};
 
 
+    // storage interface
+    hdf5_group_v2 &
+    save_info (hdf5_group_v2 &group) const
+    {
+      return wrapped.save_info (group);
+    }
+
+    hdf5_group_v2 &
+    save_data (hdf5_group_v2 &group) const
+    {
+      return wrapped.save_data (group);
+    }
+
+
     ////////////////////
     // wrapped class
     ///////////////////
 
     private:
 
-      mesh_grdecl<strategy_t> wrapped;
+      mesh_grdecl wrapped;
     };
 
 };//namespace blue_sky

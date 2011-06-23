@@ -12,10 +12,10 @@
 // #include BS_STOP_PLUGIN_IMPORT ()
 //
 #include <boost/shared_ptr.hpp>
+#include "strategies.h"
 
 namespace blue_sky
 {
-  template <typename strategy_t>
   struct keyword_params //: boost::noncopyable
   {
     typedef strategy_t                    strategy_type;
@@ -51,10 +51,9 @@ namespace blue_sky
     sp_objbase          scal_3p;
   };
       
-  template <typename strategy_t>
   struct keyword_handler_iface
   {
-    typedef keyword_params <strategy_t> keyword_params_t;
+    typedef keyword_params keyword_params_t;
 
     virtual ~keyword_handler_iface () {}
 
@@ -63,18 +62,17 @@ namespace blue_sky
   };
 
   //! keyword_manager_iface - class-factory which contain a set of handlers for different keywords
-  template <class strategy_t>
   class BS_API_PLUGIN keyword_manager_iface: public objbase
     {
     public:
       //-----------------------------------------
       //  TYPES
       //-----------------------------------------
-      typedef typename strategy_t::index_t            index_t;
-      typedef typename strategy_t::item_t             item_t;
+      typedef strategy_t::index_t            index_t;
+      typedef strategy_t::item_t             item_t;
 
-      typedef keyword_params <strategy_t>             keyword_params_t;
-      typedef keyword_handler_iface <strategy_t>      keyword_handler_iface_t;
+      typedef keyword_params keyword_params_t;
+      typedef keyword_handler_iface keyword_handler_iface_t;
 
       typedef smart_ptr <objbase, true>               sp_objbase;
       

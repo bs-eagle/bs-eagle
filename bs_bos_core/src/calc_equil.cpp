@@ -24,17 +24,12 @@
 #include "jfunction.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
-// WTF??
-#include "well_results_storage.h"
-#include "fip_results_storage.h"
-
 namespace blue_sky
   {
 
   //! calc pressure on current depth
-  template <class strategy_t>
   int
-  calc_model<strategy_t>::equil_calc_pressure (item_t prev_press, item_t cur_d, item_t h, index_t phase, index_t i_pvt,
+  calc_model::equil_calc_pressure (item_t prev_press, item_t cur_d, item_t h, index_t phase, index_t i_pvt,
       double rs_type, item_t depth_goc, item_t rs_dat,
       val_vs_depth *rsvd, val_vs_depth *pbvd,
       /*output*/ item_t &p, item_t *rs)
@@ -128,9 +123,8 @@ namespace blue_sky
   }
 
   // initialize initial conditions
-  template <class strategy_t>
   int
-  calc_model<strategy_t>::calc_equil (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
+  calc_model::calc_equil (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
   {
     typedef std::vector <float> vector_t;
 
@@ -762,7 +756,7 @@ namespace blue_sky
         item_t smin  = 0, smax = 0, pmax_table = 0;
         if (n_phases > 1 && is_w && is_swatinit)
           {
-            scal_region<strategy_t> scal_water_data = scal_prop->get_water_data ()->get_region (i_sat);
+            scal_region scal_water_data = scal_prop->get_water_data ()->get_region (i_sat);
             smin = scal_water_data.get_phase_sat_min ();
             smin = scal_prop->get_water_scale ()->get_sl (smin)[i_cell];
             smax = scal_water_data.get_phase_sat_max ();
@@ -852,33 +846,5 @@ namespace blue_sky
 
     return 0;
   }
-
-  template int
-  calc_model<base_strategy_di>::calc_equil (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
-
-  template int
-  calc_model<base_strategy_fi>::calc_equil (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
-
-  template int
-  calc_model<base_strategy_mixi>::calc_equil (const sp_idata_t &input_data, const sp_mesh_iface_t &mesh);
-
-  template int
-  calc_model<base_strategy_di>::equil_calc_pressure (item_t prev_press, item_t cur_d, item_t h, index_t phase, index_t i_pvt,
-      double rs_type, item_t depth_goc, item_t rs_dat,
-      val_vs_depth *rsvd, val_vs_depth *pbvd,
-      item_t &p, item_t *rs);
-
-  template int
-  calc_model<base_strategy_fi>::equil_calc_pressure (item_t prev_press, item_t cur_d, item_t h, index_t phase, index_t i_pvt,
-      double rs_type, item_t depth_goc, item_t rs_dat,
-      val_vs_depth *rsvd, val_vs_depth *pbvd,
-      item_t &p, item_t *rs);
-
-  template int
-  calc_model<base_strategy_mixi>::equil_calc_pressure (item_t prev_press, item_t cur_d, item_t h, index_t phase, index_t i_pvt,
-      double rs_type, item_t depth_goc, item_t rs_dat,
-      val_vs_depth *rsvd, val_vs_depth *pbvd,
-      item_t &p, item_t *rs);
-
 
 }//ns bs

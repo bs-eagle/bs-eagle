@@ -26,15 +26,11 @@ namespace blue_sky
 
         }
 
-        void read_list_int (base_strategy_di::index_array_t &array)
+        void read_list_int (strategy_t::index_array_t &array)
         {
           read_list (array);
         }
-        void read_list_float (base_strategy_fi::item_array_t &array)
-        {
-          read_list (array);
-        }
-        void read_list_double (base_strategy_di::item_array_t &array)
+        void read_list_double (strategy_t::item_array_t &array)
         {
           read_list (array);
         }
@@ -47,7 +43,6 @@ namespace blue_sky
 
       class_ <py_naive_file_reader> ("naive_file_reader", init <const char *> ())
       .def ("read_list", &py_naive_file_reader::read_list_int)
-      .def ("read_list", &py_naive_file_reader::read_list_float)
       .def ("read_list", &py_naive_file_reader::read_list_double)
       ;
     }

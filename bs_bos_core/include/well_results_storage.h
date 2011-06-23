@@ -255,162 +255,159 @@ namespace blue_sky
     }
   }
 
-  /**
-   * \class save_well_data
-   * \brief Saves well and connection data to well_results_storage
-   * */
-  template <typename strategy_t>
-  struct BS_API_PLUGIN save_well_data
-    {
-      typedef calc_model <strategy_t>                                 calc_model_t;
-      typedef typename strategy_t::index_t                            index_t;
+  ///**
+  // * \class save_well_data
+  // * \brief Saves well and connection data to well_results_storage
+  // * */
+  //struct BS_API_PLUGIN save_well_data
+  //  {
+  //    typedef strategy_t::index_t                            index_t;
 
-      typedef typename calc_model_t::data_array_t                     data_array_t;
-      typedef typename calc_model_t::item_t                           item_t;
-      typedef typename calc_model_t::connection_t                     connection_t;
-      typedef typename calc_model_t::well_t                           well_t;
-      typedef typename calc_model_t::strategy_type                    strategy_type;
+  //    typedef calc_model::data_array_t                     data_array_t;
+  //    typedef calc_model::item_t                           item_t;
+  //    typedef calc_model::connection_t                     connection_t;
+  //    typedef calc_model::well_t                           well_t;
+  //    typedef calc_model::strategy_type                    strategy_type;
 
-      typedef smart_ptr <calc_model_t, true>                          sp_calc_model_t;
-      typedef typename calc_model_t::sp_well_t                        sp_well_t;
-      typedef typename calc_model_t::sp_connection_t                  sp_connection_t;
-      typedef smart_ptr<well_results_storage, true>                   sp_well_results_storage;
+  //    typedef calc_model::sp_well_t                        sp_well_t;
+  //    typedef calc_model::sp_connection_t                  sp_connection_t;
+  //    typedef smart_ptr<well_results_storage, true>                   sp_well_results_storage;
 
-      typedef typename calc_model_t::reservoir_t::facility_manager_t  facility_manager_t;
-      typedef typename facility_manager_t::well_const_iterator_t      well_iterator_t;
+  //    typedef facility_manager  facility_manager_t;
+  //    typedef facility_manager_t::well_const_iterator_t      well_iterator_t;
 
 
-      /**
-       * \brief  Saves well and connection data to well_results_storage
-       * \param  calc_model
-       * \param  __formal
-       * \param  wb Begin of well list
-       * \param  we End of well list
-       * \param  __formal
-       * \param  time Current simulation time
-       * */
-      void
-      copy_well_data_to_storage (sp_calc_model_t &calc_model, item_t /*dt*/, well_iterator_t wb, const well_iterator_t &we, size_t /*iter_counter*/, item_t time)
-      {
-        const sp_well_results_storage &w_res (calc_model->well_res);
+  //    /**
+  //     * \brief  Saves well and connection data to well_results_storage
+  //     * \param  calc_model
+  //     * \param  __formal
+  //     * \param  wb Begin of well list
+  //     * \param  we End of well list
+  //     * \param  __formal
+  //     * \param  time Current simulation time
+  //     * */
+  //    void
+  //    copy_well_data_to_storage (BS_SP (calc_model) &calc_model, item_t /*dt*/, well_iterator_t wb, const well_iterator_t &we, size_t /*iter_counter*/, item_t time)
+  //    {
+  //      const sp_well_results_storage &w_res (calc_model->well_res);
 
-        bool write_conn_results_to_hdf5 = calc_model->ts_params->get_bool (fi_params::WRITE_CONN_RESULTS_TO_HDF5);
+  //      bool write_conn_results_to_hdf5 = calc_model->ts_params->get_bool (fi_params::WRITE_CONN_RESULTS_TO_HDF5);
 
-        //TODO: groups
-        for (well_iterator_t well = wb; well != we; ++well)
-          {
-            sp_well_t ws (well->second, bs_dynamic_cast ());
-            well_results &wr = w_res->wells[ws->get_name ()];
+  //      //TODO: groups
+  //      for (well_iterator_t well = wb; well != we; ++well)
+  //        {
+  //          sp_well_t ws (well->second, bs_dynamic_cast ());
+  //          well_results &wr = w_res->wells[ws->get_name ()];
 
-            wr.group = std::string ("FIELD");//TODO ws->get_group_name ()
-            // add time value
-            wr.dates.push_back (time);
+  //          wr.group = std::string ("FIELD");//TODO ws->get_group_name ()
+  //          // add time value
+  //          wr.dates.push_back (time);
 
-            // add current rates
-            wr.d_params[WELL_D_PARAM_COR].push_back (-(float)ws->rate ().prod.oil);
-            wr.d_params[WELL_D_PARAM_CWR].push_back (-(float)ws->rate ().prod.water);
-            wr.d_params[WELL_D_PARAM_CGR].push_back (-(float)ws->rate ().prod.gas);
-            wr.d_params[WELL_D_PARAM_CLR].push_back (-(float)ws->rate ().prod.liquid);
-            wr.d_params[WELL_D_PARAM_COI].push_back ((float)ws->rate ().inj.oil);
-            wr.d_params[WELL_D_PARAM_CWI].push_back ((float)ws->rate ().inj.water);
-            wr.d_params[WELL_D_PARAM_CGI].push_back ((float)ws->rate ().inj.gas);
+  //          // add current rates
+  //          wr.d_params[WELL_D_PARAM_COR].push_back (-(float)ws->rate ().prod.oil);
+  //          wr.d_params[WELL_D_PARAM_CWR].push_back (-(float)ws->rate ().prod.water);
+  //          wr.d_params[WELL_D_PARAM_CGR].push_back (-(float)ws->rate ().prod.gas);
+  //          wr.d_params[WELL_D_PARAM_CLR].push_back (-(float)ws->rate ().prod.liquid);
+  //          wr.d_params[WELL_D_PARAM_COI].push_back ((float)ws->rate ().inj.oil);
+  //          wr.d_params[WELL_D_PARAM_CWI].push_back ((float)ws->rate ().inj.water);
+  //          wr.d_params[WELL_D_PARAM_CGI].push_back ((float)ws->rate ().inj.gas);
 
 
-            // add initial rates
-            wr.d_params[WELL_D_PARAM_HCOR].push_back (0);
-            wr.d_params[WELL_D_PARAM_HCWR].push_back (0);
-            wr.d_params[WELL_D_PARAM_HCGR].push_back (0);
-            wr.d_params[WELL_D_PARAM_HCLR].push_back (0);
-            wr.d_params[WELL_D_PARAM_HCOI].push_back (0);
-            wr.d_params[WELL_D_PARAM_HCWI].push_back (0);
-            wr.d_params[WELL_D_PARAM_HCGI].push_back (0);
+  //          // add initial rates
+  //          wr.d_params[WELL_D_PARAM_HCOR].push_back (0);
+  //          wr.d_params[WELL_D_PARAM_HCWR].push_back (0);
+  //          wr.d_params[WELL_D_PARAM_HCGR].push_back (0);
+  //          wr.d_params[WELL_D_PARAM_HCLR].push_back (0);
+  //          wr.d_params[WELL_D_PARAM_HCOI].push_back (0);
+  //          wr.d_params[WELL_D_PARAM_HCWI].push_back (0);
+  //          wr.d_params[WELL_D_PARAM_HCGI].push_back (0);
 
-            wr.d_params[WELL_D_PARAM_TOR].push_back (-(float)ws->rate_total ().prod.oil);
-            wr.d_params[WELL_D_PARAM_TWR].push_back (-(float)ws->rate_total ().prod.water);
-            wr.d_params[WELL_D_PARAM_TGR].push_back (-(float)ws->rate_total ().prod.gas);
-            wr.d_params[WELL_D_PARAM_TLR].push_back (-(float)ws->rate_total ().prod.liquid);
-            wr.d_params[WELL_D_PARAM_TOI].push_back ((float)ws->rate_total ().inj.oil);
-            wr.d_params[WELL_D_PARAM_TWI].push_back ((float)ws->rate_total ().inj.water);
-            wr.d_params[WELL_D_PARAM_TGI].push_back ((float)ws->rate_total ().inj.gas);
+  //          wr.d_params[WELL_D_PARAM_TOR].push_back (-(float)ws->rate_total ().prod.oil);
+  //          wr.d_params[WELL_D_PARAM_TWR].push_back (-(float)ws->rate_total ().prod.water);
+  //          wr.d_params[WELL_D_PARAM_TGR].push_back (-(float)ws->rate_total ().prod.gas);
+  //          wr.d_params[WELL_D_PARAM_TLR].push_back (-(float)ws->rate_total ().prod.liquid);
+  //          wr.d_params[WELL_D_PARAM_TOI].push_back ((float)ws->rate_total ().inj.oil);
+  //          wr.d_params[WELL_D_PARAM_TWI].push_back ((float)ws->rate_total ().inj.water);
+  //          wr.d_params[WELL_D_PARAM_TGI].push_back ((float)ws->rate_total ().inj.gas);
 
-            /*          //TODO
-                        wr.d_params[WELL_D_PARAM_HTOR].push_back (-(float)ws->total_initial_rate.oil);
-                        wr.d_params[WELL_D_PARAM_HTWR].push_back (-(float)ws->total_initial_rate.water);
-                        wr.d_params[WELL_D_PARAM_HTGR].push_back (-(float)ws->total_initial_rate.gas);
-                        wr.d_params[WELL_D_PARAM_HTLR].push_back ((float)ws->total_initial_rate.liquid);
-                        wr.d_params[WELL_D_PARAM_HTOI].push_back ((float)ws->total_initial_rate.oil_inj);
-                        wr.d_params[WELL_D_PARAM_HTWI].push_back ((float)ws->total_initial_rate.water_inj);
-                        wr.d_params[WELL_D_PARAM_HTGI].push_back ((float)ws->total_initial_rate.gas_inj);
-                        wr.d_params[WELL_D_PARAM_WEFAC].push_back ((float)ws->wefac);
-            */
+  //          /*          //TODO
+  //                      wr.d_params[WELL_D_PARAM_HTOR].push_back (-(float)ws->total_initial_rate.oil);
+  //                      wr.d_params[WELL_D_PARAM_HTWR].push_back (-(float)ws->total_initial_rate.water);
+  //                      wr.d_params[WELL_D_PARAM_HTGR].push_back (-(float)ws->total_initial_rate.gas);
+  //                      wr.d_params[WELL_D_PARAM_HTLR].push_back ((float)ws->total_initial_rate.liquid);
+  //                      wr.d_params[WELL_D_PARAM_HTOI].push_back ((float)ws->total_initial_rate.oil_inj);
+  //                      wr.d_params[WELL_D_PARAM_HTWI].push_back ((float)ws->total_initial_rate.water_inj);
+  //                      wr.d_params[WELL_D_PARAM_HTGI].push_back ((float)ws->total_initial_rate.gas_inj);
+  //                      wr.d_params[WELL_D_PARAM_WEFAC].push_back ((float)ws->wefac);
+  //          */
 
-            wr.d_params[WELL_D_PARAM_CBHP].push_back ((float)ws->get_well_controller ()->bhp ());
-            wr.d_params[WELL_D_PARAM_HBHP].push_back ((float)ws->get_well_controller ()->bhp_history ());
+  //          wr.d_params[WELL_D_PARAM_CBHP].push_back ((float)ws->get_well_controller ()->bhp ());
+  //          wr.d_params[WELL_D_PARAM_HBHP].push_back ((float)ws->get_well_controller ()->bhp_history ());
 
-            // add integer information
-            wr.i_params[WELL_I_PARAM_HSTATUS].push_back (0);//TODO
-            wr.i_params[WELL_I_PARAM_STATUS].push_back (detail::get_status_old (ws));
+  //          // add integer information
+  //          wr.i_params[WELL_I_PARAM_HSTATUS].push_back (0);//TODO
+  //          wr.i_params[WELL_I_PARAM_STATUS].push_back (detail::get_status_old (ws));
 
-            if (write_conn_results_to_hdf5)
-              {
-                typename well_t::connection_iterator_t it = ws->connections_begin (), e = ws->connections_end ();
-                for (; it != e; ++it)
-                  {
-                    const sp_connection_t &ci = *it;
-                    int cell = ci->n_block ();
-                    connection_results &cr = wr.connections[cell];
-                    cr.dates.push_back (time);
+  //          if (write_conn_results_to_hdf5)
+  //            {
+  //              typename well_t::connection_iterator_t it = ws->connections_begin (), e = ws->connections_end ();
+  //              for (; it != e; ++it)
+  //                {
+  //                  const sp_connection_t &ci = *it;
+  //                  int cell = ci->n_block ();
+  //                  connection_results &cr = wr.connections[cell];
+  //                  cr.dates.push_back (time);
 
-                    if (!ci->is_shut ())
-                      {/*
-                                                //TODO
-                                                cr.d_params[CONN_D_PARAM_COR].push_back (-(float)ci->second.rate.water);
-                                                cr.d_params[CONN_D_PARAM_CWR].push_back (-(float)ci->second.rate.water);
-                                                cr.d_params[CONN_D_PARAM_CGR].push_back (-(float)ci->second.rate.gas);
-                                                cr.d_params[CONN_D_PARAM_CLR].push_back (-(float)ci->second.rate.liquid);
-                                                cr.d_params[CONN_D_PARAM_COI].push_back ((float)ci->second.rate.oil_inj);
-                                                cr.d_params[CONN_D_PARAM_CWI].push_back ((float)ci->second.rate.water_inj);
-                                                cr.d_params[CONN_D_PARAM_CGI].push_back ((float)ci->second.rate.gas_inj);
-                                                */
-                      }
-                    else
-                      {
-                        cr.d_params[CONN_D_PARAM_COR].push_back (0);
-                        cr.d_params[CONN_D_PARAM_CWR].push_back (0);
-                        cr.d_params[CONN_D_PARAM_CGR].push_back (0);
-                        cr.d_params[CONN_D_PARAM_CLR].push_back (0);
-                        cr.d_params[CONN_D_PARAM_COI].push_back (0);
-                        cr.d_params[CONN_D_PARAM_CWI].push_back (0);
-                        cr.d_params[CONN_D_PARAM_CGI].push_back (0);
-                      }
+  //                  if (!ci->is_shut ())
+  //                    {/*
+  //                                              //TODO
+  //                                              cr.d_params[CONN_D_PARAM_COR].push_back (-(float)ci->second.rate.water);
+  //                                              cr.d_params[CONN_D_PARAM_CWR].push_back (-(float)ci->second.rate.water);
+  //                                              cr.d_params[CONN_D_PARAM_CGR].push_back (-(float)ci->second.rate.gas);
+  //                                              cr.d_params[CONN_D_PARAM_CLR].push_back (-(float)ci->second.rate.liquid);
+  //                                              cr.d_params[CONN_D_PARAM_COI].push_back ((float)ci->second.rate.oil_inj);
+  //                                              cr.d_params[CONN_D_PARAM_CWI].push_back ((float)ci->second.rate.water_inj);
+  //                                              cr.d_params[CONN_D_PARAM_CGI].push_back ((float)ci->second.rate.gas_inj);
+  //                                              */
+  //                    }
+  //                  else
+  //                    {
+  //                      cr.d_params[CONN_D_PARAM_COR].push_back (0);
+  //                      cr.d_params[CONN_D_PARAM_CWR].push_back (0);
+  //                      cr.d_params[CONN_D_PARAM_CGR].push_back (0);
+  //                      cr.d_params[CONN_D_PARAM_CLR].push_back (0);
+  //                      cr.d_params[CONN_D_PARAM_COI].push_back (0);
+  //                      cr.d_params[CONN_D_PARAM_CWI].push_back (0);
+  //                      cr.d_params[CONN_D_PARAM_CGI].push_back (0);
+  //                    }
 
-                    cr.d_params[CONN_D_PARAM_FACTOR].push_back ((float)ci->get_fact ());
-                    cr.d_params[CONN_D_PARAM_BHP].push_back ((float)ci->get_cur_bhp ());
-                    cr.d_params[CONN_D_PARAM_BULKP].push_back ((float)ci->get_bulkp ());
-                    cr.d_params[CONN_D_PARAM_DEPTH].push_back ((float)ci->connection_depth);
+  //                  cr.d_params[CONN_D_PARAM_FACTOR].push_back ((float)ci->get_fact ());
+  //                  cr.d_params[CONN_D_PARAM_BHP].push_back ((float)ci->get_cur_bhp ());
+  //                  cr.d_params[CONN_D_PARAM_BULKP].push_back ((float)ci->get_bulkp ());
+  //                  cr.d_params[CONN_D_PARAM_DEPTH].push_back ((float)ci->connection_depth);
 
-                    cr.i_params[CONN_I_PARAM_STATUS].push_back (ci->get_status ());
-                    cr.i_params[CONN_I_PARAM_GRP_STATUS].push_back (0);//TODO
-                    cr.i_params[CONN_I_PARAM_I].push_back (ci->i_coord ());
-                    cr.i_params[CONN_I_PARAM_J].push_back (ci->j_coord ());
-                    cr.i_params[CONN_I_PARAM_K1].push_back (ci->k_coord ());
-                    cr.i_params[CONN_I_PARAM_K2].push_back (ci->k_coord ());
+  //                  cr.i_params[CONN_I_PARAM_STATUS].push_back (ci->get_status ());
+  //                  cr.i_params[CONN_I_PARAM_GRP_STATUS].push_back (0);//TODO
+  //                  cr.i_params[CONN_I_PARAM_I].push_back (ci->i_coord ());
+  //                  cr.i_params[CONN_I_PARAM_J].push_back (ci->j_coord ());
+  //                  cr.i_params[CONN_I_PARAM_K1].push_back (ci->k_coord ());
+  //                  cr.i_params[CONN_I_PARAM_K2].push_back (ci->k_coord ());
 
-                    /*                  //TODO
-                                        cr.d_params[CONN_D_PARAM_TOR].push_back (-(float)ci->second.commulative_rate.oil);
-                                        cr.d_params[CONN_D_PARAM_TWR].push_back (-(float)ci->second.commulative_rate.water);
-                                        cr.d_params[CONN_D_PARAM_TGR].push_back (-(float)ci->second.commulative_rate.gas);
-                                        cr.d_params[CONN_D_PARAM_TLR].push_back (-(float)ci->second.commulative_rate.liquid);
-                                        cr.d_params[CONN_D_PARAM_TOI].push_back ((float)ci->second.commulative_rate.oil_inj);
-                                        cr.d_params[CONN_D_PARAM_TWI].push_back ((float)ci->second.commulative_rate.water_inj);
-                                        cr.d_params[CONN_D_PARAM_TGI].push_back ((float)ci->second.commulative_rate.gas_inj);
-                    */
-                  }
+  //                  /*                  //TODO
+  //                                      cr.d_params[CONN_D_PARAM_TOR].push_back (-(float)ci->second.commulative_rate.oil);
+  //                                      cr.d_params[CONN_D_PARAM_TWR].push_back (-(float)ci->second.commulative_rate.water);
+  //                                      cr.d_params[CONN_D_PARAM_TGR].push_back (-(float)ci->second.commulative_rate.gas);
+  //                                      cr.d_params[CONN_D_PARAM_TLR].push_back (-(float)ci->second.commulative_rate.liquid);
+  //                                      cr.d_params[CONN_D_PARAM_TOI].push_back ((float)ci->second.commulative_rate.oil_inj);
+  //                                      cr.d_params[CONN_D_PARAM_TWI].push_back ((float)ci->second.commulative_rate.water_inj);
+  //                                      cr.d_params[CONN_D_PARAM_TGI].push_back ((float)ci->second.commulative_rate.gas_inj);
+  //                  */
+  //                }
 
-              }
-          }
-      }
-    };
+  //            }
+  //        }
+  //    }
+  //  };
 
 } //blue_sky
 #endif //__BS_WELL_RESULTS_STORAGE_H

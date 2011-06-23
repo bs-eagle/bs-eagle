@@ -16,9 +16,8 @@ namespace blue_sky
    * \brief  'default' ctor for two_stage_preconditioner
    * \param  param Additional params for ctor
    * */
-  template <class strategy_t>
-  two_stage_preconditioner<strategy_t>::two_stage_preconditioner (bs_type_ctor_param param)
-      : linear_solver_base<strategy_t> (param)
+  two_stage_preconditioner::two_stage_preconditioner (bs_type_ctor_param param)
+      : linear_solver_base (param)
   {
     //sp_link prec_2_link = bs_link::create (bs_node::create_node (), "prec_2");
 
@@ -29,36 +28,34 @@ namespace blue_sky
    * \brief  copy-ctor for two_stage_preconditioner
    * \param  prec Instance of two_stage_preconditioner to be copied
    * */
-  template <class strategy_t>
-  two_stage_preconditioner<strategy_t>::two_stage_preconditioner (const two_stage_preconditioner &prec)
-      : bs_refcounter (prec), linear_solver_base<strategy_t> (prec)
+  two_stage_preconditioner::two_stage_preconditioner (const two_stage_preconditioner &prec)
+      : bs_refcounter (prec), linear_solver_base (prec)
   {
     if (this != &prec)
       *this = prec;
   }
 
   //! destructor
-  template <class strategy_t>
-  two_stage_preconditioner<strategy_t>::~two_stage_preconditioner ()
+  two_stage_preconditioner::~two_stage_preconditioner ()
   {
   }
 
-  template <class strategy_t> int
-  two_stage_preconditioner<strategy_t>::solve(matrix_t *matrix, rhs_item_array_t &rhs, item_array_t &sol)
+  int
+  two_stage_preconditioner::solve(matrix_t *matrix, rhs_item_array_t &rhs, item_array_t &sol)
   {
     return templ_solve (matrix, rhs, sol);
   }
 
-  template <class strategy_t> int
-  two_stage_preconditioner<strategy_t>::solve_prec(matrix_t *matrix, item_array_t &rhs, item_array_t &sol)
+  int
+  two_stage_preconditioner::solve_prec(matrix_t *matrix, item_array_t &rhs, item_array_t &sol)
   {
     return templ_solve (matrix, rhs, sol);
   }
 
 
   //! solve preconditioner
-  template <class strategy_t> template <class rhs_t> int
-  two_stage_preconditioner<strategy_t>::templ_solve (matrix_t *matrix, rhs_t &rhs, item_array_t &sol)
+  template <class rhs_t> int
+  two_stage_preconditioner::templ_solve (matrix_t *matrix, rhs_t &rhs, item_array_t &sol)
   {
     BS_ASSERT (matrix);
     BS_ASSERT (rhs.size ()) (rhs.size ());
@@ -111,8 +108,8 @@ namespace blue_sky
   }
 
   //! setup preconditioner
-  template <class strategy_t> int
-  two_stage_preconditioner<strategy_t>::setup (matrix_t *matrix)
+  int
+  two_stage_preconditioner::setup (matrix_t *matrix)
   {
     if (!matrix)
       {
@@ -129,20 +126,15 @@ namespace blue_sky
   }
 
   //////////////////////////////////////////////////////////////////////////
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(two_stage_preconditioner, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(two_stage_preconditioner, (class));
-
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (two_stage_preconditioner<base_strategy_fi>) , 1, (linear_solver_base<base_strategy_fi>), "two_stage_prec_seq_fi", "Two stage Preconditioner", "Two stage Preconditioner", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (two_stage_preconditioner<base_strategy_di>) , 1, (linear_solver_base<base_strategy_di>), "two_stage_prec_seq_di", "Two stage Preconditioner", "Two stage Preconditioner", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (two_stage_preconditioner<base_strategy_mixi>) , 1, (linear_solver_base<base_strategy_mixi>), "two_stage_prec_seq_mixi", "Two stage Preconditioner", "Two stage Preconditioner", false);
+  BLUE_SKY_TYPE_STD_CREATE (two_stage_preconditioner);
+  BLUE_SKY_TYPE_STD_COPY (two_stage_preconditioner);
+  BLUE_SKY_TYPE_IMPL (two_stage_preconditioner, linear_solver_base, "two_stage_prec", "two_stage_prec", "two_stage_prec");
 
   bool two_stage_prec_register_type (const blue_sky::plugin_descriptor &pd)
   {
     bool res = true;
 
-    res &= BS_KERNEL.register_type (pd, two_stage_preconditioner<base_strategy_di>::bs_type ());
-    res &= BS_KERNEL.register_type (pd, two_stage_preconditioner<base_strategy_fi>::bs_type ());
-    res &= BS_KERNEL.register_type (pd, two_stage_preconditioner<base_strategy_mixi>::bs_type ());
+    res &= BS_KERNEL.register_type (pd, two_stage_preconditioner::bs_type ());
 
     return res;
   }

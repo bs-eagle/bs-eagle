@@ -186,9 +186,7 @@ namespace blue_sky
     void
     py_export_jacobian_matrix ()
     {
-      export_jacobian_matrix <jacobian_matrix <base_strategy_fi> >    ("jacobian_matrix_seq_fi");
-      export_jacobian_matrix <jacobian_matrix <base_strategy_di> >    ("jacobian_matrix_seq_di");
-      export_jacobian_matrix <jacobian_matrix <base_strategy_mixi> >  ("jacobian_matrix_seq_mixi");
+      export_jacobian_matrix <jacobian_matrix>    ("jacobian_matrix");
     }
 
   } // namespace python

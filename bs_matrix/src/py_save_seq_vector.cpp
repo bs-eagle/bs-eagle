@@ -24,15 +24,11 @@ namespace blue_sky
 
         }
 
-        void save_list_int (base_strategy_di::index_array_t &array)
+        void save_list_int (strategy_t::index_array_t &array)
         {
           save (array);
         }
-        void save_list_float (base_strategy_fi::item_array_t &array)
-        {
-          save (array);
-        }
-        void save_list_double (base_strategy_di::item_array_t &array)
+        void save_list_double (strategy_t::item_array_t &array)
         {
           save (array);
         }
@@ -45,7 +41,6 @@ namespace blue_sky
 
       class_ <py_save_seq_vector> ("save_seq_vector", init <const char *> ())
       .def ("save", &py_save_seq_vector::save_list_int)
-      .def ("save", &py_save_seq_vector::save_list_float)
       .def ("save", &py_save_seq_vector::save_list_double)
       ;
     }

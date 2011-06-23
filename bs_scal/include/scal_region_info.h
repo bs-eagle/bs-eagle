@@ -12,10 +12,9 @@ namespace blue_sky {
   /**
    * \brief describe a scal region
    * */
-  template <typename strategy_t>
   struct scal_region_info
   {
-    typedef typename strategy_t::item_t item_t;
+    typedef strategy_t::item_t item_t;
     int So_count;                                   ///< count of So and Krop components of region
     int Sp_count;                                   ///< count of Sp and Krp components of region
     int Krp_min_greater_zero;                       ///< index of item that first greater than zero in Krp

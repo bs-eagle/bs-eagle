@@ -16,13 +16,13 @@ namespace blue_sky {
    * \param  facility_list
    * \param  method
    * */
-  template <typename strategy_t, typename method_t>
+  template <typename method_t>
   void
-  for_each_well (facility_manager <strategy_t> &facility_list, method_t method)
+  for_each_well (facility_manager &facility_list, method_t method)
   {
-    typename facility_manager <strategy_t>::well_const_iterator_t wb = facility_list.wells_begin ();
-    typename facility_manager <strategy_t>::well_const_iterator_t we = facility_list.wells_end ();
-    typedef well <strategy_t> well_t;
+    facility_manager::well_const_iterator_t wb = facility_list.wells_begin ();
+    facility_manager::well_const_iterator_t we = facility_list.wells_end ();
+    typedef well well_t;
     typedef smart_ptr <well_t, true> sp_well_t;
 
     for (; wb != we; ++wb)
@@ -42,12 +42,12 @@ namespace blue_sky {
    * \param  facility_list
    * \param  method
    * */
-  template <typename strategy_t, typename method_t>
+  template <typename method_t>
   void
-  for_each_facility (facility_manager <strategy_t> &facility_list, method_t method)
+  for_each_facility (facility_manager &facility_list, method_t method)
   {
-    typename facility_manager <strategy_t>::well_const_iterator_t wb = facility_list.wells_begin ();
-    typename facility_manager <strategy_t>::well_const_iterator_t we = facility_list.wells_end ();
+    facility_manager::well_const_iterator_t wb = facility_list.wells_begin ();
+    facility_manager::well_const_iterator_t we = facility_list.wells_end ();
 
     for (; wb != we; ++wb)
       {
@@ -67,13 +67,13 @@ namespace blue_sky {
    * \param  method
    * \return True if for any well in list method returns true
    * */
-  template <typename strategy_t, typename method_t>
+  template <typename method_t>
   bool
-  for_each_well_while_cond (facility_manager <strategy_t> &facility_list, method_t method)
+  for_each_well_while_cond (facility_manager &facility_list, method_t method)
   {
-    typename facility_manager <strategy_t>::well_const_iterator_t wb = facility_list.wells_begin ();
-    typename facility_manager <strategy_t>::well_const_iterator_t we = facility_list.wells_end ();
-    typedef well <strategy_t> well_t;
+    facility_manager::well_const_iterator_t wb = facility_list.wells_begin ();
+    facility_manager::well_const_iterator_t we = facility_list.wells_end ();
+    typedef well well_t;
     typedef smart_ptr <well_t, true> sp_well_t;
 
     for (; wb != we; ++wb)
@@ -95,13 +95,13 @@ namespace blue_sky {
    * \param  method
    * \return Accumulated value
    * */
-  template <typename strategy_t, typename method_t>
+  template <typename method_t>
   size_t
-  for_each_well_acc (facility_manager <strategy_t> &facility_list, method_t method)
+  for_each_well_acc (facility_manager &facility_list, method_t method)
   {
-    typename facility_manager <strategy_t>::well_const_iterator_t wb = facility_list.wells_begin ();
-    typename facility_manager <strategy_t>::well_const_iterator_t we = facility_list.wells_end ();
-    typedef well <strategy_t> well_t;
+    facility_manager::well_const_iterator_t wb = facility_list.wells_begin ();
+    facility_manager::well_const_iterator_t we = facility_list.wells_end ();
+    typedef well well_t;
     typedef smart_ptr <well_t, true> sp_well_t;
 
     size_t acc = 0;

@@ -157,9 +157,9 @@ namespace blue_sky
   } // namespace xxx
 
 
-  template <typename strategy_t, bool is_w, bool is_g, bool is_o>
+  template <bool is_w, bool is_g, bool is_o>
   inline void
-  main_loop_calc <strategy_t, is_w, is_g, is_o>::generate_numeric_jacobian (int /*init*/)
+  main_loop_calc <is_w, is_g, is_o>::generate_numeric_jacobian (int /*init*/)
   {
     throw bs_exception ("generate_numeric_jacobian", "NOT IMPL YET");
     //using namespace xxx;

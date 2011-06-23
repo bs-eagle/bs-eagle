@@ -28,16 +28,15 @@ namespace blue_sky
   /**
    * \brief pvt_base
    */
-  template <typename strategy_t>
   class BS_API_PLUGIN pvt_base : public objbase
     {
     public:
 
       typedef strategy_t                              pvt_strategy_t;
-      typedef typename strategy_t::item_t							item_t;
-      typedef typename strategy_t::index_t						index_t;
-      typedef typename strategy_t::item_array_t			  item_array_t;
-      typedef typename strategy_t::index_array_t		  index_array_t;
+      typedef strategy_t::item_t							item_t;
+      typedef strategy_t::index_t						index_t;
+      typedef strategy_t::item_array_t			  item_array_t;
+      typedef strategy_t::index_array_t		  index_array_t;
       typedef shared_vector <double>    		          input_vector_t;
 
       typedef std::vector <item_t>                    vector_t;

@@ -22,9 +22,8 @@ namespace blue_sky
   template <>                                                                                                       \
   struct BOOST_PP_CAT (hx_, name) <phase>                                                                           \
   {                                                                                                                 \
-    template <typename strategy_t>                                                                                  \
-    static typename strategy_t::item_t                                                                              \
-    get (const calc_model_data <strategy_t> &data, const boost::array <int, FI_PHASE_TOT> &phase_d)                 \
+    static strategy_t::item_t                                                                              \
+    get (const calc_model_data &data, const boost::array <int, FI_PHASE_TOT> &phase_d)                 \
     {                                                                                                               \
       BS_ASSERT (phase_d[phase] != -1) (phase);                                                                     \
       return data.name [phase_d[phase]];                                                                            \
@@ -35,9 +34,8 @@ namespace blue_sky
   template <>                                                                                                       \
   struct BOOST_PP_CAT (hx_, name) <phase1, phase2>                                                                  \
   {                                                                                                                 \
-    template <typename strategy_t>                                                                                  \
-    static typename strategy_t::item_t                                                                              \
-    get (const calc_model_data <strategy_t> &data, const boost::array <int, FI_PHASE_TOT> &phase_d, int n_phases)   \
+    static strategy_t::item_t                                                                              \
+    get (const calc_model_data &data, const boost::array <int, FI_PHASE_TOT> &phase_d, int n_phases)   \
     {                                                                                                               \
       BS_ASSERT (phase_d[phase1] != -1) (phase1);                                                                   \
       BS_ASSERT (phase_d[phase2] != -1) (phase2);                                                                   \
@@ -66,9 +64,8 @@ namespace blue_sky
   template <>                                                                                                       \
   struct BOOST_PP_CAT (hx_, BOOST_PP_TUPLE_ELEM (3, 0, iter_data)) <phase>                                          \
   {                                                                                                                 \
-    template <typename strategy_t>                                                                                  \
-    static typename strategy_t::item_t                                                                              \
-    get (const calc_model_data <strategy_t> &data, const boost::array <int, FI_PHASE_TOT> &phase_d)                  \
+    static strategy_t::item_t                                                                              \
+    get (const calc_model_data &data, const boost::array <int, FI_PHASE_TOT> &phase_d)                  \
     {                                                                                                               \
       return data.BOOST_PP_TUPLE_ELEM (3, 1, iter_data) [phase] * data.BOOST_PP_TUPLE_ELEM (3, 2, iter_data) [phase]; \
     }                                                                                                               \
@@ -79,12 +76,12 @@ namespace blue_sky
   template <FI_PHASE_ENUM phase_value>                                                                              \
   struct BOOST_PP_CAT (hx_, name)                                                                                   \
   {                                                                                                                 \
-    template <typename strategy_t>                                                                                  \
-    static typename strategy_t::item_t                                                                              \
-    get (const calc_model_data <strategy_t> &data, const boost::array <int, FI_PHASE_TOT> &phase_d)                 \
+    static strategy_t::item_t                                                                              \
+    get (const calc_model_data &data, const boost::array <int, FI_PHASE_TOT> &phase_d)                 \
     {                                                                                                               \
       class inclomplete_type_1;                                                                                     \
       inclomplete_type_1 invalid_phase_value;                                                                       \
+      return strategy_t::item_t ();                                                                                 \
     }                                                                                                               \
   };                                                                                                                \
   BOOST_PP_SEQ_FOR_EACH (DEF_FUN_I, name, BOOST_PP_TUPLE_TO_SEQ (ts, tp))
@@ -93,12 +90,12 @@ namespace blue_sky
   template <FI_PHASE_ENUM phase1, FI_PHASE_ENUM phase2>                                                             \
   struct BOOST_PP_CAT (hx_, name)                                                                                   \
   {                                                                                                                 \
-    template <typename strategy_t>                                                                                  \
-    static typename strategy_t::item_t                                                                              \
-    get (const calc_model_data <strategy_t> &data, const boost::array <int, FI_PHASE_TOT> &phase_d, int n_phases)   \
+    static strategy_t::item_t                                                                              \
+    get (const calc_model_data &data, const boost::array <int, FI_PHASE_TOT> &phase_d, int n_phases)   \
     {                                                                                                               \
       class inclomplete_type_1;                                                                                     \
       inclomplete_type_1 invalid_phase_value;                                                                       \
+      return strategy_t::item_t ();                                                                                 \
     }                                                                                                               \
   };                                                                                                                \
   DEF_FUN_2_I (name, ts1, tp1, ts2, tp2)
@@ -107,12 +104,12 @@ namespace blue_sky
   template <FI_PHASE_ENUM phase>                                                                                    \
   struct BOOST_PP_CAT (hx_, name)                                                                                   \
   {                                                                                                                 \
-    template <typename strategy_t>                                                                                  \
-    static typename strategy_t::item_t                                                                              \
-    get (const calc_model_data <strategy_t> &data, const boost::array <int, FI_PHASE_TOT> &phase_d)                 \
+    static strategy_t::item_t                                                                              \
+    get (const calc_model_data &data, const boost::array <int, FI_PHASE_TOT> &phase_d)                 \
     {                                                                                                               \
       class inclomplete_type_1;                                                                                     \
       inclomplete_type_1 invalid_phase_value;                                                                       \
+      return strategy_t::item_t ();                                                                                 \
     }                                                                                                               \
   };                                                                                                                \
   BOOST_PP_SEQ_FOR_EACH (DEF_FUN_PAIR_I, (name, name1, name2), BOOST_PP_TUPLE_TO_SEQ (ts, tp))
@@ -128,7 +125,7 @@ namespace blue_sky
   DEF_FUN   (invers_visc_fvf, 3, (FI_PHASE_OIL, FI_PHASE_WATER, FI_PHASE_GAS))
   DEF_FUN   (p_deriv_invers_visc_fvf, 3, (FI_PHASE_OIL, FI_PHASE_WATER, FI_PHASE_GAS))
   DEF_FUN   (density, 3, (FI_PHASE_OIL, FI_PHASE_WATER, FI_PHASE_GAS))
-  DEF_FUN   (p_density, 3, (FI_PHASE_OIL, FI_PHASE_WATER, FI_PHASE_GAS))
+  DEF_FUN   (p_deriv_density, 3, (FI_PHASE_OIL, FI_PHASE_WATER, FI_PHASE_GAS))
   DEF_FUN   (mobility, 3, (FI_PHASE_OIL, FI_PHASE_WATER, FI_PHASE_GAS))
   DEF_FUN   (p_deriv_mobility,3, (FI_PHASE_OIL, FI_PHASE_WATER, FI_PHASE_GAS))
   DEF_FUN_2 (s_deriv_mobility, 3, (FI_PHASE_OIL, FI_PHASE_WATER, FI_PHASE_GAS), 3, (FI_PHASE_OIL, FI_PHASE_WATER, FI_PHASE_GAS))

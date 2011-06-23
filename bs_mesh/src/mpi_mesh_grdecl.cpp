@@ -10,24 +10,20 @@
 namespace blue_sky
   {
   //! default constructor
-  template<class strategy_t>
-  mpi_mesh_grdecl<strategy_t>::mpi_mesh_grdecl(bs_type_ctor_param)
+  mpi_mesh_grdecl::mpi_mesh_grdecl(bs_type_ctor_param)
   {
   }
-  template<class strategy_t>
-  mpi_mesh_grdecl<strategy_t>::mpi_mesh_grdecl(const mpi_mesh_grdecl& src)
+  mpi_mesh_grdecl::mpi_mesh_grdecl(const mpi_mesh_grdecl& src)
   {
     *this = src;
   }
 
-  template<class strategy_t>
-  int mpi_mesh_grdecl<strategy_t>::par_distribution()
+  int mpi_mesh_grdecl::par_distribution()
   {
     return 0;
   }
 
-  template<class strategy_t>
-  int mpi_mesh_grdecl<strategy_t>::print_debug_info()
+  int mpi_mesh_grdecl::print_debug_info()
   {
     printf("numprocs=%d,myid = %d\n",numprocs,myid);
     fflush(0);
@@ -40,8 +36,7 @@ namespace blue_sky
     return 0;
   }
 
-  template<class strategy_t>
-  int mpi_mesh_grdecl<strategy_t>::par_fileOpen_cube_hdf5(const char* file_name)
+  int mpi_mesh_grdecl::par_fileOpen_cube_hdf5(const char* file_name)
   {
     hid_t  file_id, dset_id = 0; //file and dataset identifiers
     int cut_dir, n_layers;
@@ -183,16 +178,14 @@ namespace blue_sky
   }
 
 
-  template<class strategy_t>
-  void mpi_mesh_grdecl<strategy_t>::set_mpi_comm(MPI_Comm acomm)
+  void mpi_mesh_grdecl::set_mpi_comm(MPI_Comm acomm)
   {
     mpi_comm = acomm;
     MPI_Comm_size(mpi_comm, &numprocs);
     MPI_Comm_rank(mpi_comm, &myid);
   }
 
-  template<class strategy_t>
-  int mpi_mesh_grdecl<strategy_t>::open_file_mpi_hdf5(const char *file_name)
+  int mpi_mesh_grdecl::open_file_mpi_hdf5(const char *file_name)
   {
     //Set up file access property list with parallel I/O access
     hid_t plist_id = H5Pcreate(H5P_FILE_ACCESS); // Creates a new property as an instance of a property li_startt class.
@@ -210,8 +203,7 @@ namespace blue_sky
     H5Pclose (plist_id);
     return file_id;
   }
-  template<class strategy_t>
-  int mpi_mesh_grdecl<strategy_t>::mpi_hdf5_read_dataset (const char* dset_title, hid_t file_id, hsize_t dims_memory,
+  int mpi_mesh_grdecl::mpi_hdf5_read_dataset (const char* dset_title, hid_t file_id, hsize_t dims_memory,
       hsize_t *stride,
       hsize_t *block,
       hsize_t *count,
@@ -287,8 +279,7 @@ namespace blue_sky
 
     return 0;
   }
-  template<class strategy_t>
-  int mpi_mesh_grdecl<strategy_t>::open_dataset(int rank, hsize_t dims_memory[], hid_t file_id, const char* dset_title)
+  int mpi_mesh_grdecl::open_dataset(int rank, hsize_t dims_memory[], hid_t file_id, const char* dset_title)
   {
     hid_t filespace = H5Screate_simple(rank, dims_memory, NULL);
     //Open the dataset and close filespace
@@ -302,11 +293,9 @@ namespace blue_sky
     return dset_id;
   }
 
-  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (mpi_mesh_grdecl<base_strategy_fi>) , 1, (objbase), "mpi_mesh_grdecl<float, int,float>", "MPI mesh_grdecl class", "MPI mesh ecllipse class", false);
-  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (mpi_mesh_grdecl<base_strategy_di>) , 1, (objbase), "mpi_mesh_grdecl<double, int,double>", "MPI mesh ecllipse class", "MPI mesh ecllipse class", false);
-
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(mpi_mesh_grdecl, (class));
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(mpi_mesh_grdecl, (class));
+  BLUE_SKY_TYPE_STD_CREATE (mpi_mesh_grdecl);
+  BLUE_SKY_TYPE_STD_COPY (mpi_mesh_grdecl);
+  BLUE_SKY_TYPE_IMPL (mpi_mesh_grdecl, objbase, "mpi_mesh_grdecl", "mpi_mesh_grdecl", "mpi_mesh_grdecl");
 
 
 }; //namespace blue_sky

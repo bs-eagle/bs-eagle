@@ -7,8 +7,6 @@
 #include "stdafx.h"
 #include "fip_results_storage.h"
 
-// WTF??
-#include "well_results_storage.h"
 namespace blue_sky
   {
 

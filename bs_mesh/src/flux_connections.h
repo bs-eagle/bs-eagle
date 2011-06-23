@@ -5,18 +5,19 @@
 	\author Iskhakov Ruslan
 	\date 2008-05-20
  * */
+
+#include "strategies.h"
  
-template<typename strategy_t>
 class flux_connections
 {
   //+++++++++++++++++++++++++++++++++++++++++++
   //  INTERNAL TYPE DECLARATION
   //===========================================
 public:
-  typedef strategy_t                                  strategy_type;
-  typedef typename strategy_t::index_array_t          index_array_t;
+  typedef blue_sky::strategy_t                                  strategy_type;
+  typedef blue_sky::strategy_t::index_array_t          index_array_t;
 
-  typedef typename strategy_t::csr_matrix_t           csr_matrix_t;
+  typedef blue_sky::strategy_t::csr_matrix_t           csr_matrix_t;
   typedef blue_sky::smart_ptr <csr_matrix_t, true>    sp_bcsr_t;
 
   //-------------------------------------------

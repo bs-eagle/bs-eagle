@@ -20,34 +20,29 @@ namespace blue_sky
     //  cgs_solver
 
     //! constructor
-    template <class strat_t>
-    cgs_solver<strat_t>::cgs_solver (bs_type_ctor_param param)
-      : linear_solver_base<strat_t> (param)
+    cgs_solver::cgs_solver (bs_type_ctor_param param)
+      : linear_solver_base (param)
     {}
 
     //! copy constructor
-    template <class strat_t>
-    cgs_solver<strat_t>::cgs_solver(const cgs_solver &solver)
-      : bs_refcounter (), linear_solver_base<strat_t> (solver)
+    cgs_solver::cgs_solver(const cgs_solver &solver)
+      : bs_refcounter (), linear_solver_base (solver)
     {
       if (&solver != this)
         *this = solver;
     }
 
     //! destructor
-    template <class strat_t>
-    cgs_solver<strat_t>::~cgs_solver ()
+    cgs_solver::~cgs_solver ()
     {}
 
 
-    template <class strat_t>
-    int cgs_solver<strat_t>::solve(matrix_t *matrix, rhs_item_array_t &rhs, item_array_t &solution)
+    int cgs_solver::solve(matrix_t *matrix, rhs_item_array_t &rhs, item_array_t &solution)
     {
       return templ_solve (matrix, rhs, solution);
     }
 
-    template <class strat_t>
-    int cgs_solver<strat_t>::solve_prec(matrix_t *matrix, item_array_t &rhs, item_array_t &solution)
+    int cgs_solver::solve_prec(matrix_t *matrix, item_array_t &rhs, item_array_t &solution)
     {
       return templ_solve (matrix, rhs, solution);
     }
@@ -64,9 +59,9 @@ namespace blue_sky
     */
 
     //template <class strat_t>
-    //int cgs_solver<strat_t>::solve(matrix_t *matrix, rhs_item_array_t &rhs, item_array_t &solution)
-    template <class strat_t> template <class rhs_t> int
-    cgs_solver<strat_t>::templ_solve (matrix_t *matrix, rhs_t &rhs, item_array_t &solution)
+    //int cgs_solver::solve(matrix_t *matrix, rhs_item_array_t &rhs, item_array_t &solution)
+    template <class rhs_t> int
+    cgs_solver::templ_solve (matrix_t *matrix, rhs_t &rhs, item_array_t &solution)
     {
 #ifdef _DEBUG
       BOSOUT (section::solvers, level::debug) << "CGS\n" << bs_end;
@@ -288,8 +283,8 @@ namespace blue_sky
     *
     * @return 0 if success
     */
-    template <class strat_t> int
-    cgs_solver<strat_t>::setup (matrix_t *matrix)
+    int
+    cgs_solver::setup (matrix_t *matrix)
     {
       if (!matrix)
         {
@@ -306,10 +301,8 @@ namespace blue_sky
     }
 
     //////////////////////////////////////////////////////////////////////////
-    BLUE_SKY_TYPE_STD_CREATE_T_DEF(cgs_solver, (class));
-    BLUE_SKY_TYPE_STD_COPY_T_DEF(cgs_solver, (class));
+    BLUE_SKY_TYPE_STD_CREATE (cgs_solver);
+    BLUE_SKY_TYPE_STD_COPY (cgs_solver);
 
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (cgs_solver<base_strategy_fi>) , 1, (linear_solver_base<base_strategy_fi>), "cgs_solver_base_fi", "CGS linear solver", "CGS linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (cgs_solver<base_strategy_di>) , 1, (linear_solver_base<base_strategy_di>), "cgs_solver_base_di", "CGS linear solver", "CGS linear solver", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (cgs_solver<base_strategy_mixi>) , 1, (linear_solver_base<base_strategy_mixi>), "cgs_solver_base_mixi", "CGS linear solver", "CGS linear solver", false);
+    BLUE_SKY_TYPE_IMPL (cgs_solver, linear_solver_base, "cgs_solver", "cgs_solver", "cgs_solver");
   }

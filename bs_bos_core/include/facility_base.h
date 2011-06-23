@@ -19,18 +19,17 @@ namespace blue_sky {
    * \brief Base class (interface) for facilities (wells e.t.c)
    * \todo  Should be renamed to facility_iface
    * */
-  template <typename strategy_t>
   class BS_API_PLUGIN facility_base : public objbase
   {
   public:
-    typedef typename strategy_t::index_array_t    index_array_t;
-    typedef typename strategy_t::item_array_t     item_array_t;
-    typedef typename strategy_t::rhs_item_array_t rhs_item_array_t;
-    typedef typename strategy_t::index_t          index_t;
+    typedef strategy_t::index_array_t    index_array_t;
+    typedef strategy_t::item_array_t     item_array_t;
+    typedef strategy_t::rhs_item_array_t rhs_item_array_t;
+    typedef strategy_t::index_t          index_t;
 
-    typedef calc_model <strategy_t>               calc_model_t;
-    typedef rs_mesh_iface <strategy_t>            mesh_iface_t;
-    typedef jacobian_matrix <strategy_t>          jmatrix_t;
+    typedef calc_model calc_model_t;
+    typedef rs_mesh_iface mesh_iface_t;
+    typedef jacobian_matrix jmatrix_t;
 
     typedef smart_ptr <calc_model_t, true>        sp_calc_model_t;
     typedef smart_ptr <mesh_iface_t, true>        sp_mesh_iface_t;

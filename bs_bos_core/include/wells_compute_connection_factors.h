@@ -22,17 +22,16 @@ namespace blue_sky
          * \class peaceman_model
          * \brief Calculates connection factors (peaceman model)
          * */
-      template <typename strategy_t>
       struct peaceman_model
         {
 
-          typedef connection <strategy_t>               connection_t;
-          typedef typename strategy_t::item_t           item_t;
-          typedef typename strategy_t::index_t          index_t;
-          typedef typename strategy_t::item_array_t     item_array_t;
+          typedef connection connection_t;
+          typedef strategy_t::item_t           item_t;
+          typedef strategy_t::index_t          index_t;
+          typedef strategy_t::item_array_t     item_array_t;
           typedef smart_ptr <fi_params, true>           sp_params_t;
 
-          typedef rs_mesh_iface <strategy_t>                  mesh_iface_t;
+          typedef rs_mesh_iface mesh_iface_t;
           typedef smart_ptr <mesh_iface_t, true>              sp_mesh_iface_t;
 
           /**

@@ -13,6 +13,10 @@
 #ifndef BS_PRECOMPILED_HEADERS_H_
 #define BS_PRECOMPILED_HEADERS_H_
 
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
+
 #ifndef UNIX
 #include <windows.h>
 #endif

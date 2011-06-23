@@ -18,17 +18,16 @@ namespace blue_sky
    * \class wellbore_density_calc
    * \brief Calculates density for all well perforations
    * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN wellbore_density_calc : public calc_perf_density_base <strategy_t>
+  class BS_API_PLUGIN wellbore_density_calc : public calc_perf_density_base
     {
     public:
 
-      typedef calc_perf_density_base <strategy_t>     base_t;
-      typedef wellbore_density_calc <strategy_t>      this_t;
+      typedef calc_perf_density_base base_t;
+      typedef wellbore_density_calc this_t;
 
-      typedef typename base_t::item_t                 item_t;
-      typedef typename base_t::sp_well_t              sp_well_t;
-      typedef typename base_t::sp_calc_model_t        sp_calc_model_t;
+      typedef base_t::item_t                 item_t;
+      typedef base_t::sp_well_t              sp_well_t;
+      typedef base_t::sp_calc_model_t        sp_calc_model_t;
 
     public:
 
@@ -41,7 +40,7 @@ namespace blue_sky
       calculate (sp_well_t &well, const sp_calc_model_t &calc_model) const;
 
       //! blue-sky type declaration
-      BLUE_SKY_TYPE_DECL_T (wellbore_density_calc);
+      BLUE_SKY_TYPE_DECL (wellbore_density_calc);
 
     protected:
 

@@ -41,10 +41,10 @@ namespace python {
     strategy_exporter::export_base <linear_solver_base, default_exporter> ("linear_solver");
 
     strategy_exporter::export_class <py_linear_solver,  linear_solver_base, solver_exporter> ("linear_solver_wrapper");
-    strategy_exporter::export_class <gmres_solver2,     linear_solver_base, solver_exporter> ("gmres_solver2_seq");
-    strategy_exporter::export_class <bicgstab_solver,   linear_solver_base, solver_exporter> ("bicgstab_solver_seq");
-    strategy_exporter::export_class <cgs_solver,        linear_solver_base, solver_exporter> ("cgs_solver_seq");
-    strategy_exporter::export_class <tfqmr_solver,      linear_solver_base, solver_exporter> ("tfqmr_solver_seq");
+    strategy_exporter::export_class <gmres_solver2,     linear_solver_base, solver_exporter> ("gmres_solver2");
+    strategy_exporter::export_class <bicgstab_solver,   linear_solver_base, solver_exporter> ("bicgstab_solver");
+    strategy_exporter::export_class <cgs_solver,        linear_solver_base, solver_exporter> ("cgs_solver");
+    strategy_exporter::export_class <tfqmr_solver,      linear_solver_base, solver_exporter> ("tfqmr_solver");
 
 #ifdef _MPI
     solver_export <py_linear_solver <gmres_solver2 <mpi_strategy_di>, py_matrix_base <mpi_vector <double>, mpi_vector <int> > > > ("gmres_solver2_mpi_di");

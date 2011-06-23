@@ -12,18 +12,17 @@ namespace blue_sky
   //namespace scal
   //  {
 
-    template <typename strategy_t>
     struct data_vector
       {
 public:
-        typedef typename strategy_t::item_t item_t;
+        typedef strategy_t::item_t item_t;
 
         struct iterator : public std::iterator <std::random_access_iterator_tag, item_t>
           {
 public:
             typedef std::iterator <std::random_access_iterator_tag, item_t> base_t;
-            typedef typename base_t::value_type                             value_type;
-            typedef typename base_t::difference_type                        difference_type;
+            typedef base_t::value_type                             value_type;
+            typedef base_t::difference_type                        difference_type;
 
             iterator()
                 : data (0)
