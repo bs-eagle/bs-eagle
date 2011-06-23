@@ -61,7 +61,7 @@ namespace blue_sky
           }
         catch (const boost::bad_lexical_cast &)
           {
-            bs_throw_exception (boost::format ("Wrong value type (index: %d, conversion to int failed)") % index);
+            bs_throw_exception (boost::format ("Wrong value type (index: %d, conversion to int failed, value: %s)") % index % str);
           }
       }
     else if (params_names[index].type == PT_FLOAT)
@@ -72,7 +72,7 @@ namespace blue_sky
           }
         catch (const boost::bad_lexical_cast &)
           {
-            bs_throw_exception (boost::format ("Wrong value type (index: %d, conversion to double failed)") % index);
+            bs_throw_exception (boost::format ("Wrong value type (index: %d, conversion to double failed, value: %s)") % index % str);
           }
       }
     else if (params_names[index].type == PT_STR)
