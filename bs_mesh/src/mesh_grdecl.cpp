@@ -826,7 +826,7 @@ float  mesh_grdecl::get_dtop(index_t n_elem) const
   
   elem = calc_element (n_elem);
 
-  return elem.get_center().z - elem.get_dz();
+  return elem.get_center().z - elem.get_dz() * 0.5; 
 }
 
 void mesh_grdecl::generate_array()
