@@ -189,7 +189,7 @@ mesh_element3d::get_dz ()
   item_t dz = 0.0;
 
   for (index_t i = 0; i < n_plane_corners; ++i)
-    dz += plane1[i].x - plane2[i].x;
+    dz += plane1[i].z - plane2[i].z;
 
   return fabs (dz / n_plane_corners);
 }
