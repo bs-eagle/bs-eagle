@@ -6,6 +6,7 @@
 #include "pvt_gas.h"
 #include "pvt_oil.h"
 #include "pvt_water.h"
+#include "pvt_dummy_iface.h"
 
 namespace blue_sky
   {
@@ -40,7 +41,7 @@ namespace blue_sky
         typedef std::vector< sp_pvt_gas >                 sp_pvt_gas_array_t;       //!< type for array of pvt_gas objects
         typedef std::vector< sp_pvt_water >               sp_pvt_water_array_t;     //!< type for array of pvt_water objects
 
-      
+        typedef smart_ptr <pvt_dummy_iface, true>         sp_pvt_dummy_iface;
         /**
          * \brief destructor
          */
@@ -62,8 +63,12 @@ namespace blue_sky
         get_pvt_gas_array () = 0;
         
         virtual sp_pvt_water_array_t &
-        get_pvt_water_array () = 0; 
-        
+        get_pvt_water_array () = 0;
+
+		virtual void
+		init_from_pvt(const sp_pvt_dummy_iface &pvt,
+		              bool is_oil, bool is_gas, bool is_water,
+					  t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals) = 0;
     };
 
 } // namespace blue_sky

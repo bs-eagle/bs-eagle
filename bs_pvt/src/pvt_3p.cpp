@@ -50,7 +50,7 @@ namespace blue_sky
       }
     };
   
-  struct pvt_table_helper
+  /*struct pvt_table_helper
     {
       template <typename pvt_array_t, typename pvt_table_array_t>
       static void 
@@ -65,9 +65,9 @@ namespace blue_sky
               pvt__->pvt_input_props->copy (p->get_table ());
             }
         }
-    };
+    };*/
       
-  void
+  /*void
   pvt_3p::init_pvt_arrays (const t_long n_pvt_regions_, const sp_idata_t idata_,
                            bool is_oil, bool is_gas, bool is_water, 
                            t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals)
@@ -124,10 +124,10 @@ namespace blue_sky
         if (is_water)
           pvt_water_array[i]->build (atm_p, min_p, max_p, n_intervals);
       }
-  }
+  }*/
 
 
-  void
+  /*void
   pvt_3p::init_pvt_arrays (const t_long n_pvt_regions_, 
                            const sp_pvt_dummy_iface_array_t &pvt_oil_data,
                            const sp_pvt_dummy_iface_array_t &pvt_gas_data,
@@ -198,6 +198,140 @@ namespace blue_sky
         if (is_water)
           pvt_water_array[i]->build (atm_p, min_p, max_p, n_intervals);
       }
+  }*/
+  
+  struct init_pvt_arr_helper
+  {
+	  template <typename pvt_base_elem_t>
+	  static void
+	  set_pvt_base (pvt_base_elem_t elem, BS_SP(table_iface) table)
+	  {
+		  int n_cols = table->get_n_cols();
+		  int n_rows = table->get_n_rows();
+          spv_double data = BS_KERNEL.create_object (v_double::bs_type ());
+		  data->resize(n_rows * n_cols);
+		  for (size_t row = 0; row < n_rows; row++)
+		  {
+			  for (size_t col = 0; col < n_cols; col++)
+			  {
+				  (*data)[row*n_cols+col] = table->get_value(row, col);
+			  }
+		  }
+		  elem->insert_vector(*data);
+	  }
+  };
+  
+  void
+  pvt_3p::init_pvt_arrays (const t_long n_pvt_regions_, 
+                           const sp_pvt_dummy_iface_array_t &pvt_data,
+                           bool is_oil, bool is_gas, bool is_water, 
+                           t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals)
+  {
+    typedef idata_t::pvt_vector    pvt_vector;
+    typedef idata_t::pvt_info      pvt_info;
+
+    this->n_pvt_regions = n_pvt_regions_;
+
+    BS_ASSERT (n_pvt_regions > 0);
+    BS_ASSERT (pvt_data.size () == n_pvt_regions);
+    
+    pvt_oil_array.resize (n_pvt_regions_);
+    pvt_gas_array.resize (n_pvt_regions_);
+    pvt_water_array.resize (n_pvt_regions_);
+
+	sp_pvt_list_t pvt_dummy_list;
+
+    for (size_t i = 0; i < n_pvt_regions_; i++)
+      {
+        if (is_oil) 
+          {
+            if (!is_gas)
+              {
+                pvt_oil_array[i] = BS_KERNEL.create_object (pvt_dead_oil_t::bs_type());
+              }
+            else
+              {
+                pvt_oil_array[i] = BS_KERNEL.create_object (pvt_oil_t::bs_type());
+              }
+          }
+        if (is_gas)
+          pvt_gas_array[i] = BS_KERNEL.create_object (pvt_gas_t::bs_type());
+        if (is_water)  
+          pvt_water_array[i] = BS_KERNEL.create_object (pvt_water_t::bs_type());
+      }
+	   
+    if (is_oil)
+      {
+        if (!is_gas)
+          {			
+            for (size_t i = 0; i<n_pvt_regions_; i++)
+			{
+				pvt_dummy_list = *pvt_data[i]->get_table_vector();
+				init_pvt_arr_helper::set_pvt_base(pvt_oil_array[i], pvt_dummy_list[0]);
+				delete &pvt_dummy_list;
+			}
+          }
+        else
+          {
+            for (size_t i = 0; i<n_pvt_regions_; i++)
+			{
+				pvt_dummy_list = *pvt_data[i]->get_table_vector();
+				init_pvt_arr_helper::set_pvt_base(pvt_oil_array[i], pvt_dummy_list[0]);
+				delete &pvt_dummy_list;
+			}
+          }
+      }
+    
+    if (is_gas) 
+      for (size_t i = 0; i<n_pvt_regions_; i++)
+	  {
+		pvt_dummy_list = *pvt_data[i]->get_table_vector();
+		init_pvt_arr_helper::set_pvt_base(pvt_gas_array[i], pvt_dummy_list[2]);
+		delete &pvt_dummy_list;
+	  }
+    if (is_water)
+      for (size_t i = 0; i<n_pvt_regions_; i++)
+	  {
+	    pvt_dummy_list = *pvt_data[i]->get_table_vector();
+		BS_SP(table_iface) new_table = BS_KERNEL.create_object("table");
+		int n_rows = pvt_dummy_list[1]->get_n_rows();
+		new_table->init(n_rows, 4);
+		for (size_t col = 0; col<4; col++)
+		{
+			new_table->set_col_name(col, pvt_dummy_list[1]->get_col_name(col));
+			for (size_t row = 0; row < n_rows; row++)
+			{
+				new_table->set_value(row, col, pvt_dummy_list[1]->get_value(row, col));
+			}
+		}
+		init_pvt_arr_helper::set_pvt_base(pvt_water_array[i], new_table);
+		delete &pvt_dummy_list;
+	  }
+
+    for (size_t i = 0; i < n_pvt_regions_; i++)
+      {
+        if (is_oil)
+          pvt_oil_array[i]->build (atm_p, min_p, max_p, n_intervals);
+
+        if (is_gas)
+          pvt_gas_array[i]->build (atm_p, min_p, max_p, n_intervals);
+
+        if (is_water)
+          pvt_water_array[i]->build (atm_p, min_p, max_p, n_intervals);
+      }
+  }
+
+  void
+  pvt_3p::init_from_pvt(const sp_pvt_dummy_iface &pvt,
+		                bool is_oil, bool is_gas, bool is_water,
+					    t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals)
+  {
+	 sp_pvt_dummy_iface_array_t pvt_array;
+	 pvt_array.push_back(pvt);
+
+	 init_pvt_arrays(pvt_array.size(), pvt_array,
+		             is_oil, is_gas, is_water,
+					 atm_p, min_p, max_p, n_intervals);
   }
 
   BS_SP (pvt_dead_oil) 

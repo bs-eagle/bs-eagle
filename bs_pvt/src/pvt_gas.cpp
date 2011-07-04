@@ -83,7 +83,7 @@ namespace blue_sky
   
     if (this->init_dependent)
       {
-        if (pvt_props_table->init (n_intervals, PVT_GAS_TOTAL))
+        if (pvt_props_table->init (n_intervals+1, PVT_GAS_TOTAL))
           {
             throw bs_exception ("pvt_gas::init table", "Error: initializing table of properties");
           }

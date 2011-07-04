@@ -44,6 +44,17 @@ namespace blue_sky {
     return tables;
   }
 
+  std::vector <BS_SP( table_iface)>*
+  pvt_dummy::get_table_vector() const
+  {
+    std::vector<BS_SP( table_iface)>* tables = new std::vector<BS_SP( table_iface)>();
+    tables->push_back (oil_table);
+	tables->push_back (water_table);
+    tables->push_back (gas_table);
+    tables->push_back (density_table);
+    return tables;
+  }
+
   int
   pvt_dummy::get_pvt_type () const
   {

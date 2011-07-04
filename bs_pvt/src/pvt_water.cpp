@@ -90,7 +90,7 @@ namespace blue_sky
     BS_ASSERT (n_intervals > 0) (n_intervals);
     if (base_t::init_dependent)
       {
-        if (pvt_props_table->init (n_intervals, PVT_WATER_TOTAL))
+        if (pvt_props_table->init (n_intervals+1, PVT_WATER_TOTAL))
           {
             throw bs_exception ("pvt_water::init table", "Error: initializing table of properties");
           }

@@ -30,6 +30,9 @@ namespace blue_sky
     
         typedef BS_SP (pvt_dummy_iface)                   sp_pvt_dummy_iface_t;
         typedef std::vector <sp_pvt_dummy_iface_t>        sp_pvt_dummy_iface_array_t;
+
+		typedef std::vector<BS_SP(table_iface)>           sp_pvt_list_t;
+		//typedef std::list<BS_SP(table_iface)>::iterator   sp_pvt_list_iter_t;
         
         virtual 
         ~pvt_3p ()   { } 
@@ -55,16 +58,27 @@ namespace blue_sky
         get_pvt_water_array () 
           { return pvt_water_array; }  
         
-        void
+        /*void
         init_pvt_arrays (const t_long n_pvt_regions_, const sp_idata_t idata_,
                          bool is_oil, bool is_gas, bool is_water, 
-                         t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals);
+                         t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals);*/
         
-        void
+        /*void
         init_pvt_arrays (const t_long n_pvt_regions_, 
                          const sp_pvt_dummy_iface_array_t &pvt_oil_data,
                          const sp_pvt_dummy_iface_array_t &pvt_gas_data,
                          const sp_pvt_dummy_iface_array_t &pvt_water_data,
+                         bool is_oil, bool is_gas, bool is_water, 
+                         t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals);*/
+		void
+		init_from_pvt(const sp_pvt_dummy_iface &pvt,
+		              bool is_oil, bool is_gas, bool is_water,
+					  t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals);
+
+
+		void
+		init_pvt_arrays (const t_long n_pvt_regions_, 
+                         const sp_pvt_dummy_iface_array_t &pvt_data,
                          bool is_oil, bool is_gas, bool is_water, 
                          t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals);
       protected: 

@@ -24,6 +24,9 @@ namespace blue_sky {
     std::list <BS_SP( table_iface)>
     get_table () const;
 
+	std::vector <BS_SP( table_iface)>*
+	get_table_vector() const;
+
     boost::python::list
     py_get_table () const;
 

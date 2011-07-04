@@ -26,6 +26,9 @@ class pvt_dummy_iface : public objbase
     virtual std::list <BS_SP( table_iface)>
     get_table () const = 0;
 
+	virtual std::vector <BS_SP( table_iface)>*
+	get_table_vector() const = 0;
+
     virtual boost::python::list
     py_get_table () const = 0;
 

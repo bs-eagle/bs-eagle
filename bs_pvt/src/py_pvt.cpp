@@ -18,6 +18,7 @@
 #include "pvt_oil.h"
 #include "pvt_water.h"
 #include "pvt_dummy.h"
+#include "pvt_3p.h"
 
 #include "export_python_wrapper.h"
 #include "py_list_converter.h"
@@ -38,6 +39,10 @@ namespace python    {
       .def ("get_pvt_type", &T::get_pvt_type)
     PY_EXPORTER_END;
 
+	PY_EXPORTER (pvt_3p_exporter, default_exporter)
+	  .def ("init_from_pvt", &T::init_from_pvt)
+	PY_EXPORTER_END;
+
   void
   py_export_pvt ()
   {
@@ -51,6 +56,9 @@ namespace python    {
 
     base_exporter <pvt_dummy_iface, pvt_dummy_exporter>::export_class ("pvt_dummy_iface");
     class_exporter<pvt_dummy, pvt_dummy_iface, pvt_dummy_exporter>::export_class ("pvt_dummy");
+
+	base_exporter <pvt_3p_iface, pvt_3p_exporter>::export_class ("pvt_3p_iface");
+	class_exporter<pvt_3p, pvt_3p_iface, pvt_3p_exporter>::export_class ("pvt_3p");
 
 	  // register vector of type descriptors <-> Python list converters
 	  typedef bspy_converter< list_traits< std::list<smart_ptr<table_iface> > > > spv_table_list_converter;
