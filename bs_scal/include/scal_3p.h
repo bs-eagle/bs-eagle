@@ -126,6 +126,15 @@ namespace blue_sky
         item_t *pc_limit) const;
 
       void
+      process_init_2 (
+        const item_t *pressure, 
+        index_t sat_reg, 
+        item_t perm, 
+        item_t poro,
+        item_t *sat, 
+        item_t *pc_limit) const;
+
+      void
       calc_pcp (index_t cell_index, 
         const item_t sat, 
         index_t sat_reg, 
@@ -136,6 +145,15 @@ namespace blue_sky
       calc_gas_water_zone (index_t cell_index, 
         index_t sat_reg, 
         const item_t *perm_array, 
+        item_t poro, 
+        item_t pcgw,
+        item_t &sw, 
+        item_t &sg) const;
+
+      void
+      calc_gas_water_zone_2 (
+        index_t sat_reg, 
+        item_t perm, 
         item_t poro, 
         item_t pcgw,
         item_t &sw, 

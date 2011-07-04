@@ -1419,6 +1419,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\equil_model_depth.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\explicit_model.cpp"
 				>
 			</File>

@@ -4,7 +4,6 @@
 /// @date 2011-05-06
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
-
 #include "bs_mesh_stdafx.h"
 #include "coord_zcorn_tools.h"
 #include "mesh_grdecl.h"
@@ -707,6 +706,7 @@ void make_wave(ray_t& ray, fp_t start_point, fp_stor_t d, fp_stor_t a,
 	//N = max< uint_t>(N, 1);
 	// calc tail to half of distance to nearest bound
 	fp_t tail = S - d * std::pow(a, double(N));
+
 	if(tail < d * 0.5 && N > 0)
 		--N;
 

@@ -309,6 +309,11 @@ namespace blue_sky {
         *d_cap = *d_cap * mult;
     }
 
+    void process_capillary_2 (item_t sat, item_t &cap) const
+    {
+      interpolate (sat, Sp, Pcp, cap, (item_t *) NULL, std::less <item_t> ());
+    }
+
     void process_init (int cell_index, const item_t cap, const scale_array_holder_t &scale_arrays, item_t &sat) const
     {
       item_t s;
@@ -322,6 +327,11 @@ namespace blue_sky {
       item_t sl     = scale_arrays.get (blue_sky::sl, s_min) [cell_index];
 
       sat = scale_not_table (sl, s_min, su, s_max, s);
+    }
+
+    void process_init_2 (const item_t cap, item_t &sat) const
+    {
+      interpolate (Pcp, Sp, cap, sat, std::less <item_t> ());
     }
 
     item_t  get_spr () const

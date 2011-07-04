@@ -184,6 +184,7 @@ namespace blue_sky
 
   void reservoir_simulator::simulate (const std::string &path)
   {
+    hdm_->init (path);
     read_keyword_file_and_init (path);
     main_loop();
   }

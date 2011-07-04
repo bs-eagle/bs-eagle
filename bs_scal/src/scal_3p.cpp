@@ -550,10 +550,16 @@ namespace blue_sky
     process_init (index_t i, const item_t *pressure, index_t sat_reg, const item_t *perm_array, item_t poro, item_t *sat, item_t *pc_limit) const = 0;
 
     virtual void
+    process_init_2 (const item_t *pressure, index_t sat_reg, item_t perm, item_t poro, item_t *sat, item_t *pc_limit) const = 0;
+
+    virtual void
     calc_pcp (index_t cell_index, item_t sat, index_t sat_reg, item_t cap, item_t &pcp) const = 0;
 
     virtual void
     calc_gas_water_zone (index_t cell_index, index_t sat_reg, const item_t *perm_array, item_t poro, item_t pcgw, item_t &sw, item_t &sg) const = 0;
+
+    virtual void
+    calc_gas_water_zone_2 (index_t sat_reg, const item_t perm, const item_t poro, item_t pcgw, item_t &sw, item_t &sg) const = 0;
 
     virtual bool
     is_water () const = 0;
@@ -766,6 +772,43 @@ namespace blue_sky
           pc_limit[i_s_g] = cap_max;
         }
     }
+    
+    void
+    process_init_2 (const item_t *pressure, index_t sat_reg, item_t perm,
+                    item_t poro, item_t *sat, item_t *pc_limit) const
+    {
+      item_t cap, cap_min, cap_max;
+      item_t mult;
+
+      BS_ASSERT (pressure);
+      BS_ASSERT (sat);
+      BS_ASSERT (pc_limit);
+
+      if (is_w)
+        {
+          BS_ASSERT (water_jfunc);
+          if (!water_jfunc)
+            throw bs_exception ("scal_3p::process_capillary", "water_jfunc is null");
+
+          cap = pressure[i_w] - pressure[i_o];
+
+          process_init_2 (cap, water_data->get_region (sat_reg), perm, poro, water_jfunc, sat[i_s_w], cap_max, cap_min);
+
+          pc_limit[i_s_w] = cap_min;
+        }
+      if (is_g)
+        {
+          BS_ASSERT (gas_jfunc);
+          if (!gas_jfunc)
+            throw bs_exception ("scal_3p::process_capillary", "gas_jfunc is null");
+
+          cap = pressure[i_g] - pressure[i_o];
+
+          process_init_2 (cap, gas_data->get_region (sat_reg), perm, poro, gas_jfunc, sat[i_s_g], cap_min, cap_max);
+
+          pc_limit[i_s_g] = cap_max;
+        }
+    }
 
     void
     calc_pcp (index_t cell_index, item_t sat, index_t sat_reg, item_t cap, item_t &pcp) const
@@ -845,6 +888,45 @@ namespace blue_sky
       sg = (1.0 - sw > 0.) ? 1.0 - sw : 0.;
     }
 
+    void
+    calc_gas_water_zone_2 (index_t sat_reg, const item_t perm, const item_t poro, item_t pcgw, item_t &sw, item_t &sg) const
+    {
+      std::vector <item_t> pcgw_table;
+      size_t n_table, i_table;
+      item_t sat_cell[2], cap_cell[2];
+      item_t sw_max, sw_min, swu, swl, s;
+
+      if (!(is_w && is_g))
+        {
+          bs_throw_exception ("Error: calculating gas-water transition zone");
+        }
+
+      const scal_region_t w_region = water_data->get_region (sat_reg);
+      const scal_region_t g_region = gas_data->get_region (sat_reg);
+
+      n_table = w_region.Sp.size ();
+      pcgw_table.resize (n_table, 0);
+
+      sw_max  = w_region.get_phase_sat_max ();
+      sw_min  = w_region.get_phase_sat_min ();
+
+      //complete gas-water cap pressure table
+      for (i_table = 0; i_table < n_table; i_table++)
+        {
+          sat_cell[i_s_w] = scale_not_table (sw_min, sw_min, sw_max, sw_max, w_region.Sp[i_table]);
+          sat_cell[i_s_g] = 1. - sat_cell[i_s_w];
+
+          process_capillary_2 (sat_cell, sat_reg, perm, poro, cap_cell, 0);
+
+          pcgw_table[i_table] = cap_cell[i_s_g] - cap_cell[i_s_w];
+        }
+
+      interpolate (pcgw_table, w_region.Sp, pcgw, sw, std::greater <item_t> ());
+
+      sg = (1.0 - sw > 0.) ? 1.0 - sw : 0.;
+    }
+
+
   protected:
     void
     process (index_t cell_index, const item_t *sat, index_t sat_reg, item_t *kr, item_t *d_kr) const
@@ -897,6 +979,26 @@ namespace blue_sky
           process_capillary (cell_index, sat[i_s_g], *gas_scale, gas_data->get_region (sat_reg), perm, poro, gas_jfunc, cap[i_s_g], d_cap ? &d_cap[i_s_g] : 0);
         }
     }
+
+    void
+    process_capillary_2 (const item_t *sat, index_t sat_reg, item_t perm, item_t poro, item_t *cap, item_t *d_cap) const
+    {
+      BS_ASSERT (sat);
+      BS_ASSERT (perm);
+      BS_ASSERT (cap);
+
+      if (is_w)
+        {
+          BS_ASSERT (water_jfunc);
+          process_capillary_2 (sat[i_s_w], water_data->get_region (sat_reg), perm, poro, water_jfunc, cap[i_s_w], d_cap ? &d_cap[i_s_w] : 0);
+        }
+      if (is_g)
+        {
+          BS_ASSERT (gas_jfunc);
+          process_capillary_2 (sat[i_s_g], gas_data->get_region (sat_reg), perm, poro, gas_jfunc, cap[i_s_g], d_cap ? &d_cap[i_s_g] : 0);
+        }
+    }
+
 
     void 
     process_water (index_t cell_index, const item_t *sat, index_t sat_reg, item_t &kr, item_t &d_kr, item_t &kro, item_t &d_kro) const
@@ -1079,6 +1181,25 @@ namespace blue_sky
         }  
     }
 
+    void 
+    process_capillary_2 (item_t sat, const scal_region_t &region,
+      item_t perm, item_t poro, const sp_jfunction_t jfunc,
+      item_t &cap, item_t *d_cap) const
+    {
+      region.process_capillary_2 (sat, cap);
+
+      BS_ASSERT (jfunc);
+      if (jfunc->valid ())
+        {
+          item_t mult = 0;
+          if (perm > EPS_DIFF)
+            mult = jfunc->st_phase * pow (poro, jfunc->alpha) / pow (perm, jfunc->beta);
+          cap         = cap * mult;
+          if (d_cap)
+            *d_cap       = *d_cap * mult;
+        }
+    }
+
     void
     process_init (index_t cell_index, item_t cap, const scale_array_holder_t &scale_arrays,
       const scal_region_t &region,
@@ -1107,6 +1228,34 @@ namespace blue_sky
 
       region.process_init (cell_index, cap, scale_arrays, sat);
     }
+    
+    void
+    process_init_2 (item_t cap, 
+                    const scal_region_t &region,
+                    item_t perm, item_t poro, 
+                    const sp_jfunction_t jfunc,
+                    item_t &sat, item_t &pc_first, item_t &pc_last) const
+    {
+      BS_ASSERT (jfunc);
+
+      pc_first = region.Pcp.front ();
+      pc_last = region.Pcp.back ();
+
+      if (jfunc->valid ())
+        {
+          item_t mult = 0;
+          if (perm > EPS_DIFF)
+            {
+              mult = jfunc->st_phase * pow (poro, jfunc->alpha) / pow (perm, jfunc->beta);
+              cap = cap / mult;
+            }
+          pc_first    *= mult;
+          pc_last     *= mult;
+        }
+
+      region.process_init_2 (cap, sat);
+    }
+    
 
     item_t
     get_water_oil_sat (const item_t *sat) const
@@ -1189,6 +1338,13 @@ namespace blue_sky
   }
 
   void
+  scal_3p::process_init_2 (const item_t *pressure, index_t sat_reg, item_t perm, item_t poro,
+                           item_t *sat, item_t *pc_limit) const
+  {
+    impl_->process_init_2 (pressure, sat_reg, perm, poro, sat, pc_limit);
+  }
+
+  void
   scal_3p::calc_pcp (index_t cell_index, const item_t sat, index_t sat_reg, item_t cap, item_t &pcp) const
   {
     impl_->calc_pcp (cell_index, sat, sat_reg, cap, pcp);
@@ -1200,6 +1356,14 @@ namespace blue_sky
   {
     impl_->calc_gas_water_zone (cell_index, sat_reg, perm_array, poro, pcgw, sw, sg);
   }
+  
+  void
+  scal_3p::calc_gas_water_zone_2 (index_t sat_reg, item_t perm, item_t poro, item_t pcgw,
+      item_t &sw, item_t &sg) const
+  {
+    impl_->calc_gas_water_zone_2 (sat_reg, perm, poro, pcgw, sw, sg);
+  }
+  
 
   void
   scal_3p::init (bool is_w, bool is_g, bool is_o, const phase_d_t &phase_d, const phase_d_t &sat_d, RPO_MODEL_ENUM r, bool is_scalecrs_)

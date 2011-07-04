@@ -116,6 +116,16 @@ namespace blue_sky
       t_double *          pc_limit) const = 0;
 
     virtual void
+    process_init_2 (
+      const t_double *    pressure, 
+      t_long              sat_reg, 
+      t_double            perm, 
+      t_double            poro,
+      t_double *          sat, 
+      t_double *          pc_limit) const = 0;
+
+
+    virtual void
     calc_pcp (t_long      cell_index, 
       const t_double      sat, 
       t_long              sat_reg, 
@@ -130,6 +140,16 @@ namespace blue_sky
       t_double            pcgw,
       t_double &          sw, 
       t_double &          sg) const = 0;
+
+    virtual void
+    calc_gas_water_zone_2 (
+      t_long              sat_reg, 
+      t_double            perm, 
+      t_double            poro, 
+      t_double            pcgw,
+      t_double &          sw, 
+      t_double &          sg) const = 0;
+
 
     virtual void
     init (bool            is_w, 

@@ -81,6 +81,10 @@ namespace blue_sky
                          const sp_pvt_dummy_iface_array_t &pvt_data,
                          bool is_oil, bool is_gas, bool is_water, 
                          t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals);
+                         
+        virtual std::list <BS_SP( table_iface)>
+        get_table (t_long index_pvt_region) const;
+                         
       protected: 
         t_long                       n_pvt_regions;                  //!< number of pvt regions 
         

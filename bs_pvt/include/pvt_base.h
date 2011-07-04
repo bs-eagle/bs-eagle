@@ -99,7 +99,11 @@ namespace blue_sky
 
       //! print pvt table
       virtual void print () const = 0;
-
+      
+      //! return pvt_input 
+      sp_table get_pvt_input_table () const
+        {  return pvt_input_props; }
+ 
     protected:
 
       /**

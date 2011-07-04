@@ -62,7 +62,7 @@ namespace blue_sky
               const typename pvt_array_t::value_type &pvt__(pvt[i]);
               const typename pvt_table_array_t::value_type &p = t[i];
               
-              pvt__->pvt_input_props->copy (p->get_table ());
+//              pvt__->pvt_input_props->copy (p->get_table ());
             }
         }
     };*/
@@ -355,6 +355,30 @@ namespace blue_sky
     return pvt_water_array[index_pvt_region];
   }
 
+
+  std::list <BS_SP( table_iface)>
+  pvt_3p::get_table (t_long index_pvt_region) const
+  {
+    BS_ASSERT (index_pvt_region >= 0 && index_pvt_region < n_pvt_regions);
+    
+    std::list<BS_SP( table_iface)> tables;
+    
+    BS_SP (pvt_dead_oil) pvt_oil_ = get_pvt_oil (index_pvt_region);
+    BS_SP (pvt_gas) pvt_gas_ = get_pvt_gas (index_pvt_region);
+    BS_SP (pvt_water) pvt_water_ = get_pvt_water (index_pvt_region);
+    
+    BS_SP (table_iface) density_table = BS_KERNEL.create_object ("table");
+    density_table->init (1, 3);
+    density_table->set_value (0, 0, pvt_oil_->get_surface_density ());
+    density_table->set_value (0, 1, pvt_water_->get_surface_density ());
+    density_table->set_value (0, 2, pvt_gas_->get_surface_density ());
+    
+    tables.push_back (pvt_oil_->get_pvt_input_table ());
+    tables.push_back (pvt_water_->get_pvt_input_table ());
+    tables.push_back (pvt_gas_->get_pvt_input_table ());
+    tables.push_back (density_table);
+    return tables;
+  }
 
   BLUE_SKY_TYPE_STD_CREATE (pvt_3p);
   BLUE_SKY_TYPE_STD_COPY (pvt_3p);
