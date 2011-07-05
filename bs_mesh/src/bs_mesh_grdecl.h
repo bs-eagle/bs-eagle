@@ -57,6 +57,15 @@ namespace blue_sky
       int init_ext_to_int()
         {return wrapped.init_ext_to_int();};
 
+      //! init COORD & ZCORN via gen_coord_zcorn
+      void init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz) {
+	return wrapped.init_props(nx, ny, nz, dx, dy, dz);
+      }
+
+      //! init COORD & ZCORN directly
+      void init_props(spv_float coord, spv_float zcorn) {
+	return wrapped.init_props(coord, zcorn);
+      }
 
       ///////////////////////
       // ACCESS VARIABLES
