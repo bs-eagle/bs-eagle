@@ -65,10 +65,32 @@ namespace blue_sky
         virtual sp_pvt_water_array_t &
         get_pvt_water_array () = 0;
 
-		virtual void
-		init_from_pvt(const sp_pvt_dummy_iface &pvt,
-		              bool is_oil, bool is_gas, bool is_water,
-					  t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals) = 0;
+		    virtual void
+		    init_from_pvt(const sp_pvt_dummy_iface &pvt,
+		                  bool is_oil, bool is_gas, bool is_water,
+					            t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals) = 0;
+
+        virtual std::list <BS_SP (table_iface)>
+        get_table (t_long index_pvt_region) const = 0;
+
+        void
+        init_pvt_arrays (const t_long n_pvt_regions_, 
+                         bool is_oil, bool is_gas, bool is_water);
+        
+        virtual BS_SP (table_iface)
+				get_table (t_long pvt_fluid_type, t_long index_pvt_region) const = 0;	 
+
+        //! get density data to fill in
+        virtual spv_float 
+        get_density () = 0;
+
+        //! set density to pvt internal data  
+        virtual void 
+        set_density_to_pvt_internal () = 0;  
+				           
+				//! build pvt internal tables 
+				virtual void 
+				build_pvt_internal (t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals) = 0;           
     };
 
 } // namespace blue_sky

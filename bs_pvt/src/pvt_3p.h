@@ -31,8 +31,8 @@ namespace blue_sky
         typedef BS_SP (pvt_dummy_iface)                   sp_pvt_dummy_iface_t;
         typedef std::vector <sp_pvt_dummy_iface_t>        sp_pvt_dummy_iface_array_t;
 
-		typedef std::vector<BS_SP(table_iface)>           sp_pvt_list_t;
-		//typedef std::list<BS_SP(table_iface)>::iterator   sp_pvt_list_iter_t;
+        typedef std::vector<BS_SP(table_iface)>           sp_pvt_list_t;
+        //typedef std::list<BS_SP(table_iface)>::iterator   sp_pvt_list_iter_t;
         
         virtual 
         ~pvt_3p ()   { } 
@@ -70,20 +70,40 @@ namespace blue_sky
                          const sp_pvt_dummy_iface_array_t &pvt_water_data,
                          bool is_oil, bool is_gas, bool is_water, 
                          t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals);*/
-		void
-		init_from_pvt(const sp_pvt_dummy_iface &pvt,
-		              bool is_oil, bool is_gas, bool is_water,
-					  t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals);
-
-
-		void
-		init_pvt_arrays (const t_long n_pvt_regions_, 
+                         
+        void
+        init_pvt_arrays (const t_long n_pvt_regions_, 
+                         bool is_oil, bool is_gas, bool is_water);
+                         
+        void
+        init_from_pvt(const sp_pvt_dummy_iface &pvt,
+                      bool is_oil, bool is_gas, bool is_water,
+										  t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals);
+ 
+ 
+        void
+        init_pvt_arrays (const t_long n_pvt_regions_, 
                          const sp_pvt_dummy_iface_array_t &pvt_data,
                          bool is_oil, bool is_gas, bool is_water, 
                          t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals);
                          
         virtual std::list <BS_SP( table_iface)>
         get_table (t_long index_pvt_region) const;
+        
+        virtual BS_SP (table_iface)
+				get_table (t_long index_pvt_region, t_long pvt_fluid_type) const;	            
+
+        virtual spv_float 
+        get_density ()
+          { return density; }
+          
+        //! set density to pvt internal data  
+        virtual void 
+        set_density_to_pvt_internal ();  
+
+				//! build pvt internal tables 
+				virtual void 
+				build_pvt_internal (t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals);           
                          
       protected: 
         t_long                       n_pvt_regions;                  //!< number of pvt regions 
@@ -91,7 +111,9 @@ namespace blue_sky
         sp_pvt_dead_oil_array_t      pvt_oil_array;                  //!< array of pvt_oil objects, length == n_pvt_regions
         sp_pvt_water_array_t         pvt_water_array;                //!< array of pvt_water objects, length == n_pvt_regions
         sp_pvt_gas_array_t           pvt_gas_array;                  //!< array of pvt_gas objects, length == n_pvt_regions
-
+         
+        spv_float                    density;                        //!< array of densities, length = n_pvt_regions * FI_PHASE_TOT
+        
       public:
 
         BLUE_SKY_TYPE_DECL (pvt_3p);

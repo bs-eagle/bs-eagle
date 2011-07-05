@@ -223,6 +223,42 @@ namespace blue_sky
   
   void
   pvt_3p::init_pvt_arrays (const t_long n_pvt_regions_, 
+                           bool is_oil, bool is_gas, bool is_water)
+  {
+
+    this->n_pvt_regions = n_pvt_regions_;
+
+    BS_ASSERT (n_pvt_regions > 0);
+    
+    pvt_oil_array.resize (n_pvt_regions);
+    pvt_gas_array.resize (n_pvt_regions);
+    pvt_water_array.resize (n_pvt_regions);
+
+    density = BS_KERNEL.create_object (v_float::bs_type ());
+    density->resize (n_pvt_regions * FI_PHASE_TOT, 0);
+    
+    for (size_t i = 0; i < n_pvt_regions; i++)
+      {
+        if (is_oil) 
+          {
+            if (!is_gas)
+              {
+                pvt_oil_array[i] = BS_KERNEL.create_object (pvt_dead_oil_t::bs_type());
+              }
+            else
+              {
+                pvt_oil_array[i] = BS_KERNEL.create_object (pvt_oil_t::bs_type());
+              }
+          }
+        if (is_gas)
+          pvt_gas_array[i] = BS_KERNEL.create_object (pvt_gas_t::bs_type());
+        if (is_water)  
+          pvt_water_array[i] = BS_KERNEL.create_object (pvt_water_t::bs_type());
+      }
+  }
+  
+  void
+  pvt_3p::init_pvt_arrays (const t_long n_pvt_regions_, 
                            const sp_pvt_dummy_iface_array_t &pvt_data,
                            bool is_oil, bool is_gas, bool is_water, 
                            t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals)
@@ -355,7 +391,6 @@ namespace blue_sky
     return pvt_water_array[index_pvt_region];
   }
 
-
   std::list <BS_SP( table_iface)>
   pvt_3p::get_table (t_long index_pvt_region) const
   {
@@ -380,6 +415,60 @@ namespace blue_sky
     return tables;
   }
 
+  //! return input table for fluid type of for defined pvt region 
+  BS_SP (table_iface)
+  pvt_3p::get_table (t_long index_pvt_region, t_long pvt_fluid_type) const 
+  {
+    BS_ASSERT (index_pvt_region >= 0 && index_pvt_region < n_pvt_regions);
+    BS_ASSERT (pvt_fluid_type >= FI_PHASE_NULL && pvt_fluid_type < FI_PHASE_TOT);
+  
+    if (pvt_fluid_type == FI_PHASE_OIL)
+      {
+        return get_pvt_oil (index_pvt_region)->get_pvt_input_table ();
+      }
+    else if (pvt_fluid_type == FI_PHASE_WATER)
+      {
+        return get_pvt_water (index_pvt_region)->get_pvt_input_table (); 
+      }  
+    else if (pvt_fluid_type == FI_PHASE_GAS)
+      {  
+        return get_pvt_gas (index_pvt_region)->get_pvt_input_table ();
+      }     
+  }
+  
+  
+  void 
+  pvt_3p::set_density_to_pvt_internal ()
+  {
+    t_float *density_data = &(*density)[0];
+    for (t_long i = 0; i < n_pvt_regions; i++)
+      {
+         if (pvt_oil_array[i].get ())
+           pvt_oil_array[i]->set_surface_density (density_data[i * FI_PHASE_TOT + FI_PHASE_OIL]);
+         if (pvt_water_array[i].get ())
+           pvt_water_array[i]->set_surface_density (density_data[i * FI_PHASE_TOT + FI_PHASE_WATER]);     
+         if (pvt_gas_array[i].get ())
+           pvt_gas_array[i]->set_surface_density (density_data[i * FI_PHASE_TOT + FI_PHASE_GAS]);          
+      }
+  }
+  
+	//! build pvt internal tables 
+	void 
+	pvt_3p::build_pvt_internal (t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals)
+	{
+    for (t_long i = 0; i < n_pvt_regions; i++)
+      {
+        if (pvt_oil_array[i].get ())
+          pvt_oil_array[i]->build (atm_p, min_p, max_p, n_intervals);
+
+        if (pvt_gas_array[i].get ())
+          pvt_gas_array[i]->build (atm_p, min_p, max_p, n_intervals);
+
+        if (pvt_water_array[i].get ())
+          pvt_water_array[i]->build (atm_p, min_p, max_p, n_intervals);
+      }
+	}           
+   
   BLUE_SKY_TYPE_STD_CREATE (pvt_3p);
   BLUE_SKY_TYPE_STD_COPY (pvt_3p);
   BLUE_SKY_TYPE_IMPL(pvt_3p, pvt_3p_iface, "pvt_3p", "pvt_3p calculation class", "pvt_3p calculation");
