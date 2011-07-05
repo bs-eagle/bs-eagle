@@ -64,7 +64,7 @@ mesh_grdecl::mesh_grdecl ()
 	: pinner_(new inner), coord_array(0), zcorn_array(0)
 {}
 
-void mesh_grdecl::init_props(spv_float coord, spv_float zcorn) {
+void mesh_grdecl::init_props(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
 	if(coord && coord->size()) {
 		pinner_->coord_ = coord;
 		coord_array = &pinner_->coord_->ss(0);
@@ -73,6 +73,10 @@ void mesh_grdecl::init_props(spv_float coord, spv_float zcorn) {
 		pinner_->zcorn_ = zcorn;
 		zcorn_array = &pinner_->zcorn_->ss(0);
 	}
+	this->nx = nx;
+	this->ny = ny;
+	this->nz = (zcorn->size() / nx / ny) >> 3;
+	this->n_elements = nx * ny * nz;
 
 	// postinit
 	pinner_->init_minmax(*this);
@@ -81,7 +85,7 @@ void mesh_grdecl::init_props(spv_float coord, spv_float zcorn) {
 void mesh_grdecl::init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz) {
 	// generate COORD & ZCORN
 	std::pair< spv_float, spv_float > cz = gen_coord_zcorn(nx, ny, nz, dx, dy, dz);
-	init_props(cz.first, cz.second);
+	init_props(nx, ny, cz.first, cz.second);
 }
 
 void mesh_grdecl::init_props(const sp_hdm_t hdm)

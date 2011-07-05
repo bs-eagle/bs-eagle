@@ -63,8 +63,8 @@ namespace blue_sky
       }
 
       //! init COORD & ZCORN directly
-      void init_props(spv_float coord, spv_float zcorn) {
-	return wrapped.init_props(coord, zcorn);
+      void init_props(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
+	return wrapped.init_props(nx, ny, coord, zcorn);
       }
 
       ///////////////////////
