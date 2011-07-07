@@ -185,8 +185,12 @@ namespace blue_sky
       boost::python::list calc_element_tops ()
       {return wrapped.calc_element_tops();};
 
-	
-	  boost::python::list calc_element_center ()
+      // same as calc_element_tops, but only return tops coordinates
+      spv_float calc_cells_vertices() {
+		  return wrapped.calc_cells_vertices();
+	  }
+
+      boost::python::list calc_element_center ()
       {return wrapped.calc_element_center();};
 
     
