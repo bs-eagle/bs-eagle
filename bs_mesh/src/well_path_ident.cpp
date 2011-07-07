@@ -420,6 +420,25 @@ public:
 		}
 	}
 
+	spv_float export_1d() const {
+		spv_float res = BS_KERNEL.create_object(v_float::bs_type());
+		res->resize(x_.size() * 5);
+		vf_iterator pr = res->begin();
+
+		for(intersect_path::const_iterator px = x_.begin(), end = x_.end(); px != end; ++px) {
+			// cell num
+			*pr++ = px->cell->first;
+			// MD
+			*pr++ = px->md;
+			// intersection point
+			*pr++ = px->where.x();
+			*pr++ = px->where.y();
+			*pr++ = px->where.z();
+		}
+
+		return res;
+	}
+
 private:
 	// mesh
 	trimesh& m_;
@@ -515,7 +534,7 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 	// finalize intersection
 	A.append_wp_nodes();
 
-	return spv_float();
+	return A.export_1d();
 }
 
 }	// eof blue-sky namespace
