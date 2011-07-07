@@ -23,6 +23,7 @@
 #include "bs_mesh_grdecl.h"
 
 #include <vector>
+#include <cmath>
 // DEBUG
 #include <iostream>
 
@@ -151,6 +152,7 @@ struct well_data {
 
 typedef std::map< ulong, well_data > well_path;
 typedef typename well_path::iterator wp_iterator;
+typedef typename well_path::const_iterator cwp_iterator;
 
 /*-----------------------------------------------------------------
  * Bounding box description
@@ -343,6 +345,18 @@ public:
 		));
 	}
 
+	double calc_md(wp_iterator& fish, const Point_3& target) const {
+		// walk all segments before the last one;
+		double md = 0;
+		for(cwp_iterator p_seg = wp_.begin(), end = wp_.end(); p_seg != fish && p_seg != end; ++p_seg) {
+			md += (p_seg->second).md();
+		}
+		// append tail
+		const t_float* W = fish->second.W;
+		md += std::sqrt(Segment_3(Point_3(W[0], W[1], W[2]), target).squared_length());
+		return md;
+	}
+
 	void operator()(const Box& bc, const Box& bw) {
 		trim_iterator cell_fish = static_cast< cell_box_handle* >(bc.handle().get())->data();
 		wp_iterator well_fish = static_cast< well_box_handle* >(bw.handle().get())->data();
@@ -362,11 +376,20 @@ public:
 			Object xres = CGAL::intersection(s, *tri);
 			// in 99% of cases we should get a point of intersection
 			if(const Point_3* xpoint = CGAL::object_cast< Point_3 >(&xres))
-				x_.insert(well_hit_cell(*xpoint, well_fish, cell_fish, 0));
+				x_.insert(well_hit_cell(
+					*xpoint, well_fish, cell_fish,
+					calc_md(well_fish, *xpoint)
+			));
 			else if(const Segment_3* xseg = CGAL::object_cast< Segment_3 >(&xres)) {
 				// in rare 1% of segment lying on the facet, add begin and end of segment
-				x_.insert(well_hit_cell(xseg->source(), well_fish, cell_fish, 0));
-				x_.insert(well_hit_cell(xseg->target(), well_fish, cell_fish, 0));
+				x_.insert(well_hit_cell(
+					xseg->source(), well_fish, cell_fish,
+					calc_md(well_fish, xseg->source())
+				));
+				x_.insert(well_hit_cell(
+					xseg->target(), well_fish, cell_fish,
+					calc_md(well_fish, xseg->target())
+				));
 			}
 		}
 
