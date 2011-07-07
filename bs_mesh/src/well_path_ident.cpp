@@ -402,6 +402,24 @@ public:
 		//std::cout << '.' << std::endl;
 	}
 
+	void append_wp_nodes() {
+		// walk through the intersection path and add node points
+		// of well geometry to the cell with previous intersection
+		intersect_path::iterator px = x_.begin();
+		t_float node_md;
+		for(wp_iterator pw = wp_.begin(), end = wp_.end(); pw != end; ++pw) {
+			node_md = pw->second.md();
+			t_float* W = pw->second.W;
+			while(px->md < node_md && px != x_.end()) ++px;
+			// we need prev intersection
+			--px;
+			px = x_.insert(well_hit_cell(
+				Point_3(W[0], W[1], W[2]),
+				pw, px->cell, node_md
+			)).first;
+		}
+	}
+
 private:
 	// mesh
 	trimesh& m_;
@@ -486,12 +504,16 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 	}
 
 	// Run the intersection algorithm with all defaults on the
-	// indirect pointers to cell bounding boxes. Avoids copying the boxes.
+	// indirect pointers to cell bounding boxes. Avoids copying the boxes
+	intersect_action A(M, W);
 	CGAL::box_intersection_d(
 		mesh_boxes.begin(), mesh_boxes.end(),
 		well_boxes.begin(), well_boxes.end(),
-		intersect_action(M, W)
+		A
 	);
+
+	// finalize intersection
+	A.append_wp_nodes();
 
 	return spv_float();
 }
