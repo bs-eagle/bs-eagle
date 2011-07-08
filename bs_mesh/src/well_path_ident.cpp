@@ -266,12 +266,14 @@ typedef std::set< well_hit_cell > intersect_path;
 class intersect_action {
 public:
 	// ctor
-	intersect_action(trimesh& mesh, well_path wp)
-		: m_(mesh), wp_(wp)
+	intersect_action(trimesh& mesh, well_path& wp, intersect_path& X)
+		: m_(mesh), wp_(wp), x_(X)
 	{}
 
 	void cell_tri_cover(cell_data& d) {
 		const t_float* V = d.V;
+		// facet 0-1-2-3
+		// 3angle 0-1-3
 		d.cover.push_back(Triangle_3(
 			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
 			Point_3(V[X(1)], V[Y(1)], V[Z(1)]),
@@ -283,42 +285,46 @@ public:
 			Point_3(V[X(2)], V[Y(2)], V[Z(2)]),
 			Point_3(V[X(3)], V[Y(3)], V[Z(3)])
 		));
-		// 3angle 0-4-5
-		d.cover.push_back(Triangle_3(
-			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
-			Point_3(V[X(4)], V[Y(4)], V[Z(4)]),
-			Point_3(V[X(5)], V[Y(5)], V[Z(5)])
-		));
+		// facet 0-1-4-5
 		// 3angle 0-1-5
 		d.cover.push_back(Triangle_3(
 			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
 			Point_3(V[X(1)], V[Y(1)], V[Z(1)]),
 			Point_3(V[X(5)], V[Y(5)], V[Z(5)])
 		));
-		// 3angle 4-5-6
+		// 3angle 0-4-5
+		d.cover.push_back(Triangle_3(
+			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
+			Point_3(V[X(4)], V[Y(4)], V[Z(4)]),
+			Point_3(V[X(5)], V[Y(5)], V[Z(5)])
+		));
+		// facet 4-5-6-7
+		// 3angle 4-5-7
 		d.cover.push_back(Triangle_3(
 			Point_3(V[X(4)], V[Y(4)], V[Z(4)]),
 			Point_3(V[X(5)], V[Y(5)], V[Z(5)]),
-			Point_3(V[X(6)], V[Y(6)], V[Z(6)])
+			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
 		));
-		// 3angle 5-6-7
+		// 3angle 4-6-7
 		d.cover.push_back(Triangle_3(
-			Point_3(V[X(5)], V[Y(5)], V[Z(5)]),
+			Point_3(V[X(4)], V[Y(4)], V[Z(4)]),
 			Point_3(V[X(6)], V[Y(6)], V[Z(6)]),
 			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
 		));
-		// 3angle 2-3-6
+		// facet 2-3-6-7
+		// 3angle 2-3-7
 		d.cover.push_back(Triangle_3(
 			Point_3(V[X(2)], V[Y(2)], V[Z(2)]),
 			Point_3(V[X(3)], V[Y(3)], V[Z(3)]),
-			Point_3(V[X(6)], V[Y(6)], V[Z(6)])
+			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
 		));
-		// 3angle 3-6-7
+		// 3angle 2-6-7
 		d.cover.push_back(Triangle_3(
-			Point_3(V[X(3)], V[Y(3)], V[Z(3)]),
+			Point_3(V[X(2)], V[Y(2)], V[Z(2)]),
 			Point_3(V[X(6)], V[Y(6)], V[Z(6)]),
 			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
 		));
+		// facet 0-2-4-6
 		// 3angle 0-2-6
 		d.cover.push_back(Triangle_3(
 			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
@@ -331,15 +337,16 @@ public:
 			Point_3(V[X(4)], V[Y(4)], V[Z(4)]),
 			Point_3(V[X(6)], V[Y(6)], V[Z(6)])
 		));
-		// 3angle 1-3-5
+		// facet 1-3-5-7
+		// 3angle 1-3-7
 		d.cover.push_back(Triangle_3(
 			Point_3(V[X(1)], V[Y(1)], V[Z(1)]),
 			Point_3(V[X(3)], V[Y(3)], V[Z(3)]),
-			Point_3(V[X(5)], V[Y(5)], V[Z(5)])
+			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
 		));
-		// 3angle 3-5-7
+		// 3angle 1-5-7
 		d.cover.push_back(Triangle_3(
-			Point_3(V[X(3)], V[Y(3)], V[Z(3)]),
+			Point_3(V[X(1)], V[Y(1)], V[Z(1)]),
 			Point_3(V[X(5)], V[Y(5)], V[Z(5)]),
 			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
 		));
@@ -347,10 +354,10 @@ public:
 
 	double calc_md(wp_iterator& fish, const Point_3& target) const {
 		// walk all segments before the last one;
-		double md = 0;
-		for(cwp_iterator p_seg = wp_.begin(), end = wp_.end(); p_seg != fish && p_seg != end; ++p_seg) {
-			md += (p_seg->second).md();
-		}
+		double md = fish->second.md();
+		//for(cwp_iterator p_seg = wp_.begin(), end = wp_.end(); p_seg != fish && p_seg != end; ++p_seg) {
+		//	md += (p_seg->second).md();
+		//}
 		// append tail
 		const t_float* W = fish->second.W;
 		md += std::sqrt(Segment_3(Point_3(W[0], W[1], W[2]), target).squared_length());
@@ -358,6 +365,9 @@ public:
 	}
 
 	void operator()(const Box& bc, const Box& bw) {
+		//std::cout << "intersection detected!" << std::endl;
+		//return;
+
 		trim_iterator cell_fish = static_cast< cell_box_handle* >(bc.handle().get())->data();
 		wp_iterator well_fish = static_cast< well_box_handle* >(bw.handle().get())->data();
 		cell_data& c = cell_fish->second;
@@ -406,18 +416,31 @@ public:
 		// walk through the intersection path and add node points
 		// of well geometry to the cell with previous intersection
 		intersect_path::iterator px = x_.begin();
+		wp_iterator pw = wp_.begin();
 		t_float node_md;
-		for(wp_iterator pw = wp_.begin(), end = wp_.end(); pw != end; ++pw) {
+		t_float* W;
+		for(wp_iterator end = wp_.end(); pw != end; ++pw) {
 			node_md = pw->second.md();
-			t_float* W = pw->second.W;
-			while(px->md < node_md && px != x_.end()) ++px;
+			W = pw->second.W;
+			while(px->md < node_md && px != x_.end())
+				++px;
 			// we need prev intersection
-			--px;
+			if(px != x_.begin())
+				--px;
 			px = x_.insert(well_hit_cell(
 				Point_3(W[0], W[1], W[2]),
 				pw, px->cell, node_md
 			)).first;
 		}
+		// well path doen't contain the end-point of trajectory
+		// add it manually to the end of intersection
+		--pw;
+		px = x_.end(); --px;
+		W = pw->second.W;
+		x_.insert(well_hit_cell(
+			Point_3(W[4], W[5], W[6]),
+			pw, px->cell, W[7]
+		));
 	}
 
 	spv_float export_1d() const {
@@ -445,7 +468,7 @@ private:
 	// well path
 	well_path& wp_;
 	// well-mesh intersection path
-	intersect_path x_;
+	intersect_path& x_;
 };
 
 spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn, trimesh& res) {
@@ -524,7 +547,8 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 
 	// Run the intersection algorithm with all defaults on the
 	// indirect pointers to cell bounding boxes. Avoids copying the boxes
-	intersect_action A(M, W);
+	intersect_path X;
+	intersect_action A(M, W, X);
 	CGAL::box_intersection_d(
 		mesh_boxes.begin(), mesh_boxes.end(),
 		well_boxes.begin(), well_boxes.end(),
