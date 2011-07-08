@@ -1512,4 +1512,124 @@ namespace blue_sky
 
     return res;
   }
+  
+  
+  void
+  scal_3p::init_scal_input_table_arrays (const t_long n_scal_regions_, 
+                                         bool is_oil, bool is_gas, bool is_water)
+    {
+      BS_ASSERT (n_scal_regions_ > 0);
+      n_scal_regions = n_scal_regions_;
+      
+      water_input_table.resize (n_scal_regions);
+      gas_input_table.resize (n_scal_regions);
+      oil_input_table.resize (n_scal_regions);
+      
+      for (t_long i = 0; i < n_scal_regions; ++i)
+        {
+          if (is_water && is_oil)
+            {
+              water_input_table[i] = BS_KERNEL.create_object ("table");
+            }
+          if (is_gas && is_oil)
+            {
+              gas_input_table[i] = BS_KERNEL.create_object ("table");
+            }  
+          
+          if (is_oil && (is_water || is_gas)) 
+            {
+              oil_input_table[i] = BS_KERNEL.create_object ("table");
+            }
+        }
+    }                                 
+  
+  BS_SP (table_iface) 
+  scal_3p::get_table (t_long index_scal_region, t_int scal_fluid_type) const
+    {
+      BS_ASSERT (index_scal_region >= 0 && index_scal_region < n_scal_regions);
+      BS_ASSERT (scal_fluid_type >= FI_PHASE_NULL && scal_fluid_type < FI_PHASE_TOT);
+    
+      if (scal_fluid_type == FI_PHASE_WATER)
+        {
+          return water_input_table[index_scal_region]; 
+        }
+      else if (scal_fluid_type == FI_PHASE_GAS)
+        {
+          return gas_input_table[index_scal_region]; 
+        }  
+      else 
+        {  
+          return oil_input_table[index_scal_region];
+        }     
+    }                                 
+
+  void 
+  scal_3p::init_scal_data_from_input_tables ()
+    {
+      BS_ASSERT (n_scal_regions > 0);
+      
+      get_water_data ()->init_table_array (n_scal_regions);
+      get_gas_data ()->init_table_array (n_scal_regions);
+      
+      for (t_long region_index = 0; region_index < n_scal_regions; ++region_index)
+        {
+          if (water_input_table[region_index].get ())
+            {
+              t_long n_cols_water = water_input_table[region_index]->get_n_cols ();
+              t_long n_rows_water = water_input_table[region_index]->get_n_rows ();
+              if (n_cols_water == SPOF_KEYWORD_COLUMNS)
+                {
+                  get_water_data ()->add_spof (water_input_table[region_index]->convert_to_array (n_rows_water, n_cols_water), region_index, true);
+                }
+              else 
+                {
+                  get_water_data ()->add_spfn (water_input_table[region_index]->convert_to_array (n_rows_water, n_cols_water), region_index, true);
+                  if (oil_input_table[region_index].get ())
+                    {
+                      t_long n_cols_oil = oil_input_table[region_index]->get_n_cols ();
+                      t_long n_rows_oil = oil_input_table[region_index]->get_n_rows ();
+                      if (n_cols_oil == SOF3_KEYWORD_COLUMNS)
+                        {
+                          get_water_data ()->add_sof3 (oil_input_table[region_index]->convert_to_array (n_rows_oil, n_cols_oil), region_index, true);
+                        }
+                      else 
+                        {
+                          get_water_data ()->add_sof2 (oil_input_table[region_index]->convert_to_array (n_rows_oil, n_cols_oil), region_index, true);
+                        }  
+                    }  
+                }  
+            }
+          
+          if (gas_input_table[region_index].get ())
+            {
+              t_long n_cols_gas = gas_input_table[region_index]->get_n_cols ();
+              t_long n_rows_gas = gas_input_table[region_index]->get_n_rows ();
+              if (n_cols_gas == SPOF_KEYWORD_COLUMNS)
+                {
+                  get_gas_data ()->add_spof (gas_input_table[region_index]->convert_to_array (n_rows_gas, n_cols_gas), region_index, false);
+                }
+              else 
+                {
+                  get_gas_data ()->add_spfn (gas_input_table[region_index]->convert_to_array (n_rows_gas, n_cols_gas), region_index, false);
+                  if (oil_input_table[region_index].get ())
+                    {
+                      t_long n_cols_oil = oil_input_table[region_index]->get_n_cols ();
+                      t_long n_rows_oil = oil_input_table[region_index]->get_n_rows ();
+                    
+                      if (oil_input_table[region_index]->get_n_cols () == SOF3_KEYWORD_COLUMNS)
+                        {
+                          get_gas_data ()->add_sof3 (oil_input_table[region_index]->convert_to_array (n_rows_oil, n_cols_oil), region_index, false);
+                        }
+                      else 
+                        {
+                          get_gas_data ()->add_sof2 (oil_input_table[region_index]->convert_to_array (n_rows_oil, n_cols_oil), region_index, false);
+                        }  
+                    }  
+                }  
+            }  
+        }
+      get_water_data ()->init_regions_from_tables ();
+      get_gas_data ()->init_regions_from_tables ();
+        
+    }  
 } // namespace blue_sky

@@ -200,6 +200,11 @@ namespace blue_sky
         {
           (values[col])[row] = val;
         }
+      
+      /*!
+        \brief convert table to array 
+      */
+      virtual spv_double convert_to_array (const t_long n_rows, const t_long n_cols) const;
 
 #ifdef BSPY_EXPORTING_PLUGIN
       /** 

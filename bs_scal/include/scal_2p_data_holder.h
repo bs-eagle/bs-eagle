@@ -181,7 +181,7 @@ namespace blue_sky {
 	}
 
     void
-    init_regions_from_table ()
+    init_regions_from_tables ()
     {
       if (region_2_.size ())
         return ;

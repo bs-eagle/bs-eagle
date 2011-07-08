@@ -19,7 +19,7 @@ namespace blue_sky
   class BS_API_PLUGIN scale_array_holder;
 
   class BS_API_PLUGIN scal_2p_data_holder;
-
+  
   //class BS_API_PLUGIN jfunction;
 
   //////////////////////////////////////////////////////////////////////////
@@ -50,9 +50,12 @@ namespace blue_sky
       typedef calc_model_data                               data_t;
       typedef std::vector <calc_model_data>                 data_array_t;
 
-	  typedef smart_ptr <scal_dummy_iface, true>			sp_scal_dummy_iface;
-      typedef unsigned char															phase_index_t;
-      typedef unsigned char															sat_index_t;
+	  typedef smart_ptr <scal_dummy_iface, true>			        sp_scal_dummy_iface;
+      typedef unsigned char															    phase_index_t;
+      typedef unsigned char															    sat_index_t;
+
+      typedef scal_3p_iface::sp_scal_input_table_t          sp_scal_input_table_t;
+      typedef scal_3p_iface::sp_scal_input_table_array_t    sp_scal_input_table_array_t; 
 
       struct scal_3p_impl_base;
 
@@ -173,8 +176,20 @@ namespace blue_sky
       void
       update_gas_data ();
 
-	  void
-	  init_from_scal(sp_scal_dummy_iface const &scal_data);
+	    void
+	    init_from_scal(sp_scal_dummy_iface const &scal_data);
+	    
+	    //! init of input scal tables 
+      void
+      init_scal_input_table_arrays (const t_long n_scal_regions_, 
+                                    bool is_oil, bool is_gas, bool is_water);
+      //! return input scal table for defined region and fluid type
+      virtual BS_SP (table_iface)
+      get_table (t_long index_scal_region, t_int scal_fluid_type) const;
+      
+      virtual void 
+      init_scal_data_from_input_tables ();
+      
     private:
 
       sp_scal_2p_data_holder_t  water_data;
@@ -187,7 +202,13 @@ namespace blue_sky
       sp_jfunction_t            gas_jfunc;
 
       scal_3p_impl_base         *impl_;
-
+      
+      // INPUT TABLES DATA
+      t_long                       n_scal_regions;
+      sp_scal_input_table_array_t  water_input_table;
+      sp_scal_input_table_array_t  gas_input_table;
+      sp_scal_input_table_array_t  oil_input_table;
+      
     public:
 
       BLUE_SKY_TYPE_DECL (scal_3p);

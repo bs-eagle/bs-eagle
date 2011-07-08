@@ -137,6 +137,12 @@ class table_iface : public objbase
        * @param val     -- <INPUT> given value
        */
       virtual void set_value (const t_long row, const t_long col, const t_double val) = 0;
+      
+      /*!
+        \brief convert table to array 
+      */
+      virtual spv_double convert_to_array (const t_long n_rows, const t_long n_cols) const = 0;
+      
 
 #ifdef BSPY_EXPORTING_PLUGIN
       /** 

@@ -16,13 +16,6 @@
 
 namespace blue_sky 
 {
-  enum 
-  {
-    SOF2_KEYWORD_COLUMNS = 2,
-    SOF3_KEYWORD_COLUMNS = 3,
-    SPFN_KEYWORD_COLUMNS = 3,
-    SPOF_KEYWORD_COLUMNS = 4
-  };
   typedef void (*handler_callback) (BS_SP (scal_3p_iface), stdv_float const &, t_long);
 
   void

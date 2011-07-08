@@ -78,7 +78,7 @@ namespace blue_sky
                          bool is_oil, bool is_gas, bool is_water);
         
         virtual BS_SP (table_iface)
-				get_table (t_long pvt_fluid_type, t_long index_pvt_region) const = 0;	 
+				get_table (t_long index_pvt_region, t_long pvt_fluid_type) const = 0;	 
 
         //! get density data to fill in
         virtual spv_float 

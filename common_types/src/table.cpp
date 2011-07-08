@@ -96,6 +96,22 @@ namespace blue_sky
             }
         }
     }
+  
+  spv_double 
+  table::convert_to_array (const t_long n_rows, const t_long n_cols) const 
+    {
+      BS_ASSERT (n_rows * n_cols <= values.size ());
+      spv_double data = BS_KERNEL.create_object (v_double::bs_type ());
+      data->resize (n_rows * n_cols);
+      t_double *data_array = &(*data)[0];
+      
+      for (t_long i = 0; i < n_rows; ++i)
+        for (t_long j = 0; j < n_cols; ++j)
+          data_array[i * n_cols + j] = get_value (i, j);
+          
+      return data;    
+    }  
+    
 #ifdef BSPY_EXPORTING_PLUGIN
   void 
   table::set_col_values (const t_long col, spv_double val)

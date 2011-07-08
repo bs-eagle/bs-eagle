@@ -10,12 +10,22 @@
  * */
 
 #include "calc_model_data.h"
+#include "table_iface.h"
 
 namespace blue_sky 
 {
 
   class BS_API_PLUGIN jfunction;
+  class BS_API_PLUGIN scal_input_table;
   
+  enum 
+  {
+    SOF2_KEYWORD_COLUMNS = 2,
+    SOF3_KEYWORD_COLUMNS = 3,
+    SPFN_KEYWORD_COLUMNS = 3,
+    SPOF_KEYWORD_COLUMNS = 4
+  };
+
   enum scale_array_name
   {
     socr,
@@ -68,6 +78,14 @@ namespace blue_sky
 
     virtual t_float
     get_pcp_max (t_long region) const = 0;
+    
+    virtual void 
+    init_table_array (const t_long n_scal_regions) = 0;
+    
+    virtual void
+    init_regions_from_tables () = 0;
+    
+    
   };
 
   class BS_API_PLUGIN scal_3p_iface : public objbase
@@ -77,6 +95,9 @@ namespace blue_sky
     typedef boost::array <t_long, FI_PHASE_TOT>			phase_d_t;
     typedef boost::array <t_long, FI_PHASE_TOT>			sat_d_t;
     typedef std::vector <calc_model_data>           data_array_t;
+    
+    typedef smart_ptr <table_iface, true>           sp_scal_input_table_t;
+    typedef std::vector <sp_scal_input_table_t>     sp_scal_input_table_array_t;    
 
     virtual ~scal_3p_iface () {}
 
