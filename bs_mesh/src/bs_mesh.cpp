@@ -69,6 +69,7 @@ namespace blue_sky { namespace python {
 void py_export_mesh_grdecl();
 void py_export_flux_connections();
 void py_export_czt();
+void py_export_wpi();
 
 }}
 
@@ -85,6 +86,7 @@ namespace {
     python::py_export_mesh_grdecl ();
     python::py_export_flux_connections ();
 	python::py_export_czt();
+	python::py_export_wpi();
   }
 }
 BLUE_SKY_INIT_PY_FUN

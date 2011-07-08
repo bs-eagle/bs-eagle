@@ -537,5 +537,13 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 	return A.export_1d();
 }
 
+namespace python {
+
+void py_export_wpi() {
+	bp::def("well_path_ident", &well_path_ident);
+}
+
+}
+
 }	// eof blue-sky namespace
 

@@ -20,6 +20,7 @@ if (build_kind == "debug") :
 elif (build_kind == "release") :
     env.AppendUnique (LIBS = libs)
 env.AppendUnique(LIBS = ["CGAL"])
+env.AppendUnique(CXXFLAGS = ["-frounding-math"])
 
 bs_mesh = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
 
