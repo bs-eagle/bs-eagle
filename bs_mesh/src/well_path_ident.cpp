@@ -77,11 +77,11 @@ struct cell_data {
 	}
 
 	cell_pos& cpos() {
-		return reinterpret_cast< cell_pos& >(V);
+		return reinterpret_cast< cell_pos& >(*V);
 	}
 
 	const cell_pos& cpos() const {
-		return reinterpret_cast< const cell_pos& >(V);
+		return reinterpret_cast< const cell_pos& >(*V);
 	}
 
 private:
@@ -92,7 +92,7 @@ private:
 		for(uint i = 0; i < 3; ++i) {
 			t_float c = cV[0][i];
 			for(uint j = 1; j < 8; ++j) {
-				if(p(c, cV[j][i]))
+				if(p(cV[j][i], c))
 					c = cV[j][i];
 			}
 			b[i] = c;
@@ -123,11 +123,11 @@ struct well_data {
 	}
 
 	vertex_pos& cstart() {
-		return reinterpret_cast< vertex_pos& >(W);
+		return reinterpret_cast< vertex_pos& >(*W);
 	}
 
 	const vertex_pos& cstart() const {
-		return reinterpret_cast< const vertex_pos& >(W);
+		return reinterpret_cast< const vertex_pos& >(*W);
 	}
 
 	//vertex_pos& cend() {
@@ -448,7 +448,7 @@ private:
 	intersect_path x_;
 };
 
-trimesh coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
+spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn, trimesh& res) {
 	// build mesh_grdecl around given mesh
 	sp_grd_mesh grd_src = BS_KERNEL.create_object(bs_mesh_grdecl::bs_type());
 	grd_src->init_props(nx, ny, coord, zcorn);
@@ -460,19 +460,19 @@ trimesh coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float zco
 	v_float::iterator pv = tops->begin();
 
 	// fill trimesh with triangles corresponding to each cell
-	trimesh res;
-
 	for(ulong i = 0; i < n_cells; ++i) {
 		res[i] = cell_data(&*pv);
 		pv += 3*8;
 	}
 
-	return res;
+	return tops;
 }
 
 spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float well_info) {
-	// conver mesh with triangles
-	trimesh M = coord_zcorn2trimesh(nx, ny, coord, zcorn);
+	// calculate mesh nodes coordinates and muild initial trimesh
+	trimesh M;
+	spv_float tops;
+	tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M);
 	//t_long nz = (zcorn->size() / nx / ny) >> 3;
 
 	// create bounding box for each cell in given mesh
