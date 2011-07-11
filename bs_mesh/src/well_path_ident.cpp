@@ -17,7 +17,7 @@
 #include <CGAL/intersections.h>
 #include <CGAL/Object.h>
 
-#include "bs_mesh_stdafx.h"
+#include "well_path_ident.h"
 #include "conf.h"
 #include "export_python_wrapper.h"
 #include "bs_mesh_grdecl.h"
@@ -36,6 +36,8 @@ namespace bp = boost::python;
 using namespace std;
 
 namespace blue_sky {
+
+namespace { 	// hide implementation details
 
 typedef CGAL::Object                                        Object;
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
@@ -105,9 +107,8 @@ typedef st_smart_ptr< cell_data > sp_cell_data;
 typedef std::map< t_ulong, cell_data > trimesh;
 typedef typename trimesh::iterator trim_iterator;
 
-// well path description
 /*-----------------------------------------------------------------
- * well_description
+ * well description
  *----------------------------------------------------------------*/
 struct well_data {
 	// segment begin, end and md in raw vector
@@ -155,7 +156,7 @@ typedef typename well_path::iterator wp_iterator;
 typedef typename well_path::const_iterator cwp_iterator;
 
 /*-----------------------------------------------------------------
- * Bounding box description
+ * Box description
  *----------------------------------------------------------------*/
 // structure to help identify given boxes
 class box_handle {
@@ -262,7 +263,9 @@ struct well_hit_cell {
 typedef std::set< well_hit_cell > intersect_path;
 
 
-// callback functor that triggers on intersecting bboxes
+/*-----------------------------------------------------------------
+ * callback functor that triggers on intersecting bboxes
+ *----------------------------------------------------------------*/
 class intersect_action {
 public:
 	// ctor
@@ -471,6 +474,7 @@ private:
 	intersect_path& x_;
 };
 
+// helper to create initial cell_data for each cell
 spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn, trimesh& res) {
 	// build mesh_grdecl around given mesh
 	sp_grd_mesh grd_src = BS_KERNEL.create_object(bs_mesh_grdecl::bs_type());
@@ -491,6 +495,11 @@ spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float z
 	return tops;
 }
 
+} 	// eof hidden namespace
+
+/*-----------------------------------------------------------------
+ * implementation of main routine
+ *----------------------------------------------------------------*/
 spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float well_info) {
 	// calculate mesh nodes coordinates and muild initial trimesh
 	trimesh M;
@@ -524,13 +533,6 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 	vector< Box > well_boxes(well_node_num - 1);
 	v_float::iterator pw = well_info->begin();
 	for(ulong i = 0; i < well_node_num - 1; ++i) {
-		// +1 because we need to skip md field
-		//lo[0] = min(pw[X(0)], pw[X(1) + 1]);
-		//lo[1] = min(pw[Y(0)], pw[Y(1) + 1]);
-		//lo[2] = min(pw[Z(0)], pw[Z(1) + 1]);
-		//hi[0] = max(pw[X(0)], pw[X(1) + 1]);
-		//hi[1] = max(pw[Y(0)], pw[Y(1) + 1]);
-		//hi[2] = max(pw[Z(0)], pw[Z(1) + 1]);
 		//well_boxes.push_back(Box(
 		//	lo, hi,
 		//	new well_box_handle( W.insert(make_pair(i, pw)).first )
@@ -561,6 +563,9 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 	return A.export_1d();
 }
 
+/*-----------------------------------------------------------------
+ * Python bindings
+ *----------------------------------------------------------------*/
 namespace python {
 
 void py_export_wpi() {
