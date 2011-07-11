@@ -12,6 +12,16 @@ using namespace boost::python;
 
 namespace blue_sky { namespace python {
 
+void init_props1(bs_mesh_grdecl& m, t_long nx, t_long ny, t_long nz,
+	spv_float dx, spv_float dy, spv_float dz)
+{
+	m.init_props(nx, ny, nz, dx, dy, dz);
+}
+
+void init_props2(bs_mesh_grdecl& m, t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
+	m.init_props(nx, ny, coord, zcorn);
+}
+
 PY_EXPORTER (mesh_grdecl_exporter, rs_mesh_iface_exporter)
 	.def ("get_ext_to_int", &T::get_ext_to_int, args(""), "Return reference to external-to-internal mesh index")
 	.def ("get_int_to_ext", &T::get_int_to_ext, args(""), "Return reference to internal-to-external mesh index")
@@ -23,6 +33,8 @@ PY_EXPORTER (mesh_grdecl_exporter, rs_mesh_iface_exporter)
 	.def ("calc_element_tops", &T::calc_element_tops, args (""), "Calc element tops")
 	.def ("calc_element_center", &T::calc_element_center, args (""), "Calc element center")
 	.def ("calc_cells_vertices", &T::calc_cells_vertices)
+	.def ("init_props", &init_props1)
+	.def ("init_props", &init_props2)
 	;
 PY_EXPORTER_END;
 
