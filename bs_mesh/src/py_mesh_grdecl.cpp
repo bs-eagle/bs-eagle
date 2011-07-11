@@ -21,7 +21,9 @@ PY_EXPORTER (mesh_grdecl_exporter, rs_mesh_iface_exporter)
 	.def ("get_element_ijk_to_int", &T::get_element_ijk_to_int, args ("i, j, k"), "get elements sizes")
 	.def ("get_n_active_elements", &T::get_n_active_elements, args (""), "Get elements sizes")
 	.def ("calc_element_tops", &T::calc_element_tops, args (""), "Calc element tops")
-	.def ("calc_element_center", &T::calc_element_center, args (""), "Calc element center");
+	.def ("calc_element_center", &T::calc_element_center, args (""), "Calc element center")
+	.def ("calc_cells_vertices", &T::calc_cells_vertices)
+	;
 PY_EXPORTER_END;
 
 }}  // eof blue_sky::python
