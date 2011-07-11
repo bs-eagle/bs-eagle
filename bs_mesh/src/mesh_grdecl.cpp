@@ -1045,7 +1045,6 @@ spv_float mesh_grdecl::calc_cells_vertices() {
   tops_data = &(*tops)[0];
   ind = 0;
 
-  t_float const *poro = poro_array->data ();
   for (i = 0; i < nx; ++i)
 	  for (j = 0; j < ny; ++j)
 		  for (k = 0; k < nz; ++k, ++ind)
@@ -1055,7 +1054,7 @@ spv_float mesh_grdecl::calc_cells_vertices() {
 				{
 				  tops_data[8 * 3 * ind + 3 * c] = element.get_corners()[c].x;
 				  tops_data[8 * 3 * ind + 3 * c + 1] = element.get_corners()[c].y;
-				  tops_data[8 * 3 * ind + 3 * c + 2] = element.get_corners()[c].z * 10;
+				  tops_data[8 * 3 * ind + 3 * c + 2] = element.get_corners()[c].z;
 				}
 			}
 
