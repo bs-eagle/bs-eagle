@@ -37,6 +37,10 @@ namespace blue_sky
       // INTERFACE METHODS
       // ------------------------------------
     public:
+      /*!
+        \brief copy 
+      */
+      virtual int copy (const sp_table_iface a);
 
       /** 
        * @brief Initialize or reinitialize table by <n_rows> <n_cols> 
@@ -196,6 +200,11 @@ namespace blue_sky
         {
           (values[col])[row] = val;
         }
+      
+      /*!
+        \brief convert table to array 
+      */
+      virtual spv_double convert_to_array (const t_long n_rows, const t_long n_cols) const;
 
 #ifdef BSPY_EXPORTING_PLUGIN
       /** 

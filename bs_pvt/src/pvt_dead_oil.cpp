@@ -10,7 +10,7 @@
 #include "pvt_interpolator.h"
 #include "scal_interpolate.h"
 
-using namespace blue_sky::pvt_detail;
+using namespace blue_sky::pvt;
 
 namespace blue_sky
   {

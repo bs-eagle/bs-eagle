@@ -10,6 +10,7 @@
 
 #include "py_scal_wrapper.h"
 #include "scal_save_data.h"
+#include "scal_2p_dummy.h"
 
 #include "export_python_wrapper.h"
 
@@ -39,6 +40,11 @@ namespace blue_sky
       .add_property ("gas_data",         &T::get_gas_data)
       .add_property ("water_jfunction",  &T::get_water_jfunction, &T::set_water_jfunction)
       .add_property ("gas_jfunction",    &T::get_gas_jfunction, &T::set_gas_jfunction)
+	  .def ("init_from_scal", &T::init_from_scal)
+    PY_EXPORTER_END;
+    
+    PY_EXPORTER (scal_dummy_exporter, default_exporter)
+      .def ("get_table", &T::py_get_table)
     PY_EXPORTER_END;
 
     void py_export_scal ()
@@ -69,6 +75,11 @@ namespace blue_sky
       base_exporter<scale_array_holder, scale_array_holder_exporter>::export_class ("scale_arrays");
       base_exporter<scal_2p_data_holder, scal_data_holder_exporter>::export_class ("scal_data");
       base_exporter<scal_3p, scal_3p_exporter>::export_class ("scal_3p");
+      
+      base_exporter <scal_dummy_iface, scal_dummy_exporter>::export_class ("scal_dummy_iface");
+      class_exporter<scal_2p_dummy, scal_dummy_iface, scal_dummy_exporter>::export_class ("scal_2p_dummy");
+      class_exporter<scal_3p_dummy, scal_dummy_iface, scal_dummy_exporter>::export_class ("scal_3p_dummy");
+      
     }
   }
 }

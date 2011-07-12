@@ -91,7 +91,7 @@ namespace blue_sky
       /**
        * \brief returns pointer to facility_storage
        * */
-      BS_SP (facility_storage_t)
+      smart_ptr <facility_storage_t> 
       get_facility_storage () const;
 
       /**
@@ -198,8 +198,6 @@ namespace blue_sky
         ((end, (clock_t), 1))
         ((post_read, (), 0))
         ((pre_read, (sp_this_t), 1))
-        ((before_ready, (), 0))
-        ((after_ready, (), 0))
       );
     };
 

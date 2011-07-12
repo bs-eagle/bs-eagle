@@ -1,13 +1,10 @@
 /**
- *       \file  well_event_apply_methods.cpp
- *      \brief  impl of <well_event>::apply methods
- *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
- *       \date  11.07.2008
- *  \copyright  This source code is released under the terms of 
- *              the BSD License. See LICENSE for more details.
+ * \file well_event_apply_methods.cpp
+ * \brief impl of <well_event>::apply methods
+ * \author Sergey Miryanov
+ * \date 11.07.2008
  * */
-
-#include "std_well_stdafx.hpp"
+#include "stdafx.h"
 
 #include "reservoir.h"
 #include "reservoir_simulator.h"

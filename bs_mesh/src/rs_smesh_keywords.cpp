@@ -75,10 +75,10 @@ namespace blue_sky
       keyword_manager->register_prop_keyword ("MAXST", "f", names, 0);
 
       keyword_manager->register_i_pool_keyword ("ACTNUM", &array_dimens[0], 1, 0);
-      keyword_manager->register_fp_pool_keyword ("PERMX", &array_dimens[0], def_value_zero, 0);
-      keyword_manager->register_fp_pool_keyword ("PERMY", &array_dimens[0], def_value_zero, 0);
-      keyword_manager->register_fp_pool_keyword ("PERMZ", &array_dimens[0], def_value_zero, 0);
-      keyword_manager->register_fp_pool_keyword ("PORO", &array_dimens[0], def_value_zero, 0);
+      keyword_manager->register_fp_pool_keyword ("PERMX", &array_dimens[0], 10., 0);
+      keyword_manager->register_fp_pool_keyword ("PERMY", &array_dimens[0], 10., 0);
+      keyword_manager->register_fp_pool_keyword ("PERMZ", &array_dimens[0], 1., 0);
+      keyword_manager->register_fp_pool_keyword ("PORO", &array_dimens[0], 0.2, 0);
       keyword_manager->register_fp_pool_keyword ("NTG", &array_dimens[0], def_value_one, 0);
       keyword_manager->register_fp_pool_keyword ("MULTX", &array_dimens[0], def_value_one, 0);
       keyword_manager->register_fp_pool_keyword ("MULTY", &array_dimens[0], def_value_one, 0);

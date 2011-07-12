@@ -64,20 +64,28 @@ mesh_grdecl::mesh_grdecl ()
 	: pinner_(new inner), coord_array(0), zcorn_array(0)
 {}
 
-void mesh_grdecl::init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz) {
-	// generate COORD & ZCORN
-	std::pair< spv_float, spv_float > cz = gen_coord_zcorn(nx, ny, nz, dx, dy, dz);
-	if(cz.first && cz.first->size()) {
-		pinner_->coord_ = cz.first;
+void mesh_grdecl::init_props(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
+	if(coord && coord->size()) {
+		pinner_->coord_ = coord;
 		coord_array = &pinner_->coord_->ss(0);
 	}
-	if(cz.second && cz.second->size()) {
-		pinner_->zcorn_ = cz.second;
+	if(zcorn && zcorn->size()) {
+		pinner_->zcorn_ = zcorn;
 		zcorn_array = &pinner_->zcorn_->ss(0);
 	}
+	this->nx = nx;
+	this->ny = ny;
+	this->nz = (zcorn->size() / nx / ny) >> 3;
+	this->n_elements = nx * ny * nz;
 
 	// postinit
 	pinner_->init_minmax(*this);
+}
+
+void mesh_grdecl::init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz) {
+	// generate COORD & ZCORN
+	std::pair< spv_float, spv_float > cz = gen_coord_zcorn(nx, ny, nz, dx, dy, dz);
+	init_props(nx, ny, cz.first, cz.second);
 }
 
 void mesh_grdecl::init_props(const sp_hdm_t hdm)
@@ -1025,6 +1033,33 @@ boost::python::list mesh_grdecl::calc_element_tops ()
   return myavi_list;
 }
 
+spv_float mesh_grdecl::calc_cells_vertices() {
+  element_t element;
+  spv_float tops;
+  t_long i, j, k, c, ind, *indexes_data;
+  t_float *tops_data;
+
+  tops = give_kernel::Instance().create_object(v_float::bs_type());
+  tops->resize (n_elements * 8 * 3);
+
+  tops_data = &(*tops)[0];
+  ind = 0;
+
+  for (i = 0; i < nx; ++i)
+	  for (j = 0; j < ny; ++j)
+		  for (k = 0; k < nz; ++k, ++ind)
+		    {
+		      calc_element (i, j, k, element);
+			  for (c = 0; c < 8; ++c)
+				{
+				  tops_data[8 * 3 * ind + 3 * c] = element.get_corners()[c].x;
+				  tops_data[8 * 3 * ind + 3 * c + 1] = element.get_corners()[c].y;
+				  tops_data[8 * 3 * ind + 3 * c + 2] = element.get_corners()[c].z;
+				}
+			}
+
+  return tops;
+}
 
 boost::python::list mesh_grdecl::calc_element_center ()
 {

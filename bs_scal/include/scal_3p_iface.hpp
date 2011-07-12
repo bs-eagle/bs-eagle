@@ -10,10 +10,22 @@
  * */
 
 #include "calc_model_data.h"
-#include "jfunction.h"
+#include "table_iface.h"
 
 namespace blue_sky 
 {
+
+  class BS_API_PLUGIN jfunction;
+  class BS_API_PLUGIN scal_input_table;
+  
+  enum 
+  {
+    SOF2_KEYWORD_COLUMNS = 2,
+    SOF3_KEYWORD_COLUMNS = 3,
+    SPFN_KEYWORD_COLUMNS = 3,
+    SPOF_KEYWORD_COLUMNS = 4
+  };
+
   enum scale_array_name
   {
     socr,
@@ -47,7 +59,7 @@ namespace blue_sky
     virtual ~scal_2p_data_holder_iface () {}
 
     virtual void
-    add_spof (spv_float const &swof, bool is_water) = 0;
+    add_spof (spv_float const &swof, t_long index, bool is_water) = 0;
 
     virtual void
     add_spfn (spv_float const &swfn, t_long index, bool is_water) = 0;
@@ -55,6 +67,9 @@ namespace blue_sky
     virtual void
     add_sof3 (spv_float const &sof3, t_long index, bool is_water) = 0;
 
+    virtual void
+    add_sof2 (spv_float const &sof3, t_long index, bool is_water) = 0;
+    
     virtual t_float
     get_phase_sat_min (t_long region) const = 0;
 
@@ -63,6 +78,14 @@ namespace blue_sky
 
     virtual t_float
     get_pcp_max (t_long region) const = 0;
+    
+    virtual void 
+    init_table_array (const t_long n_scal_regions) = 0;
+    
+    virtual void
+    init_regions_from_tables () = 0;
+    
+    
   };
 
   class BS_API_PLUGIN scal_3p_iface : public objbase
@@ -72,6 +95,9 @@ namespace blue_sky
     typedef boost::array <t_long, FI_PHASE_TOT>			phase_d_t;
     typedef boost::array <t_long, FI_PHASE_TOT>			sat_d_t;
     typedef std::vector <calc_model_data>           data_array_t;
+    
+    typedef smart_ptr <table_iface, true>           sp_scal_input_table_t;
+    typedef std::vector <sp_scal_input_table_t>     sp_scal_input_table_array_t;    
 
     virtual ~scal_3p_iface () {}
 
@@ -111,6 +137,16 @@ namespace blue_sky
       t_double *          pc_limit) const = 0;
 
     virtual void
+    process_init_2 (
+      const t_double *    pressure, 
+      t_long              sat_reg, 
+      t_double            perm, 
+      t_double            poro,
+      t_double *          sat, 
+      t_double *          pc_limit) const = 0;
+
+
+    virtual void
     calc_pcp (t_long      cell_index, 
       const t_double      sat, 
       t_long              sat_reg, 
@@ -125,6 +161,16 @@ namespace blue_sky
       t_double            pcgw,
       t_double &          sw, 
       t_double &          sg) const = 0;
+
+    virtual void
+    calc_gas_water_zone_2 (
+      t_long              sat_reg, 
+      t_double            perm, 
+      t_double            poro, 
+      t_double            pcgw,
+      t_double &          sw, 
+      t_double &          sg) const = 0;
+
 
     virtual void
     init (bool            is_w, 

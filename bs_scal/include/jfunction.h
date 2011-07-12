@@ -70,7 +70,7 @@ namespace blue_sky
           return (perm_array[plane_a] + perm_array[plane_b]) * 0.5;
         }
 
-      BLUE_SKY_TYPE_DECL_T (jfunction);
+      BLUE_SKY_TYPE_DECL (jfunction);
 
 public:
 

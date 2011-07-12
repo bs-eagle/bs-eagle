@@ -4,6 +4,8 @@
 #include "bs_pvt_stdafx.h"
 
 #include "pvt_base.h"
+#include "pvt_3p_iface.h"
+#include "pvt_3p.h"
 #include "py_pvt.h"
 #include "pvt_keywords.hpp"
 
@@ -17,7 +19,7 @@ namespace blue_sky
   {
     bool res = true;
 
-    res &= blue_sky::pvt_register_types (pd); BS_ASSERT (res); BS_ASSERT (res);
+    res &= blue_sky::pvt_register_types (pd); BS_ASSERT (res); 
     res &= BS_KERNEL.register_type (pd, blue_sky::pvt_keywords::bs_type ()); BS_ASSERT (res);
 
     return res;

@@ -42,7 +42,13 @@ namespace blue_sky
         args ("name", "array"), "Store array in the pool")
     .def ("set_i_data",                         &T::set_i_data, 
         args ("name", "array"), "Store array in the pool")
+    .def ("get_data_type",                      &T::get_data_type, 
+        args ("name"), "Get array data type")
     .def ("list_data",                          &T::py_list_data)
+    .def ("py_set_pool_dims",                   &T::py_set_pool_dims, 
+        args ("dims"), "Set pool dimensions")
+    .def ("py_get_pool_dims",                   &T::py_get_pool_dims, 
+        args (""), "Get pool dimensions")
     .def ("__str__",                            &T::py_str)
   PY_EXPORTER_END;                               
 

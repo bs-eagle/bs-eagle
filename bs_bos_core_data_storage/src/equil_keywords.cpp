@@ -7,9 +7,9 @@
  *              the BSD License. See LICENSE for more details.
  * */
 #ifdef BSPY_EXPORTING_PLUGIN
+#include "bs_bos_core_data_storage_stdafx.h"
 #include <boost/python.hpp>
 #endif
-
 #include "equil_keywords.hpp"
 #include "keyword_manager_iface.h"
 #include "init_model_iface.hpp"

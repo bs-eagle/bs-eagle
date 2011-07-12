@@ -87,6 +87,9 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
 	//! init COORD & ZCORN via gen_coord_zcorn
 	void init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz);
 
+	//! init COORD & ZCORN directly
+	void init_props(t_long nx, t_long ny, spv_float coord, spv_float zcorn);
+
 	//! init COORD & ZCORN from (nx, ny, nz, dx, dy, dz)
 	//! (x0, y0, z0) - beginning of coordinate system (mesh offset)
 	//! return: first -- coord, second -- zcorn
@@ -200,6 +203,9 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
 	boost::python::list calc_element_tops ();
 
 	boost::python::list calc_element_center ();
+
+	// same as calc_element_tops, but only return tops coordinates
+	spv_float calc_cells_vertices();
 
     /*!	\brief  find neighbours (adjacency matrix)
     	\param neig_matrix - bcsr adjacency matrix

@@ -63,7 +63,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="bs_bos_core_base_d.lib bs_bos_core_data_storage_d.lib loki_D.lib ws2_32.lib"
+				AdditionalDependencies="bs_bos_core_base_d.lib loki_D.lib ws2_32.lib"
 				OutputFile="$(ProjectDir)/../../../exe/debug/plugins/$(ProjectName)_d.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/lib&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/debug/&quot;;&quot;$(ProjectDir)/../../../exe/debug/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
@@ -123,7 +123,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Zm1000"
-				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../common_types/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;&quot;$(NUMPY_PATH)/include&quot;"
+				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_data_storage/include/&quot;;&quot;$(ProjectDir)/../bs_matrix/include/&quot;;&quot;$(ProjectDir)/../common_types/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;&quot;$(NUMPY_PATH)/include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;NOMINMAX"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
@@ -272,6 +272,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\scal_2p_dummy.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\scal_3p.cpp"
 				>
 			</File>
@@ -293,6 +297,10 @@
 			</File>
 			<File
 				RelativePath=".\include\scal_data_vector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\scal_dummy.cpp"
 				>
 			</File>
 			<File
@@ -370,6 +378,10 @@
 		</File>
 		<File
 			RelativePath=".\include\bs_scal_stdafx.h"
+			>
+		</File>
+		<File
+			RelativePath=".\include\scal_dummy_iface.h"
 			>
 		</File>
 		<File

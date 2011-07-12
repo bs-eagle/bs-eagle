@@ -7,9 +7,9 @@
  *              the BSD License. See LICENSE for more details.
  * */
 #ifdef BSPY_EXPORTING_PLUGIN
+#include "bs_bos_core_data_storage_stdafx.h"
 #include <boost/python.hpp>
 #endif
-
 #include "explicit_keywords.hpp"
 #include "keyword_manager_iface.h"
 #include "init_model_iface.hpp"
@@ -82,15 +82,29 @@ namespace blue_sky
 
       // FIXME: npy_intp
       npy_intp dimens[] = {1, 0, 1, 0, 1, 0};
-      keyword_manager->register_fp_pool_keyword ("PRESSURE", dimens, 0, 0);
-      keyword_manager->register_fp_pool_keyword ("SWAT",    dimens, 0, 0);
-      keyword_manager->register_fp_pool_keyword ("SGAS",    dimens, 0, 0);
-      keyword_manager->register_fp_pool_keyword ("SOIL",    dimens, 0, 0);
-      keyword_manager->register_fp_pool_keyword ("RS",      dimens, 0, 0);
-      keyword_manager->register_fp_pool_keyword ("PBUB",    dimens, 0, 0);
-
+      int n_phases; 
+    
+      n_phases = params.hdm->get_prop()->get_b("oil_phase");
+      n_phases += params.hdm->get_prop()->get_b("water_phase");
+      n_phases += params.hdm->get_prop()->get_b("gas_phase");
+      
+      keyword_manager->register_fp_pool_keyword ("PRESSURE", dimens, 200.0, 0);
+      
+      if (n_phases > 1)
+        {
+          if (params.hdm->get_prop()->get_b("water_phase"))
+            keyword_manager->register_fp_pool_keyword ("SWAT",    dimens, 0.3, 0);
+         
+          if (params.hdm->get_prop()->get_b("gas_phase"))
+            {
+              keyword_manager->register_fp_pool_keyword ("SGAS",    dimens, 0, 0);
+              keyword_manager->register_fp_pool_keyword ("SOIL",    dimens, 0, 0);
+              keyword_manager->register_fp_pool_keyword ("RS",      dimens, 0, 0);
+              keyword_manager->register_fp_pool_keyword ("PBUB",    dimens, 0, 0);
+            }
+        }
       // FIXME: if PRVD present in model PRESSURE shouldn't be specified
-      keyword_manager->register_keyword ("PRVD", keyword_manager_iface::keyword_handler (PRVD, 0));
+      keyword_manager->register_keyword ("PRVD", keyword_manager_iface::keyword_handler (PRVD, 0));  
     }
   }
 

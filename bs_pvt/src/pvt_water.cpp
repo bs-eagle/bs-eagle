@@ -8,7 +8,7 @@
 
 #include "pvt_water.h"
 
-using namespace blue_sky::pvt_detail;
+using namespace blue_sky::pvt;
 
 namespace blue_sky
   {

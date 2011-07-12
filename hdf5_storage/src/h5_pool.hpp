@@ -194,10 +194,13 @@ namespace blue_sky
        * if no array in pool
        * */
       virtual bool is_opened (const std::string &name);
+      virtual std::string get_data_type (const std::string &name) const;
 
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual std::string py_str () const;
       virtual boost::python::list py_list_data () const;
+      virtual void py_set_pool_dims (boost::python::list &dims);
+      virtual boost::python::list py_get_pool_dims ();
 #endif //BSPY_EXPORTING_PLUGIN
     protected:
 
@@ -244,7 +247,7 @@ namespace blue_sky
        * @return h5_pair, throws bs_exception on error
        * */
       h5_pair
-      open_data (std::string const &name);
+      open_data (std::string const &name, const int h5_write = 0);
 
 
       /** 

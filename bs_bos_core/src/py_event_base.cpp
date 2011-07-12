@@ -13,7 +13,6 @@
 
 #include "calc_model.h"
 #include "reservoir.h"
-#include "data_class.h"
 
 #include "py_event_base.h"
 

@@ -85,6 +85,33 @@ namespace blue_sky
         */
       }
   }
+  
+  void keyword_manager::handle_keyword_reactor (const std::string &keyword, keyword_params_t &params)
+  {
+    handlers_t::iterator it = handlers.find(keyword);
+    BS_SP (FRead) reader = params.hdm->get_reader ();
+
+    if (it == handlers.end ())
+      {
+        is_keyword_supported (keyword, params);
+      }
+    else
+      {
+        keyword_handler &handler = it->second;
+        
+        if (handler.react_handle_function)
+          {
+            (*(handler.react_handle_function)) (keyword, params);
+          }
+        /*
+        else if (handler.handle_object)
+          {
+            handler.handle_object->handler (keyword, params);
+          }
+        */
+      }
+  }
+
 
   
   void keyword_manager::register_keyword(const std::string &keyword, keyword_handler handler)

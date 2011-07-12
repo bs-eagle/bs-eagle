@@ -1193,7 +1193,6 @@ namespace blue_sky
       inline void
       ready ()
       {
-        rs_->on_before_ready ();
         print_mesh_info ();
         print_pvt_info ();
 
@@ -1215,7 +1214,6 @@ namespace blue_sky
         reservoir_->open_storage (path::join (path::dirname (rs_->model_filename ()), "results-v2.h5"));
         reservoir_->write_mesh_to_storage (mesh_);
         reservoir_->write_starting_date_to_storage (rs_->get_hdm ()->get_keyword_manager ()->get_starting_date ());
-        rs_->on_after_ready ();
       }
 
       /**

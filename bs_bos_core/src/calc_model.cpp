@@ -242,7 +242,6 @@ namespace blue_sky
     main_variable.resize(mesh->get_n_active_elements());
     old_data_.main_var.resize(mesh->get_n_active_elements());
     prev_niter_data_.main_var.resize(mesh->get_n_active_elements());
-    max_norm_counter.assign (mesh->get_n_active_elements (), 0);
 
 //#ifndef _DEBUG
 //    data.reserve (mesh->get_n_active_elements ());

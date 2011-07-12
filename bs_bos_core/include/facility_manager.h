@@ -10,7 +10,6 @@
 #define BS_FACILITY_MANAGER_H_
 
 #include "facility_base.h"
-#include "bos_map.h"
 
 namespace blue_sky
   {

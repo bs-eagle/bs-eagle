@@ -20,8 +20,8 @@ namespace blue_sky
         separate_vectors,
         spkrp_sokrop_pcp,
         spof,
-        spfn_sof3,
-        sof3_spfn,
+        spfn_sofX,
+        sofX_spfn,
       };
 
       struct scal_placement_info

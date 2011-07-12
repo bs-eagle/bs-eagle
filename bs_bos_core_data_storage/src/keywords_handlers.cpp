@@ -131,6 +131,38 @@ namespace blue_sky
   }
 
 
+  /*
+  
+  void keyword_manager::event_handler(const std::string &keyword, keyword_params_t &params)
+  {
+    KH_READER_DEF
+    char buf[CHAR_BUF_LEN] = {0};
+    char key1[CHAR_BUF_LEN] = {0};
+    typedef smart_ptr <event_manager , true>	sp_event_manager_t;
+    sp_event_manager_t em (params.em, bs_dynamic_cast ());
+    sp_this_t km = params.hdm->get_keyword_manager ();
+    
+    
+    for (;;)
+      {
+        reader->read_line (buf, CHAR_BUF_LEN);
+        if (sscanf (buf, "%s", key1) != 1)
+          {
+            bs_throw_exception (boost::format ("Error in %s: bad string (%s)")
+              % reader->get_prefix() % buf);
+          }
+        if (key1[0] == '/')
+          {
+            em->end_event ();
+            break;
+          }
+
+        em->process_event (km->current_date, keyword, std::string (buf));
+      }
+  }
+*/
+
+  
   void keyword_manager::TITLE_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
@@ -685,6 +717,78 @@ namespace blue_sky
 
 
   
+  void keyword_manager::DATE_handler(const std::string &keyword, keyword_params_t &params)
+  {
+    KH_READER_DEF
+    char buf[CHAR_BUF_LEN] = {0};
+    typedef event_manager  event_manager_t;
+    typedef smart_ptr <event_manager_t, true>	sp_event_manager_t;
+    sp_event_manager_t em (params.em, bs_dynamic_cast ());
+    sp_this_t km = params.hdm->get_keyword_manager ();
+    
+    if ((reader->read_line (buf, CHAR_BUF_LEN)) <= 0)
+      {
+        bs_throw_exception (boost::format ("Error in %s: can't read arguments for keyword %s")
+          % reader->get_prefix () % keyword);
+      }
+
+    km->current_date=boost::posix_time::ptime(reader->read_date (std::string(buf)));
+    if (em->event_list.find (km->current_date)==em->event_list.end ())
+      {
+        std::list <typename event_manager_t::sp_event_base> tl;
+        em->event_list.insert (std::make_pair (km->current_date, tl));
+      }
+
+    BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
+  }
+
+  
+  void keyword_manager::DATES_handler(const std::string &keyword, keyword_params_t &params)
+  {
+    DATE_handler(keyword, params);
+  }
+
+  
+  void keyword_manager::TSTEP_handler(const std::string &keyword, keyword_params_t &params)
+  {
+    KH_READER_DEF
+    shared_vector <double> dtmp;
+    dtmp.resize(MAX_TIME_STEPS_DEF);
+    typedef event_manager  event_manager_t;
+    typedef smart_ptr <event_manager_t, true>	sp_event_manager_t;
+    sp_event_manager_t em (params.em, bs_dynamic_cast ());
+    sp_this_t km = params.hdm->get_keyword_manager ();
+
+    if ((len = reader->read_array (keyword, dtmp)) < 1)
+      {
+        bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
+          % reader->get_prefix () % keyword);
+      }
+
+    //!
+    //! dtmp[0] <- days
+    //! dtmp[0]*24*60*60 <-seconds
+    //! dtmp[0]*24*60*60*1000 <-millisecs
+
+    for (size_t i = 0; i < (size_t) len; ++i)
+      {
+        km->current_date += boost::posix_time::millisec (dtmp[i]*24*60*60*1000);
+
+        if (em->event_list.find (km->current_date) == em->event_list.end ())
+          {
+            std::list <typename event_manager_t::sp_event_base> tl;
+            em->event_list.insert (std::make_pair (km->current_date, tl));
+          }
+      }
+
+    BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
+  }
+
+  
+  void keyword_manager::TSTEPS_handler(const std::string &keyword, keyword_params_t &params)
+  {
+    TSTEP_handler(keyword, params);
+  }
   */
 //bs stuff
 

@@ -37,5 +37,4 @@ else :
     SConscript ("bs_scal/SConscript.bs")
     SConscript ("bs_pvt/SConscript.bs")
     SConscript ("bs_bos_core/SConscript.bs")
-    SConscript ("std_well/SConscript.bs")
-    SConscript ("hdf5_storage/SConscript")
+    SConscript ("hdf5_storage/SConscript.bs")

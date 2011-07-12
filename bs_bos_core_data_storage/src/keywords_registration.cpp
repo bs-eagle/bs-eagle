@@ -95,6 +95,28 @@ namespace blue_sky
     //double
     REG_FLOAT_ARRAY_KEYWORD(SWATINIT);
     */
+
+    //BS_ASSERT (em);
+
+    /*
+    const type_descriptor &event_td = event_base ::bs_type ();
+    const std::vector <type_tuple> &types = BS_KERNEL.registered_types ();
+    for (size_t i = 0, cnt = types.size (); i < cnt; ++i)
+      {
+        const type_descriptor &td = types[i].td_;
+        type_descriptor parent_td = td.parent_td ();
+        while (!parent_td.is_nil ())
+          {
+            if (parent_td.stype_ == event_td.stype_)
+              {
+                register_keyword (td.short_descr_, keyword_handler (&this_t::event_handler));
+                break;
+              }
+
+            parent_td = parent_td.parent_td ();
+          }
+      }
+    */
   }
   
   

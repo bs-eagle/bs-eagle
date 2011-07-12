@@ -176,6 +176,31 @@ private:
             info.so_offset    = 0;
             info.krop_offset  = 1;
           }
+
+          static void
+          place_sof2_data (sp_array_item_t dst, scal_placement_info &info, const sp_array_item_t src)
+          {
+            array_item_t &dst_array = *dst;
+            array_item_t &src_array = *src;
+            size_t size = dst->size () - src->size ();
+            for (size_t i = 0, cnt = src->size (); i < cnt; i += 2)
+              {
+                dst_array[size + i + 0] = src_array[i + 0];
+                dst_array[size + i + 1] = src_array[i + 1];
+              }
+
+            info.sp_step      = 3;
+            info.krp_step     = 3;
+            info.pcp_step     = 3;
+            info.so_step      = 2;
+            info.krop_step    = 2;
+            info.sp_offset    = 0;
+            info.krp_offset   = 1;
+            info.pcp_offset   = 2;
+            info.so_offset    = 0;
+            info.krop_offset  = 1;
+          }
+          
         };
 
     } // namespace data_placement

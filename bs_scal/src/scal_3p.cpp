@@ -7,6 +7,7 @@
 #include "bs_scal_stdafx.h"
 
 #include "scal_3p.h"
+#include "scal_2p_dummy.h"
 #include "scal_data_source.h"
 #include "scal_data_vector.h"
 #include "scale_arrays_placement_strategies.h"
@@ -55,6 +56,7 @@ namespace blue_sky
   scal_2p_data_holder::scal_2p_data_holder (bs_type_ctor_param param /* = NULL */)
   {
     data_ = BS_KERNEL.create_object (item_array_t::bs_type ());
+    scal_table_array.clear ();
   }
 
   scal_2p_data_holder::scal_2p_data_holder (const this_t& s)
@@ -86,7 +88,7 @@ namespace blue_sky
   }
 
   void
-  scal_2p_data_holder::add_spof (sp_array_item_t const &data, bool is_water)
+  scal_2p_data_holder::add_spof (sp_array_item_t const &data, t_long region_index, bool is_water)
   {
     BS_ASSERT ((data->size () % 4) == 0) (data->size ());
 
@@ -115,6 +117,58 @@ namespace blue_sky
         throw bs_exception ("scal_2p_data_holder::add_spof", "Could not compute residual saturation");
         // TODO: LOG
       }
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+    if (scal_table_array.size ())
+      {
+        BS_ASSERT (region_index >= 0 && region_index < scal_table_array.size ());
+        t_int table_len = (t_int) data->size () / 4;
+        t_double const *data_array = data->data ();
+        
+        spv_double sp = BS_KERNEL.create_object (v_double::bs_type ()); 
+        spv_double so = BS_KERNEL.create_object (v_double::bs_type ()); 
+        spv_double krp = BS_KERNEL.create_object (v_double::bs_type ()); 
+        spv_double krop = BS_KERNEL.create_object (v_double::bs_type ()); 
+        spv_double pcp = BS_KERNEL.create_object (v_double::bs_type ()); 
+        sp->resize (table_len);
+        so->resize (table_len);
+        krp->resize (table_len);
+        krop->resize (table_len);
+        pcp->resize (table_len);
+        
+        t_double *sp_ = &(*sp)[0];
+        t_double *so_ = &(*so)[0];
+        t_double *krp_ = &(*krp)[0];
+        t_double *krop_ = &(*krop)[0];
+        t_double *pcp_ = &(*pcp)[0];
+        
+        for (t_long i = 0; i < table_len; i++)
+          {
+            sp_[i]   = data_array[i + 0];
+            so_[i]   = 1.0 - sp_[i];
+            krp_[i]  = data_array[i + 1];
+            krop_[i] = data_array[i + 2];
+            pcp_[i]  = is_water ? -data_array[i + 3] : data_array[i + 3];
+          }
+        
+        sp_table scal_table = scal_table_array[region_index]; 
+        if (is_water)
+          {
+            scal_table->add_col_vector (SCAL_TABLE_SP, "SW", sp);
+            scal_table->add_col_vector (SCAL_TABLE_SO, "SO", so);
+            scal_table->add_col_vector (SCAL_TABLE_KRP, "KRW", krp);
+            scal_table->add_col_vector (SCAL_TABLE_KROP, "KROW", krop);  
+            scal_table->add_col_vector (SCAL_TABLE_PCP, "PCW", pcp);
+          }
+        else
+          {
+            scal_table->add_col_vector (SCAL_TABLE_SP, "SG", sp);
+            scal_table->add_col_vector (SCAL_TABLE_SO, "SO", so);
+            scal_table->add_col_vector (SCAL_TABLE_KRP, "KRG", krp);
+            scal_table->add_col_vector (SCAL_TABLE_KROP, "KROG", krop);  
+            scal_table->add_col_vector (SCAL_TABLE_PCP, "PCG", pcp);
+          }      
+      }
+    ///////////////////////////////////////////////////////////////////////////////    
   }
 
   void
@@ -123,7 +177,7 @@ namespace blue_sky
     BS_ASSERT ((data->size () % 3) == 0) (data->size ());
 
     if (placement_info_.type == scal::data_placement::scal_data_placement_null ||
-        placement_info_.type == scal::data_placement::spfn_sof3)
+        placement_info_.type == scal::data_placement::spfn_sofX)
       {
         scal_region_info_t info;
         info.So_count   = -1;
@@ -132,12 +186,12 @@ namespace blue_sky
         info.sp_offset  = (int)data_->size ();
 
         data_->resize (data_->size () + data->size ());
-        placement_info_.type = scal::data_placement::spfn_sof3;
+        placement_info_.type = scal::data_placement::spfn_sofX;
 
         scal::data_placement::all_regions_t::place_spfn_data (data_, placement_info_, data, is_water);
         region_.push_back (info);
       }
-    else if (placement_info_.type == scal::data_placement::sof3_spfn)
+    else if (placement_info_.type == scal::data_placement::sofX_spfn)
       {
         BS_ASSERT (region_index < static_cast <t_long> (region_.size ())) (region_index) (region_.size ());
         scal_region_info_t &info = region_[region_index];
@@ -148,7 +202,7 @@ namespace blue_sky
         data_->resize (data_->size () + data->size ());
         scal::data_placement::all_regions_t::place_spfn_data (data_, placement_info_, data, is_water);
         scal_region_t const &new_region = get_region_from_info (region_index);
-        precalc (info, new_region, scal::data_placement::sof3_spfn, is_water);
+        precalc (info, new_region, scal::data_placement::sofX_spfn, is_water);
         if (!check (new_region, is_water))
           {
             //region_.pop_back ();
@@ -161,6 +215,48 @@ namespace blue_sky
       {
         BS_ASSERT (false && "UNSUPPORTED DATA PLACEMENT TYPE") (placement_info_.type);
       }
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+    if (scal_table_array.size ())
+      {
+        BS_ASSERT (region_index >= 0 && region_index < scal_table_array.size ());
+        t_int table_len = (t_int) data->size () / 3;
+        t_double const *data_array = data->data ();
+        
+        spv_double sp = BS_KERNEL.create_object (v_double::bs_type ()); 
+        spv_double krp = BS_KERNEL.create_object (v_double::bs_type ()); 
+        spv_double pcp = BS_KERNEL.create_object (v_double::bs_type ()); 
+        sp->resize (table_len);
+        krp->resize (table_len);
+        pcp->resize (table_len);
+        
+        t_double *sp_ = &(*sp)[0];
+        t_double *krp_ = &(*krp)[0];
+        t_double *pcp_ = &(*pcp)[0];
+        
+        for (t_long i = 0; i < table_len; i++)
+          {
+            sp_[i]   = data_array[i + 0];
+            krp_[i]  = data_array[i + 1];
+            pcp_[i]  = is_water ? -data_array[i + 2] : data_array[i + 2];
+          }
+        
+        sp_table scal_table = scal_table_array[region_index]; 
+        if (is_water)
+          {
+            scal_table->add_col_vector (SCAL_TABLE_SP, "SW", sp);
+            scal_table->add_col_vector (SCAL_TABLE_KRP, "KRW", krp);
+            scal_table->add_col_vector (SCAL_TABLE_PCP, "PCW", pcp);
+          }
+        else
+          {
+            scal_table->add_col_vector (SCAL_TABLE_SP, "SG", sp);
+            scal_table->add_col_vector (SCAL_TABLE_KRP, "KRG", krp);
+            scal_table->add_col_vector (SCAL_TABLE_PCP, "PCG", pcp);
+          }      
+      }
+    ///////////////////////////////////////////////////////////////////////////////    
+      
   }
 
   void
@@ -171,7 +267,7 @@ namespace blue_sky
     BS_ASSERT ((data->size () % 3) == 0) (data->size ());
 
     if (placement_info_.type == scal::data_placement::scal_data_placement_null ||
-        placement_info_.type == scal::data_placement::sof3_spfn)
+        placement_info_.type == scal::data_placement::sofX_spfn)
       {
         scal_region_info_t info;
         info.So_count   = (int)data->size () / 3;
@@ -180,12 +276,12 @@ namespace blue_sky
         info.sp_offset  = -1;
 
         data_->resize (data_->size () + info.So_count * 2);
-        placement_info_.type = scal::data_placement::sof3_spfn;
+        placement_info_.type = scal::data_placement::sofX_spfn;
 
         scal::data_placement::all_regions_t::place_sof3_data (data_, placement_info_, data, is_water);
         region_.push_back (info);
       }
-    else if (placement_info_.type == scal::data_placement::spfn_sof3)
+    else if (placement_info_.type == scal::data_placement::spfn_sofX)
       {
         BS_ASSERT (region_index < static_cast <t_long> (region_.size ())) (region_index) (region_.size ());
         scal_region_info_t &info = region_[region_index];
@@ -196,7 +292,7 @@ namespace blue_sky
         data_->resize (data_->size () + info.So_count * 2);
         scal::data_placement::all_regions_t::place_sof3_data (data_, placement_info_, data, is_water);
         scal_region_t const &new_region = get_region_from_info (region_index);
-        precalc (info, new_region, scal::data_placement::spfn_sof3, is_water);
+        precalc (info, new_region, scal::data_placement::spfn_sofX, is_water);
         if (!check (new_region, is_water))
           {
             //region_.pop_back ();
@@ -209,6 +305,124 @@ namespace blue_sky
       {
         BS_ASSERT (false && "UNSUPPORTED DATA PLACEMENT TYPE") (placement_info_.type);
       }
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+    if (scal_table_array.size ())
+      {
+        BS_ASSERT (region_index >= 0 && region_index < scal_table_array.size ());
+        t_int table_len = (t_int) data->size () / 3;
+        t_double const *data_array = data->data ();
+        
+        spv_double so = BS_KERNEL.create_object (v_double::bs_type ()); 
+        spv_double krop = BS_KERNEL.create_object (v_double::bs_type ()); 
+        so->resize (table_len);
+        krop->resize (table_len);
+        
+        t_double *so_ = &(*so)[0];
+        t_double *krop_ = &(*krop)[0];
+        
+        for (t_long i = 0; i < table_len; i++)
+          {
+            so_[i]   = data_array[i + 0];
+            krop_[i] = is_water ? data_array[i + 1] : data_array[i + 2];
+          }
+        
+        sp_table scal_table = scal_table_array[region_index]; 
+        if (is_water)
+          {
+            scal_table->add_col_vector (SCAL_TABLE_SO, "SO", so);
+            scal_table->add_col_vector (SCAL_TABLE_KROP, "KROW", krop);  
+          }
+        else
+          {
+            scal_table->add_col_vector (SCAL_TABLE_SO, "SO", so);
+            scal_table->add_col_vector (SCAL_TABLE_KROP, "KROG", krop);  
+          }      
+      }
+    ///////////////////////////////////////////////////////////////////////////////    
+      
+  }
+
+  void
+  scal_2p_data_holder::add_sof2 (sp_array_item_t const &data, t_long region_index, bool is_water)
+  {
+    typedef t_int   index_t;
+
+    BS_ASSERT ((data->size () % 2) == 0) (data->size ());
+
+    if (placement_info_.type == scal::data_placement::scal_data_placement_null ||
+        placement_info_.type == scal::data_placement::sofX_spfn)
+      {
+        scal_region_info_t info;
+        info.So_count   = (int)data->size () / 2;
+        info.Sp_count   = -1;
+        info.so_offset  = (int)data_->size ();
+        info.sp_offset  = -1;
+
+        data_->resize (data_->size () + data->size ());
+        placement_info_.type = scal::data_placement::sofX_spfn;
+
+        scal::data_placement::all_regions_t::place_sof2_data (data_, placement_info_, data);
+        region_.push_back (info);
+      }
+    else if (placement_info_.type == scal::data_placement::spfn_sofX)
+      {
+        BS_ASSERT (region_index < region_.size ()) (region_index) (region_.size ());
+        scal_region_info_t &info = region_[region_index];
+
+        info.So_count   = (int)data->size () / 2;
+        info.so_offset  = (int)data_->size ();
+
+        data_->resize (data_->size () + data->size ());
+        scal::data_placement::all_regions_t::place_sof2_data (data_, placement_info_, data);
+        scal_region_t const &new_region = get_region_from_info (region_index);
+        precalc (info, new_region, scal::data_placement::spfn_sofX, is_water);
+        if (!check (new_region, is_water))
+          {
+            //region_.pop_back ();
+            //data_.resize (data_.size () - info.So_count * 5);
+            throw bs_exception ("scal_2p_data_holder::add_sof2", "Could not compute residual saturation");
+            // TODO: LOG
+          }
+      }
+    else
+      {
+        BS_ASSERT (false && "UNSUPPORTED DATA PLACEMENT TYPE") (placement_info_.type);
+      }
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+    if (scal_table_array.size ())
+      {
+        BS_ASSERT (region_index >= 0 && region_index < scal_table_array.size ());
+        t_int table_len = (t_int) data->size () / 2;
+        t_double const *data_array = data->data ();
+        
+        spv_double so = BS_KERNEL.create_object (v_double::bs_type ()); 
+        spv_double krop = BS_KERNEL.create_object (v_double::bs_type ()); 
+        so->resize (table_len);
+        krop->resize (table_len);
+        
+        t_double *so_ = &(*so)[0];
+        t_double *krop_ = &(*krop)[0];
+        
+        for (t_long i = 0; i < table_len; i++)
+          {
+            so_[i]   = data_array[i + 0];
+            krop_[i] = data_array[i + 1];
+          }
+        
+        sp_table scal_table = scal_table_array[region_index]; 
+        if (is_water)
+          {
+            scal_table->add_col_vector (SCAL_TABLE_SO, "SO", so);
+            scal_table->add_col_vector (SCAL_TABLE_KROP, "KROW", krop);  
+          }
+        else
+          {
+            scal_table->add_col_vector (SCAL_TABLE_SO, "SO", so);
+            scal_table->add_col_vector (SCAL_TABLE_KROP, "KROG", krop);  
+          }      
+      }
+    ///////////////////////////////////////////////////////////////////////////////    
+      
   }
 
   bool
@@ -271,11 +485,33 @@ namespace blue_sky
         const scal_region_t &water_region = water_data->get_region ((int)i);
 
         item_t swc = water_region.Sp[0];
-        for (size_t j = 0, jcnt = gas_region.Sp.size (); j < jcnt; ++j)
+        for (size_t j = 0, jcnt = gas_region.So.size (); j < jcnt; ++j)
           {
             gas_region.So[(int)j] -= swc; // TODO: BUG:
           }
       }
+    ////////////////////////////////////////////////////////////////////
+    if (scal_table_array.size ())
+      {
+        BS_ASSERT (scal_table_array.size () == water_data->scal_table_array.size ());
+        t_long n_regions = scal_table_array.size ();
+        for (t_long i = 0; i < n_regions; i++)
+          {
+            sp_table water_scal_table = water_data->scal_table_array[i];
+            item_t swc = water_scal_table->get_value (0, SCAL_TABLE_SP);
+            
+            sp_table gas_scal_table = scal_table_array[i];
+            t_int so_table_len = gas_scal_table->get_n_rows (SCAL_TABLE_SO);
+            BS_ASSERT (so_table_len > 0);
+            t_double *so_ = gas_scal_table->get_col_ptr (SCAL_TABLE_SO);
+            for (t_int j = 0; j < so_table_len; j++)
+              {
+                so_[i] -= swc;
+              }
+          }
+      }
+    ////////////////////////////////////////////////////////////////////
+      
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -314,10 +550,16 @@ namespace blue_sky
     process_init (index_t i, const item_t *pressure, index_t sat_reg, const item_t *perm_array, item_t poro, item_t *sat, item_t *pc_limit) const = 0;
 
     virtual void
+    process_init_2 (const item_t *pressure, index_t sat_reg, item_t perm, item_t poro, item_t *sat, item_t *pc_limit) const = 0;
+
+    virtual void
     calc_pcp (index_t cell_index, item_t sat, index_t sat_reg, item_t cap, item_t &pcp) const = 0;
 
     virtual void
     calc_gas_water_zone (index_t cell_index, index_t sat_reg, const item_t *perm_array, item_t poro, item_t pcgw, item_t &sw, item_t &sg) const = 0;
+
+    virtual void
+    calc_gas_water_zone_2 (index_t sat_reg, const item_t perm, const item_t poro, item_t pcgw, item_t &sw, item_t &sg) const = 0;
 
     virtual bool
     is_water () const = 0;
@@ -530,6 +772,43 @@ namespace blue_sky
           pc_limit[i_s_g] = cap_max;
         }
     }
+    
+    void
+    process_init_2 (const item_t *pressure, index_t sat_reg, item_t perm,
+                    item_t poro, item_t *sat, item_t *pc_limit) const
+    {
+      item_t cap, cap_min, cap_max;
+      item_t mult;
+
+      BS_ASSERT (pressure);
+      BS_ASSERT (sat);
+      BS_ASSERT (pc_limit);
+
+      if (is_w)
+        {
+          BS_ASSERT (water_jfunc);
+          if (!water_jfunc)
+            throw bs_exception ("scal_3p::process_capillary", "water_jfunc is null");
+
+          cap = pressure[i_w] - pressure[i_o];
+
+          process_init_2 (cap, water_data->get_region (sat_reg), perm, poro, water_jfunc, sat[i_s_w], cap_max, cap_min);
+
+          pc_limit[i_s_w] = cap_min;
+        }
+      if (is_g)
+        {
+          BS_ASSERT (gas_jfunc);
+          if (!gas_jfunc)
+            throw bs_exception ("scal_3p::process_capillary", "gas_jfunc is null");
+
+          cap = pressure[i_g] - pressure[i_o];
+
+          process_init_2 (cap, gas_data->get_region (sat_reg), perm, poro, gas_jfunc, sat[i_s_g], cap_min, cap_max);
+
+          pc_limit[i_s_g] = cap_max;
+        }
+    }
 
     void
     calc_pcp (index_t cell_index, item_t sat, index_t sat_reg, item_t cap, item_t &pcp) const
@@ -609,6 +888,45 @@ namespace blue_sky
       sg = (1.0 - sw > 0.) ? 1.0 - sw : 0.;
     }
 
+    void
+    calc_gas_water_zone_2 (index_t sat_reg, const item_t perm, const item_t poro, item_t pcgw, item_t &sw, item_t &sg) const
+    {
+      std::vector <item_t> pcgw_table;
+      size_t n_table, i_table;
+      item_t sat_cell[2], cap_cell[2];
+      item_t sw_max, sw_min, swu, swl, s;
+
+      if (!(is_w && is_g))
+        {
+          bs_throw_exception ("Error: calculating gas-water transition zone");
+        }
+
+      const scal_region_t w_region = water_data->get_region (sat_reg);
+      const scal_region_t g_region = gas_data->get_region (sat_reg);
+
+      n_table = w_region.Sp.size ();
+      pcgw_table.resize (n_table, 0);
+
+      sw_max  = w_region.get_phase_sat_max ();
+      sw_min  = w_region.get_phase_sat_min ();
+
+      //complete gas-water cap pressure table
+      for (i_table = 0; i_table < n_table; i_table++)
+        {
+          sat_cell[i_s_w] = scale_not_table (sw_min, sw_min, sw_max, sw_max, w_region.Sp[i_table]);
+          sat_cell[i_s_g] = 1. - sat_cell[i_s_w];
+
+          process_capillary_2 (sat_cell, sat_reg, perm, poro, cap_cell, 0);
+
+          pcgw_table[i_table] = cap_cell[i_s_g] - cap_cell[i_s_w];
+        }
+
+      interpolate (pcgw_table, w_region.Sp, pcgw, sw, std::greater <item_t> ());
+
+      sg = (1.0 - sw > 0.) ? 1.0 - sw : 0.;
+    }
+
+
   protected:
     void
     process (index_t cell_index, const item_t *sat, index_t sat_reg, item_t *kr, item_t *d_kr) const
@@ -661,6 +979,26 @@ namespace blue_sky
           process_capillary (cell_index, sat[i_s_g], *gas_scale, gas_data->get_region (sat_reg), perm, poro, gas_jfunc, cap[i_s_g], d_cap ? &d_cap[i_s_g] : 0);
         }
     }
+
+    void
+    process_capillary_2 (const item_t *sat, index_t sat_reg, item_t perm, item_t poro, item_t *cap, item_t *d_cap) const
+    {
+      BS_ASSERT (sat);
+      BS_ASSERT (perm);
+      BS_ASSERT (cap);
+
+      if (is_w)
+        {
+          BS_ASSERT (water_jfunc);
+          process_capillary_2 (sat[i_s_w], water_data->get_region (sat_reg), perm, poro, water_jfunc, cap[i_s_w], d_cap ? &d_cap[i_s_w] : 0);
+        }
+      if (is_g)
+        {
+          BS_ASSERT (gas_jfunc);
+          process_capillary_2 (sat[i_s_g], gas_data->get_region (sat_reg), perm, poro, gas_jfunc, cap[i_s_g], d_cap ? &d_cap[i_s_g] : 0);
+        }
+    }
+
 
     void 
     process_water (index_t cell_index, const item_t *sat, index_t sat_reg, item_t &kr, item_t &d_kr, item_t &kro, item_t &d_kro) const
@@ -843,6 +1181,25 @@ namespace blue_sky
         }  
     }
 
+    void 
+    process_capillary_2 (item_t sat, const scal_region_t &region,
+      item_t perm, item_t poro, const sp_jfunction_t jfunc,
+      item_t &cap, item_t *d_cap) const
+    {
+      region.process_capillary_2 (sat, cap);
+
+      BS_ASSERT (jfunc);
+      if (jfunc->valid ())
+        {
+          item_t mult = 0;
+          if (perm > EPS_DIFF)
+            mult = jfunc->st_phase * pow (poro, jfunc->alpha) / pow (perm, jfunc->beta);
+          cap         = cap * mult;
+          if (d_cap)
+            *d_cap       = *d_cap * mult;
+        }
+    }
+
     void
     process_init (index_t cell_index, item_t cap, const scale_array_holder_t &scale_arrays,
       const scal_region_t &region,
@@ -871,6 +1228,34 @@ namespace blue_sky
 
       region.process_init (cell_index, cap, scale_arrays, sat);
     }
+    
+    void
+    process_init_2 (item_t cap, 
+                    const scal_region_t &region,
+                    item_t perm, item_t poro, 
+                    const sp_jfunction_t jfunc,
+                    item_t &sat, item_t &pc_first, item_t &pc_last) const
+    {
+      BS_ASSERT (jfunc);
+
+      pc_first = region.Pcp.front ();
+      pc_last = region.Pcp.back ();
+
+      if (jfunc->valid ())
+        {
+          item_t mult = 0;
+          if (perm > EPS_DIFF)
+            {
+              mult = jfunc->st_phase * pow (poro, jfunc->alpha) / pow (perm, jfunc->beta);
+              cap = cap / mult;
+            }
+          pc_first    *= mult;
+          pc_last     *= mult;
+        }
+
+      region.process_init_2 (cap, sat);
+    }
+    
 
     item_t
     get_water_oil_sat (const item_t *sat) const
@@ -953,6 +1338,13 @@ namespace blue_sky
   }
 
   void
+  scal_3p::process_init_2 (const item_t *pressure, index_t sat_reg, item_t perm, item_t poro,
+                           item_t *sat, item_t *pc_limit) const
+  {
+    impl_->process_init_2 (pressure, sat_reg, perm, poro, sat, pc_limit);
+  }
+
+  void
   scal_3p::calc_pcp (index_t cell_index, const item_t sat, index_t sat_reg, item_t cap, item_t &pcp) const
   {
     impl_->calc_pcp (cell_index, sat, sat_reg, cap, pcp);
@@ -964,6 +1356,14 @@ namespace blue_sky
   {
     impl_->calc_gas_water_zone (cell_index, sat_reg, perm_array, poro, pcgw, sw, sg);
   }
+  
+  void
+  scal_3p::calc_gas_water_zone_2 (index_t sat_reg, item_t perm, item_t poro, item_t pcgw,
+      item_t &sw, item_t &sg) const
+  {
+    impl_->calc_gas_water_zone_2 (sat_reg, perm, poro, pcgw, sw, sg);
+  }
+  
 
   void
   scal_3p::init (bool is_w, bool is_g, bool is_o, const phase_d_t &phase_d, const phase_d_t &sat_d, RPO_MODEL_ENUM r, bool is_scalecrs_)
@@ -1078,6 +1478,14 @@ namespace blue_sky
     delete impl_;
   }
 
+  void
+  scal_3p::init_from_scal(sp_scal_dummy_iface const &scal_data)
+  {
+	std::pair <BS_SP( table_iface), BS_SP( table_iface)> tables = scal_data->get_table();
+	water_data->init_regions_from_table(tables.first);
+	if (tables.second)
+		gas_data->init_regions_from_table(tables.second);
+  }
   //////////////////////////////////////////////////////////////////////////
   BLUE_SKY_TYPE_STD_CREATE (scale_array_holder);
   BLUE_SKY_TYPE_STD_COPY (scale_array_holder);
@@ -1098,7 +1506,130 @@ namespace blue_sky
     res &= BS_KERNEL.register_type (pd, scale_array_holder::bs_type ()); BS_ASSERT (res);
     res &= BS_KERNEL.register_type (pd, scal_2p_data_holder::bs_type ()); BS_ASSERT (res);
     res &= BS_KERNEL.register_type (pd, scal_3p::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, scal_2p_dummy::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, scal_3p_dummy::bs_type ()); BS_ASSERT (res);
+
 
     return res;
   }
+  
+  
+  void
+  scal_3p::init_scal_input_table_arrays (const t_long n_scal_regions_, 
+                                         bool is_oil, bool is_gas, bool is_water)
+    {
+      BS_ASSERT (n_scal_regions_ > 0);
+      n_scal_regions = n_scal_regions_;
+      
+      water_input_table.resize (n_scal_regions);
+      gas_input_table.resize (n_scal_regions);
+      oil_input_table.resize (n_scal_regions);
+      
+      for (t_long i = 0; i < n_scal_regions; ++i)
+        {
+          if (is_water && is_oil)
+            {
+              water_input_table[i] = BS_KERNEL.create_object ("table");
+            }
+          if (is_gas && is_oil)
+            {
+              gas_input_table[i] = BS_KERNEL.create_object ("table");
+            }  
+          
+          if (is_oil && (is_water || is_gas)) 
+            {
+              oil_input_table[i] = BS_KERNEL.create_object ("table");
+            }
+        }
+    }                                 
+  
+  BS_SP (table_iface) 
+  scal_3p::get_table (t_long index_scal_region, t_int scal_fluid_type) const
+    {
+      BS_ASSERT (index_scal_region >= 0 && index_scal_region < n_scal_regions);
+      BS_ASSERT (scal_fluid_type >= FI_PHASE_NULL && scal_fluid_type < FI_PHASE_TOT);
+    
+      if (scal_fluid_type == FI_PHASE_WATER)
+        {
+          return water_input_table[index_scal_region]; 
+        }
+      else if (scal_fluid_type == FI_PHASE_GAS)
+        {
+          return gas_input_table[index_scal_region]; 
+        }  
+      else 
+        {  
+          return oil_input_table[index_scal_region];
+        }     
+    }                                 
+
+  void 
+  scal_3p::init_scal_data_from_input_tables ()
+    {
+      BS_ASSERT (n_scal_regions > 0);
+      
+      get_water_data ()->init_table_array (n_scal_regions);
+      get_gas_data ()->init_table_array (n_scal_regions);
+      
+      for (t_long region_index = 0; region_index < n_scal_regions; ++region_index)
+        {
+          if (water_input_table[region_index].get ())
+            {
+              t_long n_cols_water = water_input_table[region_index]->get_n_cols ();
+              t_long n_rows_water = water_input_table[region_index]->get_n_rows ();
+              if (n_cols_water == SPOF_KEYWORD_COLUMNS)
+                {
+                  get_water_data ()->add_spof (water_input_table[region_index]->convert_to_array (n_rows_water, n_cols_water), region_index, true);
+                }
+              else 
+                {
+                  get_water_data ()->add_spfn (water_input_table[region_index]->convert_to_array (n_rows_water, n_cols_water), region_index, true);
+                  if (oil_input_table[region_index].get ())
+                    {
+                      t_long n_cols_oil = oil_input_table[region_index]->get_n_cols ();
+                      t_long n_rows_oil = oil_input_table[region_index]->get_n_rows ();
+                      if (n_cols_oil == SOF3_KEYWORD_COLUMNS)
+                        {
+                          get_water_data ()->add_sof3 (oil_input_table[region_index]->convert_to_array (n_rows_oil, n_cols_oil), region_index, true);
+                        }
+                      else 
+                        {
+                          get_water_data ()->add_sof2 (oil_input_table[region_index]->convert_to_array (n_rows_oil, n_cols_oil), region_index, true);
+                        }  
+                    }  
+                }  
+            }
+          
+          if (gas_input_table[region_index].get ())
+            {
+              t_long n_cols_gas = gas_input_table[region_index]->get_n_cols ();
+              t_long n_rows_gas = gas_input_table[region_index]->get_n_rows ();
+              if (n_cols_gas == SPOF_KEYWORD_COLUMNS)
+                {
+                  get_gas_data ()->add_spof (gas_input_table[region_index]->convert_to_array (n_rows_gas, n_cols_gas), region_index, false);
+                }
+              else 
+                {
+                  get_gas_data ()->add_spfn (gas_input_table[region_index]->convert_to_array (n_rows_gas, n_cols_gas), region_index, false);
+                  if (oil_input_table[region_index].get ())
+                    {
+                      t_long n_cols_oil = oil_input_table[region_index]->get_n_cols ();
+                      t_long n_rows_oil = oil_input_table[region_index]->get_n_rows ();
+                    
+                      if (oil_input_table[region_index]->get_n_cols () == SOF3_KEYWORD_COLUMNS)
+                        {
+                          get_gas_data ()->add_sof3 (oil_input_table[region_index]->convert_to_array (n_rows_oil, n_cols_oil), region_index, false);
+                        }
+                      else 
+                        {
+                          get_gas_data ()->add_sof2 (oil_input_table[region_index]->convert_to_array (n_rows_oil, n_cols_oil), region_index, false);
+                        }  
+                    }  
+                }  
+            }  
+        }
+      get_water_data ()->init_regions_from_tables ();
+      get_gas_data ()->init_regions_from_tables ();
+        
+    }  
 } // namespace blue_sky

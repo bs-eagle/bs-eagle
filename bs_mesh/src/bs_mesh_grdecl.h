@@ -57,6 +57,15 @@ namespace blue_sky
       int init_ext_to_int()
         {return wrapped.init_ext_to_int();};
 
+      //! init COORD & ZCORN via gen_coord_zcorn
+      void init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz) {
+	return wrapped.init_props(nx, ny, nz, dx, dy, dz);
+      }
+
+      //! init COORD & ZCORN directly
+      void init_props(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
+	return wrapped.init_props(nx, ny, coord, zcorn);
+      }
 
       ///////////////////////
       // ACCESS VARIABLES
@@ -176,8 +185,12 @@ namespace blue_sky
       boost::python::list calc_element_tops ()
       {return wrapped.calc_element_tops();};
 
-	
-	  boost::python::list calc_element_center ()
+      // same as calc_element_tops, but only return tops coordinates
+      spv_float calc_cells_vertices() {
+		  return wrapped.calc_cells_vertices();
+	  }
+
+      boost::python::list calc_element_center ()
       {return wrapped.calc_element_center();};
 
     
