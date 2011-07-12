@@ -10,9 +10,9 @@ env.Append (CPPPATH = [
     includes["bs_bos_core_base"],
     includes["bs_mtx"],
     includes["common_types"],
+	includes["bs_hdf5_storage"]
     ] 
     + includes["kernel"]
-    + includes["bs_hdf5_storage"]
     )
 
 libs = ["blue_sky", 
@@ -29,7 +29,7 @@ elif (build_kind == "release") :
     env.AppendUnique (LIBS = libs + boost_libs)
 
 env.AppendUnique (
-        LIBPATH = lib_path["hdf5"],
+        LIBPATH = ["hdf5"],
         CPPDEFINES = defines["bs_hdf5_storage"],
         LIBS = ["hdf5"]
         )
