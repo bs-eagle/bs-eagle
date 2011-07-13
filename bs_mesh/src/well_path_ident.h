@@ -11,7 +11,8 @@
 
 namespace blue_sky {
 
-spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float well_info);
+spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+	spv_float well_info, bool include_well_nodes = true);
 
 } 	// eof blue_sky
 

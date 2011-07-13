@@ -501,7 +501,9 @@ spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float z
 /*-----------------------------------------------------------------
  * implementation of main routine
  *----------------------------------------------------------------*/
-spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float well_info) {
+spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+	spv_float well_info, bool include_well_nodes)
+{
 	// calculate mesh nodes coordinates and muild initial trimesh
 	trimesh M;
 	spv_float tops;
@@ -559,7 +561,8 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 	);
 
 	// finalize intersection
-	A.append_wp_nodes();
+	if(include_well_nodes)
+		A.append_wp_nodes();
 
 	return A.export_1d();
 }
@@ -567,10 +570,12 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 /*-----------------------------------------------------------------
  * Python bindings
  *----------------------------------------------------------------*/
+BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl, well_path_ident, 5, 6)
+
 namespace python {
 
 void py_export_wpi() {
-	bp::def("well_path_ident", &well_path_ident);
+	bp::def("well_path_ident", &well_path_ident, well_path_ident_overl());
 }
 
 }
