@@ -238,11 +238,14 @@ struct well_hit_cell {
 	trim_iterator cell;
 	// depth along well in point of intersection
 	t_float md;
+	// cell facet
+	uint facet;
+
 
 	well_hit_cell() {}
 	well_hit_cell(const Point_3& where_, const wp_iterator& seg_,
-		const trim_iterator& cell_, t_float md_)
-		: where(where_), seg(seg_), cell(cell_), md(md_)
+		const trim_iterator& cell_, t_float md_, uint facet_)
+		: where(where_), seg(seg_), cell(cell_), md(md_), facet(facet_)
 	{}
 
 	// hit points ordered first by well segment
@@ -274,86 +277,109 @@ public:
 		: m_(mesh), wp_(wp), x_(X)
 	{}
 
+ /* nodes layout
+     *                             X
+     *                    0+-------+1
+     *                    /|     / |
+     *                  /  |   /   |
+     *               2/-------+3   |
+     *              Y |   4+--|----+5
+     *                |   /Z  |   /
+     *                | /     | /
+     *              6 /-------/7
+*/
+/*  facets layout (nodes - plane id)
+ *  0-1-2-3 - 0
+ *  0-1-4-5 - 1
+ *  4-5-6-7 - 2
+ *  2-3-6-7 - 3
+ *  0-2-4-6 - 4
+ *  1-3-5-7 - 5
+ *  inside cell - 6
+*/
+
 	void cell_tri_cover(cell_data& d) {
 		const t_float* V = d.V;
+		d.cover.resize(12);
+
 		// facet 0-1-2-3
 		// 3angle 0-1-3
-		d.cover.push_back(Triangle_3(
+		d.cover[0] = Triangle_3(
 			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
 			Point_3(V[X(1)], V[Y(1)], V[Z(1)]),
 			Point_3(V[X(3)], V[Y(3)], V[Z(3)])
-		));
+		);
 		// 3angle 0-2-3
-		d.cover.push_back(Triangle_3(
+		d.cover[1] = Triangle_3(
 			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
 			Point_3(V[X(2)], V[Y(2)], V[Z(2)]),
 			Point_3(V[X(3)], V[Y(3)], V[Z(3)])
-		));
+		);
 		// facet 0-1-4-5
 		// 3angle 0-1-5
-		d.cover.push_back(Triangle_3(
+		d.cover[2] = Triangle_3(
 			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
 			Point_3(V[X(1)], V[Y(1)], V[Z(1)]),
 			Point_3(V[X(5)], V[Y(5)], V[Z(5)])
-		));
+		);
 		// 3angle 0-4-5
-		d.cover.push_back(Triangle_3(
+		d.cover[3] = Triangle_3(
 			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
 			Point_3(V[X(4)], V[Y(4)], V[Z(4)]),
 			Point_3(V[X(5)], V[Y(5)], V[Z(5)])
-		));
+		);
 		// facet 4-5-6-7
 		// 3angle 4-5-7
-		d.cover.push_back(Triangle_3(
+		d.cover[4] = Triangle_3(
 			Point_3(V[X(4)], V[Y(4)], V[Z(4)]),
 			Point_3(V[X(5)], V[Y(5)], V[Z(5)]),
 			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
-		));
+		);
 		// 3angle 4-6-7
-		d.cover.push_back(Triangle_3(
+		d.cover[5] = Triangle_3(
 			Point_3(V[X(4)], V[Y(4)], V[Z(4)]),
 			Point_3(V[X(6)], V[Y(6)], V[Z(6)]),
 			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
-		));
+		);
 		// facet 2-3-6-7
 		// 3angle 2-3-7
-		d.cover.push_back(Triangle_3(
+		d.cover[6] = Triangle_3(
 			Point_3(V[X(2)], V[Y(2)], V[Z(2)]),
 			Point_3(V[X(3)], V[Y(3)], V[Z(3)]),
 			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
-		));
+		);
 		// 3angle 2-6-7
-		d.cover.push_back(Triangle_3(
+		d.cover[7] = Triangle_3(
 			Point_3(V[X(2)], V[Y(2)], V[Z(2)]),
 			Point_3(V[X(6)], V[Y(6)], V[Z(6)]),
 			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
-		));
+		);
 		// facet 0-2-4-6
 		// 3angle 0-2-6
-		d.cover.push_back(Triangle_3(
+		d.cover[8] = Triangle_3(
 			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
 			Point_3(V[X(2)], V[Y(2)], V[Z(2)]),
 			Point_3(V[X(6)], V[Y(6)], V[Z(6)])
-		));
+		);
 		// 3angle 0-4-6
-		d.cover.push_back(Triangle_3(
+		d.cover[9] = Triangle_3(
 			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
 			Point_3(V[X(4)], V[Y(4)], V[Z(4)]),
 			Point_3(V[X(6)], V[Y(6)], V[Z(6)])
-		));
+		);
 		// facet 1-3-5-7
 		// 3angle 1-3-7
-		d.cover.push_back(Triangle_3(
+		d.cover[10] = Triangle_3(
 			Point_3(V[X(1)], V[Y(1)], V[Z(1)]),
 			Point_3(V[X(3)], V[Y(3)], V[Z(3)]),
 			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
-		));
+		);
 		// 3angle 1-5-7
-		d.cover.push_back(Triangle_3(
+		d.cover[11] = Triangle_3(
 			Point_3(V[X(1)], V[Y(1)], V[Z(1)]),
 			Point_3(V[X(5)], V[Y(5)], V[Z(5)]),
 			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
-		));
+		);
 	}
 
 	double calc_md(wp_iterator& fish, const Point_3& target) const {
@@ -383,7 +409,8 @@ public:
 
 		// check that each triangle really intersects with given well segment
 		Segment_3 s = w.segment();
-		for(tri_iterator tri = c.cover.begin(), end = c.cover.end(); tri != end; ++tri) {
+		uint tri_count = 0;
+		for(tri_iterator tri = c.cover.begin(), end = c.cover.end(); tri != end; ++tri, ++tri_count) {
 			// test intersection
 			if(!CGAL::do_intersect(s, *tri)) continue;
 			// really do intersection
@@ -392,17 +419,20 @@ public:
 			if(const Point_3* xpoint = CGAL::object_cast< Point_3 >(&xres))
 				x_.insert(well_hit_cell(
 					*xpoint, well_fish, cell_fish,
-					calc_md(well_fish, *xpoint)
+					calc_md(well_fish, *xpoint),
+					tri_count >> 1
 			));
 			else if(const Segment_3* xseg = CGAL::object_cast< Segment_3 >(&xres)) {
 				// in rare 1% of segment lying on the facet, add begin and end of segment
 				x_.insert(well_hit_cell(
 					xseg->source(), well_fish, cell_fish,
-					calc_md(well_fish, xseg->source())
+					calc_md(well_fish, xseg->source()),
+					tri_count >> 1
 				));
 				x_.insert(well_hit_cell(
 					xseg->target(), well_fish, cell_fish,
-					calc_md(well_fish, xseg->target())
+					calc_md(well_fish, xseg->target()),
+					tri_count >> 1
 				));
 			}
 		}
@@ -433,7 +463,8 @@ public:
 				--px;
 			px = x_.insert(well_hit_cell(
 				Point_3(W[0], W[1], W[2]),
-				pw, px->cell, node_md
+				pw, px->cell, node_md,
+				6
 			)).first;
 		}
 		// well path doen't contain the end-point of trajectory
@@ -443,13 +474,14 @@ public:
 		W = pw->second.W;
 		x_.insert(well_hit_cell(
 			Point_3(W[4], W[5], W[6]),
-			pw, px->cell, W[7]
+			pw, px->cell, W[7],
+			6
 		));
 	}
 
 	spv_float export_1d() const {
 		spv_float res = BS_KERNEL.create_object(v_float::bs_type());
-		res->resize(x_.size() * 5);
+		res->resize(x_.size() * 6);
 		vf_iterator pr = res->begin();
 
 		for(intersect_path::const_iterator px = x_.begin(), end = x_.end(); px != end; ++px) {
@@ -461,6 +493,8 @@ public:
 			*pr++ = px->where.x();
 			*pr++ = px->where.y();
 			*pr++ = px->where.z();
+			// facet id
+			*pr++ = px->facet;
 		}
 
 		return res;
