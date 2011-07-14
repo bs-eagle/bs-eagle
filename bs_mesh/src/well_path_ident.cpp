@@ -106,7 +106,7 @@ typedef st_smart_ptr< cell_data > sp_cell_data;
 
 // storage for representing mesh
 typedef std::map< t_ulong, cell_data > trimesh;
-typedef typename trimesh::iterator trim_iterator;
+typedef trimesh::iterator trim_iterator;
 
 /*-----------------------------------------------------------------
  * well description
@@ -153,8 +153,8 @@ struct well_data {
 };
 
 typedef std::map< ulong, well_data > well_path;
-typedef typename well_path::iterator wp_iterator;
-typedef typename well_path::const_iterator cwp_iterator;
+typedef well_path::iterator wp_iterator;
+typedef well_path::const_iterator cwp_iterator;
 
 /*-----------------------------------------------------------------
  * Box description
