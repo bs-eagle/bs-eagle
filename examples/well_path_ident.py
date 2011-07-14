@@ -10,7 +10,7 @@ dy = np.array([cell_y], dtype='d') # Ly
 dz = np.array([cell_z], dtype='d') # Lz
 Nx = 50
 Ny = 50
-Nz = 1
+Nz = 10
 [c, z] = bm.mesh_grdecl.gen_coord_zcorn(Nx, Ny, Nz, dx, dy, dz)
 print 'Source mesh generated!'
 
@@ -33,8 +33,8 @@ W = np.c_[wx, wy, wz, md];
 print W
 
 # calc mesh and well intersection
-X = bm.well_path_ident(Nx, Ny, c, z, W.reshape([1, -1]))
+X = bm.well_path_ident(Nx, Ny, c, z, W.reshape([1, -1]), False)
 
 # write result to file
-np.savetxt('x.txt', X.reshape([-1, 5]), fmt = "%8.4f")
+np.savetxt('x.txt', X.reshape([-1, 6]), fmt = "%8.4f")
 
