@@ -489,6 +489,34 @@
 				</File>
 			</Filter>
 		</Filter>
+		<Filter
+			Name="well storage"
+			>
+			<File
+				RelativePath=".\src\well_storage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\well_storage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\well_storage_iface.h"
+				>
+			</File>
+			<Filter
+				Name="python"
+				>
+				<File
+					RelativePath=".\src\py_well_storage.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\include\py_well_storage.h"
+					>
+				</File>
+			</Filter>
+		</Filter>
 		<File
 			RelativePath=".\include\bs_bos_core_data_storage_stdafx.h"
 			>

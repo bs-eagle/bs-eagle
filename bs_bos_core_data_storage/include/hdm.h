@@ -39,6 +39,8 @@ namespace blue_sky {
       // read keyword file 
       void read_keyword_file(const std::string filename);
       
+      void test_well_storage ();
+      
       // ACCESS
       
       // keyword manager accessor

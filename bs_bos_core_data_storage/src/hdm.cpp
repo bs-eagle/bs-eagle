@@ -9,6 +9,20 @@
 
 #include "write_time_to_log.h"
 
+      #include <boost/multi_index_container.hpp>
+    #include <boost/multi_index/ordered_index.hpp>
+    #include <boost/multi_index/identity.hpp>
+    #include <boost/multi_index/member.hpp>
+    #include "boost/date_time/posix_time/posix_time.hpp"
+    
+    #include <iostream>
+
+    using namespace boost;
+    using namespace boost::multi_index;    
+    using namespace boost::posix_time;
+    using namespace boost::gregorian;
+    using namespace std;
+ 
 /////////////////////////////////////////////////////////////////////////////
 // You can add new variable just find next Words
 // for symple variable                  -- VAR_V
@@ -427,6 +441,177 @@ namespace blue_sky
       if (ntg_counter)
         BOSWARN (section::check_data, level::warning) << ntg_counter << " blocks will be set inactive because of NTG" << bs_end;
     }
+    
+ 
+     
+  void hdm::test_well_storage ()
+  {
+     struct well_info
+      {
+        std::string               name;
+        double  date;
+        
+        int i_params[20];
+        float f_params[20];
+        
+      };
+    
+    struct comp_date
+    {
+      bool operator()(const well_info& w1,const well_info& w2)const 
+      {
+        if (w1.name < w2.name)
+         return true;
+        else if (w1.name == w2.name)
+          return (w1.date < w2.date);
+        else
+          return false;
+      } // && w1.date < w2.date
+    }; 
+    
+    typedef multi_index_container<
+      well_info,
+      indexed_by<
+        ordered_unique<identity<well_info>, comp_date>,
+        ordered_non_unique<member<well_info, double, &well_info::date>>
+        //ordered_non_unique<member<well_info, int, &well_info::id>>
+      > 
+    > well_set;
+    
+    struct comp_name
+      {
+        bool operator()(std::string x,const well_info& w2)const{return x < w2.name;}
+
+        bool operator()(const well_info& w1,std::string x)const{return w1.name < x;}
+      };
+    
+    
+    
+    
+    well_set ws;
+    well_info *iw;
+    int i, j, k, n_wells, n_dates;
+    days dd(1);
+    char tmp[10];
+    std::vector <double> res_date;
+    std::vector <float> res_param;
+    
+    
+    //typedef well_set::index<name>::type employee_set_by_name;
+    
+    n_wells = 5000;
+    n_dates = 500;
+    
+    srand (555);
+    
+    printf ("Fill multiindex\n");
+    cout << "Fill started!"; 
+    std::pair<well_set::nth_index<0>::type::iterator, bool> res;
+    
+    iw = new well_info;
+    iw->name = "1";
+    iw->date = 2;
+    iw->i_params[0] = 500;
+    res = ws.insert (*iw);
+    printf ("Insert: %i\n", res.second);
+    
+    iw = new well_info;
+    iw->name = "1";
+    iw->date = 2;
+    iw->i_params[0] = 1500;
+    res = ws.insert (*iw);
+    printf ("Insert: %i\n", res.second);
+    
+    iw = new well_info;
+    iw->name = "1";
+    iw->date = 3;
+    iw->i_params[0] = 2500;
+    res = ws.insert (*iw);
+    printf ("Insert: %i\n", res.second);
+    
+    
+    /*
+    {  
+      write_time_to_log init_time("Fill!", "");
+      for (i = 0; i < n_wells; i++)
+        {
+          iw = new well_info;
+          sprintf(tmp, "%d", i);
+          iw->name = tmp;
+          for  (j = 0; j < n_dates; j++)
+            {
+              iw->date = rand () % n_wells;
+              
+              for  (k = 0; k < 20; k++)
+                {
+                  iw->i_params[k] = rand () % n_wells;
+                  iw->f_params[k] = rand () % n_wells * 1.5;
+                }
+              ws.insert (*iw);
+           }
+        }
+     }
+     
+    */
+    
+    const well_set::nth_index<0>::type& name_index = ws.get<0>();
+    const well_set::nth_index<1>::type& date_index = ws.get<1>();
+    well_set::nth_index<0>::type::iterator name_it, name_b, name_e;;
+    well_set::nth_index<1>::type::iterator date_it, date_b, date_e;
+     
+    int pi = 0;
+    float pf = 0.;
+    long long n = 0;
+      
+    {
+      write_time_to_log init_time("sum for T!", "");  
+      printf ("Calculating sum of param for given T\n");
+      date_b = date_index.lower_bound (333);
+      date_e = date_index.upper_bound (333);
+     
+      for (date_it = date_b; date_it != date_e; ++date_it)
+        {
+          //printf ("%s \n", date_it->name.c_str());
+          pi += date_it->i_params[15];
+          pf += date_it->f_params[10];
+          n++;
+        }
+    }
+    
+    printf ("Done %d iters: %d, %lf\n", n, pi, pf);
+    
+    pi = 0;
+    pf = 0;
+    
+    {
+      write_time_to_log init_time("Sum for name!", "");
+        
+      printf ("Done %d iters\n", n);
+      printf ("Calculating sum of param for given well name\n");
+      name_b = name_index.lower_bound ("1", comp_name());
+      name_e = name_index.upper_bound ("1", comp_name());
+      
+      n = distance(name_b, name_e);
+      res_date.reserve (n);
+      res_param.reserve (n);
+      printf ("Distance %d \n", n);
+      n = 0;
+      //printf ("%s %lf \n", name_b->name.c_str(), name_b->date);
+      //printf ("%s %lf \n", name_e->name.c_str(), name_e->date);
+      for (name_it = name_b; name_it != name_e; ++name_it)
+        {
+          pi += name_it->i_params[15];
+          pf += name_it->f_params[10];
+          res_date.push_back(name_it->date);
+          res_param.push_back(name_it->f_params[10]);
+          n++;
+          printf ("%s %lf %d\n", name_it->name.c_str(), name_it->date, name_it->i_params[0]);
+        }
+      printf ("Done %d iters\n", n);
+      printf ("Job finished\n");
+    }
+   
+  }
 
   //bs stuff
   BLUE_SKY_TYPE_STD_CREATE(hdm)

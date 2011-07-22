@@ -8,6 +8,7 @@
 #include "read_class.h"
 
 #include "py_hdm.h"
+#include "py_well_storage.h"
 #include "py_keyword_manager.h"
 #include "py_data_class.h"
 #include "py_read_class.h"
@@ -52,6 +53,7 @@ namespace {
     python::py_export_hdm ();
     python::py_export_idata ();
     python::export_keyword_manager();
+    python::py_export_well_storage();
   }
 }
 
