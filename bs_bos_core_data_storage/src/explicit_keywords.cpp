@@ -6,8 +6,8 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
-#ifdef BSPY_EXPORTING_PLUGIN
 #include "bs_bos_core_data_storage_stdafx.h"
+#ifdef BSPY_EXPORTING_PLUGIN
 #include <boost/python.hpp>
 #endif
 #include "explicit_keywords.hpp"
