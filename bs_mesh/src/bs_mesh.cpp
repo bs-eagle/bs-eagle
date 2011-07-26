@@ -71,6 +71,7 @@ void py_export_flux_connections();
 void py_export_czt();
 void py_export_wpi();
 
+void py_export_well_edit();
 }}
 
 /*-----------------------------------------------------------------
@@ -87,6 +88,7 @@ namespace {
     python::py_export_flux_connections ();
 	python::py_export_czt();
 	python::py_export_wpi();
+	python::py_export_well_edit();
   }
 }
 BLUE_SKY_INIT_PY_FUN
