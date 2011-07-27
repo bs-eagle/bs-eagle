@@ -38,6 +38,31 @@ class index3d
 
 };
 
+// mesh2d points from coord
+//spv_float mesh2d_from_coord(spv_float coord_, t_int Nx, t_int Ny)
+//{
+//    spv_float mesh2d;
+//    v_float& coord = *coord_;
+//    t_int i, j, n;
+//
+//    n = (Nx+1)*(Ny+1);
+//
+//    mesh2d = BS_KERNEL.create_object(v_float::bs_type());
+//    mesh2d->resize(3*n);
+//
+//    t_float *mesh;
+//    mesh = &(*mesh2d)[0];
+//
+//    for (i=0;i<n;i++)
+//    {
+//        for (j=0;j<2;j++)
+//            mesh[3*i+j] = coord[6*i+j];
+//        mesh[3*i+2] = 0;
+//    }
+//
+//    return mesh2d;
+//}
+
 // finds (x,y,z) coordinates of line & plane intersection point
 // plane is specified by points N1, N2 and vector (0,0,1)
 // line is specified by points M1, M2
@@ -116,8 +141,8 @@ bp::tuple make_projection(t_int ny, t_int nz,
     v_float& cross_z = *z_;
     v_int& indices = *indices_;
     v_int& faces = *faces_;
-    
-    
+
+
     t_int i, ii, j, n; 
     n = indices.size();
 
@@ -135,7 +160,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
     }
 
     printf("\n z_start = %d z_end = %d", z_start, z_end);
-    
+
     //////////////////////////////////////////////
 
     t_int n_points, n_z_points, n_l_points;
@@ -152,7 +177,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
     index3d my;
     t_int face_in, face_out;
 
-    point3d P[8], M[2], N[2], WP;
+    point3d P[8], M[2], WP;
     t_float z1, z2;
 
     int faces2corners[7][4] = { {0,1,2,3},
@@ -165,172 +190,123 @@ bp::tuple make_projection(t_int ny, t_int nz,
                               }; 
 
     int corners[8];
-    
+
     t_int index;
-    
-    t_float L = 0, l = 0, ll = 0, wL = 0, wl = 0;
+
+    t_float L = 0, l = 0, wL = 0, wl = 0;
 
     // for the first column of intersected cells
-   
+
     i = 0;
     ii = i+1;
-    
-       my_ind = indices[i];
-       ind_old = my_ind;
 
-       my = index3d(my_ind, ny ,nz);
+    my_ind = indices[i];
+    ind_old = my_ind;
 
-       printf("\n i=%d my_ind=%d x=%d y=%d z=%d", i, my_ind, my.x, my.y, my.z);
+    my = index3d(my_ind, ny ,nz);
 
-       //FIXME 
-       while (faces[ii] == 6 && ii<n-1)
-           ii ++;
+    printf("\n i=%d my_ind=%d x=%d y=%d z=%d", i, my_ind, my.x, my.y, my.z);
+
+    //FIXME 
+    while (faces[ii] == 6 && ii<n-1)
+       ii ++;
+
+    //well-cell intersection points
+    M[0].x = cross_x[i]; 
+    M[0].y = cross_y[i];
+    M[0].z = cross_z[i];
+    M[1].x = cross_x[ii]; 
+    M[1].y = cross_y[ii];
+    M[1].z = cross_z[ii];
+
+    // projection length
+    l = sqrt( (M[1].x-M[0].x)*(M[1].x-M[0].x) +  (M[1].y-M[0].y)*(M[1].y-M[0].y));
+    printf("\n l = %f", l);
+
+    //FIXME always add first well point
+    //{
+       printf("\n well point");
+       //WP.x = cross_x[i]; 
+       //WP.y = cross_y[i];
+       WP.z = cross_z[i];
+       //wl = sqrt( (WP.x-M[0].x)*(WP.x-M[0].x) +  (WP.y-M[0].y)*(WP.y-M[0].y));
+       //wL = L - l + wl;
+       //wpoints.push_back(WP.z);
+       wpoints.push_back(wL);
+       printf("\n L=%f l=%f wl=%f wL=%f \n", L, l, wl, wL);
+    //}
+
+    face_in = faces[i];
+    face_out = faces[ii];
+
+    corners[0] = faces2corners[face_in][0];
+    corners[1] = faces2corners[face_in][1];
+    corners[2] = faces2corners[face_in][2];
+    corners[3] = faces2corners[face_in][3];
+    corners[4] = faces2corners[face_out][0];
+    corners[5] = faces2corners[face_out][1];
+    corners[6] = faces2corners[face_out][2];
+    corners[7] = faces2corners[face_out][3];
+    //printf("\n %f %f %f %f %f %f", M[0].x, M[0].y, M[0].z, M[1].x, M[1].y, M[1].z);
+
+    //for the first cell in column
+    //find intersection of the cutting plane and left upper edge
+    // index = (my_ind.x; my_ind.y; z_start) ZYX
+
+    index = z_start + my.y*nz + my.x*nz*ny;
+    printf("\n index=%d", index);
+
+    // for face_in
+    if (face_in !=0 && face_in != 2 && face_in != 6)
+    {
        
-       //well-cell intersection points
-       M[0].x = cross_x[i]; 
-       M[0].y = cross_y[i];
-       M[0].z = cross_z[i];
-       M[1].x = cross_x[ii]; 
-       M[1].y = cross_y[ii];
-       M[1].z = cross_z[ii];
+       //FIXME dont calculate all 8 points, calculate as much as needed
+       //for (j=0;j<8;j++)
+       //{
+          //P[j].x = tops[8*3*index + 3*j];
+          //P[j].y = tops[8*3*index + 3*j + 1];
+          //P[j].z = tops[8*3*index + 3*j + 2];
+       //}
+       j = corners[0];
+       P[j].x = tops[8*3*index + 3*j];
+       P[j].y = tops[8*3*index + 3*j + 1];
+       P[j].z = tops[8*3*index + 3*j + 2];
+       
+       j = corners[1];
+       P[j].x = tops[8*3*index + 3*j];
+       P[j].y = tops[8*3*index + 3*j + 1];
+       P[j].z = tops[8*3*index + 3*j + 2];
+       
+       z1 = find_edge_point_z(M[0], M[1], P[corners[0]], P[corners[1]]);
 
-       // projection length
-       l = sqrt( (M[1].x-M[0].x)*(M[1].x-M[0].x) +  (M[1].y-M[0].y)*(M[1].y-M[0].y));
-       printf("\n l = %f", l);
-
-       //FIXME always add first well point
+    }
+    else
+    {
+       for (j=0;j<3;j++)
        {
-           printf("\n well point");
-           //WP.x = cross_x[i]; 
-           //WP.y = cross_y[i];
-           WP.z = cross_z[i];
-           //wl = sqrt( (WP.x-M[0].x)*(WP.x-M[0].x) +  (WP.y-M[0].y)*(WP.y-M[0].y));
-           //wL = L - l + wl;
-           wpoints.push_back(WP.z);
-           wpoints.push_back(wL);
-           printf("\n L=%f l=%f wl=%f wL=%f \n", L, l, wl, wL);
+          P[j].x = tops[8*3*index + 3*j];
+          P[j].y = tops[8*3*index + 3*j + 1];
+          P[j].z = tops[8*3*index + 3*j + 2];
        }
-
-       face_in = faces[i];
-       face_out = faces[ii];
-
-       corners[0] = faces2corners[face_in][0];
-       corners[1] = faces2corners[face_in][1];
-       corners[2] = faces2corners[face_in][2];
-       corners[3] = faces2corners[face_in][3];
-       corners[4] = faces2corners[face_out][0];
-       corners[5] = faces2corners[face_out][1];
-       corners[6] = faces2corners[face_out][2];
-       corners[7] = faces2corners[face_out][3];
-       //printf("\n %f %f %f %f %f %f", M[0].x, M[0].y, M[0].z, M[1].x, M[1].y, M[1].z);
+       z1 = find_point_z(P[0],P[1], P[2], M[0]);
+    }    
        
-       //for the first cell in column
-       //find intersection of the cutting plane and left upper edge
-       // index = (my_ind.x; my_ind.y; z_start) ZYX
+    points.push_back(z1);
+    points.push_back(L);
 
-       index = z_start + my.y*nz + my.x*nz*ny;
-       printf("\n index=%d", index);
-       
-       // for face_in
+    printf("\n z1 = %f L = %f", z1, L);
+
+
+    //for all cells in column
+    //find z-coordinates of intersection points of the cutting plane and left lower edges
+    //index = (my_ind.x; my_ind.y; z)
+
+    for (z=z_start; z<z_end+1; z++)
+    {
+       index = z + my.y*nz + my.x*nz*ny;
+
        if (face_in !=0 && face_in != 2 && face_in != 6)
        {
-           
-           //FIXME dont calculate all 8 points, calculate as much as needed
-           //for (j=0;j<8;j++)
-           //{
-              //P[j].x = tops[8*3*index + 3*j];
-              //P[j].y = tops[8*3*index + 3*j + 1];
-              //P[j].z = tops[8*3*index + 3*j + 2];
-           //}
-           j = corners[0];
-           P[j].x = tops[8*3*index + 3*j];
-           P[j].y = tops[8*3*index + 3*j + 1];
-           P[j].z = tops[8*3*index + 3*j + 2];
-           
-           j = corners[1];
-           P[j].x = tops[8*3*index + 3*j];
-           P[j].y = tops[8*3*index + 3*j + 1];
-           P[j].z = tops[8*3*index + 3*j + 2];
-           
-           z1 = find_edge_point_z(M[0], M[1], P[corners[0]], P[corners[1]]);
-
-       }
-       else
-       {
-           for (j=0;j<3;j++)
-           {
-              P[j].x = tops[8*3*index + 3*j];
-              P[j].y = tops[8*3*index + 3*j + 1];
-              P[j].z = tops[8*3*index + 3*j + 2];
-           }
-           z1 = find_point_z(P[0],P[1], P[2], M[0]);
-       }    
-           
-       points.push_back(z1);
-       points.push_back(L);
-
-       printf("\n z1 = %f L = %f", z1, L);
-
-       
-       //for all cells in column
-       //find z-coordinates of intersection points of the cutting plane and left lower edges
-       //index = (my_ind.x; my_ind.y; z)
-
-       for (z=z_start; z<z_end+1; z++)
-       {
-           index = z + my.y*nz + my.x*nz*ny;
-
-           if (face_in !=0 && face_in != 2 && face_in != 6)
-           {
-               //FIXME dont calculate all 8 points, calculate as much as needed
-               //for (j=0;j<8;j++)
-               //{
-               //   P[j].x = tops[8*3*index + 3*j];
-               //   P[j].y = tops[8*3*index + 3*j + 1];
-               //   P[j].z = tops[8*3*index + 3*j + 2];
-               //}
-               
-               j = corners[2];
-               P[j].x = tops[8*3*index + 3*j];
-               P[j].y = tops[8*3*index + 3*j + 1];
-               P[j].z = tops[8*3*index + 3*j + 2];
-               
-               j = corners[3];
-               P[j].x = tops[8*3*index + 3*j];
-               P[j].y = tops[8*3*index + 3*j + 1];
-               P[j].z = tops[8*3*index + 3*j + 2];
-
-               z2 = find_edge_point_z(M[0], M[1], P[corners[2]], P[corners[3]]);
-           }
-           else
-           {
-                //FIXME write function for z2 calc
-               for (j=4;j<7;j++)
-               {
-                  P[j].x = tops[8*3*index + 3*j];
-                  P[j].y = tops[8*3*index + 3*j + 1];
-                  P[j].z = tops[8*3*index + 3*j + 2];
-               }
-               z2 = find_point_z(P[4],P[5], P[6], M[0]);
-           }
-           points.push_back(z2);
-           points.push_back(L);
-           printf("\n z2 = %f L = %f", z2, L);
-       }
-
-       //for the first cell in column
-       //find intersection of the cutting plane and right upper edge
-       //index = (my_ind.x; my_ind.y; z_start) ZYX
-       
-       L += l;
-
-       index = z_start + my.y*nz + my.x*nz*ny;
-       printf("\n index=%d", index);
-       
-       // for face_out
-       if (face_out !=0 && face_out != 2)
-       {
-           
            //FIXME dont calculate all 8 points, calculate as much as needed
            //for (j=0;j<8;j++)
            //{
@@ -338,87 +314,111 @@ bp::tuple make_projection(t_int ny, t_int nz,
            //   P[j].y = tops[8*3*index + 3*j + 1];
            //   P[j].z = tops[8*3*index + 3*j + 2];
            //}
-           //
-           j = corners[4];
+           
+           j = corners[2];
            P[j].x = tops[8*3*index + 3*j];
            P[j].y = tops[8*3*index + 3*j + 1];
            P[j].z = tops[8*3*index + 3*j + 2];
            
-           j = corners[5];
+           j = corners[3];
            P[j].x = tops[8*3*index + 3*j];
            P[j].y = tops[8*3*index + 3*j + 1];
            P[j].z = tops[8*3*index + 3*j + 2];
-           
-           z1 = find_edge_point_z(M[0], M[1], P[corners[4]], P[corners[5]]);
 
-       //}
-       //else
-       //{
-       //    for (j=0;j<3;j++)
-       //    {
-       //       P[j].x = tops[8*3*index + 3*j];
-       //       P[j].y = tops[8*3*index + 3*j + 1];
-       //       P[j].z = tops[8*3*index + 3*j + 2];
-       //    }
-       //    z1 = find_point_z(P[0],P[1], P[2], M[1]);
-       //}
+           z2 = find_edge_point_z(M[0], M[1], P[corners[2]], P[corners[3]]);
+       }
+       else
+       {
+            //FIXME write function for z2 calc
+           for (j=4;j<7;j++)
+           {
+              P[j].x = tops[8*3*index + 3*j];
+              P[j].y = tops[8*3*index + 3*j + 1];
+              P[j].z = tops[8*3*index + 3*j + 2];
+           }
+           z2 = find_point_z(P[4],P[5], P[6], M[0]);
+       }
+       points.push_back(z2);
+       points.push_back(L);
+       printf("\n z2 = %f L = %f", z2, L);
+    }
+
+    //for the first cell in column
+    //find intersection of the cutting plane and right upper edge
+    //index = (my_ind.x; my_ind.y; z_start) ZYX
+
+    L += l;
+
+    index = z_start + my.y*nz + my.x*nz*ny;
+    printf("\n index=%d", index);
+
+    // for face_out
+    if (face_out !=0 && face_out != 2)
+    {
        
-       points.push_back(z1);
+       //FIXME dont calculate all 8 points, calculate as much as needed
+       //for (j=0;j<8;j++)
+       //{
+       //   P[j].x = tops[8*3*index + 3*j];
+       //   P[j].y = tops[8*3*index + 3*j + 1];
+       //   P[j].z = tops[8*3*index + 3*j + 2];
+       //}
+       //
+       j = corners[4];
+       P[j].x = tops[8*3*index + 3*j];
+       P[j].y = tops[8*3*index + 3*j + 1];
+       P[j].z = tops[8*3*index + 3*j + 2];
+       
+       j = corners[5];
+       P[j].x = tops[8*3*index + 3*j];
+       P[j].y = tops[8*3*index + 3*j + 1];
+       P[j].z = tops[8*3*index + 3*j + 2];
+       
+       z1 = find_edge_point_z(M[0], M[1], P[corners[4]], P[corners[5]]);
+
+    points.push_back(z1);
+    points.push_back(L);
+
+    printf("\n z1 = %f L = %f", z1, L);
+    }
+
+    //for all cells in column
+    //find z-coordinates of intersection points of the cutting plane and right lower edges
+    //index = (my_ind.x; my_ind.y; z)
+
+    for (z=z_start; z<z_end+1; z++)
+    {
+       index = z + my.y*nz + my.x*nz*ny;
+       if (face_out !=0 && face_out != 2)
+       {
+           
+           //FIXME dont calculate all 8 points, calculate as much as needed
+          // for (j=0;j<8;j++)
+          // {
+          //    P[j].x = tops[8*3*index + 3*j];
+          //    P[j].y = tops[8*3*index + 3*j + 1];
+          //    P[j].z = tops[8*3*index + 3*j + 2];
+          // }
+           
+           j = corners[6];
+           P[j].x = tops[8*3*index + 3*j];
+           P[j].y = tops[8*3*index + 3*j + 1];
+           P[j].z = tops[8*3*index + 3*j + 2];
+           
+           j = corners[7];
+           P[j].x = tops[8*3*index + 3*j];
+           P[j].y = tops[8*3*index + 3*j + 1];
+           P[j].z = tops[8*3*index + 3*j + 2];
+           
+           z2 = find_edge_point_z(M[0], M[1], P[corners[6]], P[corners[7]]);
+
+       points.push_back(z2);
        points.push_back(L);
 
-       printf("\n z1 = %f L = %f", z1, L);
+       printf("\n z2 = %f L = %f", z2, L);
        }
+    }
 
-       //for all cells in column
-       //find z-coordinates of intersection points of the cutting plane and right lower edges
-       //index = (my_ind.x; my_ind.y; z)
-
-       for (z=z_start; z<z_end+1; z++)
-       {
-           index = z + my.y*nz + my.x*nz*ny;
-           if (face_out !=0 && face_out != 2)
-           {
-               
-               //FIXME dont calculate all 8 points, calculate as much as needed
-              // for (j=0;j<8;j++)
-              // {
-              //    P[j].x = tops[8*3*index + 3*j];
-              //    P[j].y = tops[8*3*index + 3*j + 1];
-              //    P[j].z = tops[8*3*index + 3*j + 2];
-              // }
-               
-               j = corners[6];
-               P[j].x = tops[8*3*index + 3*j];
-               P[j].y = tops[8*3*index + 3*j + 1];
-               P[j].z = tops[8*3*index + 3*j + 2];
-               
-               j = corners[7];
-               P[j].x = tops[8*3*index + 3*j];
-               P[j].y = tops[8*3*index + 3*j + 1];
-               P[j].z = tops[8*3*index + 3*j + 2];
-               
-               z2 = find_edge_point_z(M[0], M[1], P[corners[6]], P[corners[7]]);
-
-           //}
-           //else
-           //{
-           //    //FIXME function to calculate z
-           //    for (j=4;j<7;j++)
-           //    {
-           //       P[j].x = tops[8*3*index + 3*j];
-           //       P[j].y = tops[8*3*index + 3*j + 1];
-           //       P[j].z = tops[8*3*index + 3*j + 2];
-           //    }
-           //    z2 = find_point_z(P[4],P[5], P[6], M[1]);
-           //}
-           points.push_back(z2);
-           points.push_back(L);
-
-           printf("\n z2 = %f L = %f", z2, L);
-           }
-       }
-    printf("\n ****************");
-    
     // for the other columns of intersected cells
 
     for (i=1;i<n-1;i++)
@@ -438,7 +438,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
            wl = sqrt( (WP.x-M[0].x)*(WP.x-M[0].x) +  (WP.y-M[0].y)*(WP.y-M[0].y));
            wL = L - l + wl;
            printf("\n L=%f l=%f wl=%f wL=%f \n", L, l, wl, wL);
-           wpoints.push_back(WP.z);
+           //wpoints.push_back(WP.z);
            wpoints.push_back(wL);
            continue;
        }
@@ -518,17 +518,6 @@ bp::tuple make_projection(t_int ny, t_int nz,
            
            z1 = find_edge_point_z(M[0], M[1], P[corners[4]], P[corners[5]]);
 
-       //}
-       //else
-       //{
-       //    for (j=0;j<3;j++)
-       //    {
-       //       P[j].x = tops[8*3*index + 3*j];
-       //       P[j].y = tops[8*3*index + 3*j + 1];
-       //       P[j].z = tops[8*3*index + 3*j + 2];
-       //    }
-       //    z1 = find_point_z(P[0],P[1], P[2], M[1]);
-       //}
            points.push_back(z1);
            points.push_back(L);
            printf("\n z1 = %f L = %f", z1, L);
@@ -564,18 +553,6 @@ bp::tuple make_projection(t_int ny, t_int nz,
                
                z2 = find_edge_point_z(M[0], M[1], P[corners[6]], P[corners[7]]);
 
-           //}
-           //else
-           //{
-           //    //FIXME function to calculate z
-           //    for (j=4;j<7;j++)
-           //    {
-           //       P[j].x = tops[8*3*index + 3*j];
-           //       P[j].y = tops[8*3*index + 3*j + 1];
-           //       P[j].z = tops[8*3*index + 3*j + 2];
-           //    }
-           //    z2 = find_point_z(P[4],P[5], P[6], M[1]);
-           //}
                points.push_back(z2);
                points.push_back(L);
                printf("\n z2 = %f L = %f", z2, L);
@@ -587,24 +564,8 @@ bp::tuple make_projection(t_int ny, t_int nz,
     // for the  last column of intersected cells
 
     i = n-1;
-   // always add last well point
-   //if (faces[i] == 6)
-   //{
-   //    printf("\n well point");
-   //    WP.x = cross_x[i]; 
-   //    WP.y = cross_y[i];
-   //    WP.z = cross_z[i];
-   //    wl = sqrt( (WP.x-M[0].x)*(WP.x-M[0].x) +  (WP.y-M[0].y)*(WP.y-M[0].y));
-   //    wL = L - l + wl;
-   //    wpoints.push_back(WP.z);
-   //    wpoints.push_back(wL);
-   //    printf("\n L=%f l=%f wl=%f wL=%f \n", L, l, wl, wL);
-   //}
-   //else
-   {
-       wpoints.push_back(M[1].z);
-       wpoints.push_back(L);
-   }
+       //wpoints.push_back(M[1].z);
+    wpoints.push_back(L);
 
     if (faces[i] == 0 || faces[i] == 2 || faces[i] == 6)
     {
@@ -685,6 +646,7 @@ namespace blue_sky { namespace python {
  
 void py_export_well_edit() {
     def("make_projection", &make_projection);
+    //def("mesh2d_from_coord", &mesh2d_from_coord);
 }
 
 }} 	// eof blue_sky::python
