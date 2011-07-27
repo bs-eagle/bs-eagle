@@ -185,7 +185,9 @@ namespace blue_sky
                                     bool is_oil, bool is_gas, bool is_water);
       //! return input scal table for defined region and fluid type
       virtual BS_SP (table_iface)
-      get_table (t_long index_scal_region, t_int scal_fluid_type) const;
+      get_table (t_int scal_fluid_type, t_long index_scal_region) const;
+      
+      std::list <BS_SP (table_iface)> get_tables (t_long index_scal_region) const;
       
       virtual void 
       init_scal_data_from_input_tables ();

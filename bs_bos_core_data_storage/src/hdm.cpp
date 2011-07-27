@@ -70,7 +70,8 @@ namespace blue_sky
     this->reader = BS_KERNEL.create_object(FRead::bs_type());
     this->data = BS_KERNEL.create_object(idata::bs_type());
     this->km = BS_KERNEL.create_object(keyword_manager::bs_type());
-    this->scal_3p_ = BS_KERNEL.create_object ("scal_3p");
+    
+    this->pvt_3p_ = BS_KERNEL.create_object ("pvt_3p");
     this->event_manager_ = BS_KERNEL.create_object ("event_manager");
   }
 
@@ -78,13 +79,66 @@ namespace blue_sky
   {
     *this = src;
   }
-  
+ 
   void
-  hdm::init()
+  hdm::init_fluids(t_int n_scal_regions, t_int n_pvt_regions)
+  {
+    int n_phases; 
+    
+    pvt_3p_->init_pvt_arrays (n_pvt_regions, data->props->get_b("oil_phase"),
+                                             data->props->get_b("water_phase"),
+                                             data->props->get_b("gas_phase"));
+    
+    n_phases = data->props->get_b("oil_phase");
+    n_phases += data->props->get_b("water_phase");
+    n_phases += data->props->get_b("gas_phase");
+    if (n_phases > 1)
+      {
+        this->scal_3p_ = BS_KERNEL.create_object ("scal_3p");
+        scal_3p_->init_scal_input_table_arrays (n_scal_regions, data->props->get_b("oil_phase"),
+                                                                data->props->get_b("water_phase"),
+                                                                data->props->get_b("gas_phase"));
+      }
+  }
+  
+   void
+  hdm::init(const std::string &model_name)
   {
     smart_ptr <hdm_iface, true> hdm = this;
+    keyword_params kp;
+    int n_pases;
     
+    kp.hdm = this;
+    data->h5_pool->open_file (model_name + ".h5", "/pool");
     km->init(hdm);
+    
+    
+    switch (data->props->get_i("mesh"))
+    {
+      case 0:
+        km->handle_keyword_reactor ("MESH_IJK", kp);
+        break;
+      case 1:
+        km->handle_keyword_reactor ("MESH_GRDECL", kp);
+        break;   
+          
+     default:
+        bs_throw_exception ("init: wrong mesh choice");  
+    }
+    
+    switch (data->props->get_i("init"))
+    {
+      case 0:
+        km->handle_keyword_reactor ("EXPLICIT_MODEL", kp);
+        break;
+      case 1:
+        km->handle_keyword_reactor ("EQUIL_MODEL", kp);
+        break;   
+          
+     default:
+        bs_throw_exception ("init: wrong mesh choice");  
+    }
+    
   }
   
   

@@ -414,6 +414,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\event_manager_keywords.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\src\py_event_base.cpp"
 					>
 				</File>
@@ -1369,10 +1373,6 @@
 			<Filter
 				Name="hdf5"
 				>
-				<File
-					RelativePath=".\src\results_hdf5_writer.cpp"
-					>
-				</File>
 				<File
 					RelativePath=".\include\results_hdf5_writer.h"
 					>

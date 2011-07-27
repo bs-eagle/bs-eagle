@@ -1,12 +1,14 @@
 #ifndef __PVT_3P_IFACE_H
 #define __PVT_3P_IFACE_H
 
+/*
 #include "pvt_base.h"
 #include "pvt_dead_oil.h"
 #include "pvt_gas.h"
 #include "pvt_oil.h"
 #include "pvt_water.h"
 #include "pvt_dummy_iface.h"
+*/
 
 namespace blue_sky
   {
@@ -20,6 +22,14 @@ namespace blue_sky
   /**
    * \brief pvt_base
    */
+   
+  class pvt_base;
+  class pvt_oil;
+  class pvt_dead_oil;
+  class pvt_gas;
+  class pvt_water;
+  
+   
   class BS_API_PLUGIN pvt_3p_iface : public objbase
     {
       public:
@@ -41,7 +51,7 @@ namespace blue_sky
         typedef std::vector< sp_pvt_gas >                 sp_pvt_gas_array_t;       //!< type for array of pvt_gas objects
         typedef std::vector< sp_pvt_water >               sp_pvt_water_array_t;     //!< type for array of pvt_water objects
 
-        typedef smart_ptr <pvt_dummy_iface, true>         sp_pvt_dummy_iface;
+        //typedef smart_ptr <pvt_dummy_iface, true>         sp_pvt_dummy_iface;
         /**
          * \brief destructor
          */
@@ -65,20 +75,22 @@ namespace blue_sky
         virtual sp_pvt_water_array_t &
         get_pvt_water_array () = 0;
 
+		    /*
 		    virtual void
 		    init_from_pvt(const sp_pvt_dummy_iface &pvt,
 		                  bool is_oil, bool is_gas, bool is_water,
 					            t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals) = 0;
+			  */
 
         virtual std::list <BS_SP (table_iface)>
-        get_table (t_long index_pvt_region) const = 0;
+        get_tables (t_long index_pvt_region) const = 0;
 
-        void
+        virtual void
         init_pvt_arrays (const t_long n_pvt_regions_, 
-                         bool is_oil, bool is_gas, bool is_water);
+                         bool is_oil, bool is_gas, bool is_water) = 0;
         
         virtual BS_SP (table_iface)
-				get_table (t_long index_pvt_region, t_long pvt_fluid_type) const = 0;	 
+				get_table (t_long pvt_fluid_type, t_long index_pvt_region) const = 0;	 
 
         //! get density data to fill in
         virtual spv_float 

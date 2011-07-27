@@ -6,6 +6,7 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
+#include "bs_mesh_stdafx.h"
 #include "well_path_ident.h"
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>

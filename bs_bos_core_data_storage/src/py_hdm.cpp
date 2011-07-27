@@ -14,11 +14,15 @@ namespace python {
 
   PY_EXPORTER (hdm_exporter, default_exporter)
     //.add_property ("data", get_data <T, strategy_t>)
+    .def("init_fluids", &T::init_fluids)
     .def("init", &T::init)
     .def("read_keyword_file", &T::read_keyword_file)
     .def("get_pool", &T::get_pool)
     .def("get_reader", &T::get_reader)
     .def("get_mesh", &T::get_mesh)
+    .def("get_scal", &T::get_scal)
+    .def("get_pvt", &T::get_pvt)
+    .def("get_prop", &T::get_prop)
     .def("get_keyword_manager", &T::get_keyword_manager)
   PY_EXPORTER_END;
 

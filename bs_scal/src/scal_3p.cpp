@@ -1543,8 +1543,22 @@ namespace blue_sky
         }
     }                                 
   
+  std::list <BS_SP (table_iface)>
+  scal_3p::get_tables (t_long index_scal_region) const
+    {
+      BS_ASSERT (index_scal_region >= 0 && index_scal_region < n_scal_regions);
+      std::list<BS_SP( table_iface)> tables;
+      
+      if (water_input_table[index_scal_region])
+        tables.push_back (water_input_table[index_scal_region]);
+      if (gas_input_table[index_scal_region])
+        tables.push_back (gas_input_table[index_scal_region]);
+      
+      return tables;
+    } 
+        
   BS_SP (table_iface) 
-  scal_3p::get_table (t_long index_scal_region, t_int scal_fluid_type) const
+  scal_3p::get_table (t_int scal_fluid_type, t_long index_scal_region = 0) const
     {
       BS_ASSERT (index_scal_region >= 0 && index_scal_region < n_scal_regions);
       BS_ASSERT (scal_fluid_type >= FI_PHASE_NULL && scal_fluid_type < FI_PHASE_TOT);

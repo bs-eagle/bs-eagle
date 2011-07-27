@@ -13,6 +13,7 @@
 #include "rs_mesh_iface.h"
 #include "read_class.h"
 #include "scal_3p_iface.hpp"
+#include "pvt_3p_iface.h"
 #include "init_model_iface.hpp"
 #include "event_manager_iface.hpp"
 
@@ -33,8 +34,11 @@ namespace blue_sky {
 
     public:
     
+      // initialize fluids
+      void init_fluids(t_int n_scal_regions, t_int n_pvt_regions);
+      
       // initialize data manager
-      void init();
+      void init(const std::string &model_name);
       
       // read keyword file 
       void read_keyword_file(const std::string filename);
@@ -62,6 +66,8 @@ namespace blue_sky {
       t_double get_darcy_constant () {return ph_const.darcy_constant;};
 
       BS_SP (scal_3p_iface) get_scal () { return scal_3p_; }
+      
+      BS_SP (pvt_3p_iface) get_pvt () { return pvt_3p_; }
 
       BS_SP (init_model_iface) get_init_model () { return init_model_; }
 
@@ -87,6 +93,7 @@ namespace blue_sky {
       sp_km_t                   km;                         //!< keyword manager
       sp_mesh_iface_t           mesh;                       //!< mesh
       BS_SP (scal_3p_iface)     scal_3p_;
+      BS_SP (pvt_3p_iface)      pvt_3p_;
       BS_SP (init_model_iface)  init_model_;
       BS_SP (event_manager_iface) event_manager_;
       locale_keeper             lkeeper;

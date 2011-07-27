@@ -257,6 +257,7 @@ namespace blue_sky
       }
   }
   
+/*  
   void
   pvt_3p::init_pvt_arrays (const t_long n_pvt_regions_, 
                            const sp_pvt_dummy_iface_array_t &pvt_data,
@@ -356,7 +357,8 @@ namespace blue_sky
           pvt_water_array[i]->build (atm_p, min_p, max_p, n_intervals);
       }
   }
-
+*/
+  /*
   void
   pvt_3p::init_from_pvt(const sp_pvt_dummy_iface &pvt,
 		                bool is_oil, bool is_gas, bool is_water,
@@ -370,6 +372,8 @@ namespace blue_sky
 					 atm_p, min_p, max_p, n_intervals);
   }
 
+  */
+  
   BS_SP (pvt_dead_oil) 
   pvt_3p::get_pvt_oil (const t_long index_pvt_region) const
   {
@@ -392,7 +396,7 @@ namespace blue_sky
   }
 
   std::list <BS_SP( table_iface)>
-  pvt_3p::get_table (t_long index_pvt_region) const
+  pvt_3p::get_tables (t_long index_pvt_region = 0) const
   {
     BS_ASSERT (index_pvt_region >= 0 && index_pvt_region < n_pvt_regions);
     
@@ -404,12 +408,18 @@ namespace blue_sky
     
     BS_SP (table_iface) density_table = BS_KERNEL.create_object ("table");
     density_table->init (1, 3);
-    density_table->set_value (0, 0, pvt_oil_->get_surface_density ());
-    density_table->set_value (0, 1, pvt_water_->get_surface_density ());
-    density_table->set_value (0, 2, pvt_gas_->get_surface_density ());
+    if (pvt_oil_)
+      density_table->set_value (0, 0, pvt_oil_->get_surface_density ());
+    if (pvt_water_)
+      density_table->set_value (0, 1, pvt_water_->get_surface_density ());
+    if (pvt_gas_)
+      density_table->set_value (0, 2, pvt_gas_->get_surface_density ());
     
-    tables.push_back (pvt_oil_->get_pvt_input_table ());
-    tables.push_back (pvt_water_->get_pvt_input_table ());
+    if (pvt_oil_)
+      tables.push_back (pvt_oil_->get_pvt_input_table ());
+    if (pvt_water_)
+      tables.push_back (pvt_water_->get_pvt_input_table ());
+    if (pvt_gas_)
     tables.push_back (pvt_gas_->get_pvt_input_table ());
     tables.push_back (density_table);
     return tables;

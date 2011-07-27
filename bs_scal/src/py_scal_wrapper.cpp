@@ -40,7 +40,9 @@ namespace blue_sky
       .add_property ("gas_data",         &T::get_gas_data)
       .add_property ("water_jfunction",  &T::get_water_jfunction, &T::set_water_jfunction)
       .add_property ("gas_jfunction",    &T::get_gas_jfunction, &T::set_gas_jfunction)
+    .def ("init_tables", &T:: init_scal_input_table_arrays)
 	  .def ("init_from_scal", &T::init_from_scal)
+	  .def ("get_table", &T::get_tables)
     PY_EXPORTER_END;
     
     PY_EXPORTER (scal_dummy_exporter, default_exporter)
@@ -74,7 +76,8 @@ namespace blue_sky
       base_exporter<jfunction, jfunction_exporter>::export_class ("jfunction");
       base_exporter<scale_array_holder, scale_array_holder_exporter>::export_class ("scale_arrays");
       base_exporter<scal_2p_data_holder, scal_data_holder_exporter>::export_class ("scal_data");
-      base_exporter<scal_3p, scal_3p_exporter>::export_class ("scal_3p");
+      base_exporter<scal_3p_iface, default_exporter>::export_class ("scal_3p_iface");
+      class_exporter<scal_3p, scal_3p_iface, scal_3p_exporter>::export_class ("scal_3p");
       
       base_exporter <scal_dummy_iface, scal_dummy_exporter>::export_class ("scal_dummy_iface");
       class_exporter<scal_2p_dummy, scal_dummy_iface, scal_dummy_exporter>::export_class ("scal_2p_dummy");

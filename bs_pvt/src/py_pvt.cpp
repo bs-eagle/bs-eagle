@@ -40,7 +40,8 @@ namespace python    {
     PY_EXPORTER_END;
 
 	PY_EXPORTER (pvt_3p_exporter, default_exporter)
-	  .def ("init_from_pvt", &T::init_from_pvt)
+	  .def ("init_pvt_arrays", &T::init_pvt_arrays)
+	  .def ("get_table", &T::get_tables)
 	PY_EXPORTER_END;
 
   void

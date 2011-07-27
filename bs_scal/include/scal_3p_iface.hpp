@@ -180,6 +180,12 @@ namespace blue_sky
       const phase_d_t &   sat_d,
       RPO_MODEL_ENUM      rpo_model, 
       bool                is_scalecrs_ = false) = 0;
+    
+    virtual void
+    init_scal_input_table_arrays (const t_long    n_scal_regions_, 
+                                  bool            is_oil, 
+                                  bool            is_gas, 
+                                  bool            is_water) = 0;
 
     virtual void
     set_water_jfunction (BS_SP (jfunction) jfunc) = 0;
