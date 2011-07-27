@@ -430,7 +430,7 @@ namespace blue_sky
   }
 
   h5_pair
-  h5_pool::open_data (std::string const &name)
+  h5_pool::open_data (std::string const &name, const int)
   {
     map_t::iterator it = h5_map.find (name);
     if (it == h5_map.end ())
