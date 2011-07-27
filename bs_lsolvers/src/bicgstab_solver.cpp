@@ -27,7 +27,7 @@ namespace blue_sky
     bicgstab_solver::bicgstab_solver (bs_type_ctor_param /*param*/)
       : lsolver_iface ()
     {
-      prop = BS_KERNEL.create_object (prop_t::bs_type ());
+      prop = BS_KERNEL.create_object ("prop");
       if (!prop)
         {
           bs_throw_exception ("Type (prop) not registered");
