@@ -273,17 +273,28 @@ namespace blue_sky
       return 0;
     }
   int 
-  gis::read_asc_info (std::vector<float> &v, std::string &s)
+  gis::read_asc_info (std::vector<float> &v, std::string &s, 
+                      int n, std::fstream &file)
     {
       namespace qi = boost::spirit::qi;
       using boost::spirit::ascii::space;
 
-      std::string::iterator begin = s.begin();
-      std::string::iterator end = s.end();
-
-      if (!qi::phrase_parse (begin, end, *qi::double_, space, v))
+      for (;;)
         {
-          std::cout << "Error: Parsing failed\n";
+          std::string::iterator begin = s.begin();
+          std::string::iterator end = s.end();
+          if (!qi::phrase_parse (begin, end, *qi::double_, space, v))
+            {
+              std::cout << "Error: Parsing failed\n";
+            }
+          if ((int)v.size () < n)
+            {
+              std::getline (file, s);
+            }
+          else
+            {
+              break;
+            }
         }
       //std::cout << v.size () << std::endl;
       return 0;
@@ -302,6 +313,8 @@ namespace blue_sky
       const std::string oth_sec = "~O";
       const std::string asc_sec = "~A";
       int param_counter = 0;
+      int row = 0;
+      std::vector <float> v;
 
       try 
         {
@@ -352,10 +365,10 @@ namespace blue_sky
                   sp_table->init (n, param_counter);
                   for (int i = 0; i < param_counter; ++i)
                     {
-                      ;
+                      std::string name = std::string ("param") 
+                                         + boost::lexical_cast<std::string> (i);
+                      sp_table->set_col_name (i, sp_prop->get_s (name));
                     }
-                  
-
                 }
               else
                 {
@@ -379,8 +392,13 @@ namespace blue_sky
                 }
               else if (state == 6)
                 {
-                  std::vector <float> v;
-                  read_asc_info (v, s);
+                  v.clear ();
+                  read_asc_info (v, s, param_counter, file);
+                  for (int j = 0; j < param_counter; ++j)
+                    {
+                      sp_table->set_value (row, j, v[j]);
+                    }
+                  ++row;
                 }
 
             }
