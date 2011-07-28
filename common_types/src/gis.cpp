@@ -10,18 +10,19 @@
 #include <iomanip>
 #include <iostream>
 #include <fstream>
+#include <vector>
 
-#include <boost/algorithm/string.hpp>
-//#include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/fusion/include/std_pair.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
+
+
 #include "bs_kernel.h"
 #include "gis.h"
 
 
-using namespace std;
 using namespace boost;
-namespace qi = boost::spirit::qi;
-namespace ascii = boost::spirit::ascii;
 
 #ifdef BSPY_EXPORTING_PLUGIN
 
@@ -45,33 +46,262 @@ namespace blue_sky
       
     }
   gis::gis (const gis& rhs) 
-    //    : bs_refcounter ()
+        : bs_refcounter ()
     {
       *this = rhs;
     }
-  int 
-  gis::read_ver_info (sp_prop_iface prop, const string &s)
+
+  namespace client
+  {
+    namespace qi = boost::spirit::qi;
+
+    typedef std::pair<std::string, std::string> pairs_type;
+
+    template <typename Iterator>
+    struct key_value_sequence_ordered 
+      : qi::grammar<Iterator, pairs_type()>
     {
-      using qi::str;
-      using qi::phrase_parse;
-      using ascii::space;
-      string s1, s2;
-      qi::parse (s.begin (), s.end(), str >> ':' >> str, s1, s2);
-      cout << "S1 " << s1 << " S2 "<< s2 <<endl
+        key_value_sequence_ordered()
+          : key_value_sequence_ordered::base_type(pair)
+        {
+            pair  =  key >> -(':' >> value);
+            key   =  *(qi::char_ - qi::char_(":"));
+            value = *qi::char_;
+        }
+
+        qi::rule<Iterator, std::pair<std::string, std::string>()> pair;
+        qi::rule<Iterator, std::string()> key, value;
+    };
+
+    template <typename Iterator>
+    struct key_value_sequence_ordered_dot 
+      : qi::grammar<Iterator, pairs_type()>
+    {
+        key_value_sequence_ordered_dot()
+          : key_value_sequence_ordered_dot::base_type(pair)
+        {
+            pair  =  key >> -('.' >> value);
+            key   =  *(qi::char_ - qi::char_("."));
+            value = *qi::char_;
+        }
+
+        qi::rule<Iterator, std::pair<std::string, std::string>()> pair;
+        qi::rule<Iterator, std::string()> key, value;
+    };
+  }
+
+
+
+  int 
+  gis::read_ver_info (sp_prop_iface prop, std::string &s)
+    {
+      namespace qi = boost::spirit::qi;
+
+      std::string::iterator begin = s.begin();
+      std::string::iterator end = s.end();
+
+      client::key_value_sequence_ordered<std::string::iterator> p;
+      client::key_value_sequence_ordered_dot<std::string::iterator> p_dot;
+      client::pairs_type v;
+      client::pairs_type v_dot;
+
+      if (!qi::parse(begin, end, p, v))
+        {
+          std::cout << "Error: Parsing failed\n";
+        }
+      else
+        {
+          //std::cout << v.first << "-----" <<v.second << std::endl;
+          std::string::iterator b_dot = v.first.begin();
+          std::string::iterator e_dot = v.first.end();
+          if (!qi::parse(b_dot, e_dot, p_dot, v_dot))
+            {
+              std::cout << "Error: Parsing failed\n";
+            }
+          else
+            {
+              trim (v_dot.first);
+              trim (v_dot.second);
+              //std::cout << v_dot.first << "-----" <<v_dot.second << std::endl;
+              prop->add_property_s ("", v_dot.first, v.second);
+              prop->set_s (v_dot.first, v_dot.second);
+            }
+           
+        }
+      return 0;
+
+    }
+  float str2float (std::string &s)
+    {
+      namespace qi = boost::spirit::qi;
+      float f;
+      std::string::iterator b_f = s.begin();
+      std::string::iterator e_f = s.end();
+
+      if (!qi::parse (b_f, e_f, qi::float_, f))
+        {
+          std::cout << "Error: Parsing failed\n";
+          return 0;
+        }
+      return f;
+    }
+
+  int 
+  gis::read_wel_info (sp_prop_iface prop, std::string &s)
+    {
+      namespace qi = boost::spirit::qi;
+
+      std::string::iterator begin = s.begin();
+      std::string::iterator end = s.end();
+
+      client::key_value_sequence_ordered<std::string::iterator> p;
+      client::key_value_sequence_ordered_dot<std::string::iterator> p_dot;
+      client::pairs_type v;
+      client::pairs_type v_dot;
+
+      if (!qi::parse(begin, end, p, v))
+        {
+          std::cout << "Error: Parsing failed\n";
+        }
+      else
+        {
+          //std::cout << v.first << "-----" <<v.second << std::endl;
+          std::string::iterator b_dot = v.first.begin();
+          std::string::iterator e_dot = v.first.end();
+          if (!qi::parse(b_dot, e_dot, p_dot, v_dot))
+            {
+              std::cout << "Error: Parsing failed\n";
+            }
+          else
+            {
+              trim (v_dot.first);
+              trim (v_dot.second);
+              trim (v.second);
+              if (v_dot.second == "")
+                {
+                  prop->add_property_s ("", v_dot.first, "");
+                  prop->set_s (v_dot.first, v.second);
+                }
+              else
+                {
+                  //std::cout << v_dot.first << "-----" <<v_dot.second << std::endl;
+                  prop->add_property_f (0, v_dot.first, v.second);
+                  prop->set_f (v_dot.first, str2float (v_dot.second));
+                }
+            }
+           
+        }
+      return 0;
+
+    }
+  int 
+  gis::read_par_info (sp_prop_iface prop, std::string &s)
+    {
+      namespace qi = boost::spirit::qi;
+
+      std::string::iterator begin = s.begin();
+      std::string::iterator end = s.end();
+
+      client::key_value_sequence_ordered<std::string::iterator> p;
+      client::key_value_sequence_ordered_dot<std::string::iterator> p_dot;
+      client::pairs_type v;
+      client::pairs_type v_dot;
+
+      if (!qi::parse(begin, end, p, v))
+        {
+          std::cout << "Error: Parsing failed\n";
+        }
+      else
+        {
+          //trim (v.first);
+          //trim (v.second);
+
+          std::string::iterator b_dot = v.first.begin();
+          std::string::iterator e_dot = v.first.end();
+
+          if (!qi::parse(b_dot, e_dot, p_dot, v_dot))
+            {
+              std::cout << "Error: Parsing failed\n";
+            }
+          else
+            {
+              trim (v_dot.first);
+              trim (v_dot.second);
+              if (v_dot.second == "")
+                {
+                  prop->add_property_s ("", v.first, "");
+                  prop->set_s (v.first, v.second);
+                }
+              else
+                {
+                  prop->add_property_f (0, v.first, "");
+                  prop->set_f (v.first, str2float (v.second));
+
+                }
+
+            }
+
+        }
+      return 0;
+    }
+  int 
+  gis::read_cur_info (sp_prop_iface prop, std::string &s, int n)
+    {
+      namespace qi = boost::spirit::qi;
+
+      std::string::iterator begin = s.begin();
+      std::string::iterator end = s.end();
+
+      client::key_value_sequence_ordered<std::string::iterator> p;
+      client::key_value_sequence_ordered_dot<std::string::iterator> p_dot;
+      client::pairs_type v;
+      client::pairs_type v_dot;
+
+      if (!qi::parse(begin, end, p, v))
+        {
+          std::cout << "Error: Parsing failed\n";
+        }
+      else
+        {
+          trim (v.first);
+          trim (v.second);
+          std::string name = std::string ("param") 
+                             + boost::lexical_cast<std::string> (n);
+          prop->add_property_s ("", name, v.second);
+          prop->set_s (name, v.first);
+        }
+      return 0;
+    }
+  int 
+  gis::read_asc_info (std::vector<float> &v, std::string &s)
+    {
+      namespace qi = boost::spirit::qi;
+      using boost::spirit::ascii::space;
+
+      std::string::iterator begin = s.begin();
+      std::string::iterator end = s.end();
+
+      if (!qi::phrase_parse (begin, end, *qi::double_, space, v))
+        {
+          std::cout << "Error: Parsing failed\n";
+        }
+      //std::cout << v.size () << std::endl;
+      return 0;
     }
 
   int 
   gis::read_from_las_file (const std::string &fname)
     {
-      fstream file;
-      string s;
+      std::fstream file;
+      std::string s;
       int state = 0;
-      const string ver_sec = "~V";
-      const string wel_sec = "~W";
-      const string par_sec = "~P";
-      const string cur_sec = "~C";
-      const string oth_sec = "~O";
-      const string asc_sec = "~A";
+      const std::string ver_sec = "~V";
+      const std::string wel_sec = "~W";
+      const std::string par_sec = "~P";
+      const std::string cur_sec = "~C";
+      const std::string oth_sec = "~O";
+      const std::string asc_sec = "~A";
+      int param_counter = 0;
 
       try 
         {
@@ -84,7 +314,7 @@ namespace blue_sky
         }
       for (;!file.eof ();)
         {
-          getline (file, s);
+          std::getline (file, s);
           trim (s);
           if (s[0] == '#')
             continue;
@@ -113,11 +343,24 @@ namespace blue_sky
               else if (s[1] == 'A') // well info
                 {
                   state = 6;
+                  double stop, start, step;
+                  int n;
+                  start = sp_prop->get_f ("STRT");
+                  stop = sp_prop->get_f ("STOP");
+                  step = sp_prop->get_f ("STEP"); 
+                  n = (int)((stop - start) / step);
+                  sp_table->init (n, param_counter);
+                  for (int i = 0; i < param_counter; ++i)
+                    {
+                      sp_table
+                    }
+                  
+
                 }
               else
                 {
                   //TODO unknown section
-                  cout << s << endl;
+                std::cout << s << std::endl;
                 }
               continue;
             }
@@ -125,6 +368,21 @@ namespace blue_sky
             {
               if (state == 1)
                 read_ver_info (sp_prop, s);
+              else if (state == 2)
+                read_wel_info (sp_prop, s);
+              else if (state == 3)
+                read_par_info (sp_prop, s);
+              else if (state == 4)
+                {
+                  read_cur_info (sp_prop, s, param_counter);
+                  ++param_counter;
+                }
+              else if (state == 6)
+                {
+                  std::vector <float> v;
+                  read_asc_info (v, s);
+                }
+
             }
 
 
@@ -133,13 +391,12 @@ namespace blue_sky
     }
 
 #ifdef BSPY_EXPORTING_PLUGIN
-  string 
+  std::string 
   gis::py_str () const
     {
-      stringstream s;
-      t_long i, j;
+      std::stringstream s;
       s << sp_prop->py_str () << "\n";
-      s << sp_table->py_str () << endl;
+      //s << sp_table->py_str () << std::endl;
       return s.str ();
     }
 #endif //BSPY_EXPORTING_PLUGIN

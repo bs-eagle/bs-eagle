@@ -74,7 +74,11 @@ namespace blue_sky
       
     protected:
 
-      int read_ver_info (sp_prop_iface prop, const std::string &s);
+      int read_ver_info (sp_prop_iface prop, std::string &s);
+      int read_wel_info (sp_prop_iface prop, std::string &s);
+      int read_par_info (sp_prop_iface prop, std::string &s);
+      int read_cur_info (sp_prop_iface prop, std::string &s, int n);
+      int read_asc_info (std::vector<float> &v, std::string &s);
       //int read_ver_info (sp_prop_iface prop, const string &s);
       //int read_ver_info (sp_prop_iface prop, const string &s);
       //int read_ver_info (sp_prop_iface prop, const string &s);
