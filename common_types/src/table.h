@@ -206,6 +206,22 @@ namespace blue_sky
       */
       virtual spv_double convert_to_array (const t_long n_rows, const t_long n_cols) const;
 
+      /** 
+       * @brief push back new row
+       * 
+       * @param v  -- <INPUT> row values
+       */
+      virtual void push_back (std::vector<t_double> &v)
+        {
+          if (v.size () != values.size ())
+            return;
+          t_long i, n;
+          n = v.size ();
+          for (i = 0; i < n; ++i)
+            {
+              values[i].push_back (v[i]);
+            }
+        }
 #ifdef BSPY_EXPORTING_PLUGIN
       /** 
        * @brief python print wrapper

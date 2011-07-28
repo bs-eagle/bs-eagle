@@ -143,6 +143,12 @@ class table_iface : public objbase
       */
       virtual spv_double convert_to_array (const t_long n_rows, const t_long n_cols) const = 0;
       
+      /** 
+       * @brief push back new row
+       * 
+       * @param v  -- <INPUT> row values
+       */
+      virtual void push_back (std::vector<t_double> &v) = 0;
 
 #ifdef BSPY_EXPORTING_PLUGIN
       /** 

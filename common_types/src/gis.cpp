@@ -51,230 +51,158 @@ namespace blue_sky
       *this = rhs;
     }
 
-  namespace client
-  {
-    namespace qi = boost::spirit::qi;
-
-    typedef std::pair<std::string, std::string> pairs_type;
-
-    template <typename Iterator>
-    struct key_value_sequence_ordered 
-      : qi::grammar<Iterator, pairs_type()>
+  void split_str (std::string &s,
+                  std::string &name,
+                  std::string &units,
+                  std::string &data,
+                  std::string &description)
     {
-        key_value_sequence_ordered()
-          : key_value_sequence_ordered::base_type(pair)
+      size_t colon_pos;
+      size_t dot_pos; 
+      size_t space_pos;
+
+      colon_pos = s.find_last_of (':');
+      description = s.substr (colon_pos + 1);
+      s.erase (colon_pos);
+      dot_pos = s.find ('.');
+      if (dot_pos == s.npos) // dot not found
         {
-            pair  =  key >> -(':' >> value);
-            key   =  *(qi::char_ - qi::char_(":"));
-            value = *qi::char_;
-        }
-
-        qi::rule<Iterator, std::pair<std::string, std::string>()> pair;
-        qi::rule<Iterator, std::string()> key, value;
-    };
-
-    template <typename Iterator>
-    struct key_value_sequence_ordered_dot 
-      : qi::grammar<Iterator, pairs_type()>
-    {
-        key_value_sequence_ordered_dot()
-          : key_value_sequence_ordered_dot::base_type(pair)
-        {
-            pair  =  key >> -('.' >> value);
-            key   =  *(qi::char_ - qi::char_("."));
-            value = *qi::char_;
-        }
-
-        qi::rule<Iterator, std::pair<std::string, std::string>()> pair;
-        qi::rule<Iterator, std::string()> key, value;
-    };
-  }
-
-
-
-  int 
-  gis::read_ver_info (sp_prop_iface prop, std::string &s)
-    {
-      namespace qi = boost::spirit::qi;
-
-      std::string::iterator begin = s.begin();
-      std::string::iterator end = s.end();
-
-      client::key_value_sequence_ordered<std::string::iterator> p;
-      client::key_value_sequence_ordered_dot<std::string::iterator> p_dot;
-      client::pairs_type v;
-      client::pairs_type v_dot;
-
-      if (!qi::parse(begin, end, p, v))
-        {
-          std::cout << "Error: Parsing failed ver 1\n";
+          name = s;
+          trim (name);
         }
       else
         {
-          //std::cout << v.first << "-----" <<v.second << std::endl;
-          std::string::iterator b_dot = v.first.begin();
-          std::string::iterator e_dot = v.first.end();
-          if (!qi::parse(b_dot, e_dot, p_dot, v_dot))
+          units = s.substr (dot_pos + 1);
+          s.erase (dot_pos);
+          name = s;
+          trim (name);
+          space_pos = units.find (' ');
+          if (space_pos != units.npos)
             {
-              std::cout << "Error: Parsing failed ver 2\n";
+              data = units.substr (space_pos + 1);
+              units.erase (space_pos);
+              trim(data);
             }
-          else
-            {
-              trim (v_dot.first);
-              trim (v_dot.second);
-              //std::cout << v_dot.first << "-----" <<v_dot.second << std::endl;
-              prop->add_property_s ("", v_dot.first, v.second);
-              prop->set_s (v_dot.first, v_dot.second);
-            }
-           
+          trim (units);
         }
-      return 0;
-
     }
-  float str2float (std::string &s)
+  template <class T>
+  T str2T (std::string &s)
     {
-      namespace qi = boost::spirit::qi;
-      float f;
-      std::string::iterator b_f = s.begin();
-      std::string::iterator e_f = s.end();
+      T f;
       trim (s);
-
-      if (!qi::parse (b_f, e_f, qi::float_, f))
+      try
         {
-          std::cout << "Error: Parsing failed\n" << s << std::endl;
-          return 0;
+          f = boost::lexical_cast<T>(s);
+        }
+      catch (boost::bad_lexical_cast &)
+        {
+          f = 0;
         }
       return f;
     }
-
   int 
-  gis::read_wel_info (sp_prop_iface prop, std::string &s)
+  gis::read_ver_info (sp_prop_iface prop, std::string &s)
     {
-      namespace qi = boost::spirit::qi;
+      std::string description;
+      std::string name;
+      std::string units;
+      std::string data;
 
-      std::string::iterator begin = s.begin();
-      std::string::iterator end = s.end();
-
-      client::key_value_sequence_ordered<std::string::iterator> p;
-      client::key_value_sequence_ordered_dot<std::string::iterator> p_dot;
-      client::pairs_type v;
-      client::pairs_type v_dot;
-
-      if (!qi::parse(begin, end, p, v))
+      split_str (s, name, units, data, description);
+      if (name == "VERS")
         {
-          std::cout << "Error: Parsing failed WEL 1\n";
+          prop->add_property_f (0, name, description);
+          prop->set_f (name, str2T<double>(data));
         }
       else
         {
-          //std::cout << v.first << "-----" <<v.second << std::endl;
-          std::string::iterator b_dot = v.first.begin();
-          std::string::iterator e_dot = v.first.end();
-          if (!qi::parse(b_dot, e_dot, p_dot, v_dot))
-            {
-              std::cout << "Error: Parsing failed wel 2\n";
-            }
-          else
-            {
-              trim (v_dot.first);
-              trim (v_dot.second);
-              trim (v.second);
-              if (v_dot.second == "")
-                {
-                  prop->add_property_s ("", v_dot.first, "");
-                  prop->set_s (v_dot.first, v.second);
-                }
-              else
-                {
-                  //std::cout << v_dot.first << "-----" <<v_dot.second << std::endl;
-                  prop->add_property_f (0, v_dot.first, v.second);
-                  prop->set_f (v_dot.first, str2float (v_dot.second));
-                }
-            }
-           
+          prop->add_property_s ("", name, description);
+          prop->set_s (name, data);
         }
       return 0;
-
     }
+
   int 
-  gis::read_par_info (sp_prop_iface prop, std::string &s)
+  gis::read_wel_info (sp_prop_iface prop, std::string &s, double ver)
     {
-      namespace qi = boost::spirit::qi;
+      std::string description;
+      std::string name;
+      std::string units;
+      std::string data;
 
-      std::string::iterator begin = s.begin();
-      std::string::iterator end = s.end();
-
-      client::key_value_sequence_ordered<std::string::iterator> p;
-      client::key_value_sequence_ordered_dot<std::string::iterator> p_dot;
-      client::pairs_type v;
-      client::pairs_type v_dot;
-
-      if (!qi::parse(begin, end, p, v))
+      split_str (s, name, units, data, description);
+      if (name == "STRT"
+          || name == "STOP"
+          || name == "STEP"
+          || name == "NULL")
         {
-          std::cout << "Error: Parsing failed PAR 1\n";
+          prop->add_property_f (0, name, units);
+          prop->set_f (name, str2T<double> (data));
+        }
+      else if (name == "LIC")
+        {
+          prop->add_property_i (0, name, description);
+          prop->set_i (name, str2T<int> (data));
         }
       else
         {
-          //trim (v.first);
-          //trim (v.second);
-
-          std::string::iterator b_dot = v.first.begin();
-          std::string::iterator e_dot = v.first.end();
-
-          if (!qi::parse(b_dot, e_dot, p_dot, v_dot))
+          if (ver <= 1.2 && data == "")
             {
-              std::cout << "Error: Parsing failed PAR 2\n";
+              prop->add_property_s ("", name, "");
+              prop->set_s (name, description);
             }
-          else
+          else if (data != "")
             {
-              trim (v_dot.first);
-              trim (v_dot.second);
-              if (v_dot.second == "")
-                {
-                  prop->add_property_s ("", v.first, "");
-                  prop->set_s (v.first, v.second);
-                }
-              else
-                {
-                  prop->add_property_f (0, v.first, "");
-                  prop->set_f (v.first, str2float (v.second));
-
-                }
-
+              prop->add_property_s ("", name, description);
+              prop->set_s (name, data);
             }
-
         }
       return 0;
     }
+
+  int 
+  gis::read_par_info (sp_prop_iface prop, std::string &s, double ver)
+    {
+      std::string description;
+      std::string name;
+      std::string units;
+      std::string data;
+
+      split_str (s, name, units, data, description);
+      if (ver <= 1.2 && data == "")
+        {
+          prop->add_property_s ("", name, "");
+          prop->set_s (name, description);
+        }
+      else if (data != "")
+        {
+          prop->add_property_s ("", name, description);
+          prop->set_s (name, data);
+        }
+      return 0;
+    }
+
   int 
   gis::read_cur_info (sp_prop_iface prop, std::string &s, int n)
     {
-      namespace qi = boost::spirit::qi;
+      std::string description;
+      std::string name;
+      std::string units;
+      std::string data;
 
-      std::string::iterator begin = s.begin();
-      std::string::iterator end = s.end();
+      std::string param = std::string ("param") 
+                         + boost::lexical_cast<std::string> (n);
+      split_str (s, name, units, data, description);
 
-      client::key_value_sequence_ordered<std::string::iterator> p;
-      client::key_value_sequence_ordered_dot<std::string::iterator> p_dot;
-      client::pairs_type v;
-      client::pairs_type v_dot;
-
-      if (!qi::parse(begin, end, p, v))
-        {
-          std::cout << "Error: Parsing failed CUR\n";
-        }
-      else
-        {
-          trim (v.first);
-          trim (v.second);
-          std::string name = std::string ("param") 
-                             + boost::lexical_cast<std::string> (n);
-          prop->add_property_s ("", name, v.second);
-          prop->set_s (name, v.first);
-        }
+      if (units != "")
+        name = name + " (" + units + ")";
+      prop->add_property_s ("", param, description);
+      prop->set_s (param, name);
       return 0;
     }
   int 
-  gis::read_asc_info (std::vector<float> &v, std::string &s, 
+  gis::read_asc_info (std::vector<t_double> &v, std::string &s, 
                       int n, std::fstream &file)
     {
       namespace qi = boost::spirit::qi;
@@ -290,6 +218,12 @@ namespace blue_sky
             }
           if ((int)v.size () < n)
             {
+              if (sp_prop->get_s ("WRAP") != "YES")
+                {
+                  std::cerr << "Error: wrong number of parameters " << v.size () 
+                            << " should be " << n << std::endl;
+                  return -1;
+                }
               std::getline (file, s);
             }
           else
@@ -314,8 +248,8 @@ namespace blue_sky
       const std::string oth_sec = "~O";
       const std::string asc_sec = "~A";
       int param_counter = 0;
-      int row = 0;
-      std::vector <float> v;
+      double ver = 0;
+      std::vector <t_double> v;
 
       try 
         {
@@ -340,6 +274,7 @@ namespace blue_sky
                 }
               else if (s[1] == 'W') // well info
                 {
+                  ver = sp_prop->get_f ("VERS");
                   state = 2;
                 }
               else if (s[1] == 'P') // well info
@@ -357,13 +292,7 @@ namespace blue_sky
               else if (s[1] == 'A') // well info
                 {
                   state = 6;
-                  double stop, start, step;
-                  int n;
-                  start = sp_prop->get_f ("STRT");
-                  stop = sp_prop->get_f ("STOP");
-                  step = sp_prop->get_f ("STEP"); 
-                  n = (int)((stop - start) / step);
-                  sp_table->init (n + 2, param_counter);
+                  sp_table->init (0, param_counter);
                   for (int i = 0; i < param_counter; ++i)
                     {
                       std::string name = std::string ("param") 
@@ -383,9 +312,9 @@ namespace blue_sky
               if (state == 1)
                 read_ver_info (sp_prop, s);
               else if (state == 2)
-                read_wel_info (sp_prop, s);
+                read_wel_info (sp_prop, s, ver);
               else if (state == 3)
-                read_par_info (sp_prop, s);
+                read_par_info (sp_prop, s, ver);
               else if (state == 4)
                 {
                   read_cur_info (sp_prop, s, param_counter);
@@ -394,12 +323,10 @@ namespace blue_sky
               else if (state == 6)
                 {
                   v.clear ();
-                  read_asc_info (v, s, param_counter, file);
-                  for (int j = 0; j < param_counter; ++j)
-                    {
-                      sp_table->set_value (row, j, v[j]);
-                    }
-                  ++row;
+                  int ret_code = read_asc_info (v, s, param_counter, file);
+                  if (ret_code)
+                    return -1;
+                  sp_table->push_back (v);
                 }
 
             }
