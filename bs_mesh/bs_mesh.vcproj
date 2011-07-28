@@ -469,6 +469,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\well_edit_tools.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\well_path_ident.cpp"
 				>
 			</File>

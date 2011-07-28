@@ -1,3 +1,5 @@
+#include "bs_mesh_stdafx.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
