@@ -236,7 +236,7 @@ namespace blue_sky
   calc_data_dims (std::string const &name, h5_pair &p, t_int n_dims, pool_dims_t const &pool_dims)
   {
     BOOST_STATIC_ASSERT (sizeof (t_long) >= sizeof (npy_intp));
-    BOOST_STATIC_ASSERT (sizeof (t_long) >= sizeof (hsize_t));
+    //BOOST_STATIC_ASSERT (sizeof (t_long) >= sizeof (hsize_t));
 
     p.n_dims = 0;
     p.size = 1;
@@ -387,7 +387,7 @@ namespace blue_sky
   h5_pool::declare_data (std::string const &name, hid_t dtype, void *value, int n_dims, npy_intp *dims, int var_dims)
   {
     BOOST_STATIC_ASSERT (sizeof (t_long) >= sizeof (npy_intp));
-    BOOST_STATIC_ASSERT (sizeof (t_long) >= sizeof (hsize_t));
+    //BOOST_STATIC_ASSERT (sizeof (t_long) >= sizeof (hsize_t));
 
     if (group_id <= 0)
       {
@@ -612,6 +612,32 @@ namespace blue_sky
         }
     }
 
+  std::string
+  h5_pool::get_data_type(const std::string &name) const
+  {
+    map_t::const_iterator i;
+    H5T_class_t dt;
+    
+    // FIXME: was <=
+    if (group_id < 0)
+      {
+        bs_throw_exception (boost::format ("Get data type %s: group not opened") % name);
+      }
+      
+    i = h5_map.find (name);  
+    if (i == h5_map.end ())
+      {
+        bs_throw_exception (boost::format ("Get data type %s: array not found") % name);
+      }
+    dt =  H5Tget_class (i->second.dtype);
+    if (dt == H5T_INTEGER)
+      return "int";
+    else if (dt == H5T_FLOAT)
+      return "float";
+    else
+      return "unknown";
+  }
+
 #ifdef BSPY_EXPORTING_PLUGIN
   std::string 
   h5_pool::py_str () const
@@ -677,7 +703,34 @@ namespace blue_sky
       items.append(i->first);
     return items;
   }
+  
+  void 
+  h5_pool::py_set_pool_dims (boost::python::list &dims)
+  {
+    t_long arr_dims[10];
+    t_int i, n_dims = len(dims);
     
+    if (n_dims > 10)
+      bs_throw_exception (boost::format ("py_set_pool_dims: too big dims number %d!") % n_dims);
+    
+    for (int i = 0; i < n_dims; ++i)
+      {
+        arr_dims[i] = boost::python::extract<int>(dims[i]);
+      }
+    set_pool_dims (arr_dims, n_dims);
+  }
+
+  boost::python::list 
+  h5_pool::py_get_pool_dims ()
+  {
+    boost::python::list dims;
+    
+    for (int i = 0; i < n_pool_dims; ++i)
+      {
+        dims.append(pool_dims[i]);
+      }
+    return dims;
+  }
 #endif //BSPY_EXPORTING_PLUGIN
 /////////////////////////////////BS Register
 /////////////////////////////////Stuff//////////////////////////
