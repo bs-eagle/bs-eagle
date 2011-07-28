@@ -72,24 +72,24 @@ namespace blue_sky {
   typedef multi_index_container<
     group_params,
     indexed_by<
-      ordered_unique<identity<group_params>, comp_date<NI_GROUP,NF_GROUP>>,
-      ordered_non_unique<member<group_params, t_double, &group_params::date>>
+      ordered_unique<identity<group_params>, comp_date<NI_GROUP,NF_GROUP> >,
+      ordered_non_unique<member<group_params, t_double, &group_params::date> >
     > 
   > group_set;
   
   typedef multi_index_container<
     well_params,
     indexed_by<
-      ordered_unique<identity<well_params>, comp_date<NI_WELL,NF_WELL>>,
-      ordered_non_unique<member<well_params, t_double, &well_params::date>>
+      ordered_unique<identity<well_params>, comp_date<NI_WELL,NF_WELL> >,
+      ordered_non_unique<member<well_params, t_double, &well_params::date> >
     > 
   > well_set;
   
   typedef multi_index_container<
     conng_params,
     indexed_by<
-      ordered_unique<identity<conng_params>, comp_date<NI_CONNG,NF_CONNG>>,
-      ordered_non_unique<member<conng_params, t_double, &conng_params::date>>
+      ordered_unique<identity<conng_params>, comp_date<NI_CONNG,NF_CONNG> >,
+      ordered_non_unique<member<conng_params, t_double, &conng_params::date> >
     > 
   > conng_set;
   
@@ -103,7 +103,7 @@ namespace blue_sky {
 
     public:
     
-      typedef std::map <std::string, std::set<std::string>> str_map;
+      typedef std::map <std::string, std::set<std::string> > str_map;
       
       virtual void add_group (group_params *params) = 0;
       virtual void add_well (well_params *params, std::string group) = 0;

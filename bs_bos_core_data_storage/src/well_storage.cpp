@@ -79,8 +79,8 @@ namespace blue_sky
   template <typename data_set, int ni, int nf>
   spv_double well_storage::get_dates (std::string name, data_set data)
   {
-    data_set::nth_index<0>::type& name_index = data.get<0>();
-    data_set::nth_index<0>::type::iterator name_it, name_b, name_e;
+    typename data_set::template nth_index<0>::type& name_index = data.get<0>();
+    typename data_set::template nth_index<0>::type::iterator name_it, name_b, name_e;
     spv_double res;
     t_double *res_data;
     long n = 0;
@@ -108,10 +108,10 @@ namespace blue_sky
   template <typename data_set_t, typename vector_t, int ni, int nf>
   blue_sky::smart_ptr< vector_t > well_storage::get_values (std::string name, data_set_t &data, int col, int type = 0)
   {
-    data_set_t::nth_index<0>::type& name_index = data.get<0>();
-    data_set_t::nth_index<0>::type::iterator name_it, name_b, name_e;
+    typename data_set_t::template nth_index<0>::type& name_index = data.get<0>();
+    typename data_set_t::template nth_index<0>::type::iterator name_it, name_b, name_e;
     blue_sky::smart_ptr< vector_t > res;
-    vector_t::value_type *res_data;
+    typename vector_t::value_type *res_data;
     long n = 0;
      
     name_b = name_index.lower_bound (name, comp_name<ni,nf>());
@@ -146,8 +146,8 @@ namespace blue_sky
   params_t*
   well_storage::get_params (data_set_t &data, std::string well, t_double date)
   {
-    data_set_t::nth_index<0>::type& name_index = data.get<0>();
-    data_set_t::iterator name_it, name_b, name_e;
+    typename data_set_t::template nth_index<0>::type& name_index = data.get<0>();
+    typename data_set_t::template iterator name_it, name_b, name_e;
      
     name_b = name_index.lower_bound (well, comp_name<ni,nf>());
     name_e = name_index.upper_bound (well, comp_name<ni,nf>());
@@ -209,8 +209,8 @@ namespace blue_sky
   void well_storage::set_params (data_set_t &data, std::string name, t_double date, blue_sky::smart_ptr< vector_t > vals, int type = 0, int operation = 0)
   {
     params_t *params;
-    vector_t::value_type *vals_data;
-    vector_t::value_type tmp;
+    typename vector_t::value_type *vals_data;
+    typename vector_t::value_type tmp;
     int i;
      
     params = get_params<params_t, data_set_t, ni, nf>(data, name, date);
