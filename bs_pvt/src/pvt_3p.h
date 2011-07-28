@@ -33,7 +33,8 @@ namespace blue_sky
 
         typedef std::vector<BS_SP(table_iface)>           sp_pvt_list_t;
         //typedef std::list<BS_SP(table_iface)>::iterator   sp_pvt_list_iter_t;
-        
+		typedef std::vector<double>						  stdv_double;
+
         virtual 
         ~pvt_3p ()   { } 
         
@@ -79,8 +80,9 @@ namespace blue_sky
         void
         init_from_pvt(const sp_pvt_dummy_iface &pvt,
                       bool is_oil, bool is_gas, bool is_water,
-										  t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals);
-        
+					  t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals,
+					  stdv_double density);
+ 
  
         void
         init_pvt_arrays (const t_long n_pvt_regions_, 

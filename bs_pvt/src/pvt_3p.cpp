@@ -276,7 +276,7 @@ namespace blue_sky
     pvt_gas_array.resize (n_pvt_regions_);
     pvt_water_array.resize (n_pvt_regions_);
 
-	sp_pvt_list_t pvt_dummy_list;
+	sp_pvt_list_t* pvt_dummy_list;
 
     for (size_t i = 0; i < n_pvt_regions_; i++)
       {
@@ -303,18 +303,18 @@ namespace blue_sky
           {			
             for (size_t i = 0; i<n_pvt_regions_; i++)
 			{
-				pvt_dummy_list = *pvt_data[i]->get_table_vector();
-				init_pvt_arr_helper::set_pvt_base(pvt_oil_array[i], pvt_dummy_list[0]);
-				delete &pvt_dummy_list;
+				pvt_dummy_list = pvt_data[i]->get_table_vector();
+				init_pvt_arr_helper::set_pvt_base(pvt_oil_array[i], (*pvt_dummy_list)[0]);
+				delete pvt_dummy_list;
 			}
           }
         else
           {
             for (size_t i = 0; i<n_pvt_regions_; i++)
 			{
-				pvt_dummy_list = *pvt_data[i]->get_table_vector();
-				init_pvt_arr_helper::set_pvt_base(pvt_oil_array[i], pvt_dummy_list[0]);
-				delete &pvt_dummy_list;
+				pvt_dummy_list = pvt_data[i]->get_table_vector();
+				init_pvt_arr_helper::set_pvt_base(pvt_oil_array[i], (*pvt_dummy_list)[0]);
+				delete pvt_dummy_list;
 			}
           }
       }
@@ -322,27 +322,27 @@ namespace blue_sky
     if (is_gas) 
       for (size_t i = 0; i<n_pvt_regions_; i++)
 	  {
-		pvt_dummy_list = *pvt_data[i]->get_table_vector();
-		init_pvt_arr_helper::set_pvt_base(pvt_gas_array[i], pvt_dummy_list[2]);
-		delete &pvt_dummy_list;
+		pvt_dummy_list = pvt_data[i]->get_table_vector();
+		init_pvt_arr_helper::set_pvt_base(pvt_gas_array[i], (*pvt_dummy_list)[2]);
+		delete pvt_dummy_list;
 	  }
     if (is_water)
       for (size_t i = 0; i<n_pvt_regions_; i++)
 	  {
-	    pvt_dummy_list = *pvt_data[i]->get_table_vector();
+	    pvt_dummy_list = pvt_data[i]->get_table_vector();
 		BS_SP(table_iface) new_table = BS_KERNEL.create_object("table");
-		int n_rows = pvt_dummy_list[1]->get_n_rows();
+		int n_rows = (*pvt_dummy_list)[1]->get_n_rows();
 		new_table->init(n_rows, 4);
 		for (size_t col = 0; col<4; col++)
 		{
-			new_table->set_col_name(col, pvt_dummy_list[1]->get_col_name(col));
+			new_table->set_col_name(col, (*pvt_dummy_list)[1]->get_col_name(col));
 			for (size_t row = 0; row < n_rows; row++)
 			{
-				new_table->set_value(row, col, pvt_dummy_list[1]->get_value(row, col));
+				new_table->set_value(row, col, (*pvt_dummy_list)[1]->get_value(row, col));
 			}
 		}
 		init_pvt_arr_helper::set_pvt_base(pvt_water_array[i], new_table);
-		delete &pvt_dummy_list;
+		delete pvt_dummy_list;
 	  }
 
     for (size_t i = 0; i < n_pvt_regions_; i++)
@@ -362,7 +362,8 @@ namespace blue_sky
   void
   pvt_3p::init_from_pvt(const sp_pvt_dummy_iface &pvt,
 		                bool is_oil, bool is_gas, bool is_water,
-					    t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals)
+					    t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals,
+						stdv_double density)
   {
 	 sp_pvt_dummy_iface_array_t pvt_array;
 	 pvt_array.push_back(pvt);
@@ -370,6 +371,13 @@ namespace blue_sky
 	 init_pvt_arrays(pvt_array.size(), pvt_array,
 		             is_oil, is_gas, is_water,
 					 atm_p, min_p, max_p, n_intervals);
+
+	 if (is_oil)
+		pvt_oil_array[0]->set_surface_density(density[0]);
+	 if (is_gas)
+		pvt_gas_array[0]->set_surface_density(density[1]);
+	 if (is_water)
+		pvt_water_array[0]->set_surface_density(density[2]);
   }
 
   */

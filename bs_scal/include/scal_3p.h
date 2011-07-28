@@ -176,8 +176,12 @@ namespace blue_sky
       void
       update_gas_data ();
 
-	    void
-	    init_from_scal(sp_scal_dummy_iface const &scal_data);
+	  void
+	  init_from_scal(sp_scal_dummy_iface const &scal_data,
+					 bool is_o, bool is_g, bool is_w,
+					 const phase_d_t &phase_d, const sat_d_t &sat_d,
+					 sp_jfunction_t water_jfunc,
+					 sp_jfunction_t gas_jfunc);
 	    
 	    //! init of input scal tables 
       void

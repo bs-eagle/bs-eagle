@@ -9,11 +9,10 @@
 
 #include "stdafx.h"
 //#include "equil_model.hpp"
-#include "data_class.h"
+#include "equil_model_depth.h"
 #include "rs_mesh_iface.h"
 #include "calc_model.h"
-#include "pvt_3p_iface.h"
-#include "scal_3p_iface.hpp"
+#include "jfunction.h"
 
 #define EQUIL_PI 0.000096816838
 
@@ -111,18 +110,19 @@ namespace blue_sky
 
   // initialize initial conditions
   void
-  calc_equil_vs_depth (t_long n_phases,
-                       bool is_o, bool is_g, bool is_w,
-                       stdv_long phase_d,
-                       t_long ds_w, t_long ds_g,
+  calc_equil_vs_depth (bool is_o, bool is_g, bool is_w,
+                       const phase_d_t &phase_d, const sat_d_t &sat_d,
+					   t_long n_phases, t_long phases, t_long sat_counter,
+					   t_long n_depth,
+                       //t_long ds_w, t_long ds_g,
                        const t_long n_eql,               //!< number of equil regions      
                        const stdv_long sat_regions,      //!< (n_eql) scal region number for current equil region 
                        const stdv_long pvt_regions,      //!< (n_eql) pvt region number for current equil region 
                        BS_SP (pvt_3p_iface) pvt_prop,    //!< PVT properties
                        BS_SP (scal_3p_iface) scal_prop,  //!< SCAL properties
                        spv_float equil,                 //!< main equil data (from EQUIL keyword)
-                       idata::vval_vs_depth &rsvd,
-                       idata::vval_vs_depth &pbvd,
+                       idata::vval_vs_depth *rsvd,
+                       idata::vval_vs_depth *pbvd,
                        const stdv_float min_depth,     //!< n_eql
                        const stdv_float max_depth,     //!< n_eql
                        const stdv_float perm,          //!< (n_eql) permeability
@@ -131,7 +131,8 @@ namespace blue_sky
                        stdv_double &saturation         //!< (n_phases * n_eql * n_depth)
                       )
   {
-    const t_long n_depth = 100, n_layer = 10;
+    const t_long n_layer = 10;
+	t_long ds_w, ds_g;
     t_long i_depth;
     t_long i_eql, i_pvt, i_sat = 0;
     t_double d_depth, h;
@@ -142,7 +143,9 @@ namespace blue_sky
     stdv_double depth, press, rs;      // array of depthes, phases pressure, gas oil ratios
     t_double p_oil, p_water, p_gas;
     t_double p_p[3], s_p[2], pc_limit[2];
-
+	
+    ds_w = sat_d[FI_PHASE_WATER];
+	ds_g = sat_d[FI_PHASE_GAS];
     t_long d_o = phase_d[FI_PHASE_OIL];
     t_long d_w = phase_d[FI_PHASE_WATER];
     t_long d_g = phase_d[FI_PHASE_GAS];
@@ -233,7 +236,7 @@ namespace blue_sky
                 equil_calc_pressure_2 (is_g, pvt_prop, EQUIL_PI, prev_p, cur_d, h, main_phase, i_pvt,
                                          is_g ? (*equil)[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
                                          is_g ? depth_goc : 0, is_g ? rs_dat : 0,
-                                         (is_g && rsvd.size ()) ? &rsvd[i_eql] : 0, (is_g && pbvd.size ()) ? &pbvd[i_eql] : 0,
+                                         (is_g && rsvd->size ()) ? &((*rsvd)[i_eql]) : 0, (is_g && pbvd->size ()) ? &(*pbvd)[i_eql] : 0,
                                          press[i_depth + (i_eql * n_phases + phase_d[main_phase]) * n_depth],
                                          rs.size () ? &rs[i_depth + i_eql * n_depth] : 0);
 
@@ -329,7 +332,7 @@ namespace blue_sky
                         equil_calc_pressure_2 (is_g, pvt_prop, EQUIL_PI, prev_p, cur_d, h, FI_PHASE_OIL, i_pvt,
                                                  is_g ? (*equil)[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
                                                  is_g ? depth_goc : 0, is_g ? rs_dat : 0,
-                                                 (is_g && rsvd.size ()) ? &rsvd[i_eql] : 0, (is_g && pbvd.size ()) ? &pbvd[i_eql] : 0,
+                                                 (is_g && rsvd->size ()) ? &(*rsvd)[i_eql] : 0, (is_g && pbvd->size ()) ? &(*pbvd)[i_eql] : 0,
                                                  press[i_depth + (i_eql * n_phases + phase_d[FI_PHASE_OIL]) * n_depth],
                                                  rs.size () ? &rs[i_depth + i_eql * n_depth] : 0);
 
@@ -375,7 +378,7 @@ namespace blue_sky
                     equil_calc_pressure_2 (is_g, pvt_prop, EQUIL_PI, prev_p, depth_woc, h, FI_PHASE_OIL, i_pvt,
                                              is_g ? (*equil)[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
                                              is_g ? depth_goc : 0, is_g ? rs_dat : 0,
-                                             (is_g && rsvd.size ()) ? &rsvd[i_eql] : 0, (is_g && pbvd.size ()) ? &pbvd[i_eql] : 0,
+                                             (is_g && rsvd->size ()) ? &(*rsvd)[i_eql] : 0, (is_g && pbvd->size ()) ? &(*pbvd)[i_eql] : 0,
                                              press_woc, &rs_temp);
                   }
                 else
@@ -461,7 +464,7 @@ namespace blue_sky
                     equil_calc_pressure_2 (is_g, pvt_prop, EQUIL_PI, prev_p, depth_goc, h, FI_PHASE_OIL, i_pvt,
                                              is_g ? (*equil)[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
                                              is_g ? depth_goc : 0, is_g ? rs_dat : 0,
-                                             (is_g && rsvd.size ()) ? &rsvd[i_eql] : 0, (is_g && pbvd.size ()) ? &pbvd[i_eql] : 0,
+                                             (is_g && rsvd->size ()) ? &(*rsvd)[i_eql] : 0, (is_g && pbvd->size ()) ? &(*pbvd)[i_eql] : 0,
                                              press_goc, &rs_temp);
                   }
                 else
@@ -523,7 +526,10 @@ namespace blue_sky
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////// CALCULATE Pp, Sp AND Rs IN CELLS /////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-    for (i_eql = 0; i_eql < n_eql; ++i_eql)
+    pressure.resize (n_phases * n_eql * n_depth, 0);
+    saturation.resize (n_phases * n_eql * n_depth, 0); 
+   
+	for (i_eql = 0; i_eql < n_eql; ++i_eql)
       {
         p_oil = 0.;
         p_water = 0.;
@@ -559,18 +565,20 @@ namespace blue_sky
             if (is_g)
               p_p[d_g] = p_gas = press_g[i_depth];
         
-            if (n_phases > 1)
+            if (phases > 1)
               {
                 scal_prop->process_init_2 (p_p, i_sat, perm[i_eql], poro[i_eql], s_p, pc_limit);
               }
             t_double s_water = s_p[ds_w];
-            t_double s_gas = s_p[ds_g];
+			t_double s_gas = 0.0;
+			if (is_g)
+				s_gas = s_p[ds_g];
 
             if (n_phases == 3 && (s_water + s_gas > 1.0))
               scal_prop->calc_gas_water_zone_2 (i_sat, perm[i_eql], poro[i_eql],
                                               p_gas - p_water, s_water, s_gas);
        
- 
+/* 
             //check pressures
             if (n_phases > 1)
               {
@@ -579,16 +587,14 @@ namespace blue_sky
                 if (is_g && (p_gas - p_oil) > pc_limit[ds_g])
                   p_oil = p_gas - pc_limit[ds_g];
               }
+*/            
             
-            
-            pressure.resize (n_phases * n_eql * n_depth, 0);
-            saturation.resize (n_phases * n_eql * n_depth, 0); 
             //set pressure
             if (n_phases > 1 || is_o)
               pressure[d_o * n_eql * n_depth + i_eql * n_depth + i_depth] = p_oil;
-            else if (is_w)
+            if (is_w)
               pressure[d_w * n_eql * n_depth + i_eql * n_depth + i_depth] = p_water;
-            else
+            if (is_g)
               pressure[d_g * n_eql * n_depth + i_eql * n_depth + i_depth] = p_gas;
         
             //set saturation
@@ -612,4 +618,111 @@ namespace blue_sky
       }
   }
 
-}
+
+  equil_model_depth::equil_model_depth(bs_type_ctor_param)
+  {
+  }
+
+  equil_model_depth::equil_model_depth(const equil_model_depth &x)
+	  :bs_refcounter(x)
+  {
+	  pressure = x.pressure;
+	  saturation = x.saturation;
+  }
+
+  void
+  equil_model_depth::py_calc_equil(bool is_o, bool is_g, bool is_w,
+		        BS_SP(scal_dummy_iface) scal_dummy, 
+				BS_SP(pvt_dummy_iface) pvt_dummy,
+				spv_float equil,
+				const stdv_float min_depth,
+				const stdv_float max_depth,
+				const stdv_float perm,
+				const stdv_float poro,
+				t_long n_depth,
+				stdv_double density,
+				sp_jfunction jfunc_water,
+				sp_jfunction jfunc_oil)
+  {
+	  t_long n_eql = 1;
+	  stdv_long sat_regions, pvt_regions;
+	  idata::vval_vs_depth val_dummy;
+	  BS_SP(pvt_3p) pvt_props = BS_KERNEL.create_object(pvt_3p::bs_type());
+	  BS_SP(scal_3p) scal_props = BS_KERNEL.create_object(scal_3p::bs_type());
+	  
+	  phase_d_t phase_d;
+	  sat_d_t sat_d;
+	  t_long n_phases = 0;
+      t_long phases = 0;
+	  t_long sat_counter = 0;    
+      if (is_w)
+      {
+        phase_d[0] = n_phases++;
+        phases |= 1 << FI_PHASE_WATER;
+      }
+      else 
+        phase_d[0] = -1;
+
+      if (is_g)
+      {
+        phase_d[1] = n_phases++;
+        phases |= 1 << FI_PHASE_GAS;
+      }
+      else 
+        phase_d[1] = -1;
+
+      if (is_o)
+      {
+        phase_d[2] = n_phases++;
+        phases |= 1 << FI_PHASE_OIL;
+      }
+      else 
+        phase_d[2] = -1;
+
+      for (size_t i = 0, sat_counter = 0; i < FI_PHASE_TOT; ++i)
+      {
+        if ((phases & (1 << i)) && (sat_counter < n_phases ))
+          sat_d[i] = sat_counter++;
+        else
+          sat_d[i] = -1;
+      }
+
+	  pvt_props->init_from_pvt(pvt_dummy, is_o, is_g, is_w,
+		                       1.0, 0.1, 1000.0, 100, density);
+	  scal_props->init_from_scal(scal_dummy, is_o, is_g, is_w, phase_d, sat_d,
+								jfunc_water, jfunc_oil);
+	  sat_regions.push_back(0);
+	  pvt_regions.push_back(0);
+
+	  calc_equil_vs_depth(is_o, is_g, is_w, 
+		                  phase_d, sat_d,
+						  n_phases, phases, sat_counter,
+						  n_depth,
+						  n_eql, 
+		                  sat_regions, pvt_regions, pvt_props, scal_props,
+		                  equil, 
+						  &val_dummy, &val_dummy, 
+						  min_depth, max_depth, 
+						  perm, poro, 
+						  this->pressure, 
+						  this->saturation);
+  }
+
+  stdv_double
+  equil_model_depth::get_pressure()
+  {
+	return pressure;
+  }
+
+  stdv_double
+  equil_model_depth::get_saturation()
+  {
+	return saturation;
+  }
+
+  BLUE_SKY_TYPE_STD_CREATE (equil_model_depth);
+  BLUE_SKY_TYPE_STD_COPY (equil_model_depth);
+
+  BLUE_SKY_TYPE_IMPL(equil_model_depth,  objbase, "equil_model_depth", "equil_model_depth", "equil_model_depth");
+
+} //namespace

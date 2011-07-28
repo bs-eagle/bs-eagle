@@ -152,7 +152,7 @@ namespace blue_sky {
         }  
     }
 
-	void init_regions_from_table(sp_table const &scal_table)
+	void init_regions_from_table(sp_table const &scal_table, bool is_water)
 	{
 		if (region_2_.size ())
 			return ;
@@ -168,15 +168,19 @@ namespace blue_sky {
         const t_int sp_table_len = scal_table->get_n_rows (SCAL_TABLE_SP);
         const t_int so_table_len = sp_table_len;  //scal_table->get_n_rows (SCAL_TABLE_SO);
         item_t *so_ = new item_t[so_table_len];
+		item_t *_pcp_ = new item_t[sp_table_len];
 		for (int i = 0; i < sp_table_len; i++)
+		{
 			so_[i] = 1.0 - sp_[i];
+			_pcp_[i]  = is_water ? - pcp_[i] : pcp_[i];
+		}
 
         region_2_.push_back (new scal_region_t (info,
                               data_vector_t (sp_,   1, sp_table_len),
                               data_vector_t (so_,   1, so_table_len),
                               data_vector_t (krp_,  1, sp_table_len),
                               data_vector_t (krop_, 1, so_table_len),
-                              data_vector_t (pcp_,  1, sp_table_len)
+                              data_vector_t (_pcp_,  1, sp_table_len)
                              ));
 	}
 

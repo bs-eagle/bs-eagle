@@ -64,6 +64,14 @@ namespace blue_sky
         is_valid = b;
       }
 
+	  void
+	  init_ab (item_t _st_phase, item_t _alpha, item_t _beta)
+	  {
+		  st_phase = _st_phase;
+		  alpha = _alpha;
+		  beta = _beta;
+	  }
+
       item_t get_perm (const item_t *perm_array) const
         {
           BS_ASSERT (is_valid);

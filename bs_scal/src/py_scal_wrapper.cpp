@@ -31,6 +31,8 @@ namespace blue_sky
       .add_property ("alpha",     &T::alpha)
       .add_property ("beta",      &T::beta)
       .add_property ("valid",     &T::valid)
+	  .def ("init", &T::init)
+	  .def ("init_ab", &T::init_ab)
     PY_EXPORTER_END;
 
     PY_EXPORTER (scal_3p_exporter, default_exporter)

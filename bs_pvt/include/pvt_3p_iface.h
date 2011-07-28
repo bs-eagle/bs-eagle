@@ -50,6 +50,7 @@ namespace blue_sky
         typedef std::vector< sp_pvt_dead_oil >            sp_pvt_dead_oil_array_t;  //!< type for array of pvt_dead_oil objects
         typedef std::vector< sp_pvt_gas >                 sp_pvt_gas_array_t;       //!< type for array of pvt_gas objects
         typedef std::vector< sp_pvt_water >               sp_pvt_water_array_t;     //!< type for array of pvt_water objects
+		typedef std::vector< double >                     stdv_double;
 
         //typedef smart_ptr <pvt_dummy_iface, true>         sp_pvt_dummy_iface;
         /**
@@ -79,7 +80,8 @@ namespace blue_sky
 		    virtual void
 		    init_from_pvt(const sp_pvt_dummy_iface &pvt,
 		                  bool is_oil, bool is_gas, bool is_water,
-					            t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals) = 0;
+					      t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals,
+						  stdv_double density) = 0;
 			  */
 
         virtual std::list <BS_SP (table_iface)>
