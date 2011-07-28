@@ -135,9 +135,10 @@ t_float find_point_z(point3d N1, point3d N2, point3d N3, point3d M)
 // returns mesh_points, well_points
 bp::tuple make_projection(t_int ny, t_int nz, 
                           spv_int indices_, spv_int faces_, 
-                          spv_float x_, spv_float y_, spv_float z_,  spv_float tops_ ) 
+                          spv_float x_, spv_float y_, spv_float z_,  spv_float tops_, spv_float values_ ) 
 {
     v_float& tops = *tops_;
+    v_float& values = *values_;
     v_float& cross_x = *x_;
     v_float& cross_y = *y_;
     v_float& cross_z = *z_;
@@ -168,12 +169,13 @@ bp::tuple make_projection(t_int ny, t_int nz,
     t_int n_points, n_z_points, n_l_points;
     n_z_points = z_end-z_start+2;
 
-    list <t_float> points, wpoints;
+    list <t_float> points, wpoints, vals;
 
-    spv_float proj_mesh, well_points;
+    spv_float proj_mesh, well_points, scalars;
 
     proj_mesh = BS_KERNEL.create_object(v_float::bs_type());
     well_points = BS_KERNEL.create_object(v_float::bs_type());
+    scalars = BS_KERNEL.create_object(v_float::bs_type());
 
     t_int my_ind, ind_old;
     index3d my;
@@ -391,9 +393,14 @@ bp::tuple make_projection(t_int ny, t_int nz,
     for (z=z_start; z<z_end+1; z++)
     {
        index = z + my.y*nz + my.x*nz*ny;
+       
+
        if (face_out !=0 && face_out != 2)
        {
            
+          // if xyz in values xyz_ind = my.x + my.y*nx + z*nx*ny
+          vals.push_back(values[index]);
+
            //FIXME dont calculate all 8 points, calculate as much as needed
           // for (j=0;j<8;j++)
           // {
@@ -532,9 +539,14 @@ bp::tuple make_projection(t_int ny, t_int nz,
        for (z=z_start; z<z_end+1; z++)
        {
            index = z + my.y*nz + my.x*nz*ny;
+           
+           
            if (face_out !=0 && face_out != 2 && face_out != 6)
            {
                
+               // if xyz in values xyz_ind = my.x + my.y*nx + z*nx*ny
+               vals.push_back(values[index]);
+
                //FIXME dont calculate all 8 points, calculate as much as needed
                //for (j=0;j<8;j++)
                //{
@@ -610,6 +622,9 @@ bp::tuple make_projection(t_int ny, t_int nz,
        {
            index = z + my.y*nz + my.x*nz*ny;
            
+           // if xyz in values xyz_ind = my.x + my.y*nx + z*nx*ny
+           vals.push_back(values[index]);
+           
                //FIXME function to calculate z
                for (j=4;j<7;j++)
                {
@@ -631,14 +646,18 @@ bp::tuple make_projection(t_int ny, t_int nz,
     n_points = points.size();
     proj_mesh->resize (n_points);
     well_points->resize (wpoints.size());
+    scalars->resize (vals.size());
+
     copy(points.begin(), points.end(), &(*proj_mesh)[0]);
     copy(wpoints.begin(), wpoints.end(), &(*well_points)[0]);
+    copy(vals.begin(), vals.end(), &(*scalars)[0]);
+
 
     n_l_points = points.size()/n_z_points/2;
 
     printf("\n nl=%d nz=%d", n_l_points, n_z_points);
 
-    return bp::make_tuple(proj_mesh, well_points, n_z_points, n_l_points); 
+    return bp::make_tuple(proj_mesh, well_points, scalars, n_z_points, n_l_points); 
 }
 
 }
