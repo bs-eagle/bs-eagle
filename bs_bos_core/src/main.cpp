@@ -56,6 +56,7 @@
 #include "equil_model.hpp"
 #include "event_manager_keywords.hpp"
 
+#include "py_equil_model.h"
 //#include "well_results_storage.h"
 //#include "fip_results_storage.h"
 
@@ -442,13 +443,14 @@ namespace {
   {
     using namespace boost::python;
 
-    py_export_fi_params ();
-
   //#ifdef _MPI
   //  python::py_export_mpi_vector ();
   //  python::py_export_mpi_csr_matrix ();
   //#endif
 
+	python::py_export_equil_model();
+
+	py_export_fi_params ();
 
     py_export_events ();
     py_export_event_manager();
