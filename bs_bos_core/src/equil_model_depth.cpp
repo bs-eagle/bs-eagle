@@ -687,8 +687,8 @@ namespace blue_sky
           sat_d[i] = -1;
       }
 
-	  pvt_props->init_from_pvt(pvt_dummy, is_o, is_g, is_w,
-		                       1.0, 0.1, 1000.0, 100, density);
+//	  pvt_props->init_from_pvt(pvt_dummy, is_o, is_g, is_w,
+//		                       1.0, 0.1, 1000.0, 100, density);
 	  scal_props->init_from_scal(scal_dummy, is_o, is_g, is_w, phase_d, sat_d,
 								jfunc_water, jfunc_oil);
 	  sat_regions.push_back(0);

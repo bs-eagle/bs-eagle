@@ -37,7 +37,7 @@ namespace blue_sky
       , reservoir_simulator_events_init_ (this)
   {
     this->add_signal (BS_SIGNAL_RANGE (reservoir_simulator));
-    hdm_->init ();
+    hdm_->init (".");
     
     //bs_node::insert (bs_link::create (hdm_, "hdm"), false);
     //bs_node::insert (bs_link::create (cm, "calc_model"), false);
