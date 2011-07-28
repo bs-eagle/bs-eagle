@@ -352,7 +352,7 @@ namespace blue_sky
                   sp_table->init (n, param_counter);
                   for (int i = 0; i < param_counter; ++i)
                     {
-                      sp_table
+                      ;
                     }
                   
 

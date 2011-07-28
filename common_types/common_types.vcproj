@@ -183,6 +183,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\gis.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\h5_helper.h"
 				>
 			</File>
@@ -208,6 +212,10 @@
 			</File>
 			<File
 				RelativePath=".\src\prop_impl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\py_gis.cpp"
 				>
 			</File>
 			<File
@@ -249,11 +257,23 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\src\gis.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\gis_iface.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\pool_iface.h"
 				>
 			</File>
 			<File
 				RelativePath=".\include\prop_iface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\py_gis.h"
 				>
 			</File>
 			<File

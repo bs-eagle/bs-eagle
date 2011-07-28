@@ -183,10 +183,6 @@
 			Name="hdf5_storage"
 			>
 			<File
-				RelativePath=".\src\bs_hdf5_storage.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\bs_hdf5_storage.h"
 				>
 			</File>
@@ -199,7 +195,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\h5_helper.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\hdf5_functions.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\hdf5_group_impl.hpp"
 				>
 			</File>
 			<File
@@ -207,11 +211,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\hdf5_type.h"
+				RelativePath=".\src\hdf5_storage_v2_impl.hpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\py_bs_hdf5_storage.cpp"
+				RelativePath=".\src\hdf5_type.h"
 				>
 			</File>
 			<File
