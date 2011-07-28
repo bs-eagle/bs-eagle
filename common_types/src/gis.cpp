@@ -107,7 +107,7 @@ namespace blue_sky
 
       if (!qi::parse(begin, end, p, v))
         {
-          std::cout << "Error: Parsing failed\n";
+          std::cout << "Error: Parsing failed ver 1\n";
         }
       else
         {
@@ -116,7 +116,7 @@ namespace blue_sky
           std::string::iterator e_dot = v.first.end();
           if (!qi::parse(b_dot, e_dot, p_dot, v_dot))
             {
-              std::cout << "Error: Parsing failed\n";
+              std::cout << "Error: Parsing failed ver 2\n";
             }
           else
             {
@@ -137,10 +137,11 @@ namespace blue_sky
       float f;
       std::string::iterator b_f = s.begin();
       std::string::iterator e_f = s.end();
+      trim (s);
 
       if (!qi::parse (b_f, e_f, qi::float_, f))
         {
-          std::cout << "Error: Parsing failed\n";
+          std::cout << "Error: Parsing failed\n" << s << std::endl;
           return 0;
         }
       return f;
@@ -161,7 +162,7 @@ namespace blue_sky
 
       if (!qi::parse(begin, end, p, v))
         {
-          std::cout << "Error: Parsing failed\n";
+          std::cout << "Error: Parsing failed WEL 1\n";
         }
       else
         {
@@ -170,7 +171,7 @@ namespace blue_sky
           std::string::iterator e_dot = v.first.end();
           if (!qi::parse(b_dot, e_dot, p_dot, v_dot))
             {
-              std::cout << "Error: Parsing failed\n";
+              std::cout << "Error: Parsing failed wel 2\n";
             }
           else
             {
@@ -209,7 +210,7 @@ namespace blue_sky
 
       if (!qi::parse(begin, end, p, v))
         {
-          std::cout << "Error: Parsing failed\n";
+          std::cout << "Error: Parsing failed PAR 1\n";
         }
       else
         {
@@ -221,7 +222,7 @@ namespace blue_sky
 
           if (!qi::parse(b_dot, e_dot, p_dot, v_dot))
             {
-              std::cout << "Error: Parsing failed\n";
+              std::cout << "Error: Parsing failed PAR 2\n";
             }
           else
             {
@@ -259,7 +260,7 @@ namespace blue_sky
 
       if (!qi::parse(begin, end, p, v))
         {
-          std::cout << "Error: Parsing failed\n";
+          std::cout << "Error: Parsing failed CUR\n";
         }
       else
         {
@@ -279,13 +280,13 @@ namespace blue_sky
       namespace qi = boost::spirit::qi;
       using boost::spirit::ascii::space;
 
-      for (;;)
+      for (;!file.eof ();)
         {
           std::string::iterator begin = s.begin();
           std::string::iterator end = s.end();
           if (!qi::phrase_parse (begin, end, *qi::double_, space, v))
             {
-              std::cout << "Error: Parsing failed\n";
+              std::cout << "Error: Parsing failed double\n";
             }
           if ((int)v.size () < n)
             {
@@ -296,7 +297,7 @@ namespace blue_sky
               break;
             }
         }
-      //std::cout << v.size () << std::endl;
+      //std::cout << v.size () << n << std::endl;
       return 0;
     }
 
@@ -329,7 +330,7 @@ namespace blue_sky
         {
           std::getline (file, s);
           trim (s);
-          if (s[0] == '#')
+          if (s[0] == '#' || s == "")
             continue;
           else if (s[0] == '~')
             {
@@ -362,7 +363,7 @@ namespace blue_sky
                   stop = sp_prop->get_f ("STOP");
                   step = sp_prop->get_f ("STEP"); 
                   n = (int)((stop - start) / step);
-                  sp_table->init (n, param_counter);
+                  sp_table->init (n + 2, param_counter);
                   for (int i = 0; i < param_counter; ++i)
                     {
                       std::string name = std::string ("param") 
@@ -414,7 +415,7 @@ namespace blue_sky
     {
       std::stringstream s;
       s << sp_prop->py_str () << "\n";
-      //s << sp_table->py_str () << std::endl;
+      s << sp_table->py_str () << std::endl;
       return s.str ();
     }
 #endif //BSPY_EXPORTING_PLUGIN
