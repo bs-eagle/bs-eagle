@@ -147,7 +147,7 @@ namespace blue_sky
   well_storage::get_params (data_set_t &data, std::string well, t_double date)
   {
     typename data_set_t::template nth_index<0>::type& name_index = data.get<0>();
-    typename data_set_t::template iterator name_it, name_b, name_e;
+    typename data_set_t::iterator name_it, name_b, name_e;
      
     name_b = name_index.lower_bound (well, comp_name<ni,nf>());
     name_e = name_index.upper_bound (well, comp_name<ni,nf>());
