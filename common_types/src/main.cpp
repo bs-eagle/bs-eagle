@@ -12,11 +12,13 @@
 #include "table.h"
 #include "gis.h"
 #include "frac.h"
+#include "perf.h"
 #include "traj.h"
 #include "py_prop.h"
 #include "py_table.h"
 #include "py_gis.h"
 #include "py_frac.h"
+#include "py_perf.h"
 #include "py_traj.h"
 #include "vartype_table.h"
 
@@ -40,6 +42,7 @@ namespace blue_sky {
     REG_TYPE (table)
     REG_TYPE (gis)
     REG_TYPE (frac)
+    REG_TYPE (perf)
     REG_TYPE (traj)
     res &= BS_KERNEL.register_type (pd, vartype_table <t_float>::bs_type ());
 
@@ -64,6 +67,7 @@ namespace {
     python::py_export_table ();
     python::py_export_gis ();
     python::py_export_frac ();
+    python::py_export_perf ();
     python::py_export_traj ();
     // FIXME: export vartype table
   }
