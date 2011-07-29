@@ -106,32 +106,32 @@ namespace blue_sky {
       typedef std::map <std::string, std::set<std::string> > str_map;
       
       virtual void add_group (group_params *params) = 0;
-      virtual void add_well (well_params *params, std::string group) = 0;
-      virtual void add_conng (conng_params *params, std::string well) = 0;
+      virtual void add_well (well_params *params, const std::string &group) = 0;
+      virtual void add_conng (conng_params *params, const std::string &well) = 0;
       
-      virtual int add_well_to_group (std::string well, std::string group) = 0;
+      virtual int add_well_to_group (const std::string &well, const std::string &group) = 0;
       
-      virtual void set_group_fparam (std::string group, t_double date, int col, t_double val) = 0;
-      virtual void set_group_iparam (std::string group, t_double date, int col, t_int val) = 0;
+      virtual void set_group_fparam (const std::string &group, t_double date, int col, t_double val) = 0;
+      virtual void set_group_iparam (const std::string &group, t_double date, int col, t_int val) = 0;
       
-      virtual void set_group_fparams (std::string group, t_double date, spv_double vals) = 0;
-      virtual void set_group_iparams (std::string group, t_double date, spv_int vals) = 0;
+      virtual void set_group_fparams (const std::string &group, t_double date, spv_double vals) = 0;
+      virtual void set_group_iparams (const std::string &group, t_double date, spv_int vals) = 0;
       
-      virtual void set_well_fparam (std::string well, t_double date, int col, t_double val) = 0;
-      virtual void set_well_iparam (std::string well, t_double date, int col, t_int val) = 0;
+      virtual void set_well_fparam (const std::string &well, t_double date, int col, t_double val) = 0;
+      virtual void set_well_iparam (const std::string &well, t_double date, int col, t_int val) = 0;
       
-      virtual void set_well_fparams (std::string well, t_double date, spv_double vals) = 0;
-      virtual void set_well_iparams (std::string well, t_double date, spv_int vals) = 0;
+      virtual void set_well_fparams (const std::string &well, t_double date, spv_double vals) = 0;
+      virtual void set_well_iparams (const std::string &well, t_double date, spv_int vals) = 0;
       
-      //virtual void update_group (std::string group) = 0;
+      //virtual void update_group (const std::string &group) = 0;
       
-      virtual spv_double get_group_dates (std::string group) = 0;
-      virtual spv_double get_group_fvalues (std::string group, int col) = 0;
-      virtual spv_int get_group_ivalues (std::string group, int col) = 0;
+      virtual spv_double get_group_dates (const std::string &group) = 0;
+      virtual spv_double get_group_fvalues (const std::string &group, int col) = 0;
+      virtual spv_int get_group_ivalues (const std::string &group, int col) = 0;
       
-      virtual spv_double get_well_dates (std::string well) = 0;
-      virtual spv_double get_well_fvalues (std::string well, int col) = 0;
-      virtual spv_int get_well_ivalues (std::string well, int col) = 0;
+      virtual spv_double get_well_dates (const std::string &well) = 0;
+      virtual spv_double get_well_fvalues (const std::string &well, int col) = 0;
+      virtual spv_int get_well_ivalues (const std::string &well, int col) = 0;
       
       
     };

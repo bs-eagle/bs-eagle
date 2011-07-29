@@ -30,7 +30,7 @@ namespace blue_sky
     groups.insert (*params);
   }
   
-  void well_storage::add_well (well_params *params, std::string group)
+  void well_storage::add_well (well_params *params, const std::string &group)
   {
     str_map::iterator it;
     wells.insert (*params);
@@ -41,7 +41,7 @@ namespace blue_sky
       }  
   }
   
-  void well_storage::add_conng (conng_params *params, std::string well)
+  void well_storage::add_conng (conng_params *params, const std::string &well)
   {
     str_map::iterator it;
     std::set<std::string> str_set;
@@ -53,12 +53,12 @@ namespace blue_sky
       }
   }
   
-  int well_storage::add_well_to_group (std::string well, std::string group)
+  int well_storage::add_well_to_group (const std::string &well, const std::string &group)
   {
     return add_child (well, group, groups_map);
   }
   
-  int well_storage::add_child (std::string child, std::string parent, str_map &parent_map)
+  int well_storage::add_child (const std::string &child, const std::string &parent, str_map &parent_map)
   {
     str_map::iterator it;
     std::set<std::string> str_set;
@@ -77,7 +77,7 @@ namespace blue_sky
   }
   
   template <typename data_set, int ni, int nf>
-  spv_double well_storage::get_dates (std::string name, data_set data)
+  spv_double well_storage::get_dates (const std::string &name, data_set data)
   {
     typename data_set::template nth_index<0>::type& name_index = data.get<0>();
     typename data_set::template nth_index<0>::type::iterator name_it, name_b, name_e;
@@ -106,7 +106,7 @@ namespace blue_sky
   }
   
   template <typename data_set_t, typename vector_t, int ni, int nf>
-  blue_sky::smart_ptr< vector_t > well_storage::get_values (std::string name, data_set_t &data, int col, int type = 0)
+  blue_sky::smart_ptr< vector_t > well_storage::get_values (const std::string &name, data_set_t &data, int col, int type = 0)
   {
     typename data_set_t::template nth_index<0>::type& name_index = data.get<0>();
     typename data_set_t::template nth_index<0>::type::iterator name_it, name_b, name_e;
@@ -144,7 +144,7 @@ namespace blue_sky
   
   template <typename params_t, typename data_set_t, int ni, int nf>
   params_t*
-  well_storage::get_params (data_set_t &data, std::string well, t_double date)
+  well_storage::get_params (data_set_t &data, const std::string &well, t_double date)
   {
     typename data_set_t::template nth_index<0>::type& name_index = data.get<0>();
     typename data_set_t::iterator name_it, name_b, name_e;
@@ -164,7 +164,7 @@ namespace blue_sky
   
   
   template <typename params_t, typename data_t, typename data_set_t, int ni, int nf>
-  void well_storage::set_param (data_set_t &data, std::string name, t_double date, int col, data_t &val, int type = 0, int operation = 0)
+  void well_storage::set_param (data_set_t &data, const std::string &name, t_double date, int col, data_t &val, int type = 0, int operation = 0)
   {
     params_t *params;
     data_t tmp;
@@ -206,7 +206,7 @@ namespace blue_sky
   }
   
   template <typename params_t, typename vector_t, typename data_set_t, int ni, int nf>
-  void well_storage::set_params (data_set_t &data, std::string name, t_double date, blue_sky::smart_ptr< vector_t > vals, int type = 0, int operation = 0)
+  void well_storage::set_params (data_set_t &data, const std::string &name, t_double date, blue_sky::smart_ptr< vector_t > vals, int type = 0, int operation = 0)
   {
     params_t *params;
     typename vector_t::value_type *vals_data;
@@ -259,7 +259,7 @@ namespace blue_sky
   
   template <typename child_params_t, typename parent_params_t, typename data_t,typename child_data_set_t, typename parent_data_set_t, 
             int child_ni, int child_nf, int parent_ni, int parent_nf>
-  void well_storage::set_child_param (child_data_set_t &child_data, parent_data_set_t &parent_data, str_map &parent_map, std::string child_name, 
+  void well_storage::set_child_param (child_data_set_t &child_data, parent_data_set_t &parent_data, str_map &parent_map, const std::string &child_name, 
                                            t_double date, int col, data_t val, int type = 0)
   {
     str_map::iterator it, b, e;
@@ -280,7 +280,7 @@ namespace blue_sky
   
   template <typename child_params_t, typename parent_params_t, typename vector_t,typename child_data_set_t, typename parent_data_set_t, 
             int child_ni, int child_nf, int parent_ni, int parent_nf>
-  void well_storage::set_child_params (child_data_set_t &child_data, parent_data_set_t &parent_data, str_map &parent_map, std::string child_name, 
+  void well_storage::set_child_params (child_data_set_t &child_data, parent_data_set_t &parent_data, str_map &parent_map, const std::string &child_name, 
                                            t_double date, blue_sky::smart_ptr< vector_t > vals, int type = 0)
   {
     str_map::iterator it, b, e;
@@ -302,30 +302,30 @@ namespace blue_sky
   
   
   
-  void well_storage::set_well_fparam (std::string well_name, t_double date, int col, t_double val)
+  void well_storage::set_well_fparam (const std::string &well_name, t_double date, int col, t_double val)
   {
     set_child_param <well_params, group_params, t_double, well_set, group_set, NI_WELL, NF_WELL, NI_GROUP, NF_GROUP> (wells, groups, groups_map, well_name, date, col, val);
   }
   
     
-  void well_storage::set_well_iparam (std::string well_name, t_double date, int col, t_int val)
+  void well_storage::set_well_iparam (const std::string &well_name, t_double date, int col, t_int val)
   {
     set_child_param <well_params, group_params, t_int, well_set, group_set, NI_WELL, NF_WELL, NI_GROUP, NF_GROUP> (wells, groups, groups_map, well_name, date, col, val, 1);
   }
    
-  void well_storage::set_well_fparams (std::string well_name, t_double date, spv_double vals)
+  void well_storage::set_well_fparams (const std::string &well_name, t_double date, spv_double vals)
   {
     set_child_params <well_params, group_params, v_double, well_set, group_set, NI_WELL, NF_WELL, NI_GROUP, NF_GROUP> (wells, groups, groups_map, well_name, date, vals);
   }
   
   
-  void well_storage::set_well_iparams (std::string well_name, t_double date, spv_int vals)
+  void well_storage::set_well_iparams (const std::string &well_name, t_double date, spv_int vals)
   {
     set_child_params <well_params, group_params, v_int, well_set, group_set, NI_WELL, NF_WELL, NI_GROUP, NF_GROUP> (wells, groups, groups_map, well_name, date, vals, 1);
   }
   
   /*
-  void well_storage::update_group (std::string group)
+  void well_storage::update_group (const std::string &group)
   {
     str_map::iterator gr;
     std::set<std::string>::iterator it, b, e;
@@ -341,56 +341,56 @@ namespace blue_sky
   }
   */
   
-  void well_storage::set_group_fparam (std::string group_name, t_double date, int col, t_double val)
+  void well_storage::set_group_fparam (const std::string &group_name, t_double date, int col, t_double val)
   {
     set_param <group_params, t_double, group_set, NI_GROUP, NF_GROUP> (groups, group_name, date, col, val);
   }
   
     
-  void well_storage::set_group_iparam (std::string group_name, t_double date, int col, t_int val)
+  void well_storage::set_group_iparam (const std::string &group_name, t_double date, int col, t_int val)
   {
     set_param <group_params, t_int, group_set, NI_GROUP, NF_GROUP> (groups, group_name, date, col, val, 1);
   }
    
   
-  void well_storage::set_group_fparams (std::string group_name, t_double date, spv_double vals)
+  void well_storage::set_group_fparams (const std::string &group_name, t_double date, spv_double vals)
   {
     set_params <group_params, v_double, group_set, NI_GROUP, NF_GROUP> (groups, group_name, date, vals);
   }
   
   
-  void well_storage::set_group_iparams (std::string group_name, t_double date, spv_int vals)
+  void well_storage::set_group_iparams (const std::string &group_name, t_double date, spv_int vals)
   {
     set_params <group_params, v_int, group_set, NI_GROUP, NF_GROUP> (groups, group_name, date, vals, 1);
   }
   
-    spv_double well_storage::get_group_dates (std::string group_name)
+    spv_double well_storage::get_group_dates (const std::string &group_name)
   {
     return get_dates<group_set, NI_GROUP, NF_GROUP> (group_name, groups);
   }
   
-  spv_double well_storage::get_group_fvalues (std::string group_name, int col)
+  spv_double well_storage::get_group_fvalues (const std::string &group_name, int col)
   {
     return get_values<group_set, v_double, NI_GROUP, NF_GROUP> (group_name, groups, col);
   }
   
-  spv_int well_storage::get_group_ivalues (std::string group_name, int col)
+  spv_int well_storage::get_group_ivalues (const std::string &group_name, int col)
   {
     return get_values<group_set, v_int, NI_GROUP, NF_GROUP> (group_name, groups, col, 1);
   }
   
   
-  spv_double well_storage::get_well_dates (std::string well_name)
+  spv_double well_storage::get_well_dates (const std::string &well_name)
   {
     return get_dates<well_set, NI_WELL, NF_WELL> (well_name, wells);
   }
   
-  spv_double well_storage::get_well_fvalues (std::string well_name, int col)
+  spv_double well_storage::get_well_fvalues (const std::string &well_name, int col)
   {
     return get_values<well_set, v_double, NI_WELL, NF_WELL> (well_name, wells, col);
   }
   
-  spv_int well_storage::get_well_ivalues (std::string well_name, int col)
+  spv_int well_storage::get_well_ivalues (const std::string &well_name, int col)
   {
     return get_values<well_set, v_int, NI_WELL, NF_WELL> (well_name, wells, col, 1);
   }

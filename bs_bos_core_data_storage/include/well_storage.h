@@ -24,47 +24,47 @@ namespace blue_sky {
       //typedef std::map <std::string, std::list<std::string>> str_map;
       
       void add_group (group_params *params);
-      void add_well (well_params *params, std::string group);
-      void add_conng (conng_params *params, std::string well);
+      void add_well (well_params *params, const std::string &group);
+      void add_conng (conng_params *params, const std::string &well);
       
-      int add_well_to_group (std::string well, std::string group);
+      int add_well_to_group (const std::string &well, const std::string &group);
       
-      well_params* get_well_params (std::string well, t_double date);
-      group_params* get_group_params (std::string group, t_double date);
+      well_params* get_well_params (const std::string &well, t_double date);
+      group_params* get_group_params (const std::string &group, t_double date);
       
-      void set_group_fparam (std::string group, t_double date, int col, t_double val);
-      void set_group_iparam (std::string group, t_double date, int col, t_int val);
+      void set_group_fparam (const std::string &group, t_double date, int col, t_double val);
+      void set_group_iparam (const std::string &group, t_double date, int col, t_int val);
       
-      void set_group_fparams (std::string group, t_double date, spv_double);
-      void set_group_iparams (std::string group, t_double date, spv_int);
+      void set_group_fparams (const std::string &group, t_double date, spv_double);
+      void set_group_iparams (const std::string &group, t_double date, spv_int);
       
-      void set_well_fparam (std::string well, t_double date, int col, t_double val);
-      void set_well_iparam (std::string well, t_double date, int col, t_int val);
+      void set_well_fparam (const std::string &well, t_double date, int col, t_double val);
+      void set_well_iparam (const std::string &well, t_double date, int col, t_int val);
       
-      void set_well_fparams (std::string well, t_double date, spv_double);
-      void set_well_iparams (std::string well, t_double date, spv_int);
+      void set_well_fparams (const std::string &well, t_double date, spv_double);
+      void set_well_iparams (const std::string &well, t_double date, spv_int);
       
-      //void update_group (std::string group);
+      //void update_group (const std::string &group);
       
       template <typename data_set, int ni, int nf>
-      spv_double get_dates (std::string name, data_set data);
+      spv_double get_dates (const std::string &name, data_set data);
       
-      spv_double get_group_dates (std::string group);
-      spv_double get_group_fvalues (std::string group, int col);
-      spv_int get_group_ivalues (std::string group, int col);
+      spv_double get_group_dates (const std::string &group);
+      spv_double get_group_fvalues (const std::string &group, int col);
+      spv_int get_group_ivalues (const std::string &group, int col);
       
-      spv_double get_well_dates (std::string well);
-      spv_double get_well_fvalues (std::string well, int col);
-      spv_int get_well_ivalues (std::string well, int col);
+      spv_double get_well_dates (const std::string &well);
+      spv_double get_well_fvalues (const std::string &well, int col);
+      spv_int get_well_ivalues (const std::string &well, int col);
       
     private:
-      int add_child (std::string child, std::string parent, str_map &parent_map);
+      int add_child (const std::string &child, const std::string &parent, str_map &parent_map);
       
       template <typename params_t, typename data_set_t, int ni, int nf>
-        params_t* get_params (data_set_t &data, std::string well, t_double date);
+        params_t* get_params (data_set_t &data, const std::string &well, t_double date);
       
       template <typename data_set_t, typename vector_t, int ni, int nf>
-        blue_sky::smart_ptr< vector_t > get_values (std::string name, data_set_t &data, int col, int type);
+        blue_sky::smart_ptr< vector_t > get_values (const std::string &name, data_set_t &data, int col, int type);
         
         
       //! set exact param on specified date
@@ -76,20 +76,20 @@ namespace blue_sky {
       //! type - parameter type, floating point with type = 0 and integer with type = 1
       //! operation - operation type, assignment with operation = 0 and addition with operation = 1
       template <typename params_t, typename data_t, typename data_set_t, int ni, int nf>
-        void set_param (data_set_t &data, std::string name, t_double date, int col, data_t &val, int type, int operation);
+        void set_param (data_set_t &data, const std::string &name, t_double date, int col, data_t &val, int type, int operation);
       
       template <typename params_t, typename vector_t, typename data_set_t, int ni, int nf>
-        void set_params (data_set_t &data, std::string name, t_double date, blue_sky::smart_ptr< vector_t > vals, int type, int operation);
+        void set_params (data_set_t &data, const std::string &name, t_double date, blue_sky::smart_ptr< vector_t > vals, int type, int operation);
         
       //! set exact param to child and take this change into account for all parents
       template <typename child_params_t, typename parent_params_t, typename data_t,typename child_data_set_t, typename parent_data_set_t, 
                 int child_ni, int child_nf, int parent_ni, int parent_nf>
-        void set_child_param (child_data_set_t &child_data, parent_data_set_t &parent_data, str_map &parent_map, std::string child_name, 
+        void set_child_param (child_data_set_t &child_data, parent_data_set_t &parent_data, str_map &parent_map, const std::string &child_name, 
                                            t_double date, int col, data_t val, int type);
         
       template <typename child_params_t, typename parent_params_t, typename vector_t,typename child_data_set_t, typename parent_data_set_t, 
                 int child_ni, int child_nf, int parent_ni, int parent_nf>
-        void set_child_params (child_data_set_t &child_data, parent_data_set_t &parent_data, str_map &parent_map, std::string child_name, 
+        void set_child_params (child_data_set_t &child_data, parent_data_set_t &parent_data, str_map &parent_map, const std::string &child_name, 
                              t_double date, blue_sky::smart_ptr< vector_t > vals, int type);
       
     public:
