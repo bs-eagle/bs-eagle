@@ -8,50 +8,63 @@
 namespace blue_sky
   {
   
-  well::~well ()
+  well::well (bs_type_ctor_param /*param*/)
   {
-
+      sp_prop = BS_KERNEL.create_object ("prop");
+      if (!sp_prop)
+        {
+          bs_throw_exception ("Type (prop) not refractered");
+        }
   }
 
-  
-  well::well(bs_type_ctor_param /*param*/)
-  {
-  }
-
-  well::well(const well& src)
+  well::well(const well& src): bs_refcounter ()
   {
     *this = src;
   }
   
-  void well::add_branch (std::string branch_name, sp_branch_iface branch)
+  void 
+  well::add_branch (const std::string &branch_name, sp_branch_t branch)
   {
-    branches.insert(std::pair<std::string, sp_branch_iface>(branch_name, branch));
+     branches.insert (pair_t(branch_name, branch));
   }
      
-  std::list <std::string> 
-  well::get_branch_names ()
+  well::list_t 
+  well::get_branch_names () const
   {
-    std::list <std::string> branch_names;
-    std::map <std::string, sp_branch_iface>::iterator it, b, e;
+    list_t branch_names;
+    map_t::const_iterator it, b, e;
     
     b = branches.begin();
     e = branches.end();
     
     for (it = b; it != e; it++)
       {
-        branch_names.push_back(it->first);
+        branch_names.push_back (it->first);
       }
     
     return branch_names;
   }
   
   
-  well::sp_branch_iface
-  well::get_branch (std::string branch_name)
+  well::sp_branch_t 
+  well::get_branch (const std::string &branch_name)
   {
-    return branches.find(branch_name)->second;
+    map_t::iterator i = branches.find(branch_name);
+    if (i != branches.end ())
+      return i->second;
+    else
+      return sp_branch_t (0);
   }
 
+#ifdef BSPY_EXPORTING_PLUGIN
+  std::string 
+  well::py_str () const
+    {
+      std::stringstream s;
+      s << sp_prop->py_str () << "\n";
+      return s.str ();
+    }
+#endif //BSPY_EXPORTING_PLUGIN
   
   //bs stuff
   BLUE_SKY_TYPE_STD_CREATE(well)

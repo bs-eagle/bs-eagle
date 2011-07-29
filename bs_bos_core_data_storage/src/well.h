@@ -6,7 +6,9 @@
  * \author Mark Khait
  * \date 29.07.2011
  * */
- 
+#include <map>
+#include <string>
+
 #include "well_iface.h"
 #include "well_branch_iface.h"
  
@@ -21,23 +23,63 @@ namespace blue_sky {
     {
      
     public:
+      typedef BS_SP (well_branch_iface)                 sp_branch_t;
+      typedef std::map <std::string, sp_branch_t>       map_t;
+      typedef std::pair<std::string, sp_branch_t>       pair_t;
+      typedef std::list<std::string>                    list_t;
+      typedef BS_SP (prop_iface)                        sp_prop_t;
 
+    public:
+      
+      ~well ()
+        {}
+
+     /** 
+      * @brief add new branch to the well
+      * 
+      * @param branch_name  -- <INPUT> new branch name
+      * @param branch       -- <INPUT> new branch
+      */
+     virtual void add_branch (const std::string &branch_name, sp_branch_t branch);
+     
+     /** 
+      * @brief return list of branch names
+      */
+     virtual list_t get_branch_names () const;
+     
+     /** 
+      * @brief return branch by name
+      * 
+      * @param branch_name  -- <INPUT> branch name
+      * 
+      * @return smatr pointer ti branch
+      */
+     virtual sp_branch_t get_branch (const std::string &branch_name);
+
+      /** 
+       * @brief return SP to the property 
+       */
+      virtual sp_prop_t get_prop ()
+        {
+          return sp_prop;
+        }
+
+#ifdef BSPY_EXPORTING_PLUGIN
+      /** 
+       * @brief python print wrapper
+       * 
+       * @return return table description
+       */
+      virtual std::string py_str () const;
+
+#endif //BSPY_EXPORTING_PLUGIN
       //METHODS
-     ~well ();
-     
-     void add_branch (std::string branch_name, sp_branch_iface branch);
-     
-     std::list <std::string> get_branch_names ();
-     
-     sp_branch_iface get_branch (std::string branch_name);
-     
     public:
       BLUE_SKY_TYPE_DECL (well)
 
     public:
-    
-      std::map <std::string, sp_branch_iface> branches;
-    
+      sp_prop_t sp_prop; 
+      map_t branches;
     };
 
 } //ns bs

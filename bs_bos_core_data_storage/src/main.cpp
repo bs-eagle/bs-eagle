@@ -4,10 +4,12 @@
 #include "bs_bos_core_data_storage_stdafx.h"
 
 #include "hdm.h"
+#include "well.h"
 #include "data_class.h"
 #include "read_class.h"
 
 #include "py_hdm.h"
+#include "py_well.h"
 #include "py_well_storage.h"
 #include "py_keyword_manager.h"
 #include "py_data_class.h"
@@ -26,6 +28,7 @@ namespace blue_sky
     bool res = true;
 
     res &= BS_KERNEL.register_type (pd, hdm::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, well::bs_type ()); BS_ASSERT (res);
 
     res &= BS_KERNEL.register_type (pd, idata::bs_type ()); BS_ASSERT (res);
     
@@ -54,6 +57,7 @@ namespace {
     python::py_export_idata ();
     python::export_keyword_manager();
     python::py_export_well_storage();
+    python::py_export_well();
   }
 }
 
