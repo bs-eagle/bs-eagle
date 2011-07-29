@@ -10,7 +10,7 @@
 #define PY_GIS_M2WDGY4K
 
 #include <string>
-#include "table_iface.h"
+#include "gis_iface.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "dummy_base.h"
