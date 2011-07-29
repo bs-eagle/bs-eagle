@@ -493,6 +493,30 @@
 			Name="well storage"
 			>
 			<File
+				RelativePath=".\src\well.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\well.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\well_branch.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\well_branch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\well_branch_iface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\well_iface.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\well_storage.cpp"
 				>
 			</File>
