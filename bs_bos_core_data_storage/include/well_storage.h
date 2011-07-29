@@ -9,13 +9,16 @@
  
  
 #include "well_storage_iface.h"
+#include "well_iface.h"
 
 namespace blue_sky {
 
   class BS_API_PLUGIN well_storage: public well_storage_iface
     {
     public:
-
+    
+      typedef BS_SP (well_iface) sp_well_iface; 
+  
       //METHODS
       ~well_storage();
 
@@ -49,13 +52,30 @@ namespace blue_sky {
       template <typename data_set, int ni, int nf>
       spv_double get_dates (const std::string &name, data_set data);
       
+      template <typename data_set, int ni, int nf>
+       std::list<std::string> get_names (data_set data);
+      
+      std::list<std::string> get_group_names ();
       spv_double get_group_dates (const std::string &group);
       spv_double get_group_fvalues (const std::string &group, int col);
       spv_int get_group_ivalues (const std::string &group, int col);
       
+      std::list<std::string> get_well_names ();
       spv_double get_well_dates (const std::string &well);
       spv_double get_well_fvalues (const std::string &well, int col);
       spv_int get_well_ivalues (const std::string &well, int col);
+      
+      
+      
+       /** 
+       * @brief python print wrapper
+       * 
+       * @return return table description
+       */
+      virtual std::string py_str () const 
+      { 
+        return "To be continued...\n";
+      };
       
     private:
       int add_child (const std::string &child, const std::string &parent, str_map &parent_map);
@@ -91,6 +111,8 @@ namespace blue_sky {
                 int child_ni, int child_nf, int parent_ni, int parent_nf>
         void set_child_params (child_data_set_t &child_data, parent_data_set_t &parent_data, str_map &parent_map, const std::string &child_name, 
                              t_double date, blue_sky::smart_ptr< vector_t > vals, int type);
+     
+     
       
     public:
       BLUE_SKY_TYPE_DECL (well_storage)
@@ -103,6 +125,8 @@ namespace blue_sky {
       
       str_map groups_map;
       str_map wells_map;
+      
+      std::map<std::string, sp_well_iface> well_branches;
       
     };
 

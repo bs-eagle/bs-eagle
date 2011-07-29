@@ -133,6 +133,13 @@ namespace blue_sky {
       virtual spv_double get_well_fvalues (const std::string &well, int col) = 0;
       virtual spv_int get_well_ivalues (const std::string &well, int col) = 0;
       
+       /** 
+       * @brief python print wrapper
+       * 
+       * @return return table description
+       */
+      virtual std::string py_str () const = 0;
+      
       
     };
 

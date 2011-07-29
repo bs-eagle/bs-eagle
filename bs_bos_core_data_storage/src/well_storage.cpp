@@ -77,6 +77,30 @@ namespace blue_sky
   }
   
   template <typename data_set, int ni, int nf>
+  std::list<std::string> well_storage::get_names (data_set data)
+  {
+    typename data_set::template nth_index<0>::type& name_index = data.get<0>();
+    typename data_set::template nth_index<0>::type::iterator name_it, name_b, name_e;
+    std::list<std::string> names;
+    long n = 0;
+     
+    name_b = name_index.begin();
+    name_e = name_index.end();
+    n = distance(name_b, name_e);
+    
+    if (n)
+      {
+        names.resize (n);
+       
+        for (name_it = name_b; name_it != name_e; ++name_it)
+          {
+            names.push_back(name_it->name);
+          }
+      }
+    return names;
+  }
+   
+  template <typename data_set, int ni, int nf>
   spv_double well_storage::get_dates (const std::string &name, data_set data)
   {
     typename data_set::template nth_index<0>::type& name_index = data.get<0>();
@@ -305,23 +329,27 @@ namespace blue_sky
   void well_storage::set_well_fparam (const std::string &well_name, t_double date, int col, t_double val)
   {
     set_child_param <well_params, group_params, t_double, well_set, group_set, NI_WELL, NF_WELL, NI_GROUP, NF_GROUP> (wells, groups, groups_map, well_name, date, col, val);
+    well_branches.insert(std::pair<std::string, sp_well_iface> (well_name, BS_KERNEL.create_object ("well")));
   }
   
     
   void well_storage::set_well_iparam (const std::string &well_name, t_double date, int col, t_int val)
   {
     set_child_param <well_params, group_params, t_int, well_set, group_set, NI_WELL, NF_WELL, NI_GROUP, NF_GROUP> (wells, groups, groups_map, well_name, date, col, val, 1);
+    well_branches.insert(std::pair<std::string, sp_well_iface> (well_name, BS_KERNEL.create_object ("well")));
   }
    
   void well_storage::set_well_fparams (const std::string &well_name, t_double date, spv_double vals)
   {
     set_child_params <well_params, group_params, v_double, well_set, group_set, NI_WELL, NF_WELL, NI_GROUP, NF_GROUP> (wells, groups, groups_map, well_name, date, vals);
+    well_branches.insert(std::pair<std::string, sp_well_iface> (well_name, BS_KERNEL.create_object ("well")));
   }
   
   
   void well_storage::set_well_iparams (const std::string &well_name, t_double date, spv_int vals)
   {
     set_child_params <well_params, group_params, v_int, well_set, group_set, NI_WELL, NF_WELL, NI_GROUP, NF_GROUP> (wells, groups, groups_map, well_name, date, vals, 1);
+    well_branches.insert(std::pair<std::string, sp_well_iface> (well_name, BS_KERNEL.create_object ("well")));
   }
   
   /*
@@ -364,6 +392,11 @@ namespace blue_sky
     set_params <group_params, v_int, group_set, NI_GROUP, NF_GROUP> (groups, group_name, date, vals, 1);
   }
   
+  std::list<std::string> well_storage::get_group_names ()
+  {
+    return get_names<group_set, NI_GROUP, NF_GROUP> (groups);
+  }
+  
     spv_double well_storage::get_group_dates (const std::string &group_name)
   {
     return get_dates<group_set, NI_GROUP, NF_GROUP> (group_name, groups);
@@ -379,6 +412,10 @@ namespace blue_sky
     return get_values<group_set, v_int, NI_GROUP, NF_GROUP> (group_name, groups, col, 1);
   }
   
+  std::list<std::string> well_storage::get_well_names ()
+  {
+    return get_names<well_set, NI_WELL, NF_WELL> (wells);
+  }
   
   spv_double well_storage::get_well_dates (const std::string &well_name)
   {
