@@ -19,7 +19,7 @@ namespace blue_sky {
   class perforation;
   class fracture;
   
-  class BS_API_PLUGIN well: public well_iface
+  class BS_API_PLUGIN well_obj: public well_obj_iface
     {
      
     public:
@@ -31,7 +31,7 @@ namespace blue_sky {
 
     public:
       
-      ~well ()
+      ~well_obj ()
         {}
 
      /** 
@@ -75,7 +75,7 @@ namespace blue_sky {
 #endif //BSPY_EXPORTING_PLUGIN
       //METHODS
     public:
-      BLUE_SKY_TYPE_DECL (well)
+      BLUE_SKY_TYPE_DECL (well_obj)
 
     public:
       sp_prop_t sp_prop; 

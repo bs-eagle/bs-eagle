@@ -5,6 +5,8 @@
  * @version 
  * @date 2011-07-29
  */
+ 
+ #include "bs_bos_core_data_storage_stdafx.h"
 
 #include "py_well.h"
 #include "well.h"
@@ -22,9 +24,9 @@ namespace python {
   {
     using namespace boost::python;
 
-    base_exporter <well_iface, py_well_exporter>::export_class ("well_iface");
+    base_exporter <well_obj_iface, py_well_exporter>::export_class ("well_iface");
 
-    class_exporter <well, well_iface, py_well_exporter>::export_class ("well");
+    class_exporter <well_obj, well_obj_iface, py_well_exporter>::export_class ("well");
 
   }
 

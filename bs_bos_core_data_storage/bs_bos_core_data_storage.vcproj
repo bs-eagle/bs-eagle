@@ -532,6 +532,14 @@
 				Name="python"
 				>
 				<File
+					RelativePath=".\src\py_well.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\py_well.h"
+					>
+				</File>
+				<File
 					RelativePath=".\src\py_well_storage.cpp"
 					>
 				</File>

@@ -15,7 +15,7 @@
 namespace blue_sky {
 
   
-  class well_iface: public objbase
+  class well_obj_iface: public objbase
     {
     public:
       typedef BS_SP (well_branch_iface)                 sp_branch_t;
@@ -30,7 +30,7 @@ namespace blue_sky {
       /** 
        * @brief destructor
        */
-     virtual ~well_iface () {};
+     virtual ~well_obj_iface () {};
      
      /** 
       * @brief add new branch to the well

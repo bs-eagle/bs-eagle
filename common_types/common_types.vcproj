@@ -183,6 +183,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\frac.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\gis.cpp"
 				>
 			</File>
@@ -203,6 +207,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\perf.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\prop.cpp"
 				>
 			</File>
@@ -219,11 +227,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\py_frac.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\py_frac.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\py_gis.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\src\py_gis.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\py_perf.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\py_perf.h"
 				>
 			</File>
 			<File
@@ -240,6 +264,14 @@
 			</File>
 			<File
 				RelativePath=".\src\py_table.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\py_traj.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\py_traj.h"
 				>
 			</File>
 			<File

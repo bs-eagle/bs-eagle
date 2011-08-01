@@ -8,7 +8,7 @@
 namespace blue_sky
   {
   
-  well::well (bs_type_ctor_param /*param*/)
+  well_obj::well_obj (bs_type_ctor_param /*param*/)
   {
       sp_prop = BS_KERNEL.create_object ("prop");
       if (!sp_prop)
@@ -17,19 +17,19 @@ namespace blue_sky
         }
   }
 
-  well::well(const well& src): bs_refcounter ()
+  well_obj::well_obj(const well_obj& src): bs_refcounter ()
   {
     *this = src;
   }
   
   void 
-  well::add_branch (const std::string &branch_name, sp_branch_t branch)
+  well_obj::add_branch (const std::string &branch_name, sp_branch_t branch)
   {
      branches.insert (pair_t(branch_name, branch));
   }
      
-  well::list_t 
-  well::get_branch_names () const
+  well_obj::list_t 
+  well_obj::get_branch_names () const
   {
     list_t branch_names;
     map_t::const_iterator it, b, e;
@@ -46,8 +46,8 @@ namespace blue_sky
   }
   
   
-  well::sp_branch_t 
-  well::get_branch (const std::string &branch_name)
+  well_obj::sp_branch_t 
+  well_obj::get_branch (const std::string &branch_name)
   {
     map_t::iterator i = branches.find(branch_name);
     if (i != branches.end ())
@@ -58,7 +58,7 @@ namespace blue_sky
 
 #ifdef BSPY_EXPORTING_PLUGIN
   std::string 
-  well::py_str () const
+  well_obj::py_str () const
     {
       std::stringstream s;
       s << sp_prop->py_str () << "\n";
@@ -67,8 +67,8 @@ namespace blue_sky
 #endif //BSPY_EXPORTING_PLUGIN
   
   //bs stuff
-  BLUE_SKY_TYPE_STD_CREATE(well)
-  BLUE_SKY_TYPE_STD_COPY(well)
+  BLUE_SKY_TYPE_STD_CREATE(well_obj)
+  BLUE_SKY_TYPE_STD_COPY(well_obj)
 
-  BLUE_SKY_TYPE_IMPL(well, objbase, "well", "BOS_Core well class", "BOS_Core well class")
+  BLUE_SKY_TYPE_IMPL(well_obj, well_obj_iface, "well_obj", "BOS_Core well_obj class", "BOS_Core well_obj class")
 }//ns bs

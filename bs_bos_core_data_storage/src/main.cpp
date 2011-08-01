@@ -28,7 +28,7 @@ namespace blue_sky
     bool res = true;
 
     res &= BS_KERNEL.register_type (pd, hdm::bs_type ()); BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, well::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, well_obj::bs_type ()); BS_ASSERT (res);
 
     res &= BS_KERNEL.register_type (pd, idata::bs_type ()); BS_ASSERT (res);
     

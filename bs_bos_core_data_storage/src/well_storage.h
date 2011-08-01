@@ -17,7 +17,7 @@ namespace blue_sky {
     {
     public:
     
-      typedef BS_SP (well_iface) sp_well_iface; 
+      typedef BS_SP (well_obj_iface) sp_well_iface; 
   
       //METHODS
       ~well_storage();
