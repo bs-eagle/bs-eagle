@@ -15,7 +15,7 @@
 namespace blue_sky {
 
   
-  class BS_API_PLUGIN well_iface: public objbase
+  class well_iface: public objbase
     {
     public:
       typedef BS_SP (well_branch_iface)                 sp_branch_t;

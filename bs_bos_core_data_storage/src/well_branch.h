@@ -22,6 +22,9 @@ namespace blue_sky {
     {
     public:
     
+      typedef BS_SP (prop_iface)             sp_prop_t;
+      typedef BS_SP (gis_iface)              sp_gis_t;
+      typedef BS_SP (traj_iface)             sp_traj_t;
       typedef std::map <t_float, perforation *> perforation_map;
       typedef std::map <t_float, fracture *> fracture_map;
       typedef BS_SP (prop_iface)             sp_prop_iface;
