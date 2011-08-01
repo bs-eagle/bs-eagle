@@ -146,7 +146,7 @@
 				AdditionalDependencies="loki.lib ws2_32.lib CGAL-vc80-mt.lib libgmp-10.lib"
 				OutputFile="$(ProjectDir)/../../../exe/release/plugins/$(ProjectName).dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/lib&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/release/&quot;;&quot;$(ProjectDir)/../../../exe/release/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(CGAL_DIR)\auxiliary\gmp\lib&quot;;&quot;$(CGAL_DIR)\lib&quot;;&quot;$(HDF5_PATH)/lib&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/release/&quot;;&quot;$(ProjectDir)/../../../exe/release/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
 				IgnoreDefaultLibraryNames="python25_d.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
