@@ -21,6 +21,7 @@ if build_kind == 'init':
     includes["bs_scal"]                     = Dir("bs_scal/include")
     includes["bs_swift"]                    = Dir("bs_swift/include")
     includes["common_types"]                = Dir("common_types/include")
+    includes["sql_well"]                    = Dir("sql_well/include")
     includes["hdm_fluid"]                   = Dir("hdm_fluid/include")
     includes["bs_hdf5_storage"]             = Dir("hdf5_storage/src")
     Export ("includes")
@@ -28,6 +29,7 @@ if build_kind == 'init':
 else :
     SConscript ("bs_bos_core_base/SConscript.bs")
     SConscript ("common_types/SConscript.bs")
+    SConscript ("sql_well/SConscript.bs")
     SConscript ("bs_mtx/SConscript.bs")
     SConscript ("bs_lsolvers/SConscript.bs")
     SConscript ("bs_swift/SConscript.bs")
@@ -36,5 +38,5 @@ else :
     SConscript ("bs_mesh/SConscript.bs")
     SConscript ("bs_scal/SConscript.bs")
     SConscript ("bs_pvt/SConscript.bs")
-#    SConscript ("bs_bos_core/SConscript.bs")
+    SConscript ("bs_bos_core/SConscript.bs")
     SConscript ("hdf5_storage/SConscript.bs")
