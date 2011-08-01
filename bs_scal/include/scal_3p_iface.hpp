@@ -85,7 +85,11 @@ namespace blue_sky
     virtual void
     init_regions_from_tables () = 0;
     
-    
+    virtual void
+	init_scal_tables(const t_long num_cols) = 0;
+
+	virtual void
+	clear_regions() = 0;
   };
 
   class BS_API_PLUGIN scal_3p_iface : public objbase

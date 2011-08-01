@@ -1587,6 +1587,9 @@ namespace blue_sky
     {
       BS_ASSERT (n_scal_regions > 0);
       
+	  get_water_data ()->clear_regions();
+	  get_gas_data ()->clear_regions();
+
       get_water_data ()->init_table_array (n_scal_regions);
       get_gas_data ()->init_table_array (n_scal_regions);
       
@@ -1598,10 +1601,12 @@ namespace blue_sky
               t_long n_rows_water = water_input_table[region_index]->get_n_rows ();
               if (n_cols_water == SPOF_KEYWORD_COLUMNS)
                 {
+				  get_water_data ()->init_scal_tables(5);
                   get_water_data ()->add_spof (water_input_table[region_index]->convert_to_array (n_rows_water, n_cols_water), region_index, true);
                 }
               else 
                 {
+				  get_water_data ()->init_scal_tables(3);
                   get_water_data ()->add_spfn (water_input_table[region_index]->convert_to_array (n_rows_water, n_cols_water), region_index, true);
                   if (oil_input_table[region_index].get ())
                     {
@@ -1625,10 +1630,12 @@ namespace blue_sky
               t_long n_rows_gas = gas_input_table[region_index]->get_n_rows ();
               if (n_cols_gas == SPOF_KEYWORD_COLUMNS)
                 {
+				  get_gas_data ()->init_scal_tables(5);
                   get_gas_data ()->add_spof (gas_input_table[region_index]->convert_to_array (n_rows_gas, n_cols_gas), region_index, false);
                 }
               else 
                 {
+				  get_gas_data ()->init_scal_tables(3);
                   get_gas_data ()->add_spfn (gas_input_table[region_index]->convert_to_array (n_rows_gas, n_cols_gas), region_index, false);
                   if (oil_input_table[region_index].get ())
                     {

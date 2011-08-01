@@ -103,7 +103,7 @@ namespace blue_sky
   spv_double 
   table::convert_to_array (const t_long n_rows, const t_long n_cols) const 
     {
-      BS_ASSERT (n_rows * n_cols <= values.size ());
+      //BS_ASSERT (n_rows * n_cols <= values.size ());
       spv_double data = BS_KERNEL.create_object (v_double::bs_type ());
       data->resize (n_rows * n_cols);
       t_double *data_array = &(*data)[0];
