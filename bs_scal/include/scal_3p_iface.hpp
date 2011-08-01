@@ -99,6 +99,9 @@ namespace blue_sky
     typedef smart_ptr <table_iface, true>           sp_scal_input_table_t;
     typedef std::vector <sp_scal_input_table_t>     sp_scal_input_table_array_t;    
 
+	typedef jfunction             					jfunction_t;
+    typedef smart_ptr <jfunction_t, true>			sp_jfunction_t;
+
     virtual ~scal_3p_iface () {}
 
     virtual BS_SP (scale_array_holder_iface)
@@ -181,6 +184,12 @@ namespace blue_sky
       RPO_MODEL_ENUM      rpo_model, 
       bool                is_scalecrs_ = false) = 0;
     
+	virtual void
+	init_from_scal(bool is_o, bool is_g, bool is_w,
+							const phase_d_t &phase_d, const sat_d_t &sat_d,
+							sp_jfunction_t water_jfunc,
+							sp_jfunction_t gas_jfunc) = 0;
+
     virtual void
     init_scal_input_table_arrays (const t_long    n_scal_regions_, 
                                   bool            is_oil, 

@@ -632,8 +632,8 @@ namespace blue_sky
 
   void
   equil_model_depth::py_calc_equil(bool is_o, bool is_g, bool is_w,
-		        BS_SP(scal_dummy_iface) scal_dummy, 
-				BS_SP(pvt_dummy_iface) pvt_dummy,
+		        BS_SP(scal_3p_iface) scal_props, 
+				BS_SP(pvt_3p_iface) pvt_props,
 				spv_float equil,
 				const stdv_float min_depth,
 				const stdv_float max_depth,
@@ -647,8 +647,6 @@ namespace blue_sky
 	  t_long n_eql = 1;
 	  stdv_long sat_regions, pvt_regions;
 	  idata::vval_vs_depth val_dummy;
-	  BS_SP(pvt_3p) pvt_props = BS_KERNEL.create_object(pvt_3p::bs_type());
-	  BS_SP(scal_3p) scal_props = BS_KERNEL.create_object(scal_3p::bs_type());
 	  
 	  phase_d_t phase_d;
 	  sat_d_t sat_d;
@@ -687,10 +685,10 @@ namespace blue_sky
           sat_d[i] = -1;
       }
 
-//	  pvt_props->init_from_pvt(pvt_dummy, is_o, is_g, is_w,
-//		                       1.0, 0.1, 1000.0, 100, density);
-	  scal_props->init_from_scal(scal_dummy, is_o, is_g, is_w, phase_d, sat_d,
-								jfunc_water, jfunc_oil);
+	  pvt_props->fill_pvt_arrays(is_o, is_g, is_w,
+		                       1.0, 0.1, 1000.0, 100);
+	  scal_props->init_from_scal(is_o, is_g, is_w, phase_d, sat_d,
+								 jfunc_water, jfunc_oil);
 	  sat_regions.push_back(0);
 	  pvt_regions.push_back(0);
 

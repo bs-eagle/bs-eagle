@@ -39,9 +39,7 @@ namespace blue_sky
       typedef scale_array_holder            						scale_array_holder_t;
       typedef scal_2p_data_holder              					scal_2p_data_holder_t;
 
-      typedef jfunction             										jfunction_t;
-
-      typedef smart_ptr <jfunction_t, true>							sp_jfunction_t;
+      
       typedef smart_ptr <scale_array_holder_t, true>		sp_scale_array_holder_t;
       typedef smart_ptr <scal_2p_data_holder_t, true>		sp_scal_2p_data_holder_t;
       typedef boost::array <index_t, FI_PHASE_TOT>			phase_d_t;
@@ -177,8 +175,7 @@ namespace blue_sky
       update_gas_data ();
 
 	  void
-	  init_from_scal(sp_scal_dummy_iface const &scal_data,
-					 bool is_o, bool is_g, bool is_w,
+	  init_from_scal(bool is_o, bool is_g, bool is_w,
 					 const phase_d_t &phase_d, const sat_d_t &sat_d,
 					 sp_jfunction_t water_jfunc,
 					 sp_jfunction_t gas_jfunc);

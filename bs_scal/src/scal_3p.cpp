@@ -1479,21 +1479,17 @@ namespace blue_sky
   }
 
   void
-  scal_3p::init_from_scal(sp_scal_dummy_iface const &scal_data, 
-                          bool is_o, bool is_g, bool is_w,
+  scal_3p::init_from_scal(bool is_o, bool is_g, bool is_w,
 						  const phase_d_t &phase_d, const sat_d_t &sat_d,
 						  sp_jfunction_t water_jfunc,
 						  sp_jfunction_t gas_jfunc)
   {
-	std::pair <BS_SP( table_iface), BS_SP( table_iface)> tables = scal_data->get_table();
-	water_data->init_regions_from_table(tables.first, true);
-	if (tables.second)
-		gas_data->init_regions_from_table(tables.second, false);
+	  init_scal_data_from_input_tables();
 
-	set_water_jfunction(water_jfunc);
-	set_gas_jfunction(gas_jfunc);
-	init(is_w, is_g, is_o, phase_d, sat_d, RPO_DEFAULT_MODEL);
-	update_gas_data();
+	  set_water_jfunction(water_jfunc);
+	  set_gas_jfunction(gas_jfunc);
+	  init(is_w, is_g, is_o, phase_d, sat_d, RPO_DEFAULT_MODEL);
+	  update_gas_data();
   }
   //////////////////////////////////////////////////////////////////////////
   BLUE_SKY_TYPE_STD_CREATE (scale_array_holder);

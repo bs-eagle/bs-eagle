@@ -47,8 +47,8 @@ namespace blue_sky
 	public:
 		void
 		py_calc_equil(bool is_o, bool is_g, bool is_w,
-		              BS_SP(scal_dummy_iface) scal_props, 
-					  BS_SP(pvt_dummy_iface) pvt_props,
+		              BS_SP(scal_3p_iface) scal_props, 
+					  BS_SP(pvt_3p_iface) pvt_props,
 					  spv_float equil,
 					  const stdv_float min_depth,
 					  const stdv_float max_depth,
