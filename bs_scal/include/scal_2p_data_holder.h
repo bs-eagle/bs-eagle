@@ -156,19 +156,9 @@ namespace blue_sky {
       for (t_long i = 0; i < n_scal_regions; i++)
         {
           scal_table_array[i] = BS_KERNEL.create_object ("table");
+		  scal_table_array[i]->init(0, SCAL_TABLE_TOTAL);
         }  
     }
-
-	void
-	init_scal_tables(const t_long num_cols)
-	{
-		BS_ASSERT (num_cols >= 1);
-		int size;
-		for (t_long i = 0, size = scal_table_array.size(); i < size; i++)
-		{
-			scal_table_array[i]->init(0, num_cols);
-		}
-	}
 
 	void init_regions_from_table(sp_table const &scal_table, bool is_water)
 	{

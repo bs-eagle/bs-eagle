@@ -85,7 +85,8 @@ namespace blue_sky
 
 		virtual void
 		fill_pvt_arrays (bool is_oil, bool is_gas, bool is_water, 
-                         t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals) = 0;
+                         t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals,
+						 stdv_double density) = 0;
         
         virtual BS_SP (table_iface)
 				get_table (t_long pvt_fluid_type, t_long index_pvt_region) const = 0;	 

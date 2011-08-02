@@ -175,15 +175,17 @@ namespace blue_sky
       update_gas_data ();
 
 	  void
-	  init_from_scal(bool is_o, bool is_g, bool is_w,
-					 const phase_d_t &phase_d, const sat_d_t &sat_d,
+	  init_from_scal();
+
+	  void
+	  init_from_scal_ex(const phase_d_t &phase_d, const sat_d_t &sat_d,
 					 sp_jfunction_t water_jfunc,
 					 sp_jfunction_t gas_jfunc);
 	    
 	    //! init of input scal tables 
       void
       init_scal_input_table_arrays (const t_long n_scal_regions_, 
-                                    bool is_oil, bool is_gas, bool is_water);
+                                    bool is_oil_, bool is_gas_, bool is_water_);
       //! return input scal table for defined region and fluid type
       virtual BS_SP (table_iface)
       get_table (t_int scal_fluid_type, t_long index_scal_region) const;
@@ -212,6 +214,7 @@ namespace blue_sky
       sp_scal_input_table_array_t  gas_input_table;
       sp_scal_input_table_array_t  oil_input_table;
       
+	  bool is_gas, is_oil, is_water;
     public:
 
       BLUE_SKY_TYPE_DECL (scal_3p);

@@ -686,9 +686,9 @@ namespace blue_sky
       }
 
 	  pvt_props->fill_pvt_arrays(is_o, is_g, is_w,
-		                       1.0, 0.1, 1000.0, 100);
-	  scal_props->init_from_scal(is_o, is_g, is_w, phase_d, sat_d,
-								 jfunc_water, jfunc_oil);
+		                       1.0, 0.1, 1000.0, 100,
+							   density);
+	  scal_props->init_from_scal();
 	  sat_regions.push_back(0);
 	  pvt_regions.push_back(0);
 

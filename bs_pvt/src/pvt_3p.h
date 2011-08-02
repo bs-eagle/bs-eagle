@@ -78,7 +78,8 @@ namespace blue_sky
         
 		void
 		fill_pvt_arrays (bool is_oil, bool is_gas, bool is_water, 
-                         t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals);
+                         t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals,
+						 stdv_double density);
                 
         virtual std::list <BS_SP( table_iface)>
         get_tables (t_long index_pvt_region) const;

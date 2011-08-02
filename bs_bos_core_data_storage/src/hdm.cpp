@@ -78,8 +78,9 @@ namespace blue_sky
     int n_phases; 
     
     pvt_3p_->init_pvt_arrays (n_pvt_regions, data->props->get_b("oil_phase"),
-                                             data->props->get_b("water_phase"),
-                                             data->props->get_b("gas_phase"));
+											 data->props->get_b("gas_phase"),
+                                             data->props->get_b("water_phase")
+                                             );
     
     n_phases = data->props->get_b("oil_phase");
     n_phases += data->props->get_b("water_phase");

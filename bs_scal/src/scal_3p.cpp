@@ -143,11 +143,11 @@ namespace blue_sky
         
         for (t_long i = 0; i < table_len; i++)
           {
-            sp_[i]   = data_array[i + 0];
+            sp_[i]   = data_array[i*4 + 0];
             so_[i]   = 1.0 - sp_[i];
-            krp_[i]  = data_array[i + 1];
-            krop_[i] = data_array[i + 2];
-            pcp_[i]  = is_water ? -data_array[i + 3] : data_array[i + 3];
+            krp_[i]  = data_array[i*4 + 1];
+            krop_[i] = data_array[i*4 + 2];
+            pcp_[i]  = is_water ? -data_array[i*4 + 3] : data_array[i*4 + 3];
           }
         
         sp_table scal_table = scal_table_array[region_index]; 
@@ -236,9 +236,9 @@ namespace blue_sky
         
         for (t_long i = 0; i < table_len; i++)
           {
-            sp_[i]   = data_array[i + 0];
-            krp_[i]  = data_array[i + 1];
-            pcp_[i]  = is_water ? -data_array[i + 2] : data_array[i + 2];
+            sp_[i]   = data_array[i*3 + 0];
+            krp_[i]  = data_array[i*3 + 1];
+            pcp_[i]  = is_water ? -data_array[i*3 + 2] : data_array[i*3 + 2];
           }
         
         sp_table scal_table = scal_table_array[region_index]; 
@@ -322,8 +322,8 @@ namespace blue_sky
         
         for (t_long i = 0; i < table_len; i++)
           {
-            so_[i]   = data_array[i + 0];
-            krop_[i] = is_water ? data_array[i + 1] : data_array[i + 2];
+            so_[i]   = data_array[i*3 + 0];
+            krop_[i] = is_water ? data_array[i*3 + 1] : data_array[i*3 + 2];
           }
         
         sp_table scal_table = scal_table_array[region_index]; 
@@ -405,8 +405,8 @@ namespace blue_sky
         
         for (t_long i = 0; i < table_len; i++)
           {
-            so_[i]   = data_array[i + 0];
-            krop_[i] = data_array[i + 1];
+            so_[i]   = data_array[i*2 + 0];
+            krop_[i] = data_array[i*2 + 1];
           }
         
         sp_table scal_table = scal_table_array[region_index]; 
@@ -1479,8 +1479,51 @@ namespace blue_sky
   }
 
   void
-  scal_3p::init_from_scal(bool is_o, bool is_g, bool is_w,
-						  const phase_d_t &phase_d, const sat_d_t &sat_d,
+  scal_3p::init_from_scal()
+  {
+	  sp_jfunction_t wat_jfunc = BS_KERNEL.create_object(jfunction::bs_type());
+	  sp_jfunction_t gas_jfunc = BS_KERNEL.create_object(jfunction::bs_type());
+	  phase_d_t phase_d;
+	  sat_d_t sat_d;
+	  t_long n_phases = 0;
+      t_long phases = 0;
+	  t_long sat_counter = 0;    
+      if (is_water)
+      {
+        phase_d[0] = n_phases++;
+        phases |= 1 << FI_PHASE_WATER;
+      }
+      else 
+        phase_d[0] = -1;
+
+      if (is_gas)
+      {
+        phase_d[1] = n_phases++;
+        phases |= 1 << FI_PHASE_GAS;
+      }
+      else 
+        phase_d[1] = -1;
+
+      if (is_oil)
+      {
+        phase_d[2] = n_phases++;
+        phases |= 1 << FI_PHASE_OIL;
+      }
+      else 
+        phase_d[2] = -1;
+
+      for (size_t i = 0, sat_counter = 0; i < FI_PHASE_TOT; ++i)
+      {
+        if ((phases & (1 << i)) && (sat_counter < n_phases ))
+          sat_d[i] = sat_counter++;
+        else
+          sat_d[i] = -1;
+      }
+	  init_from_scal_ex(phase_d, sat_d, wat_jfunc, gas_jfunc);
+  }
+
+  void
+  scal_3p::init_from_scal_ex(const phase_d_t &phase_d, const sat_d_t &sat_d,
 						  sp_jfunction_t water_jfunc,
 						  sp_jfunction_t gas_jfunc)
   {
@@ -1488,7 +1531,7 @@ namespace blue_sky
 
 	  set_water_jfunction(water_jfunc);
 	  set_gas_jfunction(gas_jfunc);
-	  init(is_w, is_g, is_o, phase_d, sat_d, RPO_DEFAULT_MODEL);
+	  init(is_water, is_gas, is_oil, phase_d, sat_d, RPO_DEFAULT_MODEL);
 	  update_gas_data();
   }
   //////////////////////////////////////////////////////////////////////////
@@ -1521,11 +1564,14 @@ namespace blue_sky
   
   void
   scal_3p::init_scal_input_table_arrays (const t_long n_scal_regions_, 
-                                         bool is_oil, bool is_gas, bool is_water)
+                                         bool is_oil_, bool is_gas_, bool is_water_)
     {
       BS_ASSERT (n_scal_regions_ > 0);
       n_scal_regions = n_scal_regions_;
-      
+      is_oil = is_oil_;
+	  is_gas = is_gas_;
+	  is_water = is_water_;
+
       water_input_table.resize (n_scal_regions);
       gas_input_table.resize (n_scal_regions);
       oil_input_table.resize (n_scal_regions);
@@ -1601,12 +1647,10 @@ namespace blue_sky
               t_long n_rows_water = water_input_table[region_index]->get_n_rows ();
               if (n_cols_water == SPOF_KEYWORD_COLUMNS)
                 {
-				  get_water_data ()->init_scal_tables(5);
                   get_water_data ()->add_spof (water_input_table[region_index]->convert_to_array (n_rows_water, n_cols_water), region_index, true);
                 }
               else 
                 {
-				  get_water_data ()->init_scal_tables(3);
                   get_water_data ()->add_spfn (water_input_table[region_index]->convert_to_array (n_rows_water, n_cols_water), region_index, true);
                   if (oil_input_table[region_index].get ())
                     {
@@ -1630,12 +1674,10 @@ namespace blue_sky
               t_long n_rows_gas = gas_input_table[region_index]->get_n_rows ();
               if (n_cols_gas == SPOF_KEYWORD_COLUMNS)
                 {
-				  get_gas_data ()->init_scal_tables(5);
                   get_gas_data ()->add_spof (gas_input_table[region_index]->convert_to_array (n_rows_gas, n_cols_gas), region_index, false);
                 }
               else 
                 {
-				  get_gas_data ()->init_scal_tables(3);
                   get_gas_data ()->add_spfn (gas_input_table[region_index]->convert_to_array (n_rows_gas, n_cols_gas), region_index, false);
                   if (oil_input_table[region_index].get ())
                     {

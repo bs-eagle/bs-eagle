@@ -259,7 +259,8 @@ namespace blue_sky
   
   void
   pvt_3p::fill_pvt_arrays (bool is_oil, bool is_gas, bool is_water, 
-                           t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals)
+                           t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals,
+						   stdv_double density)
   {
 
     if (is_oil)
@@ -269,6 +270,7 @@ namespace blue_sky
             for (size_t i = 0; i<n_pvt_regions; i++)
 			{
 				init_pvt_arr_helper::set_pvt_base(pvt_oil_array[i], get_table(i, FI_PHASE_OIL));
+				pvt_oil_array[i]->set_surface_density(density[0]);
 			}
           }
         else
@@ -276,6 +278,7 @@ namespace blue_sky
             for (size_t i = 0; i<n_pvt_regions; i++)
 			{
 				init_pvt_arr_helper::set_pvt_base(pvt_oil_array[i], get_table(i, FI_PHASE_OIL));
+				pvt_oil_array[i]->set_surface_density(density[0]);
 			}
           }
       }
@@ -284,6 +287,7 @@ namespace blue_sky
       for (size_t i = 0; i<n_pvt_regions; i++)
 	  {
 		init_pvt_arr_helper::set_pvt_base(pvt_gas_array[i], get_table(i, FI_PHASE_GAS));
+		pvt_gas_array[i]->set_surface_density(density[1]);
 	  }
     if (is_water)
       for (size_t i = 0; i<n_pvt_regions; i++)
@@ -301,6 +305,7 @@ namespace blue_sky
 			}
 		}
 		init_pvt_arr_helper::set_pvt_base(pvt_water_array[i], new_table);
+		pvt_water_array[i]->set_surface_density(density[2]);
 	  }
 
     for (size_t i = 0; i < n_pvt_regions; i++)

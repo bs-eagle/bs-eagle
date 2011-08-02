@@ -85,9 +85,6 @@ namespace blue_sky
     virtual void
     init_regions_from_tables () = 0;
     
-    virtual void
-	init_scal_tables(const t_long num_cols) = 0;
-
 	virtual void
 	clear_regions() = 0;
   };
@@ -189,8 +186,10 @@ namespace blue_sky
       bool                is_scalecrs_ = false) = 0;
     
 	virtual void
-	init_from_scal(bool is_o, bool is_g, bool is_w,
-							const phase_d_t &phase_d, const sat_d_t &sat_d,
+	init_from_scal () = 0;
+
+	virtual void
+	init_from_scal_ex(const phase_d_t &phase_d, const sat_d_t &sat_d,
 							sp_jfunction_t water_jfunc,
 							sp_jfunction_t gas_jfunc) = 0;
 
