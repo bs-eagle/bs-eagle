@@ -162,7 +162,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
             z_end = z;
     }
 
-    printf("\n z_start = %d z_end = %d", z_start, z_end);
+    //printf("\n z_start = %d z_end = %d", z_start, z_end);
 
     //////////////////////////////////////////////
 
@@ -181,7 +181,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
     index3d my;
     t_int face_in, face_out;
 
-    point3d P[8], M[2], WP;
+    point3d P[8], M[2], WP, WP_old;
     t_float z1, z2;
 
     int faces2corners[7][4] = { {0,1,2,3},
@@ -209,7 +209,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
 
     my = index3d(my_ind, ny ,nz);
 
-    printf("\n i=%d my_ind=%d x=%d y=%d z=%d", i, my_ind, my.x, my.y, my.z);
+    //printf("\n i=%d my_ind=%d x=%d y=%d z=%d", i, my_ind, my.x, my.y, my.z);
 
     //FIXME 
     while (faces[ii] == 6 && ii<n-1)
@@ -225,19 +225,22 @@ bp::tuple make_projection(t_int ny, t_int nz,
 
     // projection length
     l = sqrt( (M[1].x-M[0].x)*(M[1].x-M[0].x) +  (M[1].y-M[0].y)*(M[1].y-M[0].y));
-    printf("\n l = %f", l);
+    //printf("\n l = %f", l);
 
     //FIXME always add first well point
     //{
-       printf("\n well point");
+       //printf("\n well point");
        //WP.x = cross_x[i]; 
        //WP.y = cross_y[i];
-       WP.z = cross_z[i];
+       //WP.z = cross_z[i];
        //wl = sqrt( (WP.x-M[0].x)*(WP.x-M[0].x) +  (WP.y-M[0].y)*(WP.y-M[0].y));
        //wL = L - l + wl;
        //wpoints.push_back(WP.z);
        wpoints.push_back(wL);
-       printf("\n L=%f l=%f wl=%f wL=%f \n", L, l, wl, wL);
+       WP_old.x = cross_x[0]; 
+       WP_old.y = cross_y[0]; 
+       WP_old.z = cross_z[0]; 
+       //printf("\n L=%f l=%f wl=%f wL=%f \n", L, l, wl, wL);
     //}
 
     face_in = faces[i];
@@ -258,7 +261,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
     // index = (my_ind.x; my_ind.y; z_start) ZYX
 
     index = z_start + my.y*nz + my.x*nz*ny;
-    printf("\n index=%d", index);
+    //printf("\n index=%d", index);
 
     // for face_in
     if (face_in !=0 && face_in != 2 && face_in != 6)
@@ -298,7 +301,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
     points.push_back(z1);
     points.push_back(L);
 
-    printf("\n z1 = %f L = %f", z1, L);
+    //printf("\n z1 = %f L = %f", z1, L);
 
 
     //for all cells in column
@@ -344,7 +347,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
        }
        points.push_back(z2);
        points.push_back(L);
-       printf("\n z2 = %f L = %f", z2, L);
+       //printf("\n z2 = %f L = %f", z2, L);
     }
 
     //for the first cell in column
@@ -354,7 +357,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
     L += l;
 
     index = z_start + my.y*nz + my.x*nz*ny;
-    printf("\n index=%d", index);
+    //printf("\n index=%d", index);
 
     // for face_out
     if (face_out !=0 && face_out != 2)
@@ -383,7 +386,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
     points.push_back(z1);
     points.push_back(L);
 
-    printf("\n z1 = %f L = %f", z1, L);
+    //printf("\n z1 = %f L = %f", z1, L);
     }
 
     //for all cells in column
@@ -424,7 +427,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
        points.push_back(z2);
        points.push_back(L);
 
-       printf("\n z2 = %f L = %f", z2, L);
+       //printf("\n z2 = %f L = %f", z2, L);
        }
     }
 
@@ -435,18 +438,21 @@ bp::tuple make_projection(t_int ny, t_int nz,
        my_ind = indices[i];
        
        my = index3d(my_ind, ny ,nz);
-       printf("\n i=%d my_ind=%d x=%d y=%d z=%d", i, my_ind, my.x, my.y, my.z);
+       //printf("\n i=%d my_ind=%d x=%d y=%d z=%d", i, my_ind, my.x, my.y, my.z);
        
        //FIXME add well point handler
        if (faces[i] == 6)
        {
-           printf("\n\n well point i=%d my_ind=%d",i,my_ind);
+           //printf("\n\n well point i=%d my_ind=%d",i,my_ind);
            WP.x = cross_x[i]; 
            WP.y = cross_y[i];
            WP.z = cross_z[i];
-           wl = sqrt( (WP.x-M[0].x)*(WP.x-M[0].x) +  (WP.y-M[0].y)*(WP.y-M[0].y));
-           wL = L - l + wl;
-           printf("\n L=%f l=%f wl=%f wL=%f \n", L, l, wl, wL);
+           //wl = sqrt( (WP.x-M[0].x)*(WP.x-M[0].x) +  (WP.y-M[0].y)*(WP.y-M[0].y));
+           //wL = L - l + wl;
+           wl = sqrt( (WP.x-WP_old.x)*(WP.x-WP_old.x) +  (WP.y-WP_old.y)*(WP.y-WP_old.y));
+           wL += wl;
+           //printf("\n L=%f l=%f wl=%f wL=%f \n", L, l, wl, wL);
+           WP_old = WP;
            //wpoints.push_back(WP.z);
            wpoints.push_back(wL);
            continue;
@@ -462,7 +468,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
        ii = i + 1;
        while (faces[ii] == 6 && ii<n-1)
            ii ++;
-       printf("\n i=%d ii=%d",i,ii);
+       //printf("\n i=%d ii=%d",i,ii);
        //well-cell intersection points
        M[0].x = cross_x[i]; 
        M[0].y = cross_y[i];
@@ -471,7 +477,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
        M[1].y = cross_y[ii];
        M[1].z = cross_z[ii];
 
-       printf("\n M[0] %f %f %f M[1] %f %f %f", M[0].x, M[0].y, M[0].z, M[1].x, M[1].y, M[1].z);
+       //printf("\n M[0] %f %f %f M[1] %f %f %f", M[0].x, M[0].y, M[0].z, M[1].x, M[1].y, M[1].z);
 
        // projection length
        l = sqrt( (M[1].x-M[0].x)*(M[1].x-M[0].x) +  (M[1].y-M[0].y)*(M[1].y-M[0].y));
@@ -480,7 +486,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
        if (l == 0)
            continue;
 
-       printf("\n l = %f", l);
+       //printf("\n l = %f", l);
        L += l;
 
        //face_in = faces[i];
@@ -529,7 +535,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
 
            points.push_back(z1);
            points.push_back(L);
-           printf("\n z1 = %f L = %f", z1, L);
+           //printf("\n z1 = %f L = %f", z1, L);
         }
        
        //for the other cells in column
@@ -569,7 +575,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
 
                points.push_back(z2);
                points.push_back(L);
-               printf("\n z2 = %f L = %f", z2, L);
+               //printf("\n z2 = %f L = %f", z2, L);
              }
        }
 
@@ -579,14 +585,23 @@ bp::tuple make_projection(t_int ny, t_int nz,
 
     i = n-1;
        //wpoints.push_back(M[1].z);
-    wpoints.push_back(L);
+    
+    //wpoints.push_back(L);
 
     if (faces[i] == 0 || faces[i] == 2 || faces[i] == 6)
     {
+       WP.x = cross_x[i]; 
+       WP.y = cross_y[i];
+       WP.z = cross_z[i];
+       wl = sqrt( (WP.x-WP_old.x)*(WP.x-WP_old.x) +  (WP.y-WP_old.y)*(WP.y-WP_old.y));
+       wL += wl;
+       //printf("\n L=%f l=%f wl=%f wL=%f \n", L, l, wl, wL);
+       wpoints.push_back(wL);
+
        my_ind = indices[i];
        
        my = index3d(my_ind, ny ,nz);
-       printf("\n i=%d my_ind=%d x=%d y=%d z=%d", i, my_ind, my.x, my.y, my.z);
+       //printf("\n i=%d my_ind=%d x=%d y=%d z=%d", i, my_ind, my.x, my.y, my.z);
        
 
        
@@ -610,8 +625,8 @@ bp::tuple make_projection(t_int ny, t_int nz,
            z1 = find_point_z(P[0],P[1], P[2], M[1]);
        
            points.push_back(z1);
-           points.push_back(L);
-           printf("\n z1 = %f L = %f", z1, L);
+           points.push_back(wL);
+           //printf("\n z1 = %f L = %f", z1, L);
         
        
        //for the other cells in column
@@ -635,8 +650,8 @@ bp::tuple make_projection(t_int ny, t_int nz,
                z2 = find_point_z(P[4],P[5], P[6], M[1]);
            
                points.push_back(z2);
-               points.push_back(L);
-               printf("\n z2 = %f L = %f", z2, L);
+               points.push_back(wL);
+               //printf("\n z2 = %f L = %f", z2, L);
              
        }
 
@@ -655,7 +670,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
 
     n_l_points = points.size()/n_z_points/2;
 
-    printf("\n nl=%d nz=%d", n_l_points, n_z_points);
+    //printf("\n nl=%d nz=%d", n_l_points, n_z_points);
 
     return bp::make_tuple(proj_mesh, well_points, scalars, n_z_points, n_l_points); 
 }
