@@ -1697,7 +1697,8 @@ namespace blue_sky
             }  
         }
       get_water_data ()->init_regions_from_tables ();
-      get_gas_data ()->init_regions_from_tables ();
+	  if (is_gas)
+		get_gas_data ()->init_regions_from_tables ();
         
     }  
 } // namespace blue_sky

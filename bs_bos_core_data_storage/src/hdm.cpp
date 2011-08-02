@@ -89,8 +89,8 @@ namespace blue_sky
       {
         this->scal_3p_ = BS_KERNEL.create_object ("scal_3p");
         scal_3p_->init_scal_input_table_arrays (n_scal_regions, data->props->get_b("oil_phase"),
-                                                                data->props->get_b("water_phase"),
-                                                                data->props->get_b("gas_phase"));
+                                                                data->props->get_b("gas_phase"),
+                                                                data->props->get_b("water_phase"));
       }
   }
   
