@@ -22,19 +22,19 @@ namespace blue_sky
     BS_SP (idata) idata = params.hdm->get_data ();
 
     t_long n_pvt_region = idata->props->get_i ("pvt_region");
-    stdv_float density (n_pvt_region * 3);
+    spv_float sp_density = BS_KERNEL.create_object (v_float::bs_type ());
 
+    sp_density->resize (3 * n_pvt_region);
     for (t_long i = 0; i < n_pvt_region; ++i)
       {
-        if (reader->read_array (keyword, density, 3 * i, 3) != 3)
+        if (reader->read_array (keyword, *sp_density, 3 * i, 3) != 3)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
               % reader->get_prefix () % keyword);
           }
       }
 
-    spv_float sp_density = BS_KERNEL.create_object (v_float::bs_type ());
-    sp_density->init (density);
+    
     idata->set_density (sp_density);
 
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;

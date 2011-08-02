@@ -36,7 +36,7 @@ namespace blue_sky {
     public:
     
       // initialize fluids
-      virtual void init_fluids(t_int n_scal_regions, t_int n_pvt_regions) = 0;
+      virtual void init_fluids(t_int n_pvt_regions, t_int n_scal_regions) = 0;
     
       // initialize data manager
       virtual void init(const std::string &model_name) = 0;

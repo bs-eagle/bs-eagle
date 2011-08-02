@@ -530,7 +530,7 @@ namespace blue_sky
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
           % reader->get_prefix() % keyword);
       }
-
+    params.hdm->init_fluids(regions[0], regions[1]);
     idata->set_region (regions[0], regions[1], regions[2], regions[3]);
 
     /*

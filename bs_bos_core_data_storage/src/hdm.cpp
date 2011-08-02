@@ -73,7 +73,7 @@ namespace blue_sky
   }
  
   void
-  hdm::init_fluids(t_int n_scal_regions, t_int n_pvt_regions)
+  hdm::init_fluids(t_int n_pvt_regions, t_int n_scal_regions)
   {
     int n_phases; 
     
