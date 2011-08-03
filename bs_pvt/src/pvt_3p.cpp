@@ -402,11 +402,11 @@ namespace blue_sky
     for (t_long i = 0; i < n_pvt_regions; i++)
       {
          if (pvt_oil_array[i].get ())
-           pvt_oil_array[i]->set_surface_density (density_data[i * FI_PHASE_TOT + FI_PHASE_OIL]);
+           pvt_oil_array[i]->set_surface_density (density_data[i * FI_PHASE_TOT]);
          if (pvt_water_array[i].get ())
-           pvt_water_array[i]->set_surface_density (density_data[i * FI_PHASE_TOT + FI_PHASE_WATER]);     
+           pvt_water_array[i]->set_surface_density (density_data[i * FI_PHASE_TOT + 1]);     
          if (pvt_gas_array[i].get ())
-           pvt_gas_array[i]->set_surface_density (density_data[i * FI_PHASE_TOT + FI_PHASE_GAS]);          
+           pvt_gas_array[i]->set_surface_density (density_data[i * FI_PHASE_TOT + 2]);          
       }
   }
   

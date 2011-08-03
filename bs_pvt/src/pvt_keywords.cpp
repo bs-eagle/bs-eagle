@@ -12,6 +12,8 @@
 #include "keyword_manager_iface.h"
 #include "data_class.h"
 #include "read_class.h"
+#include "pvt_3p_iface.h"
+#include "table_iface.h"
 
 namespace blue_sky 
 {
@@ -19,10 +21,10 @@ namespace blue_sky
   DENSITY (std::string const &keyword, keyword_params &params)
   {
     BS_SP (FRead) reader = params.hdm->get_reader ();
-    BS_SP (idata) idata = params.hdm->get_data ();
+    BS_SP (pvt_3p_iface) pvt = params.hdm->get_pvt ();
 
-    t_long n_pvt_region = idata->props->get_i ("pvt_region");
-    spv_float sp_density = BS_KERNEL.create_object (v_float::bs_type ());
+    t_long n_pvt_region = params.hdm->get_prop()->get_i ("pvt_region");
+    spv_float sp_density = pvt->get_density();
 
     sp_density->resize (3 * n_pvt_region);
     for (t_long i = 0; i < n_pvt_region; ++i)
@@ -35,8 +37,7 @@ namespace blue_sky
       }
 
     
-    idata->set_density (sp_density);
-
+    pvt->set_density_to_pvt_internal();
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
@@ -44,20 +45,26 @@ namespace blue_sky
   PVTO (std::string const &keyword, keyword_params &params)
   {
     BS_SP (FRead) reader = params.hdm->get_reader ();
-    BS_SP (idata) idata = params.hdm->get_data ();
-    t_float dbuf[DOUB_BUF_LEN] = {0};
-    t_long n_pvt_region = idata->props->get_i("pvt_region");
+    BS_SP (pvt_3p_iface) pvt = params.hdm->get_pvt ();
+    BS_SP(table_iface) tbl;
     
+    stdv_float dbuf;
+    t_long n_pvt_region = params.hdm->get_prop()->get_i("pvt_region");
+    dbuf.resize(4);
+    /*   
     if (!idata->pvto.size())
       {
         bs_throw_exception (boost::format ("Error in %s: PVT table for oil has not been initialized yet (keyword: %s)")
           % reader->get_prefix () % keyword);
       }
+    */
 
     // Read table for each of region
     for (t_long i = 0; i < n_pvt_region; i++)
       {
-        t_long lj = 0;
+        tbl = pvt->get_table (i, FI_PHASE_OIL);
+        tbl->init(0, 4);
+        //t_long lj = 0;
         char buf[CHAR_BUF_LEN] = {0};
         if (reader->read_line (buf, CHAR_BUF_LEN) <= 0)
           {
@@ -65,14 +72,15 @@ namespace blue_sky
               % reader->get_prefix () % keyword);
           }
 
-        if (sscanf (buf, "%lf%lf%lf%lf", &dbuf[lj * 4],
-                    &dbuf[lj * 4 + 1], &dbuf[lj * 4 + 2],
-                    &dbuf[lj * 4 + 3]) != 4)
+        if (sscanf (buf, "%lf%lf%lf%lf", &dbuf[0],
+                    &dbuf[1], &dbuf[2],
+                    &dbuf[3]) != 4)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
               % reader->get_prefix () % keyword);
           }
-        for (lj = 1;; ++lj)
+        tbl->push_back(dbuf);
+        for (;;)
           {
             if (reader->read_line (buf, CHAR_BUF_LEN) <= 0)
               {
@@ -81,22 +89,21 @@ namespace blue_sky
               }
             if (buf[0] == '/')
               {
-                idata->pvto[i].main_data_->resize(lj*4);
                 break;
               }
 
             size_t len = 0;
-            if ((len = sscanf (buf, "%lf%lf%lf%lf", &dbuf[lj * 4],
-                               &dbuf[lj * 4 + 1], &dbuf[lj * 4 + 2],
-                               &dbuf[lj * 4 + 3])) != 4)
+            if ((len = sscanf (buf, "%lf%lf%lf%lf", &dbuf[0],
+                               &dbuf[1], &dbuf[2],
+                               &dbuf[3])) != 4)
               {
                 if (len == 3)
                   {
                     // 3 values table
-                    dbuf[lj * 4 + 3] = dbuf[lj * 4 + 2];
-                    dbuf[lj * 4 + 2] = dbuf[lj * 4 + 1];
-                    dbuf[lj * 4 + 1] = dbuf[lj * 4];
-                    dbuf[lj * 4] = -1.0; //dbuf[(lj - 1) * 4];    // previous
+                    dbuf[3] = dbuf[2];
+                    dbuf[2] = dbuf[1];
+                    dbuf[1] = dbuf[0];
+                    dbuf[0] = -999.0; 
                   }
                 else
                   {
@@ -104,96 +111,154 @@ namespace blue_sky
                       % reader->get_prefix () % keyword);
                   }
               }
+            tbl->push_back(dbuf);
           }
 
-        t_float *main_data = idata->pvto[i].main_data_->data ();
-        // Rows infill
-        for (t_long j = 0; j < lj*4; j++)
-          {
-            main_data[j] = dbuf[j];
-          }
-
-        BOSOUT (section::read_data, level::medium) << "lj=" << lj << " i=" << i << bs_end;
+        BOSOUT (section::read_data, level::medium) << " i=" << i << bs_end;
       }
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
-
+  
+  
   void
   PVDO (std::string const &keyword, keyword_params &params)
   {
     BS_SP (FRead) reader = params.hdm->get_reader ();
-    BS_SP (idata) idata = params.hdm->get_data ();
-    t_long n_pvt_region = idata->props->get_i("pvt_region");
-
-    if (!idata->pvtdo.size())
-      {
-        bs_throw_exception (boost::format ("Error in %s: PVT table for dead oil has not been initialized yet (keyword: %s)")
-          % reader->get_prefix () % keyword);
-      }
-
+    BS_SP (pvt_3p_iface) pvt = params.hdm->get_pvt ();
+    BS_SP(table_iface) tbl;
+    int n_cols = 3;
+    
+    stdv_float dbuf;
+    char buf[CHAR_BUF_LEN] = {0};
+    t_long n_pvt_region = params.hdm->get_prop()->get_i("pvt_region");
+    
+    dbuf.resize(n_cols);
+    
     // Read table for each of region
     for (t_int i = 0; i < n_pvt_region; i++)
       {
-        if (reader->read_table (keyword, (*idata->pvtdo[i].main_data_), 3) < 1)
+        tbl = pvt->get_table (i, FI_PHASE_OIL);
+        tbl->init(0, n_cols);
+        
+        
+        for (;;)
           {
-            bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
-              % reader->get_prefix () % keyword);
+            if (reader->read_line (buf, CHAR_BUF_LEN) <= 0)
+              {
+                bs_throw_exception (boost::format ("Error in %s: can't read arguments for keyword %s")
+                  % reader->get_prefix () % keyword);
+              }
+            if (buf[0] == '/')
+              {
+                break;
+              }
+
+            size_t len = 0;
+            if ((len = sscanf (buf, "%lf%lf%lf", &dbuf[0],
+                               &dbuf[1], &dbuf[2])) != n_cols)
+                  {
+                    bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
+                      % reader->get_prefix () % keyword);
+                  }
+            tbl->push_back(dbuf);
           }
       }
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
+  
   void
   PVTW (std::string const &keyword, keyword_params &params)
   {
     BS_SP (FRead) reader = params.hdm->get_reader ();
-    BS_SP (idata) idata = params.hdm->get_data ();
-    t_long n_pvt_region = idata->props->get_i("pvt_region");
+    BS_SP (pvt_3p_iface) pvt = params.hdm->get_pvt ();
+    BS_SP(table_iface) tbl;
+    int n_rows = 0, n_cols = 4;
     
-    if (!idata->pvtw.size())
-      {
-        bs_throw_exception (boost::format ("Error in %s: PVT table for water has not been initialized yet (keyword: %s)")
-          % reader->get_prefix () % keyword);
-      }
-
+    stdv_float dbuf;
+    char buf[CHAR_BUF_LEN] = {0};
+    t_long n_pvt_region = params.hdm->get_prop()->get_i("pvt_region");
+    
+    dbuf.resize(n_cols);
+    
     // Read table for each of region
     for (t_int i = 0; i < n_pvt_region; i++)
       {
-        //idata->pvtw[i].main_data_.resize(4);
-        size_t len = 0;
-        if ((len = reader->read_table (keyword, (*idata->pvtw[i].main_data_), 4)) < 1)
+        tbl = pvt->get_table (i, FI_PHASE_WATER);
+        tbl->init(0, n_cols);
+        
+        
+        for (;;n_rows++)
           {
-            bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
-              % reader->get_prefix () % keyword);
-          }
-        if (len != 1)
-          {
-            bs_throw_exception (boost::format ("Error in %s: you can specify only 4 arguments for keyword %s")
-              % reader->get_prefix () % keyword);
+            if (reader->read_line (buf, CHAR_BUF_LEN) <= 0)
+              {
+                bs_throw_exception (boost::format ("Error in %s: can't read arguments for keyword %s")
+                  % reader->get_prefix () % keyword);
+              }
+            if (buf[0] == '/')
+              {
+                break;
+              }
+            if (n_rows > 1)
+              {
+                bs_throw_exception (boost::format ("Error in %s: you can specify only 4 arguments for keyword %s")
+                  % reader->get_prefix () % keyword);
+              }
+
+            if (sscanf (buf, "%lf%lf%lf%lf", &dbuf[0], &dbuf[1], &dbuf[2], &dbuf[3]) != n_cols)
+                  {
+                    bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
+                      % reader->get_prefix () % keyword);
+                  }
+            tbl->push_back(dbuf);
           }
       }
-
-    BOSOUT (section::read_data, level::medium) << "pvt_region=" << n_pvt_region << bs_end;
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
+
   void
   PVDG (std::string const &keyword, keyword_params &params)
   {
     BS_SP (FRead) reader = params.hdm->get_reader ();
-    BS_SP (idata) idata = params.hdm->get_data ();
-    t_long n_pvt_region = idata->props->get_i("pvt_region");
-
+    BS_SP (pvt_3p_iface) pvt = params.hdm->get_pvt ();
+    BS_SP(table_iface) tbl;
+    int n_cols = 3;
+    
+    stdv_float dbuf;
+    char buf[CHAR_BUF_LEN] = {0};
+    t_long n_pvt_region = params.hdm->get_prop()->get_i("pvt_region");
+    
+    dbuf.resize(n_cols);
+    
     // Read table for each of region
     for (t_int i = 0; i < n_pvt_region; i++)
       {
-        //idata->pvtg[i].main_data_.resize(DOUB_BUF_LEN);
-        if (reader->read_table (keyword, (*idata->pvtg[i].main_data_), 3) < 1)
+        tbl = pvt->get_table (i, FI_PHASE_GAS);
+        tbl->init(0, n_cols);
+        
+        
+        for (;;)
           {
-            bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
-              % reader->get_prefix () % keyword);
+            if (reader->read_line (buf, CHAR_BUF_LEN) <= 0)
+              {
+                bs_throw_exception (boost::format ("Error in %s: can't read arguments for keyword %s")
+                  % reader->get_prefix () % keyword);
+              }
+            if (buf[0] == '/')
+              {
+                break;
+              }
+
+            if (sscanf (buf, "%lf%lf%lf", &dbuf[0], &dbuf[1], &dbuf[2]) != n_cols)
+                  {
+                    bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
+                      % reader->get_prefix () % keyword);
+                  }
+            tbl->push_back(dbuf);
           }
       }
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
   }
+  
   void
   ROCK (std::string const &keyword, keyword_params &params)
   {

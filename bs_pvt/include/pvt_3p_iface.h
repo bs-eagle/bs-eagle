@@ -89,7 +89,7 @@ namespace blue_sky
 						 stdv_double density) = 0;
         
         virtual BS_SP (table_iface)
-				get_table (t_long pvt_fluid_type, t_long index_pvt_region) const = 0;	 
+				get_table (t_long index_pvt_region, t_long pvt_fluid_type) const = 0;	 
 
         //! get density data to fill in
         virtual spv_float 
