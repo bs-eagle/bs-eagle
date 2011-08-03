@@ -269,7 +269,20 @@ namespace blue_sky
           {			
             for (size_t i = 0; i<n_pvt_regions; i++)
 			{
-				init_pvt_arr_helper::set_pvt_base(pvt_oil_array[i], get_table(i, FI_PHASE_OIL));
+				BS_SP(table_iface) old_table = get_table(i, FI_PHASE_OIL);
+				if (old_table->get_col_name(0) == "gor")
+				{
+					BS_SP(table_iface) new_table = BS_KERNEL.create_object("table");
+					new_table->init(0, 3);
+					for (int i = 0; i < 3; i++)
+					{
+						new_table->add_col_vector(i, 
+												old_table->get_col_name(i+1),
+												old_table->get_col_values(i+1));
+					}
+					old_table = new_table;
+				}
+				init_pvt_arr_helper::set_pvt_base(pvt_oil_array[i], old_table);
 				pvt_oil_array[i]->set_surface_density(density[0]);
 			}
           }
