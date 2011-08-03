@@ -21,7 +21,9 @@ namespace blue_sky
       // METHODS
       // ------------------------------------
     public:
-      typedef std::list<std::string> list_t;
+      typedef std::list<std::string>                  list_t;
+      typedef boost::archive::text_iarchive           tia_t;
+      typedef boost::archive::text_oarchive           toa_t;
 
       // destructor
       virtual ~prop ()
@@ -168,6 +170,20 @@ namespace blue_sky
           b_impl.reset_all ();
         }
 
+      virtual void save (toa_t &ar) const
+        {
+          ar & fp_impl;
+          ar & i_impl;
+          ar & s_impl;
+          ar & b_impl;
+        }
+      virtual void load (tia_t &ar)
+        {
+          ar & fp_impl;
+          ar & i_impl;
+          ar & s_impl;
+          ar & b_impl;
+        }
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual std::string py_str () const
         {

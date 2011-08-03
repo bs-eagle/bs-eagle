@@ -12,6 +12,11 @@
 #include <sstream>
 #include <map>
 #include <list>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/string.hpp>
 
 #include "throw_exception.h"
 
@@ -29,6 +34,16 @@ class prop_impl
         bool flag;
         std::string short_name;
         std::string description;
+        
+        template<class Archive>
+        void serialize(Archive & ar, const unsigned int /*version*/)
+          {
+            ar & value;
+            ar & def_value;
+            ar & flag;
+            ar & short_name;
+            ar & description;
+          }
       };
 
     typedef std::map<std::string, prop_storage> map_t;
@@ -161,6 +176,11 @@ class prop_impl
     // reset all
     void reset_all ();
 
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int /*version*/)
+      {
+        ar & data;
+      }
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual std::string py_str () const;
 #endif //BSPY_EXPORTING_PLUGIN

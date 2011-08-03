@@ -1,0 +1,63 @@
+/** 
+ * @file py_sql_well.h
+ * @brief python wraper for #sql_well
+ * @author Oleg Borschuk
+ * @version 
+ * @date 2011-07-29
+ */
+#ifndef PY_SQL_WELL_O4VRW03K
+
+#define PY_SQL_WELL_O4VRW03K
+
+
+#include <string>
+#include "well_pool_iface.h"
+
+#include BS_FORCE_PLUGIN_IMPORT ()
+#include "dummy_base.h"
+#include "construct_python_object.h"
+#include "make_me_happy.h"
+#include BS_STOP_PLUGIN_IMPORT ()
+
+#include "export_python_wrapper.h"
+
+#ifdef BSPY_EXPORTING_PLUGIN
+namespace blue_sky
+  {
+  namespace python
+    {
+
+  PY_EXPORTER (py_sql_well_exporter, default_exporter)
+    .def ("open_db",                            &T::open_db, 
+        args ("file_name"), "Open database")
+    .def ("close_db",                           &T::close_db, 
+        args (""), "Close database")
+    .def ("fill_db",                           &T::fill_db, 
+        args (""), "Fill database")
+    .def ("create_db_struct",                   &T::create_db_struct, 
+        args (""), "Create data base structure")
+    .def ("add_well",                           &T::add_well, 
+        args ("well_name"), "Add new well to the storage")
+    .def ("add_branch_gis",                     &T::add_branch_gis, 
+        args ("well_name", "branch_name", "gis"), "Add gis to the well branch")
+    .def ("get_branch_gis",                     &T::get_branch_gis, 
+        args ("well_name", "branch_name"),  "Get gis of well branch")
+    .def ("add_branch_traj",                     &T::add_branch_traj, 
+        args ("well_name", "branch_name", "traj"), "Add traj to the well branch")
+    .def ("get_branch_traj",                     &T::get_branch_traj, 
+        args ("well_name", "branch_name"),  "Get traj of well branch")
+    .def ("get_well_names",                     &T::get_well_names, 
+        args (""), "Return well namew")
+    .def ("__str__",                            &T::py_str)
+  PY_EXPORTER_END;                               
+
+  //! export matrices to python                  
+  void py_export_sql_well ();                    
+
+    
+  } // namespace python
+} // namespace blue_sky
+
+#endif // #ifdef BSPY_EXPORTING_PLUGIN
+#endif /* end of include guard: PY_sql_well_O4VRW03K */
+

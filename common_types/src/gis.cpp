@@ -336,6 +336,24 @@ namespace blue_sky
       return 0;
     }
 
+  gis::sp_gis_t 
+  gis::check_serial () const
+    {
+      std::ostringstream oss;
+      std::istringstream iss;
+
+      boost::archive::text_oarchive oar(oss);
+
+      sp_gis_t sp_gis = BS_KERNEL.create_object ("gis");
+
+      save (oar);
+      iss.str (oss.str ());
+      boost::archive::text_iarchive iar(iss);
+      sp_gis->load (iar);
+      return sp_gis;
+
+    }
+
 #ifdef BSPY_EXPORTING_PLUGIN
   std::string 
   gis::py_str () const

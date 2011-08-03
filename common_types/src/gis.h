@@ -27,6 +27,8 @@ namespace blue_sky
 
       typedef BS_SP (table_iface)                     sp_table_iface;
       typedef BS_SP (prop_iface)                      sp_prop_iface;
+      typedef boost::archive::text_iarchive           tia_t;
+      typedef boost::archive::text_oarchive           toa_t;
 
       // ------------------------------------
       // METHODS
@@ -62,6 +64,18 @@ namespace blue_sky
        * @return 0 if ok
        */
       virtual int read_from_las_file (const std::string &fname);
+
+      virtual void save (toa_t &ar) const
+        {
+          sp_table->save (ar);
+          sp_prop->save (ar);
+        }
+      virtual void load (tia_t &ar)
+        {
+          sp_table->load (ar);
+          sp_prop->load (ar);
+        }
+      virtual sp_gis_t check_serial () const;
     public:
 #ifdef BSPY_EXPORTING_PLUGIN
       /** 

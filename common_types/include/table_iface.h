@@ -9,6 +9,10 @@
 
 #define TABLE_IFACE_EUVNSA26
 #include <string>
+#include <sstream>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
 
 #include "bs_object_base.h"
 
@@ -23,7 +27,9 @@ class table_iface : public objbase
   {
     public:
       typedef std::vector <t_double>                  vector_t;
-      typedef BS_SP (table_iface)                     sp_table_iface;
+      typedef BS_SP (table_iface)                     sp_table_t;
+      typedef boost::archive::text_iarchive           tia_t;
+      typedef boost::archive::text_oarchive           toa_t;
 
     public:
       /** 
@@ -35,7 +41,7 @@ class table_iface : public objbase
       /*!
         \brief copy 
       */
-      virtual int copy (const sp_table_iface a) = 0;
+      virtual int copy (const sp_table_t a) = 0;
       
       /** 
        * @brief Initialize or reinitialize table by <n_rows> <n_cols> 
@@ -154,6 +160,11 @@ class table_iface : public objbase
        * @param v  -- <INPUT> row values
        */
       virtual void push_back (std::vector<t_double> &v) = 0;
+
+
+      virtual void save (toa_t &ar) const = 0;
+      virtual void load (tia_t &ar) = 0;
+      virtual sp_table_t check_serial () const = 0;
 
 #ifdef BSPY_EXPORTING_PLUGIN
       /** 

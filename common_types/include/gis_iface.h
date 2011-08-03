@@ -10,6 +10,8 @@
 #define GIS_IFACE_CT2B01R1
 
 #include <string>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 
 #include "bs_object_base.h"
 #include "conf.h"
@@ -25,8 +27,11 @@ namespace blue_sky
 class gis_iface : public objbase
   {
     public:
-      typedef BS_SP (table_iface)                     sp_table_iface;
-      typedef BS_SP (prop_iface)                      sp_prop_iface;
+      typedef BS_SP (table_iface)                   sp_table_t;
+      typedef BS_SP (prop_iface)                    sp_prop_t;
+      typedef BS_SP (gis_iface)                     sp_gis_t;
+      typedef boost::archive::text_iarchive         tia_t;
+      typedef boost::archive::text_oarchive         toa_t;
 
     public:
       /** 
@@ -37,12 +42,12 @@ class gis_iface : public objbase
       /** 
        * @brief return SP to the table
        */
-      virtual sp_table_iface get_table () = 0;
+      virtual sp_table_t get_table () = 0;
 
       /** 
        * @brief return SP to the property 
        */
-      virtual sp_prop_iface get_prop () = 0;
+      virtual sp_prop_t get_prop () = 0;
 
       /** 
        * @brief read data from LAS file
@@ -52,6 +57,10 @@ class gis_iface : public objbase
        * @return 0 if ok
        */
       virtual int read_from_las_file (const std::string &fname) = 0;
+
+      virtual void save (toa_t &ar) const = 0;
+      virtual void load (tia_t &ar) = 0;
+      virtual sp_gis_t check_serial () const = 0;
 #ifdef BSPY_EXPORTING_PLUGIN
       /** 
        * @brief python print wrapper

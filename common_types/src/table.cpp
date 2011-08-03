@@ -13,6 +13,11 @@
 
 #include "bs_kernel.h"
 #include "table.h"
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/string.hpp>
+
 
 
 using namespace std;
@@ -40,7 +45,7 @@ namespace blue_sky
 
   //! copy 
   int 
-  table::copy (const sp_table_iface a)
+  table::copy (const sp_table_t a)
     {
       clear ();
       t_long n_cols = a->get_n_cols ();
@@ -130,6 +135,38 @@ namespace blue_sky
         for (t_long j = 0; j < n_cols; ++j)
           values[j].push_back (data_array[i * n_cols + j]);
     }    
+
+  void 
+  table::save (toa_t &ar) const
+    {
+      //using namespace boost::serialization;
+      ar & col_names & values;
+    }
+
+  void 
+  table::load (tia_t &ar)
+    {
+      ar & col_names & values;
+    }
+
+  table::sp_table_t 
+  table::check_serial () const
+    {
+      std::ostringstream oss;
+      std::istringstream iss;
+
+      boost::archive::text_oarchive oar(oss);
+
+      sp_table_t sp_table = BS_KERNEL.create_object ("table");
+
+      save (oar);
+      iss.str (oss.str ());
+      boost::archive::text_iarchive iar(iss);
+      sp_table->load (iar);
+      return sp_table;
+
+    }
+    
 #ifdef BSPY_EXPORTING_PLUGIN
   void 
   table::set_col_values (const t_long col, spv_double val)

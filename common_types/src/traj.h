@@ -26,6 +26,8 @@ namespace blue_sky
     public: 
 
       typedef BS_SP (table_iface)                     sp_table_t;
+      typedef boost::archive::text_iarchive           tia_t;
+      typedef boost::archive::text_oarchive           toa_t;
 
       // ------------------------------------
       // METHODS
@@ -53,6 +55,14 @@ namespace blue_sky
        * @return 0 if ok
        */
       virtual int read_from_dev_file (const std::string &fname);
+      virtual void save (toa_t &ar) const
+        {
+          sp_table->save (ar);
+        }
+      virtual void load (tia_t &ar)
+        {
+          sp_table->load (ar);
+        }
     public:
 #ifdef BSPY_EXPORTING_PLUGIN
       /** 

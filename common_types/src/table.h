@@ -25,6 +25,9 @@ namespace blue_sky
 
       typedef std::vector <t_double>                  vector_t;
       typedef std::vector <vector_t>                  table_t;
+      typedef BS_SP (table_iface)                     sp_table_t;
+      typedef boost::archive::text_iarchive           tia_t;
+      typedef boost::archive::text_oarchive           toa_t;
 
       // ------------------------------------
       // METHODS
@@ -40,7 +43,7 @@ namespace blue_sky
       /*!
         \brief copy 
       */
-      virtual int copy (const sp_table_iface a);
+      virtual int copy (const sp_table_t a);
 
       /** 
        * @brief Initialize or reinitialize table by <n_rows> <n_cols> 
@@ -227,6 +230,9 @@ namespace blue_sky
               values[i].push_back (v[i]);
             }
         }
+      virtual void save (toa_t &ar) const;
+      virtual void load (tia_t &ar);
+      virtual sp_table_t check_serial () const;
 #ifdef BSPY_EXPORTING_PLUGIN
       /** 
        * @brief python print wrapper
