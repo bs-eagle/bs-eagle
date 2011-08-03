@@ -55,7 +55,7 @@ namespace blue_sky
 					  const stdv_float perm,
 					  const stdv_float poro,
 					  t_long n_depth,
-					  stdv_double density,
+					  //stdv_double density,
 					  sp_jfunction jfunc_water,
 					  sp_jfunction jfunc_oil);
 

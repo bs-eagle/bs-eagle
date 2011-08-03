@@ -640,7 +640,7 @@ namespace blue_sky
 				const stdv_float perm,
 				const stdv_float poro,
 				t_long n_depth,
-				stdv_double density,
+				//stdv_double density,
 				sp_jfunction jfunc_water,
 				sp_jfunction jfunc_oil)
   {
@@ -685,10 +685,10 @@ namespace blue_sky
           sat_d[i] = -1;
       }
 
-	  pvt_props->fill_pvt_arrays(is_o, is_g, is_w,
+	  /*pvt_props->fill_pvt_arrays(is_o, is_g, is_w,
 		                       1.0, 0.1, 1000.0, 100,
-							   density);
-	  scal_props->init_from_scal();
+							   density);*/
+	  //scal_props->init_from_scal();
 	  sat_regions.push_back(0);
 	  pvt_regions.push_back(0);
 
