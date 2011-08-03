@@ -192,7 +192,10 @@ namespace blue_sky
 	init_from_scal_ex(const phase_d_t &phase_d, const sat_d_t &sat_d,
 							sp_jfunction_t water_jfunc,
 							sp_jfunction_t gas_jfunc) = 0;
-
+    
+    virtual BS_SP (table_iface)
+      get_table (t_int scal_fluid_type, t_long index_scal_region) const = 0;
+      
     virtual void
     init_scal_input_table_arrays (const t_long    n_scal_regions_, 
                                   bool            is_oil, 

@@ -113,8 +113,23 @@ namespace blue_sky
           data_array[i * n_cols + j] = get_value (i, j);
           
       return data;    
-    }  
-    
+    } 
+     
+  void 
+  table::convert_from_array (const t_long n_rows, const t_long n_cols, spv_double data) 
+    {
+      BS_ASSERT (n_rows * n_cols == data->size ());
+      t_double *data_array = &(*data)[0];
+      
+      init(0, n_cols);
+      
+      for (t_long j = 0; j < n_cols; ++j)
+        values[j].reserve(n_rows);
+        
+      for (t_long i = 0; i < n_rows; ++i)
+        for (t_long j = 0; j < n_cols; ++j)
+          values[j].push_back (data_array[i * n_cols + j]);
+    }    
 #ifdef BSPY_EXPORTING_PLUGIN
   void 
   table::set_col_values (const t_long col, spv_double val)

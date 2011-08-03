@@ -1569,8 +1569,8 @@ namespace blue_sky
       BS_ASSERT (n_scal_regions_ > 0);
       n_scal_regions = n_scal_regions_;
       is_oil = is_oil_;
-	  is_gas = is_gas_;
-	  is_water = is_water_;
+	    is_gas = is_gas_;
+	    is_water = is_water_;
 
       water_input_table.resize (n_scal_regions);
       gas_input_table.resize (n_scal_regions);

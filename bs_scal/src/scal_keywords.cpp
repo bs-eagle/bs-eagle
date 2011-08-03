@@ -16,7 +16,7 @@
 
 namespace blue_sky 
 {
-  typedef void (*handler_callback) (BS_SP (scal_3p_iface), spv_float &, t_long);
+  typedef void (*handler_callback) (BS_SP (scal_3p_iface), spv_float &, t_int, t_int, t_int);
 
   void
   handler (std::string const &keyword, keyword_params &params, handler_callback callback, const t_int n_columns)
@@ -25,58 +25,63 @@ namespace blue_sky
     BS_SP (idata) idata = params.hdm->get_data ();
     BS_SP (scal_3p_iface) scal = params.hdm->get_scal ();
 
-    t_long regions = idata->props->get_i ("sat_region");
+    t_int regions = idata->props->get_i ("sat_region");
+    t_int n_rows;
+    
     spv_float data = BS_KERNEL.create_object (v_float::bs_type ());
     for (t_long i = 0; i < regions; ++i)
       {
-        if (reader->read_table (keyword, *data, n_columns) < 1)
+        if ((n_rows = reader->read_table (keyword, *data, n_columns)) < 1)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough arguments for keyword %s")
                                 % reader->get_prefix () % keyword);
           }
 
-        callback (scal, data, i);
+        callback (scal, data, i, n_rows, n_columns);
         data->clear ();
       }
   }
 
   void
-  SWOF_callback (BS_SP (scal_3p_iface) scal, spv_float &data, t_long region_index)
+  SWOF_callback (BS_SP (scal_3p_iface) scal, spv_float &data, t_int region_index, t_int n_rows, t_int n_cols)
   {
-    BS_SP (scal_2p_data_holder_iface) wdata = scal->get_water_data ();
-    wdata->add_spof (data, region_index, true);
+    BS_SP (table_iface) tbl = scal->get_table (FI_PHASE_WATER, region_index);
+    tbl->convert_from_array(n_rows, n_cols, data);
   }
   void
-  SGOF_callback (BS_SP (scal_3p_iface) scal, spv_float &data, t_long region_index)
+  SGOF_callback (BS_SP (scal_3p_iface) scal, spv_float &data, t_int region_index, t_int n_rows, t_int n_cols)
   {
-    scal->get_gas_data ()->add_spof (data, region_index, false);
-  }
-
-  void
-  SWFN_callback (BS_SP (scal_3p_iface) scal, spv_float &data, t_long region_index)
-  {
-    scal->get_water_data ()->add_spfn (data, region_index, true);
-  }
-  void
-  SGFN_callback (BS_SP (scal_3p_iface) scal, spv_float &data, t_long region_index)
-  {
-    scal->get_gas_data ()->add_spfn (data, region_index, false);
+    BS_SP (table_iface) tbl = scal->get_table (FI_PHASE_GAS, region_index);
+    tbl->convert_from_array(n_rows, n_cols, data);
   }
 
   void
-  SOF3_callback (BS_SP (scal_3p_iface) scal, spv_float &data, t_long region_index)
+  SWFN_callback (BS_SP (scal_3p_iface) scal, spv_float &data, t_int region_index, t_int n_rows, t_int n_cols)
   {
-    scal->get_water_data ()->add_sof3 (data, region_index, true);
-    scal->get_gas_data ()->add_sof3 (data, region_index, false);
+    BS_SP (table_iface) tbl = scal->get_table (FI_PHASE_WATER, region_index);
+    tbl->convert_from_array(n_rows, n_cols, data);
+  }
+  void
+  SGFN_callback (BS_SP (scal_3p_iface) scal, spv_float &data, t_int region_index, t_int n_rows, t_int n_cols)
+  {
+    BS_SP (table_iface) tbl = scal->get_table (FI_PHASE_GAS, region_index);
+    tbl->convert_from_array(n_rows, n_cols, data);
   }
 
   void
-  SOF2_callback (BS_SP (scal_3p_iface) scal, spv_float &data, t_long region_index)
+  SOF3_callback (BS_SP (scal_3p_iface) scal, spv_float &data, t_int region_index, t_int n_rows, t_int n_cols)
+  {
+    BS_SP (table_iface) tbl = scal->get_table (FI_PHASE_OIL, region_index);
+    tbl->convert_from_array(n_rows, n_cols, data);
+  }
+
+  void
+  SOF2_callback (BS_SP (scal_3p_iface) scal, spv_float &data, t_int region_index, t_int n_rows, t_int n_cols)
   {
     // TODO: sof2 for 2-phase models only => need check for phases
     // currently write this table for both water and gas data and use one of them (depends on phase which is present)
-    scal->get_water_data ()->add_sof2 (data, region_index, true);
-    scal->get_gas_data ()->add_sof2 (data, region_index, false);
+    BS_SP (table_iface) tbl = scal->get_table (FI_PHASE_OIL, region_index);
+    tbl->convert_from_array(n_rows, n_cols, data);
   }
   
  void

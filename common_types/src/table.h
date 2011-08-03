@@ -202,6 +202,11 @@ namespace blue_sky
         }
       
       /*!
+        \brief convert table from array 
+      */
+      virtual void convert_from_array (const t_long n_rows, const t_long n_cols, spv_double data);
+      
+      /*!
         \brief convert table to array 
       */
       virtual spv_double convert_to_array (const t_long n_rows, const t_long n_cols) const;
