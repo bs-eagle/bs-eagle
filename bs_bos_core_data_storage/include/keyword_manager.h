@@ -136,6 +136,9 @@ namespace blue_sky
       //! registration of property keyword
       void register_prop_keyword (const std::string &keyword, const std::string &format, prop_names_t &prop_names , handler_t external_handler = 0);
       
+      //! python registration of active integer pool keyword in factory
+      void py_register_i_pool_keyword (const std::string keyword, boost::python::list dimens, t_int def_value);
+      
       //! python registration of active floating point pool keyword in factory
       void py_register_fp_pool_keyword (const std::string keyword, boost::python::list dimens, t_float def_value);
 

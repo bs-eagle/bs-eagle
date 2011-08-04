@@ -195,6 +195,15 @@ namespace blue_sky
     handlers.insert (std::make_pair (keyword, handler));
   }
   
+  void  keyword_manager::py_register_i_pool_keyword (const std::string keyword, boost::python::list dimens, t_int def_value)
+    {
+      npy_intp new_dimens[ARRAY_POOL_TOTAL];
+      for (int i = 0; i < ARRAY_POOL_TOTAL; i++) 
+        {
+          new_dimens[i] = boost::python::extract<int>(dimens[i]);
+        }
+      register_i_pool_keyword (keyword, &new_dimens[0], def_value);
+    }
   
   void  keyword_manager::py_register_fp_pool_keyword (const std::string keyword, boost::python::list dimens, t_float def_value)
     {

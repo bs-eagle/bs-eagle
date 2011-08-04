@@ -455,13 +455,17 @@ INSERT INTO branches (well_name, branch_name) VALUES('%s', 'main')",
       char buf[4096];
       sprintf (buf, "UPDATE branches SET well_log = @q WHERE well_name = '%s' AND branch_name = '%s'",
                wname.c_str (), branch.c_str ());
-      rc = sqlite3_prepare_v2 (db, buf, strlen (buf) + 1, &stmp, &ttt);
+      rc = sqlite3_prepare_v2 (db, buf, strlen (buf), &stmp, &ttt);
       if (rc)
         {
           fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
           return -1;
         }
-
+      
+      if (stmp)
+        fprintf(stderr, "stmp not null1\n");
+      else
+         fprintf(stderr, "stmp null1\n");
       std::ostringstream oss (std::ios_base::binary | std::ios_base::out | std::ios_base::in);
       boost::archive::binary_oarchive oar(oss);
       g->save (oar);
@@ -475,9 +479,21 @@ INSERT INTO branches (well_name, branch_name) VALUES('%s', 'main')",
           fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
           return -3;
         }
-
+           if (stmp)
+        fprintf(stderr, "stmp not null2\n");
+      else
+         fprintf(stderr, "stmp null2\n");
       sqlite3_step (stmp); // UPDATE
+           if (stmp)
+        fprintf(stderr, "stmp not null3\n");
+      else
+         fprintf(stderr, "stmp null3\n");
       sqlite3_finalize (stmp);
+      
+      if (stmp)
+        fprintf(stderr, "stmp not null4\n");
+      else
+         fprintf(stderr, "stmp null4\n");
       
       return 0;
     }

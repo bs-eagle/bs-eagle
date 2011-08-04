@@ -121,7 +121,7 @@ namespace python {
 
   PY_EXPORTER (keyword_manager_exporter, default_exporter)
     //.def ("register_keyword", register_keyword <T>)
-    .def ("register_i_pool_keyword", &T::register_i_pool_keyword)
+    .def ("register_i_pool_keyword", &T::py_register_i_pool_keyword)
     .def ("register_fp_pool_keyword", &T::py_register_fp_pool_keyword)
     .def ("register_keywords", &T::register_plugin_keywords)
     .def ("register_plugin_keywords", &T::register_plugin_keywords)
