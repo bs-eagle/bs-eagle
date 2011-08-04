@@ -27,8 +27,8 @@ namespace blue_sky
 
       typedef BS_SP (table_iface)                     sp_table_iface;
       typedef BS_SP (prop_iface)                      sp_prop_iface;
-      typedef boost::archive::text_iarchive           tia_t;
-      typedef boost::archive::text_oarchive           toa_t;
+      typedef boost::archive::binary_iarchive           tia_t;
+      typedef boost::archive::binary_oarchive           toa_t;
 
       // ------------------------------------
       // METHODS

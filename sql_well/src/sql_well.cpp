@@ -11,6 +11,9 @@
 #include <stdio.h>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/fstream.hpp"
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+
 
 
 #include "bs_kernel.h"
@@ -101,6 +104,7 @@ namespace blue_sky
   sql_well::sql_well (bs_type_ctor_param) 
     {
       db = 0;
+      stmp_sql = 0;
       
     }
   sql_well::sql_well (const sql_well& rhs) 
@@ -202,20 +206,21 @@ CREATE TABLE wells_in_group (group_name TEXT, well_name TEXT);\
 CREATE INDEX well_name2 ON wells_in_group (well_name ASC);\
 CREATE INDEX group_name ON wells_in_group (group_name ASC);\
 CREATE TABLE fractures (well_name TEXT, \
-                        parent TEXT, \
-                        is_vertical BOOLEAN,\
-                        is_symmetric BOOLEAN,\
-                        inf_perm BOOLEAN,\
-                        perm REAL,\
-                        wf REAL,\
-                        half_length REAL,\
-                        up_half_height REAL,\
-                        down_half_height REAL,\
-                        angle REAL,\
-                        hor_main_radius REAL,\
-                        hor_sec_radius REAL,\
-                        parent_md REAL);\
+                        parent TEXT DEFAULT 'main', \
+                        date REAL DEFAULT -1,\
+                        is_vertical BOOLEAN DEFAULT 1,\
+                        is_symmetric BOOLEAN DEFAULT 1,\
+                        perm REAL DEFAULT -1,\
+                        wf REAL DEFAULT 0.005,\
+                        half_length REAL DEFAULT 50,\
+                        up_half_height REAL DEFAULT 10,\
+                        down_half_height REAL DEFAULT 10,\
+                        angle REAL DEFAULT 0,\
+                        hor_main_radius REAL DEFAULT 50,\
+                        hor_sec_radius REAL DEFAULT 50,\
+                        parent_md REAL DEFAULT 10);\
 CREATE INDEX well_name3 ON fractures (well_name ASC);\
+CREATE INDEX by_date ON fractures (well_name, date);\
 CREATE INDEX duo_name ON fractures (well_name, parent);\
 CREATE TABLE branches (well_name TEXT,\
                        branch_name TEXT,\
@@ -254,6 +259,9 @@ CREATE UNIQUE INDEX names ON wells (well_name ASC);\
           char buf[2048];
           
           
+          if (stmp_sql)
+            finalize_sql ();
+            
           sprintf (buf, "ATTACH DATABASE '%s' as backup; BEGIN", file_name.c_str ());
           rc = sqlite3_exec (db, buf, NULL, NULL, &zErrMsg);
           if (rc != SQLITE_OK)
@@ -302,6 +310,9 @@ CREATE UNIQUE INDEX names ON wells (well_name ASC);\
       char sw_up[4096];
       if (!db)
         return;
+
+      if (stmp_sql)
+        finalize_sql ();
       //rc = sqlite3_exec (db, "BEGIN TRANSACTION", NULL, 0, &zErrMsg);
       for (int i = 0; i < 500; ++i)
         {
@@ -335,6 +346,8 @@ CREATE UNIQUE INDEX names ON wells (well_name ASC);\
       if (!db)
         return -2;
 
+      if (stmp_sql)
+        finalize_sql ();
       int rc = 0;
       char *zErrMsg = 0;
       const char *ttt;
@@ -378,6 +391,8 @@ CREATE UNIQUE INDEX names ON wells (well_name ASC);\
     {
       if (!db)
         return -2;
+      if (stmp_sql)
+        finalize_sql ();
 
       int rc = 0;
       char *zErrMsg = 0;
@@ -430,6 +445,8 @@ INSERT INTO branches (well_name, branch_name) VALUES('%s', 'main')",
     {
       if (!db)
         return -1;
+      if (stmp_sql)
+        finalize_sql ();
 
       int rc = 0;
       //char *zErrMsg = 0;
@@ -445,13 +462,14 @@ INSERT INTO branches (well_name, branch_name) VALUES('%s', 'main')",
           return -1;
         }
 
-      std::ostringstream oss;
-      boost::archive::text_oarchive oar(oss);
+      std::ostringstream oss (std::ios_base::binary | std::ios_base::out | std::ios_base::in);
+      boost::archive::binary_oarchive oar(oss);
       g->save (oar);
       std::string s = oss.str ();
+      std::vector<char> ch (s.begin (), s.end ());
       //printf ("GIS\n%s\n", s.c_str ());
-      printf ("GIS INT %d %d\n", (int)strlen (s.c_str ()), (int)s.length ());
-      rc = sqlite3_bind_text (stmp, 1, s.c_str (), -1, SQLITE_STATIC);
+      //printf ("GIS INT %d %d\n", (int)strlen (s.c_str ()), (int)s.length ());
+      rc = sqlite3_bind_blob (stmp, 1, &ch[0], ch.size (), SQLITE_STATIC);
       if (rc)
         {
           fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
@@ -470,6 +488,8 @@ INSERT INTO branches (well_name, branch_name) VALUES('%s', 'main')",
       sp_gis_t sp_gis = BS_KERNEL.create_object ("gis"); 
       if (!db)
         return sp_gis;
+      if (stmp_sql)
+        return sp_gis;
 
       int rc = 0;
       //char *zErrMsg = 0;
@@ -486,12 +506,15 @@ INSERT INTO branches (well_name, branch_name) VALUES('%s', 'main')",
         }
       if (sqlite3_step (stmp) == SQLITE_ROW) // UPDATE
         {
-          
-          std::string s = (const char *)sqlite3_column_text (stmp, 0);
+          int n = sqlite3_column_bytes (stmp, 0);  
+          const char *b = (const char *)sqlite3_column_blob (stmp, 0);
+          //std::string s = (const char *)sqlite3_column_text (stmp, 0);
+          std::string s;
+          s.assign (b, n);
           printf ("READ GIS %d\n", (int)s.length ());
           std::istringstream iss;
           iss.str (s);
-          boost::archive::text_iarchive iar(iss);
+          boost::archive::binary_iarchive iar(iss);
           sp_gis->load (iar);
           
         }
@@ -505,6 +528,8 @@ INSERT INTO branches (well_name, branch_name) VALUES('%s', 'main')",
      {
       if (!db)
         return -1;
+      if (stmp_sql)
+        finalize_sql ();
 
       int rc = 0;
       //char *zErrMsg = 0;
@@ -521,13 +546,13 @@ INSERT INTO branches (well_name, branch_name) VALUES('%s', 'main')",
         }
 
       std::ostringstream oss;
-      boost::archive::text_oarchive oar(oss);
+      boost::archive::binary_oarchive oar(oss);
       t->save (oar);
       std::string s = oss.str ();
+      std::vector<char> ch (s.begin (), s.end ());
+      rc = sqlite3_bind_blob (stmp, 1, &ch[0], ch.size (), SQLITE_STATIC);
       //printf ("TRAJ\n%s\n", s.c_str ());
-      printf ("TRAJ INT %d %d\n", (int)strlen (s.c_str ()), (int)s.length ());
-      rc = sqlite3_bind_text (stmp, 1, s.c_str (), -1, SQLITE_STATIC);
-
+      //printf ("TRAJ INT %d %d\n", (int)strlen (s.c_str ()), (int)s.length ());
       if (rc)
         {
           fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
@@ -546,6 +571,8 @@ INSERT INTO branches (well_name, branch_name) VALUES('%s', 'main')",
       sp_traj_t sp_traj = BS_KERNEL.create_object ("traj"); 
       if (!db)
         return sp_traj;
+      if (stmp_sql)
+        return sp_traj;
 
       int rc = 0;
       //char *zErrMsg = 0;
@@ -563,19 +590,121 @@ INSERT INTO branches (well_name, branch_name) VALUES('%s', 'main')",
       if (sqlite3_step (stmp) == SQLITE_ROW) // UPDATE
         {
           
-          //std::istringstream iss (std::string ((const char *)sqlite3_column_text (stmp, 0)));
-          std::string s = (const char *)sqlite3_column_text (stmp, 0);
+          int n = sqlite3_column_bytes (stmp, 0);  
+          const char *b = (const char *)sqlite3_column_blob (stmp, 0);
+          //std::string s = (const char *)sqlite3_column_text (stmp, 0);
+          std::string s;
+          s.assign (b, n);
           printf ("READ TRAJ %d\n", (int)s.length ());
           std::istringstream iss;
           iss.str (s);
           //printf ("hkdjhkf: %s\n", iss.str ().c_str ());
-          boost::archive::text_iarchive iar(iss);
+          boost::archive::binary_iarchive iar(iss);
           sp_traj->load (iar);
           
         }
       sqlite3_finalize (stmp);
       return sp_traj;
      }
+
+  int 
+  sql_well::prepare_sql (const std::string &sql)
+    {
+      if (!db)
+        return -1;
+      if (stmp_sql)
+        finalize_sql ();
+      const char *ttt;
+      int rc = 0;
+
+      rc = sqlite3_prepare_v2 (db, sql.c_str (), sql.length () + 1, &stmp_sql, &ttt);
+      if (rc)
+        {
+          fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
+          return -1;
+        }
+      return 0;
+    }
+
+  int 
+  sql_well::step_sql ()
+    {
+      if (!db)
+        return -1;
+      if (!stmp_sql)
+        return -1;
+      if (sqlite3_step (stmp_sql) == SQLITE_ROW) // UPDATE
+        return 0;
+      else
+        return 2;
+      return 0;
+    }
+  int 
+  sql_well::finalize_sql ()
+    {
+      if (stmp_sql)
+        {
+          sqlite3_finalize (stmp_sql);
+          stmp_sql = 0;
+        }
+      return 0;
+    }
+  t_int 
+  sql_well::get_sql_int (t_int col)
+    {
+      if (!db)
+        return 0;
+      if (!stmp_sql)
+        return 0;
+      return (t_int)sqlite3_column_int (stmp_sql, (int)col);
+    }
+  t_double 
+  sql_well::get_sql_real (t_int col)
+    {
+      if (!db)
+        return 0;
+      if (!stmp_sql)
+        return 0;
+      return (t_double)sqlite3_column_double (stmp_sql, (int)col);
+    }
+  bool 
+  sql_well::get_sql_bool (t_int col)
+    {
+      if (!db)
+        return 0;
+      if (!stmp_sql)
+        return 0;
+      return (bool)sqlite3_column_int (stmp_sql, (int)col);
+    }
+  std::string 
+  sql_well::get_sql_str (t_int col)
+    {
+      if (!db)
+        return 0;
+      if (!stmp_sql)
+        return 0;
+      return std::string ((const char *)sqlite3_column_text (stmp_sql, (int)col));
+    }
+  int 
+  sql_well::exec_sql (const std::string &sql)
+    {
+      if (!db)
+        return 0;
+      if (stmp_sql)
+        finalize_sql ();
+
+      int rc = 0;
+      char *zErrMsg = 0;
+
+      rc = sqlite3_exec (db, sql.c_str (), NULL, 0, &zErrMsg);
+      if( rc != SQLITE_OK )
+        {
+          fprintf (stderr, "SQL error: %s\n", zErrMsg);
+          sqlite3_free (zErrMsg);
+          return -4; 
+        }
+      return 0;
+    }
 
 #ifdef BSPY_EXPORTING_PLUGIN
   std::string 

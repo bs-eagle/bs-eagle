@@ -342,13 +342,13 @@ namespace blue_sky
       std::ostringstream oss;
       std::istringstream iss;
 
-      boost::archive::text_oarchive oar(oss);
+      boost::archive::binary_oarchive oar(oss);
 
       sp_gis_t sp_gis = BS_KERNEL.create_object ("gis");
 
       save (oar);
       iss.str (oss.str ());
-      boost::archive::text_iarchive iar(iss);
+      boost::archive::binary_iarchive iar(iss);
       sp_gis->load (iar);
       return sp_gis;
 

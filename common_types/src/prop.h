@@ -22,8 +22,8 @@ namespace blue_sky
       // ------------------------------------
     public:
       typedef std::list<std::string>                  list_t;
-      typedef boost::archive::text_iarchive           tia_t;
-      typedef boost::archive::text_oarchive           toa_t;
+      typedef boost::archive::binary_iarchive           tia_t;
+      typedef boost::archive::binary_oarchive           toa_t;
 
       // destructor
       virtual ~prop ()

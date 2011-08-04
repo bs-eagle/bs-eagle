@@ -101,6 +101,16 @@ namespace blue_sky
       virtual sp_gis_t get_branch_gis (const std::string &wname, const std::string &branch) const;
       virtual sp_traj_t get_branch_traj (const std::string &wname, const std::string &branch) const;
       //virtual void remove_branch (const std::string &wname, const std::string &branch);
+
+
+      virtual int prepare_sql (const std::string &sql);
+      virtual int step_sql ();
+      virtual int finalize_sql ();
+      virtual t_int get_sql_int (t_int col);
+      virtual t_double get_sql_real (t_int col);
+      virtual bool get_sql_bool (t_int col);
+      virtual std::string get_sql_str (t_int col);
+      virtual int exec_sql (const std::string &sql);
     public:
 #ifdef BSPY_EXPORTING_PLUGIN
       /** 
@@ -125,6 +135,7 @@ namespace blue_sky
       //sp_prop_t sp_prop;        //!< ptoperties pointer
       std::string   file_name;          //!< database filename
       sqlite3       *db;                //!< database pointer
+      sqlite3_stmt  *stmp_sql;
 
       BLUE_SKY_TYPE_DECL (sql_well);
     };

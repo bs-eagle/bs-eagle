@@ -12,8 +12,8 @@
 
 #include <string>
 #include <sstream>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 
 #include "bs_object_base.h"
 #include "conf.h"
@@ -29,8 +29,8 @@ class traj_iface : public objbase
   {
     public:
       typedef BS_SP (table_iface)                     sp_table_t;
-      typedef boost::archive::text_iarchive           tia_t;
-      typedef boost::archive::text_oarchive           toa_t;
+      typedef boost::archive::binary_iarchive           tia_t;
+      typedef boost::archive::binary_oarchive           toa_t;
 
     public:
       /** 

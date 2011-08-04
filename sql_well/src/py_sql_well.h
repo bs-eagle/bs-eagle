@@ -48,6 +48,22 @@ namespace blue_sky
         args ("well_name", "branch_name"),  "Get traj of well branch")
     .def ("get_well_names",                     &T::get_well_names, 
         args (""), "Return well namew")
+    .def ("prepare_sql",                        &T::prepare_sql, 
+        args ("SQL_str"), "Prepare SQL")
+    .def ("step_sql",                           &T::step_sql, 
+        args (""), "Step SQL")
+    .def ("finalize_sql",                       &T::finalize_sql, 
+        args (""), "Finalize SQL")
+    .def ("get_sql_int",                        &T::get_sql_int, 
+        args ("Column"), "Return int value of column")
+    .def ("get_sql_real",                       &T::get_sql_real, 
+        args ("Column"), "Return real value of column")
+    .def ("get_sql_bool",                       &T::get_sql_bool, 
+        args ("Column"), "Return bool value of column")
+    .def ("get_sql_str",                        &T::get_sql_str, 
+        args ("Column"), "Return text value of column")
+    .def ("exec_sql",                           &T::exec_sql, 
+        args ("Sql_string"), "Execute SQL")
     .def ("__str__",                            &T::py_str)
   PY_EXPORTER_END;                               
 

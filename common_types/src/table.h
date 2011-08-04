@@ -26,8 +26,8 @@ namespace blue_sky
       typedef std::vector <t_double>                  vector_t;
       typedef std::vector <vector_t>                  table_t;
       typedef BS_SP (table_iface)                     sp_table_t;
-      typedef boost::archive::text_iarchive           tia_t;
-      typedef boost::archive::text_oarchive           toa_t;
+      typedef boost::archive::binary_iarchive           tia_t;
+      typedef boost::archive::binary_oarchive           toa_t;
 
       // ------------------------------------
       // METHODS

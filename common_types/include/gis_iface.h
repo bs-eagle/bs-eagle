@@ -10,8 +10,8 @@
 #define GIS_IFACE_CT2B01R1
 
 #include <string>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 
 #include "bs_object_base.h"
 #include "conf.h"
@@ -30,8 +30,8 @@ class gis_iface : public objbase
       typedef BS_SP (table_iface)                   sp_table_t;
       typedef BS_SP (prop_iface)                    sp_prop_t;
       typedef BS_SP (gis_iface)                     sp_gis_t;
-      typedef boost::archive::text_iarchive         tia_t;
-      typedef boost::archive::text_oarchive         toa_t;
+      typedef boost::archive::binary_iarchive         tia_t;
+      typedef boost::archive::binary_oarchive         toa_t;
 
     public:
       /** 
