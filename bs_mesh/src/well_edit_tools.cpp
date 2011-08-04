@@ -17,6 +17,9 @@ struct point3d
 {
     t_float x,y,z;
 
+    // FIXME reimplement operator =
+    // FIXME write set_xyz function
+
 };
 
 class index3d
@@ -131,26 +134,13 @@ t_float find_point_z(point3d N1, point3d N2, point3d N3, point3d M)
    return z;
 }
 
-// finds well-mesh intersection
-// returns mesh_points, well_points
-bp::tuple make_projection(t_int ny, t_int nz, 
-                          spv_int indices_, spv_int faces_, 
-                          spv_float x_, spv_float y_, spv_float z_,  spv_float tops_, spv_float values_ ) 
+// finds z_min, z_max from 1d indices
+bp::tuple find_z_min_max (spv_int indices_, t_int ny, t_int nz)
 {
-    v_float& tops = *tops_;
-    v_float& values = *values_;
-    v_float& cross_x = *x_;
-    v_float& cross_y = *y_;
-    v_float& cross_z = *z_;
     v_int& indices = *indices_;
-    v_int& faces = *faces_;
-
-
-    t_int i, ii, j, n; 
+    t_int z, z_start = 1000000, z_end = 0;
+    t_int i, n;
     n = indices.size();
-
-
-    t_int z, z_start = 1000000, z_end = 0; 
 
     // calculate z_start, z_end from indices[]
     for (i=0;i<n;i++)
@@ -163,7 +153,49 @@ bp::tuple make_projection(t_int ny, t_int nz,
     }
 
     //printf("\n z_start = %d z_end = %d", z_start, z_end);
+    return bp::make_tuple (z_start, z_end);
+}
 
+// finds well-mesh intersection
+// returns mesh_points, well_points
+bp::tuple make_projection(t_int ny, t_int nz, 
+                          spv_int indices_, spv_int faces_, 
+                          spv_float x_, spv_float y_, spv_float z_,  spv_float tops_, spv_float values_, 
+                          t_int z_start, t_int z_end) 
+{
+    v_float& tops = *tops_;
+    v_float& values = *values_;
+    v_float& cross_x = *x_;
+    v_float& cross_y = *y_;
+    v_float& cross_z = *z_;
+    v_int& indices = *indices_;
+    v_int& faces = *faces_;
+
+
+    t_int i, ii, j, n, n_wp_in_cell; 
+    n = indices.size();
+    
+    //t_int z, z_start = 1000000, z_end = 0; 
+
+    // calculate z_start, z_end from indices[]
+    //for (i=0;i<n;i++)
+    //{
+    //    z = index3d(indices[i], ny, nz).z;
+    //    if (z < z_start)
+    //        z_start = z;
+    //    if (z > z_end)
+    //        z_end = z;
+    //}
+
+    //if (z_min > z_start)
+    //    z_start = z_min;
+    //if (z_max < z_end)
+    //    z_end = z_max;
+
+    //printf("\n z_start = %d z_end = %d", z_start, z_end);
+    //
+    t_int z;
+    
     //////////////////////////////////////////////
 
     t_int n_points, n_z_points, n_l_points;
@@ -181,7 +213,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
     index3d my;
     t_int face_in, face_out;
 
-    point3d P[8], M[2], WP, WP_old;
+    point3d P[8], M[2], WP[2];
     t_float z1, z2;
 
     int faces2corners[7][4] = { {0,1,2,3},
@@ -203,6 +235,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
 
     i = 0;
     ii = i+1;
+    // FIXME change i -> 0
 
     my_ind = indices[i];
     ind_old = my_ind;
@@ -223,11 +256,42 @@ bp::tuple make_projection(t_int ny, t_int nz,
     M[1].y = cross_y[ii];
     M[1].z = cross_z[ii];
 
-    // projection length
-    l = sqrt( (M[1].x-M[0].x)*(M[1].x-M[0].x) +  (M[1].y-M[0].y)*(M[1].y-M[0].y));
-    //printf("\n l = %f", l);
+    // FIXME if faces[i]==0,2,6 calculate plane/cell intersection, draw first line (-l)
 
+    // projection length
+    //l = sqrt( (M[1].x-M[0].x)*(M[1].x-M[0].x) +  (M[1].y-M[0].y)*(M[1].y-M[0].y));
+    //printf("\n l = %f", l);
+    //
+    // projection length is a sum of (x,y) projections of distances between every pair of consecutive  well points inside a cell
     //FIXME always add first well point
+    //WP[0].x = cross_x[0]; 
+    //WP[0].y = cross_y[0]; 
+    //WP[0].z = cross_z[0]; 
+    
+    WP[0] = M[0];
+
+    wpoints.push_back(0);
+    for (j=i+1;j<ii;j++)
+    {
+        WP[1].x = cross_x[j]; 
+        WP[1].y = cross_y[j]; 
+        WP[1].z = cross_z[j]; 
+        wl = sqrt( (WP[1].x-WP[0].x)*(WP[1].x-WP[0].x) +  (WP[1].y-WP[0].y)*(WP[1].y-WP[0].y));
+        wL += wl;
+        wpoints.push_back(wL);
+        //L += wl;
+        WP[0].x = WP[1].x;
+        WP[0].y = WP[1].y;
+        WP[0].z = WP[1].z;
+    }
+
+    //printf("\n j = %d", j);
+
+    l = sqrt( (M[1].x-WP[0].x)*(M[1].x-WP[0].x) +  (M[1].y-WP[0].y)*(M[1].y-WP[0].y));
+    L = wL + l;
+
+    //printf("\n L = %f", l);
+
     //{
        //printf("\n well point");
        //WP.x = cross_x[i]; 
@@ -236,10 +300,9 @@ bp::tuple make_projection(t_int ny, t_int nz,
        //wl = sqrt( (WP.x-M[0].x)*(WP.x-M[0].x) +  (WP.y-M[0].y)*(WP.y-M[0].y));
        //wL = L - l + wl;
        //wpoints.push_back(WP.z);
-       wpoints.push_back(wL);
-       WP_old.x = cross_x[0]; 
-       WP_old.y = cross_y[0]; 
-       WP_old.z = cross_z[0]; 
+       //WP[0].x = cross_x[0]; 
+       //WP[0].y = cross_y[0]; 
+       //WP[0].z = cross_z[0]; 
        //printf("\n L=%f l=%f wl=%f wL=%f \n", L, l, wl, wL);
     //}
 
@@ -299,7 +362,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
     }    
        
     points.push_back(z1);
-    points.push_back(L);
+    points.push_back(0);
 
     //printf("\n z1 = %f L = %f", z1, L);
 
@@ -346,7 +409,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
            z2 = find_point_z(P[4],P[5], P[6], M[0]);
        }
        points.push_back(z2);
-       points.push_back(L);
+       points.push_back(0);
        //printf("\n z2 = %f L = %f", z2, L);
     }
 
@@ -354,7 +417,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
     //find intersection of the cutting plane and right upper edge
     //index = (my_ind.x; my_ind.y; z_start) ZYX
 
-    L += l;
+    //L += l;
 
     index = z_start + my.y*nz + my.x*nz*ny;
     //printf("\n index=%d", index);
@@ -433,33 +496,40 @@ bp::tuple make_projection(t_int ny, t_int nz,
 
     // for the other columns of intersected cells
 
-    for (i=1;i<n-1;i++)
+    n_wp_in_cell = 0;
+
+    for (i=ii+1;i<n-1;i++)
     {
        my_ind = indices[i];
        
        my = index3d(my_ind, ny ,nz);
        //printf("\n i=%d my_ind=%d x=%d y=%d z=%d", i, my_ind, my.x, my.y, my.z);
-       
+
        //FIXME add well point handler
        if (faces[i] == 6)
        {
+           n_wp_in_cell ++;
            //printf("\n\n well point i=%d my_ind=%d",i,my_ind);
-           WP.x = cross_x[i]; 
-           WP.y = cross_y[i];
-           WP.z = cross_z[i];
+           WP[1].x = cross_x[i]; 
+           WP[1].y = cross_y[i];
+           WP[1].z = cross_z[i];
            //wl = sqrt( (WP.x-M[0].x)*(WP.x-M[0].x) +  (WP.y-M[0].y)*(WP.y-M[0].y));
            //wL = L - l + wl;
-           wl = sqrt( (WP.x-WP_old.x)*(WP.x-WP_old.x) +  (WP.y-WP_old.y)*(WP.y-WP_old.y));
+           wl = sqrt( (WP[1].x-WP[0].x)*(WP[1].x-WP[0].x) +  (WP[1].y-WP[0].y)*(WP[1].y-WP[0].y));
            wL += wl;
            //printf("\n L=%f l=%f wl=%f wL=%f \n", L, l, wl, wL);
-           WP_old = WP;
+           WP[0] = WP[1];
            //wpoints.push_back(WP.z);
            wpoints.push_back(wL);
            continue;
        }
 
+       // FIXME  every index appears in indices twice: for face_in and face_out
        if (my_ind == ind_old)
+       {
+           n_wp_in_cell = 0;
            continue;
+       }
 
        ind_old = my_ind;
 
@@ -480,14 +550,23 @@ bp::tuple make_projection(t_int ny, t_int nz,
        //printf("\n M[0] %f %f %f M[1] %f %f %f", M[0].x, M[0].y, M[0].z, M[1].x, M[1].y, M[1].z);
 
        // projection length
-       l = sqrt( (M[1].x-M[0].x)*(M[1].x-M[0].x) +  (M[1].y-M[0].y)*(M[1].y-M[0].y));
+       if (n_wp_in_cell == 0)
+       {
+           l = sqrt( (M[1].x-M[0].x)*(M[1].x-M[0].x) +  (M[1].y-M[0].y)*(M[1].y-M[0].y));
+           L += l;
+       }
+       else
+       {
+           l = sqrt( (M[1].x-WP[0].x)*(M[1].x-WP[0].x) +  (M[1].y-WP[0].y)*(M[1].y-WP[0].y));
+           L = wL + l;
+       }
+
 
        //FIXME
        if (l == 0)
            continue;
 
        //printf("\n l = %f", l);
-       L += l;
 
        //face_in = faces[i];
        face_out = faces[ii];
@@ -590,10 +669,10 @@ bp::tuple make_projection(t_int ny, t_int nz,
 
     if (faces[i] == 0 || faces[i] == 2 || faces[i] == 6)
     {
-       WP.x = cross_x[i]; 
-       WP.y = cross_y[i];
-       WP.z = cross_z[i];
-       wl = sqrt( (WP.x-WP_old.x)*(WP.x-WP_old.x) +  (WP.y-WP_old.y)*(WP.y-WP_old.y));
+       WP[1].x = cross_x[i]; 
+       WP[1].y = cross_y[i];
+       WP[1].z = cross_z[i];
+       wl = sqrt( (WP[1].x-WP[0].x)*(WP[1].x-WP[0].x) +  (WP[1].y-WP[0].y)*(WP[1].y-WP[0].y));
        wL += wl;
        //printf("\n L=%f l=%f wl=%f wL=%f \n", L, l, wl, wL);
        wpoints.push_back(wL);
@@ -683,6 +762,7 @@ namespace blue_sky { namespace python {
 void py_export_well_edit() {
     def("make_projection", &make_projection);
     //def("mesh2d_from_coord", &mesh2d_from_coord);
+    def("find_z_min_max", &find_z_min_max);
 }
 
 }} 	// eof blue_sky::python
