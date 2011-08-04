@@ -149,7 +149,7 @@ namespace python {
     using namespace boost::python;
 
     base_exporter<keyword_manager_iface, empty_exporter>::export_class ("keyword_manager_iface");
-    class_exporter<keyword_manager, keyword_manager_iface, keyword_manager_exporter>::export_class ("keyword_manager");
+    //class_exporter<keyword_manager, keyword_manager_iface, keyword_manager_exporter>::export_class ("keyword_manager");
 
 
     //strategy_exporter::export_base_ext <keyword_params, keyword_params_exporter, class_type::concrete_class> ("keyword_params");
