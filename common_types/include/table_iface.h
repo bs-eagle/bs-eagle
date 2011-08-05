@@ -81,6 +81,12 @@ class table_iface : public objbase
        */
       virtual t_double *get_col_ptr (const t_long col) = 0;
 
+      /** 
+       * @brief remove row from bs.comm.table
+       * 
+       * @param row_index -- row index
+       */
+      virtual void remove_row (const t_long row_index) = 0;
 
       /** 
        * @brief return reference to the column <col> data 

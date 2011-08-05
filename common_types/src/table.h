@@ -70,6 +70,12 @@ namespace blue_sky
         }
 
       /** 
+       * @brief remove row from bs.comm.table
+       * 
+       * @param row_index -- row index
+       */
+      virtual void remove_row (const t_long row_index);
+      /** 
        * @brief return name of the <col> column
        * 
        * @param col -- <INPUT> column index

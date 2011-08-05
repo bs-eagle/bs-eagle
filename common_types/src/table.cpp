@@ -105,6 +105,19 @@ namespace blue_sky
         }
     }
   
+  void 
+  table::remove_row (const t_long row_index)
+    {
+      table_t::iterator i, e;
+
+      for (i = values.begin (), e = values.end (); i != e; ++i)
+        {
+            if (row_index >= (t_long)i->size ())
+                continue;
+            i->erase(i->begin() + row_index);
+        }
+    }
+  
   spv_double 
   table::convert_to_array (const t_long n_rows, const t_long n_cols) const 
     {

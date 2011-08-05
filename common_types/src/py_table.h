@@ -45,6 +45,8 @@ namespace blue_sky
         args ("col_idx"), "Return values of the column col_idx")
     .def ("add_row",                            &T::add_row, 
         args ("row_idx"), "Insert row at the position row")
+    .def ("remove_row",                            &T::remove_row, 
+        args ("row_idx"), "Remove row at the position row")
     .def ("get_value",                            &T::get_value, 
         args ("row_idx", "column_idx"), "Return value at given row and column")
     .def ("set_value",                            &T::set_value, 
