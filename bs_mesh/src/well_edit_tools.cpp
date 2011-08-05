@@ -667,8 +667,6 @@ bp::tuple make_projection(t_int ny, t_int nz,
     
     //wpoints.push_back(L);
 
-    if (faces[i] == 0 || faces[i] == 2 || faces[i] == 6)
-    {
        WP[1].x = cross_x[i]; 
        WP[1].y = cross_y[i];
        WP[1].z = cross_z[i];
@@ -677,6 +675,8 @@ bp::tuple make_projection(t_int ny, t_int nz,
        //printf("\n L=%f l=%f wl=%f wL=%f \n", L, l, wl, wL);
        wpoints.push_back(wL);
 
+    if (faces[i] == 0 || faces[i] == 2 || faces[i] == 6)
+    {
        my_ind = indices[i];
        
        my = index3d(my_ind, ny ,nz);
