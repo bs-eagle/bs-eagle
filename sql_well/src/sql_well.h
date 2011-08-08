@@ -23,7 +23,6 @@ namespace blue_sky
   
   class BS_API_PLUGIN sql_well : public well_pool_iface
     {
-    
     public: 
       typedef std::list<std::string>                    list_t;
       typedef BS_SP (prop_iface)                        sp_prop_t;

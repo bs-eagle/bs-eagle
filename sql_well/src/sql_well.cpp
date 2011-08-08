@@ -118,7 +118,6 @@ namespace blue_sky
     {
       int rc = 0;
       char *zErrMsg = 0;
-      char buf[2048];
 
       if (db)
         close_db ();
@@ -133,9 +132,18 @@ namespace blue_sky
               return -1;
             }
           create_db (db);
+
+          rc = sqlite3_exec (db, "INSERT INTO groups(name) VALUES ('field');", NULL, NULL, &zErrMsg);
+          if (rc != SQLITE_OK)
+            {
+              fprintf (stderr, "SQL error: %s\n", zErrMsg);
+              sqlite3_free (zErrMsg);
+            }
           sqlite3_close (db);
         }
 
+#if 0
+      char buf[2048];
       rc = sqlite3_open (":memory:", &db);
       if (rc)
         {
@@ -165,7 +173,16 @@ namespace blue_sky
           sqlite3_free (zErrMsg);
         }
       sqlite3_exec(db, "COMMIT; DETACH DATABASE backup", NULL, NULL, NULL);
-      
+#else //0
+      rc = sqlite3_open (file.c_str (), &db);
+      if (rc)
+        {
+          fprintf (stderr, "Can't open database: %s\n", sqlite3_errmsg (db));
+          sqlite3_close (db);
+          db = 0;
+          return -1;
+        }
+#endif //0 
       return 0;
     }
   
@@ -176,66 +193,103 @@ namespace blue_sky
       int rc = 0;
       char *zErrMsg = 0;
       const char *sql = \
-"CREATE TABLE well_dynamic (well_name TEXT,\
-                           date REAL NOT NULL,\
-                           h_orate REAL DEFAULT -1,\
-                           h_wrate REAL DEFAULT -1,\
-                           h_grate REAL DEFAULT -1,\
-                           h_bhp   REAL DEFAULT -1,\
-                           h_wefac REAL DEFAULT -1,\
-                           l_orate REAL DEFAULT -1,\
-                           l_wrate REAL DEFAULT -1,\
-                           l_grate REAL DEFAULT -1,\
-                           l_bhp   REAL DEFAULT -1,\
-                           c_orate REAL DEFAULT -1,\
-                           c_wrate REAL DEFAULT -1,\
-                           c_grate REAL DEFAULT -1,\
-                           c_bhp   REAL DEFAULT -1,\
-                           c_wefac REAL DEFAULT -1,\
-                           ct_orate REAL DEFAULT -1,\
-                           ct_wrate REAL DEFAULT -1,\
-                           ct_grate REAL DEFAULT -1,\
-                           h_status INTEGER DEFAULT -1,\
-                           h_ctrl   INTEGER DEFAULT -1,\
-                           c_status INTEGER DEFAULT -1,\
-                           c_ctrl   INTEGER DEFAULT -1);\
-CREATE INDEX well_name ON well_dynamic (well_name ASC);\
-CREATE INDEX date ON well_dynamic (date ASC);\
-CREATE UNIQUE INDEX iname_date ON well_dynamic (well_name, date ASC);\
-CREATE TABLE wells_in_group (group_name TEXT, well_name TEXT);\
-CREATE INDEX well_name2 ON wells_in_group (well_name ASC);\
-CREATE INDEX group_name ON wells_in_group (group_name ASC);\
-CREATE TABLE fractures (well_name TEXT, \
-                        parent TEXT DEFAULT 'main', \
-                        date REAL DEFAULT -1,\
-                        is_vertical BOOLEAN DEFAULT 1,\
-                        is_symmetric BOOLEAN DEFAULT 1,\
-                        perm REAL DEFAULT -1,\
-                        wf REAL DEFAULT 0.005,\
-                        half_length REAL DEFAULT 50,\
-                        up_half_height REAL DEFAULT 10,\
-                        down_half_height REAL DEFAULT 10,\
-                        angle REAL DEFAULT 0,\
-                        hor_main_radius REAL DEFAULT 50,\
-                        hor_sec_radius REAL DEFAULT 50,\
-                        parent_md REAL DEFAULT 10);\
-CREATE INDEX well_name3 ON fractures (well_name ASC);\
-CREATE INDEX by_date ON fractures (well_name, date);\
-CREATE INDEX duo_name ON fractures (well_name, parent);\
-CREATE TABLE branches (well_name TEXT,\
-                       branch_name TEXT,\
-                       parent TEXT DEFAULT '',\
-                       parent_md REAL DEFAULT -1.0,\
-                       prop TEXT,\
-                       traj TEXT,\
-                       well_log TEXT);\
-CREATE INDEX well_name4 ON branches (well_name ASC);\
-CREATE UNIQUE INDEX duo_name2 ON branches (well_name ASC, branch_name ASC);\
-CREATE INDEX parent on branches (well_name ASC, parent);\
-CREATE TABLE wells (well_name TEXT,\
-                    x REAL DEFAULT -1,\
-                    y REAL DEFAULT -1);\
-CREATE UNIQUE INDEX names ON wells (well_name ASC);\
+"\
+BEGIN;\
+CREATE TABLE wells(name TEXT UNIQUE PRIMARY KEY, \
+				    x REAL DEFAULT -1, \
+				    y REAL DEFAULT -1);\
+CREATE TABLE groups(name TEXT UNIQUE PRIMARY KEY);\
+COMMIT;\
+BEGIN;\
+CREATE TABLE wells_in_group(gr_name TEXT REFERENCES groups(name) ON UPDATE CASCADE ON DELETE CASCADE,\
+						    well_name TEXT REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE);\
+CREATE INDEX i4 ON wells_in_group (gr_name ASC);\
+CREATE INDEX i5 ON wells_in_group (well_name ASC);\
+CREATE TABLE well_hist(well_name TEXT REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE,\
+					 d REAL NOT NULL, \
+					 hist_or REAL DEFAULT -1,\
+					 hist_wr REAL DEFAULT -1,\
+					 hist_gr REAL DEFAULT -1,\
+					 hist_bhp REAL DEFAULT -1,\
+					 ctrl INTEGER DEFAULT 0,\
+					 status INTEGER DEFAULT 0,\
+					 ctrl_or REAL DEFAULT -1,\
+					 ctrl_wr REAL DEFAULT -1,\
+					 ctrl_gr REAL DEFAULT -1,\
+					 ctrl_bhp REAL DEFAULT -1,\
+					 ctrl_wefac REAL DEFAULT 1) ;\
+CREATE INDEX i1 ON well_hist (well_name ASC);\
+CREATE INDEX i2 ON well_hist (d ASC);\
+CREATE UNIQUE INDEX i3 ON well_hist (well_name, d ASC);\
+CREATE TABLE well_res(well_name TEXT REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE,\
+					 d REAL NOT NULL, \
+					 res_or REAL DEFAULT -1,\
+					 res_wr REAL DEFAULT -1,\
+					 res_gr REAL DEFAULT -1,\
+					 res_bhp REAL DEFAULT -1,\
+					 res_wefac REAL DEFAULT 1,\
+					 res_gor REAL DEFAULT -1,\
+					 ctrl INTEGER DEFAULT 0,\
+					 status INTEGER DEFAULT 0,\
+					 tot_or REAL DEFAULT -1,\
+					 tot_wr REAL DEFAULT -1,\
+					 tot_gr REAL DEFAULT -1);\
+CREATE INDEX i6 ON well_res (well_name ASC);\
+CREATE INDEX i7 ON well_res (d ASC);\
+CREATE UNIQUE INDEX i8 ON well_res (well_name, d ASC);\
+COMMIT;\
+BEGIN;\
+CREATE TABLE branches(well_name TEXT REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE,\
+					   branch_name TEXT, \
+					   traj BLOB, \
+					   well_log BLOB,\
+					   PRIMARY KEY (well_name, branch_name));\
+CREATE INDEX i9 ON branches (well_name ASC);\
+CREATE INDEX i10 ON branches (well_name, branch_name ASC);\
+COMMIT;\
+CREATE TRIGGER tr1 AFTER INSERT ON wells\
+	BEGIN\
+		INSERT INTO branches(well_name, branch_name) VALUES(new.name, 'main');\
+	END;\
+CREATE TRIGGER tr2 AFTER INSERT ON wells\
+	BEGIN\
+		INSERT INTO wells_in_group(gr_name, well_name) VALUES ('field', new.name);\
+	END;\
+BEGIN;\
+COMMIT;\
+BEGIN;\
+  CREATE TABLE fractures(well_name TEXT NOT NULL,\
+					     branch_name TEXT DEFAULT 'main', \
+					     md REAL NOT NULL, \
+					     d READ NOT NULL,\
+					     status  INTEGER DEFAULT 0,\
+					     is_symmetric INTEGER DEFAULT 1,\
+					     angle REAL DEFAULT 0,\
+					     half_length REAL DEFAULT 50,\
+					     perm REAL DEFAULT -1,\
+					     half_thin REAL DEFAULT 0.005,\
+					     half_up REAL DEFAULT 5,\
+					     half_down REAL DEFAULT 5,\
+					     FOREIGN KEY (well_name, branch_name) REFERENCES branches(well_name, branch_name) ON UPDATE CASCADE ON DELETE CASCADE\
+					     );\
+CREATE INDEX i11 ON fractures (well_name ASC);\
+CREATE INDEX i12 ON fractures (well_name, branch_name ASC);\
+CREATE TABLE completions(well_name TEXT NOT NULL, \
+					     branch_name TEXT DEFAULT 'main', \
+					     md REAL NOT NULL, \
+					     d READ NOT NULL,\
+					     status  INTEGER DEFAULT 0,\
+					     length REAL DEFAULT 1,\
+					     half_length REAL DEFAULT 50,\
+					     rw REAL DEFAULT 0.08,\
+					     r0 REAL DEFAULT -1,\
+					     kh REAL DEFAULT -1,\
+					     kh_mult REAL DEFAULT 1,\
+					     FOREIGN KEY (well_name, branch_name) REFERENCES branches(well_name, branch_name) ON UPDATE CASCADE ON DELETE CASCADE\
+					     );					     \
+CREATE INDEX i13 ON completions (well_name ASC);\
+CREATE INDEX i14 ON completions (well_name, branch_name ASC);\
+COMMIT;\
 ";
       if (!db_in)
         return -1;
@@ -254,14 +308,15 @@ CREATE UNIQUE INDEX names ON wells (well_name ASC);\
     {
       if (db)
         {
-          int rc = 0;
-          char *zErrMsg = 0;
-          char buf[2048];
           
           
           if (stmp_sql)
             finalize_sql ();
             
+#if 0
+          int rc = 0;
+          char *zErrMsg = 0;
+          char buf[2048];
           sprintf (buf, "ATTACH DATABASE '%s' as backup; BEGIN", file_name.c_str ());
           rc = sqlite3_exec (db, buf, NULL, NULL, &zErrMsg);
           if (rc != SQLITE_OK)
@@ -285,6 +340,7 @@ CREATE UNIQUE INDEX names ON wells (well_name ASC);\
               sqlite3_free (zErrMsg);
             }
           sqlite3_exec(db, "COMMIT; DETACH DATABASE backup", NULL, NULL, NULL);
+#endif //0
           sqlite3_close (db);
         }
 
@@ -398,16 +454,12 @@ CREATE UNIQUE INDEX names ON wells (well_name ASC);\
       char *zErrMsg = 0;
       char buf[2048];
 
-      sprintf (buf, "INSERT INTO wells (well_name) VALUES('%s'); \
-INSERT INTO wells_in_group (group_name, well_name) VALUES('FIELD', '%s');\
-INSERT INTO branches (well_name, branch_name) VALUES('%s', 'main')", 
-               well_name.c_str (),
-               well_name.c_str (),
+      sprintf (buf, "INSERT INTO wells (name) VALUES('%s');", 
                well_name.c_str ());
       rc = sqlite3_exec (db, buf, NULL, 0, &zErrMsg);
       if( rc != SQLITE_OK )
         {
-          fprintf (stderr, "SQL error: %s\n", zErrMsg);
+          fprintf (stderr, "SQL error (add_well): %s\n", zErrMsg);
           sqlite3_free (zErrMsg);
         }
       return 0;    
@@ -424,7 +476,7 @@ INSERT INTO branches (well_name, branch_name) VALUES('%s', 'main')",
       //char *zErrMsg = 0;
       const char *ttt;
       sqlite3_stmt *stmp;
-      std::string sql = "SELECT well_name FROM wells";
+      std::string sql = "SELECT name FROM wells";
       rc = sqlite3_prepare_v2 (db, sql.c_str (), sql.length () + 1, &stmp, &ttt);
       if (rc)
         {
@@ -479,7 +531,7 @@ INSERT INTO branches (well_name, branch_name) VALUES('%s', 'main')",
           fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
           return -3;
         }
-           if (stmp)
+      if (stmp)
         fprintf(stderr, "stmp not null2\n");
       else
          fprintf(stderr, "stmp null2\n");
@@ -493,7 +545,7 @@ INSERT INTO branches (well_name, branch_name) VALUES('%s', 'main')",
       if (stmp)
         fprintf(stderr, "stmp not null4\n");
       else
-         fprintf(stderr, "stmp null4\n");
+        fprintf(stderr, "stmp null4\n");
       
       return 0;
     }
