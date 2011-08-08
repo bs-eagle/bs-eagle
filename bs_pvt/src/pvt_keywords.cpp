@@ -185,7 +185,7 @@ namespace blue_sky
       {
         tbl = pvt->get_table (i, FI_PHASE_WATER);
         tbl->init(0, n_cols);
-        
+        n_rows = 0;
         
         for (;;n_rows++)
           {
