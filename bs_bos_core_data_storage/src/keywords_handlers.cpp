@@ -81,6 +81,10 @@ namespace blue_sky
     sp_pool_t pool = params.hdm->get_pool ();
     t_int nx, ny, nz, i, j , k;
     
+    nx = params.hdm->get_prop ()->get_i("nx");
+    ny = params.hdm->get_prop ()->get_i("ny");
+    nz = params.hdm->get_prop ()->get_i("nz");
+    
     t_long ndim = pool->calc_data_dims (keyword);
     std::vector <t_float> this_arr (ndim);
 
