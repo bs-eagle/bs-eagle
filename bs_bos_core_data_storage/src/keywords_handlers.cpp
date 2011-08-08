@@ -38,17 +38,36 @@ namespace blue_sky
   {
     BS_SP (FRead) reader = params.hdm->get_reader ();
     sp_pool_t pool = params.hdm->get_pool ();
+    t_int nx, ny, nz, i, j , k;
+    
+    nx = params.hdm->get_prop ()->get_i("nx");
+    ny = params.hdm->get_prop ()->get_i("ny");
+    nz = params.hdm->get_prop ()->get_i("nz");
+    spv_int data = BS_KERNEL.create_object (v_int::bs_type ());
     
     t_long ndim = pool->calc_data_dims (keyword);
     std::vector <t_int> this_arr (ndim);
-
+    
+    
     if (reader->read_array (keyword, this_arr) != (size_t)ndim)
       {
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s") % reader->get_prefix () % keyword);
       }
-
-    spv_int data = BS_KERNEL.create_object (v_int::bs_type ());
-    data->init (this_arr);
+    
+    // convert to C order  
+    if (nx * ny * nz == ndim) 
+      {
+        std::vector <t_int> this_arr_c (ndim);
+        for (i = 0; i < nx; i++)
+          for (j = 0; j < ny; j++)
+            for (k = 0; k < nz; k++)
+              this_arr_c[k + j * nz + i * ny * nz] = this_arr[i + j * nx + k * nx * ny];
+        
+        data->init (this_arr_c);
+      }
+    else
+      data->init (this_arr);
+    
     pool->set_i_data (keyword, data);
 
     BOSOUT (section::read_data, level::medium) << "int pool keyword: " << keyword << bs_end;
@@ -60,6 +79,7 @@ namespace blue_sky
   {
     BS_SP (FRead) reader = params.hdm->get_reader ();
     sp_pool_t pool = params.hdm->get_pool ();
+    t_int nx, ny, nz, i, j , k;
     
     t_long ndim = pool->calc_data_dims (keyword);
     std::vector <t_float> this_arr (ndim);
@@ -70,7 +90,21 @@ namespace blue_sky
       }
 
     spv_float data = BS_KERNEL.create_object (v_float::bs_type ());
-    data->init (this_arr);
+    
+    // convert to C order  
+    if (nx * ny * nz == ndim) 
+      {
+        std::vector <t_float> this_arr_c (ndim);
+        for (i = 0; i < nx; i++)
+          for (j = 0; j < ny; j++)
+            for (k = 0; k < nz; k++)
+              this_arr_c[k + j * nz + i * ny * nz] = this_arr[i + j * nx + k * nx * ny];
+        
+        data->init (this_arr_c);
+      }
+    else
+      data->init (this_arr);
+    
     pool->set_fp_data (keyword, data);
 
     BOSOUT (section::read_data, level::medium) << "fp pool keyword: " << keyword << bs_end;
