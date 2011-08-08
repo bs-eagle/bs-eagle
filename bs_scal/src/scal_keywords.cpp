@@ -150,6 +150,8 @@ namespace blue_sky
     keyword_manager->register_fp_pool_keyword ("SWCR",  dimens, 0, 0);
     keyword_manager->register_fp_pool_keyword ("PCW",   dimens, 0, 0);
     keyword_manager->register_fp_pool_keyword ("PCG",   dimens, 0, 0);
+    keyword_manager->register_fp_pool_keyword ("KRO",   dimens, 0, 0);
+    keyword_manager->register_fp_pool_keyword ("KRW",   dimens, 0, 0);
   }
 
   BLUE_SKY_TYPE_STD_CREATE (scal_keywords);
