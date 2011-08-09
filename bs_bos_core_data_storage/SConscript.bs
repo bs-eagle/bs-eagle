@@ -14,6 +14,7 @@ env.Append (CPPPATH = ["include",
     includes["bs_pvt"],
     includes["bs_scal"],
     includes["bs_bos_core"],
+    includes["sql_well"],
     ] + includes["kernel"])
 
 libs = ["blue_sky", "bs_bos_core_base"]
