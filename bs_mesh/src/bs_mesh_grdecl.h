@@ -147,8 +147,6 @@ namespace blue_sky
       grd_ecl::fpoint3d_vector calc_element (const t_long index) const
         {return wrapped.calc_element (index).get_corners ();};
 
-	  spv_double
-      get_element_sizes (const t_long n_element);
       ///////////////////////
       // ACCESS ARRAYS
       ///////////////////////

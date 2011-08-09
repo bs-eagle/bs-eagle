@@ -172,7 +172,7 @@ namespace blue_sky
       {return wrapped.build_jacobian_and_flux_connections (jacobian, flux_conn, boundary_array);};
 
 	  spv_double
-	  get_element_sizes (const t_long n_element)
+	  get_element_sizes (const t_long n_element) const
 	  {
 		double dx, dy, dz;
 		get_element_size(n_element, dx, dy, dz);

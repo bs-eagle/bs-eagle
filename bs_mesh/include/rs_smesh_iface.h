@@ -59,7 +59,7 @@ namespace blue_sky
       virtual t_long get_element_ijk_to_int (const t_long i, const t_long j, const t_long k) const = 0;
 
 	  virtual spv_double
-      get_element_sizes (const t_long n_element) = 0;
+      get_element_sizes (const t_long n_element) const = 0;
     };
 
 };//namespace blue_sky
