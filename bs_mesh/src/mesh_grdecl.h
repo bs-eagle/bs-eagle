@@ -38,7 +38,7 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
   private:
 	  struct inner;
 	  st_smart_ptr< inner > pinner_;
-  
+
 //+++++++++++++++++++++++++++++++++++++++++++
 //  INTERNAL TYPE DECLARATION
 //===========================================
@@ -61,7 +61,7 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     typedef grd_ecl::fpoint3d                  fpoint3d_t;
     typedef grd_ecl::fpoint2d                  fpoint2d_t;
     typedef grd_ecl::quadrangle_t              quadrangle_t;
-    
+
     typedef boost::array <t_long, 8>         element_zcorn_t_long;
     typedef boost::array <t_long, 4>         plane_zcorn_t_long;
     typedef boost::array <t_double, 3>                point3d_t;
@@ -80,7 +80,7 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
 
     //! read zcorn from FRead
     //void read_zcorn(const sp_fread_t &r);
-    
+
     //! init arrays of properties
     void init_props (const sp_hdm_t hdm);
 
@@ -129,7 +129,7 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
 
     //! get vertex of cube [i,j,k]
     void calc_element (const t_long i, const t_long j, const t_long k, element_t &element) const;
-    
+
     //! get vertex of cube [index]
     element_t calc_element (const t_long index) const;
 
@@ -184,7 +184,7 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
 
     	we optimize this function by skipping butting cells and change bypass method (Z->Y->X => X->Y->Z);
     	in all cases we using local indexing.*/
-    int build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, const sp_flux_conn_iface_t flux_conn, 
+    int build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, const sp_flux_conn_iface_t flux_conn,
                                              spv_long boundary_array);
 
     /*!	\brief allocate jacobian and fill structure
@@ -227,19 +227,19 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     t_double get_block_dy(t_long n_elem) const;
 
     t_double get_block_dz(t_long n_elem) const;
-    
-    spv_double mesh_grdecl::get_element_sizes (const t_long n_element) const;
-    
+
+    spv_double get_element_sizes (const t_long n_element) const;
+
     t_double get_depth(t_long n_elem) const
       {
         return (*depths)[n_elem];
-      }; 
+      };
 
     t_double get_dtop(t_long n_elem) const;
 
     //! function for filling net by testing data
     void generate_array();
-    
+
     //! check mesh data
     void check_data () const;
 
@@ -267,7 +267,7 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
 
     /*! \brief check if 2 blocks (block [i,j,k] and [i,j,k1]) are close enough to be coupled*/
     bool are_two_blocks_close (const t_long i, const t_long j, const t_long k, const t_long k1) ;
-    
+
     /*! \brief check if every active cell in mesh is adjacent*/
     bool check_adjacency(int shift_zcorn = 0);
 
@@ -305,8 +305,8 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     	\param d_dir - direction of transmissibility
     	\param plane2 - contact plane of block2 (if 0, then blocks are fully adjacent and contact area calculation is simple)
     	\return transmissiblity value between 2 blocks */
-      t_double calc_tran (const t_long ext_index1, const t_long ext_index2, const plane_t &plane1, 
-                          const fpoint3d_t &center1, const fpoint3d_t &center2, direction d_dir, plane_t *plane2  = 0) const;                          
+      t_double calc_tran (const t_long ext_index1, const t_long ext_index2, const plane_t &plane1,
+                          const fpoint3d_t &center1, const fpoint3d_t &center2, direction d_dir, plane_t *plane2  = 0) const;
 
 
 //-------------------------------------------
