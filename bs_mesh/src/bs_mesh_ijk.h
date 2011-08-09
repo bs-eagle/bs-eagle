@@ -171,7 +171,18 @@ namespace blue_sky
       int build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, const sp_flux_conn_iface_t flux_conn, spv_long boundary_array)
       {return wrapped.build_jacobian_and_flux_connections (jacobian, flux_conn, boundary_array);};
 
-
+	  spv_double
+	  get_element_sizes (const t_long n_element)
+	  {
+		double dx, dy, dz;
+		get_element_size(n_element, dx, dy, dz);
+		spv_double sizes = BS_KERNEL.create_object(v_double::bs_type());
+		sizes->resize(3);
+		(*sizes)[0] = dx;
+		(*sizes)[1] = dy;
+		(*sizes)[2] = dz;
+		return sizes;
+	  }
     ////////////////////
     // wrapped class
     ///////////////////

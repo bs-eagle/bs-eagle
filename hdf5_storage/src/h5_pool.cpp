@@ -439,7 +439,7 @@ namespace blue_sky
       }
 
     h5_pair &p = it->second;
-    if (p.size != calc_size (n_pool_dims, pool_dims, p.src_dims))
+    if (p.var_dims && p.size != calc_size (n_pool_dims, pool_dims, p.src_dims))
       {
         if (p.dset >= 0)
           {

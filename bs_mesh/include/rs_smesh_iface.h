@@ -57,6 +57,9 @@ namespace blue_sky
 
       //! return internal number of an element by I, J and K structured mesh coordinates
       virtual t_long get_element_ijk_to_int (const t_long i, const t_long j, const t_long k) const = 0;
+
+	  virtual spv_double
+      get_element_sizes (const t_long n_element) = 0;
     };
 
 };//namespace blue_sky
