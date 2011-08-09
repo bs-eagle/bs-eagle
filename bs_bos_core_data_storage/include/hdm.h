@@ -16,6 +16,7 @@
 #include "pvt_3p_iface.h"
 #include "init_model_iface.hpp"
 #include "event_manager_iface.hpp"
+#include "well_pool_iface.h"
 
 namespace blue_sky {
 
@@ -72,6 +73,8 @@ namespace blue_sky {
       BS_SP (init_model_iface) get_init_model () { return init_model_; }
 
       BS_SP (event_manager_iface) get_event_manager () { return event_manager_; }
+      
+      BS_SP (well_pool_iface) get_well_pool () { return well_pool_; }
   
       // SET
 
@@ -96,6 +99,7 @@ namespace blue_sky {
       BS_SP (pvt_3p_iface)      pvt_3p_;
       BS_SP (init_model_iface)  init_model_;
       BS_SP (event_manager_iface) event_manager_;
+      BS_SP (well_pool_iface)   well_pool_;                 //!< SQL well pool
       locale_keeper             lkeeper;
       physical_constants        ph_const;                //!< default physical constants
     };

@@ -23,6 +23,7 @@ namespace python {
     .def("get_scal", &T::get_scal)
     .def("get_pvt", &T::get_pvt)
     .def("get_prop", &T::get_prop)
+    .def("get_well_pool", &T::get_well_pool)
     .def("get_keyword_manager", &T::get_keyword_manager)
   PY_EXPORTER_END;
 

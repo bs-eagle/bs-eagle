@@ -65,6 +65,7 @@ namespace blue_sky
     
     this->pvt_3p_ = BS_KERNEL.create_object ("pvt_3p");
     this->event_manager_ = BS_KERNEL.create_object ("event_manager");
+    this->well_pool_ = BS_KERNEL.create_object ("sql_well");
   }
 
   hdm::hdm(const hdm& src):bs_refcounter (src), lkeeper ("C", LC_ALL)

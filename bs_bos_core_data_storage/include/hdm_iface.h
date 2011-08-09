@@ -18,6 +18,7 @@ namespace blue_sky {
   class pvt_3p_iface;
   class init_model_iface;
   class event_manager_iface;
+  class well_pool_iface;
 
   class BS_API_PLUGIN hdm_iface: public objbase
     {
@@ -71,6 +72,8 @@ namespace blue_sky {
       virtual BS_SP (init_model_iface) get_init_model () = 0;
 
       virtual BS_SP (event_manager_iface) get_event_manager () = 0;
+      
+      virtual BS_SP (well_pool_iface) get_well_pool () = 0;
   
       // SET
 
