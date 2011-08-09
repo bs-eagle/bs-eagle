@@ -97,7 +97,10 @@ namespace blue_sky
       //! return element size in all 3 dimensions
       void get_element_size (const t_long n_element, t_double &d_dim1, t_double &d_dim2, t_double &d_dim3) const
         {wrapped.get_block_dx_dy_dz(n_element, d_dim1, d_dim2, d_dim3);};
-	  
+        
+      spv_double get_element_sizes(const t_long n_element) const
+        {return wrapped.get_element_sizes(n_element);};  
+
       //! return element size in 3rd dimension
       t_double get_element_dim3_size (const t_long n_element) const
         {return wrapped.get_block_dz(n_element);};

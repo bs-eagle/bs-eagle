@@ -25,18 +25,6 @@ namespace blue_sky
     //*this = src;
   }
   
-  spv_double
-  bs_mesh_grdecl::get_element_sizes (const t_long n_element)
-  {
-	double dx, dy, dz;
-	get_element_size(n_element, dx, dy, dz);
-	spv_double sizes = BS_KERNEL.create_object(v_double::bs_type());
-	sizes->resize(3);
-	(*sizes)[0] = dx;
-	(*sizes)[1] = dy;
-	(*sizes)[2] = dz;
-	return sizes;
-  }
 
   BLUE_SKY_TYPE_IMPL(bs_mesh_grdecl, rs_smesh_iface, "bs_mesh_grdecl", "Mesh base (virtual)  class", "Mesh base (virtual) class");
 //  BLUE_SKY_TYPE_IMPL_T_EXT(1 , (bs_mesh_grdecl<base_strategy_did>) , 1, (rs_smesh_iface), "bs_mesh_grdecl_did", "Mesh base (virtual)  class", "Mesh base (virtual)  class", false);

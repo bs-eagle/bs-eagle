@@ -890,6 +890,18 @@ void mesh_grdecl::get_block_dx_dy_dz (t_long n_elem, t_double &dx, t_double &dy,
     dy = sizes[1];
     dz = sizes[2];
   }
+  
+spv_double mesh_grdecl::get_element_sizes (const t_long n_element) const
+  {
+	  double dx, dy, dz;
+	  get_block_dx_dy_dz(n_element, dx, dy, dz);
+	  spv_double sizes = BS_KERNEL.create_object(v_double::bs_type());
+	  sizes->resize(3);
+	  (*sizes)[0] = dx;
+	  (*sizes)[1] = dy;
+	  (*sizes)[2] = dz;
+	  return sizes;
+  }
 
 
 t_double mesh_grdecl:: get_block_dx(t_long n_elem) const
