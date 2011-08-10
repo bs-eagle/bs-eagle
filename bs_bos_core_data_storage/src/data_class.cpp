@@ -100,7 +100,7 @@ namespace blue_sky
   void idata::init()
   {
     //depth.resize((nx+1) * (ny+1) * (nz+1));
-    h5_pool->open_file ("bs_data_storage.h5", "/pool");
+    //h5_pool->open_file ("bs_data_storage.h5", "/pool");
     
     props->add_property_i (0, "rpo_model", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
     props->add_property_i (1, "pvt_region", "Number of PVT regions in simulation");

@@ -144,10 +144,14 @@ namespace blue_sky
     keyword_params kp;
     int flag;
     int len;
+    BS_SP(hdm_iface) sp_hdm;
+    sp_hdm = this;
     
     write_time_to_log init_time ("Read model", "");
-
+  
     reader->init (filename, filename);
+    data->h5_pool->open_file (filename.substr(0,filename.find_last_of(".")) +".h5", "/pool");
+    km->init(sp_hdm);
     kp.hdm = this;
 
     // start of loop for data file reading
