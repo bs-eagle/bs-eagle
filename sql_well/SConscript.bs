@@ -5,7 +5,7 @@ lib_name = "sql_well"
 tar_name = "sql_well"
 
 env = custom_env.Clone ()
-env.Append (CPPPATH = ["include", "src",
+env.AppendUnique (CPPPATH = ["include", "src",
     includes["bs_bos_core_base"],
     includes["common_types"]
     ] + includes["kernel"],

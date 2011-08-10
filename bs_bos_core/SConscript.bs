@@ -15,10 +15,9 @@ env.Append (CPPPATH = ["include",
     #includes["bs_mesh_mpfa"],
     includes["bs_scal"],
     includes["bs_pvt"],
-    includes["sql_well"],
-
-	includes["kernel"],
-	includes["bs_mesh"],
+    includes["kernel"],
+    includes["bs_mesh"],
+    includes["sql_well"]
     ])
 
 libs = ["blue_sky", 

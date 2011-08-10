@@ -160,8 +160,8 @@ bp::tuple find_z_min_max (spv_int indices_, t_int ny, t_int nz)
 // returns mesh_points, well_points
 bp::tuple make_projection(t_int ny, t_int nz, 
                           spv_int indices_, spv_int faces_, 
-                          spv_float x_, spv_float y_, spv_float z_,  spv_float tops_, spv_float values_, 
-                          t_int z_start, t_int z_end) 
+                          spv_float x_, spv_float y_, spv_float z_,  spv_float tops_, spv_float values_) //, 
+                          //t_int z_start, t_int z_end) 
 {
     v_float& tops = *tops_;
     v_float& values = *values_;
@@ -175,17 +175,17 @@ bp::tuple make_projection(t_int ny, t_int nz,
     t_int i, ii, j, n, n_wp_in_cell; 
     n = indices.size();
     
-    //t_int z, z_start = 1000000, z_end = 0; 
+    t_int z, z_start = 1000000, z_end = 0; 
 
     // calculate z_start, z_end from indices[]
-    //for (i=0;i<n;i++)
-    //{
-    //    z = index3d(indices[i], ny, nz).z;
-    //    if (z < z_start)
-    //        z_start = z;
-    //    if (z > z_end)
-    //        z_end = z;
-    //}
+    for (i=0;i<n;i++)
+    {
+        z = index3d(indices[i], ny, nz).z;
+        if (z < z_start)
+            z_start = z;
+        if (z > z_end)
+            z_end = z;
+    }
 
     //if (z_min > z_start)
     //    z_start = z_min;
@@ -194,7 +194,7 @@ bp::tuple make_projection(t_int ny, t_int nz,
 
     //printf("\n z_start = %d z_end = %d", z_start, z_end);
     //
-    t_int z;
+    //t_int z;
     
     //////////////////////////////////////////////
 
