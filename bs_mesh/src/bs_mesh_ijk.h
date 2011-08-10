@@ -92,6 +92,10 @@ namespace blue_sky
       //! return element size in 3rd dimension
       t_double get_element_dim3_size (const t_long n_element) const
       {return wrapped.get_block_dz(n_element);};
+      
+      //! return element size in 3rd dimension
+      t_double get_element_dim3_size_ext (const t_long i, const t_long j, const t_long k) const
+        {return wrapped.get_block_dz_ext(i, j, k);};
 
       //! return center point of an element by I, J and K mesh coordinates
       point3d_t get_element_center (const t_long i, const t_long j, const t_long k)const

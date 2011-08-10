@@ -94,6 +94,11 @@ class  mesh_ijk : public rs_smesh_base
       {
         return dz_array->data ()[n_elem];
       };
+    
+    t_double get_block_dz_ext(t_long i, t_long j, t_long k) const
+      {
+        return dz_array->data ()[XYZ_to_inside (i, j, k)];
+      }
     t_double get_depth(t_long n_elem) const
       {
         return depths->data ()[n_elem];

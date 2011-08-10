@@ -99,6 +99,9 @@ namespace blue_sky
       //! return element size in 3rd dimension
       virtual t_double get_element_dim3_size (const t_long n_element) const = 0;
       
+      //! return element size in 3rd dimension
+      virtual t_double get_element_dim3_size_ext (const t_long i, const t_long j, const t_long k) const = 0;
+      
       //! return depth of mesh element
       virtual t_double get_element_depth(const t_long n_element) const = 0;
         

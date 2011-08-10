@@ -227,6 +227,8 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     t_double get_block_dy(t_long n_elem) const;
 
     t_double get_block_dz(t_long n_elem) const;
+    
+    t_double get_block_dz_ext(t_long i, t_long j, t_long k) const;
 
     spv_double get_element_sizes (const t_long n_element) const;
 

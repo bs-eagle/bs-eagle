@@ -175,6 +175,12 @@ class BS_API_PLUGIN rs_smesh_base : public rs_mesh_base
         BS_ASSERT (false && "PURE CALL");
         return 0;
       }
+    
+    virtual t_double get_block_dz_ext(t_long /*i*/, t_long /*j*/, t_long /*k*/) const
+      {
+        BS_ASSERT (false && "PURE CALL");
+        return 0;
+      }
 
     virtual t_double get_dtop(t_long /*n_elem*/) const
       {

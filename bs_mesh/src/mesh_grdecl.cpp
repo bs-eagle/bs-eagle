@@ -921,6 +921,12 @@ t_double mesh_grdecl:: get_block_dz(t_long n_elem) const
     return calc_element(n_elem).get_dz();
   }
 
+t_double mesh_grdecl:: get_block_dz_ext(t_long i, t_long j, t_long k) const
+  {
+    element_t element;
+    calc_element(i, j, k, element);
+    return element.get_dz();
+  }
 
 t_double  mesh_grdecl::get_dtop(t_long n_elem) const
 {
