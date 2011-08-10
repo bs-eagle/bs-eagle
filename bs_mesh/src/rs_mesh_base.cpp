@@ -40,7 +40,7 @@ int rs_mesh_base::init_int_to_ext()
     return -1;
     
   //int_to_ext->init (n_active_elements, 0);
-  int_to_ext->init (*ext_to_int);
+  int_to_ext->resize (n_active_elements);
   
   t_long *int_to_ext_data = int_to_ext->data ();
   t_long *ext_to_int_data = ext_to_int->data ();
