@@ -150,13 +150,17 @@ namespace blue_sky
             continue;
           }
 
-        if (std::string (key) == "END")
+        if (keywrd == "END")
           {
             BOSOUT (section::read_data, level::low) << "Finish reading with END keyword" << bs_end;
             break;
           }
-
-        keywords->handle_keyword (keywrd, params);
+          
+        // do nat handle numbers
+        if (keywrd.find_first_of("1234567890") == std::string::npos)
+          {
+            keywords->handle_keyword (keywrd, params);
+          }
       }
   }
 
