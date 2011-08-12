@@ -16,6 +16,7 @@
 #include <fstream>
 #include <sqlite3.h>
 
+#include "read_class.h"
 #include "well_pool_iface.h"
 
 namespace blue_sky
@@ -35,8 +36,7 @@ namespace blue_sky
       // ------------------------------------
     public:
       // destructor
-      virtual ~sql_well ()
-        {}
+      virtual ~sql_well ();
       // ------------------------------------
       // INTERFACE METHODS
       // ------------------------------------
@@ -110,6 +110,14 @@ namespace blue_sky
       virtual bool get_sql_bool (t_int col);
       virtual std::string get_sql_str (t_int col);
       virtual int exec_sql (const std::string &sql);
+      /** 
+       * @brief read from ascii file in new format
+       * 
+       * @param fname -- <INPUT> input file name
+       *
+       * @return 0 if success
+       */
+      virtual int read_from_ascii_file (const std::string &fname, double starting_date);
     public:
 #ifdef BSPY_EXPORTING_PLUGIN
       /** 
@@ -126,6 +134,14 @@ namespace blue_sky
       int insert_or_update (const std::string &select_sql,
                             const std::string &insert_sql,
                             const std::string &update_sql);
+      int read_date_and_time (char *buf, char **next_start, double *dd);
+      int read_w_spec (char *buf);
+      int read_w_branch_f (char *buf);
+      int read_w_comp (char *buf, double d);
+      int read_w_frac (char *buf, double d);
+      int read_w_prod (char *buf, double d);
+      int read_w_inj (char *buf, double d);
+
 
       // ------------------------------
       // VARIABLES
@@ -135,6 +151,7 @@ namespace blue_sky
       std::string   file_name;          //!< database filename
       sqlite3       *db;                //!< database pointer
       sqlite3_stmt  *stmp_sql;
+      FRead *fr_file;                    //!< read from ascii helper 
 
       BLUE_SKY_TYPE_DECL (sql_well);
     };

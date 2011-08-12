@@ -64,6 +64,8 @@ namespace blue_sky
         args ("Column"), "Return text value of column")
     .def ("exec_sql",                           &T::exec_sql, 
         args ("Sql_string"), "Execute SQL")
+    .def ("read_from_ascii_file",               &T::read_from_ascii_file, 
+        args ("File_name", "starting_date"), "Read data from ascii file")
     .def ("__str__",                            &T::py_str)
   PY_EXPORTER_END;                               
 

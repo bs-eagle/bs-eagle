@@ -1,21 +1,29 @@
-#LyX 1.6.9 created this file. For more info see http://www.lyx.org/
-\lyxformat 345
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
 \begin_document
 \begin_header
 \textclass extreport
 \use_default_options true
+\maintain_unincluded_children false
 \language russian
+\language_package default
 \inputencoding auto
+\fontencoding global
 \font_roman default
 \font_sans default
 \font_typewriter default
 \font_default_family default
+\use_non_tex_fonts false
 \font_sc false
 \font_osf false
 \font_sf_scale 100
 \font_tt_scale 100
 
 \graphics pdftex
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
 \paperfontsize 9
 \spacing single
 \use_hyperref true
@@ -27,14 +35,23 @@
 \pdf_pdfborder true
 \pdf_colorlinks true
 \pdf_backref false
-\pdf_pdfusetitle false
+\pdf_pdfusetitle true
 \papersize a4paper
 \use_geometry true
 \use_amsmath 1
 \use_esint 1
+\use_mhchem 1
+\use_mathdots 1
 \cite_engine basic
 \use_bibtopic false
+\use_indices false
 \paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Предметный указатель
+\shortcut idx
+\color #008000
+\end_index
 \leftmargin 2cm
 \topmargin 2cm
 \rightmargin 1cm
@@ -42,15 +59,16 @@
 \secnumdepth 3
 \tocdepth 3
 \paragraph_separation indent
-\defskip medskip
+\paragraph_indentation default
 \quotes_language english
 \papercolumns 1
 \papersides 1
 \paperpagestyle fancy
 \tracking_changes false
 \output_changes false
-\author "" 
-\author "" 
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
 \end_header
 
 \begin_body
@@ -199,6 +217,7 @@ hor_pos "c"
 has_inner_box 1
 inner_pos "t"
 use_parbox 0
+use_makebox 0
 width "60col%"
 special "none"
 height "1in"
@@ -222,10 +241,6 @@ NOWATER OIL DGAS
 
 \end_layout
 
-\begin_layout Standard
-
-\end_layout
-
 \begin_layout Section
 Описание скважин
 \end_layout
@@ -246,7 +261,7 @@ NOWATER OIL DGAS
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="1" columns="6">
-<features>
+<features tabularvalignment="middle">
 <column alignment="left" valignment="top" width="0">
 <column alignment="left" valignment="top" width="0">
 <column alignment="left" valignment="top" width="0">
@@ -499,6 +514,7 @@ hor_pos "c"
 has_inner_box 1
 inner_pos "t"
 use_parbox 0
+use_makebox 0
 width "60col%"
 special "none"
 height "1in"
@@ -508,7 +524,7 @@ status open
 \begin_layout Plain Layout
 \begin_inset Tabular
 <lyxtabular version="3" rows="4" columns="8">
-<features>
+<features tabularvalignment="middle">
 <column alignment="left" valignment="top" width="0">
 <column alignment="left" valignment="top" width="0">
 <column alignment="left" valignment="top" width="0">
@@ -901,7 +917,7 @@ name "sub:W_BRANCH_F"
 \end_layout
 
 \begin_layout Standard
-Задание ветки (ствола) скважины с помощью инклинометрии из СSV файла.
+Задание ветки (ствола) скважины с помощью инклинометрии из DEV файла.
 \end_layout
 
 \begin_layout Standard
@@ -917,299 +933,38 @@ Name --- имя скважины (использование
 \end_layout
 
 \begin_layout Enumerate
-Bname --- уникальное имя ветки (использование 
+Bname --- уникальное имя ветки ( 
 \series bold
 *
 \series default
- недопустимо);
+ --- 
+\begin_inset Quotes eld
+\end_inset
+
+main
+\begin_inset Quotes erd
+\end_inset
+
+, основной ствол скважины);
 \end_layout
 
 \begin_layout Enumerate
-Parent --- имя ветки родителя (* --- для одноствольных скважин);
+Parent --- имя ветки родителя (* --- для одноствольных скважин или главного
+ ствола);
 \end_layout
 
 \begin_layout Enumerate
-File --- относительный или абсолютный путь к CSV файлу инклинометрии следующего
- формата (X;Y;Z;MD), где
+MD --- точка стыковки ствола с родителем (* --- для главного ствола);
 \end_layout
 
-\begin_deeper
-\begin_layout Itemize
-X --- 
-\begin_inset Formula $x$
-\end_inset
-
- координата (использование 
-\series bold
-*
-\series default
- недопустимо);
+\begin_layout Enumerate
+DEV File --- относительный или абсолютный путь к DEV файлу инклинометрии
+ (* --- не загрузать траекторию);
 \end_layout
 
-\begin_layout Itemize
-Y --- 
-\begin_inset Formula $y$
-\end_inset
-
- координата (использование 
-\series bold
-*
-\series default
- недопустимо);
-\end_layout
-
-\begin_layout Itemize
-Z --- 
-\begin_inset Formula $z$
-\end_inset
-
- координата (использование 
-\series bold
-*
-\series default
- недопустимо);
-\end_layout
-
-\begin_layout Itemize
-MD --- абсолютное удлинение (
-\series bold
-*
-\series default
- --- абсолютное удленение будет расчитано из координат 
-\begin_inset Formula $x,\, y,\, z$
-\end_inset
-
-).
-\end_layout
-
-\end_deeper
-\begin_layout Standard
-
-\series bold
-Пример файла инклинометрии для вертикальной скважины:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Box ovalbox
-position "t"
-hor_pos "c"
-has_inner_box 1
-inner_pos "t"
-use_parbox 0
-width "60col%"
-special "none"
-height "1in"
-height_special "totalheight"
-status open
-
-\begin_layout Plain Layout
-\begin_inset Tabular
-<lyxtabular version="3" rows="5" columns="4">
-<features>
-<column alignment="left" valignment="top" width="0">
-<column alignment="left" valignment="top" width="0">
-<column alignment="left" valignment="top" width="0">
-<column alignment="left" valignment="top" width="0">
-<row>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.0;
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.0;
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.0;
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.0
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.0;
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.0;
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-500.0;
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-510.0
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.0;
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.0;
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1000.0;
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1050.0
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.0;
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.0;
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1500.0;
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1580.0
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.0;
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-1.0;
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2000.0;
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-2115.0
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
+\begin_layout Enumerate
+WELL_LOG File --- относительный или абсолютный путь к DEV файлу данных ГИС
+ (* --- не загружать ГИС).
 \end_layout
 
 \begin_layout Subsection
@@ -1292,6 +1047,7 @@ hor_pos "c"
 has_inner_box 1
 inner_pos "t"
 use_parbox 0
+use_makebox 0
 width "60col%"
 special "none"
 height "1in"
@@ -1301,7 +1057,7 @@ status open
 \begin_layout Plain Layout
 \begin_inset Tabular
 <lyxtabular version="3" rows="2" columns="5">
-<features>
+<features tabularvalignment="middle">
 <column alignment="left" valignment="top" width="0">
 <column alignment="left" valignment="top" width="0">
 <column alignment="left" valignment="top" width="0">
@@ -1414,10 +1170,10 @@ status open
 \end_layout
 
 \begin_layout Subsection
-W_Z
+W_COMP
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:W_Z"
+name "sub:W_COMP"
 
 \end_inset
 
@@ -1425,7 +1181,7 @@ name "sub:W_Z"
 \end_layout
 
 \begin_layout Standard
-Задание вертикального ствола скважины с реальными координатами.
+Задание перфорированных интервалов.
 \end_layout
 
 \begin_layout Standard
@@ -1441,11 +1197,28 @@ Name --- имя скважины (использование
 \end_layout
 
 \begin_layout Enumerate
-X --- 
-\begin_inset Formula $x$
+Bname --- уникальное имя ветки (
+\series bold
+*
+\series default
+ --- 
+\begin_inset Quotes eld
 \end_inset
 
- координата (использование 
+main
+\begin_inset Quotes erd
+\end_inset
+
+, для одноствольных скважин);
+\end_layout
+
+\begin_layout Enumerate
+Status --- (SHUT, OPEN) (* --- OPEN)
+\end_layout
+
+\begin_layout Enumerate
+MD --- измеренная глубина начала перфорированного интервала (использование
+ 
 \series bold
 *
 \series default
@@ -1453,11 +1226,257 @@ X ---
 \end_layout
 
 \begin_layout Enumerate
-Y --- 
-\begin_inset Formula $y$
+LENGTH --- длина перфорированного интервала (
+\series bold
+*
+\series default
+ --- 1 м.);
+\end_layout
+
+\begin_layout Enumerate
+R --- радиус скважины (* --- 0.08 м.);
+\end_layout
+
+\begin_layout Enumerate
+SKIN --- скин-фактор (* --- 0.0);
+\end_layout
+
+\begin_layout Enumerate
+KHMULT --- множитель на койффициент соединения скважина-пласт (* --- 1);
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Пример:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box ovalbox
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "60col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="9">
+<features tabularvalignment="middle">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+*;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+*;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+well_1;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+*;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+OPEN
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+100.0;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5.5;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+*;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+*;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+well_2;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+second;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+OPEN
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+240.0;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+10.0;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.06;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
 \end_inset
 
- координата (использование 
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+W_FRAC
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:W_FRAC"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Задание трещин гидроразрыва.
+\end_layout
+
+\begin_layout Standard
+Параметры:
+\end_layout
+
+\begin_layout Enumerate
+Name --- имя скважины (использование 
 \series bold
 *
 \series default
@@ -1465,11 +1484,27 @@ Y ---
 \end_layout
 
 \begin_layout Enumerate
-Z1 --- 
-\begin_inset Formula $z$
+Bname --- уникальное имя ветки (
+\series bold
+*
+\series default
+ --- 
+\begin_inset Quotes eld
 \end_inset
 
- координата начала зоны перфораций (использование 
+main
+\begin_inset Quotes erd
+\end_inset
+
+, для одноствольных скважин);
+\end_layout
+
+\begin_layout Enumerate
+Status --- (SHUT, OPEN) (* --- OPEN)
+\end_layout
+
+\begin_layout Enumerate
+MD --- измеренная глубина центра трещины гидроразрыва (использование 
 \series bold
 *
 \series default
@@ -1477,27 +1512,254 @@ Z1 ---
 \end_layout
 
 \begin_layout Enumerate
-Z2 --- 
-\begin_inset Formula $z$
-\end_inset
+ANGLE --- угол направления трещины (град.), отсчитывается от направления
+ на север против часовой стрелки (* --- 0);
+\end_layout
 
- координата конца зоны перфораций (использование 
+\begin_layout Enumerate
+HALF_LENGTH_1 --- полудлина трещины (м.) в направлении заданного угла (*
+ --- 50 м.);
+\end_layout
+
+\begin_layout Enumerate
+HALF_LENGTH_2 --- полудлина трещины (м.) в направлении противоположном заданному
+ углу (* --- 50 м.);
+\end_layout
+
+\begin_layout Enumerate
+HALF_UP --- высота трещины вверх (м.) от точки MD (* --- 5 м.);
+\end_layout
+
+\begin_layout Enumerate
+HALF_DOWN --- высота трещины вниз (м.) от точки MD (* --- 5 м.);
+\end_layout
+
+\begin_layout Enumerate
+PERM --- проводимость трещины (мД.) (
 \series bold
 *
 \series default
- недопустимо);
+ --- бесконечная проводимость);
 \end_layout
 
 \begin_layout Enumerate
-R --- радиус скважины (* --- радиус скважины по умолчанию);
+HALF_THIN --- полураскрытие трещины (м.), используется только если PERM не
+ * (
+\series bold
+*
+\series default
+ --- 0.005 м.);
 \end_layout
 
-\begin_layout Enumerate
-SKIN --- skin-фактор (* --- 0);
+\begin_layout Standard
+
+\series bold
+Пример:
 \end_layout
 
-\begin_layout Enumerate
-KHMULT --- множитель на койффициент соединения скважина-пласт (* --- 1).
+\begin_layout Standard
+\begin_inset Box ovalbox
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "60col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="9">
+<features tabularvalignment="middle">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+*;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+*;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+well_1;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+*;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+OPEN
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+100.0;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+45;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+150
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+150
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+*;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+*;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+well_2;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+second;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+OPEN
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+240.0;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+10.0;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.06;
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -1586,7 +1848,8 @@ Ctrl
 \series bold
 BHP
 \series default
-):
+):\SpecialChar \-
+
 \end_layout
 
 \begin_deeper
@@ -1689,6 +1952,99 @@ Lrate
 *
 \series default
  --- не известно);
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Bhp_lim
+\series default
+ --- ограничение на забойное давление при достижении этого давления скважина
+ переходит на контроль 
+\series bold
+BHP
+\series default
+ со значением 
+\series bold
+Bhp_lim
+\series default
+ (* --- не известно);
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Wrate_lim
+\series default
+ --- ограничение на дебит воды при достижении этого дебита скважина переходит
+ на контроль 
+\series bold
+WRATE
+\series default
+ cо значением 
+\series bold
+Wrate_lim
+\series default
+ (* --- не известно);
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Orate_lim
+\series default
+ --- ограничение на дебит нефти при достижении этого дебита скважина переходит
+ на контроль 
+\series bold
+ORATE
+\series default
+ cо значением 
+\series bold
+Orate_lim
+\series default
+ (* --- не известно);
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Grate_lim
+\series default
+ --- ограничение на дебит газа при достижении этого дебита скважина переходит
+ на контроль 
+\series bold
+GRATE
+\series default
+ cо значением 
+\series bold
+Grate_lim
+\series default
+ (* --- не известно);
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Lrate_lim
+\series default
+ --- ограничение на дебит жидкости при достижении этого дебита скважина
+ переходит на контроль 
+\series bold
+LRATE
+\series default
+ cо значением 
+\series bold
+Lrate_lim
+\series default
+ (* --- не известно);
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+WEFAC
+\series default
+ --- доля времени которое скважина работает (* --- 1);
 \end_layout
 
 \begin_layout Subsection
@@ -1861,22 +2217,49 @@ Rate
 \series bold
 *
 \series default
- --- не известно).
+ --- не известно);
 \end_layout
 
-\begin_layout Subsection
-W_PLIM
-\begin_inset CommandInset label
-LatexCommand label
-name "sub:W_PLIM"
+\begin_layout Enumerate
 
-\end_inset
-
-
+\series bold
+Bhp_lim
+\series default
+ --- ограничение на забойное давление при достижении этого давления скважина
+ переходит на контроль 
+\series bold
+BHP
+\series default
+ со значением 
+\series bold
+Bhp_lim
+\series default
+ (* --- не известно);
 \end_layout
 
-\begin_layout Standard
-Задание ограничений для добывающих скважин.
+\begin_layout Enumerate
+
+\series bold
+Rate_lim
+\series default
+ --- ограничение на дебит воды при достижении этого дебита скважина переходит
+ на контроль 
+\series bold
+RATE
+\series default
+ cо значением 
+\series bold
+Rate_lim
+\series default
+ (* --- не известно);
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+WEFAC
+\series default
+ --- доля времени которое скважина работает (* --- 1);
 \end_layout
 
 \end_body

@@ -105,12 +105,20 @@ namespace blue_sky
     {
       db = 0;
       stmp_sql = 0;
+      fr_file = 0;
       
     }
   sql_well::sql_well (const sql_well& rhs) 
         : bs_refcounter ()
     {
       *this = rhs;
+      fr_file = 0;
+    }
+  sql_well::~sql_well ()
+    {
+      if (fr_file)
+        delete fr_file;
+      fr_file = 0;
     }
 
   int 
@@ -207,45 +215,67 @@ CREATE INDEX i4 ON wells_in_group (gr_name ASC);\
 CREATE INDEX i5 ON wells_in_group (well_name ASC);\
 CREATE TABLE well_hist(well_name TEXT REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE,\
 					 d REAL NOT NULL, \
-					 hist_or REAL DEFAULT -1,\
-					 hist_wr REAL DEFAULT -1,\
-					 hist_gr REAL DEFAULT -1,\
-					 hist_bhp REAL DEFAULT -1,\
+					 p_or REAL DEFAULT -1,\
+					 p_wr REAL DEFAULT -1,\
+					 p_gr REAL DEFAULT -1,\
+					 p_lr REAL DEFAULT -1,\
+					 p_bhp REAL DEFAULT -1,\
+                     p_fgr REAL DEFAULT -1,\
+					 i_or REAL DEFAULT -1,\
+					 i_wr REAL DEFAULT -1,\
+					 i_gr REAL DEFAULT -1,\
+					 i_bhp REAL DEFAULT -1,\
+                     wefac REAL DEFAULT 1.0,\
 					 ctrl INTEGER DEFAULT 0,\
 					 status INTEGER DEFAULT 0,\
-					 ctrl_or REAL DEFAULT -1,\
-					 ctrl_wr REAL DEFAULT -1,\
-					 ctrl_gr REAL DEFAULT -1,\
-					 ctrl_bhp REAL DEFAULT -1,\
-					 ctrl_wefac REAL DEFAULT 1) ;\
+					 lim_p_or REAL DEFAULT -1,\
+					 lim_p_wr REAL DEFAULT -1,\
+					 lim_p_gr REAL DEFAULT -1,\
+                     lim_p_lr REAL DEFAULT -1,\
+					 lim_p_bhp REAL DEFAULT -1,\
+					 lim_i_or REAL DEFAULT -1,\
+					 lim_i_wr REAL DEFAULT -1,\
+					 lim_i_gr REAL DEFAULT -1,\
+					 lim_i_bhp REAL DEFAULT -1);\
 CREATE INDEX i1 ON well_hist (well_name ASC);\
 CREATE INDEX i2 ON well_hist (d ASC);\
 CREATE UNIQUE INDEX i3 ON well_hist (well_name, d ASC);\
 CREATE TABLE well_res(well_name TEXT REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE,\
 					 d REAL NOT NULL, \
-					 res_or REAL DEFAULT -1,\
-					 res_wr REAL DEFAULT -1,\
-					 res_gr REAL DEFAULT -1,\
-					 res_bhp REAL DEFAULT -1,\
-					 res_wefac REAL DEFAULT 1,\
-					 res_gor REAL DEFAULT -1,\
+					 p_or REAL DEFAULT -1,\
+					 p_wr REAL DEFAULT -1,\
+					 p_gr REAL DEFAULT -1,\
+					 p_bhp REAL DEFAULT -1,\
+					 i_or REAL DEFAULT -1,\
+					 i_wr REAL DEFAULT -1,\
+					 i_gr REAL DEFAULT -1,\
+					 i_bhp REAL DEFAULT -1,\
+					 wefac REAL DEFAULT 1,\
+					 p_gor REAL DEFAULT -1,\
+					 p_fgr REAL DEFAULT -1,\
 					 ctrl INTEGER DEFAULT 0,\
 					 status INTEGER DEFAULT 0,\
-					 tot_or REAL DEFAULT -1,\
-					 tot_wr REAL DEFAULT -1,\
-					 tot_gr REAL DEFAULT -1);\
+					 tot_p_or REAL DEFAULT -1,\
+					 tot_p_wr REAL DEFAULT -1,\
+					 tot_p_gr REAL DEFAULT -1,\
+					 tot_p_fgr REAL DEFAULT -1,\
+					 tot_i_or REAL DEFAULT -1,\
+					 tot_i_wr REAL DEFAULT -1,\
+					 tot_i_gr REAL DEFAULT -1);\
 CREATE INDEX i6 ON well_res (well_name ASC);\
 CREATE INDEX i7 ON well_res (d ASC);\
 CREATE UNIQUE INDEX i8 ON well_res (well_name, d ASC);\
 COMMIT;\
 BEGIN;\
 CREATE TABLE branches(well_name TEXT REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE,\
-					   branch_name TEXT, \
+					   branch_name TEXT DEFAULT 'main', \
+                       md REAL DEFAULT -1,\
+                       parent TEXT DEFAULT '',\
 					   traj BLOB, \
 					   well_log BLOB,\
 					   PRIMARY KEY (well_name, branch_name));\
 CREATE INDEX i9 ON branches (well_name ASC);\
-CREATE INDEX i10 ON branches (well_name, branch_name ASC);\
+CREATE UNIQUE INDEX i10 ON branches (well_name, branch_name ASC);\
 COMMIT;\
 CREATE TRIGGER tr1 AFTER INSERT ON wells\
 	BEGIN\
@@ -261,15 +291,15 @@ BEGIN;\
   CREATE TABLE fractures(well_name TEXT NOT NULL,\
 					     branch_name TEXT DEFAULT 'main', \
 					     md REAL NOT NULL, \
-					     d READ NOT NULL,\
+					     d REAL NOT NULL,\
 					     status  INTEGER DEFAULT 0,\
-					     is_symmetric INTEGER DEFAULT 1,\
-					     angle REAL DEFAULT 0,\
-					     half_length REAL DEFAULT 50,\
-					     perm REAL DEFAULT -1,\
-					     half_thin REAL DEFAULT 0.005,\
 					     half_up REAL DEFAULT 5,\
 					     half_down REAL DEFAULT 5,\
+					     angle REAL DEFAULT 0,\
+					     half_length_1 REAL DEFAULT 50,\
+					     half_length_2 REAL DEFAULT 50,\
+					     perm REAL DEFAULT -1,\
+					     half_thin REAL DEFAULT 0.005,\
 					     FOREIGN KEY (well_name, branch_name) REFERENCES branches(well_name, branch_name) ON UPDATE CASCADE ON DELETE CASCADE\
 					     );\
 CREATE INDEX i11 ON fractures (well_name ASC);\
@@ -277,10 +307,9 @@ CREATE INDEX i12 ON fractures (well_name, branch_name ASC);\
 CREATE TABLE completions(well_name TEXT NOT NULL, \
 					     branch_name TEXT DEFAULT 'main', \
 					     md REAL NOT NULL, \
-					     d READ NOT NULL,\
+					     d REAL NOT NULL,\
 					     status  INTEGER DEFAULT 0,\
 					     length REAL DEFAULT 1,\
-					     half_length REAL DEFAULT 50,\
 					     rw REAL DEFAULT 0.08,\
 					     r0 REAL DEFAULT -1,\
 					     kh REAL DEFAULT -1,\
@@ -772,6 +801,753 @@ COMMIT;\
           return -4; 
         }
       return 0;
+    }
+
+  int 
+  sql_well::read_from_ascii_file (const std::string &fname, double starting_date)
+    {
+      if (fr_file)
+        delete fr_file;
+      fr_file = new FRead (fname.c_str (), "./");
+
+      int rc = 0;
+      char buf[4096];
+      char *id = 0;
+      char *other = 0;
+      double d = 0;
+
+      for (;;)
+        {
+          rc = fr_file->read_line (buf, 4096, FREAD_DONT_CONVERT_CASE);
+          //printf ("%s\n", buf);
+          if (rc <= 0)
+            break;
+          d = starting_date;
+          // read date and time
+          rc = read_date_and_time (buf, &id, &d);
+          if (rc)
+            return -4;
+          // read id
+          rc = trim_left (&id);
+          other = id;
+          rc |= get_phrase (&other);
+          if (rc)
+            return -1;
+          //trim_right_s (id);
+          locale_ucase (id);
+
+          if (!strcmp (id, "W_SPEC"))
+            {
+              rc = read_w_spec (other);
+              if (rc)
+                return rc;
+            }
+          else if (!strcmp (id, "W_BRANCH_F"))
+            {
+              rc = read_w_branch_f (other);
+              if (rc)
+                return rc;
+            }
+          else if (!strcmp (id, "W_COMP"))
+            {
+              rc = read_w_comp (other, d);
+              if (rc)
+                return rc;
+            }
+          else if (!strcmp (id, "W_FRAC"))
+            {
+              rc = read_w_frac (other, d);
+              if (rc)
+                return rc;
+            }
+          else if (!strcmp (id, "W_PROD"))
+            {
+              rc = read_w_prod (other, d);
+              if (rc)
+                return rc;
+            }
+          else if (!strcmp (id, "W_INJ"))
+            {
+              rc = read_w_inj (other, d);
+              if (rc)
+                return rc;
+            }
+          //printf ("date %lf\n", d);
+          //printf ("next: %s\n", next);
+        }
+      return 0;
+    }
+
+  int 
+  sql_well::read_w_branch_f (char *buf)
+    {
+      int rc = 0;
+      char *nx = 0;
+      char wname[1024];
+      char branch[1024];
+      char parent[1024];
+      char fname[1024];
+      char fname2[1024];
+
+      char sql[1024];
+      double md = -1;
+      // read well name
+      wname[0] = '\0';
+      nx = buf;
+      // read well name
+      rc = get_phrase_str (&nx, wname);
+      if (rc || wname[0] == '\0')
+        {
+          fprintf (stderr, "Error: well name in keyword W_BRANCH_F can not be set by default\n");
+          return -1;
+        }
+      // read branch
+      strcpy (branch, "main");
+      rc = get_phrase_str (&nx, branch);
+      if (rc)
+        {
+          fprintf (stderr, "Error: W_BRANCH_F can not read branch name\n");
+          return -1;
+        }
+      // read parent
+      parent[0] = '\0';
+      rc = get_phrase_str (&nx, parent);
+      if (rc)
+        {
+          fprintf (stderr, "Error: W_BRANCH_F can not read parent name\n");
+          return -1;
+        }
+      //read md
+      rc = get_phrase_double (&nx, &md);
+      if (rc)
+        {
+          fprintf (stderr, "Error: W_BRANCH_F\n");
+          return -1;
+        }
+      // read file name
+      fname[0] = '\0';
+      rc = get_phrase_str (&nx, fname);
+      if (rc)
+        {
+          fprintf (stderr, "Error: W_BRANCH_F can not read file name\n");
+          return -1;
+        }
+      // read well_log file name
+      fname2[0] = '\0';
+      rc = get_phrase_str (&nx, fname2);
+      if (rc)
+        {
+          fprintf (stderr, "Error: W_BRANCH_F can not read file name\n");
+          return -1;
+        }
+      // add to data base
+      sprintf (sql, "INSERT OR REPLACE INTO branches(well_name, branch_name, md, parent) VALUES ('%s', '%s', %lf, '%s')",
+               wname, branch, md, parent);
+      if (exec_sql (sql))
+        return -1;
+      if (fname[0] != '\0')
+        {
+          sp_traj_t sp_traj = BS_KERNEL.create_object ("traj"); 
+          rc = sp_traj->read_from_dev_file (fname);
+          if (rc)
+            {
+              return rc;
+            }
+          if (add_branch_traj (wname, branch, sp_traj))
+            return -6;
+        }
+      if (fname2[0] != '\0')
+        {
+          sp_gis_t sp_gis = BS_KERNEL.create_object ("gis"); 
+          rc = sp_gis->read_from_las_file (fname);
+          if (rc)
+            {
+              return rc;
+            }
+          if (add_branch_gis (wname, branch, sp_gis))
+            return -6;
+        }
+
+      printf ("W_BRANCH_F %s %s %s %lf\n", wname, branch, parent, md);
+
+      return 0;
+    }
+  int 
+  sql_well::read_w_spec (char *buf)
+    {
+      int rc = 0;
+      char *nx = 0;
+      char wname[1024];
+      char sql[1024];
+      double x = -1, y = -1;
+      // read well name
+      wname[0] = '\0';
+      nx = buf;
+      rc = get_phrase_str (&nx, wname);
+      //printf ("WNAME: %s\n", wname);
+      if (rc || wname[0] == '\0')
+        {
+          fprintf (stderr, "Error: well name in keyword W_SPEC can not be set by default\n");
+          return -1;
+        }
+      rc = get_phrase_double (&nx, &x);
+      //printf ("rc: %lf\n", x); 
+      rc |= get_phrase_double (&nx, &y);
+      //printf ("rc: %lf\n", y); 
+      if (rc)
+        {
+          fprintf (stderr, "Error: W_SPEC\n");
+          return -1;
+        }
+      printf ("W_SPEC %s %lf %lf\n", wname, x, y);
+      // add to data base
+      sprintf (sql, "INSERT INTO wells(name, x, y) VALUES ('%s', %lf, %lf)",
+               wname, x, y);
+      return exec_sql (sql);
+    }
+  int 
+  sql_well::read_w_frac (char *buf, double d)
+    {
+      int rc = 0;
+      char *nx = 0;
+      char wname[1024];
+      char branch[1024];
+      char status[1024];
+      int i_status;
+      char sql[1024];
+      double md = -1; 
+      double angle  = 0; 
+      double half_length_1 = 50.0; 
+      double half_length_2 = 50.0; 
+      double half_up = 5.0; 
+      double half_down = 5.0; 
+      double perm = -1; 
+      double half_thin = 0.005;
+      // read well name
+      wname[0] = '\0';
+      nx = buf;
+      rc = get_phrase_str (&nx, wname);
+      //printf ("WNAME: %s\n", wname);
+      if (rc || wname[0] == '\0')
+        {
+          fprintf (stderr, "Error: well name in keyword W_FRAC can not be set by default\n");
+          return -1;
+        }
+      strcpy (branch, "main");
+      rc = get_phrase_str (&nx, branch);
+      //printf ("WNAME: %s\n", wname);
+      if (rc)
+        {
+          fprintf (stderr, "Error: well branch name in keyword W_FRAC\n");
+          return -1;
+        }
+      strcpy (status, "SHUT");
+      rc = get_phrase_str (&nx, status);
+      //printf ("WNAME: %s\n", wname);
+      if (rc)
+        {
+          fprintf (stderr, "Error: well status in keyword W_FRAC\n");
+          return -1;
+        }
+      
+      rc = get_phrase_double (&nx, &md);
+      rc |= get_phrase_double (&nx, &angle);
+      rc |= get_phrase_double (&nx, &half_length_1);
+      rc |= get_phrase_double (&nx, &half_length_2);
+      rc |= get_phrase_double (&nx, &half_up);
+      rc |= get_phrase_double (&nx, &half_down);
+      rc |= get_phrase_double (&nx, &perm);
+      rc |= get_phrase_double (&nx, &half_thin);
+      if (rc)
+        {
+          fprintf (stderr, "Error: W_SPEC\n");
+          return -1;
+        }
+      // check input data
+      locale_ucase (status);
+      if (status[0] == 'S')
+        i_status = STATUS_CON_SHUT;
+      //else if (status[0] == 'C') // close
+      //  i_status = 1;
+      else if (status[0] == 'O') // OPEN
+        i_status = STATUS_CON_OPEN;
+      else
+        {
+          fprintf (stderr, "Error: status %s for W_FRAC not aloowed\n", status);
+          return -9;
+        }
+      if (md < 0)
+        {
+          fprintf (stderr, "Error: you should specify md for W_FRAC \n");
+          return -9;
+        }
+      if (half_length_1 <= 0)
+        {
+          fprintf (stderr, "Error: HALF_LENGTH_1 should be > 0 for W_FRAC \n");
+          return -9;
+        }
+      if (half_length_2 <= 0)
+        {
+          fprintf (stderr, "Error: HALF_LENGTH_2 should be > 0 for W_FRAC \n");
+          return -9;
+        }
+      if (half_up <= 0)
+        {
+          fprintf (stderr, "Error: HALF_UP should be > 0 for W_FRAC \n");
+          return -9;
+        }
+      if (half_down <= 0)
+        {
+          fprintf (stderr, "Error: HALF_DOWN should be > 0 for W_FRAC \n");
+          return -9;
+        }
+      if (half_thin <= 0)
+        {
+          fprintf (stderr, "Error: HALF_THIN should be > 0 for W_FRAC \n");
+          return -9;
+        }
+
+      printf ("W_FRAC %s %s %s %lf %lf %lf %lf %lf %lf %lf %lf\n", 
+              wname, branch, status, md, angle, half_length_1, half_length_2, 
+              half_up, half_down, perm, half_thin);
+      // add to data base
+      sprintf (sql, "INSERT INTO fractures(well_name, branch_name, md, d, status, \
+half_up, half_down, angle, half_length_1, half_length_2, perm, half_thin) \
+VALUES ('%s', '%s', %lf, %lf, %d, %lf, %lf, %lf, %lf, %lf, %lf, %lf)",
+               wname, branch, md, d, i_status, half_up, half_down, angle, 
+               half_length_1, half_length_2, perm, half_thin);
+      return exec_sql (sql);
+      return 0;
+    }
+  int 
+  sql_well::read_w_comp (char *buf, double d)
+    {
+      int rc = 0;
+      char *nx = 0;
+      char wname[1024];
+      char branch[1024];
+      char status[1024];
+      int i_status;
+      char sql[1024];
+      double md = -1, length  = 1, rw = 0.08, skin = 0, khmult = 1.0;
+      // read well name
+      wname[0] = '\0';
+      nx = buf;
+      rc = get_phrase_str (&nx, wname);
+      //printf ("WNAME: %s\n", wname);
+      if (rc || wname[0] == '\0')
+        {
+          fprintf (stderr, "Error: well name in keyword W_COMP can not be set by default\n");
+          return -1;
+        }
+      strcpy (branch, "main");
+      rc = get_phrase_str (&nx, branch);
+      //printf ("WNAME: %s\n", wname);
+      if (rc)
+        {
+          fprintf (stderr, "Error: well branch name in keyword W_COMP\n");
+          return -1;
+        }
+      strcpy (status, "SHUT");
+      rc = get_phrase_str (&nx, status);
+      //printf ("WNAME: %s\n", wname);
+      if (rc)
+        {
+          fprintf (stderr, "Error: well status in keyword W_COMP\n");
+          return -1;
+        }
+      
+      rc = get_phrase_double (&nx, &md);
+      rc |= get_phrase_double (&nx, &length);
+      rc |= get_phrase_double (&nx, &rw);
+      rc |= get_phrase_double (&nx, &skin);
+      rc |= get_phrase_double (&nx, &khmult);
+      if (rc)
+        {
+          fprintf (stderr, "Error: W_SPEC\n");
+          return -1;
+        }
+      // check input data
+      locale_ucase (status);
+      if (status[0] == 'S')
+        i_status = STATUS_CON_SHUT;
+      //else if (status[0] == 'C') // close
+      //  i_status = 1;
+      else if (status[0] == 'O') // OPEN
+        i_status = STATUS_CON_OPEN;
+      else
+        {
+          fprintf (stderr, "Error: status %s for W_COMP not aloowed\n", status);
+          return -9;
+        }
+      if (md < 0)
+        {
+          fprintf (stderr, "Error: you should specify md for W_COMP \n");
+          return -9;
+        }
+      if (length <= 0)
+        {
+          fprintf (stderr, "Error: length should be > 0 for W_COMP \n");
+          return -9;
+        }
+      if (rw <= 0)
+        {
+          fprintf (stderr, "Error: rw should be > 0 for W_COMP \n");
+          return -9;
+        }
+      if (khmult <= 0)
+        {
+          fprintf (stderr, "Error: khmult should be > 0 for W_COMP \n");
+          return -9;
+        }
+
+      printf ("W_COMP %s %s %lf %lf %lf %lf %lf\n", 
+              wname, branch, md, length, rw, skin, khmult);
+      // add to data base
+      sprintf (sql, "INSERT INTO completions(well_name, branch_name, md, d, length, status, rw, kh_mult) VALUES ('%s', '%s', %lf, %lf, %lf, %d, %lf, %lf)",
+               wname, branch, md, d, length, i_status, rw, khmult);
+      return exec_sql (sql);
+      return 0;
+    }
+ 
+  int 
+  sql_well::read_w_inj (char *buf, double d)
+    {
+      int rc = 0;
+      char *nx = 0;
+      char wname[1024];
+      char status[1024];
+      char ctrl[1024];
+      char fluid[1024];
+      int i_status = 0;
+      int i_ctrl = 0;
+      char sql[1024];
+      double bhp = -1;
+      double rate = -1;
+      double orate = -1;
+      double wrate = -1;
+      double grate = -1;
+      double lim_bhp = -1;
+      double lim_rate = -1;
+      double lim_orate = -1;
+      double lim_wrate = -1;
+      double lim_grate = -1;
+      double wefac = 1.0;
+
+      // read well name
+      wname[0] = '\0';
+      nx = buf;
+      rc = get_phrase_str (&nx, wname);
+      //printf ("WNAME: %s\n", wname);
+      if (rc || wname[0] == '\0')
+        {
+          fprintf (stderr, "Error: well name in keyword W_INJ can not be set by default\n");
+          return -1;
+        }
+      strcpy (status, "SHUT");
+      rc = get_phrase_str (&nx, status);
+      //printf ("WNAME: %s\n", wname);
+      if (rc)
+        {
+          fprintf (stderr, "Error: well status in keyword W_INJ\n");
+          return -1;
+        }
+      strcpy (ctrl, "BHP");
+      rc = get_phrase_str (&nx, ctrl);
+      if (rc)
+        {
+          fprintf (stderr, "Error: well control in keyword W_INJ\n");
+          return -1;
+        }
+      strcpy (fluid, "WATER");
+      rc = get_phrase_str (&nx, ctrl);
+      if (rc)
+        {
+          fprintf (stderr, "Error: well control in keyword W_INJ\n");
+          return -1;
+        }
+      
+      rc = get_phrase_double (&nx, &bhp);
+      rc |= get_phrase_double (&nx, &rate);
+      rc = get_phrase_double  (&nx, &lim_bhp);
+      rc |= get_phrase_double (&nx, &lim_rate);
+      rc |= get_phrase_double (&nx, &wefac);
+      if (rc)
+        {
+          fprintf (stderr, "Error: W_PROD\n");
+          return -1;
+        }
+      // check input data
+      locale_ucase (status);
+      locale_ucase (ctrl);
+      locale_ucase (fluid);
+      if (status[0] == 'S')
+        i_status = STATUS_SHUT;
+      else if (status[0] == 'C') // close
+        i_status = STATUS_CLOSE;
+      else if (status[0] == 'O') // OPEN
+        i_status = STATUS_OPEN;
+      else
+        {
+          fprintf (stderr, "Error: status %s for W_COMP not aloowed\n", status);
+          return -9;
+        }
+      if (ctrl[0] == 'B')
+        {
+          i_ctrl = CTRL_I_BHP;
+          if (i_status == 2 && bhp <= 0)
+            {
+              fprintf (stderr, "Error: BHP = %lf for CONTROL %s in keyword W_INJ",
+                       bhp, ctrl);
+              return -1;
+            }
+        }
+      else if (ctrl[0] == 'R') // rate
+        {
+          if (i_status == STATUS_OPEN && rate <= 0)
+            {
+              fprintf (stderr, "Error: RATE = %lf for CONTROL %s in keyword W_INJ",
+                       wrate, ctrl);
+              return -1;
+            }
+          if (fluid[0] == 'W')
+            {
+              i_ctrl = CTRL_I_WRATE;
+              wrate = rate;
+              lim_wrate = lim_rate;
+            }
+          else if (fluid[0] == 'O')
+            {
+              i_ctrl = -CTRL_I_ORATE;
+              orate = rate;
+              lim_orate = lim_rate;
+            }
+          else if (fluid[0] == 'G')
+            {
+              i_ctrl = CTRL_I_GRATE;
+              grate = rate;
+              lim_grate = lim_rate;
+            }
+          else
+            {
+              fprintf (stderr, "Error: FLUID = %s not allowed in keyword W_INJ",
+                       fluid);
+              return -1;
+            }
+        }
+      else
+        {
+          fprintf (stderr, "Error: control %s for W_INJ not aloowed\n", ctrl);
+          return -9;
+        }
+      if (i_status == STATUS_OPEN && wefac <= 0)
+        {
+          fprintf (stderr, "Error: WEFAC = %lf in keyword W_INJ",
+                   wefac);
+          return -1;
+        }
+
+      printf ("W_INJ %s %s %s %s %lf %lf %lf %lf %lf\n", 
+              wname, status, ctrl, fluid, bhp, rate, lim_bhp, lim_rate, wefac);
+      // add to data base
+      sprintf (sql, "INSERT INTO well_hist(well_name, d, i_or, i_wr, i_gr, \
+i_bhp, wefac, ctrl, status, lim_i_or, lim_i_wr, lim_i_gr, lim_i_bhp) \
+VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf)",
+               wname, d, orate, wrate, grate, bhp, wefac, i_ctrl, i_status, 
+               lim_orate, lim_wrate, lim_grate, lim_bhp);
+      return exec_sql (sql);
+      return 0;
+    }
+
+  int 
+  sql_well::read_w_prod (char *buf, double d)
+    {
+      int rc = 0;
+      char *nx = 0;
+      char wname[1024];
+      char status[1024];
+      char ctrl[1024];
+      int i_status = 0;
+      int i_ctrl = 0;
+      char sql[1024];
+      double bhp = -1;
+      double orate = -1;
+      double wrate = -1;
+      double grate = -1;
+      double lrate = -1;
+      double lim_bhp = -1;
+      double lim_orate = -1;
+      double lim_wrate = -1;
+      double lim_grate = -1;
+      double lim_lrate = -1;
+      double wefac = 1.0;
+
+      // read well name
+      wname[0] = '\0';
+      nx = buf;
+      rc = get_phrase_str (&nx, wname);
+      //printf ("WNAME: %s\n", wname);
+      if (rc || wname[0] == '\0')
+        {
+          fprintf (stderr, "Error: well name in keyword W_PROD can not be set by default\n");
+          return -1;
+        }
+      strcpy (status, "SHUT");
+      rc = get_phrase_str (&nx, status);
+      //printf ("WNAME: %s\n", wname);
+      if (rc)
+        {
+          fprintf (stderr, "Error: well status in keyword W_PROD\n");
+          return -1;
+        }
+      strcpy (ctrl, "BHP");
+      rc = get_phrase_str (&nx, ctrl);
+      if (rc)
+        {
+          fprintf (stderr, "Error: well control in keyword W_PROD\n");
+          return -1;
+        }
+      
+      rc = get_phrase_double (&nx, &bhp);
+      rc |= get_phrase_double (&nx, &wrate);
+      rc |= get_phrase_double (&nx, &orate);
+      rc |= get_phrase_double (&nx, &grate);
+      rc |= get_phrase_double (&nx, &lrate);
+      rc = get_phrase_double  (&nx, &lim_bhp);
+      rc |= get_phrase_double (&nx, &lim_wrate);
+      rc |= get_phrase_double (&nx, &lim_orate);
+      rc |= get_phrase_double (&nx, &lim_grate);
+      rc |= get_phrase_double (&nx, &lim_lrate);
+
+      rc |= get_phrase_double (&nx, &wefac);
+      if (rc)
+        {
+          fprintf (stderr, "Error: W_PROD\n");
+          return -1;
+        }
+      // check input data
+      locale_ucase (status);
+      locale_ucase (ctrl);
+      if (status[0] == 'S')
+        i_status = STATUS_SHUT;
+      else if (status[0] == 'C') // close
+        i_status = STATUS_CLOSE;
+      else if (status[0] == 'O') // OPEN
+        i_status = STATUS_OPEN;
+      else
+        {
+          fprintf (stderr, "Error: status %s for W_COMP not aloowed\n", status);
+          return -9;
+        }
+      if (ctrl[0] == 'B')
+        {
+          i_ctrl = CTRL_P_BHP;
+          if (i_status == 2 && bhp <= 0)
+            {
+              fprintf (stderr, "Error: BHP = %lf for CONTROL %s in keyword W_PROD",
+                       bhp, ctrl);
+              return -1;
+            }
+        }
+      else if (ctrl[0] == 'W') // close
+        {
+          i_ctrl = CTRL_P_WRATE;
+          if (i_status == 2 && wrate <= 0)
+            {
+              fprintf (stderr, "Error: WRATE = %lf for CONTROL %s in keyword W_PROD",
+                       wrate, ctrl);
+              return -1;
+            }
+        }
+      else if (ctrl[0] == 'O') // close
+        {
+          i_ctrl = CTRL_P_ORATE;
+          if (i_status == 2 && orate <= 0)
+            {
+              fprintf (stderr, "Error: ORATE = %lf for CONTROL %s in keyword W_PROD",
+                       orate, ctrl);
+              return -1;
+            }
+        }
+      else if (ctrl[0] == 'G') // close
+        {
+          i_ctrl = CTRL_P_GRATE;
+          if (i_status == 2 && grate <= 0)
+            {
+              fprintf (stderr, "Error: GRATE = %lf for CONTROL %s in keyword W_PROD",
+                       grate, ctrl);
+              return -1;
+            }
+        }
+      else if (ctrl[0] == 'L') // close
+        {
+          i_ctrl = CTRL_P_LRATE;
+          if (i_status == 2 && lrate <= 0)
+            {
+              fprintf (stderr, "Error: LRATE = %lf for CONTROL %s in keyword W_PROD",
+                       lrate, ctrl);
+              return -1;
+            }
+        }
+      else
+        {
+          fprintf (stderr, "Error: control %s for W_PROD not aloowed\n", status);
+          return -9;
+        }
+      if (i_status == STATUS_OPEN && wefac <= 0)
+        {
+          fprintf (stderr, "Error: WEFAC = %lf in keyword W_PROD",
+                   wefac);
+          return -1;
+        }
+
+      printf ("W_PROD %s %s %s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf\n", 
+              wname, status, ctrl, bhp, wrate, orate, grate, lrate, lim_bhp, 
+              lim_wrate, lim_orate, lim_grate, lim_lrate, wefac);
+      // add to data base
+      sprintf (sql, "INSERT INTO well_hist(well_name, d, p_or, p_wr, p_gr, p_lr, \
+p_bhp, wefac, ctrl, status, lim_p_or, lim_p_wr, lim_p_gr, lim_p_lr, lim_p_bhp) \
+VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf)",
+               wname, d, orate, wrate, grate, lrate, bhp, wefac, i_ctrl, i_status, 
+               lim_orate, lim_wrate, lim_grate, lim_lrate, lim_bhp);
+      return exec_sql (sql);
+      return 0;
+    }
+
+  int 
+  sql_well::read_date_and_time (char *buf, char **next_start, double *dd)
+    {
+      int rc = 0;
+      double days;
+      double t;
+      char *nx;
+
+      *next_start = buf;
+      rc = trim_left (next_start);
+      nx = *next_start;
+      rc |= get_phrase (&nx);
+      if (**next_start == '*')
+        days = 0;
+      else
+        {
+          rc |= key_read_date (*next_start, days);
+          *dd = (double)days;
+        }
+
+      *next_start = nx;
+      rc = trim_left (next_start);
+      nx = *next_start;
+      rc |= get_phrase (&nx);
+      if (**next_start == '*')
+        t = 0;
+      else
+        {
+          rc |= key_read_time (*next_start, t);
+        }
+      *next_start = nx;
+
+      *dd += (double)t;
+      return rc;
     }
 
 #ifdef BSPY_EXPORTING_PLUGIN

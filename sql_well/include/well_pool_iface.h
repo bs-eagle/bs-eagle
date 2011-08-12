@@ -36,6 +36,23 @@ class well_pool_iface : public objbase
       typedef BS_SP (gis_iface)                         sp_gis_t;
       typedef BS_SP (traj_iface)                        sp_traj_t;
 
+      static const int CTRL_P_BHP = 1;
+      static const int CTRL_P_WRATE = 2;
+      static const int CTRL_P_ORATE = 3;
+      static const int CTRL_P_GRATE = 4;
+      static const int CTRL_P_LRATE = 5;
+
+      static const int CTRL_I_BHP = -1;
+      static const int CTRL_I_WRATE = -2;
+      static const int CTRL_I_ORATE = -3;
+      static const int CTRL_I_GRATE = -4;
+      static const int STATUS_SHUT = 0;
+      static const int STATUS_CLOSE = 1;
+      static const int STATUS_OPEN = 2;
+
+      static const int STATUS_CON_SHUT = 0;
+      static const int STATUS_CON_OPEN = 1;
+
     public:
       /** 
        * @brief destructor
@@ -108,6 +125,17 @@ class well_pool_iface : public objbase
       virtual int create_db_struct () = 0;
 
       virtual void fill_db () = 0;
+
+      /** 
+       * @brief read from ascii file in new format
+       * 
+       * @param fname -- <INPUT> input file name
+       * @param starting_date -- <INPUT> starting date
+       *
+       * @return 0 if success
+       */
+      virtual int read_from_ascii_file (const std::string &fname, 
+                                        double starting_date) = 0;
 #ifdef BSPY_EXPORTING_PLUGIN
       /** 
        * @brief python print wrapper
