@@ -183,6 +183,14 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\date_tools.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\localization.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\main.cpp"
 				>
 			</File>
@@ -195,11 +203,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\read_class.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\sql_well.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\src\sql_well.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\table_upper.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\well_keywords.hpp"
 				>
 			</File>
 		</Filter>
