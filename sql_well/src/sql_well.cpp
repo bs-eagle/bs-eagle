@@ -9,10 +9,12 @@
 #include <iomanip>
 #include <iostream>
 #include <stdio.h>
+#include <string>
+#include <fstream>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/fstream.hpp"
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 
 
 
@@ -547,8 +549,8 @@ COMMIT;\
         fprintf(stderr, "stmp not null1\n");
       else
          fprintf(stderr, "stmp null1\n");
-      std::ostringstream oss (std::ios_base::binary | std::ios_base::out | std::ios_base::in);
-      boost::archive::binary_oarchive oar(oss);
+      std::ostringstream oss;
+      boost::archive::text_oarchive oar(oss);
       g->save (oar);
       std::string s = oss.str ();
       std::vector<char> ch (s.begin (), s.end ());
@@ -611,7 +613,7 @@ COMMIT;\
           printf ("READ GIS %d\n", (int)s.length ());
           std::istringstream iss;
           iss.str (s);
-          boost::archive::binary_iarchive iar(iss);
+          boost::archive::text_iarchive iar(iss);
           sp_gis->load (iar);
           
         }
@@ -643,7 +645,7 @@ COMMIT;\
         }
 
       std::ostringstream oss;
-      boost::archive::binary_oarchive oar(oss);
+      boost::archive::text_oarchive oar(oss);
       t->save (oar);
       std::string s = oss.str ();
       std::vector<char> ch (s.begin (), s.end ());
@@ -696,7 +698,7 @@ COMMIT;\
           std::istringstream iss;
           iss.str (s);
           //printf ("hkdjhkf: %s\n", iss.str ().c_str ());
-          boost::archive::binary_iarchive iar(iss);
+          boost::archive::text_iarchive iar(iss);
           sp_traj->load (iar);
           
         }

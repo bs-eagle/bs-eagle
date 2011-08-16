@@ -13,8 +13,8 @@
 
 #include "bs_kernel.h"
 #include "table.h"
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>
 
@@ -168,19 +168,39 @@ namespace blue_sky
       std::ostringstream oss;
       std::istringstream iss;
 
-      boost::archive::binary_oarchive oar(oss);
+      boost::archive::text_oarchive oar(oss);
 
       sp_table_t sp_table = BS_KERNEL.create_object ("table");
 
       save (oar);
       iss.str (oss.str ());
-      boost::archive::binary_iarchive iar(iss);
+      boost::archive::text_iarchive iar(iss);
       sp_table->load (iar);
       return sp_table;
 
     }
     
 #ifdef BSPY_EXPORTING_PLUGIN
+  std::string 
+  table::to_str () const
+    {
+      std::ostringstream oss;
+
+      boost::archive::text_oarchive oar(oss);
+
+      save (oar);
+      return oss.str ();
+    }
+  void 
+  table::from_str (const std::string &s)
+    {
+      std::istringstream iss;
+
+      iss.str (s);
+      boost::archive::text_iarchive iar(iss);
+      load (iar);
+    }
+
   void 
   table::set_col_values (const t_long col, spv_double val)
     {

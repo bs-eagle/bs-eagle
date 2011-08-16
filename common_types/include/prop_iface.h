@@ -7,8 +7,8 @@
 #ifndef __PROP_IFACE_H
 #define __PROP_IFACE_H
 #include <string>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 
 #include "bs_object_base.h"
 #include "conf.h"
@@ -26,8 +26,8 @@ namespace blue_sky
   class prop_iface : public objbase
     {
     public:
-      typedef boost::archive::binary_iarchive           tia_t;
-      typedef boost::archive::binary_oarchive           toa_t;
+      typedef boost::archive::text_iarchive           tia_t;
+      typedef boost::archive::text_oarchive           toa_t;
 
       virtual ~prop_iface ()
         {}
@@ -104,6 +104,19 @@ namespace blue_sky
       virtual void save (toa_t &ar) const = 0;
       virtual void load (tia_t &ar) = 0;
 #ifdef BSPY_EXPORTING_PLUGIN
+      /** 
+       * @brief pack(serialize) all information of class to text string 
+       * 
+       * @return string
+       */
+      virtual std::string to_str () const = 0; 
+
+      /** 
+       * @brief Reastore all class information from input text string
+       * 
+       * @param s -- <INPUT> string
+       */
+      virtual void from_str (const std::string &s) = 0;
       virtual std::string py_str () const = 0;
 #endif //BSPY_EXPORTING_PLUGIN
 

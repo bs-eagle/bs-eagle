@@ -32,6 +32,10 @@ namespace blue_sky
         args (""), "Return table with depth and DEV curves")
     .def ("read_from_dev_file",               &T::read_from_dev_file, 
         args ("fname"), "Read wellbore trajectory from DEV file format")
+    .def ("to_str",                               &T::to_str, 
+        args (""), "serialize class content to string")
+    .def ("from_str",                             &T::from_str, 
+        args ("string"), "restore class content from string")
     .def ("__str__",                            &T::py_str)
   PY_EXPORTER_END;                               
 

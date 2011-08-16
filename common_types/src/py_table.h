@@ -53,6 +53,10 @@ namespace blue_sky
         args ("row_idx", "column_idx", "value"), "Set value at given row and column")
     .def ("check_serial",                         &T::check_serial, 
         args (""), "should return copy of the table")
+    .def ("to_str",                               &T::to_str, 
+        args (""), "serialize class content to string")
+    .def ("from_str",                             &T::from_str, 
+        args ("string"), "restore class content from string")
     .def ("__str__",                            &T::py_str)
   PY_EXPORTER_END;                               
 

@@ -342,19 +342,38 @@ namespace blue_sky
       std::ostringstream oss;
       std::istringstream iss;
 
-      boost::archive::binary_oarchive oar(oss);
+      boost::archive::text_oarchive oar(oss);
 
       sp_gis_t sp_gis = BS_KERNEL.create_object ("gis");
 
       save (oar);
       iss.str (oss.str ());
-      boost::archive::binary_iarchive iar(iss);
+      boost::archive::text_iarchive iar(iss);
       sp_gis->load (iar);
       return sp_gis;
 
     }
 
 #ifdef BSPY_EXPORTING_PLUGIN
+  std::string 
+  gis::to_str () const
+    {
+      std::ostringstream oss;
+
+      boost::archive::text_oarchive oar(oss);
+
+      save (oar);
+      return oss.str ();
+    }
+  void 
+  gis::from_str (const std::string &s)
+    {
+      std::istringstream iss;
+
+      iss.str (s);
+      boost::archive::text_iarchive iar(iss);
+      load (iar);
+    }
   std::string 
   gis::py_str () const
     {

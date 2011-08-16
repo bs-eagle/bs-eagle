@@ -35,6 +35,10 @@ namespace blue_sky
         args ("fname"), "Read gis from LAS file format")
     .def ("check_serial",                         &T::check_serial, 
         args (""), "should return copy of the table")
+    .def ("to_str",                               &T::to_str, 
+        args (""), "serialize class content to string")
+    .def ("from_str",                             &T::from_str, 
+        args ("string"), "restore class content from string")
     .def ("__str__",                            &T::py_str)
   PY_EXPORTER_END;                               
 

@@ -124,6 +124,25 @@ namespace blue_sky
 
 #ifdef BSPY_EXPORTING_PLUGIN
   std::string 
+  traj::to_str () const
+    {
+      std::ostringstream oss;
+
+      boost::archive::text_oarchive oar(oss);
+
+      save (oar);
+      return oss.str ();
+    }
+  void 
+  traj::from_str (const std::string &s)
+    {
+      std::istringstream iss;
+
+      iss.str (s);
+      boost::archive::text_iarchive iar(iss);
+      load (iar);
+    }
+  std::string 
   traj::py_str () const
     {
       std::stringstream s;

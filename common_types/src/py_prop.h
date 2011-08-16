@@ -101,6 +101,10 @@ namespace blue_sky
         args ("Name"), "Return description")
     .def ("get_description_s",                   &T::get_description_s, 
         args ("Name"), "Return description")
+    .def ("to_str",                               &T::to_str, 
+        args (""), "serialize class content to string")
+    .def ("from_str",                             &T::from_str, 
+        args ("string"), "restore class content from string")
   PY_EXPORTER_END;                               
 
   PY_EXPORTER (py_dummy_exporter, default_exporter)

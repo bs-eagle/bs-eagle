@@ -22,8 +22,8 @@ namespace blue_sky
       // ------------------------------------
     public:
       typedef std::list<std::string>                  list_t;
-      typedef boost::archive::binary_iarchive           tia_t;
-      typedef boost::archive::binary_oarchive           toa_t;
+      typedef boost::archive::text_iarchive           tia_t;
+      typedef boost::archive::text_oarchive           toa_t;
 
       // destructor
       virtual ~prop ()
@@ -185,6 +185,19 @@ namespace blue_sky
           ar & b_impl;
         }
 #ifdef BSPY_EXPORTING_PLUGIN
+      /** 
+       * @brief pack(serialize) all information of class to text string 
+       * 
+       * @return string
+       */
+      virtual std::string to_str () const; 
+
+      /** 
+       * @brief Reastore all class information from input text string
+       * 
+       * @param s -- <INPUT> string
+       */
+      virtual void from_str (const std::string &s);
       virtual std::string py_str () const
         {
           std::stringstream s;
