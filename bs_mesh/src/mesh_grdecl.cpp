@@ -1052,27 +1052,48 @@ boost::python::list mesh_grdecl::calc_element_tops ()
 }
 
 spv_float mesh_grdecl::calc_cells_vertices() {
-  element_t element;
-  spv_float tops;
-  t_long i, j, k, c, ind, *indexes_data;
-  t_float *tops_data;
-
-  tops = give_kernel::Instance().create_object(v_float::bs_type());
+  spv_float tops = give_kernel::Instance().create_object(v_float::bs_type());
   tops->resize (n_elements * 8 * 3);
 
-  tops_data = &(*tops)[0];
-  ind = 0;
+  t_float* tops_data = &(*tops)[0];
+  t_long ind = 0;
 
-  for (i = 0; i < nx; ++i)
-	  for (j = 0; j < ny; ++j)
-		  for (k = 0; k < nz; ++k, ++ind)
+  element_t element;
+  for (t_long i = 0; i < nx; ++i)
+	  for (t_long j = 0; j < ny; ++j)
+		  for (t_long k = 0; k < nz; ++k, ++ind)
 		    {
 		      calc_element (i, j, k, element);
-			  for (c = 0; c < 8; ++c)
+			  for (t_long c = 0; c < 8; ++c)
 				{
 				  tops_data[8 * 3 * ind + 3 * c] = element.get_corners()[c].x;
 				  tops_data[8 * 3 * ind + 3 * c + 1] = element.get_corners()[c].y;
 				  tops_data[8 * 3 * ind + 3 * c + 2] = element.get_corners()[c].z;
+				}
+			}
+
+  return tops;
+}
+
+spv_float mesh_grdecl::calc_cells_vertices_xyz() {
+  spv_float tops = give_kernel::Instance().create_object(v_float::bs_type());
+  tops->resize (n_elements * 8 * 3);
+
+  t_float* tops_data = &(*tops)[0];
+  t_long ind = 0;
+
+  element_t element;
+  for (t_long k = 0; k < nz; ++k)
+    for (t_long j = 0; j < ny; ++j)
+      for (t_long i = 0; i < nx; ++i, ++ind)
+		  {
+		      calc_element (i, j, k, element);
+			  for (t_long c = 0; c < 8; ++c)
+				{
+				  const t_long start = 8 * 3 * ind + 3 * c;
+				  tops_data[start] = element.get_corners()[c].x;
+				  tops_data[start + 1] = element.get_corners()[c].y;
+				  tops_data[start + 2] = element.get_corners()[c].z;
 				}
 			}
 
