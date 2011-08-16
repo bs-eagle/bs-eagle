@@ -27,7 +27,7 @@
 #include <vector>
 #include <cmath>
 // DEBUG
-#include <iostream>
+//#include <iostream>
 
 #define X(n) (3*n)
 #define Y(n) (3*n + 1)
@@ -249,16 +249,16 @@ struct well_hit_cell {
 		: where(where_), seg(seg_), cell(cell_), md(md_), facet(facet_)
 	{}
 
-	// hit points ordered first by well segment
-	// next by md
+	// hit points ordered first by md
+	// next by well segment
 	// and at last by cell number
 	bool operator <(const well_hit_cell& rhs) const {
-		if(seg->first < rhs.seg->first)
+		if(md < rhs.md)
 			return true;
-		else if(seg->first == rhs.seg->first) {
-			if(md < rhs.md)
+		else if(md == rhs.md) {
+			if(seg->first < rhs.seg->first)
 				return true;
-			else if(md == rhs.md)
+			else if(seg->first == rhs.seg->first)
 				return cell->first < rhs.cell->first;
 		}
 		return false;
@@ -539,7 +539,7 @@ spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float z
 spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 	spv_float well_info, bool include_well_nodes)
 {
-	// calculate mesh nodes coordinates and muild initial trimesh
+	// calculate mesh nodes coordinates and build initial trimesh
 	trimesh M;
 	spv_float tops;
 	tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M);
