@@ -4,7 +4,7 @@
 #include "data_class.h"
 #include "pvt_3p_iface.h"
 #include "scal_3p_iface.hpp"
-#include "pvt_3p.h"
+#include "pvt_3p_iface.h"
 #include "scal_3p.h"
 //Needed for scal_3p.h
 #include "scale_array_holder.h"
