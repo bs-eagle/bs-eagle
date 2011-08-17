@@ -25,10 +25,11 @@ namespace blue_sky {
   register_types (const plugin_descriptor &pd)
   {
     bool res = true;
+    setlocale(LC_NUMERIC, "C");
 
-   REG_TYPE (sql_well);
+    REG_TYPE (sql_well);
 //res &= BS_KERNEL.register_type (pd, vartype_table <t_float>::bs_type ());
-
+    
     return res;
   }
   }
