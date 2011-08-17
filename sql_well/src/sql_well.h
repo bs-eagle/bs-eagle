@@ -110,6 +110,9 @@ namespace blue_sky
       virtual bool get_sql_bool (t_int col);
       virtual std::string get_sql_str (t_int col);
       virtual int exec_sql (const std::string &sql);
+	  virtual int insert_or_update (const std::string &select_sql,
+                            const std::string &insert_sql,
+                            const std::string &update_sql);
       /** 
        * @brief read from ascii file in new format
        * 
@@ -131,9 +134,7 @@ namespace blue_sky
       
     protected:
       int create_db (sqlite3 *db_in);
-      int insert_or_update (const std::string &select_sql,
-                            const std::string &insert_sql,
-                            const std::string &update_sql);
+      
       int read_date_and_time (char *buf, char **next_start, double *dd);
       int read_w_spec (char *buf);
       int read_w_branch_f (char *buf);

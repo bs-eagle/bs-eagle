@@ -138,10 +138,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="hdf5dll.lib"
+				AdditionalDependencies="hdf5dll.lib loki.lib ws2_32.lib"
 				OutputFile="$(ProjectDir)/../../../exe/release/plugins/$(ProjectName).dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/release/&quot;;&quot;$(HDF5_PATH)/dll&quot;"
+				AdditionalLibraryDirectories="&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/release&quot;;&quot;$(HDF5_PATH)/dll&quot;;&quot;$(LOKI_PATH)/lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -222,12 +222,40 @@
 				RelativePath=".\src\well_keywords.hpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\timer.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\src\date_tools.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\localization.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\main_def.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\read_class.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\table_upper.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\timer.h"
+				>
+			</File>
 			<File
 				RelativePath=".\include\well_pool_iface.h"
 				>

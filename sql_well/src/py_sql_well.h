@@ -66,6 +66,8 @@ namespace blue_sky
         args ("Sql_string"), "Execute SQL")
     .def ("read_from_ascii_file",               &T::read_from_ascii_file, 
         args ("File_name", "starting_date"), "Read data from ascii file")
+	.def ("insert_or_update",					&T::insert_or_update,
+		args ("select", "insert", "update"), "Insert or update data")
     .def ("__str__",                            &T::py_str)
   PY_EXPORTER_END;                               
 
