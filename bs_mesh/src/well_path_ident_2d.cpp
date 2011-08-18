@@ -1,8 +1,8 @@
 /// @file well_path_ident.cpp
-/// @brief Well path and mesh intersection utilities
+/// @brief Well path and mesh intersection utilities in 2D
 /// @author uentity
 /// @version 0.1
-/// @date 05.07.2011
+/// @date 16.08.2011
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
@@ -11,8 +11,9 @@
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/intersections.h>
-#include <CGAL/point_generators_3.h>
-#include <CGAL/Bbox_3.h>
+#include <CGAL/point_generators_2.h>
+#include <CGAL/Bbox_2.h>
+#include <CGAL/Polygon_2.h>
 #include <CGAL/box_intersection_d.h>
 #include <CGAL/function_objects.h>
 #include <CGAL/Join_input_iterator.h>
@@ -43,11 +44,13 @@ namespace { 	// hide implementation details
 
 typedef CGAL::Object                                        Object;
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
-typedef Kernel::Point_3                                     Point_3;
-typedef Kernel::Triangle_3                                  Triangle_3;
-typedef Kernel::Segment_3                                   Segment_3;
-typedef CGAL::Bbox_3                                        Bbox_3;
-typedef std::vector<Triangle_3>                             Triangles;
+typedef Kernel::Point_2                                     Point_2;
+typedef Kernel::Triangle_2                                  Triangle_2;
+typedef Kernel::Segment_2                                   Segment_2;
+typedef Kernel::Iso_rectangle_2                             Iso_rectangle_2;
+typedef CGAL::Bbox_2                                        Bbox_2;
+typedef CGAL::Polygon_2< Kernel >                           Polygon_2;
+typedef std::vector<Triangle_2>                             Triangles;
 typedef Triangles::iterator                                 tri_iterator;
 
 typedef smart_ptr< bs_mesh_grdecl > sp_grd_mesh;
@@ -58,14 +61,14 @@ typedef v_float::iterator vf_iterator;
 /*-----------------------------------------------------------------
  * cell description
  *----------------------------------------------------------------*/
-typedef t_float vertex_pos[3];
+typedef t_float vertex_pos[2];
 typedef t_float cell_pos[8][3];
 
 struct cell_data {
 	// vertex coord
 	t_float* V;
 	// cell facets cover with triangles
-	Triangles cover;
+	//Triangles cover;
 
 	// empty ctor for map
 	cell_data() : V(NULL) {}
@@ -88,14 +91,30 @@ struct cell_data {
 		return reinterpret_cast< const cell_pos& >(*V);
 	}
 
+	Bbox_2 bbox() const {
+		vertex_pos p1, p2;
+		lo(p1); hi(p2);
+		return Bbox_2(p1[0], p1[1], p2[0], p2[1]);
+	}
+
+	Polygon_2 polygon() const {
+		// 2D upper plane of cell
+		Point_2 points[] = {
+			Point_2(V[0], V[1]),  Point_2(V[3], V[4]),
+			Point_2(V[9], V[10]), Point_2(V[6], V[7])
+		};
+		return Polygon_2(points, points + 4);
+	}
+
+
 private:
 	template< template< class > class pred >
 	void bound(vertex_pos& b) const {
 		pred< t_float > p = pred< t_float >();
 		const cell_pos& cV = cpos();
-		for(uint i = 0; i < 3; ++i) {
+		for(uint i = 0; i < 2; ++i) {
 			t_float c = cV[0][i];
-			for(uint j = 1; j < 8; ++j) {
+			for(uint j = 1; j < 4; ++j) {
 				if(p(cV[j][i], c))
 					c = cV[j][i];
 			}
@@ -115,14 +134,16 @@ typedef trimesh::iterator trim_iterator;
 struct well_data {
 	// segment begin, end and md in raw vector
 	t_float* W;
+	double md_;
 
 	//empty ctor for map
-	well_data() : W(NULL) {}
+	well_data() : W(NULL), md_(0) {}
 	//std ctor
-	well_data(t_float *const segment) : W(segment) {}
+	well_data(t_float *const segment, double md) : W(segment), md_(md) {}
 
 	t_float md() const {
-		return W[3];
+		return md_;
+		//return W[3];
 	}
 
 	vertex_pos& cstart() {
@@ -141,15 +162,19 @@ struct well_data {
 	//	return reinterpret_cast< const vertex_pos& >(W + 4);
 	//}
 
-	Segment_3 segment() const {
-		return Segment_3(
-			Point_3(W[0], W[1], W[2]),
-			Point_3(W[4], W[5], W[6])
+	Segment_2 segment() const {
+		return Segment_2(
+			Point_2(W[0], W[1]),
+			Point_2(W[4], W[5])
 		);
 	}
 
-	Bbox_3 bbox() const {
+	Bbox_2 bbox() const {
 		return segment().bbox();
+	}
+
+	double len() const {
+		return std::sqrt(segment().squared_length());
 	}
 };
 
@@ -207,32 +232,15 @@ private:
 typedef box_handle_impl< trim_iterator > cell_box_handle;
 typedef box_handle_impl< wp_iterator > well_box_handle;
 
-//class well_box_handle : public box_handle {
-//public:
-//	well_box_handle(v_float::iterator p) : p_(p) {}
-//
-//	int type() const {
-//		return box_handle::WELL_BOX;
-//	}
-//
-//	well_path::iterator data() const {
-//		return p_;
-//	}
-//
-//private:
-//	v_float::iterator p_;
-//};
-
-typedef CGAL::Box_intersection_d::Box_with_handle_d< double, 3, sp_bhandle > Box;
-//typedef CGAL::Box_intersection_d::Box_with_handle_d< double, 3, trim_iterator > cell_box;
-//typedef CGAL::Box_intersection_d::Box_with_handle_d< double, 3, typename v_float::iterator > well_box;
+// box intersections storage
+typedef CGAL::Box_intersection_d::Box_with_handle_d< double, 2, sp_bhandle > Box;
 
 /*-----------------------------------------------------------------
  * intersections description
  *----------------------------------------------------------------*/
 struct well_hit_cell {
 	// point of intersection
-	Point_3 where;
+	Point_2 where;
 	// what segment of well
 	wp_iterator seg;
 	// interseect with which cell
@@ -241,12 +249,14 @@ struct well_hit_cell {
 	t_float md;
 	// cell facet
 	uint facet;
-
+	// is that point a node?
+	bool is_node;
 
 	well_hit_cell() {}
-	well_hit_cell(const Point_3& where_, const wp_iterator& seg_,
-		const trim_iterator& cell_, t_float md_, uint facet_)
-		: where(where_), seg(seg_), cell(cell_), md(md_), facet(facet_)
+	well_hit_cell(const Point_2& where_, const wp_iterator& seg_,
+		const trim_iterator& cell_, t_float md_, uint facet_, bool is_node_ = false)
+		: where(where_), seg(seg_), cell(cell_), md(md_), facet(facet_),
+		is_node(is_node_)
 	{}
 
 	// hit points ordered first by md
@@ -299,99 +309,16 @@ public:
  *  inside cell - 6
 */
 
-	void cell_tri_cover(cell_data& d) {
-		const t_float* V = d.V;
-		d.cover.resize(12);
-
-		// facet 0-1-2-3
-		// 3angle 0-1-3
-		d.cover[0] = Triangle_3(
-			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
-			Point_3(V[X(1)], V[Y(1)], V[Z(1)]),
-			Point_3(V[X(3)], V[Y(3)], V[Z(3)])
-		);
-		// 3angle 0-2-3
-		d.cover[1] = Triangle_3(
-			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
-			Point_3(V[X(2)], V[Y(2)], V[Z(2)]),
-			Point_3(V[X(3)], V[Y(3)], V[Z(3)])
-		);
-		// facet 0-1-4-5
-		// 3angle 0-1-5
-		d.cover[2] = Triangle_3(
-			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
-			Point_3(V[X(1)], V[Y(1)], V[Z(1)]),
-			Point_3(V[X(5)], V[Y(5)], V[Z(5)])
-		);
-		// 3angle 0-4-5
-		d.cover[3] = Triangle_3(
-			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
-			Point_3(V[X(4)], V[Y(4)], V[Z(4)]),
-			Point_3(V[X(5)], V[Y(5)], V[Z(5)])
-		);
-		// facet 4-5-6-7
-		// 3angle 4-5-7
-		d.cover[4] = Triangle_3(
-			Point_3(V[X(4)], V[Y(4)], V[Z(4)]),
-			Point_3(V[X(5)], V[Y(5)], V[Z(5)]),
-			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
-		);
-		// 3angle 4-6-7
-		d.cover[5] = Triangle_3(
-			Point_3(V[X(4)], V[Y(4)], V[Z(4)]),
-			Point_3(V[X(6)], V[Y(6)], V[Z(6)]),
-			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
-		);
-		// facet 2-3-6-7
-		// 3angle 2-3-7
-		d.cover[6] = Triangle_3(
-			Point_3(V[X(2)], V[Y(2)], V[Z(2)]),
-			Point_3(V[X(3)], V[Y(3)], V[Z(3)]),
-			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
-		);
-		// 3angle 2-6-7
-		d.cover[7] = Triangle_3(
-			Point_3(V[X(2)], V[Y(2)], V[Z(2)]),
-			Point_3(V[X(6)], V[Y(6)], V[Z(6)]),
-			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
-		);
-		// facet 0-2-4-6
-		// 3angle 0-2-6
-		d.cover[8] = Triangle_3(
-			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
-			Point_3(V[X(2)], V[Y(2)], V[Z(2)]),
-			Point_3(V[X(6)], V[Y(6)], V[Z(6)])
-		);
-		// 3angle 0-4-6
-		d.cover[9] = Triangle_3(
-			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
-			Point_3(V[X(4)], V[Y(4)], V[Z(4)]),
-			Point_3(V[X(6)], V[Y(6)], V[Z(6)])
-		);
-		// facet 1-3-5-7
-		// 3angle 1-3-7
-		d.cover[10] = Triangle_3(
-			Point_3(V[X(1)], V[Y(1)], V[Z(1)]),
-			Point_3(V[X(3)], V[Y(3)], V[Z(3)]),
-			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
-		);
-		// 3angle 1-5-7
-		d.cover[11] = Triangle_3(
-			Point_3(V[X(1)], V[Y(1)], V[Z(1)]),
-			Point_3(V[X(5)], V[Y(5)], V[Z(5)]),
-			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
-		);
+	static double distance(const Point_2& p1, const Point_2& p2) {
+		return std::sqrt(Segment_2(p1, p2).squared_length());
 	}
 
-	double calc_md(wp_iterator& fish, const Point_3& target) const {
+	static double calc_md(const wp_iterator& fish, const Point_2& target) {
 		// walk all segments before the last one;
 		double md = fish->second.md();
-		//for(cwp_iterator p_seg = wp_.begin(), end = wp_.end(); p_seg != fish && p_seg != end; ++p_seg) {
-		//	md += (p_seg->second).md();
-		//}
 		// append tail
 		const t_float* W = fish->second.W;
-		md += std::sqrt(Segment_3(Point_3(W[0], W[1], W[2]), target).squared_length());
+		md += distance(Point_2(W[0], W[1]), target);
 		return md;
 	}
 
@@ -404,47 +331,35 @@ public:
 		cell_data& c = cell_fish->second;
 		well_data& w = well_fish->second;
 
-		// cover cell with triangles
-		if(!c.cover.size())
-			cell_tri_cover(c);
+		// obtain well segment
+		const Segment_2& s = w.segment();
+		// and cell polygon
+		const Polygon_2& p = c.polygon();
 
-		// check that each triangle really intersects with given well segment
-		Segment_3 s = w.segment();
-		uint tri_count = 0;
-		for(tri_iterator tri = c.cover.begin(), end = c.cover.end(); tri != end; ++tri, ++tri_count) {
-			// test intersection
-			if(!CGAL::do_intersect(s, *tri)) continue;
-			// really do intersection
-			Object xres = CGAL::intersection(s, *tri);
+		// intersect well segment with each segment of polygon
+		for(ulong i = 0; i < 4; ++i) {
+			Object xres = CGAL::intersection(p.edge(i), s);
 			// in 99% of cases we should get a point of intersection
-			if(const Point_3* xpoint = CGAL::object_cast< Point_3 >(&xres))
+			if(const Point_2* xpoint = CGAL::object_cast< Point_2 >(&xres))
 				x_.insert(well_hit_cell(
 					*xpoint, well_fish, cell_fish,
 					calc_md(well_fish, *xpoint),
-					tri_count >> 1
-			));
-			else if(const Segment_3* xseg = CGAL::object_cast< Segment_3 >(&xres)) {
+					i
+				));
+			else if(const Segment_2* xseg = CGAL::object_cast< Segment_2 >(&xres)) {
 				// in rare 1% of segment lying on the facet, add begin and end of segment
 				x_.insert(well_hit_cell(
 					xseg->source(), well_fish, cell_fish,
 					calc_md(well_fish, xseg->source()),
-					tri_count >> 1
+					i
 				));
 				x_.insert(well_hit_cell(
 					xseg->target(), well_fish, cell_fish,
 					calc_md(well_fish, xseg->target()),
-					tri_count >> 1
+					i
 				));
 			}
 		}
-
-		//std::cout << "Box " << (a->handle() - triangles.begin()) << " and "
-		//		<< (b->handle() - triangles.begin()) << " intersect";
-		//if ( ! a->handle()->is_degenerate() && ! b->handle()->is_degenerate()
-		//	&& CGAL::do_intersect( *(a->handle()), *(b->handle()))) {
-		//	std::cout << ", and the triangles intersect also";
-		//}
-		//std::cout << '.' << std::endl;
 	}
 
 	void append_wp_nodes() {
@@ -463,20 +378,21 @@ public:
 			if(px != x_.begin())
 				--px;
 			px = x_.insert(well_hit_cell(
-				Point_3(W[0], W[1], W[2]),
+				Point_2(W[0], W[1]),
 				pw, px->cell, node_md,
-				6
+				4, true
 			)).first;
 		}
-		// well path doen't contain the end-point of trajectory
+		// well path doesn't contain the end-point of trajectory
 		// add it manually to the end of intersection
 		--pw;
 		px = x_.end(); --px;
 		W = pw->second.W;
+		Point_2 wend(W[4], W[5]);
 		x_.insert(well_hit_cell(
-			Point_3(W[4], W[5], W[6]),
-			pw, px->cell, W[7],
-			6
+			wend, pw, px->cell,
+			px->md + distance(px->where, wend),
+			4, true
 		));
 	}
 
@@ -493,9 +409,10 @@ public:
 			// intersection point
 			*pr++ = px->where.x();
 			*pr++ = px->where.y();
-			*pr++ = px->where.z();
 			// facet id
 			*pr++ = px->facet;
+			// node flag
+			*pr++ = px->is_node;
 		}
 
 		return res;
@@ -515,14 +432,15 @@ spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float z
 	// build mesh_grdecl around given mesh
 	sp_grd_mesh grd_src = BS_KERNEL.create_object(bs_mesh_grdecl::bs_type());
 	grd_src->init_props(nx, ny, coord, zcorn);
-	t_long nz = (zcorn->size() / nx / ny) >> 3;
-	ulong n_cells = ulong(nx * ny * nz);
-
+	//t_long nz = (zcorn->size() / nx / ny) >> 3;
+	
 	// obtain coordinates for all vertices of all cells
-	spv_float tops = grd_src->calc_cells_vertices();
+	spv_float tops = grd_src->calc_cells_vertices_xyz();
 	v_float::iterator pv = tops->begin();
 
 	// fill trimesh with triangles corresponding to each cell
+	// use only first plane of cells
+	ulong n_cells = ulong(nx * ny);
 	for(ulong i = 0; i < n_cells; ++i) {
 		res[i] = cell_data(&*pv);
 		pv += 3*8;
@@ -536,7 +454,7 @@ spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float z
 /*-----------------------------------------------------------------
  * implementation of main routine
  *----------------------------------------------------------------*/
-spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 	spv_float well_info, bool include_well_nodes)
 {
 	// calculate mesh nodes coordinates and build initial trimesh
@@ -547,14 +465,13 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 
 	// create bounding box for each cell in given mesh
 	std::vector< Box > mesh_boxes(M.size());
-	t_float lo[3];
-	t_float hi[3];
+	//vertex_pos lo, hi;
 	ulong cnt = 0;
 	for(trim_iterator pm = M.begin(), end = M.end(); pm != end; ++pm, ++cnt) {
 		// calc lo and hi for bounding box of cell
 		const cell_data& d = pm->second;
-		d.lo(lo); d.hi(hi);
-		mesh_boxes[cnt] = Box(lo, hi, new cell_box_handle(pm));
+		//d.lo(lo); d.hi(hi);
+		mesh_boxes[cnt] = Box(d.bbox(), new cell_box_handle(pm));
 	}
 
 	// Create the corresponding vector of pointers to cells bounding boxes
@@ -570,13 +487,18 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 	well_path W;
 	vector< Box > well_boxes(well_node_num - 1);
 	v_float::iterator pw = well_info->begin();
+	double md = 0;
 	for(ulong i = 0; i < well_node_num - 1; ++i) {
 		//well_boxes.push_back(Box(
 		//	lo, hi,
 		//	new well_box_handle( W.insert(make_pair(i, pw)).first )
 		//));
 
-		well_data wd(pw);
+		// calc md
+		if(i > 0)
+			md += W[i - 1].len();
+		well_data wd(pw, md);
+		// make bbox
 		well_boxes[i] = Box(
 			wd.bbox(),
 			new well_box_handle(W.insert(make_pair(i, wd)).first)
@@ -602,20 +524,6 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 	return A.export_1d();
 }
 
-/*-----------------------------------------------------------------
- * Python bindings
- *----------------------------------------------------------------*/
-BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl, well_path_ident, 5, 6)
-BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl_2d, well_path_ident_2d, 5, 6)
-
-namespace python {
-
-void py_export_wpi() {
-	bp::def("well_path_ident", &well_path_ident, well_path_ident_overl());
-	bp::def("well_path_ident_2d", &well_path_ident_2d, well_path_ident_overl_2d());
-}
-
-}
-
 }	// eof blue-sky namespace
+
 

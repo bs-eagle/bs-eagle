@@ -206,6 +206,8 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
 
 	// same as calc_element_tops, but only return tops coordinates
 	spv_float calc_cells_vertices();
+	// reverse mesh walk order
+	spv_float calc_cells_vertices_xyz();
 
     /*!	\brief  find neighbours (adjacency matrix)
     	\param neig_matrix - bcsr adjacency matrix

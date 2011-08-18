@@ -196,6 +196,9 @@ namespace blue_sky
       spv_float calc_cells_vertices() {
 		  return wrapped.calc_cells_vertices();
 	  }
+      spv_float calc_cells_vertices_xyz() {
+		  return wrapped.calc_cells_vertices_xyz();
+	  }
 
       boost::python::list calc_element_center ()
       {return wrapped.calc_element_center();};
