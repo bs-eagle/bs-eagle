@@ -1066,9 +1066,11 @@ spv_float mesh_grdecl::calc_cells_vertices() {
 		      calc_element (i, j, k, element);
 			  for (t_long c = 0; c < 8; ++c)
 				{
-				  tops_data[8 * 3 * ind + 3 * c] = element.get_corners()[c].x;
-				  tops_data[8 * 3 * ind + 3 * c + 1] = element.get_corners()[c].y;
-				  tops_data[8 * 3 * ind + 3 * c + 2] = element.get_corners()[c].z;
+				  const t_long offs = 8 * 3 * ind + 3 * c;
+				  const element_t::fpoint3d_t& cur_corner = element.get_corners()[c];
+				  tops_data[offs]     = cur_corner.x;
+				  tops_data[offs + 1] = cur_corner.y;
+				  tops_data[offs + 2] = cur_corner.z;
 				}
 			}
 
@@ -1090,10 +1092,11 @@ spv_float mesh_grdecl::calc_cells_vertices_xyz() {
 		      calc_element (i, j, k, element);
 			  for (t_long c = 0; c < 8; ++c)
 				{
-				  const t_long start = 8 * 3 * ind + 3 * c;
-				  tops_data[start] = element.get_corners()[c].x;
-				  tops_data[start + 1] = element.get_corners()[c].y;
-				  tops_data[start + 2] = element.get_corners()[c].z;
+				  const t_long offs = 8 * 3 * ind + 3 * c;
+				  const element_t::fpoint3d_t& cur_corner = element.get_corners()[c];
+				  tops_data[offs]     = cur_corner.x;
+				  tops_data[offs + 1] = cur_corner.y;
+				  tops_data[offs + 2] = cur_corner.z;
 				}
 			}
 
