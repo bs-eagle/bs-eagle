@@ -606,11 +606,13 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
  * Python bindings
  *----------------------------------------------------------------*/
 BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl, well_path_ident, 5, 6)
+BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl_2d, well_path_ident_2d, 5, 6)
 
 namespace python {
 
 void py_export_wpi() {
 	bp::def("well_path_ident", &well_path_ident, well_path_ident_overl());
+	bp::def("well_path_ident_2d", &well_path_ident_2d, well_path_ident_overl_2d());
 }
 
 }
