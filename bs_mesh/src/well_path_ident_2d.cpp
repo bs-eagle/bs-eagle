@@ -252,14 +252,15 @@ struct well_hit_cell {
 	// is that point a node?
 	bool is_node;
 	// Alina wants z coord for node points - well, why not
-	t_float z;
+	// Today she don't want Z - terminated
+	//t_float z;
 
 	well_hit_cell() {}
 	well_hit_cell(const Point_2& where_, const wp_iterator& seg_,
-		const trim_iterator& cell_, t_float md_, uint facet_, bool is_node_ = false,
-		double z_ = 0)
+		const trim_iterator& cell_, t_float md_, uint facet_, bool is_node_ = false)
+		//double z_ = 0)
 		: where(where_), seg(seg_), cell(cell_), md(md_), facet(facet_),
-		is_node(is_node_), z(z_)
+		is_node(is_node_)
 	{}
 
 	// hit points ordered first by md
@@ -383,7 +384,7 @@ public:
 			px = x_.insert(well_hit_cell(
 				Point_2(W[0], W[1]),
 				pw, px->cell, node_md,
-				4, true, W[2]
+				4, true //, W[2]
 			)).first;
 		}
 		// well path doesn't contain the end-point of trajectory
@@ -395,13 +396,13 @@ public:
 		x_.insert(well_hit_cell(
 			wend, pw, px->cell,
 			px->md + distance(px->where, wend),
-			4, true, W[6]
+			4, true //, W[6]
 		));
 	}
 
 	spv_float export_1d() const {
 		spv_float res = BS_KERNEL.create_object(v_float::bs_type());
-		res->resize(x_.size() * 7);
+		res->resize(x_.size() * 6);
 		vf_iterator pr = res->begin();
 
 		for(intersect_path::const_iterator px = x_.begin(), end = x_.end(); px != end; ++px) {
@@ -412,7 +413,7 @@ public:
 			// intersection point
 			*pr++ = px->where.x();
 			*pr++ = px->where.y();
-			*pr++ = px->z;
+			//*pr++ = px->z;
 			// facet id
 			*pr++ = px->facet;
 			// node flag
