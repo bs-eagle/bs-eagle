@@ -824,7 +824,7 @@ bp::tuple find_z_min_max (spv_int indices_, t_int ny, t_int nz)
 
 // finds well-mesh intersection
 // returns mesh_points, well_points
-bp::tuple make_projection_2d(t_int nx, t_int ny, 
+bp::tuple make_projection_2d(t_int nx, t_int ny, t_int nz, 
                           spv_int indices_, spv_int faces_, 
                           spv_float x_, spv_float y_, //spv_float z_,  
                           spv_float tops_, spv_float values_, 
@@ -909,7 +909,7 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
 
     my = index2d(my_ind, nx);
 
-    printf("\n i=%d my_ind=%d x=%d y=%d", i, my_ind, my.x, my.y);
+    //printf("\n i=%d my_ind=%d x=%d y=%d", i, my_ind, my.x, my.y);
 
     //FIXME 
     while (faces[ii] == 4 && ii<n-1)
@@ -918,10 +918,8 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
     //well-cell intersection points
     M[0].x = cross_x[i]; 
     M[0].y = cross_y[i];
-    //M[0].z = cross_z[i];
     M[1].x = cross_x[ii]; 
     M[1].y = cross_y[ii];
-    //M[1].z = cross_z[ii];
 
     // FIXME if faces[i]==0,2,6 calculate plane/cell intersection, draw first line (-l)
 
@@ -932,36 +930,17 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
     {
         WP[1].x = cross_x[j]; 
         WP[1].y = cross_y[j]; 
-        //WP[1].z = cross_z[j]; 
         wl = sqrt( (WP[1].x-WP[0].x)*(WP[1].x-WP[0].x) +  (WP[1].y-WP[0].y)*(WP[1].y-WP[0].y));
         wL += wl;
         wpoints.push_back(wL);
-        //L += wl;
         WP[0].x = WP[1].x;
         WP[0].y = WP[1].y;
-        //WP[0].z = WP[1].z;
     }
 
-    //printf("\n j = %d", j);
 
     l = sqrt( (M[1].x-WP[0].x)*(M[1].x-WP[0].x) +  (M[1].y-WP[0].y)*(M[1].y-WP[0].y));
     L = wL + l;
 
-    //printf("\n L = %f", l);
-
-    //{
-       //printf("\n well point");
-       //WP.x = cross_x[i]; 
-       //WP.y = cross_y[i];
-       //WP.z = cross_z[i];
-       //wl = sqrt( (WP.x-M[0].x)*(WP.x-M[0].x) +  (WP.y-M[0].y)*(WP.y-M[0].y));
-       //wL = L - l + wl;
-       //wpoints.push_back(WP.z);
-       //WP[0].x = cross_x[0]; 
-       //WP[0].y = cross_y[0]; 
-       //WP[0].z = cross_z[0]; 
-       //printf("\n L=%f l=%f wl=%f wL=%f \n", L, l, wl, wL);
-    //}
 
     face_in = faces[i];
     face_out = faces[ii];
@@ -974,18 +953,15 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
     corners[5] = faces2corners[face_out][1];
     corners[6] = faces2corners[face_out][2];
     corners[7] = faces2corners[face_out][3];
-    //printf("\n %f %f %f %f %f %f", M[0].x, M[0].y, M[0].z, M[1].x, M[1].y, M[1].z);
 
     //for the first cell in column
     //find intersection of the cutting plane and left upper edge
     // index = (my_ind.x; my_ind.y; z_start) ZYX
 
-    //index = z_start + my.y*nz + my.x*nz*ny;
-    index = my.x + my.y*nx + z_start*nx*ny;
-    printf("\n index=%d", index);
+    index = z_start + my.y*nz + my.x*nz*ny;
+    //printf("\n index=%d", index);
 
     // for face_in
-    //if (face_in !=0 && face_in != 2 && face_in != 6)
     if (face_in != 4)
     {
        j = corners[0];
@@ -1009,16 +985,16 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
           P[j].y = tops[8*3*index + 3*j + 1];
           P[j].z = tops[8*3*index + 3*j + 2];
        
-          printf("\n P[%d].x = %f P[%d].y = %f P[%d].z = %f", j, P[j].x, j, P[j].y, j, P[j].z );
+          //printf("\n P[%d].x = %f P[%d].y = %f P[%d].z = %f", j, P[j].x, j, P[j].y, j, P[j].z );
        }
-
+       //printf("\n M.x = %f M.y = %f", M[0].x, M[0].y);
        z1 = find_point_z(P[0],P[1], P[2], M[0]);
     }    
        
     points.push_back(z1);
     points.push_back(0);
 
-    printf("\n z1 = %f", z1);
+    //printf("\n z1 = %f", z1);
 
 
     //for all cells in column
@@ -1027,12 +1003,10 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
 
     for (z=z_start; z<z_end+1; z++)
     {
-       //index = z + my.y*nz + my.x*nz*ny;
-       index = my.x + my.y*nx + z*nx*ny;
-       printf("\n x = %d y = %d z = %d", my.x, my.y, z);
-       printf("\n index=%d", index);
+       index = z + my.y*nz + my.x*nz*ny;
+       //printf("\n x = %d y = %d z = %d", my.x, my.y, z);
+       //printf("\n index=%d", index);
 
-       //if (face_in !=0 && face_in != 2 && face_in != 6)
        if (face_in != 4)
        {
            j = corners[2];
@@ -1059,7 +1033,7 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
        }
        points.push_back(z2);
        points.push_back(0);
-       printf("\n z2 = %f", z2);
+       //printf("\n z2 = %f", z2);
     }
 
     //for the first cell in column
@@ -1068,12 +1042,10 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
 
     //L += l;
 
-    //index = z_start + my.y*nz + my.x*nz*ny;
-    index = my.x + my.y*nx + z_start*nx*ny;
-    printf("\n index=%d", index);
+    index = z_start + my.y*nz + my.x*nz*ny;
+    //printf("\n index=%d", index);
 
     // for face_out
-    //if (face_out !=0 && face_out != 2)
     if (face_out != 4)
     {
        j = corners[4];
@@ -1091,7 +1063,7 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
     points.push_back(z1);
     points.push_back(L);
 
-    printf("\n z1 = %f L = %f", z1, L);
+    //printf("\n z1 = %f L = %f", z1, L);
     }
 
     //for all cells in column
@@ -1100,12 +1072,11 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
 
     for (z=z_start; z<z_end+1; z++)
     {
-       //index = z + my.y*nz + my.x*nz*ny;
-       index = my.x + my.y*nx + z*nx*ny;
-       printf("\n index=%d", index);
+       index = z + my.y*nz + my.x*nz*ny;
+       //printf("\n index=%d", index);
        
 
-       //if (face_out !=0 && face_out != 2)
+       if (face_out != 4)
        {
            
           // if xyz in values xyz_ind = my.x + my.y*nx + z*nx*ny
@@ -1126,7 +1097,7 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
        points.push_back(z2);
        points.push_back(L);
 
-       printf("\n z2 = %f L = %f", z2, L);
+       //printf("\n z2 = %f L = %f", z2, L);
        }
     }
 
@@ -1140,7 +1111,7 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
        
        my = index2d(my_ind, nx);
        
-       printf("\n i=%d my_ind=%d x=%d y=%d", i, my_ind, my.x, my.y);
+       //printf("\n i=%d my_ind=%d x=%d y=%d", i, my_ind, my.x, my.y);
        //printf("\n i=%d my_ind=%d x=%d y=%d z=%d", i, my_ind, my.x, my.y, my.z);
 
        //FIXME add well point handler
@@ -1150,14 +1121,10 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
            //printf("\n\n well point i=%d my_ind=%d",i,my_ind);
            WP[1].x = cross_x[i]; 
            WP[1].y = cross_y[i];
-           //WP[1].z = cross_z[i];
-           //wl = sqrt( (WP.x-M[0].x)*(WP.x-M[0].x) +  (WP.y-M[0].y)*(WP.y-M[0].y));
-           //wL = L - l + wl;
            wl = sqrt( (WP[1].x-WP[0].x)*(WP[1].x-WP[0].x) +  (WP[1].y-WP[0].y)*(WP[1].y-WP[0].y));
            wL += wl;
            //printf("\n L=%f l=%f wl=%f wL=%f \n", L, l, wl, wL);
            WP[0] = WP[1];
-           //wpoints.push_back(WP.z);
            wpoints.push_back(wL);
            continue;
        }
@@ -1180,10 +1147,8 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
        //well-cell intersection points
        M[0].x = cross_x[i]; 
        M[0].y = cross_y[i];
-       //M[0].z = cross_z[i];
        M[1].x = cross_x[ii]; 
        M[1].y = cross_y[ii];
-       //M[1].z = cross_z[ii];
 
        //printf("\n M[0] %f %f %f M[1] %f %f %f", M[0].x, M[0].y, M[0].z, M[1].x, M[1].y, M[1].z);
 
@@ -1222,13 +1187,11 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
        //find intersection point of the cutting plane and upper right edge
        //index = (my_ind.x; my_ind.y; z_start) ZYX
        
-       //index = z_start + my.y*nz + my.x*nz*ny;
-       index = my.x + my.y*nx + z_start*nx*ny;
+       index = z_start + my.y*nz + my.x*nz*ny;
 
        //printf("\n index=%d", index);
        
        // for face_out
-       //if (face_out !=0 && face_out != 2 && face_out != 6)
        if (face_out != 4)
        {
            
@@ -1246,7 +1209,7 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
 
            points.push_back(z1);
            points.push_back(L);
-           printf("\n z1 = %f L = %f", z1, L);
+           //printf("\n z1 = %f L = %f", z1, L);
         }
        
        //for the other cells in column
@@ -1255,11 +1218,8 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
 
        for (z=z_start; z<z_end+1; z++)
        {
-           //index = z + my.y*nz + my.x*nz*ny;
-           index = my.x + my.y*nx + z*nx*ny;
+           index = z + my.y*nz + my.x*nz*ny;
            
-           
-           //if (face_out !=0 && face_out != 2 && face_out != 6)
            if (face_out != 4)
            {
                
@@ -1280,7 +1240,7 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
 
                points.push_back(z2);
                points.push_back(L);
-               printf("\n z2 = %f L = %f", z2, L);
+               //printf("\n z2 = %f L = %f", z2, L);
              }
        }
 
@@ -1289,19 +1249,15 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
     // for the  last column of intersected cells
 
     i = n-1;
-       //wpoints.push_back(M[1].z);
     
-    //wpoints.push_back(L);
 
        WP[1].x = cross_x[i]; 
        WP[1].y = cross_y[i];
-       //WP[1].z = cross_z[i];
        wl = sqrt( (WP[1].x-WP[0].x)*(WP[1].x-WP[0].x) +  (WP[1].y-WP[0].y)*(WP[1].y-WP[0].y));
        wL += wl;
        //printf("\n L=%f l=%f wl=%f wL=%f \n", L, l, wl, wL);
        wpoints.push_back(wL);
 
-    //if (faces[i] == 0 || faces[i] == 2 || faces[i] == 6)
     if (faces[i] == 4)
     {
        my_ind = indices[i];
@@ -1309,16 +1265,11 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
        my = index2d(my_ind, nx);
        //printf("\n i=%d my_ind=%d x=%d y=%d z=%d", i, my_ind, my.x, my.y, my.z);
        
-
-       
-       
        //for the first cell in column
        //find intersection point of the cutting plane and upper right edge
        //index = (my_ind.x; my_ind.y; z_start) ZYX
        
-       //index = z_start + my.y*nz + my.x*nz*ny;
-       index = my.x + my.y*nx + z_start*nx*ny;
-
+       index = z_start + my.y*nz + my.x*nz*ny;
        //printf("\n index=%d", index);
        
        // for face_out
@@ -1333,7 +1284,7 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
        
            points.push_back(z1);
            points.push_back(wL);
-           printf("\n z1 = %f L = %f", z1, L);
+           //printf("\n z1 = %f L = %f", z1, L);
         
        
        //for the other cells in column
@@ -1342,8 +1293,7 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
 
        for (z=z_start; z<z_end+1; z++)
        {
-           //index = z + my.y*nz + my.x*nz*ny;
-           index = my.x + my.y*nx + z*nx*ny;
+           index = z + my.y*nz + my.x*nz*ny;
            
            // if xyz in values xyz_ind = my.x + my.y*nx + z*nx*ny
            vals.push_back(values[index]);
@@ -1359,7 +1309,7 @@ bp::tuple make_projection_2d(t_int nx, t_int ny,
            
                points.push_back(z2);
                points.push_back(wL);
-               printf("\n z2 = %f L = %f", z2, L);
+               //printf("\n z2 = %f L = %f", z2, L);
              
        }
 
