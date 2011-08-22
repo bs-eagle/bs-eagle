@@ -476,6 +476,10 @@
 				RelativePath=".\src\well_path_ident.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\well_path_ident_2d.cpp"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\src\bs_mesh.cpp"
