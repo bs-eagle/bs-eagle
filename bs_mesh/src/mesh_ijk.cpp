@@ -61,12 +61,12 @@ int mesh_ijk::init_ext_to_int()
   t_float const *dy = dy_array->data ();
   t_float const *dz = dz_array->data ();
   t_int const *actnum = actnum_array->data ();
-  for (t_long i = 0; i < nz; ++i)
+  for (t_long i = 0; i < nx; ++i)
     {
       for (t_long j = 0; j < ny; ++j)
-        for (t_long k = 0; k < nx; ++k, ++n_count)
+        for (t_long k = 0; k < nz; ++k, ++n_count)
           {
-            i_index = BLOCK_NUM (k, j, i, nx, ny);
+            i_index = k + (nz * j) + (i * ny * nz);
 
             volumes_temp[i_index] = dx[i_index] * dy[i_index] * dz[i_index];
 
@@ -501,10 +501,10 @@ int mesh_ijk::calc_depths ()
   for (t_long i = 0; i < nx; ++i)
     for (t_long j = 0; j < ny; ++j)
       {
-        t_float current_tops = tops[i+j*nx]; //tops of current block
+        t_float current_tops = tops[i + j * nx]; //tops of current block
         for (t_long k = 0; k < nz; ++k)
           {
-            index = i + j * nx + k * nx * ny;
+            index = k + j * nz + i * ny * nz;
             if (actnum[index])
               depths_data[ext_to_int_data[index]] = current_tops + dz[index]/2;
             current_tops += dz[index];

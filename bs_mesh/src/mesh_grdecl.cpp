@@ -379,12 +379,12 @@ int mesh_grdecl::init_ext_to_int()
 
   t_long nn_active = 0; //number of non-active previous cells
   t_int const *actnum = actnum_array->data ();
-  for (t_long i = 0; i < nz; ++i)
+  for (t_long i = 0; i < nx; ++i)
     {
       for (t_long j = 0; j < ny; ++j)
-        for (t_long k = 0; k < nx; ++k, ++n_count)
+        for (t_long k = 0; k < nz; ++k, ++n_count)
           {
-            t_long i_index = k + (nx * j) + (i * nx * ny);
+            t_long i_index = k + (nz * j) + (i * ny * nz);
             
             if (!actnum[i_index])
               {
@@ -493,7 +493,7 @@ bool mesh_grdecl::check_adjacency(int shift_zcorn)
       for (t_long k = 0; k < nz; ++k)
         {
           
-          t_long index = i + j * nx + k * nx * ny;
+          t_long index = k + j * nz + i * ny * nz;
           
           
           // miss inactive blocks
@@ -565,7 +565,7 @@ int mesh_grdecl::splicing(stdv_float& volumes_temp)
         t_double vol_sum = 0.0;
         for (t_long k = 0; k < nz; ++k)
           {
-            t_long index = i + j * nx + k * nx * ny;
+            t_long index = k + j * nz + i * ny * nz;
             
             // miss inactive blocks
             if (!actnum[index])
@@ -606,7 +606,7 @@ int mesh_grdecl::splicing(stdv_float& volumes_temp)
                     // this block is absorbed by bigger block above
                     splice_two_blocks (i, j, big_block_top, k);
                     // add volume this small block to the volume of big block
-                    volumes_temp[i + j * nx + big_block_top * nx * ny] += vol_block;
+                    volumes_temp[big_block_top + j * nz + i * ny * nz] += vol_block;
 
                     // make block inactive
                     actnum[index] = 0;
@@ -654,7 +654,7 @@ int mesh_grdecl::splicing(stdv_float& volumes_temp)
                         splice_two_blocks (i, j, k, k1);
                         n_incative_splice++;
                         // make small block inactive
-                        actnum[i + j * nx + k1 * nx * ny] = 0;
+                        actnum[k1 + j * nz + i * ny * nz] = 0;
                         ++nCount;
                       }
 
@@ -713,9 +713,9 @@ int mesh_grdecl::calc_depths ()
   t_int const *actnum = actnum_array->data ();
 
   t_long index = 0;
-  for (t_long k = 0; k < nz; ++k)
+  for (t_long i = 0; i < nx; ++i)
     for (t_long j = 0; j < ny; ++j)
-      for (t_long i = 0; i < nx; ++i, ++index)
+      for (t_long k = 0; k < nz; ++k, ++index)
         {
           if (actnum[index])
             {
@@ -1194,7 +1194,7 @@ struct build_jacobian_rows_class
   void
   prepare (t_long i, t_long j, t_long k)
   {
-    ext_index  = i + j * nx + k * nx * ny;
+    ext_index  = k + (nz * j) + (i * ny * nz);
   }
 
   // check if (i, j) column of cells is adjacent to neigbours
@@ -1210,7 +1210,7 @@ struct build_jacobian_rows_class
     t_float const *zcorn = mesh->pinner_->zcorn_->data ();
     for (k = 0; k < nz; ++k)
       {
-        index = i + j * nx + k * nx * ny;
+        index = k + (nz * j) + (i * ny * nz);
          
         // miss inactive blocks
         if (!actnum[index])
@@ -1338,7 +1338,7 @@ struct build_jacobian_cols_class
   void
   prepare (t_long i, t_long j, t_long k)
   {
-    ext_index  = i + j * nx + k * nx * ny;
+    ext_index  = k + (nz * j) + (i * ny * nz);
     int_index  = mesh->convert_ext_to_int (ext_index);
 
     mesh->calc_element(i, j, k, element);
@@ -1548,7 +1548,7 @@ struct build_jacobian_and_flux : boost::noncopyable
   {
     for (t_long k = 0; k < nz; ++k)
       {
-        t_long ext_index1  = i + j * nx + k * nx * ny;
+        t_long ext_index1  = k + (nz * j) + (i * ny * nz);
         
         //skip non-active cells
         if (!actnum[ext_index1])
@@ -1600,7 +1600,7 @@ struct build_jacobian_and_flux : boost::noncopyable
                 
     for (t_long k = 0; k < nz; ++k)
       {
-        t_long ext_index1  = i + j * nx + k * nx * ny;
+        t_long ext_index1  = k + (nz * j) + (i * ny * nz);
         
         //skip non-active cells
         if (!actnum[ext_index1])
@@ -1641,7 +1641,7 @@ struct build_jacobian_and_flux : boost::noncopyable
                     last_k_x = k_x + 1;
                   }
                   
-                t_long ext_index2 = ext_index1 + 1 + (k_x - k) * nx * ny;
+                t_long ext_index2 = ext_index1 + (k_x - k) + ny * nz;
                 
                 // if neighbour active and it`s X- plane is not a line
                 if (actnum[ext_index2] && ((zcorn_array[zcorn_index2[0]] != zcorn_array[zcorn_index2[4]]) || (zcorn_array[zcorn_index2[2]] != zcorn_array[zcorn_index2[6]])))
@@ -1676,7 +1676,7 @@ struct build_jacobian_and_flux : boost::noncopyable
                     last_k_y = k_y + 1;
                   }
                   
-                t_long ext_index2 = ext_index1 + ny + (k_y - k) * nx * ny;
+                t_long ext_index2 = ext_index1 + (k_y - k) + nz;
                 
                 // if neighbour active and it`s Y- plane is not a line
                 if (actnum[ext_index2] && ((zcorn_array[zcorn_index2[0]] != zcorn_array[zcorn_index2[4]]) || (zcorn_array[zcorn_index2[1]] != zcorn_array[zcorn_index2[5]])))
@@ -1690,7 +1690,7 @@ struct build_jacobian_and_flux : boost::noncopyable
           
         if (k + 1 < nz && actnum[ext_index1 + nx * ny])
           {
-            loop_body.change_by_z (i, j, k + 1, ext_index1 + nx * ny, true);
+            loop_body.change_by_z (i, j, k + 1, ext_index1 + 1, true);
           }    
       }
   }
