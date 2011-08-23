@@ -112,23 +112,23 @@ namespace blue_sky
   void
   calc_equil_vs_depth (bool is_o, bool is_g, bool is_w,
                        const phase_d_t &phase_d, const sat_d_t &sat_d,
-					   t_long n_phases, t_long phases, t_long sat_counter,
-					   t_long n_depth,
+					             t_long n_phases, t_long phases, t_long sat_counter,
+					             t_long n_depth,
                        //t_long ds_w, t_long ds_g,
                        const t_long n_eql,               //!< number of equil regions      
-                       const stdv_long sat_regions,      //!< (n_eql) scal region number for current equil region 
-                       const stdv_long pvt_regions,      //!< (n_eql) pvt region number for current equil region 
+                       const stdv_long &sat_regions,      //!< (n_eql) scal region number for current equil region 
+                       const stdv_long &pvt_regions,      //!< (n_eql) pvt region number for current equil region 
                        BS_SP (pvt_3p_iface) pvt_prop,    //!< PVT properties
                        BS_SP (scal_3p_iface) scal_prop,  //!< SCAL properties
                        spv_float equil,                 //!< main equil data (from EQUIL keyword)
                        idata::vval_vs_depth *rsvd,
                        idata::vval_vs_depth *pbvd,
-                       const stdv_float min_depth,     //!< n_eql
-                       const stdv_float max_depth,     //!< n_eql
-                       const stdv_float perm,          //!< (n_eql) permeability
-                       const stdv_float poro,          //!< (n_eql) poro
-                       stdv_double &pressure,          //!< (n_phases * n_eql * n_depth)
-                       stdv_double &saturation         //!< (n_phases * n_eql * n_depth)
+                       const stdv_float &min_depth,     //!< n_eql
+                       const stdv_float &max_depth,     //!< n_eql
+                       const stdv_float &perm,          //!< (n_eql) permeability
+                       const stdv_float &poro,          //!< (n_eql) poro
+                       spv_double pressure,          //!< (n_phases * n_eql * n_depth)
+                       spv_double saturation         //!< (n_phases * n_eql * n_depth)
                       )
   {
     const t_long n_layer = 10;
@@ -526,8 +526,8 @@ namespace blue_sky
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////// CALCULATE Pp, Sp AND Rs IN CELLS /////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-    pressure.resize (n_phases * n_eql * n_depth, 0);
-    saturation.resize (n_phases * n_eql * n_depth, 0); 
+    pressure->resize (n_phases * n_eql * n_depth, 0);
+    saturation->resize (n_phases * n_eql * n_depth, 0); 
    
 	for (i_eql = 0; i_eql < n_eql; ++i_eql)
       {
@@ -591,11 +591,11 @@ namespace blue_sky
             
             //set pressure
             if (n_phases > 1 || is_o)
-              pressure[d_o * n_eql * n_depth + i_eql * n_depth + i_depth] = p_oil;
+              (*pressure)[d_o * n_eql * n_depth + i_eql * n_depth + i_depth] = p_oil;
             if (is_w)
-              pressure[d_w * n_eql * n_depth + i_eql * n_depth + i_depth] = p_water;
+              (*pressure)[d_w * n_eql * n_depth + i_eql * n_depth + i_depth] = p_water;
             if (is_g)
-              pressure[d_g * n_eql * n_depth + i_eql * n_depth + i_depth] = p_gas;
+              (*pressure)[d_g * n_eql * n_depth + i_eql * n_depth + i_depth] = p_gas;
         
             //set saturation
             if (n_phases > 1)
@@ -608,11 +608,11 @@ namespace blue_sky
                       }
                   }
                 if (is_g)
-                  saturation[d_g * n_eql * n_depth + i_eql * n_depth + i_depth] = (float)s_gas;
+                  (*saturation)[d_g * n_eql * n_depth + i_eql * n_depth + i_depth] = (float)s_gas;
                 if (is_w)
-                  saturation[d_w * n_eql * n_depth + i_eql * n_depth + i_depth] = (float)s_water;
+                  (*saturation)[d_w * n_eql * n_depth + i_eql * n_depth + i_depth] = (float)s_water;
                   
-                saturation[d_o * n_eql * n_depth + i_eql * n_depth + i_depth] = 1. - (float)s_water - (float)s_gas;
+                (*saturation)[d_o * n_eql * n_depth + i_eql * n_depth + i_depth] = 1. - (float)s_water - (float)s_gas;
               }
           }    
       }
@@ -621,13 +621,15 @@ namespace blue_sky
 
   equil_model_depth::equil_model_depth(bs_type_ctor_param)
   {
+    pressure = BS_KERNEL.create_object (v_double::bs_type ());
+    saturation = BS_KERNEL.create_object (v_double::bs_type ());
   }
 
   equil_model_depth::equil_model_depth(const equil_model_depth &x)
-	  :bs_refcounter(x)
+	  :bs_refcounter(x),
+	   pressure (BS_KERNEL.create_object (v_double::bs_type ())),
+	   saturation (BS_KERNEL.create_object (v_double::bs_type ()))
   {
-	  pressure = x.pressure;
-	  saturation = x.saturation;
   }
 
   void
@@ -635,10 +637,10 @@ namespace blue_sky
 		        BS_SP(scal_3p_iface) scal_props, 
 				BS_SP(pvt_3p_iface) pvt_props,
 				spv_float equil,
-				const stdv_float min_depth,
-				const stdv_float max_depth,
-				const stdv_float perm,
-				const stdv_float poro,
+				const stdv_float &min_depth,
+				const stdv_float &max_depth,
+				const stdv_float &perm,
+				const stdv_float &poro,
 				t_long n_depth,
 				//stdv_double density,
 				sp_jfunction jfunc_water,
@@ -693,29 +695,29 @@ namespace blue_sky
 	  pvt_regions.push_back(0);
 
 	  calc_equil_vs_depth(is_o, is_g, is_w, 
-		                  phase_d, sat_d,
-						  n_phases, phases, sat_counter,
-						  n_depth,
-						  n_eql, 
-		                  sat_regions, pvt_regions, pvt_props, scal_props,
-		                  equil, 
-						  &val_dummy, &val_dummy, 
-						  min_depth, max_depth, 
-						  perm, poro, 
-						  this->pressure, 
-						  this->saturation);
+		                    phase_d, sat_d,
+                        n_phases, phases, sat_counter,
+                        n_depth,
+                        n_eql, 
+                        sat_regions, pvt_regions, pvt_props, scal_props,
+                        equil, 
+                        &val_dummy, &val_dummy, 
+                        min_depth, max_depth, 
+                        perm, poro, 
+                        this->pressure, 
+                        this->saturation);
   }
 
-  stdv_double
+  spv_double
   equil_model_depth::get_pressure()
   {
-	return pressure;
+	  return pressure;
   }
 
-  stdv_double
+  spv_double
   equil_model_depth::get_saturation()
   {
-	return saturation;
+	  return saturation;
   }
 
   BLUE_SKY_TYPE_STD_CREATE (equil_model_depth);

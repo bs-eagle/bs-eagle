@@ -27,17 +27,17 @@ namespace blue_sky
 						 t_long n_phases, t_long phases, t_long sat_counter,
 						 t_long n_depth,
                          const t_long n_eql,               //!< number of equil regions      
-                         const stdv_long sat_regions,      //!< (n_eql) scal region number for current equil region 
-                         const stdv_long pvt_regions,      //!< (n_eql) pvt region number for current equil region 
+                         const stdv_long &sat_regions,      //!< (n_eql) scal region number for current equil region 
+                         const stdv_long &pvt_regions,      //!< (n_eql) pvt region number for current equil region 
                          BS_SP (pvt_3p_iface) pvt_prop,    //!< PVT properties
                          BS_SP (scal_3p_iface) scal_prop,  //!< SCAL properties
                          spv_float equil,                 //!< main equil data (from EQUIL keyword)
                          idata::vval_vs_depth *rsvd,
                          idata::vval_vs_depth *pbvd,
-                         const stdv_float min_depth,     //!< n_eql
-                         const stdv_float max_depth,     //!< n_eql
-                         const stdv_float perm,          //!< (n_eql) permeability
-                         const stdv_float poro,          //!< (n_eql) poro
+                         const stdv_float &min_depth,     //!< n_eql
+                         const stdv_float &max_depth,     //!< n_eql
+                         const stdv_float &perm,          //!< (n_eql) permeability
+                         const stdv_float &poro,          //!< (n_eql) poro
                          stdv_double &pressure,          //!< (n_phases * n_eql * n_depth)
                          stdv_double &saturation         //!< (n_phases * n_eql * n_depth)
                         );
@@ -50,23 +50,23 @@ namespace blue_sky
 		              BS_SP(scal_3p_iface) scal_props, 
 					  BS_SP(pvt_3p_iface) pvt_props,
 					  spv_float equil,
-					  const stdv_float min_depth,
-					  const stdv_float max_depth,
-					  const stdv_float perm,
-					  const stdv_float poro,
+					  const stdv_float &min_depth,
+					  const stdv_float &max_depth,
+					  const stdv_float &perm,
+					  const stdv_float &poro,
 					  t_long n_depth,
 					  //stdv_double density,
 					  sp_jfunction jfunc_water,
 					  sp_jfunction jfunc_oil);
 
-		stdv_double get_pressure();
-		stdv_double get_saturation();
+		spv_double get_pressure ();
+		spv_double get_saturation ();
 
 	public:
 		BLUE_SKY_TYPE_DECL (equil_model_depth);
 	private:
-		stdv_double pressure;
-		stdv_double saturation;
+		spv_double pressure;
+		spv_double saturation;
 	};
 }
 
