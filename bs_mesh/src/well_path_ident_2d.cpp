@@ -481,7 +481,7 @@ public:
 			}
 
 			// now remove leafs that don't contain given point
-			for(part_iterator l = leafs.begin(), end = leafs.end(); l != end; ++l) {
+			for(part_iterator l = leafs.begin(), end = leafs.end(); l != end; ) {
 				if(l->bbox().has_on_unbounded_side(point)) {
 					leafs.erase(l++);
 					continue;
@@ -492,7 +492,11 @@ public:
 					if(!m_[cell_id].polygon().has_on_unbounded_side(point))
 						return cell_id;
 				}
+				++l;
 			}
+
+			// leafs become the new start point for further division
+			parts = leafs;
 		}
 
 		return -1;
@@ -506,8 +510,8 @@ private:
 		typedef set< mesh_part > container_t;
 
 		mesh_part(trimesh& m, ulong nx, ulong ny)
-			: x_first(0), x_last(nx_)
-			, y_first(0), y_last(ny_)
+			: x_first(0), x_last(nx)
+			, y_first(0), y_last(ny)
 			, m_(m), nx_(nx), ny_(ny)
 		{}
 
@@ -564,8 +568,8 @@ private:
 			for(ulong i = 0; i < 2; ++i) {
 				if(y_div[i + 1] - y_div[i] == 0) continue;
 				for(ulong j = 0; j < 2; ++j) {
-					if(x_div[i + 1] - x_div[i] == 0) continue;
-					*ii++ = mesh_part(m_, nx_, ny_, x_div[i], x_div[i + 1], y_div[i], y_div[i + 1]);
+					if(x_div[j + 1] - x_div[j] == 0) continue;
+					*ii++ = mesh_part(m_, nx_, ny_, x_div[j], x_div[j + 1], y_div[i], y_div[i + 1]);
 				}
 			}
 			return res;
