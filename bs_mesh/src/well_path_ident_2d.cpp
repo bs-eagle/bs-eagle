@@ -154,6 +154,13 @@ struct well_data {
 		return reinterpret_cast< const vertex_pos& >(*W);
 	}
 
+	Point_2 start() const {
+		return Point_2(W[0], W[1]);
+	}
+	Point_2 finish() const {
+		return Point_2(W[4], W[5]);
+	}
+
 	//vertex_pos& cend() {
 	//	return reinterpret_cast< vertex_pos& >(W + 4);
 	//}
@@ -163,10 +170,7 @@ struct well_data {
 	//}
 
 	Segment_2 segment() const {
-		return Segment_2(
-			Point_2(W[0], W[1]),
-			Point_2(W[4], W[5])
-		);
+		return Segment_2(start(), finish());
 	}
 
 	Bbox_2 bbox() const {
@@ -367,35 +371,52 @@ public:
 	}
 
 	void append_wp_nodes() {
+		if(!wp_.size()) return;
+		// if intersections list is empty then we have a verticall well
+		// that is located in single cell in X-Y plane
+		// and we need to find which cell it hurts
+		if(!x_.size()) {
+			const well_data& wbegin = wp_.begin()->second;
+			ulong cell_id = where_is_point(wbegin.start());
+			if(cell_id >= m_.size()) return;
+			x_.insert(well_hit_cell(
+				wbegin.start(), wp_.begin(),
+				m_.find(cell_id), 0, 4, true
+			));
+		}
+
 		// walk through the intersection path and add node points
 		// of well geometry to the cell with previous intersection
 		intersect_path::iterator px = x_.begin();
 		wp_iterator pw = wp_.begin();
-		t_float node_md;
-		t_float* W;
+		//t_float node_md;
+		//t_float* W;
 		for(wp_iterator end = wp_.end(); pw != end; ++pw) {
-			node_md = pw->second.md();
-			W = pw->second.W;
-			while(px->md < node_md && px != x_.end())
+			const well_data& wseg = pw->second;
+			//node_md = pw->second.md();
+			//W = pw->second.W;
+			while(px->md < wseg.md() && px != x_.end())
 				++px;
 			// we need prev intersection
 			if(px != x_.begin())
 				--px;
 			px = x_.insert(well_hit_cell(
-				Point_2(W[0], W[1]),
-				pw, px->cell, node_md,
+				wseg.start(),
+				pw, px->cell, wseg.md(),
 				4, true //, W[2]
 			)).first;
 		}
+
 		// well path doesn't contain the end-point of trajectory
 		// add it manually to the end of intersection
 		--pw;
+		const well_data& wend = pw->second;
 		px = x_.end(); --px;
-		W = pw->second.W;
-		Point_2 wend(W[4], W[5]);
+		//W = pw->second.W;
+		//Point_2 wend(W[4], W[5]);
 		x_.insert(well_hit_cell(
-			wend, pw, px->cell,
-			px->md + distance(px->where, wend),
+			wend.finish(), pw, px->cell,
+			px->md + distance(px->where, wend.finish()),
 			4, true //, W[6]
 		));
 	}
