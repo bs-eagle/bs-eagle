@@ -112,6 +112,7 @@ t_float find_point_z(point3d N1, point3d N2, point3d N3, point2d M)
 }
 
 
+
 // finds well-mesh intersection
 // returns mesh_points, well_points
 bp::tuple make_projection(t_int nx, t_int ny, t_int nz, 
@@ -127,12 +128,13 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
     v_float& cross_y = *y_;
     v_int& indices = *indices_;
     v_int& faces = *faces_;
-    //v_int& internal = *internal_;
+    v_int& internal = *internal_;
 
 
-    t_int i, ii, j, n, n_wp_in_cell, z; 
+    t_int i, ii, j, n, z; 
     n = indices.size();
 
+    // FIXME
     if (n<2)
         return bp::make_tuple(0,0,0,0,0);
     
@@ -154,7 +156,7 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
     t_int face_in, face_out;
 
     point3d P[8];
-    point2d M[2], WP[2];
+    point2d M[2];
 
     t_float z1, z2;
 
@@ -169,9 +171,7 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
 
     t_int index;
 
-    t_float L = 0, l = 0, wL = 0, wl = 0;
-
-    printf("\n mesh proj calc");
+    t_float L = 0, l = 0;
 
     //! for the first column of intersected cells
     i = 0;
@@ -182,34 +182,178 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
     my = index2d(my_ind, nx);
     ind_old = my_ind;
 
-    printf("\n i=%d my_ind=%d x=%d y=%d", i, my_ind, my.x, my.y);
+    //well-cell intersection points
+    M[0].x = cross_x[i]; 
+    M[0].y = cross_y[i];
+    M[1].x = cross_x[ii]; 
+    M[1].y = cross_y[ii];
 
-    // find index of the first well point on the cell face
-    // while faces[ii] == 4 well point is inside the cell
-    while (faces[ii] == 4 && ii<n-1)
-       ii ++;
+    // well-cell intersection faces and face corners
+    face_in = faces[i];
+
+    if (face_in == 4)
+    {
+        //for the first cell in column
+        //find intersection of the cutting plane and left upper edge
+        // index = (my_ind.x; my_ind.y; z_start) ZYX
+        index = z_start + my.y*nz + my.x*nz*ny;
+
+        for (j=0;j<3;j++)
+        {
+          P[j].x = tops[8*3*index + 3*j];
+          P[j].y = tops[8*3*index + 3*j + 1];
+          P[j].z = tops[8*3*index + 3*j + 2];
+        }
+       
+        z1 = find_point_z(P[0],P[1], P[2], M[0]);
+           
+        points.push_back(z1);
+        points.push_back(0);
+
+        //for all cells in column
+        //find z-coordinates of intersection points of the cutting plane and left lower edges
+        //index = (my_ind.x; my_ind.y; z)
+
+        for (z=z_start; z<z_end+1; z++)
+        {
+           index = z + my.y*nz + my.x*nz*ny;
+           vals.push_back(values[index]);
+
+           for (j=4;j<7;j++)
+           {
+              P[j].x = tops[8*3*index + 3*j];
+              P[j].y = tops[8*3*index + 3*j + 1];
+              P[j].z = tops[8*3*index + 3*j + 2];
+           }
+           
+           z2 = find_point_z(P[4],P[5], P[6], M[0]);
+
+           points.push_back(z2);
+           points.push_back(0);
+        }
+        
+    }
+
+    //! for all columns of intersected cells
+    for (i=0;i<n-1;i++)
+    {
+        my_ind = indices[i];
+        my = index2d(my_ind, nx);
+
+        // well-cell intersection faces and face corners
+        face_in = faces[i];
+
+        if (internal[i])
+            wpoints.push_back(L);
+        
+        ii = i + 1;
+
+        // well-cell intersection points
+        M[0].x = cross_x[i];
+        M[0].y = cross_y[i];
+        M[1].x = cross_x[ii]; 
+        M[1].y = cross_y[ii];
+        
+        if (face_in == 4)
+        {
+            l = sqrt( (M[1].x-M[0].x)*(M[1].x-M[0].x) +  (M[1].y-M[0].y)*(M[1].y-M[0].y));
+            L += l;
+            continue;
+        }
+
+        // every index appears in indices twice: for face_in and face_out
+        if (my_ind == ind_old)
+           continue;
+        ind_old = my_ind;
+
+        corners[0] = faces2corners[face_in][0];
+        corners[1] = faces2corners[face_in][1];
+        corners[2] = faces2corners[face_in][2];
+        corners[3] = faces2corners[face_in][3];
+
+
+        //for the first cell in column
+        //find intersection point of the cutting plane and upper right edge
+        //index = (my_ind.x; my_ind.y; z_start) ZYX
+
+        index = z_start + my.y*nz + my.x*nz*ny;
+
+        j = corners[0];
+        P[j].x = tops[8*3*index + 3*j];
+        P[j].y = tops[8*3*index + 3*j + 1];
+        P[j].z = tops[8*3*index + 3*j + 2];
+
+        j = corners[1];
+        P[j].x = tops[8*3*index + 3*j];
+        P[j].y = tops[8*3*index + 3*j + 1];
+        P[j].z = tops[8*3*index + 3*j + 2];
+
+        z1 = find_edge_point_z(M[0], M[1], P[corners[0]], P[corners[1]]);
+
+        points.push_back(z1);
+        points.push_back(L);
+
+        //for the other cells in column
+        //find z-coordinates of intersection points of the cutting plane and lower right edge
+        //index = (my_ind.x; my_ind.y; z) ZYX
+
+        for (z=z_start; z<z_end+1; z++)
+        {
+           index = z + my.y*nz + my.x*nz*ny;
+           
+           vals.push_back(values[index]);
+
+           j = corners[2];
+           P[j].x = tops[8*3*index + 3*j];
+           P[j].y = tops[8*3*index + 3*j + 1];
+           P[j].z = tops[8*3*index + 3*j + 2];
+           
+           j = corners[3];
+           P[j].x = tops[8*3*index + 3*j];
+           P[j].y = tops[8*3*index + 3*j + 1];
+           P[j].z = tops[8*3*index + 3*j + 2];
+           
+           z2 = find_edge_point_z(M[0], M[1], P[corners[2]], P[corners[3]]);
+
+           points.push_back(z2);
+           points.push_back(L);
+        }
+        
+        l = sqrt( (M[1].x-M[0].x)*(M[1].x-M[0].x) +  (M[1].y-M[0].y)*(M[1].y-M[0].y));
+        L += l;
+        
+    }
+
+
+    //! for the last column of intersected cells
+    i = n-1;
+    ii = n-2;
+
+    wpoints.push_back(L);
+
+    my_ind = indices[i];
+    my = index2d(my_ind, nx);
 
     //well-cell intersection points
     M[0].x = cross_x[i]; 
     M[0].y = cross_y[i];
     M[1].x = cross_x[ii]; 
     M[1].y = cross_y[ii];
-    WP[0] = M[0];
 
     // well-cell intersection faces and face corners
-    face_in = faces[i];
-    corners[0] = faces2corners[face_in][0];
-    corners[1] = faces2corners[face_in][1];
-    corners[2] = faces2corners[face_in][2];
-    corners[3] = faces2corners[face_in][3];
+    face_out = faces[i];
+    corners[0] = faces2corners[face_out][0];
+    corners[1] = faces2corners[face_out][1];
+    corners[2] = faces2corners[face_out][2];
+    corners[3] = faces2corners[face_out][3];
 
     //for the first cell in column
     //find intersection of the cutting plane and left upper edge
     // index = (my_ind.x; my_ind.y; z_start) ZYX
     index = z_start + my.y*nz + my.x*nz*ny;
 
-    // for face_in
-    if (face_in != 4)
+    // for face_out
+    if (face_out != 4)
     {
        j = corners[0];
        P[j].x = tops[8*3*index + 3*j];
@@ -237,8 +381,7 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
     }    
        
     points.push_back(z1);
-    points.push_back(0);
-    wpoints.push_back(0);
+    points.push_back(L);
 
     //for all cells in column
     //find z-coordinates of intersection points of the cutting plane and left lower edges
@@ -248,7 +391,7 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
     {
        index = z + my.y*nz + my.x*nz*ny;
 
-       if (face_in != 4)
+       if (face_out != 4)
        {
            j = corners[2];
            P[j].x = tops[8*3*index + 3*j];
@@ -273,196 +416,7 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
            z2 = find_point_z(P[4],P[5], P[6], M[0]);
        }
        points.push_back(z2);
-       points.push_back(0);
-    }
-
-    //! for all columns of intersected cells
-    n_wp_in_cell = 0;
-
-    for (i=1;i<n-1;i++)
-    {
-        my_ind = indices[i];
-        my = index2d(my_ind, nx);
-
-        // well-point is inside the cell
-        // projection length calculation
-        if (faces[i] == 4)
-        {
-           n_wp_in_cell ++;
-           WP[1].x = cross_x[i]; 
-           WP[1].y = cross_y[i];
-           wl = sqrt( (WP[1].x-WP[0].x)*(WP[1].x-WP[0].x) +  (WP[1].y-WP[0].y)*(WP[1].y-WP[0].y));
-           wL += wl;
-           WP[0] = WP[1];
-           wpoints.push_back(wL);
-           continue;
-        }
-
-        // FIXME 
-        // if (internal[i])
-        // wpoints.push_back();
-
-        // every index appears in indices twice: for face_in and face_out
-        if (my_ind == ind_old)
-        {
-           n_wp_in_cell = 0;
-           continue;
-        }
-        ind_old = my_ind;
-
-        // find index of the first well point on the cell face
-        // while faces[ii] == 4 well point is inside the cell
-        ii = i + 1;
-        while (faces[ii] == 4 && ii<n-1)
-           ii ++;
-
-        // well-cell intersection points
-        M[0].x = cross_x[i]; 
-        M[0].y = cross_y[i];
-        M[1].x = cross_x[ii]; 
-        M[1].y = cross_y[ii];
-        
-        // projection length
-        if (n_wp_in_cell == 0)
-        {
-           l = sqrt( (M[1].x-M[0].x)*(M[1].x-M[0].x) +  (M[1].y-M[0].y)*(M[1].y-M[0].y));
-           L += l;
-        }
-        else
-        {
-           l = sqrt( (M[1].x-WP[0].x)*(M[1].x-WP[0].x) +  (M[1].y-WP[0].y)*(M[1].y-WP[0].y));
-           L = wL + l;
-        }
-
-        // well-cell intersection faces and face corners
-        face_out = faces[ii];
-
-        // FIXME
-        //if (face_out == 4)
-            //continue;
-
-        corners[0] = faces2corners[face_out][0];
-        corners[1] = faces2corners[face_out][1];
-        corners[2] = faces2corners[face_out][2];
-        corners[3] = faces2corners[face_out][3];
-
-        
-       //for the first cell in column
-       //find intersection point of the cutting plane and upper right edge
-       //index = (my_ind.x; my_ind.y; z_start) ZYX
-       
-       index = z_start + my.y*nz + my.x*nz*ny;
-       
-       // for face_out
-       if (face_out != 4)
-       {
-           
-           j = corners[0];
-           P[j].x = tops[8*3*index + 3*j];
-           P[j].y = tops[8*3*index + 3*j + 1];
-           P[j].z = tops[8*3*index + 3*j + 2];
-           
-           j = corners[1];
-           P[j].x = tops[8*3*index + 3*j];
-           P[j].y = tops[8*3*index + 3*j + 1];
-           P[j].z = tops[8*3*index + 3*j + 2];
-           
-           z1 = find_edge_point_z(M[0], M[1], P[corners[0]], P[corners[1]]);
-
-           points.push_back(z1);
-           points.push_back(L);
-       }
-       
-       //for the other cells in column
-       //find z-coordinates of intersection points of the cutting plane and lower right edge
-       //index = (my_ind.x; my_ind.y; z) ZYX
-
-       for (z=z_start; z<z_end+1; z++)
-       {
-           index = z + my.y*nz + my.x*nz*ny;
-           
-           if (face_out != 4)
-           {
-               vals.push_back(values[index]);
-
-               j = corners[2];
-               P[j].x = tops[8*3*index + 3*j];
-               P[j].y = tops[8*3*index + 3*j + 1];
-               P[j].z = tops[8*3*index + 3*j + 2];
-               
-               j = corners[3];
-               P[j].x = tops[8*3*index + 3*j];
-               P[j].y = tops[8*3*index + 3*j + 1];
-               P[j].z = tops[8*3*index + 3*j + 2];
-               
-               z2 = find_edge_point_z(M[0], M[1], P[corners[2]], P[corners[3]]);
-
-               points.push_back(z2);
-               points.push_back(L);
-            }
-       }
-
-       
-    }
-
-    // for the  last column of intersected cells
-    i = n-1;
-
-    WP[1].x = cross_x[i]; 
-    WP[1].y = cross_y[i];
-    wl = sqrt( (WP[1].x-WP[0].x)*(WP[1].x-WP[0].x) +  (WP[1].y-WP[0].y)*(WP[1].y-WP[0].y));
-    wL += wl;
-    wpoints.push_back(wL);
-
-    if (faces[i] == 4)
-    {
-       my_ind = indices[i];
-       my = index2d(my_ind, nx);
-       
-       //for the first cell in column
-       //find intersection point of the cutting plane and upper right edge
-       //index = (my_ind.x; my_ind.y; z_start) ZYX
-       index = z_start + my.y*nz + my.x*nz*ny;
-       
-       // for face_out
-       
-           for (j=0;j<3;j++)
-           {
-              P[j].x = tops[8*3*index + 3*j];
-              P[j].y = tops[8*3*index + 3*j + 1];
-              P[j].z = tops[8*3*index + 3*j + 2];
-           }
-           z1 = find_point_z(P[0],P[1], P[2], M[1]);
-       
-           points.push_back(z1);
-           points.push_back(wL);
-        
-       
-       //for the other cells in column
-       //find z-coordinates of intersection points of the cutting plane and lower right edge
-       //index = (my_ind.x; my_ind.y; z) ZYX
-
-       for (z=z_start; z<z_end+1; z++)
-       {
-           index = z + my.y*nz + my.x*nz*ny;
-           
-           // if xyz in values xyz_ind = my.x + my.y*nx + z*nx*ny
-           vals.push_back(values[index]);
-           
-               //FIXME function to calculate z
-               for (j=4;j<7;j++)
-               {
-                  P[j].x = tops[8*3*index + 3*j];
-                  P[j].y = tops[8*3*index + 3*j + 1];
-                  P[j].z = tops[8*3*index + 3*j + 2];
-               }
-               z2 = find_point_z(P[4],P[5], P[6], M[1]);
-           
-               points.push_back(z2);
-               points.push_back(wL);
-             
-       }
-
+       points.push_back(L);
     }
 
     n_points = points.size();
