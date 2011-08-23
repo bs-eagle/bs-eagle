@@ -154,6 +154,13 @@ struct well_data {
 		return reinterpret_cast< const vertex_pos& >(*W);
 	}
 
+	Point_2 start() const {
+		return Point_2(W[0], W[1]);
+	}
+	Point_2 finish() const {
+		return Point_2(W[4], W[5]);
+	}
+
 	//vertex_pos& cend() {
 	//	return reinterpret_cast< vertex_pos& >(W + 4);
 	//}
@@ -163,10 +170,7 @@ struct well_data {
 	//}
 
 	Segment_2 segment() const {
-		return Segment_2(
-			Point_2(W[0], W[1]),
-			Point_2(W[4], W[5])
-		);
+		return Segment_2(start(), finish());
 	}
 
 	Bbox_2 bbox() const {
@@ -288,8 +292,8 @@ typedef std::set< well_hit_cell > intersect_path;
 class intersect_action {
 public:
 	// ctor
-	intersect_action(trimesh& mesh, well_path& wp, intersect_path& X)
-		: m_(mesh), wp_(wp), x_(X)
+	intersect_action(trimesh& mesh, well_path& wp, intersect_path& X, ulong nx, ulong ny)
+		: m_(mesh), wp_(wp), x_(X), nx_(nx), ny_(ny)
 	{}
 
  /* nodes layout
@@ -367,35 +371,52 @@ public:
 	}
 
 	void append_wp_nodes() {
+		if(!wp_.size()) return;
+		// if intersections list is empty then we have a verticall well
+		// that is located in single cell in X-Y plane
+		// and we need to find which cell it hurts
+		if(!x_.size()) {
+			const well_data& wbegin = wp_.begin()->second;
+			ulong cell_id = where_is_point(wbegin.start());
+			if(cell_id >= m_.size()) return;
+			x_.insert(well_hit_cell(
+				wbegin.start(), wp_.begin(),
+				m_.find(cell_id), 0, 4, true
+			));
+		}
+
 		// walk through the intersection path and add node points
 		// of well geometry to the cell with previous intersection
 		intersect_path::iterator px = x_.begin();
 		wp_iterator pw = wp_.begin();
-		t_float node_md;
-		t_float* W;
+		//t_float node_md;
+		//t_float* W;
 		for(wp_iterator end = wp_.end(); pw != end; ++pw) {
-			node_md = pw->second.md();
-			W = pw->second.W;
-			while(px->md < node_md && px != x_.end())
+			const well_data& wseg = pw->second;
+			//node_md = pw->second.md();
+			//W = pw->second.W;
+			while(px->md < wseg.md() && px != x_.end())
 				++px;
 			// we need prev intersection
 			if(px != x_.begin())
 				--px;
 			px = x_.insert(well_hit_cell(
-				Point_2(W[0], W[1]),
-				pw, px->cell, node_md,
+				wseg.start(),
+				pw, px->cell, wseg.md(),
 				4, true //, W[2]
 			)).first;
 		}
+
 		// well path doesn't contain the end-point of trajectory
 		// add it manually to the end of intersection
 		--pw;
+		const well_data& wend = pw->second;
 		px = x_.end(); --px;
-		W = pw->second.W;
-		Point_2 wend(W[4], W[5]);
+		//W = pw->second.W;
+		//Point_2 wend(W[4], W[5]);
 		x_.insert(well_hit_cell(
-			wend, pw, px->cell,
-			px->md + distance(px->where, wend),
+			wend.finish(), pw, px->cell,
+			px->md + distance(px->where, wend.finish()),
 			4, true //, W[6]
 		));
 	}
@@ -423,13 +444,174 @@ public:
 		return res;
 	}
 
+	//Bbox_2 mesh_part_bbox(ulong x_start, ulong x_end, ulong y_start, ulong y_end) {
+	//	// sanity checks
+	//	x_start = min(x_start, nx_ - 1);
+	//	x_end   = min(x_end  , nx_ - 1);
+	//	y_start = min(y_start, ny_ - 1);
+	//	y_end   = min(y_end  , ny_ - 1);
+
+	//	// calc idx of "upper left" cell
+	//	const ulong start_idx = y_start * nx_ + x_start;
+	//	const ulong end_idx = y_end * nx_ + x_end;
+
+	//	vertex_pos lo, hi;
+	//	m_[start_idx].lo(lo);
+	//	m_[end_idx].hi(hi);
+	//	return Bbox_2(lo[0], lo[1], hi[0], hi[1]);
+	//}
+
+	ulong where_is_point(Point_2 point) {
+		// start with full mesh
+		// and divide it until we come to only one cell
+
+		//mesh_part ceed(m_, nx_, ny_);
+		typedef mesh_part::container_t parts_container;
+		typedef mesh_part::container_t::iterator part_iterator;
+		parts_container parts;
+		parts.insert(mesh_part(m_, nx_, ny_));
+
+		//ulong cell_id;
+		while(parts.size()) {
+			// store all peacies after split here
+			parts_container leafs;
+			for(part_iterator p = parts.begin(), end = parts.end(); p != end; ++p) {
+				parts_container kids = p->divide();
+				leafs.insert(kids.begin(), kids.end());
+			}
+
+			// now remove leafs that don't contain given point
+			for(part_iterator l = leafs.begin(), end = leafs.end(); l != end; ) {
+				if(l->bbox().has_on_unbounded_side(point)) {
+					leafs.erase(l++);
+					continue;
+				}
+				else if(l->count() == 1) {
+					// if box contains only 1 cell - test if cell poly contains given point
+					ulong cell_id = l->y_first * nx_ + l->x_first;
+					if(!m_[cell_id].polygon().has_on_unbounded_side(point))
+						return cell_id;
+				}
+				++l;
+			}
+
+			// leafs become the new start point for further division
+			parts = leafs;
+		}
+
+		return -1;
+	}
+
 private:
+
+	// x_last = last_element + 1 = x_size
+	// y_last = last_element + 1 = y_size
+	struct mesh_part {
+		typedef set< mesh_part > container_t;
+
+		mesh_part(trimesh& m, ulong nx, ulong ny)
+			: x_first(0), x_last(nx)
+			, y_first(0), y_last(ny)
+			, m_(m), nx_(nx), ny_(ny)
+		{}
+
+		void init(ulong x1, ulong x2, ulong y1, ulong y2) {
+			x_first = x1; x_last = x2;
+			y_first = y1; y_last = y2;
+
+			// sanity checks
+			x_first = min(x_first, nx_ - 1);
+			x_last   = min(x_last  , nx_);
+			y_first = min(y_first, ny_ - 1);
+			y_last   = min(y_last  , ny_);
+
+			x_last = max(x_first + 1, x_last);
+			y_last = max(y_first + 1, y_last);
+		}
+
+		ulong size(int dim = 0) const {
+			if(!dim)
+				return x_last - x_first;
+			else
+				return y_last - y_first;
+		}
+
+		ulong count() const {
+			return size() * size(1);
+		}
+
+		Iso_rectangle_2 bbox() const {
+			// calc idx of "upper left" cell
+			const ulong start_idx = y_first * nx_ + x_first;
+			const ulong end_idx = (y_last - 1) * nx_ + x_last - 1;
+
+			vertex_pos lo, hi;
+			m_[start_idx].lo(lo);
+			m_[end_idx].hi(hi);
+			return Iso_rectangle_2(Point_2(lo[0], lo[1]), Point_2(hi[0], hi[1]));
+		}
+
+		container_t divide() const {
+			// resulting split
+			container_t res;
+			insert_iterator< container_t > ii(res, res.begin());
+
+			// split points
+			ulong x_div[3], y_div[3];
+			x_div[0] = x_first; x_div[2] = x_last;
+			x_div[1] = x_first + (size() >> 1);
+			y_div[0] = y_first; y_div[2] = y_last;
+			y_div[1] = y_first + (size(1) >> 1);
+
+			// make splitting only if split containt more than 1 cell
+			//ulong x_len, y_len;
+			for(ulong i = 0; i < 2; ++i) {
+				if(y_div[i + 1] - y_div[i] == 0) continue;
+				for(ulong j = 0; j < 2; ++j) {
+					if(x_div[j + 1] - x_div[j] == 0) continue;
+					*ii++ = mesh_part(m_, nx_, ny_, x_div[j], x_div[j + 1], y_div[i], y_div[i + 1]);
+				}
+			}
+			return res;
+		}
+
+		// for sorted containers
+		bool operator <(const mesh_part& rhs) const {
+			return
+			x_first == rhs.x_first ?
+				(x_last == rhs.x_last ?
+					(y_first == rhs.y_first ?
+						y_last < rhs.y_last :
+					y_first < rhs.y_first) :
+				x_last < rhs.x_last) :
+			x_first < rhs.x_first;
+		}
+
+		// public members
+		ulong x_first, x_last;
+		ulong y_first, y_last;
+
+	private:
+		trimesh& m_;
+		ulong nx_, ny_;
+
+		mesh_part(trimesh& m, ulong nx, ulong ny,
+				ulong x1, ulong x2,
+				ulong y1, ulong y2)
+			: x_first(x1), x_last(x2)
+			, y_first(y1), y_last(y2)
+			, m_(m), nx_(nx), ny_(ny)
+		{}
+	};
+
 	// mesh
 	trimesh& m_;
 	// well path
 	well_path& wp_;
 	// well-mesh intersection path
 	intersect_path& x_;
+	// mesh dimensions
+	ulong nx_, ny_;
 };
 
 // helper to create initial cell_data for each cell
@@ -515,7 +697,7 @@ spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zc
 	// Run the intersection algorithm with all defaults on the
 	// indirect pointers to cell bounding boxes. Avoids copying the boxes
 	intersect_path X;
-	intersect_action A(M, W, X);
+	intersect_action A(M, W, X, nx, ny);
 	CGAL::box_intersection_d(
 		mesh_boxes.begin(), mesh_boxes.end(),
 		well_boxes.begin(), well_boxes.end(),
