@@ -126,7 +126,143 @@ typedef st_smart_ptr< cell_data > sp_cell_data;
 
 // storage for representing mesh
 typedef std::map< t_ulong, cell_data > trimesh;
-typedef trimesh::iterator trim_iterator;
+typedef trimesh::const_iterator trim_iterator;
+
+/*-----------------------------------------------------------------
+ * represent rectangular part of mesh with splitting support
+ *----------------------------------------------------------------*/
+// x_last = last_element + 1 = x_size
+// y_last = last_element + 1 = y_size
+struct mesh_part {
+	typedef set< mesh_part > container_t;
+
+	mesh_part(const trimesh& m, ulong nx, ulong ny)
+		: x_first(0), x_last(nx)
+		, y_first(0), y_last(ny)
+		, m_(m), nx_(nx), ny_(ny)
+	{}
+
+	void init(ulong x1, ulong x2, ulong y1, ulong y2) {
+		x_first = x1; x_last = x2;
+		y_first = y1; y_last = y2;
+
+		// sanity checks
+		x_first = min(x_first, nx_ - 1);
+		x_last   = min(x_last  , nx_);
+		y_first = min(y_first, ny_ - 1);
+		y_last   = min(y_last  , ny_);
+
+		x_last = max(x_first + 1, x_last);
+		y_last = max(y_first + 1, y_last);
+	}
+
+	void init(const vector< ulong >& cell_idx) {
+		ulong x1, x2;
+		ulong y1, y2;
+		// search for bounds
+		for(ulong i = 0; i < cell_idx.size(); ++i) {
+			ulong y = cell_idx[i] / nx_;
+			ulong x = cell_idx[i] - y * nx_;
+			if(i == 0) {
+				x1 = x2 = x;
+				y1 = y2 = y;
+			}
+			else {
+				x1 = min(x1, x); x2 = max(x2, x);
+				y1 = min(y1, y); y2 = max(y2, y);
+			}
+		}
+		// +1 for x_last and y_last
+		// finally usual init
+		init(x1, ++x2, y1, ++y2);
+	}
+
+	ulong side_len(int dim) const {
+		if(!dim)
+			return x_last - x_first;
+		else
+			return y_last - y_first;
+	}
+
+	ulong size() const {
+		return side_len(0) * side_len(1);
+	}
+
+	trim_iterator ss_iter(ulong x, ulong y) {
+		if(x >= side_len(0) || y >= side_len(1))
+			return m_.end();
+		ulong idx = (y_first + y) * nx_ + x_first + x;
+		return m_.find(idx);
+	}
+
+	Iso_rectangle_2 bbox() const {
+		// calc idx of "upper left" cell
+		const ulong start_idx = y_first * nx_ + x_first;
+		const ulong end_idx = (y_last - 1) * nx_ + x_last - 1;
+
+		vertex_pos lo, hi;
+		mesh_ss(start_idx).lo(lo);
+		mesh_ss(end_idx).hi(hi);
+		return Iso_rectangle_2(Point_2(lo[0], lo[1]), Point_2(hi[0], hi[1]));
+	}
+
+	container_t divide() const {
+		// resulting split
+		container_t res;
+		insert_iterator< container_t > ii(res, res.begin());
+
+		// split points
+		ulong x_div[3], y_div[3];
+		x_div[0] = x_first; x_div[2] = x_last;
+		x_div[1] = x_first + (side_len(0) >> 1);
+		y_div[0] = y_first; y_div[2] = y_last;
+		y_div[1] = y_first + (side_len(1) >> 1);
+
+		// make splitting only if split containt more than 1 cell
+		//ulong x_len, y_len;
+		for(ulong i = 0; i < 2; ++i) {
+			if(y_div[i + 1] - y_div[i] == 0) continue;
+			for(ulong j = 0; j < 2; ++j) {
+				if(x_div[j + 1] - x_div[j] == 0) continue;
+				*ii++ = mesh_part(m_, nx_, ny_, x_div[j], x_div[j + 1], y_div[i], y_div[i + 1]);
+			}
+		}
+		return res;
+	}
+
+	// for sorted containers
+	bool operator <(const mesh_part& rhs) const {
+		return
+		x_first == rhs.x_first ?
+			(x_last == rhs.x_last ?
+				(y_first == rhs.y_first ?
+					y_last < rhs.y_last :
+				y_first < rhs.y_first) :
+			x_last < rhs.x_last) :
+		x_first < rhs.x_first;
+	}
+
+	// public members
+	ulong x_first, x_last;
+	ulong y_first, y_last;
+
+private:
+	const trimesh& m_;
+	ulong nx_, ny_;
+
+	mesh_part(const trimesh& m, ulong nx, ulong ny,
+			ulong x1, ulong x2,
+			ulong y1, ulong y2)
+		: x_first(x1), x_last(x2)
+		, y_first(y1), y_last(y2)
+		, m_(m), nx_(nx), ny_(ny)
+	{}
+
+	const cell_data& mesh_ss(ulong idx) const {
+		// idx SHOULD BE IN MESH!
+		return m_.find(idx)->second;
+	}
+};
 
 /*-----------------------------------------------------------------
  * well description
@@ -336,8 +472,8 @@ public:
 
 		trim_iterator cell_fish = static_cast< cell_box_handle* >(bc.handle().get())->data();
 		wp_iterator well_fish = static_cast< well_box_handle* >(bw.handle().get())->data();
-		cell_data& c = cell_fish->second;
-		well_data& w = well_fish->second;
+		const cell_data& c = cell_fish->second;
+		const well_data& w = well_fish->second;
 
 		// obtain well segment
 		const Segment_2& s = w.segment();
@@ -420,6 +556,23 @@ public:
 			4, true //, W[6]
 		));
 	}
+
+	//void append_wp_nodes(const vector< ulong >& cell_idx) {
+	//	intersect_path::iterator px;
+	//	wp_iterator pw = wp_.begin();
+	//	ulong i = 0;
+	//	for(wp_iterator end = wp_.end(); pw != end; ++pw, ++i) {
+	//		if(i == cell_idx.size()) break;
+	//		if(cell_idx[i] >= m_.size()) continue;
+
+	//		const well_data& wseg = pw->second;
+	//		px = x_.insert(well_hit_cell(
+	//			wseg.start(), wp_->find(cell_idx[i]),
+	//			m_.find(cell_idx[i]), 0, 4, true
+	//		)).first;
+
+	//	}
+	//}
 
 	void remove_dups() {
 		if(!x_.size()) return;
@@ -504,7 +657,7 @@ public:
 				// if box contains only 1 cell - test if cell poly contains given points
 				if(!catched_points.size())
 					leafs.erase(l++);
-				else if(l->count() == 1) {
+				else if(l->size() == 1) {
 					ulong cell_id = l->y_first * nx_ + l->x_first;
 					Polygon_2 cell_poly = m_[cell_id].polygon();
 					for(list< ulong >::iterator pp = catched_points.begin(), cp_end = catched_points.end(); pp != cp_end; ++pp) {
@@ -527,112 +680,6 @@ public:
 	}
 
 private:
-
-	// x_last = last_element + 1 = x_size
-	// y_last = last_element + 1 = y_size
-	struct mesh_part {
-		typedef set< mesh_part > container_t;
-
-		mesh_part(const trimesh& m, ulong nx, ulong ny)
-			: x_first(0), x_last(nx)
-			, y_first(0), y_last(ny)
-			, m_(m), nx_(nx), ny_(ny)
-		{}
-
-		void init(ulong x1, ulong x2, ulong y1, ulong y2) {
-			x_first = x1; x_last = x2;
-			y_first = y1; y_last = y2;
-
-			// sanity checks
-			x_first = min(x_first, nx_ - 1);
-			x_last   = min(x_last  , nx_);
-			y_first = min(y_first, ny_ - 1);
-			y_last   = min(y_last  , ny_);
-
-			x_last = max(x_first + 1, x_last);
-			y_last = max(y_first + 1, y_last);
-		}
-
-		ulong size(int dim = 0) const {
-			if(!dim)
-				return x_last - x_first;
-			else
-				return y_last - y_first;
-		}
-
-		ulong count() const {
-			return size() * size(1);
-		}
-
-		Iso_rectangle_2 bbox() const {
-			// calc idx of "upper left" cell
-			const ulong start_idx = y_first * nx_ + x_first;
-			const ulong end_idx = (y_last - 1) * nx_ + x_last - 1;
-
-			vertex_pos lo, hi;
-			mesh_ss(start_idx).lo(lo);
-			mesh_ss(end_idx).hi(hi);
-			return Iso_rectangle_2(Point_2(lo[0], lo[1]), Point_2(hi[0], hi[1]));
-		}
-
-		container_t divide() const {
-			// resulting split
-			container_t res;
-			insert_iterator< container_t > ii(res, res.begin());
-
-			// split points
-			ulong x_div[3], y_div[3];
-			x_div[0] = x_first; x_div[2] = x_last;
-			x_div[1] = x_first + (size() >> 1);
-			y_div[0] = y_first; y_div[2] = y_last;
-			y_div[1] = y_first + (size(1) >> 1);
-
-			// make splitting only if split containt more than 1 cell
-			//ulong x_len, y_len;
-			for(ulong i = 0; i < 2; ++i) {
-				if(y_div[i + 1] - y_div[i] == 0) continue;
-				for(ulong j = 0; j < 2; ++j) {
-					if(x_div[j + 1] - x_div[j] == 0) continue;
-					*ii++ = mesh_part(m_, nx_, ny_, x_div[j], x_div[j + 1], y_div[i], y_div[i + 1]);
-				}
-			}
-			return res;
-		}
-
-		// for sorted containers
-		bool operator <(const mesh_part& rhs) const {
-			return
-			x_first == rhs.x_first ?
-				(x_last == rhs.x_last ?
-					(y_first == rhs.y_first ?
-						y_last < rhs.y_last :
-					y_first < rhs.y_first) :
-				x_last < rhs.x_last) :
-			x_first < rhs.x_first;
-		}
-
-		// public members
-		ulong x_first, x_last;
-		ulong y_first, y_last;
-
-	private:
-		const trimesh& m_;
-		ulong nx_, ny_;
-
-		mesh_part(const trimesh& m, ulong nx, ulong ny,
-				ulong x1, ulong x2,
-				ulong y1, ulong y2)
-			: x_first(x1), x_last(x2)
-			, y_first(y1), y_last(y2)
-			, m_(m), nx_(nx), ny_(ny)
-		{}
-
-		const cell_data& mesh_ss(ulong idx) const {
-			// idx SHOULD BE IN MESH!
-			return m_.find(idx)->second;
-		}
-	};
-
 	// mesh
 	trimesh& m_;
 	// well path
@@ -673,35 +720,24 @@ spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float z
 spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 	spv_float well_info, bool include_well_nodes)
 {
-	// calculate mesh nodes coordinates and build initial trimesh
+	// 1) calculate mesh nodes coordinates and build initial trimesh
 	trimesh M;
 	spv_float tops;
 	tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M);
 	//t_long nz = (zcorn->size() / nx / ny) >> 3;
 
-	// create bounding box for each cell in given mesh
-	std::vector< Box > mesh_boxes(M.size());
-	//vertex_pos lo, hi;
-	ulong cnt = 0;
-	for(trim_iterator pm = M.begin(), end = M.end(); pm != end; ++pm, ++cnt) {
-		// calc lo and hi for bounding box of cell
-		const cell_data& d = pm->second;
-		//d.lo(lo); d.hi(hi);
-		mesh_boxes[cnt] = Box(d.bbox(), new cell_box_handle(pm));
-	}
-
-	// Create the corresponding vector of pointers to cells bounding boxes
-	//std::vector< cell_box* > mesh_boxes_ptr;
-	//for(std::vector< cell_box >::iterator i = mesh_boxes.begin(); i != mesh_boxes.end(); ++i)
-	//	mesh_boxes_ptr.push_back(&*i);
-
-	// create bounding boxes for line segments representing well trajectory
+	// 2) create well path description and
+	// bounding boxes for line segments representing well trajectory
 	ulong well_node_num = well_info->size() >> 2;
 	if(well_node_num < 2) return spv_float();
 
-	//vector< well_box > well_boxes;
+	// storage
 	well_path W;
 	vector< Box > well_boxes(well_node_num - 1);
+	// build array of well nodes as Point_2
+	vector< Point_2 > wnodes(well_node_num);
+
+	// walk along well
 	v_float::iterator pw = well_info->begin();
 	double md = 0;
 	for(ulong i = 0; i < well_node_num - 1; ++i) {
@@ -713,7 +749,10 @@ spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zc
 		// calc md
 		if(i > 0)
 			md += W[i - 1].len();
+
 		well_data wd(pw, md);
+		wnodes[i] = wd.start();
+
 		// make bbox
 		well_boxes[i] = Box(
 			wd.bbox(),
@@ -722,11 +761,38 @@ spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zc
 
 		pw += 4;
 	}
+	// put last node to array
+	wnodes[well_node_num - 1] = W[well_node_num - 2].finish();
+
+	// 3) find where each node of well is located
+	// to restrict search area
+	// intersections storage
+	intersect_path X;
+	intersect_action A(M, W, X, nx, ny);
+	const vector< ulong >& hit_idx = A.where_is_point(wnodes);
+	// create part of mesh to process based on these cells
+	mesh_part hot_mesh(M, nx, ny);
+	hot_mesh.init(hit_idx);
+
+	// create bounding box for each cell in given mesh
+	std::vector< Box > mesh_boxes(hot_mesh.size());
+	ulong cnt = 0;
+	trim_iterator pm;
+	for(ulong j = 0; j < hot_mesh.side_len(1); ++j) {
+		for(ulong i = 0; i < hot_mesh.side_len(0); ++i) {
+			pm = hot_mesh.ss_iter(i, j);
+			const cell_data& d = pm->second;
+			mesh_boxes[cnt++] = Box(d.bbox(), new cell_box_handle(pm));
+		}
+	}
+
+	// Create the corresponding vector of pointers to cells bounding boxes
+	//std::vector< cell_box* > mesh_boxes_ptr;
+	//for(std::vector< cell_box >::iterator i = mesh_boxes.begin(); i != mesh_boxes.end(); ++i)
+	//	mesh_boxes_ptr.push_back(&*i);
 
 	// Run the intersection algorithm with all defaults on the
 	// indirect pointers to cell bounding boxes. Avoids copying the boxes
-	intersect_path X;
-	intersect_action A(M, W, X, nx, ny);
 	CGAL::box_intersection_d(
 		mesh_boxes.begin(), mesh_boxes.end(),
 		well_boxes.begin(), well_boxes.end(),
