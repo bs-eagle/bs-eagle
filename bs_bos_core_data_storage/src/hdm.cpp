@@ -104,6 +104,8 @@ namespace blue_sky
     
     kp.hdm = this;
     data->h5_pool->open_file (model_name + ".h5", "/pool");
+    this->well_pool_->open_db (model_name + ".db");
+    data->props->add_property_s(model_name.substr(0,model_name.find_last_of("/\\") + 1), "model_path", "model_path");
     km->init(hdm);
     
     
@@ -146,11 +148,17 @@ namespace blue_sky
     int len;
     BS_SP(hdm_iface) sp_hdm;
     sp_hdm = this;
+    std::string model_name;
     
     write_time_to_log init_time ("Read model", "");
   
     reader->init (filename, filename);
-    data->h5_pool->open_file (filename.substr(0,filename.find_last_of(".")) +".h5", "/pool");
+    model_name = filename.substr(0,filename.find_last_of("."));
+    data->props->add_property_s(filename.substr(0,filename.find_last_of("/\\") + 1), "model_path", "model_path");
+    
+    data->h5_pool->open_file (model_name + ".h5", "/pool");
+    well_pool_->open_db (model_name + ".db");
+    
     km->init(sp_hdm);
     kp.hdm = this;
 

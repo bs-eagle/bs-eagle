@@ -810,8 +810,8 @@ COMMIT;\
     {
       if (fr_file)
         delete fr_file;
-      fr_file = new FRead (fname.c_str (), "./");
-
+      fr_file = new FRead (fname.c_str (), fname.c_str ());
+      
       int rc = 0;
       char buf[4096];
       char *id = 0;
@@ -950,7 +950,7 @@ COMMIT;\
       if (fname[0] != '\0')
         {
           sp_traj_t sp_traj = BS_KERNEL.create_object ("traj"); 
-          rc = sp_traj->read_from_dev_file (fname);
+          rc = sp_traj->read_from_dev_file (std::string(fr_file->get_incdir()) + std::string(fname));
           if (rc)
             {
               return rc;
@@ -961,7 +961,7 @@ COMMIT;\
       if (fname2[0] != '\0')
         {
           sp_gis_t sp_gis = BS_KERNEL.create_object ("gis"); 
-          rc = sp_gis->read_from_las_file (fname);
+          rc = sp_gis->read_from_las_file (std::string(fr_file->get_incdir()) + std::string(fname2));
           if (rc)
             {
               return rc;
