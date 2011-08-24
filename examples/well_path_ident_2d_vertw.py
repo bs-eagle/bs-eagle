@@ -16,8 +16,10 @@ print 'Source mesh generated!'
 
 # generate randomly mesh trajectory
 well_nodes_num = 10;
-wx = np.random.rand(well_nodes_num) * cell_x * Nx;
-wy = np.random.rand(well_nodes_num) * cell_y * Ny;
+pos_x = 10 * cell_x + 3;
+pos_y = 7 * cell_y + 7;
+wx = np.ones(well_nodes_num) * pos_x;
+wy = np.ones(well_nodes_num) * pos_y;
 wz = np.random.rand(well_nodes_num) * cell_z * Nz;
 print wz
 
@@ -33,7 +35,7 @@ W = np.c_[wx, wy, wz, md];
 print W
 
 # calc mesh and well intersection
-X = bm.well_path_ident(Nx, Ny, c, z, W.reshape([1, -1]), True)
+X = bm.well_path_ident_2d(Nx, Ny, c, z, W.reshape([1, -1]), True)
 
 # write result to file
 np.savetxt('x.txt', X.reshape([-1, 6]), fmt = "%8.4f")

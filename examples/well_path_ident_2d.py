@@ -33,7 +33,7 @@ W = np.c_[wx, wy, wz, md];
 print W
 
 # calc mesh and well intersection
-X = bm.well_path_ident(Nx, Ny, c, z, W.reshape([1, -1]), True)
+X = bm.well_path_ident_2d(Nx, Ny, c, z, W.reshape([1, -1]), True)
 
 # write result to file
 np.savetxt('x.txt', X.reshape([-1, 6]), fmt = "%8.4f")
