@@ -421,6 +421,10 @@ public:
 		));
 	}
 
+	void remove_dups() {
+		if(!x_.size()) return;
+	}
+
 	spv_float export_1d() const {
 		spv_float res = BS_KERNEL.create_object(v_float::bs_type());
 		res->resize(x_.size() * 6);
@@ -461,45 +465,65 @@ public:
 	//	return Bbox_2(lo[0], lo[1], hi[0], hi[1]);
 	//}
 
-	ulong where_is_point(Point_2 point) {
+	vector< ulong > where_is_point(vector< Point_2 > points) const {
 		// start with full mesh
 		// and divide it until we come to only one cell
 
-		//mesh_part ceed(m_, nx_, ny_);
+		// mesh partition stored here
 		typedef mesh_part::container_t parts_container;
 		typedef mesh_part::container_t::iterator part_iterator;
 		parts_container parts;
 		parts.insert(mesh_part(m_, nx_, ny_));
 
+		// found cell_ids stored here
+		vector< ulong > res(points.size(), -1);
 		//ulong cell_id;
 		while(parts.size()) {
-			// store all peacies after split here
+			// split every part
 			parts_container leafs;
 			for(part_iterator p = parts.begin(), end = parts.end(); p != end; ++p) {
 				parts_container kids = p->divide();
 				leafs.insert(kids.begin(), kids.end());
 			}
 
-			// now remove leafs that don't contain given point
+			// collection of points inside current partition
+			list< ulong > catched_points;
+			// process each leaf and find points inside it
 			for(part_iterator l = leafs.begin(), end = leafs.end(); l != end; ) {
-				if(l->bbox().has_on_unbounded_side(point)) {
+				const Iso_rectangle_2& cur_rect = l->bbox();
+				catched_points.clear();
+				for(ulong i = 0; i < points.size(); ++i) {
+					// skip already found points
+					if(res[i] < m_.size()) continue;
+					// check that point lies inside this part
+					if(!cur_rect.has_on_unbounded_side(points[i]))
+						catched_points.insert(catched_points.begin(), i);
+				}
+
+				// if this part don't contain any points - remove it
+				// if box contains only 1 cell - test if cell poly contains given points
+				if(!catched_points.size())
 					leafs.erase(l++);
-					continue;
-				}
 				else if(l->count() == 1) {
-					// if box contains only 1 cell - test if cell poly contains given point
 					ulong cell_id = l->y_first * nx_ + l->x_first;
-					if(!m_[cell_id].polygon().has_on_unbounded_side(point))
-						return cell_id;
+					Polygon_2 cell_poly = m_[cell_id].polygon();
+					for(list< ulong >::iterator pp = catched_points.begin(), cp_end = catched_points.end(); pp != cp_end; ++pp) {
+						if(!cell_poly.has_on_unbounded_side(points[*pp]))
+							res[*pp] = cell_id;
+					}
+					leafs.erase(l++);
 				}
-				++l;
+				else ++l;
 			}
 
 			// leafs become the new start point for further division
 			parts = leafs;
 		}
+		return res;
+	}
 
-		return -1;
+	ulong where_is_point(Point_2 point) const {
+		return where_is_point(vector< Point_2 >(1, point))[0];
 	}
 
 private:
@@ -509,7 +533,7 @@ private:
 	struct mesh_part {
 		typedef set< mesh_part > container_t;
 
-		mesh_part(trimesh& m, ulong nx, ulong ny)
+		mesh_part(const trimesh& m, ulong nx, ulong ny)
 			: x_first(0), x_last(nx)
 			, y_first(0), y_last(ny)
 			, m_(m), nx_(nx), ny_(ny)
@@ -546,8 +570,8 @@ private:
 			const ulong end_idx = (y_last - 1) * nx_ + x_last - 1;
 
 			vertex_pos lo, hi;
-			m_[start_idx].lo(lo);
-			m_[end_idx].hi(hi);
+			mesh_ss(start_idx).lo(lo);
+			mesh_ss(end_idx).hi(hi);
 			return Iso_rectangle_2(Point_2(lo[0], lo[1]), Point_2(hi[0], hi[1]));
 		}
 
@@ -592,16 +616,21 @@ private:
 		ulong y_first, y_last;
 
 	private:
-		trimesh& m_;
+		const trimesh& m_;
 		ulong nx_, ny_;
 
-		mesh_part(trimesh& m, ulong nx, ulong ny,
+		mesh_part(const trimesh& m, ulong nx, ulong ny,
 				ulong x1, ulong x2,
 				ulong y1, ulong y2)
 			: x_first(x1), x_last(x2)
 			, y_first(y1), y_last(y2)
 			, m_(m), nx_(nx), ny_(ny)
 		{}
+
+		const cell_data& mesh_ss(ulong idx) const {
+			// idx SHOULD BE IN MESH!
+			return m_.find(idx)->second;
+		}
 	};
 
 	// mesh
