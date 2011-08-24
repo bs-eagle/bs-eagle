@@ -10,6 +10,8 @@
 
 #include "sql_well.h" 
 #include "py_sql_well.h"
+#include "well_keywords.hpp"
+
 using namespace blue_sky;
 using namespace blue_sky::python;
 using namespace boost::python;
@@ -28,6 +30,7 @@ namespace blue_sky {
     setlocale(LC_NUMERIC, "C");
 
     REG_TYPE (sql_well);
+    res &= BS_KERNEL.register_type (pd, blue_sky::well_keywords::bs_type ()); BS_ASSERT (res);
 //res &= BS_KERNEL.register_type (pd, vartype_table <t_float>::bs_type ());
     
     return res;

@@ -242,12 +242,14 @@ namespace blue_sky
       static void SGFN_handler                     (const std::string &keyword, keyword_params_t &params);
       static void SOF3_handler                     (const std::string &keyword, keyword_params_t &params);
       static void SOF2_handler                     (const std::string &keyword, keyword_params_t &params);
+      
+      static void START_handler                    (const std::string &keyword, keyword_params_t &params);
       /*
       static void EQUIL_handler                    (const std::string &keyword, keyword_params_t &params);
       static void PRVD_handler                     (const std::string &keyword, keyword_params_t &params);
       static void RSVD_handler                     (const std::string &keyword, keyword_params_t &params);
       static void PBVD_handler                     (const std::string &keyword, keyword_params_t &params);
-      static void START_handler                    (const std::string &keyword, keyword_params_t &params);
+      
       static void DATE_handler                     (const std::string &keyword, keyword_params_t &params);
       static void DATES_handler                    (const std::string &keyword, keyword_params_t &params);
       static void TSTEP_handler                    (const std::string &keyword, keyword_params_t &params);

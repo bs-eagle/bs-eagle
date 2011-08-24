@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../common_types/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(NUMPY_PATH)/include&quot;;&quot;$(HDF5_PATH)/include&quot;;&quot;$(LOKI_PATH)/include&quot;;.\sqlite"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../common_types/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_data_storage/include&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(NUMPY_PATH)/include&quot;;&quot;$(HDF5_PATH)/include&quot;;&quot;$(LOKI_PATH)/include&quot;;.\sqlite"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING;BSPY_EXPORTING_PLUGIN;_HDF5;H5_USE_16_API;_HDF5USEDLL_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_BOS_CORE_COLLECT_BACKTRACE_;BS_EXCEPTION_USE_BOOST_FORMAT"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -119,7 +119,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(NUMPY_PATH)/include&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;.\include;&quot;$(HDF5_PATH)/include&quot;;&quot;$(ProjectDir)/../common_types/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;.\sqlite"
+				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(NUMPY_PATH)/include&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;.\include;&quot;$(HDF5_PATH)/include&quot;;&quot;$(ProjectDir)/../common_types/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_data_storage/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;.\sqlite"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING;BSPY_EXPORTING_PLUGIN;_HDF5;H5_USE_16_API;_HDF5USEDLL_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_BOS_CORE_COLLECT_BACKTRACE_;BS_EXCEPTION_USE_BOOST_FORMAT"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -219,11 +219,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\well_keywords.hpp"
+				RelativePath=".\src\timer.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\timer.cpp"
+				RelativePath=".\src\well_keywords.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\well_keywords.hpp"
 				>
 			</File>
 		</Filter>

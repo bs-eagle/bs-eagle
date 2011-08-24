@@ -122,9 +122,10 @@ namespace blue_sky
     BS_SP (idata) idata = params.hdm->get_data ();
     char buf[CHAR_BUF_LEN] = {0};
     char s_prop[CHAR_BUF_LEN];
+    char prop_name[CHAR_BUF_LEN];
     char *start, *end;
     
-    t_int i, n, i_prop;
+    t_int i, n, i_prop, j;
     t_float f_prop;
     std::string &format = km->handlers[keyword].prop_format;
     prop_names_t &names = km->handlers[keyword].prop_names;
@@ -148,6 +149,27 @@ namespace blue_sky
         {
           scanf_s (start, &end, s_prop);
           idata->props->add_property_s (s_prop, names[i], names[i]);
+        }
+        else if (format[i] == 'S')
+        {
+          scanf_s (start, &end, s_prop);
+          sprintf (prop_name, "%s", names[i].c_str());
+          j = 1;
+          
+          while (1)
+            {
+              try
+                {
+                  idata->props->get_s(prop_name);
+                  sprintf (prop_name, "%s_%d", names[i].c_str(), j);
+                  j++;
+                }
+              catch (...)
+                {
+                  break;  
+                }
+            }
+          idata->props->add_property_s (s_prop, prop_name, prop_name);
         }
         else if (format[i] == 'b')
         {
@@ -733,7 +755,7 @@ namespace blue_sky
 
   
   
-  /*
+  
   void keyword_manager::START_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
@@ -746,6 +768,9 @@ namespace blue_sky
           % reader->get_prefix () % keyword);
       }
     boost::gregorian::date start=reader->read_date(std::string(buf));
+    boost::gregorian::date base_date (1900, 1, 1);
+    double starting_date = (start - base_date).days () + 2;
+    params.hdm->get_prop()->add_property_f(starting_date, "starting_date", "starting_date");
     km->starting_date = boost::posix_time::ptime(start);        // set starting date
 
     // Current date
@@ -754,7 +779,7 @@ namespace blue_sky
   }
 
 
-  
+  /*
   void keyword_manager::DATE_handler(const std::string &keyword, keyword_params_t &params)
   {
     KH_READER_DEF
