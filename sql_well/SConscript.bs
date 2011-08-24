@@ -7,12 +7,13 @@ tar_name = "sql_well"
 env = custom_env.Clone ()
 env.AppendUnique (CPPPATH = ["include", "src",
     includes["bs_bos_core_base"],
-    includes["common_types"]
+    includes["common_types"],
+    includes["bs_bos_core_data_storage"]
     ] + includes["kernel"],
 	CPPDEFINES = ["_HDF5", 'H5_USE_16_API'],
     LIBS=["sqlite3"])
 
-libs = ["blue_sky"]
+libs = ["blue_sky","bs_bos_core_base"]
 
 if (build_kind == "debug") :
     env.AppendUnique (LIBS = list_suffix (libs, "_d"))
