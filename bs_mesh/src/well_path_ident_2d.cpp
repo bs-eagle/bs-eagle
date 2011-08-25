@@ -34,6 +34,7 @@
 #define Y(n) (3*n + 1)
 #define Z(n) (3*n + 2)
 #define C(n, offs) (3*n + offs)
+#define MD_TOL 0.000001
 
 namespace bp = boost::python;
 using namespace std;
@@ -391,9 +392,6 @@ struct well_hit_cell {
 	uint facet;
 	// is that point a node?
 	bool is_node;
-	// Alina wants z coord for node points - well, why not
-	// Today she don't want Z - terminated
-	//t_float z;
 
 	well_hit_cell() {}
 	well_hit_cell(const Point_2& where_, const wp_iterator& seg_,
@@ -403,23 +401,23 @@ struct well_hit_cell {
 		is_node(is_node_)
 	{}
 
-	// hit points ordered first by md
-	// next by well segment
-	// and at last by cell number
+	// hit points ordered by md
 	bool operator <(const well_hit_cell& rhs) const {
-		if(md < rhs.md)
-			return true;
-		else if(md == rhs.md) {
-			if(seg->first < rhs.seg->first)
-				return true;
-			else if(seg->first == rhs.seg->first)
-				return cell->first < rhs.cell->first;
-		}
-		return false;
+		return md < rhs.md;
+		//if(md < rhs.md)
+		//	return true;
+		//else if(md == rhs.md) {
+		//	if(seg->first < rhs.seg->first)
+		//		return true;
+		//	else if(seg->first == rhs.seg->first)
+		//		return cell->first < rhs.cell->first;
+		//}
+		//return false;
 	}
 };
 
-typedef std::set< well_hit_cell > intersect_path;
+// storage of intersection points
+typedef std::multiset< well_hit_cell > intersect_path;
 
 
 /*-----------------------------------------------------------------
@@ -427,6 +425,21 @@ typedef std::set< well_hit_cell > intersect_path;
  *----------------------------------------------------------------*/
 class intersect_action {
 public:
+	// traits for removing duplicates in X and Y direction
+	struct dup_traits_x {
+		// dimesion to operate onto
+		enum { dim_id = 0 };
+		// specify IDs of crossing sides of cell in positive direction
+		enum { cross_1st = 1, cross_2nd = 3 };
+	};
+
+	struct dup_traits_y {
+		// dimesion to operate onto
+		enum { dim_id = 1 };
+		// specify IDs of crossing sides of cell in positive direction
+		enum { cross_1st = 2, cross_2nd = 0 };
+	};
+
 	// ctor
 	intersect_action(trimesh& mesh, well_path& wp, intersect_path& X, ulong nx, ulong ny)
 		: m_(mesh), wp_(wp), x_(X), nx_(nx), ny_(ny)
@@ -540,7 +553,7 @@ public:
 				wseg.start(),
 				pw, px->cell, wseg.md(),
 				4, true //, W[2]
-			)).first;
+			));
 		}
 
 		// well path doesn't contain the end-point of trajectory
@@ -574,8 +587,72 @@ public:
 	//	}
 	//}
 
-	void remove_dups() {
+	template< class dup_traits >
+	void remove_dups(const dup_traits& t) {
+		typedef intersect_path::iterator x_iterator;
+
+		// helper to decide which of consequent cross-points whould we keep
+		struct who_survive {
+			who_survive(int dir, intersect_path& x)
+				: surv_id_(dup_traits::cross_2nd), kill_id_(dup_traits::cross_1st), x_(x)
+			{
+				// in positive direction 2nd point survives
+				// in negative - first point
+				if(dir)
+					swap(surv_id_, kill_id_);
+			}
+
+			x_iterator operator()(const x_iterator& p1, const x_iterator& p2) {
+				if(p1->facet == surv_id_ && p2->facet == kill_id_) {
+					x_.erase(p2);
+					return p1;
+				}
+				else if(p1->facet == kill_id_ && p2->facet == surv_id_) {
+					x_.erase(p1);
+					return p2;
+				}
+				return p1;
+			}
+
+			uint surv_id_, kill_id_;
+			intersect_path& x_;
+		};
+
+		// sanity check
 		if(!x_.size()) return;
+
+		// position on first intersection
+		x_iterator px = x_.begin(), x_end = x_.end();
+		// check up to cross point before last
+		--x_end;
+		// walk the nodes and determine direction of trajectory
+		//int dir;
+		const int dim_id = dup_traits::dim_id;
+		double max_md;
+		for(wp_iterator pw = wp_.begin(), end = wp_.end(); pw != end; ++pw) {
+			// identify direction
+			const well_data& seg = pw->second;
+			//Point_2 seg_end = seg.finish();
+			who_survive judge(
+				seg.start()[dim_id] < seg.finish()[dim_id] ? 0 : 1,
+				x_
+			);
+
+			// remove dups lying on current well segment
+			max_md = seg.md() + seg.len();
+			for(; px->md <= max_md && px != x_end; ++px) {
+				// skeep well node points if any
+				if(px->facet == 4)
+					continue;
+
+				// check if next intersection coincides with current one
+				// remove dup
+				x_iterator pn = px;
+				++pn;
+				if(abs(px->md - pn->md) < MD_TOL)
+					px = judge(px, pn);
+			}
+		}
 	}
 
 	spv_float export_1d() const {
@@ -600,23 +677,6 @@ public:
 
 		return res;
 	}
-
-	//Bbox_2 mesh_part_bbox(ulong x_start, ulong x_end, ulong y_start, ulong y_end) {
-	//	// sanity checks
-	//	x_start = min(x_start, nx_ - 1);
-	//	x_end   = min(x_end  , nx_ - 1);
-	//	y_start = min(y_start, ny_ - 1);
-	//	y_end   = min(y_end  , ny_ - 1);
-
-	//	// calc idx of "upper left" cell
-	//	const ulong start_idx = y_start * nx_ + x_start;
-	//	const ulong end_idx = y_end * nx_ + x_end;
-
-	//	vertex_pos lo, hi;
-	//	m_[start_idx].lo(lo);
-	//	m_[end_idx].hi(hi);
-	//	return Bbox_2(lo[0], lo[1], hi[0], hi[1]);
-	//}
 
 	vector< ulong > where_is_point(vector< Point_2 > points) const {
 		// start with full mesh
@@ -798,6 +858,10 @@ spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zc
 		well_boxes.begin(), well_boxes.end(),
 		A
 	);
+
+	// remove duplicates in X and Y directions
+	A.remove_dups(intersect_action::dup_traits_x());
+	A.remove_dups(intersect_action::dup_traits_y());
 
 	// finalize intersection
 	if(include_well_nodes)
