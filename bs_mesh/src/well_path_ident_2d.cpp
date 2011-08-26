@@ -616,12 +616,10 @@ public:
 		};
 
 		// sanity check
-		if(!x_.size()) return;
+		if(x_.size() < 2) return;
 
 		// position on first intersection
-		x_iterator px = x_.begin(), x_end = x_.end();
-		// check up to cross point before last
-		--x_end;
+		x_iterator px = x_.begin();
 		// walk the nodes and determine direction of trajectory
 		//int dir;
 		const int dim_id = dup_traits::dim_id;
@@ -637,7 +635,7 @@ public:
 
 			// remove dups lying on current well segment
 			max_md = seg.md() + seg.len();
-			for(; px->md <= max_md && px != x_end; ++px) {
+			for(; px != x_.end() && px->md <= max_md; ++px) {
 				// skeep well node points if any
 				if(px->facet == 4)
 					continue;
@@ -646,7 +644,7 @@ public:
 				// remove dup
 				x_iterator pn = px;
 				++pn;
-				if(abs(px->md - pn->md) < MD_TOL)
+				if(pn != x_.end() && abs(px->md - pn->md) < MD_TOL)
 					px = judge(px, pn);
 			}
 		}
@@ -827,6 +825,8 @@ spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zc
 	intersect_path X;
 	intersect_action A(M, W, X, nx, ny);
 	const vector< ulong >& hit_idx = A.where_is_point(wnodes);
+	// DEBUG
+	//cout << "well nodes hit_idx built" << endl;
 	// create part of mesh to process based on these cells
 	mesh_part hot_mesh(M, nx, ny);
 	hot_mesh.init(hit_idx);
@@ -855,14 +855,18 @@ spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zc
 		well_boxes.begin(), well_boxes.end(),
 		A
 	);
+	//cout << "facet intersections" << endl;
 
 	// remove duplicates in X and Y directions
 	A.remove_dups(intersect_action::dup_traits_x());
+	//cout << "dups X removed" << endl;
 	A.remove_dups(intersect_action::dup_traits_y());
+	//cout << "dups Y removed" << endl;
 
 	// finalize intersection
 	if(include_well_nodes)
 		A.append_wp_nodes(hit_idx);
+	//cout << "wwll path nodes added" << endl;
 
 	return A.export_1d();
 }
