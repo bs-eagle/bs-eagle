@@ -50,13 +50,16 @@ namespace blue_sky
         typedef std::vector< sp_pvt_dead_oil >            sp_pvt_dead_oil_array_t;  //!< type for array of pvt_dead_oil objects
         typedef std::vector< sp_pvt_gas >                 sp_pvt_gas_array_t;       //!< type for array of pvt_gas objects
         typedef std::vector< sp_pvt_water >               sp_pvt_water_array_t;     //!< type for array of pvt_water objects
-		typedef std::vector< double >                     stdv_double;
+		    typedef std::vector< double >                     stdv_double;
 
         //typedef smart_ptr <pvt_dummy_iface, true>         sp_pvt_dummy_iface;
         /**
          * \brief destructor
          */
         virtual ~pvt_3p_iface () {}
+        
+        virtual t_long
+        get_n_pvt_regions () const = 0;
 
         virtual BS_SP (pvt_dead_oil) 
         get_pvt_oil (const t_long index_pvt_region) const = 0;
@@ -77,24 +80,31 @@ namespace blue_sky
         get_pvt_water_array () = 0;
 
         virtual std::list <BS_SP (table_iface)>
-        get_tables (t_long index_pvt_region) const = 0;
+        get_tables_list (t_long pvt_fluid_type) const = 0;
 
         virtual void
         init_pvt_arrays (const t_long n_pvt_regions_, 
                          bool is_oil, bool is_gas, bool is_water) = 0;
 
-		virtual void
-		fill_pvt_arrays (bool is_oil, bool is_gas, bool is_water, 
+        virtual void
+        fill_pvt_arrays (bool is_oil, bool is_gas, bool is_water, 
                          t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals,
-						 stdv_double density) = 0;
+                         stdv_double density) = 0;
         
         virtual BS_SP (table_iface)
 				get_table (t_long index_pvt_region, t_long pvt_fluid_type) const = 0;	 
 
         //! get density data to fill in
-        virtual spv_float 
-        get_density () = 0;
+        virtual BS_SP (table_iface)
+        get_density_table (t_long index_pvt_region) const = 0;
 
+        virtual std::list <BS_SP( table_iface)>
+        get_density_list () const = 0;
+
+        //! get density data to fill in
+        virtual spv_float
+        get_density () const = 0;
+        
         //! set density to pvt internal data  
         virtual void 
         set_density_to_pvt_internal () = 0;  

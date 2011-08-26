@@ -14,12 +14,12 @@
 #include "calc_model.h"
 #include "jfunction.h"
 
-#define EQUIL_PI 0.000096816838
+#define EQUIL_PI_METRIC 0.000096816838
 
 namespace blue_sky 
 {
   void
-  equil_calc_pressure_2 (bool is_g, BS_SP (pvt_3p_iface) pvt_prop, t_double gravity_constant,
+  equil_calc_pressure_2 (bool is_g, BS_SP (pvt_3p_iface) pvt_prop,
       t_double prev_press, t_double cur_d, t_double h, t_long phase, t_long i_pvt,
       double rs_type, t_double depth_goc, t_double rs_dat,
       val_vs_depth *rsvd, val_vs_depth *pbvd,
@@ -28,6 +28,7 @@ namespace blue_sky
     t_double p0, p1, rho, pb;
     t_double invers_fvf = 0;
     t_double rs_max;
+    t_double gravity_constant = EQUIL_PI_METRIC;
 
     if (phase == FI_PHASE_OIL && is_g)
       {
@@ -233,7 +234,7 @@ namespace blue_sky
                 cur_d = depth[i_depth + i_eql * n_depth];
                 h = cur_d - prev_d;
 
-                equil_calc_pressure_2 (is_g, pvt_prop, EQUIL_PI, prev_p, cur_d, h, main_phase, i_pvt,
+                equil_calc_pressure_2 (is_g, pvt_prop, prev_p, cur_d, h, main_phase, i_pvt,
                                          is_g ? (*equil)[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
                                          is_g ? depth_goc : 0, is_g ? rs_dat : 0,
                                          (is_g && rsvd->size ()) ? &((*rsvd)[i_eql]) : 0, (is_g && pbvd->size ()) ? &(*pbvd)[i_eql] : 0,
@@ -285,7 +286,7 @@ namespace blue_sky
 
                     h = d_temp - prev_d;
 
-                    equil_calc_pressure_2 (is_g, pvt_prop, EQUIL_PI, prev_p, d_temp, h, main_phase, i_pvt,
+                    equil_calc_pressure_2 (is_g, pvt_prop, prev_p, d_temp, h, main_phase, i_pvt,
                       0, 0, 0, 0, 0,
                       p_temp);
                   }
@@ -329,7 +330,7 @@ namespace blue_sky
                         cur_d = depth[i_depth + i_eql * n_depth];
                         h = cur_d - prev_d;
 
-                        equil_calc_pressure_2 (is_g, pvt_prop, EQUIL_PI, prev_p, cur_d, h, FI_PHASE_OIL, i_pvt,
+                        equil_calc_pressure_2 (is_g, pvt_prop, prev_p, cur_d, h, FI_PHASE_OIL, i_pvt,
                                                  is_g ? (*equil)[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
                                                  is_g ? depth_goc : 0, is_g ? rs_dat : 0,
                                                  (is_g && rsvd->size ()) ? &(*rsvd)[i_eql] : 0, (is_g && pbvd->size ()) ? &(*pbvd)[i_eql] : 0,
@@ -375,7 +376,7 @@ namespace blue_sky
                     h = depth_woc - prev_d;
 
                     //calc oil pressure at WOC
-                    equil_calc_pressure_2 (is_g, pvt_prop, EQUIL_PI, prev_p, depth_woc, h, FI_PHASE_OIL, i_pvt,
+                    equil_calc_pressure_2 (is_g, pvt_prop, prev_p, depth_woc, h, FI_PHASE_OIL, i_pvt,
                                              is_g ? (*equil)[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
                                              is_g ? depth_goc : 0, is_g ? rs_dat : 0,
                                              (is_g && rsvd->size ()) ? &(*rsvd)[i_eql] : 0, (is_g && pbvd->size ()) ? &(*pbvd)[i_eql] : 0,
@@ -418,7 +419,7 @@ namespace blue_sky
                         cur_d = depth[i_depth + i_eql * n_depth];
                         h = cur_d - prev_d;
 
-                        equil_calc_pressure_2 (is_g, pvt_prop, EQUIL_PI, prev_p, cur_d, h, FI_PHASE_WATER, i_pvt,
+                        equil_calc_pressure_2 (is_g, pvt_prop, prev_p, cur_d, h, FI_PHASE_WATER, i_pvt,
                                                  0, 0, 0, 0, 0,
                                                  press[i_depth + (i_eql * n_phases + phase_d[FI_PHASE_WATER]) * n_depth]);
 
@@ -461,7 +462,7 @@ namespace blue_sky
                     h = depth_goc - prev_d;
 
                     //calc oil pressure at GOC
-                    equil_calc_pressure_2 (is_g, pvt_prop, EQUIL_PI, prev_p, depth_goc, h, FI_PHASE_OIL, i_pvt,
+                    equil_calc_pressure_2 (is_g, pvt_prop, prev_p, depth_goc, h, FI_PHASE_OIL, i_pvt,
                                              is_g ? (*equil)[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
                                              is_g ? depth_goc : 0, is_g ? rs_dat : 0,
                                              (is_g && rsvd->size ()) ? &(*rsvd)[i_eql] : 0, (is_g && pbvd->size ()) ? &(*pbvd)[i_eql] : 0,
@@ -504,7 +505,7 @@ namespace blue_sky
                         cur_d = depth[i_depth + i_eql * n_depth];
                         h = cur_d - prev_d;
 
-                        equil_calc_pressure_2 (is_g, pvt_prop, EQUIL_PI, prev_p, cur_d, h, FI_PHASE_GAS, i_pvt,
+                        equil_calc_pressure_2 (is_g, pvt_prop, prev_p, cur_d, h, FI_PHASE_GAS, i_pvt,
                                                  0, 0, 0, 0, 0,
                                                  press[i_depth + (i_eql * n_phases + phase_d[FI_PHASE_GAS]) * n_depth]);
 

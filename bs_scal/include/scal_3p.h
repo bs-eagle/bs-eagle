@@ -171,14 +171,18 @@ namespace blue_sky
       void
       set_gas_jfunction (sp_jfunction_t jfunc);
 
+      t_long 
+      get_n_scal_regions ()
+        { return n_scal_regions; }
+
       void
       update_gas_data ();
 
-	  void
-	  init_from_scal();
+	    void
+	    init_from_scal();
 
-	  void
-	  init_from_scal_ex(const phase_d_t &phase_d, const sat_d_t &sat_d,
+	    void
+	    init_from_scal_ex(const phase_d_t &phase_d, const sat_d_t &sat_d,
 					 sp_jfunction_t water_jfunc,
 					 sp_jfunction_t gas_jfunc);
 	    
@@ -190,7 +194,11 @@ namespace blue_sky
       virtual BS_SP (table_iface)
       get_table (t_int scal_fluid_type, t_long index_scal_region) const;
       
-      std::list <BS_SP (table_iface)> get_tables (t_long index_scal_region) const;
+      std::list <BS_SP (table_iface)> 
+      get_tables_list (t_long index_scal_region) const;
+
+      std::list <BS_SP (table_iface)>
+      get_tables_fluid_all_regions (t_long scal_fluid_type) const;
       
       virtual void 
       init_scal_data_from_input_tables ();

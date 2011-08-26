@@ -1586,16 +1586,17 @@ namespace blue_sky
             {
               gas_input_table[i] = BS_KERNEL.create_object ("table");
             }  
-          
+#if 0          
           if (is_oil && (is_water || is_gas)) 
             {
               oil_input_table[i] = BS_KERNEL.create_object ("table");
             }
+#endif             
         }
     }                                 
   
   std::list <BS_SP (table_iface)>
-  scal_3p::get_tables (t_long index_scal_region) const
+  scal_3p::get_tables_list (t_long index_scal_region) const
     {
       BS_ASSERT (index_scal_region >= 0 && index_scal_region < n_scal_regions);
       std::list<BS_SP( table_iface)> tables;
@@ -1604,6 +1605,33 @@ namespace blue_sky
         tables.push_back (water_input_table[index_scal_region]);
       if (gas_input_table[index_scal_region])
         tables.push_back (gas_input_table[index_scal_region]);
+      if (oil_input_table[index_scal_region])
+        tables.push_back (oil_input_table[index_scal_region]);
+      return tables;
+    } 
+       
+       
+  std::list <BS_SP (table_iface)>
+  scal_3p::get_tables_fluid_all_regions (t_long scal_fluid_type) const
+    {
+      BS_ASSERT (scal_fluid_type >= FI_PHASE_NULL && scal_fluid_type < FI_PHASE_TOT);
+      std::list<BS_SP( table_iface)> tables;
+
+      if (scal_fluid_type == FI_PHASE_WATER)
+        {
+          for (t_long i = 0; i < n_scal_regions; ++i)
+            tables.push_back (water_input_table[i]);
+        }
+      else if (scal_fluid_type == FI_PHASE_GAS)
+        {
+          for (t_long i = 0; i < n_scal_regions; ++i)
+            tables.push_back (gas_input_table[i]);
+        }  
+      else if (scal_fluid_type == FI_PHASE_OIL)
+        {  
+          for (t_long i = 0; i < n_scal_regions; ++i)
+            tables.push_back (oil_input_table[i]);
+        }     
       
       return tables;
     } 
@@ -1622,7 +1650,7 @@ namespace blue_sky
         {
           return gas_input_table[index_scal_region]; 
         }  
-      else 
+      else if (scal_fluid_type == FI_PHASE_OIL)
         {  
           return oil_input_table[index_scal_region];
         }     

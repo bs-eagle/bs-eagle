@@ -32,12 +32,18 @@ namespace blue_sky
         //typedef std::vector <sp_pvt_dummy_iface_t>        sp_pvt_dummy_iface_array_t;
 
         typedef std::vector<BS_SP(table_iface)>           sp_pvt_list_t;
+        typedef BS_SP (table_iface)                       sp_table_t;
+        typedef std::vector<BS_SP (table_iface)>          sp_table_array_t;
         //typedef std::list<BS_SP(table_iface)>::iterator   sp_pvt_list_iter_t;
-		typedef std::vector<double>						  stdv_double;
+		    typedef std::vector<double>						  stdv_double;
 
         virtual 
         ~pvt_3p ()   { } 
-        
+ 
+        virtual t_long
+        get_n_pvt_regions () const
+          { return n_pvt_regions;  }
+       
         BS_SP (pvt_dead_oil) 
         get_pvt_oil (const t_long index_pvt_region) const;
         
@@ -76,21 +82,26 @@ namespace blue_sky
         init_pvt_arrays (const t_long n_pvt_regions_, 
                          bool is_oil, bool is_gas, bool is_water);
         
-		void
-		fill_pvt_arrays (bool is_oil, bool is_gas, bool is_water, 
+		    void
+		    fill_pvt_arrays (bool is_oil, bool is_gas, bool is_water, 
                          t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals,
-						 stdv_double density);
+						             stdv_double density);
                 
         virtual std::list <BS_SP( table_iface)>
-        get_tables (t_long index_pvt_region) const;
+        get_tables_list (t_long pvt_fluid_type) const;
         
         virtual BS_SP (table_iface)
 				get_table (t_long index_pvt_region, t_long pvt_fluid_type) const;	            
 
-        virtual spv_float 
-        get_density ()
-          { return density; }
+        virtual BS_SP (table_iface) 
+        get_density_table (t_long index_pvt_region) const;
+
+        virtual std::list <BS_SP( table_iface)>
+        get_density_list () const;
           
+        virtual spv_float 
+        get_density () const 
+          { return density; }  
         //! set density to pvt internal data  
         virtual void 
         set_density_to_pvt_internal ();  
@@ -106,8 +117,8 @@ namespace blue_sky
         sp_pvt_water_array_t         pvt_water_array;                //!< array of pvt_water objects, length == n_pvt_regions
         sp_pvt_gas_array_t           pvt_gas_array;                  //!< array of pvt_gas objects, length == n_pvt_regions
          
+        sp_table_array_t             density_table;                        
         spv_float                    density;                        //!< array of densities, length = n_pvt_regions * FI_PHASE_TOT
-        
       public:
 
         BLUE_SKY_TYPE_DECL (pvt_3p);

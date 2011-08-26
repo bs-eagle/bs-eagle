@@ -44,7 +44,10 @@ namespace blue_sky
       .add_property ("gas_jfunction",    &T::get_gas_jfunction, &T::set_gas_jfunction)
     .def ("init_tables", &T:: init_scal_input_table_arrays)
 	  .def ("init_from_scal", &T::init_from_scal)
-	  .def ("get_table", &T::get_tables)
+	  .def ("get_tables_list", &T::get_tables_list)
+	  .def ("get_n_scal_regions", &T::get_n_scal_regions)
+	  .def ("get_table", &T::get_table)
+	  .def ("get_tables_fluid_all_regions", &T::get_tables_fluid_all_regions)
     PY_EXPORTER_END;
     
     PY_EXPORTER (scal_dummy_exporter, default_exporter)

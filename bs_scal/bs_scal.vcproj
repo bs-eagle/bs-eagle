@@ -284,6 +284,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\scal_3p_iface.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\include\scal_data_placement_info.h"
 				>
 			</File>

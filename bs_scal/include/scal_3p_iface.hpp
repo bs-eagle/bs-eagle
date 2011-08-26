@@ -185,22 +185,31 @@ namespace blue_sky
       RPO_MODEL_ENUM      rpo_model, 
       bool                is_scalecrs_ = false) = 0;
     
-	virtual void
-	init_from_scal () = 0;
-
-	virtual void
-	init_from_scal_ex(const phase_d_t &phase_d, const sat_d_t &sat_d,
-							sp_jfunction_t water_jfunc,
-							sp_jfunction_t gas_jfunc) = 0;
+    virtual t_long 
+    get_n_scal_regions () = 0;
     
+    virtual void
+    init_from_scal () = 0;
+
+    virtual void
+    init_from_scal_ex(const phase_d_t &phase_d, const sat_d_t &sat_d,
+		                  sp_jfunction_t water_jfunc,
+                      sp_jfunction_t gas_jfunc) = 0;
+  
     virtual BS_SP (table_iface)
-      get_table (t_int scal_fluid_type, t_long index_scal_region) const = 0;
-      
+    get_table (t_int scal_fluid_type, t_long index_scal_region) const = 0;
+    
+    virtual std::list <BS_SP (table_iface)> 
+    get_tables_list (t_long index_scal_region) const = 0;
+    
+    virtual std::list <BS_SP (table_iface)>
+    get_tables_fluid_all_regions (t_long scal_fluid_type) const = 0;
+    
     virtual void
     init_scal_input_table_arrays (const t_long    n_scal_regions_, 
-                                  bool            is_oil, 
-                                  bool            is_gas, 
-                                  bool            is_water) = 0;
+                                bool            is_oil, 
+                                bool            is_gas, 
+                                bool            is_water) = 0;
 
     virtual void
     set_water_jfunction (BS_SP (jfunction) jfunc) = 0;
