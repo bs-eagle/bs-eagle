@@ -66,7 +66,9 @@ namespace blue_sky
       }
     std::string csv_schedule = params.hdm->get_prop()->get_s ("model_path") + params.hdm->get_prop()->get_s (prop_name_last);
     t_double starting_date = params.hdm->get_prop()->get_f ("starting_date");
+    //TODO: and reading error check
     params.hdm->get_well_pool()->read_from_ascii_file(csv_schedule, starting_date);
+
   }
 
   BLUE_SKY_TYPE_STD_CREATE (well_keywords);

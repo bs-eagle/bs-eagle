@@ -16,6 +16,7 @@
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/filesystem.hpp>
 
 
 #include "bs_kernel.h"
@@ -203,7 +204,7 @@ namespace blue_sky
     }
   int 
   gis::read_asc_info (std::vector<t_double> &v, std::string &s, 
-                      int n, std::fstream &file)
+                      int n, std::ifstream &file)
     {
       namespace qi = boost::spirit::qi;
       using boost::spirit::ascii::space;
@@ -238,7 +239,7 @@ namespace blue_sky
   int 
   gis::read_from_las_file (const std::string &fname)
     {
-      std::fstream file;
+      std::ifstream file;
       std::string s;
       int state = 0;
       const std::string ver_sec = "~V";
@@ -250,15 +251,37 @@ namespace blue_sky
       int param_counter = 0;
       double ver = 0;
       std::vector <t_double> v;
+      namespace fs = boost::filesystem;
+      fs::path p(fname);
+      try
+        {
+          if (!fs::exists (p) || !is_regular_file (p))
+            {
+# ifdef BOOST_POSIX_API
+              std::cout  << "Error: can not open file " << p << std::endl;
+# else  // BOOST_WINDOWS_API
+              std::wcout << L"Error: can not open file " << p << std::endl;
+# endif
+              return -2;
+            }
+        }
+      catch (const fs::filesystem_error& ex)
+        {
+          std::cout << ex.what() << '\n';
+          return -1;
+        }
 
       try 
         {
-          file.open (fname.c_str ());
+          std::string sss = p.file_string ();
+          std::cout << "Read LAS from file: " << sss << std::endl;
+          file.open (sss.c_str ());
         }
       catch (...)
         {
           //TODO error
-          ;
+          fprintf (stderr, "Error: cannot open file %s\n", p.file_string ().c_str ());
+          return -2;
         }
       for (;!file.eof ();)
         {

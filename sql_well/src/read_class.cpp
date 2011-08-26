@@ -295,21 +295,20 @@ FRead::read_line (char *buf, int MaxLen, int flg)
 
       // if exist INCLUDE keyword
       if ((strstr (word_cand, INC) == word_cand)
-	  || (strstr (word_cand, inc) == word_cand))
-	{
-	  fln = trim_right_s (trim_left_s (word_cand + inc_len, '/'), '/');
-	  while (*fln == '\0')
-	    {
-	      fln = buf;
-	      disp =
-		get_next_not_empty_line (fln, f_len, this->fp, &word_len);
-	      SET_LINE_INFO (disp);
-	      fln = trim_right_s (trim_left_s (fln, '/'), '/');
-	    }
-	  if ((current_error_num = this->push (fln)))	// try to open file with name <fln>
-	    return current_error_num;	// if can not open include file return -5
-	  continue;
-	}
+          || (strstr (word_cand, inc) == word_cand))
+        {
+          fln = trim_right_s (trim_left_s (word_cand + inc_len, '/'), '/');
+          while (*fln == '\0')
+            {
+              fln = buf;
+              disp = get_next_not_empty_line (fln, f_len, this->fp, &word_len);
+              SET_LINE_INFO (disp);
+              fln = trim_right_s (trim_left_s (fln, '/'), '/');
+            }
+          if ((current_error_num = this->push (fln)))	// try to open file with name <fln>
+            return current_error_num;	// if can not open include file return -5
+          continue;
+        }
       // pass comment strings
     else if ((word_cand[0] != '#') && (word_cand[0] != ';') &&
 	       !(word_cand[0] == '-' && word_cand[1] == '-'))

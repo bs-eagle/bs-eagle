@@ -562,21 +562,8 @@ COMMIT;\
           fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
           return -3;
         }
-      if (stmp)
-        fprintf(stderr, "stmp not null2\n");
-      else
-         fprintf(stderr, "stmp null2\n");
       sqlite3_step (stmp); // UPDATE
-           if (stmp)
-        fprintf(stderr, "stmp not null3\n");
-      else
-         fprintf(stderr, "stmp null3\n");
       sqlite3_finalize (stmp);
-      
-      if (stmp)
-        fprintf(stderr, "stmp not null4\n");
-      else
-        fprintf(stderr, "stmp null4\n");
       
       return 0;
     }
@@ -928,7 +915,7 @@ COMMIT;\
         }
       // read file name
       fname[0] = '\0';
-      rc = get_phrase_str (&nx, fname);
+      rc = get_phrase_filepath (&nx, fname);
       if (rc)
         {
           fprintf (stderr, "Error: W_BRANCH_F can not read file name\n");
@@ -936,7 +923,7 @@ COMMIT;\
         }
       // read well_log file name
       fname2[0] = '\0';
-      rc = get_phrase_str (&nx, fname2);
+      rc = get_phrase_filepath (&nx, fname2);
       if (rc)
         {
           fprintf (stderr, "Error: W_BRANCH_F can not read file name\n");

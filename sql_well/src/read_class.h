@@ -158,6 +158,31 @@ get_phrase_str (char **next, char *buf, char delim = ';')
   strcpy (buf, start);
   return 0;
 }
+
+static inline int
+get_phrase_filepath (char **next, char *buf, char delim = ';')
+{
+  int rc = get_phrase_str (next, buf, delim);
+  if (rc)
+    return rc;
+
+  size_t n = strlen (buf);
+#ifdef BOOST_POSIX_API
+  for (size_t i = 0; i < n; ++i)
+    {
+      if (buf[i] == '\\')
+        buf[i] = '/';
+    }
+#else // WINDOWS
+  for (size_t i = 0; i < n; ++i)
+    {
+      if (buf[i] == '/')
+        buf[i] = '\\';
+    }
+#endif //BOOST_POSIX_API
+  return 0;
+}
+
 static inline int
 get_phrase_int (char **next, int *i, char delim = ';')
 {
