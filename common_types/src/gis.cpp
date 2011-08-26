@@ -260,7 +260,7 @@ namespace blue_sky
 # ifdef BOOST_POSIX_API
               std::cout  << "Error: can not open file " << p << std::endl;
 # else  // BOOST_WINDOWS_API
-              std::wcout << L"Error: can not open file " << p << std::endl;
+              std::cout << "Error: can not open file " << p.file_string() << std::endl;
 # endif
               return -2;
             }
