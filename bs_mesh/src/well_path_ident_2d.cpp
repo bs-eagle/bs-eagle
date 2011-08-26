@@ -64,6 +64,7 @@ typedef v_float::iterator vf_iterator;
  *----------------------------------------------------------------*/
 typedef t_float vertex_pos[2];
 typedef t_float cell_pos[8][3];
+typedef ulong cell_pos_i[2];
 
 struct cell_data {
 	// vertex coord
@@ -434,6 +435,7 @@ public:
 		enum { dim_id = 0 };
 		// specify IDs of crossing sides of cell in positive direction
 		enum { cross_1st = 1, cross_2nd = 3 };
+		enum { axe_facet1 = 0, axe_facet2 = 2 };
 	};
 
 	struct dup_traits_y {
@@ -441,6 +443,50 @@ public:
 		enum { dim_id = 1 };
 		// specify IDs of crossing sides of cell in positive direction
 		enum { cross_1st = 2, cross_2nd = 0 };
+		enum { axe_facet1 = 1, axe_facet2 = 3 };
+	};
+
+	template< int N >
+	struct spatial_sort {
+		typedef int dirvec_t[N];
+		typedef intersect_path::iterator x_iterator;
+
+		spatial_sort(const dirvec_t& dir, const intersect_action& A)
+			: dir_(dir), A_(A)
+		{}
+
+		spatial_sort(const spatial_sort& rhs)
+			: dir_(rhs.dir_), A_(rhs.A_)
+		{}
+
+		bool operator()(const x_iterator& r1, const x_iterator& r2) const {
+			// cell ids
+			cell_pos_i c1, c2;
+			A_.decode_cell_pos(r1->cell->first, c1);
+			A_.decode_cell_pos(r2->cell->first, c2);
+
+			//bool res = false;
+			for(uint i = 0; i < N; ++i) {
+				bool f = greater(i, c1[i], c2[i]);
+				if(f || i == N - 1)
+					return f;
+				else if(c1[i] == c2[i])
+					continue;
+				else
+					return false;
+			}
+			return false;
+		}
+
+		bool greater(uint ndim, ulong v1, ulong v2) const {
+			if(dir_[ndim])
+				return v1 > v2;
+			else
+				return v2 > v1;
+		}
+
+		const dirvec_t& dir_;
+		const intersect_action& A_;
 	};
 
 	// ctor
@@ -648,6 +694,82 @@ public:
 					px = judge(px, pn);
 			}
 		}
+	}
+
+	template< int N >
+	void remove_dups2() {
+		typedef int dirvec_t[N];
+		typedef intersect_path::iterator x_iterator;
+
+		struct top_surv {
+			typedef set< x_iterator, spatial_sort< N > > spat_storage_t;
+			typedef typename spat_storage_t::iterator spat_iterator;
+
+			top_surv(const dirvec_t& dir, intersect_path& x, const intersect_action& A)
+				: dir_(dir), x_(x), A_(A)
+			{}
+
+			x_iterator operator()(x_iterator r1, x_iterator r2) {
+				spat_storage_t r(spatial_sort< N >(dir_, A_));
+
+				// spatially sort iterators
+				for(; r1 != r2; ++r1)
+					r.insert(r1);
+				// save only frst element
+				spat_iterator s = r.begin();
+				for(++s; s != r.end(); ++s)
+					x_.erase(*s);
+
+				return *r.begin();
+			}
+
+			const dirvec_t& dir_;
+			intersect_path& x_;
+			const intersect_action& A_;
+		};
+
+		// main processing cycle
+		// sanity check
+		if(x_.size() < 2) return;
+
+		// position on first intersection
+		x_iterator px = x_.begin();
+		// walk the nodes and determine direction of trajectory
+		double max_md;
+		dirvec_t dir;
+		for(wp_iterator pw = wp_.begin(), end = wp_.end(); pw != end; ++pw) {
+			// identify direction
+			const well_data& seg = pw->second;
+			// calc direction vector
+			Point_2 start = seg.start();
+			Point_2 finish = seg.finish();
+			for(uint i = 0; i < 2; ++i)
+				dir[i] = start[i] < finish[i] ? 0 : 1;
+			// judge
+			top_surv judge(dir, x_, *this);
+
+			// remove dups lying on current well segment
+			max_md = seg.md() + seg.len();
+			for(; px != x_.end() && px->md <= max_md; ++px) {
+				// skeep well node points if any
+				if(px->facet == 4)
+					continue;
+
+				// find range of cross points with equal MD
+				// upper_bound
+				x_iterator pn = px;
+				while(pn != x_.end() && abs(px->md - pn->md) < MD_TOL)
+					++pn;
+				// if we have nonempty range - leave only 1 element
+				//if(pn != px)
+				px = judge(px, pn);
+			}
+		}
+	}
+
+	void decode_cell_pos(ulong cell_id, cell_pos_i& res) const {
+		res[0] = cell_id / nx_;
+		res[1] = cell_id - res[0] * nx_;
 	}
 
 	spv_float export_1d() const {
@@ -858,10 +980,9 @@ spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zc
 	//cout << "facet intersections" << endl;
 
 	// remove duplicates in X and Y directions
-	A.remove_dups(intersect_action::dup_traits_x());
-	//cout << "dups X removed" << endl;
-	A.remove_dups(intersect_action::dup_traits_y());
-	//cout << "dups Y removed" << endl;
+	//A.remove_dups(intersect_action::dup_traits_x());
+	//A.remove_dups(intersect_action::dup_traits_y());
+	A.remove_dups2< 2 >();
 
 	// finalize intersection
 	if(include_well_nodes)
