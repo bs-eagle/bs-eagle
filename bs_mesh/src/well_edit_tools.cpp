@@ -135,8 +135,8 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
     n = indices.size();
 
     // FIXME
-    if (n<2)
-        return bp::make_tuple(0,0,0,0,0);
+    //if (n<2)
+        //return bp::make_tuple(0,0,0,0,0);
     
     //////////////////////////////////////////////
 
@@ -171,7 +171,7 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
 
     t_int index;
 
-    t_float L = 0, l = 0;
+    t_float L = 0, l = 0, dl = 10;
 
     //! for the first column of intersected cells
     i = 0;
@@ -187,6 +187,12 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
     M[0].y = cross_y[i];
     M[1].x = cross_x[ii]; 
     M[1].y = cross_y[ii];
+
+    // vertical well
+    if (M[0].x == M[1].x && M[0].y == M[1].y)
+    {
+        L -= dl;
+    }
 
     // well-cell intersection faces and face corners
     face_in = faces[i];
@@ -208,7 +214,7 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
         z1 = find_point_z(P[0],P[1], P[2], M[0]);
            
         points.push_back(z1);
-        points.push_back(0);
+        points.push_back(L);
 
         //for all cells in column
         //find z-coordinates of intersection points of the cutting plane and left lower edges
@@ -229,9 +235,15 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
            z2 = find_point_z(P[4],P[5], P[6], M[0]);
 
            points.push_back(z2);
-           points.push_back(0);
+           points.push_back(L);
         }
         
+    }
+    
+    // vertical well
+    if (M[0].x == M[1].x && M[0].y == M[1].y)
+    {
+        L += dl;
     }
 
     //! for all columns of intersected cells
@@ -346,6 +358,12 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
     corners[1] = faces2corners[face_out][1];
     corners[2] = faces2corners[face_out][2];
     corners[3] = faces2corners[face_out][3];
+    
+    // vertical well
+    if (M[0].x == M[1].x && M[0].y == M[1].y)
+    {
+        L += dl;
+    }
 
     //for the first cell in column
     //find intersection of the cutting plane and left upper edge
