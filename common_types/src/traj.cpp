@@ -98,13 +98,13 @@ namespace blue_sky
 
       try 
         {
-          std::string sss = p.file_string ();
+          std::string sss = p.string ();
           std::cout << "Read DEV file: " << sss << std::endl;
           file.open (sss.c_str ());
         }
       catch (...)
         {
-          fprintf (stderr, "Error: cannot open file %s\n", p.file_string ().c_str ());
+          fprintf (stderr, "Error: cannot open file %s\n", p.string ().c_str ());
           return -2;
         }
       for (;!file.eof ();)
