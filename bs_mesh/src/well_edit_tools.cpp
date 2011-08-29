@@ -274,9 +274,9 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
         }
 
         // every index appears in indices twice: for face_in and face_out
-        if (my_ind == ind_old)
-           continue;
-        ind_old = my_ind;
+        //if (my_ind == ind_old)
+           //continue;
+        //ind_old = my_ind;
 
         corners[0] = faces2corners[face_in][0];
         corners[1] = faces2corners[face_in][1];
