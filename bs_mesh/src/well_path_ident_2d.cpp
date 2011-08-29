@@ -987,15 +987,13 @@ spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zc
 	);
 	//cout << "facet intersections" << endl;
 
+	// remove duplicates in X and Y directions
+	A.remove_dups2< 2 >();
+
 	// append well path nodes
 	if(include_well_nodes)
 		A.append_wp_nodes(hit_idx);
 	//cout << "wwll path nodes added" << endl;
-
-	// remove duplicates in X and Y directions
-	//A.remove_dups(intersect_action::dup_traits_x());
-	//A.remove_dups(intersect_action::dup_traits_y());
-	A.remove_dups2< 2 >();
 
 	return A.export_1d();
 }
