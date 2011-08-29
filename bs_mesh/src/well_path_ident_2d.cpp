@@ -428,6 +428,8 @@ typedef std::multiset< well_hit_cell > intersect_path;
  *----------------------------------------------------------------*/
 class intersect_action {
 public:
+	typedef intersect_path::iterator x_iterator;
+
 	// traits for removing duplicates in X and Y direction
 	struct dup_traits_x {
 		// dimesion to operate onto
@@ -570,59 +572,29 @@ public:
 		}
 	}
 
+	// run it after all dups killed
 	void append_wp_nodes(const vector< ulong >& hit_idx) {
 		if(!wp_.size()) return;
-		// if intersections list is empty then we probably have a verticall well
-		// that is located in single cell in X-Y plane
-		// add first intersection manually
-		wp_iterator pw = wp_.begin();
-		ulong node_idx = 0;
 
 		// walk through the intersection path and add node points
 		// of well geometry to the cell with previous intersection
 		intersect_path::iterator px = x_.begin();
-		ulong facet_id;
-		for(wp_iterator end = wp_.end(); pw != end; ++pw) {
-			const well_data& wseg = pw->second;
+		//ulong facet_id;
+
+		wp_iterator pw = wp_.begin();
+		ulong node_idx = 0;
+		for(wp_iterator end = wp_.end(); pw != end; ++pw, ++node_idx) {
+			//const well_data& wseg = pw->second;
 			// lower_bound
-			while(px != x_.end() && px->md < wseg.md())
+			while(px != x_.end() && px->md < pw->second.md())
 				++px;
 
-			facet_id = 4;
-			// check if current or prev intersection match with node
-			if(px != x_.end() && abs(px->md - wseg.md()) < MD_TOL)
-				facet_id = px->facet;
-			else if(px != x_.begin()) {
-				--px;
-				if(abs(px->md - wseg.md()) < MD_TOL)
-					facet_id = px->facet;
-			}
-
-			px =
-			x_.insert(well_hit_cell(
-				wseg.start(),
-				pw, m_.find(hit_idx[node_idx++]), wseg.md(),
-				facet_id, true
-			));
+			px = insert_wp_node(hit_idx[node_idx], pw, px);
 		}
 
 		// well path doesn't contain the end-point of trajectory
-		// add it manually to the end of intersection
-		--pw;
-		const well_data& wend = pw->second;
-		px = x_.end(); --px;
-		// check coinsidence with last intersection
-		const double wend_md = px->md + distance(px->where, wend.finish());
-		if(abs(px->md - wend_md) < MD_TOL)
-			facet_id = px->facet;
-		else
-			facet_id = 4;
-		// add well end-point
-		x_.insert(well_hit_cell(
-			wend.finish(), pw,
-			m_.find(hit_idx[node_idx]),
-			wend_md, facet_id, true
-		));
+		// add it manually
+		insert_wp_node(hit_idx[node_idx], --pw, x_.end(), true);
 	}
 
 	template< class dup_traits >
@@ -856,6 +828,43 @@ public:
 	}
 
 private:
+
+	x_iterator insert_wp_node(ulong cell_id, wp_iterator pw, x_iterator px, bool end_point = false) {
+		// initialization
+		const well_data& wseg = pw->second;
+		Point_2 where = wseg.start();
+		t_float wp_md = wseg.md();
+		if(end_point) {
+			where = wseg.finish();
+			wp_md += wseg.len();
+			//wp_md = px->md + distance(px->where, where);
+		}
+
+		// check if current or prev intersection match with node
+		uint facet_id = 4;
+		if(px != x_.end() && abs(px->md - wp_md) < MD_TOL)
+			facet_id = px->facet;
+		else if(px != x_.begin()) {
+			--px;
+			if(abs(px->md - wp_md) < MD_TOL)
+				facet_id = px->facet;
+		}
+
+		// if node point coinside with existing intersection
+		// then just change is_node flag (dont't affect ordering)
+		// otherwise insert new intersection point
+		if(facet_id == 4)
+			px = x_.insert(well_hit_cell(
+				where, pw, m_.find(cell_id), wp_md,
+				facet_id, true
+			));
+		else {
+			well_hit_cell& x = const_cast< well_hit_cell& >(*px);
+			x.is_node = true;
+		}
+		return px;
+	}
+
 	// mesh
 	trimesh& m_;
 	// well path
