@@ -423,7 +423,6 @@ struct well_hit_cell {
 // storage of intersection points
 typedef std::multiset< well_hit_cell > intersect_path;
 
-
 /*-----------------------------------------------------------------
  * callback functor that triggers on intersecting bboxes
  *----------------------------------------------------------------*/
@@ -460,6 +459,17 @@ public:
 		{}
 
 		bool operator()(const x_iterator& r1, const x_iterator& r2) const {
+			// check if r1 or r2 are node points
+			if(r1->is_node) {
+				if(!r2->is_node)
+					return true;
+				else
+					// merge node points in same position
+					return false;
+			}
+			else if(r2->is_node)
+				return false;
+
 			// cell ids
 			cell_pos_i c1, c2;
 			A_.decode_cell_pos(r1->cell->first, c1);
@@ -467,22 +477,14 @@ public:
 
 			//bool res = false;
 			for(uint i = 0; i < N; ++i) {
-				bool f = greater(i, c1[i], c2[i]);
-				if(f || i == N - 1)
-					return f;
-				else if(c1[i] == c2[i])
-					continue;
-				else
-					return false;
+				if(greater(i, c1[i], c2[i]))
+					return true;
 			}
 			return false;
 		}
 
 		bool greater(uint ndim, ulong v1, ulong v2) const {
-			if(dir_[ndim])
-				return v1 > v2;
-			else
-				return v2 > v1;
+			return dir_[ndim] == 0 ? v1 > v2 : v2 > v1;
 		}
 
 		const dirvec_t& dir_;
@@ -575,14 +577,6 @@ public:
 		// add first intersection manually
 		wp_iterator pw = wp_.begin();
 		ulong node_idx = 0;
-		//if(!x_.size()) {
-		//	const well_data& wbegin = pw->second;
-		//	x_.insert(well_hit_cell(
-		//		wbegin.start(), wp_.begin(),
-		//		m_.find(hit_idx[node_idx++]), 0, 4, true
-		//	));
-		//	++pw;
-		//}
 
 		// walk through the intersection path and add node points
 		// of well geometry to the cell with previous intersection
@@ -604,7 +598,8 @@ public:
 					facet_id = px->facet;
 			}
 
-			px = x_.insert(well_hit_cell(
+			px =
+			x_.insert(well_hit_cell(
 				wseg.start(),
 				pw, m_.find(hit_idx[node_idx++]), wseg.md(),
 				facet_id, true
@@ -617,7 +612,8 @@ public:
 		const well_data& wend = pw->second;
 		px = x_.end(); --px;
 		// check coinsidence with last intersection
-		if(abs(px->md - wend.md()) < MD_TOL)
+		const double wend_md = px->md + distance(px->where, wend.finish());
+		if(abs(px->md - wend_md) < MD_TOL)
 			facet_id = px->facet;
 		else
 			facet_id = 4;
@@ -625,8 +621,7 @@ public:
 		x_.insert(well_hit_cell(
 			wend.finish(), pw,
 			m_.find(hit_idx[node_idx]),
-			px->md + distance(px->where, wend.finish()),
-			4, true
+			wend_md, facet_id, true
 		));
 	}
 
@@ -709,18 +704,20 @@ public:
 				: dir_(dir), x_(x), A_(A)
 			{}
 
-			x_iterator operator()(x_iterator r1, x_iterator r2) {
-				spat_storage_t r(spatial_sort< N >(dir_, A_));
+			x_iterator operator()(x_iterator from, x_iterator to) {
+				spat_storage_t sr(spatial_sort< N >(dir_, A_));
 
 				// spatially sort iterators
-				for(; r1 != r2; ++r1)
-					r.insert(r1);
+				for(x_iterator px = from; px != to; ++px)
+					sr.insert(px);
 				// save only frst element
-				spat_iterator s = r.begin();
-				for(++s; s != r.end(); ++s)
-					x_.erase(*s);
+				while(from != to) {
+					if(from != *sr.begin())
+						x_.erase(from++);
+					else ++from;
+				}
 
-				return *r.begin();
+				return *sr.begin();
 			}
 
 			const dirvec_t& dir_;
@@ -744,7 +741,7 @@ public:
 			Point_2 start = seg.start();
 			Point_2 finish = seg.finish();
 			for(uint i = 0; i < 2; ++i)
-				dir[i] = start[i] < finish[i] ? 0 : 1;
+				dir[i] = start[i] <= finish[i] ? 0 : 1;
 			// judge
 			top_surv judge(dir, x_, *this);
 
@@ -752,24 +749,26 @@ public:
 			max_md = seg.md() + seg.len();
 			for(; px != x_.end() && px->md <= max_md; ++px) {
 				// skeep well node points if any
-				if(px->facet == 4)
-					continue;
+				//if(px->facet == 4)
+				//	continue;
 
 				// find range of cross points with equal MD
 				// upper_bound
+				ulong cnt = 0;
 				x_iterator pn = px;
-				while(pn != x_.end() && abs(px->md - pn->md) < MD_TOL)
-					++pn;
+				for(; pn != x_.end() && abs(px->md - pn->md) < MD_TOL; ++pn, ++cnt)
+				{}
 				// if we have nonempty range - leave only 1 element
-				//if(pn != px)
-				px = judge(px, pn);
+				if(cnt)
+					px = judge(px, pn);
 			}
 		}
 	}
 
+	// X-Y order!
 	void decode_cell_pos(ulong cell_id, cell_pos_i& res) const {
-		res[0] = cell_id / nx_;
-		res[1] = cell_id - res[0] * nx_;
+		res[1] = cell_id / nx_;
+		res[0] = cell_id - res[1] * nx_;
 	}
 
 	spv_float export_1d() const {
@@ -979,15 +978,15 @@ spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zc
 	);
 	//cout << "facet intersections" << endl;
 
+	// append well path nodes
+	if(include_well_nodes)
+		A.append_wp_nodes(hit_idx);
+	//cout << "wwll path nodes added" << endl;
+
 	// remove duplicates in X and Y directions
 	//A.remove_dups(intersect_action::dup_traits_x());
 	//A.remove_dups(intersect_action::dup_traits_y());
 	A.remove_dups2< 2 >();
-
-	// finalize intersection
-	if(include_well_nodes)
-		A.append_wp_nodes(hit_idx);
-	//cout << "wwll path nodes added" << endl;
 
 	return A.export_1d();
 }
