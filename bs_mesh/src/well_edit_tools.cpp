@@ -76,6 +76,11 @@ point3d find_edge_point(point3d N1, point3d N2, point3d M1, point3d M2)
 // line is specified by points M1, M2
 t_float find_edge_point_z(point2d N1, point2d N2, point3d M1, point3d M2)
 {
+   if (N2.x == M1.x && N2.y == M1.y)
+       return M1.z;
+   if (N2.x == M2.x && N2.y == M2.y)
+       return M2.z;
+   
    t_float t, A, B, C, D, E, F, G, z;
 
    A = N2.y - N1.y;
@@ -92,6 +97,7 @@ t_float find_edge_point_z(point2d N1, point2d N2, point3d M1, point3d M2)
    
    z = M1.z + E*t;
    
+
    return z;
 }
 
@@ -134,9 +140,6 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
     t_int i, ii, j, n, z; 
     n = indices.size();
 
-    // FIXME
-    //if (n<2)
-        //return bp::make_tuple(0,0,0,0,0);
     
     //////////////////////////////////////////////
 
@@ -151,7 +154,7 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
     well_points = BS_KERNEL.create_object(v_float::bs_type());
     scalars = BS_KERNEL.create_object(v_float::bs_type());
 
-    t_int my_ind, ind_old;
+    t_int my_ind; 
     index2d my;
     t_int face_in, face_out;
 
@@ -176,11 +179,9 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
     //! for the first column of intersected cells
     i = 0;
     ii = i+1;
-    // FIXME change i -> 0
 
     my_ind = indices[i];
     my = index2d(my_ind, nx);
-    ind_old = my_ind;
 
     //well-cell intersection points
     M[0].x = cross_x[i]; 
@@ -338,12 +339,12 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
 
 
     //! for the last column of intersected cells
-    i = n-1;
-    ii = n-2;
+    i = n-2;
+    ii = n-1;
 
     wpoints.push_back(L);
 
-    my_ind = indices[i];
+    my_ind = indices[ii];
     my = index2d(my_ind, nx);
 
     //well-cell intersection points
@@ -353,7 +354,7 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
     M[1].y = cross_y[ii];
 
     // well-cell intersection faces and face corners
-    face_out = faces[i];
+    face_out = faces[ii];
     corners[0] = faces2corners[face_out][0];
     corners[1] = faces2corners[face_out][1];
     corners[2] = faces2corners[face_out][2];
@@ -377,7 +378,7 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
        P[j].x = tops[8*3*index + 3*j];
        P[j].y = tops[8*3*index + 3*j + 1];
        P[j].z = tops[8*3*index + 3*j + 2];
-       
+
        j = corners[1];
        P[j].x = tops[8*3*index + 3*j];
        P[j].y = tops[8*3*index + 3*j + 1];
