@@ -116,6 +116,63 @@ key_read_time (const char *buf, date_sim &tm)
   tm = ((date_sim)h + ((date_sim)m + (date_sim)s / 60.0) / 60.0) / 24.0;
   return 0;
 }
+
+double
+ymd2d (int year, int month, int day)
+{
+  int days_in_current_month;
+  static const int days_in_month[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+  int i;
+  double date;
+  
+  // Check month and year
+  
+  if (year < 1900)
+    {
+      fprintf (stderr, "Error: years earlier 1900 not supported\n");
+      return -1;
+    }
+  
+  if (month < 1 || month > 12)
+    {
+      fprintf (stderr, "Error: invalid (nonexistent) date\n");
+      return -1;
+    } 
+  
+  date = 0;
+  
+  for (i = 1900; i < year; i++)
+    {
+    if (IS_LEAP_YEAR (i))
+      date += 366;
+    else
+      date += 365;
+    }
+    
+  month--;  
+  
+  for (i = 0; i < month; i++)
+    {
+      date += days_in_month[i];
+      if (IS_LEAP_YEAR (year) && i == 1) // February of leap year
+        date++;
+    }
+  date += day;
+  
+  days_in_current_month = days_in_month[month];
+  if (IS_LEAP_YEAR (year) && month == 1) // February of leap year
+    days_in_current_month++;
+  
+  
+  // check day
+  if (day < 1 || day > days_in_current_month)
+    {
+      fprintf (stderr, "Error: invalid (nonexistent) date\n");
+      return -1;
+    }
+  
+  return date;
+}
 /*!
   \brief Date in format %d.%d.%d reads from text buffer BUF\n
          into date_sim
@@ -231,6 +288,19 @@ get_date_day_month_year(date_sim date, int &day, int &month, int &year)
   return (date - day);
 }
 
+void 
+d2hms (date_sim date, int &h, int &m, int &s)
+{
+  double d, n, hh, mm, ss;
+  
+  d = modf (date, &n);
+  d = modf (d * 24.0, &hh);
+  d = modf (d * 60.0, &mm);
+  d = modf (d * 60.0, &ss);
+  h = (int)hh;
+  m = (int)mm;
+  s = (int)ss;
+}
 
 /*!
   \brief Print text from BUF and date from CUR to output 

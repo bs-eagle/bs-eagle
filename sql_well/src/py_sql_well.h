@@ -68,6 +68,14 @@ namespace blue_sky
         args ("File_name", "starting_date"), "Read data from ascii file")
 	.def ("insert_or_update",					&T::insert_or_update,
 		args ("select", "insert", "update"), "Insert or update data")
+	.def ("d2date",					            &T::d2date,
+		args ("d"), "convert d to list (year, month, day, hour, minute, second)")
+	.def ("date2d",					            &T::date2d,
+		args ("year", "month", "day", "hour", "minute", "second"), "date and time to double")
+	.def ("d2str",					            &T::d2str,
+		args ("d"), "convert date from double to str")
+	.def ("t2str",					            &T::t2str,
+		args ("d"), "convert time from double to str")
     .def ("__str__",                            &T::py_str)
   PY_EXPORTER_END;                               
 
