@@ -316,7 +316,8 @@ namespace detail {
         return feof (fp);
       }
 
-      typedef shared_vector <include_file> file_list_t;
+      //typedef shared_vector <include_file> file_list_t;
+      typedef std::vector <include_file> file_list_t;
 
       //! set pointer to the external include list
       void 

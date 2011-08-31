@@ -30,6 +30,7 @@ namespace python {
 
   PY_EXPORTER (fread_exporter, default_exporter)
     .def ("read_line", read_line <T>)
+    .def ("init", &T::init)
   PY_EXPORTER_END;
 
   void
