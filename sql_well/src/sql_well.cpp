@@ -132,7 +132,7 @@ namespace blue_sky
       if (db)
         close_db ();
       printf ("SQL open_db %s\n", file.c_str ());
-      if (file == ":memory:" or !boost::filesystem::exists (file))
+      if (file == ":memory:" || !boost::filesystem::exists (file))
         {
           rc = sqlite3_open (file.c_str (), &db);
           if (rc)
