@@ -26,7 +26,10 @@ namespace blue_sky
     : hdm (hdm)
     {
     }
-
+    void set_hdm (sp_hdm hdm_)
+    {
+      hdm = hdm_;
+    }
     sp_hdm          hdm;
   };
       

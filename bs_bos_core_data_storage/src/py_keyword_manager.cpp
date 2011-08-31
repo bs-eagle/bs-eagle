@@ -129,11 +129,13 @@ namespace python {
     .def ("list_supported_keywords", &T::py_list_supported_keywords)
     .def ("is_keyword_supported", &T::is_keyword_supported)
     .def ("is_keyword_activated", &T::is_keyword_activated)
+    .def ("handle_keyword", &T::handle_keyword)
     .def ("init", &T::init)
   PY_EXPORTER_END;
 
   PY_EXPORTER (keyword_params_exporter, empty_exporter)
-    .add_property ("hdm", make_function (get_reader <T>))
+    //.add_property ("hdm", make_function (get_reader <T>))
+    .def ("set_hdm", &T::set_hdm)
     //.add_property ("data",   make_function (get_data <T>))
     //.add_property ("mesh",   make_function (get_mesh <T>))
     //.add_property ("keyword_manager", make_function (get_keyword_manager <T>))
@@ -152,7 +154,7 @@ namespace python {
     class_exporter<keyword_manager, keyword_manager_iface, keyword_manager_exporter>::export_class ("keyword_manager");
 
 
-    //strategy_exporter::export_base_ext <keyword_params, keyword_params_exporter, class_type::concrete_class> ("keyword_params");
+    base_exporter_nobs<keyword_params, keyword_params_exporter>::export_class ("keyword_params");
 	
     /*
     strategy_exporter::export_base_ext <keyword_handler_iface, empty_exporter, class_type::abstract_class> ("keyword_handler_iface");
