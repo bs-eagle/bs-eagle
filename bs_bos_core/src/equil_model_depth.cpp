@@ -133,7 +133,7 @@ namespace blue_sky
                       )
   {
     const t_long n_layer = 10;
-	t_long ds_w, ds_g;
+    t_long ds_w, ds_g;
     t_long i_depth;
     t_long i_eql, i_pvt, i_sat = 0;
     t_double d_depth, h;
@@ -146,7 +146,7 @@ namespace blue_sky
     t_double p_p[3], s_p[2], pc_limit[2];
 	
     ds_w = sat_d[FI_PHASE_WATER];
-	ds_g = sat_d[FI_PHASE_GAS];
+    ds_g = sat_d[FI_PHASE_GAS];
     t_long d_o = phase_d[FI_PHASE_OIL];
     t_long d_w = phase_d[FI_PHASE_WATER];
     t_long d_g = phase_d[FI_PHASE_GAS];

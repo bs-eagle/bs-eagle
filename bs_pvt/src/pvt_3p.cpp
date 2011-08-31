@@ -241,6 +241,7 @@ namespace blue_sky
     for (size_t i = 0; i < n_pvt_regions; i++)
       {
         density_table[i] = BS_KERNEL.create_object ("table");
+        density_table[i]->init (1, FI_PHASE_TOT);
         if (is_oil) 
           {
             if (!is_gas)
@@ -422,14 +423,19 @@ namespace blue_sky
   void 
   pvt_3p::set_density_to_pvt_internal ()
   {
+    t_float *density_data = &(*density)[0];
     for (t_long i = 0; i < n_pvt_regions; i++)
       {
+         density_table[i]->set_value (0, 0, density_data[i * FI_PHASE_TOT]);
+         density_table[i]->set_value (0, 1, density_data[i * FI_PHASE_TOT + 1]);
+         density_table[i]->set_value (0, 2, density_data[i * FI_PHASE_TOT + 2]);
+         
          if (pvt_oil_array[i].get ())
-           pvt_oil_array[i]->set_surface_density (density_table[i]->get_value (i, FI_PHASE_OIL));
+           pvt_oil_array[i]->set_surface_density (density_data[i * FI_PHASE_TOT]);
          if (pvt_water_array[i].get ())
-           pvt_water_array[i]->set_surface_density (density_table[i]->get_value (i, FI_PHASE_WATER));     
+           pvt_water_array[i]->set_surface_density (density_data[i * FI_PHASE_TOT + 1]);     
          if (pvt_gas_array[i].get ())
-           pvt_gas_array[i]->set_surface_density (density_table[i]->get_value (i, FI_PHASE_GAS));          
+           pvt_gas_array[i]->set_surface_density (density_data[i * FI_PHASE_TOT + 2]);          
       }
   }
   
