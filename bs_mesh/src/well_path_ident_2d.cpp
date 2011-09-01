@@ -11,7 +11,6 @@
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/intersections.h>
-#include <CGAL/point_generators_2.h>
 #include <CGAL/Bbox_2.h>
 #include <CGAL/Polygon_2.h>
 #include <CGAL/box_intersection_d.h>
@@ -30,10 +29,6 @@
 // DEBUG
 //#include <iostream>
 
-#define X(n) (3*n)
-#define Y(n) (3*n + 1)
-#define Z(n) (3*n + 2)
-#define C(n, offs) (3*n + offs)
 #define MD_TOL 0.000001
 
 namespace bp = boost::python;
@@ -51,8 +46,8 @@ typedef Kernel::Segment_2                                   Segment_2;
 typedef Kernel::Iso_rectangle_2                             Iso_rectangle_2;
 typedef CGAL::Bbox_2                                        Bbox_2;
 typedef CGAL::Polygon_2< Kernel >                           Polygon_2;
-typedef std::vector<Triangle_2>                             Triangles;
-typedef Triangles::iterator                                 tri_iterator;
+//typedef std::vector<Triangle_2>                             Triangles;
+//typedef Triangles::iterator                                 tri_iterator;
 
 typedef smart_ptr< bs_mesh_grdecl > sp_grd_mesh;
 typedef t_ulong ulong;
@@ -69,8 +64,6 @@ typedef ulong cell_pos_i[2];
 struct cell_data {
 	// vertex coord
 	t_float* V;
-	// cell facets cover with triangles
-	//Triangles cover;
 
 	// empty ctor for map
 	cell_data() : V(NULL) {}
@@ -430,23 +423,6 @@ class intersect_action {
 public:
 	typedef intersect_path::iterator x_iterator;
 
-	// traits for removing duplicates in X and Y direction
-	struct dup_traits_x {
-		// dimesion to operate onto
-		enum { dim_id = 0 };
-		// specify IDs of crossing sides of cell in positive direction
-		enum { cross_1st = 1, cross_2nd = 3 };
-		enum { axe_facet1 = 0, axe_facet2 = 2 };
-	};
-
-	struct dup_traits_y {
-		// dimesion to operate onto
-		enum { dim_id = 1 };
-		// specify IDs of crossing sides of cell in positive direction
-		enum { cross_1st = 2, cross_2nd = 0 };
-		enum { axe_facet1 = 1, axe_facet2 = 3 };
-	};
-
 	template< int N >
 	struct spatial_sort {
 		typedef int dirvec_t[N];
@@ -595,72 +571,6 @@ public:
 		// well path doesn't contain the end-point of trajectory
 		// add it manually
 		insert_wp_node(hit_idx[node_idx], --pw, x_.end(), true);
-	}
-
-	template< class dup_traits >
-	void remove_dups(const dup_traits& t) {
-		typedef intersect_path::iterator x_iterator;
-
-		// helper to decide which of consequent cross-points whould we keep
-		struct who_survive {
-			who_survive(int dir, intersect_path& x)
-				: surv_id_(dup_traits::cross_2nd), kill_id_(dup_traits::cross_1st), x_(x)
-			{
-				// in positive direction 2nd point survives
-				// in negative - first point
-				if(dir)
-					swap(surv_id_, kill_id_);
-			}
-
-			x_iterator operator()(const x_iterator& p1, const x_iterator& p2) {
-				if(p1->facet == surv_id_ && p2->facet == kill_id_) {
-					x_.erase(p2);
-					return p1;
-				}
-				else if(p1->facet == kill_id_ && p2->facet == surv_id_) {
-					x_.erase(p1);
-					return p2;
-				}
-				return p1;
-			}
-
-			uint surv_id_, kill_id_;
-			intersect_path& x_;
-		};
-
-		// sanity check
-		if(x_.size() < 2) return;
-
-		// position on first intersection
-		x_iterator px = x_.begin();
-		// walk the nodes and determine direction of trajectory
-		//int dir;
-		const int dim_id = dup_traits::dim_id;
-		double max_md;
-		for(wp_iterator pw = wp_.begin(), end = wp_.end(); pw != end; ++pw) {
-			// identify direction
-			const well_data& seg = pw->second;
-			//Point_2 seg_end = seg.finish();
-			who_survive judge(
-				seg.start()[dim_id] < seg.finish()[dim_id] ? 0 : 1,
-				x_
-			);
-
-			// remove dups lying on current well segment
-			max_md = seg.md() + seg.len();
-			for(; px != x_.end() && px->md <= max_md; ++px) {
-				// skeep well node points if any
-				if(px->facet == 4)
-					continue;
-
-				// check if next intersection coincides with current one
-				// remove dup
-				x_iterator pn = px;
-				++pn;
-				if(pn != x_.end() && abs(px->md - pn->md) < MD_TOL)
-					px = judge(px, pn);
-			}
-		}
 	}
 
 	template< int N >
