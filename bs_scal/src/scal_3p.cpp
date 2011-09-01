@@ -1650,7 +1650,8 @@ namespace blue_sky
         {
           return gas_input_table[index_scal_region]; 
         }  
-      else if (scal_fluid_type == FI_PHASE_OIL)
+      //else if (scal_fluid_type == FI_PHASE_OIL)
+      else
         {  
           return oil_input_table[index_scal_region];
         }     
