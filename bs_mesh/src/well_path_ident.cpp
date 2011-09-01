@@ -26,6 +26,7 @@
 
 #include <vector>
 #include <cmath>
+#include <boost/array.hpp>
 // DEBUG
 //#include <iostream>
 
@@ -47,6 +48,7 @@ typedef Kernel::Point_3                                     Point_3;
 typedef Kernel::Triangle_3                                  Triangle_3;
 typedef Kernel::Segment_3                                   Segment_3;
 typedef CGAL::Bbox_3                                        Bbox_3;
+typedef Kernel::Iso_cuboid_3                                Iso_cuboid_3;
 typedef std::vector<Triangle_3>                             Triangles;
 typedef Triangles::iterator                                 tri_iterator;
 
@@ -56,11 +58,106 @@ typedef t_uint uint;
 typedef v_float::iterator vf_iterator;
 
 /*-----------------------------------------------------------------
+ * strategy
+ *----------------------------------------------------------------*/
+// dimens num, cell vertex num
+enum { D = 3, CVN = 8 };
+// boost::array with opertator= and ctor with elements init
+template< class T >
+class stat_array : public boost::array< T, D > {
+public:
+	typedef boost::array< t_float, D > base_t;
+	// propagate typedefs
+	typedef typename base_t::value_type             value_type;
+	typedef typename base_t::iterator               iterator;
+	typedef typename base_t::const_iterator         const_iterator;
+	typedef typename base_t::reverse_iterator       reverse_iterator;
+	typedef typename base_t::const_reverse_iterator const_reverse_iterator;
+	typedef typename base_t::reference              reference;
+	typedef typename base_t::const_reference        const_reference;
+	typedef typename base_t::size_type              size_type;
+	typedef typename base_t::difference_type        difference_type;
+
+	using base_t::begin;
+	using base_t::end;
+	using base_t::size;
+	using base_t::elems;
+
+	// empty ctor
+	stat_array() : base_t() {
+		// ensure all elems are filled with zero
+		fill(begin(), end(), value_type());
+	}
+
+	// ctor accepting C-array
+	stat_array(const value_type(&data)[D]) : base_t() {
+		copy(&data[0], &data[D], begin());
+	}
+
+	// hack-like but useful ctor with per-element init
+	stat_array(int N, ...) : base_t() {
+		assert(D < N && "vertex_pos overflow!");
+		va_list arg_list;
+		va_start(arg_list, N);
+		for(uint i = 0; i < N; ++i) {
+			elems[i] = va_arg(arg_list, value_type);
+		}
+		va_end(arg_list);
+	}
+
+	// assigning arrays
+	template< class R >
+	stat_array& operator=(const stat_array< R >& rhs) {
+		copy(rhs.begin(), rhs.begin() + min(size(), rhs.size()), begin());
+		return *this;
+	}
+};
+
+// strategy base types
+//typedef stat_array< t_float > vertex_pos;
+//typedef vertex_pos< ulong >   vertex_pos_i;
+//typedef vertex_pos            cell_pos[CVN];
+
+typedef t_float vertex_pos[D];
+typedef ulong   vertex_pos_i[D];
+typedef t_float cell_pos[CVN][D];
+// assign for c arrays
+// fun with returning reference to array :)
+template< class T >
+T (&ca_assign(T (&lhs)[D], const T (&rhs)[D]))[D] {
+	copy(&rhs[0], &rhs[D], &lhs[0]);
+	return lhs;
+}
+
+template< class T >
+T (&ca_assign(T (&lhs)[D], const T& v))[D] {
+	fill(&lhs[0], &lhs[D], v);
+	return lhs;
+}
+
+// X-Y-Z order!
+void decode_cell_id(ulong id, vertex_pos_i& res, const vertex_pos_i& m_size) {
+	//vertex_pos_i res;
+	res[2] = id / (m_size[0] * m_size[1]);
+	res[1] = (id - res[2] * m_size[0] * m_size[1]) / m_size[0];
+	res[0] = id - m_size[0]*(res[2] * m_size[1] + res[1]);
+}
+
+ulong encode_cell_id(const vertex_pos_i& p, const vertex_pos_i& m_size) {
+	return p[0] + m_size[0] * (p[1] + p[2] * m_size[1]);
+}
+
+Bbox_3 vertex_pos2bbox(const vertex_pos& lo, const vertex_pos& hi) {
+	return Bbox_3(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2]);
+}
+
+Iso_cuboid_3 vertex_pos2rect(const vertex_pos& lo, const vertex_pos& hi) {
+	return Iso_cuboid_3(Point_3(lo[0], lo[1], lo[2]), Point_3(hi[0], hi[1], hi[2]));
+}
+
+/*-----------------------------------------------------------------
  * cell description
  *----------------------------------------------------------------*/
-typedef t_float vertex_pos[3];
-typedef t_float cell_pos[8][3];
-
 struct cell_data {
 	// vertex coord
 	t_float* V;
@@ -88,14 +185,20 @@ struct cell_data {
 		return reinterpret_cast< const cell_pos& >(*V);
 	}
 
+	Bbox_3 bbox() const {
+		vertex_pos p1, p2;
+		lo(p1); hi(p2);
+		return vertex_pos2bbox(p1, p2);
+	}
+
 private:
 	template< template< class > class pred >
 	void bound(vertex_pos& b) const {
 		pred< t_float > p = pred< t_float >();
 		const cell_pos& cV = cpos();
-		for(uint i = 0; i < 3; ++i) {
+		for(uint i = 0; i < D; ++i) {
 			t_float c = cV[0][i];
-			for(uint j = 1; j < 8; ++j) {
+			for(uint j = 1; j < CVN; ++j) {
 				if(p(cV[j][i], c))
 					c = cV[j][i];
 			}
@@ -108,6 +211,167 @@ typedef st_smart_ptr< cell_data > sp_cell_data;
 // storage for representing mesh
 typedef std::map< t_ulong, cell_data > trimesh;
 typedef trimesh::iterator trim_iterator;
+typedef trimesh::const_iterator ctrim_iterator;
+
+/*-----------------------------------------------------------------
+ * represent rectangular part of mesh with splitting support
+ *----------------------------------------------------------------*/
+// x_last = last_element + 1 = x_size
+// y_last = last_element + 1 = y_size
+struct mesh_part {
+	typedef set< mesh_part > container_t;
+
+	mesh_part(const trimesh& m, const vertex_pos_i& mesh_size)
+		: m_(m)
+	{
+		ca_assign(lo, ulong(0));
+		ca_assign(hi, mesh_size);
+		ca_assign(m_size_, mesh_size);
+	}
+
+	void init(const vertex_pos_i& lower, const vertex_pos_i& upper) {
+		ca_assign(lo, lower);
+		ca_assign(hi, upper);
+
+		// sanity checks
+		for(uint i = 0; i < D; ++i) {
+			lo[i] = min(lo[i], m_size_[i] - 1);
+			hi[i] = min(hi[i], m_size_[i]);
+			hi[i] = max(lo[i] + 1, hi[i]);
+		}
+	}
+
+	void init(const vector< ulong >& cell_idx) {
+		vertex_pos_i lower, upper, p;
+		// search for bounds
+		for(ulong i = 0; i < cell_idx.size(); ++i) {
+			decode_cell_id(cell_idx[i], p, m_size_);
+			if(i == 0)
+				ca_assign(lower, ca_assign(upper, p));
+			else {
+				for(uint i = 0; i < D; ++i) {
+					lower[i] = min(lower[i], p[i]);
+					upper[i] = max(upper[i], p[i]);
+				}
+			}
+		}
+		// add +1 to upper
+		for(uint i = 0; i < D; ++i)
+			++upper[i];
+		// finally usual init
+		init(lower, upper);
+	}
+
+	ulong side_len(uint dim) const {
+		if(dim < D)
+			return hi[dim] - lo[dim];
+		else
+			return hi[D - 1] - lo[D - 1];
+	}
+
+	ulong size() const {
+		ulong res = 1;
+		for(uint i = 0; i < D; ++i)
+			res *= side_len(i);
+		return res;
+	}
+
+	ctrim_iterator ss_iter(const vertex_pos_i& offset) {
+		vertex_pos_i cell;
+		ca_assign(cell, lo);
+		for(uint i = 0; i < D; ++i)
+			cell[i] += offset[i];
+		return m_.find(encode_cell_id(cell, m_size_));
+	}
+
+	Iso_cuboid_3 bbox() const {
+		vertex_pos lo_pos, hi_pos;
+		mesh_ss(lo).lo(lo_pos);
+		// last = hi - 1
+		vertex_pos_i last;
+		ca_assign(last, hi);
+		transform(&last[0], &last[D], &last[0], bind2nd(minus< ulong >(), 1));
+		mesh_ss(last).hi(hi_pos);
+		return vertex_pos2rect(lo_pos, hi_pos);
+	}
+
+	container_t divide() const {
+		// resulting split
+		container_t res;
+		insert_iterator< container_t > ii(res, res.begin());
+
+		// split points
+		vertex_pos_i split_p[3];
+		ca_assign(split_p[0], lo);
+		ca_assign(split_p[2], hi);
+		// middle
+		for(uint i = 0; i < D; ++i)
+			split_p[1][i] = hi[i] >> 1;
+
+		// TODO: make it dimens-independent
+		// make splitting only if split containt more than 1 cell
+		vertex_pos_i spl_lo, spl_hi;
+		for(ulong z = 0; z < 2; ++z) {
+			//if(split_p[z + 1][2] - split_p[z][2] == 0) continue;
+			spl_lo[2] = split_p[z][2]; spl_hi[2] = split_p[z + 1][2];
+			for(ulong y = 0; y < 2; ++y) {
+				spl_lo[1] = split_p[y + 1][1]; spl_hi[1] = split_p[y][1];
+					for(ulong x = 0; x < 2; ++x) {
+						spl_lo[1] = split_p[y + 1][0]; spl_hi[1] = split_p[y][0];
+						// check if any side is zero
+						ulong sz = 1;
+						for(uint i = 0; i < D; ++i)
+							sz *= spl_hi[i] - spl_lo[i];
+						// add new child cell
+						if(sz)
+							*ii++ = mesh_part(m_, m_size_, spl_lo, spl_hi);
+					}
+			}
+		}
+		return res;
+	}
+
+	// for sorted containers
+	bool operator <(const mesh_part& rhs) const {
+		for(uint i = 0; i < D; ++i) {
+			if(lo[i] < rhs.lo[i])
+				return true;
+			else if(lo[i] > rhs.lo[i])
+				return false;
+			else if(hi[i] < rhs.hi[i])
+				return true;
+			else if(hi[i] > rhs.hi[i])
+				return false;
+		}
+		return false;
+	}
+
+	// public members
+	vertex_pos_i lo, hi;
+
+private:
+	const trimesh& m_;
+	vertex_pos_i m_size_;
+
+	mesh_part(const trimesh& m, const vertex_pos_i& mesh_size,
+			const vertex_pos_i& first_,
+			const vertex_pos_i& last_)
+		: m_(m)
+	{
+		ca_assign(lo, first_);
+		ca_assign(hi, last_);
+		ca_assign(m_size_, mesh_size);
+	}
+
+	const cell_data& mesh_ss(ulong idx) const {
+		// idx SHOULD BE IN MESH!
+		return m_.find(idx)->second;
+	}
+
+	const cell_data& mesh_ss(const vertex_pos_i& idx) const {
+		return m_.find(encode_cell_id(idx, m_size_))->second;
+	}
+};
 
 /*-----------------------------------------------------------------
  * well description
