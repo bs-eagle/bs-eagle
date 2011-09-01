@@ -50,6 +50,7 @@ typedef Kernel::Triangle_3                                  Triangle_3;
 typedef Kernel::Segment_3                                   Segment_3;
 typedef CGAL::Bbox_3                                        Bbox_3;
 typedef Kernel::Iso_cuboid_3                                Iso_cuboid_3;
+typedef Kernel::Tetrahedron_3                               Tetrahedron_3;
 typedef std::vector<Triangle_3>                             Triangles;
 typedef Triangles::iterator                                 tri_iterator;
 
@@ -160,10 +161,14 @@ Iso_cuboid_3 vertex_pos2rect(const vertex_pos& lo, const vertex_pos& hi) {
  * cell description
  *----------------------------------------------------------------*/
 struct cell_data {
+	typedef vector< Tetrahedron_3 > Tetrahedrons;
+
 	// vertex coord
 	t_float* V;
 	// cell facets cover with triangles
 	Triangles cover;
+	// cell split into tetrahedrons
+	Tetrahedrons split;
 
 	// empty ctor for map
 	cell_data() : V(NULL) {}
@@ -190,6 +195,45 @@ struct cell_data {
 		vertex_pos p1, p2;
 		lo(p1); hi(p2);
 		return vertex_pos2bbox(p1, p2);
+	}
+
+	bool contains(const Point_3& p) {
+		// split cell into 5 tetrahedrons
+		// and check whether point belongs to any of 'em
+		if(!split.size()) {
+			split.resize(5);
+			// cell A B C D A' B' C' D'
+			// ord  0 1 3 2 4  5  7  6
+			// A A' B' D'
+			// 0 4  5  6
+			split[0] = Tetrahedron_3(ss(0), ss(4), ss(5), ss(6));
+			// A B' B C
+			// 0 5  1 3
+			split[0] = Tetrahedron_3(ss(0), ss(5), ss(1), ss(3));
+			// A C D D'
+			// 0 3 2 6
+			split[0] = Tetrahedron_3(ss(0), ss(3), ss(2), ss(6));
+			// B' C' D' C
+			// 5  7  6  3
+			split[0] = Tetrahedron_3(ss(5), ss(7), ss(6), ss(3));
+			// A C B' D'
+			// 0 3 5  6
+			split[0] = Tetrahedron_3(ss(0), ss(3), ss(5), ss(6));
+		}
+
+		// check each tetrahedron
+		for(uint i = 0; i < split.size(); ++i) {
+			if(!split[i].has_on_unbounded_side(p))
+				return true;
+		}
+		return false;
+	}
+
+	Point_3 ss(uint vert_idx) const {
+		return Point_3(V[X(vert_idx)], V[Y(vert_idx)], V[Z(vert_idx)]);
+	}
+	Point_3 operator[](uint vert_idx) const {
+		return ss(vert_idx);
 	}
 
 private:
@@ -222,7 +266,7 @@ typedef trimesh::const_iterator ctrim_iterator;
 struct mesh_part {
 	typedef set< mesh_part > container_t;
 
-	mesh_part(const trimesh& m, const vertex_pos_i& mesh_size)
+	mesh_part(trimesh& m, const vertex_pos_i& mesh_size)
 		: m_(m)
 	{
 		ca_assign(lo, ulong(0));
@@ -277,12 +321,25 @@ struct mesh_part {
 		return res;
 	}
 
-	ctrim_iterator ss_iter(const vertex_pos_i& offset) {
+	trim_iterator ss_iter(const vertex_pos_i& offset) {
 		vertex_pos_i cell;
 		ca_assign(cell, lo);
 		for(uint i = 0; i < D; ++i)
 			cell[i] += offset[i];
 		return m_.find(encode_cell_id(cell, m_size_));
+	}
+
+	trim_iterator ss_iter(const ulong& offset) {
+		// size of this part
+		vertex_pos_i part_size;
+		for(uint i = 0; i < D; ++i)
+			part_size[i] = side_len(i);
+
+		// plain id -> vertex_pos_i
+		vertex_pos_i part_pos;
+		decode_cell_id(offset, part_pos, part_size);
+		// part_pos -> cell
+		return ss_iter(part_pos);
 	}
 
 	Iso_cuboid_3 bbox() const {
@@ -351,10 +408,10 @@ struct mesh_part {
 	vertex_pos_i lo, hi;
 
 private:
-	const trimesh& m_;
+	trimesh& m_;
 	vertex_pos_i m_size_;
 
-	mesh_part(const trimesh& m, const vertex_pos_i& mesh_size,
+	mesh_part(trimesh& m, const vertex_pos_i& mesh_size,
 			const vertex_pos_i& first_,
 			const vertex_pos_i& last_)
 		: m_(m)
@@ -863,66 +920,71 @@ public:
 		return res;
 	}
 
-	//vector< ulong > where_is_point(vector< Point_3 > points) const {
-	//	// start with full mesh
-	//	// and divide it until we come to only one cell
+	vector< ulong > where_is_point(vector< Point_3 > points) const {
+		// start with full mesh
+		// and divide it until we come to only one cell
 
-	//	// mesh partition stored here
-	//	typedef mesh_part::container_t parts_container;
-	//	typedef mesh_part::container_t::iterator part_iterator;
-	//	parts_container parts;
-	//	parts.insert(mesh_part(m_, nx_, ny_));
+		// mesh partition stored here
+		typedef mesh_part::container_t parts_container;
+		typedef mesh_part::container_t::iterator part_iterator;
+		parts_container parts;
+		parts.insert(mesh_part(m_, m_size_));
 
-	//	// found cell_ids stored here
-	//	vector< ulong > res(points.size(), -1);
-	//	//ulong cell_id;
-	//	while(parts.size()) {
-	//		// split every part
-	//		parts_container leafs;
-	//		for(part_iterator p = parts.begin(), end = parts.end(); p != end; ++p) {
-	//			parts_container kids = p->divide();
-	//			leafs.insert(kids.begin(), kids.end());
-	//		}
+		// found cell_ids stored here
+		vector< ulong > res(points.size(), -1);
+		//ulong cell_id;
+		while(parts.size()) {
+			// split every part
+			parts_container leafs;
+			for(part_iterator p = parts.begin(), end = parts.end(); p != end; ++p) {
+				parts_container kids = p->divide();
+				leafs.insert(kids.begin(), kids.end());
+			}
 
-	//		// collection of points inside current partition
-	//		list< ulong > catched_points;
-	//		// process each leaf and find points inside it
-	//		for(part_iterator l = leafs.begin(), end = leafs.end(); l != end; ) {
-	//			const Iso_cuboid_3& cur_rect = l->bbox();
-	//			catched_points.clear();
-	//			for(ulong i = 0; i < points.size(); ++i) {
-	//				// skip already found points
-	//				if(res[i] < m_.size()) continue;
-	//				// check that point lies inside this part
-	//				if(!cur_rect.has_on_unbounded_side(points[i]))
-	//					catched_points.insert(catched_points.begin(), i);
-	//			}
+			// collection of points inside current partition
+			list< ulong > catched_points;
+			// process each leaf and find points inside it
+			for(part_iterator l = leafs.begin(), end = leafs.end(); l != end; ) {
+				const Iso_cuboid_3& cur_rect = l->bbox();
+				catched_points.clear();
+				for(ulong i = 0; i < points.size(); ++i) {
+					// skip already found points
+					if(res[i] < m_.size()) continue;
+					// check that point lies inside this part
+					if(!cur_rect.has_on_unbounded_side(points[i]))
+						catched_points.insert(catched_points.begin(), i);
+				}
 
-	//			// if this part don't contain any points - remove it
-	//			// if box contains only 1 cell - test if cell poly contains given points
-	//			if(!catched_points.size())
-	//				leafs.erase(l++);
-	//			else if(l->size() == 1) {
-	//				ulong cell_id = l->y_first * nx_ + l->x_first;
-	//				Polygon_2 cell_poly = m_[cell_id].polygon();
-	//				for(list< ulong >::iterator pp = catched_points.begin(), cp_end = catched_points.end(); pp != cp_end; ++pp) {
-	//					if(!cell_poly.has_on_unbounded_side(points[*pp]))
-	//						res[*pp] = cell_id;
-	//				}
-	//				leafs.erase(l++);
-	//			}
-	//			else ++l;
-	//		}
+				// if this part don't contain any points - remove it
+				// if box contains only 1 cell - test if cell poly contains given points
+				if(!catched_points.size())
+					leafs.erase(l++);
+				else if(l->size() == 1) {
+					ulong cell_id = encode_cell_id(l->lo, m_size_);
+					//Polygon_2 cell_poly = m_[cell_id].polygon();
+					cell_data& cell = m_[cell_id];
+					for(list< ulong >::iterator pp = catched_points.begin(),
+						cp_end = catched_points.end();
+						pp != cp_end; ++pp
+						)
+					{
+						if(cell.contains(points[*pp]))
+							res[*pp] = cell_id;
+					}
+					leafs.erase(l++);
+				}
+				else ++l;
+			}
 
-	//		// leafs become the new start point for further division
-	//		parts = leafs;
-	//	}
-	//	return res;
-	//}
+			// leafs become the new start point for further division
+			parts = leafs;
+		}
+		return res;
+	}
 
-	//ulong where_is_point(Point_2 point) const {
-	//	return where_is_point(vector< Point_2 >(1, point))[0];
-	//}
+	ulong where_is_point(Point_3 point) const {
+		return where_is_point(vector< Point_3 >(1, point))[0];
+	}
 
 private:
 	x_iterator insert_wp_node(ulong cell_id, wp_iterator pw, x_iterator px, bool end_point = false) {
@@ -1000,44 +1062,31 @@ spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float z
 spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 	spv_float well_info, bool include_well_nodes)
 {
-	// calculate mesh nodes coordinates and build initial trimesh
+	// 1) calculate mesh nodes coordinates and build initial trimesh
 	trimesh M;
 	spv_float tops;
 	tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M);
 	t_long nz = (zcorn->size() / nx / ny) >> 3;
 
-	// create bounding box for each cell in given mesh
-	std::vector< Box > mesh_boxes(M.size());
-	t_float lo[3];
-	t_float hi[3];
-	ulong cnt = 0;
-	for(trim_iterator pm = M.begin(), end = M.end(); pm != end; ++pm, ++cnt) {
-		// calc lo and hi for bounding box of cell
-		const cell_data& d = pm->second;
-		d.lo(lo); d.hi(hi);
-		mesh_boxes[cnt] = Box(lo, hi, new cell_box_handle(pm));
-	}
-
-	// Create the corresponding vector of pointers to cells bounding boxes
-	//std::vector< cell_box* > mesh_boxes_ptr;
-	//for(std::vector< cell_box >::iterator i = mesh_boxes.begin(); i != mesh_boxes.end(); ++i)
-	//	mesh_boxes_ptr.push_back(&*i);
-
-	// create bounding boxes for line segments representing well trajectory
+	// 2) create well path description and
+	// bounding boxes for line segments representing well trajectory
 	ulong well_node_num = well_info->size() >> 2;
 	if(well_node_num < 2) return spv_float();
 
-	//vector< well_box > well_boxes;
+	// storage
 	well_path W;
 	vector< Box > well_boxes(well_node_num - 1);
-	v_float::iterator pw = well_info->begin();
-	for(ulong i = 0; i < well_node_num - 1; ++i) {
-		//well_boxes.push_back(Box(
-		//	lo, hi,
-		//	new well_box_handle( W.insert(make_pair(i, pw)).first )
-		//));
+	// build array of well nodes as Point_2
+	vector< Point_3 > wnodes(well_node_num);
 
+	// walk along well
+	v_float::iterator pw = well_info->begin();
+	//double md = 0;
+	for(ulong i = 0; i < well_node_num - 1; ++i) {
 		well_data wd(pw);
+		wnodes[i] = wd.start();
+
+		// make bbox
 		well_boxes[i] = Box(
 			wd.bbox(),
 			new well_box_handle(W.insert(make_pair(i, wd)).first)
@@ -1045,21 +1094,45 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 
 		pw += 4;
 	}
+	// put last node to array
+	wnodes[well_node_num - 1] = W[well_node_num - 2].finish();
 
-	// Run the intersection algorithm with all defaults on the
-	// indirect pointers to cell bounding boxes. Avoids copying the boxes
+	// 3) find where each node of well is located
+	// to restrict search area
+	// intersections storage
 	intersect_path X;
 	vertex_pos_i mesh_size = {nx, ny, nz};
 	intersect_action A(M, W, X, mesh_size);
+	const vector< ulong >& hit_idx = A.where_is_point(wnodes);
+	// create part of mesh to process based on these cells
+	mesh_part hot_mesh(M, mesh_size);
+	hot_mesh.init(hit_idx);
+
+	// create bounding box for each cell in given mesh
+	std::vector< Box > mesh_boxes(hot_mesh.size());
+	ulong cnt = 0;
+	trim_iterator pm;
+	for(ulong i = 0; i < hot_mesh.size(); ++i) {
+		pm = hot_mesh.ss_iter(i);
+		const cell_data& d = pm->second;
+		mesh_boxes[cnt++] = Box(d.bbox(), new cell_box_handle(pm));
+	}
+
+
+	// Run the intersection algorithm with all defaults on the
+	// indirect pointers to cell bounding boxes. Avoids copying the boxes
 	CGAL::box_intersection_d(
 		mesh_boxes.begin(), mesh_boxes.end(),
 		well_boxes.begin(), well_boxes.end(),
 		A
 	);
 
+	// remove duplicates in X,Y,Z directions
+	A.remove_dups2();
+
 	// finalize intersection
-	//if(include_well_nodes)
-	//	A.append_wp_nodes();
+	if(include_well_nodes)
+		A.append_wp_nodes(hit_idx);
 
 	return A.export_1d();
 }
