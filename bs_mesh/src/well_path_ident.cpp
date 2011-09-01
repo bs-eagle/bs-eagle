@@ -34,6 +34,7 @@
 #define Y(n) (3*n + 1)
 #define Z(n) (3*n + 2)
 #define C(n, offs) (3*n + offs)
+#define MD_TOL 0.000001
 
 namespace bp = boost::python;
 using namespace std;
@@ -397,23 +398,23 @@ struct well_data {
 		return reinterpret_cast< const vertex_pos& >(*W);
 	}
 
-	//vertex_pos& cend() {
-	//	return reinterpret_cast< vertex_pos& >(W + 4);
-	//}
-
-	//const vertex_pos& cend() const {
-	//	return reinterpret_cast< const vertex_pos& >(W + 4);
-	//}
+	Point_3 start() const {
+		return Point_3(W[0], W[1], W[2]);
+	}
+	Point_3 finish() const {
+		return Point_3(W[4], W[5], W[6]);
+	}
 
 	Segment_3 segment() const {
-		return Segment_3(
-			Point_3(W[0], W[1], W[2]),
-			Point_3(W[4], W[5], W[6])
-		);
+		return Segment_3(start(), finish());
 	}
 
 	Bbox_3 bbox() const {
 		return segment().bbox();
+	}
+
+	double len() const {
+		return std::sqrt(segment().squared_length());
 	}
 };
 
@@ -471,25 +472,8 @@ private:
 typedef box_handle_impl< trim_iterator > cell_box_handle;
 typedef box_handle_impl< wp_iterator > well_box_handle;
 
-//class well_box_handle : public box_handle {
-//public:
-//	well_box_handle(v_float::iterator p) : p_(p) {}
-//
-//	int type() const {
-//		return box_handle::WELL_BOX;
-//	}
-//
-//	well_path::iterator data() const {
-//		return p_;
-//	}
-//
-//private:
-//	v_float::iterator p_;
-//};
-
+// box intersections storage
 typedef CGAL::Box_intersection_d::Box_with_handle_d< double, 3, sp_bhandle > Box;
-//typedef CGAL::Box_intersection_d::Box_with_handle_d< double, 3, trim_iterator > cell_box;
-//typedef CGAL::Box_intersection_d::Box_with_handle_d< double, 3, typename v_float::iterator > well_box;
 
 /*-----------------------------------------------------------------
  * intersections description
@@ -505,42 +489,87 @@ struct well_hit_cell {
 	t_float md;
 	// cell facet
 	uint facet;
-
+	// is that point a node?
+	bool is_node;
 
 	well_hit_cell() {}
 	well_hit_cell(const Point_3& where_, const wp_iterator& seg_,
-		const trim_iterator& cell_, t_float md_, uint facet_)
-		: where(where_), seg(seg_), cell(cell_), md(md_), facet(facet_)
+		const trim_iterator& cell_, t_float md_, uint facet_, bool is_node_ = false)
+		: where(where_), seg(seg_), cell(cell_), md(md_), facet(facet_), is_node(is_node_)
 	{}
 
 	// hit points ordered first by md
-	// next by well segment
-	// and at last by cell number
 	bool operator <(const well_hit_cell& rhs) const {
-		if(md < rhs.md)
-			return true;
-		else if(md == rhs.md) {
-			if(seg->first < rhs.seg->first)
-				return true;
-			else if(seg->first == rhs.seg->first)
-				return cell->first < rhs.cell->first;
-		}
-		return false;
+		return md < rhs.md;
 	}
 };
 
-typedef std::set< well_hit_cell > intersect_path;
-
+// storage of intersection points
+typedef std::multiset< well_hit_cell > intersect_path;
 
 /*-----------------------------------------------------------------
  * callback functor that triggers on intersecting bboxes
  *----------------------------------------------------------------*/
 class intersect_action {
 public:
+	typedef intersect_path::iterator x_iterator;
+
+	//template< int N >
+	struct spatial_sort {
+		typedef int dirvec_t[D];
+		typedef intersect_path::iterator x_iterator;
+
+		spatial_sort(const dirvec_t& dir, const vertex_pos_i& mesh_size)
+			: dir_(dir), m_size_(mesh_size)
+		{}
+
+		spatial_sort(const spatial_sort& rhs)
+			: dir_(rhs.dir_), m_size_(rhs.m_size_)
+		{}
+
+		bool operator()(const x_iterator& r1, const x_iterator& r2) const {
+			// check if r1 or r2 are node points
+			if(r1->is_node) {
+				if(!r2->is_node)
+					return true;
+				else
+					// merge node points in same position
+					return false;
+			}
+			else if(r2->is_node)
+				return false;
+
+			// cell ids
+			vertex_pos_i c1, c2;
+			decode_cell_id(r1->cell->first, c1, m_size_);
+			decode_cell_id(r2->cell->first, c2, m_size_);
+
+			//bool res = false;
+			for(uint i = 0; i < D; ++i) {
+				int f = greater(i, c1[i], c2[i]);
+				if(f > 0)
+					return true;
+				else if(f == 0)
+					return false;
+			}
+			return false;
+		}
+
+		int greater(uint ndim, ulong v1, ulong v2) const {
+			if(v1 == v2) return -1;
+			return dir_[ndim] == 0 ? v1 > v2 : v2 > v1;
+		}
+
+		const dirvec_t& dir_;
+		const vertex_pos_i& m_size_;
+	};
+
 	// ctor
-	intersect_action(trimesh& mesh, well_path& wp, intersect_path& X)
+	intersect_action(trimesh& mesh, well_path& wp, intersect_path& X, const vertex_pos_i& mesh_size)
 		: m_(mesh), wp_(wp), x_(X)
-	{}
+	{
+		ca_assign(m_size_, mesh_size);
+	}
 
  /* nodes layout
      *                             X
@@ -563,7 +592,7 @@ public:
  *  inside cell - 6
 */
 
-	void cell_tri_cover(cell_data& d) {
+	static void cell_tri_cover(cell_data& d) {
 		const t_float* V = d.V;
 		d.cover.resize(12);
 
@@ -647,15 +676,16 @@ public:
 		);
 	}
 
-	double calc_md(wp_iterator& fish, const Point_3& target) const {
+	static double distance(const Point_3& p1, const Point_3& p2) {
+		return std::sqrt(Segment_3(p1, p2).squared_length());
+	}
+
+	static double calc_md(wp_iterator& fish, const Point_3& target) {
 		// walk all segments before the last one;
 		double md = fish->second.md();
-		//for(cwp_iterator p_seg = wp_.begin(), end = wp_.end(); p_seg != fish && p_seg != end; ++p_seg) {
-		//	md += (p_seg->second).md();
-		//}
 		// append tail
 		const t_float* W = fish->second.W;
-		md += std::sqrt(Segment_3(Point_3(W[0], W[1], W[2]), target).squared_length());
+		md += distance(Point_3(W[0], W[1], W[2]), target);
 		return md;
 	}
 
@@ -711,42 +741,108 @@ public:
 		//std::cout << '.' << std::endl;
 	}
 
-	void append_wp_nodes() {
+	// run it after all dups killed
+	void append_wp_nodes(const vector< ulong >& hit_idx) {
+		if(!wp_.size()) return;
+
 		// walk through the intersection path and add node points
 		// of well geometry to the cell with previous intersection
 		intersect_path::iterator px = x_.begin();
+		//ulong facet_id;
+
 		wp_iterator pw = wp_.begin();
-		t_float node_md;
-		t_float* W;
-		for(wp_iterator end = wp_.end(); pw != end; ++pw) {
-			node_md = pw->second.md();
-			W = pw->second.W;
-			while(px->md < node_md && px != x_.end())
+		ulong node_idx = 0;
+		for(wp_iterator end = wp_.end(); pw != end; ++pw, ++node_idx) {
+			//const well_data& wseg = pw->second;
+			// lower_bound
+			while(px != x_.end() && px->md < pw->second.md())
 				++px;
-			// we need prev intersection
-			if(px != x_.begin())
-				--px;
-			px = x_.insert(well_hit_cell(
-				Point_3(W[0], W[1], W[2]),
-				pw, px->cell, node_md,
-				6
-			)).first;
+
+			px = insert_wp_node(hit_idx[node_idx], pw, px);
 		}
-		// well path doen't contain the end-point of trajectory
-		// add it manually to the end of intersection
-		--pw;
-		px = x_.end(); --px;
-		W = pw->second.W;
-		x_.insert(well_hit_cell(
-			Point_3(W[4], W[5], W[6]),
-			pw, px->cell, W[7],
-			6
-		));
+
+		// well path doesn't contain the end-point of trajectory
+		// add it manually
+		insert_wp_node(hit_idx[node_idx], --pw, x_.end(), true);
+	}
+
+	//template< int N >
+	void remove_dups2() {
+		typedef int dirvec_t[D];
+		typedef intersect_path::iterator x_iterator;
+
+		struct top_surv {
+			typedef set< x_iterator, spatial_sort > spat_storage_t;
+			typedef typename spat_storage_t::iterator spat_iterator;
+
+			top_surv(const dirvec_t& dir, intersect_path& x, const vertex_pos_i& mesh_size)
+				: dir_(dir), x_(x), m_size_(mesh_size)
+			{}
+
+			x_iterator operator()(x_iterator from, x_iterator to) {
+				spat_storage_t sr(spatial_sort(dir_, m_size_));
+
+				// spatially sort iterators
+				for(x_iterator px = from; px != to; ++px)
+					sr.insert(px);
+				// save only frst element
+				while(from != to) {
+					if(from != *sr.begin())
+						x_.erase(from++);
+					else ++from;
+				}
+
+				return *sr.begin();
+			}
+
+			const dirvec_t& dir_;
+			intersect_path& x_;
+			const vertex_pos_i& m_size_;
+		};
+
+		// main processing cycle
+		// sanity check
+		if(x_.size() < 2) return;
+
+		// position on first intersection
+		x_iterator px = x_.begin();
+		// walk the nodes and determine direction of trajectory
+		double max_md;
+		dirvec_t dir;
+		for(wp_iterator pw = wp_.begin(), end = wp_.end(); pw != end; ++pw) {
+			// identify direction
+			const well_data& seg = pw->second;
+			// calc direction vector
+			Point_3 start = seg.start();
+			Point_3 finish = seg.finish();
+			for(uint i = 0; i < 2; ++i)
+				dir[i] = start[i] <= finish[i] ? 0 : 1;
+			// judge
+			top_surv judge(dir, x_, m_size_);
+
+			// remove dups lying on current well segment
+			max_md = seg.md() + seg.len();
+			for(; px != x_.end() && px->md <= max_md; ++px) {
+				// skeep well node points if any
+				//if(px->facet == 4)
+				//	continue;
+
+				// find range of cross points with equal MD
+				// upper_bound
+				ulong cnt = 0;
+				x_iterator pn = px;
+				for(; pn != x_.end() && abs(px->md - pn->md) < MD_TOL; ++pn, ++cnt)
+				{}
+				// if we have nonempty range - leave only 1 element
+				if(cnt)
+					px = judge(px, pn);
+			}
+		}
 	}
 
 	spv_float export_1d() const {
 		spv_float res = BS_KERNEL.create_object(v_float::bs_type());
-		res->resize(x_.size() * 6);
+		res->resize(x_.size() * 7);
 		vf_iterator pr = res->begin();
 
 		for(intersect_path::const_iterator px = x_.begin(), end = x_.end(); px != end; ++px) {
@@ -760,18 +856,119 @@ public:
 			*pr++ = px->where.z();
 			// facet id
 			*pr++ = px->facet;
+			// node flag
+			*pr++ = px->is_node;
 		}
 
 		return res;
 	}
 
+	//vector< ulong > where_is_point(vector< Point_3 > points) const {
+	//	// start with full mesh
+	//	// and divide it until we come to only one cell
+
+	//	// mesh partition stored here
+	//	typedef mesh_part::container_t parts_container;
+	//	typedef mesh_part::container_t::iterator part_iterator;
+	//	parts_container parts;
+	//	parts.insert(mesh_part(m_, nx_, ny_));
+
+	//	// found cell_ids stored here
+	//	vector< ulong > res(points.size(), -1);
+	//	//ulong cell_id;
+	//	while(parts.size()) {
+	//		// split every part
+	//		parts_container leafs;
+	//		for(part_iterator p = parts.begin(), end = parts.end(); p != end; ++p) {
+	//			parts_container kids = p->divide();
+	//			leafs.insert(kids.begin(), kids.end());
+	//		}
+
+	//		// collection of points inside current partition
+	//		list< ulong > catched_points;
+	//		// process each leaf and find points inside it
+	//		for(part_iterator l = leafs.begin(), end = leafs.end(); l != end; ) {
+	//			const Iso_cuboid_3& cur_rect = l->bbox();
+	//			catched_points.clear();
+	//			for(ulong i = 0; i < points.size(); ++i) {
+	//				// skip already found points
+	//				if(res[i] < m_.size()) continue;
+	//				// check that point lies inside this part
+	//				if(!cur_rect.has_on_unbounded_side(points[i]))
+	//					catched_points.insert(catched_points.begin(), i);
+	//			}
+
+	//			// if this part don't contain any points - remove it
+	//			// if box contains only 1 cell - test if cell poly contains given points
+	//			if(!catched_points.size())
+	//				leafs.erase(l++);
+	//			else if(l->size() == 1) {
+	//				ulong cell_id = l->y_first * nx_ + l->x_first;
+	//				Polygon_2 cell_poly = m_[cell_id].polygon();
+	//				for(list< ulong >::iterator pp = catched_points.begin(), cp_end = catched_points.end(); pp != cp_end; ++pp) {
+	//					if(!cell_poly.has_on_unbounded_side(points[*pp]))
+	//						res[*pp] = cell_id;
+	//				}
+	//				leafs.erase(l++);
+	//			}
+	//			else ++l;
+	//		}
+
+	//		// leafs become the new start point for further division
+	//		parts = leafs;
+	//	}
+	//	return res;
+	//}
+
+	//ulong where_is_point(Point_2 point) const {
+	//	return where_is_point(vector< Point_2 >(1, point))[0];
+	//}
+
 private:
+	x_iterator insert_wp_node(ulong cell_id, wp_iterator pw, x_iterator px, bool end_point = false) {
+		// initialization
+		const well_data& wseg = pw->second;
+		Point_3 where = wseg.start();
+		t_float wp_md = wseg.md();
+		if(end_point) {
+			where = wseg.finish();
+			wp_md += wseg.len();
+			//wp_md = px->md + distance(px->where, where);
+		}
+
+		// check if current or prev intersection match with node
+		uint facet_id = 4;
+		if(px != x_.end() && abs(px->md - wp_md) < MD_TOL)
+			facet_id = px->facet;
+		else if(px != x_.begin()) {
+			--px;
+			if(abs(px->md - wp_md) < MD_TOL)
+				facet_id = px->facet;
+		}
+
+		// if node point coinside with existing intersection
+		// then just change is_node flag (dont't affect ordering)
+		// otherwise insert new intersection point
+		if(facet_id == 4)
+			px = x_.insert(well_hit_cell(
+				where, pw, m_.find(cell_id), wp_md,
+				facet_id, true
+			));
+		else {
+			well_hit_cell& x = const_cast< well_hit_cell& >(*px);
+			x.is_node = true;
+		}
+		return px;
+	}
+
 	// mesh
 	trimesh& m_;
 	// well path
 	well_path& wp_;
 	// well-mesh intersection path
 	intersect_path& x_;
+	// mesh size
+	vertex_pos_i m_size_;
 };
 
 // helper to create initial cell_data for each cell
@@ -807,7 +1004,7 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 	trimesh M;
 	spv_float tops;
 	tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M);
-	//t_long nz = (zcorn->size() / nx / ny) >> 3;
+	t_long nz = (zcorn->size() / nx / ny) >> 3;
 
 	// create bounding box for each cell in given mesh
 	std::vector< Box > mesh_boxes(M.size());
@@ -852,7 +1049,8 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 	// Run the intersection algorithm with all defaults on the
 	// indirect pointers to cell bounding boxes. Avoids copying the boxes
 	intersect_path X;
-	intersect_action A(M, W, X);
+	vertex_pos_i mesh_size = {nx, ny, nz};
+	intersect_action A(M, W, X, mesh_size);
 	CGAL::box_intersection_d(
 		mesh_boxes.begin(), mesh_boxes.end(),
 		well_boxes.begin(), well_boxes.end(),
@@ -860,8 +1058,8 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 	);
 
 	// finalize intersection
-	if(include_well_nodes)
-		A.append_wp_nodes();
+	//if(include_well_nodes)
+	//	A.append_wp_nodes();
 
 	return A.export_1d();
 }
