@@ -511,7 +511,7 @@ COMMIT;\
       //char *zErrMsg = 0;
       const char *ttt;
       sqlite3_stmt *stmp;
-      std::string sql = "SELECT name FROM wells";
+      std::string sql = "SELECT name FROM wells ORDER BY name ASC";
       rc = sqlite3_prepare_v2 (db, sql.c_str (), sql.length () + 1, &stmp, &ttt);
       if (rc)
         {
