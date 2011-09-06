@@ -36,5 +36,5 @@ print W
 X = bm.well_path_ident(Nx, Ny, c, z, W.reshape([1, -1]), True)
 
 # write result to file
-np.savetxt('x.txt', X.reshape([-1, 6]), fmt = "%8.4f")
+np.savetxt('x.txt', X.reshape([-1, 7]), fmt = "%8.4f")
 

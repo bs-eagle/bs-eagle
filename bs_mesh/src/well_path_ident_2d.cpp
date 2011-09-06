@@ -401,15 +401,6 @@ struct well_hit_cell {
 	// hit points ordered by md
 	bool operator <(const well_hit_cell& rhs) const {
 		return md < rhs.md;
-		//if(md < rhs.md)
-		//	return true;
-		//else if(md == rhs.md) {
-		//	if(seg->first < rhs.seg->first)
-		//		return true;
-		//	else if(seg->first == rhs.seg->first)
-		//		return cell->first < rhs.cell->first;
-		//}
-		//return false;
 	}
 };
 
