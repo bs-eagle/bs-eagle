@@ -209,16 +209,16 @@ struct cell_data {
 			split[0] = Tetrahedron_3(ss(0), ss(4), ss(5), ss(6));
 			// A B' B C
 			// 0 5  1 3
-			split[0] = Tetrahedron_3(ss(0), ss(5), ss(1), ss(3));
+			split[1] = Tetrahedron_3(ss(0), ss(5), ss(1), ss(3));
 			// A C D D'
 			// 0 3 2 6
-			split[0] = Tetrahedron_3(ss(0), ss(3), ss(2), ss(6));
+			split[2] = Tetrahedron_3(ss(0), ss(3), ss(2), ss(6));
 			// B' C' D' C
 			// 5  7  6  3
-			split[0] = Tetrahedron_3(ss(5), ss(7), ss(6), ss(3));
+			split[3] = Tetrahedron_3(ss(5), ss(7), ss(6), ss(3));
 			// A C B' D'
 			// 0 3 5  6
-			split[0] = Tetrahedron_3(ss(0), ss(3), ss(5), ss(6));
+			split[4] = Tetrahedron_3(ss(0), ss(3), ss(5), ss(6));
 		}
 
 		// check each tetrahedron
@@ -364,28 +364,33 @@ struct mesh_part {
 		ca_assign(split_p[2], hi);
 		// middle
 		for(uint i = 0; i < D; ++i)
-			split_p[1][i] = hi[i] >> 1;
+			split_p[1][i] = lo[i] + (side_len(i) >> 1);
 
-		// TODO: make it dimens-independent
 		// make splitting only if split containt more than 1 cell
+		const ulong cube_num = 1 << D;
 		vertex_pos_i spl_lo, spl_hi;
-		for(ulong z = 0; z < 2; ++z) {
-			//if(split_p[z + 1][2] - split_p[z][2] == 0) continue;
-			spl_lo[2] = split_p[z][2]; spl_hi[2] = split_p[z + 1][2];
-			for(ulong y = 0; y < 2; ++y) {
-				spl_lo[1] = split_p[y + 1][1]; spl_hi[1] = split_p[y][1];
-					for(ulong x = 0; x < 2; ++x) {
-						spl_lo[1] = split_p[y + 1][0]; spl_hi[1] = split_p[y][0];
-						// check if any side is zero
-						ulong sz = 1;
-						for(uint i = 0; i < D; ++i)
-							sz *= spl_hi[i] - spl_lo[i];
-						// add new child cell
-						if(sz)
-							*ii++ = mesh_part(m_, m_size_, spl_lo, spl_hi);
-					}
+		ulong tot_sz = 0;
+		for(ulong i = 0; i < cube_num; ++i) {
+			ca_assign(spl_lo, split_p[0]);
+			ca_assign(spl_hi, split_p[1]);
+
+			ulong mask = 1, sz = 1;
+			for(ulong j = 0; j < D; ++j, mask <<= 1) {
+				if(i & mask) {
+					spl_lo[j] = split_p[1][j];
+					spl_hi[j] = split_p[2][j];
+				}
+				sz *= spl_hi[j] - spl_lo[j];
+			}
+
+			// add new child cell
+			if(sz) {
+				*ii++ = mesh_part(m_, m_size_, spl_lo, spl_hi);
+				tot_sz += sz;
 			}
 		}
+
+		assert(tot_sz == size());
 		return res;
 	}
 
@@ -1042,7 +1047,7 @@ spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float z
 	ulong n_cells = ulong(nx * ny * nz);
 
 	// obtain coordinates for all vertices of all cells
-	spv_float tops = grd_src->calc_cells_vertices();
+	spv_float tops = grd_src->calc_cells_vertices_xyz();
 	v_float::iterator pv = tops->begin();
 
 	// fill trimesh with triangles corresponding to each cell
