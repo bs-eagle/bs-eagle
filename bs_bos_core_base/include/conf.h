@@ -14,6 +14,7 @@
 #define BS_ARRAY_DEFAULT_TRAITS bs_nparray
 
 #include "bs_nparray.h"
+#include "bs_npvec.h"
 #include "bs_array.h"
 
 //! using this type for small data
@@ -39,12 +40,13 @@ typedef double        t_double;
 typedef unsigned long               t_uint;
 typedef unsigned long               t_ulong;
 
-typedef blue_sky::bs_array< t_int, blue_sky::bs_nparray >           v_int;
-typedef blue_sky::bs_array< t_long, blue_sky::bs_nparray >          v_long;
-typedef blue_sky::bs_array< t_uint, blue_sky::bs_nparray >          v_uint;
-typedef blue_sky::bs_array< t_ulong, blue_sky::bs_nparray >         v_ulong;
-typedef blue_sky::bs_array< t_float, blue_sky::bs_nparray >         v_float;
-typedef blue_sky::bs_array< t_double, blue_sky::bs_nparray >        v_double;
+#define BS_EAGLE_ARRAY_TRAITS blue_sky::bs_npvec
+typedef blue_sky::bs_array< t_int    , BS_EAGLE_ARRAY_TRAITS >    v_int;
+typedef blue_sky::bs_array< t_long   , BS_EAGLE_ARRAY_TRAITS >   v_long;
+typedef blue_sky::bs_array< t_uint   , BS_EAGLE_ARRAY_TRAITS >   v_uint;
+typedef blue_sky::bs_array< t_ulong  , BS_EAGLE_ARRAY_TRAITS >  v_ulong;
+typedef blue_sky::bs_array< t_float  , BS_EAGLE_ARRAY_TRAITS >  v_float;
+typedef blue_sky::bs_array< t_double , BS_EAGLE_ARRAY_TRAITS > v_double;
 
 typedef std::vector< t_int >        stdv_int;
 typedef std::vector< t_long >       stdv_long;

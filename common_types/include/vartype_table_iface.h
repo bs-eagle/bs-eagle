@@ -26,7 +26,7 @@ namespace blue_sky
     {
       public:
         typedef std::vector <var_type_t>                       vector_t;
-        typedef bs_array <var_type_t, bs_nparray>              var_type_array_t;    
+        typedef bs_array <var_type_t, BS_EAGLE_ARRAY_TRAITS>   var_type_array_t;
         typedef smart_ptr <var_type_array_t, true >            sp_var_type_array_t;
  
       public:
