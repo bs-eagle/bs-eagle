@@ -62,8 +62,8 @@ typedef v_float::iterator vf_iterator;
 /*-----------------------------------------------------------------
  * strategy
  *----------------------------------------------------------------*/
-// dimens num, cell vertex num
-enum { D = 3, CVN = 8 };
+// dimens num, cell vertex num, inner point id
+enum { D = 3, CVN = 8, inner_point_id = 6 };
 // boost::array with opertator= and ctor with elements init
 template< class T >
 class stat_array : public boost::array< T, D > {
@@ -153,8 +153,12 @@ Bbox_3 vertex_pos2bbox(const vertex_pos& lo, const vertex_pos& hi) {
 	return Bbox_3(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2]);
 }
 
+Point_3 vertex_pos2point(const vertex_pos& p) {
+	return Point_3(p[0], p[1], p[2]);
+}
+
 Iso_cuboid_3 vertex_pos2rect(const vertex_pos& lo, const vertex_pos& hi) {
-	return Iso_cuboid_3(Point_3(lo[0], lo[1], lo[2]), Point_3(hi[0], hi[1], hi[2]));
+	return Iso_cuboid_3(vertex_pos2point(lo), vertex_pos2point(hi));
 }
 
 /*-----------------------------------------------------------------
@@ -195,6 +199,113 @@ struct cell_data {
 		vertex_pos p1, p2;
 		lo(p1); hi(p2);
 		return vertex_pos2bbox(p1, p2);
+	}
+
+ /* nodes layout
+     *                             X
+     *                    0+-------+1
+     *                    /|     / |
+     *                  /  |   /   |
+     *               2/-------+3   |
+     *              Y |   4+--|----+5
+     *                |   /Z  |   /
+     *                | /     | /
+     *              6 /-------/7
+*/
+/*  facets layout (nodes - plane id)
+ *  0-1-2-3 - 0
+ *  0-1-4-5 - 1
+ *  4-5-6-7 - 2
+ *  2-3-6-7 - 3
+ *  0-2-4-6 - 4
+ *  1-3-5-7 - 5
+ *  inside cell - 6
+*/
+
+	void cell_tri_cover() {
+		if(cover.size() > 0) return;
+		//const t_float* V = d.V;
+		cover.resize(12);
+		const cell_pos& p = cpos();
+
+		// facet 0-1-2-3
+		// 3angle 0-1-3
+		cover[0] = Triangle_3(
+			vertex_pos2point(p[0]),
+			vertex_pos2point(p[1]),
+			vertex_pos2point(p[3])
+		);
+		// 3angle 0-2-3
+		cover[1] = Triangle_3(
+			vertex_pos2point(p[0]),
+			vertex_pos2point(p[2]),
+			vertex_pos2point(p[3])
+		);
+		// facet 0-1-4-5
+		// 3angle 0-1-5
+		cover[2] = Triangle_3(
+			vertex_pos2point(p[0]),
+			vertex_pos2point(p[1]),
+			vertex_pos2point(p[5])
+		);
+		// 3angle 0-4-5
+		cover[3] = Triangle_3(
+			vertex_pos2point(p[0]),
+			vertex_pos2point(p[4]),
+			vertex_pos2point(p[5])
+		);
+		// facet 4-5-6-7
+		// 3angle 4-5-7
+		cover[4] = Triangle_3(
+			vertex_pos2point(p[4]),
+			vertex_pos2point(p[5]),
+			vertex_pos2point(p[7])
+		);
+		// 3angle 4-6-7
+		cover[5] = Triangle_3(
+			vertex_pos2point(p[4]),
+			vertex_pos2point(p[6]),
+			vertex_pos2point(p[7])
+		);
+		// facet 2-3-6-7
+		// 3angle 2-3-7
+		cover[6] = Triangle_3(
+			vertex_pos2point(p[2]),
+			vertex_pos2point(p[3]),
+			vertex_pos2point(p[7])
+		);
+		// 3angle 2-6-7
+		cover[7] = Triangle_3(
+			vertex_pos2point(p[2]),
+			vertex_pos2point(p[6]),
+			vertex_pos2point(p[7])
+		);
+		// facet 0-2-4-6
+		// 3angle 0-2-6
+		cover[8] = Triangle_3(
+			vertex_pos2point(p[0]),
+			vertex_pos2point(p[2]),
+			vertex_pos2point(p[6])
+		);
+		// 3angle 0-4-6
+		cover[9] = Triangle_3(
+			vertex_pos2point(p[0]),
+			vertex_pos2point(p[4]),
+			vertex_pos2point(p[6])
+		);
+		// facet 1-3-5-7
+		// 3angle 1-3-7
+		cover[10] = Triangle_3(
+			vertex_pos2point(p[1]),
+			vertex_pos2point(p[3]),
+			vertex_pos2point(p[7])
+		);
+		// 3angle 1-5-7
+		cover[11] = Triangle_3(
+			vertex_pos2point(p[1]),
+			vertex_pos2point(p[5]),
+			vertex_pos2point(p[7])
+		);
 	}
 
 	bool contains(const Point_3& p) {
@@ -633,111 +744,6 @@ public:
 		ca_assign(m_size_, mesh_size);
 	}
 
- /* nodes layout
-     *                             X
-     *                    0+-------+1
-     *                    /|     / |
-     *                  /  |   /   |
-     *               2/-------+3   |
-     *              Y |   4+--|----+5
-     *                |   /Z  |   /
-     *                | /     | /
-     *              6 /-------/7
-*/
-/*  facets layout (nodes - plane id)
- *  0-1-2-3 - 0
- *  0-1-4-5 - 1
- *  4-5-6-7 - 2
- *  2-3-6-7 - 3
- *  0-2-4-6 - 4
- *  1-3-5-7 - 5
- *  inside cell - 6
-*/
-
-	static void cell_tri_cover(cell_data& d) {
-		const t_float* V = d.V;
-		d.cover.resize(12);
-
-		// facet 0-1-2-3
-		// 3angle 0-1-3
-		d.cover[0] = Triangle_3(
-			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
-			Point_3(V[X(1)], V[Y(1)], V[Z(1)]),
-			Point_3(V[X(3)], V[Y(3)], V[Z(3)])
-		);
-		// 3angle 0-2-3
-		d.cover[1] = Triangle_3(
-			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
-			Point_3(V[X(2)], V[Y(2)], V[Z(2)]),
-			Point_3(V[X(3)], V[Y(3)], V[Z(3)])
-		);
-		// facet 0-1-4-5
-		// 3angle 0-1-5
-		d.cover[2] = Triangle_3(
-			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
-			Point_3(V[X(1)], V[Y(1)], V[Z(1)]),
-			Point_3(V[X(5)], V[Y(5)], V[Z(5)])
-		);
-		// 3angle 0-4-5
-		d.cover[3] = Triangle_3(
-			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
-			Point_3(V[X(4)], V[Y(4)], V[Z(4)]),
-			Point_3(V[X(5)], V[Y(5)], V[Z(5)])
-		);
-		// facet 4-5-6-7
-		// 3angle 4-5-7
-		d.cover[4] = Triangle_3(
-			Point_3(V[X(4)], V[Y(4)], V[Z(4)]),
-			Point_3(V[X(5)], V[Y(5)], V[Z(5)]),
-			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
-		);
-		// 3angle 4-6-7
-		d.cover[5] = Triangle_3(
-			Point_3(V[X(4)], V[Y(4)], V[Z(4)]),
-			Point_3(V[X(6)], V[Y(6)], V[Z(6)]),
-			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
-		);
-		// facet 2-3-6-7
-		// 3angle 2-3-7
-		d.cover[6] = Triangle_3(
-			Point_3(V[X(2)], V[Y(2)], V[Z(2)]),
-			Point_3(V[X(3)], V[Y(3)], V[Z(3)]),
-			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
-		);
-		// 3angle 2-6-7
-		d.cover[7] = Triangle_3(
-			Point_3(V[X(2)], V[Y(2)], V[Z(2)]),
-			Point_3(V[X(6)], V[Y(6)], V[Z(6)]),
-			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
-		);
-		// facet 0-2-4-6
-		// 3angle 0-2-6
-		d.cover[8] = Triangle_3(
-			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
-			Point_3(V[X(2)], V[Y(2)], V[Z(2)]),
-			Point_3(V[X(6)], V[Y(6)], V[Z(6)])
-		);
-		// 3angle 0-4-6
-		d.cover[9] = Triangle_3(
-			Point_3(V[X(0)], V[Y(0)], V[Z(0)]),
-			Point_3(V[X(4)], V[Y(4)], V[Z(4)]),
-			Point_3(V[X(6)], V[Y(6)], V[Z(6)])
-		);
-		// facet 1-3-5-7
-		// 3angle 1-3-7
-		d.cover[10] = Triangle_3(
-			Point_3(V[X(1)], V[Y(1)], V[Z(1)]),
-			Point_3(V[X(3)], V[Y(3)], V[Z(3)]),
-			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
-		);
-		// 3angle 1-5-7
-		d.cover[11] = Triangle_3(
-			Point_3(V[X(1)], V[Y(1)], V[Z(1)]),
-			Point_3(V[X(5)], V[Y(5)], V[Z(5)]),
-			Point_3(V[X(7)], V[Y(7)], V[Z(7)])
-		);
-	}
-
 	static double distance(const Point_3& p1, const Point_3& p2) {
 		return std::sqrt(Segment_3(p1, p2).squared_length());
 	}
@@ -762,7 +768,7 @@ public:
 
 		// cover cell with triangles
 		if(!c.cover.size())
-			cell_tri_cover(c);
+			c.cell_tri_cover();
 
 		// check that each triangle really intersects with given well segment
 		Segment_3 s = w.segment();
@@ -1004,7 +1010,7 @@ private:
 		}
 
 		// check if current or prev intersection match with node
-		uint facet_id = 4;
+		uint facet_id = inner_point_id;
 		if(px != x_.end() && abs(px->md - wp_md) < MD_TOL)
 			facet_id = px->facet;
 		else if(px != x_.begin()) {
@@ -1016,7 +1022,7 @@ private:
 		// if node point coinside with existing intersection
 		// then just change is_node flag (dont't affect ordering)
 		// otherwise insert new intersection point
-		if(facet_id == 4)
+		if(facet_id == inner_point_id)
 			px = x_.insert(well_hit_cell(
 				where, pw, m_.find(cell_id), wp_md,
 				facet_id, true
