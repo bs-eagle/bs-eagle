@@ -201,10 +201,10 @@ namespace blue_sky
       }
     else
       {
-        sec_rhs->init (1, 0);
-        ss_diagonal->init (1, 0);
-        sp_diagonal->init (1, 0);
-        sec_solution->init (1, 0);
+        sec_rhs->init (1, 0.);
+        ss_diagonal->init (1, 0.);
+        sp_diagonal->init (1, 0.);
+        sec_solution->init (1, 0.);
       }
 
     // FIXME: copied from reservoir_simulator
