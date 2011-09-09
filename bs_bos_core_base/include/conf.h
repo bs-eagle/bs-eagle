@@ -15,6 +15,7 @@
 
 #include "bs_nparray.h"
 #include "bs_npvec.h"
+#include "bs_npvec_shared.h"
 #include "bs_array.h"
 
 //! using this type for small data
@@ -40,7 +41,7 @@ typedef double        t_double;
 typedef unsigned long               t_uint;
 typedef unsigned long               t_ulong;
 
-#define BS_EAGLE_ARRAY_TRAITS blue_sky::bs_npvec
+#define BS_EAGLE_ARRAY_TRAITS blue_sky::bs_npvec_shared
 typedef blue_sky::bs_array< t_int    , BS_EAGLE_ARRAY_TRAITS >    v_int;
 typedef blue_sky::bs_array< t_long   , BS_EAGLE_ARRAY_TRAITS >   v_long;
 typedef blue_sky::bs_array< t_uint   , BS_EAGLE_ARRAY_TRAITS >   v_uint;
