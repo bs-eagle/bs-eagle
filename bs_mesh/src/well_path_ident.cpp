@@ -26,7 +26,7 @@
 
 #include <vector>
 #include <cmath>
-#include <boost/array.hpp>
+//#include <boost/array.hpp>
 // DEBUG
 //#include <iostream>
 
@@ -65,55 +65,56 @@ typedef v_float::iterator vf_iterator;
 // dimens num, cell vertex num, inner point id
 enum { D = 3, CVN = 8, inner_point_id = 6 };
 // boost::array with opertator= and ctor with elements init
-template< class T >
-class stat_array : public boost::array< T, D > {
-public:
-	typedef boost::array< t_float, D > base_t;
-	// propagate typedefs
-	typedef typename base_t::value_type             value_type;
-	typedef typename base_t::iterator               iterator;
-	typedef typename base_t::const_iterator         const_iterator;
-	typedef typename base_t::reverse_iterator       reverse_iterator;
-	typedef typename base_t::const_reverse_iterator const_reverse_iterator;
-	typedef typename base_t::reference              reference;
-	typedef typename base_t::const_reference        const_reference;
-	typedef typename base_t::size_type              size_type;
-	typedef typename base_t::difference_type        difference_type;
-
-	using base_t::begin;
-	using base_t::end;
-	using base_t::size;
-	using base_t::elems;
-
-	// empty ctor
-	stat_array() : base_t() {
-		// ensure all elems are filled with zero
-		fill(begin(), end(), value_type());
-	}
-
-	// ctor accepting C-array
-	stat_array(const value_type(&data)[D]) : base_t() {
-		copy(&data[0], &data[D], begin());
-	}
-
-	// hack-like but useful ctor with per-element init
-	stat_array(int N, ...) : base_t() {
-		assert(D < N && "vertex_pos overflow!");
-		va_list arg_list;
-		va_start(arg_list, N);
-		for(uint i = 0; i < N; ++i) {
-			elems[i] = va_arg(arg_list, value_type);
-		}
-		va_end(arg_list);
-	}
-
-	// assigning arrays
-	template< class R >
-	stat_array& operator=(const stat_array< R >& rhs) {
-		copy(rhs.begin(), rhs.begin() + min(size(), rhs.size()), begin());
-		return *this;
-	}
-};
+// not needed right now
+//template< class T >
+//class stat_array : public boost::array< T, D > {
+//public:
+//	typedef boost::array< t_float, D > base_t;
+//	// propagate typedefs
+//	typedef typename base_t::value_type             value_type;
+//	typedef typename base_t::iterator               iterator;
+//	typedef typename base_t::const_iterator         const_iterator;
+//	typedef typename base_t::reverse_iterator       reverse_iterator;
+//	typedef typename base_t::const_reverse_iterator const_reverse_iterator;
+//	typedef typename base_t::reference              reference;
+//	typedef typename base_t::const_reference        const_reference;
+//	typedef typename base_t::size_type              size_type;
+//	typedef typename base_t::difference_type        difference_type;
+//
+//	using base_t::begin;
+//	using base_t::end;
+//	using base_t::size;
+//	using base_t::elems;
+//
+//	// empty ctor
+//	stat_array() : base_t() {
+//		// ensure all elems are filled with zero
+//		fill(begin(), end(), value_type());
+//	}
+//
+//	// ctor accepting C-array
+//	stat_array(const value_type(&data)[D]) : base_t() {
+//		copy(&data[0], &data[D], begin());
+//	}
+//
+//	// hack-like but useful ctor with per-element init
+//	stat_array(int N, ...) : base_t() {
+//		assert(D < N && "vertex_pos overflow!");
+//		va_list arg_list;
+//		va_start(arg_list, N);
+//		for(uint i = 0; i < N; ++i) {
+//			elems[i] = va_arg(arg_list, value_type);
+//		}
+//		va_end(arg_list);
+//	}
+//
+//	// assigning arrays
+//	template< class R >
+//	stat_array& operator=(const stat_array< R >& rhs) {
+//		copy(rhs.begin(), rhs.begin() + min(size(), rhs.size()), begin());
+//		return *this;
+//	}
+//};
 
 // strategy base types
 //typedef stat_array< t_float > vertex_pos;
@@ -841,7 +842,7 @@ public:
 
 		struct top_surv {
 			typedef set< x_iterator, spatial_sort > spat_storage_t;
-			typedef typename spat_storage_t::iterator spat_iterator;
+			typedef spat_storage_t::iterator spat_iterator;
 
 			top_surv(const dirvec_t& dir, intersect_path& x, const vertex_pos_i& mesh_size)
 				: dir_(dir), x_(x), m_size_(mesh_size)
