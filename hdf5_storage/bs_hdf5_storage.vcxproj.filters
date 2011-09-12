@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="hdf5_storage">
+      <UniqueIdentifier>{397a063e-e9c6-4a8e-a62c-7f16b62a40d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pool">
+      <UniqueIdentifier>{bd767a9f-6bda-4b12-b15f-42aecfd85f0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="python">
+      <UniqueIdentifier>{015c3c9e-ccab-4e8d-a50d-02c54d6b840a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\bs_hdf5_storage.h">
+      <Filter>hdf5_storage</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bs_hdf5_storage_v2.h">
+      <Filter>hdf5_storage</Filter>
+    </ClInclude>
+    <ClInclude Include="src\h5_helper.h">
+      <Filter>hdf5_storage</Filter>
+    </ClInclude>
+    <ClInclude Include="src\hdf5_functions.h">
+      <Filter>hdf5_storage</Filter>
+    </ClInclude>
+    <ClInclude Include="src\hdf5_group_impl.hpp">
+      <Filter>hdf5_storage</Filter>
+    </ClInclude>
+    <ClInclude Include="src\hdf5_hid_holder.hpp">
+      <Filter>hdf5_storage</Filter>
+    </ClInclude>
+    <ClInclude Include="src\hdf5_storage_v2_impl.hpp">
+      <Filter>hdf5_storage</Filter>
+    </ClInclude>
+    <ClInclude Include="src\hdf5_type.h">
+      <Filter>hdf5_storage</Filter>
+    </ClInclude>
+    <ClInclude Include="src\py_bs_hdf5_storage.h">
+      <Filter>hdf5_storage</Filter>
+    </ClInclude>
+    <ClInclude Include="src\h5_pool.hpp">
+      <Filter>pool</Filter>
+    </ClInclude>
+    <ClInclude Include="src\py_pool.h">
+      <Filter>python</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\bs_hdf5_storage_v2.cpp">
+      <Filter>hdf5_storage</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h5_pool.cpp">
+      <Filter>pool</Filter>
+    </ClCompile>
+    <ClCompile Include="src\py_pool.cpp">
+      <Filter>python</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp" />
+  </ItemGroup>
+</Project>
