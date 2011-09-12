@@ -10,11 +10,16 @@
 #define H5_POOL_G42LCHNB
 
 #include <map>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 #include <string>
 #include "pool_iface.h"
 
 namespace blue_sky
 {
+  typedef boost::archive::text_iarchive           tia_t;
+  typedef boost::archive::text_oarchive           toa_t;
+  
   struct h5_pair
     {
       hid_t     dset;
@@ -28,6 +33,35 @@ namespace blue_sky
       hsize_t   src_dims[6];  // dims for array are calculated from pool_dims and src_dims: dims[i] = src_dims[2 * i] * pool_dims[i] + src_dims[i + 1]. i = 0..2
 
       bool      var_dims;         // flag is true if array has variable dimensins depend on pool dimensions.
+     /* 
+      void save (toa_t &ar) const
+        {
+          ar & dset;
+          ar & dspace;
+          ar & dtype;
+          ar & plist;
+          ar & n_dims;
+          ar & size;
+          ar & py_dims;
+          ar & h5_dims;
+          ar & src_dims;
+          ar & var_dims;
+        }
+        
+      void load (tia_t &ar) const
+        {
+          ar & dset;
+          ar & dspace;
+          ar & dtype;
+          ar & plist;
+          ar & n_dims;
+          ar & size;
+          ar & py_dims;
+          ar & h5_dims;
+          ar & src_dims;
+          ar & var_dims;
+        }
+        */
     };
 
   /** 

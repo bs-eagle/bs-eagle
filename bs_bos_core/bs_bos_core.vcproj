@@ -132,7 +132,7 @@
 				OmitFramePointers="true"
 				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)/../bs_csr_ilu_prec\include&quot;;&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_lsolvers/include/&quot;;&quot;$(ProjectDir)/../common_types/include/&quot;;&quot;$(ProjectDir)/../../hdf5-storage/src/&quot;;&quot;$(ProjectDir)/../bs_mtx/include/&quot;;&quot;$(ProjectDir)/../bs_base_linear_solvers/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_data_storage/include/&quot;;&quot;$(ProjectDir)/../bs_mesh/include&quot;;&quot;$(ProjectDir)/../bs_scal/src/&quot;;&quot;$(ProjectDir)/../bs_scal/include/&quot;;&quot;$(ProjectDir)/../bs_pvt/src/&quot;;&quot;$(ProjectDir)/../sql_well/include/&quot;;&quot;$(ProjectDir)/../bs_pvt/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;&quot;$(NUMPY_PATH)/include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;BS_BOS_CORE_DEBUG_MEMORY_;_HDF5_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;NOMINMAX"
+				PreprocessorDefinitions="BOOST_ALL_DYN_LINK"
 				GeneratePreprocessedFile="0"
 				RuntimeLibrary="2"
 				EnableEnhancedInstructionSet="0"
