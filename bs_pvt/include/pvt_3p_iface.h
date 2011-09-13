@@ -1,24 +1,9 @@
 #ifndef __PVT_3P_IFACE_H
 #define __PVT_3P_IFACE_H
 
-/*
-#include "pvt_base.h"
-#include "pvt_dead_oil.h"
-#include "pvt_gas.h"
-#include "pvt_oil.h"
-#include "pvt_water.h"
-#include "pvt_dummy_iface.h"
-*/
 
 namespace blue_sky
   {
-/*  
-    class BS_API_PLUGIN pvt_base;
-    class BS_API_PLUGIN pvt_oil;
-    class BS_API_PLUGIN pvt_dead_oil;
-    class BS_API_PLUGIN pvt_gas;
-    class BS_API_PLUGIN pvt_water;
-*/
   /**
    * \brief pvt_base
    */

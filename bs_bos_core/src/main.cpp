@@ -55,6 +55,7 @@
 #include "explicit_model.hpp"
 #include "equil_model.hpp"
 #include "event_manager_keywords.hpp"
+#include "equil_model_depth.h"
 
 #include "py_equil_model.h"
 //#include "well_results_storage.h"
@@ -367,7 +368,8 @@ namespace blue_sky
     res &= BS_KERNEL.register_type (pd, equil_model::bs_type ()); BS_ASSERT (res);
 
     res &= BS_KERNEL.register_type (pd, event_manager_keywords::bs_type ()); BS_ASSERT (res);
-
+    
+    res &= BS_KERNEL.register_type (pd, equil_model_depth::bs_type ()); BS_ASSERT (res);
     return res;
   }
   }

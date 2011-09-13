@@ -19,6 +19,7 @@ namespace blue_sky {
   class init_model_iface;
   class event_manager_iface;
   class well_pool_iface;
+  class equil_model_iface;
 
   class BS_API_PLUGIN hdm_iface: public objbase
     {
@@ -38,6 +39,8 @@ namespace blue_sky {
     
       // initialize fluids
       virtual void init_fluids(t_int n_pvt_regions, t_int n_scal_regions) = 0;
+      // initialize fluids
+      virtual void init_equil(t_int n_equil_regions) = 0;
     
       // initialize data manager
       virtual void init(const std::string &model_name) = 0;
@@ -75,6 +78,7 @@ namespace blue_sky {
       
       virtual BS_SP (well_pool_iface) get_well_pool () = 0;
   
+      virtual BS_SP (equil_model_iface) get_equil_model ()  = 0;
       // SET
 
       // mesh setter

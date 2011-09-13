@@ -64,6 +64,7 @@ namespace blue_sky
     this->km = BS_KERNEL.create_object(keyword_manager::bs_type());
     
     this->pvt_3p_ = BS_KERNEL.create_object ("pvt_3p");
+    this->scal_3p_ = BS_KERNEL.create_object ("scal_3p");
     this->event_manager_ = BS_KERNEL.create_object ("event_manager");
     this->well_pool_ = BS_KERNEL.create_object ("sql_well");
   }
@@ -88,11 +89,22 @@ namespace blue_sky
     n_phases += data->props->get_b("gas_phase");
     if (n_phases > 1)
       {
-        this->scal_3p_ = BS_KERNEL.create_object ("scal_3p");
         scal_3p_->init_scal_input_table_arrays (n_scal_regions, data->props->get_b("oil_phase"),
                                                                 data->props->get_b("gas_phase"),
                                                                 data->props->get_b("water_phase"));
       }
+  }
+  
+  void 
+  hdm::init_equil (t_int n_equil_regions)
+  {
+    int n_phases;
+    n_phases = data->props->get_b("oil_phase");
+    n_phases += data->props->get_b("water_phase");
+    n_phases += data->props->get_b("gas_phase");
+    
+    this->equil_model_ = BS_KERNEL.create_object ("equil_model_depth"); 
+    equil_model_->init_equil_model (n_equil_regions, n_phases);
   }
   
    void
@@ -100,7 +112,6 @@ namespace blue_sky
   {
     smart_ptr <hdm_iface, true> hdm = this;
     keyword_params kp;
-    int n_pases;
     
     kp.hdm = this;
     data->h5_pool->open_file (model_name + ".h5", "/pool");

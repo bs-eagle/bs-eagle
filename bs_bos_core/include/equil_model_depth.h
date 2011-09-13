@@ -1,6 +1,7 @@
 #ifndef EQUIL_MODEL_DEPTH_H
 #define EQUIL_MODEL_DEPTH_H
 
+#include "equil_model_iface.h"
 #include "data_class.h"
 #include "pvt_3p_iface.h"
 #include "scal_3p_iface.hpp"
@@ -31,7 +32,7 @@ namespace blue_sky
                          const stdv_long &pvt_regions,      //!< (n_eql) pvt region number for current equil region 
                          BS_SP (pvt_3p_iface) pvt_prop,    //!< PVT properties
                          BS_SP (scal_3p_iface) scal_prop,  //!< SCAL properties
-                         spv_float equil,                 //!< main equil data (from EQUIL keyword)
+                         BS_SP (table_iface) equil,        //!< main equil data (from EQUIL keyword)
                          idata::vval_vs_depth *rsvd,
                          idata::vval_vs_depth *pbvd,
                          const stdv_float &min_depth,     //!< n_eql
@@ -42,14 +43,18 @@ namespace blue_sky
                          stdv_double &saturation         //!< (n_phases * n_eql * n_depth)
                         );
 
-	class BS_API_PLUGIN equil_model_depth : public objbase
+	class BS_API_PLUGIN equil_model_depth : public equil_model_iface
 	{
 	public:
+	  typedef std::vector <spv_double>           stdv_spv_double;
+	  typedef BS_SP (table_iface)                sp_table_t;
+	  typedef std::vector <BS_SP (table_iface)>  sp_table_array_t;
+	
 		void
 		py_calc_equil(bool is_o, bool is_g, bool is_w,
 		              BS_SP(scal_3p_iface) scal_props, 
 					  BS_SP(pvt_3p_iface) pvt_props,
-					  spv_float equil,
+					  BS_SP (table_iface) equil,
 					  const stdv_float &min_depth,
 					  const stdv_float &max_depth,
 					  const stdv_float &perm,
@@ -61,12 +66,27 @@ namespace blue_sky
 
 		spv_double get_pressure ();
 		spv_double get_saturation ();
+    
+    virtual void init_equil_model (const t_long n_equil_regions_,
+                                   t_int n_phases);
 
+    virtual BS_SP (table_iface)
+    get_equil_region_data (const t_long region) const;
+    
+    virtual std::list <BS_SP( table_iface)>
+    get_equil_data () const;
+    
+    virtual t_long
+    get_n_equil_regions () const 
+      { return n_equil_regions;  }                           
+                            
+	private:
+	  t_long                          n_equil_regions;   //!< number of equil regions 
+	  sp_table_array_t                equil_data;        //!< equil data 
+		spv_double                      pressure;
+		spv_double                      saturation;
 	public:
 		BLUE_SKY_TYPE_DECL (equil_model_depth);
-	private:
-		spv_double pressure;
-		spv_double saturation;
 	};
 }
 

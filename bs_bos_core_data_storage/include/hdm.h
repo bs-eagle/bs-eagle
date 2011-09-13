@@ -17,6 +17,7 @@
 #include "init_model_iface.hpp"
 #include "event_manager_iface.hpp"
 #include "well_pool_iface.h"
+#include "equil_model_iface.h"
 
 namespace blue_sky {
 
@@ -37,6 +38,7 @@ namespace blue_sky {
     
       // initialize fluids
       void init_fluids(t_int n_pvt_regions, t_int n_scal_regions);
+      void init_equil (t_int n_equil_regions);
       
       // initialize data manager
       void init(const std::string &model_name);
@@ -75,7 +77,8 @@ namespace blue_sky {
       BS_SP (event_manager_iface) get_event_manager () { return event_manager_; }
       
       BS_SP (well_pool_iface) get_well_pool () { return well_pool_; }
-  
+      
+      BS_SP (equil_model_iface) get_equil_model ()  { return equil_model_; }
       // SET
 
       void set_mesh (sp_mesh_iface_t new_mesh) {mesh = new_mesh;};
@@ -97,6 +100,7 @@ namespace blue_sky {
       sp_mesh_iface_t           mesh;                       //!< mesh
       BS_SP (scal_3p_iface)     scal_3p_;
       BS_SP (pvt_3p_iface)      pvt_3p_;
+      BS_SP (equil_model_iface) equil_model_;
       BS_SP (init_model_iface)  init_model_;
       BS_SP (event_manager_iface) event_manager_;
       BS_SP (well_pool_iface)   well_pool_;                 //!< SQL well pool

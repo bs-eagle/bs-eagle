@@ -8,11 +8,12 @@
  * */
 
 #include "stdafx.h"
-//#include "equil_model.hpp"
+#include "equil_model_iface.h"
 #include "equil_model_depth.h"
 #include "rs_mesh_iface.h"
 #include "calc_model.h"
 #include "jfunction.h"
+#include "constants.h"
 
 #define EQUIL_PI_METRIC 0.000096816838
 
@@ -121,7 +122,7 @@ namespace blue_sky
                        const stdv_long &pvt_regions,      //!< (n_eql) pvt region number for current equil region 
                        BS_SP (pvt_3p_iface) pvt_prop,    //!< PVT properties
                        BS_SP (scal_3p_iface) scal_prop,  //!< SCAL properties
-                       spv_float equil,                 //!< main equil data (from EQUIL keyword)
+                       BS_SP (table_iface) equil,                 //!< main equil data (from EQUIL keyword)
                        idata::vval_vs_depth *rsvd,
                        idata::vval_vs_depth *pbvd,
                        const stdv_float &min_depth,     //!< n_eql
@@ -172,10 +173,15 @@ namespace blue_sky
       {
         i_pvt = pvt_regions[i_eql];    // pvt region for current equil region
 
-        depth_dat = (*equil)[EQUIL_TOTAL * i_eql + EQUIL_DAT_DEPTH];
-        depth_woc = (*equil)[EQUIL_TOTAL * i_eql + EQUIL_WOC_DEPTH];
-        depth_goc = (*equil)[EQUIL_TOTAL * i_eql + EQUIL_GOC_DEPTH];
-        press_dat = (*equil)[EQUIL_TOTAL * i_eql + EQUIL_DAT_PRESS];
+//        depth_dat = (*equil)[EQUIL_TOTAL * i_eql + EQUIL_DAT_DEPTH];
+//        depth_woc = (*equil)[EQUIL_TOTAL * i_eql + EQUIL_WOC_DEPTH];
+//        depth_goc = (*equil)[EQUIL_TOTAL * i_eql + EQUIL_GOC_DEPTH];
+//        press_dat = (*equil)[EQUIL_TOTAL * i_eql + EQUIL_DAT_PRESS];
+
+        depth_dat = equil->get_value (0, EQUIL_DAT_DEPTH); 
+        depth_woc = equil->get_value (0, EQUIL_WOC_DEPTH);
+        depth_goc = equil->get_value (0, EQUIL_GOC_DEPTH);
+        press_dat = equil->get_value (0, EQUIL_DAT_PRESS);
 
         //set main_phase
         main_phase = FI_PHASE_OIL;
@@ -235,7 +241,7 @@ namespace blue_sky
                 h = cur_d - prev_d;
 
                 equil_calc_pressure_2 (is_g, pvt_prop, prev_p, cur_d, h, main_phase, i_pvt,
-                                         is_g ? (*equil)[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
+                                         is_g ? equil->get_value (0, EQUIL_RS_TYPE) : 0,
                                          is_g ? depth_goc : 0, is_g ? rs_dat : 0,
                                          (is_g && rsvd->size ()) ? &((*rsvd)[i_eql]) : 0, (is_g && pbvd->size ()) ? &(*pbvd)[i_eql] : 0,
                                          press[i_depth + (i_eql * n_phases + phase_d[main_phase]) * n_depth],
@@ -308,9 +314,9 @@ namespace blue_sky
 
                 //oil pressure at WOC/GOC
                 if (main_phase == FI_PHASE_WATER)
-                  p_temp += (*equil)[EQUIL_TOTAL * i_eql + EQUIL_WOC_PRESS];
+                  p_temp += equil->get_value (0, EQUIL_WOC_PRESS);
                 else
-                  p_temp -= (*equil)[EQUIL_TOTAL * i_eql + EQUIL_GOC_PRESS];
+                  p_temp -= equil->get_value (0, EQUIL_GOC_PRESS);
 
                 //---- calc pressure table of oil -----
                 for (t_long up_down = -1; up_down < 2; up_down += 2)
@@ -331,7 +337,7 @@ namespace blue_sky
                         h = cur_d - prev_d;
 
                         equil_calc_pressure_2 (is_g, pvt_prop, prev_p, cur_d, h, FI_PHASE_OIL, i_pvt,
-                                                 is_g ? (*equil)[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
+                                                 is_g ? equil->get_value (0, EQUIL_RS_TYPE) : 0,
                                                  is_g ? depth_goc : 0, is_g ? rs_dat : 0,
                                                  (is_g && rsvd->size ()) ? &(*rsvd)[i_eql] : 0, (is_g && pbvd->size ()) ? &(*pbvd)[i_eql] : 0,
                                                  press[i_depth + (i_eql * n_phases + phase_d[FI_PHASE_OIL]) * n_depth],
@@ -377,7 +383,7 @@ namespace blue_sky
 
                     //calc oil pressure at WOC
                     equil_calc_pressure_2 (is_g, pvt_prop, prev_p, depth_woc, h, FI_PHASE_OIL, i_pvt,
-                                             is_g ? (*equil)[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
+                                             is_g ? equil->get_value (0, EQUIL_RS_TYPE) : 0,
                                              is_g ? depth_goc : 0, is_g ? rs_dat : 0,
                                              (is_g && rsvd->size ()) ? &(*rsvd)[i_eql] : 0, (is_g && pbvd->size ()) ? &(*pbvd)[i_eql] : 0,
                                              press_woc, &rs_temp);
@@ -399,7 +405,7 @@ namespace blue_sky
                   }
 
                 //water pressure at WOC
-                press_woc -= (*equil)[EQUIL_TOTAL * i_eql + EQUIL_WOC_PRESS];
+                press_woc -= equil->get_value (0, EQUIL_WOC_PRESS);
 
                 //---- calc pressure table of water -----
                 for (t_long up_down = -1; up_down < 2; up_down += 2)
@@ -463,7 +469,7 @@ namespace blue_sky
 
                     //calc oil pressure at GOC
                     equil_calc_pressure_2 (is_g, pvt_prop, prev_p, depth_goc, h, FI_PHASE_OIL, i_pvt,
-                                             is_g ? (*equil)[EQUIL_TOTAL * i_eql + EQUIL_RS_TYPE] : 0,
+                                             is_g ? equil->get_value (0, EQUIL_RS_TYPE) : 0,
                                              is_g ? depth_goc : 0, is_g ? rs_dat : 0,
                                              (is_g && rsvd->size ()) ? &(*rsvd)[i_eql] : 0, (is_g && pbvd->size ()) ? &(*pbvd)[i_eql] : 0,
                                              press_goc, &rs_temp);
@@ -485,7 +491,7 @@ namespace blue_sky
                   }
 
                 //gas pressure at GOC
-                press_goc += (*equil)[EQUIL_TOTAL * i_eql + EQUIL_GOC_PRESS];
+                press_goc += equil->get_value (0, EQUIL_GOC_PRESS);
 
                 //---- calc pressure table of gas -----
                 for (t_long up_down = -1; up_down < 2; up_down += 2)
@@ -620,6 +626,30 @@ namespace blue_sky
   }
 
 
+  void 
+  equil_model_depth::init_equil_model (const t_long n_equil_regions_, 
+                                       t_int n_phases)
+    {
+      BS_ASSERT (n_equil_regions_ > 0);
+      n_equil_regions = n_equil_regions_;
+      
+      equil_data.resize (n_equil_regions);
+      for (t_long region = 0; region < n_equil_regions; ++region)
+        {
+          equil_data[region] = BS_KERNEL.create_object ("table");
+          equil_data[region]->init (1, EQUIL_TOTAL_BLACK_OIL);
+          equil_data[region]->set_col_name (EQUIL_DAT_DEPTH, "Datum depth");
+          equil_data[region]->set_col_name (EQUIL_DAT_PRESS, "Datum pressure");
+          equil_data[region]->set_col_name (EQUIL_WOC_DEPTH, "WOC depth");
+          equil_data[region]->set_col_name (EQUIL_WOC_PRESS, "WOC pressure");
+          equil_data[region]->set_col_name (EQUIL_GOC_DEPTH, "GOC depth");
+          equil_data[region]->set_col_name (EQUIL_GOC_PRESS, "GOC pressure");
+          equil_data[region]->set_col_name (EQUIL_RS_TYPE, "RS type");
+          equil_data[region]->set_col_name (EQUIL_RV_TYPE, "RV type");
+          equil_data[region]->set_col_name (EQUIL_NUM_SEC, "Section's number");
+        }  
+    }
+    
   equil_model_depth::equil_model_depth(bs_type_ctor_param)
   {
     pressure = BS_KERNEL.create_object (v_double::bs_type ());
@@ -627,7 +657,7 @@ namespace blue_sky
   }
 
   equil_model_depth::equil_model_depth(const equil_model_depth &x)
-	  :bs_refcounter(x),
+	  :bs_refcounter(x), equil_model_iface (x),
 	   pressure (BS_KERNEL.create_object (v_double::bs_type ())),
 	   saturation (BS_KERNEL.create_object (v_double::bs_type ()))
   {
@@ -637,7 +667,7 @@ namespace blue_sky
   equil_model_depth::py_calc_equil(bool is_o, bool is_g, bool is_w,
 		        BS_SP(scal_3p_iface) scal_props, 
 				BS_SP(pvt_3p_iface) pvt_props,
-				spv_float equil,
+				BS_SP (table_iface) equil,
 				const stdv_float &min_depth,
 				const stdv_float &max_depth,
 				const stdv_float &perm,
@@ -721,9 +751,28 @@ namespace blue_sky
 	  return saturation;
   }
 
+  BS_SP (table_iface)
+  equil_model_depth::get_equil_region_data (const t_long region) const
+  {
+    BS_ASSERT (region >= 0 && region < n_equil_regions);
+    return equil_data[region];
+  }
+
+  std::list <BS_SP( table_iface)>
+  equil_model_depth::get_equil_data () const
+  {
+    std::list<BS_SP( table_iface)> tables;
+    
+    for (t_long i = 0; i < n_equil_regions; ++i)
+      tables.push_back (get_equil_region_data (i));
+    return tables;
+  }
+  
+  
+
   BLUE_SKY_TYPE_STD_CREATE (equil_model_depth);
   BLUE_SKY_TYPE_STD_COPY (equil_model_depth);
 
-  BLUE_SKY_TYPE_IMPL(equil_model_depth,  objbase, "equil_model_depth", "equil_model_depth", "equil_model_depth");
+  BLUE_SKY_TYPE_IMPL(equil_model_depth,  equil_model_iface, "equil_model_depth", "equil_model_depth", "equil_model_depth");
 
 } //namespace

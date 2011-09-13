@@ -15,6 +15,7 @@ namespace python {
   PY_EXPORTER (hdm_exporter, default_exporter)
     //.add_property ("data", get_data <T, strategy_t>)
     .def("init_fluids", &T::init_fluids)
+    .def("init_equil", &T::init_equil)
     .def("init", &T::init)
     .def("read_keyword_file", &T::read_keyword_file)
     .def("get_pool", &T::get_pool)
@@ -25,6 +26,7 @@ namespace python {
     .def("get_prop", &T::get_prop)
     .def("get_well_pool", &T::get_well_pool)
     .def("get_keyword_manager", &T::get_keyword_manager)
+    .def("get_equil_model", &T::get_equil_model)
   PY_EXPORTER_END;
 
   void py_export_hdm ()
