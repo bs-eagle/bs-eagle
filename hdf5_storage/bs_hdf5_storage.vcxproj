@@ -37,7 +37,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\exe\$(Configuration)\plugins\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\exe\$(Configuration)\plugins\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">build\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\exe\$(Configuration)\plugins\</OutDir>
@@ -49,7 +49,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(NUMPY_PATH)/include;$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../bs_bos_core_base/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(HDF5_PATH)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;BS_HDF5_STORAGE_EXPORTS;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5;H5_USE_16_API;_HDF5USEDLL_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_EXCEPTION_USE_BOOST_FORMAT;%(PreprocessorDefinitions);BOOST_ALL_DYN_LINK;BOOST_ALL_DYN_LINK</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;BS_HDF5_STORAGE_EXPORTS;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5;H5_USE_16_API;_HDF5USEDLL_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_EXCEPTION_USE_BOOST_FORMAT;%(PreprocessorDefinitions);BOOST_ALL_DYN_LINK;BOOST_ALL_DYN_LINK;_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -71,7 +71,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(NUMPY_PATH)/include;$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../bs_bos_core_base/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(HDF5_PATH)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_HDF5_STORAGE_EXPORTS;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5;H5_USE_16_API;_HDF5USEDLL_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_EXCEPTION_USE_BOOST_FORMAT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_HDF5_STORAGE_EXPORTS;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5;H5_USE_16_API;_HDF5USEDLL_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_EXCEPTION_USE_BOOST_FORMAT;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>

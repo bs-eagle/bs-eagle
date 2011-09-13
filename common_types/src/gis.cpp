@@ -38,17 +38,12 @@ namespace blue_sky
 
   gis::gis (bs_type_ctor_param) 
     {
-      spv_float density = BS_KERNEL.create_object (v_float::bs_type ());
-      density->resize (3);
-
-      /*
       sp_prop = BS_KERNEL.create_object ("prop");
       sp_table = BS_KERNEL.create_object ("table");
       if (!sp_prop || !sp_table)
         {
           bs_throw_exception ("Type (prop) not registered");
         }
-      */
     }
   gis::gis (const gis& rhs) 
         : bs_refcounter ()
