@@ -56,7 +56,6 @@ namespace {
     python::py_export_hdm ();
     python::py_export_idata ();
     python::export_keyword_manager();
-    python::py_export_well_storage();
     python::py_export_well();
   }
 }

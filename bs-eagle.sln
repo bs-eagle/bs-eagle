@@ -1,72 +1,29 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_scal", "bs_scal\bs_scal.vcproj", "{6179CF48-524A-4031-993A-FD353AD2A74F}"
-	ProjectSection(ProjectDependencies) = postProject
-		{3DF8BD9D-CAEF-4081-A1C2-B624E0959A81} = {3DF8BD9D-CAEF-4081-A1C2-B624E0959A81}
-		{578A43D7-0338-4ED0-A455-666FDA782085} = {578A43D7-0338-4ED0-A455-666FDA782085}
-		{7C235C2A-609A-49B4-A89B-AC23530F0F89} = {7C235C2A-609A-49B4-A89B-AC23530F0F89}
-	EndProjectSection
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_scal", "bs_scal\bs_scal.vcxproj", "{6179CF48-524A-4031-993A-FD353AD2A74F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_mtx", "bs_mtx\bs_mtx.vcproj", "{D588B62C-A1A8-49D2-88AC-FFADACC4545A}"
-	ProjectSection(ProjectDependencies) = postProject
-		{578A43D7-0338-4ED0-A455-666FDA782085} = {578A43D7-0338-4ED0-A455-666FDA782085}
-		{7C235C2A-609A-49B4-A89B-AC23530F0F89} = {7C235C2A-609A-49B4-A89B-AC23530F0F89}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_mtx", "bs_mtx\bs_mtx.vcxproj", "{D588B62C-A1A8-49D2-88AC-FFADACC4545A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "blue-sky", "..\..\kernel\blue-sky.vcproj", "{7C235C2A-609A-49B4-A89B-AC23530F0F89}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "blue-sky", "..\..\kernel\blue-sky.vcxproj", "{7C235C2A-609A-49B4-A89B-AC23530F0F89}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_bos_core_base", "bs_bos_core_base\bs_bos_core_base.vcproj", "{578A43D7-0338-4ED0-A455-666FDA782085}"
-	ProjectSection(ProjectDependencies) = postProject
-		{7C235C2A-609A-49B4-A89B-AC23530F0F89} = {7C235C2A-609A-49B4-A89B-AC23530F0F89}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_bos_core_base", "bs_bos_core_base\bs_bos_core_base.vcxproj", "{578A43D7-0338-4ED0-A455-666FDA782085}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_mesh", "bs_mesh\bs_mesh.vcproj", "{CE770FDD-686B-48FB-9DFA-B660196BEF89}"
-	ProjectSection(ProjectDependencies) = postProject
-		{7C235C2A-609A-49B4-A89B-AC23530F0F89} = {7C235C2A-609A-49B4-A89B-AC23530F0F89}
-		{578A43D7-0338-4ED0-A455-666FDA782085} = {578A43D7-0338-4ED0-A455-666FDA782085}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_mesh", "bs_mesh\bs_mesh.vcxproj", "{CE770FDD-686B-48FB-9DFA-B660196BEF89}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_bos_core", "bs_bos_core\bs_bos_core.vcproj", "{B096BE31-726C-42A6-AFB0-C6BADE241F0D}"
-	ProjectSection(ProjectDependencies) = postProject
-		{7C235C2A-609A-49B4-A89B-AC23530F0F89} = {7C235C2A-609A-49B4-A89B-AC23530F0F89}
-		{6179CF48-524A-4031-993A-FD353AD2A74F} = {6179CF48-524A-4031-993A-FD353AD2A74F}
-		{3DF8BD9D-CAEF-4081-A1C2-B624E0959A81} = {3DF8BD9D-CAEF-4081-A1C2-B624E0959A81}
-		{578A43D7-0338-4ED0-A455-666FDA782085} = {578A43D7-0338-4ED0-A455-666FDA782085}
-		{32C5BEFC-9E7D-4341-ACD4-DDDCFEB77652} = {32C5BEFC-9E7D-4341-ACD4-DDDCFEB77652}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_bos_core", "bs_bos_core\bs_bos_core.vcxproj", "{B096BE31-726C-42A6-AFB0-C6BADE241F0D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bspy_loader", "..\..\python\bspy_loader\bspy_loader.vcproj", "{5FC52CB5-D666-4608-A354-81E3B5DE6035}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bspy_loader", "..\..\python\bspy_loader\bspy_loader.vcxproj", "{5FC52CB5-D666-4608-A354-81E3B5DE6035}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common_types", "common_types\common_types.vcproj", "{917136D8-8A55-4319-9A9C-483BB647AC4E}"
-	ProjectSection(ProjectDependencies) = postProject
-		{7C235C2A-609A-49B4-A89B-AC23530F0F89} = {7C235C2A-609A-49B4-A89B-AC23530F0F89}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common_types", "common_types\common_types.vcxproj", "{917136D8-8A55-4319-9A9C-483BB647AC4E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_hdf5_storage", "hdf5_storage\bs_hdf5_storage.vcproj", "{E7322907-2C9C-4570-A99E-A2F3E56A3D57}"
-	ProjectSection(ProjectDependencies) = postProject
-		{7C235C2A-609A-49B4-A89B-AC23530F0F89} = {7C235C2A-609A-49B4-A89B-AC23530F0F89}
-		{578A43D7-0338-4ED0-A455-666FDA782085} = {578A43D7-0338-4ED0-A455-666FDA782085}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_hdf5_storage", "hdf5_storage\bs_hdf5_storage.vcxproj", "{E7322907-2C9C-4570-A99E-A2F3E56A3D57}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_pvt", "bs_pvt\bs_pvt.vcproj", "{32C5BEFC-9E7D-4341-ACD4-DDDCFEB77652}"
-	ProjectSection(ProjectDependencies) = postProject
-		{578A43D7-0338-4ED0-A455-666FDA782085} = {578A43D7-0338-4ED0-A455-666FDA782085}
-		{3DF8BD9D-CAEF-4081-A1C2-B624E0959A81} = {3DF8BD9D-CAEF-4081-A1C2-B624E0959A81}
-		{7C235C2A-609A-49B4-A89B-AC23530F0F89} = {7C235C2A-609A-49B4-A89B-AC23530F0F89}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_pvt", "bs_pvt\bs_pvt.vcxproj", "{32C5BEFC-9E7D-4341-ACD4-DDDCFEB77652}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_bos_core_data_storage", "bs_bos_core_data_storage\bs_bos_core_data_storage.vcproj", "{3DF8BD9D-CAEF-4081-A1C2-B624E0959A81}"
-	ProjectSection(ProjectDependencies) = postProject
-		{578A43D7-0338-4ED0-A455-666FDA782085} = {578A43D7-0338-4ED0-A455-666FDA782085}
-		{7C235C2A-609A-49B4-A89B-AC23530F0F89} = {7C235C2A-609A-49B4-A89B-AC23530F0F89}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_bos_core_data_storage", "bs_bos_core_data_storage\bs_bos_core_data_storage.vcxproj", "{3DF8BD9D-CAEF-4081-A1C2-B624E0959A81}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sql_well", "sql_well\sql_well.vcproj", "{EEAD7144-E89C-4C7B-84BA-E3328140EC48}"
-	ProjectSection(ProjectDependencies) = postProject
-		{578A43D7-0338-4ED0-A455-666FDA782085} = {578A43D7-0338-4ED0-A455-666FDA782085}
-		{7C235C2A-609A-49B4-A89B-AC23530F0F89} = {7C235C2A-609A-49B4-A89B-AC23530F0F89}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sql_well", "sql_well\sql_well.vcxproj", "{EEAD7144-E89C-4C7B-84BA-E3328140EC48}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -38,4 +38,12 @@ tags
 *.zip
 *.h5
 *.vcproj?*
+*.tlog
+*.cache
+*.lastbuildstate
+*.rc
+*.old
+*.opensdf
+*.sdf
+*.xml
 

@@ -20,7 +20,9 @@ int key_read_date_as_text (const char *buf, int &day, int &month, int &year);
 
 
 double get_date_day_month_year (date_sim date, int &day, int &month, int &year);
+void d2hms (date_sim date, int &h, int &m, int &s);
 
+double ymd2d (int year, int month, int day);
 
 void print_date (const date_sim cur, char *buf);
 

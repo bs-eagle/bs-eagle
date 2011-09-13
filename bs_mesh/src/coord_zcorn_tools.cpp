@@ -359,12 +359,13 @@ coord_zcorn_pair gen_coord_zcorn(int_t nx, int_t ny, int_t nz, spv_float dx, spv
 	using namespace std;
 	typedef coord_zcorn_pair ret_t;
 	typedef v_float::value_type value_t;
+    spv_float null_arr = 0;
 
 	// DEBUG
 	BSOUT << "gen_coord_zcorn: init stage" << bs_end;
 	// create subscripter
-	if(!dx || !dy || !dz) return ret_t(NULL, NULL);
-	if(!dx->size() || !dy->size() || !dz->size()) return ret_t(NULL, NULL);
+	if(!dx || !dy || !dz) return ret_t(null_arr, null_arr);
+	if(!dx->size() || !dy->size() || !dz->size()) return ret_t(null_arr, null_arr);
 
 	// if dimension offset is given as array, then size should be taken from array size
 	if(dx->size() > 1) nx = (int_t) dx->size();
@@ -374,7 +375,7 @@ coord_zcorn_pair gen_coord_zcorn(int_t nx, int_t ny, int_t nz, spv_float dx, spv
 	// create zcorn array
 	spv_float zcorn = BS_KERNEL.create_object(v_float::bs_type());
 	// FIXME: raise exception
-	if(!zcorn) return ret_t(NULL, NULL);
+	if(!zcorn) return ret_t(null_arr, null_arr);
 
 	// fill zcorn
 	// very simple case

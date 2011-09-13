@@ -12,12 +12,15 @@
 
 #include <string>
 
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python/list.hpp>
+#endif //BSPY_EXPORTING_PLUGIN
+
 #include "bs_object_base.h"
 #include "conf.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include BS_STOP_PLUGIN_IMPORT ()
-
 
 #include "prop_iface.h"
 #include "table_iface.h"
@@ -140,6 +143,11 @@ class well_pool_iface : public objbase
       virtual int read_from_ascii_file (const std::string &fname, 
                                         double starting_date) = 0;
 #ifdef BSPY_EXPORTING_PLUGIN
+      virtual boost::python::list d2date (double d) const = 0;
+      virtual double date2d (int year, int month, int day, int hour, int minute, int second) const = 0;
+      virtual std::string d2str (double d) const = 0;
+      virtual std::string t2str (double d) const = 0;
+
       /** 
        * @brief python print wrapper
        * 

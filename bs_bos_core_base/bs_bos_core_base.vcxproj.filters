@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="property">
+      <UniqueIdentifier>{f642ac20-ce0c-44dd-a01c-350d2b55e0b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="report">
+      <UniqueIdentifier>{d1df488e-3b74-4457-8042-96c518ad6958}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tools">
+      <UniqueIdentifier>{104126d1-ea2b-4ea3-8b6b-cb40c2f95b22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="omp">
+      <UniqueIdentifier>{992f5b3d-f0a1-471d-a7db-790544a3c5d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="constants">
+      <UniqueIdentifier>{e3312e79-185e-49a7-aabf-bd0bf00efbcf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="python">
+      <UniqueIdentifier>{1814825b-2a81-4e20-bdab-b6e9ef898d38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="keywords">
+      <UniqueIdentifier>{4a447182-11c6-47c0-a269-380d12136047}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="strategy">
+      <UniqueIdentifier>{586d8efd-e57c-4f02-995a-8345c45265a1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\named_pbase_access.cpp">
+      <Filter>property</Filter>
+    </ClCompile>
+    <ClCompile Include="src\property_base.cpp">
+      <Filter>property</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bos_report.cpp">
+      <Filter>report</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dummy_base.cpp">
+      <Filter>tools</Filter>
+    </ClCompile>
+    <ClCompile Include="src\omp_tools.cpp">
+      <Filter>omp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\keyword_info_base.cpp">
+      <Filter>keywords</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bs_bos_core_base.cpp" />
+    <ClCompile Include="src\conf.cpp" />
+    <ClCompile Include="src\py_data_diments.cpp" />
+    <ClCompile Include="src\stdafx.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\named_pbase_access.h">
+      <Filter>property</Filter>
+    </ClInclude>
+    <ClInclude Include="include\named_pbase_type_helper.h">
+      <Filter>property</Filter>
+    </ClInclude>
+    <ClInclude Include="include\property_base.h">
+      <Filter>property</Filter>
+    </ClInclude>
+    <ClInclude Include="include\bos_report.h">
+      <Filter>report</Filter>
+    </ClInclude>
+    <ClInclude Include="include\aligned_allocator.h">
+      <Filter>tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\auto_value.h">
+      <Filter>tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\debug_macroses.h">
+      <Filter>tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dummy_base.h">
+      <Filter>tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\force_inline.h">
+      <Filter>tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interpolation_macro.h">
+      <Filter>tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\locale_keeper.h">
+      <Filter>tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\memory_macroses.h">
+      <Filter>tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mv_tools.h">
+      <Filter>tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\print_process_memory_info.h">
+      <Filter>tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vector_assign.h">
+      <Filter>tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\write_time_to_log.h">
+      <Filter>tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\omp_tools.h">
+      <Filter>omp</Filter>
+    </ClInclude>
+    <ClInclude Include="include\constants.h">
+      <Filter>constants</Filter>
+    </ClInclude>
+    <ClInclude Include="include\plane_orientation.h">
+      <Filter>constants</Filter>
+    </ClInclude>
+    <ClInclude Include="include\construct_python_object.h">
+      <Filter>python</Filter>
+    </ClInclude>
+    <ClInclude Include="include\export_python_wrapper.h">
+      <Filter>python</Filter>
+    </ClInclude>
+    <ClInclude Include="include\make_me_happy.h">
+      <Filter>python</Filter>
+    </ClInclude>
+    <ClInclude Include="include\pass_arg_to_python.h">
+      <Filter>python</Filter>
+    </ClInclude>
+    <ClInclude Include="include\pp_py_call_list.h">
+      <Filter>python</Filter>
+    </ClInclude>
+    <ClInclude Include="include\python_class_wrapper.h">
+      <Filter>python</Filter>
+    </ClInclude>
+    <ClInclude Include="include\python_method_wrapper.h">
+      <Filter>python</Filter>
+    </ClInclude>
+    <ClInclude Include="include\keyword_info_base.h">
+      <Filter>keywords</Filter>
+    </ClInclude>
+    <ClInclude Include="include\keyword_manager_iface.h">
+      <Filter>keywords</Filter>
+    </ClInclude>
+    <ClInclude Include="include\seq_vector.h">
+      <Filter>strategy</Filter>
+    </ClInclude>
+    <ClInclude Include="include\strategies.h">
+      <Filter>strategy</Filter>
+    </ClInclude>
+    <ClInclude Include="include\strategy_name.h">
+      <Filter>strategy</Filter>
+    </ClInclude>
+    <ClInclude Include="include\bs_bos_core_base_stdafx.h" />
+    <ClInclude Include="include\conf.h" />
+    <ClInclude Include="include\data_dimens.h" />
+  </ItemGroup>
+</Project>

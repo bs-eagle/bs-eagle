@@ -123,6 +123,44 @@ namespace blue_sky
       virtual int read_from_ascii_file (const std::string &fname, double starting_date);
     public:
 #ifdef BSPY_EXPORTING_PLUGIN
+      virtual boost::python::list d2date (double d) const
+        {
+          boost::python::list l;
+          int day, month, year, hour, minute, second;
+          double dd;
+          dd = get_date_day_month_year (d, day, month, year);
+          d2hms (dd, hour, minute, second);
+          l.append (year);
+          l.append (month);
+          l.append (day);
+          l.append  (hour);
+          l.append (minute);
+          l.append (second);
+          return l;
+        }
+      virtual double date2d (int year, int month, int day, int hour, int minute, int second) const
+        {
+          double tm;
+          tm = ((double)hour + ((double)minute + (date_sim)second / 60.0) / 60.0) / 24.0;
+          return ymd2d (year, month, day) + tm;
+        }
+      virtual std::string d2str (double d) const
+        {
+          char b[1024];
+          int day, month, year;
+          get_date_day_month_year (d, day, month, year);
+          sprintf (b, "%02d.%02d.%04d", day, month, year);
+          return std::string (b);
+        }
+      virtual std::string t2str (double d) const 
+        {
+          char b[1024];
+          int hour, minute, second;
+          d2hms (d, hour, minute, second);
+          sprintf (b, "Time: %02d:%02d:%02d", hour, minute, second);
+          return std::string (b);
+        }
+
       /** 
        * @brief python print wrapper
        * 

@@ -115,7 +115,7 @@ namespace blue_sky
     
     kp.hdm = this;
     data->h5_pool->open_file (model_name + ".h5", "/pool");
-    this->well_pool_->open_db (model_name + ".db");
+    this->well_pool_->open_db (":memory:");
     data->props->add_property_s(model_name.substr(0,model_name.find_last_of("/\\") + 1), "model_path", "model_path");
     km->init(hdm);
     
@@ -168,7 +168,7 @@ namespace blue_sky
     data->props->add_property_s(filename.substr(0,filename.find_last_of("/\\") + 1), "model_path", "model_path");
     
     data->h5_pool->open_file (model_name + ".h5", "/pool");
-    well_pool_->open_db (model_name + ".db");
+    well_pool_->open_db (":memory:");
     
     km->init(sp_hdm);
     kp.hdm = this;
