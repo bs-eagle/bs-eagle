@@ -111,7 +111,7 @@ namespace blue_sky
         {
           std::getline (file, s);
           trim (s);
-          if (s[0] == '#' || s == "")
+          if (s.length() < 1 || s[0] == '#')
             continue;
           if (state == 0) // read header
             {

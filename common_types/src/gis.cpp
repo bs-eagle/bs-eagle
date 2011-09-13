@@ -286,7 +286,7 @@ namespace blue_sky
         {
           std::getline (file, s);
           trim (s);
-          if (s == "" || s[0] == '#')
+          if (s.length() < 2 || s[0] == '#')
             continue;
           else if (s[0] == '~')
             {
