@@ -76,10 +76,10 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalOptions>/Zm1000 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zm1000</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir)/../bs_pvt/src/;$(ProjectDir)/../bs_csr_ilu_prec\include;$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include/;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../bs_lsolvers/include/;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../../hdf5-storage/src/;$(ProjectDir)/../bs_mtx/include/;$(ProjectDir)/../bs_base_linear_solvers/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(ProjectDir)/../sql_well/include;$(ProjectDir)/../bs_mesh/include;$(ProjectDir)/../bs_scal/include/;$(ProjectDir)/../bs_pvt/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(HDF5_PATH)/include;$(NUMPY_PATH)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;_USRDLL;_HDF5_;WIN32;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;BS_BOS_CORE_DEBUG_MEMORY_;_MPI_;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;_SCL_SECURE_NO_WARNINGS;NOMINMAX;%(PreprocessorDefinitions);BOOST_ALL_DYN_LINK;BOOST_ALL_DYN_LINK;_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_USRDLL;_HDF5_;WIN32;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;BS_BOS_CORE_DEBUG_MEMORY_;_MPI_;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;_SCL_SECURE_NO_WARNINGS;NOMINMAX;%(PreprocessorDefinitions);BOOST_ALL_DYN_LINK;BOOST_ALL_DYN_LINK;_SCL_SECURE_NO_WARNINGS; _SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
       <MinimalRebuild>true</MinimalRebuild>
@@ -89,6 +89,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <EnablePREfast>false</EnablePREfast>
+      <DisableSpecificWarnings>4520</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalDependencies>loki_D.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -103,7 +104,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalOptions>/Zm1000 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zm1000</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -111,7 +112,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>$(ProjectDir)/../bs_csr_ilu_prec\include;$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include/;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../bs_lsolvers/include/;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../../hdf5-storage/src/;$(ProjectDir)/../bs_mtx/include/;$(ProjectDir)/../bs_base_linear_solvers/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(ProjectDir)/../bs_mesh/include;$(ProjectDir)/../bs_scal/src/;$(ProjectDir)/../bs_scal/include/;$(ProjectDir)/../bs_pvt/src/;$(ProjectDir)/../sql_well/include/;$(ProjectDir)/../bs_pvt/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(HDF5_PATH)/include;$(NUMPY_PATH)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;BS_BOS_CORE_DEBUG_MEMORY_;_HDF5_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;BS_BOS_CORE_DEBUG_MEMORY_;_HDF5_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS; _SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
