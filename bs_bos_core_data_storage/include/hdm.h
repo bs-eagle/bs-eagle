@@ -84,6 +84,8 @@ namespace blue_sky {
       void set_mesh (sp_mesh_iface_t new_mesh) {mesh = new_mesh;};
 
       void set_init_model (BS_SP (init_model_iface) model) { init_model_ = model; }
+
+      void set_equil_model (BS_SP (equil_model_iface) model) { equil_model_ = model; }
       
       //CHECK
       void check_arrays_for_inactive_blocks () const;

@@ -85,7 +85,9 @@ namespace blue_sky {
       virtual void set_mesh (sp_mesh_iface_t mesh) = 0;
 
       virtual void set_init_model (BS_SP (init_model_iface) model) = 0;
-      
+  
+      virtual void set_equil_model (BS_SP (equil_model_iface) model) = 0;
+    
     };
 
 } //ns bs

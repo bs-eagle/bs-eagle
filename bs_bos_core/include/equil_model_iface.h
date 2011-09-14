@@ -1,8 +1,13 @@
 #ifndef __EQUIL_MODEL_IFACE_H
 #define __EQUIL_MODEL_IFACE_H
 
+
 namespace blue_sky
 {
+  class jfunction;
+  class table_iface;
+  class pvt_3p_iface;
+  class scal_3p_iface;
 
 	class BS_API_PLUGIN equil_model_iface : public objbase
 	{

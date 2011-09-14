@@ -16,6 +16,8 @@
 #include "read_class.h"
 #include "data_class.h"
 #include "constants.h"
+#include "equil_model_iface.h"
+#include "table_iface.h"
 
 namespace blue_sky 
 {
@@ -146,8 +148,25 @@ namespace blue_sky
       // flag indicating init section
       idata->props->set_i ("init_section", 1);
 
-      BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
 
+      params.hdm->init_equil (eql_region);
+
+      BS_SP (equil_model_iface) equil_model = params.hdm->get_equil_model ();
+      if (equil_model)
+        {
+          BS_ASSERT (eql_region == equil_model->get_n_equil_regions ());
+          for (t_long i = 0; i < eql_region; ++i)
+            {
+              BS_SP (table_iface) equil_tbl = equil_model->get_equil_region_data (i);
+              for (t_long ii = 0; ii < EQUIL_TOTAL_BLACK_OIL; ++ii)
+                {
+                  equil_tbl->set_value (0, ii, equil[EQUIL_TOTAL * i + ii]);
+                }
+            } 
+
+        }
+
+      BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
 
     }
     void
@@ -242,6 +261,7 @@ namespace blue_sky
     {
       BS_SP (keyword_manager_iface) keyword_manager = params.hdm->get_keyword_manager ();
       BS_ASSERT (keyword_manager);
+
 
       BS_SP (init_model_iface) init_model (BS_KERNEL.create_object ("equil_init_model"), bs_dynamic_cast ());
       params.hdm->set_init_model (init_model);

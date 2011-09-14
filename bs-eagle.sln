@@ -14,6 +14,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_bos_core", "bs_bos_core\bs_bos_core.vcxproj", "{B096BE31-726C-42A6-AFB0-C6BADE241F0D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bspy_loader", "..\..\python\bspy_loader\bspy_loader.vcxproj", "{5FC52CB5-D666-4608-A354-81E3B5DE6035}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7C235C2A-609A-49B4-A89B-AC23530F0F89} = {7C235C2A-609A-49B4-A89B-AC23530F0F89}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common_types", "common_types\common_types.vcxproj", "{917136D8-8A55-4319-9A9C-483BB647AC4E}"
 EndProject
