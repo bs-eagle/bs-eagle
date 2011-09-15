@@ -260,80 +260,6 @@ namespace blue_sky
       }
   }
   
-  void
-  pvt_3p::fill_pvt_arrays (bool is_oil, bool is_gas, bool is_water, 
-                           t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals,
-						               stdv_double density)
-  {
-
-    if (is_oil)
-      {
-        if (!is_gas)
-          {			
-            for (size_t i = 0; i<n_pvt_regions; i++)
-			{
-				BS_SP(table_iface) old_table = get_table(i, FI_PHASE_OIL);
-				if (old_table->get_col_name(0) == "gor")
-				{
-					BS_SP(table_iface) new_table = BS_KERNEL.create_object("table");
-					new_table->init(0, 3);
-					for (int i = 0; i < 3; i++)
-					{
-						new_table->add_col_vector(i, 
-												old_table->get_col_name(i+1),
-												old_table->get_col_values(i+1));
-					}
-					old_table = new_table;
-				}
-				init_pvt_arr_helper::set_pvt_base(pvt_oil_array[i], old_table);
-				pvt_oil_array[i]->set_surface_density(density[0]);
-			}
-          }
-        else
-          {
-            for (size_t i = 0; i<n_pvt_regions; i++)
-			{
-				pvt_oil_array[i]->set_surface_density(density[0]);
-			}
-          }
-      }
-    
-    if (is_gas) 
-      for (size_t i = 0; i<n_pvt_regions; i++)
-	  {
-		pvt_gas_array[i]->set_surface_density(density[1]);
-	  }
-    if (is_water)
-      for (size_t i = 0; i<n_pvt_regions; i++)
-	  {
-		/*BS_SP(table_iface) wat_table = get_table(i, FI_PHASE_WATER);
-		BS_SP(table_iface) new_table = BS_KERNEL.create_object("table");
-		int n_rows = wat_table->get_n_rows();
-		new_table->init(n_rows, 4);
-		for (size_t col = 0; col<4; col++)
-		{
-			new_table->set_col_name(col, wat_table->get_col_name(col));
-			for (size_t row = 0; row < n_rows; row++)
-			{
-				new_table->set_value(row, col, wat_table->get_value(row, col));
-			}
-		}
-		init_pvt_arr_helper::set_pvt_base(pvt_water_array[i], new_table);*/
-		pvt_water_array[i]->set_surface_density(density[2]);
-	  }
-
-    for (size_t i = 0; i < n_pvt_regions; i++)
-      {
-        if (is_oil)
-          pvt_oil_array[i]->build (atm_p, min_p, max_p, n_intervals);
-
-        if (is_gas)
-          pvt_gas_array[i]->build (atm_p, min_p, max_p, n_intervals);
-
-        if (is_water)
-          pvt_water_array[i]->build (atm_p, min_p, max_p, n_intervals);
-      }
-  }
 
   BS_SP (pvt_dead_oil) 
   pvt_3p::get_pvt_oil (const t_long index_pvt_region) const
@@ -426,23 +352,33 @@ namespace blue_sky
     t_float *density_data = &(*density)[0];
     for (t_long i = 0; i < n_pvt_regions; i++)
       {
-         density_table[i]->set_value (0, 0, density_data[i * FI_PHASE_TOT]);
+         density_table[i]->set_value (0, 0, density_data[i * FI_PHASE_TOT + 0]);
          density_table[i]->set_value (0, 1, density_data[i * FI_PHASE_TOT + 1]);
          density_table[i]->set_value (0, 2, density_data[i * FI_PHASE_TOT + 2]);
-         
-         if (pvt_oil_array[i].get ())
-           pvt_oil_array[i]->set_surface_density (density_data[i * FI_PHASE_TOT]);
-         if (pvt_water_array[i].get ())
-           pvt_water_array[i]->set_surface_density (density_data[i * FI_PHASE_TOT + 1]);     
-         if (pvt_gas_array[i].get ())
-           pvt_gas_array[i]->set_surface_density (density_data[i * FI_PHASE_TOT + 2]);          
       }
   }
   
+  void
+  pvt_3p::set_density_to_pvt_arrays ()
+  {
+    for (t_long i = 0; i < n_pvt_regions; i++)
+      {
+         if (pvt_oil_array[i].get ())
+           pvt_oil_array[i]->set_surface_density (density_table[i]->get_value (0, 0));
+         if (pvt_water_array[i].get ())
+           pvt_water_array[i]->set_surface_density (density_table[i]->get_value (0, 1));     
+         if (pvt_gas_array[i].get ())
+           pvt_gas_array[i]->set_surface_density (density_table[i]->get_value (0, 2)); 
+      }      
+  }
+
 	//! build pvt internal tables 
 	void 
-	pvt_3p::build_pvt_internal (t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals)
+	pvt_3p::init_pvt_calc_data (t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals)
 	{
+    // set density 
+    set_density_to_pvt_arrays ();
+    // build calc pvt data 
     for (t_long i = 0; i < n_pvt_regions; i++)
       {
         if (pvt_oil_array[i].get ())

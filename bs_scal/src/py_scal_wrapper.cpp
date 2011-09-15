@@ -42,7 +42,7 @@ namespace blue_sky
       .add_property ("water_jfunction",  &T::get_water_jfunction, &T::set_water_jfunction)
       .add_property ("gas_jfunction",    &T::get_gas_jfunction, &T::set_gas_jfunction)
     .def ("init_tables", &T:: init_scal_input_table_arrays)
-	  .def ("init_from_scal", &T::init_from_scal)
+	  .def ("init_scal_calc_data", &T::init_scal_calc_data)
 	  .def ("get_tables_list", &T::get_tables_list)
 	  .def ("get_n_scal_regions", &T::get_n_scal_regions)
 	  .def ("get_table", &T::get_table)

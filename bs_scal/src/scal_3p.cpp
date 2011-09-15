@@ -1478,14 +1478,14 @@ namespace blue_sky
   }
 
   void
-  scal_3p::init_from_scal()
+  scal_3p::init_scal_calc_data ()
   {
 	  sp_jfunction_t wat_jfunc = BS_KERNEL.create_object(jfunction::bs_type());
 	  sp_jfunction_t gas_jfunc = BS_KERNEL.create_object(jfunction::bs_type());
 	  phase_d_t phase_d;
 	  sat_d_t sat_d;
 	  t_long n_phases = 0;
-      t_long phases = 0;
+    t_long phases = 0;
 	  t_long sat_counter = 0;    
       if (is_water)
       {

@@ -41,7 +41,7 @@ namespace python    {
 
 	PY_EXPORTER (pvt_3p_exporter, default_exporter)
 	  .def ("init_pvt_arrays", &T::init_pvt_arrays)
-	  .def ("fill_pvt_arrays", &T::fill_pvt_arrays)
+	  .def ("init_pvt_calc_data", &T::init_pvt_calc_data)
 	  .def ("get_table", &T::get_table)
 	  .def ("get_n_pvt_regions", &T::get_n_pvt_regions)
 	  .def ("get_density_table", &T::get_density_table)

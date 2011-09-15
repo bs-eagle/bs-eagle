@@ -189,7 +189,7 @@ namespace blue_sky
     get_n_scal_regions () = 0;
     
     virtual void
-    init_from_scal () = 0;
+    init_scal_calc_data () = 0;
 
     virtual void
     init_from_scal_ex(const phase_d_t &phase_d, const sat_d_t &sat_d,

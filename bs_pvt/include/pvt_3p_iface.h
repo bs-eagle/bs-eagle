@@ -71,11 +71,6 @@ namespace blue_sky
         init_pvt_arrays (const t_long n_pvt_regions_, 
                          bool is_oil, bool is_gas, bool is_water) = 0;
 
-        virtual void
-        fill_pvt_arrays (bool is_oil, bool is_gas, bool is_water, 
-                         t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals,
-                         stdv_double density) = 0;
-        
         virtual BS_SP (table_iface)
 				get_table (t_long index_pvt_region, t_long pvt_fluid_type) const = 0;	 
 
@@ -96,7 +91,7 @@ namespace blue_sky
 				           
 				//! build pvt internal tables 
 				virtual void 
-				build_pvt_internal (t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals) = 0;           
+				init_pvt_calc_data (t_float atm_p, t_float min_p, t_float max_p, t_float n_intervals) = 0;           
     };
 
 } // namespace blue_sky

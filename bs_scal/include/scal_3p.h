@@ -179,7 +179,7 @@ namespace blue_sky
       update_gas_data ();
 
 	    void
-	    init_from_scal();
+	    init_scal_calc_data ();
 
 	    void
 	    init_from_scal_ex(const phase_d_t &phase_d, const sat_d_t &sat_d,
