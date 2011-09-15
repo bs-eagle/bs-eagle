@@ -356,6 +356,8 @@ namespace blue_sky
          density_table[i]->set_value (0, 1, density_data[i * FI_PHASE_TOT + 1]);
          density_table[i]->set_value (0, 2, density_data[i * FI_PHASE_TOT + 2]);
       }
+    // set density values to pvt arrays
+    set_density_to_pvt_arrays ();
   }
   
   void
