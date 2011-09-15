@@ -10,19 +10,17 @@
 #define WPI_STRATEGY_3D_SJLKT8NL
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/intersections.h>
-#include <CGAL/point_generators_3.h>
+#include <CGAL/Object.h>
 #include <CGAL/Bbox_3.h>
 #include <CGAL/box_intersection_d.h>
-#include <CGAL/function_objects.h>
-#include <CGAL/Join_input_iterator.h>
-#include <CGAL/algorithm.h>
 #include <CGAL/intersections.h>
-#include <CGAL/Object.h>
+//#include <CGAL/function_objects.h>
+//#include <CGAL/Join_input_iterator.h>
+//#include <CGAL/algorithm.h>
 
 #include "conf.h"
 
-namespace blue_sky {
+namespace blue_sky { namespace wpi {
 
 struct wpi_strategy_3d {
 	// common typedefs
@@ -296,7 +294,7 @@ struct wpi_strategy_3d {
 	}
 };
 
-} // eof blue_sky
+}} // eof blue_sky::wpi
 
 #endif /* end of include guard: WPI_STRATEGY_3D_SJLKT8NL */
 
