@@ -252,6 +252,13 @@ namespace blue_sky
           }
       }
 
+    if (p.dset > 0)
+      {
+        t_long size = p.size;
+        p.size = -1; // set wrong size to push dataset recreation when next set_data is called
+        return size;
+      }
+      
     return p.size;   
   }
 
@@ -530,7 +537,7 @@ namespace blue_sky
     herr_t r = H5Dwrite (p.dset, p.dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
     if (r < 0)
       {
-        bs_throw_exception (boost::format ("Can't write data: %s") % name);
+        bs_throw_exception (boost::format ("Can't write data (%s)") % name);
       }
   }
     
@@ -713,7 +720,7 @@ namespace blue_sky
     if (n_dims > 10)
       bs_throw_exception (boost::format ("py_set_pool_dims: too big dims number %d!") % n_dims);
     
-    for (int i = 0; i < n_dims; ++i)
+    for (i = 0; i < n_dims; ++i)
       {
         arr_dims[i] = boost::python::extract<int>(dims[i]);
       }
