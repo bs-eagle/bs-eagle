@@ -52,20 +52,6 @@ struct wpi_strategy_3d {
 
 	// misc helper functions
 
-	// assign for c arrays
-	// fun with returning reference to array :)
-	template< class T >
-	static T (&ca_assign(T (&lhs)[D], const T (&rhs)[D]))[D] {
-		copy(&rhs[0], &rhs[D], &lhs[0]);
-		return lhs;
-	}
-
-	template< class T >
-	static T (&ca_assign(T (&lhs)[D], const T& v))[D] {
-		fill(&lhs[0], &lhs[D], v);
-		return lhs;
-	}
-
 	// X-Y-Z order!
 	static void decode_cell_id(ulong id, vertex_pos_i& res, const vertex_pos_i& m_size) {
 		//vertex_pos_i res;
@@ -84,10 +70,6 @@ struct wpi_strategy_3d {
 
 	static Point vertex_pos2point(const vertex_pos& p) {
 		return Point(p[0], p[1], p[2]);
-	}
-
-	static Iso_bbox vertex_pos2rect(const vertex_pos& lo, const vertex_pos& hi) {
-		return Iso_bbox(vertex_pos2point(lo), vertex_pos2point(hi));
 	}
 
 	// add members nessessary to cover find intersection points and checking
@@ -270,13 +252,18 @@ struct wpi_strategy_3d {
 		}
 	};
 
+	typedef std::list< std::pair< Point, uint > > xpoints_list;
+
 	// action taken on well & mesh boxes intersection
-	template< class cell_handle, class well_handle, class intersect_path, class Box >
-	static void on_boxes_intersect(cell_handle* cf, well_handle* wf, intersect_path x_, const Box& bc, const Box& bw) {
-		typedef typename cell_handle::data_t cell_data;
-		typedef typename well_handle::data_t well_data;
+	template< class cell_handle, class well_handle, class Box >
+	static xpoints_list on_boxes_intersect(
+		cell_handle* cf, well_handle* wf,
+		const Box& bc, const Box& bw)
+	{
 		typedef typename cell_handle::fish_t cell_fish_t;
 		typedef typename well_handle::fish_t well_fish_t;
+		typedef typename cell_handle::data_t cell_data;
+		typedef typename well_handle::data_t well_data;
 
 		cell_fish_t cell_fish = cf->data();
 		well_fish_t well_fish = wf->data();
@@ -287,6 +274,7 @@ struct wpi_strategy_3d {
 		if(!c.cover.size())
 			c.cell_tri_cover();
 
+		xpoints_list res;
 		// check that each triangle really intersects with given well segment
 		Segment s = w.segment();
 		uint tri_count = 0;
@@ -297,25 +285,14 @@ struct wpi_strategy_3d {
 			Object xres = CGAL::intersection(s, *tri);
 			// in 99% of cases we should get a point of intersection
 			if(const Point* xpoint = CGAL::object_cast< Point >(&xres))
-				x_.insert(well_hit_cell(
-					*xpoint, well_fish, cell_fish,
-					calc_md(well_fish, *xpoint),
-					tri_count >> 1
-			));
+				res.push_back(std::make_pair(*xpoint, tri_count >> 1));
 			else if(const Segment* xseg = CGAL::object_cast< Segment >(&xres)) {
 				// in rare 1% of segment lying on the facet, add begin and end of segment
-				x_.insert(well_hit_cell(
-					xseg->source(), well_fish, cell_fish,
-					calc_md(well_fish, xseg->source()),
-					tri_count >> 1
-				));
-				x_.insert(well_hit_cell(
-					xseg->target(), well_fish, cell_fish,
-					calc_md(well_fish, xseg->target()),
-					tri_count >> 1
-				));
+				res.push_back(std::make_pair(xseg->source(), tri_count >> 1));
+				res.push_back(std::make_pair(xseg->target(), tri_count >> 1));
 			}
 		}
+		return res;
 	}
 };
 

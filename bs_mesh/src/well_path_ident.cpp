@@ -89,7 +89,7 @@ public:
  * implement well path identification algos depending on strategy
  *----------------------------------------------------------------*/
 template< class strat_t >
-struct wpi_impl : public strat_t {
+struct wpi_impl {
 	// import strategy typedefs
 	typedef typename strat_t::Object   Object;
 	typedef typename strat_t::Kernel   Kernel;
@@ -103,18 +103,49 @@ struct wpi_impl : public strat_t {
 	typedef typename strat_t::cell_pos     cell_pos;
 
 	// import global consts
-	//enum { D = strat_t::D, CVA = strat_t::CVA, inner_point_id = strat_t::inner_point_id };
-	using strat_t::D;
-	using strat_t::CVN;
-	using strat_t::inner_point_id;
+	enum { D = strat_t::D, CVN = strat_t::CVN, inner_point_id = strat_t::inner_point_id };
+	//using strat_t::D;
+	//using strat_t::CVN;
+	//using strat_t::inner_point_id;
 
 	// import misc helper functions
-	using strat_t::ca_assign;
-	using strat_t::decode_cell_id;
-	using strat_t::encode_cell_id;
-	using strat_t::vertex_pos2bbox;
-	using strat_t::vertex_pos2point;
-	using strat_t::vertex_pos2rect;
+	//typedef typename strat_t::decode_cell_id decode_cell_id;
+	//typedef typename strat_t::encode_cell_id encode_cell_id;
+	//typedef typename strat_t::vertex_pos2bbox vertex_pos2bbox;
+	//typedef typename strat_t::vertex_pos2point vertex_pos2point;
+
+	static void decode_cell_id(ulong id, vertex_pos_i& res, const vertex_pos_i& m_size) {
+		strat_t::decode_cell_id(id, res, m_size);
+	}
+	static ulong encode_cell_id(const vertex_pos_i& p, const vertex_pos_i& m_size) {
+		return strat_t::encode_cell_id(p, m_size);
+	}
+
+	static Bbox vertex_pos2bbox(const vertex_pos& lo, const vertex_pos& hi) {
+		return strat_t::vertex_pos2bbox(lo, hi);
+	}
+
+	static Point vertex_pos2point(const vertex_pos& p) {
+		return strat_t::vertex_pos2point(p);
+	}
+
+	// assign for c arrays
+	// fun with returning reference to array :)
+	template< class T >
+	static T (&ca_assign(T (&lhs)[D], const T (&rhs)[D]))[D] {
+		std::copy(&rhs[0], &rhs[D], &lhs[0]);
+		return lhs;
+	}
+
+	template< class T >
+	static T (&ca_assign(T (&lhs)[D], const T& v))[D] {
+		std::fill(&lhs[0], &lhs[D], v);
+		return lhs;
+	}
+
+	static Iso_bbox vertex_pos2rect(const vertex_pos& lo, const vertex_pos& hi) {
+		return Iso_bbox(vertex_pos2point(lo), vertex_pos2point(hi));
+	}
 
 	/*-----------------------------------------------------------------
 	* cell description
@@ -567,7 +598,7 @@ struct wpi_impl : public strat_t {
 			return std::sqrt(Segment(p1, p2).squared_length());
 		}
 
-		static double calc_md(wp_iterator& fish, const Point& target) {
+		static double calc_md(const wp_iterator& fish, const Point& target) {
 			// walk all segments before the last one;
 			double md = fish->second.md();
 			// append tail
@@ -576,19 +607,28 @@ struct wpi_impl : public strat_t {
 		}
 
 		void operator()(const Box& bc, const Box& bw) {
-			//std::cout << "intersection detected!" << std::endl;
-			//return;
+			typedef typename strat_t::xpoints_list xpoints_list;
 
 			//trim_iterator cell_fish = static_cast< cell_box_handle* >(bc.handle().get())->data();
 			//wp_iterator well_fish = static_cast< well_box_handle* >(bw.handle().get())->data();
 			//cell_data& c = cell_fish->second;
 			//well_data& w = well_fish->second;
 
-			strat_t::on_boxes_intersect(
-				static_cast< cell_box_handle* >(bc.handle().get()),
-				static_cast< well_box_handle* >(bw.handle().get()),
-				x_, bc, bw
-			);
+			cell_box_handle* cell_h = static_cast< cell_box_handle* >(bc.handle().get());
+			well_box_handle* well_h = static_cast< well_box_handle* >(bw.handle().get());
+
+			xpoints_list res = strat_t::on_boxes_intersect(cell_h, well_h, bc, bw);
+
+			// add all points to interscetion path
+			for(typename xpoints_list::iterator px = res.begin(), end = res.end(); px != end; ++px) {
+				x_.insert(well_hit_cell(
+					px->first, well_h->data(), cell_h->data(),
+					calc_md(well_h->data(), px->first),
+					px->second
+				));
+			}
+
+			//strat_t::on_boxes_intersect< wpi_impl >(bc, bw, x_);
 		}
 
 		// run it after all dups killed
