@@ -597,6 +597,10 @@ COMMIT;\
       if (sqlite3_step (stmp) == SQLITE_ROW) // UPDATE
         {
           int n = sqlite3_column_bytes (stmp, 0);  
+          if (n < 1)
+            {
+              return sp_gis_t ();
+            }
           const char *b = (const char *)sqlite3_column_blob (stmp, 0);
           //std::string s = (const char *)sqlite3_column_text (stmp, 0);
           std::string s;
