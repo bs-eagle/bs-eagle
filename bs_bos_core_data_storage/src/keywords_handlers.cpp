@@ -131,7 +131,7 @@ namespace blue_sky
     prop_names_t &names = km->handlers[keyword].prop_names;
     
     n = format.length();
-    reader->read_line (buf, CHAR_BUF_LEN);
+    reader->read_line (buf, CHAR_BUF_LEN, FREAD_DONT_CONVERT_CASE);
     start = buf;
     for (i = 0; i <n; ++i)
       {
