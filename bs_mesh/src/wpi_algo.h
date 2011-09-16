@@ -733,9 +733,8 @@ struct wpi_algo {
 				// MD
 				*pr++ = px->md;
 				// intersection point
-				*pr++ = px->where.x();
-				*pr++ = px->where.y();
-				*pr++ = px->where.z();
+				for(uint i = 0; i < D; ++i)
+					*pr++ = px->where[i];
 				// facet id
 				*pr++ = px->facet;
 				// node flag
@@ -885,17 +884,6 @@ struct wpi_algo {
 	static spv_float well_path_ident_d(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 		spv_float well_info, bool include_well_nodes)
 	{
-		//typedef wpi_impl< strat_t > impl;
-		//typedef typename impl::Point Point;
-		//typedef typename impl::Box Box;
-
-		//typedef typename impl::cell_data cell_data;
-		//typedef typename impl::well_data well_data;
-		//typedef typename impl::mesh_part mesh_part;
-		//typedef typename impl::well_path well_path;
-		//typedef typename impl::trimesh trimesh;
-		//typedef typename impl::intersect_path intersect_path;
-
 		// 1) calculate mesh nodes coordinates and build initial trimesh
 		trimesh M;
 		spv_float tops;
@@ -916,8 +904,12 @@ struct wpi_algo {
 		// walk along well
 		v_float::iterator pw = well_info->begin();
 		//double md = 0;
+		well_data wd;
 		for(ulong i = 0; i < well_node_num - 1; ++i) {
-			well_data wd(pw);
+			if(i)
+				wd = well_data(pw, &W[i - 1]);
+			else
+				wd = well_data(pw);
 			wnodes[i] = wd.start();
 
 			// make bbox
@@ -935,7 +927,11 @@ struct wpi_algo {
 		// to restrict search area
 		// intersections storage
 		intersect_path X;
-		vertex_pos_i mesh_size = {nx, ny, nz};
+		// TODO: init mesh_size in better way
+		ulong full_mesh_size[] = {nx, ny, nz};
+		vertex_pos_i mesh_size;
+		std::copy(full_mesh_size, full_mesh_size + D, mesh_size);
+
 		intersect_action A(M, W, X, mesh_size);
 		const std::vector< ulong >& hit_idx = A.where_is_point(wnodes);
 		// create part of mesh to process based on these cells

@@ -237,7 +237,7 @@ struct wpi_strategy_3d {
 		// ctors
 		well_data() {}
 
-		well_data(t_float *const segment) : base_t(segment) {}
+		well_data(t_float *const segment, const well_data* prev = NULL) : base_t(segment) {}
 
 		// MD access
 		using base_t::W;

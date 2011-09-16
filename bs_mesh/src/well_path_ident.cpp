@@ -8,6 +8,7 @@
 
 #include "well_path_ident.h"
 #include "wpi_strategy_3d.h"
+#include "wpi_strategy_2d.h"
 #include "wpi_algo.h"
 
 #include "bs_mesh_stdafx.h"
@@ -27,17 +28,29 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 	);
 }
 
+// specialization for 2D
+spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+	spv_float well_info, bool include_well_nodes)
+{
+	//return well_path_ident_(nx, ny, coord, zcorn, well_info, include_well_nodes);
+	return wpi::wpi_algo< wpi::wpi_strategy_2d >::well_path_ident_d(
+		nx, ny, coord, zcorn, well_info, include_well_nodes
+	);
+}
+
 /*-----------------------------------------------------------------
  * Python bindings
  *----------------------------------------------------------------*/
 BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl, well_path_ident, 5, 6)
 BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl_2d, well_path_ident_2d, 5, 6)
+BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl_2d_old, well_path_ident_2d_old, 5, 6)
 
 namespace python {
 
 void py_export_wpi() {
 	bp::def("well_path_ident", &well_path_ident, well_path_ident_overl());
 	bp::def("well_path_ident_2d", &well_path_ident_2d, well_path_ident_overl_2d());
+	bp::def("well_path_ident_2d_old", &well_path_ident_2d_old, well_path_ident_overl_2d_old());
 }
 
 }
