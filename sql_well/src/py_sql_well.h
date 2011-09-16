@@ -62,6 +62,8 @@ namespace blue_sky
         args ("Column"), "Return bool value of column")
     .def ("get_sql_str",                        &T::get_sql_str, 
         args ("Column"), "Return text value of column")
+    .def ("get_table",                          &T::get_table, 
+        args ("Table_name", "Column list", "Filter"), "Return nparray of values in columns list")
     .def ("exec_sql",                           &T::exec_sql, 
         args ("Sql_string"), "Execute SQL")
     .def ("read_from_ascii_file",               &T::read_from_ascii_file, 

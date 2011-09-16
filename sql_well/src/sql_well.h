@@ -1,8 +1,8 @@
-/** 
+/**
  * @file sql_well.h
  * @brief implementation of #well_pool_iface on sqlite database
  * @author Oleg Borschuk
- * @version 
+ * @version
  * @date 2011-07-29
  */
 #ifndef SQL_WELL_YSG17OI0
@@ -21,10 +21,10 @@
 
 namespace blue_sky
 {
-  
+
   class BS_API_PLUGIN sql_well : public well_pool_iface
     {
-    public: 
+    public:
       typedef std::list<std::string>                    list_t;
       typedef BS_SP (prop_iface)                        sp_prop_t;
       typedef BS_SP (table_iface)                       sp_table_t;
@@ -41,32 +41,32 @@ namespace blue_sky
       // INTERFACE METHODS
       // ------------------------------------
 
-      /** 
-       * @brief return SP to the property 
+      /**
+       * @brief return SP to the property
        */
       //virtual sp_prop_t get_prop ()
       //  {
       //    return sp_prop;
       //  }
 
-      /** 
+      /**
        * @brief this method should be call first
-       * 
+       *
        * @param file  -- <INPUT> data base file
-       * 
+       *
        * @return 0 if success
        */
-      virtual int open_db (const std::string &file); 
+      virtual int open_db (const std::string &file);
 
-      /** 
+      /**
        * @brief close database connection
        */
-      virtual void close_db (); 
+      virtual void close_db ();
 
 
-      /** 
+      /**
        * @brief create internal structure of the database
-       * 
+       *
        * @return 0 if success
        */
       virtual int create_db_struct ();
@@ -74,21 +74,21 @@ namespace blue_sky
       virtual void fill_db ();
 
       // wels
-      /** 
+      /**
        * @brief add well to the storage
-       * 
+       *
        * @param well_name -- <INPUT> name for the new well
-       * 
+       *
        * @return 0 if OK
        */
       virtual int add_well (const std::string &well_name);
       virtual list_t get_well_names () const;
       //virtual int set_well_param (const std::string &wname, double date, const std::string param, double value);
       //virtual double get_well_param (const std::string &wname, double date, const std::string param);
-      
+
       // branches
       //virtual list_t get_branches_names (const std::string &well_name) const;
-      //virtual int add_branch (const std::string &wname, const std::string &branch, 
+      //virtual int add_branch (const std::string &wname, const std::string &branch,
       //                        t_double md, const std::string &parent);
       //virtual int add_branch_prop (const std::string &wname, const std::string &branch,
       //                             sp_table_t tbl);
@@ -110,12 +110,21 @@ namespace blue_sky
       virtual bool get_sql_bool (t_int col);
       virtual std::string get_sql_str (t_int col);
       virtual int exec_sql (const std::string &sql);
-	  virtual int insert_or_update (const std::string &select_sql,
-                            const std::string &insert_sql,
-                            const std::string &update_sql);
-      /** 
+      virtual int insert_or_update (const std::string &select_sql,
+                                    const std::string &insert_sql,
+                                    const std::string &update_sql);
+      /**
+       * @brief get data from SQL table
+       * @param table_name     -- <INPUT> name of table
+       * @param table_columns  -- <INPUT> list of column names
+       * @param filter         -- <INPUT> specification for SQL.SELECT
+       * @return smart pointer to 2D array
+       */
+      virtual spv_double get_table (const std::string &table_name, boost::python::list &table_columns, const std::string &filter);
+
+      /**
        * @brief read from ascii file in new format
-       * 
+       *
        * @param fname -- <INPUT> input file name
        *
        * @return 0 if success
@@ -133,7 +142,7 @@ namespace blue_sky
           l.append (year);
           l.append (month);
           l.append (day);
-          l.append  (hour);
+          l.append (hour);
           l.append (minute);
           l.append (second);
           return l;
@@ -152,7 +161,7 @@ namespace blue_sky
           sprintf (b, "%02d.%02d.%04d", day, month, year);
           return std::string (b);
         }
-      virtual std::string t2str (double d) const 
+      virtual std::string t2str (double d) const
         {
           char b[1024];
           int hour, minute, second;
@@ -161,18 +170,18 @@ namespace blue_sky
           return std::string (b);
         }
 
-      /** 
+      /**
        * @brief python print wrapper
-       * 
+       *
        * @return return table description
        */
       virtual std::string py_str () const;
 
 #endif //BSPY_EXPORTING_PLUGIN
-      
+
     protected:
       int create_db (sqlite3 *db_in);
-      
+
       int read_date_and_time (char *buf, char **next_start, double *dd);
       int read_w_spec (char *buf);
       int read_w_branch_f (char *buf);
@@ -190,7 +199,7 @@ namespace blue_sky
       std::string   file_name;          //!< database filename
       sqlite3       *db;                //!< database pointer
       sqlite3_stmt  *stmp_sql;
-      FRead *fr_file;                    //!< read from ascii helper 
+      FRead *fr_file;                    //!< read from ascii helper
 
       BLUE_SKY_TYPE_DECL (sql_well);
     };

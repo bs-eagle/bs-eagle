@@ -120,9 +120,11 @@ class well_pool_iface : public objbase
       virtual bool get_sql_bool (t_int col) = 0;
       virtual std::string get_sql_str (t_int col) = 0;
       virtual int exec_sql (const std::string &sql) = 0;
-	  virtual int insert_or_update (const std::string &select_sql,
-									const std::string &insert_sql,
-									const std::string &update_sql) = 0;
+      virtual int insert_or_update (const std::string &select_sql,
+                                    const std::string &insert_sql,
+                                    const std::string &update_sql) = 0;
+      virtual spv_double get_table (const std::string &table_name, boost::python::list &table_columns, const std::string &filter) = 0;
+
       /** 
        * @brief create internal structure of the database
        * 
