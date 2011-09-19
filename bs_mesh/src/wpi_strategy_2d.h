@@ -9,28 +9,26 @@
 #ifndef WPI_STRATEGY_2D_C5EHIKCY
 #define WPI_STRATEGY_2D_C5EHIKCY
 
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Object.h>
-#include <CGAL/box_intersection_d.h>
-#include <CGAL/intersections.h>
+#include "wpi_common.h"
+//#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+//#include <CGAL/Object.h>
+//#include <CGAL/box_intersection_d.h>
+//#include <CGAL/intersections.h>
 #include <CGAL/Bbox_2.h>
 #include <CGAL/Polygon_2.h>
-//#include <CGAL/function_objects.h>
-//#include <CGAL/Join_input_iterator.h>
-//#include <CGAL/algorithm.h>
 
-#include "conf.h"
+//#include "conf.h"
 
 namespace blue_sky { namespace wpi {
 
 struct wpi_strategy_2d {
 	// common typedefs
-	typedef t_ulong ulong;
-	typedef t_uint uint;
+	//typedef t_ulong ulong;
+	//typedef t_uint uint;
 
 	// main typedefs
-	typedef CGAL::Object                                        Object;
-	typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
+	//typedef CGAL::Object                                        Object;
+	//typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 	typedef Kernel::Point_2                                     Point;
 	typedef Kernel::Segment_2                                   Segment;
 	typedef CGAL::Bbox_2                                        Bbox;

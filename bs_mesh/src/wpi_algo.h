@@ -12,6 +12,7 @@
 #include "conf.h"
 #include "bs_mesh_grdecl.h"
 
+#include "wpi_common.h"
 #include "wpi_algo_pod.h"
 #include "wpi_algo_meshp.h"
 #include "wpi_algo_xaction.h"
@@ -26,15 +27,7 @@ namespace blue_sky { namespace wpi {
  *----------------------------------------------------------------*/
 template< class strat_t >
 struct wpi_algo : public wpi_algo_helpers< strat_t > {
-	// common typedefs
-	typedef t_ulong ulong;
-	typedef t_uint uint;
-	typedef v_float::iterator vf_iterator;
-	typedef smart_ptr< bs_mesh_grdecl > sp_grd_mesh;
-
 	// import strategy typedefs
-	typedef typename strat_t::Object   Object;
-	typedef typename strat_t::Kernel   Kernel;
 	typedef typename strat_t::Point    Point;
 	typedef typename strat_t::Segment  Segment;
 	typedef typename strat_t::Bbox     Bbox;
@@ -46,9 +39,6 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 
 	// import global consts
 	enum { D = strat_t::D, CVN = strat_t::CVN, inner_point_id = strat_t::inner_point_id };
-	//using strat_t::D;
-	//using strat_t::CVN;
-	//using strat_t::inner_point_id;
 
 	// import pods
 	typedef wpi_algo_pod< strat_t > wpi_pod;

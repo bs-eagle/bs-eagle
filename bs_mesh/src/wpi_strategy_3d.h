@@ -9,27 +9,25 @@
 #ifndef WPI_STRATEGY_3D_SJLKT8NL
 #define WPI_STRATEGY_3D_SJLKT8NL
 
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Object.h>
+#include "wpi_common.h"
+//#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+//#include <CGAL/Object.h>
 #include <CGAL/Bbox_3.h>
-#include <CGAL/box_intersection_d.h>
-#include <CGAL/intersections.h>
-//#include <CGAL/function_objects.h>
-//#include <CGAL/Join_input_iterator.h>
-//#include <CGAL/algorithm.h>
+//#include <CGAL/box_intersection_d.h>
+//#include <CGAL/intersections.h>
 
-#include "conf.h"
+//#include "conf.h"
 
 namespace blue_sky { namespace wpi {
 
 struct wpi_strategy_3d {
 	// common typedefs
-	typedef t_ulong ulong;
-	typedef t_uint uint;
+	//typedef t_ulong ulong;
+	//typedef t_uint uint;
 
 	// main typedefs
-	typedef CGAL::Object                                        Object;
-	typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
+	//typedef CGAL::Object                                        Object;
+	//typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 	typedef Kernel::Point_3                                     Point;
 	typedef Kernel::Segment_3                                   Segment;
 	typedef CGAL::Bbox_3                                        Bbox;

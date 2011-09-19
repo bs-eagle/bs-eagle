@@ -9,9 +9,11 @@
 #ifndef WPI_ALGO_XACTION_PLJRVQ8B
 #define WPI_ALGO_XACTION_PLJRVQ8B
 
+#include <CGAL/box_intersection_d.h>
+#include <CGAL/intersections.h>
+
 #include "wpi_algo_pod.h"
 #include "wpi_algo_meshp.h"
-#include <cmath>
 
 #define MD_TOL 0.000001
 
@@ -23,9 +25,10 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 	typedef typename strat_t::vertex_pos   vertex_pos;
 	typedef typename strat_t::vertex_pos_i vertex_pos_i;
 	typedef typename strat_t::cell_pos     cell_pos;
+
 	typedef typename strat_t::Point    Point;
 	typedef typename strat_t::Segment  Segment;
-	typedef v_float::iterator vf_iterator;
+
 	// import global consts
 	enum { D = strat_t::D, CVN = strat_t::CVN, inner_point_id = strat_t::inner_point_id };
 

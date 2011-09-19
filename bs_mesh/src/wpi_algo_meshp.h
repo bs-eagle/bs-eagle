@@ -20,8 +20,9 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 	typedef typename strat_t::vertex_pos_i vertex_pos_i;
 	typedef typename strat_t::cell_pos     cell_pos;
 
-	typedef typename strat_t::Point Point;
+	typedef typename strat_t::Point    Point;
 	typedef typename strat_t::Iso_bbox Iso_bbox;
+
 	// import global consts
 	enum { D = strat_t::D, CVN = strat_t::CVN, inner_point_id = strat_t::inner_point_id };
 

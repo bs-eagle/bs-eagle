@@ -9,6 +9,8 @@
 #ifndef WPI_ALGO_POD_BDBOLFWA
 #define WPI_ALGO_POD_BDBOLFWA
 
+#include "wpi_common.h"
+
 namespace blue_sky { namespace wpi {
 
 template< class strat_t >
