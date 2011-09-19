@@ -69,10 +69,108 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 	typedef typename wpi_xaction::intersect_action intersect_action;
 
 	/*-----------------------------------------------------------------
-	 * branch & bound algorithm for finding intersections
+	 * branch & bound algorithm for finding cells that really intersect with well
 	 *----------------------------------------------------------------*/
-	struct branch_bound_intersect {
-		
+	struct branch_bound {
+		typedef typename wpi_xaction::mesh_box_handle mesh_box_handle;
+		typedef typename strat_t::xpoints_list xpoints_list;
+
+		typedef std::list< mesh_part > search_space;
+		typedef typename search_space::iterator ss_iterator;
+		typedef typename search_space::const_iterator css_iterator;
+
+		typedef std::list< trim_iterator > result_t;
+
+		branch_bound(std::vector< Box >& well_boxes, trimesh& M,
+			const vertex_pos_i& mesh_size, const std::vector< ulong > hit_idx)
+			: wb_(well_boxes)
+		{
+			init(M, mesh_size, hit_idx);
+		}
+
+		void init(trimesh& M, const vertex_pos_i& mesh_size, const std::vector< ulong > hit_idx) {
+			// create list of mesh parts for each well segment
+			for(ulong i = 0; i < hit_idx.size() - 1; ++i) {
+				mesh_part seg_m(M, mesh_size);
+				seg_m.init(hit_idx[i], hit_idx[i + 1]);
+				space_.push_back(seg_m);
+			}
+		}
+
+		result_t& go() {
+			typedef typename mesh_part::container_t meshp_container;
+
+			res_.clear();
+			while(space_.size()) {
+				// split each mesh part and intersect splitting with well path
+				search_space div_space;
+				for(css_iterator pp = space_.begin(), end = space_.end(); pp != end; ++pp) {
+					meshp_container kids = pp->divide();
+					div_space.insert(div_space.begin(), kids.begin(), kids.end());
+				}
+
+				// make boxes around div space
+				std::vector< Box > div_boxes(div_space.size());
+				for(ss_iterator pp = div_space.begin(), end = div_space.end(); pp != end; ++pp)
+					div_boxes.push_back(
+						Box(pp->bbox().bbox(), new mesh_box_handle(&(*pp)))
+					);
+
+				// find intersections with well
+				surv_.clear();
+				CGAL::box_intersection_d(
+					div_boxes.begin(), div_boxes.end(),
+					wb_.begin(), wb_.end(),
+					*this
+				);
+
+				// clear mesh_parts that don't survive
+				// TODO: make it better
+				for(ss_iterator pp = div_space.begin(), end = div_space.end(); pp != end; ) {
+					if(surv_.find(&*pp) == surv_.end())
+						div_space.erase(pp++);
+					else if(pp->size() == 1) {
+						// mesh parts of only 1 cell goes to result
+						res_.push_back(pp->ss_iter(0));
+						div_space.erase(pp++);
+					}
+					else
+						++pp;
+				}
+
+				// update search space
+				space_.clear();
+				space_.insert(space_.begin(), div_space.begin(), div_space.end());
+				//space_ = div_space;
+			}
+
+			return res_;
+		}
+
+		void operator()(const Box& bm, const Box& bw) {
+			mesh_box_handle* mesh_h = static_cast< mesh_box_handle* >(bm.handle().get());
+			//well_box_handle* well_h = static_cast< well_box_handle* >(bw.handle().get());
+
+			// just remember mesh_part that really intersect with well
+			surv_.insert(mesh_h->data());
+		}
+
+		// access result
+		result_t& res() {
+			return res_;
+		}
+		const result_t& res() const {
+			return res_;
+		}
+
+		// bounding boxes ariund well segments
+		std::vector< Box >& wb_;
+		// live mesh parts
+		search_space space_;
+		// who will survive in next iteration?
+		std::set< mesh_part* > surv_;
+		// resulting cells contained here
+		result_t res_;
 	};
 
 	// helper to create initial cell_data for each cell
@@ -154,29 +252,24 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		intersect_action A(M, W, X, mesh_size);
 		const std::vector< ulong >& hit_idx = wpi_meshp::where_is_point(M, mesh_size, wnodes);
 
-		// create list of mesh parts for each well segment
-		//std::list< mesh_part > search_space;
-		//for(ulong i = 0; i < hit_idx.size() - 1; ++i) {
-		//	mesh_part seg_m(M, mesh_size);
-		//	seg_m.init(hit_idx[i], hit_idx[i + 1]);
-		//	search_space.push_back(seg_m);
-		//}
-
-		// split current mesh parts and find intersections on each split
-
+		// narrow search space via branch & bound algo
+		branch_bound bb(well_boxes, M, mesh_size, hit_idx);
+		typedef typename branch_bound::result_t search_space;
+		search_space& s_space = bb.go();
 
 		// create part of mesh to process based on these cells
-		mesh_part hot_mesh(M, mesh_size);
-		hot_mesh.init(hit_idx);
+		//mesh_part hot_mesh(M, mesh_size);
+		//hot_mesh.init(hit_idx);
 
 		// create bounding box for each cell in given mesh
-		std::vector< Box > mesh_boxes(hot_mesh.size());
+		std::vector< Box > mesh_boxes(s_space.size());
 		ulong cnt = 0;
-		trim_iterator pm;
-		for(ulong i = 0; i < hot_mesh.size(); ++i) {
-			pm = hot_mesh.ss_iter(i);
-			const cell_data& d = pm->second;
-			mesh_boxes[cnt++] = Box(d.bbox(), new cell_box_handle(pm));
+		//trim_iterator pm;
+		for(typename search_space::iterator ps = s_space.begin(), end = s_space.end(); ps != end; ++ps) {
+			const cell_data& d = (*ps)->second;
+			//pm = hot_mesh.ss_iter(i);
+			//const cell_data& d = pm->second;
+			mesh_boxes[cnt++] = Box(d.bbox(), new cell_box_handle(*ps));
 		}
 
 
