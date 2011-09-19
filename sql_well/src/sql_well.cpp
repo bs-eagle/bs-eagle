@@ -592,13 +592,15 @@ COMMIT;\
       if (rc)
         {
           fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
-          return sp_gis;
+          sqlite3_finalize (stmp);
+          return sp_gis_t ();
         }
       if (sqlite3_step (stmp) == SQLITE_ROW) // UPDATE
         {
           int n = sqlite3_column_bytes (stmp, 0);
           if (n < 1)
             {
+              sqlite3_finalize (stmp);
               return sp_gis_t ();
             }
           const char *b = (const char *)sqlite3_column_blob (stmp, 0);
@@ -679,12 +681,17 @@ COMMIT;\
       if (rc)
         {
           fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
-          return sp_traj;
+          sqlite3_finalize (stmp);
+          return sp_traj_t ();
         }
       if (sqlite3_step (stmp) == SQLITE_ROW) // UPDATE
         {
-
-          int n = sqlite3_column_bytes (stmp, 0);
+          int n = sqlite3_column_bytes (stmp, 0);  
+          if (!n)
+            {
+              sqlite3_finalize (stmp);
+              return sp_traj_t ();
+            }
           const char *b = (const char *)sqlite3_column_blob (stmp, 0);
           //std::string s = (const char *)sqlite3_column_text (stmp, 0);
           std::string s;
