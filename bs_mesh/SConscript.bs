@@ -22,7 +22,9 @@ elif (build_kind == "release") :
 env.AppendUnique(LIBS = ["CGAL", "gmp"])
 env.AppendUnique(CXXFLAGS = ["-frounding-math"])
 
-bs_mesh = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
+bs_mesh = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name),
+	source = files (["."]).sources)
+#	source = files (["."], ["well_path_ident_2d.cpp"]).sources)
 
 env.Alias (tar_name, bs_mesh)
 Export ("bs_mesh")
