@@ -111,17 +111,16 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 
 				// make boxes around div space
 				std::vector< Box > div_boxes(div_space.size());
+				ulong i = 0;
 				for(ss_iterator pp = div_space.begin(), end = div_space.end(); pp != end; ++pp)
-					div_boxes.push_back(
-						Box(pp->bbox().bbox(), new mesh_box_handle(&(*pp)))
-					);
+					div_boxes[i++] = Box(pp->bbox().bbox(), new mesh_box_handle(&*pp));
 
 				// find intersections with well
 				surv_.clear();
 				CGAL::box_intersection_d(
 					div_boxes.begin(), div_boxes.end(),
 					wb_.begin(), wb_.end(),
-					*this
+					xaction(*this)
 				);
 
 				// clear mesh_parts that don't survive
@@ -147,13 +146,13 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 			return res_;
 		}
 
-		void operator()(const Box& bm, const Box& bw) {
-			mesh_box_handle* mesh_h = static_cast< mesh_box_handle* >(bm.handle().get());
-			//well_box_handle* well_h = static_cast< well_box_handle* >(bw.handle().get());
+		//void operator()(const Box& bm, const Box& bw) {
+		//	mesh_box_handle* mesh_h = static_cast< mesh_box_handle* >(bm.handle().get());
+		//	//well_box_handle* well_h = static_cast< well_box_handle* >(bw.handle().get());
 
-			// just remember mesh_part that really intersect with well
-			surv_.insert(mesh_h->data());
-		}
+		//	// just remember mesh_part that really intersect with well
+		//	surv_.insert(mesh_h->data());
+		//}
 
 		// access result
 		result_t& res() {
@@ -171,6 +170,21 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		std::set< mesh_part* > surv_;
 		// resulting cells contained here
 		result_t res_;
+
+	private:
+		struct xaction {
+			xaction(branch_bound& boss) : boss_(boss) {}
+
+			void operator()(const Box& bm, const Box& bw) {
+				mesh_box_handle* mesh_h = static_cast< mesh_box_handle* >(bm.handle().get());
+				//well_box_handle* well_h = static_cast< well_box_handle* >(bw.handle().get());
+
+				// just remember mesh_part that really intersect with well
+				boss_.surv_.insert(mesh_h->data());
+			}
+
+			branch_bound& boss_;
+		};
 	};
 
 	// helper to create initial cell_data for each cell
