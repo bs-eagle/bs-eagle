@@ -62,105 +62,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 
 	// import intersect_action
 	typedef wpi_algo_xaction< strat_t > wpi_xaction;
-	typedef typename wpi_xaction::box_handle box_handle;
-	typedef typename wpi_xaction::cell_box_handle cell_box_handle;
-	typedef typename wpi_xaction::well_box_handle well_box_handle;
-	typedef typename wpi_xaction::Box Box;
 	typedef typename wpi_xaction::intersect_action intersect_action;
-
-	// helper to resolve issue with CGAL that can intersect only Bbox_3 in 3D
-	// and Iso_rectangle_2 in 2D! holy shit
-	template< int dims, class = void >
-	struct meshp2xbbox {
-		static Bbox get(const mesh_part& mp) {
-			return mp.bbox();
-		}
-	};
-	template< class unused >
-	struct meshp2xbbox< 2, unused > {
-		static Iso_bbox get(const mesh_part& mp) {
-			return mp.iso_bbox();
-		}
-	};
-
-	/*-----------------------------------------------------------------
-	 * branch & bound algorithm for finding cells that really intersect with well
-	 *----------------------------------------------------------------*/
-	struct branch_bound {
-		typedef typename wpi_xaction::mesh_box_handle mesh_box_handle;
-		typedef typename strat_t::xpoints_list xpoints_list;
-
-		// well segment -> list of corresponding mesh parts
-		typedef std::multimap< ulong, mesh_part > search_space;
-		typedef typename search_space::iterator ss_iterator;
-		typedef typename search_space::const_iterator css_iterator;
-
-		typedef std::list< trim_iterator > result_t;
-
-		branch_bound(const well_path& W, trimesh& M,
-			const vertex_pos_i& mesh_size, const std::vector< ulong > hit_idx)
-			: W_(W)
-		{
-			init(M, mesh_size, hit_idx);
-		}
-
-		void init(trimesh& M, const vertex_pos_i& mesh_size, const std::vector< ulong > hit_idx) {
-			// create list of mesh parts for each well segment
-			for(ulong i = 0; i < hit_idx.size() - 1; ++i) {
-				mesh_part seg_m(M, mesh_size);
-				seg_m.init(hit_idx[i], hit_idx[i + 1]);
-				space_.insert(std::make_pair(i, seg_m));
-			}
-		}
-
-		result_t& go() {
-			typedef typename mesh_part::container_t meshp_container;
-
-			res_.clear();
-			while(space_.size()) {
-				// split each mesh part and intersect splitting with well path
-				search_space div_space;
-				for(css_iterator pp = space_.begin(), end = space_.end(); pp != end; ++pp) {
-					meshp_container kids = pp->second.divide();
-
-					// test for intersections with corresponding well segment
-					const ulong wseg_id = pp->first;
-					const Segment& seg = W_.find(wseg_id)->second.segment();
-					for(typename meshp_container::iterator pk = kids.begin(), kend = kids.end(); pk != kend; ++pk) {
-						if(CGAL::do_intersect(seg, meshp2xbbox< D >::get(*pk))) {
-							// mesh parts of only 1 cell goes to result
-							if(pk->size() == 1)
-								res_.push_back(const_cast< mesh_part& >(*pk).ss_iter(0));
-							else
-								div_space.insert(std::make_pair(wseg_id, *pk));
-						}
-					}
-				}
-
-				// update search space
-				space_.clear();
-				space_.insert(div_space.begin(), div_space.end());
-				//space_ = div_space;
-			}
-
-			return res_;
-		}
-
-		// access result
-		result_t& res() {
-			return res_;
-		}
-		const result_t& res() const {
-			return res_;
-		}
-
-		// bounding boxes ariund well segments
-		const well_path& W_;
-		// live mesh parts
-		search_space space_;
-		// resulting cells contained here
-		result_t res_;
-	};
 
 	// helper to create initial cell_data for each cell
 	static spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn, trimesh& res) {
@@ -202,7 +104,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 
 		// storage
 		well_path W;
-		std::vector< Box > well_boxes(well_node_num - 1);
+		//std::vector< Box > well_boxes(well_node_num - 1);
 		// build array of well nodes as Point_2
 		std::vector< Point > wnodes(well_node_num);
 
@@ -217,11 +119,8 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 				wd = well_data(pw);
 			wnodes[i] = wd.start();
 
-			// make bbox
-			well_boxes[i] = Box(
-				wd.bbox(),
-				new well_box_handle(W.insert(std::make_pair(i, wd)).first)
-			);
+			// insert well segment
+			W[i] = wd;
 
 			pw += 4;
 		}
@@ -230,45 +129,19 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 
 		// 3) find where each node of well is located
 		// to restrict search area
-		// intersections storage
-		intersect_path X;
 		// TODO: init mesh_size in better way
 		ulong full_mesh_size[] = {nx, ny, nz};
 		vertex_pos_i mesh_size;
 		std::copy(full_mesh_size, full_mesh_size + D, mesh_size);
 
+		// intersections storage
+		intersect_path X;
 		// find where well path nodes are located
 		intersect_action A(M, W, X, mesh_size);
 		const std::vector< ulong >& hit_idx = wpi_meshp::where_is_point(M, mesh_size, wnodes);
 
 		// narrow search space via branch & bound algo
-		branch_bound bb(W, M, mesh_size, hit_idx);
-		typedef typename branch_bound::result_t search_space;
-		search_space& s_space = bb.go();
-
-		// create part of mesh to process based on these cells
-		//mesh_part hot_mesh(M, mesh_size);
-		//hot_mesh.init(hit_idx);
-
-		// create bounding box for each cell in given mesh
-		std::vector< Box > mesh_boxes(s_space.size());
-		ulong cnt = 0;
-		//trim_iterator pm;
-		for(typename search_space::iterator ps = s_space.begin(), end = s_space.end(); ps != end; ++ps) {
-			const cell_data& d = (*ps)->second;
-			//pm = hot_mesh.ss_iter(i);
-			//const cell_data& d = pm->second;
-			mesh_boxes[cnt++] = Box(d.bbox(), new cell_box_handle(*ps));
-		}
-
-
-		// Run the intersection algorithm with all defaults on the
-		// indirect pointers to cell bounding boxes. Avoids copying the boxes
-		CGAL::box_intersection_d(
-			mesh_boxes.begin(), mesh_boxes.end(),
-			well_boxes.begin(), well_boxes.end(),
-			A
-		);
+		A.build(hit_idx);
 
 		// remove duplicates in X,Y,Z directions
 		A.remove_dups2();

@@ -9,7 +9,7 @@
 #ifndef WPI_ALGO_XACTION_PLJRVQ8B
 #define WPI_ALGO_XACTION_PLJRVQ8B
 
-#include <CGAL/box_intersection_d.h>
+//#include <CGAL/box_intersection_d.h>
 #include <CGAL/intersections.h>
 
 #include "wpi_algo_pod.h"
@@ -28,6 +28,8 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 
 	typedef typename strat_t::Point    Point;
 	typedef typename strat_t::Segment  Segment;
+	typedef typename strat_t::Bbox     Bbox;
+	typedef typename strat_t::Iso_bbox Iso_bbox;
 
 	// import global consts
 	enum { D = strat_t::D, CVN = strat_t::CVN, inner_point_id = strat_t::inner_point_id };
@@ -51,76 +53,17 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 	// mesh_part
 	typedef typename wpi_algo_meshp< strat_t >::mesh_part mesh_part;
 
-	/*-----------------------------------------------------------------
-	* Box description
-	*----------------------------------------------------------------*/
-	// structure to help identify given boxes
-	class box_handle {
-	public:
-		enum {
-			CELL_BOX,
-			WELL_BOX,
-			MESH_BOX
-		};
-
-		virtual int type() const = 0;
-
-	protected:
-		template< class fish_t, class = void >
-		struct fish2box_t {
-			// default value
-			enum { type = CELL_BOX };
-			typedef cell_data data_t;
-		};
-		// overload for well path
-		template< class unused >
-		struct fish2box_t< wp_iterator, unused > {
-			enum { type = WELL_BOX };
-			typedef well_data data_t;
-		};
-		// overload for mesh_part
-		template< class unused >
-		struct fish2box_t< mesh_part*, unused > {
-			enum { type = MESH_BOX };
-			typedef mesh_part data_t;
-		};
-	};
-	// pointer is really stored as box handle
-	typedef st_smart_ptr< box_handle > sp_bhandle;
-
-	template< class fish >
-	class box_handle_impl : public box_handle {
-	public:
-		typedef fish fish_t;
-		typedef typename box_handle::template fish2box_t< fish_t >::data_t data_t;
-
-		box_handle_impl(const fish_t& f) : f_(f) {}
-
-		int type() const {
-			return box_handle::template fish2box_t< fish_t >::type;
-		}
-
-		fish_t data() const {
-			return f_;
-		}
-
-	private:
-		fish_t f_;
-	};
-	// handy typedefs
-	typedef box_handle_impl< trim_iterator > cell_box_handle;
-	typedef box_handle_impl< wp_iterator > well_box_handle;
-	typedef box_handle_impl< mesh_part* > mesh_box_handle;
-
-	// box intersections storage
-	typedef CGAL::Box_intersection_d::Box_with_handle_d< double, D, sp_bhandle > Box;
 
 	/*-----------------------------------------------------------------
-	* callback functor that triggers on intersecting bboxes
+	* holds all data and search actual intersection points
 	*----------------------------------------------------------------*/
 	class intersect_action {
 	public:
 		typedef typename intersect_path::iterator x_iterator;
+		// well segment -> list of corresponding mesh parts
+		typedef std::multimap< ulong, mesh_part > search_space;
+		typedef typename search_space::iterator ss_iterator;
+		typedef typename search_space::const_iterator css_iterator;
 
 		//template< int N >
 		struct spatial_sort {
@@ -172,6 +115,22 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			const vertex_pos_i& m_size_;
 		};
 
+
+		// helper to resolve issue with CGAL that can intersect only Bbox_3 in 3D
+		// and Iso_rectangle_2 in 2D! holy shit
+		template< int dims, class = void >
+		struct meshp2xbbox {
+			static Bbox get(const mesh_part& mp) {
+				return mp.bbox();
+			}
+		};
+		template< class unused >
+		struct meshp2xbbox< 2, unused > {
+			static Iso_bbox get(const mesh_part& mp) {
+				return mp.iso_bbox();
+			}
+		};
+
 		// ctor
 		intersect_action(trimesh& mesh, well_path& wp, intersect_path& X, const vertex_pos_i& mesh_size)
 			: m_(mesh), wp_(wp), x_(X)
@@ -191,29 +150,49 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			return md;
 		}
 
-		void operator()(const Box& bc, const Box& bw) {
-			typedef typename strat_t::xpoints_list xpoints_list;
+		// branch & bound algorithm for finding cells that really intersect with well
+		void build(const std::vector< ulong >& hit_idx) {
+			typedef typename mesh_part::container_t meshp_container;
+			typedef typename meshp_container::iterator meshp_iterator;
 
-			//trim_iterator cell_fish = static_cast< cell_box_handle* >(bc.handle().get())->data();
-			//wp_iterator well_fish = static_cast< well_box_handle* >(bw.handle().get())->data();
-			//cell_data& c = cell_fish->second;
-			//well_data& w = well_fish->second;
-
-			cell_box_handle* cell_h = static_cast< cell_box_handle* >(bc.handle().get());
-			well_box_handle* well_h = static_cast< well_box_handle* >(bw.handle().get());
-
-			xpoints_list res = strat_t::on_boxes_intersect(cell_h, well_h, bc, bw);
-
-			// add all points to interscetion path
-			for(typename xpoints_list::iterator px = res.begin(), end = res.end(); px != end; ++px) {
-				x_.insert(well_hit_cell(
-					px->first, well_h->data(), cell_h->data(),
-					calc_md(well_h->data(), px->first),
-					px->second
-				));
+			// storage of mesh parts that really intersects with well
+			search_space space;
+			// create list of mesh parts for each well segment
+			for(ulong i = 0; i < hit_idx.size() - 1; ++i) {
+				mesh_part seg_m(m_, m_size_);
+				seg_m.init(hit_idx[i], hit_idx[i + 1]);
+				space.insert(std::make_pair(i, seg_m));
 			}
 
-			//strat_t::on_boxes_intersect< wpi_impl >(bc, bw, x_);
+			// let's go
+			while(space.size()) {
+				// split each mesh part and intersect splitting with well path
+				search_space div_space;
+				for(css_iterator pp = space.begin(), end = space.end(); pp != end; ++pp) {
+					meshp_container kids = pp->second.divide();
+
+					// test for intersections with corresponding well segment
+					const ulong wseg_id = pp->first;
+					wp_iterator pw = wp_.find(wseg_id);
+					if(pw == wp_.end()) continue;
+					const Segment& seg = pw->second.segment();
+					for(meshp_iterator pk = kids.begin(), kend = kids.end(); pk != kend; ++pk) {
+						if(CGAL::do_intersect(seg, meshp2xbbox< D >::get(*pk))) {
+							// mesh parts of only 1 cell goes to result
+							if(pk->size() == 1)
+								// find intersection points if any
+								check_intersection(const_cast< mesh_part& >(*pk).ss_iter(0), pw, seg);
+							else
+								div_space.insert(std::make_pair(wseg_id, *pk));
+						}
+					}
+				}
+
+				// update search space
+				space.clear();
+				space.insert(div_space.begin(), div_space.end());
+				//space = div_space;
+			}
 		}
 
 		// run it after all dups killed
@@ -372,6 +351,20 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 				x.is_node = true;
 			}
 			return px;
+		}
+
+		void check_intersection(trim_iterator pc, wp_iterator pw, const Segment& well_seg) {
+			typedef typename strat_t::xpoints_list xpoints_list;
+			
+			// find intersection points coord if any
+			const xpoints_list& res = strat_t::precise_intersection(pc->second, well_seg);
+
+			// add all points to interscetion path
+			for(typename xpoints_list::const_iterator px = res.begin(), end = res.end(); px != end; ++px) {
+				x_.insert(
+					well_hit_cell(px->first, pw, pc, calc_md(pw, px->first), px->second)
+				);
+			}
 		}
 
 		// mesh

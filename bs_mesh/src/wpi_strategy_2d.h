@@ -123,29 +123,16 @@ struct wpi_strategy_2d {
 	typedef std::list< std::pair< Point, uint > > xpoints_list;
 
 	// action taken on well & mesh boxes intersection
-	template< class cell_handle, class well_handle, class Box >
-	static xpoints_list on_boxes_intersect(
-		cell_handle* cf, well_handle* wf,
-		const Box& bc, const Box& bw)
-	{
-		typedef typename cell_handle::fish_t cell_fish_t;
-		typedef typename well_handle::fish_t well_fish_t;
-		typedef typename cell_handle::data_t cell_data;
-		typedef typename well_handle::data_t well_data;
-
-		cell_fish_t cell_fish = cf->data();
-		well_fish_t well_fish = wf->data();
-		cell_data& c = cell_fish->second;
-		well_data& w = well_fish->second;
-
+	template< class cell_data_t >
+	static xpoints_list precise_intersection(cell_data_t& c, const Segment& well_seg) {
 		// obtain well segment
-		const Segment& s = w.segment();
+		//const Segment& s = w.segment();
 		// and cell polygon
 		const Polygon_2& p = c.polygon();
 
 		xpoints_list res;
 		for(ulong i = 0; i < 4; ++i) {
-			Object xres = CGAL::intersection(p.edge(i), s);
+			Object xres = CGAL::intersection(p.edge(i), well_seg);
 			// in 99% of cases we should get a point of intersection
 			if(const Point* xpoint = CGAL::object_cast< Point >(&xres))
 				res.push_back(std::make_pair(*xpoint, i));

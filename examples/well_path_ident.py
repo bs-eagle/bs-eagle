@@ -8,14 +8,14 @@ cell_x = 25; cell_y = 25; cell_z = 1;
 dx = np.array([cell_x], dtype='d') # Lx
 dy = np.array([cell_y], dtype='d') # Ly
 dz = np.array([cell_z], dtype='d') # Lz
-Nx = 50
-Ny = 50
+Nx = 500
+Ny = 500
 Nz = 10
 [c, z] = bm.mesh_grdecl.gen_coord_zcorn(Nx, Ny, Nz, dx, dy, dz)
 print 'Source mesh generated!'
 
 # generate randomly mesh trajectory
-well_nodes_num = 10;
+well_nodes_num = 100;
 wx = np.random.rand(well_nodes_num) * cell_x * Nx;
 wy = np.random.rand(well_nodes_num) * cell_y * Ny;
 wz = np.random.rand(well_nodes_num) * cell_z * Nz;
