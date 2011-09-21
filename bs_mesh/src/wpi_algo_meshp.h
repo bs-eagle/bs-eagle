@@ -22,6 +22,7 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 
 	typedef typename strat_t::Point    Point;
 	typedef typename strat_t::Iso_bbox Iso_bbox;
+	typedef typename strat_t::Bbox     Bbox;
 
 	// import global consts
 	enum { D = strat_t::D, CVN = strat_t::CVN, inner_point_id = strat_t::inner_point_id };
@@ -123,15 +124,16 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 			return ss_iter(part_pos);
 		}
 
-		Iso_bbox bbox() const {
+		Iso_bbox iso_bbox() const {
 			vertex_pos lo_pos, hi_pos;
-			mesh_ss(lo).lo(lo_pos);
-			// last = hi - 1
-			vertex_pos_i last;
-			ca_assign(last, hi);
-			std::transform(&last[0], &last[D], &last[0], bind2nd(std::minus< ulong >(), 1));
-			mesh_ss(last).hi(hi_pos);
+			bounds(lo_pos, hi_pos);
 			return vertex_pos2rect(lo_pos, hi_pos);
+		}
+
+		Bbox bbox() const {
+			vertex_pos lo_pos, hi_pos;
+			bounds(lo_pos, hi_pos);
+			return vertex_pos2bbox(lo_pos, hi_pos);
 		}
 
 		container_t divide() const {
@@ -215,6 +217,15 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 		const cell_data& mesh_ss(const vertex_pos_i& idx) const {
 			return m_.find(encode_cell_id(idx, m_size_))->second;
 		}
+
+		void bounds(vertex_pos& lo_pos, vertex_pos& hi_pos) const {
+			mesh_ss(lo).lo(lo_pos);
+			// last = hi - 1
+			vertex_pos_i last;
+			ca_assign(last, hi);
+			std::transform(&last[0], &last[D], &last[0], bind2nd(std::minus< ulong >(), 1));
+			mesh_ss(last).hi(hi_pos);
+		}
 	};
 
 	static std::vector< ulong > where_is_point(
@@ -245,7 +256,7 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 			std::list< ulong > catched_points;
 			// process each leaf and find points inside it
 			for(part_iterator l = leafs.begin(), end = leafs.end(); l != end; ) {
-				const Iso_bbox& cur_rect = l->bbox();
+				const Iso_bbox& cur_rect = l->iso_bbox();
 				catched_points.clear();
 				for(ulong i = 0; i < points.size(); ++i) {
 					// skip already found points
