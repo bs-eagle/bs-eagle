@@ -15,6 +15,9 @@
 #include "wpi_algo_pod.h"
 #include "wpi_algo_meshp.h"
 
+// DEBUG
+//#include <iostream>
+
 #define MD_TOL 0.000001
 
 namespace blue_sky { namespace wpi {
@@ -120,12 +123,14 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 		// and Iso_rectangle_2 in 2D! holy shit
 		template< int dims, class = void >
 		struct meshp2xbbox {
+			typedef Bbox type;
 			static Bbox get(const mesh_part& mp) {
 				return mp.bbox();
 			}
 		};
 		template< class unused >
 		struct meshp2xbbox< 2, unused > {
+			typedef Iso_bbox type;
 			static Iso_bbox get(const mesh_part& mp) {
 				return mp.iso_bbox();
 			}
@@ -192,6 +197,67 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 				space.clear();
 				space.insert(div_space.begin(), div_space.end());
 				//space = div_space;
+			}
+		}
+
+		void build2(const std::vector< ulong >& hit_idx) {
+			typedef typename meshp2xbbox< D >::type xrect_t;
+			// mesh partition stored here
+			typedef typename mesh_part::container_t parts_container;
+			typedef typename mesh_part::container_t::iterator part_iterator;
+			parts_container parts;
+
+			// create list of mesh parts for each well segment
+			std::vector< Segment > wseg(hit_idx.size() - 1);
+			for(ulong i = 0; i < hit_idx.size() - 1; ++i) {
+				mesh_part seg_m(m_, m_size_);
+				seg_m.init(hit_idx[i], hit_idx[i + 1]);
+				parts.insert(seg_m);
+				wseg[i] = wp_[i].segment();
+			}
+
+			while(parts.size()) {
+				// split every part
+				parts_container leafs;
+				for(part_iterator p = parts.begin(), end = parts.end(); p != end; ++p) {
+					parts_container kids = p->divide();
+					leafs.insert(kids.begin(), kids.end());
+				}
+
+				// collection of points inside current partition
+				std::list< ulong > catched_seg;
+				// process each leaf and find points inside it
+				for(part_iterator l = leafs.begin(), end = leafs.end(); l != end; ) {
+					const xrect_t& cur_rect = meshp2xbbox< D >::get(*l);
+					catched_seg.clear();
+					for(ulong i = 0; i < wseg.size(); ++i) {
+						// TODO: skip already found segments - any way to to it?
+						// probably need to switch search order - cycle through well segments
+						//if(res[i] < m.size()) continue;
+						// check that segment lies inside this part
+						if(CGAL::do_intersect(wseg[i], cur_rect))
+							catched_seg.push_back(i);
+					}
+
+					// if this part don't intersect any segments - remove it
+					// if box contains only 1 cell - find intersection points
+					if(!catched_seg.size())
+						leafs.erase(l++);
+					else if(l->size() == 1) {
+						for(std::list< ulong >::iterator ps = catched_seg.begin(),
+							cs_end = catched_seg.end(); ps != cs_end; ++ps
+							)
+							check_intersection(
+								const_cast< mesh_part& >(*l).ss_iter(0),
+								wp_.find(*ps), wseg[*ps]
+							);
+						leafs.erase(l++);
+					}
+					else ++l;
+				}
+
+				// leafs become the new start point for further division
+				parts = leafs;
 			}
 		}
 
@@ -296,7 +362,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 
 		spv_float export_1d() const {
 			spv_float res = BS_KERNEL.create_object(v_float::bs_type());
-			res->resize(x_.size() * 7);
+			res->resize(x_.size() * (4 + D));
 			vf_iterator pr = res->begin();
 
 			for(typename intersect_path::const_iterator px = x_.begin(), end = x_.end(); px != end; ++px) {
@@ -330,11 +396,11 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 
 			// check if current or prev intersection match with node
 			uint facet_id = inner_point_id;
-			if(px != x_.end() && abs(px->md - wp_md) < MD_TOL)
+			if(px != x_.end() && std::abs(px->md - wp_md) < MD_TOL)
 				facet_id = px->facet;
 			else if(px != x_.begin()) {
 				--px;
-				if(abs(px->md - wp_md) < MD_TOL)
+				if(std::abs(px->md - wp_md) < MD_TOL)
 					facet_id = px->facet;
 			}
 
@@ -347,6 +413,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 					facet_id, true
 				));
 			else {
+				//std::cout << facet_id << ' ' << inner_point_id << " facet_id != inner_point_id" << std::endl;
 				well_hit_cell& x = const_cast< well_hit_cell& >(*px);
 				x.is_node = true;
 			}
