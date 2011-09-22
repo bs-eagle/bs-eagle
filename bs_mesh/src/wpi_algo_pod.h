@@ -23,10 +23,9 @@ struct wpi_algo_helpers {
 
 	typedef typename strat_t::vertex_pos   vertex_pos;
 	typedef typename strat_t::vertex_pos_i vertex_pos_i;
-	typedef typename strat_t::cell_pos     cell_pos;
 
 	// import global consts
-	enum { D = strat_t::D, CVN = strat_t::CVN, inner_point_id = strat_t::inner_point_id };
+	enum { D = strat_t::D };
 
 	static void decode_cell_id(ulong id, vertex_pos_i& res, const vertex_pos_i& m_size) {
 		strat_t::decode_cell_id(id, res, m_size);
@@ -72,16 +71,17 @@ struct wpi_algo_pod : public wpi_algo_helpers< strat_t > {
 
 	typedef typename strat_t::vertex_pos   vertex_pos;
 	typedef typename strat_t::vertex_pos_i vertex_pos_i;
-	typedef typename strat_t::cell_pos     cell_pos;
 
 	// import global consts
-	enum { D = strat_t::D, CVN = strat_t::CVN, inner_point_id = strat_t::inner_point_id };
+	enum { D = strat_t::D };
 	//typedef wpi_algo_helpers< strat_t > helper_t;
 
 	/*-----------------------------------------------------------------
 	* cell description
 	*----------------------------------------------------------------*/
 	struct cell_data_base {
+		// actual vertex number
+		enum { N = (1 << D) };
 		// vertex coord
 		t_float* V;
 
@@ -124,9 +124,11 @@ struct wpi_algo_pod : public wpi_algo_helpers< strat_t > {
 		void bound(vertex_pos& b) const {
 			pred< t_float > p = pred< t_float >();
 			const cell_pos& cV = cpos();
+			// actual vertex number to search
+			//const uint N = (1 << D);
 			for(uint i = 0; i < D; ++i) {
 				t_float c = cV[0][i];
-				for(uint j = 1; j < CVN; ++j) {
+				for(uint j = 1; j < N; ++j) {
 					if(p(cV[j][i], c))
 						c = cV[j][i];
 				}

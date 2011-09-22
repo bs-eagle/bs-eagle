@@ -35,10 +35,9 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 
 	typedef typename strat_t::vertex_pos   vertex_pos;
 	typedef typename strat_t::vertex_pos_i vertex_pos_i;
-	typedef typename strat_t::cell_pos     cell_pos;
 
 	// import global consts
-	enum { D = strat_t::D, CVN = strat_t::CVN, inner_point_id = strat_t::inner_point_id };
+	enum { D = strat_t::D };
 
 	// import pods
 	typedef wpi_algo_pod< strat_t > wpi_pod;

@@ -18,14 +18,13 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 	// basic types
 	typedef typename strat_t::vertex_pos   vertex_pos;
 	typedef typename strat_t::vertex_pos_i vertex_pos_i;
-	typedef typename strat_t::cell_pos     cell_pos;
 
 	typedef typename strat_t::Point    Point;
 	typedef typename strat_t::Iso_bbox Iso_bbox;
 	typedef typename strat_t::Bbox     Bbox;
 
 	// import global consts
-	enum { D = strat_t::D, CVN = strat_t::CVN, inner_point_id = strat_t::inner_point_id };
+	enum { D = strat_t::D };
 
 	// import pods
 	typedef wpi_algo_pod< strat_t > wpi_pod;
@@ -263,7 +262,7 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 					if(res[i] < m.size()) continue;
 					// check that point lies inside this part
 					if(!cur_rect.has_on_unbounded_side(points[i]))
-						catched_points.insert(catched_points.begin(), i);
+						catched_points.push_back(i);
 				}
 
 				// if this part don't contain any points - remove it

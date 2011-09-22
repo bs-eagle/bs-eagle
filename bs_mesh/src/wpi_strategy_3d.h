@@ -21,13 +21,7 @@
 namespace blue_sky { namespace wpi {
 
 struct wpi_strategy_3d {
-	// common typedefs
-	//typedef t_ulong ulong;
-	//typedef t_uint uint;
-
 	// main typedefs
-	//typedef CGAL::Object                                        Object;
-	//typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 	typedef Kernel::Point_3                                     Point;
 	typedef Kernel::Segment_3                                   Segment;
 	typedef CGAL::Bbox_3                                        Bbox;
@@ -39,12 +33,11 @@ struct wpi_strategy_3d {
 	typedef std::vector<Triangle>                               Triangles;
 	typedef Triangles::iterator                                 tri_iterator;
 
-	// dimens num, cell vertex num, inner point id
-	enum { D = 3, CVN = 8, inner_point_id = 6 };
+	// dimens num, inner point id
+	enum { D = 3, inner_point_id = 6 };
 
 	typedef t_float vertex_pos[D];
 	typedef ulong   vertex_pos_i[D];
-	typedef t_float cell_pos[CVN][D];
 
 	// misc helper functions
 

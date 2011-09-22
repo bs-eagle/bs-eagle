@@ -22,13 +22,7 @@
 namespace blue_sky { namespace wpi {
 
 struct wpi_strategy_2d {
-	// common typedefs
-	//typedef t_ulong ulong;
-	//typedef t_uint uint;
-
 	// main typedefs
-	//typedef CGAL::Object                                        Object;
-	//typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 	typedef Kernel::Point_2                                     Point;
 	typedef Kernel::Segment_2                                   Segment;
 	typedef CGAL::Bbox_2                                        Bbox;
@@ -37,12 +31,11 @@ struct wpi_strategy_2d {
 	// 2D specific typedefs
 	typedef CGAL::Polygon_2< Kernel >                           Polygon_2;
 
-	// dimens num, cell vertex num, inner point id
-	enum { D = 2, CVN = 8, inner_point_id = 4 };
+	// dimens num, inner point id
+	enum { D = 2, inner_point_id = 4 };
 
 	typedef t_float vertex_pos[D];
 	typedef ulong   vertex_pos_i[D];
-	typedef t_float cell_pos[CVN][D];
 
 	// misc helper functions
 
@@ -85,7 +78,7 @@ struct wpi_strategy_2d {
 		}
 
 		bool contains(const Point& p) {
-			return !polygon().has_on_unbounded_side(p);
+			return !(polygon().has_on_unbounded_side(p));
 		}
 	};
 

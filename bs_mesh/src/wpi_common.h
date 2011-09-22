@@ -26,6 +26,8 @@ typedef t_uint uint;
 typedef v_float::iterator vf_iterator;
 typedef smart_ptr< bs_mesh_grdecl > sp_grd_mesh;
 
+typedef t_float cell_pos[8][3];
+
 // CGAL common typedefs
 typedef CGAL::Object                                        Object;
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
