@@ -281,9 +281,11 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			ulong node_idx = 0;
 			for(wp_iterator end = wp_.end(); pw != end; ++pw, ++node_idx) {
 				//const well_data& wseg = pw->second;
-				// lower_bound
+				// upper_bound
 				while(px != x_.end() && px->md < pw->second.md())
 					++px;
+				// we need prev intersection
+				//if(px != x_.begin()) --px;
 
 				px = insert_wp_node(hit_idx[node_idx], pw, px);
 			}
@@ -402,19 +404,26 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			}
 
 			// check if current or prev intersection match with node
+			// TODO: refactor this code, looks ugly
 			uint facet_id = inner_point_id;
-			if(px != x_.end() && std::abs(px->md - wp_md) < MD_TOL)
+			bool prev_is_node = false;
+			if(px != x_.end() && std::abs(px->md - wp_md) < MD_TOL) {
 				facet_id = px->facet;
+				prev_is_node = px->is_node;
+			}
 			else if(px != x_.begin()) {
 				--px;
-				if(std::abs(px->md - wp_md) < MD_TOL)
+				if(std::abs(px->md - wp_md) < MD_TOL) {
 					facet_id = px->facet;
+					prev_is_node = px->is_node;
+				}
 			}
 
 			// if node point coinside with existing intersection
-			// then just change is_node flag (dont't affect ordering)
+			// and that intersection is not a node
+			// then just set is_node flag (dont't affect ordering)
 			// otherwise insert new intersection point
-			if(facet_id == inner_point_id)
+			if(facet_id == inner_point_id || prev_is_node)
 				px = x_.insert(well_hit_cell(
 					where, pw, m_.find(cell_id), wp_md,
 					facet_id, true
