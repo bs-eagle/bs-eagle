@@ -18,6 +18,8 @@ print 'Source mesh generated!'
 well_nodes_num = 10;
 pos_x = 10 * cell_x + 3;
 pos_y = 7 * cell_y + 7;
+#pos_x = cell_x;
+#pos_y = cell_y;
 wx = np.ones(well_nodes_num) * pos_x;
 wy = np.ones(well_nodes_num) * pos_y;
 wz = np.random.rand(well_nodes_num) * cell_z * Nz;
