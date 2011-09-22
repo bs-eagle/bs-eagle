@@ -172,6 +172,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			while(space.size()) {
 				// split each mesh part and intersect splitting with well path
 				search_space div_space;
+				bool do_intersect;
 				for(css_iterator pp = space.begin(), end = space.end(); pp != end; ++pp) {
 					meshp_container kids = pp->second.divide();
 
@@ -180,8 +181,17 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 					wp_iterator pw = wp_.find(wseg_id);
 					if(pw == wp_.end()) continue;
 					const Segment& seg = pw->second.segment();
+
 					for(meshp_iterator pk = kids.begin(), kend = kids.end(); pk != kend; ++pk) {
-						if(CGAL::do_intersect(seg, meshp2xbbox< D >::get(*pk))) {
+						// is segment is null-length (vertical well in 2D)
+						// then check if point lie on mesh rect boundary
+						if(seg.is_degenerate())
+							do_intersect = pk->iso_bbox().has_on_boundary(seg.source());
+						// otherwise check that segment intersect with this mesh rect
+						else
+							do_intersect = CGAL::do_intersect(seg, meshp2xbbox< D >::get(*pk));
+
+						if(do_intersect) {
 							// mesh parts of only 1 cell goes to result
 							if(pk->size() == 1)
 								// find intersection points if any

@@ -140,7 +140,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		const std::vector< ulong >& hit_idx = wpi_meshp::where_is_point(M, mesh_size, wnodes);
 
 		// narrow search space via branch & bound algo
-		A.build2(hit_idx);
+		A.build(hit_idx);
 
 		// remove duplicates in X,Y,Z directions
 		A.remove_dups2();
