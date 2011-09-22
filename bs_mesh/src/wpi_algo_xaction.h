@@ -228,13 +228,21 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 				// process each leaf and find points inside it
 				for(part_iterator l = leafs.begin(), end = leafs.end(); l != end; ) {
 					const xrect_t& cur_rect = meshp2xbbox< D >::get(*l);
+					const Iso_bbox& cur_ibb = l->iso_bbox();
 					catched_seg.clear();
 					for(ulong i = 0; i < wseg.size(); ++i) {
 						// TODO: skip already found segments - any way to to it?
 						// probably need to switch search order - cycle through well segments
 						//if(res[i] < m.size()) continue;
-						// check that segment lies inside this part
-						if(CGAL::do_intersect(wseg[i], cur_rect))
+
+						// is segment is null-length (vertical well in 2D)
+						// then check if point lie on mesh rect boundary
+						if(wseg[i].is_degenerate()) {
+							if(cur_ibb.has_on_boundary(wseg[i].source()))
+								catched_seg.push_back(i);
+						}
+						// otherwise check that segment intersect with this mesh rect
+						else if(CGAL::do_intersect(wseg[i], cur_rect))
 							catched_seg.push_back(i);
 					}
 
