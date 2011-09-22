@@ -17,5 +17,8 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 	spv_float well_info, bool include_well_nodes = true);
 
+spv_float well_path_ident_2d_old(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+	spv_float well_info, bool include_well_nodes = true);
+
 } 	// eof blue_sky
 

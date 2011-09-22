@@ -803,7 +803,7 @@ spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float z
 /*-----------------------------------------------------------------
  * implementation of main routine
  *----------------------------------------------------------------*/
-spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+spv_float well_path_ident_2d_old(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 	spv_float well_info, bool include_well_nodes)
 {
 	// 1) calculate mesh nodes coordinates and build initial trimesh
