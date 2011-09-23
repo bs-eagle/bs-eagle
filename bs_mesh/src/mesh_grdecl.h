@@ -89,6 +89,8 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
 
 	//! init COORD & ZCORN directly
 	void init_props(t_long nx, t_long ny, spv_float coord, spv_float zcorn);
+	//! free COORD & ZCORN arrays
+	void clear();
 
 	//! init COORD & ZCORN from (nx, ny, nz, dx, dy, dz)
 	//! (x0, y0, z0) - beginning of coordinate system (mesh offset)
