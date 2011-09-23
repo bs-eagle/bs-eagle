@@ -130,7 +130,6 @@
     <ClInclude Include="include\table_iface.h" />
     <ClInclude Include="include\traj_iface.h" />
     <ClInclude Include="include\vartype_table_iface.h" />
-    <ClInclude Include="compile_fix\assert.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\kernel\blue-sky.vcxproj">
