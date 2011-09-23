@@ -235,6 +235,14 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 		}
 	};
 
+	static bool point_inside_bbox(const Bbox& b, const Point& p) {
+		for(uint i = 0; i < D; ++i) {
+			if(p[i] < b.min(i) || p[i] > b.max(i))
+				return false;
+		}
+		return true;
+	}
+
 	static std::vector< ulong > where_is_point(
 		trimesh& m, const vertex_pos_i& m_size,
 		std::vector< Point > points)
@@ -251,6 +259,7 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 		// found cell_ids stored here
 		std::vector< ulong > res(points.size(), -1);
 		//ulong cell_id;
+		//vertex_pos c_lo, c_hi;
 		while(parts.size()) {
 			// split every part
 			parts_container leafs;
@@ -263,14 +272,19 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 			std::list< ulong > catched_points;
 			// process each leaf and find points inside it
 			for(part_iterator l = leafs.begin(), end = leafs.end(); l != end; ) {
-				const Iso_bbox& cur_rect = l->iso_bbox();
+				//const Iso_bbox& cur_rect = l->iso_bbox();
+				const Bbox& cur_rect = l->bbox();
+
 				catched_points.clear();
 				for(ulong i = 0; i < points.size(); ++i) {
 					// skip already found points
 					if(res[i] < m.size()) continue;
 					// check that point lies inside this part
-					if(!cur_rect.has_on_unbounded_side(points[i]))
+					if(point_inside_bbox(cur_rect, points[i]))
 						catched_points.push_back(i);
+
+					//if(!cur_rect.has_on_unbounded_side(points[i]))
+					//	catched_points.push_back(i);
 				}
 
 				// if this part don't contain any points - remove it
