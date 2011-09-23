@@ -20,6 +20,9 @@
 #include <iterator>
 #include <cmath>
 
+// DEBUG
+#include <iostream>
+
 namespace blue_sky { namespace wpi {
 
 /*-----------------------------------------------------------------
@@ -73,10 +76,19 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 
 		// obtain coordinates for all vertices of all cells
 		spv_float tops = grd_src->calc_cells_vertices_xyz();
-		v_float::iterator pv = tops->begin();
+		// clear COORD & ZCORN arrays
+		grd_src->clear();
 
 		// fill trimesh with triangles corresponding to each cell
+		v_float::iterator pv = tops->begin();
 		for(ulong i = 0; i < n_cells; ++i) {
+			// DEBUG
+			//if(i < 100) {
+			//	std::cout << std::fixed << std::setprecision(2);
+			//	for(uint j = 0; j < 24; ++j)
+			//		std::cout << *(pv + j) << ' ';
+			//	std::cout << std::endl;
+			//}
 			res[i] = cell_data(&*pv);
 			pv += 3*8;
 		}
@@ -92,9 +104,12 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 	{
 		// 1) calculate mesh nodes coordinates and build initial trimesh
 		trimesh M;
-		spv_float tops;
-		tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M);
 		t_long nz = (zcorn->size() / nx / ny) >> 3;
+		spv_float tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M);
+		// free memory, don't need mesh any more
+		//coord->clear(); zcorn->clear();
+		// DEBUG
+		std::cout << "trimesh built" << std::endl;
 
 		// 2) create well path description and
 		// bounding boxes for line segments representing well trajectory
@@ -125,6 +140,8 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		}
 		// put last node to array
 		wnodes[well_node_num - 1] = W[well_node_num - 2].finish();
+		// DEBUG
+		std::cout << "well_path created" << std::endl;
 
 		// 3) find where each node of well is located
 		// to restrict search area
@@ -138,16 +155,28 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		// find where well path nodes are located
 		intersect_action A(M, W, X, mesh_size);
 		const std::vector< ulong >& hit_idx = wpi_meshp::where_is_point(M, mesh_size, wnodes);
+		// DEBUG
+		std::cout << "hit_idx found" << std::endl;
+		// dump hit_idx
+		for(ulong i = 0; i < hit_idx.size(); ++i)
+			std::cout << hit_idx[i] << ' ';
+		std::cout << std::endl;
 
 		// narrow search space via branch & bound algo
-		A.build(hit_idx);
+		A.build2(hit_idx);
+		// DEBUG
+		std::cout << "build() done" << std::endl;
 
 		// remove duplicates in X,Y,Z directions
 		A.remove_dups2();
+		// DEBUG
+		std::cout << "remove_dups2 done" << std::endl;
 
 		// finalize intersection
 		if(include_well_nodes)
 			A.append_wp_nodes(hit_idx);
+		// DEBUG
+		std::cout << "well nodes inserted" << std::endl;
 
 		return A.export_1d();
 	}
