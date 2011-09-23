@@ -140,7 +140,8 @@ struct wpi_algo_pod : public wpi_algo_helpers< strat_t > {
 	typedef typename strat_t::template cell_data< cell_data_base > cell_data;
 	typedef st_smart_ptr< cell_data > sp_cell_data;
 	// storage for representing mesh
-	typedef std::map< t_ulong, cell_data > trimesh;
+	//typedef std::map< t_ulong, cell_data > trimesh;
+	typedef std::vector< cell_data > trimesh;
 	typedef typename trimesh::iterator trim_iterator;
 	typedef typename trimesh::const_iterator ctrim_iterator;
 

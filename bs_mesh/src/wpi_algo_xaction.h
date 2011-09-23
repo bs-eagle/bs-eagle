@@ -72,12 +72,12 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			typedef int dirvec_t[D];
 			typedef typename intersect_path::iterator x_iterator;
 
-			spatial_sort(const dirvec_t& dir, const vertex_pos_i& mesh_size)
-				: dir_(dir), m_size_(mesh_size)
+			spatial_sort(const dirvec_t& dir, const trimesh& m, const vertex_pos_i& mesh_size)
+				: dir_(dir), m_(m), m_size_(mesh_size)
 			{}
 
 			spatial_sort(const spatial_sort& rhs)
-				: dir_(rhs.dir_), m_size_(rhs.m_size_)
+				: dir_(rhs.dir_), m_(rhs.m_), m_size_(rhs.m_size_)
 			{}
 
 			bool operator()(const x_iterator& r1, const x_iterator& r2) const {
@@ -94,8 +94,8 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 
 				// cell ids
 				vertex_pos_i c1, c2;
-				decode_cell_id(r1->cell->first, c1, m_size_);
-				decode_cell_id(r2->cell->first, c2, m_size_);
+				decode_cell_id(r1->cell - m_.begin(), c1, m_size_);
+				decode_cell_id(r2->cell - m_.begin(), c2, m_size_);
 
 				//bool res = false;
 				for(uint i = 0; i < D; ++i) {
@@ -114,6 +114,8 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			}
 
 			const dirvec_t& dir_;
+			// TODO: remove mesh ref from here if well_hit_cell store directly cell id
+			const trimesh& m_;
 			const vertex_pos_i& m_size_;
 		};
 
@@ -314,12 +316,12 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 				typedef std::set< x_iterator, spatial_sort > spat_storage_t;
 				typedef typename spat_storage_t::iterator spat_iterator;
 
-				top_surv(const dirvec_t& dir, intersect_path& x, const vertex_pos_i& mesh_size)
-					: dir_(dir), x_(x), m_size_(mesh_size)
+				top_surv(const dirvec_t& dir, intersect_path& x, const trimesh& m, const vertex_pos_i& mesh_size)
+					: dir_(dir), x_(x), m_(m), m_size_(mesh_size)
 				{}
 
 				x_iterator operator()(x_iterator from, x_iterator to) {
-					spat_storage_t sr(spatial_sort(dir_, m_size_));
+					spat_storage_t sr(spatial_sort(dir_, m_, m_size_));
 
 					// spatially sort iterators
 					for(x_iterator px = from; px != to; ++px)
@@ -336,6 +338,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 
 				const dirvec_t& dir_;
 				intersect_path& x_;
+				const trimesh& m_;
 				const vertex_pos_i& m_size_;
 			};
 
@@ -357,7 +360,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 				for(uint i = 0; i < 2; ++i)
 					dir[i] = start[i] <= finish[i] ? 0 : 1;
 				// judge
-				top_surv judge(dir, x_, m_size_);
+				top_surv judge(dir, x_, m_, m_size_);
 
 				// remove dups lying on current well segment
 				max_md = seg.md() + seg.len();
@@ -386,7 +389,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 
 			for(typename intersect_path::const_iterator px = x_.begin(), end = x_.end(); px != end; ++px) {
 				// cell num
-				*pr++ = px->cell->first;
+				*pr++ = px->cell - m_.begin();
 				// MD
 				*pr++ = px->md;
 				// intersection point
@@ -435,7 +438,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			// otherwise insert new intersection point
 			if(facet_id == inner_point_id || prev_is_node)
 				px = x_.insert(well_hit_cell(
-					where, pw, m_.find(cell_id), wp_md,
+					where, pw, m_.begin() + cell_id, wp_md,
 					facet_id, true
 				));
 			else {
@@ -450,7 +453,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			typedef typename strat_t::xpoints_list xpoints_list;
 			
 			// find intersection points coord if any
-			const xpoints_list& res = strat_t::precise_intersection(pc->second, well_seg);
+			const xpoints_list& res = strat_t::precise_intersection(*pc, well_seg);
 
 			// add all points to interscetion path
 			for(typename xpoints_list::const_iterator px = res.begin(), end = res.end(); px != end; ++px) {

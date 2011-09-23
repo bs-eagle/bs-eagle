@@ -105,6 +105,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		// 1) calculate mesh nodes coordinates and build initial trimesh
 		trimesh M;
 		t_long nz = (zcorn->size() / nx / ny) >> 3;
+		M.resize(nx * ny * nz);
 		spv_float tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M);
 		// free memory, don't need mesh any more
 		//coord->clear(); zcorn->clear();
@@ -163,7 +164,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		std::cout << std::endl;
 
 		// narrow search space via branch & bound algo
-		A.build2(hit_idx);
+		A.build(hit_idx);
 		// DEBUG
 		std::cout << "build() done" << std::endl;
 

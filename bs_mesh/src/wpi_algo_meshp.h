@@ -107,7 +107,7 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 			ca_assign(cell, lo);
 			for(uint i = 0; i < D; ++i)
 				cell[i] += offset[i];
-			return m_.find(encode_cell_id(cell, m_size_));
+			return m_.begin() + encode_cell_id(cell, m_size_);
 		}
 
 		trim_iterator ss_iter(const ulong& offset) {
@@ -210,11 +210,11 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 
 		const cell_data& mesh_ss(ulong idx) const {
 			// idx SHOULD BE IN MESH!
-			return m_.find(idx)->second;
+			return m_[idx];
 		}
 
 		const cell_data& mesh_ss(const vertex_pos_i& idx) const {
-			return m_.find(encode_cell_id(idx, m_size_))->second;
+			return m_[encode_cell_id(idx, m_size_)];
 		}
 
 		void bounds(vertex_pos& lo_pos, vertex_pos& hi_pos) const {
