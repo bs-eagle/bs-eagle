@@ -102,15 +102,15 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 			return res;
 		}
 
-		trim_iterator ss_iter(const vertex_pos_i& offset) {
+		ulong ss_id(const vertex_pos_i& offset) const {
 			vertex_pos_i cell;
 			ca_assign(cell, lo);
 			for(uint i = 0; i < D; ++i)
 				cell[i] += offset[i];
-			return m_.begin() + encode_cell_id(cell, m_size_);
+			return encode_cell_id(cell, m_size_);
 		}
 
-		trim_iterator ss_iter(const ulong& offset) {
+		ulong ss_id(ulong offset) const {
 			// size of this part
 			vertex_pos_i part_size;
 			for(uint i = 0; i < D; ++i)
@@ -120,7 +120,15 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 			vertex_pos_i part_pos;
 			decode_cell_id(offset, part_pos, part_size);
 			// part_pos -> cell
-			return ss_iter(part_pos);
+			return ss_id(part_pos);
+		}
+
+		trim_iterator ss_iter(const vertex_pos_i& offset) {
+			return m_.begin() + ss_id(offset);
+		}
+
+		trim_iterator ss_iter(ulong offset) {
+			return m_.begin() + ss_id(offset);
 		}
 
 		Iso_bbox iso_bbox() const {
@@ -198,6 +206,15 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 		trimesh& m_;
 		vertex_pos_i m_size_;
 
+		const cell_data& ss(ulong idx) const {
+			// idx SHOULD BE IN MESH!
+			return m_[idx];
+		}
+
+		const cell_data& ss(const vertex_pos_i& idx) const {
+			return m_[encode_cell_id(idx, m_size_)];
+		}
+
 		mesh_part(trimesh& m, const vertex_pos_i& mesh_size,
 				const vertex_pos_i& first_,
 				const vertex_pos_i& last_)
@@ -208,22 +225,13 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 			ca_assign(m_size_, mesh_size);
 		}
 
-		const cell_data& mesh_ss(ulong idx) const {
-			// idx SHOULD BE IN MESH!
-			return m_[idx];
-		}
-
-		const cell_data& mesh_ss(const vertex_pos_i& idx) const {
-			return m_[encode_cell_id(idx, m_size_)];
-		}
-
 		void bounds(vertex_pos& lo_pos, vertex_pos& hi_pos) const {
-			mesh_ss(lo).lo(lo_pos);
+			ss(lo).lo(lo_pos);
 			// last = hi - 1
 			vertex_pos_i last;
 			ca_assign(last, hi);
 			std::transform(&last[0], &last[D], &last[0], bind2nd(std::minus< ulong >(), 1));
-			mesh_ss(last).hi(hi_pos);
+			ss(last).hi(hi_pos);
 		}
 	};
 
