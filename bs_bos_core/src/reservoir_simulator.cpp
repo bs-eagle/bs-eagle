@@ -37,7 +37,7 @@ namespace blue_sky
       , reservoir_simulator_events_init_ (this)
   {
     this->add_signal (BS_SIGNAL_RANGE (reservoir_simulator));
-    hdm_->get_keyword_manager()->init (hdm_);
+    //hdm_->get_keyword_manager()->init (hdm_);
     
     //bs_node::insert (bs_link::create (hdm_, "hdm"), false);
     //bs_node::insert (bs_link::create (cm, "calc_model"), false);
@@ -179,7 +179,11 @@ namespace blue_sky
     model_filename_ = path;
     pre_read (hdm_->get_event_manager ()); 
     on_pre_read (this);
+#if 1
+    hdm_->read_keyword_file (path);
+#else
     read_keyword_file(path, hdm_, hdm_->get_event_manager ());
+#endif
     post_read (hdm_->get_event_manager ());
     on_post_read ();
     init();

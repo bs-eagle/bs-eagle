@@ -433,9 +433,11 @@ namespace blue_sky
           {
             if (fabs (region.Krp[(int)i]) > EPS_DIFF)
               {
+#if 0
                 if (i == region.Krp.size() - 1)
                   return false;
                 else
+#endif 
                   return true;
               }
           }

@@ -172,7 +172,7 @@ namespace blue_sky
     BS_SP (FRead) reader = params.hdm->get_reader ();
     BS_SP (pvt_3p_iface) pvt = params.hdm->get_pvt ();
     BS_SP(table_iface) tbl;
-    int n_rows = 0, n_cols = 4;
+    int n_rows = 0, n_cols = 5;
     
     stdv_float dbuf;
     char buf[CHAR_BUF_LEN] = {0};
@@ -204,11 +204,19 @@ namespace blue_sky
                   % reader->get_prefix () % keyword);
               }
 
-            if (sscanf (buf, "%lf%lf%lf%lf", &dbuf[0], &dbuf[1], &dbuf[2], &dbuf[3]) != n_cols)
+            size_t len = 0;
+            if ((len = sscanf (buf, "%lf%lf%lf%lf%lf", &dbuf[0], &dbuf[1], &dbuf[2], &dbuf[3], &dbuf[4])) != n_cols)
+              {
+                if (len == 4)
+                  {
+                    dbuf[4] = 0;
+                  }
+                else 
                   {
                     bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
-                      % reader->get_prefix () % keyword);
+                        % reader->get_prefix () % keyword);
                   }
+              }
             tbl->push_back(dbuf);
           }
       }
