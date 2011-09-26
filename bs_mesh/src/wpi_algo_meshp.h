@@ -280,8 +280,12 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 					// skip already found points
 					if(res[i] < m.size()) continue;
 					// check that point lies inside this part
-					if(point_inside_bbox(cur_rect, points[i]))
+					if(point_inside_bbox(cur_rect, points[i])) {
 						catched_points.push_back(i);
+						// parts with > 1 cell anyway undergo splitting
+						if(l->size() > 1)
+							break;
+					}
 
 					//if(!cur_rect.has_on_unbounded_side(points[i]))
 					//	catched_points.push_back(i);
