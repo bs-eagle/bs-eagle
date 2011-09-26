@@ -118,7 +118,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		if(well_node_num < 2) return spv_float();
 
 		// storage
-		well_path W;
+		well_path W(well_node_num - 1);
 		//std::vector< Box > well_boxes(well_node_num - 1);
 		// build array of well nodes as Point_2
 		//std::vector< Point > wnodes(well_node_num);

@@ -151,9 +151,9 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 
 		static double calc_md(const wp_iterator& fish, const Point& target) {
 			// walk all segments before the last one;
-			double md = fish->second.md();
+			double md = fish->md();
 			// append tail
-			md += distance(fish->second.start(), target);
+			md += distance(fish->start(), target);
 			return md;
 		}
 
@@ -181,7 +181,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 
 					// test for intersections with corresponding well segment
 					const ulong wseg_id = pp->first;
-					wp_iterator pw = wp_.find(wseg_id);
+					wp_iterator pw = wp_.begin() + wseg_id;
 					if(pw == wp_.end()) continue;
 					const Segment& seg = pw->second.segment();
 
@@ -315,7 +315,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 						for(std::list< ulong >::iterator ps = catched_seg.begin(),
 							cs_end = catched_seg.end(); ps != cs_end; ++ps
 							)
-							check_intersection(l->ss_id(0), wp_.find(*ps), wseg[*ps]);
+							check_intersection(l->ss_id(0), wp_.begin() + *ps, wseg[*ps]);
 
 						leafs.erase(l++);
 					}
@@ -344,7 +344,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			for(wp_iterator end = wp_.end(); pw != end; ++pw, ++node_idx) {
 				//const well_data& wseg = pw->second;
 				// upper_bound
-				while(px != x_.end() && px->md < pw->second.md())
+				while(px != x_.end() && px->md < pw->md())
 					++px;
 				// we need prev intersection
 				//if(px != x_.begin()) --px;
@@ -402,7 +402,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			dirvec_t dir;
 			for(wp_iterator pw = wp_.begin(), end = wp_.end(); pw != end; ++pw) {
 				// identify direction
-				const well_data& seg = pw->second;
+				const well_data& seg = *pw;
 				// calc direction vector
 				Point start = seg.start();
 				Point finish = seg.finish();
@@ -456,7 +456,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 	private:
 		x_iterator insert_wp_node(ulong cell_id, wp_iterator pw, x_iterator px, bool end_point = false) {
 			// initialization
-			const well_data& wseg = pw->second;
+			const well_data& wseg = *pw;
 			Point where = wseg.start();
 			t_float wp_md = wseg.md();
 			if(end_point) {

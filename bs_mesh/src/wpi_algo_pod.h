@@ -194,7 +194,7 @@ struct wpi_algo_pod : public wpi_algo_helpers< strat_t > {
 	};
 
 	typedef typename strat_t::template well_data< well_data_base > well_data;
-	typedef std::map< ulong, well_data > well_path;
+	typedef std::vector< well_data > well_path;
 	typedef typename well_path::iterator wp_iterator;
 	typedef typename well_path::const_iterator cwp_iterator;
 
