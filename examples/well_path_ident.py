@@ -10,12 +10,12 @@ dy = np.array([cell_y], dtype='d') # Ly
 dz = np.array([cell_z], dtype='d') # Lz
 Nx = 500
 Ny = 500
-Nz = 10
+Nz = 100
 [c, z] = bm.mesh_grdecl.gen_coord_zcorn(Nx, Ny, Nz, dx, dy, dz)
 print 'Source mesh generated!'
 
 # generate randomly mesh trajectory
-well_nodes_num = 100;
+well_nodes_num = 5000;
 wx = np.random.rand(well_nodes_num) * cell_x * Nx;
 wy = np.random.rand(well_nodes_num) * cell_y * Ny;
 wz = np.random.rand(well_nodes_num) * cell_z * Nz;
@@ -33,7 +33,14 @@ W = np.c_[wx, wy, wz, md];
 print W
 
 # calc mesh and well intersection
+from time import clock
+start = clock()
 X = bm.well_path_ident(Nx, Ny, c, z, W.reshape([1, -1]), True)
+elapsed = (clock() - start)
+print '==============================================='
+print 'Well_path_ident time %.3f seconds' % elapsed
+print 'Result contain %d intersections' % (X.size / 7)
+print '==============================================='
 
 # write result to file
 np.savetxt('x.txt', X.reshape([-1, 7]), fmt = "%8.4f")

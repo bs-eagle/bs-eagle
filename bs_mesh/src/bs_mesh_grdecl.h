@@ -67,6 +67,11 @@ namespace blue_sky
 	return wrapped.init_props(nx, ny, coord, zcorn);
       }
 
+      //! reset internal state and release memory
+      void clear() {
+	wrapped.clear();
+      }
+
       ///////////////////////
       // ACCESS VARIABLES
       ///////////////////////

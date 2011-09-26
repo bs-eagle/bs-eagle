@@ -82,6 +82,31 @@ void mesh_grdecl::init_props(t_long nx, t_long ny, spv_float coord, spv_float zc
 	pinner_->init_minmax(*this);
 }
 
+void mesh_grdecl::clear() {
+	// free coord
+	if(pinner_->coord_ && pinner_->coord_->size()) {
+		pinner_->coord_->clear();
+		pinner_->coord_.release();
+		coord_array = NULL;
+	}
+
+	// free zcorn
+	if(pinner_->zcorn_ && pinner_->zcorn_->size()) {
+		pinner_->zcorn_->clear();
+		pinner_->zcorn_.release();
+		zcorn_array = NULL;
+	}
+
+	this->nx = 0;
+	this->ny = 0;
+	this->nz = 0;
+	this->n_elements = 0;
+
+	// zero bounds
+	this->max_x = this->max_y = this->max_z = 0;
+	this->min_x = this->min_y = this->min_z = 0;
+}
+
 void mesh_grdecl::init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz) {
 	// generate COORD & ZCORN
 	std::pair< spv_float, spv_float > cz = gen_coord_zcorn(nx, ny, nz, dx, dy, dz);
