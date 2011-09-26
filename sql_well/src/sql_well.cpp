@@ -1006,6 +1006,7 @@ COMMIT;\
       // add to data base
       sprintf (sql, "INSERT OR REPLACE INTO branches(well_name, branch_name, md, parent) VALUES ('%s', '%s', %lf, '%s')",
                wname, branch, md, parent);
+      printf ("SQL: %s\n", sql);
       if (exec_sql (sql))
         return -1;
       if (fname[0] != '\0')
@@ -1018,6 +1019,7 @@ COMMIT;\
             }
           if (add_branch_traj (wname, branch, sp_traj))
             return -6;
+          printf ("TRAJ\n %s\n", sp_traj->py_str ().c_str ());
         }
       if (fname2[0] != '\0')
         {
