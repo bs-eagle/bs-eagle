@@ -6,12 +6,13 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
+#include "bs_mesh_stdafx.h"
+
 #include "well_path_ident.h"
 #include "wpi_strategy_3d.h"
 #include "wpi_strategy_2d.h"
 #include "wpi_algo.h"
 
-#include "bs_mesh_stdafx.h"
 #include "export_python_wrapper.h"
 
 namespace blue_sky {
