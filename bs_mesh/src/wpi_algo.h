@@ -77,7 +77,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		// obtain coordinates for all vertices of all cells
 		spv_float tops = grd_src->calc_cells_vertices_xyz();
 		// clear COORD & ZCORN arrays
-		grd_src->clear();
+		//grd_src->clear();
 
 		// fill trimesh with triangles corresponding to each cell
 		v_float::iterator pv = tops->begin();
@@ -108,7 +108,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		M.resize(nx * ny * nz);
 		spv_float tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M);
 		// free memory, don't need mesh any more
-		//coord->clear(); zcorn->clear();
+		coord.release(); zcorn.release();
 		// DEBUG
 		std::cout << "trimesh built" << std::endl;
 
@@ -121,7 +121,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		well_path W;
 		//std::vector< Box > well_boxes(well_node_num - 1);
 		// build array of well nodes as Point_2
-		std::vector< Point > wnodes(well_node_num);
+		//std::vector< Point > wnodes(well_node_num);
 
 		// walk along well
 		v_float::iterator pw = well_info->begin();
@@ -132,7 +132,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 				wd = well_data(pw, &W[i - 1]);
 			else
 				wd = well_data(pw);
-			wnodes[i] = wd.start();
+			//wnodes[i] = wd.start();
 
 			// insert well segment
 			W[i] = wd;
@@ -140,7 +140,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 			pw += 4;
 		}
 		// put last node to array
-		wnodes[well_node_num - 1] = W[well_node_num - 2].finish();
+		//wnodes[well_node_num - 1] = W[well_node_num - 2].finish();
 		// DEBUG
 		std::cout << "well_path created" << std::endl;
 
@@ -155,16 +155,16 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		intersect_path X;
 		// find where well path nodes are located
 		intersect_action A(M, W, X, mesh_size);
-		const std::vector< ulong >& hit_idx = wpi_meshp::where_is_point(M, mesh_size, wnodes);
+		//const std::vector< ulong >& hit_idx = wpi_meshp::where_is_point(M, mesh_size, wnodes);
 		// DEBUG
-		std::cout << "hit_idx found" << std::endl;
-		// dump hit_idx
-		for(ulong i = 0; i < hit_idx.size(); ++i)
-			std::cout << hit_idx[i] << ' ';
-		std::cout << std::endl;
+		//std::cout << "hit_idx found" << std::endl;
+		//// dump hit_idx
+		//for(ulong i = 0; i < hit_idx.size(); ++i)
+		//	std::cout << hit_idx[i] << ' ';
+		//std::cout << std::endl;
 
 		// narrow search space via branch & bound algo
-		A.build(hit_idx);
+		const std::vector< ulong > hit_idx = A.build2();
 		// DEBUG
 		std::cout << "build() done" << std::endl;
 

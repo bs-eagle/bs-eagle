@@ -53,7 +53,8 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 	typedef typename wpi_pod::intersect_path intersect_path;
 
 	// mesh_part
-	typedef typename wpi_algo_meshp< strat_t >::mesh_part mesh_part;
+	typedef wpi_algo_meshp< strat_t > wpi_meshp;
+	typedef typename wpi_meshp::mesh_part mesh_part;
 
 
 	/*-----------------------------------------------------------------
@@ -211,22 +212,30 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			}
 		}
 
-		void build2(const std::vector< ulong >& hit_idx) {
+		std::vector< ulong > build2() {
 			typedef typename meshp2xbbox< D >::type xrect_t;
 			// mesh partition stored here
 			typedef typename mesh_part::container_t parts_container;
 			typedef typename mesh_part::container_t::iterator part_iterator;
-			parts_container parts;
 
-			// create list of mesh parts for each well segment
-			std::vector< Segment > wseg(hit_idx.size() - 1);
-			for(ulong i = 0; i < hit_idx.size() - 1; ++i) {
-				mesh_part seg_m(m_, m_size_);
-				seg_m.init(hit_idx[i], hit_idx[i + 1]);
-				parts.insert(seg_m);
+			// list of mesh parts
+			parts_container parts;
+			parts.insert(mesh_part(m_, m_size_));
+
+			// cache list of well nodes
+			std::vector< Segment > wseg(wp_.size());
+			//wseg.reserve(wp_.size());
+			for(ulong i = 0; i < wp_.size(); ++i) {
 				wseg[i] = wp_[i].segment();
+				//const Segment& s = wp_[i].segment();
+				//if(!s.is_degenerate())
+				//	wseg.push_back(s);
 			}
 
+			// result - hit index
+			std::vector< ulong > res(wp_.size() + 1, m_.size());
+
+			// let's got
 			while(parts.size()) {
 				// split every part
 				parts_container leafs;
@@ -236,45 +245,89 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 				}
 
 				// collection of points inside current partition
-				std::list< ulong > catched_seg;
+				//std::list< ulong > catched_seg;
+				//std::list< ulong > catched_points;
+
 				// process each leaf and find points inside it
 				for(part_iterator l = leafs.begin(), end = leafs.end(); l != end; ) {
 					const xrect_t& cur_rect = meshp2xbbox< D >::get(*l);
-					const Iso_bbox& cur_ibb = l->iso_bbox();
-					catched_seg.clear();
-					for(ulong i = 0; i < wseg.size(); ++i) {
-						// TODO: skip already found segments - any way to to it?
-						// probably need to switch search order - cycle through well segments
-						//if(res[i] < m.size()) continue;
+					//const Iso_bbox& cur_ibb = l->iso_bbox();
+					const Bbox& cur_bbox = l->bbox();
 
-						// is segment is null-length (vertical well in 2D)
-						// then check if point lie on mesh rect boundary
-						if(wseg[i].is_degenerate()) {
-							if(cur_ibb.has_on_boundary(wseg[i].source()))
-								catched_seg.push_back(i);
+					std::list< ulong > catched_points;
+					for(ulong i = 0; i <= wp_.size(); ++i) {
+						// skip already found points
+						if(res[i] < m_.size()) continue;
+						// check that point lies inside this part
+						if(wpi_meshp::point_inside_bbox(cur_bbox, ss_wp(i))) {
+							catched_points.push_back(i);
+							// parts with > 1 cell anyway undergo splitting
+							if(l->size() > 1)
+								break;
 						}
-						// otherwise check that segment intersect with this mesh rect
-						else if(CGAL::do_intersect(wseg[i], cur_rect))
-							catched_seg.push_back(i);
+					}
+
+					// check for segment intersection only if point inside
+					// isn't found
+					//catched_seg.clear();
+					std::list< ulong > catched_seg;
+					if(!catched_points.size()) {
+						for(ulong i = 0; i < wp_.size(); ++i) {
+							// first check if point is inside 
+
+							// is segment is null-length (vertical well in 2D)
+							// then check if point lie on mesh rect boundary
+							// *update - degenerated segments checked on find points stage
+							//if(wseg[i].is_degenerate()) {
+							//	if(cur_ibb.has_on_boundary(wseg[i].source()))
+							//		catched_seg.push_back(i);
+							//}
+
+							//const Segment& s = wp_[i].segment();
+							// check that segment intersect with this mesh rect
+							if(!wseg[i].is_degenerate() && CGAL::do_intersect(wseg[i], cur_rect)) {
+								catched_seg.push_back(i);
+								// parts with > 1 cell anyway undergo splitting
+								if(l->size() > 1)
+									break;
+							}
+						}
 					}
 
 					// if this part don't intersect any segments - remove it
 					// if box contains only 1 cell - find intersection points
-					if(!catched_seg.size())
+					if(!catched_points.size() && !catched_seg.size())
 						leafs.erase(l++);
 					else if(l->size() == 1) {
+						// check for contained points if any
+						ulong cell_id = encode_cell_id(l->lo, m_size_);
+						cell_data& cell = m_[cell_id];
+						for(std::list< ulong >::iterator pp = catched_points.begin(),
+							cp_end = catched_points.end();
+							pp != cp_end; ++pp
+							)
+						{
+							if(cell.contains(ss_wp(*pp)))
+								res[*pp] = cell_id;
+						}
+
+						// check for intersection points
 						for(std::list< ulong >::iterator ps = catched_seg.begin(),
 							cs_end = catched_seg.end(); ps != cs_end; ++ps
 							)
 							check_intersection(l->ss_id(0), wp_.find(*ps), wseg[*ps]);
+
 						leafs.erase(l++);
 					}
-					else ++l;
+					else
+						++l;
 				}
 
 				// leafs become the new start point for further division
 				parts = leafs;
 			}
+
+			return res;
 		}
 
 		// run it after all dups killed
@@ -457,6 +510,14 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 					well_hit_cell(px->first, pw, cell_id, calc_md(pw, px->first), px->second)
 				);
 			}
+		}
+
+		// subscript for accessing well path nodes
+		inline Point ss_wp(ulong point_idx) const {
+			if(point_idx < wp_.size())
+				return wp_[point_idx].start();
+			else
+				return wp_[wp_.size() - 1].finish();
 		}
 
 		// mesh
