@@ -77,7 +77,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		// obtain coordinates for all vertices of all cells
 		spv_float tops = grd_src->calc_cells_vertices_xyz();
 		// clear COORD & ZCORN arrays
-		//grd_src->clear();
+		grd_src->clear();
 
 		// fill trimesh with triangles corresponding to each cell
 		v_float::iterator pv = tops->begin();

@@ -205,7 +205,8 @@ struct wpi_algo_pod : public wpi_algo_helpers< strat_t > {
 		// point of intersection
 		Point where;
 		// what segment of well
-		wp_iterator seg;
+		//wp_iterator seg;
+		ulong seg;
 		// interseect with which cell
 		//trim_iterator cell;
 		ulong cell;
@@ -217,8 +218,8 @@ struct wpi_algo_pod : public wpi_algo_helpers< strat_t > {
 		bool is_node;
 
 		well_hit_cell() {}
-		well_hit_cell(const Point& where_, const wp_iterator& seg_,
-			const ulong& cell_, t_float md_, uint facet_, bool is_node_ = false)
+		well_hit_cell(const Point& where_, ulong seg_,
+			ulong cell_, t_float md_, uint facet_, bool is_node_ = false)
 			: where(where_), seg(seg_), cell(cell_), md(md_), facet(facet_), is_node(is_node_)
 		{}
 
