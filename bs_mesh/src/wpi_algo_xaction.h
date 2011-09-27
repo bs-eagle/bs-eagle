@@ -9,7 +9,7 @@
 #ifndef WPI_ALGO_XACTION_PLJRVQ8B
 #define WPI_ALGO_XACTION_PLJRVQ8B
 
-//#include <CGAL/box_intersection_d.h>
+#include <CGAL/box_intersection_d.h>
 #include <CGAL/intersections.h>
 
 #include "wpi_algo_pod.h"
@@ -56,6 +56,72 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 	typedef wpi_algo_meshp< strat_t > wpi_meshp;
 	typedef typename wpi_meshp::mesh_part mesh_part;
 
+	/*-----------------------------------------------------------------
+	* Box description
+	*----------------------------------------------------------------*/
+	enum fish_id {
+		CELL_BOX,
+		WELL_BOX,
+		MESH_BOX
+	};
+
+	// structure to help identify given boxes
+	class box_handle {
+	public:
+		virtual int type() const = 0;
+
+	protected:
+		template< fish_id Id, class = void >
+		struct fish2box_t {
+			// default value
+			typedef ulong fish_t;
+			typedef cell_data data_t;
+		};
+		// overload for well path
+		template< class unused >
+		struct fish2box_t< WELL_BOX, unused > {
+			typedef ulong fish_t;
+			typedef well_data data_t;
+		};
+		// overload for mesh_part
+		template< class unused >
+		struct fish2box_t< MESH_BOX, unused > {
+			typedef const mesh_part* fish_t;
+			typedef mesh_part data_t;
+		};
+	};
+	// pointer is really stored as box handle
+	typedef st_smart_ptr< box_handle > sp_bhandle;
+
+	template< fish_id Id >
+	class box_handle_impl : public box_handle {
+		typedef typename box_handle::template fish2box_t< Id > fish2box_t;
+
+	public:
+		enum { id = Id };
+		typedef typename fish2box_t::fish_t fish_t;
+		typedef typename fish2box_t::data_t data_t;
+
+		box_handle_impl(const fish_t& f) : f_(f) {}
+
+		int type() const {
+			return int(id);
+		}
+
+		fish_t data() const {
+			return f_;
+		}
+
+	private:
+		fish_t f_;
+	};
+	// handy typedefs
+	typedef box_handle_impl< CELL_BOX > cell_box_handle;
+	typedef box_handle_impl< WELL_BOX > well_box_handle;
+	typedef box_handle_impl< MESH_BOX > mesh_box_handle;
+
+	// box intersections storage
+	typedef CGAL::Box_intersection_d::Box_with_handle_d< double, D, sp_bhandle > Box;
 
 	/*-----------------------------------------------------------------
 	* holds all data and search actual intersection points
@@ -124,17 +190,32 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 		// helper to resolve issue with CGAL that can intersect only Bbox_3 in 3D
 		// and Iso_rectangle_2 in 2D! holy shit
 		template< int dims, class = void >
-		struct meshp2xbbox {
+		struct xbbox {
 			typedef Bbox type;
-			static Bbox get(const mesh_part& mp) {
+
+			static type get(const mesh_part& mp) {
 				return mp.bbox();
 			}
+			static type get(const cell_data& c) {
+				return c.bbox();
+			}
+			static type get(const well_data& w) {
+				return w.bbox();
+			}
 		};
+
+		// spec for 2D
 		template< class unused >
-		struct meshp2xbbox< 2, unused > {
+		struct xbbox< 2, unused > {
 			typedef Iso_bbox type;
-			static Iso_bbox get(const mesh_part& mp) {
+			static type get(const mesh_part& mp) {
 				return mp.iso_bbox();
+			}
+			static type get(const cell_data& c) {
+				return c.iso_bbox();
+			}
+			static type get(const well_data& w) {
+				return w.iso_bbox();
 			}
 		};
 
@@ -188,7 +269,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 							do_intersect = pk->iso_bbox().has_on_boundary(seg.source());
 						// otherwise check that segment intersect with this mesh rect
 						else
-							do_intersect = CGAL::do_intersect(seg, meshp2xbbox< D >::get(*pk));
+							do_intersect = CGAL::do_intersect(seg, xbbox< D >::get(*pk));
 
 						if(do_intersect) {
 							// mesh parts of only 1 cell goes to result
@@ -209,7 +290,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 		}
 
 		std::vector< ulong > build2() {
-			typedef typename meshp2xbbox< D >::type xrect_t;
+			typedef typename xbbox< D >::type xrect_t;
 			// mesh partition stored here
 			typedef typename mesh_part::container_t parts_container;
 			typedef typename mesh_part::container_t::iterator part_iterator;
@@ -246,7 +327,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 
 				// process each leaf and find points inside it
 				for(part_iterator l = leafs.begin(), end = leafs.end(); l != end; ) {
-					const xrect_t& cur_rect = meshp2xbbox< D >::get(*l);
+					const xrect_t& cur_rect = xbbox< D >::get(*l);
 					//const Iso_bbox& cur_ibb = l->iso_bbox();
 					const Bbox& cur_bbox = l->bbox();
 
@@ -321,6 +402,124 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 
 				// leafs become the new start point for further division
 				parts = leafs;
+			}
+
+			return res;
+		}
+
+		struct leafs_builder {
+			typedef typename mesh_part::container_t parts_container;
+			typedef std::vector< Segment > Segments;
+			typedef xbbox< D > xbbox_t;
+
+			leafs_builder(intersect_action& A, const Segments& s, std::vector< ulong >& hit, parts_container& leafs)
+				: A_(A), s_(s), hit_(hit), leafs_(leafs)
+			{}
+
+			//leafs_builder(const leafs_builder& rhs)
+			//	: A_(rhs.A_), s_(rhs.s_), hit_(rhs.hit_), leafs_(rhs.leafs_)
+			//{}
+
+			void operator()(const Box& mb, const Box& wb) {
+				const mesh_part* pm = static_cast< mesh_box_handle* >(mb.handle().get())->data();
+				ulong wseg_id = static_cast< well_box_handle* >(wb.handle().get())->data();
+
+				// if mesh_part contains > 1 cells than just push it for further splitting
+				// otherwise check for real intersections
+				if(pm->size() == 1) {
+					ulong cell_id = pm->ss_id(0);
+					cell_data& cell = A_.m_[cell_id];
+					// check if segment start & finish are inside the cell
+					if(hit_[wseg_id] >= A_.m_.size()) {
+						const Point& start = A_.wp_[wseg_id].start();
+						if(
+							wpi_meshp::point_inside_bbox(cell.bbox(), start) &&
+							cell.contains(start)
+							)
+							hit_[wseg_id] = cell_id;
+					}
+					// check segment end for last segment
+					if(wseg_id == A_.wp_.size() - 1 && hit_[wseg_id + 1] >= A_.m_.size()) {
+						const Point& finish = A_.wp_[wseg_id].finish();
+						if(
+							wpi_meshp::point_inside_bbox(cell.bbox(), finish) &&
+							cell.contains(finish)
+							)
+							hit_[wseg_id + 1] = cell_id;
+					}
+
+					// check for intersections with segment
+					if(CGAL::do_intersect(xbbox_t::get(cell), s_[wseg_id]))
+						A_.check_intersection(cell_id, wseg_id, s_[wseg_id]);
+				}
+				else
+					leafs_.insert(*pm);
+			}
+
+			intersect_action& A_;
+			const Segments& s_;
+			std::vector< ulong >& hit_;
+			parts_container& leafs_;
+		};
+
+		// branch & bound algorithm for finding cells that really intersect with well
+		// works using boxes intersection
+		std::vector< ulong > build3() {
+			typedef typename mesh_part::container_t parts_container;
+			typedef typename parts_container::iterator part_iterator;
+			typedef std::vector< Segment > Segments;
+
+			// cache well segments
+			// and make boxes for them
+			Segments wseg(wp_.size());
+			std::vector< Box > well_boxes(wp_.size());
+			//wseg.reserve(wp_.size());
+			for(ulong i = 0; i < wp_.size(); ++i) {
+				wseg[i] = wp_[i].segment();
+				well_boxes[i] = Box(wp_[i].bbox(), new well_box_handle(i));
+			}
+
+			// list of mesh parts
+			parts_container parts;
+			parts.insert(mesh_part(m_, m_size_));
+
+			// result - hit index
+			std::vector< ulong > res(wp_.size() + 1, m_.size());
+
+			// let's go
+			leafs_builder B(*this, wseg, res, parts);
+			//std::vector< Box > mp_boxes;
+			while(parts.size()) {
+				// split every part
+				// and make boxes around splitted parts
+				// try to use single boxes container over all iterations - no profit
+				const ulong max_boxes = parts.size() * (1 << D);
+				//if(mp_boxes.size() < max_boxes)
+				//	mp_boxes.resize(max_boxes);
+				std::vector< Box > mp_boxes;
+				mp_boxes.reserve(max_boxes);
+				// we need container to hold all mesh parts
+				parts_container leafs;
+				//ulong i = 0;
+				for(part_iterator p = parts.begin(), end = parts.end(); p != end; ++p) {
+					parts_container kids = p->divide();
+					//ulong i = 0;
+					for(part_iterator pk = kids.begin(), kend = kids.end(); pk != kend; ++pk) {
+						mp_boxes.push_back(Box(pk->bbox(), new mesh_box_handle(&*leafs.insert(*pk).first)));
+					}
+				}
+
+				// do intersect boxes
+				//parts_container new_kids;
+				parts.clear();
+				CGAL::box_intersection_d(
+					mp_boxes.begin(), mp_boxes.end(),
+					well_boxes.begin(), well_boxes.end(),
+					B
+				);
+
+				// update parts
+				//parts = new_kids;
 			}
 
 			return res;

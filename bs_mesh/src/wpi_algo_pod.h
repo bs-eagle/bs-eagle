@@ -112,6 +112,12 @@ struct wpi_algo_pod : public wpi_algo_helpers< strat_t > {
 			return vertex_pos2bbox(p1, p2);
 		}
 
+		Iso_bbox iso_bbox() const {
+			vertex_pos p1, p2;
+			lo(p1); hi(p2);
+			return vertex_pos2rect(p1, p2);
+		}
+
 		Point ss(uint vert_idx) const {
 			return vertex_pos2point(cpos()[vert_idx]);
 		}
@@ -186,6 +192,10 @@ struct wpi_algo_pod : public wpi_algo_helpers< strat_t > {
 
 		Bbox bbox() const {
 			return segment().bbox();
+		}
+
+		Iso_bbox iso_bbox() const {
+			return Iso_bbox(start(), finish());
 		}
 
 		double len() const {

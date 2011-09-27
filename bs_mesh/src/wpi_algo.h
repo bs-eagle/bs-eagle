@@ -121,7 +121,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		well_path W(well_node_num - 1);
 		//std::vector< Box > well_boxes(well_node_num - 1);
 		// build array of well nodes as Point_2
-		std::vector< Point > wnodes(well_node_num);
+		//std::vector< Point > wnodes(well_node_num);
 
 		// walk along well
 		v_float::iterator pw = well_info->begin();
@@ -135,12 +135,12 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 	
 			// insert well segment
 			W[i] = wd;
-			wnodes[i] = wd.start();
+			//wnodes[i] = wd.start();
 
 			pw += 4;
 		}
 		// put last node to array
-		wnodes[well_node_num - 1] = W[well_node_num - 2].finish();
+		//wnodes[well_node_num - 1] = W[well_node_num - 2].finish();
 		// DEBUG
 		//std::cout << "well_path created" << std::endl;
 
@@ -154,7 +154,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		intersect_path X;
 		// find where well path nodes are located
 		intersect_action A(M, W, X, mesh_size);
-		const std::vector< ulong >& hit_idx = wpi_meshp::where_is_point(M, mesh_size, wnodes);
+		//const std::vector< ulong >& hit_idx = wpi_meshp::where_is_point(M, mesh_size, wnodes);
 		// DEBUG
 		//std::cout << "hit_idx found" << std::endl;
 		// dump hit_idx
@@ -163,8 +163,8 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		//std::cout << std::endl;
 
 		// narrow search space via branch & bound algo
-		//const std::vector< ulong > hit_idx = A.build2();
-		A.build(hit_idx);
+		const std::vector< ulong > hit_idx = A.build3();
+		//A.build(hit_idx);
 		// DEBUG
 		//std::cout << "build() done" << std::endl;
 
