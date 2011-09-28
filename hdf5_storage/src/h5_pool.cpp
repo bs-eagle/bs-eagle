@@ -175,21 +175,11 @@ namespace blue_sky
         {
           close_file ();
         }
-      if (!file_exists (fname_) || !detail::is_hdf5_file (fname_))
+
+      file_id = H5Fcreate (fname_.c_str (), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+      if (file_id < 0)
         {
-          file_id = H5Fcreate (fname_.c_str (), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-          if (file_id < 0)
-            {
-              bs_throw_exception (boost::format ("Can't create h5 file: %s") % fname);
-            }
-        }
-      else
-        {
-          file_id = H5Fopen (fname_.c_str (), H5F_ACC_RDWR, H5P_DEFAULT);
-          if (file_id < 0)
-            {
-              bs_throw_exception (boost::format ("Can't open h5 file: %s") % fname);
-            }
+          bs_throw_exception (boost::format ("Can't create h5 file: %s") % fname);
         }
 
       fname = fname_;
