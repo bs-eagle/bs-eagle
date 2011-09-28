@@ -39,7 +39,7 @@ spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zc
 	);
 }
 
-spv_uint where_is_point(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
+spv_uint where_is_points(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
 	typedef wpi::wpi_strategy_3d strat_t;
 	typedef wpi::wpi_algo_pod< strat_t > wpi_pod;
 	typedef wpi::wpi_algo_meshp< strat_t > wpi_meshp;
@@ -76,6 +76,30 @@ spv_uint where_is_point(t_long nx, t_long ny, spv_float coord, spv_float zcorn, 
 	return res;
 }
 
+t_uint where_is_point(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) {
+	typedef wpi::wpi_strategy_3d strat_t;
+	typedef wpi::wpi_algo_pod< strat_t > wpi_pod;
+	typedef wpi::wpi_algo_meshp< strat_t > wpi_meshp;
+	typedef wpi::wpi_algo< strat_t > wpi_algo;
+
+	typedef typename wpi_pod::trimesh trimesh;
+	typedef typename strat_t::vertex_pos_i vertex_pos_i;
+	typedef typename strat_t::Point Point;
+
+	enum { D = strat_t::D };
+
+	// convert coord & zcorn to tops
+	trimesh M;
+	vertex_pos_i mesh_size;
+	spv_float tops = wpi_algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
+
+	// convert plain array of coords to Point object
+	Point P = wpi_pod::rawptr2point(&*point->begin());
+
+	// real action
+	return wpi_meshp::where_is_point(M, mesh_size, P);
+}
+
 /*-----------------------------------------------------------------
  * Python bindings
  *----------------------------------------------------------------*/
@@ -90,6 +114,7 @@ void py_export_wpi() {
 	bp::def("well_path_ident_2d", &well_path_ident_2d, well_path_ident_overl_2d());
 	bp::def("well_path_ident_2d_old", &well_path_ident_2d_old, well_path_ident_overl_2d_old());
 	bp::def("where_is_point", &where_is_point);
+	bp::def("where_is_points", &where_is_points);
 }
 
 }

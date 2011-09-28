@@ -20,7 +20,9 @@ spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zc
 spv_float well_path_ident_2d_old(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 	spv_float well_info, bool include_well_nodes = true);
 
-spv_uint where_is_point(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points);
+spv_uint where_is_points(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points);
+
+t_uint where_is_point(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point);
 
 } 	// eof blue_sky
 
