@@ -265,13 +265,13 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 					for(meshp_iterator pk = kids.begin(), kend = kids.end(); pk != kend; ++pk) {
 						// is segment is null-length (vertical well in 2D)
 						// then check if point lie on mesh rect boundary
-						if(seg.is_degenerate())
-							do_intersect = pk->iso_bbox().has_on_boundary(seg.source());
-						// otherwise check that segment intersect with this mesh rect
-						else
-							do_intersect = CGAL::do_intersect(seg, xbbox< D >::get(*pk));
+						//if(seg.is_degenerate())
+						//	do_intersect = pk->iso_bbox().has_on_boundary(seg.source());
+						//// otherwise check that segment intersect with this mesh rect
+						//else
+						//	do_intersect = CGAL::do_intersect(seg, xbbox< D >::get(*pk));
 
-						if(do_intersect) {
+						if(!seg.is_degenerate() && strat_t::bbox_segment_x(pk->bbox(), seg)) {
 							// mesh parts of only 1 cell goes to result
 							if(pk->size() == 1)
 								// find intersection points if any
@@ -299,14 +299,14 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			parts_container parts;
 			parts.insert(mesh_part(m_, m_size_));
 
-			// cache list of well nodes
-			std::vector< Segment > wseg(wp_.size());
-			//wseg.reserve(wp_.size());
+			// cache list of normal well segments
+			std::vector< Segment > wseg();
+			wseg.reserve(wp_.size());
 			for(ulong i = 0; i < wp_.size(); ++i) {
-				wseg[i] = wp_[i].segment();
-				//const Segment& s = wp_[i].segment();
-				//if(!s.is_degenerate())
-				//	wseg.push_back(s);
+				//wseg[i] = wp_[i].segment();
+				const Segment& s = wp_[i].segment();
+				if(!s.is_degenerate())
+					wseg.push_back(s);
 			}
 
 			// result - hit index
@@ -334,9 +334,8 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 					std::list< ulong > catched_points;
 					for(ulong i = 0; i <= wp_.size(); ++i) {
 						// skip already found points
-						if(res[i] < m_.size()) continue;
 						// check that point lies inside this part
-						if(wpi_meshp::point_inside_bbox(cur_bbox, ss_wp(i))) {
+						if(res[i] >= m_.size() && wpi_meshp::point_inside_bbox(cur_bbox, ss_wp(i))) {
 							catched_points.push_back(i);
 							// parts with > 1 cell anyway undergo splitting
 							if(l->size() > 1)
@@ -424,7 +423,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 				const mesh_part* pm = static_cast< mesh_box_handle* >(mb->handle().get())->data();
 				ulong wseg_id = static_cast< well_box_handle* >(wb->handle().get())->data();
 
-				// if mesh_part contains > 1 cells than just push it for further splitting
+				// if mesh_part contains > 1 cells then just push it for further splitting
 				// otherwise check for real intersections
 				if(pm->size() == 1) {
 					ulong cell_id = pm->ss_id(0);
@@ -435,7 +434,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 						if(
 							wpi_meshp::point_inside_bbox(cell.bbox(), start) &&
 							cell.contains(start)
-							)
+						  )
 							hit_[wseg_id] = cell_id;
 					}
 					// check segment end for last segment
@@ -444,12 +443,13 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 						if(
 							wpi_meshp::point_inside_bbox(cell.bbox(), finish) &&
 							cell.contains(finish)
-							)
+						  )
 							hit_[wseg_id + 1] = cell_id;
 					}
 
 					// check for intersections with segment
-					if(CGAL::do_intersect(xbbox_t::get(cell), s_[wseg_id]))
+					//if(CGAL::do_intersect(xbbox_t::get(cell), s_[wseg_id]))
+					if(!s_[wseg_id].is_degenerate() && strat_t::bbox_segment_x(cell.bbox(), s_[wseg_id]))
 						A_.check_intersection(cell_id, wseg_id, s_[wseg_id]);
 				}
 				else
