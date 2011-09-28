@@ -420,9 +420,9 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			//	: A_(rhs.A_), s_(rhs.s_), hit_(rhs.hit_), leafs_(rhs.leafs_)
 			//{}
 
-			void operator()(const Box& mb, const Box& wb) {
-				const mesh_part* pm = static_cast< mesh_box_handle* >(mb.handle().get())->data();
-				ulong wseg_id = static_cast< well_box_handle* >(wb.handle().get())->data();
+			void operator()(const Box* mb, const Box* wb) {
+				const mesh_part* pm = static_cast< mesh_box_handle* >(mb->handle().get())->data();
+				ulong wseg_id = static_cast< well_box_handle* >(wb->handle().get())->data();
 
 				// if mesh_part contains > 1 cells than just push it for further splitting
 				// otherwise check for real intersections
@@ -473,10 +473,12 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			// and make boxes for them
 			Segments wseg(wp_.size());
 			std::vector< Box > well_boxes(wp_.size());
+			std::vector< Box* > well_boxes_p(wp_.size());
 			//wseg.reserve(wp_.size());
 			for(ulong i = 0; i < wp_.size(); ++i) {
 				wseg[i] = wp_[i].segment();
 				well_boxes[i] = Box(wp_[i].bbox(), new well_box_handle(i));
+				well_boxes_p[i] = &well_boxes[i];
 			}
 
 			// list of mesh parts
@@ -490,6 +492,9 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			leafs_builder B(*this, wseg, res, parts);
 			//std::vector< Box > mp_boxes;
 			while(parts.size()) {
+				// we need container to hold all mesh parts
+				parts_container leafs;
+	
 				// split every part
 				// and make boxes around splitted parts
 				// try to use single boxes container over all iterations - no profit
@@ -497,15 +502,17 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 				//if(mp_boxes.size() < max_boxes)
 				//	mp_boxes.resize(max_boxes);
 				std::vector< Box > mp_boxes;
+				std::vector< Box* > mp_boxes_p;
 				mp_boxes.reserve(max_boxes);
-				// we need container to hold all mesh parts
-				parts_container leafs;
+				mp_boxes_p.reserve(max_boxes);
+
 				//ulong i = 0;
 				for(part_iterator p = parts.begin(), end = parts.end(); p != end; ++p) {
 					parts_container kids = p->divide();
 					//ulong i = 0;
 					for(part_iterator pk = kids.begin(), kend = kids.end(); pk != kend; ++pk) {
 						mp_boxes.push_back(Box(pk->bbox(), new mesh_box_handle(&*leafs.insert(*pk).first)));
+						mp_boxes_p.push_back(&mp_boxes[mp_boxes.size() - 1]);
 					}
 				}
 
@@ -513,8 +520,8 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 				//parts_container new_kids;
 				parts.clear();
 				CGAL::box_intersection_d(
-					mp_boxes.begin(), mp_boxes.end(),
-					well_boxes.begin(), well_boxes.end(),
+					mp_boxes_p.begin(), mp_boxes_p.end(),
+					well_boxes_p.begin(), well_boxes_p.end(),
 					B
 				);
 
