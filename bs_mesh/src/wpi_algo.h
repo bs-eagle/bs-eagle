@@ -67,12 +67,16 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 	typedef typename wpi_xaction::intersect_action intersect_action;
 
 	// helper to create initial cell_data for each cell
-	static spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn, trimesh& res) {
+	static spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+			trimesh& res, vertex_pos_i& mesh_size)
+	{
 		// build mesh_grdecl around given mesh
 		sp_grd_mesh grd_src = BS_KERNEL.create_object(bs_mesh_grdecl::bs_type());
 		grd_src->init_props(nx, ny, coord, zcorn);
-		t_long nz = (zcorn->size() / nx / ny) >> 3;
-		ulong n_cells = ulong(nx * ny * nz);
+		// init mesh size
+		const ulong full_sz[] = {nx, ny, (zcorn->size() / (nx * ny)) >> 3};
+		const ulong n_cells = ulong(full_sz[0] * full_sz[1] * full_sz[2]);
+		std::copy(full_sz, full_sz + D, mesh_size);
 
 		// obtain coordinates for all vertices of all cells
 		spv_float tops = grd_src->calc_cells_vertices_xyz();
@@ -80,6 +84,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		grd_src->clear();
 
 		// fill trimesh with triangles corresponding to each cell
+		res.resize(n_cells);
 		v_float::iterator pv = tops->begin();
 		for(ulong i = 0; i < n_cells; ++i) {
 			// DEBUG
@@ -104,9 +109,8 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 	{
 		// 1) calculate mesh nodes coordinates and build initial trimesh
 		trimesh M;
-		t_long nz = (zcorn->size() / nx / ny) >> 3;
-		M.resize(nx * ny * nz);
-		spv_float tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M);
+		vertex_pos_i mesh_size;
+		spv_float tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
 		// free memory, don't need mesh any more
 		coord.release(); zcorn.release();
 		// DEBUG
@@ -146,9 +150,6 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 
 		// 3) find where each node of well is located
 		// to restrict search area
-		ulong full_mesh_size[] = {nx, ny, nz};
-		vertex_pos_i mesh_size;
-		std::copy(full_mesh_size, full_mesh_size + D, mesh_size);
 
 		// intersections storage
 		intersect_path X;
