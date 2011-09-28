@@ -42,6 +42,10 @@ struct wpi_algo_helpers {
 		return strat_t::vertex_pos2point(p);
 	}
 
+	static Point rawptr2point(const t_float* p) {
+		return strat_t::vertex_pos2point(reinterpret_cast< const vertex_pos& >(*p));
+	}
+
 	// assign for c arrays
 	// fun with returning reference to array :)
 	template< class T >

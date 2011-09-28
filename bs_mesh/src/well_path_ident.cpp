@@ -39,6 +39,43 @@ spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zc
 	);
 }
 
+spv_uint where_is_point(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
+	typedef wpi::wpi_strategy_3d strat_t;
+	typedef wpi::wpi_algo_pod< strat_t > wpi_pod;
+	typedef wpi::wpi_algo_meshp< strat_t > wpi_meshp;
+	typedef wpi::wpi_algo< strat_t > wpi_algo;
+
+	typedef wpi::ulong ulong;
+	typedef typename wpi_pod::trimesh trimesh;
+	typedef typename strat_t::vertex_pos_i vertex_pos_i;
+	typedef typename strat_t::Point Point;
+
+	enum { D = strat_t::D };
+
+	// convert coord & zcorn to tops
+	trimesh M;
+	vertex_pos_i mesh_size;
+	spv_float tops = wpi_algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
+
+	// convert plain array of coords to array of Point objects
+	ulong pnum = points->size() / D;
+	std::vector< Point > P(pnum);
+	v_float::const_iterator p = points->begin();
+	for(ulong i = 0; i < pnum; ++i) {
+		P[i] = wpi_pod::rawptr2point(&*p);
+		p += D;
+	}
+
+	// real action
+	const std::vector< ulong >& hit_idx = wpi_meshp::where_is_point(M, mesh_size, P);
+	
+	// return result
+	spv_uint res = BS_KERNEL.create_object(v_uint::bs_type());
+	res->resize(hit_idx.size());
+	std::copy(hit_idx.begin(), hit_idx.end(), res->begin());
+	return res;
+}
+
 /*-----------------------------------------------------------------
  * Python bindings
  *----------------------------------------------------------------*/
@@ -52,6 +89,7 @@ void py_export_wpi() {
 	bp::def("well_path_ident", &well_path_ident, well_path_ident_overl());
 	bp::def("well_path_ident_2d", &well_path_ident_2d, well_path_ident_overl_2d());
 	bp::def("well_path_ident_2d_old", &well_path_ident_2d_old, well_path_ident_overl_2d_old());
+	bp::def("where_is_point", &where_is_point);
 }
 
 }
