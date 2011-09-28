@@ -82,9 +82,9 @@ t_uint where_is_point(t_long nx, t_long ny, spv_float coord, spv_float zcorn, sp
 	typedef wpi::wpi_algo_meshp< strat_t > wpi_meshp;
 	typedef wpi::wpi_algo< strat_t > wpi_algo;
 
-	typedef typename wpi_pod::trimesh trimesh;
-	typedef typename strat_t::vertex_pos_i vertex_pos_i;
-	typedef typename strat_t::Point Point;
+	typedef wpi_pod::trimesh trimesh;
+	typedef strat_t::vertex_pos_i vertex_pos_i;
+	typedef strat_t::Point Point;
 
 	enum { D = strat_t::D };
 
