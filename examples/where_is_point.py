@@ -24,10 +24,13 @@ pz = np.random.rand(pnum) * cell_z * Nz;
 P = np.c_[px, py, pz];
 print P
 
-# calc mesh and well intersection
+# find where are points
+cell_id = bm.where_is_point(Nx, Ny, c, z, P.reshape([1, -1]));
+print 'first point is in cell ', cell_id;
+
 from time import clock
 start = clock()
-X = bm.where_is_point(Nx, Ny, c, z, P.reshape([1, -1]));
+X = bm.where_is_points(Nx, Ny, c, z, P.reshape([1, -1]));
 elapsed = (clock() - start)
 print '==============================================='
 print 'where_is_point time %.3f seconds' % elapsed
