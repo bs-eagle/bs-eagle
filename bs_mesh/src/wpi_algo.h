@@ -178,10 +178,8 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		// 3) find where each node of well is located
 		// to restrict search area
 
-		// intersections storage
-		intersect_path X;
 		// find where well path nodes are located
-		intersect_action A(M, W, X, mesh_size);
+		intersect_action A(M, W, mesh_size);
 		//const std::vector< ulong >& hit_idx = wpi_meshp::where_is_point(M, mesh_size, wnodes);
 		// DEBUG
 		//std::cout << "hit_idx found" << std::endl;

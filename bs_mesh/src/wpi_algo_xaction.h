@@ -220,8 +220,8 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 		};
 
 		// ctor
-		intersect_action(trimesh& mesh, well_path& wp, intersect_path& X, const vertex_pos_i& mesh_size)
-			: m_(mesh), wp_(wp), x_(X)
+		intersect_action(trimesh& mesh, well_path& wp, const vertex_pos_i& mesh_size)
+			: m_(mesh), wp_(wp)
 		{
 			ca_assign(m_size_, mesh_size);
 		}
@@ -734,7 +734,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 		// well path
 		well_path& wp_;
 		// well-mesh intersection path
-		intersect_path& x_;
+		intersect_path x_;
 		// mesh size
 		vertex_pos_i m_size_;
 	};
