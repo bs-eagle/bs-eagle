@@ -104,9 +104,36 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 	/*-----------------------------------------------------------------
 	* implementation of main routine
 	*----------------------------------------------------------------*/
-	static spv_float well_path_ident_d(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+	template< bool pythonish, class = void >
+	struct wpi_return {
+		typedef spv_float type;
+
+		static type make(intersect_action& A) {
+			return A.export_1d();
+		}
+	};
+
+	template< class unused >
+	struct wpi_return< false, unused > {
+		typedef std::vector< well_hit_cell > type;
+
+		static type make(intersect_action& A) {
+			type res(A.path().size());
+			ulong i = 0;
+			for(typename intersect_path::const_iterator px = A.path().begin(), end = A.path().end(); px != end; ++px)
+				res[i++] = *px;
+
+			return res;
+		}
+	};
+
+	template< bool pythonish >
+	static typename wpi_return< pythonish >::type well_path_ident_d(
+		t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 		spv_float well_info, bool include_well_nodes)
 	{
+		typedef typename wpi_return< pythonish >::type ret_t;
+
 		// 1) calculate mesh nodes coordinates and build initial trimesh
 		trimesh M;
 		vertex_pos_i mesh_size;
@@ -119,7 +146,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		// 2) create well path description and
 		// bounding boxes for line segments representing well trajectory
 		ulong well_node_num = well_info->size() >> 2;
-		if(well_node_num < 2) return spv_float();
+		if(well_node_num < 2) return ret_t();
 
 		// storage
 		well_path W(well_node_num - 1);
@@ -180,7 +207,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		// DEBUG
 		//std::cout << "well nodes inserted" << std::endl;
 
-		return A.export_1d();
+		return wpi_return< pythonish >::make(A);
 	}
 };
 

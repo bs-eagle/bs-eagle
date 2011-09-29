@@ -9,8 +9,7 @@
 #include "bs_mesh_stdafx.h"
 
 #include "well_path_ident.h"
-#include "wpi_strategy_3d.h"
-#include "wpi_strategy_2d.h"
+#include "wpi_iface.h"
 #include "wpi_algo.h"
 
 #include "export_python_wrapper.h"
@@ -24,7 +23,7 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 	spv_float well_info, bool include_well_nodes)
 {
 	//return well_path_ident_(nx, ny, coord, zcorn, well_info, include_well_nodes);
-	return wpi::wpi_algo< wpi::wpi_strategy_3d >::well_path_ident_d(
+	return wpi::wpi_algo< wpi::wpi_strategy_3d >::well_path_ident_d< true >(
 		nx, ny, coord, zcorn, well_info, include_well_nodes
 	);
 }
@@ -34,7 +33,7 @@ spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zc
 	spv_float well_info, bool include_well_nodes)
 {
 	//return well_path_ident_(nx, ny, coord, zcorn, well_info, include_well_nodes);
-	return wpi::wpi_algo< wpi::wpi_strategy_2d >::well_path_ident_d(
+	return wpi::wpi_algo< wpi::wpi_strategy_2d >::well_path_ident_d< true >(
 		nx, ny, coord, zcorn, well_info, include_well_nodes
 	);
 }
@@ -99,6 +98,31 @@ t_uint where_is_point(t_long nx, t_long ny, spv_float coord, spv_float zcorn, sp
 	// real action
 	return wpi_meshp::where_is_point(M, mesh_size, P);
 }
+
+/*-----------------------------------------------------------------
+ * C++ iface
+ *----------------------------------------------------------------*/
+namespace wpi {
+
+std::vector< well_hit_cell_3d > well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+	spv_float well_info, bool include_well_nodes)
+{
+	//return well_path_ident_(nx, ny, coord, zcorn, well_info, include_well_nodes);
+	return wpi_algo< wpi_strategy_3d >::well_path_ident_d< false >(
+		nx, ny, coord, zcorn, well_info, include_well_nodes
+	);
+}
+
+std::vector< well_hit_cell_2d > well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+	spv_float well_info, bool include_well_nodes)
+{
+	//return well_path_ident_(nx, ny, coord, zcorn, well_info, include_well_nodes);
+	return wpi_algo< wpi_strategy_2d >::well_path_ident_d< false >(
+		nx, ny, coord, zcorn, well_info, include_well_nodes
+	);
+}
+
+} /* wpi */
 
 /*-----------------------------------------------------------------
  * Python bindings
