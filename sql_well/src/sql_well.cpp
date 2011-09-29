@@ -834,6 +834,17 @@ COMMIT;\
         return 0;
       return std::string ((const char *)sqlite3_column_text (stmp_sql, (int)col));
     }
+  bool
+  sql_well::get_sql_exist (t_int col)
+  {
+	  if (!db)
+		  return false;
+	  if (!stmp_sql)
+		  return false;
+	  int n = sqlite3_column_bytes(stmp_sql, (int)col);
+	  return (bool)n;
+  }
+
   int 
   sql_well::exec_sql (const std::string &sql)
     {
