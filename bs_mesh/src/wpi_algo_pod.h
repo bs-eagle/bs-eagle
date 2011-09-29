@@ -209,14 +209,12 @@ struct wpi_algo_pod : public wpi_algo_helpers< strat_t > {
 		// point of intersection
 		Point where;
 		// what segment of well
-		//wp_iterator seg;
 		ulong seg;
-		// interseect with which cell
-		//trim_iterator cell;
+		// intersect with which cell
 		ulong cell;
 		// depth along well in point of intersection
 		t_float md;
-		// cell facet
+		// cell facet that contains intersection
 		uint facet;
 		// is that point a node?
 		bool is_node;

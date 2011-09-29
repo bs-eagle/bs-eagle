@@ -449,6 +449,14 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			return res;
 		}
 
+		// directly access intersection path
+		intersect_path& path() {
+			return x_;
+		}
+		const intersect_path& path() const {
+			return x_;
+		}
+
 	private:
 		x_iterator insert_wp_node(ulong cell_id, ulong wseg_id, x_iterator px, bool end_point = false) {
 			// initialization
