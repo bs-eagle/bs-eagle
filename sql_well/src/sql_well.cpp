@@ -573,9 +573,9 @@ COMMIT;\
     {
       sp_gis_t sp_gis = BS_KERNEL.create_object ("gis"); 
       if (!db)
-        return sp_gis;
+        return sp_gis_t ();
       if (stmp_sql)
-        return sp_gis;
+        return sp_gis_t ();
 
       int rc = 0;
       //char *zErrMsg = 0;
@@ -610,6 +610,10 @@ COMMIT;\
           sp_gis->load (iar);
           
         }
+	  else
+	    {
+		  return sp_gis_t ();
+	    }
       sqlite3_finalize (stmp);
       return sp_gis;
     }
@@ -662,9 +666,9 @@ COMMIT;\
      {
       sp_traj_t sp_traj = BS_KERNEL.create_object ("traj"); 
       if (!db)
-        return sp_traj;
+        return sp_traj_t ();
       if (stmp_sql)
-        return sp_traj;
+        return sp_traj_t ();
 
       int rc = 0;
       //char *zErrMsg = 0;
@@ -700,6 +704,10 @@ COMMIT;\
           sp_traj->load (iar);
           
         }
+	  else
+	    {
+		  return sp_traj_t ();
+	    }
       sqlite3_finalize (stmp);
       return sp_traj;
      }
