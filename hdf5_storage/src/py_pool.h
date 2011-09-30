@@ -49,6 +49,8 @@ namespace blue_sky
         args ("dims"), "Set pool dimensions")
     .def ("py_get_pool_dims",                   &T::py_get_pool_dims, 
         args (""), "Get pool dimensions")
+    .def ("py_get_data_dims",                   &T::py_get_data_dims, 
+        args ("Name"), "Get array dimensions")
     .def ("__str__",                            &T::py_str)
   PY_EXPORTER_END;                               
 

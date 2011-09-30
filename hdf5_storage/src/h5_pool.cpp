@@ -718,13 +718,31 @@ namespace blue_sky
   }
 
   boost::python::list 
-  h5_pool::py_get_pool_dims ()
+  h5_pool::py_get_pool_dims () const
   {
     boost::python::list dims;
     
     for (int i = 0; i < n_pool_dims; ++i)
       {
         dims.append(pool_dims[i]);
+      }
+    return dims;
+  }
+
+  boost::python::list 
+  h5_pool::py_get_data_dims (const std::string &name) const
+  {
+    boost::python::list dims;
+    map_t::const_iterator ti, te; 
+    ti = h5_map.find (name);
+    if (ti != h5_map.end ())
+      {
+        int n = ti->second.n_dims;
+        for (int i = 0; i < n; ++i)
+          {
+            dims.append(ti->second.py_dims[i]);
+          }
+
       }
     return dims;
   }

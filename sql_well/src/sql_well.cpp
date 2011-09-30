@@ -208,6 +208,7 @@ namespace blue_sky
       char *zErrMsg = 0;
       const char *sql = \
 "\
+PRAGMA foreign_keys=ON;\
 BEGIN;\
 CREATE TABLE wells(name TEXT UNIQUE PRIMARY KEY, \
 				    x REAL DEFAULT -1, \
