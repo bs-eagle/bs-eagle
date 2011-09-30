@@ -9,17 +9,16 @@
 #ifndef WPI_ALGO_I21Y0RBS
 #define WPI_ALGO_I21Y0RBS
 
-#include "conf.h"
-#include "bs_mesh_grdecl.h"
+#include <iterator>
+#include <cmath>
 
 #include "wpi_common.h"
 #include "wpi_algo_pod.h"
 #include "wpi_algo_meshp.h"
 #include "wpi_algo_xaction.h"
 
-#include <iterator>
-#include <cmath>
-
+#include "conf.h"
+#include "bs_mesh_grdecl.h"
 // DEBUG
 //#include <iostream>
 
@@ -65,6 +64,8 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 	// import intersect_action
 	typedef wpi_algo_xaction< strat_t > wpi_xaction;
 	typedef typename wpi_xaction::intersect_action intersect_action;
+
+  typedef smart_ptr< bs_mesh_grdecl, true > sp_grd_mesh;
 
 	// helper to create initial cell_data for each cell
 	static spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn,

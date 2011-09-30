@@ -78,8 +78,8 @@
     <ClCompile>
       <AdditionalOptions>/Zm1000</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)/../bs_pvt/src/;$(ProjectDir)/../bs_csr_ilu_prec\include;$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include/;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../bs_lsolvers/include/;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../../hdf5-storage/src/;$(ProjectDir)/../bs_mtx/include/;$(ProjectDir)/../bs_base_linear_solvers/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(ProjectDir)/../sql_well/include;$(ProjectDir)/../bs_mesh/include;$(ProjectDir)/../bs_scal/include/;$(ProjectDir)/../bs_pvt/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(HDF5_PATH)/include;$(NUMPY_PATH)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;_USRDLL;_HDF5_;WIN32;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;BS_BOS_CORE_DEBUG_MEMORY_;_MPI_;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;_SCL_SECURE_NO_WARNINGS;NOMINMAX;%(PreprocessorDefinitions);BOOST_ALL_DYN_LINK;BOOST_ALL_DYN_LINK;_SCL_SECURE_NO_WARNINGS; _SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)/../bs_pvt/src/;$(ProjectDir)/../bs_csr_ilu_prec\include;$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include/;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../bs_lsolvers/include/;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../../hdf5-storage/src/;$(ProjectDir)/../bs_mtx/include/;$(ProjectDir)/../bs_base_linear_solvers/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(ProjectDir)/../sql_well/include;$(ProjectDir)/../bs_mesh/include;$(ProjectDir)/../bs_scal/include/;$(ProjectDir)/../bs_pvt/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(HDF5_PATH)/include;$(NUMPY_PATH)/include;$(CGAL_DIR)/include;$(CGAL_DIR)/auxiliary/gmp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;_USRDLL;_HDF5_;WIN32;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;BS_BOS_CORE_DEBUG_MEMORY_;_MPI_;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;_SCL_SECURE_NO_WARNINGS;NOMINMAX;%(PreprocessorDefinitions);BOOST_ALL_DYN_LINK;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
       <MinimalRebuild>true</MinimalRebuild>
@@ -92,9 +92,9 @@
       <DisableSpecificWarnings>4520</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>loki_D.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>loki_D.lib;ws2_32.lib;CGAL-vc100-mt-gd.lib;libgmp-10.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>$(HDF5_PATH)/lib;$(PYTHON_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/debug/;$(ProjectDir)/../../../exe/debug/plugins/;$(MPICH_PATH)/SDK/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(HDF5_PATH)/lib;$(PYTHON_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/debug/;$(ProjectDir)/../../../exe/debug/plugins/;$(MPICH_PATH)/SDK/lib;$(CGAL_DIR)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>python25_d.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -247,6 +247,7 @@
     <ClCompile Include="src\well_limit_operation.cpp" />
     <ClCompile Include="src\fi_params.cpp" />
     <ClCompile Include="src\data_storage_interface.cpp" />
+    <ClCompile Include="src\well_process_completions.cpp" />
     <ClCompile Include="src\well_serializer.cpp" />
     <ClCompile Include="src\py_data_storage_interface.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
@@ -318,6 +319,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\well_process_completions.h" />
     <ClInclude Include="src\data_saver.h" />
     <ClInclude Include="src\data_saver_dummy.h" />
     <ClInclude Include="src\data_saver_hdf5.h" />

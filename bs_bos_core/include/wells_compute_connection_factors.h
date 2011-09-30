@@ -55,11 +55,31 @@ namespace blue_sky
                    const sp_mesh_iface_t &mesh,
                    const stdv_float &perm,
                    const stdv_float &ntg,
-                   bool ro_calc_flag);
+                   bool ro_calc_flag,
+                   item_t *completion_thickness = 0);
 
           static item_t compute_grp_pi_mult (connection_t &connection);
         };
+      
+      struct completion_connection_factor 
+        {
+          typedef connection                      connection_t;
+          typedef t_double                        item_t;
+          typedef t_long                          index_t;
+          typedef spv_double                      item_array_t;
+          typedef smart_ptr <fi_params, true>     sp_params_t;
 
+          typedef rs_mesh_iface                   mesh_iface_t;
+          typedef smart_ptr <mesh_iface_t, true>  sp_mesh_iface_t;
+
+          static void 
+          compute (connection_t &connection,
+                   const physical_constants &internal_constants,
+                   const sp_params_t &params,
+                   const sp_mesh_iface_t &mesh,
+                   const stdv_float &perm,
+                   const stdv_float &ntg);
+        };
       //struct baby_odeh_model
       //{
       //  static void compute (well::connection &connection, physical_constants *internal_constants,

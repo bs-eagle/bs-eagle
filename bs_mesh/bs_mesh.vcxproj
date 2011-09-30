@@ -166,6 +166,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\py_flux_connections.h" />
+    <ClInclude Include="include\wpi_iface.h" />
     <ClInclude Include="src\py_mesh_grdecl.h" />
     <ClInclude Include="include\py_rs_mesh.h" />
     <ClInclude Include="include\fpoint2d.h" />
@@ -189,6 +190,13 @@
     <ClInclude Include="src\rs_smesh_keywords.h" />
     <ClInclude Include="src\gauss_method.h" />
     <ClInclude Include="src\bs_mesh_stdafx.h" />
+    <ClInclude Include="src\wpi_algo.h" />
+    <ClInclude Include="src\wpi_algo_meshp.h" />
+    <ClInclude Include="src\wpi_algo_pod.h" />
+    <ClInclude Include="src\wpi_algo_xaction.h" />
+    <ClInclude Include="src\wpi_common.h" />
+    <ClInclude Include="src\wpi_strategy_2d.h" />
+    <ClInclude Include="src\wpi_strategy_3d.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\kernel\blue-sky.vcxproj">
