@@ -19,6 +19,7 @@
 #include "pvt_oil.h"
 #include "pvt_gas.h"
 #include "pvt_water.h"
+#include "pvt_3p_iface.h"
 #include "scal_3p_iface.hpp"
 #include "rock_grid.h"
 #include BS_STOP_PLUGIN_IMPORT ()
@@ -47,6 +48,7 @@ namespace blue_sky
   class calc_model;
   class reservoir;
   class init_model_iface;
+  class hdm_iface;
 
   //class well_results_storage;
   //class fip_results_storage;
@@ -185,10 +187,7 @@ namespace blue_sky
        * \todo   remove return values, throw exceptions instead
        * */
       int 
-      init_main_arrays (const BS_SP (init_model_iface) &init_model, 
-        const BS_SP (scal_3p_iface) &scal_prop,
-        const sp_idata_t &input_data, 
-        const sp_mesh_iface_t &mesh);
+      init_main_arrays (const BS_SP (hdm_iface) hdm);
 
       /**
        * \brief  inits arrays for calculation process
@@ -202,17 +201,14 @@ namespace blue_sky
 
       /**
        * \brief  inits pvt arrays
-       * \param  pvto_ array of pvt_oil objects
-       * \param  pvtg_ array of pvt_gas objects
-       * \param  pvtw_ array of pvt_water objects
-       * \param  idata_ pointer to idata instance that 
-       *                holds input data for pvt
        * */
       void 
-      init_pvt_arrays (sp_pvt_oil_array_t &pvto_,
-                       sp_pvt_gas_array_t &pvtg_,
-                       sp_pvt_water_array_t &pvtw_,
-                       const sp_idata_t &idata_);
+      init_pvt_arrays (BS_SP (pvt_3p_iface) pvt_prop_);
+      /**
+       * \brief  inits pvt arrays
+       * */
+      void 
+      init_scal_arrays (BS_SP (scal_3p_iface) scal_prop_, const BS_SP (idata) input_data);
 
       /**
        * \brief  returns true if water phase present in model
@@ -423,6 +419,8 @@ namespace blue_sky
       sp_pvt_dead_oil_array_t                                 pvt_oil_array;                  //!< array of pvt_oil objects, length == n_pvt_regions
       sp_pvt_water_array_t                                    pvt_water_array;                //!< array of pvt_water objects, length == n_pvt_regions
       sp_pvt_gas_array_t                                      pvt_gas_array;                  //!< array of pvt_gas objects, length == n_pvt_regions
+
+      BS_SP (pvt_3p_iface)                                    pvt_prop;                      //!< pvt properties
 
       data_array_t                                            data;                           //!< array of calc_model_data, length == n_elements 
 

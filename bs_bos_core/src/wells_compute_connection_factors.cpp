@@ -23,12 +23,13 @@ namespace blue_sky
 
       void
       peaceman_model::compute (connection_t &con,
-                                           const physical_constants &internal_constants,
-                                           const sp_params_t &params,
-                                           const sp_mesh_iface_t &mesh,
-                                           const stdv_float &perm,
-                                           const stdv_float &ntg,
-                                           bool ro_calc_flag)
+                               const physical_constants &internal_constants,
+                               const sp_params_t &params,
+                               const sp_mesh_iface_t &mesh,
+                               const stdv_float &perm,
+                               const stdv_float &ntg,
+                               bool ro_calc_flag,
+                               item_t *completion_thickness)
       {
         BS_ASSERT (con.n_block_ >= 0) (con.n_block_);
 
@@ -42,6 +43,8 @@ namespace blue_sky
         d1 = d[dir_plane1];
         d2 = d[dir_plane2];
         d_ort = d[dir_orth];
+        if (completion_thickness)
+          d_ort = (*completion_thickness);
 
         item_t perm1 = (perm[3 * con.n_block () + dir_plane1]);
         item_t perm2 = (perm[3 * con.n_block () + dir_plane2]);
@@ -126,6 +129,28 @@ namespace blue_sky
         return (::log (4.0 * con.fracture_half_length_ / con.diam_) /*+  con.skin_ */) / (::log (4.0) /*+ con.skin_ */);
       }
 
+      //////////////////////////////////////////////////////////////////////////
+      void
+      completion_connection_factor::compute (connection_t &connection, 
+                                             const physical_constants &internal_constants, 
+                                             const sp_params_t &params, 
+                                             const sp_mesh_iface_t &mesh, 
+                                             const stdv_float &perm, 
+                                             const stdv_float &ntg)
+      {
+        item_t completion_fact_ = 0;
+        // loop through all directions 
+        for (t_uint dir = 0; dir < direction_total; ++dir)
+          {
+            connection.set_direction ((connection_direction_type) dir);
+            item_t completion_thickness = fabs (connection.completion_data.x2[dir] - connection.completion_data.x1[dir]);
+            peaceman_model::compute (connection, internal_constants, params, mesh, perm, ntg, /*ro_calc_flag*/ 1, &completion_thickness);
+            completion_fact_ += connection.get_fact ();
+          }
+        // set full completion connection factor
+        connection.set_factor (completion_fact_); 
+        connection.set_CFF_flag (true);
+      }
       //////////////////////////////////////////////////////////////////////////
       ///**
       // * \brief computes connection factor by baby and odeh model.

@@ -303,7 +303,7 @@ int mesh_ijk::build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, con
   t_double *values_tran =  &(*conn_trans->get_values())[0];
   
   flux_conn->get_matrix_block_idx_plus ()->resize (n_connections * 2);
-  flux_conn->get_matrix_block_idx_plus ()->resize (n_connections * 2);
+  flux_conn->get_matrix_block_idx_minus ()->resize (n_connections * 2);
   
   t_long *matrix_block_idx_plus = &(*flux_conn->get_matrix_block_idx_plus ())[0];
   t_long *matrix_block_idx_minus = &(*flux_conn->get_matrix_block_idx_minus ())[0];

@@ -17,13 +17,13 @@ namespace blue_sky {
   struct connection_iterator : 
     std::iterator <
       std::forward_iterator_tag, 
-      smart_ptr <wells::connection> 
+      smart_ptr <wells::connection, true> 
     >
   {
     typedef connection_iterator       this_t;
     typedef wells::connection         connection_t;
 
-    typedef smart_ptr <connection_t>  sp_connection_t;
+    typedef smart_ptr <connection_t, true>  sp_connection_t;
 
   public:
 

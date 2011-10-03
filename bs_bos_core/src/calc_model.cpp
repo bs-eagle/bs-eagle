@@ -12,6 +12,7 @@
 #include "fi_params.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
+#include "hdm_iface.h"
 #include "scal_3p_iface.hpp"
 //#include "scale_array_holder.h"
 //#include "scal_region_info.h"
@@ -133,18 +134,22 @@ namespace blue_sky
   }
 
   int 
-  calc_model::init_main_arrays (const BS_SP (init_model_iface) &init_model, const BS_SP (scal_3p_iface) &scal_prop_, const sp_idata_t &input_data, const sp_mesh_iface_t &mesh)
+  calc_model::init_main_arrays (const BS_SP (hdm_iface) hdm)
   {
 #ifdef _DEBUG
     BOSOUT (section::init_data, level::debug) << "FI DEBUG: begin of init_main_arrays method" << bs_end;
 #endif // _DEBUG
     write_time_to_log init_time ("Main arrays initialization", "");
 
-    BS_ASSERT(input_data);
-
     // set up phases
     n_phases = 0;
     phases = 0;
+
+    BS_SP (idata)            input_data = hdm->get_data ();
+    BS_SP (pvt_3p_iface)     pvt_prop_  = hdm->get_pvt ();
+    BS_SP (scal_3p_iface)    scal_prop_ = hdm->get_scal ();
+    BS_SP (init_model_iface) init_model = hdm->get_init_model ();
+    BS_SP (rs_mesh_iface)    mesh       = hdm->get_mesh ();
     
     if (input_data->props->get_b ("water_phase"))
       {
@@ -349,11 +354,11 @@ namespace blue_sky
     this->rock_grid_prop->init(input_data, mesh->get_n_active_elements(), this->n_pvt_regions);
 
     //initialize pvt
-    this->init_pvt_arrays(this->pvt_oil_array,
-                          this->pvt_gas_array,
-                          this->pvt_water_array,
-                          input_data);
+    this->init_pvt_arrays(pvt_prop_);
 
+#if 1
+    this->init_scal_arrays (scal_prop_, input_data);
+#else
     // initialize scale arrays
     scal_prop = scal_prop_;
     const BS_SP (scale_array_holder_iface) &gas_scale_ = scal_prop->get_gas_scale ();
@@ -374,6 +379,7 @@ namespace blue_sky
     scal_prop->set_gas_jfunction (BS_KERNEL.create_object (jfunction::bs_type ()));
     scal_prop->init (is_water (), is_gas (), is_oil (), phase_d, sat_d, rpo_model);
     scal_prop->update_gas_data ();
+#endif 
 
     // initialize rock grid data
     this->rock_grid_prop->init_data(mesh->get_n_active_elements (), mesh->get_int_to_ext (), input_data);
@@ -525,67 +531,42 @@ namespace blue_sky
     };
 
   void 
-  calc_model::init_pvt_arrays (sp_pvt_oil_array_t &pvto,
-      sp_pvt_gas_array_t &pvtg,
-      sp_pvt_water_array_t &pvtw,
-      const sp_idata_t &idata)
+  calc_model::init_pvt_arrays (BS_SP (pvt_3p_iface) pvt_prop_)
   {
-    typedef idata_t::pvt_vector    pvt_vector;
-    typedef idata_t::pvt_info      pvt_info;
-
-    pvto.resize(this->n_pvt_regions);
-    pvtg.resize(this->n_pvt_regions);
-    pvtw.resize(this->n_pvt_regions);
-
-    for (size_t i = 0; i<this->n_pvt_regions; i++)
-      {
-        BS_ASSERT (idata->pvto.size ());
-        std::cout << "pvto (" << i << "): " << idata->pvto.back ().main_data_->empty () << std::endl;
-
-        if (idata->pvto.back ().main_data_->empty ())
-          {
-            pvto[i] = BS_KERNEL.create_object (pvt_dead_oil_t::bs_type());
-          }
-        else
-          {
-            pvto[i] = BS_KERNEL.create_object (pvt_oil_t::bs_type());
-          }
-
-        pvtg[i] = BS_KERNEL.create_object (pvt_gas_t::bs_type());
-        pvtw[i] = BS_KERNEL.create_object (pvt_water_t::bs_type());
-      }
-
-    BS_ASSERT (idata->pvto.size ());
-    if (idata->pvto.back ().main_data_->empty ())
-      {
-        pvt_helper::set_array (pvto, idata->pvtdo);
-      }
-    else
-      {
-        pvt_helper::set_array (pvto, idata->pvto);
-      }
-
-    pvt_helper::set_array (pvtg, idata->pvtg);
-    pvt_helper::set_array (pvtw, idata->pvtw);
-
-    //const sp_fi_params &l_tsp (this->ts_params);
-
+    pvt_prop = pvt_prop_;
+    
     float atm_p     = this->internal_constants.atmospheric_pressure;
     float min_p     = this->ts_params->get_float (fi_params::PVT_PRESSURE_RANGE_MIN);
     float max_p     = this->ts_params->get_float (fi_params::PVT_PRESSURE_RANGE_MAX);
     int n_intervals = this->ts_params->get_int (fi_params::PVT_INTERP_POINTS);
 
-    for (size_t i = 0; i<this->n_pvt_regions; i++)
-      {
-        if (is_oil ())
-          pvto[i]->build (atm_p, min_p, max_p, n_intervals);
+    pvt_prop->init_pvt_calc_data (atm_p, min_p, max_p, n_intervals);
 
-        if (is_gas ())
-          pvtg[i]->build (atm_p, min_p, max_p, n_intervals);
+    pvt_oil_array = pvt_prop->get_pvt_oil_array ();
+    pvt_gas_array = pvt_prop->get_pvt_gas_array ();
+    pvt_water_array = pvt_prop->get_pvt_water_array ();
+  }
 
-        if (is_water ())
-          pvtw[i]->build (atm_p, min_p, max_p, n_intervals);
-      }
+  void
+  calc_model::init_scal_arrays (BS_SP (scal_3p_iface) scal_prop_, const BS_SP (idata) input_data)
+  {    
+    // initialize scale arrays
+    scal_prop = scal_prop_;
+    scal_prop->init_scal_calc_data ();
+
+    const BS_SP (scale_array_holder_iface) &gas_scale_ = scal_prop->get_gas_scale ();
+    const BS_SP (scale_array_holder_iface) &water_scale_ = scal_prop->get_water_scale ();
+
+    if (input_data->is_set ("SOGCR"))   gas_scale_->set (socr, "SOGCR", input_data->get_fp_array ("SOGCR"));
+    if (input_data->is_set ("SGCR"))    gas_scale_->set (scr, "SGCR", input_data->get_fp_array ("SGCR"));
+    if (input_data->is_set ("SGU"))     gas_scale_->set (su, "SGU", input_data->get_fp_array ("SGU"));
+    if (input_data->is_set ("SGL"))     gas_scale_->set (sl, "SGL", input_data->get_fp_array ("SGL"));
+
+    if (input_data->is_set ("SOWCR"))   water_scale_->set (socr, "SOWCR", input_data->get_fp_array ("SOWCR"));
+    if (input_data->is_set ("SWCR"))    water_scale_->set (scr, "SWCR", input_data->get_fp_array ("SWCR"));
+    if (input_data->is_set ("SWU"))     water_scale_->set (su, "SWU", input_data->get_fp_array ("SWU"));
+    if (input_data->is_set ("SWL"))     water_scale_->set (sl, "SWL", input_data->get_fp_array ("SWL"));
+    if (input_data->is_set ("PCW"))     water_scale_->set (pcp, "PCW", input_data->get_fp_array ("PCW"));
 
   }
 

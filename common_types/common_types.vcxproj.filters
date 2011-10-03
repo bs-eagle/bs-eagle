@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
-    <Filter Include="replace boost/mpl/assert.hpp">
-      <UniqueIdentifier>{f3fa5cbf-4051-4f61-8a50-12b20b824de3}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\frac.cpp">
@@ -124,9 +121,6 @@
     </ClInclude>
     <ClInclude Include="include\vartype_table_iface.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="compile_fix\assert.hpp">
-      <Filter>replace boost/mpl/assert.hpp</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

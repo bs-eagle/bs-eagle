@@ -109,6 +109,7 @@ namespace blue_sky
       virtual t_double get_sql_real (t_int col);
       virtual bool get_sql_bool (t_int col);
       virtual std::string get_sql_str (t_int col);
+	  virtual bool get_sql_exist (t_int col);
       virtual int exec_sql (const std::string &sql);
       virtual int insert_or_update (const std::string &select_sql,
                                     const std::string &insert_sql,

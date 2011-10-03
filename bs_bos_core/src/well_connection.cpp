@@ -132,7 +132,8 @@ namespace blue_sky
         const sp_mesh_iface_t &mesh,
         const stdv_float &perm,
         const stdv_float &ntg,
-        bool ro_calc_flag)
+        bool ro_calc_flag,
+        bool use_CCF_flag)
     {
       BS_ASSERT (n_block_ >= 0) (n_block_);
       if (n_block_ < 0)
@@ -140,7 +141,12 @@ namespace blue_sky
 
       using namespace wells::compute_factors;
 
-      if (HORIZ_WELL_MODEL_PEACEMAN || dir_ == direction_z /* || !wfrictn_keyword_active*/)
+      if (use_CCF_flag && this->completion_data.use_CCF_flag == false)
+        {
+          // compute this factor only once 
+          completion_connection_factor::compute (*this, internal_constants, params, mesh, perm, ntg);
+        }
+      else if (HORIZ_WELL_MODEL_PEACEMAN || dir_ == direction_z  && this->completion_data.use_CCF_flag == false)
         {
           peaceman_model::compute (*this, internal_constants, params, mesh, perm, ntg, ro_calc_flag);
         }
@@ -311,6 +317,36 @@ namespace blue_sky
       //  << bs_end;
     }
 
+    /*!
+      \brief set completion_coords
+    */
+    void 
+    connection::set_completion_coords (completion_coords_t &completion_coords_data)
+    {
+      for (t_uint i = 0; i < 3; ++i)
+        {
+          completion_data.x1[i] = completion_coords_data.x1[i];
+          completion_data.x2[i] = completion_coords_data.x2[i];
+        }
+    }
+
+    /*!
+      \brief set using completion connection factor flag
+    */
+    void 
+    connection::set_CFF_flag (bool flag)
+    {
+      completion_data.use_CCF_flag = flag;
+    }
+
+    /*!
+      \brief get using completion connection factor flag
+    */
+    bool 
+    connection::get_CFF_flag ()
+    {
+      return completion_data.use_CCF_flag;
+    }
 
     BLUE_SKY_TYPE_STD_CREATE (connection)
     BLUE_SKY_TYPE_STD_COPY (connection)

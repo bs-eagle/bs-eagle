@@ -44,6 +44,7 @@ namespace wells {
       typedef shared_vector <sp_default_connection_t>   connection_list_t;
       typedef index_t                                   connection_block_t;
       typedef index_t                                   connection_index_t;
+      typedef base_t::completion_coords_t               completion_coords_t;
 
       typedef std::map <connection_block_t, connection_index_t>   connection_map_t;   //!< \todo Obsolete, deprecated
 
@@ -126,6 +127,10 @@ namespace wells {
     calc_rate_and_derivs_concrete (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, BS_SP (jacobian) &jacobian);
 
   public:
+    //! add completion
+    sp_connection_t
+    add_completion (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block, completion_coords_t &completion_coords_data);
+
     /**
      * \brief  Adds primary connection (perforation) to well and return it
      * \param  i_coord i coordinate of perforation

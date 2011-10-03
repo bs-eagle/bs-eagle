@@ -17,6 +17,7 @@
 #include "connection_iterator.h"
 #include "well_facility.h"
 #include "shared_vector.h"
+#include "well_connection.h"
 
 // TODO: BUG
 #include "calc_well_pressure.h"
@@ -33,10 +34,12 @@ namespace blue_sky
   // fwd declarations
   class physical_constants;
   class calc_model;
+  
 
   namespace wells
   {
     class connection;
+    struct completion_coords;
 
     namespace compute_factors
     {
@@ -80,7 +83,7 @@ namespace blue_sky
   class BS_API_PLUGIN well : public facility_base
     {
     public:
-
+      typedef wells::completion_coords      completion_coords_t;
       typedef facility_base                 base_t;
       typedef well                          well_t;
       typedef spv_double                    item_array_t;
@@ -137,6 +140,14 @@ namespace blue_sky
       typedef shared_vector <sp_well_facility_t>        well_facility_list_t;
 
     public:
+      
+      virtual sp_connection_t 
+      add_completion (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block,
+                      completion_coords_t &completion_data)
+        {
+          bs_throw_exception ("PURE CALL");
+        }
+
       /**
        * \brief  Adds primary connection (perforation) to well and return it
        * \param  i_coord i coordinate of perforation
@@ -742,10 +753,10 @@ namespace blue_sky
     {
     public:
 
-      typedef well                        well_t;
-      typedef wells::connection           connection_t;
-      typedef smart_ptr <well_t>          sp_well_t;
-      typedef smart_ptr <connection_t>    sp_connection_t;
+      typedef well                              well_t;
+      typedef wells::connection                 connection_t;
+      typedef smart_ptr <well_t, true>          sp_well_t;
+      typedef smart_ptr <connection_t, true>    sp_connection_t;
 
     public:
 

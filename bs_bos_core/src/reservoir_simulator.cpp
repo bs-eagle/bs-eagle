@@ -37,7 +37,7 @@ namespace blue_sky
       , reservoir_simulator_events_init_ (this)
   {
     this->add_signal (BS_SIGNAL_RANGE (reservoir_simulator));
-    hdm_->get_keyword_manager()->init (hdm_);
+    //hdm_->get_keyword_manager()->init (hdm_);
     
     //bs_node::insert (bs_link::create (hdm_, "hdm"), false);
     //bs_node::insert (bs_link::create (cm, "calc_model"), false);
@@ -179,7 +179,11 @@ namespace blue_sky
     model_filename_ = path;
     pre_read (hdm_->get_event_manager ()); 
     on_pre_read (this);
+#if 1
+    hdm_->read_keyword_file (path);
+#else
     read_keyword_file(path, hdm_, hdm_->get_event_manager ());
+#endif
     post_read (hdm_->get_event_manager ());
     on_post_read ();
     init();
@@ -793,7 +797,7 @@ namespace blue_sky
     // Check input data before units conversion for correct reporting of user errors
     check_data (hdm_->get_mesh (), hdm_->data);
 
-    cm->init_main_arrays(hdm_->get_init_model (), hdm_->get_scal (), hdm_->get_data (), hdm_->get_mesh ());
+    cm->init_main_arrays(hdm_);
     cm->init_calcul_arrays (hdm_->data, hdm_->get_mesh ());
     // calculate planes geometric transmissibility
     cm->rock_grid_prop->init_planes_trans (n_active_elements, hdm_->mesh->get_volumes (), cm->ts_params, cm->internal_constants);

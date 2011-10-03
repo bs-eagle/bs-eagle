@@ -254,6 +254,9 @@
     </ClCompile>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
+    <ClCompile Include="src\well_process_completions.cpp">
+      <Filter>data\wells\compute factors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\data_saver.h">
@@ -518,6 +521,9 @@
       <Filter>initialization</Filter>
     </ClInclude>
     <ClInclude Include="include\stdafx.h" />
+    <ClInclude Include="include\well_process_completions.h">
+      <Filter>data\wells\compute factors</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\bspy_test\unit_test\bos\ARITHMETIC\arithmetic_test.py">

@@ -19,6 +19,7 @@
 #include "shared_vector.h"
 
 #include "well_controller.h"
+#include "well_process_completions.h"
 
 
 namespace blue_sky
@@ -101,6 +102,7 @@ namespace blue_sky
       {
       public:
 
+        typedef completion_coords               completion_coords_t;
         typedef connection                      this_t;
         typedef smart_ptr <this_t, true>        sp_this_t;
 
@@ -121,6 +123,8 @@ namespace blue_sky
         typedef connection                      connection_t;
         typedef calc_model                      calc_model_t;
 
+
+
       public:
 
         /**
@@ -138,7 +142,8 @@ namespace blue_sky
                          const sp_mesh_iface_t &mesh,
                          const stdv_float &perm,
                          const stdv_float &ntg,
-                         bool ro_calc_flag = false);
+                         bool ro_calc_flag = false, 
+                         bool use_CCF_flag = false);
 
         /**
          * \brief  Multiplies mult_ with mult
@@ -224,6 +229,18 @@ namespace blue_sky
         void
         set_connection_depth (const sp_mesh_iface_t &mesh);
 
+        /*!
+          \brief set using completion connection factor flag
+        */
+        void 
+        set_CFF_flag (bool flag);
+
+        /*!
+          \brief get using completion connection factor flag
+        */
+        bool 
+        get_CFF_flag ();
+          
         /**
          * \brief  Returns index of grid block to
          *         which perforation belongs
@@ -439,6 +456,11 @@ namespace blue_sky
           return rate_.inj;
         }
 
+        /*!
+          \brief set completion_coords
+        */
+        void set_completion_coords (completion_coords_t &completion_coords_data); 
+          
       public:
         auto_value <item_t>           head_term;
         auto_value <item_t>           cur_bhp;
@@ -448,6 +470,8 @@ namespace blue_sky
 
         rate_data_t                   rate_;
         rate_data_t                   rate_rc_;
+
+        completion_coords_t           completion_data;
 
       private:
 

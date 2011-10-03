@@ -433,9 +433,11 @@ namespace blue_sky
           {
             if (fabs (region.Krp[(int)i]) > EPS_DIFF)
               {
+#if 0
                 if (i == region.Krp.size() - 1)
                   return false;
                 else
+#endif 
                   return true;
               }
           }
@@ -1415,9 +1417,9 @@ namespace blue_sky
             bs_throw_exception ("Unkown phase value");
           }
       }
-
-    water_data->init_regions ();
-    gas_data->init_regions ();
+    // TODO: see initialization from tables 
+    //water_data->init_regions ();
+    //gas_data->init_regions ();
   }
 
 
@@ -1658,8 +1660,8 @@ namespace blue_sky
     {
       BS_ASSERT (n_scal_regions > 0);
       
-	  get_water_data ()->clear_regions();
-	  get_gas_data ()->clear_regions();
+	    get_water_data ()->clear_regions();
+	    get_gas_data ()->clear_regions();
 
       get_water_data ()->init_table_array (n_scal_regions);
       get_gas_data ()->init_table_array (n_scal_regions);
@@ -1723,7 +1725,7 @@ namespace blue_sky
         }
       get_water_data ()->init_regions_from_tables ();
 	  if (is_gas)
-		get_gas_data ()->init_regions_from_tables ();
+		  get_gas_data ()->init_regions_from_tables ();
         
     }  
 } // namespace blue_sky

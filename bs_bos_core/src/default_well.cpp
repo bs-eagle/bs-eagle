@@ -59,6 +59,14 @@ namespace wells {
   }
 
   default_well::sp_connection_t
+    default_well::add_completion (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block, completion_coords_t &completion_coords_data)
+  {
+    sp_connection_t con = detail::add_connection (i_coord, j_coord, k_coord, n_block, primary_connection_list_, this);
+    con->set_completion_coords (completion_coords_data);
+    return con;
+  }
+
+  default_well::sp_connection_t
   default_well::add_primary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
   {
     return detail::add_connection (i_coord, j_coord, k_coord, n_block, primary_connection_list_, this);

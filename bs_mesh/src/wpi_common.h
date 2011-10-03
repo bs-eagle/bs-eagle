@@ -16,7 +16,7 @@
 #include <cmath>
 
 #include "conf.h"
-#include "bs_mesh_grdecl.h"
+class bs_mesh_grdecl;
 
 namespace blue_sky { namespace wpi {
 
@@ -24,7 +24,7 @@ namespace blue_sky { namespace wpi {
 typedef t_ulong ulong;
 typedef t_uint uint;
 typedef v_float::iterator vf_iterator;
-typedef smart_ptr< bs_mesh_grdecl > sp_grd_mesh;
+//typedef smart_ptr< bs_mesh_grdecl, true > sp_grd_mesh;
 
 typedef t_float cell_pos[8][3];
 
