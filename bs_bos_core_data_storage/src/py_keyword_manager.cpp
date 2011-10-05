@@ -130,6 +130,7 @@ namespace python {
     .def ("is_keyword_supported", &T::is_keyword_supported)
     .def ("is_keyword_activated", &T::is_keyword_activated)
     .def ("handle_keyword", &T::handle_keyword)
+    .def ("handle_keyword_reactor", &T::handle_keyword_reactor)
     .def ("init", &T::init)
   PY_EXPORTER_END;
 
