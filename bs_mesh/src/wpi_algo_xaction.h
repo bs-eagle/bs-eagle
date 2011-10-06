@@ -56,6 +56,8 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 	typedef wpi_algo_meshp< strat_t > wpi_meshp;
 	typedef typename wpi_meshp::mesh_part mesh_part;
 
+	typedef std::vector< ulong > hit_idx_t;
+
 	/*-----------------------------------------------------------------
 	* Box description
 	*----------------------------------------------------------------*/
@@ -234,6 +236,32 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			return wp_[wseg_id].md() + distance(wp_[wseg_id].start(), target);
 		}
 
+		hit_idx_t& calc_hit_idx() {
+			hit_idx_.clear();
+			if(wp_.size()) {
+				// prepare vector of well node points
+				std::vector< Point > wnodes(wp_.size() + 1);
+				ulong i = 0;
+				for(; i < wp_.size(); ++i) {
+					wnodes[i] = wp_[i].start();
+				}
+				// last point of well traj
+				wnodes[i] = wp_[i - 1].finish();
+
+				// calculate hit_idx
+				hit_idx_ = wpi_meshp::where_is_point(m_, m_size_, wnodes);
+			}
+
+			return hit_idx_;
+		}
+		// hit_idx getters
+		hit_idx_t& hit_idx() {
+			return hit_idx_;
+		}
+		const hit_idx_t& hit_idx() const {
+			return hit_idx_;
+		}
+
 		// branch & bound algorithm for finding cells that really intersect with well
 		void build(const std::vector< ulong >& hit_idx) {
 			typedef typename mesh_part::container_t meshp_container;
@@ -252,7 +280,7 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 			while(space.size()) {
 				// split each mesh part and intersect splitting with well path
 				search_space div_space;
-				bool do_intersect;
+				//bool do_intersect;
 				for(css_iterator pp = space.begin(), end = space.end(); pp != end; ++pp) {
 					meshp_container kids = pp->second.divide();
 
@@ -737,6 +765,8 @@ struct wpi_algo_xaction : public wpi_algo_helpers< strat_t > {
 		intersect_path x_;
 		// mesh size
 		vertex_pos_i m_size_;
+		// cell IDs of where each well node is located
+		hit_idx_t hit_idx_;
 	};
 
 };
