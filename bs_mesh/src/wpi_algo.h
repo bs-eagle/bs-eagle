@@ -17,6 +17,7 @@
 #include "wpi_algo_meshp.h"
 #include "wpi_algo_xaction.h"
 #include "wpi_algo_xaction_build.h"
+#include "wpi_algo_xaction_build2.h"
 
 #include "conf.h"
 #include "bs_mesh_grdecl.h"
@@ -63,10 +64,9 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 	typedef typename wpi_meshp::mesh_part mesh_part;
 
 	// import intersect_action
-	typedef wpi_algo_xaction< strat_t > wpi_xaction;
-	typedef typename wpi_xaction::hit_idx_t hit_idx_t;
-	typedef xaction_build< strat_t > intersect_action;
-	//typedef typename wpi_xaction::intersect_action intersect_action;
+	typedef intersect_base< strat_t > xbase;
+	typedef typename xbase::hit_idx_t hit_idx_t;
+	typedef intersect_builder2< strat_t > xbuilder;
 
 	// helper to create initial cell_data for each cell
 	static spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
@@ -111,7 +111,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 	struct wpi_return {
 		typedef spv_float type;
 
-		static type make(intersect_action& A) {
+		static type make(xbase& A) {
 			return A.export_1d();
 		}
 	};
@@ -120,7 +120,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 	struct wpi_return< false, unused > {
 		typedef std::vector< well_hit_cell > type;
 
-		static type make(intersect_action& A) {
+		static type make(xbase& A) {
 			type res(A.path().size());
 			ulong i = 0;
 			for(typename intersect_path::const_iterator px = A.path().begin(), end = A.path().end(); px != end; ++px)
@@ -177,7 +177,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		// to restrict search area
 
 		// construct main object
-		intersect_action A(M, W, mesh_size);
+		xbuilder A(M, W, mesh_size);
 		// DEBUG
 		//std::cout << "hit_idx found" << std::endl;
 		// dump hit_idx
