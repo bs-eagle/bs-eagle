@@ -15,8 +15,8 @@
 
 namespace blue_sky { namespace wpi {
 // handy typedefs
-typedef wpi_algo_pod< wpi_strategy_3d >::well_hit_cell well_hit_cell_3d;
-typedef wpi_algo_pod< wpi_strategy_2d >::well_hit_cell well_hit_cell_2d;
+typedef pods< strategy_3d >::well_hit_cell well_hit_cell_3d;
+typedef pods< strategy_2d >::well_hit_cell well_hit_cell_2d;
 
 std::vector< well_hit_cell_3d > well_path_ident(
 	t_long nx, t_long ny, spv_float coord, spv_float zcorn,

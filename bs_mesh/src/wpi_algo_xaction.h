@@ -25,7 +25,7 @@ namespace blue_sky { namespace wpi {
 * holds all data and search actual intersection points
 *----------------------------------------------------------------*/
 template< class strat_t >
-class intersect_base : public wpi_algo_helpers< strat_t > {
+class intersect_base : public helpers< strat_t > {
 public:
 	// basic types
 	typedef typename strat_t::vertex_pos   vertex_pos;
@@ -40,24 +40,24 @@ public:
 	enum { D = strat_t::D, inner_point_id = strat_t::inner_point_id };
 
 	// import pods
-	typedef wpi_algo_pod< strat_t > wpi_pod;
-	typedef typename wpi_pod::cell_data cell_data;
-	typedef typename wpi_pod::sp_cell_data sp_cell_data;
-	typedef typename wpi_pod::trimesh trimesh;
-	typedef typename wpi_pod::trim_iterator trim_iterator;
-	typedef typename wpi_pod::ctrim_iterator ctrim_iterator;
+	typedef pods< strat_t > pods_t;
+	typedef typename pods_t::cell_data cell_data;
+	typedef typename pods_t::sp_cell_data sp_cell_data;
+	typedef typename pods_t::trimesh trimesh;
+	typedef typename pods_t::trim_iterator trim_iterator;
+	typedef typename pods_t::ctrim_iterator ctrim_iterator;
 
-	typedef typename wpi_pod::well_data well_data;
-	typedef typename wpi_pod::well_path well_path;
-	typedef typename wpi_pod::wp_iterator wp_iterator;
-	typedef typename wpi_pod::cwp_iterator cwp_iterator;
+	typedef typename pods_t::well_data well_data;
+	typedef typename pods_t::well_path well_path;
+	typedef typename pods_t::wp_iterator wp_iterator;
+	typedef typename pods_t::cwp_iterator cwp_iterator;
 
-	typedef typename wpi_pod::well_hit_cell well_hit_cell;
-	typedef typename wpi_pod::intersect_path intersect_path;
+	typedef typename pods_t::well_hit_cell well_hit_cell;
+	typedef typename pods_t::intersect_path intersect_path;
 
 	// mesh_part
-	typedef wpi_algo_meshp< strat_t > wpi_meshp;
-	typedef typename wpi_meshp::mesh_part mesh_part;
+	typedef mesh_tools< strat_t > mesh_tools_t;
+	typedef typename mesh_tools_t::mesh_part mesh_part;
 
 	typedef std::vector< ulong > hit_idx_t;
 
@@ -174,7 +174,7 @@ public:
 			wnodes[i] = wp_[i - 1].finish();
 
 			// calculate hit_idx
-			hit_idx_ = wpi_meshp::where_is_point(m_, m_size_, wnodes);
+			hit_idx_ = mesh_tools_t::where_is_point(m_, m_size_, wnodes);
 		}
 
 		return hit_idx_;

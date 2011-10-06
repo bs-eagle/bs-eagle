@@ -20,7 +20,7 @@
 
 namespace blue_sky { namespace wpi {
 
-struct wpi_strategy_3d {
+struct strategy_3d {
 	// main typedefs
 	typedef Kernel::Point_3                                     Point;
 	typedef Kernel::Segment_3                                   Segment;

@@ -31,7 +31,7 @@ namespace blue_sky { namespace wpi {
  * implement well path identification algos depending on strategy
  *----------------------------------------------------------------*/
 template< class strat_t >
-struct wpi_algo : public wpi_algo_helpers< strat_t > {
+struct algo : public helpers< strat_t > {
 	// import strategy typedefs
 	typedef typename strat_t::Point    Point;
 	typedef typename strat_t::Segment  Segment;
@@ -45,29 +45,29 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 	enum { D = strat_t::D };
 
 	// import pods
-	typedef wpi_algo_pod< strat_t > wpi_pod;
-	typedef typename wpi_pod::cell_data cell_data;
-	typedef typename wpi_pod::sp_cell_data sp_cell_data;
-	typedef typename wpi_pod::trimesh trimesh;
-	typedef typename wpi_pod::trim_iterator trim_iterator;
-	typedef typename wpi_pod::ctrim_iterator ctrim_iterator;
+	typedef pods< strat_t > pods_t;
+	typedef typename pods_t::cell_data cell_data;
+	typedef typename pods_t::sp_cell_data sp_cell_data;
+	typedef typename pods_t::trimesh trimesh;
+	typedef typename pods_t::trim_iterator trim_iterator;
+	typedef typename pods_t::ctrim_iterator ctrim_iterator;
 
-	typedef typename wpi_pod::well_data well_data;
-	typedef typename wpi_pod::well_path well_path;
-	typedef typename wpi_pod::wp_iterator wp_iterator;
-	typedef typename wpi_pod::cwp_iterator cwp_iterator;
+	typedef typename pods_t::well_data well_data;
+	typedef typename pods_t::well_path well_path;
+	typedef typename pods_t::wp_iterator wp_iterator;
+	typedef typename pods_t::cwp_iterator cwp_iterator;
 
-	typedef typename wpi_pod::well_hit_cell well_hit_cell;
-	typedef typename wpi_pod::intersect_path intersect_path;
+	typedef typename pods_t::well_hit_cell well_hit_cell;
+	typedef typename pods_t::intersect_path intersect_path;
 
 	// import mesh_part
-	typedef wpi_algo_meshp< strat_t > wpi_meshp;
-	typedef typename wpi_meshp::mesh_part mesh_part;
+	typedef mesh_tools< strat_t > mesh_tools_t;
+	typedef typename mesh_tools_t::mesh_part mesh_part;
 
 	// import intersect_action
 	typedef intersect_base< strat_t > xbase;
 	typedef typename xbase::hit_idx_t hit_idx_t;
-	typedef intersect_builder3< strat_t > xbuilder;
+	typedef intersect_builder< strat_t > xbuilder;
 
 	// helper to create initial cell_data for each cell
 	static spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
@@ -168,36 +168,27 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 	
 			// insert well segment
 			W[i] = wd;
-
 			pw += 4;
 		}
 		// DEBUG
 		//std::cout << "well_path created" << std::endl;
 
-		// 3) find where each node of well is located
-		// to restrict search area
-
-		// construct main object
+		// 3) construct main object
 		xbuilder A(M, W, mesh_size);
 		// DEBUG
 		//std::cout << "hit_idx found" << std::endl;
-		// dump hit_idx
-		//for(ulong i = 0; i < hit_idx.size(); ++i)
-		//	std::cout << hit_idx[i] << ' ';
-		//std::cout << std::endl;
 
-		// narrow search space via branch & bound algo
-		//const std::vector< ulong > hit_idx = A.build3();
+		// 4) narrow search space via branch & bound algo
 		hit_idx_t& hit_idx = A.build();
 		// DEBUG
 		//std::cout << "build() done" << std::endl;
 
-		// remove duplicates in X,Y,Z directions
+		// 5) remove duplicates in X,Y,Z directions
 		A.remove_dups2();
 		// DEBUG
 		//std::cout << "remove_dups2 done" << std::endl;
 
-		// finalize intersection
+		// 6) finalize intersection
 		if(include_well_nodes)
 			A.append_wp_nodes(hit_idx);
 		// DEBUG

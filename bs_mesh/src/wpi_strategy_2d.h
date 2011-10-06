@@ -21,7 +21,7 @@
 
 namespace blue_sky { namespace wpi {
 
-struct wpi_strategy_2d {
+struct strategy_2d {
 	// main typedefs
 	typedef Kernel::Point_2                                     Point;
 	typedef Kernel::Segment_2                                   Segment;
