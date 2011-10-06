@@ -46,6 +46,10 @@ if (build_kind == "debug") :
 elif (build_kind == "release") :
     env.AppendUnique (LIBS = libs + boost_libs)
 
+# link with CGAL
+#env.AppendUnique (LIBS = ['CGAL', 'gmp'])
+env.AppendUnique(CXXFLAGS = ["-frounding-math"])
+
 excluded = [
     "csr_ilu_cfl.cpp",
     "py_csr_ilu_cfl_prec.cpp",
