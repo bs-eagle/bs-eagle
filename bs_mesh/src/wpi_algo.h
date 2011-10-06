@@ -18,6 +18,7 @@
 #include "wpi_algo_xaction.h"
 #include "wpi_algo_xaction_build.h"
 #include "wpi_algo_xaction_build2.h"
+#include "wpi_algo_xaction_build3.h"
 
 #include "conf.h"
 #include "bs_mesh_grdecl.h"
@@ -66,7 +67,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 	// import intersect_action
 	typedef intersect_base< strat_t > xbase;
 	typedef typename xbase::hit_idx_t hit_idx_t;
-	typedef intersect_builder2< strat_t > xbuilder;
+	typedef intersect_builder3< strat_t > xbuilder;
 
 	// helper to create initial cell_data for each cell
 	static spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
