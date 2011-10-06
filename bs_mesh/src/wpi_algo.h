@@ -71,7 +71,7 @@ struct algo : public helpers< strat_t > {
 
 	// helper to create initial cell_data for each cell
 	static spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
-			trimesh& res, vertex_pos_i& mesh_size)
+			trimesh& res, vertex_pos_i& mesh_size, bool free_cz_mem = false)
 	{
 		typedef smart_ptr< bs_mesh_grdecl, true > sp_grd_mesh;
 		// build mesh_grdecl around given mesh
@@ -85,7 +85,12 @@ struct algo : public helpers< strat_t > {
 		// obtain coordinates for all vertices of all cells
 		spv_float tops = grd_src->calc_cells_vertices_xyz();
 		// clear COORD & ZCORN arrays
-		grd_src->clear();
+		if(free_cz_mem) {
+			spv_float t = BS_KERNEL.create_object(v_float::bs_type());
+			t->swap(*coord);
+			t = BS_KERNEL.create_object(v_float::bs_type());
+			t->swap(*zcorn);
+		}
 
 		// fill trimesh with triangles corresponding to each cell
 		res.resize(n_cells);
@@ -103,6 +108,32 @@ struct algo : public helpers< strat_t > {
 		}
 
 		return tops;
+	}
+
+	static ulong fill_well_path(spv_float well_info, well_path& W) {
+		ulong well_node_num = well_info->size() >> 2;
+		if(well_node_num < 2) return 0;
+
+		// storage
+		W.resize(well_node_num - 1);
+
+		// walk along well
+		v_float::iterator pw = well_info->begin();
+		W[0] = well_data(pw);
+		//well_data wd;
+		for(ulong i = 1; i < well_node_num - 1; ++i) {
+			pw += 4;
+			//if(i)
+			//	wd = well_data(pw, &W[i - 1]);
+			//else
+			//	wd = well_data(pw);
+	
+			// insert well segment
+			W[i] = well_data(pw, &W[i - 1]);
+			//pw += 4;
+		}
+
+		return well_node_num;
 	}
 
 	/*-----------------------------------------------------------------
@@ -141,35 +172,13 @@ struct algo : public helpers< strat_t > {
 		// 1) calculate mesh nodes coordinates and build initial trimesh
 		trimesh M;
 		vertex_pos_i mesh_size;
-		spv_float tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
-		// free memory, don't need mesh any more
-		coord.release(); zcorn.release();
+		spv_float tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size, true);
 		// DEBUG
 		//std::cout << "trimesh built" << std::endl;
 
-		// 2) create well path description and
-		// bounding boxes for line segments representing well trajectory
-		ulong well_node_num = well_info->size() >> 2;
-		if(well_node_num < 2) return ret_t();
-
-		// storage
-		well_path W(well_node_num - 1);
-		//std::vector< Box > well_boxes(well_node_num - 1);
-
-		// walk along well
-		v_float::iterator pw = well_info->begin();
-		//double md = 0;
-		well_data wd;
-		for(ulong i = 0; i < well_node_num - 1; ++i) {
-			if(i)
-				wd = well_data(pw, &W[i - 1]);
-			else
-				wd = well_data(pw);
-	
-			// insert well segment
-			W[i] = wd;
-			pw += 4;
-		}
+		// 2) create well path description
+		well_path W;
+		if(!fill_well_path(well_info, W)) return ret_t();
 		// DEBUG
 		//std::cout << "well_path created" << std::endl;
 
