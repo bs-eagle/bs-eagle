@@ -16,6 +16,7 @@
 #include "wpi_algo_pod.h"
 #include "wpi_algo_meshp.h"
 #include "wpi_algo_xaction.h"
+#include "wpi_algo_xaction_build.h"
 
 #include "conf.h"
 #include "bs_mesh_grdecl.h"
@@ -63,14 +64,15 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 
 	// import intersect_action
 	typedef wpi_algo_xaction< strat_t > wpi_xaction;
-	typedef typename wpi_xaction::intersect_action intersect_action;
-
-  typedef smart_ptr< bs_mesh_grdecl, true > sp_grd_mesh;
+	typedef typename wpi_xaction::hit_idx_t hit_idx_t;
+	typedef xaction_build< strat_t > intersect_action;
+	//typedef typename wpi_xaction::intersect_action intersect_action;
 
 	// helper to create initial cell_data for each cell
 	static spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 			trimesh& res, vertex_pos_i& mesh_size)
 	{
+		typedef smart_ptr< bs_mesh_grdecl, true > sp_grd_mesh;
 		// build mesh_grdecl around given mesh
 		sp_grd_mesh grd_src = BS_KERNEL.create_object(bs_mesh_grdecl::bs_type());
 		grd_src->init_props(nx, ny, coord, zcorn);
@@ -152,8 +154,6 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		// storage
 		well_path W(well_node_num - 1);
 		//std::vector< Box > well_boxes(well_node_num - 1);
-		// build array of well nodes as Point_2
-		//std::vector< Point > wnodes(well_node_num);
 
 		// walk along well
 		v_float::iterator pw = well_info->begin();
@@ -167,21 +167,17 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 	
 			// insert well segment
 			W[i] = wd;
-			//wnodes[i] = wd.start();
 
 			pw += 4;
 		}
-		// put last node to array
-		//wnodes[well_node_num - 1] = W[well_node_num - 2].finish();
 		// DEBUG
 		//std::cout << "well_path created" << std::endl;
 
 		// 3) find where each node of well is located
 		// to restrict search area
 
-		// find where well path nodes are located
+		// construct main object
 		intersect_action A(M, W, mesh_size);
-		//const std::vector< ulong >& hit_idx = wpi_meshp::where_is_point(M, mesh_size, wnodes);
 		// DEBUG
 		//std::cout << "hit_idx found" << std::endl;
 		// dump hit_idx
@@ -190,8 +186,8 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		//std::cout << std::endl;
 
 		// narrow search space via branch & bound algo
-		const std::vector< ulong > hit_idx = A.build3();
-		//A.build(hit_idx);
+		//const std::vector< ulong > hit_idx = A.build3();
+		hit_idx_t& hit_idx = A.build();
 		// DEBUG
 		//std::cout << "build() done" << std::endl;
 
