@@ -235,6 +235,11 @@ struct pods : public helpers< strat_t > {
 			: where(where_), seg(seg_), cell(cell_), md(md_), facet(facet_), is_node(is_node_)
 		{}
 
+		// ctor for searching
+		well_hit_cell(t_float md_)
+			: seg(0), cell(0), md(md_), facet(0), is_node(false)
+		{}
+
 		// hit points ordered first by md
 		bool operator <(const well_hit_cell& rhs) const {
 			return md < rhs.md;
@@ -270,7 +275,7 @@ public:
 	// empty ctor
 	stat_array() : base_t() {
 		// ensure all elems are filled with zero
-		fill(begin(), end(), value_type());
+		std::fill(begin(), end(), value_type());
 	}
 
 	// ctor accepting C-array
