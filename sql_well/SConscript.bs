@@ -8,7 +8,10 @@ env = custom_env.Clone ()
 env.AppendUnique (CPPPATH = ["include", "src",
     includes["bs_bos_core_base"],
     includes["common_types"],
-    includes["bs_bos_core_data_storage"]
+    includes["bs_bos_core_data_storage"],
+	includes["bs_mesh"],
+	includes["bs_mesh_src"],
+	includes["bs_mtx"]
     ] + includes["kernel"],
 	CPPDEFINES = ["_HDF5", 'H5_USE_16_API'],
     LIBS=["sqlite3"])
