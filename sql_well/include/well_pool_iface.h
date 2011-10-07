@@ -145,6 +145,15 @@ class well_pool_iface : public objbase
        */
       virtual int read_from_ascii_file (const std::string &fname, 
                                         double starting_date) = 0;
+
+      /** 
+       * @brief Save all data from db to BOS ascii format
+       * 
+       * @param fname   -- <INPUT> file name
+       * 
+       * @return 0 if success
+       */
+      virtual int save_to_bos_ascii_file (const std::string &fname) = 0;
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual boost::python::list d2date (double d) const = 0;
       virtual double date2d (int year, int month, int day, int hour, int minute, int second) const = 0;
