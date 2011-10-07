@@ -58,11 +58,12 @@ struct compfrac {
 
 typedef std::list< compfrac > cf_storage;
 
-} /* hidden namespace*/
-
-spv_float completions_ident(smart_ptr< sql_well > sw, double date,
-		t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn)
-{
+/*-----------------------------------------------------------------
+ * implementation of COMPDAT building algo
+ *----------------------------------------------------------------*/
+template< class cd_traits >
+class compdat_builder {
+public:
 	typedef algo< strategy_3d > wpi_algo;
 	typedef typename wpi_algo::trimesh trimesh;
 	typedef typename wpi_algo::well_path well_path;
@@ -78,93 +79,172 @@ spv_float completions_ident(smart_ptr< sql_well > sw, double date,
 	typedef multimap< string, string > wb_storage;
 	typedef typename xpath::iterator x_iterator;
 
-	// 1 find all unique well+branch names on given date
-	wb_storage wb;
-	string q = (boost::format(
-		"SELECT DISTINCT well_name, branch_name FROM completions WHERE d=%f") % date).str();
-	sw->prepare_sql(q);
-	// fill storage with all unique well+branch
-	while(sw->step_sql() == 0) {
-		wb.insert(make_pair(sw->get_sql_str(0), sw->get_sql_str(1)));
+	compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
+		init(nx, ny, coord, zcorn);
 	}
-	sw->finalize_sql();
 
-	// 2 build trimesh for given coord+zcorn
-	trimesh M;
-	vertex_pos_i mesh_size;
-	spv_float tops = wpi_algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size, true);
-	const ulong plane_sz = mesh_size[0] * mesh_size[1];
+	compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
+		smart_ptr< sql_well > src_well)
+	{
+		init(nx, ny, coord, zcorn);
+		init(src_well);
+	}
 
-	// 3 for each well+branch combo do
-	cf_storage cfs;
-	for(wb_storage::iterator pwb = wb.begin(), wb_end = wb.end(); pwb != wb_end; ++pwb) {
-		// 3.1 from 'branches' select well+branch_i trajectory (sql_well::get_branch_traj)
-		sp_traj_t traj = sw->get_branch_traj(pwb->first, pwb->second);
-		if(!traj) return NULL;
-		sp_table_t traj_t = traj->get_table();
-		if(!traj_t) return NULL;
+	void init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
+		// build trimesh for given coord+zcorn
+		tops_ = wpi_algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, m_, m_size_, true);
+	}
 
-		// 3.2 find intersections of given branch with mesh (well_path_ident)
-		// fill array with branch trajectory
-		spv_float traj_v = BS_KERNEL.create_object(v_float::bs_type());
-		traj_v->resize(traj_t->get_n_rows() * 4);
-		v_float::iterator ptv = traj_v->begin();
-		for(ulong i = 0, trows = traj_t->get_n_rows(); i < trows; ++i) {
-			for(ulong j = 0; j < 4; ++j)
-				*ptv++ = traj_t->get_value(i, 0);
+	void init(smart_ptr< sql_well > src_well) {
+		sw_ = BS_KERNEL.create_object_copy(src_well);
+	}
+
+	void go(double date) {
+		cfs_.clear();
+
+		// 1 fill storage with all unique well+branch
+		wb_storage wb;
+		std::string q = (cd_traits::select_unique_well_branch() % date).str();
+		sw_->prepare_sql(q);
+		while(sw_->step_sql() == 0) {
+			wb.insert(make_pair(sw_->get_sql_str(0), sw_->get_sql_str(1)));
 		}
-		// make well_path
-		well_path W;
-		if(!wpi_algo::fill_well_path(traj_v, W)) return NULL;
-		// find intersections
-		xbuilder A(M, W, mesh_size);
-		A.build();
-		A.remove_dups2();
-		//A.append_wp_nodes(hit_idx);
+		sw_->finalize_sql();
 
-		// 3.3 select all completions that belong to well+branch_i
-		q = (boost::format(
-			"SELECT md, length FROM completions WHERE well_name='%1%' and well_branch='%2%'")
-			% pwb->first % pwb->second).str();
-		sw->prepare_sql(q);
+		// 2 precalc plane size
+		const ulong plane_sz = m_size_[0] * m_size_[1];
 
-		// 3.4 for all completions do
-		while(sw->step_sql() == 0) {
-			// 3.4.1 search for completion_j begin_j and end_j using md_j and lentgh_j
-			xpath& xp = A.path();
-			x_iterator px = xp.upper_bound(whc(sw->get_sql_real(0)));
-			x_iterator xend = xp.upper_bound(whc(sw->get_sql_real(0) + sw->get_sql_real(1)));
+		// 3 for each well+branch combo do
+		for(wb_storage::iterator pwb = wb.begin(), wb_end = wb.end(); pwb != wb_end; ++pwb) {
+			// 3.1 from 'branches' select well+branch_i trajectory (sql_well::get_branch_traj)
+			sp_traj_t traj = sw_->get_branch_traj(pwb->first, pwb->second);
+			if(!traj) return;
+			sp_table_t traj_t = traj->get_table();
+			if(!traj_t) return;
 
-			// 3.4.2 consider all intersections between begin_j and end_j
-			for(; px != xend; ++px) {
-				// prepare compfrac
-				vertex_pos_i cell_id;
-				wpi_algo::decode_cell_id(px->cell, cell_id, mesh_size);
-				compfrac cf(pwb->first, pwb->second, cell_id);
+			// 3.2 find intersections of given branch with mesh (well_path_ident)
+			// fill array with branch trajectory
+			spv_float traj_v = BS_KERNEL.create_object(v_float::bs_type());
+			traj_v->resize(traj_t->get_n_rows() * 4);
+			v_float::iterator ptv = traj_v->begin();
+			for(ulong i = 0, trows = traj_t->get_n_rows(); i < trows; ++i) {
+				for(ulong j = 0; j < 4; ++j)
+					*ptv++ = traj_t->get_value(i, 0);
+			}
+			// make well_path
+			well_path W;
+			if(!wpi_algo::fill_well_path(traj_v, W)) return;
+			// find intersections
+			xbuilder A(m_, W, m_size_);
+			A.build();
+			A.remove_dups2();
+			//A.append_wp_nodes(hit_idx);
 
-				// 3.4.3.1 calc delta between consequent xpoint_k and xpoint_(k + 1)
-				// position to prev point
-				x_iterator pprev_x = px;
-				if(pprev_x != xp.begin())
-					--pprev_x;
-				ulong delta = std::abs(px->cell - pprev_x->cell);
+			// 3.3 select all completions that belong to well+branch_i
+			q = (cd_traits::select_segment() % date % pwb->first % pwb->second).str();
+			sw_->prepare_sql(q);
 
-				// 3.4.3.2 if delta == 1 mark direction as 'X'
-				//         else if delta == dx direction = 'Y'
-				//         else if delta = dx*dy direction = 'Z'
+			// 3.4 for all completions do
+			while(sw_->step_sql() == 0) {
+				// 3.4.1 search for completion_j begin_j and end_j using md_j and lentgh_j
+				xpath& xp = A.path();
+				x_iterator px = xp.upper_bound(whc(sw_->get_sql_real(0)));
+				x_iterator xend = xp.upper_bound(whc(sw_->get_sql_real(0) + sw_->get_sql_real(1)));
 
-				if(delta == 1)
-					cf.dir = 'X';
-				else if(delta >= mesh_size[0] && delta < plane_sz)
-					cf.dir = 'Y';
-				else
-					cf.dir = 'Z';
-				// add new COMPDAT record
-				cfs.push_back(cf);
-			} // 3.4.4 end of intersections loop
-		} // 3.5 end of completions loop
-	} // 4 end of well+branch loop
+				// 3.4.2 consider all intersections between begin_j and end_j
+				for(; px != xend; ++px) {
+					// prepare compfrac
+					vertex_pos_i cell_id;
+					wpi_algo::decode_cell_id(px->cell, cell_id, m_size_);
+					compfrac cf(pwb->first, pwb->second, cell_id);
 
+					// 3.4.3.1 calc delta between consequent xpoint_k and xpoint_(k + 1)
+					// position to prev point
+					x_iterator pprev_x = px;
+					if(pprev_x != xp.begin())
+						--pprev_x;
+					ulong delta = std::abs(px->cell - pprev_x->cell);
+
+					// 3.4.3.2 if delta == 1 mark direction as 'X'
+					//         else if delta == dx direction = 'Y'
+					//         else if delta = dx*dy direction = 'Z'
+
+					if(delta == 1)
+						cf.dir = 'X';
+					else if(delta >= m_size_[0] && delta < plane_sz)
+						cf.dir = 'Y';
+					else
+						cf.dir = 'Z';
+					// add new COMPDAT record
+					cfs_.push_back(cf);
+				} // 3.4.4 end of intersections loop
+			} // 3.5 end of completions loop
+
+			sw_->finalize_sql();
+		} // 4 end of well+branch loop
+	}
+
+	//virtual std::string select_unique_well_branch(double d) = 0;
+	//virtual std::string select_segment(double d, const std::string well_name,
+	//	const std::string& branch_name) = 0;
+
+private:
+	trimesh m_;
+	vertex_pos_i m_size_;
+	// tops should live as long as mesh lives
+	spv_float tops_;
+	// copy of source sql_well
+	smart_ptr< sql_well > sw_;
+	// storage for compdat records
+	cf_storage cfs_;
+};
+
+/*-----------------------------------------------------------------
+ * traits for completions
+ *----------------------------------------------------------------*/
+struct compl_traits {
+	static boost::format select_unique_well_branch() {
+		return boost::format("SELECT DISTINCT well_name, branch_name FROM completions WHERE d=%f");
+	}
+
+	static boost::format select_segment() {
+		return boost::format(
+			"SELECT md, length FROM completions WHERE d=%f and well_name='%1%' and branch_name='%2%'"
+		);
+	}
+};
+
+struct fract_traits {
+	static boost::format select_unique_well_branch() {
+		return boost::format("SELECT DISTINCT well_name, branch_name FROM fractures WHERE d=%f");
+	}
+
+	static boost::format select_segment() {
+		return boost::format(
+			"SELECT md, half_length1 + half_length_2 FROM fractures WHERE d=%f and well_name='%1%' and branch_name='%2%'"
+		);
+	}
+};
+
+} /* hidden namespace*/
+
+spv_float completions_ident(smart_ptr< sql_well > src_well, double date,
+		t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn)
+{
+	typedef compdat_builder< compl_traits > builder_t;
+
+	builder_t b(nx, ny, coord, zcorn, src_well);
+	b.go(date);
+	return NULL;
+}
+
+spv_float fractures_ident(smart_ptr< sql_well > src_well, double date,
+		t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn)
+{
+	typedef compdat_builder< fract_traits > builder_t;
+
+	builder_t b(nx, ny, coord, zcorn, src_well);
+	b.go(date);
 	return NULL;
 }
 

@@ -14,10 +14,10 @@
 
 namespace blue_sky { namespace fci {
 
-spv_float completions_ident(smart_ptr< sql_well > sw, double date,
+spv_float completions_ident(smart_ptr< sql_well > src_well, double date,
 		t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
 
-spv_float fractures_ident(smart_ptr< sql_well > sw, double date,
+spv_float fractures_ident(smart_ptr< sql_well > src_well, double date,
 		t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
 
 }}  // eof blue_sky::fci
