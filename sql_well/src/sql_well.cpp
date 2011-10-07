@@ -214,14 +214,13 @@ CREATE TABLE wells(name TEXT UNIQUE PRIMARY KEY, \
 				    x REAL DEFAULT -1, \
 				    y REAL DEFAULT -1);\
 CREATE TABLE groups(name TEXT UNIQUE PRIMARY KEY);\
-COMMIT;\
-BEGIN;\
-CREATE TABLE wells_in_group(gr_name TEXT REFERENCES groups(name) ON UPDATE CASCADE ON DELETE CASCADE,\
-						    well_name TEXT REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE);\
+CREATE TABLE wells_in_group(gr_name TEXT NOT NULL REFERENCES groups(name) ON UPDATE CASCADE ON DELETE CASCADE,\
+						    well_name TEXT NOT NULL REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE);\
 CREATE INDEX i4 ON wells_in_group (gr_name ASC);\
 CREATE INDEX i5 ON wells_in_group (well_name ASC);\
-CREATE TABLE well_hist(well_name TEXT REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE,\
-					 d REAL NOT NULL, \
+CREATE TABLE dates(d REAL UNIQUE PRIMARY KEY);\
+CREATE TABLE well_hist(well_name TEXT NOT NULL REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE,\
+					 d REAL NOT NULL REFERENCES dates(d) ON UPDATE CASCADE ON DELETE CASCADE,\
 					 p_or REAL DEFAULT -1,\
 					 p_wr REAL DEFAULT -1,\
 					 p_gr REAL DEFAULT -1,\
@@ -247,8 +246,8 @@ CREATE TABLE well_hist(well_name TEXT REFERENCES wells(name) ON UPDATE CASCADE O
 CREATE INDEX i1 ON well_hist (well_name ASC);\
 CREATE INDEX i2 ON well_hist (d ASC);\
 CREATE UNIQUE INDEX i3 ON well_hist (well_name, d ASC);\
-CREATE TABLE well_res(well_name TEXT REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE,\
-					 d REAL NOT NULL, \
+CREATE TABLE well_res(well_name TEXT NOT NULL REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE,\
+					 d REAL NOT NULL REFERENCES dates(d) ON UPDATE CASCADE ON DELETE CASCADE,\
 					 p_or REAL DEFAULT -1,\
 					 p_wr REAL DEFAULT -1,\
 					 p_gr REAL DEFAULT -1,\
@@ -272,10 +271,8 @@ CREATE TABLE well_res(well_name TEXT REFERENCES wells(name) ON UPDATE CASCADE ON
 CREATE INDEX i6 ON well_res (well_name ASC);\
 CREATE INDEX i7 ON well_res (d ASC);\
 CREATE UNIQUE INDEX i8 ON well_res (well_name, d ASC);\
-COMMIT;\
-BEGIN;\
-CREATE TABLE branches(well_name TEXT REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE,\
-					   branch_name TEXT DEFAULT 'main', \
+CREATE TABLE branches(well_name TEXT NOT NULL REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE,\
+					   branch_name TEXT NOT NULL DEFAULT 'main', \
                        md REAL DEFAULT -1,\
                        parent TEXT DEFAULT '',\
 					   traj BLOB, \
@@ -283,7 +280,6 @@ CREATE TABLE branches(well_name TEXT REFERENCES wells(name) ON UPDATE CASCADE ON
 					   PRIMARY KEY (well_name, branch_name));\
 CREATE INDEX i9 ON branches (well_name ASC);\
 CREATE UNIQUE INDEX i10 ON branches (well_name, branch_name ASC);\
-COMMIT;\
 CREATE TRIGGER tr1 AFTER INSERT ON wells\
 	BEGIN\
 		INSERT INTO branches(well_name, branch_name) VALUES(new.name, 'main');\
@@ -292,13 +288,10 @@ CREATE TRIGGER tr2 AFTER INSERT ON wells\
 	BEGIN\
 		INSERT INTO wells_in_group(gr_name, well_name) VALUES ('field', new.name);\
 	END;\
-BEGIN;\
-COMMIT;\
-BEGIN;\
-  CREATE TABLE fractures(well_name TEXT NOT NULL,\
+CREATE TABLE fractures(well_name TEXT NOT NULL,\
 					     branch_name TEXT DEFAULT 'main', \
 					     md REAL NOT NULL, \
-					     d REAL NOT NULL,\
+					     d REAL NOT NULL REFERENCES dates(d) ON UPDATE CASCADE ON DELETE CASCADE,\
 					     status  INTEGER DEFAULT 0,\
 					     half_up REAL DEFAULT 5,\
 					     half_down REAL DEFAULT 5,\
@@ -312,9 +305,9 @@ BEGIN;\
 CREATE INDEX i11 ON fractures (well_name ASC);\
 CREATE INDEX i12 ON fractures (well_name, branch_name ASC);\
 CREATE TABLE completions(well_name TEXT NOT NULL, \
-					     branch_name TEXT DEFAULT 'main', \
+					     branch_name TEXT NOT NULL DEFAULT 'main', \
 					     md REAL NOT NULL, \
-					     d REAL NOT NULL,\
+					     d REAL NOT NULL REFERENCES dates(d) ON UPDATE CASCADE ON DELETE CASCADE,\
 					     status  INTEGER DEFAULT 0,\
 					     length REAL DEFAULT 1,\
 					     rw REAL DEFAULT 0.08,\
@@ -325,6 +318,18 @@ CREATE TABLE completions(well_name TEXT NOT NULL, \
 					     );					     \
 CREATE INDEX i13 ON completions (well_name ASC);\
 CREATE INDEX i14 ON completions (well_name, branch_name ASC);\
+CREATE TRIGGER tr3 BEFORE INSERT ON fractures\
+	BEGIN\
+		INSERT OR REPLACE INTO dates(d) VALUES(new.d);\
+	END;\
+CREATE TRIGGER tr4 BEFORE INSERT ON completions\
+	BEGIN\
+		INSERT OR REPLACE INTO dates(d) VALUES(new.d);\
+	END;\
+CREATE TRIGGER tr5 BEFORE INSERT ON well_hist\
+	BEGIN\
+		INSERT OR REPLACE INTO dates(d) VALUES(new.d);\
+	END;\
 COMMIT;\
 ";
       if (!db_in)
@@ -787,7 +792,6 @@ COMMIT;\
         return 0;
       else
         return 2;
-      return 0;
     }
   int 
   sql_well::finalize_sql ()
@@ -1616,6 +1620,182 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
       return rc;
     }
 
+  int 
+  sql_well::save_to_bos_ascii_file (const std::string &fname)
+    {
+      FILE *fp = fopen (fname.c_str (), "w");
+      std::list<double> dates;
+      std::list<double>::iterator di, de;
+      int w_spec_flag = 0;
+      char s_buf[2048];
+
+
+      if (!fp)
+        {
+          printf ("Error: Can not open destination file %s\n", fname.c_str ());
+          return -1;
+        }
+      // get dates list
+      std::string sql = "SELECT d FROM dates ORDER BY d ASC";
+
+      if (prepare_sql (sql.c_str ()))
+        return -1;
+      for (; !step_sql ();)
+        {
+          double d = get_sql_real (0); 
+          dates.push_back (d);
+        }
+      finalize_sql ();
+      de = dates.end ();
+      for (di = dates.begin (); di != de; ++di)
+        {
+          char d_buf[1024];
+          print_date_ecl (*di, d_buf);
+          printf ("DATE %s\n", d_buf);
+          fprintf (fp, "DATES\n%s\n/\n", d_buf);
+          if (!w_spec_flag)
+            {
+              w_spec_flag = 1;
+              // well specs
+              fprintf (fp, "WELSPECS\n");
+              if (prepare_sql ("SELECT name FROM wells ORDER BY name ASC"))
+                return -1;
+              for (; !step_sql ();)
+                {
+                  std::string s = get_sql_str (0);
+                  fprintf (fp, "\'%s\' \'FIELD\' 2* /\n", s.c_str ());
+                }
+              fprintf (fp, "/\n");
+              finalize_sql ();
+            }
+          // WCONINJE
+          fprintf (fp, "WCONINJE\n");
+          sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND ctrl < 0 ORDER BY well_name ASC", *di);
+          if (prepare_sql (s_buf))
+            return -1;
+          for (; !step_sql ();)
+            {
+              std::string s = get_sql_str (0);
+              int status = get_sql_int (14);
+              int ctrl = get_sql_int (13); 
+              double i_or = get_sql_real (8);
+              double i_wr = get_sql_real (9);
+              double i_gr = get_sql_real (10);
+              double i_bhp = get_sql_real (11);
+              double rate = i_wr;
+              char s_status[10];
+              char s_ctrl[10];
+              char s_phase[10];
+              if (status == STATUS_OPEN)
+                sprintf (s_status, "OPEN");
+              else
+                sprintf (s_status, "SHUT");
+              if (ctrl == CTRL_I_BHP)
+                {
+                  sprintf (s_ctrl, "BHP");
+                  // TODO: add injection phase into DB
+                  sprintf (s_phase, "WATER");
+                }
+              else
+                {
+                  sprintf (s_ctrl, "RATE");
+                  if (ctrl == CTRL_I_WRATE)
+                    sprintf (s_phase, "WATER");
+                  else if (ctrl == CTRL_I_ORATE)
+                    {
+                      sprintf (s_phase, "OIL");
+                      rate = i_or;
+                    }
+                  else if (ctrl == CTRL_I_GRATE)
+                    {
+                      sprintf (s_phase, "GAS");
+                      rate = i_gr;
+                    }
+                  else
+                    sprintf (s_phase, "WATER");
+                }
+              fprintf (fp, "\'%s\' \'%s\' \'%s\' \'%s\' ", s.c_str (), s_phase, s_status, s_ctrl);
+              if (rate < 0)
+                fprintf (fp, "2* ");
+              else
+                fprintf (fp, "%lf 1* ", rate);
+              if (i_bhp < 0)
+                fprintf (fp, "1* ");
+              else
+                fprintf (fp, "%lf ", i_bhp);
+
+              fprintf (fp, "/\n");
+            }
+          fprintf (fp, "/\n");
+          finalize_sql ();
+
+          // WCONPROD
+          fprintf (fp, "WCONPROD\n");
+          sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND ctrl > 0 ORDER BY well_name ASC", *di);
+          if (prepare_sql (s_buf))
+            return -1;
+          for (; !step_sql ();)
+            {
+              std::string s = get_sql_str (0);
+              int status = get_sql_int (14);
+              int ctrl = get_sql_int (13); 
+              double p_or = get_sql_real (2);
+              double p_wr = get_sql_real (3);
+              double p_gr = get_sql_real (4);
+              double p_lr = get_sql_real (5);
+              double p_bhp = get_sql_real (6);
+              char s_status[10];
+              char s_ctrl[10];
+              if (status == STATUS_OPEN)
+                sprintf (s_status, "OPEN");
+              else
+                sprintf (s_status, "SHUT");
+              if (ctrl == CTRL_P_LRATE)
+                sprintf (s_ctrl, "LRATE");
+              else if (ctrl == CTRL_P_BHP)
+                sprintf (s_ctrl, "BHP");
+              else if (ctrl == CTRL_P_ORATE)
+                sprintf (s_ctrl, "ORATE");
+              else if (ctrl == CTRL_P_WRATE)
+                sprintf (s_ctrl, "WRATE");
+              else if (ctrl == CTRL_P_GRATE)
+                sprintf (s_ctrl, "GRATE");
+
+
+
+              fprintf (fp, "\'%s\' \'%s\' \'%s\' ", s.c_str (), s_status, s_ctrl);
+              if (p_or < 0)
+                fprintf (fp, "1* ");
+              else
+                fprintf (fp, "%lf ", p_or);
+              if (p_wr < 0)
+                fprintf (fp, "1* ");
+              else
+                fprintf (fp, "%lf ", p_wr);
+              if (p_gr < 0)
+                fprintf (fp, "1* ");
+              else
+                fprintf (fp, "%lf ", p_gr);
+              if (p_lr < 0)
+                fprintf (fp, "2* ");
+              else
+                fprintf (fp, "%lf * ", p_lr);
+              if (p_bhp < 0)
+                fprintf (fp, "1* ");
+              else
+                fprintf (fp, "%lf ", p_bhp);
+
+              fprintf (fp, "/\n");
+            }
+          fprintf (fp, "/\n");
+          finalize_sql ();
+
+        }
+
+      fclose (fp);
+      return 0;
+    }
+      
 #ifdef BSPY_EXPORTING_PLUGIN
   std::string 
   sql_well::py_str () const
