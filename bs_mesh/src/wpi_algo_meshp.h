@@ -14,7 +14,7 @@
 namespace blue_sky { namespace wpi {
 
 template< class strat_t >
-struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
+struct mesh_tools : public helpers< strat_t > {
 	// basic types
 	typedef typename strat_t::vertex_pos   vertex_pos;
 	typedef typename strat_t::vertex_pos_i vertex_pos_i;
@@ -27,18 +27,18 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 	enum { D = strat_t::D };
 
 	// import pods
-	typedef wpi_algo_pod< strat_t > wpi_pod;
-	typedef typename wpi_pod::cell_data cell_data;
-	typedef typename wpi_pod::well_data well_data;
-	typedef typename wpi_pod::trimesh trimesh;
-	typedef typename wpi_pod::trim_iterator trim_iterator;
+	typedef pods< strat_t > pods_t;
+	typedef typename pods_t::cell_data cell_data;
+	typedef typename pods_t::well_data well_data;
+	typedef typename pods_t::trimesh trimesh;
+	typedef typename pods_t::trim_iterator trim_iterator;
 
 	/*-----------------------------------------------------------------
 	* represent rectangular part of mesh with splitting support
 	*----------------------------------------------------------------*/
 	// x_last = last_element + 1 = x_size
 	// y_last = last_element + 1 = y_size
-	struct mesh_part : public wpi_algo_helpers< strat_t > {
+	struct mesh_part : public helpers< strat_t > {
 		typedef std::set< mesh_part > container_t;
 
 		mesh_part(trimesh& m, const vertex_pos_i& mesh_size)

@@ -20,7 +20,7 @@
 
 namespace blue_sky { namespace wpi {
 
-struct wpi_strategy_3d {
+struct strategy_3d {
 	// main typedefs
 	typedef Kernel::Point_3                                     Point;
 	typedef Kernel::Segment_3                                   Segment;
@@ -269,6 +269,44 @@ struct wpi_strategy_3d {
 			}
 		}
 		return res;
+	}
+
+	// fast chack if bbox intersect with segment
+	static bool bbox_segment_x(
+		const Point& b_min, const Point& b_max,
+		const Point& s_min, const Point& s_max
+		)
+	{
+		double t_min[D], t_max[D];
+		for(uint i = 0; i < D; ++i) {
+			double dd = 0;
+			if(s_min[i] != s_max[i])
+				dd = 1.0 / (s_min[i] - s_max[i]);
+
+			t_min[i] = (b_max[i] - s_min[i]) * dd;
+			t_max[i] = (b_min[i] - s_min[i]) * dd;
+
+			// fisrt check in 2D
+			if(i == 2) {
+				if(t_min[0] > t_max[1] || t_min[1] > t_max[0])
+					return false;
+				t_min[0] = std::max(t_min[0], t_min[1]);
+				t_max[0] = std::min(t_max[0], t_max[1]);
+			}
+		}
+
+		// last check in 3d
+		if(t_min[0] > t_max[2] || t_min[2] > t_max[0])
+			return false;
+		return true;
+	}
+
+	static bool bbox_segment_x(const Bbox& b, const Segment& s) {
+		return bbox_segment_x(
+			Point(b.min(0), b.min(1), b.min(2)),
+			Point(b.max(0), b.max(1), b.max(2)),
+			s.min(), s.max()
+		);
 	}
 };
 

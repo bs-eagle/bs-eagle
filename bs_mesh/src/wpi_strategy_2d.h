@@ -21,7 +21,7 @@
 
 namespace blue_sky { namespace wpi {
 
-struct wpi_strategy_2d {
+struct strategy_2d {
 	// main typedefs
 	typedef Kernel::Point_2                                     Point;
 	typedef Kernel::Segment_2                                   Segment;
@@ -137,6 +137,36 @@ struct wpi_strategy_2d {
 		}
 		return res;
 	}
+
+	// fast chack if bbox intersect with segment
+	static bool bbox_segment_x(
+		const Point& b_min, const Point& b_max,
+		const Point& s_min, const Point& s_max
+		)
+	{
+		double t_min[D], t_max[D];
+		for(uint i = 0; i < D; ++i) {
+			double dd = 0;
+			if(s_min[i] != s_max[i])
+				dd = 1.0 / (s_min[i] - s_max[i]);
+
+			t_min[i] = (b_max[i] - s_min[i]) * dd;
+			t_max[i] = (b_min[i] - s_min[i]) * dd;
+		}
+
+		if(t_min[0] > t_max[1] || t_min[1] > t_max[0])
+			return false;
+		return true;
+	}
+
+	static bool bbox_segment_x(const Bbox& b, const Segment& s) {
+		return bbox_segment_x(
+			Point(b.min(0), b.min(1)),
+			Point(b.max(0), b.max(1)),
+			s.min(), s.max()
+		);
+	}
+
 };
 
 }} // eof blue_sky::wpi

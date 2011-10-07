@@ -16,6 +16,9 @@
 #include "wpi_algo_pod.h"
 #include "wpi_algo_meshp.h"
 #include "wpi_algo_xaction.h"
+#include "wpi_algo_xaction_build.h"
+#include "wpi_algo_xaction_build2.h"
+#include "wpi_algo_xaction_build3.h"
 
 #include "conf.h"
 #include "bs_mesh_grdecl.h"
@@ -28,7 +31,7 @@ namespace blue_sky { namespace wpi {
  * implement well path identification algos depending on strategy
  *----------------------------------------------------------------*/
 template< class strat_t >
-struct wpi_algo : public wpi_algo_helpers< strat_t > {
+struct algo : public helpers< strat_t > {
 	// import strategy typedefs
 	typedef typename strat_t::Point    Point;
 	typedef typename strat_t::Segment  Segment;
@@ -42,35 +45,35 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 	enum { D = strat_t::D };
 
 	// import pods
-	typedef wpi_algo_pod< strat_t > wpi_pod;
-	typedef typename wpi_pod::cell_data cell_data;
-	typedef typename wpi_pod::sp_cell_data sp_cell_data;
-	typedef typename wpi_pod::trimesh trimesh;
-	typedef typename wpi_pod::trim_iterator trim_iterator;
-	typedef typename wpi_pod::ctrim_iterator ctrim_iterator;
+	typedef pods< strat_t > pods_t;
+	typedef typename pods_t::cell_data cell_data;
+	typedef typename pods_t::sp_cell_data sp_cell_data;
+	typedef typename pods_t::trimesh trimesh;
+	typedef typename pods_t::trim_iterator trim_iterator;
+	typedef typename pods_t::ctrim_iterator ctrim_iterator;
 
-	typedef typename wpi_pod::well_data well_data;
-	typedef typename wpi_pod::well_path well_path;
-	typedef typename wpi_pod::wp_iterator wp_iterator;
-	typedef typename wpi_pod::cwp_iterator cwp_iterator;
+	typedef typename pods_t::well_data well_data;
+	typedef typename pods_t::well_path well_path;
+	typedef typename pods_t::wp_iterator wp_iterator;
+	typedef typename pods_t::cwp_iterator cwp_iterator;
 
-	typedef typename wpi_pod::well_hit_cell well_hit_cell;
-	typedef typename wpi_pod::intersect_path intersect_path;
+	typedef typename pods_t::well_hit_cell well_hit_cell;
+	typedef typename pods_t::intersect_path intersect_path;
 
 	// import mesh_part
-	typedef wpi_algo_meshp< strat_t > wpi_meshp;
-	typedef typename wpi_meshp::mesh_part mesh_part;
+	typedef mesh_tools< strat_t > mesh_tools_t;
+	typedef typename mesh_tools_t::mesh_part mesh_part;
 
 	// import intersect_action
-	typedef wpi_algo_xaction< strat_t > wpi_xaction;
-	typedef typename wpi_xaction::intersect_action intersect_action;
-
-  typedef smart_ptr< bs_mesh_grdecl, true > sp_grd_mesh;
+	typedef intersect_base< strat_t > xbase;
+	typedef typename xbase::hit_idx_t hit_idx_t;
+	typedef intersect_builder< strat_t > xbuilder;
 
 	// helper to create initial cell_data for each cell
 	static spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
-			trimesh& res, vertex_pos_i& mesh_size)
+			trimesh& res, vertex_pos_i& mesh_size, bool free_cz_mem = false)
 	{
+		typedef smart_ptr< bs_mesh_grdecl, true > sp_grd_mesh;
 		// build mesh_grdecl around given mesh
 		sp_grd_mesh grd_src = BS_KERNEL.create_object(bs_mesh_grdecl::bs_type());
 		grd_src->init_props(nx, ny, coord, zcorn);
@@ -82,7 +85,12 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		// obtain coordinates for all vertices of all cells
 		spv_float tops = grd_src->calc_cells_vertices_xyz();
 		// clear COORD & ZCORN arrays
-		grd_src->clear();
+		if(free_cz_mem) {
+			spv_float t = BS_KERNEL.create_object(v_float::bs_type());
+			t->swap(*coord);
+			t = BS_KERNEL.create_object(v_float::bs_type());
+			t->swap(*zcorn);
+		}
 
 		// fill trimesh with triangles corresponding to each cell
 		res.resize(n_cells);
@@ -102,6 +110,32 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		return tops;
 	}
 
+	static ulong fill_well_path(spv_float well_info, well_path& W) {
+		ulong well_node_num = well_info->size() >> 2;
+		if(well_node_num < 2) return 0;
+
+		// storage
+		W.resize(well_node_num - 1);
+
+		// walk along well
+		v_float::iterator pw = well_info->begin();
+		W[0] = well_data(pw);
+		//well_data wd;
+		for(ulong i = 1; i < well_node_num - 1; ++i) {
+			pw += 4;
+			//if(i)
+			//	wd = well_data(pw, &W[i - 1]);
+			//else
+			//	wd = well_data(pw);
+	
+			// insert well segment
+			W[i] = well_data(pw, &W[i - 1]);
+			//pw += 4;
+		}
+
+		return well_node_num;
+	}
+
 	/*-----------------------------------------------------------------
 	* implementation of main routine
 	*----------------------------------------------------------------*/
@@ -109,7 +143,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 	struct wpi_return {
 		typedef spv_float type;
 
-		static type make(intersect_action& A) {
+		static type make(xbase& A) {
 			return A.export_1d();
 		}
 	};
@@ -118,7 +152,7 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 	struct wpi_return< false, unused > {
 		typedef std::vector< well_hit_cell > type;
 
-		static type make(intersect_action& A) {
+		static type make(xbase& A) {
 			type res(A.path().size());
 			ulong i = 0;
 			for(typename intersect_path::const_iterator px = A.path().begin(), end = A.path().end(); px != end; ++px)
@@ -138,69 +172,32 @@ struct wpi_algo : public wpi_algo_helpers< strat_t > {
 		// 1) calculate mesh nodes coordinates and build initial trimesh
 		trimesh M;
 		vertex_pos_i mesh_size;
-		spv_float tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
-		// free memory, don't need mesh any more
-		coord.release(); zcorn.release();
+		spv_float tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size, true);
 		// DEBUG
 		//std::cout << "trimesh built" << std::endl;
 
-		// 2) create well path description and
-		// bounding boxes for line segments representing well trajectory
-		ulong well_node_num = well_info->size() >> 2;
-		if(well_node_num < 2) return ret_t();
-
-		// storage
-		well_path W(well_node_num - 1);
-		//std::vector< Box > well_boxes(well_node_num - 1);
-		// build array of well nodes as Point_2
-		std::vector< Point > wnodes(well_node_num);
-
-		// walk along well
-		v_float::iterator pw = well_info->begin();
-		//double md = 0;
-		well_data wd;
-		for(ulong i = 0; i < well_node_num - 1; ++i) {
-			if(i)
-				wd = well_data(pw, &W[i - 1]);
-			else
-				wd = well_data(pw);
-	
-			// insert well segment
-			W[i] = wd;
-			wnodes[i] = wd.start();
-
-			pw += 4;
-		}
-		// put last node to array
-		wnodes[well_node_num - 1] = W[well_node_num - 2].finish();
+		// 2) create well path description
+		well_path W;
+		if(!fill_well_path(well_info, W)) return ret_t();
 		// DEBUG
 		//std::cout << "well_path created" << std::endl;
 
-		// 3) find where each node of well is located
-		// to restrict search area
-
-		// find where well path nodes are located
-		intersect_action A(M, W, mesh_size);
-		const std::vector< ulong >& hit_idx = wpi_meshp::where_is_point(M, mesh_size, wnodes);
+		// 3) construct main object
+		xbuilder A(M, W, mesh_size);
 		// DEBUG
 		//std::cout << "hit_idx found" << std::endl;
-		// dump hit_idx
-		//for(ulong i = 0; i < hit_idx.size(); ++i)
-		//	std::cout << hit_idx[i] << ' ';
-		//std::cout << std::endl;
 
-		// narrow search space via branch & bound algo
-		//const std::vector< ulong > hit_idx = A.build2();
-		A.build(hit_idx);
+		// 4) narrow search space via branch & bound algo
+		hit_idx_t& hit_idx = A.build();
 		// DEBUG
 		//std::cout << "build() done" << std::endl;
 
-		// remove duplicates in X,Y,Z directions
+		// 5) remove duplicates in X,Y,Z directions
 		A.remove_dups2();
 		// DEBUG
 		//std::cout << "remove_dups2 done" << std::endl;
 
-		// finalize intersection
+		// 6) finalize intersection
 		if(include_well_nodes)
 			A.append_wp_nodes(hit_idx);
 		// DEBUG

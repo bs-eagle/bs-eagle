@@ -14,7 +14,7 @@
 namespace blue_sky { namespace wpi {
 
 template< class strat_t >
-struct wpi_algo_helpers {
+struct helpers {
 	// import strategy typedefs
 	typedef typename strat_t::Point    Point;
 	typedef typename strat_t::Segment  Segment;
@@ -66,7 +66,7 @@ struct wpi_algo_helpers {
 };
 
 template< class strat_t >
-struct wpi_algo_pod : public wpi_algo_helpers< strat_t > {
+struct pods : public helpers< strat_t > {
 	// import strategy typedefs
 	typedef typename strat_t::Point    Point;
 	typedef typename strat_t::Segment  Segment;
@@ -78,7 +78,7 @@ struct wpi_algo_pod : public wpi_algo_helpers< strat_t > {
 
 	// import global consts
 	enum { D = strat_t::D };
-	//typedef wpi_algo_helpers< strat_t > helper_t;
+	//typedef helpers< strat_t > helper_t;
 
 	/*-----------------------------------------------------------------
 	* cell description
@@ -114,6 +114,12 @@ struct wpi_algo_pod : public wpi_algo_helpers< strat_t > {
 			vertex_pos p1, p2;
 			lo(p1); hi(p2);
 			return vertex_pos2bbox(p1, p2);
+		}
+
+		Iso_bbox iso_bbox() const {
+			vertex_pos p1, p2;
+			lo(p1); hi(p2);
+			return vertex_pos2rect(p1, p2);
 		}
 
 		Point ss(uint vert_idx) const {
@@ -190,6 +196,10 @@ struct wpi_algo_pod : public wpi_algo_helpers< strat_t > {
 
 		Bbox bbox() const {
 			return segment().bbox();
+		}
+
+		Iso_bbox iso_bbox() const {
+			return Iso_bbox(start(), finish());
 		}
 
 		double len() const {
