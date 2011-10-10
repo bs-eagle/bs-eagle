@@ -12,6 +12,8 @@
 #include "wpi_strategy_3d.h"
 
 #include <boost/format.hpp>
+#include <iosfwd>
+#include <iostream>
 
 using namespace wpi;
 
@@ -184,6 +186,15 @@ public:
 		} // 4 end of well+branch loop
 	}
 
+	void dump(std::ostream& os) {
+		for(cf_storage::iterator pc = cfs_.begin(), end = cfs_.end(); pc != end; ++pc) {
+			os << setw(15) << pc->well_name << ' ' << setw(15) << pc->branch_name << ' ';
+			for(int i = 0; i < 5; ++i)
+				os << setw(3) << pc->cell_id[i] << ' ';
+			os << pc->dir << std::endl;
+		}
+	}
+
 	//virtual std::string select_unique_well_branch(double d) = 0;
 	//virtual std::string select_segment(double d, const std::string well_name,
 	//	const std::string& branch_name) = 0;
@@ -235,6 +246,7 @@ spv_float completions_ident(smart_ptr< sql_well > src_well, double date,
 
 	builder_t b(nx, ny, coord, zcorn, src_well);
 	b.go(date);
+	b.dump(std::cout);
 	return NULL;
 }
 
@@ -245,6 +257,7 @@ spv_float fractures_ident(smart_ptr< sql_well > src_well, double date,
 
 	builder_t b(nx, ny, coord, zcorn, src_well);
 	b.go(date);
+	b.dump(std::cout);
 	return NULL;
 }
 
