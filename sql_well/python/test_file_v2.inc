@@ -1,5 +1,5 @@
 # well declaration W_SPEC
-12.04.2010 ; *; W_SPEC; p001; 100.4; 89
+12.04.2011 ; *; W_SPEC; p001; 100.4; 89
 * ; 12:32:48.22; W_SPEC; i002;
 *; *; W_SPEC; p003
 
@@ -11,9 +11,9 @@
 # well completions W_COMP
 # date      ; time      ; id        ; well      ; branch    ; STATUS    ; md        ; l     ; r     ; skin  ; khmult
 #---------------------------------------------------------------------------------------------------------------------
-*           ;*          ;W_COMP     ;p001       ;main       ;OPEN       ;2600       ; 100;
-*           ;*          ;W_COMP     ;p003       ;main       ;OPEN       ;2500       ;200    ;0.1    ;1.0    ;2.0   
-*           ;*          ;W_COMP     ;i002       ;*          ;*          ;2500       ;200    ;0.1    ;1.0   
+01.02.2011  ;*          ;W_COMP     ;p001       ;main       ;OPEN       ;2600       ; 100;
+01.03.2011  ;*          ;W_COMP     ;p003       ;main       ;OPEN       ;2500       ;200    ;0.1    ;1.0    ;2.0   
+01.04.2011  ;*          ;W_COMP     ;i002       ;*          ;*          ;2500       ;200    ;0.1    ;1.0   
 
 # well frac W_FRAC
 # date      ; time      ; id        ; well      ; branch    ; STATUS    ; md        ; angle     ; H_L_1     ; H_L_2     ; H_U   ; H_D   ; PERM  ; H_TH  ;
