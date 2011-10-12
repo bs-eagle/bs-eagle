@@ -14,7 +14,7 @@
 namespace blue_sky { namespace wpi {
 
 template< class strat_t >
-struct wpi_algo_helpers {
+struct helpers {
 	// import strategy typedefs
 	typedef typename strat_t::Point    Point;
 	typedef typename strat_t::Segment  Segment;
@@ -66,7 +66,7 @@ struct wpi_algo_helpers {
 };
 
 template< class strat_t >
-struct wpi_algo_pod : public wpi_algo_helpers< strat_t > {
+struct pods : public helpers< strat_t > {
 	// import strategy typedefs
 	typedef typename strat_t::Point    Point;
 	typedef typename strat_t::Segment  Segment;
@@ -78,7 +78,7 @@ struct wpi_algo_pod : public wpi_algo_helpers< strat_t > {
 
 	// import global consts
 	enum { D = strat_t::D };
-	//typedef wpi_algo_helpers< strat_t > helper_t;
+	//typedef helpers< strat_t > helper_t;
 
 	/*-----------------------------------------------------------------
 	* cell description
@@ -114,6 +114,12 @@ struct wpi_algo_pod : public wpi_algo_helpers< strat_t > {
 			vertex_pos p1, p2;
 			lo(p1); hi(p2);
 			return vertex_pos2bbox(p1, p2);
+		}
+
+		Iso_bbox iso_bbox() const {
+			vertex_pos p1, p2;
+			lo(p1); hi(p2);
+			return vertex_pos2rect(p1, p2);
 		}
 
 		Point ss(uint vert_idx) const {
@@ -192,6 +198,10 @@ struct wpi_algo_pod : public wpi_algo_helpers< strat_t > {
 			return segment().bbox();
 		}
 
+		Iso_bbox iso_bbox() const {
+			return Iso_bbox(start(), finish());
+		}
+
 		double len() const {
 			return std::sqrt(segment().squared_length());
 		}
@@ -223,6 +233,11 @@ struct wpi_algo_pod : public wpi_algo_helpers< strat_t > {
 		well_hit_cell(const Point& where_, ulong seg_,
 			ulong cell_, t_float md_, uint facet_, bool is_node_ = false)
 			: where(where_), seg(seg_), cell(cell_), md(md_), facet(facet_), is_node(is_node_)
+		{}
+
+		// ctor for searching
+		well_hit_cell(t_float md_)
+			: seg(0), cell(0), md(md_), facet(0), is_node(false)
 		{}
 
 		// hit points ordered first by md
@@ -260,7 +275,7 @@ public:
 	// empty ctor
 	stat_array() : base_t() {
 		// ensure all elems are filled with zero
-		fill(begin(), end(), value_type());
+		std::fill(begin(), end(), value_type());
 	}
 
 	// ctor accepting C-array

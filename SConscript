@@ -16,6 +16,7 @@ if build_kind == 'init':
     includes["bs_csr_ilu_prec"]             = Dir("bs_csr_ilu_prec/include")
     includes["bs_lsolvers"]                 = Dir("bs_lsolvers/include")
     includes["bs_mesh"]                     = Dir("bs_mesh/include")
+    includes["bs_mesh_src"]                 = Dir("bs_mesh/src")
     includes["bs_mtx"]                      = Dir("bs_mtx/include")
     includes["bs_pvt"]                      = Dir("bs_pvt/include")
     includes["bs_scal"]                     = Dir("bs_scal/include")

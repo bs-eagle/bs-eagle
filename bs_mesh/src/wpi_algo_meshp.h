@@ -14,7 +14,7 @@
 namespace blue_sky { namespace wpi {
 
 template< class strat_t >
-struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
+struct mesh_tools : public helpers< strat_t > {
 	// basic types
 	typedef typename strat_t::vertex_pos   vertex_pos;
 	typedef typename strat_t::vertex_pos_i vertex_pos_i;
@@ -27,18 +27,19 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 	enum { D = strat_t::D };
 
 	// import pods
-	typedef wpi_algo_pod< strat_t > wpi_pod;
-	typedef typename wpi_pod::cell_data cell_data;
-	typedef typename wpi_pod::well_data well_data;
-	typedef typename wpi_pod::trimesh trimesh;
-	typedef typename wpi_pod::trim_iterator trim_iterator;
+	typedef pods< strat_t > pods_t;
+	typedef typename pods_t::cell_data cell_data;
+	typedef typename pods_t::well_data well_data;
+	typedef typename pods_t::trimesh trimesh;
+	typedef typename pods_t::trim_iterator trim_iterator;
+	typedef typename pods_t::ctrim_iterator ctrim_iterator;
 
 	/*-----------------------------------------------------------------
 	* represent rectangular part of mesh with splitting support
 	*----------------------------------------------------------------*/
 	// x_last = last_element + 1 = x_size
 	// y_last = last_element + 1 = y_size
-	struct mesh_part : public wpi_algo_helpers< strat_t > {
+	struct mesh_part : public helpers< strat_t > {
 		typedef std::set< mesh_part > container_t;
 
 		mesh_part(trimesh& m, const vertex_pos_i& mesh_size)
@@ -131,6 +132,14 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 			return m_.begin() + ss_id(offset);
 		}
 
+		ctrim_iterator ss_iter(const vertex_pos_i& offset) const {
+			return m_.begin() + ss_id(offset);
+		}
+
+		ctrim_iterator ss_iter(ulong offset) const {
+			return m_.begin() + ss_id(offset);
+		}
+
 		Iso_bbox iso_bbox() const {
 			vertex_pos lo_pos, hi_pos;
 			bounds(lo_pos, hi_pos);
@@ -197,6 +206,20 @@ struct wpi_algo_meshp : public wpi_algo_helpers< strat_t > {
 					return false;
 			}
 			return false;
+		}
+
+		// calc size of cell in x-y-z directions
+		void cell_size(ulong offset, vertex_pos& res) const {
+			ctrim_iterator pc = this->ss_iter(offset);
+			if(pc != m_.end()) {
+				vertex_pos b1, b2;
+				pc->lo(b1); pc->hi(b2);
+				std::transform(&b2[0], &b2[D], &b1[0], &res[0], std::minus< t_float >());
+			}
+		}
+
+		void cell_size(const vertex_pos_i& offset, vertex_pos& res) {
+			cell_size(ss_id(offset), res);
 		}
 
 		// public members

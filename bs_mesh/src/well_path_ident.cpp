@@ -23,7 +23,7 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 	spv_float well_info, bool include_well_nodes)
 {
 	//return well_path_ident_(nx, ny, coord, zcorn, well_info, include_well_nodes);
-	return wpi::wpi_algo< wpi::wpi_strategy_3d >::well_path_ident_d< true >(
+	return wpi::algo< wpi::strategy_3d >::well_path_ident_d< true >(
 		nx, ny, coord, zcorn, well_info, include_well_nodes
 	);
 }
@@ -33,41 +33,41 @@ spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zc
 	spv_float well_info, bool include_well_nodes)
 {
 	//return well_path_ident_(nx, ny, coord, zcorn, well_info, include_well_nodes);
-	return wpi::wpi_algo< wpi::wpi_strategy_2d >::well_path_ident_d< true >(
+	return wpi::algo< wpi::strategy_2d >::well_path_ident_d< true >(
 		nx, ny, coord, zcorn, well_info, include_well_nodes
 	);
 }
 
 spv_uint where_is_points(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
-	typedef wpi::wpi_strategy_3d strat_t;
-	typedef wpi::wpi_algo_pod< strat_t > wpi_pod;
-	typedef wpi::wpi_algo_meshp< strat_t > wpi_meshp;
-	typedef wpi::wpi_algo< strat_t > wpi_algo;
+	typedef wpi::strategy_3d strat_t;
+	typedef wpi::pods< strat_t > pods_t;
+	typedef wpi::mesh_tools< strat_t > mesh_tools_t;
+	typedef wpi::algo< strat_t > algo;
 
 	typedef wpi::ulong ulong;
-	typedef wpi_pod::trimesh trimesh;
-	typedef strat_t::vertex_pos_i vertex_pos_i;
-	typedef strat_t::Point Point;
+	typedef typename pods_t::trimesh trimesh;
+	typedef typename strat_t::vertex_pos_i vertex_pos_i;
+	typedef typename strat_t::Point Point;
 
 	enum { D = strat_t::D };
 
 	// convert coord & zcorn to tops
 	trimesh M;
 	vertex_pos_i mesh_size;
-	spv_float tops = wpi_algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
+	spv_float tops = algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
 
 	// convert plain array of coords to array of Point objects
 	ulong pnum = points->size() / D;
 	std::vector< Point > P(pnum);
 	v_float::const_iterator p = points->begin();
 	for(ulong i = 0; i < pnum; ++i) {
-		P[i] = wpi_pod::rawptr2point(&*p);
+		P[i] = pods_t::rawptr2point(&*p);
 		p += D;
 	}
 
 	// real action
-	const std::vector< ulong >& hit_idx = wpi_meshp::where_is_point(M, mesh_size, P);
-
+	const std::vector< ulong >& hit_idx = mesh_tools_t::where_is_point(M, mesh_size, P);
+	
 	// return result
 	spv_uint res = BS_KERNEL.create_object(v_uint::bs_type());
 	res->resize(hit_idx.size());
@@ -76,27 +76,27 @@ spv_uint where_is_points(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 }
 
 t_uint where_is_point(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) {
-	typedef wpi::wpi_strategy_3d strat_t;
-	typedef wpi::wpi_algo_pod< strat_t > wpi_pod;
-	typedef wpi::wpi_algo_meshp< strat_t > wpi_meshp;
-	typedef wpi::wpi_algo< strat_t > wpi_algo;
+	typedef wpi::strategy_3d strat_t;
+	typedef wpi::pods< strat_t > pods_t;
+	typedef wpi::mesh_tools< strat_t > mesh_tools_t;
+	typedef wpi::algo< strat_t > algo;
 
-	typedef wpi_pod::trimesh trimesh;
-	typedef strat_t::vertex_pos_i vertex_pos_i;
-	typedef strat_t::Point Point;
+	typedef typename pods_t::trimesh trimesh;
+	typedef typename strat_t::vertex_pos_i vertex_pos_i;
+	typedef typename strat_t::Point Point;
 
 	enum { D = strat_t::D };
 
 	// convert coord & zcorn to tops
 	trimesh M;
 	vertex_pos_i mesh_size;
-	spv_float tops = wpi_algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
+	spv_float tops = algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
 
 	// convert plain array of coords to Point object
-	Point P = wpi_pod::rawptr2point(&*point->begin());
+	Point P = pods_t::rawptr2point(&*point->begin());
 
 	// real action
-	return wpi_meshp::where_is_point(M, mesh_size, P);
+	return mesh_tools_t::where_is_point(M, mesh_size, P);
 }
 
 /*-----------------------------------------------------------------
@@ -108,7 +108,7 @@ std::vector< well_hit_cell_3d > well_path_ident(t_long nx, t_long ny, spv_float 
 	spv_float well_info, bool include_well_nodes)
 {
 	//return well_path_ident_(nx, ny, coord, zcorn, well_info, include_well_nodes);
-	return wpi_algo< wpi_strategy_3d >::well_path_ident_d< false >(
+	return algo< strategy_3d >::well_path_ident_d< false >(
 		nx, ny, coord, zcorn, well_info, include_well_nodes
 	);
 }
@@ -117,7 +117,7 @@ std::vector< well_hit_cell_2d > well_path_ident_2d(t_long nx, t_long ny, spv_flo
 	spv_float well_info, bool include_well_nodes)
 {
 	//return well_path_ident_(nx, ny, coord, zcorn, well_info, include_well_nodes);
-	return wpi_algo< wpi_strategy_2d >::well_path_ident_d< false >(
+	return algo< strategy_2d >::well_path_ident_d< false >(
 		nx, ny, coord, zcorn, well_info, include_well_nodes
 	);
 }

@@ -111,9 +111,11 @@ namespace blue_sky
       
     }
   sql_well::sql_well (const sql_well& rhs) 
-        : bs_refcounter ()
+        : bs_refcounter (), file_name(rhs.file_name), db(rhs.db)
     {
-      *this = rhs;
+      //*this = rhs;
+      // don't copy pending statement
+      stmp_sql = 0;
       fr_file = 0;
     }
   sql_well::~sql_well ()
