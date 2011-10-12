@@ -135,7 +135,7 @@ public:
 
 	template< class cd_traits >
 	void build(double date, const cd_traits& t = cd_traits()) {
-		cfs_.clear();
+		//cfs_.clear();
 
 		// 1 fill storage with all unique well+branch
 		wb_storage wb;
@@ -301,6 +301,10 @@ const cd_storage& compdat_builder::build(double date, int mode) {
 
 const cd_storage& compdat_builder::storage() const {
 	return pimpl_->cfs_;
+}
+
+void compdat_builder::clear() {
+	pimpl_->cfs_.clear();
 }
 
 /*-----------------------------------------------------------------

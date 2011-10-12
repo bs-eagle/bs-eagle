@@ -65,6 +65,9 @@ public:
 	// mode == 0 - search completions, otherwise - fractures
 	const cd_storage& build(double date, int mode = 0);
 
+	// clear storage
+	void clear();
+
 	// storage getter
 	const cd_storage& storage() const;
 
