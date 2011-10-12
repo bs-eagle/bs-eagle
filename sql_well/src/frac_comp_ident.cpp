@@ -337,7 +337,7 @@ namespace bp = boost::python;
 
 void py_export_compdat_ident() {
 	bp::def("completions_ident", &fci::completions_ident);
-	bp::def("fractions_ident", &fci::fractures_ident);
+	bp::def("fractures_ident", &fci::fractures_ident);
 }
 
 } /* blue_sky::python */
