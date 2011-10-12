@@ -14,6 +14,66 @@
 
 namespace blue_sky { namespace fci {
 
+/*-----------------------------------------------------------------
+ *  POD that holds info needed by COMPDAT
+ *----------------------------------------------------------------*/
+struct compdat {
+	typedef unsigned long ulong;
+	typedef ulong cell_info[4];
+	typedef ulong pos_i[3];
+
+	std::string well_name;
+	std::string branch_name;
+	cell_info cell_pos;
+	char dir;
+	t_double kh_mult;
+
+	// ctors
+	compdat(const std::string& well_name_, const std::string& branch_name_, const pos_i& cell_pos_);
+	// cell_pos decoded from cell_id
+	compdat(const std::string& well_name_, const std::string& branch_name_, ulong cell_id, const pos_i& mesh_size);
+	// for searching only
+	compdat(ulong cell_id);
+
+	bool operator<(const compdat& rhs) const {
+		return cell_id_ < rhs.cell_id_;
+	}
+
+private:
+	ulong cell_id_;
+};
+
+typedef std::set< compdat > cd_storage;
+
+/*-----------------------------------------------------------------
+ * interface of COMPDAT building algo
+ *----------------------------------------------------------------*/
+class compdat_builder {
+
+public:
+	// ctors
+	compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
+
+	compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
+		smart_ptr< sql_well > src_well);
+
+	void init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
+	void init(smart_ptr< sql_well > src_well);
+
+	// mode == 0 - search completions, otherwise - fractures
+	const cd_storage& build(double date, int mode = 0);
+
+	// storage getter
+	const cd_storage& storage() const;
+
+private:
+	class impl;
+	st_smart_ptr< impl > pimpl_;
+};
+
+/*-----------------------------------------------------------------
+ * global functions
+ *----------------------------------------------------------------*/
 spv_float completions_ident(smart_ptr< sql_well > src_well, double date,
 		t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
 

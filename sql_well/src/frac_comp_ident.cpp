@@ -16,58 +16,80 @@
 #include <iosfwd>
 #include <iostream>
 
-using namespace wpi;
-
 namespace blue_sky { namespace fci {
 // impl details
-namespace {
 using namespace std;
+using namespace wpi;
 
-// assign for c arrays
-// fun with returning reference to array :)
-template< class T, unsigned int D >
-static T (&ca_assign(T (&lhs)[D], const T (&rhs)[D]))[D] {
-	std::copy(&rhs[0], &rhs[D], &lhs[0]);
-	return lhs;
-}
+typedef algo< strategy_3d > wpi_algo;
 
-template< class T, unsigned int D >
-static T (&ca_assign(T (&lhs)[D], const T& v))[D] {
-	std::fill(&lhs[0], &lhs[D], v);
-	return lhs;
-}
+// hidden details
+namespace {
 
-// POD that holds all info needed by COMPDAT
-struct compfrac {
-	typedef stat_array< ulong, 4 > cell_info;
-	typedef strategy_3d::vertex_pos_i vertex_pos_i;
+/*-----------------------------------------------------------------
+ * search different tables
+ *----------------------------------------------------------------*/
+struct fract_traits  {
+	static boost::format select_unique_well_branch() {
+		return boost::format("SELECT DISTINCT well_name, branch_name FROM fractures WHERE d=%f");
+	}
 
-	std::string well_name;
-	std::string branch_name;
-	cell_info cell_id;
-	char dir;
-
-	compfrac(const string& well_name_, const string& branch_name_, const cell_info& cell_info, char dir_)
-		: well_name(well_name_), branch_name(branch_name_), cell_id(cell_info), dir(dir_)
-	{}
-
-	compfrac(const string& well_name_, const string& branch_name_, const vertex_pos_i& id)
-		: well_name(well_name_), branch_name(branch_name_)
-	{
-		copy(&id[0], &id[strategy_3d::D], cell_id.begin());
-		cell_id[3] = cell_id[2];
+	static boost::format select_segment() {
+		return boost::format(
+			"SELECT md, half_length1 + half_length_2 FROM fractures WHERE d=%f and well_name='%s' and branch_name='%s'"
+		);
 	}
 };
 
-typedef std::list< compfrac > cf_storage;
+struct compl_traits {
+	static boost::format select_unique_well_branch() {
+		return boost::format("SELECT DISTINCT well_name, branch_name FROM completions WHERE d=%f");
+	}
+
+	static boost::format select_segment() {
+		return boost::format(
+			"SELECT md, length FROM completions WHERE d=%f and well_name='%s' and branch_name='%s'"
+		);
+	}
+};
+
+// simple dump
+void dump(std::ostream& os, const cd_storage& cfs) {
+	for(cd_storage::const_iterator pc = cfs.begin(), end = cfs.end(); pc != end; ++pc) {
+		os << setw(15) << pc->well_name << ' ' << setw(15) << pc->branch_name << ' ';
+		for(int i = 0; i < 4; ++i)
+			os << setw(3) << pc->cell_pos[i] << ' ';
+		os << pc->dir << std::endl;
+	}
+}
+
+}  // oef hidden namespace
 
 /*-----------------------------------------------------------------
- * implementation of COMPDAT building algo
+ * compdat
  *----------------------------------------------------------------*/
-template< class cd_traits >
-class compdat_builder {
+compdat::compdat(const string& well_name_, const string& branch_name_, const pos_i& cell_pos_)
+	: well_name(well_name_), branch_name(branch_name_), dir(' '), kh_mult(0)
+{
+	copy(&cell_pos_[0], &cell_pos_[strategy_3d::D], &cell_pos[0]);
+	cell_pos[3] = cell_pos[2];
+}
+
+compdat::compdat(const string& well_name_, const string& branch_name_, ulong cell_id, const pos_i& mesh_size)
+	: well_name(well_name_), branch_name(branch_name_), dir(' '), kh_mult(0)
+{
+	pos_i cell_pos_;
+	wpi_algo::decode_cell_id(cell_id, cell_pos_, mesh_size);
+	copy(&cell_pos_[0], &cell_pos_[strategy_3d::D], &cell_pos[0]);
+	cell_pos[3] = cell_pos[2];
+}
+
+/*-----------------------------------------------------------------
+ * compdat_builder::impl
+ *----------------------------------------------------------------*/
+class compdat_builder::impl {
 public:
-	typedef algo< strategy_3d > wpi_algo;
+	//typedef algo< strategy_3d > wpi_algo;
 	typedef typename wpi_algo::trimesh trimesh;
 	typedef typename wpi_algo::well_path well_path;
 	typedef typename wpi_algo::well_hit_cell whc;
@@ -82,11 +104,11 @@ public:
 	typedef multimap< string, string > wb_storage;
 	typedef typename xpath::iterator x_iterator;
 
-	compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
+	impl(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
 		init(nx, ny, coord, zcorn);
 	}
 
-	compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
+	impl(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
 		smart_ptr< sql_well > src_well)
 	{
 		init(nx, ny, coord, zcorn);
@@ -102,7 +124,8 @@ public:
 		sw_ = BS_KERNEL.create_object_copy(src_well);
 	}
 
-	void go(double date) {
+	template< class cd_traits >
+	void build(double date, const cd_traits& t = cd_traits()) {
 		cfs_.clear();
 
 		// 1 fill storage with all unique well+branch
@@ -170,10 +193,10 @@ public:
 
 				// 3.4.2 consider all intersections between begin_j and end_j
 				for(; px != xend; ++px) {
-					// prepare compfrac
-					vertex_pos_i cell_id;
-					wpi_algo::decode_cell_id(px->cell, cell_id, m_size_);
-					compfrac cf(pwb->first, pwb->second, cell_id);
+					// prepare compdat
+					//vertex_pos_i cell_id;
+					//wpi_algo::decode_cell_id(px->cell, cell_id, m_size_);
+					compdat cf(pwb->first, pwb->second, px->cell, m_size_);
 
 					// 3.4.3.1 calc delta between consequent xpoint_k and xpoint_(k + 1)
 					// position to next point
@@ -194,7 +217,7 @@ public:
 						else
 							cf.dir = 'Z';
 						// add new COMPDAT record
-						cfs_.push_back(cf);
+						cfs_.insert(cf);
 					}
 				} // 3.4.4 end of intersections loop
 			} // 3.5 end of completions loop
@@ -203,20 +226,10 @@ public:
 		} // 4 end of well+branch loop
 	}
 
-	void dump(std::ostream& os) {
-		for(cf_storage::iterator pc = cfs_.begin(), end = cfs_.end(); pc != end; ++pc) {
-			os << setw(15) << pc->well_name << ' ' << setw(15) << pc->branch_name << ' ';
-			for(int i = 0; i < 4; ++i)
-				os << setw(3) << pc->cell_id[i] << ' ';
-			os << pc->dir << std::endl;
-		}
-	}
-
 	//virtual std::string select_unique_well_branch(double d) = 0;
 	//virtual std::string select_segment(double d, const std::string well_name,
 	//	const std::string& branch_name) = 0;
 
-private:
 	trimesh m_;
 	vertex_pos_i m_size_;
 	// tops should live as long as mesh lives
@@ -224,46 +237,50 @@ private:
 	// copy of source sql_well
 	smart_ptr< sql_well > sw_;
 	// storage for compdat records
-	cf_storage cfs_;
+	cd_storage cfs_;
 };
 
 /*-----------------------------------------------------------------
- * traits for completions
+ * compdat_builder implementation
  *----------------------------------------------------------------*/
-struct compl_traits {
-	static boost::format select_unique_well_branch() {
-		return boost::format("SELECT DISTINCT well_name, branch_name FROM completions WHERE d=%f");
-	}
+compdat_builder::compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn)
+	: pimpl_(new impl(nx, ny, coord, zcorn))
+{}
 
-	static boost::format select_segment() {
-		return boost::format(
-			"SELECT md, length FROM completions WHERE d=%f and well_name='%s' and branch_name='%s'"
-		);
-	}
-};
+compdat_builder::compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
+	smart_ptr< sql_well > src_well)
+	: pimpl_(new impl(nx, ny, coord, zcorn, src_well))
+{}
 
-struct fract_traits {
-	static boost::format select_unique_well_branch() {
-		return boost::format("SELECT DISTINCT well_name, branch_name FROM fractures WHERE d=%f");
-	}
+void compdat_builder::init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
+	pimpl_->init(nx, ny, coord, zcorn);
+}
 
-	static boost::format select_segment() {
-		return boost::format(
-			"SELECT md, half_length1 + half_length_2 FROM fractures WHERE d=%f and well_name='%s' and branch_name='%s'"
-		);
-	}
-};
+void compdat_builder::init(smart_ptr< sql_well > src_well) {
+	pimpl_->init(src_well);
+}
 
-} /* hidden namespace*/
+const cd_storage& compdat_builder::build(double date, int mode) {
+	if(mode == 0)
+		pimpl_->build(date, compl_traits());
+	else
+		pimpl_->build(date, fract_traits());
+	return storage();
+}
 
+const cd_storage& compdat_builder::storage() const {
+	return pimpl_->cfs_;
+}
+
+/*-----------------------------------------------------------------
+ * global functions impl
+ *----------------------------------------------------------------*/
 spv_float completions_ident(smart_ptr< sql_well > src_well, double date,
 		t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn)
 {
-	typedef compdat_builder< compl_traits > builder_t;
-
-	builder_t b(nx, ny, coord, zcorn, src_well);
-	b.go(date);
-	b.dump(std::cout);
+	compdat_builder b(nx, ny, coord, zcorn, src_well);
+	b.build(date, 0);
+	dump(std::cout, b.storage());
 	//return BS_KERNEL.create_object(v_float::bs_type());
 	return NULL;
 }
@@ -271,11 +288,9 @@ spv_float completions_ident(smart_ptr< sql_well > src_well, double date,
 spv_float fractures_ident(smart_ptr< sql_well > src_well, double date,
 		t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn)
 {
-	typedef compdat_builder< fract_traits > builder_t;
-
-	builder_t b(nx, ny, coord, zcorn, src_well);
-	b.go(date);
-	b.dump(std::cout);
+	compdat_builder b(nx, ny, coord, zcorn, src_well);
+	b.build(date, 1);
+	dump(std::cout, b.storage());
 	//return BS_KERNEL.create_object(v_float::bs_type());
 	return NULL;
 }
