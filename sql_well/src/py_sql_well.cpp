@@ -14,6 +14,8 @@ using namespace boost::python;
 
 namespace blue_sky {
 namespace python {
+  void py_export_compdat_ident();
+
   //////////////////////////////////////////////////////////////////////////
 
   //////////////////////////////////////////////////////////////////////////
@@ -26,6 +28,7 @@ namespace python {
 
     class_exporter <sql_well, well_pool_iface, py_sql_well_exporter>::export_class ("sql_well");
 
+    py_export_compdat_ident();
   }
 
 }	// namespace python

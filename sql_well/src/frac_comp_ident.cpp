@@ -10,6 +10,7 @@
 #include "bcsr_matrix_iface.h"
 #include "wpi_algo.h"
 #include "wpi_strategy_3d.h"
+#include "export_python_wrapper.h"
 
 #include <boost/format.hpp>
 #include <iosfwd>
@@ -124,23 +125,35 @@ public:
 			sp_table_t traj_t = traj->get_table();
 			if(!traj_t) return;
 
-			// 3.2 find intersections of given branch with mesh (well_path_ident)
-			// fill array with branch trajectory
+			// find column id's for X, Y, Z and MD
+			t_long col_ids[4] = {1, 2, 3, 0};
+			//for(t_long i = 0; i < traj_t->get_n_cols(); ++i) {
+			//	std::string cur_col = traj_t->get_col_name(i);
+			//	if(cur_col == "X")
+			//		col_ids[0] = i;
+			//	else if(cur_col == "Y")
+			//		col_ids[1] = i;
+			//	else if(cur_col == "Z")
+			//		col_ids[2] = i;
+			//	else if(cur_col == "MD")
+			//		col_ids[3] = i;
+			//}
+			// fill vector with traj data
 			spv_float traj_v = BS_KERNEL.create_object(v_float::bs_type());
 			traj_v->resize(traj_t->get_n_rows() * 4);
 			v_float::iterator ptv = traj_v->begin();
 			for(ulong i = 0, trows = traj_t->get_n_rows(); i < trows; ++i) {
 				for(ulong j = 0; j < 4; ++j)
-					*ptv++ = traj_t->get_value(i, 0);
+					*ptv++ = traj_t->get_value(i, col_ids[j]);
 			}
 			// make well_path
 			well_path W;
 			if(!wpi_algo::fill_well_path(traj_v, W)) return;
-			// find intersections
+			// 3.2 find intersections of given branch with mesh (well_path_ident)
 			xbuilder A(m_, W, m_size_);
 			A.build();
 			A.remove_dups2();
-			//A.append_wp_nodes(hit_idx);
+			xpath& xp = A.path();
 
 			// 3.3 select all completions that belong to well+branch_i
 			q = (cd_traits::select_segment() % date % pwb->first % pwb->second).str();
@@ -149,9 +162,11 @@ public:
 			// 3.4 for all completions do
 			while(sw_->step_sql() == 0) {
 				// 3.4.1 search for completion_j begin_j and end_j using md_j and lentgh_j
-				xpath& xp = A.path();
 				x_iterator px = xp.upper_bound(whc(sw_->get_sql_real(0)));
 				x_iterator xend = xp.upper_bound(whc(sw_->get_sql_real(0) + sw_->get_sql_real(1)));
+				// always start with prev intersection
+				if(px != xp.begin())
+					--px;
 
 				// 3.4.2 consider all intersections between begin_j and end_j
 				for(; px != xend; ++px) {
@@ -161,24 +176,26 @@ public:
 					compfrac cf(pwb->first, pwb->second, cell_id);
 
 					// 3.4.3.1 calc delta between consequent xpoint_k and xpoint_(k + 1)
-					// position to prev point
-					x_iterator pprev_x = px;
-					if(pprev_x != xp.begin())
-						--pprev_x;
-					ulong delta = std::abs(px->cell - pprev_x->cell);
+					// position to next point
+					x_iterator pnext_x = px;
+					++pnext_x;
+					ulong delta = 0;
+					if(pnext_x != xp.end())
+						delta = std::abs(pnext_x->cell - px->cell);
 
 					// 3.4.3.2 if delta == 1 mark direction as 'X'
 					//         else if delta == dx direction = 'Y'
 					//         else if delta = dx*dy direction = 'Z'
-
-					if(delta == 1)
-						cf.dir = 'X';
-					else if(delta >= m_size_[0] && delta < plane_sz)
-						cf.dir = 'Y';
-					else
-						cf.dir = 'Z';
-					// add new COMPDAT record
-					cfs_.push_back(cf);
+					if(delta) {
+						if(delta == 1)
+							cf.dir = 'X';
+						else if(delta >= m_size_[0] && delta < plane_sz)
+							cf.dir = 'Y';
+						else
+							cf.dir = 'Z';
+						// add new COMPDAT record
+						cfs_.push_back(cf);
+					}
 				} // 3.4.4 end of intersections loop
 			} // 3.5 end of completions loop
 
@@ -189,7 +206,7 @@ public:
 	void dump(std::ostream& os) {
 		for(cf_storage::iterator pc = cfs_.begin(), end = cfs_.end(); pc != end; ++pc) {
 			os << setw(15) << pc->well_name << ' ' << setw(15) << pc->branch_name << ' ';
-			for(int i = 0; i < 5; ++i)
+			for(int i = 0; i < 4; ++i)
 				os << setw(3) << pc->cell_id[i] << ' ';
 			os << pc->dir << std::endl;
 		}
@@ -220,7 +237,7 @@ struct compl_traits {
 
 	static boost::format select_segment() {
 		return boost::format(
-			"SELECT md, length FROM completions WHERE d=%f and well_name='%1%' and branch_name='%2%'"
+			"SELECT md, length FROM completions WHERE d=%f and well_name='%s' and branch_name='%s'"
 		);
 	}
 };
@@ -232,7 +249,7 @@ struct fract_traits {
 
 	static boost::format select_segment() {
 		return boost::format(
-			"SELECT md, half_length1 + half_length_2 FROM fractures WHERE d=%f and well_name='%1%' and branch_name='%2%'"
+			"SELECT md, half_length1 + half_length_2 FROM fractures WHERE d=%f and well_name='%s' and branch_name='%s'"
 		);
 	}
 };
@@ -247,6 +264,7 @@ spv_float completions_ident(smart_ptr< sql_well > src_well, double date,
 	builder_t b(nx, ny, coord, zcorn, src_well);
 	b.go(date);
 	b.dump(std::cout);
+	//return BS_KERNEL.create_object(v_float::bs_type());
 	return NULL;
 }
 
@@ -258,7 +276,20 @@ spv_float fractures_ident(smart_ptr< sql_well > src_well, double date,
 	builder_t b(nx, ny, coord, zcorn, src_well);
 	b.go(date);
 	b.dump(std::cout);
+	//return BS_KERNEL.create_object(v_float::bs_type());
 	return NULL;
 }
 
-}} /* blue_sky::fci */
+} // eof blue_sky::fci
+
+namespace python {
+namespace bp = boost::python;
+
+void py_export_compdat_ident() {
+	bp::def("completions_ident", &fci::completions_ident);
+	bp::def("fractions_ident", &fci::fractures_ident);
+}
+
+} /* blue_sky::python */
+
+} /* blue_sky */
