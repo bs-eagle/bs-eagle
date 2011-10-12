@@ -19,12 +19,23 @@ print 'Source mesh generated!'
 s = sw.sql_well();
 s.open_db('db.db');
 
+# prepare compdat_builder
+cb = sw.compdat_builder(Nx, Ny, c, z, s);
+
 # walk through all dates
 s.prepare_sql("SELECT d FROM dates");
 while s.step_sql() == 0 :
 	d = s.get_sql_real(0);
+
+	cb.clear();
+	cl = cb.build(d, 0);
 	print "Completions on date", d;
-	sw.completions_ident(s, d, Nx, Ny, c, z);
+	for c in cl :
+		c.dump();
+
+	cb.clear();
+	fr = cb.build(d, 1);
 	print "Fractures on date", d;
-	sw.fractures_ident(s, d, Nx, Ny, c, z);
+	for f in fr :
+		f.dump();
 
