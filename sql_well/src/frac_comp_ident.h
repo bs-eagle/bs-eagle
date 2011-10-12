@@ -17,7 +17,7 @@ namespace blue_sky { namespace fci {
 /*-----------------------------------------------------------------
  *  POD that holds info needed by COMPDAT
  *----------------------------------------------------------------*/
-struct compdat {
+struct BS_API_PLUGIN compdat {
 	typedef unsigned long ulong;
 	typedef ulong cell_info[4];
 	typedef ulong pos_i[3];
@@ -29,9 +29,11 @@ struct compdat {
 	t_double kh_mult;
 
 	// ctors
-	compdat(const std::string& well_name_, const std::string& branch_name_, const pos_i& cell_pos_);
+	compdat(const std::string& well_name_, const std::string& branch_name_,
+		const pos_i& cell_pos_, const pos_i& mesh_size);
 	// cell_pos decoded from cell_id
-	compdat(const std::string& well_name_, const std::string& branch_name_, ulong cell_id, const pos_i& mesh_size);
+	compdat(const std::string& well_name_, const std::string& branch_name_,
+		ulong cell_id, const pos_i& mesh_size);
 	// for searching only
 	compdat(ulong cell_id);
 
@@ -48,7 +50,7 @@ typedef std::set< compdat > cd_storage;
 /*-----------------------------------------------------------------
  * interface of COMPDAT building algo
  *----------------------------------------------------------------*/
-class compdat_builder {
+class BS_API_PLUGIN compdat_builder {
 
 public:
 	// ctors

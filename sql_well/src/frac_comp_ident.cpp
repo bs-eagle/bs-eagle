@@ -58,8 +58,9 @@ void dump(std::ostream& os, const cd_storage& cfs) {
 	for(cd_storage::const_iterator pc = cfs.begin(), end = cfs.end(); pc != end; ++pc) {
 		os << setw(15) << pc->well_name << ' ' << setw(15) << pc->branch_name << ' ';
 		for(int i = 0; i < 4; ++i)
-			os << setw(3) << pc->cell_pos[i] << ' ';
-		os << pc->dir << std::endl;
+			os << setw(4) << pc->cell_pos[i];
+		os << setw(2) << pc->dir;
+		os << setw(10) << std::fixed << std::setprecision(3) << pc->kh_mult << std::endl;
 	}
 }
 
@@ -68,21 +69,26 @@ void dump(std::ostream& os, const cd_storage& cfs) {
 /*-----------------------------------------------------------------
  * compdat
  *----------------------------------------------------------------*/
-compdat::compdat(const string& well_name_, const string& branch_name_, const pos_i& cell_pos_)
+compdat::compdat(const string& well_name_, const string& branch_name_, const pos_i& cell_pos_, const pos_i& mesh_size)
 	: well_name(well_name_), branch_name(branch_name_), dir(' '), kh_mult(0)
 {
 	copy(&cell_pos_[0], &cell_pos_[strategy_3d::D], &cell_pos[0]);
 	cell_pos[3] = cell_pos[2];
+	cell_id_ = wpi_algo::encode_cell_id(cell_pos_, mesh_size);
 }
 
 compdat::compdat(const string& well_name_, const string& branch_name_, ulong cell_id, const pos_i& mesh_size)
-	: well_name(well_name_), branch_name(branch_name_), dir(' '), kh_mult(0)
+	: well_name(well_name_), branch_name(branch_name_), dir(' '), kh_mult(0), cell_id_(cell_id)
 {
 	pos_i cell_pos_;
 	wpi_algo::decode_cell_id(cell_id, cell_pos_, mesh_size);
 	copy(&cell_pos_[0], &cell_pos_[strategy_3d::D], &cell_pos[0]);
 	cell_pos[3] = cell_pos[2];
 }
+
+compdat::compdat(ulong cell_id)
+	: dir(' '), kh_mult(0), cell_id_(cell_id)
+{}
 
 /*-----------------------------------------------------------------
  * compdat_builder::impl
@@ -96,7 +102,10 @@ public:
 	typedef typename wpi_algo::intersect_path xpath;
 	typedef typename wpi_algo::xbuilder xbuilder;
 	typedef typename wpi_algo::hit_idx_t hit_idx_t;
-	typedef typename wpi_algo::vertex_pos_i vertex_pos_i;
+
+	typedef typename strategy_3d::vertex_pos_i vertex_pos_i;
+	typedef typename strategy_3d::vertex_pos vertex_pos;
+	typedef typename mesh_tools< strategy_3d>::mesh_part mesh_part;
 
 	typedef typename sql_well::sp_traj_t sp_traj_t;
 	typedef typename sql_well::sp_table_t sp_table_t;
@@ -139,6 +148,8 @@ public:
 
 		// 2 precalc plane size
 		const ulong plane_sz = m_size_[0] * m_size_[1];
+		// prepare mesh_part representin full mesh
+		mesh_part fullmesh(m_, m_size_);
 
 		// 3 for each well+branch combo do
 		for(wb_storage::iterator pwb = wb.begin(), wb_end = wb.end(); pwb != wb_end; ++pwb) {
@@ -185,8 +196,9 @@ public:
 			// 3.4 for all completions do
 			while(sw_->step_sql() == 0) {
 				// 3.4.1 search for completion_j begin_j and end_j using md_j and lentgh_j
-				x_iterator px = xp.upper_bound(whc(sw_->get_sql_real(0)));
-				x_iterator xend = xp.upper_bound(whc(sw_->get_sql_real(0) + sw_->get_sql_real(1)));
+				double cur_md = sw_->get_sql_real(0);
+				x_iterator px = xp.upper_bound(whc(cur_md));
+				x_iterator xend = xp.upper_bound(whc(cur_md + sw_->get_sql_real(1)));
 				// always start with prev intersection
 				if(px != xp.begin())
 					--px;
@@ -194,8 +206,6 @@ public:
 				// 3.4.2 consider all intersections between begin_j and end_j
 				for(; px != xend; ++px) {
 					// prepare compdat
-					//vertex_pos_i cell_id;
-					//wpi_algo::decode_cell_id(px->cell, cell_id, m_size_);
 					compdat cf(pwb->first, pwb->second, px->cell, m_size_);
 
 					// 3.4.3.1 calc delta between consequent xpoint_k and xpoint_(k + 1)
@@ -209,15 +219,36 @@ public:
 					// 3.4.3.2 if delta == 1 mark direction as 'X'
 					//         else if delta == dx direction = 'Y'
 					//         else if delta = dx*dy direction = 'Z'
+					//         also calc kh_mult assuming that cells are rectangular (!)
 					if(delta) {
-						if(delta == 1)
+						// calc md to current intersection
+						double delta_l = pnext_x->md - cur_md;
+						// obtain cell size
+						vertex_pos cell_sz;
+						fullmesh.cell_size(px->cell, cell_sz);
+
+						if(delta == 1) {
 							cf.dir = 'X';
-						else if(delta >= m_size_[0] && delta < plane_sz)
+							cf.kh_mult = delta_l / cell_sz[0];
+						}
+						else if(delta >= m_size_[0] && delta < plane_sz) {
 							cf.dir = 'Y';
-						else
+							cf.kh_mult = delta_l / cell_sz[1];
+						}
+						else {
 							cf.dir = 'Z';
-						// add new COMPDAT record
-						cfs_.insert(cf);
+							cf.kh_mult = delta_l / cell_sz[2];
+						}
+
+						// if compdat for this cell is already added
+						// then just update kh_mult
+						// otherwise add new COMPDAT record
+						// TODO: handle case of different directions inside one cell
+						cd_storage::iterator pcd = cfs_.find(compdat(px->cell));
+						if(pcd != cfs_.end())
+							const_cast< compdat& >(*pcd).kh_mult += cf.kh_mult;
+						else
+							cfs_.insert(cf);
 					}
 				} // 3.4.4 end of intersections loop
 			} // 3.5 end of completions loop
