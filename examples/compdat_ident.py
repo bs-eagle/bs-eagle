@@ -18,5 +18,13 @@ print 'Source mesh generated!'
 # open sql_well db
 s = sw.sql_well();
 s.open_db('db.db');
-sw.completions_ident(s, 33160, Nx, Ny, c, z);
+
+# walk through all dates
+s.prepare_sql("SELECT d FROM dates");
+while s.step_sql() == 0 :
+	d = s.get_sql_real(0);
+	print "Completions on date", d;
+	sw.completions_ident(s, d, Nx, Ny, c, z);
+	print "Fractures on date", d;
+	sw.fractures_ident(s, d, Nx, Ny, c, z);
 
