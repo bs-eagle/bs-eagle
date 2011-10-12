@@ -11,6 +11,7 @@
 #include "wpi_algo.h"
 #include "wpi_strategy_3d.h"
 #include "export_python_wrapper.h"
+#include "py_list_converter.h"
 
 #include <boost/format.hpp>
 #include <iosfwd>
@@ -54,14 +55,17 @@ struct compl_traits {
 };
 
 // simple dump
+void dump(std::ostream& os, const compdat& cd) {
+	os << setw(15) << cd.well_name << ' ' << setw(15) << cd.branch_name << ' ';
+	for(int i = 0; i < 4; ++i)
+		os << setw(4) << cd.cell_pos[i];
+	os << setw(2) << cd.dir;
+	os << setw(10) << std::fixed << std::setprecision(3) << cd.kh_mult << std::endl;
+}
+
 void dump(std::ostream& os, const cd_storage& cfs) {
-	for(cd_storage::const_iterator pc = cfs.begin(), end = cfs.end(); pc != end; ++pc) {
-		os << setw(15) << pc->well_name << ' ' << setw(15) << pc->branch_name << ' ';
-		for(int i = 0; i < 4; ++i)
-			os << setw(4) << pc->cell_pos[i];
-		os << setw(2) << pc->dir;
-		os << setw(10) << std::fixed << std::setprecision(3) << pc->kh_mult << std::endl;
-	}
+	for(cd_storage::const_iterator pc = cfs.begin(), end = cfs.end(); pc != end; ++pc)
+		dump(os, *pc);
 }
 
 }  // oef hidden namespace
@@ -332,12 +336,50 @@ spv_float fractures_ident(smart_ptr< sql_well > src_well, double date,
 
 } // eof blue_sky::fci
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(cdb_build_overl, blue_sky::fci::compdat_builder::build, 1, 2)
+
 namespace python {
 namespace bp = boost::python;
 
+static void print_compdat(const fci::compdat& cd) {
+	fci::dump(std::cout, cd);
+}
+
 void py_export_compdat_ident() {
+	using namespace fci;
+
+	// export global functions
 	bp::def("completions_ident", &fci::completions_ident);
 	bp::def("fractures_ident", &fci::fractures_ident);
+
+	// export compdat
+	bp::class_< compdat >("compdat", bp::no_init)
+		.def_readwrite("well_name", &compdat::well_name)
+		.def_readwrite("branch_name", &compdat::branch_name)
+		.def_readwrite("dir", &compdat::dir)
+		.def("dump", &print_compdat)
+	;
+
+	// export cd_storage as list
+	typedef bspy_converter< list_traits< cd_storage, 2 > > py_cds_conv;
+	py_cds_conv::register_to_py();
+	py_cds_conv::register_from_py();
+
+	void (compdat_builder::*init1)(t_ulong, t_ulong, spv_float, spv_float) = &compdat_builder::init;
+	void (compdat_builder::*init2)(smart_ptr< sql_well >) = &compdat_builder::init;
+	bp::class_< compdat_builder >("compdat_builder",
+		bp::init< t_ulong, t_ulong, spv_float, spv_float >())
+		.def(bp::init< t_ulong, t_ulong, spv_float, spv_float, smart_ptr< sql_well> >())
+		.def("init", init1)
+		.def("init", init2)
+		.def("build", &compdat_builder::build,
+			bp::return_value_policy< bp::copy_const_reference >(),
+			cdb_build_overl())
+		.def("clear", &compdat_builder::clear)
+		.def("storage", &compdat_builder::storage,
+			bp::return_value_policy< bp::copy_const_reference >())
+	;
+
 }
 
 } /* blue_sky::python */
