@@ -32,6 +32,7 @@ struct mesh_tools : public helpers< strat_t > {
 	typedef typename pods_t::well_data well_data;
 	typedef typename pods_t::trimesh trimesh;
 	typedef typename pods_t::trim_iterator trim_iterator;
+	typedef typename pods_t::ctrim_iterator ctrim_iterator;
 
 	/*-----------------------------------------------------------------
 	* represent rectangular part of mesh with splitting support
@@ -131,6 +132,14 @@ struct mesh_tools : public helpers< strat_t > {
 			return m_.begin() + ss_id(offset);
 		}
 
+		ctrim_iterator ss_iter(const vertex_pos_i& offset) const {
+			return m_.begin() + ss_id(offset);
+		}
+
+		ctrim_iterator ss_iter(ulong offset) const {
+			return m_.begin() + ss_id(offset);
+		}
+
 		Iso_bbox iso_bbox() const {
 			vertex_pos lo_pos, hi_pos;
 			bounds(lo_pos, hi_pos);
@@ -197,6 +206,20 @@ struct mesh_tools : public helpers< strat_t > {
 					return false;
 			}
 			return false;
+		}
+
+		// calc size of cell in x-y-z directions
+		void cell_size(ulong offset, vertex_pos& res) const {
+			ctrim_iterator pc = this->ss_iter(offset);
+			if(pc != m_.end()) {
+				vertex_pos b1, b2;
+				pc->lo(b1); pc->hi(b2);
+				std::transform(&b2[0], &b2[D], &b1[0], &res[0], std::minus< t_float >());
+			}
+		}
+
+		void cell_size(const vertex_pos_i& offset, vertex_pos& res) {
+			cell_size(ss_id(offset), res);
 		}
 
 		// public members
