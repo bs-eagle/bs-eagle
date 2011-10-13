@@ -87,7 +87,8 @@ public:
 					//else
 					//	do_intersect = CGAL::do_intersect(seg, xbbox_t::get(*pk));
 
-					if(!seg.is_degenerate() && strat_t::bbox_segment_x(pk->bbox(), seg)) {
+					//if(!seg.is_degenerate() && strat_t::bbox_segment_x(pk->bbox(), seg)) {
+					if(!seg.is_degenerate() && CGAL::do_intersect(seg, xbbox_t::get(*pk))) {
 						// mesh parts of only 1 cell goes to result
 						if(pk->size() == 1)
 							// find intersection points if any

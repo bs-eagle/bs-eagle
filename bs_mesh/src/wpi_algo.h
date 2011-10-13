@@ -67,7 +67,7 @@ struct algo : public helpers< strat_t > {
 	// import intersect_action
 	typedef intersect_base< strat_t > xbase;
 	typedef typename xbase::hit_idx_t hit_idx_t;
-	typedef intersect_builder< strat_t > xbuilder;
+	typedef intersect_builder2< strat_t > xbuilder;
 
 	// helper to create initial cell_data for each cell
 	static spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
