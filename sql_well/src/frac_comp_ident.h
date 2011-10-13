@@ -57,10 +57,10 @@ public:
 	compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
 
 	compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
-		smart_ptr< sql_well > src_well);
+		smart_ptr< sql_well, true > src_well);
 
 	void init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
-	void init(smart_ptr< sql_well > src_well);
+	void init(smart_ptr< sql_well, true > src_well);
 
 	// mode == 0 - search completions, otherwise - fractures
 	const cd_storage& build(double date, int mode = 0);

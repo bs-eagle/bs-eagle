@@ -100,23 +100,23 @@ compdat::compdat(ulong cell_id)
 class compdat_builder::impl {
 public:
 	//typedef algo< strategy_3d > wpi_algo;
-	typedef typename wpi_algo::trimesh trimesh;
-	typedef typename wpi_algo::well_path well_path;
-	typedef typename wpi_algo::well_hit_cell whc;
-	typedef typename wpi_algo::intersect_path xpath;
-	typedef typename wpi_algo::hit_idx_t hit_idx_t;
-	typedef typename wpi_algo::xbuilder xbuilder;
+	typedef wpi_algo::trimesh trimesh;
+	typedef wpi_algo::well_path well_path;
+	typedef wpi_algo::well_hit_cell whc;
+	typedef wpi_algo::intersect_path xpath;
+	typedef wpi_algo::hit_idx_t hit_idx_t;
+	typedef wpi_algo::xbuilder xbuilder;
 	//typedef intersect_builder2< strategy_3d > xbuilder;
 
-	typedef typename strategy_3d::vertex_pos_i vertex_pos_i;
-	typedef typename strategy_3d::vertex_pos vertex_pos;
-	typedef typename mesh_tools< strategy_3d>::mesh_part mesh_part;
+	typedef strategy_3d::vertex_pos_i vertex_pos_i;
+	typedef strategy_3d::vertex_pos vertex_pos;
+	typedef mesh_tools< strategy_3d>::mesh_part mesh_part;
 
-	typedef typename sql_well::sp_traj_t sp_traj_t;
-	typedef typename sql_well::sp_table_t sp_table_t;
+	typedef sql_well::sp_traj_t sp_traj_t;
+	typedef sql_well::sp_table_t sp_table_t;
 
 	typedef multimap< string, string > wb_storage;
-	typedef typename xpath::iterator x_iterator;
+	typedef xpath::iterator x_iterator;
 
 	impl(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
 		init(nx, ny, coord, zcorn);
