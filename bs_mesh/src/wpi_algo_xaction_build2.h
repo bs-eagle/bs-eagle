@@ -54,37 +54,56 @@ public:
 		MESH_BOX
 	};
 
+#ifdef _WIN32
+	template< fish_id Id >
+	struct fish2box {
+		// default value
+		typedef ulong fish_t;
+		typedef cell_data data_t;
+	};
+	// overload for well path
+	template< >
+	struct fish2box< WELL_BOX > {
+		typedef ulong fish_t;
+		typedef well_data data_t;
+	};
+	// overload for mesh_part
+	template< >
+	struct fish2box< MESH_BOX > {
+		typedef const mesh_part* fish_t;
+		typedef mesh_part data_t;
+	};
+#else
+	template< fish_id Id, class = void >
+	struct fish2box {
+		// default value
+		typedef ulong fish_t;
+		typedef cell_data data_t;
+	};
+	// overload for well path
+	template< class unused >
+	struct fish2box< WELL_BOX, unused > {
+		typedef ulong fish_t;
+		typedef well_data data_t;
+	};
+	// overload for mesh_part
+	template< class unused >
+	struct fish2box< MESH_BOX, unused > {
+		typedef const mesh_part* fish_t;
+		typedef mesh_part data_t;
+	};
+#endif
 	// structure to help identify given boxes
 	class box_handle {
 	public:
 		virtual int type() const = 0;
-
-	protected:
-		template< fish_id Id, class = void >
-		struct fish2box_t {
-			// default value
-			typedef ulong fish_t;
-			typedef cell_data data_t;
-		};
-		// overload for well path
-		template< class unused >
-		struct fish2box_t< WELL_BOX, unused > {
-			typedef ulong fish_t;
-			typedef well_data data_t;
-		};
-		// overload for mesh_part
-		template< class unused >
-		struct fish2box_t< MESH_BOX, unused > {
-			typedef const mesh_part* fish_t;
-			typedef mesh_part data_t;
-		};
 	};
 	// pointer is really stored as box handle
 	typedef st_smart_ptr< box_handle > sp_bhandle;
 
 	template< fish_id Id >
 	class box_handle_impl : public box_handle {
-		typedef typename box_handle::template fish2box_t< Id > fish2box_t;
+		typedef fish2box< Id > fish2box_t;
 
 	public:
 		enum { id = Id };
