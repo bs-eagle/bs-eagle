@@ -223,7 +223,7 @@ public:
 					++pnext_x;
 					ulong delta = 0;
 					if(pnext_x != xp.end())
-						delta = std::abs(pnext_x->cell - px->cell);
+						delta = pnext_x->cell > px->cell ? pnext_x->cell - px->cell : px->cell - pnext_x->cell;
 
 					// 3.4.3.2 if delta == 1 mark direction as 'X'
 					//         else if delta == dx direction = 'Y'
