@@ -27,6 +27,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_bos_core_data_storage", "bs_bos_core_data_storage\bs_bos_core_data_storage.vcxproj", "{3DF8BD9D-CAEF-4081-A1C2-B624E0959A81}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sql_well", "sql_well\sql_well.vcxproj", "{EEAD7144-E89C-4C7B-84BA-E3328140EC48}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CE770FDD-686B-48FB-9DFA-B660196BEF89} = {CE770FDD-686B-48FB-9DFA-B660196BEF89}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

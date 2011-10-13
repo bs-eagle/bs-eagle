@@ -30,7 +30,7 @@ using namespace blue_sky;
     
 
   
-  class mesh_element3d
+  class BS_API_PLUGIN mesh_element3d
     {
 
     //-----------------------------------------

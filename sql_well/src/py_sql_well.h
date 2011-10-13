@@ -71,7 +71,7 @@ namespace blue_sky
     .def ("read_from_ascii_file",               &T::read_from_ascii_file, 
         args ("File_name", "starting_date"), "Read data from ascii file")
     .def ("save_to_bos_ascii_file",             &T::save_to_bos_ascii_file, 
-        args ("File_name"),                  "Save data to ascii file in BOS format")
+        args ("File_name", "h5_pool"),                  "Save data to ascii file in BOS format")
 	.def ("insert_or_update",					&T::insert_or_update,
 		args ("select", "insert", "update"), "Insert or update data")
 	.def ("d2date",					            &T::d2date,

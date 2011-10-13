@@ -30,6 +30,7 @@ namespace blue_sky
       typedef BS_SP (table_iface)                       sp_table_t;
       typedef BS_SP (gis_iface)                         sp_gis_t;
       typedef BS_SP (traj_iface)                        sp_traj_t;
+      typedef BS_SP (h5_pool_iface)           					sp_pool_t;
 
       // ------------------------------------
       // METHODS
@@ -139,7 +140,7 @@ namespace blue_sky
        * 
        * @return 0 if success
        */
-      virtual int save_to_bos_ascii_file (const std::string &fname);
+      virtual int save_to_bos_ascii_file (const std::string &fname, sp_pool_t pool);
     public:
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual boost::python::list d2date (double d) const

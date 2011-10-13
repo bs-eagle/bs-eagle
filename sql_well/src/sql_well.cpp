@@ -20,6 +20,7 @@
 
 #include "bs_kernel.h"
 #include "sql_well.h"
+#include "frac_comp_ident.h"
 
 
 using namespace boost;
@@ -1623,13 +1624,17 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
     }
 
   int 
-  sql_well::save_to_bos_ascii_file (const std::string &fname)
+  sql_well::save_to_bos_ascii_file (const std::string &fname, sp_pool_t pool)
     {
       FILE *fp = fopen (fname.c_str (), "w");
       std::list<double> dates;
       std::list<double>::iterator di, de;
+      boost::python::list dims;
+      fci::cd_storage cd;
+      fci::cd_storage::iterator cdi, cde;
       int w_spec_flag = 0;
       char s_buf[2048];
+      int nx, ny;
 
 
       if (!fp)
@@ -1649,6 +1654,12 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
         }
       finalize_sql ();
       de = dates.end ();
+
+      dims = pool->py_get_pool_dims();
+      nx = boost::python::extract<int>(dims[0]);
+      ny = boost::python::extract<int>(dims[1]);
+      BS_SP (well_pool_iface) sp_wp = this;
+      fci::compdat_builder cb (nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), sp_wp);
       for (di = dates.begin (); di != de; ++di)
         {
           char d_buf[1024];
@@ -1753,15 +1764,15 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               else
                 sprintf (s_status, "SHUT");
               if (ctrl == CTRL_P_LRATE)
-                sprintf (s_ctrl, "LRATE");
+                sprintf (s_ctrl, "LRAT");
               else if (ctrl == CTRL_P_BHP)
                 sprintf (s_ctrl, "BHP");
               else if (ctrl == CTRL_P_ORATE)
-                sprintf (s_ctrl, "ORATE");
+                sprintf (s_ctrl, "ORAT");
               else if (ctrl == CTRL_P_WRATE)
-                sprintf (s_ctrl, "WRATE");
+                sprintf (s_ctrl, "WRAT");
               else if (ctrl == CTRL_P_GRATE)
-                sprintf (s_ctrl, "GRATE");
+                sprintf (s_ctrl, "GRAT");
 
 
 
@@ -1791,6 +1802,18 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             }
           fprintf (fp, "/\n");
           finalize_sql ();
+
+
+          // COMPDAT
+          fprintf (fp, "COMPDAT\n");
+          cd = cb.build (*di);
+          cde = cd.end();
+          for (cdi = cd.begin(); cdi != cde; ++cdi)
+            {
+               fprintf (fp, "\'%s\' %u %u %u %u \'OPEN\' 3* %lf 2* \'%c\'\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->kh_mult, cdi->dir);
+            }
+      
+          fprintf (fp, "/\n");
 
         }
 

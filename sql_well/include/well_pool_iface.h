@@ -26,6 +26,7 @@
 #include "table_iface.h"
 #include "gis_iface.h"
 #include "traj_iface.h"
+#include "pool_iface.h"
 
 
 namespace blue_sky
@@ -38,6 +39,7 @@ class well_pool_iface : public objbase
       typedef BS_SP (table_iface)                       sp_table_t;
       typedef BS_SP (gis_iface)                         sp_gis_t;
       typedef BS_SP (traj_iface)                        sp_traj_t;
+      typedef BS_SP (h5_pool_iface)           					sp_pool_t;
 
       static const int CTRL_P_BHP = 1;
       static const int CTRL_P_WRATE = 2;
@@ -153,7 +155,7 @@ class well_pool_iface : public objbase
        * 
        * @return 0 if success
        */
-      virtual int save_to_bos_ascii_file (const std::string &fname) = 0;
+      virtual int save_to_bos_ascii_file (const std::string &fname, sp_pool_t pool) = 0;
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual boost::python::list d2date (double d) const = 0;
       virtual double date2d (int year, int month, int day, int hour, int minute, int second) const = 0;
