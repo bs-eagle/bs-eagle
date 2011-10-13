@@ -45,9 +45,9 @@ spv_uint where_is_points(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 	typedef wpi::algo< strat_t > algo;
 
 	typedef wpi::ulong ulong;
-	typedef typename pods_t::trimesh trimesh;
-	typedef typename strat_t::vertex_pos_i vertex_pos_i;
-	typedef typename strat_t::Point Point;
+	typedef pods_t::trimesh trimesh;
+	typedef strat_t::vertex_pos_i vertex_pos_i;
+	typedef strat_t::Point Point;
 
 	enum { D = strat_t::D };
 
@@ -67,7 +67,7 @@ spv_uint where_is_points(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 
 	// real action
 	const std::vector< ulong >& hit_idx = mesh_tools_t::where_is_point(M, mesh_size, P);
-	
+
 	// return result
 	spv_uint res = BS_KERNEL.create_object(v_uint::bs_type());
 	res->resize(hit_idx.size());
@@ -81,9 +81,9 @@ t_uint where_is_point(t_long nx, t_long ny, spv_float coord, spv_float zcorn, sp
 	typedef wpi::mesh_tools< strat_t > mesh_tools_t;
 	typedef wpi::algo< strat_t > algo;
 
-	typedef typename pods_t::trimesh trimesh;
-	typedef typename strat_t::vertex_pos_i vertex_pos_i;
-	typedef typename strat_t::Point Point;
+	typedef pods_t::trimesh trimesh;
+	typedef strat_t::vertex_pos_i vertex_pos_i;
+	typedef strat_t::Point Point;
 
 	enum { D = strat_t::D };
 
