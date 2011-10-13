@@ -131,7 +131,7 @@ public:
 
 	void init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
 		// build trimesh for given coord+zcorn
-		tops_ = wpi_algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, m_, m_size_, true);
+		tops_ = wpi_algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, m_, m_size_);
 	}
 
 	void init(smart_ptr< sql_well > src_well) {
