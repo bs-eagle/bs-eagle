@@ -23,19 +23,21 @@ s.open_db('db.db');
 cb = sw.compdat_builder(Nx, Ny, c, z, s);
 
 # walk through all dates
-s.prepare_sql("SELECT d FROM dates");
+s.prepare_sql("SELECT d FROM dates ORDER BY d");
 while s.step_sql() == 0 :
 	d = s.get_sql_real(0);
 
 	cb.clear();
 	cl = cb.build(d, 0);
-	print "Completions on date", d;
-	for c in cl :
-		c.dump();
+	if len(cl) > 0 :
+		print "Completions on date", d;
+		for c in cl :
+			c.dump();
 
 	cb.clear();
 	fr = cb.build(d, 1);
-	print "Fractures on date", d;
-	for f in fr :
-		f.dump();
+	if len(fr) > 0 :
+		print "Fractures on date", d;
+		for f in fr :
+			f.dump();
 
