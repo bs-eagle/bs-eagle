@@ -104,8 +104,9 @@ public:
 	typedef typename wpi_algo::well_path well_path;
 	typedef typename wpi_algo::well_hit_cell whc;
 	typedef typename wpi_algo::intersect_path xpath;
-	typedef typename wpi_algo::xbuilder xbuilder;
 	typedef typename wpi_algo::hit_idx_t hit_idx_t;
+	typedef typename wpi_algo::xbuilder xbuilder;
+	//typedef intersect_builder2< strategy_3d > xbuilder;
 
 	typedef typename strategy_3d::vertex_pos_i vertex_pos_i;
 	typedef typename strategy_3d::vertex_pos vertex_pos;
@@ -176,6 +177,7 @@ public:
 			//	else if(cur_col == "MD")
 			//		col_ids[3] = i;
 			//}
+
 			// fill vector with traj data
 			spv_float traj_v = BS_KERNEL.create_object(v_float::bs_type());
 			traj_v->resize(traj_t->get_n_rows() * 4);
@@ -184,13 +186,16 @@ public:
 				for(ulong j = 0; j < 4; ++j)
 					*ptv++ = traj_t->get_value(i, col_ids[j]);
 			}
+
 			// make well_path
 			well_path W;
 			if(!wpi_algo::fill_well_path(traj_v, W)) return;
+
 			// 3.2 find intersections of given branch with mesh (well_path_ident)
 			xbuilder A(m_, W, m_size_);
 			A.build();
 			A.remove_dups2();
+			//A.append_wp_nodes(hi);
 			xpath& xp = A.path();
 
 			// 3.3 select all completions that belong to well+branch_i
@@ -243,14 +248,17 @@ public:
 							cf.dir = 'Z';
 							cf.kh_mult = delta_l / cell_sz[2];
 						}
+						cf.kh_mult = std::min(cf.kh_mult, 1.);
 
 						// if compdat for this cell is already added
 						// then just update kh_mult
 						// otherwise add new COMPDAT record
 						// TODO: handle case of different directions inside one cell
 						cd_storage::iterator pcd = cfs_.find(compdat(px->cell));
-						if(pcd != cfs_.end())
-							const_cast< compdat& >(*pcd).kh_mult += cf.kh_mult;
+						if(pcd != cfs_.end()) {
+							compdat& cur_cd = const_cast< compdat& >(*pcd);
+							cur_cd.kh_mult = std::min(cur_cd.kh_mult + cf.kh_mult, 1.);
+						}
 						else
 							cfs_.insert(cf);
 					}
