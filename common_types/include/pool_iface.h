@@ -197,6 +197,9 @@ class h5_pool_iface : public bs_node
       virtual void py_set_pool_dims (boost::python::list &dims) = 0;
       virtual boost::python::list py_get_pool_dims () const = 0;
       virtual boost::python::list py_get_data_dims (const std::string &name) const = 0;
+
+      virtual int py_declare_i_data (const std::string &name, t_int def_value, int n_dims, boost::python::list &dims, int var_dims) = 0;
+      virtual int py_declare_fp_data (const std::string &name, t_float def_value, int n_dims, boost::python::list &dims, int var_dims) = 0;
 #endif //BSPY_EXPORTING_PLUGIN
   };
 } // end of blue_sky namespace

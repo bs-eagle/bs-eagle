@@ -395,12 +395,14 @@ namespace blue_sky
     if (it != h5_map.end ())
       {
         BOSOUT (section::h5, level::warning) << "Declared data " << name << " already exists in pool" << bs_end;
+        /*
         h5_pair &p = it->second;
 
         for (int i = 0; i < 6; ++i)
           {
             p.src_dims[i] = dims[i];
           }
+        */
       }
     else
       {
@@ -509,6 +511,50 @@ namespace blue_sky
     declare_data (name, get_hdf5_type <hdf5_type_helper <t_float>::type> (), &def_value, n_dims, dims, var_dims);
     return 0;
   }
+
+#ifdef BSPY_EXPORTING_PLUGIN
+  int 
+  h5_pool::py_declare_i_data (const std::string &name, t_int def_value, int n_dims, boost::python::list &dims, int var_dims)
+  {
+    t_int i;
+    npy_intp arr_dims[10];
+
+    if (var_dims)
+      for (i = 0; i < 6; ++i)
+        {
+          arr_dims[i] = boost::python::extract<int>(dims[i]);
+        }
+    else
+      for (i = 0; i < n_dims; ++i)
+        {
+          arr_dims[i] = boost::python::extract<int>(dims[i]);
+        }
+      
+    declare_data (name, get_hdf5_type <hdf5_type_helper <t_int>::type> (), &def_value, n_dims, arr_dims, var_dims);
+    return 0;
+  }
+
+  int 
+  h5_pool::py_declare_fp_data (const std::string &name, t_float def_value, int n_dims, boost::python::list &dims, int var_dims)
+  {
+    t_int i;
+    npy_intp arr_dims[10];
+
+    if (var_dims)
+      for (i = 0; i < 6; ++i)
+        {
+          arr_dims[i] = boost::python::extract<int>(dims[i]);
+        }
+    else
+      for (i = 0; i < n_dims; ++i)
+        {
+          arr_dims[i] = boost::python::extract<int>(dims[i]);
+        }
+      
+    declare_data (name, get_hdf5_type <hdf5_type_helper <t_float>::type> (), &def_value, n_dims, arr_dims, var_dims);
+    return 0;
+  }
+#endif //BSPY_EXPORTING_PLUGIN
 
   void
   h5_pool::set_data (std::string const &name, hid_t dtype, void *data, t_long data_size, int n_dims, npy_intp *dims, void *def_value)

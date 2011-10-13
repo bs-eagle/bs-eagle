@@ -38,6 +38,10 @@ namespace blue_sky
         args ("name"), "Return array with given name")
     .def ("get_i_data",                         &T::get_i_data, 
         args ("name"), "Return array with given name")
+    .def ("declare_fp_data",                        &T::py_declare_fp_data, 
+        args ("name", "def_value", "n_dims", "dims", "var_dims"), "Declare array in the pool")
+    .def ("declare_i_data",                        &T::py_declare_i_data, 
+        args ("name", "def_value", "n_dims", "dims", "var_dims"), "Declare array in the pool")
     .def ("set_fp_data",                        &T::set_fp_data, 
         args ("name", "array"), "Store array in the pool")
     .def ("set_i_data",                         &T::set_i_data, 
