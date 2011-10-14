@@ -21,7 +21,9 @@
 #include "wpi_algo_xaction_build3.h"
 
 #include "conf.h"
-#include "bs_mesh_grdecl.h"
+//#include "bs_mesh_grdecl.h"
+#include "i_cant_link_2_mesh.h"
+
 // DEBUG
 //#include <iostream>
 
@@ -73,17 +75,19 @@ struct algo : public helpers< strat_t > {
 	static spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 			trimesh& res, vertex_pos_i& mesh_size, bool free_cz_mem = false)
 	{
-		typedef smart_ptr< bs_mesh_grdecl, true > sp_grd_mesh;
+		//typedef smart_ptr< bs_mesh_grdecl, true > sp_grd_mesh;
 		// build mesh_grdecl around given mesh
-		sp_grd_mesh grd_src = BS_KERNEL.create_object(bs_mesh_grdecl::bs_type());
-		grd_src->init_props(nx, ny, coord, zcorn);
+		//sp_grd_mesh grd_src = BS_KERNEL.create_object(bs_mesh_grdecl::bs_type());
+		//grd_src->init_props(nx, ny, coord, zcorn);
+
 		// init mesh size
 		const ulong full_sz[] = {nx, ny, (zcorn->size() / (nx * ny)) >> 3};
 		const ulong n_cells = ulong(full_sz[0] * full_sz[1] * full_sz[2]);
 		std::copy(full_sz, full_sz + D, mesh_size);
 
 		// obtain coordinates for all vertices of all cells
-		spv_float tops = grd_src->calc_cells_vertices_xyz();
+		sp_himesh handy = BS_KERNEL.create_object("handy_mesh_iface");
+		spv_float tops = handy->calc_cells_vertices_xyz(nx, ny, coord, zcorn);
 		// clear COORD & ZCORN arrays
 		if(free_cz_mem) {
 			spv_float t = BS_KERNEL.create_object(v_float::bs_type());
