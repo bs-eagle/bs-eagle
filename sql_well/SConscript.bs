@@ -17,7 +17,7 @@ env.AppendUnique (CPPPATH = ["include", "src",
     LIBS=["sqlite3", "CGAL", "gmp", "boost_filesystem"],
 	CXXFLAGS = ["-frounding-math"])
 
-libs = ["blue_sky", "bs_bos_core_base", "bs_mesh"]
+libs = ["blue_sky", "bs_bos_core_base"]
 boost_libs = list_suffix(["boost_serialization"], env["boost_suffix"]);
 
 if (build_kind == "debug") :
