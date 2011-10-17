@@ -82,24 +82,31 @@ compdat::compdat(const string& well_name_, const string& branch_name_, const pos
 }
 
 compdat::compdat(const string& well_name_, const string& branch_name_, ulong cell_id, const pos_i& mesh_size)
-	: well_name(well_name_), branch_name(branch_name_), dir(' '), kh_mult(0), cell_id_(cell_id)
+	: well_name(well_name_), branch_name(branch_name_), dir(' '), kh_mult(0)
 {
-	pos_i cell_pos_;
-	wpi_algo::decode_cell_id(cell_id, cell_pos_, mesh_size);
-	copy(&cell_pos_[0], &cell_pos_[strategy_3d::D], &cell_pos[0]);
-	cell_pos[3] = cell_pos[2];
+	init(cell_id, mesh_size);
 }
 
 compdat::compdat(ulong cell_id)
 	: dir(' '), kh_mult(0), cell_id_(cell_id)
 {}
 
+void compdat::init(ulong cell_id, const pos_i& mesh_size) {
+	// convert cell id -> cell pos
+	pos_i cell_pos_;
+	wpi_algo::decode_cell_id(cell_id, cell_pos_, mesh_size);
+	copy(&cell_pos_[0], &cell_pos_[strategy_3d::D], &cell_pos[0]);
+	cell_pos[3] = cell_pos[2];
+	// store cell_id
+	cell_id_ = cell_id;
+}
+
 /*-----------------------------------------------------------------
  * compdat_builder::impl
  *----------------------------------------------------------------*/
 class compdat_builder::impl {
 public:
-	//typedef algo< strategy_3d > wpi_algo;
+	typedef strategy_3d strat_t;
 	typedef wpi_algo::trimesh trimesh;
 	typedef wpi_algo::well_path well_path;
 	typedef wpi_algo::well_hit_cell whc;
@@ -110,7 +117,7 @@ public:
 
 	typedef strategy_3d::vertex_pos_i vertex_pos_i;
 	typedef strategy_3d::vertex_pos vertex_pos;
-	typedef mesh_tools< strategy_3d>::mesh_part mesh_part;
+	typedef mesh_tools< strat_t >::mesh_part mesh_part;
 
 	typedef sql_well::sp_traj_t sp_traj_t;
 	typedef sql_well::sp_table_t sp_table_t;
@@ -152,7 +159,7 @@ public:
 		sw_->finalize_sql();
 
 		// 2 precalc plane size
-		const ulong plane_sz = m_size_[0] * m_size_[1];
+		//const ulong plane_sz = m_size_[0] * m_size_[1];
 		// prepare mesh_part representin full mesh
 		mesh_part fullmesh(m_, m_size_);
 
@@ -221,33 +228,45 @@ public:
 					// position to next point
 					x_iterator pnext_x = px;
 					++pnext_x;
-					ulong delta = 0;
+					double delta_l = 0;
 					if(pnext_x != xp.end())
-						delta = pnext_x->cell > px->cell ? pnext_x->cell - px->cell : px->cell - pnext_x->cell;
+						delta_l = pnext_x->md - cur_md;
 
 					// 3.4.3.2 if delta == 1 mark direction as 'X'
 					//         else if delta == dx direction = 'Y'
 					//         else if delta = dx*dy direction = 'Z'
 					//         also calc kh_mult assuming that cells are rectangular (!)
-					if(delta) {
-						// calc md to current intersection
-						double delta_l = pnext_x->md - cur_md;
+					// update: use better recognition of direction using max coord change
+					//         between two intersections
+					if(delta_l) {
 						// obtain cell size
 						vertex_pos cell_sz;
 						fullmesh.cell_size(px->cell, cell_sz);
 
-						if(delta == 1) {
-							cf.dir = 'X';
-							cf.kh_mult = delta_l / cell_sz[0];
+						// select direction, calc kh increase
+						const char dirs[] = {'X', 'Y', 'Z'};
+						double max_step = 0;
+						for(uint i = 0; i < strat_t::D; ++i) {
+							double cur_step = std::abs(pnext_x->where[i] - px->where[i]);
+							if(max_step < cur_step) {
+								max_step = cur_step;
+								cf.dir = dirs[i];
+								cf.kh_mult = delta_l / cell_sz[i];
+							}
 						}
-						else if(delta >= m_size_[0] && delta < plane_sz) {
-							cf.dir = 'Y';
-							cf.kh_mult = delta_l / cell_sz[1];
-						}
-						else {
-							cf.dir = 'Z';
-							cf.kh_mult = delta_l / cell_sz[2];
-						}
+
+						//if(delta == 1) {
+						//	cf.dir = 'X';
+						//	cf.kh_mult = delta_l / cell_sz[0];
+						//}
+						//else if(delta >= m_size_[0] && delta < plane_sz) {
+						//	cf.dir = 'Y';
+						//	cf.kh_mult = delta_l / cell_sz[1];
+						//}
+						//else {
+						//	cf.dir = 'Z';
+						//	cf.kh_mult = delta_l / cell_sz[2];
+						//}
 						cf.kh_mult = std::min(cf.kh_mult, 1.);
 
 						// if compdat for this cell is already added
@@ -262,6 +281,8 @@ public:
 						else
 							cfs_.insert(cf);
 					}
+
+					cur_md += delta_l;
 				} // 3.4.4 end of intersections loop
 			} // 3.5 end of completions loop
 

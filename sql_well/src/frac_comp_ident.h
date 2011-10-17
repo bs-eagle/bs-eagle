@@ -37,6 +37,9 @@ struct BS_API_PLUGIN compdat {
 	// for searching only
 	compdat(ulong cell_id);
 
+	// decode cell id
+	void init(ulong cell_id, const pos_i& mesh_size);
+
 	bool operator<(const compdat& rhs) const {
 		return cell_id_ < rhs.cell_id_;
 	}
