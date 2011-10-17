@@ -6,6 +6,10 @@
  * @date 2011-07-29
  */
 
+// d REAL NOT NULL REFERENCES dates(d) ON UPDATE CASCADE ON DELETE CASCADE,
+// 
+// d REAL NOT NULL,
+
 #include <iomanip>
 #include <iostream>
 #include <stdio.h>
@@ -223,7 +227,7 @@ CREATE INDEX i4 ON wells_in_group (gr_name ASC);\
 CREATE INDEX i5 ON wells_in_group (well_name ASC);\
 CREATE TABLE dates(d REAL UNIQUE PRIMARY KEY);\
 CREATE TABLE well_hist(well_name TEXT NOT NULL REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE,\
-					 d REAL NOT NULL REFERENCES dates(d) ON UPDATE CASCADE ON DELETE CASCADE,\
+					 d REAL NOT NULL, \
 					 p_or REAL DEFAULT -1,\
 					 p_wr REAL DEFAULT -1,\
 					 p_gr REAL DEFAULT -1,\
@@ -250,7 +254,7 @@ CREATE INDEX i1 ON well_hist (well_name ASC);\
 CREATE INDEX i2 ON well_hist (d ASC);\
 CREATE UNIQUE INDEX i3 ON well_hist (well_name, d ASC);\
 CREATE TABLE well_res(well_name TEXT NOT NULL REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE,\
-					 d REAL NOT NULL REFERENCES dates(d) ON UPDATE CASCADE ON DELETE CASCADE,\
+					 d REAL NOT NULL, \
 					 p_or REAL DEFAULT -1,\
 					 p_wr REAL DEFAULT -1,\
 					 p_gr REAL DEFAULT -1,\
@@ -294,7 +298,7 @@ CREATE TRIGGER tr2 AFTER INSERT ON wells\
 CREATE TABLE fractures(well_name TEXT NOT NULL,\
 					     branch_name TEXT DEFAULT 'main', \
 					     md REAL NOT NULL, \
-					     d REAL NOT NULL REFERENCES dates(d) ON UPDATE CASCADE ON DELETE CASCADE,\
+					     d REAL NOT NULL, \
 					     status  INTEGER DEFAULT 0,\
 					     half_up REAL DEFAULT 5,\
 					     half_down REAL DEFAULT 5,\
@@ -310,7 +314,7 @@ CREATE INDEX i12 ON fractures (well_name, branch_name ASC);\
 CREATE TABLE completions(well_name TEXT NOT NULL, \
 					     branch_name TEXT NOT NULL DEFAULT 'main', \
 					     md REAL NOT NULL, \
-					     d REAL NOT NULL REFERENCES dates(d) ON UPDATE CASCADE ON DELETE CASCADE,\
+					     d REAL NOT NULL, \
 					     status  INTEGER DEFAULT 0,\
 					     length REAL DEFAULT 1,\
 					     rw REAL DEFAULT 0.08,\
