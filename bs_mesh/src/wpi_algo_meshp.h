@@ -195,6 +195,10 @@ struct mesh_tools : public helpers< strat_t > {
 
 		// for sorted containers
 		bool operator <(const mesh_part& rhs) const {
+			// if same objects
+			if(&lo[0] == &rhs.lo[0] || &hi[0] == &rhs.hi[0])
+				return false;
+			// per-element lexicographical compare
 			for(uint i = 0; i < D; ++i) {
 				if(lo[i] < rhs.lo[i])
 					return true;
