@@ -17,7 +17,7 @@ env.Append (CPPPATH = ["include",
     includes["bs_pvt"],
     includes["kernel"],
     includes["bs_mesh"],
-    #includes["bs_mesh_src"],
+    includes["bs_mesh_src"],
     includes["sql_well"]
     ])
 
