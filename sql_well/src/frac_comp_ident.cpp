@@ -240,7 +240,7 @@ public:
 					//         between two intersections
 					if(delta_l) {
 						// obtain cell size
-						vertex_pos cell_sz;
+						vertex_pos cell_sz = {1., 1., 1.};
 						fullmesh.cell_size(px->cell, cell_sz);
 
 						// select direction, calc kh increase
