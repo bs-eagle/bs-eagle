@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\i_cant_link_2_mesh.cpp" />
     <ClCompile Include="src\py_coord_zcorn_tools.cpp" />
     <ClCompile Include="src\py_flux_connections.cpp" />
     <ClCompile Include="src\py_mesh_grdecl.cpp" />
