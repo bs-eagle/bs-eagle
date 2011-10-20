@@ -239,7 +239,7 @@ CREATE TABLE well_hist(well_name TEXT NOT NULL REFERENCES wells(name) ON UPDATE 
 					 i_gr REAL DEFAULT -1,\
 					 i_bhp REAL DEFAULT -1,\
                      wefac REAL DEFAULT 1.0,\
-					 ctrl INTEGER DEFAULT 1,\
+					 ctrl INTEGER DEFAULT 0,\
 					 status INTEGER DEFAULT 0,\
 					 lim_p_or REAL DEFAULT -1,\
 					 lim_p_wr REAL DEFAULT -1,\
@@ -266,7 +266,7 @@ CREATE TABLE well_res(well_name TEXT NOT NULL REFERENCES wells(name) ON UPDATE C
 					 wefac REAL DEFAULT 1,\
 					 p_gor REAL DEFAULT -1,\
 					 p_fgr REAL DEFAULT -1,\
-					 ctrl INTEGER DEFAULT 1,\
+					 ctrl INTEGER DEFAULT 0,\
 					 status INTEGER DEFAULT 0,\
 					 tot_p_or REAL DEFAULT -1,\
 					 tot_p_wr REAL DEFAULT -1,\
