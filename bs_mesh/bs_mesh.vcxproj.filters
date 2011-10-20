@@ -195,5 +195,6 @@
     <ClInclude Include="src\wpi_strategy_3d.h">
       <Filter>gen</Filter>
     </ClInclude>
+    <ClInclude Include="include\i_cant_link_2_mesh.h" />
   </ItemGroup>
 </Project>

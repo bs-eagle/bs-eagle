@@ -166,6 +166,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\i_cant_link_2_mesh.h" />
     <ClInclude Include="include\py_flux_connections.h" />
     <ClInclude Include="include\wpi_iface.h" />
     <ClInclude Include="src\py_mesh_grdecl.h" />
