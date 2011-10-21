@@ -79,6 +79,9 @@ compdat::compdat(const string& well_name_, const string& branch_name_, const pos
 	copy(&cell_pos_[0], &cell_pos_[strategy_3d::D], &cell_pos[0]);
 	cell_pos[3] = cell_pos[2];
 	cell_id_ = wpi_algo::encode_cell_id(cell_pos_, mesh_size);
+  
+  x1[0] = x1[1] = x1[2] = 0;
+  x2[0] = x2[1] = x2[2] = 0;
 }
 
 compdat::compdat(const string& well_name_, const string& branch_name_, ulong cell_id, const pos_i& mesh_size)
@@ -89,7 +92,10 @@ compdat::compdat(const string& well_name_, const string& branch_name_, ulong cel
 
 compdat::compdat(ulong cell_id)
 	: dir(' '), kh_mult(0), cell_id_(cell_id)
-{}
+{
+  x1[0] = x1[1] = x1[2] = 0;
+  x2[0] = x2[1] = x2[2] = 0;
+}
 
 void compdat::init(ulong cell_id, const pos_i& mesh_size) {
 	// convert cell id -> cell pos
@@ -99,6 +105,8 @@ void compdat::init(ulong cell_id, const pos_i& mesh_size) {
 	cell_pos[3] = cell_pos[2];
 	// store cell_id
 	cell_id_ = cell_id;
+  x1[0] = x1[1] = x1[2] = 0;
+  x2[0] = x2[1] = x2[2] = 0;
 }
 
 /*-----------------------------------------------------------------
@@ -212,9 +220,10 @@ public:
 			// 3.4 for all completions do
 			while(sw_->step_sql() == 0) {
 				// 3.4.1 search for completion_j begin_j and end_j using md_j and lentgh_j
-				double cur_md = sw_->get_sql_real(0);
+        t_double cur_md = sw_->get_sql_real (0);
+        t_double cur_len = sw_->get_sql_real (1);
 				x_iterator px = xp.upper_bound(whc(cur_md));
-				x_iterator xend = xp.upper_bound(whc(cur_md + sw_->get_sql_real(1)));
+				x_iterator xend = xp.upper_bound(whc(cur_md + cur_len));
 				// always start with prev intersection
 				if(px != xp.begin())
 					--px;
@@ -230,7 +239,55 @@ public:
 					++pnext_x;
 					double delta_l = 0;
 					if(pnext_x != xp.end())
-						delta_l = pnext_x->md - cur_md;
+						{
+              // completion fully inside well segment
+              if (cur_md >= px->md && (cur_md + cur_len) <= pnext_x->md)
+                {
+                  delta_l = cur_len;
+                  for (t_uint j = 0; j < strat_t::D; ++j)
+                    {
+                      cf.x1[j] = px->where[j] + (cur_md - px->md) / (pnext_x->md - px->md) * (pnext_x->where[j] - px->where[j]);
+                      cf.x2[j] = px->where[j] + (cur_md + cur_len - px->md) / (pnext_x->md - px->md) * (pnext_x->where[j] - px->where[j]);
+                    }
+                }
+              // well segment fully inside completion
+              else if (cur_md <= px->md && (cur_md + cur_len) >= pnext_x->md)
+                {
+                  delta_l = pnext_x->md - px->md;
+                  for (t_uint j = 0; j < strat_t::D; ++j)
+                    {
+                      cf.x1[j] = px->where[j];
+                      cf.x2[j] = pnext_x->where[j];
+                    }
+                } 
+              // start of completion is inside well segment 
+              // end of completion is out of well segment
+              else if (cur_md >= px->md && (cur_md + cur_len) >= pnext_x->md)
+                {
+                  delta_l = pnext_x->md - cur_md;
+                  for (t_uint j = 0; j < strat_t::D; ++j)
+                    {
+                      cf.x1[j] = px->where[j] + (cur_md - px->md) / (pnext_x->md - px->md) * (pnext_x->where[j] - px->where[j]);
+                      cf.x2[j] = pnext_x->where[j];
+                    }
+                }
+              // start of completion is outside well segment 
+              // end of completion is inside of well segment
+              else if (cur_md <= px->md && (cur_md + cur_len) <= pnext_x->md)
+                {
+                  delta_l = cur_md + cur_len - px->md;
+                  for (t_uint j = 0; j < strat_t::D; ++j)
+                    {
+                      cf.x1[j] = px->where[j];
+                      cf.x2[j] = px->where[j] + (cur_md + cur_len - px->md) / (pnext_x->md - px->md) * (pnext_x->where[j] - px->where[j]);
+                    }
+                }
+            } 
+          else
+            {
+              // TODO: identify coordinates of last cell intersection???
+            }
+
 
 					// 3.4.3.2 if delta == 1 mark direction as 'X'
 					//         else if delta == dx direction = 'Y'
@@ -247,7 +304,7 @@ public:
 						const char dirs[] = {'X', 'Y', 'Z'};
 						double max_step = 0;
 						for(uint i = 0; i < strat_t::D; ++i) {
-							double cur_step = std::abs(pnext_x->where[i] - px->where[i]);
+							double cur_step = std::abs(cf.x2[i] - cf.x1[i]);
 							if(max_step < cur_step) {
 								max_step = cur_step;
 								cf.dir = dirs[i];
@@ -282,7 +339,6 @@ public:
 							cfs_.insert(cf);
 					}
 
-					cur_md += delta_l;
 				} // 3.4.4 end of intersections loop
 			} // 3.5 end of completions loop
 

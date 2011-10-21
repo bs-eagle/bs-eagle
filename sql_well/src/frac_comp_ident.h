@@ -27,6 +27,8 @@ struct BS_API_PLUGIN compdat {
 	cell_info cell_pos;
 	char dir;
 	t_double kh_mult;
+  t_float x1[3];       //!< start point coordinates (in 3D) of completion part
+  t_float x2[3];       //!< end point coordinates  (in 3D) of completion part
 
 	// ctors
 	compdat(const std::string& well_name_, const std::string& branch_name_,
