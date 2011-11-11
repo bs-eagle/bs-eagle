@@ -1,13 +1,13 @@
-/** 
+/**
  * @file sql_well.cpp
  * @brief implementation of frac storage
  * @author Oleg Borschuk
- * @version 
+ * @version
  * @date 2011-07-29
  */
 
 // d REAL NOT NULL REFERENCES dates(d) ON UPDATE CASCADE ON DELETE CASCADE,
-// 
+//
 // d REAL NOT NULL,
 
 #include <iomanip>
@@ -40,20 +40,20 @@ using namespace boost::python;
 namespace blue_sky
 {
 
-  int clear_table (void *pData, int nColumns, 
+  int clear_table (void *pData, int nColumns,
                    char **values, char ** /*columns*/)
     {
       int rc = 0;
       char *zErrMsg = 0;
       if (nColumns != 1)
         return 1; // Error
-        
+
       sqlite3* db = (sqlite3*)pData;
 
-      char *stmt = sqlite3_mprintf("DELETE FROM backup.%q", 
+      char *stmt = sqlite3_mprintf("DELETE FROM backup.%q",
                                    values[0]);
       rc = sqlite3_exec (db, stmt, NULL, NULL, &zErrMsg);
-      sqlite3_free (stmt);     
+      sqlite3_free (stmt);
       if (rc != SQLITE_OK)
         {
           fprintf (stderr, "SQL error: %s\n", zErrMsg);
@@ -62,20 +62,20 @@ namespace blue_sky
 
       return 0;
     }
-  int main_to_backup (void *pData, int nColumns, 
+  int main_to_backup (void *pData, int nColumns,
                       char **values, char ** /*columns*/)
     {
       int rc = 0;
       char *zErrMsg = 0;
       if (nColumns != 1)
         return 1; // Error
-        
+
       sqlite3* db = (sqlite3*)pData;
 
-      char *stmt = sqlite3_mprintf("insert into backup.%q select * from main.%q", 
+      char *stmt = sqlite3_mprintf("insert into backup.%q select * from main.%q",
                                    values[0], values[0]);
       rc = sqlite3_exec (db, stmt, NULL, NULL, &zErrMsg);
-      sqlite3_free (stmt);     
+      sqlite3_free (stmt);
       if (rc != SQLITE_OK)
         {
           fprintf (stderr, "SQL error: %s\n", zErrMsg);
@@ -85,20 +85,20 @@ namespace blue_sky
       return 0;
     }
 
-  int backup_to_main (void *pData, int nColumns, 
+  int backup_to_main (void *pData, int nColumns,
                       char **values, char ** /*columns*/)
     {
       int rc = 0;
       char *zErrMsg = 0;
       if (nColumns != 1)
         return 1; // Error
-        
+
       sqlite3* db = (sqlite3*)pData;
 
-      char *stmt = sqlite3_mprintf("insert into main.%q select * from backup.%q", 
+      char *stmt = sqlite3_mprintf("insert into main.%q select * from backup.%q",
                                    values[0], values[0]);
       rc = sqlite3_exec (db, stmt, NULL, NULL, &zErrMsg);
-      sqlite3_free (stmt);     
+      sqlite3_free (stmt);
       if (rc != SQLITE_OK)
         {
           fprintf (stderr, "SQL error: %s\n", zErrMsg);
@@ -108,14 +108,14 @@ namespace blue_sky
       return 0;
     }
 
-  sql_well::sql_well (bs_type_ctor_param) 
+  sql_well::sql_well (bs_type_ctor_param)
     {
       db = 0;
       stmp_sql = 0;
       fr_file = 0;
-      
+
     }
-  sql_well::sql_well (const sql_well& rhs) 
+  sql_well::sql_well (const sql_well& rhs)
         : bs_refcounter (), file_name(rhs.file_name), db(rhs.db)
     {
       //*this = rhs;
@@ -130,7 +130,7 @@ namespace blue_sky
       fr_file = 0;
     }
 
-  int 
+  int
   sql_well::open_db (const std::string &file)
     {
       int rc = 0;
@@ -181,7 +181,7 @@ namespace blue_sky
           db = 0;
           return -1;
         }
-      file_name = file;      
+      file_name = file;
       // load from file to memory
       rc = create_db (db);
       if (rc)
@@ -193,8 +193,8 @@ namespace blue_sky
           fprintf (stderr, "SQL error: %s\n", zErrMsg);
           sqlite3_free (zErrMsg);
         }
-    
-      rc = sqlite3_exec(db, "SELECT name FROM backup.sqlite_master WHERE type='table'", 
+
+      rc = sqlite3_exec(db, "SELECT name FROM backup.sqlite_master WHERE type='table'",
                         &backup_to_main, db, &zErrMsg);
       if (rc != SQLITE_OK)
         {
@@ -203,12 +203,12 @@ namespace blue_sky
         }
       sqlite3_exec(db, "COMMIT; DETACH DATABASE backup", NULL, NULL, NULL);
 #else //0
-#endif //0 
+#endif //0
       return 0;
     }
-  
 
-  int 
+
+  int
   sql_well::create_db (sqlite3 *db_in)
     {
       int rc = 0;
@@ -337,6 +337,23 @@ CREATE TRIGGER tr5 BEFORE INSERT ON well_hist\
 	BEGIN\
 		INSERT OR REPLACE INTO dates(d) VALUES(new.d);\
 	END;\
+CREATE TABLE permfrac(d REAL NOT NULL, \
+					     status  INTEGER DEFAULT 0,\
+					     x1 REAL NOT NULL,\
+					     y1 REAL NOT NULL,\
+					     x2 REAL NOT NULL,\
+					     y2 REAL NOT NULL,\
+					     z_top REAL NOT NULL,\
+					     z_bottom REAL NOT NULL,\
+					     dx REAL DEFAULT 0.01,\
+					     dy REAL DEFAULT 0.01,\
+					     perm REAL NOT NULL,\
+					     i1  INTEGER DEFAULT -1,\
+					     j1  INTEGER DEFAULT -1,\
+					     i2  INTEGER DEFAULT -1,\
+					     j2  INTEGER DEFAULT -1,\
+					     k1  INTEGER DEFAULT -1,\
+					     k2  INTEGER DEFAULT -1);\
 COMMIT;\
 ";
       if (!db_in)
@@ -351,16 +368,16 @@ COMMIT;\
     }
 
 
-  void 
+  void
   sql_well::close_db ()
     {
       if (db)
         {
-          
-          
+
+
           if (stmp_sql)
             finalize_sql ();
-            
+
 #if 0
           int rc = 0;
           char *zErrMsg = 0;
@@ -372,15 +389,15 @@ COMMIT;\
               fprintf (stderr, "SQL error: %s\n", zErrMsg);
               sqlite3_free (zErrMsg);
             }
-          rc = sqlite3_exec (db, "SELECT name FROM backup.sqlite_master WHERE type='table'", 
+          rc = sqlite3_exec (db, "SELECT name FROM backup.sqlite_master WHERE type='table'",
                             &clear_table, db, &zErrMsg);
           if (rc != SQLITE_OK)
             {
               fprintf (stderr, "SQL error: %s\n", zErrMsg);
               sqlite3_free (zErrMsg);
             }
-        
-          rc = sqlite3_exec (db, "SELECT name FROM main.sqlite_master WHERE type='table'", 
+
+          rc = sqlite3_exec (db, "SELECT name FROM main.sqlite_master WHERE type='table'",
                              &main_to_backup, db, &zErrMsg);
           if (rc != SQLITE_OK)
             {
@@ -397,13 +414,13 @@ COMMIT;\
     }
 
 
-  int 
+  int
   sql_well::create_db_struct ()
     {
       return create_db (db);
     }
 
-  void 
+  void
   sql_well::fill_db ()
     {
       //int rc = 0;
@@ -435,14 +452,14 @@ COMMIT;\
                                     std::string (sw_ins),
                                     std::string (sw_up)))
                 {
-                  return; 
+                  return;
                 }
             }
         }
       //rc = sqlite3_exec (db, "COMMIT TRANSACTION", NULL, 0, &zErrMsg);
       return;
     }
-  int 
+  int
   sql_well::insert_or_update (const std::string &select_sql,
                               const std::string &insert_sql,
                               const std::string &update_sql)
@@ -472,7 +489,7 @@ COMMIT;\
             {
               fprintf (stderr, "SQL error: %s\n", zErrMsg);
               sqlite3_free (zErrMsg);
-              return -4; 
+              return -4;
             }
         }
       else
@@ -483,14 +500,14 @@ COMMIT;\
             {
               fprintf (stderr, "SQL error: %s\n", zErrMsg);
               sqlite3_free (zErrMsg);
-              return -4; 
+              return -4;
             }
         }
 
       return 0;
     }
-  
-  int 
+
+  int
   sql_well::add_well (const std::string &well_name)
     {
       if (!db)
@@ -502,7 +519,7 @@ COMMIT;\
       char *zErrMsg = 0;
       char buf[2048];
 
-      sprintf (buf, "INSERT INTO wells (name) VALUES('%s');", 
+      sprintf (buf, "INSERT INTO wells (name) VALUES('%s');",
                well_name.c_str ());
       rc = sqlite3_exec (db, buf, NULL, 0, &zErrMsg);
       if( rc != SQLITE_OK )
@@ -510,10 +527,10 @@ COMMIT;\
           fprintf (stderr, "SQL error (add_well): %s\n", zErrMsg);
           sqlite3_free (zErrMsg);
         }
-      return 0;    
+      return 0;
     }
 
-  sql_well::list_t 
+  sql_well::list_t
   sql_well::get_well_names () const
     {
       list_t lst;
@@ -539,7 +556,7 @@ COMMIT;\
       sqlite3_finalize (stmp);
       return lst;
     }
-  int 
+  int
   sql_well::add_branch_gis (const std::string &wname, const std::string &branch,
                             sp_gis_t g)
     {
@@ -561,7 +578,7 @@ COMMIT;\
           fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
           return -1;
         }
-      
+
       std::ostringstream oss;
       boost::archive::text_oarchive oar(oss);
       g->save (oar);
@@ -577,14 +594,14 @@ COMMIT;\
         }
       sqlite3_step (stmp); // UPDATE
       sqlite3_finalize (stmp);
-      
+
       return 0;
     }
 
-  sql_well::sp_gis_t 
+  sql_well::sp_gis_t
   sql_well::get_branch_gis (const std::string &wname, const std::string &branch) const
     {
-      sp_gis_t sp_gis = BS_KERNEL.create_object ("gis"); 
+      sp_gis_t sp_gis = BS_KERNEL.create_object ("gis");
       if (!db)
         return sp_gis_t ();
       if (stmp_sql)
@@ -606,7 +623,7 @@ COMMIT;\
         }
       if (sqlite3_step (stmp) == SQLITE_ROW) // UPDATE
         {
-          int n = sqlite3_column_bytes (stmp, 0);  
+          int n = sqlite3_column_bytes (stmp, 0);
           if (n < 1)
             {
               sqlite3_finalize (stmp);
@@ -621,7 +638,7 @@ COMMIT;\
           iss.str (s);
           boost::archive::text_iarchive iar(iss);
           sp_gis->load (iar);
-          
+
         }
 	  else
 	    {
@@ -631,7 +648,7 @@ COMMIT;\
       return sp_gis;
     }
 
-   int 
+   int
    sql_well::add_branch_traj (const std::string &wname, const std::string &branch,
                               sp_traj_t t)
      {
@@ -670,14 +687,14 @@ COMMIT;\
 
       sqlite3_step (stmp); // UPDATE
       sqlite3_finalize (stmp);
-      
+
       return 0;
      }
 
-   sql_well::sp_traj_t 
+   sql_well::sp_traj_t
    sql_well::get_branch_traj (const std::string &wname, const std::string &branch) const
      {
-      sp_traj_t sp_traj = BS_KERNEL.create_object ("traj"); 
+      sp_traj_t sp_traj = BS_KERNEL.create_object ("traj");
       if (!db)
         return sp_traj_t ();
       if (stmp_sql)
@@ -699,7 +716,7 @@ COMMIT;\
         }
       if (sqlite3_step (stmp) == SQLITE_ROW) // UPDATE
         {
-          int n = sqlite3_column_bytes (stmp, 0);  
+          int n = sqlite3_column_bytes (stmp, 0);
           if (!n)
             {
               sqlite3_finalize (stmp);
@@ -715,7 +732,7 @@ COMMIT;\
           //printf ("hkdjhkf: %s\n", iss.str ().c_str ());
           boost::archive::text_iarchive iar(iss);
           sp_traj->load (iar);
-          
+
         }
 	  else
 	    {
@@ -725,7 +742,7 @@ COMMIT;\
       return sp_traj;
      }
 
-  int 
+  int
    sql_well::update_branch_traj (const std::string &wname, const std::string &branch,
                                  sp_traj_t t)
      {
@@ -764,11 +781,11 @@ COMMIT;\
 
       sqlite3_step (stmp); // UPDATE
       sqlite3_finalize (stmp);
-      
+
       return 0;
      }
 
-  int 
+  int
   sql_well::prepare_sql (const std::string &sql)
     {
       if (!db)
@@ -831,7 +848,7 @@ COMMIT;\
     }
 //#endif //BSPY_EXPORTING_PLUGIN
 
-  int 
+  int
   sql_well::step_sql ()
     {
       if (!db)
@@ -843,7 +860,7 @@ COMMIT;\
       else
         return 2;
     }
-  int 
+  int
   sql_well::finalize_sql ()
     {
       if (stmp_sql)
@@ -853,7 +870,7 @@ COMMIT;\
         }
       return 0;
     }
-  t_int 
+  t_int
   sql_well::get_sql_int (t_int col)
     {
       if (!db)
@@ -862,7 +879,7 @@ COMMIT;\
         return 0;
       return (t_int)sqlite3_column_int (stmp_sql, (int)col);
     }
-  t_double 
+  t_double
   sql_well::get_sql_real (t_int col)
     {
       if (!db)
@@ -871,7 +888,7 @@ COMMIT;\
         return 0;
       return (t_double)sqlite3_column_double (stmp_sql, (int)col);
     }
-  bool 
+  bool
   sql_well::get_sql_bool (t_int col)
     {
       if (!db)
@@ -880,7 +897,7 @@ COMMIT;\
         return 0;
       return (bool)sqlite3_column_int (stmp_sql, (int)col);
     }
-  std::string 
+  std::string
   sql_well::get_sql_str (t_int col)
     {
       if (!db)
@@ -900,7 +917,7 @@ COMMIT;\
 	  return (bool)n;
   }
 
-  int 
+  int
   sql_well::exec_sql (const std::string &sql)
     {
       if (!db)
@@ -916,18 +933,18 @@ COMMIT;\
         {
           fprintf (stderr, "SQL error: %s\n", zErrMsg);
           sqlite3_free (zErrMsg);
-          return -4; 
+          return -4;
         }
       return 0;
     }
 
-  int 
+  int
   sql_well::read_from_ascii_file (const std::string &fname, double starting_date)
     {
       if (fr_file)
         delete fr_file;
       fr_file = new FRead (fname.c_str (), fname.c_str ());
-      
+
       int rc = 0;
       char buf[4096];
       char *id = 0;
@@ -996,7 +1013,7 @@ COMMIT;\
       return 0;
     }
 
-  int 
+  int
   sql_well::read_w_branch_f (char *buf)
     {
       int rc = 0;
@@ -1066,7 +1083,7 @@ COMMIT;\
         return -1;
       if (fname[0] != '\0')
         {
-          sp_traj_t sp_traj = BS_KERNEL.create_object ("traj"); 
+          sp_traj_t sp_traj = BS_KERNEL.create_object ("traj");
           rc = sp_traj->read_from_dev_file (std::string(fr_file->get_incdir()) + std::string(fname));
           if (rc)
             {
@@ -1078,7 +1095,7 @@ COMMIT;\
         }
       if (fname2[0] != '\0')
         {
-          sp_gis_t sp_gis = BS_KERNEL.create_object ("gis"); 
+          sp_gis_t sp_gis = BS_KERNEL.create_object ("gis");
           rc = sp_gis->read_from_las_file (std::string(fr_file->get_incdir()) + std::string(fname2));
           if (rc)
             {
@@ -1092,7 +1109,7 @@ COMMIT;\
 
       return 0;
     }
-  int 
+  int
   sql_well::read_w_spec (char *buf)
     {
       int rc = 0;
@@ -1111,9 +1128,9 @@ COMMIT;\
           return -1;
         }
       rc = get_phrase_double (&nx, &x);
-      //printf ("rc: %lf\n", x); 
+      //printf ("rc: %lf\n", x);
       rc |= get_phrase_double (&nx, &y);
-      //printf ("rc: %lf\n", y); 
+      //printf ("rc: %lf\n", y);
       if (rc)
         {
           fprintf (stderr, "Error: W_SPEC\n");
@@ -1125,7 +1142,7 @@ COMMIT;\
                wname, x, y);
       return exec_sql (sql);
     }
-  int 
+  int
   sql_well::read_w_frac (char *buf, double d)
     {
       int rc = 0;
@@ -1135,13 +1152,13 @@ COMMIT;\
       char status[1024];
       int i_status;
       char sql[1024];
-      double md = -1; 
-      double angle  = 0; 
-      double half_length_1 = 50.0; 
-      double half_length_2 = 50.0; 
-      double half_up = 5.0; 
-      double half_down = 5.0; 
-      double perm = -1; 
+      double md = -1;
+      double angle  = 0;
+      double half_length_1 = 50.0;
+      double half_length_2 = 50.0;
+      double half_up = 5.0;
+      double half_down = 5.0;
+      double perm = -1;
       double half_thin = 0.005;
       // read well name
       wname[0] = '\0';
@@ -1169,7 +1186,7 @@ COMMIT;\
           fprintf (stderr, "Error: well status in keyword W_FRAC\n");
           return -1;
         }
-      
+
       rc = get_phrase_double (&nx, &md);
       rc |= get_phrase_double (&nx, &angle);
       rc |= get_phrase_double (&nx, &half_length_1);
@@ -1227,19 +1244,19 @@ COMMIT;\
           return -9;
         }
 
-      printf ("W_FRAC %s %s %s %lf %lf %lf %lf %lf %lf %lf %lf\n", 
-              wname, branch, status, md, angle, half_length_1, half_length_2, 
+      printf ("W_FRAC %s %s %s %lf %lf %lf %lf %lf %lf %lf %lf\n",
+              wname, branch, status, md, angle, half_length_1, half_length_2,
               half_up, half_down, perm, half_thin);
       // add to data base
       sprintf (sql, "INSERT INTO fractures(well_name, branch_name, md, d, status, \
 half_up, half_down, angle, half_length_1, half_length_2, perm, half_thin) \
 VALUES ('%s', '%s', %lf, %lf, %d, %lf, %lf, %lf, %lf, %lf, %lf, %lf)",
-               wname, branch, md, d, i_status, half_up, half_down, angle, 
+               wname, branch, md, d, i_status, half_up, half_down, angle,
                half_length_1, half_length_2, perm, half_thin);
       return exec_sql (sql);
       return 0;
     }
-  int 
+  int
   sql_well::read_w_comp (char *buf, double d)
     {
       int rc = 0;
@@ -1276,7 +1293,7 @@ VALUES ('%s', '%s', %lf, %lf, %d, %lf, %lf, %lf, %lf, %lf, %lf, %lf)",
           fprintf (stderr, "Error: well status in keyword W_COMP\n");
           return -1;
         }
-      
+
       rc = get_phrase_double (&nx, &md);
       rc |= get_phrase_double (&nx, &length);
       rc |= get_phrase_double (&nx, &rw);
@@ -1321,7 +1338,7 @@ VALUES ('%s', '%s', %lf, %lf, %d, %lf, %lf, %lf, %lf, %lf, %lf, %lf)",
           return -9;
         }
 
-      printf ("W_COMP %s %s %lf %lf %lf %lf %lf\n", 
+      printf ("W_COMP %s %s %lf %lf %lf %lf %lf\n",
               wname, branch, md, length, rw, skin, khmult);
       // add to data base
       sprintf (sql, "INSERT INTO completions(well_name, branch_name, md, d, length, status, rw, kh_mult) VALUES ('%s', '%s', %lf, %lf, %lf, %d, %lf, %lf)",
@@ -1329,8 +1346,8 @@ VALUES ('%s', '%s', %lf, %lf, %d, %lf, %lf, %lf, %lf, %lf, %lf, %lf)",
       return exec_sql (sql);
       return 0;
     }
- 
-  int 
+
+  int
   sql_well::read_w_inj (char *buf, double d)
     {
       int rc = 0;
@@ -1386,7 +1403,7 @@ VALUES ('%s', '%s', %lf, %lf, %d, %lf, %lf, %lf, %lf, %lf, %lf, %lf)",
           fprintf (stderr, "Error: well control in keyword W_INJ\n");
           return -1;
         }
-      
+
       rc = get_phrase_double (&nx, &bhp);
       rc |= get_phrase_double (&nx, &rate);
       rc = get_phrase_double  (&nx, &lim_bhp);
@@ -1467,19 +1484,19 @@ VALUES ('%s', '%s', %lf, %lf, %d, %lf, %lf, %lf, %lf, %lf, %lf, %lf)",
           return -1;
         }
 
-      printf ("W_INJ %s %s %s %s %lf %lf %lf %lf %lf\n", 
+      printf ("W_INJ %s %s %s %s %lf %lf %lf %lf %lf\n",
               wname, status, ctrl, fluid, bhp, rate, lim_bhp, lim_rate, wefac);
       // add to data base
       sprintf (sql, "INSERT INTO well_hist(well_name, d, i_or, i_wr, i_gr, \
 i_bhp, wefac, ctrl, status, lim_i_or, lim_i_wr, lim_i_gr, lim_i_bhp) \
 VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf)",
-               wname, d, orate, wrate, grate, bhp, wefac, i_ctrl, i_status, 
+               wname, d, orate, wrate, grate, bhp, wefac, i_ctrl, i_status,
                lim_orate, lim_wrate, lim_grate, lim_bhp);
       return exec_sql (sql);
       return 0;
     }
 
-  int 
+  int
   sql_well::read_w_prod (char *buf, double d)
     {
       int rc = 0;
@@ -1527,7 +1544,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf)",
           fprintf (stderr, "Error: well control in keyword W_PROD\n");
           return -1;
         }
-      
+
       rc = get_phrase_double (&nx, &bhp);
       rc |= get_phrase_double (&nx, &wrate);
       rc |= get_phrase_double (&nx, &orate);
@@ -1621,20 +1638,20 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf)",
           return -1;
         }
 
-      printf ("W_PROD %s %s %s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf\n", 
-              wname, status, ctrl, bhp, wrate, orate, grate, lrate, lim_bhp, 
+      printf ("W_PROD %s %s %s %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf\n",
+              wname, status, ctrl, bhp, wrate, orate, grate, lrate, lim_bhp,
               lim_wrate, lim_orate, lim_grate, lim_lrate, wefac);
       // add to data base
       sprintf (sql, "INSERT INTO well_hist(well_name, d, p_or, p_wr, p_gr, p_lr, \
 p_bhp, wefac, ctrl, status, lim_p_or, lim_p_wr, lim_p_gr, lim_p_lr, lim_p_bhp) \
 VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf)",
-               wname, d, orate, wrate, grate, lrate, bhp, wefac, i_ctrl, i_status, 
+               wname, d, orate, wrate, grate, lrate, bhp, wefac, i_ctrl, i_status,
                lim_orate, lim_wrate, lim_grate, lim_lrate, lim_bhp);
       return exec_sql (sql);
       return 0;
     }
 
-  int 
+  int
   sql_well::read_date_and_time (char *buf, char **next_start, double *dd)
     {
       int rc = 0;
@@ -1670,7 +1687,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
       return rc;
     }
 
-  int 
+  int
   sql_well::save_to_bos_ascii_file (const std::string &fname, sp_pool_t pool)
     {
       FILE *fp = fopen (fname.c_str (), "w");
@@ -1696,7 +1713,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
         return -1;
       for (; !step_sql ();)
         {
-          double d = get_sql_real (0); 
+          double d = get_sql_real (0);
           dates.push_back (d);
         }
       finalize_sql ();
@@ -1737,7 +1754,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             {
               std::string s = get_sql_str (0);
               int status = get_sql_int (14);
-              int ctrl = get_sql_int (13); 
+              int ctrl = get_sql_int (13);
               double i_or = get_sql_real (8);
               double i_wr = get_sql_real (9);
               double i_gr = get_sql_real (10);
@@ -1798,7 +1815,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             {
               std::string s = get_sql_str (0);
               int status = get_sql_int (14);
-              int ctrl = get_sql_int (13); 
+              int ctrl = get_sql_int (13);
               double p_or = get_sql_real (2);
               double p_wr = get_sql_real (3);
               double p_gr = get_sql_real (4);
@@ -1859,7 +1876,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             {
                fprintf (fp, "\'%s\' %u %u %u %u \'OPEN\' 3* %lf 2* \'%c\'\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->kh_mult, cdi->dir);
             }
-      
+
           fprintf (fp, "/\n");
 
         }
@@ -1867,9 +1884,9 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
       fclose (fp);
       return 0;
     }
-      
+
 #ifdef BSPY_EXPORTING_PLUGIN
-  std::string 
+  std::string
   sql_well::py_str () const
     {
       std::stringstream s;
