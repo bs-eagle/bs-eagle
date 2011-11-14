@@ -63,7 +63,7 @@
     <Link>
       <AdditionalDependencies>hdf5dll.lib;loki_D.lib;ws2_32.lib;CGAL-vc100-mt-gd.lib;libgmp-10.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>$(CGAL_DIR)/lib;$(PYTHON_PATH)/libs;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/debug;$(HDF5_PATH)/dll;$(LOKI_PATH)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CGAL_DIR)/lib;$(CGAL_DIR)/auxiliary/gmp/lib;$(PYTHON_PATH)/libs;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/debug;$(HDF5_PATH)/dll;$(LOKI_PATH)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>

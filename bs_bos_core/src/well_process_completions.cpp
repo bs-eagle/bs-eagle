@@ -13,7 +13,8 @@
 #include "wells_common_const.h"
 #include "fi_params.h"
 #include "well_connection.h"
-#include "calc_well.h"
+#include "well_pool_iface.h"
+#include "frac_comp_ident.h"
 
 namespace blue_sky
   {
