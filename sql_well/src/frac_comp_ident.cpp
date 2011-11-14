@@ -101,7 +101,7 @@ well_path_builder::init(smart_ptr< well_pool_iface, true > src_well)
 }
 
 template <class cd_traits> 
-xpath_storage well_path_builder::build (const cd_traits& t = cd_traits ()) 
+xpath_storage well_path_builder::build (double date, const cd_traits& t = cd_traits ()) 
 {
 	// 1 fill storage with all unique well+branch
   xpath_storage xpath_storage_;
@@ -159,7 +159,7 @@ xpath_storage well_path_builder::build (const cd_traits& t = cd_traits ())
 		A.remove_dups2();
 		//A.append_wp_nodes(hi);
 		xpath& xp = A.path();
-    xpath_storage_.insert (xp);
+    //xpath_storage_.insert (xp);
   }
   return xpath_storage_;
 }

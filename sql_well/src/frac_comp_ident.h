@@ -60,7 +60,7 @@ public:
 	void init(smart_ptr< well_pool_iface, true > src_well);
 
   template <class cd_traits> 
-  xpath_storage build (const cd_traits& t);
+  xpath_storage build (double date, const cd_traits& t);
 	// clear storage
 	void clear();
 	

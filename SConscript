@@ -23,6 +23,7 @@ if build_kind == 'init':
     includes["bs_swift"]                    = Dir("bs_swift/include")
     includes["common_types"]                = Dir("common_types/include")
     includes["sql_well"]                    = Dir("sql_well/include")
+    includes["sql_well_src"]                = Dir("sql_well/src")
     includes["hdm_fluid"]                   = Dir("hdm_fluid/include")
     includes["bs_hdf5_storage"]             = Dir("hdf5_storage/src")
     Export ("includes")
