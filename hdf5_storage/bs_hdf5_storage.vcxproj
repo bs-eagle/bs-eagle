@@ -95,7 +95,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\bs_hdf5_storage.h" />
     <ClInclude Include="src\bs_hdf5_storage_v2.h" />
     <ClInclude Include="src\h5_helper.h" />
     <ClInclude Include="src\hdf5_functions.h" />
@@ -103,7 +102,6 @@
     <ClInclude Include="src\hdf5_hid_holder.hpp" />
     <ClInclude Include="src\hdf5_storage_v2_impl.hpp" />
     <ClInclude Include="src\hdf5_type.h" />
-    <ClInclude Include="src\py_bs_hdf5_storage.h" />
     <ClInclude Include="src\h5_pool.hpp" />
     <ClInclude Include="src\py_pool.h" />
   </ItemGroup>

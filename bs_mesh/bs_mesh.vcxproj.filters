@@ -101,15 +101,6 @@
     <ClCompile Include="src\i_cant_link_2_mesh.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\py_flux_connections.h">
-      <Filter>python</Filter>
-    </ClInclude>
-    <ClInclude Include="src\py_mesh_grdecl.h">
-      <Filter>python</Filter>
-    </ClInclude>
-    <ClInclude Include="include\py_rs_mesh.h">
-      <Filter>python</Filter>
-    </ClInclude>
     <ClInclude Include="include\fpoint2d.h">
       <Filter>mesh</Filter>
     </ClInclude>
@@ -171,9 +162,6 @@
       <Filter>rs\grdecl_mpfa</Filter>
     </ClInclude>
     <ClInclude Include="src\bs_mesh_stdafx.h" />
-    <ClInclude Include="include\wpi_iface.h">
-      <Filter>gen</Filter>
-    </ClInclude>
     <ClInclude Include="src\wpi_algo.h">
       <Filter>gen</Filter>
     </ClInclude>

@@ -63,9 +63,6 @@
     <ClInclude Include="include\bos_report.h">
       <Filter>report</Filter>
     </ClInclude>
-    <ClInclude Include="include\aligned_allocator.h">
-      <Filter>tools</Filter>
-    </ClInclude>
     <ClInclude Include="include\auto_value.h">
       <Filter>tools</Filter>
     </ClInclude>
@@ -134,9 +131,6 @@
     </ClInclude>
     <ClInclude Include="include\keyword_manager_iface.h">
       <Filter>keywords</Filter>
-    </ClInclude>
-    <ClInclude Include="include\seq_vector.h">
-      <Filter>strategy</Filter>
     </ClInclude>
     <ClInclude Include="include\strategies.h">
       <Filter>strategy</Filter>

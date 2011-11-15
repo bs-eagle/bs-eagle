@@ -57,9 +57,6 @@
     <ClInclude Include="src\dens_matrix_tools.h">
       <Filter>mtx</Filter>
     </ClInclude>
-    <ClInclude Include="src\matrix_impl.h">
-      <Filter>mtx</Filter>
-    </ClInclude>
     <ClInclude Include="src\mbcsr_matrix.h">
       <Filter>mtx</Filter>
     </ClInclude>
@@ -75,9 +72,6 @@
     <ClInclude Include="src\py_mbcsr_matrix.h">
       <Filter>mtx</Filter>
     </ClInclude>
-    <ClInclude Include="include\array_ext.h">
-      <Filter>iface</Filter>
-    </ClInclude>
     <ClInclude Include="include\bcsr_amg_matrix_iface.h">
       <Filter>iface</Filter>
     </ClInclude>
@@ -90,16 +84,10 @@
     <ClInclude Include="include\bdiag_matrix_iface.h">
       <Filter>iface</Filter>
     </ClInclude>
-    <ClInclude Include="include\bs_mtx_stdafx.h">
-      <Filter>iface</Filter>
-    </ClInclude>
     <ClInclude Include="include\dens_matrix_iface.h">
       <Filter>iface</Filter>
     </ClInclude>
     <ClInclude Include="include\dens_matrix_tools_iface.h">
-      <Filter>iface</Filter>
-    </ClInclude>
-    <ClInclude Include="include\jac_matrix_iface.h">
       <Filter>iface</Filter>
     </ClInclude>
     <ClInclude Include="include\matrix_iface.h">
@@ -109,12 +97,6 @@
       <Filter>iface</Filter>
     </ClInclude>
     <ClInclude Include="include\merge_matrices.h">
-      <Filter>iface</Filter>
-    </ClInclude>
-    <ClInclude Include="include\read_b_matrix.h">
-      <Filter>iface</Filter>
-    </ClInclude>
-    <ClInclude Include="include\save_seq_vector.h">
       <Filter>iface</Filter>
     </ClInclude>
   </ItemGroup>

@@ -78,9 +78,6 @@
     <ClInclude Include="include\prvd_table.h">
       <Filter>data storage</Filter>
     </ClInclude>
-    <ClInclude Include="include\shared_array.h">
-      <Filter>data storage</Filter>
-    </ClInclude>
     <ClInclude Include="include\numpy_tools.h">
       <Filter>data storage\python</Filter>
     </ClInclude>

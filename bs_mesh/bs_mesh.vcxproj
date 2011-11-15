@@ -76,7 +76,7 @@
       <DisableSpecificWarnings>4520</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>loki_D.lib;ws2_32.lib;CGAL-vc100-mt-gd.lib;libgmp-10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>loki_D.lib;ws2_32.lib;CGAL-vc100-mt-gd.lib;mpir.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>$(CGAL_DIR)\auxiliary\gmp\lib;$(CGAL_DIR)\lib;$(HDF5_PATH)/lib;$(PYTHON_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/debug/;$(ProjectDir)/../../../exe/debug/plugins/;$(MPICH_PATH)/SDK/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -167,10 +167,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\i_cant_link_2_mesh.h" />
-    <ClInclude Include="include\py_flux_connections.h" />
-    <ClInclude Include="include\wpi_iface.h" />
-    <ClInclude Include="src\py_mesh_grdecl.h" />
-    <ClInclude Include="include\py_rs_mesh.h" />
     <ClInclude Include="include\fpoint2d.h" />
     <ClInclude Include="include\fpoint3d.h" />
     <ClInclude Include="src\mesh_base.h" />

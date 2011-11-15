@@ -92,7 +92,7 @@
       <DisableSpecificWarnings>4520</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>loki_D.lib;ws2_32.lib;CGAL-vc100-mt-gd.lib;libgmp-10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>loki_D.lib;ws2_32.lib;CGAL-vc100-mt-gd.lib;mpir.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>$(HDF5_PATH)/lib;$(PYTHON_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/debug/;$(ProjectDir)/../../../exe/debug/plugins/;$(MPICH_PATH)/SDK/lib;$(CGAL_DIR)/lib;$(CGAL_DIR)/auxiliary/gmp/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>python25_d.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -359,7 +359,6 @@
     <ClInclude Include="include\default_connection.h" />
     <ClInclude Include="include\default_rr_eliminator.h" />
     <ClInclude Include="include\default_well.h" />
-    <ClInclude Include="src\default_well_calc_rate.h" />
     <ClInclude Include="include\py_default_wells.h" />
     <CustomBuildStep Include="include\mpi_amg_solver.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_MPI|Win32'">true</ExcludedFromBuild>
@@ -386,9 +385,7 @@
     <ClInclude Include="include\member_accessor.h" />
     <ClInclude Include="include\rr_rw_wr_saver.h" />
     <ClInclude Include="include\string_formater.h" />
-    <ClInclude Include="include\inverse_matrix.h" />
     <ClInclude Include="include\res_file_id.h" />
-    <ClInclude Include="include\pp_param_list.h" />
     <ClInclude Include="include\prepare_fpu.h" />
     <ClInclude Include="include\calc_model.h" />
     <ClInclude Include="include\calc_model_data.h" />
@@ -401,7 +398,6 @@
     <ClInclude Include="include\py_calc_model.h" />
     <ClInclude Include="include\py_reservoir_simulator.h" />
     <ClInclude Include="include\apply_wefac.h" />
-    <ClInclude Include="include\save_connection_data.h" />
     <ClInclude Include="include\compute_acc_rates.h" />
     <ClInclude Include="include\generate_numeric_jacobian.h" />
     <ClInclude Include="include\fi_operator.h" />
@@ -412,12 +408,9 @@
     <ClInclude Include="include\fi_operator_calc_solution_mult_cell.h" />
     <ClInclude Include="include\fi_operator_calc_step_dt_mult.h" />
     <ClInclude Include="include\fi_operator_norm_calc.h" />
-    <ClInclude Include="include\fi_operator_save_debug_data.h" />
     <ClInclude Include="include\norm_calc.h" />
     <ClInclude Include="include\jacobian.h" />
-    <ClInclude Include="include\jacobian_impl.h" />
     <ClInclude Include="include\py_jacobian.h" />
-    <ClInclude Include="include\results_hdf5_writer.h" />
     <ClInclude Include="src\results_storage_hdf5_tools.h" />
     <ClInclude Include="include\well_reporter.h" />
     <ClInclude Include="include\timers.h" />

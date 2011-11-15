@@ -12,9 +12,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\bs_hdf5_storage.h">
-      <Filter>hdf5_storage</Filter>
-    </ClInclude>
     <ClInclude Include="src\bs_hdf5_storage_v2.h">
       <Filter>hdf5_storage</Filter>
     </ClInclude>
@@ -34,9 +31,6 @@
       <Filter>hdf5_storage</Filter>
     </ClInclude>
     <ClInclude Include="src\hdf5_type.h">
-      <Filter>hdf5_storage</Filter>
-    </ClInclude>
-    <ClInclude Include="src\py_bs_hdf5_storage.h">
       <Filter>hdf5_storage</Filter>
     </ClInclude>
     <ClInclude Include="src\h5_pool.hpp">

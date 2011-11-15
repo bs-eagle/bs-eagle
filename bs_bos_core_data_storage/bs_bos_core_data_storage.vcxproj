@@ -148,7 +148,6 @@
     <ClInclude Include="include\bos_map.h" />
     <ClInclude Include="include\data_class.h" />
     <ClInclude Include="include\prvd_table.h" />
-    <ClInclude Include="include\shared_array.h" />
     <ClInclude Include="include\numpy_tools.h" />
     <ClInclude Include="include\py_data_class.h" />
     <ClInclude Include="src\equil_keywords.hpp" />

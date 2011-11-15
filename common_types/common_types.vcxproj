@@ -111,8 +111,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\gis.h" />
-    <ClInclude Include="src\h5_helper.h" />
-    <ClInclude Include="src\h5_pool.h" />
     <ClInclude Include="src\prop.h" />
     <ClInclude Include="src\prop_impl.h" />
     <ClInclude Include="src\py_frac.h" />

@@ -159,26 +159,20 @@
     <ClInclude Include="src\bdiag_matrix.h" />
     <ClInclude Include="src\dens_matrix.h" />
     <ClInclude Include="src\dens_matrix_tools.h" />
-    <ClInclude Include="src\matrix_impl.h" />
     <ClInclude Include="src\mbcsr_matrix.h" />
     <ClInclude Include="src\py_bcsr.h" />
     <ClInclude Include="src\py_dens.h" />
     <ClInclude Include="src\py_matrix_iface.h" />
     <ClInclude Include="src\py_mbcsr_matrix.h" />
-    <ClInclude Include="include\array_ext.h" />
     <ClInclude Include="include\bcsr_amg_matrix_iface.h" />
     <ClInclude Include="include\bcsr_matrix_iface.h" />
     <ClInclude Include="include\bcsr_matrix_tools_iface.h" />
     <ClInclude Include="include\bdiag_matrix_iface.h" />
-    <ClInclude Include="include\bs_mtx_stdafx.h" />
     <ClInclude Include="include\dens_matrix_iface.h" />
     <ClInclude Include="include\dens_matrix_tools_iface.h" />
-    <ClInclude Include="include\jac_matrix_iface.h" />
     <ClInclude Include="include\matrix_iface.h" />
     <ClInclude Include="include\matrix_sum_spec.h" />
     <ClInclude Include="include\merge_matrices.h" />
-    <ClInclude Include="include\read_b_matrix.h" />
-    <ClInclude Include="include\save_seq_vector.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\kernel\blue-sky.vcxproj">

@@ -376,9 +376,6 @@
     <ClInclude Include="include\default_well.h">
       <Filter>data\wells\default well</Filter>
     </ClInclude>
-    <ClInclude Include="src\default_well_calc_rate.h">
-      <Filter>data\wells\default well</Filter>
-    </ClInclude>
     <ClInclude Include="include\py_default_wells.h">
       <Filter>data\wells\default well</Filter>
     </ClInclude>
@@ -403,14 +400,8 @@
     <ClInclude Include="include\string_formater.h">
       <Filter>tools</Filter>
     </ClInclude>
-    <ClInclude Include="include\inverse_matrix.h">
-      <Filter>tools\to exclude</Filter>
-    </ClInclude>
     <ClInclude Include="include\res_file_id.h">
       <Filter>tools\to exclude</Filter>
-    </ClInclude>
-    <ClInclude Include="include\pp_param_list.h">
-      <Filter>tools\pp</Filter>
     </ClInclude>
     <ClInclude Include="include\prepare_fpu.h">
       <Filter>tools\fpu</Filter>
@@ -448,9 +439,6 @@
     <ClInclude Include="include\apply_wefac.h">
       <Filter>simulator\tools</Filter>
     </ClInclude>
-    <ClInclude Include="include\save_connection_data.h">
-      <Filter>simulator\tools</Filter>
-    </ClInclude>
     <ClInclude Include="include\compute_acc_rates.h">
       <Filter>simulator\main_loop_calc</Filter>
     </ClInclude>
@@ -481,23 +469,14 @@
     <ClInclude Include="include\fi_operator_norm_calc.h">
       <Filter>simulator\fi_operator</Filter>
     </ClInclude>
-    <ClInclude Include="include\fi_operator_save_debug_data.h">
-      <Filter>simulator\fi_operator</Filter>
-    </ClInclude>
     <ClInclude Include="include\norm_calc.h">
       <Filter>simulator\fi_operator</Filter>
     </ClInclude>
     <ClInclude Include="include\jacobian.h">
       <Filter>simulator\jacobian</Filter>
     </ClInclude>
-    <ClInclude Include="include\jacobian_impl.h">
-      <Filter>simulator\jacobian</Filter>
-    </ClInclude>
     <ClInclude Include="include\py_jacobian.h">
       <Filter>simulator\jacobian</Filter>
-    </ClInclude>
-    <ClInclude Include="include\results_hdf5_writer.h">
-      <Filter>simulator\hdf5</Filter>
     </ClInclude>
     <ClInclude Include="src\results_storage_hdf5_tools.h">
       <Filter>simulator\hdf5</Filter>

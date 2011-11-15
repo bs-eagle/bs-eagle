@@ -156,7 +156,6 @@
     <ClInclude Include="include\named_pbase_type_helper.h" />
     <ClInclude Include="include\property_base.h" />
     <ClInclude Include="include\bos_report.h" />
-    <ClInclude Include="include\aligned_allocator.h" />
     <ClInclude Include="include\auto_value.h" />
     <ClInclude Include="include\debug_macroses.h" />
     <ClInclude Include="include\dummy_base.h" />
@@ -180,7 +179,6 @@
     <ClInclude Include="include\python_method_wrapper.h" />
     <ClInclude Include="include\keyword_info_base.h" />
     <ClInclude Include="include\keyword_manager_iface.h" />
-    <ClInclude Include="include\seq_vector.h" />
     <ClInclude Include="include\strategies.h" />
     <ClInclude Include="include\strategy_name.h" />
     <ClInclude Include="include\bs_bos_core_base_stdafx.h" />
