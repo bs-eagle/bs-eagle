@@ -59,14 +59,31 @@ struct compl_traits {
 // simple dump
 void dump(std::ostream& os, const compdat& cd) {
 	os << setw(15) << cd.well_name << ' ' << setw(15) << cd.branch_name << ' ';
+  os << setw(10) << std::fixed << std::setprecision(3) << cd.md;
+  os << setw(10) << std::fixed << std::setprecision(3) << cd.len;
 	for(int i = 0; i < 4; ++i)
 		os << setw(4) << cd.cell_pos[i];
 	os << setw(2) << cd.dir;
 	os << setw(10) << std::fixed << std::setprecision(3) << cd.kh_mult << std::endl;
 }
 
-void dump(std::ostream& os, const cd_storage& cfs) {
-	for(cd_storage::const_iterator pc = cfs.begin(), end = cfs.end(); pc != end; ++pc)
+// simple fracture dump
+void dump(std::ostream& os, const fracture& frac)
+{
+  os << setw(15) << frac.well_name << ' ' << setw(15) << frac.branch_name << ' ';
+  os << setw(15) << frac.frac_status << ' ';
+  for(int i = 0; i < 4; ++i)
+    os << setw(4) << frac.cell_pos[i];
+  os << setw(10) << std::fixed << std::setprecision(3) << frac.frac_half_length_1;
+  os << setw(10) << std::fixed << std::setprecision(3) << frac.frac_half_length_2;
+  os << setw(10) << std::fixed << std::setprecision(3) << frac.frac_angle;
+  os << setw(10) << std::fixed << std::setprecision(3) << frac.frac_half_thin;
+  os << setw(10) << std::fixed << std::setprecision(3) << frac.frac_perm << std::endl;
+}
+
+template <class x_storage>
+void dump(std::ostream& os, const x_storage& cfs) {
+	for(x_storage::const_iterator pc = cfs.begin(), end = cfs.end(); pc != end; ++pc)
 		dump(os, *pc);
 }
 
@@ -101,10 +118,9 @@ well_path_builder::init(smart_ptr< well_pool_iface, true > src_well)
 }
 
 template <class cd_traits> 
-xpath_storage well_path_builder::build (double date, const cd_traits& t = cd_traits ()) 
+xpath_storage& well_path_builder::build (double date, const cd_traits& t = cd_traits ()) 
 {
 	// 1 fill storage with all unique well+branch
-  xpath_storage xpath_storage_;
 	wb_storage wb;
 	std::string q = (cd_traits::select_unique_well_branch() % date).str();
 	sw_->prepare_sql(q);
@@ -159,7 +175,8 @@ xpath_storage well_path_builder::build (double date, const cd_traits& t = cd_tra
 		A.remove_dups2();
 		//A.append_wp_nodes(hi);
 		xpath& xp = A.path();
-    //xpath_storage_.insert (xp);
+    // insert to storage
+    xpath_storage_.insert (xp);
   }
   return xpath_storage_;
 }
@@ -169,7 +186,7 @@ xpath_storage well_path_builder::build (double date, const cd_traits& t = cd_tra
  * compdat
  *----------------------------------------------------------------*/
 compdat::compdat(const string& well_name_, const string& branch_name_, const pos_i& cell_pos_, const pos_i& mesh_size)
-	: well_name(well_name_), branch_name(branch_name_), dir(' '), kh_mult(0)
+	: well_name(well_name_), branch_name(branch_name_), dir(' '), kh_mult(0), md(0), len(0)
 {
 	copy(&cell_pos_[0], &cell_pos_[strategy_3d::D], &cell_pos[0]);
 	cell_pos[3] = cell_pos[2];
@@ -180,13 +197,13 @@ compdat::compdat(const string& well_name_, const string& branch_name_, const pos
 }
 
 compdat::compdat(const string& well_name_, const string& branch_name_, ulong cell_id, const pos_i& mesh_size)
-	: well_name(well_name_), branch_name(branch_name_), dir(' '), kh_mult(0)
+	: well_name(well_name_), branch_name(branch_name_), dir(' '), kh_mult(0), md(0), len(0)
 {
 	init(cell_id, mesh_size);
 }
 
 compdat::compdat(ulong cell_id)
-	: dir(' '), kh_mult(0), cell_id_(cell_id)
+	: dir(' '), kh_mult(0), md(0), len(0), cell_id_(cell_id)
 {
   x1[0] = x1[1] = x1[2] = 0;
   x2[0] = x2[1] = x2[2] = 0;
@@ -319,62 +336,71 @@ public:
         t_double cur_len = sw_->get_sql_real (1);
 				x_iterator px = xp.upper_bound(whc(cur_md));
 				x_iterator xend = xp.upper_bound(whc(cur_md + cur_len));
+        x_iterator pprev_x = px;
 				// always start with prev intersection
 				if(px != xp.begin())
-					--px;
+					--pprev_x;
+        else
+          ++px;  // TODO: fix this case???
 
 				// 3.4.2 consider all intersections between begin_j and end_j
 				for(; px != xend; ++px) {
 					// prepare compdat
 					compdat cf(pwb->first, pwb->second, px->cell, m_size_);
 
-					// 3.4.3.1 calc delta between consequent xpoint_k and xpoint_(k + 1)
-					// position to next point
-					x_iterator pnext_x = px;
-					++pnext_x;
+					// 3.4.3.1 calc delta between consequent xpoint_k and xpoint_(k - 1)
+					// position to previous point
 					double delta_l = 0;
-					if(pnext_x != xp.end())
+					if(px != xp.end())
 						{
               // completion fully inside well segment
-              if (cur_md >= px->md && (cur_md + cur_len) <= pnext_x->md)
+              if (cur_md >= pprev_x->md && (cur_md + cur_len) <= px->md)
                 {
                   delta_l = cur_len;
+                  cf.md = cur_md;
+                  cf.len = delta_l;
                   for (t_uint j = 0; j < strat_t::D; ++j)
                     {
-                      cf.x1[j] = px->where[j] + (cur_md - px->md) / (pnext_x->md - px->md) * (pnext_x->where[j] - px->where[j]);
-                      cf.x2[j] = px->where[j] + (cur_md + cur_len - px->md) / (pnext_x->md - px->md) * (pnext_x->where[j] - px->where[j]);
+                      cf.x1[j] = pprev_x->where[j] + (cur_md - pprev_x->md) / (px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
+                      cf.x2[j] = pprev_x->where[j] + (cur_md + cur_len - pprev_x->md) / (px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
                     }
                 }
               // well segment fully inside completion
-              else if (cur_md <= px->md && (cur_md + cur_len) >= pnext_x->md)
+              else if (cur_md <= pprev_x->md && (cur_md + cur_len) >= px->md)
                 {
-                  delta_l = pnext_x->md - px->md;
+                  delta_l = px->md - pprev_x->md;
+                  cf.md = pprev_x->md;
+                  cf.len = delta_l;
                   for (t_uint j = 0; j < strat_t::D; ++j)
                     {
-                      cf.x1[j] = px->where[j];
-                      cf.x2[j] = pnext_x->where[j];
+                      cf.x1[j] = pprev_x->where[j];
+                      cf.x2[j] = px->where[j];
                     }
                 } 
               // start of completion is inside well segment 
               // end of completion is out of well segment
-              else if (cur_md >= px->md && (cur_md + cur_len) >= pnext_x->md)
+              else if (cur_md >= pprev_x->md && (cur_md + cur_len) >= px->md)
                 {
-                  delta_l = pnext_x->md - cur_md;
+                  delta_l = px->md - cur_md;
+                  cf.md = cur_md;
+                  cf.len = delta_l;
                   for (t_uint j = 0; j < strat_t::D; ++j)
                     {
-                      cf.x1[j] = px->where[j] + (cur_md - px->md) / (pnext_x->md - px->md) * (pnext_x->where[j] - px->where[j]);
-                      cf.x2[j] = pnext_x->where[j];
+                      cf.x1[j] = pprev_x->where[j] + (cur_md - pprev_x->md) / (px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
+                      cf.x2[j] = px->where[j];
                     }
                 }
               // start of completion is outside well segment 
               // end of completion is inside of well segment
-              else if (cur_md <= px->md && (cur_md + cur_len) <= pnext_x->md)
+              else if (cur_md <= pprev_x->md && (cur_md + cur_len) <= px->md)
                 {
-                  delta_l = cur_md + cur_len - px->md;
+                  delta_l = cur_md + cur_len - pprev_x->md;
+                  cf.md = pprev_x->md;
+                  cf.len = delta_l;
                   for (t_uint j = 0; j < strat_t::D; ++j)
                     {
-                      cf.x1[j] = px->where[j];
-                      cf.x2[j] = px->where[j] + (cur_md + cur_len - px->md) / (pnext_x->md - px->md) * (pnext_x->where[j] - px->where[j]);
+                      cf.x1[j] = pprev_x->where[j];
+                      cf.x2[j] = pprev_x->where[j] + (cur_md + cur_len - pprev_x->md) / (px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
                     }
                 }
             } 
@@ -399,8 +425,8 @@ public:
 						const char dirs[] = {'X', 'Y', 'Z'};
 						double max_step = 0;
 						for(uint i = 0; i < strat_t::D; ++i) {
-							double cur_step = std::abs(cf.x2[i] - cf.x1[i]);
-							if(max_step < cur_step) {
+							double cur_step = std::fabs(cf.x2[i] - cf.x1[i]);
+							if (max_step < cur_step) {
 								max_step = cur_step;
 								cf.dir = dirs[i];
 								cf.kh_mult = delta_l / cell_sz[i];
@@ -433,7 +459,8 @@ public:
 						else
 							cfs_.insert(cf);
 					}
-
+          // set next element 
+          pprev_x = px;
 				} // 3.4.4 end of intersections loop
 			} // 3.5 end of completions loop
 
@@ -649,11 +676,14 @@ public:
         t_double half_thin     = sw_->get_sql_real (8);
 
 				x_iterator px = xp.upper_bound(whc(md));
+
+        if (px == xp.end ())
+          continue;
 				// position to next point
-				x_iterator pnext_x = px;
+				x_iterator pprev_x = px;
 				// always start with prev intersection
 				if(px != xp.begin())
-					--px;
+					--pprev_x;
 
   			// prepare compdat
 	  		fracture frac(pwb->first, pwb->second, px->cell, m_size_);
@@ -673,7 +703,7 @@ public:
 
         for (t_uint j = 0; j < strat_t::D; ++j)
           {
-            frac_coords[j] = px->where[j] + (md - px->md) / (pnext_x->md - px->md) * (pnext_x->where[j] - px->where[j]);
+            frac_coords[j] = pprev_x->where[j] + (md - pprev_x->md) / (px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
           }
 
         // find kw1 position of fracture
@@ -718,7 +748,7 @@ public:
             // fracture inside this layer
             if (frac_coords[2] + half_down < z_down) 
               {
-                frac.cell_pos[2] = kw; // Kw2 position
+                frac.cell_pos[3] = kw; // Kw2 position
                 break;
               }
           }
@@ -807,7 +837,7 @@ spv_float completions_ident(smart_ptr< well_pool_iface, true > src_well, double 
 spv_float fractures_ident(smart_ptr< well_pool_iface, true > src_well, double date,
 		t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn)
 {
-	compdat_builder b(nx, ny, coord, zcorn, src_well);
+	fracture_builder b(nx, ny, coord, zcorn, src_well);
 	b.build(date, 1);
 	dump(std::cout, b.storage());
 	//return BS_KERNEL.create_object(v_float::bs_type());
@@ -822,8 +852,13 @@ namespace python {
 namespace bp = boost::python;
 
 static void print_compdat(const fci::compdat& cd) {
-	fci::dump(std::cout, cd);
+  fci::dump(std::cout, cd);
 }
+
+static void print_fracture(const fci::fracture& frac) {
+  fci::dump(std::cout, frac);
+}
+
 
 void py_export_compdat_ident() {
 	using namespace fci;
@@ -859,6 +894,35 @@ void py_export_compdat_ident() {
 		.def("storage", &compdat_builder::storage,
 			bp::return_value_policy< bp::copy_const_reference >())
 	;
+
+  // export fracture
+  bp::class_< fracture >("fracture", bp::no_init)
+    .def_readwrite("well_name", &fracture::well_name)
+    .def_readwrite("branch_name", &fracture::branch_name)
+    //.def_readwrite("dir", &compdat::dir)
+    .def("dump", &print_fracture)
+    ;
+
+  // export cd_storage as list
+  typedef bspy_converter< list_traits< frac_storage, 2 > > py_fracs_conv;
+  py_fracs_conv::register_to_py();
+  py_fracs_conv::register_from_py();
+
+  void (fracture_builder::*init3)(t_ulong, t_ulong, spv_float, spv_float) = &fracture_builder::init;
+  void (fracture_builder::*init4)(smart_ptr< well_pool_iface, true >) = &fracture_builder::init;
+  bp::class_< fracture_builder >("fracture_builder",
+    bp::init< t_ulong, t_ulong, spv_float, spv_float >())
+    .def(bp::init< t_ulong, t_ulong, spv_float, spv_float, smart_ptr< well_pool_iface, true> >())
+    .def("init", init3)
+    .def("init", init4)
+    .def("build", &fracture_builder::build,
+    bp::return_value_policy< bp::copy_const_reference >(),
+    cdb_build_overl())
+    .def("clear", &fracture_builder::clear)
+    .def("storage", &fracture_builder::storage,
+    bp::return_value_policy< bp::copy_const_reference >())
+    ;
+
 
 }
 

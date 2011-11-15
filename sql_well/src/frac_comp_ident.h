@@ -60,7 +60,7 @@ public:
 	void init(smart_ptr< well_pool_iface, true > src_well);
 
   template <class cd_traits> 
-  xpath_storage build (double date, const cd_traits& t);
+  xpath_storage &build (double date, const cd_traits& t);
 	// clear storage
 	void clear();
 	
@@ -72,6 +72,7 @@ public:
 	smart_ptr< well_pool_iface, true > sw_;
 
 private:
+  xpath_storage xpath_storage_;
 };
 
 /*-----------------------------------------------------------------
@@ -88,6 +89,8 @@ struct BS_API_PLUGIN compdat {
 	cell_info cell_pos;
 	char dir;
 	t_double kh_mult;
+  t_double md;
+  t_double len;
   coord x1;       //!< start point coordinates (in 3D) of completion part
   coord x2;       //!< end point coordinates  (in 3D) of completion part
 
