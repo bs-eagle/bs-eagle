@@ -307,6 +307,7 @@ CREATE TABLE fractures(well_name TEXT NOT NULL,\
 					     half_length_2 REAL DEFAULT 50,\
 					     perm REAL DEFAULT -1,\
 					     half_thin REAL DEFAULT 0.005,\
+               skin REAL DEFAULT 0,\
 					     FOREIGN KEY (well_name, branch_name) REFERENCES branches(well_name, branch_name) ON UPDATE CASCADE ON DELETE CASCADE\
 					     );\
 CREATE INDEX i11 ON fractures (well_name ASC);\
@@ -321,6 +322,7 @@ CREATE TABLE completions(well_name TEXT NOT NULL, \
 					     r0 REAL DEFAULT -1,\
 					     kh REAL DEFAULT -1,\
 					     kh_mult REAL DEFAULT 1,\
+               skin REAL DEFAULT 0,\
 					     FOREIGN KEY (well_name, branch_name) REFERENCES branches(well_name, branch_name) ON UPDATE CASCADE ON DELETE CASCADE\
 					     );					     \
 CREATE INDEX i13 ON completions (well_name ASC);\
@@ -1696,6 +1698,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
       boost::python::list dims;
       fci::cd_storage cd;
       fci::cd_storage::iterator cdi, cde;
+      fci::frac_storage ft;
+      fci::frac_storage::iterator fti, fte;
       int w_spec_flag = 0;
       char s_buf[2048];
       int nx, ny;
@@ -1723,7 +1727,12 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
       nx = boost::python::extract<int>(dims[0]);
       ny = boost::python::extract<int>(dims[1]);
       BS_SP (well_pool_iface) sp_wp = this;
-      fci::compdat_builder cb (nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), sp_wp);
+#if 0
+      fci::compdat_builder compdats (nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), sp_wp);
+      fci::fracture_builder fractures (nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), sp_wp);
+#else
+      fci::compl_n_frac_builder compl_n_frac (nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), sp_wp);
+#endif
       for (di = dates.begin (); di != de; ++di)
         {
           char d_buf[1024];
@@ -1745,13 +1754,19 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               fprintf (fp, "/\n");
               finalize_sql ();
             }
+
           // WCONINJE
-          fprintf (fp, "WCONINJE\n");
           sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND ctrl < 0 ORDER BY well_name ASC", *di);
           if (prepare_sql (s_buf))
             return -1;
+          t_uint wconinje_flag = 0;
           for (; !step_sql ();)
             {
+              if (wconinje_flag == 0)
+                {
+                  fprintf (fp, "WCONINJE\n");
+                  wconinje_flag++;
+                }
               std::string s = get_sql_str (0);
               int status = get_sql_int (14);
               int ctrl = get_sql_int (13);
@@ -1803,16 +1818,23 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 
               fprintf (fp, "/\n");
             }
-          fprintf (fp, "/\n");
+          if (wconinje_flag)
+            fprintf (fp, "/\n");
           finalize_sql ();
 
           // WCONPROD
-          fprintf (fp, "WCONPROD\n");
           sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND ctrl > 0 ORDER BY well_name ASC", *di);
           if (prepare_sql (s_buf))
             return -1;
+          
+          t_uint wconprod_flag = 0;
           for (; !step_sql ();)
             {
+              if (wconprod_flag == 0)
+                {
+                  fprintf (fp, "WCONPROD\n");
+                  wconprod_flag++;
+                }
               std::string s = get_sql_str (0);
               int status = get_sql_int (14);
               int ctrl = get_sql_int (13);
@@ -1864,21 +1886,72 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 
               fprintf (fp, "/\n");
             }
-          fprintf (fp, "/\n");
+          if (wconprod_flag) 
+            fprintf (fp, "/\n");
           finalize_sql ();
 
-
+#if 0
           // COMPDAT
-          fprintf (fp, "COMPDAT\n");
-          cd = cb.build (*di);
-          cde = cd.end();
-          for (cdi = cd.begin(); cdi != cde; ++cdi)
+          compdats.clear ();
+          cd = compdats.build (*di);
+          if (!cd.empty ()) 
             {
-               fprintf (fp, "\'%s\' %u %u %u %u \'OPEN\' 3* %lf 2* \'%c\'\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->kh_mult, cdi->dir);
+              fprintf (fp, "COMPDAT\n");
+              cde = cd.end();
+              for (cdi = cd.begin(); cdi != cde; ++cdi)
+                {
+                   fprintf (fp, "\'%s\' %u %u %u %u \'OPEN\' 3* %lf 2* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->kh_mult, cdi->dir);
+                }
+              fprintf (fp, "/\n\n");
             }
 
-          fprintf (fp, "/\n");
+          // FRACTURES
+          fractures.clear ();
+          ft = fractures.build(*di);
+          if (!ft.empty ())
+            {
+              fprintf (fp, "FRACTURES\n");
+              fte = ft.end ();
+              for (fti = ft.begin (); fti != fte; ++fti)
+                {
+                  fprintf (fp, "\'%s\' %u %u %u %u %10.8f %10.8f 0 \'%s\' %10.8f %10.8f /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1, 
+                  fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle, fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin,  fti->frac_perm); 
+                }
+              fprintf (fp, "/\n\n");
+            }
+#else
+          // COMPDAT
+          compl_n_frac.clear ();
+          cd = compl_n_frac.compl_build (*di);
+          if (!cd.empty ()) 
+          {
+            fprintf (fp, "COMPDAT\n");
+            cde = cd.end();
+            for (cdi = cd.begin(); cdi != cde; ++cdi)
+            {
+              fprintf (fp, "\'%s\' %u %u %u %u \'OPEN\' 3* %lf 2* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->kh_mult, cdi->dir);
+            }
+            fprintf (fp, "/\n\n");
+          }
 
+          // FRACTURES
+          ft = compl_n_frac.frac_build(*di);
+          if (!ft.empty ())
+          {
+            char buf[20];
+            fprintf (fp, "FRACTURE\n");
+            fte = ft.end ();
+            for (fti = ft.begin (); fti != fte; ++fti)
+            {
+              if (fti->frac_perm > 0)
+                sprintf (buf, "%lf", fti->frac_perm);
+              fprintf (fp, "\'%s\' %u %u %u %u %lf %lf 0 \'%s\' %lf %s /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1, 
+                fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle, fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin,  
+                fti->frac_perm > 0 ? buf : " * "); 
+            }
+            fprintf (fp, "/\n\n");
+          }
+#endif 
         }
 
       fclose (fp);
