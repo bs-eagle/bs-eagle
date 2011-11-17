@@ -259,6 +259,11 @@ struct mesh_tools : public helpers< strat_t > {
 			ca_assign(last, hi);
 			std::transform(&last[0], &last[D], &last[0], bind2nd(std::minus< ulong >(), 1));
 			ss(last).hi(hi_pos);
+			// ensure that lo[i] < hi[i]
+			for(uint i = 0; i < D; ++i) {
+				if(lo_pos[i] > hi_pos[i])
+					std::swap(lo_pos[i], hi_pos[i]);
+			}
 		}
 	};
 
