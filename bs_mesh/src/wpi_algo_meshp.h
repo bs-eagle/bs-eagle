@@ -272,7 +272,7 @@ struct mesh_tools : public helpers< strat_t > {
             lo_pos[i] = lo_lo_pos[i]; // std::min (lo_lo_pos[i], lo_hi_pos[i]);
             hi_pos[i] = hi_hi_pos[i]; // std::max (hi_lo_pos[i], hi_hi_pos[i]);
           }
-        else // lo_lo_pos[i] > hi_lo_pos[i] // global coordinates decreasing along cells - reverse orde 
+        else // lo_lo_pos[i] > hi_lo_pos[i] // global coordinates decreasing along cells - reverse order 
           {
             lo_pos[i] = hi_lo_pos[i]; // std::min (hi_lo_pos[i], hi_hi_pos[i]);
             hi_pos[i] = lo_hi_pos[i]; // std::max (lo_lo_pos[i], lo_hi_pos[i]);
