@@ -91,6 +91,10 @@ struct BS_API_PLUGIN compdat {
 	t_double kh_mult;
   t_double md;
   t_double len;
+  t_double skin;
+  t_double diam;
+  t_double kh;
+  t_uint status;
   coord x1;       //!< start point coordinates (in 3D) of completion part
   coord x2;       //!< end point coordinates  (in 3D) of completion part
 
@@ -132,7 +136,7 @@ public:
 	void init(smart_ptr< well_pool_iface, true > src_well);
 
 	// mode == 0 - search completions, otherwise - fractures
-	const cd_storage& build(double date, int mode = 0); 
+	const cd_storage& build(double date); 
 
 	// clear storage
 	void clear();
@@ -156,13 +160,15 @@ struct BS_API_PLUGIN fracture {
 
 	std::string well_name;
 	std::string branch_name;
-  std::string frac_status;
+  t_int frac_status;
 	cell_info cell_pos;
+  pos_i    md_cell_pos;
 	t_double frac_half_length_1;
   t_double frac_half_length_2;
 	t_double frac_angle;
   t_double frac_half_thin;
   t_double frac_perm;
+  t_double frac_skin;
 
 
 	// ctors
@@ -188,7 +194,7 @@ private:
 typedef std::set< fracture > frac_storage;
 
 /*-----------------------------------------------------------------
- * interface of COMPDAT building algo
+ * interface of FRACTURE building algo
  *----------------------------------------------------------------*/
 class BS_API_PLUGIN fracture_builder {
 
@@ -203,13 +209,49 @@ public:
 	void init(smart_ptr< well_pool_iface, true > src_well);
 
 	// mode == 0 - search completions, otherwise - fractures
-	const frac_storage& build(double date, int mode = 0);
+	const frac_storage& build(double date);
 
 	// clear storage
 	void clear();
 
 	// storage getter
 	const frac_storage& storage() const;
+
+private:
+	class impl;
+	st_smart_ptr< impl > pimpl_;
+};
+
+
+/*-----------------------------------------------------------------
+ * interface of COMPDAT and FRACTURE building algo
+ *----------------------------------------------------------------*/
+class BS_API_PLUGIN compl_n_frac_builder {
+
+public:
+	// ctors
+	compl_n_frac_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
+
+	compl_n_frac_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
+		smart_ptr< well_pool_iface, true > src_well);
+
+	void init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
+	void init(smart_ptr< well_pool_iface, true > src_well);
+
+  // compdat build
+  const cd_storage& compl_build(double date);
+
+	// fractures build
+	const frac_storage& frac_build(double date);
+
+	// clear storage
+	void clear();
+
+  // storage getter
+  const cd_storage& storage_compdat() const;
+
+	// storage getter
+	const frac_storage& storage_fracture() const;
 
 private:
 	class impl;
