@@ -72,6 +72,7 @@ struct choose_traits< fracture > {
 	typedef fract_traits type;
 };
 
+
 }  // oef hidden namespace
 
 /*-----------------------------------------------------------------
