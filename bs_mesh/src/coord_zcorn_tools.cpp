@@ -869,25 +869,92 @@ coord_zcorn_pair wave_mesh_deltas_s1(
 {
 	using namespace std;
 	typedef fp_storvec_t::iterator v_iterator;
+	typedef std::map< fp_stor_t, fp_storarr_t::const_iterator > pmap_t;
+
+	// helper to produce waves in + and - directions from give point
+	struct make_2side_wave {
+		static void go(const pmap_t& pmap, fp_set& mesh, fp_stor_t len, fp_stor_t max_d, uint cid) {
+			static char dir[] = {'x', 'y'};
+			// store processed points here
+			fp_set p_ready;
+
+			// process points in X direction
+			int_t cnt = 0;
+			pmap_t::const_iterator lower = pmap.begin();
+			pmap_t::const_iterator upper = pmap.begin();
+			++upper;
+			for(pmap_t::const_iterator p = pmap.begin(), end = pmap.end(); p != end; ++p) {
+				fp_storarr_t::const_iterator p_param = p->second;
+				fp_stor_t d = p_param[cid];
+				fp_stor_t a = p_param[cid + 2];
+
+				// point coord value
+				fp_stor_t val = p->first;
+				// DEBUG
+				BSOUT << "point[" << ++cnt << "] at (" << dir[cid] << " = " << val << "), d" << dir[cid] << " = " << d
+					<< ", a" << dir[cid] << " = " << a << bs_end;
+				// process only new points
+				if(d != 0 && p_ready.find(val) == p_ready.end()) {
+					make_wave(mesh, val, d, a, max_d, len,
+							upper == end ? len + (len - val) : upper->first,
+							proc_ray::dir_ray< 1 >());
+					make_wave(mesh, val, d, a, max_d, len,
+							p == pmap.begin() ? -val : lower->first,
+							proc_ray::dir_ray< -1 >());
+
+					p_ready.insert(val);
+				}
+				if(p != pmap.begin())
+					++lower;
+#ifdef _WIN32
+				if(upper != end)
+#endif
+					++upper;
+			}
+		}
+	};
 
 	// DEBUG
 	BSOUT << "wave_mesh_deltas: init stage" << bs_end;
 	// sanity check
 	if(!points_pos) return coord_zcorn_pair();
 
-	fp_storarr_t::const_iterator pp = points_pos->begin(), p_end = points_pos->end();
-	// make (p_end - p_begin) % 4 = 0
-	p_end -= (p_end - pp) % 2;
+	fp_storarr_t::const_iterator pp = points_pos->begin(); //, p_end = points_pos->end();
+	const ulong p_num = points_pos->size() >> 1;
+	//p_end -= (p_end - pp) % 2;
 
 	// DEBUG
 	BSOUT << "wave_mesh_deltas: points processing starts..." << bs_end;
 	BSOUT << "len_x = " << len_x << ", len_y = " << len_y << bs_end;
+
+	// params array: {(dx, dy, ax, ay)}
+	// if params specified only once - then params is equal for all points
+	fp_stor_t dx, dy, ax, ay;
+	bool const_params = false;
+	fp_storarr_t::const_iterator p_param = points_param->begin();
+	if(points_param->size() == 4) {
+		const_params = true;
+		dx = *(p_param++); dy = *(p_param++);
+		ax = *(p_param++); ay = *(p_param++);
+		p_param = points_param->begin();
+	}
+	else if(points_param->size() < p_num * 4) {
+		BSERR << "wave_mesh_deltas_s1: wrong size of points params array!" << bs_end;
+		return coord_zcorn_pair();
+	}
+
 	// points array: {(x, y}}
 	// first pass - build set of increasing px_coord & py_coord
-	fp_set px_coord, py_coord;
-	while(pp != p_end) {
-		px_coord.insert(*pp++);
-		py_coord.insert(*pp++);
+	// for each point save pointer to point parameters
+	//fp_set px_coord, py_coord;
+	pmap_t px_coord, py_coord;
+	for(ulong i = 0; i < p_num; ++i) {
+		px_coord[*pp++] = p_param;
+		py_coord[*pp++] = p_param;
+		if(!const_params)
+			p_param += 4;
+		//px_coord.insert(*pp++);
+		//py_coord.insert(*pp++);
 	}
 
 	// make intial mesh with bounds
@@ -895,84 +962,11 @@ coord_zcorn_pair wave_mesh_deltas_s1(
 	x.insert(0); x.insert(len_x);
 	y.insert(0); y.insert(len_y);
 
-	// if params specified only once - then params is equal for all points
-	fp_stor_t dx, dy, ax, ay;
-	fp_storarr_t::const_iterator p_param = points_param->begin();
-	bool const_params = false;
-	if(points_param->size() == 4) {
-		const_params = true;
-		dx = *(p_param++); dy = *(p_param++);
-		ax = *(p_param++); ay = *(p_param++);
-	}
-
-	// points coord
-	//fp_stor_t x_coord = 0, y_coord = 0;
-	// store processed points here
-	fp_set dx_ready, dy_ready;
-
 	// process points in X direction
-	int_t cnt = 0;
-	fp_set::const_iterator lower = px_coord.begin();
-	fp_set::const_iterator upper = px_coord.begin();
-	++upper;
-	for(fp_set::const_iterator px = px_coord.begin(), end = px_coord.end(); px != end; ++px) {
-		if(!const_params) {
-			dx = *(p_param++); dy = *(p_param++);
-			ax = *(p_param++); ay = *(p_param++);
-		}
-		// DEBUG
-		BSOUT << "point[" << ++cnt << "] at (x = " << *px << "), dx = " << dx
-		<< ", ax = " << ax << bs_end;
-		// process only new points
-		if(dx != 0 && dx_ready.find(*px) == dx_ready.end()) {
-			make_wave(x, *px, dx, ax, max_dx, len_x,
-				upper == end ? len_x + (len_x - *px) : *upper,
-				proc_ray::dir_ray< 1 >());
-			make_wave(x, *px, dx, ax, max_dx, len_x,
-				px == px_coord.begin() ? -*px : *lower,
-				proc_ray::dir_ray< -1 >());
-
-			dx_ready.insert(*px);
-		}
-		if(px != px_coord.begin())
-			++lower;
-#ifdef _WIN32
-		if(upper != end)
-#endif
-		++upper;
-	}
+	make_2side_wave::go(px_coord, x, len_x, max_dx, 0);
 
 	// process points in Y direction
-	cnt = 0;
-	p_param = points_param->begin();
-	lower = py_coord.begin();
-	upper = py_coord.begin(); ++upper;
-	for(fp_set::const_iterator py = py_coord.begin(), end = py_coord.end(); py != end; ++py) {
-		if(!const_params) {
-			dx = *(p_param++); dy = *(p_param++);
-			ax = *(p_param++); ay = *(p_param++);
-		}
-		// DEBUG
-		BSOUT << "point[" << ++cnt << "] at (y = " << *py << "), dy = " << dy
-		<< ", ay = " << ay << bs_end;
-		// process only new points
-		if(dy != 0 && dy_ready.find(*py) == dy_ready.end()) {
-			make_wave(y, *py, dy, ay, max_dy, len_y,
-				upper == end ? len_y + (len_y - *py) : *upper,
-				proc_ray::dir_ray< 1 >());
-			make_wave(y, *py, dy, ay, max_dy, len_y,
-				py == py_coord.begin() ? -*py : *lower,
-				proc_ray::dir_ray< -1 >());
-
-			dy_ready.insert(*py);
-		}
-		if(py != py_coord.begin())
-			++lower;
-#ifdef _WIN32
-		if(upper != end)
-#endif
-		++upper;
-	}
+	make_2side_wave::go(py_coord, y, len_y, max_dy, 1);
 
 	// make deltas from coordinates
 	vector< fp_stor_t > delta_x, delta_y;

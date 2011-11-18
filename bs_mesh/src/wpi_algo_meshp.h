@@ -373,4 +373,3 @@ struct mesh_tools : public helpers< strat_t > {
 }} /* blue_sky::wpi */
 
 #endif /* end of include guard: WPI_ALGO_MESHP_RIC3ZQNS */
-
