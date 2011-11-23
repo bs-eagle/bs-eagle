@@ -42,15 +42,15 @@ class well_pool_iface : public objbase
       typedef BS_SP (h5_pool_iface)           					sp_pool_t;
 
       static const int CTRL_P_BHP = 1;
-      static const int CTRL_P_WRATE = 2;
+      static const int CTRL_P_LRATE = 2;
       static const int CTRL_P_ORATE = 3;
-      static const int CTRL_P_GRATE = 4;
-      static const int CTRL_P_LRATE = 5;
+      static const int CTRL_P_WRATE = 4;
+      static const int CTRL_P_GRATE = 5;
 
       static const int CTRL_I_BHP = -1;
       static const int CTRL_I_WRATE = -2;
-      static const int CTRL_I_ORATE = -3;
-      static const int CTRL_I_GRATE = -4;
+      static const int CTRL_I_GRATE = -3;
+      static const int CTRL_I_ORATE = -4;
       static const int STATUS_SHUT = 0;
       static const int STATUS_CLOSE = 1;
       static const int STATUS_OPEN = 2;

@@ -258,8 +258,9 @@ double
 get_date_day_month_year(date_sim date, int &day, int &month, int &year)
 {
   static const int days_in_month[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-  double next_date;
-  
+  double next_date, datetime;
+  datetime = date;
+  date = floor(date);
   for (year = 0; date > 0; year++)
     {
       if (IS_LEAP_YEAR (1900 + year))
@@ -285,7 +286,7 @@ get_date_day_month_year(date_sim date, int &day, int &month, int &year)
   month++;
   year += 1900;
     
-  return (date - day);
+  return (datetime - day);
 }
 
 void 
