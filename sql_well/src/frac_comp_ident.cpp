@@ -1,7 +1,7 @@
 /// @file frac_comp_ient.cpp
 /// @brief Implementation of finding fractions/completions intersections with mesh
 /// @author uentity
-/// @version 
+/// @version
 /// @date 06.10.2011
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
@@ -85,7 +85,9 @@ void dump(std::ostream& os, const fracture& frac)
 
 template <class x_storage>
 void dump(std::ostream& os, const x_storage& cfs) {
-	for(x_storage::const_iterator pc = cfs.begin(), end = cfs.end(); pc != end; ++pc)
+  typename x_storage::const_iterator pc;
+  typename x_storage::const_iterator end;
+	for(pc = cfs.begin(), end = cfs.end(); pc != end; ++pc)
 		dump(os, *pc);
 }
 
@@ -107,20 +109,20 @@ well_path_builder::well_path_builder(t_ulong nx, t_ulong ny, spv_float coord, sp
 	init(src_well);
 }
 
-void 
-well_path_builder::init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) 
+void
+well_path_builder::init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn)
 {
   tops_ = wpi_algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, m_, m_size_);
 }
 
-void 
-well_path_builder::init(smart_ptr< well_pool_iface, true > src_well) 
+void
+well_path_builder::init(smart_ptr< well_pool_iface, true > src_well)
 {
 	sw_ = BS_KERNEL.create_object_copy(src_well);
 }
 
-template <class cd_traits> 
-xpath_storage& well_path_builder::build (double date, const cd_traits& t = cd_traits ()) 
+template <class cd_traits>
+xpath_storage& well_path_builder::build (double date, const cd_traits& t = cd_traits ())
 {
 	// 1 fill storage with all unique well+branch
 	wb_storage wb;
@@ -178,7 +180,7 @@ xpath_storage& well_path_builder::build (double date, const cd_traits& t = cd_tr
 		//A.append_wp_nodes(hi);
 		xpath& xp = A.path();
     // insert to storage
-    xpath_storage_.insert (xp);
+    xpath_storage_.push_back(xp);
   }
   return xpath_storage_;
 }
@@ -193,7 +195,7 @@ compdat::compdat(const string& well_name_, const string& branch_name_, const pos
 	copy(&cell_pos_[0], &cell_pos_[strategy_3d::D], &cell_pos[0]);
 	cell_pos[3] = cell_pos[2];
 	cell_id_ = wpi_algo::encode_cell_id(cell_pos_, mesh_size);
-  
+
   x1[0] = x1[1] = x1[2] = 0;
   x2[0] = x2[1] = x2[2] = 0;
 }
@@ -327,7 +329,7 @@ public:
 			//A.append_wp_nodes(hi);
 			xpath& xp = A.path();
       if (xp.empty ()) // no intersections
-        continue; 
+        continue;
 
 			// 3.3 select all completions that belong to well+branch_i
 			q = (cd_traits::select_segment() % date % pwb->first % pwb->second).str();
@@ -348,7 +350,7 @@ public:
 				// always start with prev intersection
 				if(px != xp.begin())
 					--pprev_x;
-        
+
         // add last segment to intersection loop
         if (xend != xp.end ())
           ++xend;
@@ -386,8 +388,8 @@ public:
                       cf.x1[j] = pprev_x->where[j];
                       cf.x2[j] = px->where[j];
                     }
-                } 
-              // start of completion is inside well segment 
+                }
+              // start of completion is inside well segment
               // end of completion is out of well segment
               else if (md >= pprev_x->md && (md + len) >= px->md)
                 {
@@ -400,7 +402,7 @@ public:
                       cf.x2[j] = px->where[j];
                     }
                 }
-              // start of completion is outside well segment 
+              // start of completion is outside well segment
               // end of completion is inside of well segment
               else if (md <= pprev_x->md && (md + len) <= px->md)
                 {
@@ -413,7 +415,7 @@ public:
                       cf.x2[j] = pprev_x->where[j] + (md + len - pprev_x->md) / (px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
                     }
                 }
-            } 
+            }
           else
             {
               // TODO: identify coordinates of last cell intersection???
@@ -462,7 +464,7 @@ public:
             //cf.kh = kh;
             //cf.status = status;
             //cf.skin = skin;
-             
+
 						// if compdat for this cell is already added
 						// then just update kh_mult
 						// otherwise add new COMPDAT record
@@ -475,7 +477,7 @@ public:
 						else
 							cfs_.insert(cf);
 					}
-          // set next element 
+          // set next element
           pprev_x = px;
 				} // 3.4.4 end of intersections loop
 			} // 3.5 end of completions loop
@@ -535,7 +537,7 @@ void compdat_builder::clear() {
  * fracture
  *----------------------------------------------------------------*/
 fracture::fracture(const string& well_name_, const string& branch_name_, const pos_i& cell_pos_, const pos_i& mesh_size)
-	: well_name(well_name_), branch_name(branch_name_), frac_half_length_1 (0), frac_half_length_2 (0),  frac_angle (0),  
+	: well_name(well_name_), branch_name(branch_name_), frac_half_length_1 (0), frac_half_length_2 (0),  frac_angle (0),
     frac_half_thin (0), frac_status(0), frac_perm (0)
 {
 	copy(&cell_pos_[0], &cell_pos_[strategy_3d::D], &cell_pos[0]);
@@ -545,14 +547,14 @@ fracture::fracture(const string& well_name_, const string& branch_name_, const p
 }
 
 fracture::fracture(const string& well_name_, const string& branch_name_, ulong cell_id, const pos_i& mesh_size)
-	: well_name(well_name_), branch_name(branch_name_), frac_half_length_1 (0), frac_half_length_2 (0),  frac_angle (0), 
+	: well_name(well_name_), branch_name(branch_name_), frac_half_length_1 (0), frac_half_length_2 (0),  frac_angle (0),
     frac_half_thin (0), frac_status(0), frac_perm (0)
 {
 	init(cell_id, mesh_size);
 }
 
 fracture::fracture(ulong cell_id)
-	: frac_half_length_1 (0), frac_half_length_2 (0),  frac_angle (0),  
+	: frac_half_length_1 (0), frac_half_length_2 (0),  frac_angle (0),
     frac_half_thin (0), frac_status(0), frac_perm (0), cell_id_(cell_id)
 {
 }
@@ -731,57 +733,57 @@ public:
           {
             vertex_pos_i cell_up;
             copy (&cell_pos[0], &cell_pos[strat_t::D], &cell_up[0]);
-            cell_up[2] = kw; 
+            cell_up[2] = kw;
 
-            t_ulong k_cell_id_ = wpi_algo::encode_cell_id (cell_up, m_size_); 
+            t_ulong k_cell_id_ = wpi_algo::encode_cell_id (cell_up, m_size_);
             t_double z_top = 0;
             t_float* tops_data = &(*tops_)[0];
 
-            // get mean of Z top plane 
+            // get mean of Z top plane
             for (t_uint j = 0; j < 4; ++j)
               {
-                z_top += 0.25 * tops_data[24 * k_cell_id_ + 3 * j + 2]; 
+                z_top += 0.25 * tops_data[24 * k_cell_id_ + 3 * j + 2];
               }
             // fracture inside this layer
-            if (frac_coords[2] - half_up > z_top) 
+            if (frac_coords[2] - half_up > z_top)
               {
                 kw1_flag = 1;
                 frac.cell_pos[2] = kw;  // Kw1 - position
                 break;
               }
           }
-        
+
         if (kw1_flag == 0)
           {
             frac.md_cell_pos[2] = 0;
-          } 
-        
+          }
+
         t_uint kw2_flag = 0;
         // find kw2 position of fracture
         for (t_long kw = cell_pos[2]; kw < m_size_[2]; kw++)
           {
             vertex_pos_i cell_down;
             copy (&cell_pos[0], &cell_pos[strat_t::D], &cell_down[0]);
-            cell_down[2] = kw; 
+            cell_down[2] = kw;
 
-            t_ulong k_cell_id_ = wpi_algo::encode_cell_id (cell_down, m_size_); 
+            t_ulong k_cell_id_ = wpi_algo::encode_cell_id (cell_down, m_size_);
             t_double z_down = 0;
             t_float* tops_data = &(*tops_)[0];
 
-            // get mean of Z bottom plane 
+            // get mean of Z bottom plane
             for (t_uint j = 4; j < 8; ++j)
               {
-                z_down += 0.25 * tops_data[24 * k_cell_id_ + 3 * j + 2]; 
+                z_down += 0.25 * tops_data[24 * k_cell_id_ + 3 * j + 2];
               }
             // fracture inside this layer
-            if (frac_coords[2] + half_down < z_down) 
+            if (frac_coords[2] + half_down < z_down)
               {
                 kw2_flag = 1;
                 frac.cell_pos[3] = kw; // Kw2 position
                 break;
               }
           }
-        
+
         if (kw2_flag == 0)
           {
             frac.md_cell_pos[3] = m_size_[2] - 1;
@@ -956,7 +958,7 @@ public:
       //A.append_wp_nodes(hi);
       xpath& xp = A.path();
       if (xp.empty ()) // no intersections
-        continue; 
+        continue;
 
       // 3.3 select all completions that belong to well+branch_i
       q = (cd_traits::select_segment() % date % pwb->first % pwb->second).str();
@@ -1015,8 +1017,8 @@ public:
                 cf.x1[j] = pprev_x->where[j];
                 cf.x2[j] = px->where[j];
               }
-            } 
-            // start of completion is inside well segment 
+            }
+            // start of completion is inside well segment
             // end of completion is out of well segment
             else if (md >= pprev_x->md && (md + len) >= px->md)
             {
@@ -1029,7 +1031,7 @@ public:
                 cf.x2[j] = px->where[j];
               }
             }
-            // start of completion is outside well segment 
+            // start of completion is outside well segment
             // end of completion is inside of well segment
             else if (md <= pprev_x->md && (md + len) <= px->md)
             {
@@ -1042,7 +1044,7 @@ public:
                 cf.x2[j] = pprev_x->where[j] + (md + len - pprev_x->md) / (px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
               }
             }
-          } 
+          }
           else
           {
             // TODO: identify coordinates of last cell intersection???
@@ -1104,7 +1106,7 @@ public:
             else
               compls_.insert(cf);
           }
-          // set next element 
+          // set next element
           pprev_x = px;
         } // 3.4.4 end of intersections loop
       } // 3.5 end of completions loop
@@ -1225,70 +1227,70 @@ public:
           {
             frac_coords[j] = pprev_x->where[j] + (md - pprev_x->md) / (px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
           }
-        
+
         t_uint kw1_flag = 0;
         // find kw1 position of fracture
         for (t_long kw = cell_pos[2]; kw >= 0; kw--)
           {
             vertex_pos_i cell_up;
             copy (&cell_pos[0], &cell_pos[strat_t::D], &cell_up[0]);
-            cell_up[2] = kw; 
+            cell_up[2] = kw;
 
-            t_long k_cell_id_ = wpi_algo::encode_cell_id (cell_up, m_size_); 
+            t_long k_cell_id_ = wpi_algo::encode_cell_id (cell_up, m_size_);
             t_double z_top = 0;
             t_float* tops_data = &(*tops_)[0];
 
-            // get mean of Z top plane 
+            // get mean of Z top plane
             for (t_uint j = 0; j < 4; ++j)
               {
-                z_top += 0.25 * tops_data[24 * k_cell_id_ + 3 * j + 2]; 
+                z_top += 0.25 * tops_data[24 * k_cell_id_ + 3 * j + 2];
               }
             // fracture inside this layer
-            if (frac_coords[2] - half_up > z_top) 
+            if (frac_coords[2] - half_up > z_top)
               {
                 kw1_flag = 1;
                 frac.cell_pos[2] = kw;  // Kw1 - position
                 break;
               }
           }
-        
+
         if (kw1_flag == 0)  // cell_pos[2] hasn't changed
           {
             // reach top of reservoir
-            frac.cell_pos[2] = 0; 
+            frac.cell_pos[2] = 0;
           }
-        
+
         t_uint kw2_flag = 0;
         // find kw2 position of fracture
         for (t_long kw = cell_pos[2]; kw < m_size_[2]; kw++)
           {
             vertex_pos_i cell_down;
             copy (&cell_pos[0], &cell_pos[strat_t::D], &cell_down[0]);
-            cell_down[2] = kw; 
+            cell_down[2] = kw;
 
-            t_ulong k_cell_id_ = wpi_algo::encode_cell_id (cell_down, m_size_); 
+            t_ulong k_cell_id_ = wpi_algo::encode_cell_id (cell_down, m_size_);
             t_double z_down = 0;
             t_float* tops_data = &(*tops_)[0];
 
-            // get mean of Z bottom plane 
+            // get mean of Z bottom plane
             for (t_uint j = 4; j < 8; ++j)
               {
-                z_down += 0.25 * tops_data[24 * k_cell_id_ + 3 * j + 2]; 
+                z_down += 0.25 * tops_data[24 * k_cell_id_ + 3 * j + 2];
               }
             // fracture inside this layer
-            if (frac_coords[2] + half_down < z_down) 
+            if (frac_coords[2] + half_down < z_down)
               {
                 kw2_flag = 1;
                 frac.cell_pos[3] = kw; // Kw2 position
                 break;
               }
-            
+
           }
         if (kw2_flag == 0)
           {
-            // reach bottom of reservoir 
+            // reach bottom of reservoir
             frac.cell_pos[3] = m_size_[2] - 1;
-          } 
+          }
 
 				// if compdat for this cell is already added
 				// then just update kh_mult

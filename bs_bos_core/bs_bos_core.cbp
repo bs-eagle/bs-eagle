@@ -472,6 +472,7 @@
 		<Unit filename="../common_types/src/traj.h" />
 		<Unit filename="../common_types/src/vartype_table.cpp" />
 		<Unit filename="../common_types/src/vartype_table.h" />
+		<Unit filename="../hdf5_storage/python/pool_test.py" />
 		<Unit filename="../hdm_fluid/include/fluids_iface.h" />
 		<Unit filename="../hdm_fluid/include/pvt_iface.h" />
 		<Unit filename="../hdm_fluid/include/pvt_oil_iface.h" />
@@ -487,6 +488,8 @@
 		<Unit filename="../sql_well/sqlite/sqlite3.h" />
 		<Unit filename="../sql_well/src/date_tools.cpp" />
 		<Unit filename="../sql_well/src/date_tools.h" />
+		<Unit filename="../sql_well/src/frac_comp_ident.cpp" />
+		<Unit filename="../sql_well/src/frac_comp_ident.h" />
 		<Unit filename="../sql_well/src/localization.cpp" />
 		<Unit filename="../sql_well/src/localization.h" />
 		<Unit filename="../sql_well/src/main.cpp" />
