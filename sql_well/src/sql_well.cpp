@@ -1890,39 +1890,22 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             fprintf (fp, "/\n");
           finalize_sql ();
 
+
 #if 0
           // COMPDAT
           compdats.clear ();
           cd = compdats.build (*di);
-          if (!cd.empty ())
-            {
-              fprintf (fp, "COMPDAT\n");
-              cde = cd.end();
-              for (cdi = cd.begin(); cdi != cde; ++cdi)
-                {
-                   fprintf (fp, "\'%s\' %u %u %u %u \'OPEN\' 3* %lf 2* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->kh_mult, cdi->dir);
-                }
-              fprintf (fp, "/\n\n");
-            }
-
           // FRACTURES
           fractures.clear ();
           ft = fractures.build(*di);
-          if (!ft.empty ())
-            {
-              fprintf (fp, "FRACTURES\n");
-              fte = ft.end ();
-              for (fti = ft.begin (); fti != fte; ++fti)
-                {
-                  fprintf (fp, "\'%s\' %u %u %u %u %10.8f %10.8f 0 \'%s\' %10.8f %10.8f /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1,
-                  fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle, fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin,  fti->frac_perm);
-                }
-              fprintf (fp, "/\n\n");
-            }
 #else
-          // COMPDAT
+          // COMPDAT AND FRACTURES
           compl_n_frac.clear ();
           cd = compl_n_frac.compl_build (*di);
+          ft = compl_n_frac.frac_build(*di);
+#endif
+
+          // COMPDAT
           if (!cd.empty ())
           {
             fprintf (fp, "COMPDAT\n");
@@ -1935,23 +1918,24 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           }
 
           // FRACTURES
-          ft = compl_n_frac.frac_build(*di);
           if (!ft.empty ())
           {
-            char buf[20];
+            char frac_perm_str[20];
             fprintf (fp, "FRACTURE\n");
             fte = ft.end ();
             for (fti = ft.begin (); fti != fte; ++fti)
             {
               if (fti->frac_perm > 0)
-                sprintf (buf, "%lf", fti->frac_perm);
-              fprintf (fp, "\'%s\' %u %u %u %u %lf %lf 0 \'%s\' %lf %s %s %s %u /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1,
+                sprintf (frac_perm_str, "%lf", fti->frac_perm);
+              else
+                sprintf (frac_perm_str, " * ");
+
+              fprintf (fp, "\'%s\' %u %u %u %u %lf %lf 0 \'%s\' %s %s %s %s /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1,
                 fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle, fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin,
-                fti->frac_perm > 0 ? buf : " * ", " * ", " * ", " * ");
+                frac_perm_str, " * ", " * ", " * ");
             }
             fprintf (fp, "/\n\n");
           }
-#endif
         }
 
       fclose (fp);
