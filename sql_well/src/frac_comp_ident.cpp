@@ -52,8 +52,8 @@ struct compl_traits {
 
 	static boost::format select_segment() {
 		return boost::format(
-      "SELECT md, length FROM completions WHERE d=%f and well_name='%s' and branch_name='%s'"
-			//"SELECT md, length, status, rw, kh, skin FROM completions WHERE d=%f and well_name='%s' and branch_name='%s'"
+      //"SELECT md, length FROM completions WHERE d=%f and well_name='%s' and branch_name='%s'"
+			"SELECT md, length, status, rw, kh, skin FROM completions WHERE d=%f and well_name='%s' and branch_name='%s'"
 		);
 	}
 };

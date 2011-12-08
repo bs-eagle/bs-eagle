@@ -81,7 +81,7 @@
       <AdditionalOptions> /Zm1000</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>hdf5dll.lib;CGAL-vc100-mt.lib;libgmp-10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>hdf5dll.lib;CGAL-vc100-mt.lib;mpir.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>$(CGAL_DIR)\lib;$(PYTHON_PATH)/libs;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/release/;$(HDF5_PATH)/dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>

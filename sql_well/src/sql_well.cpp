@@ -1739,6 +1739,13 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           print_date_ecl (*di, d_buf);
           printf ("DATE %s\n", d_buf);
           fprintf (fp, "DATES\n%s\n/\n", d_buf);
+
+          // Building compdat to put first completion I, J to WELLSPECS
+          compl_n_frac.clear ();
+          cd = compl_n_frac.compl_build (*di);
+          cde = cd.end();
+          
+
           if (!w_spec_flag)
             {
               w_spec_flag = 1;
@@ -1749,11 +1756,51 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               for (; !step_sql ();)
                 {
                   std::string s = get_sql_str (0);
-                  fprintf (fp, "\'%s\' \'FIELD\' 2* /\n", s.c_str ());
+                  int x, y;
+                  for (cdi = cd.begin(); cdi != cde; ++cdi)
+                    if (cdi->well_name == s)
+                      {
+                        x = cdi->cell_pos[0] + 1;
+                        y = cdi->cell_pos[1] + 1;
+                        break;
+                      }
+                  fprintf (fp, "\'%s\' \'FIELD\' %u %u /\n", s.c_str (), x, y);
                 }
               fprintf (fp, "/\n");
               finalize_sql ();
             }
+
+
+          // COMPDAT
+          
+          if (!cd.empty ()) 
+          {
+            fprintf (fp, "COMPDAT\n");
+            cde = cd.end();
+            for (cdi = cd.begin(); cdi != cde; ++cdi)
+            {
+              fprintf (fp, "\'%s\' %u %u %u %u \'OPEN\' 2* %lf 1* %lf 1* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
+            }
+            fprintf (fp, "/\n\n");
+          }
+
+          // FRACTURES
+          ft = compl_n_frac.frac_build(*di);
+          if (!ft.empty ())
+          {
+            char buf[20];
+            fprintf (fp, "FRACTURE\n");
+            fte = ft.end ();
+            for (fti = ft.begin (); fti != fte; ++fti)
+            {
+              if (fti->frac_perm > 0)
+                sprintf (buf, "%lf", fti->frac_perm);
+              fprintf (fp, "\'%s\' %u %u %u %u %lf %lf 0 \'%s\' %lf %s %s %s %u /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1, 
+                fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle, fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin,  
+                fti->frac_perm > 0 ? buf : " * ", " * ", " * ", fti->md_cell_pos[2] + 1); 
+            }
+            fprintf (fp, "/\n\n");
+          }
 
           // WCONINJE
           sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND ctrl < 0 ORDER BY well_name ASC", *di);
@@ -1778,6 +1825,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               char s_status[10];
               char s_ctrl[10];
               char s_phase[10];
+              char s_params[20];
               if (status == STATUS_OPEN)
                 sprintf (s_status, "OPEN");
               else
@@ -1787,6 +1835,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   sprintf (s_ctrl, "BHP");
                   // TODO: add injection phase into DB
                   sprintf (s_phase, "WATER");
+                  sprintf (s_params, "2* %lf", i_bhp);
                 }
               else
                 {
@@ -1805,8 +1854,11 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                     }
                   else
                     sprintf (s_phase, "WATER");
+
+                  sprintf (s_params, "%lf 1* %lf", rate, i_bhp);
                 }
-              fprintf (fp, "\'%s\' \'%s\' \'%s\' \'%s\' ", s.c_str (), s_phase, s_status, s_ctrl);
+              fprintf (fp, "\'%s\' \'%s\' \'%s\' \'%s\' %s ", s.c_str (), s_phase, s_status, s_ctrl, s_params);
+              /*
               if (rate < 0)
                 fprintf (fp, "2* ");
               else
@@ -1815,7 +1867,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                 fprintf (fp, "1* ");
               else
                 fprintf (fp, "%lf ", i_bhp);
-
+              */
               fprintf (fp, "/\n");
             }
           if (wconinje_flag)
@@ -1826,7 +1878,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND ctrl > 0 ORDER BY well_name ASC", *di);
           if (prepare_sql (s_buf))
             return -1;
-
+          
           t_uint wconprod_flag = 0;
           for (; !step_sql ();)
             {
@@ -1845,24 +1897,39 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               double p_bhp = get_sql_real (6);
               char s_status[10];
               char s_ctrl[10];
+              char s_params[30];
               if (status == STATUS_OPEN)
                 sprintf (s_status, "OPEN");
               else
                 sprintf (s_status, "SHUT");
               if (ctrl == CTRL_P_LRATE)
-                sprintf (s_ctrl, "LRAT");
+                {
+                  sprintf (s_ctrl, "LRAT");
+                  sprintf (s_params, "3* %lf 1* %lf", p_lr, p_bhp);
+                }
               else if (ctrl == CTRL_P_BHP)
-                sprintf (s_ctrl, "BHP");
+                {
+                  sprintf (s_ctrl, "BHP");
+                  sprintf (s_params, "5* %lf", p_bhp);
+                }
               else if (ctrl == CTRL_P_ORATE)
-                sprintf (s_ctrl, "ORAT");
+                {
+                  sprintf (s_ctrl, "ORAT");
+                  sprintf (s_params, "%lf 4* %lf", p_or, p_bhp);
+                }
               else if (ctrl == CTRL_P_WRATE)
-                sprintf (s_ctrl, "WRAT");
+                {
+                  sprintf (s_ctrl, "WRAT");
+                  sprintf (s_params, "1* %lf 3* %lf", p_wr, p_bhp);
+                }
               else if (ctrl == CTRL_P_GRATE)
-                sprintf (s_ctrl, "GRAT");
+                {
+                  sprintf (s_ctrl, "GRAT");
+                  sprintf (s_params, "2* %lf 2* %lf", p_gr, p_bhp);
+                }
 
-
-
-              fprintf (fp, "\'%s\' \'%s\' \'%s\' ", s.c_str (), s_status, s_ctrl);
+              fprintf (fp, "\'%s\' \'%s\' \'%s\' %s ", s.c_str (), s_status, s_ctrl, s_params);
+              /*
               if (p_or < 0)
                 fprintf (fp, "1* ");
               else
@@ -1883,59 +1950,12 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                 fprintf (fp, "1* ");
               else
                 fprintf (fp, "%lf ", p_bhp);
-
+              */
               fprintf (fp, "/\n");
             }
-          if (wconprod_flag)
+          if (wconprod_flag) 
             fprintf (fp, "/\n");
           finalize_sql ();
-
-
-#if 0
-          // COMPDAT
-          compdats.clear ();
-          cd = compdats.build (*di);
-          // FRACTURES
-          fractures.clear ();
-          ft = fractures.build(*di);
-#else
-          // COMPDAT AND FRACTURES
-          compl_n_frac.clear ();
-          cd = compl_n_frac.compl_build (*di);
-          ft = compl_n_frac.frac_build(*di);
-#endif
-
-          // COMPDAT
-          if (!cd.empty ())
-          {
-            fprintf (fp, "COMPDAT\n");
-            cde = cd.end();
-            for (cdi = cd.begin(); cdi != cde; ++cdi)
-            {
-              fprintf (fp, "\'%s\' %u %u %u %u \'OPEN\' 3* %lf 2* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->kh_mult, cdi->dir);
-            }
-            fprintf (fp, "/\n\n");
-          }
-
-          // FRACTURES
-          if (!ft.empty ())
-          {
-            char frac_perm_str[20];
-            fprintf (fp, "FRACTURE\n");
-            fte = ft.end ();
-            for (fti = ft.begin (); fti != fte; ++fti)
-            {
-              if (fti->frac_perm > 0)
-                sprintf (frac_perm_str, "%lf", fti->frac_perm);
-              else
-                sprintf (frac_perm_str, " * ");
-
-              fprintf (fp, "\'%s\' %u %u %u %u %lf %lf 0 \'%s\' %s %s %s %s /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1,
-                fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle, fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin,
-                frac_perm_str, " * ", " * ", " * ");
-            }
-            fprintf (fp, "/\n\n");
-          }
         }
 
       fclose (fp);
