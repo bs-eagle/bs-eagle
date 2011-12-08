@@ -1228,10 +1228,15 @@ public:
             frac_coords[j] = pprev_x->where[j] + (md - pprev_x->md) / (px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
           }
 
+        //std::cout<<"up "<<half_up<<" down "<<half_down<<"\n";
+
+
         t_uint kw1_flag = 0;
         // find kw1 position of fracture
         for (t_long kw = cell_pos[2]; kw >= 0; kw--)
           {
+            //std::cout<<"kw "<<kw<<" 0";
+
             vertex_pos_i cell_up;
             copy (&cell_pos[0], &cell_pos[strat_t::D], &cell_up[0]);
             cell_up[2] = kw;
@@ -1245,11 +1250,14 @@ public:
               {
                 z_top += 0.25 * tops_data[24 * k_cell_id_ + 3 * j + 2];
               }
+           //std::cout<<" frac "<<frac_coords[2] - half_up<<" z_down "<<z_top<<"\n";
+
             // fracture inside this layer
-            if (frac_coords[2] - half_up > z_top)
+            if (frac_coords[2] - half_up >= z_top)
               {
                 kw1_flag = 1;
                 frac.cell_pos[2] = kw;  // Kw1 - position
+                //std::cout<<"    break\n";
                 break;
               }
           }
@@ -1264,6 +1272,8 @@ public:
         // find kw2 position of fracture
         for (t_long kw = cell_pos[2]; kw < m_size_[2]; kw++)
           {
+            //std::cout<<"kw "<<kw<<"m_size "<<m_size_[2];
+
             vertex_pos_i cell_down;
             copy (&cell_pos[0], &cell_pos[strat_t::D], &cell_down[0]);
             cell_down[2] = kw;
@@ -1277,11 +1287,15 @@ public:
               {
                 z_down += 0.25 * tops_data[24 * k_cell_id_ + 3 * j + 2];
               }
+
+           //std::cout<<" frac "<<frac_coords[2] + half_down<<" z_down "<<z_down<<"\n";
+
             // fracture inside this layer
-            if (frac_coords[2] + half_down < z_down)
+            if (frac_coords[2] + half_down <= z_down)
               {
                 kw2_flag = 1;
                 frac.cell_pos[3] = kw; // Kw2 position
+                //std::cout<<"    break\n";
                 break;
               }
 
@@ -1291,6 +1305,14 @@ public:
             // reach bottom of reservoir
             frac.cell_pos[3] = m_size_[2] - 1;
           }
+
+         if (!half_down)
+           frac.cell_pos[3] = frac.cell_pos[2];
+
+         if (!half_up && !half_down)
+           continue;
+
+         //std::cout<<"FRACTURE K1 "<<frac.cell_pos[2]<<" K2 "<<frac.cell_pos[3]<<"\n";
 
 				// if compdat for this cell is already added
 				// then just update kh_mult
