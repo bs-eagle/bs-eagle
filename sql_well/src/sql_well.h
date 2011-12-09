@@ -135,14 +135,14 @@ namespace blue_sky
        */
       virtual int read_from_ascii_file (const std::string &fname, double starting_date);
 
-      /** 
+      /**
        * @brief Save all data from db to BOS ascii format
-       * 
+       *
        * @param fname   -- <INPUT> file name
-       * 
+       *
        * @return 0 if success
        */
-      virtual int save_to_bos_ascii_file (const std::string &fname, sp_pool_t pool);
+      virtual int save_to_bos_ascii_file (const std::string &fname, sp_pool_t pool, sp_prop_t prop);
     public:
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual boost::python::list d2date (double d) const

@@ -1,8 +1,8 @@
-/** 
+/**
  * @file well_pool_iface.h
  * @brief interface for the well storage
  * @author Oleg Borschuk
- * @version 
+ * @version
  * @date 2011-07-29
  */
 #ifndef WELL_POOL_IFACE_LA5BNEMD
@@ -59,48 +59,48 @@ class well_pool_iface : public objbase
       static const int STATUS_CON_OPEN = 1;
 
     public:
-      /** 
+      /**
        * @brief destructor
        */
       virtual ~well_pool_iface ()
         {}
 
-      /** 
-       * @brief return SP to the property 
+      /**
+       * @brief return SP to the property
        */
       //virtual sp_prop_t get_prop () = 0;
 
-      /** 
+      /**
        * @brief this method should be call first
-       * 
+       *
        * @param file  -- <INPUT> data base file
-       * 
+       *
        * @return 0 if success
        */
-      virtual int open_db (const std::string &file) = 0; 
+      virtual int open_db (const std::string &file) = 0;
 
-      /** 
+      /**
        * @brief close database connection
        */
-      virtual void close_db () = 0; 
+      virtual void close_db () = 0;
 
 
       // wels
-      /** 
+      /**
        * @brief add well to the storage
-       * 
+       *
        * @param well_name -- <INPUT> name for the new well
-       * 
+       *
        * @return 0 if OK
        */
       virtual int add_well (const std::string &well_name) = 0;
       virtual list_t get_well_names () const = 0;
       //virtual int set_well_param (const std::string &wname, double date, const std::string param, double value) = 0;
       //virtual double get_well_param (const std::string &wname, double date, const std::string param) = 0;
-      
+
       // branches
       //virtual list_t get_branches_names (const std::string &well_name) const = 0;
-      //virtual int add_branch (const std::string &wname, const std::string &branch, 
+      //virtual int add_branch (const std::string &wname, const std::string &branch,
       //                        t_double md, const std::string &parent) = 0;
       //virtual int add_branch_prop (const std::string &wname, const std::string &branch,
       //                             sp_table_t tbl) = 0;
@@ -128,43 +128,43 @@ class well_pool_iface : public objbase
                                     const std::string &update_sql) = 0;
       virtual spv_double get_table (const std::string &table_name, boost::python::list &table_columns, const std::string &filter) = 0;
 
-      /** 
+      /**
        * @brief create internal structure of the database
-       * 
+       *
        * @return 0 if success
        */
       virtual int create_db_struct () = 0;
 
       virtual void fill_db () = 0;
 
-      /** 
+      /**
        * @brief read from ascii file in new format
-       * 
+       *
        * @param fname -- <INPUT> input file name
        * @param starting_date -- <INPUT> starting date
        *
        * @return 0 if success
        */
-      virtual int read_from_ascii_file (const std::string &fname, 
+      virtual int read_from_ascii_file (const std::string &fname,
                                         double starting_date) = 0;
 
-      /** 
+      /**
        * @brief Save all data from db to BOS ascii format
-       * 
+       *
        * @param fname   -- <INPUT> file name
-       * 
+       *
        * @return 0 if success
        */
-      virtual int save_to_bos_ascii_file (const std::string &fname, sp_pool_t pool) = 0;
+      virtual int save_to_bos_ascii_file (const std::string &fname, sp_pool_t pool, sp_prop_t prop) = 0;
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual boost::python::list d2date (double d) const = 0;
       virtual double date2d (int year, int month, int day, int hour, int minute, int second) const = 0;
       virtual std::string d2str (double d) const = 0;
       virtual std::string t2str (double d) const = 0;
 
-      /** 
+      /**
        * @brief python print wrapper
-       * 
+       *
        * @return return table description
        */
       virtual std::string py_str () const = 0;

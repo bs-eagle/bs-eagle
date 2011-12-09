@@ -25,7 +25,7 @@
 #include "bs_kernel.h"
 #include "sql_well.h"
 #include "frac_comp_ident.h"
-
+#include "well_path_ident.h"
 
 using namespace boost;
 
@@ -1690,7 +1690,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
     }
 
   int
-  sql_well::save_to_bos_ascii_file (const std::string &fname, sp_pool_t pool)
+  sql_well::save_to_bos_ascii_file (const std::string &fname, sp_pool_t pool, sp_prop_t prop)
     {
       FILE *fp = fopen (fname.c_str (), "w");
       std::list<double> dates;
@@ -1702,7 +1702,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
       fci::frac_storage::iterator fti, fte;
       int w_spec_flag = 0;
       char s_buf[2048];
-      int nx, ny;
+      int nx, ny, nz;
 
 
       if (!fp)
@@ -1726,6 +1726,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
       dims = pool->py_get_pool_dims();
       nx = boost::python::extract<int>(dims[0]);
       ny = boost::python::extract<int>(dims[1]);
+      nz = boost::python::extract<int>(dims[2]);
+      int nx_ny = nx * ny;
       BS_SP (well_pool_iface) sp_wp = this;
 #if 0
       fci::compdat_builder compdats (nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), sp_wp);
@@ -1744,27 +1746,33 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           compl_n_frac.clear ();
           cd = compl_n_frac.compl_build (*di);
           cde = cd.end();
-          
+
 
           if (!w_spec_flag)
             {
               w_spec_flag = 1;
               // well specs
               fprintf (fp, "WELSPECS\n");
-              if (prepare_sql ("SELECT name FROM wells ORDER BY name ASC"))
+              if (prepare_sql ("SELECT name, x, y FROM wells ORDER BY name ASC"))
                 return -1;
               for (; !step_sql ();)
                 {
                   std::string s = get_sql_str (0);
-                  int x, y;
-                  for (cdi = cd.begin(); cdi != cde; ++cdi)
-                    if (cdi->well_name == s)
-                      {
-                        x = cdi->cell_pos[0] + 1;
-                        y = cdi->cell_pos[1] + 1;
-                        break;
-                      }
-                  fprintf (fp, "\'%s\' \'FIELD\' %u %u /\n", s.c_str (), x, y);
+                  //determine IJ of well
+                  //strat_t::Point point;
+                  spv_double point = BS_KERNEL.create_object (v_double::bs_type ());
+                  point->resize (3);
+                  t_double *point_ptr = &(*point)[0];
+                  point_ptr[0] = get_sql_real (1);
+                  point_ptr[1] = get_sql_real (2);
+                  point_ptr[2] = prop->get_f ("min_z");
+                  int cell = where_is_point(nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), point);
+                  if (cell >= nx_ny * nz)
+                    throw bs_exception ("", "first point in PVTO should be a saturated point");
+                  int k1 = cell / nx_ny;
+                  int j1 = (cell - k1 * nx_ny) / nx;
+                  int i1 = cell - k1 * nx_ny - j1 * nx;
+                  fprintf (fp, "\'%s\' \'FIELD\' %u %u /\n", s.c_str (), i1 + 1, j1 + 1);
                 }
               fprintf (fp, "/\n");
               finalize_sql ();
@@ -1772,8 +1780,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 
 
           // COMPDAT
-          
-          if (!cd.empty ()) 
+
+          if (!cd.empty ())
           {
             fprintf (fp, "COMPDAT\n");
             cde = cd.end();
@@ -1817,9 +1825,9 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             {
               if (fti->frac_perm > 0)
                 sprintf (buf, "%lf", fti->frac_perm);
-              fprintf (fp, "\'%s\' %u %u %u %u %lf %lf 0 \'%s\' %lf %s %s %s %u /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1, 
-                fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle, fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin,  
-                fti->frac_perm > 0 ? buf : " * ", " * ", " * ", fti->md_cell_pos[2] + 1); 
+              fprintf (fp, "\'%s\' %u %u %u %u %lf %lf 0 \'%s\' %lf %s %s %s %u /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1,
+                fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle, fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin,
+                fti->frac_perm > 0 ? buf : " * ", " * ", " * ", fti->md_cell_pos[2] + 1);
             }
             fprintf (fp, "/\n\n");
           }
@@ -1900,7 +1908,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND ctrl > 0 ORDER BY well_name ASC", *di);
           if (prepare_sql (s_buf))
             return -1;
-          
+
           t_uint wconprod_flag = 0;
           for (; !step_sql ();)
             {
@@ -1975,7 +1983,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               */
               fprintf (fp, "/\n");
             }
-          if (wconprod_flag) 
+          if (wconprod_flag)
             fprintf (fp, "/\n");
           finalize_sql ();
         }
