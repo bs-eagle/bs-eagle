@@ -1784,6 +1784,28 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             fprintf (fp, "/\n\n");
           }
 
+          // WPIMULT
+
+          if (!cd.empty ()) 
+          {
+            
+            cde = cd.end();
+            int wpimult_exist = 0;
+            for (cdi = cd.begin(); cdi != cde; ++cdi)
+            {
+              if (cdi->kh_mult != 1)
+                {
+                  if (!wpimult_exist)
+                    fprintf (fp, "WPIMULT\n");
+                  wpimult_exist = 1;
+                  fprintf (fp, "\'%s\' %lf %u %u %u /\n", cdi->well_name.c_str(), cdi->kh_mult, cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1);
+                }
+            }
+            if (wpimult_exist)
+              fprintf (fp, "/\n\n");
+          }
+
+
           // FRACTURES
           ft = compl_n_frac.frac_build(*di);
           if (!ft.empty ())

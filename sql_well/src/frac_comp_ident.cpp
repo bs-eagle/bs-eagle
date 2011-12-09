@@ -53,7 +53,7 @@ struct compl_traits {
 	static boost::format select_segment() {
 		return boost::format(
       //"SELECT md, length FROM completions WHERE d=%f and well_name='%s' and branch_name='%s'"
-			"SELECT md, length, status, rw, kh, skin FROM completions WHERE d=%f and well_name='%s' and branch_name='%s'"
+			"SELECT md, length, status, rw, kh, skin, kh_mult FROM completions WHERE d=%f and well_name='%s' and branch_name='%s'"
 		);
 	}
 };
@@ -973,6 +973,7 @@ public:
         t_double rw = sw_->get_sql_real (3);
         t_double kh = sw_->get_sql_real (4);
         t_double skin = sw_->get_sql_real (5);
+        t_double kh_mult = sw_->get_sql_real (6);
         x_iterator px = xp.upper_bound(whc(md));
         x_iterator xend = xp.upper_bound(whc(md + len));
         x_iterator pprev_x = px;
@@ -1093,6 +1094,8 @@ public:
             cf.kh = kh;
             cf.status = status;
             cf.skin = skin;
+            cf.kh_mult *= kh_mult;
+
 
             // if compdat for this cell is already added
             // then just update kh_mult
