@@ -1,13 +1,13 @@
-/// @file compdat_builder.h
-/// @brief COMPDAT builder implementation
+/// @file compdat_traits.h
+/// @brief COMPDAT traits implementation
 /// @author uentity
 /// @version 
 /// @date 12.12.2011
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
-#ifndef COMPDAT_BUILDER_IMPL_RXNBKXX0
-#define COMPDAT_BUILDER_IMPL_RXNBKXX0
+#ifndef COMPDAT_TRAITS_RXNBKXX0
+#define COMPDAT_TRAITS_RXNBKXX0
 
 #include "frac_comp_builder.h"
 

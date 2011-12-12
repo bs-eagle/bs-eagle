@@ -1,13 +1,13 @@
-/// @file fracture_builder_impl.h
-/// @brief FRACTURE builder implementation
+/// @file fracture_traits.h
+/// @brief FRACTURE traits implementation
 /// @author uentity
 /// @version 
 /// @date 12.12.2011
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
-#ifndef FRACTURE_BUILDER_IMPL_RAF5LK1T
-#define FRACTURE_BUILDER_IMPL_RAF5LK1T
+#ifndef FRACTURE_TRAITS_RAF5LK1T
+#define FRACTURE_TRAITS_RAF5LK1T
 
 #include "frac_comp_builder.h"
 

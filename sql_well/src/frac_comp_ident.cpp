@@ -14,9 +14,8 @@
 #include "py_list_converter.h"
 #include "sql_well.h"
 
-//#include "frac_comp_builder.h"
-#include "compdat_builder_impl.h"
-#include "fracture_builder_impl.h"
+#include "compdat_traits.h"
+#include "fracture_traits.h"
 
 #include <boost/format.hpp>
 #include <iosfwd>
