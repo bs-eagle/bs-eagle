@@ -1798,9 +1798,9 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 
           // WPIMULT
 
-          if (!cd.empty ()) 
+          if (!cd.empty ())
           {
-            
+
             cde = cd.end();
             int wpimult_exist = 0;
             for (cdi = cd.begin(); cdi != cde; ++cdi)
@@ -1829,9 +1829,11 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             {
               if (fti->frac_perm > 0)
                 sprintf (buf, "%lf", fti->frac_perm);
-              fprintf (fp, "\'%s\' %u %u %u %u %lf %lf 0 \'%s\' %lf %s %s %s %u /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1,
-                fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle, fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin,
-                fti->frac_perm > 0 ? buf : " * ", " * ", " * ", fti->md_cell_pos[2] + 1);
+              else
+                sprintf (buf, " * ");
+              fprintf (fp, "\'%s\' %u %u %u %u %lf %lf %lf \'%s\' %lf %s %s %s %s /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1,
+                fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle, fti->frac_skin, fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin,
+                buf, " * ", " * ", " * ");
             }
             fprintf (fp, "/\n\n");
           }

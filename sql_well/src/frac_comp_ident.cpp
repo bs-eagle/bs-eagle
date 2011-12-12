@@ -39,7 +39,7 @@ struct fract_traits  {
 
 	static boost::format select_segment() {
 		return boost::format(
-      "SELECT status, md, half_length_1, half_length_2, angle, half_up, half_down, perm, half_thin FROM fractures WHERE d=%f and well_name='%s' and branch_name='%s'"
+      "SELECT status, md, half_length_1, half_length_2, angle, half_up, half_down, perm, half_thin, skin FROM fractures WHERE d=%f and well_name='%s' and branch_name='%s'"
 			//"SELECT status, md, half_length_1, half_length_2, angle, half_up, half_down, perm, half_thin, skin FROM fractures WHERE d=%f and well_name='%s' and branch_name='%s'"
 		);
 	}
@@ -1197,8 +1197,8 @@ public:
         t_double half_down     = sw_->get_sql_real (6);
         t_double perm          = sw_->get_sql_real (7);
         t_double half_thin     = sw_->get_sql_real (8);
-
-				x_iterator px = xp.upper_bound(whc(md));
+        t_double frac_skin     = sw_->get_sql_real (9);
+		x_iterator px = xp.upper_bound(whc(md));
 
         if (px == xp.end ())
           continue;
@@ -1225,6 +1225,7 @@ public:
         frac.frac_angle = angle;
         frac.frac_perm  = perm;
         frac.frac_half_thin = half_thin;
+        frac.frac_skin = frac_skin;
 
         for (t_uint j = 0; j < strat_t::D; ++j)
           {
