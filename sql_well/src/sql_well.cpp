@@ -1791,7 +1791,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             cde = cd.end();
             for (cdi = cd.begin(); cdi != cde; ++cdi)
             {
-              fprintf (fp, "\'%s\' %u %u %u %u \'OPEN\' 2* %lf 1* %lf 1* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
+              fprintf (fp, "\'%s\' %lu %lu %lu %lu \'OPEN\' 2* %lf 1* %lf 1* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
             }
             fprintf (fp, "/\n\n");
           }
@@ -1810,7 +1810,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   if (!wpimult_exist)
                     fprintf (fp, "WPIMULT\n");
                   wpimult_exist = 1;
-                  fprintf (fp, "\'%s\' %lf %u %u %u /\n", cdi->well_name.c_str(), cdi->kh_mult, cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1);
+                  fprintf (fp, "\'%s\' %lf %lu %lu %lu /\n", cdi->well_name.c_str(), cdi->kh_mult, cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1);
                 }
             }
             if (wpimult_exist)
@@ -1829,7 +1829,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             {
               if (fti->frac_perm > 0)
                 sprintf (buf, "%lf", fti->frac_perm);
-              fprintf (fp, "\'%s\' %u %u %u %u %lf %lf %lf \'%s\' %lf %s %s %s %u /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1, 
+              fprintf (fp, "\'%s\' %lu %lu %lu %lu %lf %lf %lf \'%s\' %lf %s %s %s %lu /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1, 
                 fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle - 90, fti->frac_skin, fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin,  
                 fti->frac_perm > 0 ? buf : " * ", " * ", " * ", fti->md_cell_pos[2] + 1); 
             }
