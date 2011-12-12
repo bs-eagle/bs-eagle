@@ -26,77 +26,27 @@ typedef wpi_algo::intersect_path xpath;
 typedef std::vector <xpath>  xpath_storage;
 
 /*-----------------------------------------------------------------
- * interface of well_path_builder building algo
- *----------------------------------------------------------------*/
-class BS_API_PLUGIN well_path_builder {
-
-public:
-	typedef strategy_3d strat_t;
-	typedef wpi_algo::trimesh trimesh;
-	typedef wpi_algo::well_path well_path;
-	typedef wpi_algo::well_hit_cell whc;
-	typedef wpi_algo::intersect_path xpath;
-	typedef wpi_algo::hit_idx_t hit_idx_t;
-	typedef wpi_algo::xbuilder xbuilder;
-	//typedef intersect_builder2< strategy_3d > xbuilder;
-
-	typedef strategy_3d::vertex_pos_i vertex_pos_i;
-	typedef strategy_3d::vertex_pos vertex_pos;
-	typedef mesh_tools< strat_t >::mesh_part mesh_part;
-
-	typedef well_pool_iface::sp_traj_t sp_traj_t;
-	typedef well_pool_iface::sp_table_t sp_table_t;
-
-  typedef xpath::iterator x_iterator;
-	typedef multimap< string, string > wb_storage;
-
-	// ctors
-	well_path_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
-
-	well_path_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
-	                 	smart_ptr< well_pool_iface, true > src_well);
-
-	void init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
-	void init(smart_ptr< well_pool_iface, true > src_well);
-
-  template <class cd_traits> 
-  xpath_storage &build (double date, const cd_traits& t);
-	// clear storage
-	void clear();
-	
-  trimesh m_;
-	vertex_pos_i m_size_;
-	// tops should live as long as mesh lives
-	spv_float tops_;
-	// copy of source sql_well
-	smart_ptr< well_pool_iface, true > sw_;
-
-private:
-  xpath_storage xpath_storage_;
-};
-
-/*-----------------------------------------------------------------
  *  POD that holds info needed by COMPDAT
  *----------------------------------------------------------------*/
 struct BS_API_PLUGIN compdat {
 	typedef unsigned long ulong;
 	typedef ulong cell_info[4];
 	typedef ulong pos_i[3];
-  typedef t_float coord[3];
+	typedef t_float coord[3];
 
 	std::string well_name;
 	std::string branch_name;
-	cell_info cell_pos;
-	char dir;
-	t_double kh_mult;
-  t_double md;
-  t_double len;
-  t_double skin;
-  t_double diam;
-  t_double kh;
-  t_uint status;
-  coord x1;       //!< start point coordinates (in 3D) of completion part
-  coord x2;       //!< end point coordinates  (in 3D) of completion part
+	cell_info   cell_pos;
+	char        dir;
+	t_double    kh_mult;
+	t_double    md;
+	t_double    len;
+	t_double    skin;
+	t_double    diam;
+	t_double    kh;
+	t_uint      status;
+	coord x1;       //!< start point coordinates (in 3D) of completion part
+	coord x2;       //!< end point coordinates  (in 3D) of completion part
 
 	// ctors
 	compdat(const std::string& well_name_, const std::string& branch_name_,
@@ -156,20 +106,19 @@ struct BS_API_PLUGIN fracture {
 	typedef unsigned long ulong;
 	typedef ulong cell_info[4];
 	typedef ulong pos_i[3];
-  typedef t_float coord[3];
+	typedef t_float coord[3];
 
 	std::string well_name;
 	std::string branch_name;
-  t_int frac_status;
-	cell_info cell_pos;
-  pos_i    md_cell_pos;
-	t_double frac_half_length_1;
-  t_double frac_half_length_2;
-	t_double frac_angle;
-  t_double frac_half_thin;
-  t_double frac_perm;
-  t_double frac_skin;
-
+	t_int       frac_status;
+	cell_info   cell_pos;
+	pos_i       md_cell_pos;
+	t_double    frac_half_length_1;
+	t_double    frac_half_length_2;
+	t_double    frac_angle;
+	t_double    frac_half_thin;
+	t_double    frac_perm;
+	t_double    frac_skin;
 
 	// ctors
 	fracture(const std::string& well_name_, const std::string& branch_name_,
