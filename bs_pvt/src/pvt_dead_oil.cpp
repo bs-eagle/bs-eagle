@@ -48,31 +48,37 @@ namespace blue_sky
     if (!base_t::init_dependent)
       {
         base_t::init_dependent = true;
-        
+
         //pvt_input_props->clear ();
-        
+
         //main_gpr_.clear ();
         //main_pressure_.clear ();
         //main_fvf_.clear ();
         //main_visc_.clear ();
       }
     t_int n_points = (t_int) vec.size () / elem_count;
-    
+
     if (pvt_input_props->init (n_points, PVT_OIL_INPUT_TOTAL))
       {
         throw bs_exception ("pvt_dead_oil::insert_vector in table", "Error: initializing table of properties");
       }
 
-    pvt_input_props->set_col_name (PVT_OIL_INPUT_GPR, "gor");
-    pvt_input_props->set_col_name (PVT_OIL_INPUT_PRESSURE, "pressure");
-    pvt_input_props->set_col_name (PVT_OIL_INPUT_FVF, "fvf");   
-    pvt_input_props->set_col_name (PVT_OIL_INPUT_VISC, "visc");
+    int n_cols = pvt_input_props->get_n_cols ();
+    //n_cols==3 -- 2 phase model, 3 columns in PVT: pressure, fvf, viscosity
+    int shift = 0;
+    if (n_cols == 3)
+      shift = 1;
 
-    vector_t &main_gpr_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_GPR);
-    vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_OIL_INPUT_PRESSURE);
-    vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_FVF);
-    vector_t &main_visc_         = pvt_input_props->get_col_vector (PVT_OIL_INPUT_VISC);
-     
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_GPR, "gor");
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_PRESSURE - shift, "pressure");
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_FVF - shift, "fvf");
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_VISC - shift, "visc");
+
+    vector_t &main_gpr_        = pvt_input_props->get_col_vector (PVT_OIL_INPUT_GPR);
+    vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_OIL_INPUT_PRESSURE - shift);
+    vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_FVF - shift);
+    vector_t &main_visc_         = pvt_input_props->get_col_vector (PVT_OIL_INPUT_VISC - shift);
+
     for (t_int i = 0; i < n_points; ++i)
       {
         main_gpr_[i]      = (0.0);
@@ -85,10 +91,14 @@ namespace blue_sky
   int
   pvt_dead_oil::build_internal (t_double /*atm_p*/, t_double min_p, t_double max_p, t_long /*n_intervals*/, bool is_pvto)
   {
+    int n_cols = pvt_input_props->get_n_cols ();
+    int shift = 0;
+    if (n_cols == 3)
+      shift = 1;
     vector_t &main_gpr_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_GPR);
-    vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_OIL_INPUT_PRESSURE);
-    vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_FVF);
-    vector_t &main_visc_         = pvt_input_props->get_col_vector (PVT_OIL_INPUT_VISC);
+    vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_OIL_INPUT_PRESSURE - shift);
+    vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_FVF - shift);
+    vector_t &main_visc_         = pvt_input_props->get_col_vector (PVT_OIL_INPUT_VISC - shift);
 
     check_oil ();
 
@@ -162,13 +172,13 @@ namespace blue_sky
       {
         throw bs_exception ("pvt_dead_oil::init table", "Error: initializing table of properties");
       }
-    
+
     pvt_props_table->set_col_name (PVT_OIL_PRESSURE, "pressure");
-    pvt_props_table->set_col_name (PVT_OIL_INV_FVF, "inv_fvf");   
+    pvt_props_table->set_col_name (PVT_OIL_INV_FVF, "inv_fvf");
     pvt_props_table->set_col_name (PVT_OIL_INV_VISC, "inv_visc");
     pvt_props_table->set_col_name (PVT_OIL_INV_VISC_FVF, "inv_visc_fvf");
     pvt_props_table->set_col_name (PVT_OIL_GOR, "gor");
-    
+
     vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_OIL_PRESSURE);
     vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_OIL_INV_FVF);
     vector_t &inv_visc_     = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC);
@@ -271,10 +281,14 @@ namespace blue_sky
   void
   pvt_dead_oil::check_oil ()
   {
-    vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_OIL_INPUT_PRESSURE);
-    vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_FVF);
-    vector_t &main_visc_         = pvt_input_props->get_col_vector (PVT_OIL_INPUT_VISC);
-  
+    int n_cols = pvt_input_props->get_n_cols ();
+    int shift = 0;
+    if (n_cols == 3)
+      shift = 1;
+    vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_OIL_INPUT_PRESSURE - shift);
+    vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_FVF - shift);
+    vector_t &main_visc_         = pvt_input_props->get_col_vector (PVT_OIL_INPUT_VISC - shift);
+
     base_t::check_common ();
 
     check_oil_common (main_pressure_, main_fvf_, main_visc_);
@@ -310,7 +324,7 @@ namespace blue_sky
       vector_t &inv_visc_     = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC);
       vector_t &inv_visc_fvf_ = pvt_props_table->get_col_vector (PVT_OIL_INV_VISC_FVF);
       vector_t &gor_          = pvt_props_table->get_col_vector (PVT_OIL_GOR);
-    
+
       size_t i = binary_search (p, pressure_, std::less <t_double> ());
       if (i == 0)
         ++i;
@@ -419,10 +433,10 @@ namespace blue_sky
     BS_ASSERT (pressure_.size () == inv_fvf_.size ());
     BS_ASSERT (inv_fvf_.size ()  == inv_visc_.size ());
     BS_ASSERT (inv_visc_.size () == inv_visc_fvf_.size ());
-    
+
     BOSOUT (section::pvt, level::medium) << bs_end;
     BOSOUT (section::pvt, level::medium) << "*************************************** PVDO ****************************************" << bs_end;
-    BOSOUT (section::pvt, level::medium) 
+    BOSOUT (section::pvt, level::medium)
       << boost::format ("*%9s%13s%12s%12s%12s%12s%12s%12s%2s\n")
       % "P"
       % "RS"
@@ -440,7 +454,7 @@ namespace blue_sky
         BOSOUT (section::pvt, level::medium)
           << boost::format (
             "*%9.6f\t\t%9.6f\t\t%9.6f\t\t%9.6f\t\t%9.6f\t\t%9.6f\t\t%9.6f\t\t%9.6f%2s"
-          ) 
+          )
           % (pressure_[j])
           % (gor_[j])
           % (1.0 / inv_fvf_[j])
