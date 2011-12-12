@@ -150,6 +150,8 @@ private:
 class BS_API_PLUGIN compdat_builder : public builder< compdat > {
 public:
 	// ctors
+	compdat_builder();
+
 	compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
 
 	compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
@@ -162,6 +164,8 @@ public:
 class BS_API_PLUGIN fracture_builder : public builder< fracture > {
 public:
 	// ctors
+	fracture_builder();
+
 	fracture_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
 
 	fracture_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
@@ -176,6 +180,8 @@ class BS_API_PLUGIN compl_n_frac_builder {
 
 public:
 	// ctors
+	compl_n_frac_builder();
+
 	compl_n_frac_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
 
 	compl_n_frac_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
@@ -184,8 +190,8 @@ public:
 	void init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
 	void init(smart_ptr< well_pool_iface, true > src_well);
 
-  // compdat build
-  const cd_storage& compl_build(double date);
+	// compdat build
+	const cd_storage& compl_build(double date);
 
 	// fractures build
 	const frac_storage& frac_build(double date);
@@ -193,8 +199,8 @@ public:
 	// clear storage
 	void clear();
 
-  // storage getter
-  const cd_storage& storage_compdat() const;
+	// storage getter
+	const cd_storage& storage_compdat() const;
 
 	// storage getter
 	const frac_storage& storage_fracture() const;

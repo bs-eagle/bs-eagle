@@ -49,10 +49,11 @@ struct compl_traits {
 		// 3.4.1 search for completion_j begin_j and end_j using md_j and lentgh_j
 		t_double md = sw->get_sql_real (0);
 		t_double len = sw->get_sql_real (1);
-		//t_uint status = sw->get_sql_int (2);
-		//t_double rw = sw->get_sql_real (3);
-		//t_double kh = sw->get_sql_real (4);
-		//t_double skin = sw->get_sql_real (5);
+		t_uint status = sw->get_sql_int (2);
+		t_double rw = sw->get_sql_real (3);
+		t_double kh = sw->get_sql_real (4);
+		t_double skin = sw->get_sql_real (5);
+		t_double kh_mult = sw->get_sql_real (6);
 		x_iterator px = xp.upper_bound(whc(md));
 		x_iterator xend = xp.upper_bound(whc(md + len));
 		x_iterator pprev_x = px;
@@ -136,7 +137,7 @@ struct compl_traits {
 				const char dirs[] = {'X', 'Y', 'Z'};
 				double max_step = 0;
 				for(uint i = 0; i < strat_t::D; ++i) {
-					const double dir_step = std::fabs(cf.x2[i] - cf.x1[i]);
+					double dir_step = std::fabs(cf.x2[i] - cf.x1[i]);
 					if (max_step < dir_step) {
 						max_step = dir_step;
 						cf.dir = dirs[i];
@@ -146,16 +147,18 @@ struct compl_traits {
 				cf.kh_mult = std::min(cf.kh_mult, 1.);
 
 				// set data
-				//cf.diam = 2 * rw;
-				//cf.kh = kh;
-				//cf.status = status;
-				//cf.skin = skin;
+				cf.diam = 2 * rw;
+				cf.kh = kh;
+				cf.status = status;
+				cf.skin = skin;
+				cf.kh_mult *= kh_mult;
+
 
 				// if compdat for this cell is already added
 				// then just update kh_mult
 				// otherwise add new COMPDAT record
 				// TODO: handle case of different directions inside one cell
-				storage_t::iterator pcd = fcb.s_.find(compdat(px->cell));
+				cd_storage::iterator pcd = fcb.s_.find(compdat(px->cell));
 				if(pcd != fcb.s_.end()) {
 					compdat& cur_cd = const_cast< compdat& >(*pcd);
 					cur_cd.kh_mult = std::min(cur_cd.kh_mult + cf.kh_mult, 1.);

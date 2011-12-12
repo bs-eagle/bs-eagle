@@ -1,4 +1,4 @@
-/// @file frac_comp_ient.cpp
+/// @file frac_comp_ident.cpp
 /// @brief Implementation of finding fractions/completions intersections with mesh
 /// @author uentity
 /// @version
@@ -188,6 +188,8 @@ void builder< brick >::clear() {
 /*-----------------------------------------------------------------
  * compdat_builder implementation
  *----------------------------------------------------------------*/
+compdat_builder::compdat_builder() {}
+
 compdat_builder::compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
 	builder::init(nx, ny, coord, zcorn);
 }
@@ -202,6 +204,8 @@ compdat_builder::compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_fl
 /*-----------------------------------------------------------------
  * fracture_builder implementation
  *----------------------------------------------------------------*/
+fracture_builder::fracture_builder() {}
+
 fracture_builder::fracture_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn)
 {
 	builder::init(nx, ny, coord, zcorn);
@@ -634,7 +638,7 @@ public:
 
         t_uint kw2_flag = 0;
         // find kw2 position of fracture
-        for (t_long kw = cell_pos[2]; kw < m_size_[2]; kw++)
+        for (t_ulong kw = cell_pos[2]; kw < m_size_[2]; kw++)
           {
             //std::cout<<"kw "<<kw<<"m_size "<<m_size_[2];
 
@@ -684,7 +688,7 @@ public:
 				// TODO: handle case of different directions inside one cell
 				frac_storage::iterator pcd = fracs_.find(fracture(px->cell));
 				if(pcd != fracs_.end()) {
-					fracture& cur_cd = const_cast< fracture& >(*pcd);
+					//fracture& cur_cd = const_cast< fracture& >(*pcd);
 					// TODO: cur_cd.kh_mult = std::min(cur_cd.kh_mult + cf.kh_mult, 1.);
 				}
 				else

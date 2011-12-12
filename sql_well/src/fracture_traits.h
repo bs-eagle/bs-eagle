@@ -52,7 +52,7 @@ struct fract_traits  {
 		t_double half_down     = sw->get_sql_real (6);
 		t_double perm          = sw->get_sql_real (7);
 		t_double half_thin     = sw->get_sql_real (8);
-
+		t_double frac_skin     = sw->get_sql_real (9);
 		x_iterator px = xp.upper_bound(whc(md));
 
 		if (px == xp.end ())
@@ -80,19 +80,25 @@ struct fract_traits  {
 		frac.frac_angle = angle;
 		frac.frac_perm  = perm;
 		frac.frac_half_thin = half_thin;
+		frac.frac_skin = frac_skin;
 
 		for (t_uint j = 0; j < strat_t::D; ++j) {
 			frac_coords[j] = pprev_x->where[j] + (md - pprev_x->md) / (px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
 		}
 
+		//std::cout<<"up "<<half_up<<" down "<<half_down<<"\n";
+
+
 		t_uint kw1_flag = 0;
 		// find kw1 position of fracture
 		for (t_long kw = cell_pos[2]; kw >= 0; kw--) {
+			//std::cout<<"kw "<<kw<<" 0";
+
 			vertex_pos_i cell_up;
 			copy (&cell_pos[0], &cell_pos[strat_t::D], &cell_up[0]);
 			cell_up[2] = kw;
 
-			t_ulong k_cell_id_ = wpi_algo::encode_cell_id (cell_up, fcb.m_size_);
+			t_long k_cell_id_ = wpi_algo::encode_cell_id (cell_up, fcb.m_size_);
 			t_double z_top = 0;
 			t_float* tops_data = &(*fcb.tops_)[0];
 
@@ -100,21 +106,28 @@ struct fract_traits  {
 			for (t_uint j = 0; j < 4; ++j) {
 				z_top += 0.25 * tops_data[24 * k_cell_id_ + 3 * j + 2];
 			}
+			//std::cout<<" frac "<<frac_coords[2] - half_up<<" z_down "<<z_top<<"\n";
+
 			// fracture inside this layer
-			if (frac_coords[2] - half_up > z_top) {
+			if (frac_coords[2] - half_up >= z_top) {
 				kw1_flag = 1;
 				frac.cell_pos[2] = kw;  // Kw1 - position
+				//std::cout<<"    break\n";
 				break;
 			}
 		}
 
-		if (kw1_flag == 0) {
-			frac.md_cell_pos[2] = 0;
+		if (kw1_flag == 0)  {
+			// cell_pos[2] hasn't changed
+			// reach top of reservoir
+			frac.cell_pos[2] = 0;
 		}
 
 		t_uint kw2_flag = 0;
 		// find kw2 position of fracture
 		for (t_ulong kw = cell_pos[2]; kw < fcb.m_size_[2]; kw++) {
+			//std::cout<<"kw "<<kw<<"m_size "<<fcb.m_size_[2];
+
 			vertex_pos_i cell_down;
 			copy (&cell_pos[0], &cell_pos[strat_t::D], &cell_down[0]);
 			cell_down[2] = kw;
@@ -127,23 +140,36 @@ struct fract_traits  {
 			for (t_uint j = 4; j < 8; ++j) {
 				z_down += 0.25 * tops_data[24 * k_cell_id_ + 3 * j + 2];
 			}
+
+			//std::cout<<" frac "<<frac_coords[2] + half_down<<" z_down "<<z_down<<"\n";
+
 			// fracture inside this layer
-			if (frac_coords[2] + half_down < z_down) {
+			if (frac_coords[2] + half_down <= z_down) {
 				kw2_flag = 1;
 				frac.cell_pos[3] = kw; // Kw2 position
+				//std::cout<<"    break\n";
 				break;
 			}
+
+		}
+		if (kw2_flag == 0) {
+			// reach bottom of reservoir
+			frac.cell_pos[3] = fcb.m_size_[2] - 1;
 		}
 
-		if (kw2_flag == 0) {
-			frac.md_cell_pos[3] = fcb.m_size_[2] - 1;
-		}
+		if (!half_down)
+			frac.cell_pos[3] = frac.cell_pos[2];
+
+		if (!half_up && !half_down)
+			return;
+
+		//std::cout<<"FRACTURE K1 "<<frac.cell_pos[2]<<" K2 "<<frac.cell_pos[3]<<"\n";
 
 		// if compdat for this cell is already added
 		// then just update kh_mult
 		// otherwise add new COMPDAT record
 		// TODO: handle case of different directions inside one cell
-		storage_t::iterator pcd = fcb.s_.find(fracture(px->cell));
+		frac_storage::iterator pcd = fcb.s_.find(fracture(px->cell));
 		if(pcd != fcb.s_.end()) {
 			//fracture& cur_cd = const_cast< fracture& >(*pcd);
 			// TODO: cur_cd.kh_mult = std::min(cur_cd.kh_mult + cf.kh_mult, 1.);
