@@ -14,6 +14,7 @@
 #include "py_list_converter.h"
 #include "sql_well.h"
 
+//#include "frac_comp_builder.h"
 #include "compdat_builder_impl.h"
 #include "fracture_builder_impl.h"
 
@@ -31,40 +32,11 @@ typedef algo< strategy_3d > wpi_algo;
 // hidden details
 namespace {
 
-/*-----------------------------------------------------------------
- * search different tables
- *----------------------------------------------------------------*/
-struct fract_traits  {
-	static boost::format select_unique_well_branch() {
-		return boost::format("SELECT DISTINCT well_name, branch_name FROM fractures WHERE d=%f");
-	}
-
-	static boost::format select_segment() {
-		return boost::format(
-      "SELECT status, md, half_length_1, half_length_2, angle, half_up, half_down, perm, half_thin, skin FROM fractures WHERE d=%f and well_name='%s' and branch_name='%s'"
-			//"SELECT status, md, half_length_1, half_length_2, angle, half_up, half_down, perm, half_thin, skin FROM fractures WHERE d=%f and well_name='%s' and branch_name='%s'"
-		);
-	}
-};
-
-struct compl_traits {
-	static boost::format select_unique_well_branch() {
-		return boost::format("SELECT DISTINCT well_name, branch_name FROM completions WHERE d=%f");
-	}
-
-	static boost::format select_segment() {
-		return boost::format(
-      //"SELECT md, length FROM completions WHERE d=%f and well_name='%s' and branch_name='%s'"
-			"SELECT md, length, status, rw, kh, skin, kh_mult FROM completions WHERE d=%f and well_name='%s' and branch_name='%s'"
-		);
-	}
-};
-
 // simple dump
 void dump(std::ostream& os, const compdat& cd) {
 	os << setw(15) << cd.well_name << ' ' << setw(15) << cd.branch_name << ' ';
-  os << setw(10) << std::fixed << std::setprecision(3) << cd.md;
-  os << setw(10) << std::fixed << std::setprecision(3) << cd.len;
+	os << setw(10) << std::fixed << std::setprecision(3) << cd.md;
+	os << setw(10) << std::fixed << std::setprecision(3) << cd.len;
 	for(int i = 0; i < 4; ++i)
 		os << setw(4) << cd.cell_pos[i];
 	os << setw(2) << cd.dir;
@@ -72,35 +44,42 @@ void dump(std::ostream& os, const compdat& cd) {
 }
 
 // simple fracture dump
-void dump(std::ostream& os, const fracture& frac)
-{
-  os << setw(15) << frac.well_name << ' ' << setw(15) << frac.branch_name << ' ';
-  os << setw(3) << frac.frac_status << ' ';
-  for(int i = 0; i < 4; ++i)
-    os << setw(4) << frac.cell_pos[i];
-  os << setw(10) << std::fixed << std::setprecision(3) << frac.frac_half_length_1;
-  os << setw(10) << std::fixed << std::setprecision(3) << frac.frac_half_length_2;
-  os << setw(10) << std::fixed << std::setprecision(3) << frac.frac_angle;
-  os << setw(10) << std::fixed << std::setprecision(3) << frac.frac_half_thin;
-  os << setw(10) << std::fixed << std::setprecision(3) << frac.frac_perm << std::endl;
+void dump(std::ostream& os, const fracture& frac) {
+	os << setw(15) << frac.well_name << ' ' << setw(15) << frac.branch_name << ' ';
+	os << setw(3) << frac.frac_status << ' ';
+	for(int i = 0; i < 4; ++i)
+		os << setw(4) << frac.cell_pos[i];
+	os << setw(10) << std::fixed << std::setprecision(3) << frac.frac_half_length_1;
+	os << setw(10) << std::fixed << std::setprecision(3) << frac.frac_half_length_2;
+	os << setw(10) << std::fixed << std::setprecision(3) << frac.frac_angle;
+	os << setw(10) << std::fixed << std::setprecision(3) << frac.frac_half_thin;
+	os << setw(10) << std::fixed << std::setprecision(3) << frac.frac_perm << std::endl;
 }
 
 template <class x_storage>
 void dump(std::ostream& os, const x_storage& cfs) {
-  typename x_storage::const_iterator pc;
-  typename x_storage::const_iterator end;
+	typename x_storage::const_iterator pc;
+	typename x_storage::const_iterator end;
 	for(pc = cfs.begin(), end = cfs.end(); pc != end; ++pc)
 		dump(os, *pc);
 }
 
-}  // oef hidden namespace
+template< class brick >
+struct choose_traits {
+	typedef compl_traits type;
+};
+template< >
+struct choose_traits< fracture > {
+	typedef fract_traits type;
+};
 
+}  // oef hidden namespace
 
 /*-----------------------------------------------------------------
  * compdat
  *----------------------------------------------------------------*/
 compdat::compdat(const string& well_name_, const string& branch_name_, const pos_i& cell_pos_, const pos_i& mesh_size)
-	: well_name(well_name_), branch_name(branch_name_), dir(' '), kh_mult(0), md(0), len(0), skin (0), diam (0.146), status (0), kh (0)
+	: well_name(well_name_), branch_name(branch_name_), dir(' '), kh_mult(0), md(0), len(0), skin (0), diam (0.146), kh (0), status (0)
 {
 	copy(&cell_pos_[0], &cell_pos_[strategy_3d::D], &cell_pos[0]);
 	cell_pos[3] = cell_pos[2];
@@ -111,13 +90,13 @@ compdat::compdat(const string& well_name_, const string& branch_name_, const pos
 }
 
 compdat::compdat(const string& well_name_, const string& branch_name_, ulong cell_id, const pos_i& mesh_size)
-	: well_name(well_name_), branch_name(branch_name_), dir(' '), kh_mult(0), md(0), len(0), skin (0), diam (0.146), status (0), kh (0)
+	: well_name(well_name_), branch_name(branch_name_), dir(' '), kh_mult(0), md(0), len(0), skin (0), diam (0.146), kh (0), status (0)
 {
 	init(cell_id, mesh_size);
 }
 
 compdat::compdat(ulong cell_id)
-	: dir(' '), kh_mult(0), md(0), len(0), skin (0), diam (0.146), status (0), kh (0), cell_id_(cell_id)
+	: dir(' '), kh_mult(0), md(0), len(0), skin (0), diam (0.146), kh (0), status (0), cell_id_(cell_id)
 {
   x1[0] = x1[1] = x1[2] = 0;
   x2[0] = x2[1] = x2[2] = 0;
@@ -136,40 +115,6 @@ void compdat::init(ulong cell_id, const pos_i& mesh_size) {
 }
 
 /*-----------------------------------------------------------------
- * compdat_builder implementation
- *----------------------------------------------------------------*/
-compdat_builder::compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn)
-	: pimpl_(new impl(nx, ny, coord, zcorn))
-{}
-
-compdat_builder::compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
-	smart_ptr< well_pool_iface, true > src_well)
-	: pimpl_(new impl(nx, ny, coord, zcorn, src_well))
-{}
-
-void compdat_builder::init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
-	pimpl_->init(nx, ny, coord, zcorn);
-}
-
-void compdat_builder::init(smart_ptr< well_pool_iface, true > src_well) {
-	pimpl_->init(src_well);
-}
-
-const cd_storage& compdat_builder::build(double date) {
-  pimpl_->build(date, compl_traits());
-	return storage();
-}
-
-const cd_storage& compdat_builder::storage() const {
-	return pimpl_->cfs_;
-}
-
-void compdat_builder::clear() {
-	pimpl_->cfs_.clear();
-}
-
-
-/*-----------------------------------------------------------------
  * fracture
  *----------------------------------------------------------------*/
 fracture::fracture(const string& well_name_, const string& branch_name_, const pos_i& cell_pos_, const pos_i& mesh_size)
@@ -178,7 +123,7 @@ fracture::fracture(const string& well_name_, const string& branch_name_, const p
 {
 	copy(&cell_pos_[0], &cell_pos_[strategy_3d::D], &cell_pos[0]);
 	cell_pos[3] = cell_pos[2];
-  copy(&cell_pos_[0], &cell_pos_[strategy_3d::D], &md_cell_pos[0]);
+	copy(&cell_pos_[0], &cell_pos_[strategy_3d::D], &md_cell_pos[0]);
 	cell_id_ = wpi_algo::encode_cell_id(cell_pos_, mesh_size);
 }
 
@@ -207,36 +152,67 @@ void fracture::init(ulong cell_id, const pos_i& mesh_size) {
 }
 
 /*-----------------------------------------------------------------
- * fracture_builder implementation
+ * builder implementation for any brick type
  *----------------------------------------------------------------*/
-fracture_builder::fracture_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn)
-	: pimpl_(new impl(nx, ny, coord, zcorn))
-{}
+template< class brick >
+class builder< brick >::impl : public frac_comp_builder< typename choose_traits< brick >::type > {};
 
-fracture_builder::fracture_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
-	smart_ptr< well_pool_iface, true > src_well)
-	: pimpl_(new impl(nx, ny, coord, zcorn, src_well))
-{}
+template< class brick >
+builder< brick >::builder() : pimpl_(new impl) {}
 
-void fracture_builder::init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
+template< class brick >
+void builder< brick >::init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
 	pimpl_->init(nx, ny, coord, zcorn);
 }
 
-void fracture_builder::init(smart_ptr< well_pool_iface, true > src_well) {
+template< class brick >
+void builder< brick >::init(smart_ptr< well_pool_iface, true > src_well) {
 	pimpl_->init(src_well);
 }
 
-const frac_storage& fracture_builder::build(double date) {
-	pimpl_->build(date, fract_traits());
+template< class brick >
+const typename builder< brick >::storage_t& builder< brick >::build(double date) {
+	pimpl_->build(date);
 	return storage();
 }
 
-const frac_storage& fracture_builder::storage() const {
-	return pimpl_->cfs_;
+template< class brick >
+const typename builder< brick >::storage_t& builder< brick >::storage() const {
+	return pimpl_->s_;
 }
 
-void fracture_builder::clear() {
-	pimpl_->cfs_.clear();
+template< class brick >
+void builder< brick >::clear() {
+	pimpl_->s_.clear();
+}
+
+/*-----------------------------------------------------------------
+ * compdat_builder implementation
+ *----------------------------------------------------------------*/
+compdat_builder::compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
+	builder::init(nx, ny, coord, zcorn);
+}
+
+compdat_builder::compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
+	smart_ptr< well_pool_iface, true > src_well)
+{
+	builder::init(nx, ny, coord, zcorn);
+	builder::init(src_well);
+}
+
+/*-----------------------------------------------------------------
+ * fracture_builder implementation
+ *----------------------------------------------------------------*/
+fracture_builder::fracture_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn)
+{
+	builder::init(nx, ny, coord, zcorn);
+}
+
+fracture_builder::fracture_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
+	smart_ptr< well_pool_iface, true > src_well)
+{
+	builder::init(nx, ny, coord, zcorn);
+	builder::init(src_well);
 }
 
 /*-----------------------------------------------------------------

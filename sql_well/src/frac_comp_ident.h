@@ -14,14 +14,14 @@
 #include "wpi_algo.h"
 #include "wpi_strategy_3d.h"
 
-namespace blue_sky { 
-namespace fci {
+namespace blue_sky { namespace fci {
 
 // impl details
 using namespace std;
 using namespace wpi;
 
-typedef algo< strategy_3d > wpi_algo;
+typedef strategy_3d strat_t;
+typedef algo< strat_t > wpi_algo;
 typedef wpi_algo::intersect_path xpath;
 typedef std::vector <xpath>  xpath_storage;
 
@@ -29,6 +29,7 @@ typedef std::vector <xpath>  xpath_storage;
  *  POD that holds info needed by COMPDAT
  *----------------------------------------------------------------*/
 struct BS_API_PLUGIN compdat {
+	typedef std::set< compdat > storage_t;
 	typedef unsigned long ulong;
 	typedef ulong cell_info[4];
 	typedef ulong pos_i[3];
@@ -68,41 +69,13 @@ private:
 	ulong cell_id_;
 };
 
-typedef std::set< compdat > cd_storage;
-
-/*-----------------------------------------------------------------
- * interface of COMPDAT building algo
- *----------------------------------------------------------------*/
-class BS_API_PLUGIN compdat_builder {
-
-public:
-	// ctors
-	compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
-
-	compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
-		smart_ptr< well_pool_iface, true > src_well);
-
-	void init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
-	void init(smart_ptr< well_pool_iface, true > src_well);
-
-	// mode == 0 - search completions, otherwise - fractures
-	const cd_storage& build(double date); 
-
-	// clear storage
-	void clear();
-
-	// storage getter
-	const cd_storage& storage() const;
-
-private:
-	class impl;
-	st_smart_ptr< impl > pimpl_;
-};
+typedef typename compdat::storage_t cd_storage;
 
 /*-----------------------------------------------------------------
  *  POD that holds info needed by FRACTURE
  *----------------------------------------------------------------*/
 struct BS_API_PLUGIN fracture {
+	typedef std::set< fracture > storage_t;
 	typedef unsigned long ulong;
 	typedef ulong cell_info[4];
 	typedef ulong pos_i[3];
@@ -140,35 +113,59 @@ private:
 	ulong cell_id_;
 };
 
-typedef std::set< fracture > frac_storage;
+typedef typename fracture::storage_t frac_storage;
+
+/*-----------------------------------------------------------------
+ * interface of COMPDAT/FRACTURE building algo
+ *----------------------------------------------------------------*/
+// brick - compdat or fracture
+template< class brick >
+class BS_API_PLUGIN builder {
+public:
+	typedef typename brick::storage_t storage_t;
+
+	builder();
+
+	void init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
+	void init(smart_ptr< well_pool_iface, true > src_well);
+
+	// invoke main algo
+	const storage_t& build(double date);
+
+	// clear storage
+	void clear();
+
+	// storage getter
+	const storage_t& storage() const;
+
+private:
+	class impl;
+	st_smart_ptr< impl > pimpl_;
+};
+
+
+/*-----------------------------------------------------------------
+ * interface of COMPDAT building algo
+ *----------------------------------------------------------------*/
+class BS_API_PLUGIN compdat_builder : public builder< compdat > {
+public:
+	// ctors
+	compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
+
+	compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
+		smart_ptr< well_pool_iface, true > src_well);
+};
 
 /*-----------------------------------------------------------------
  * interface of FRACTURE building algo
  *----------------------------------------------------------------*/
-class BS_API_PLUGIN fracture_builder {
-
+class BS_API_PLUGIN fracture_builder : public builder< fracture > {
 public:
 	// ctors
 	fracture_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
 
 	fracture_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
 		smart_ptr< well_pool_iface, true > src_well);
-
-	void init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
-	void init(smart_ptr< well_pool_iface, true > src_well);
-
-	// mode == 0 - search completions, otherwise - fractures
-	const frac_storage& build(double date);
-
-	// clear storage
-	void clear();
-
-	// storage getter
-	const frac_storage& storage() const;
-
-private:
-	class impl;
-	st_smart_ptr< impl > pimpl_;
 };
 
 
