@@ -3,7 +3,7 @@
  *      \brief  Keywords for EQUIL model
  *     \author  Sergey Miryanov (sergey-miryanov), sergey.miryanov@gmail.com
  *       \date  29.04.2011
- *  \copyright  This source code is released under the terms of 
+ *  \copyright  This source code is released under the terms of
  *              the BSD License. See LICENSE for more details.
  * */
 #include "bs_bos_core_data_storage_stdafx.h"
@@ -19,7 +19,7 @@
 #include "equil_model_iface.h"
 #include "table_iface.h"
 
-namespace blue_sky 
+namespace blue_sky
 {
   equil_keywords::equil_keywords (bs_type_ctor_param)
   {
@@ -30,7 +30,7 @@ namespace blue_sky
   {
   }
 
-  namespace 
+  namespace
   {
     // FIXME: subject to refactoring
     void
@@ -137,7 +137,7 @@ namespace blue_sky
             equil[EQUIL_TOTAL * i + ii] = dbuf[ii];
         }
 
-      // FIXME: 
+      // FIXME:
       //if (idata->prvd.size())
       //  idata->prvd.resize(0);
       if (idata->rsvd.size())
@@ -162,7 +162,7 @@ namespace blue_sky
                 {
                   equil_tbl->set_value (0, ii, equil[EQUIL_TOTAL * i + ii]);
                 }
-            } 
+            }
 
         }
 
@@ -174,7 +174,7 @@ namespace blue_sky
     {
       BS_SP (FRead) reader = params.hdm->get_reader ();
       BS_SP (idata) idata = params.hdm->get_data ();
-      
+
       t_long eql_region = idata->props->get_i ("eql_region");
       if (eql_region == 0)
         {
@@ -217,7 +217,7 @@ namespace blue_sky
     {
       BS_SP (FRead) reader = params.hdm->get_reader ();
       BS_SP (idata) idata = params.hdm->get_data ();
-      
+
       t_long eql_region = idata->props->get_i ("eql_region");
       if (eql_region == 0)
         {
@@ -269,6 +269,7 @@ namespace blue_sky
       keyword_manager->register_keyword ("EQUIL", keyword_manager_iface::keyword_handler (EQUIL, 0));
       keyword_manager->register_keyword ("RSVD", keyword_manager_iface::keyword_handler (RSVD, 0));
       keyword_manager->register_keyword ("PBVD", keyword_manager_iface::keyword_handler (PBVD, 0));
+      params.hdm->get_prop()->add_property_i(1, "init", "init type");
     }
   }
 
