@@ -26,6 +26,7 @@
 #include "sql_well.h"
 #include "frac_comp_ident.h"
 #include "well_path_ident.h"
+#include "i_cant_link_2_mesh.h"
 
 using namespace boost;
 
@@ -1703,6 +1704,9 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
       int w_spec_flag = 0;
       char s_buf[2048];
       int nx, ny, nz;
+      // interface to mesh
+      sp_himesh himesh = BS_KERNEL.create_object("handy_mesh_iface");
+      BS_ASSERT(himesh);
 
 
       if (!fp)
@@ -1766,7 +1770,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   point_ptr[0] = get_sql_real (1);
                   point_ptr[1] = get_sql_real (2);
                   point_ptr[2] = prop->get_f ("min_z");
-                  int cell = where_is_point(nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), point);
+                  int cell = himesh->where_is_point(nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), point);
                   if (cell >= nx_ny * nz)
                     throw bs_exception ("", "first point in PVTO should be a saturated point");
                   int k1 = cell / nx_ny;
