@@ -1750,7 +1750,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           compl_n_frac.clear ();
           cd = compl_n_frac.compl_build (*di);
           cde = cd.end();
-
+          
 
           if (!w_spec_flag)
             {
@@ -1777,15 +1777,15 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   int j1 = (cell - k1 * nx_ny) / nx;
                   int i1 = cell - k1 * nx_ny - j1 * nx;
                   fprintf (fp, "\'%s\' \'FIELD\' %u %u /\n", s.c_str (), i1 + 1, j1 + 1);
-                }
+                      }
               fprintf (fp, "/\n");
               finalize_sql ();
             }
 
 
           // COMPDAT
-
-          if (!cd.empty ())
+          
+          if (!cd.empty ()) 
           {
             fprintf (fp, "COMPDAT\n");
             cde = cd.end();
@@ -1798,9 +1798,9 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 
           // WPIMULT
 
-          if (!cd.empty ())
+          if (!cd.empty ()) 
           {
-
+            
             cde = cd.end();
             int wpimult_exist = 0;
             for (cdi = cd.begin(); cdi != cde; ++cdi)
@@ -1829,11 +1829,9 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             {
               if (fti->frac_perm > 0)
                 sprintf (buf, "%lf", fti->frac_perm);
-              else
-                sprintf (buf, " * ");
-              fprintf (fp, "\'%s\' %u %u %u %u %lf %lf %lf \'%s\' %lf %s %s %s %s /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1,
-                fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle, fti->frac_skin, fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin,
-                buf, " * ", " * ", " * ");
+              fprintf (fp, "\'%s\' %u %u %u %u %lf %lf %lf \'%s\' %lf %s %s %s %u /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1, 
+                fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle - 90, fti->frac_skin, fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin,  
+                fti->frac_perm > 0 ? buf : " * ", " * ", " * ", fti->md_cell_pos[2] + 1); 
             }
             fprintf (fp, "/\n\n");
           }
@@ -1914,7 +1912,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND ctrl > 0 ORDER BY well_name ASC", *di);
           if (prepare_sql (s_buf))
             return -1;
-
+          
           t_uint wconprod_flag = 0;
           for (; !step_sql ();)
             {
@@ -1989,7 +1987,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               */
               fprintf (fp, "/\n");
             }
-          if (wconprod_flag)
+          if (wconprod_flag) 
             fprintf (fp, "/\n");
           finalize_sql ();
         }
