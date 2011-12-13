@@ -58,74 +58,78 @@ struct compl_traits {
 
 		x_iterator px      = xp.upper_bound(whc(md));
 		x_iterator xend    = xp.upper_bound(whc(md + len));
-		x_iterator pprev_x = px;
+		// sanity check if completion inside well segment
+		if(px == xp.end()) return;
 
 		// always start with prev intersection
+		x_iterator pnext_x = px;
 		if(px != xp.begin())
-			--pprev_x;
+			--px;
+		//if(pprev_x != xp.begin())
+		//	--pprev_x;
 		// add last segment to intersection loop
-		if (xend != xp.end ())
-			++xend;
+		//if (xend != xp.end ())
+		//	++xend;
 
 		// 3.4.2 consider all intersections between begin_j and end_j
 		for(; px != xend; ++px) {
 			// prepare compdat
-			compdat cf(well_name, branch_name, pprev_x->cell, fcb.m_size_);
+			compdat cf(well_name, branch_name, px->cell, fcb.m_size_);
 
 			// 3.4.3.1 calc delta between consequent xpoint_k and xpoint_(k - 1)
 			// position to previous point
 			double delta_l = 0;
-			if(px != xp.end()) {
-				// completion fully inside well segment
-				if (md >= pprev_x->md && (md + len) <= px->md) {
-					delta_l = len;
-					cf.md = md;
-					cf.len = delta_l;
-					for (t_uint j = 0; j < strat_t::D; ++j) {
-						cf.x1[j] = pprev_x->where[j] + (md - pprev_x->md) /
-							(px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
-						cf.x2[j] = pprev_x->where[j] + (md + len - pprev_x->md) /
-							(px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
-					}
-				}
-				// well segment fully inside completion
-				else if (md <= pprev_x->md && (md + len) >= px->md) {
-					delta_l = px->md - pprev_x->md;
-					cf.md = pprev_x->md;
-					cf.len = delta_l;
-					for (t_uint j = 0; j < strat_t::D; ++j) {
-						cf.x1[j] = pprev_x->where[j];
-						cf.x2[j] = px->where[j];
-					}
-				}
-				// start of completion is inside well segment
-				// end of completion is out of well segment
-				else if (md >= pprev_x->md && (md + len) >= px->md) {
-					delta_l = px->md - md;
-					cf.md = md;
-					cf.len = delta_l;
-					for (t_uint j = 0; j < strat_t::D; ++j) {
-						cf.x1[j] = pprev_x->where[j] + (md - pprev_x->md) /
-							(px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
-						cf.x2[j] = px->where[j];
-					}
-				}
-				// start of completion is outside well segment
-				// end of completion is inside of well segment
-				else if (md <= pprev_x->md && (md + len) <= px->md) {
-					delta_l = md + len - pprev_x->md;
-					cf.md = pprev_x->md;
-					cf.len = delta_l;
-					for (t_uint j = 0; j < strat_t::D; ++j) {
-						cf.x1[j] = pprev_x->where[j];
-						cf.x2[j] = pprev_x->where[j] + (md + len - pprev_x->md) /
-							(px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
-					}
+			//if(px != xp.end()) {
+			// completion fully inside well segment
+			if (md >= px->md && (md + len) <= pnext_x->md) {
+				delta_l = len;
+				cf.md = md;
+				cf.len = delta_l;
+				for (t_uint j = 0; j < strat_t::D; ++j) {
+					cf.x1[j] = px->where[j] + (md - px->md) /
+						(pnext_x->md - px->md) * (pnext_x->where[j] - px->where[j]);
+					cf.x2[j] = px->where[j] + (md + len - px->md) /
+						(pnext_x->md - px->md) * (pnext_x->where[j] - px->where[j]);
 				}
 			}
-			else {
-				// TODO: identify coordinates of last cell intersection???
+			// well segment fully inside completion
+			else if (md <= px->md && (md + len) >= pnext_x->md) {
+				delta_l = pnext_x->md - px->md;
+				cf.md = px->md;
+				cf.len = delta_l;
+				for (t_uint j = 0; j < strat_t::D; ++j) {
+					cf.x1[j] = px->where[j];
+					cf.x2[j] = pnext_x->where[j];
+				}
 			}
+			// start of completion is inside well segment
+			// end of completion is out of well segment
+			else if (md >= pnext_x->md && (md + len) >= pnext_x->md) {
+				delta_l = pnext_x->md - md;
+				cf.md = md;
+				cf.len = delta_l;
+				for (t_uint j = 0; j < strat_t::D; ++j) {
+					cf.x1[j] = px->where[j] + (md - px->md) /
+						(pnext_x->md - px->md) * (pnext_x->where[j] - px->where[j]);
+					cf.x2[j] = pnext_x->where[j];
+				}
+			}
+			// start of completion is outside well segment
+			// end of completion is inside of well segment
+			else if (md <= px->md && (md + len) <= pnext_x->md) {
+				delta_l = md + len - px->md;
+				cf.md = px->md;
+				cf.len = delta_l;
+				for (t_uint j = 0; j < strat_t::D; ++j) {
+					cf.x1[j] = px->where[j];
+					cf.x2[j] = px->where[j] + (md + len - px->md) /
+						(pnext_x->md - px->md) * (pnext_x->where[j] - px->where[j]);
+				}
+			}
+			//}
+			//else {
+			//	// TODO: identify coordinates of last cell intersection???
+			//}
 
 
 			// 3.4.3.2 if delta == 1 mark direction as 'X'
@@ -137,7 +141,7 @@ struct compl_traits {
 			if(delta_l) {
 				// obtain cell size
 				vertex_pos cell_sz = {1., 1., 1.};
-				fullmesh.cell_size(pprev_x->cell, cell_sz);
+				fullmesh.cell_size(px->cell, cell_sz);
 
 				// select direction, calc kh increase
 				const char dirs[] = {'X', 'Y', 'Z'};
@@ -147,7 +151,7 @@ struct compl_traits {
 					if (max_step < dir_step) {
 						max_step = dir_step;
 						cf.dir = dirs[i];
-						cf.kh_mult = dir_step / cell_sz[i];
+						cf.kh_mult = delta_l / cell_sz[i];
 					}
 				}
 				cf.kh_mult = std::min(cf.kh_mult, 1.);
@@ -164,7 +168,7 @@ struct compl_traits {
 				// then just update kh_mult
 				// otherwise add new COMPDAT record
 				// TODO: handle case of different directions inside one cell
-				cd_storage::iterator pcd = fcb.s_.find(compdat(pprev_x->cell));
+				cd_storage::iterator pcd = fcb.s_.find(compdat(px->cell));
 				if(pcd != fcb.s_.end()) {
 					compdat& cur_cd = const_cast< compdat& >(*pcd);
 					cur_cd.kh_mult = std::min(cur_cd.kh_mult + cf.kh_mult, 1.);
@@ -173,7 +177,9 @@ struct compl_traits {
 					fcb.s_.insert(cf);
 			}
 			// set next element
-			pprev_x = px;
+			if(++pnext_x == xp.end())
+				pnext_x = px;
+			//pprev_x = px;
 		} // 3.4.4 end of intersections loop
 	}
 };
