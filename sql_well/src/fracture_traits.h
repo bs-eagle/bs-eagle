@@ -61,17 +61,17 @@ struct fract_traits  {
 		if (px == xp.end ())
 			return;
 		// position to next point
-		x_iterator pprev_x = px;
+		x_iterator pnext_x = px;
 		// always start with prev intersection
 		if(px != xp.begin())
-			--pprev_x;
+			--px;
 
 		// prepare compdat
-		fracture frac(well_name, branch_name, pprev_x->cell, fcb.m_size_);
+		fracture frac(well_name, branch_name, px->cell, fcb.m_size_);
 
 		vertex_pos   frac_coords;
 		vertex_pos_i cell_pos;
-		wpi_algo::decode_cell_id (pprev_x->cell, cell_pos, fcb.m_size_);
+		wpi_algo::decode_cell_id (px->cell, cell_pos, fcb.m_size_);
 
 		frac.md_cell_pos[0] = frac.cell_pos[0] = cell_pos[0];   // I - position
 		frac.md_cell_pos[1] = frac.cell_pos[1] = cell_pos[1];   // J - position
@@ -86,8 +86,8 @@ struct fract_traits  {
 		frac.frac_skin = frac_skin;
 
 		for (t_uint j = 0; j < strat_t::D; ++j) {
-			frac_coords[j] = pprev_x->where[j] + (md - pprev_x->md) /
-				(px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
+			frac_coords[j] = px->where[j] + (md - px->md) /
+				(pnext_x->md - px->md) * (pnext_x->where[j] - px->where[j]);
 		}
 
 		//std::cout<<"up "<<half_up<<" down "<<half_down<<"\n";
@@ -173,7 +173,7 @@ struct fract_traits  {
 		// then just update kh_mult
 		// otherwise add new COMPDAT record
 		// TODO: handle case of different directions inside one cell
-		frac_storage::iterator pcd = fcb.s_.find(fracture(pprev_x->cell));
+		frac_storage::iterator pcd = fcb.s_.find(fracture(px->cell));
 		if(pcd != fcb.s_.end()) {
 			//fracture& cur_cd = const_cast< fracture& >(*pcd);
 			// TODO: cur_cd.kh_mult = std::min(cur_cd.kh_mult + cf.kh_mult, 1.);
