@@ -33,7 +33,7 @@ struct compl_traits {
 		return boost::format(
 			//"SELECT md, length FROM completions WHERE d=%f and well_name='%s' and branch_name='%s'"
 			"SELECT md, length, status, rw, kh, skin, kh_mult FROM\
-			completions WHERE d=%f and well_name='%s' and branch_name='%s'"
+			completions WHERE d=%f and well_name='%s' and branch_name='%s' ORDER BY md"
 		);
 	}
 

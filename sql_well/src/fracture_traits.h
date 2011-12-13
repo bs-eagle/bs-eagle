@@ -31,7 +31,8 @@ struct fract_traits  {
 	static boost::format select_segment() {
 		return boost::format(
 			"SELECT status, md, half_length_1, half_length_2, angle, half_up, half_down, perm,\
-			half_thin, skin FROM fractures WHERE d=%f and well_name='%s' and branch_name='%s'"
+			half_thin, skin FROM fractures WHERE d=%f and well_name='%s' and branch_name='%s'\
+			ORDER BY md"
 			//"SELECT status, md, half_length_1, half_length_2, angle, half_up, half_down, perm,\
 			//half_thin, skin FROM fractures WHERE d=%f and well_name='%s' and branch_name='%s'"
 		);
