@@ -89,5 +89,11 @@
     <ClInclude Include="src\frac_comp_ident.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\compdat_traits.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fracture_traits.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

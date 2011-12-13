@@ -70,7 +70,7 @@ struct compl_traits {
 		// 3.4.2 consider all intersections between begin_j and end_j
 		for(; px != xend; ++px) {
 			// prepare compdat
-			compdat cf(well_name, branch_name, px->cell, fcb.m_size_);
+			compdat cf(well_name, branch_name, pprev_x->cell, fcb.m_size_);
 
 			// 3.4.3.1 calc delta between consequent xpoint_k and xpoint_(k - 1)
 			// position to previous point
@@ -137,7 +137,7 @@ struct compl_traits {
 			if(delta_l) {
 				// obtain cell size
 				vertex_pos cell_sz = {1., 1., 1.};
-				fullmesh.cell_size(px->cell, cell_sz);
+				fullmesh.cell_size(pprev_x->cell, cell_sz);
 
 				// select direction, calc kh increase
 				const char dirs[] = {'X', 'Y', 'Z'};
@@ -147,7 +147,7 @@ struct compl_traits {
 					if (max_step < dir_step) {
 						max_step = dir_step;
 						cf.dir = dirs[i];
-						cf.kh_mult = delta_l / cell_sz[i];
+						cf.kh_mult = dir_step / cell_sz[i];
 					}
 				}
 				cf.kh_mult = std::min(cf.kh_mult, 1.);
@@ -164,7 +164,7 @@ struct compl_traits {
 				// then just update kh_mult
 				// otherwise add new COMPDAT record
 				// TODO: handle case of different directions inside one cell
-				cd_storage::iterator pcd = fcb.s_.find(compdat(px->cell));
+				cd_storage::iterator pcd = fcb.s_.find(compdat(pprev_x->cell));
 				if(pcd != fcb.s_.end()) {
 					compdat& cur_cd = const_cast< compdat& >(*pcd);
 					cur_cd.kh_mult = std::min(cur_cd.kh_mult + cf.kh_mult, 1.);

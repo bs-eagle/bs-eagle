@@ -105,7 +105,9 @@
     <ClCompile Include="sqlite\sqlite3.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\compdat_traits.h" />
     <ClInclude Include="src\date_tools.h" />
+    <ClInclude Include="src\fracture_traits.h" />
     <ClInclude Include="src\frac_comp_ident.h" />
     <ClInclude Include="src\localization.h" />
     <ClInclude Include="src\main_def.h" />
