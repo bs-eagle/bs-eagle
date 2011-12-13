@@ -31,8 +31,9 @@ struct compl_traits {
 
 	static boost::format select_segment() {
 		return boost::format(
-      //"SELECT md, length FROM completions WHERE d=%f and well_name='%s' and branch_name='%s'"
-			"SELECT md, length, status, rw, kh, skin, kh_mult FROM completions WHERE d=%f and well_name='%s' and branch_name='%s'"
+			//"SELECT md, length FROM completions WHERE d=%f and well_name='%s' and branch_name='%s'"
+			"SELECT md, length, status, rw, kh, skin, kh_mult FROM\
+			completions WHERE d=%f and well_name='%s' and branch_name='%s'"
 		);
 	}
 
@@ -47,20 +48,21 @@ struct compl_traits {
 		mesh_part fullmesh(fcb.m_, fcb.m_size_);
 
 		// 3.4.1 search for completion_j begin_j and end_j using md_j and lentgh_j
-		t_double md = sw->get_sql_real (0);
-		t_double len = sw->get_sql_real (1);
-		t_uint status = sw->get_sql_int (2);
-		t_double rw = sw->get_sql_real (3);
-		t_double kh = sw->get_sql_real (4);
-		t_double skin = sw->get_sql_real (5);
+		t_double md      = sw->get_sql_real (0);
+		t_double len     = sw->get_sql_real (1);
+		t_uint status    = sw->get_sql_int (2);
+		t_double rw      = sw->get_sql_real (3);
+		t_double kh      = sw->get_sql_real (4);
+		t_double skin    = sw->get_sql_real (5);
 		t_double kh_mult = sw->get_sql_real (6);
-		x_iterator px = xp.upper_bound(whc(md));
-		x_iterator xend = xp.upper_bound(whc(md + len));
+
+		x_iterator px      = xp.upper_bound(whc(md));
+		x_iterator xend    = xp.upper_bound(whc(md + len));
 		x_iterator pprev_x = px;
+
 		// always start with prev intersection
 		if(px != xp.begin())
 			--pprev_x;
-
 		// add last segment to intersection loop
 		if (xend != xp.end ())
 			++xend;
@@ -80,8 +82,10 @@ struct compl_traits {
 					cf.md = md;
 					cf.len = delta_l;
 					for (t_uint j = 0; j < strat_t::D; ++j) {
-						cf.x1[j] = pprev_x->where[j] + (md - pprev_x->md) / (px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
-						cf.x2[j] = pprev_x->where[j] + (md + len - pprev_x->md) / (px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
+						cf.x1[j] = pprev_x->where[j] + (md - pprev_x->md) /
+							(px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
+						cf.x2[j] = pprev_x->where[j] + (md + len - pprev_x->md) /
+							(px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
 					}
 				}
 				// well segment fully inside completion
@@ -101,7 +105,8 @@ struct compl_traits {
 					cf.md = md;
 					cf.len = delta_l;
 					for (t_uint j = 0; j < strat_t::D; ++j) {
-						cf.x1[j] = pprev_x->where[j] + (md - pprev_x->md) / (px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
+						cf.x1[j] = pprev_x->where[j] + (md - pprev_x->md) /
+							(px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
 						cf.x2[j] = px->where[j];
 					}
 				}
@@ -113,7 +118,8 @@ struct compl_traits {
 					cf.len = delta_l;
 					for (t_uint j = 0; j < strat_t::D; ++j) {
 						cf.x1[j] = pprev_x->where[j];
-						cf.x2[j] = pprev_x->where[j] + (md + len - pprev_x->md) / (px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
+						cf.x2[j] = pprev_x->where[j] + (md + len - pprev_x->md) /
+							(px->md - pprev_x->md) * (px->where[j] - pprev_x->where[j]);
 					}
 				}
 			}
@@ -147,11 +153,11 @@ struct compl_traits {
 				cf.kh_mult = std::min(cf.kh_mult, 1.);
 
 				// set data
-				cf.diam = 2 * rw;
-				cf.kh = kh;
-				cf.status = status;
-				cf.skin = skin;
-				cf.kh_mult *= kh_mult;
+				cf.diam      = 2 * rw;
+				cf.kh        = kh;
+				cf.status    = status;
+				cf.skin      = skin;
+				cf.kh_mult  *= kh_mult;
 
 
 				// if compdat for this cell is already added
