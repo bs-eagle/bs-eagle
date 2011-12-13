@@ -69,7 +69,7 @@ private:
 	ulong cell_id_;
 };
 
-typedef typename compdat::storage_t cd_storage;
+typedef compdat::storage_t cd_storage;
 
 /*-----------------------------------------------------------------
  *  POD that holds info needed by FRACTURE
@@ -113,7 +113,7 @@ private:
 	ulong cell_id_;
 };
 
-typedef typename fracture::storage_t frac_storage;
+typedef fracture::storage_t frac_storage;
 
 /*-----------------------------------------------------------------
  * interface of COMPDAT/FRACTURE building algo
