@@ -451,7 +451,7 @@ struct proc_ray {
 		static typename ray_t::iterator closest_bound(ray_t& ray, fp_t v) {
 			typename ray_t::iterator t = std::upper_bound(ray.begin(), ray.end(), v);
 			if(t == ray.begin()) return t;
-			return t--;
+			return --t;
 		}
 
 		static fp_t min(fp_t f, fp_t s) {
@@ -863,9 +863,12 @@ void find_hit_idx(uint_t nx, uint_t ny, const coord_t& coord,
 	}
 }
 
-coord_zcorn_pair wave_mesh_deltas_s1(
+// x & y coord vectors define initial mesh,
+// wich will be refined by wave algorithm
+coord_zcorn_pair wave_mesh_deltas_s1_impl(
 	fp_stor_t max_dx, fp_stor_t max_dy,
-	fp_stor_t len_x, fp_stor_t len_y, spfp_storarr_t points_pos, spfp_storarr_t points_param)
+	spfp_storarr_t points_pos, spfp_storarr_t points_param,
+	const fp_set& x, const fp_set& y)
 {
 	using namespace std;
 	typedef fp_storvec_t::iterator v_iterator;
@@ -917,11 +920,25 @@ coord_zcorn_pair wave_mesh_deltas_s1(
 	// DEBUG
 	BSOUT << "wave_mesh_deltas: init stage" << bs_end;
 	// sanity check
-	if(!points_pos) return coord_zcorn_pair();
+	if(!points_pos || x.size() < 2 || y.size() < 2) return coord_zcorn_pair();
 
 	fp_storarr_t::const_iterator pp = points_pos->begin(); //, p_end = points_pos->end();
 	const ulong p_num = points_pos->size() >> 1;
 	//p_end -= (p_end - pp) % 2;
+
+	// prepare x & y coord vectors to be without offset
+	const fp_t x_offs = *x.begin();
+	const fp_t y_offs = *y.begin();
+	fp_set x0;
+	// x0[i] = x[i] - x_offs
+	transform(x.begin(), x.end(), insert_iterator< fp_set >(x0, x0.begin()),
+		bind2nd(std::minus< fp_t >(), x_offs));
+	// y0[i] = y[i] - y_offs
+	fp_set y0;
+	transform(y.begin(), y.end(), insert_iterator< fp_set >(y0, y0.begin()),
+		bind2nd(std::minus< fp_t >(), y_offs));
+	const fp_t len_x = *(--x0.end());
+	const fp_t len_y = *(--y0.end());
 
 	// DEBUG
 	BSOUT << "wave_mesh_deltas: points processing starts..." << bs_end;
@@ -957,32 +974,89 @@ coord_zcorn_pair wave_mesh_deltas_s1(
 		//py_coord.insert(*pp++);
 	}
 
-	// make intial mesh with bounds
-	fp_set x, y;
-	x.insert(0); x.insert(len_x);
-	y.insert(0); y.insert(len_y);
-
 	// process points in X direction
-	make_2side_wave::go(px_coord, x, len_x, max_dx, 0);
+	make_2side_wave::go(px_coord, x0, len_x, max_dx, 0);
 
 	// process points in Y direction
-	make_2side_wave::go(py_coord, y, len_y, max_dy, 1);
+	make_2side_wave::go(py_coord, y0, len_y, max_dy, 1);
 
 	// make deltas from coordinates
-	vector< fp_stor_t > delta_x, delta_y;
-	coord2deltas(x, delta_x);
-	coord2deltas(y, delta_y);
+	//vector< fp_stor_t > delta_x, delta_y;
+	//coord2deltas(x, delta_x);
+	//coord2deltas(y, delta_y);
 
 	// copy delta_x & delta_y to bs_arrays
 	//nx = (int_t)  delta_x.size();
 	//ny = (int_t)  delta_y.size();
 	spfp_storarr_t adx = BS_KERNEL.create_object(fp_storarr_t::bs_type()),
-				   ady = BS_KERNEL.create_object(fp_storarr_t::bs_type());
-	adx->resize(delta_x.size()); ady->resize(delta_y.size());
-	copy(delta_x.begin(), delta_x.end(), adx->begin());
-	copy(delta_y.begin(), delta_y.end(), ady->begin());
+	               ady = BS_KERNEL.create_object(fp_storarr_t::bs_type());
+	coord2deltas(x, *adx);
+	coord2deltas(y, *ady);
+	//adx->resize(delta_x.size()); ady->resize(delta_y.size());
+	//copy(delta_x.begin(), delta_x.end(), adx->begin());
+	//copy(delta_y.begin(), delta_y.end(), ady->begin());
 
 	return coord_zcorn_pair(adx, ady);
+}
+
+// std wave mesh implementation
+coord_zcorn_pair wave_mesh_deltas_s1(
+	fp_stor_t max_dx, fp_stor_t max_dy,
+	fp_stor_t len_x, fp_stor_t len_y, spfp_storarr_t points_pos, spfp_storarr_t points_param)
+{
+	// make intial mesh with bounds
+	fp_set x, y;
+	x.insert(0); x.insert(len_x);
+	y.insert(0); y.insert(len_y);
+	// call implementation
+	return wave_mesh_deltas_s1_impl(max_dx, max_dy, points_pos, points_param, x, y);
+}
+
+// mesh refine with wave algorithm
+// returns refined coord & zcorn
+coord_zcorn_pair refine_wave_mesh(
+	int_t& nx, int_t& ny,
+	spfp_storarr_t coord, spfp_storarr_t zcorn,
+	fp_stor_t max_dx, fp_stor_t max_dy,
+	spfp_storarr_t points_pos, spfp_storarr_t points_param)
+{
+	using namespace std;
+	// convert COORD -> x & y coord vectors
+	fp_set x;
+	dim_iterator px(coord->begin());
+	copy(px, px + (nx + 1), insert_iterator< fp_set >(x, x.begin()));
+
+	fp_set y;
+	dim_iterator py(coord->begin() + 1, 6 * (nx + 1));
+	copy(py, py + (ny + 1), insert_iterator< fp_set >(y, y.begin()));
+
+	// remember old dimensions for correct zcorn resize
+	int_t old_nx = nx;
+	int_t old_ny = ny;
+
+	// (left, top, up)
+	const fp_stor_t x0 = *x.begin();
+	const fp_stor_t y0 = *y.begin();
+	//const fp_stor_t z0 = *min_element(zcorn->begin(), zcorn->end());
+
+	// invoke wave algo on existing mesh
+	coord_zcorn_pair deltas = wave_mesh_deltas_s1_impl(max_dx, max_dy, points_pos, points_param, x, y);
+	spfp_storarr_t& dx = deltas.first;
+	spfp_storarr_t& dy = deltas.second;
+	nx = dx->size(); ny = dy->size();
+
+	// generate new coord
+	spfp_storarr_t new_coord = gen_coord(nx, ny, dx, dy, x0, y0);
+
+	// rzcorn = copy of zcorn
+	spfp_storarr_t new_zcorn = BS_KERNEL.create_object(fp_storarr_t::bs_type());
+	new_zcorn->resize(zcorn->size());
+	std::copy(new_zcorn->begin(), new_zcorn->end(), zcorn->begin());
+	// resize rzcorn
+	resize_zcorn(*new_zcorn, old_nx, old_ny, nx, ny);
+
+	// return result
+	return coord_zcorn_pair(new_coord, new_zcorn);
 }
 
 void wave_mesh_deltas_s2(

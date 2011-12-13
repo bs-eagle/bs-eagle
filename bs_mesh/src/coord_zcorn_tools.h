@@ -110,5 +110,13 @@ BS_API_PLUGIN spi_arr_t find_hit_idx(
 	uint_t nx, uint_t ny, spfp_storarr_t coord,
 	spfp_storarr_t points_pos);
 
+// mesh refine with wave algorithm
+// returns refined coord & zcorn
+BS_API_PLUGIN coord_zcorn_pair refine_wave_mesh(
+	int_t& nx, int_t& ny,
+	spfp_storarr_t coord, spfp_storarr_t zcorn,
+	fp_stor_t max_dx, fp_stor_t max_dy,
+	spfp_storarr_t points_pos, spfp_storarr_t points_param);
+
 }}  // eof namespace blue_sky::coord_zcorn_tools
 

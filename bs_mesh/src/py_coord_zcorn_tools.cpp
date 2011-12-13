@@ -140,6 +140,7 @@ void py_export_czt() {
 	def("wave_mesh", &wave_mesh_ij, wave_mesh_ij_overl());
 	def("find_hit_idx", &find_hit_idx1, find_hit_idx_overl());
 	def("find_hit_idx", &find_hit_idx2);
+	def("refine_wave_mesh", &czt::refine_wave_mesh);
 }
 
 }} 	// eof blue_sky::python
