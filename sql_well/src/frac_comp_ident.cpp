@@ -191,14 +191,14 @@ void builder< brick >::clear() {
 compdat_builder::compdat_builder() {}
 
 compdat_builder::compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
-	builder::init(nx, ny, coord, zcorn);
+	builder< compdat >::init(nx, ny, coord, zcorn);
 }
 
 compdat_builder::compdat_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
 	smart_ptr< well_pool_iface, true > src_well)
 {
-	builder::init(nx, ny, coord, zcorn);
-	builder::init(src_well);
+	builder< compdat >::init(nx, ny, coord, zcorn);
+	builder< compdat >::init(src_well);
 }
 
 /*-----------------------------------------------------------------
@@ -208,14 +208,14 @@ fracture_builder::fracture_builder() {}
 
 fracture_builder::fracture_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn)
 {
-	builder::init(nx, ny, coord, zcorn);
+	builder< fracture >::init(nx, ny, coord, zcorn);
 }
 
 fracture_builder::fracture_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
 	smart_ptr< well_pool_iface, true > src_well)
 {
-	builder::init(nx, ny, coord, zcorn);
-	builder::init(src_well);
+	builder< fracture >::init(nx, ny, coord, zcorn);
+	builder< fracture >::init(src_well);
 }
 
 /*-----------------------------------------------------------------
