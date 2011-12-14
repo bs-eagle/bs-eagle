@@ -1791,7 +1791,10 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             cde = cd.end();
             for (cdi = cd.begin(); cdi != cde; ++cdi)
             {
-              fprintf (fp, "\'%s\' %lu %lu %lu %lu \'OPEN\' 2* %lf 1* %lf 1* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
+              if (cdi->status)
+                fprintf (fp, "\'%s\' %lu %lu %lu %lu \'OPEN\' 2* %lf 1* %lf 1* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
+              else
+                fprintf (fp, "\'%s\' %lu %lu %lu %lu \'SHUT\' 2* %lf 1* %lf 1* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
             }
             fprintf (fp, "/\n\n");
           }
