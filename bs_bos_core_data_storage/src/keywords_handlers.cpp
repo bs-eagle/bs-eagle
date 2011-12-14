@@ -769,7 +769,7 @@ namespace blue_sky
       }
     boost::gregorian::date start=reader->read_date(std::string(buf));
     boost::gregorian::date base_date (1900, 1, 1);
-    double starting_date = (start - base_date).days () + 2;
+    double starting_date = (start - base_date).days () + 1;
     params.hdm->get_prop()->add_property_f(starting_date, "starting_date", "starting_date");
     km->starting_date = boost::posix_time::ptime(start);        // set starting date
 
