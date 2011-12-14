@@ -104,7 +104,7 @@ struct compl_traits {
 			}
 			// start of completion is inside well segment
 			// end of completion is out of well segment
-			else if (md >= pnext_x->md && (md + len) >= pnext_x->md) {
+			else if (md >= px->md && (md + len) >= pnext_x->md) {
 				delta_l = pnext_x->md - md;
 				cf.md = md;
 				cf.len = delta_l;
