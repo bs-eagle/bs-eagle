@@ -118,5 +118,10 @@ BS_API_PLUGIN coord_zcorn_pair refine_wave_mesh(
 	fp_stor_t max_dx, fp_stor_t max_dy,
 	spfp_storarr_t points_pos, spfp_storarr_t points_param);
 
+BS_API_PLUGIN coord_zcorn_pair refine_wave_mesh_deltas(
+	spfp_storarr_t dx, spfp_storarr_t dy,
+	fp_stor_t max_dx, fp_stor_t max_dy,
+	spfp_storarr_t points_pos, spfp_storarr_t points_param);
+
 }}  // eof namespace blue_sky::coord_zcorn_tools
 

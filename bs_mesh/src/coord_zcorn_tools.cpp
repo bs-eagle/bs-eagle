@@ -982,16 +982,16 @@ coord_zcorn_pair wave_mesh_deltas_s1_impl(
 
 	// make deltas from coordinates
 	//vector< fp_stor_t > delta_x, delta_y;
-	//coord2deltas(x, delta_x);
-	//coord2deltas(y, delta_y);
+	//coord2deltas(x0, delta_x);
+	//coord2deltas(y0, delta_y);
 
 	// copy delta_x & delta_y to bs_arrays
 	//nx = (int_t)  delta_x.size();
 	//ny = (int_t)  delta_y.size();
 	spfp_storarr_t adx = BS_KERNEL.create_object(fp_storarr_t::bs_type()),
 	               ady = BS_KERNEL.create_object(fp_storarr_t::bs_type());
-	coord2deltas(x, *adx);
-	coord2deltas(y, *ady);
+	coord2deltas(x0, *adx);
+	coord2deltas(y0, *ady);
 	//adx->resize(delta_x.size()); ady->resize(delta_y.size());
 	//copy(delta_x.begin(), delta_x.end(), adx->begin());
 	//copy(delta_y.begin(), delta_y.end(), ady->begin());
@@ -1057,6 +1057,33 @@ coord_zcorn_pair refine_wave_mesh(
 
 	// return result
 	return coord_zcorn_pair(new_coord, new_zcorn);
+}
+
+// mesh refine with wave algorithm
+// returns refined coord & zcorn
+coord_zcorn_pair refine_wave_mesh_deltas(
+	spfp_storarr_t dx, spfp_storarr_t dy,
+	fp_stor_t max_dx, fp_stor_t max_dy,
+	spfp_storarr_t points_pos, spfp_storarr_t points_param)
+{
+	using namespace std;
+	typedef cumsum_iterator< fp_storarr_t::iterator > cs_iterator;
+
+	// convert deltas -> coord vectors
+	fp_set x;
+	copy(cs_iterator(dx->begin()), cs_iterator(dx->end()),
+		insert_iterator< fp_set >(x, x.begin()));
+	// append last bound
+	x.insert(*(--x.end()) + dx->ss(dx->size() - 1));
+
+	fp_set y;
+	copy(cs_iterator(dy->begin()), cs_iterator(dy->end()),
+		insert_iterator< fp_set >(y, y.begin()));
+	// append last bound
+	y.insert(*(--y.end()) + dy->ss(dy->size() - 1));
+
+	// invoke wave algo on existing mesh
+	return wave_mesh_deltas_s1_impl(max_dx, max_dy, points_pos, points_param, x, y);
 }
 
 void wave_mesh_deltas_s2(
