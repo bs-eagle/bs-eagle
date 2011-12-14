@@ -220,7 +220,8 @@ PRAGMA foreign_keys=ON;\
 BEGIN;\
 CREATE TABLE wells(name TEXT UNIQUE PRIMARY KEY, \
 				    x REAL DEFAULT -1, \
-				    y REAL DEFAULT -1);\
+				    y REAL DEFAULT -1, \
+				    horiz INTEGER DEFAULT 0);\
 CREATE TABLE groups(name TEXT UNIQUE PRIMARY KEY);\
 CREATE TABLE wells_in_group(gr_name TEXT NOT NULL REFERENCES groups(name) ON UPDATE CASCADE ON DELETE CASCADE,\
 						    well_name TEXT NOT NULL REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE);\
@@ -1750,7 +1751,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           compl_n_frac.clear ();
           cd = compl_n_frac.compl_build (*di);
           cde = cd.end();
-          
+
 
           if (!w_spec_flag)
             {
@@ -1784,8 +1785,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 
 
           // COMPDAT
-          
-          if (!cd.empty ()) 
+
+          if (!cd.empty ())
           {
             fprintf (fp, "COMPDAT\n");
             cde = cd.end();
@@ -1801,9 +1802,9 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 
           // WPIMULT
 
-          if (!cd.empty ()) 
+          if (!cd.empty ())
           {
-            
+
             cde = cd.end();
             int wpimult_exist = 0;
             for (cdi = cd.begin(); cdi != cde; ++cdi)
@@ -1832,9 +1833,9 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             {
               if (fti->frac_perm > 0)
                 sprintf (buf, "%lf", fti->frac_perm);
-              fprintf (fp, "\'%s\' %lu %lu %lu %lu %lf %lf %lf \'%s\' %lf %s %s %s %lu /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1, 
-                fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle - 90, fti->frac_skin, fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin,  
-                fti->frac_perm > 0 ? buf : " * ", " * ", " * ", fti->md_cell_pos[2] + 1); 
+              fprintf (fp, "\'%s\' %lu %lu %lu %lu %lf %lf %lf \'%s\' %lf %s %s %s %lu /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1,
+                fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle - 90, fti->frac_skin, fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin,
+                fti->frac_perm > 0 ? buf : " * ", " * ", " * ", fti->md_cell_pos[2] + 1);
             }
             fprintf (fp, "/\n\n");
           }
@@ -1915,7 +1916,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND ctrl > 0 ORDER BY well_name ASC", *di);
           if (prepare_sql (s_buf))
             return -1;
-          
+
           t_uint wconprod_flag = 0;
           for (; !step_sql ();)
             {
@@ -1990,7 +1991,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               */
               fprintf (fp, "/\n");
             }
-          if (wconprod_flag) 
+          if (wconprod_flag)
             fprintf (fp, "/\n");
           finalize_sql ();
         }
