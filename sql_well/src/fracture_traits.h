@@ -1,7 +1,7 @@
 /// @file fracture_traits.h
 /// @brief FRACTURE traits implementation
 /// @author uentity
-/// @version 
+/// @version
 /// @date 12.12.2011
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
@@ -84,6 +84,7 @@ struct fract_traits  {
 		frac.frac_perm  = perm;
 		frac.frac_half_thin = half_thin;
 		frac.frac_skin = frac_skin;
+		frac.frac_main_k = cell_pos[2];
 
 		for (t_uint j = 0; j < strat_t::D; ++j) {
 			frac_coords[j] = px->where[j] + (md - px->md) /

@@ -1,7 +1,7 @@
 /// @file frac_comp_ident.h
 /// @brief Fractures and completions identification inside mesh
 /// @author uentity
-/// @version 
+/// @version
 /// @date 06.10.2011
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
@@ -92,6 +92,7 @@ struct BS_API_PLUGIN fracture {
 	t_double    frac_half_thin;
 	t_double    frac_perm;
 	t_double    frac_skin;
+	t_int       frac_main_k;
 
 	// ctors
 	fracture(const std::string& well_name_, const std::string& branch_name_,
