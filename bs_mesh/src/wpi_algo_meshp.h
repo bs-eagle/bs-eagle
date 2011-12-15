@@ -48,6 +48,7 @@ struct mesh_tools : public helpers< strat_t > {
 			ca_assign(lo, ulong(0));
 			ca_assign(hi, mesh_size);
 			ca_assign(m_size_, mesh_size);
+			calc_bounds();
 		}
 
 		void init(const vertex_pos_i& lower, const vertex_pos_i& upper) {
@@ -60,6 +61,9 @@ struct mesh_tools : public helpers< strat_t > {
 				hi[i] = std::min(hi[i], m_size_[i]);
 				hi[i] = std::max(lo[i] + 1, hi[i]);
 			}
+
+			// precalc bounds
+			calc_bounds();
 		}
 
 		void init(const std::vector< ulong >& cell_idx) {
@@ -141,15 +145,15 @@ struct mesh_tools : public helpers< strat_t > {
 		}
 
 		Iso_bbox iso_bbox() const {
-			vertex_pos lo_pos, hi_pos;
-			bounds(lo_pos, hi_pos);
-			return vertex_pos2rect(lo_pos, hi_pos);
+			//vertex_pos lo_pos, hi_pos;
+			//bounds(lo_pos, hi_pos);
+			return vertex_pos2rect(lo_bnd, hi_bnd);
 		}
 
 		Bbox bbox() const {
-			vertex_pos lo_pos, hi_pos;
-			bounds(lo_pos, hi_pos);
-			return vertex_pos2bbox(lo_pos, hi_pos);
+			//vertex_pos lo_pos, hi_pos;
+			//bounds(lo_pos, hi_pos);
+			return vertex_pos2bbox(lo_bnd, hi_bnd);
 		}
 
 		container_t divide() const {
@@ -232,6 +236,7 @@ struct mesh_tools : public helpers< strat_t > {
 	private:
 		trimesh& m_;
 		vertex_pos_i m_size_;
+		vertex_pos lo_bnd, hi_bnd;
 
 		const cell_data& ss(ulong idx) const {
 			// idx SHOULD BE IN MESH!
@@ -250,33 +255,53 @@ struct mesh_tools : public helpers< strat_t > {
 			ca_assign(lo, first_);
 			ca_assign(hi, last_);
 			ca_assign(m_size_, mesh_size);
+			calc_bounds();
+		}
+
+		void calc_bounds() {
+			// init bounds from first cell
+			ss(lo).lo(lo_bnd); ss(lo).hi(hi_bnd);
+
+			// walk all other cells
+			vertex_pos lo_cell, hi_cell;
+			ulong sz = size();
+			for(ulong i = 1; i < sz; ++i) {
+				const cell_data& cell = ss(ss_id(i));
+				cell.lo(lo_cell); cell.hi(hi_cell);
+				for(uint i = 0; i < D; ++i) {
+					if(lo_cell[i] < lo_bnd[i])
+						lo_bnd[i] = lo_cell[i];
+					if(hi_cell[i] > hi_bnd[i])
+						hi_bnd[i] = hi_cell[i];
+				}
+			}
 		}
 
 		void bounds(vertex_pos& lo_pos, vertex_pos& hi_pos) const {
-      vertex_pos lo_lo_pos, lo_hi_pos;
-      vertex_pos hi_lo_pos, hi_hi_pos;
+			vertex_pos lo_lo_pos, lo_hi_pos;
+			vertex_pos hi_lo_pos, hi_hi_pos;
 			ss(lo).lo (lo_lo_pos);
-      ss(lo).hi (lo_hi_pos);
+			ss(lo).hi (lo_hi_pos);
 
 			// last = hi - 1
 			vertex_pos_i last;
 			ca_assign(last, hi);
 			std::transform(&last[0], &last[D], &last[0], bind2nd(std::minus< ulong >(), 1));
-      ss(last).lo (hi_lo_pos);
-      ss(last).hi (hi_hi_pos);
+			ss(last).lo (hi_lo_pos);
+			ss(last).hi (hi_hi_pos);
 
 			// ensure that lo[i] < hi[i]
 			for(uint i = 0; i < D; ++i) {
-        if (lo_lo_pos[i] < hi_lo_pos[i])  // global coordinates increasing along cells - normal order
-          {
-            lo_pos[i] = lo_lo_pos[i]; // std::min (lo_lo_pos[i], lo_hi_pos[i]);
-            hi_pos[i] = hi_hi_pos[i]; // std::max (hi_lo_pos[i], hi_hi_pos[i]);
-          }
-        else // lo_lo_pos[i] > hi_lo_pos[i] // global coordinates decreasing along cells - reverse order 
-          {
-            lo_pos[i] = hi_lo_pos[i]; // std::min (hi_lo_pos[i], hi_hi_pos[i]);
-            hi_pos[i] = lo_hi_pos[i]; // std::max (lo_lo_pos[i], lo_hi_pos[i]);
-          }
+				if (lo_lo_pos[i] < hi_lo_pos[i]) {
+					// global coordinates increasing along cells - normal order
+					lo_pos[i] = lo_lo_pos[i]; // std::min (lo_lo_pos[i], lo_hi_pos[i]);
+					hi_pos[i] = hi_hi_pos[i]; // std::max (hi_lo_pos[i], hi_hi_pos[i]);
+				}
+				else {
+					// lo_lo_pos[i] > hi_lo_pos[i] // global coordinates decreasing along cells - reverse order 
+					lo_pos[i] = hi_lo_pos[i]; // std::min (hi_lo_pos[i], hi_hi_pos[i]);
+					hi_pos[i] = lo_hi_pos[i]; // std::max (lo_lo_pos[i], lo_hi_pos[i]);
+				}
 			}
 		}
 	};
