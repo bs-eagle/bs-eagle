@@ -1849,7 +1849,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               finalize_sql ();
 
               if (horiz)
-                sprintf (main_k_str, "%d", fti->frac_main_k);
+                sprintf (main_k_str, "%d", fti->frac_main_k + 1);
               else
                 sprintf (main_k_str, " * ");
 
