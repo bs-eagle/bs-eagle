@@ -263,7 +263,7 @@ public:
 			// calc direction vector
 			Point start = seg.start();
 			Point finish = seg.finish();
-			for(uint i = 0; i < 2; ++i)
+			for(uint i = 0; i < D; ++i)
 				dir[i] = start[i] <= finish[i] ? 0 : 1;
 			// judge
 			top_surv judge(dir, x_, m_size_);
