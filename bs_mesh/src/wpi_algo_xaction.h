@@ -17,7 +17,7 @@
 // DEBUG
 //#include <iostream>
 
-#define MD_TOL 0.000001
+#define MD_TOL 1e-10
 
 namespace blue_sky { namespace wpi {
 
@@ -279,7 +279,7 @@ public:
 				// upper_bound
 				ulong cnt = 0;
 				x_iterator pn = px;
-				for(; pn != x_.end() && abs(px->md - pn->md) < MD_TOL; ++pn, ++cnt)
+				for(; pn != x_.end() && std::abs< double >(px->md - pn->md) < MD_TOL; ++pn, ++cnt)
 				{}
 				// if we have nonempty range - leave only 1 element
 				if(cnt)
