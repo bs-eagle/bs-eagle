@@ -63,9 +63,10 @@ public:
 
 	typedef typename intersect_path::iterator x_iterator;
 
+	typedef int dirvec_t[D];
+
 	//template< int N >
 	struct spatial_sort {
-		typedef int dirvec_t[D];
 		typedef typename intersect_path::iterator x_iterator;
 
 		spatial_sort(const dirvec_t& dir, const vertex_pos_i& mesh_size)
@@ -76,22 +77,22 @@ public:
 			: dir_(rhs.dir_), m_size_(rhs.m_size_)
 		{}
 
-		bool operator()(const x_iterator& r1, const x_iterator& r2) const {
+		bool greater(const well_hit_cell& r1, const well_hit_cell& r2) const {
 			// check if r1 or r2 are node points
-			if(r1->is_node) {
-				if(!r2->is_node)
+			if(r1.is_node) {
+				if(!r2.is_node)
 					return true;
 				else
 					// merge node points in same position
 					return false;
 			}
-			else if(r2->is_node)
+			else if(r2.is_node)
 				return false;
 
 			// cell ids
 			vertex_pos_i c1, c2;
-			decode_cell_id(r1->cell, c1, m_size_);
-			decode_cell_id(r2->cell, c2, m_size_);
+			decode_cell_id(r1.cell, c1, m_size_);
+			decode_cell_id(r2.cell, c2, m_size_);
 
 			//bool res = false;
 			for(uint i = 0; i < D; ++i) {
@@ -102,6 +103,10 @@ public:
 					return false;
 			}
 			return false;
+		}
+
+		bool operator()(const x_iterator& r1, const x_iterator& r2) const {
+			return greater(*r1, *r2);
 		}
 
 		int greater(uint ndim, ulong v1, ulong v2) const {
@@ -216,8 +221,6 @@ public:
 
 	//template< int N >
 	void remove_dups2() {
-		typedef int dirvec_t[D];
-		//typedef intersect_path::iterator x_iterator;
 
 		struct top_surv {
 			typedef std::set< x_iterator, spatial_sort > spat_storage_t;
@@ -370,9 +373,27 @@ protected:
 
 		// add all points to interscetion path
 		for(typename xpoints_list::const_iterator px = res.begin(), end = res.end(); px != end; ++px) {
-			x_.insert(
-				well_hit_cell(px->first, wseg_id, cell_id, calc_md(wseg_id, px->first), px->second)
-			);
+			// prepare intersection to insert
+			well_hit_cell new_x(px->first, wseg_id, cell_id, calc_md(wseg_id, px->first), px->second);
+			// if intersection for that point exists
+			// append new intersection only if it is 'greater' than existing
+			x_iterator p_samex = x_.find(new_x);
+			if(p_samex != x_.end()) {
+				// calc direction vector
+				dirvec_t dir;
+				Point start = wp_[wseg_id].start();
+				Point finish = wp_[wseg_id].finish();
+				for(uint i = 0; i < D; ++i)
+					dir[i] = start[i] <= finish[i] ? 0 : 1;
+
+				// if new_x > p_samex then replace p_samex with new_x
+				if(spatial_sort(dir, m_size_).greater(new_x, *p_samex)) {
+					x_.insert(new_x);
+					x_.erase(p_samex);
+				}
+			}
+			else
+				x_.insert(new_x);
 		}
 	}
 

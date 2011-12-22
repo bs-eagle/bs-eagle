@@ -197,7 +197,7 @@ struct algo : public helpers< strat_t > {
 		//std::cout << "build() done" << std::endl;
 
 		// 5) remove duplicates in X,Y,Z directions
-		A.remove_dups2();
+		//A.remove_dups2();
 		// DEBUG
 		//std::cout << "remove_dups2 done" << std::endl;
 

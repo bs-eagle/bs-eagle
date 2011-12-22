@@ -116,7 +116,7 @@ public:
 			// 3.2 find intersections of given branch with mesh (well_path_ident)
 			xbuilder A(m_, W, m_size_);
 			A.build();
-			A.remove_dups2();
+			//A.remove_dups2();
 			//A.append_wp_nodes(hi);
 			xpath& xp = A.path();
 			if (xp.empty ()) // no intersections
