@@ -223,12 +223,18 @@ fracture_builder::fracture_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_
  *----------------------------------------------------------------*/
 class compl_n_frac_builder::impl {
 public:
-	compdat_builder cb_;
-	fracture_builder fb_;
+	typedef frac_comp_builder< compl_traits >::xp_cache_t xp_cache_t;
+	typedef frac_comp_builder< compl_traits >::spxp_cache_t spxp_cache_t;
 	typedef smart_ptr< well_pool_iface, true > sp_srcwell;
 
+	frac_comp_builder< compl_traits > cb_;
+	frac_comp_builder< fract_traits > fb_;
+	spxp_cache_t xp_cache_;
+
 	// ctors
-	impl() {}
+	impl() {
+		init_cache();
+	}
 	impl(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
 		init(nx, ny, coord, zcorn);
 	}
@@ -246,17 +252,25 @@ public:
 		fb_.init(src_well);
 	}
 
+	void init_cache() {
+		xp_cache_ = new xp_cache_t;
+		cb_.init_cache(xp_cache_);
+		fb_.init_cache(xp_cache_);
+	}
+
 	const cd_storage& compl_build(double date) {
-		return cb_.build(date);
+		cb_.build(date);
+		return cb_.s_;
 	}
 
 	const frac_storage& frac_build(double date) {
-		return fb_.build(date);
+		fb_.build(date);
+		return fb_.s_;
 	}
 
 	void clear() {
-		cb_.clear();
-		fb_.clear();
+		cb_.s_.clear();
+		fb_.s_.clear();
 	}
 };
 
@@ -290,11 +304,11 @@ const frac_storage& compl_n_frac_builder::frac_build(double date) {
 }
 
 const cd_storage& compl_n_frac_builder::storage_compdat ()  const {
-	return pimpl_->cb_.storage();
+	return pimpl_->cb_.s_;
 }
 
 const frac_storage& compl_n_frac_builder::storage_fracture () const {
-	return pimpl_->fb_.storage();
+	return pimpl_->fb_.s_;
 }
 
 void compl_n_frac_builder::clear() {
