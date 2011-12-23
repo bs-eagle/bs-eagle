@@ -451,6 +451,9 @@ struct proc_ray {
 	template< int_t direction, class = void >
 	struct dir_ray {
 		enum { dir = direction };
+		bool is_bound;
+
+		dir_ray(bool is_bound_ = false) : is_bound(is_bound_) {}
 
 		template< class ray_t >
 		static typename ray_t::iterator end(ray_t& ray) {
@@ -479,6 +482,9 @@ struct proc_ray {
 	template< class unused >
 	struct dir_ray< -1, unused > {
 		enum { dir = -1 };
+		bool is_bound;
+
+		dir_ray(bool is_bound_ = false) : is_bound(is_bound_) {}
 
 		template< class ray_t >
 		static typename ray_t::iterator end(ray_t& ray) {
@@ -749,10 +755,7 @@ void make_wave(ray_t& ray, fp_t start_point, fp_stor_t d, fp_stor_t a,
 	// insert one bound anyway
 	//N = max< uint_t>(N, 1);
 	// calc tail to half of distance to nearest bound
-	fp_t tail = S - d * std::pow(a, double(N));
-
-	if(tail < d * 0.5 && N > 0)
-		--N;
+	fp_t tail = S - d * (std::pow(a, double(N)) - 1)/(a - 1);
 
 	// refined ray stored here
 	fp_set ref_ray;
@@ -760,30 +763,23 @@ void make_wave(ray_t& ray, fp_t start_point, fp_stor_t d, fp_stor_t a,
 	const fp_t max_front = dr.max(0, field_len);
 	fp_t cell_sz = d;
 	fp_t wave_front = dr.min(start_point - dir * 0.5 * d, max_front);
-	
+
+	if(tail < d * 0.5 && N > 0) {
+		--N;
+		if(S >= d && dir > 0 && !dr.is_bound)
+			ref_ray.insert(wave_front + S);
+	}
+
 	for(uint_t i = 0; i < N; ++i) {
 		wave_front += dir * cell_sz;
 		//if(i == N -1 && tail < d * 0.5)
 		//	wave_front += dir * tail;
 		wave_front = dr.min(wave_front, max_front);
-		if(abs(wave_front - max_front) < 0.000001)
+		if(abs(wave_front - max_front) < 1e-10)
 			break;
 		ref_ray.insert(wave_front);
 		cell_sz = min(cell_sz * a, max_sz);
 	}
-	//if(tail > 0 && tail < max_sz) {
-	//	wave_front = dr.min(wave_front + dir * tail, max_front);
-	//	if(wave_front != max_front)
-	//		ref_ray.insert(wave_front);
-	//}
-
-	//while(cell_sz < max_sz && abs(wave_front - max_front) > 0.000001) {
-	//	ref_ray.insert(wave_front);
-	//	cell_sz = min(cell_sz * a, max_sz);
-	//	wave_front = dr.min(wave_front + dir * cell_sz, max_front);
-	//	if(N == 0) break;
-	//	else --N;
-	//}
 
 	// merge refinement with original grid
 	copy(ray.begin(), ray.end(), insert_iterator< fp_set >(ref_ray, ref_ray.begin()));
@@ -943,10 +939,10 @@ coord_zcorn_pair wave_mesh_deltas_s1_impl(
 				if(d != 0 && p_ready.find(val) == p_ready.end()) {
 					make_wave(mesh, val, d, a, max_d, len,
 							upper == end ? len + (len - val) : upper->first,
-							proc_ray::dir_ray< 1 >());
+							proc_ray::dir_ray< 1 >(upper == end));
 					make_wave(mesh, val, d, a, max_d, len,
 							p == pmap.begin() ? -val : lower->first,
-							proc_ray::dir_ray< -1 >());
+							proc_ray::dir_ray< -1 >(p == pmap.begin()));
 
 					p_ready.insert(val);
 				}
