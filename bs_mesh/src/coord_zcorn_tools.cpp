@@ -781,11 +781,12 @@ void make_wave(ray_t& ray, fp_t start_point, fp_stor_t d, fp_stor_t a,
 		cell_sz = min(cell_sz * a, max_sz);
 	}
 
-	// merge refinement with original grid
-	copy(ray.begin(), ray.end(), insert_iterator< fp_set >(ref_ray, ref_ray.begin()));
-	// copy results back
-	ray.clear();
+	// merge refinement with original grid - suppose that ray is a set
 	copy(ref_ray.begin(), ref_ray.end(), insert_iterator< ray_t >(ray, ray.begin()));
+	//copy(ray.begin(), ray.end(), insert_iterator< fp_set >(ref_ray, ref_ray.begin()));
+	//// copy results back
+	//ray.clear();
+	//copy(ref_ray.begin(), ref_ray.end(), insert_iterator< ray_t >(ray, ray.begin()));
 }
 
 template< class delta_t >
