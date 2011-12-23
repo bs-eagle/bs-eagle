@@ -99,6 +99,10 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
 	gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz,
 		t_float x0 = 0, t_float y0 = 0, t_float z0 = 0);
 
+  //! init coord
+	static spv_float
+	gen_coord2(spv_float x, spv_float y);
+
 	//! return refined dx and dy for given COORD
 	static std::pair< spv_float, spv_float >
 	refine_mesh_deltas(t_long& nx, t_long& ny, spv_float coord, spv_float points,

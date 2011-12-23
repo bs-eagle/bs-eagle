@@ -164,6 +164,8 @@ struct mesh_grdecl_exporter_plus {
 			.def("gen_coord_zcorn", &gen_coord_zcorn1, "Generate COORD & ZCORN from given dimensions")
 			.def("gen_coord_zcorn", &gen_coord_zcorn2, "Generate COORD & ZCORN from given dimensions")
 			.def("gen_coord_zcorn", &gen_coord_zcorn3, "Generate COORD & ZCORN from given dimensions")
+      .def("gen_coord2", &T::gen_coord2, "Generate COORD")
+      .staticmethod("gen_coord2")
 			.staticmethod("gen_coord_zcorn")
 			.def("refine_mesh_deltas", &refine_mesh_deltas, "Calc dx and dy arrays for refined mesh in given points")
 			.def("refine_mesh_deltas", &refine_mesh_deltas1, "Calc dx and dy arrays for refined mesh in given points")

@@ -218,6 +218,13 @@ namespace blue_sky
 		return wrapped_t::gen_coord_zcorn(nx, ny, nz, dx, dy, dz, x0, y0, z0);
 	}
 
+  //! init coord
+	static spv_float
+	gen_coord2(spv_float x, spv_float y)
+	{
+		return wrapped_t::gen_coord2(x, y);
+	}
+
 	static std::pair< spv_float, spv_float >
 	refine_mesh_deltas(t_long& nx, t_long& ny, spv_float coord, spv_float points,
 			spv_long hit_idx = NULL,

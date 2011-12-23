@@ -1785,17 +1785,18 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 
 
           // COMPDAT
-
+          double eps = 1.0e-5;
           if (!cd.empty ())
           {
             fprintf (fp, "COMPDAT\n");
             cde = cd.end();
             for (cdi = cd.begin(); cdi != cde; ++cdi)
             {
-              if (cdi->status)
-                fprintf (fp, "\'%s\' %lu %lu %lu %lu \'OPEN\' 2* %lf 1* %lf 1* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
-              else
-                fprintf (fp, "\'%s\' %lu %lu %lu %lu \'SHUT\' 2* %lf 1* %lf 1* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
+              if (abs(cdi->kh_mult) > eps)
+                if (cdi->status)
+                  fprintf (fp, "\'%s\' %lu %lu %lu %lu \'OPEN\' 2* %lf 1* %lf 1* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
+                else
+                  fprintf (fp, "\'%s\' %lu %lu %lu %lu \'SHUT\' 2* %lf 1* %lf 1* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
             }
             fprintf (fp, "/\n\n");
           }
@@ -1809,7 +1810,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             int wpimult_exist = 0;
             for (cdi = cd.begin(); cdi != cde; ++cdi)
             {
-              if (cdi->kh_mult != 1)
+              if (cdi->kh_mult != 1 && abs(cdi->kh_mult) > eps)
                 {
                   if (!wpimult_exist)
                     fprintf (fp, "WPIMULT\n");

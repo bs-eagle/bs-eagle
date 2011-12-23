@@ -355,6 +355,49 @@ spfp_storarr_t gen_coord(int_t nx, int_t ny, spfp_storarr_t dx, spfp_storarr_t d
 	return coord;
 }
 
+spfp_storarr_t gen_coord2(spfp_storarr_t x, spfp_storarr_t y) {
+	using namespace std;
+	typedef fp_storarr_t::value_type value_t;
+  int_t nx, ny;
+  value_t *ys, *xs;
+
+	// DEBUG
+	BSOUT << "gen_coord: init stage" << bs_end;
+	
+	// if dimension offset is given as array, then size should be taken from array size
+	if(x->size() > 1) nx = (int_t) x->size() - 1;
+	if(y->size() > 1) ny = (int_t) y->size() - 1;
+
+  xs = &(*x)[0];
+  ys = &(*y)[0];
+
+
+	// create arrays
+	spfp_storarr_t coord = BS_KERNEL.create_object(fp_storarr_t::bs_type());
+// FIXME: raise exception
+	if(!coord) return NULL;
+
+	// DEBUG
+	BSOUT << "gen_coord: creation starts..." << bs_end;
+	// fill coord
+	// coord is simple grid
+	coord->resize((nx + 1)*(ny + 1)*6, value_t(0));
+	fp_storarr_t::iterator pcd = coord->begin();
+	for(int_t iy = 0; iy <= ny; ++iy) {
+		fp_t cur_y = ys[iy];
+		for(int_t ix = 0; ix <= nx; ++ix) {
+			pcd[0] = pcd[3] = xs[ix];
+			pcd[1] = pcd[4] = cur_y;
+			pcd[5] = 1; // pcd[2] = 0 from init
+			pcd += 6;
+		}
+	}
+	// DEBUG
+	BSOUT << "gen_coord: creation finished" << bs_end;
+
+	return coord;
+}
+
 coord_zcorn_pair gen_coord_zcorn(int_t nx, int_t ny, int_t nz, spv_float dx, spv_float dy, spv_float dz, fp_stor_t x0, fp_stor_t y0, fp_stor_t z0) {
 	using namespace std;
 	typedef coord_zcorn_pair ret_t;
@@ -1502,6 +1545,11 @@ namespace czt = blue_sky::coord_zcorn_tools;
 std::pair< spv_float, spv_float >
 mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz, t_float x0, t_float y0, t_float z0) {
 	return czt::gen_coord_zcorn(nx, ny, nz, dx, dy, dz, x0, y0, z0);
+}
+
+spv_float
+mesh_grdecl::gen_coord2 (spv_float x, spv_float y) {
+	return czt::gen_coord2(x, y);
 }
 
 /*-----------------------------------------------------------------
