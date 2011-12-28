@@ -53,7 +53,7 @@ class h5_pool_iface : public bs_node
        * @param fname   -- <INPUT> file name
        * @param path    -- <INPUT> path to the pool
        */
-      virtual void open_file (const std::string &fname, const std::string &path) = 0;
+      virtual void open_file (const std::string &fname) = 0;
 
       /** 
        * @brief close file

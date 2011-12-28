@@ -1773,7 +1773,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   point_ptr[2] = prop->get_f ("min_z");
                   int cell = himesh->where_is_point(nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), point);
                   if (cell >= nx_ny * nz)
-                    throw bs_exception ("", "first point in PVTO should be a saturated point");
+                    throw bs_exception ("", "Well's X Y is out of mesh!");
                   int k1 = cell / nx_ny;
                   int j1 = (cell - k1 * nx_ny) / nx;
                   int i1 = cell - k1 * nx_ny - j1 * nx;

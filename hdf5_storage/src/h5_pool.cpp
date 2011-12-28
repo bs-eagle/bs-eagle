@@ -20,7 +20,7 @@
 #include "hdf5_type_to_hid.hpp"
 #include "hdf5_hid_holder.hpp"
 #include "hdf5_functions.h"
-
+#include "date_helper.h"
 #include "bos_report.h"
 
 using namespace std;
@@ -119,11 +119,11 @@ namespace blue_sky
     }
 
   void 
-  h5_pool::fill_map ()
+  h5_pool::fill_map (hid_t group)
   {
-    BS_ASSERT (group_id);
+    BS_ASSERT (group);
     clear_map ();
-    herr_t r = H5Literate (group_id, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, &(h5_pool::it_group), this); 
+    herr_t r = H5Literate (group, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, &(h5_pool::it_group), this);
     if (r < 0)
       {
         bs_throw_exception (boost::format ("iterate fails"));
@@ -168,7 +168,7 @@ namespace blue_sky
 
     }
   void 
-  h5_pool::open_file (const std::string &fname_, const std::string &path_)
+  h5_pool::open_file (const std::string &fname_)
     {
       // FIXME:
       if (file_id)
@@ -184,34 +184,47 @@ namespace blue_sky
 
       fname = fname_;
 
-      if (detail::is_object_exists (file_id, path_))
-        {
-          group_id = H5Gopen (file_id, path_.c_str ());
-          if (group_id < 0)
-            {
-              bs_throw_exception (boost::format ("Can't open existing group: %s") % path_);
-            }
-        }
-      else
-        {
-          group_id = H5Gcreate (file_id, path_.c_str (), -1);
-          if (group_id < 0)
-            {
-              bs_throw_exception (boost::format ("Can't create group: %s") % path_);
-            }
-        }
+      //TODO: Open existing file: remove H5F_ACC_TRUNC, parse and add existing groups
+      group_id.clear ();
+      std::string base_name = "base_" + get_date_time_str();
+      group_id.insert (pair<std::string, hid_t>(base_name.c_str(), -1));
+      group_id.insert (pair<std::string, hid_t>("actual", -1));
 
-      path = path_;
-      fill_map ();
+      map_hid_t::iterator i;
+      for (i = group_id.begin(); i != group_id.end(); ++i)
+        {
+          std::string path_ = i->first;
+          if (detail::is_object_exists (file_id, path_))
+            {
+        	  i->second = H5Gopen (file_id, path_.c_str ());
+              if (i->second < 0)
+                {
+                  bs_throw_exception (boost::format ("Can't open existing group: %s") % path_);
+                }
+            }
+          else
+            {
+        	  i->second = H5Gcreate (file_id, path_.c_str (), -1);
+              if (i->second < 0)
+                {
+                  bs_throw_exception (boost::format ("Can't create group: %s") % path_);
+                }
+            }
+          fill_map (i->second);
+        }
     }
   
   void 
   h5_pool::close_file ()
     {
       clear_map ();
-      if (group_id > 0)
+      map_hid_t::iterator i;
+      for (i = group_id.begin(); i != group_id.end(); ++i)
         {
-          H5Gclose (group_id);
+          if (i->second > 0)
+            {
+              H5Gclose (i->second);
+            }
         }
       if (file_id > 0)
         {
@@ -296,9 +309,9 @@ namespace blue_sky
   }
 
   spv_float
-  h5_pool::get_fp_data (std::string const &name)
+  h5_pool::get_fp_data_group (std::string const &name, const std::string &group_name)
   {
-    spv_float a = get_fp_data_unsafe (name);
+    spv_float a = get_fp_data_unsafe_group (name, group_name);
     if (!a || a->empty ())
       throw error_h5_no_array (name);
 
@@ -306,9 +319,9 @@ namespace blue_sky
   }
 
   spv_int
-  h5_pool::get_i_data (std::string const &name)
+  h5_pool::get_i_data_group (std::string const &name, const std::string &group_name)
   {
-    spv_int a = get_i_data_unsafe (name);
+    spv_int a = get_i_data_unsafe_group (name, group_name);
     if (!a || a->empty ())
       throw error_h5_no_array (name);
 
@@ -316,9 +329,10 @@ namespace blue_sky
   }
 
   bool
-  h5_pool::is_opened (std::string const &name)
+  h5_pool::is_opened_group (std::string const &name, const std::string &group_name)
   {
-    BS_ASSERT (group_id >= 0) (name);
+	hid_t group = group_id.find (group_name)->second;
+    BS_ASSERT (group >= 0) (name);
     map_t::iterator it = h5_map.find (name);
     if (it == h5_map.end ())
       {
@@ -348,10 +362,11 @@ namespace blue_sky
   }
 
   spv_float 
-  h5_pool::get_fp_data_unsafe (const std::string &name)
+  h5_pool::get_fp_data_unsafe_group (const std::string &name, const std::string &group_name)
   {
     // FIXME: was <=
-    if (group_id < 0)
+	hid_t group = group_id.find (group_name)->second;
+    if (group < 0)
       {
         bs_throw_exception (boost::format ("Get data %s: group not opened") % name);
       }
@@ -360,14 +375,15 @@ namespace blue_sky
         return spv_float ();
       }
 
-    return get_data <v_float> (name, open_data (name));
+    return get_data <v_float> (name, open_data (name, group_name));
   }
 
   spv_int 
-  h5_pool::get_i_data_unsafe (const std::string &name)
+  h5_pool::get_i_data_unsafe_group (const std::string &name, const std::string &group_name)
   {
     // FIXME: was <=
-    if (group_id < 0)
+	hid_t group = group_id.find (group_name)->second;
+    if (group < 0)
       {
         bs_throw_exception (boost::format ("Get data %s: group not opened") % name);
       }
@@ -376,7 +392,7 @@ namespace blue_sky
         return spv_int ();
       }
 
-    return get_data <v_int> (name, open_data (name));
+    return get_data <v_int> (name, open_data (name, group_name));
   }
     
     
@@ -386,7 +402,12 @@ namespace blue_sky
     BOOST_STATIC_ASSERT (sizeof (t_long) >= sizeof (npy_intp));
     //BOOST_STATIC_ASSERT (sizeof (t_long) >= sizeof (hsize_t));
 
-    if (group_id <= 0)
+    map_hid_t::iterator i;
+    for (i = group_id.begin(); i != group_id.end(); ++i)
+      {
+    	hid_t group = i->second;
+
+    if (group <= 0)
       {
         bs_throw_exception (boost::format ("Declare: %s, group not opened.") % name);
       }
@@ -409,28 +430,30 @@ namespace blue_sky
         hid_t plist = H5Pcreate (H5P_DATASET_CREATE);
         if (plist < 0)
           {
-            bs_throw_exception (boost::format ("Can't create property for dataset %s in group %d") % name % group_id);
+            bs_throw_exception (boost::format ("Can't create property for dataset %s in group %d") % name % group);
           }
 
         herr_t r = H5Pset_fill_value (plist, dtype, value);
         if (r < 0)
           {
-            bs_throw_exception (boost::format ("Can't set fill for property, dataset %s in group %d") % name % group_id);
+            bs_throw_exception (boost::format ("Can't set fill for property, dataset %s in group %d") % name % group);
           }
 
         hid_t dtype_copy = H5Tcopy (dtype);
         if (dtype_copy < 0)
           {
-            bs_throw_exception (boost::format ("Can't copy datatype for %s in group %d") % name % group_id);
+            bs_throw_exception (boost::format ("Can't copy datatype for %s in group %d") % name % group);
           }
 
         add_node (name, -1, -1, dtype_copy, plist, n_dims, dims, var_dims);
       }
+      }
   }
 
   h5_pair
-  h5_pool::open_data (std::string const &name, const int)
+  h5_pool::open_data (std::string const &name, const std::string &group_name)
   {
+	hid_t group = group_id.find (group_name)->second;
     map_t::iterator it = h5_map.find (name);
     if (it == h5_map.end ())
       {
@@ -442,7 +465,7 @@ namespace blue_sky
       {
         if (p.dset >= 0)
           {
-            H5Ldelete (group_id, name.c_str (), H5P_DEFAULT);
+            H5Ldelete (group, name.c_str (), H5P_DEFAULT);
           }
 
         hid_t dtype = p.dtype;
@@ -459,21 +482,21 @@ namespace blue_sky
 
     if (p.dset < 0)
       {
-        if (!detail::is_object_exists (group_id, name.c_str ()))
+        if (!detail::is_object_exists (group, name.c_str ()))
           {
             hid_t dspace = H5Screate_simple (p.n_dims, p.h5_dims, NULL);
             if (dspace < 0)
               {
-                bs_throw_exception (boost::format ("Can't create simple dataspace for dataset %s in group %d") % name % group_id);
+                bs_throw_exception (boost::format ("Can't create simple dataspace for dataset %s in group %d") % name % group);
               }
 
             BS_ASSERT (p.dtype >= 0) (name);
             BS_ASSERT (p.plist) (name);
 
-            hid_t dset = H5Dcreate (group_id, name.c_str (), p.dtype, dspace, p.plist);
+            hid_t dset = H5Dcreate (group, name.c_str (), p.dtype, dspace, p.plist);
             if (dset < 0)
               {
-                bs_throw_exception (boost::format ("Can't create dataset %s in group %d") % name % group_id);
+                bs_throw_exception (boost::format ("Can't create dataset %s in group %d") % name % group);
               }
 
             p.dspace = dspace;
@@ -482,11 +505,11 @@ namespace blue_sky
           }
         else 
           {
-            hid_t dset = detail::open_dataset (group_id, name.c_str ());
+            hid_t dset = detail::open_dataset (group, name.c_str ());
             hid_t dspace = H5Dget_space (dset);
             if (dspace < 0)
               {
-                bs_throw_exception (boost::format ("Can't get dataspace for dataset %s in group %d") % name % group_id);
+                bs_throw_exception (boost::format ("Can't get dataspace for dataset %s in group %d") % name % group);
               }
 
             p.dspace = dspace;
@@ -656,13 +679,15 @@ namespace blue_sky
     }
 
   std::string
-  h5_pool::get_data_type(const std::string &name) const
+  h5_pool::get_data_type_group (const std::string &name, const std::string &group_name) const
   {
+	hid_t group = group_id.find (group_name)->second;
+
     map_t::const_iterator i;
     H5T_class_t dt;
-    
+
     // FIXME: was <=
-    if (group_id < 0)
+    if (group < 0)
       {
         bs_throw_exception (boost::format ("Get data type %s: group not opened") % name);
       }
