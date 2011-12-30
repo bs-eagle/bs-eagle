@@ -30,10 +30,11 @@ namespace blue_sky
       t_long    size;
       npy_intp  py_dims[10];
       hsize_t   h5_dims[10];
-      hsize_t   src_dims[6];  // dims for array are calculated from pool_dims and src_dims: dims[i] = src_dims[2 * i] * pool_dims[i] + src_dims[i + 1]. i = 0..2
+      hsize_t   src_dims[6];    // dims for array are calculated from pool_dims and src_dims: dims[i] = src_dims[2 * i] * pool_dims[i] + src_dims[i + 1]. i = 0..2
 
-      bool      var_dims;         // flag is true if array has variable dimensins depend on pool dimensions.
-     /*
+      bool      var_dims;       // flag is true if array has variable dimensions depend on pool dimensions.
+      bool      diff_from_base; // flag if array was changed
+    /*
       void save (toa_t &ar) const
         {
           ar & dset;
@@ -134,8 +135,7 @@ namespace blue_sky
        * @return smart pointer to the data vector or
        * raise exception if no array with name 'name'
        */
-      virtual spv_float get_fp_data (const std::string &name)
-        {return get_fp_data_group (name, "actual");}
+      virtual spv_float get_fp_data (const std::string &name);
 
       virtual spv_float get_fp_data_group (const std::string &name, const std::string &group);
 
@@ -159,8 +159,7 @@ namespace blue_sky
        * @return smart pointer to the data vector or
        * raise exception if no array with name 'name'
        */
-      virtual spv_int get_i_data (const std::string &name)
-        {return get_i_data_group (name, "actual");}
+      virtual spv_int get_i_data (const std::string &name);
 
       virtual spv_int get_i_data_group (const std::string &name, const std::string &group);
 
@@ -218,6 +217,7 @@ namespace blue_sky
        */
 
       virtual int set_fp_data (const std::string &name, spv_float data, t_float def_value = 0);
+      virtual int set_fp_data_script (const std::string &name, spv_float data, t_float def_value = 0);
 
       /**
        * @brief rewrite existing array in file
@@ -229,6 +229,10 @@ namespace blue_sky
        * @return 0 if success
        */
       virtual int set_i_data (const std::string &name, spv_int data, t_int def_value = 0);
+      virtual int set_i_data_script (const std::string &name, spv_int data, t_int def_value = 0);
+
+
+      virtual void finish_base ();
 
       /**
        * @brief returns is data array opened or not
@@ -292,7 +296,7 @@ namespace blue_sky
                 t_long data_size,
                 int n_dims,
                 npy_intp *dims,
-                void *def_value);
+                void *def_value, bool create_base);
 
       /**
        * @brief opens data set

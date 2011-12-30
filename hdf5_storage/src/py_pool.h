@@ -34,17 +34,23 @@ namespace blue_sky
         args (""), "Close h5 file")
     .def ("flush",                              &T::flush, 
         args (""), "Flush buffers to the file")
+    .def ("finish_base",                        &T::finish_base,
+        args (""), "Finish editing current base group")
     .def ("get_fp_data",                        &T::get_fp_data, 
         args ("name"), "Return array with given name")
     .def ("get_i_data",                         &T::get_i_data, 
         args ("name"), "Return array with given name")
-    .def ("declare_fp_data",                        &T::py_declare_fp_data, 
+    .def ("declare_fp_data",                    &T::py_declare_fp_data,
         args ("name", "def_value", "n_dims", "dims", "var_dims"), "Declare array in the pool")
-    .def ("declare_i_data",                        &T::py_declare_i_data, 
+    .def ("declare_i_data",                     &T::py_declare_i_data,
         args ("name", "def_value", "n_dims", "dims", "var_dims"), "Declare array in the pool")
     .def ("set_fp_data",                        &T::set_fp_data, 
         args ("name", "array"), "Store array in the pool")
     .def ("set_i_data",                         &T::set_i_data, 
+        args ("name", "array"), "Store array in the pool")
+    .def ("set_fp_data_script",                 &T::set_fp_data_script,
+        args ("name", "array"), "Store array in the pool")
+    .def ("set_i_data_script",                  &T::set_i_data_script,
         args ("name", "array"), "Store array in the pool")
     .def ("get_data_type",                      &T::get_data_type, 
         args ("name"), "Get array data type")

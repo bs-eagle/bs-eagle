@@ -161,6 +161,7 @@ class h5_pool_iface : public bs_node
       virtual t_long calc_data_dims (const std::string &name) = 0;
        
       virtual int set_fp_data (const std::string &name, spv_float data, t_float def_value = 0) = 0;
+      virtual int set_fp_data_script (const std::string &name, spv_float data, t_float def_value = 0) = 0;
 
       /** 
        * @brief rewrite existing array in file
@@ -171,7 +172,9 @@ class h5_pool_iface : public bs_node
        * @return 0 if success
        */
       virtual int set_i_data (const std::string &name, spv_int data, t_int def_value = 0) = 0;
+      virtual int set_i_data_script (const std::string &name, spv_int data, t_int def_value = 0) = 0;
 
+      virtual void finish_base () = 0;
       /**
        * @brief returns is data array opened or not
        *
