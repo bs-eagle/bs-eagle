@@ -36,6 +36,10 @@ namespace blue_sky
         args (""), "Flush buffers to the file")
     .def ("finish_base",                        &T::finish_base,
         args (""), "Finish editing current base group")
+    .def ("add_script",                         &T::add_script,
+        args ("string"), "Add string to script dataset")
+    .def ("get_script",                         &T::get_script,
+        args (""), "Return script text")
     .def ("get_fp_data",                        &T::get_fp_data, 
         args ("name"), "Return array with given name")
     .def ("get_i_data",                         &T::get_i_data, 

@@ -588,7 +588,70 @@ namespace blue_sky
     return p;
   }
 
+  const char *
+  h5_pool::get_script ()
+  {
+	const hsize_t rank = 1;
+	hid_t dset, dspace;
+	const int BUF_SIZE = 1024;
+
+	// Create the datatype
+	hid_t dtype = H5Tcopy (H5T_C_S1);
+	H5Tset_size (dtype, BUF_SIZE);
+
+	char buf[BUF_SIZE];
+    if (detail::is_object_exists (file_id, "script"))
+      {
+        dset = detail::open_dataset (file_id, "script");
+        herr_t r = H5Dread (dset, dtype, NULL, NULL, H5P_DEFAULT, buf);
+      }
+    else
+      return "";
+    return buf;
+  }
+
   int 
+  h5_pool::add_script (const std::string &script)
+  {
+	const hsize_t rank = 1;
+	hid_t dset, dspace;
+	const int BUF_SIZE = 1024;
+
+	// Create the datatype
+	hid_t dtype = H5Tcopy (H5T_C_S1);
+	H5Tset_size (dtype, BUF_SIZE);
+
+	char *buf = 0;
+    if (!detail::is_object_exists (file_id, "script"))
+      {
+    	const hsize_t dims = 1;
+    	const hsize_t max_dims = 1;
+        dspace = H5Screate_simple (1, &dims, &max_dims);
+    	dset = H5Dcreate (file_id, "script", dtype, dspace, H5P_DEFAULT);
+      }
+    else //read existing script
+      {
+        dset = detail::open_dataset (file_id, "script");
+        buf = new char[BUF_SIZE];
+        herr_t r = H5Dread (dset, dtype, NULL, NULL, H5P_DEFAULT, buf);
+      }
+    std::string script2 = script;
+    if (buf)
+      {
+        script2 = std::string (buf);
+        script2 += "\n# " + get_date_time_str () +"\n";
+        script2 += script;
+        delete [] buf;
+      }
+
+    char wbuf[BUF_SIZE];
+    sprintf (wbuf, "%s", script2.c_str ());
+    herr_t r = H5Dwrite (dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
+
+    return 0;
+  }
+
+  int
   h5_pool::declare_i_data (const std::string &name, t_int def_value, int n_dims, npy_intp *dims, int var_dims)
   {
     declare_data (name, get_hdf5_type <hdf5_type_helper <t_int>::type> (), &def_value, n_dims, dims, var_dims);

@@ -233,6 +233,8 @@ namespace blue_sky
 
 
       virtual void finish_base ();
+      virtual int add_script (const std::string &script);
+      virtual const char * get_script ();
 
       /**
        * @brief returns is data array opened or not
