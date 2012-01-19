@@ -65,11 +65,8 @@ struct compl_traits {
 		x_iterator pnext_x = px;
 		if(px != xp.begin())
 			--px;
-		//if(pprev_x != xp.begin())
-		//	--pprev_x;
-		// add last segment to intersection loop
-		//if (xend != xp.end ())
-		//	++xend;
+		else
+			++pnext_x;
 
 		// 3.4.2 consider all intersections between begin_j and end_j
 		for(; px != xend; ++px) {
@@ -126,11 +123,11 @@ struct compl_traits {
 						(pnext_x->md - px->md) * (pnext_x->where[j] - px->where[j]);
 				}
 			}
-			//}
-			//else {
-			//	// TODO: identify coordinates of last cell intersection???
-			//}
-
+			// set next element
+			if(++pnext_x == xp.end()) {
+				pnext_x = px;
+				++pnext_x;
+			}
 
 			// 3.4.3.2 if delta == 1 mark direction as 'X'
 			//         else if delta == dx direction = 'Y'
@@ -176,14 +173,6 @@ struct compl_traits {
 				else
 					fcb.s_.insert(cf);
 			}
-			// set next element
-			if(++pnext_x == xp.end())
-				{
-          pnext_x = px;
-          ++pnext_x;
-        }
-
-			//pprev_x = px;
 		} // 3.4.4 end of intersections loop
 	}
 };

@@ -141,9 +141,9 @@ public:
 
 				// 3.2 find intersections of given branch with mesh (well_path_ident)
 				sp_A = new xbuilder(m_, W, m_size_);
-				sp_A->build();
-				//A.remove_dups2();
-				//A.append_wp_nodes(hi);
+				hit_idx_t& hi = sp_A->build();
+				//sp_A->remove_dups2();
+				sp_A->append_wp_nodes(hi);
 				xp = &sp_A->path();
 
 				// if cache enabled - then store new xpath in cache
