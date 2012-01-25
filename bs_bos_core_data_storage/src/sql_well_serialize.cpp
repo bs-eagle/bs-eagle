@@ -6,6 +6,8 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
+#include "bs_bos_core_data_storage_stdafx.h"
+
 #include "sql_well_serialize.h"
 
 #include <boost/serialization/string.hpp>
@@ -19,8 +21,7 @@
 
 using namespace blue_sky;
 namespace bu = boost::uuids;
-
-BLUE_SKY_TYPE_SERIALIZE_IMPL(blue_sky::sql_well)
+namespace boser = boost::serialization;
 
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 	// save file_name
@@ -117,8 +118,17 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, blue_sky::sql_well)
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 // generate serialize() function that uses save & load
-BLUE_SKY_CLASS_SERIALIZE_SPLIT(blue_sky::sql_well)
+//BLUE_SKY_CLASS_SERIALIZE_SPLIT(blue_sky::sql_well)
+BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, blue_sky::sql_well)
+	// register conversion to base iface
+	boser::bs_void_cast_register(
+		static_cast< sql_well* >(NULL),
+		static_cast< well_pool_iface* >(NULL)
+	);
+	// split into save/load
+	boser::split_free(ar, t, version);
+BLUE_SKY_CLASS_SRZ_FCN_END
 
 // instantiate serialization code
-BLUE_SKY_TYPE_SERIALIZE_EXPORT(blue_sky::sql_well)
+BLUE_SKY_TYPE_SERIALIZE_IMPL(blue_sky::sql_well)
 

@@ -15,7 +15,7 @@
 BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::h5_pool)
 
 BLUE_SKY_TYPE_SERIALIZE_DECL(blue_sky::h5_pool)
-BLUE_SKY_TYPE_SERIALIZE_GUID(blue_sky::h5_pool)
+//BLUE_SKY_TYPE_SERIALIZE_GUID(blue_sky::h5_pool)
 
 #endif /* end of include guard: H5_POOL_SERIALIZE_8APE4URJ */
 

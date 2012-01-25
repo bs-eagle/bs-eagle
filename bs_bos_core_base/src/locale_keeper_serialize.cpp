@@ -6,6 +6,11 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
+#if defined(BSPY_EXPORTING_PLUGIN) && defined(UNIX)
+// supress gcc warnings
+#include <boost/python/detail/wrap_python.hpp>
+#endif
+
 #include "locale_keeper_serialize.h"
 
 #include <boost/archive/polymorphic_iarchive.hpp>

@@ -6,6 +6,8 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
+#include "bs_bos_core_data_storage_stdafx.h"
+
 #include "h5_pool_serialize.h"
 #include <boost/serialization/array.hpp>
 
@@ -35,7 +37,15 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, h5_pool)
 	ar >> t.n_pool_dims;
 BLUE_SKY_CLASS_SRZ_FCN_END
 
-BLUE_SKY_CLASS_SERIALIZE_SPLIT(h5_pool)
+BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, h5_pool)
+	// register conversion to base interface
+	boser::bs_void_cast_register< h5_pool, h5_pool_iface >(
+		static_cast< h5_pool* >(NULL),
+		static_cast< h5_pool_iface* >(NULL)
+	);
+	boser::split_free(ar, t, version);
+BLUE_SKY_CLASS_SRZ_FCN_END
 
+BOOST_SERIALIZATION_ASSUME_ABSTRACT(h5_pool_iface)
 BLUE_SKY_TYPE_SERIALIZE_IMPL(h5_pool)
 

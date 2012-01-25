@@ -15,6 +15,8 @@
 #include <string>
 #include "pool_iface.h"
 
+#include "bs_serialize_decl.h"
+
 namespace blue_sky
 {
   typedef boost::archive::text_iarchive           tia_t;
@@ -341,6 +343,8 @@ namespace blue_sky
 
       //blue-sky class declaration
       BLUE_SKY_TYPE_DECL (h5_pool);
+
+      friend class blue_sky::bs_serialize;
     };
 
 }//namespace blue_sky

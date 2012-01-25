@@ -15,7 +15,8 @@
 BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::sql_well)
 
 BLUE_SKY_TYPE_SERIALIZE_DECL(blue_sky::sql_well)
-BLUE_SKY_TYPE_SERIALIZE_GUID(blue_sky::sql_well)
+// the following is included in *_DECL
+//BLUE_SKY_TYPE_SERIALIZE_GUID(blue_sky::sql_well)
 
 #endif /* end of include guard: SQL_WELL_SERIALIZE_5XHD5ON5 */
 
