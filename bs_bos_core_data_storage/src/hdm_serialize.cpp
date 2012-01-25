@@ -9,7 +9,7 @@
 #include "bs_bos_core_data_storage_stdafx.h"
 
 #include "hdm_serialize.h"
-//#include "sql_well_serialize.h"
+#include "sql_well_serialize.h"
 
 using namespace blue_sky;
 namespace boser = boost::serialization;
