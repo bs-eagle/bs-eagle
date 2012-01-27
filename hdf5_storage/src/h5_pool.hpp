@@ -15,6 +15,8 @@
 #include <string>
 #include "pool_iface.h"
 
+const int BUF_SIZE = 1024; //!< size of buffer for script
+
 namespace blue_sky
 {
   typedef boost::archive::text_iarchive           tia_t;
@@ -355,6 +357,8 @@ namespace blue_sky
    protected:
       map_hid_t                 group_id;       //!< base data groups in file
       map_t                     h5_map;
+      bool                      edit_base;      //!< is true while hdm creating master is running
+      char buf[BUF_SIZE];                       //!< buffer for script
 
       hsize_t                   pool_dims[3];
       t_int                     n_pool_dims;

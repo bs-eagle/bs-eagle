@@ -171,6 +171,10 @@ namespace blue_sky
   void 
   h5_pool::open_file (const std::string &fname_)
     {
+	  //this function is not really open, it creates file
+	  //TODO: set edit_base = false; at open_file
+      edit_base = true;
+
       // FIXME:
       if (file_id)
         {
@@ -313,13 +317,13 @@ namespace blue_sky
   h5_pool::get_fp_data (std::string const &name)
   {
 	std::string group_name = "";
-	std::cout<<"get_fp_data ( " << name.c_str () <<" )\n";
-	std::cout<<"try actual\n";
+	//std::cout<<"get_fp_data ( " << name.c_str () <<" )\n";
+	//std::cout<<"try actual\n";
 	map_hid_t::iterator group = group_id.find ("actual");
     if (detail::is_object_exists (group->second, name.c_str ()))
       {
 		group_name = group->first;
-    	std::cout<<"found at "<< group_name.c_str () <<"\n";
+    	//std::cout<<"found at "<< group_name.c_str () <<"\n";
         return get_fp_data_group (name, group_name);
       }
     map_hid_t::iterator b = group_id.begin();
@@ -327,15 +331,15 @@ namespace blue_sky
 	for (;rev_i != rev_end; ++rev_i)
 	  {
 		group_name = rev_i->first;
-	    std::cout<<"try "<< group_name.c_str () <<"\n";
+	    //std::cout<<"try "<< group_name.c_str () <<"\n";
 		group = group_id.find (group_name);
         if (detail::is_object_exists (group->second, name.c_str ()))
 	      break;
 	  }
-	if (rev_i != rev_end)
-	  std::cout<<"found at "<< group_name.c_str () <<"\n";
-	else
-	  std::cout<<"not found !!!\n";
+	//if (rev_i != rev_end)
+	//  std::cout<<"found at "<< group_name.c_str () <<"\n";
+	//else
+	//  std::cout<<"not found !!!\n";
     return get_fp_data_group (name, group_name);
   }
 
@@ -353,13 +357,13 @@ namespace blue_sky
   h5_pool::get_i_data (std::string const &name)
   {
 	std::string group_name = "";
-	std::cout<<"get_i_data ( " << name.c_str () <<" )\n";
-	std::cout<<"try actual\n";
+	//std::cout<<"get_i_data ( " << name.c_str () <<" )\n";
+	//std::cout<<"try actual\n";
 	map_hid_t::iterator group = group_id.find ("actual");
     if (detail::is_object_exists (group->second, name.c_str ()))
       {
 		group_name = group->first;
-    	std::cout<<"found at "<< group_name.c_str () <<"\n";
+    	//std::cout<<"found at "<< group_name.c_str () <<"\n";
         return get_i_data_group (name, group_name);
       }
     map_hid_t::iterator b = group_id.begin();
@@ -368,14 +372,14 @@ namespace blue_sky
 	  {
 		group_name = rev_i->first;
 	    group = group_id.find (group_name);
-	    std::cout<<"try "<< group_name.c_str () <<" id "<<group->second<< "\n";
+	    //std::cout<<"try "<< group_name.c_str () <<" id "<<group->second<< "\n";
         if (detail::is_object_exists (group->second, name.c_str ()))
 	      break;
 	  }
-	if (rev_i != rev_end)
-	  std::cout<<"found at "<< group_name.c_str () <<"\n";
-	else
-	  std::cout<<"not found !!!\n";
+	//if (rev_i != rev_end)
+	//  std::cout<<"found at "<< group_name.c_str () <<"\n";
+	//else
+	//  std::cout<<"not found !!!\n";
     return get_i_data_group (name, group_name);
   }
 
@@ -464,16 +468,6 @@ namespace blue_sky
     //BOOST_STATIC_ASSERT (sizeof (t_long) >= sizeof (hsize_t));
 
     hid_t group = group_id.find ("actual")->second;
-    std::cout<<"### Declare array "<< name <<"\n";
-    //map_hid_t::iterator i;
-    //for (i = group_id.begin(); i != group_id.end(); ++i)
-    //  {
-    //	hid_t group = i->second;
-
-    //if (group <= 0)
-    //  {
-    //    bs_throw_exception (boost::format ("Declare: %s, group not opened.") % name);
-    //  }
 
     map_t::iterator it = h5_map.find (name);
     if (it != h5_map.end ())
@@ -509,7 +503,6 @@ namespace blue_sky
           }
 
         add_node (name, -1, -1, dtype_copy, plist, n_dims, dims, var_dims);
-      //}
       }
   }
 
@@ -545,7 +538,7 @@ namespace blue_sky
         blue_sky::calc_data_dims (name, p, n_pool_dims, pool_dims);
       }
 
-    if (p.dset < 0)
+    //if (p.dset < 0)
       {
         if (!detail::is_object_exists (group, name.c_str ()))
           {
@@ -593,13 +586,11 @@ namespace blue_sky
   {
 	const hsize_t rank = 1;
 	hid_t dset, dspace;
-	const int BUF_SIZE = 1024;
 
 	// Create the datatype
 	hid_t dtype = H5Tcopy (H5T_C_S1);
 	H5Tset_size (dtype, BUF_SIZE);
 
-	char buf[BUF_SIZE];
     if (detail::is_object_exists (file_id, "script"))
       {
         dset = detail::open_dataset (file_id, "script");
@@ -615,38 +606,34 @@ namespace blue_sky
   {
 	const hsize_t rank = 1;
 	hid_t dset, dspace;
-	const int BUF_SIZE = 1024;
+    std::string script2 = "";
 
-	// Create the datatype
+	// create the datatype
 	hid_t dtype = H5Tcopy (H5T_C_S1);
 	H5Tset_size (dtype, BUF_SIZE);
 
-	char *buf = 0;
-    if (!detail::is_object_exists (file_id, "script"))
+	// create "script" if it not exists
+	bool is_exist = detail::is_object_exists (file_id, "script");
+    if (!is_exist)
       {
-    	const hsize_t dims = 1;
-    	const hsize_t max_dims = 1;
+	    const hsize_t dims = 1;
+	    const hsize_t max_dims = 1;
         dspace = H5Screate_simple (1, &dims, &max_dims);
-    	dset = H5Dcreate (file_id, "script", dtype, dspace, H5P_DEFAULT);
+	    dset = H5Dcreate (file_id, "script", dtype, dspace, H5P_DEFAULT);
       }
-    else //read existing script
-      {
-        dset = detail::open_dataset (file_id, "script");
-        buf = new char[BUF_SIZE];
-        herr_t r = H5Dread (dset, dtype, NULL, NULL, H5P_DEFAULT, buf);
-      }
-    std::string script2 = script;
-    if (buf)
-      {
-        script2 = std::string (buf);
-        script2 += "\n# " + get_date_time_str () +"\n";
-        script2 += script;
-        delete [] buf;
-      }
+    //else// read "script" and store to script2
+    //  {
+    //    dset = detail::open_dataset (file_id, "script");
+    //    herr_t r = H5Dread (dset, dtype, NULL, NULL, H5P_DEFAULT, buf);
+    //    script2 = std::string (buf);
+    //  }
 
-    char wbuf[BUF_SIZE];
-    sprintf (wbuf, "%s", script2.c_str ());
-    herr_t r = H5Dwrite (dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
+    //script2 = script2 + "\n# " + get_date_time_str () +"\n" + script;
+    //script2 = "\n# " + get_date_time_str () +"\n" + script;
+    script2 = script;
+
+    sprintf (buf, "%s", script2.c_str ());
+    herr_t r = H5Dwrite (dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
 
     return 0;
   }
@@ -718,38 +705,40 @@ namespace blue_sky
       {
         declare_data (name, dtype, def_value, n_dims, dims);
       }
-    else if (create_base)// already exist
+    else if (create_base)// already exist and create_base=true
       {
-		std::cout<<"diff_from_base "<<(int)map_it->second.diff_from_base<<"\n";
-    	if (map_it->second.diff_from_base) // array in last base different from prev base
+		if (map_it->second.diff_from_base) // array in last base different from prev base
     	  {
-    	    //create new base and copy actual to it
-    	    hid_t actual = group_id.find ("actual")->second;
+    	    //create new base group
     	    last_base_name = "base_" + get_date_time_str();
-    	    H5Ocopy (file_id, "actual", file_id, last_base_name.c_str(), H5P_DEFAULT, H5P_DEFAULT);
 
-    	    hid_t base_id = H5Gopen (file_id, last_base_name.c_str());
+    	    hid_t base_id = H5Gcreate (file_id, last_base_name.c_str(), -1);
     	    group_id.insert (pair<std::string, hid_t>(last_base_name, base_id));
 
-    	    // set flag difference from (new) base is false
+    	    std::string comment = "# Created base\n";
+    	    add_script (comment);
+
+    	    // set other array's flags difference from (new) base is false
     	    map_t::iterator it = h5_map.begin (), e = h5_map.end ();
             for (; it != e; ++it)
               {
-                it->second.diff_from_base = false;
+            	if (it != map_it)
+                  it->second.diff_from_base = false;
               }
-           	std::cout<<"h5_pool: created "<< last_base_name << " because array " << name <<" changed\n";
-    	  }
+          }
     	else
     	  {
     	    //set array path to last base instead of "actual"
     	    map_hid_t::iterator e = group_id.end();
-    	    last_base_name = (--e)->first;
+    	    if (!group_id.empty ())
+    	      last_base_name = (--e)->first;
+    	    else
+    	      bs_throw_exception (boost::format ("set data %s error: No groups in pool!") % name);
+    	    //set flag current array is changed
+        	if (!edit_base)
+        	  map_it->second.diff_from_base = true;
     	  }
-	    //set flag current array is changed
-    	map_it->second.diff_from_base = true;
       }
-
-  	std::cout<<"h5_pool: set data /"<< last_base_name << "/" << name <<"\n";
 
     const h5_pair &p = open_data (name, last_base_name);
     if (p.size > data_size)
@@ -767,6 +756,7 @@ namespace blue_sky
   void
   h5_pool::finish_base ()
   {
+	edit_base = false;
     // set flag difference from (new) base is true for all arrays
 	// next call of set_data will create new base
     map_t::iterator it = h5_map.begin (), e = h5_map.end ();
