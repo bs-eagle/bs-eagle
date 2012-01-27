@@ -10,6 +10,8 @@
 #include "scal_data_placement_info.h"
 #include "table_iface.h"
 
+#include "bs_serialize_decl.h"
+
 namespace blue_sky {
 
   /**
@@ -29,8 +31,8 @@ namespace blue_sky {
     typedef data_vector <item_t>                    data_vector_t;
     typedef v_double                                item_array_t;
     typedef smart_ptr <item_array_t, true>          sp_array_item_t;
-    typedef shared_vector <scal_region_info_t>      region_vector_t;
-    typedef shared_vector <scal_region_t *>         region_vector_2_t;
+    typedef std::vector <scal_region_info_t>      region_vector_t;
+    typedef std::vector <scal_region_t *>         region_vector_2_t;
     typedef smart_ptr <this_t, true>								sp_scal_data_t;
     typedef BS_SP (table_iface)                     sp_table;
     typedef std::vector <sp_table>                  sp_table_array_t;
@@ -272,6 +274,8 @@ namespace blue_sky {
   public:
 
     BLUE_SKY_TYPE_DECL_T (scal_2p_data_holder);
+
+    friend class blue_sky::bs_serialize;
 
   };
 

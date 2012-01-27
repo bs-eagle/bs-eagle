@@ -11,6 +11,8 @@
 #include "jfunction.h"
 #include "scal_dummy_iface.h"
 
+#include "bs_serialize_decl.h"
+
 namespace blue_sky
 {
 
@@ -223,6 +225,9 @@ namespace blue_sky
       sp_scal_input_table_array_t  oil_input_table;
       
 	  bool is_gas, is_oil, is_water;
+
+      friend class blue_sky::bs_serialize;
+
     public:
 
       BLUE_SKY_TYPE_DECL (scal_3p);
