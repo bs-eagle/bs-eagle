@@ -13,38 +13,13 @@
 #include "h5_pool_serialize.h"
 #include "convert_units_serialize.h"
 #include "rocktab_table_serialize.h"
-
-#include "prop_iface.h"
+#include "common_types_serialize.h"
 
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>
 
 using namespace blue_sky;
 namespace boser = boost::serialization;
-
-/*-----------------------------------------------------------------
- * serialize prop_iface
- *----------------------------------------------------------------*/
-BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, prop_iface)
-	// dump all info to string and save it
-	ar << (const std::string&)t.to_str();
-BLUE_SKY_CLASS_SRZ_FCN_END
-
-BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, prop_iface)
-	// dump all info to string and save it
-	std::string prop_data;
-	ar >> prop_data;
-	t.from_str(prop_data);
-BLUE_SKY_CLASS_SRZ_FCN_END
-
-BLUE_SKY_CLASS_SERIALIZE_SPLIT(prop_iface)
-
-// define GUID and implementation of prop_iface serialization
-// for GUID use std boost::serialization macro, cause we declare it for interface
-// also instantiate code using _BYNAME macro
-BOOST_CLASS_EXPORT_KEY2(prop_iface, "prop")
-BLUE_SKY_TYPE_SERIALIZE_DECL_NOGUID(prop_iface)
-BLUE_SKY_TYPE_SERIALIZE_IMPL_BYNAME(prop_iface, "prop")
 
 /*-----------------------------------------------------------------
  * serialize pvt_info & scal_info
