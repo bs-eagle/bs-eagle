@@ -632,16 +632,10 @@ namespace blue_sky
         script2 = std::string (buf);
       }
 
-    //script2 = script2 + "\n# " + get_date_time_str () +"\n" + script;
-    //script2 = "\n# " + get_date_time_str () +"\n" + script;
     script2 = script2 + script;
 
     sprintf (buf, "%s", script2.c_str ());
     herr_t r = H5Dwrite (dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-    //H5Fflush (file_id, H5F_SCOPE_LOCAL);
-
-    std::cout<<"add_script: "<<buf<<"\nreplace = "<<(int)replace<<"\n";
-    std::cout<<"get_script: "<<get_script ()<<"\n";
 
     return 0;
   }
@@ -723,7 +717,9 @@ namespace blue_sky
     	    hid_t base_id = H5Gcreate (file_id, last_base_name.c_str(), -1);
     	    group_id.insert (pair<std::string, hid_t>(last_base_name, base_id));
 
-    	    std::string comment = "\n# Created " + last_base_name + "\n";
+    	    std::string comment = "# Created " + last_base_name + "\n";
+    	    // add "\n" before script if not first line
+    	    comment = strlen(get_script ()) > 0 ? "\n" : "" + comment;
     	    add_script (comment, false);
 
     	    // set other array's flags difference from (new) base is false
