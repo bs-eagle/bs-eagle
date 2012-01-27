@@ -27,6 +27,7 @@ if build_kind == 'init':
     includes["hdm_fluid"]                   = Dir("hdm_fluid/include")
     includes["bs_hdf5_storage"]             = Dir("hdf5_storage/src")
     includes["bs_pvt_src"]                  = Dir("bs_pvt/src")
+    includes["bs_scal_src"]                 = Dir("bs_scal/src")
     Export ("includes")
 
 else :
