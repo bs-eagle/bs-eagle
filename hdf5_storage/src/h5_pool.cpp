@@ -602,7 +602,7 @@ namespace blue_sky
   }
 
   int 
-  h5_pool::add_script (const std::string &script)
+  h5_pool::add_script (const std::string &script, bool replace)
   {
 	const hsize_t rank = 1;
 	hid_t dset, dspace;
@@ -621,19 +621,27 @@ namespace blue_sky
         dspace = H5Screate_simple (1, &dims, &max_dims);
 	    dset = H5Dcreate (file_id, "script", dtype, dspace, H5P_DEFAULT);
       }
-    //else// read "script" and store to script2
-    //  {
-    //    dset = detail::open_dataset (file_id, "script");
-    //    herr_t r = H5Dread (dset, dtype, NULL, NULL, H5P_DEFAULT, buf);
-    //    script2 = std::string (buf);
-    //  }
+    else
+      {
+        dset = detail::open_dataset (file_id, "script");
+      }
+
+    if (!replace)// read "script" and store to script2
+      {
+        herr_t r = H5Dread (dset, dtype, NULL, NULL, H5P_DEFAULT, buf);
+        script2 = std::string (buf);
+      }
 
     //script2 = script2 + "\n# " + get_date_time_str () +"\n" + script;
     //script2 = "\n# " + get_date_time_str () +"\n" + script;
-    script2 = script;
+    script2 = script2 + script;
 
     sprintf (buf, "%s", script2.c_str ());
     herr_t r = H5Dwrite (dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    //H5Fflush (file_id, H5F_SCOPE_LOCAL);
+
+    std::cout<<"add_script: "<<buf<<"\nreplace = "<<(int)replace<<"\n";
+    std::cout<<"get_script: "<<get_script ()<<"\n";
 
     return 0;
   }
@@ -715,8 +723,8 @@ namespace blue_sky
     	    hid_t base_id = H5Gcreate (file_id, last_base_name.c_str(), -1);
     	    group_id.insert (pair<std::string, hid_t>(last_base_name, base_id));
 
-    	    std::string comment = "# Created base\n";
-    	    add_script (comment);
+    	    std::string comment = "\n# Created " + last_base_name + "\n";
+    	    add_script (comment, false);
 
     	    // set other array's flags difference from (new) base is false
     	    map_t::iterator it = h5_map.begin (), e = h5_map.end ();

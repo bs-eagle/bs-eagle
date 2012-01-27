@@ -235,7 +235,7 @@ namespace blue_sky
 
 
       virtual void finish_base ();
-      virtual int add_script (const std::string &script);
+      virtual int add_script (const std::string &script, bool replace);
       virtual const char * get_script ();
 
       /**
