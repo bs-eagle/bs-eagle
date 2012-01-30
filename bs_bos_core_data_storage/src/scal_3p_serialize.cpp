@@ -12,7 +12,7 @@
 #include "scal_3p_serialize.h"
 #include "common_types_serialize.h"
 #include "scal_3p_impl.h"
-#include "py_scal_wrapper.h"
+//#include "py_scal_wrapper.h"
 
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>

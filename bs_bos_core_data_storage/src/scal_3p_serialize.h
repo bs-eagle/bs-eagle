@@ -10,6 +10,7 @@
 #define SCAL_3P_SERIALIZE_YKAKIY2R
 
 #include "scal_3p.h"
+#include "py_scal_wrapper.h"
 #include "bs_serialize.h"
 
 BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::scal_3p)
