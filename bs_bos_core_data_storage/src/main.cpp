@@ -46,6 +46,10 @@ namespace blue_sky
 }
 
 #ifdef BSPY_EXPORTING_PLUGIN
+namespace blue_sky { namespace python {
+void py_export_hdm_serialize();
+}}
+
 namespace {
   void
   init_py_subsystem ()
@@ -57,6 +61,7 @@ namespace {
     python::py_export_idata ();
     python::export_keyword_manager();
     python::py_export_well();
+    python::py_export_hdm_serialize();
   }
 }
 
