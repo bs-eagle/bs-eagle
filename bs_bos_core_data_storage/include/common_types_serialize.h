@@ -9,11 +9,11 @@
 #ifndef COMMON_TYPES_SERIALIZE_ZD0U0FWQ
 #define COMMON_TYPES_SERIALIZE_ZD0U0FWQ
 
+#include "bs_serialize.h"
+
 #include "table_iface.h"
 #include "prop_iface.h"
 #include "vartype_table_iface.h"
-
-#include "bs_serialize.h"
 
 BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::table_iface)
 BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::prop_iface)

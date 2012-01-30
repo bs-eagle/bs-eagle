@@ -9,8 +9,8 @@
 #ifndef H5_POOL_SERIALIZE_8APE4URJ
 #define H5_POOL_SERIALIZE_8APE4URJ
 
-#include "h5_pool.hpp"
 #include "bs_serialize.h"
+#include "h5_pool.hpp"
 
 BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::h5_pool)
 
