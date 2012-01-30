@@ -33,7 +33,7 @@ libs = ["blue_sky",
      "bs_mesh",
      ]
 
-boost_libs = ["boost_date_time-mt"]
+boost_libs = list_suffix(["boost_date_time", "boost_serialization"], env["boost_suffix"]);
 
 if ("cfl" in env and env["cfl"] == "1") :
 	env.AppendUnique (CPPDEFINES = ["BS_BOS_CORE_USE_CSR_ILU_CFL_PREC"])
