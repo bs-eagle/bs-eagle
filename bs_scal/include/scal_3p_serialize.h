@@ -9,6 +9,7 @@
 #ifndef SCAL_3P_SERIALIZE_YKAKIY2R
 #define SCAL_3P_SERIALIZE_YKAKIY2R
 
+#include "conf.h"
 #include "scal_3p.h"
 #include "py_scal_wrapper.h"
 #include "bs_serialize.h"
