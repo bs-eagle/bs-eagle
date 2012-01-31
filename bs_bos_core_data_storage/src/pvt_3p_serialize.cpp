@@ -10,7 +10,7 @@
 #include "bs_pvt_stdafx.h"
 
 #include "pvt_3p_serialize.h"
-#include "common_types_serialize.h"
+//#include "common_types_serialize.h"
 
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>

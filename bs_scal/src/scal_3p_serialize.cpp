@@ -10,7 +10,7 @@
 //#include "bs_scal_stdafx.h"
 
 #include "scal_3p_serialize.h"
-#include "common_types_serialize.h"
+//#include "common_types_serialize.h"
 #include "scal_3p_impl.h"
 //#include "py_scal_wrapper.h"
 

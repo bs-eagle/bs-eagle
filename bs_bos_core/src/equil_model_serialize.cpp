@@ -8,7 +8,7 @@
 
 #include "stdafx.h"
 #include "equil_model_serialize.h"
-#include "common_types_serialize.h"
+//#include "common_types_serialize.h"
 
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>
