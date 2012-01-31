@@ -9,7 +9,7 @@
 #include "bs_bos_core_data_storage_stdafx.h"
 
 #include "hdm_serialize.h"
-#include "common_types_serialize.h"
+//#include "common_types_serialize.h"
 #include "sql_well_serialize.h"
 #include "locale_keeper_serialize.h"
 #include "convert_units_serialize.h"
@@ -42,11 +42,21 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, hdm)
 	ar << t.ph_const;
 
 	// save number of pvt regions
-	ar << (const t_long&)t.pvt_3p_->get_n_pvt_regions();
+	const t_long long_zero = 0;
+	if(t.pvt_3p_)
+		ar << (const t_long&)t.pvt_3p_->get_n_pvt_regions();
+	else
+		ar << long_zero;
 	// save number of scal regions
-	ar << (const t_long&)t.scal_3p_->get_n_scal_regions();
+	if(t.scal_3p_)
+		ar << (const t_long&)t.scal_3p_->get_n_scal_regions();
+	else
+		ar << long_zero;
 	// save number of equil regions
-	ar << (const t_long&)t.equil_model_->get_n_equil_regions();
+	if(t.equil_model_)
+		ar << (const t_long&)t.equil_model_->get_n_equil_regions();
+	else
+		ar << long_zero;
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 /*-----------------------------------------------------------------

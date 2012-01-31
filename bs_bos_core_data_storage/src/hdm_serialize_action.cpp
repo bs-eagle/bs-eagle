@@ -37,7 +37,8 @@ void hdm_serialize_save(
 	const std::string& prj_path,
 	const std::string& prj_name
 ){
-	std::ofstream f((prj_path + PATHSEP + prj_name + HDM_DUMP_EXT).c_str());
+	std::string fname = prj_path + PATHSEP + prj_name + HDM_DUMP_EXT;
+	std::ofstream f(fname.c_str());
 	boarch::polymorphic_text_oarchive oa(f);
 	oa << t;
 }
