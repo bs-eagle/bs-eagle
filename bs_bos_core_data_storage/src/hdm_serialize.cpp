@@ -9,7 +9,7 @@
 #include "bs_bos_core_data_storage_stdafx.h"
 
 #include "hdm_serialize.h"
-//#include "common_types_serialize.h"
+#include "common_types_serialize.h"
 #include "sql_well_serialize.h"
 #include "locale_keeper_serialize.h"
 #include "convert_units_serialize.h"

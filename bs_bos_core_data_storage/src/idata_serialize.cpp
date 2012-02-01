@@ -13,7 +13,7 @@
 #include "h5_pool_serialize.h"
 #include "convert_units_serialize.h"
 #include "rocktab_table_serialize.h"
-//#include "common_types_serialize.h"
+#include "common_types_serialize.h"
 
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>
