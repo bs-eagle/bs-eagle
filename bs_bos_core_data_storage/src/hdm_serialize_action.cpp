@@ -40,6 +40,10 @@ void hdm_serialize_save(
 	std::string fname = prj_path + PATHSEP + prj_name + HDM_DUMP_EXT;
 	std::ofstream f(fname.c_str());
 	boarch::polymorphic_text_oarchive oa(f);
+	// save db filename for sql_well object
+	BS_KERNEL.pert_idx_dt(t->well_pool_->bs_resolve_type())->insert< std::string >(
+		prj_path + PATHSEP + prj_name + "_well_pool.db"
+	);
 	oa << t;
 }
 

@@ -55,16 +55,22 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 	// check db has an associated filename
 	// strangely there is no such API function though it is documented
 	//std::string db_fname(sqlite3_db_filename(t.db, "main"));
-	std::string db_fname = t.file_name;
+	std::string db_fname;
+	// check if hdm serializer saved filename for us
+	kernel::idx_dt_ptr kdt = BS_KERNEL.pert_idx_dt(t.bs_type());
+	if(kdt->size< std::string >())
+		db_fname = kdt->ss< std::string >(0);
+	else
+		db_fname = t.file_name;
 	// generate uuid that is part of filename
 	// if db_fname != "", uuid is generated based on it
 	// otherwise it is random
-	bu::uuid db_uuid;
-	if(db_fname.size())
-		db_uuid = bu::string_generator()(db_fname);
-	else
-		db_uuid = bu::random_generator()();
-	db_fname = std::string("well_pool_") + bu::to_string(db_uuid) + ".db";
+		//if(db_fname.size())
+	//	db_uuid = bu::string_generator()(db_fname);
+	if(db_fname.empty()) {
+		bu::uuid db_uuid = bu::random_generator()();
+		db_fname = std::string("file:well_pool_") + bu::to_string(db_uuid) + ".db";
+	}
 
 	// open db for backup
 	sqlite3* save_db = NULL;
@@ -81,9 +87,10 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 
 	// copy data to save_db
 	while((opres = sqlite3_backup_step(save_bu, -1)) == SQLITE_OK) {}
+	sqlite3_backup_finish(save_bu);
+	sqlite3_close(save_db);
 	if(opres != SQLITE_DONE) {
 		// if error happens
-		sqlite3_close(save_db);
 		::remove(db_fname.c_str());
 		ar << do_write_db;
 		return;
