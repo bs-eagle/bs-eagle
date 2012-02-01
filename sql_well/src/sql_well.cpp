@@ -1745,45 +1745,64 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           char d_buf[1024];
           print_date_ecl (*di, d_buf);
           printf ("DATE %s\n", d_buf);
-          fprintf (fp, "DATES\n%s\n/\n", d_buf);
+          fprintf (fp, "DATES\n%s\n/\n\n", d_buf);
 
           // Building compdat to put first completion I, J to WELLSPECS
           compl_n_frac.clear ();
           cd = compl_n_frac.compl_build (*di);
           cde = cd.end();
 
-
           if (!w_spec_flag)
             {
               w_spec_flag = 1;
+              spv_double point = BS_KERNEL.create_object (v_double::bs_type ());
+              prepare_sql("SELECT COUNT(*) FROM wells");
+              if (!step_sql ())
+                {
+                  BSOUT << "Wells count " << get_sql_int(0) << bs_end;
+                  point->resize (3 * get_sql_int(0));
+                }
+              else
+                return -1;
+
+              finalize_sql();
+              t_double *point_ptr = &(*point)[0];
               // well specs
               fprintf (fp, "WELSPECS\n");
+
               if (prepare_sql ("SELECT name, x, y FROM wells ORDER BY name ASC"))
                 return -1;
               for (; !step_sql ();)
                 {
-                  std::string s = get_sql_str (0);
-                  //determine IJ of well
-                  //strat_t::Point point;
-                  spv_double point = BS_KERNEL.create_object (v_double::bs_type ());
-                  point->resize (3);
-                  t_double *point_ptr = &(*point)[0];
                   point_ptr[0] = get_sql_real (1);
                   point_ptr[1] = get_sql_real (2);
                   point_ptr[2] = prop->get_f ("min_z");
-                  int cell = himesh->where_is_point(nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), point);
+                  point_ptr += 3;
+                }
+              finalize_sql ();
+
+              spv_uint cells = himesh->where_is_points(nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), point);
+
+              if (prepare_sql ("SELECT name FROM wells ORDER BY name ASC"))
+                return -1;
+              
+              for (int i = 0; !step_sql (); i++)
+                {
+                  std::string s = get_sql_str (0);
+                  BSOUT << "Writing well " << s << bs_end;
+                  int cell = (*cells)[i];
                   if (cell >= nx_ny * nz)
                     throw bs_exception ("", "Well's X Y is out of mesh!");
                   int k1 = cell / nx_ny;
                   int j1 = (cell - k1 * nx_ny) / nx;
                   int i1 = cell - k1 * nx_ny - j1 * nx;
                   fprintf (fp, "\'%s\' \'FIELD\' %u %u /\n", s.c_str (), i1 + 1, j1 + 1);
-                      }
-              fprintf (fp, "/\n");
+                }
+              fprintf (fp, "/\n\n");
               finalize_sql ();
             }
 
-
+          
           // COMPDAT
           double eps = 1.0e-5;
           if (!cd.empty ())
@@ -1801,6 +1820,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             fprintf (fp, "/\n\n");
           }
 
+         
           // WPIMULT
 
           if (!cd.empty ())
@@ -1822,7 +1842,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               fprintf (fp, "/\n\n");
           }
 
-
+         
           // FRACTURES
           ft = compl_n_frac.frac_build(*di);
           if (!ft.empty ())
@@ -1834,9 +1854,9 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             for (fti = ft.begin (); fti != fte; ++fti)
             {
               if (fti->frac_perm > 0)
-                sprintf (perm_str, "%lf", fti->frac_perm);
+                sprintf (perm_str, "%lf %lf", fti->frac_half_thin, fti->frac_perm);
               else
-                sprintf (perm_str, " * ");
+                sprintf (perm_str, " *   * ");
 
               int horiz = 0;
               std::string sql = "SELECT name, horiz FROM wells WHERE name = ";
@@ -1854,13 +1874,12 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               else
                 sprintf (main_k_str, " * ");
 
-              fprintf (fp, "\'%s\' %lu %lu %lu %lu %lf %lf %lf \'%s\' %lf %s %s %s %s /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1,
-                fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle - 90, fti->frac_skin, fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin,
-                perm_str, " * ", " * ", main_k_str);
+              fprintf (fp, "\'%s\' %lu %lu %lu %lu %lf %lf %lf \'%s\' %s %s %s %s /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1,
+                fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle - 90, fti->frac_skin, fti->frac_status == 0 ? "SHUT" : "OPEN", perm_str, " * ", " * ", main_k_str);
             }
             fprintf (fp, "/\n\n");
           }
-
+         
           // WCONINJE
           sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND ctrl < 0 ORDER BY well_name ASC", *di);
           if (prepare_sql (s_buf))
@@ -1930,9 +1949,9 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               fprintf (fp, "/\n");
             }
           if (wconinje_flag)
-            fprintf (fp, "/\n");
+            fprintf (fp, "/\n\n");
           finalize_sql ();
-
+          
           // WCONPROD
           sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND ctrl > 0 ORDER BY well_name ASC", *di);
           if (prepare_sql (s_buf))
@@ -2012,8 +2031,38 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               */
               fprintf (fp, "/\n");
             }
+
+        
           if (wconprod_flag)
-            fprintf (fp, "/\n");
+            fprintf (fp, "/\n\n");
+          finalize_sql ();
+
+
+          // WEFAC
+          sprintf (s_buf, "SELECT well_name, wefac FROM well_hist WHERE d=%lf ORDER BY well_name ASC", *di);
+          if (prepare_sql (s_buf))
+            return -1;
+
+          t_uint wefac_flag = 0;
+          for (; !step_sql ();)
+            {
+              double wefac = get_sql_real (1);
+              if (wefac == 1.0)
+                continue;
+              if (wefac_flag == 0)
+                {
+                  fprintf (fp, "WEFAC\n");
+                  wefac_flag++;
+                }
+              std::string s = get_sql_str (0);
+              
+              fprintf (fp, "\'%s\' %lf", s.c_str (), wefac);
+              fprintf (fp, "/\n");
+            }
+
+        
+          if (wefac_flag)
+            fprintf (fp, "/\n\n");
           finalize_sql ();
         }
 
