@@ -39,7 +39,7 @@ BLUE_SKY_TYPE_SERIALIZE_IMPL(pvt_base)
  *----------------------------------------------------------------*/
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, pvt_dead_oil)
 	// just redirect to base class
-	boser::bs_base_object< pvt_base >(t);
+	ar & boser::bs_base_object< pvt_base >(t);
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 BLUE_SKY_TYPE_SERIALIZE_DECL(pvt_dead_oil)
@@ -50,7 +50,7 @@ BLUE_SKY_TYPE_SERIALIZE_IMPL(pvt_dead_oil)
  *----------------------------------------------------------------*/
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, pvt_gas)
 	// just redirect to base class
-	boser::bs_base_object< pvt_base >(t);
+	ar & boser::bs_base_object< pvt_base >(t);
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 BLUE_SKY_TYPE_SERIALIZE_DECL(pvt_gas)
@@ -61,7 +61,7 @@ BLUE_SKY_TYPE_SERIALIZE_IMPL(pvt_gas)
  *----------------------------------------------------------------*/
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, pvt_oil)
 	// just redirect to base class
-	boser::bs_base_object< pvt_base >(t);
+	ar & boser::bs_base_object< pvt_base >(t);
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 BLUE_SKY_TYPE_SERIALIZE_DECL(pvt_oil)
@@ -72,7 +72,7 @@ BLUE_SKY_TYPE_SERIALIZE_IMPL(pvt_oil)
  *----------------------------------------------------------------*/
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, pvt_water)
 	// just redirect to base class
-	boser::bs_base_object< pvt_base >(t);
+	ar & boser::bs_base_object< pvt_base >(t);
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 BLUE_SKY_TYPE_SERIALIZE_DECL(pvt_water)
