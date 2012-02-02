@@ -81,8 +81,6 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, hdm)
 	//t.init_fluids(n_pvt_r, n_scal_r);
 	//t.init_equil(n_equil_r);
 
-	// init mesh
-	t.mesh->init_props(sp_hdm(&t));
 	// init keyword_manager
 	keyword_params kp;
 	kp.hdm = &t;
@@ -90,12 +88,14 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, hdm)
 	switch (t.data->props->get_i("mesh")) {
 	case 0:
 		t.km->handle_keyword_reactor ("MESH_IJK", kp);
+		t.mesh = BS_KERNEL.create_object("bs_mesh_ijk_fi");
 		break;
 	case 1:
 		t.km->handle_keyword_reactor ("MESH_GRDECL", kp);
+		t.mesh = BS_KERNEL.create_object("bs_mesh_grdecl");
 		break;
 	default:
-			bs_throw_exception ("init: wrong mesh choice");
+		bs_throw_exception ("init: wrong mesh choice");
 	}
 	switch (t.data->props->get_i("init")) {
 	case 0:
@@ -107,6 +107,9 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, hdm)
 	default:
 		bs_throw_exception ("init: wrong mesh choice");
 	}
+	// init mesh
+	if(t.mesh)
+		t.mesh->init_props(sp_hdm(&t));
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 /*-----------------------------------------------------------------
