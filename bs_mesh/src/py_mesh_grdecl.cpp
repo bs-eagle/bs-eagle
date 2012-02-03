@@ -38,6 +38,7 @@ PY_EXPORTER (mesh_grdecl_exporter, rs_mesh_iface_exporter)
 	.def ("calc_cells_vertices_xyz", &T::calc_cells_vertices_xyz)
 	.def ("init_props", &init_props1)
 	.def ("init_props", &init_props2)
+  .def ("check_data", &T::check_data)
 	.def ("get_element_sizes", &T::get_element_sizes)
 	;
 PY_EXPORTER_END;

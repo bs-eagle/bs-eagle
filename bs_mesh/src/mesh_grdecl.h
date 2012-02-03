@@ -206,14 +206,17 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     int build_jacobian_and_flux_connections_add_boundary (const sp_bcsr_t jacobian, const sp_flux_conn_iface_t flux_conn,
                                                           spv_long boundary_array);
 
-	boost::python::list calc_element_tops ();
+    //! find well`s trajectories and mesh cells intersection
+    int intersect_trajectories ();
 
-	boost::python::list calc_element_center ();
+	  boost::python::list calc_element_tops ();
 
-	// same as calc_element_tops, but only return tops coordinates
-	spv_float calc_cells_vertices();
-	// reverse mesh walk order
-	spv_float calc_cells_vertices_xyz();
+	  boost::python::list calc_element_center ();
+
+	  // same as calc_element_tops, but only return tops coordinates
+	  spv_float calc_cells_vertices();
+	  // reverse mesh walk order
+	  spv_float calc_cells_vertices_xyz();
 
     /*!	\brief  find neighbours (adjacency matrix)
     	\param neig_matrix - bcsr adjacency matrix

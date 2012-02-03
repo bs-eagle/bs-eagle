@@ -19,6 +19,7 @@ rs_mesh_base ::rs_mesh_base ()
 void
 rs_mesh_base ::init_props (const sp_hdm_t hdm)
 {
+  well_pool = hdm->get_well_pool();
   minpv = hdm->get_prop ()->get_f ("minimal_pore_volume");
   minsv = hdm->get_prop ()->get_f ("minimal_splice_volume");
   max_thickness = hdm->get_prop ()->get_f ("maximum_splice_thickness");

@@ -8,6 +8,7 @@
  */
 
 #include "flux_connections_iface.h"
+#include "well_pool_iface.h"
 #include "mesh_base.h"
 
 using namespace blue_sky;
@@ -33,6 +34,8 @@ class BS_API_PLUGIN rs_mesh_base : public mesh_base
     
     typedef flux_connections_iface                      flux_conn_iface_t;
     typedef smart_ptr <flux_conn_iface_t, true>         sp_flux_conn_iface_t;
+    
+    typedef BS_SP(well_pool_iface)                      sp_well_pool_t;
     
     
   //-----------------------------------------
@@ -92,11 +95,16 @@ class BS_API_PLUGIN rs_mesh_base : public mesh_base
     virtual int build_jacobian_and_flux_connections (const sp_bcsr_t /*jacobian*/, const sp_flux_conn_iface_t/*flux_conn*/, 
                                                      spv_long /*boundary_array*/) = 0;
 
+    //! find well`s trajectories and mesh cells intersection
+    virtual int intersect_trajectories () = 0;
+
   //-----------------------------------------
   //  VARIABLES
   //-----------------------------------------
 
   protected:
+
+    sp_well_pool_t well_pool; //!< sql well pool
     
     t_double minpv;	  //!< minimum pore volume
     t_double minsv;	  //!< minimum volume for splicing

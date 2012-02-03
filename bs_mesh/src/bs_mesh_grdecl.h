@@ -194,6 +194,9 @@ namespace blue_sky
       int build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, const sp_flux_conn_iface_t flux_conn, spv_long boundary_array)
         {return wrapped.build_jacobian_and_flux_connections (jacobian, flux_conn, boundary_array);};
 
+      //! find well`s trajectories and mesh cells intersection
+      int intersect_trajectories () {return wrapped.intersect_trajectories();};
+
       boost::python::list calc_element_tops ()
       {return wrapped.calc_element_tops();};
 

@@ -150,12 +150,12 @@ void mesh_grdecl::init_props(const sp_hdm_t hdm)
   hdm->get_prop()->set_f("max_x", max_x);
   hdm->get_prop()->set_f("max_y", max_y);
   hdm->get_prop()->set_f("max_z", max_z);
-
 }
 
 
 void mesh_grdecl::check_data() const
 {
+  write_time_to_log init_time ("Mesh check", ""); 
   base_t::check_data ();
 
   if (min_x < 0)
@@ -169,9 +169,63 @@ void mesh_grdecl::check_data() const
     bs_throw_exception ("COORD array is not initialized");
   if (!zcorn_array)
     bs_throw_exception ("ZCORN array is not initialized");
+
+  // check if all cells are convex
+
+  element_t element;
+  t_long wrong_cells = 0;
+  t_int *actnum = actnum_array->data ();
+
+  for (t_long i = 0; i < nx; ++i)
+    for (t_long j = 0; j < ny; ++j)
+      {
+        for (t_long k = 0; k < nz; ++k)
+          {
+            t_long index = k + j * nz + i * ny * nz;
+
+            // miss inactive blocks
+            if (actnum[index])
+              {
+                calc_element (i, j, k, element);
+                mesh_element3d::corners_t corns = element.get_corners();
+				
+                // check X
+                if (((corns[1].x - corns[0].x) * (corns[3].x - corns[2].x) < 0) ||
+                    ((corns[1].x - corns[0].x) * (corns[5].x - corns[4].x) < 0) ||
+                    ((corns[1].x - corns[0].x) * (corns[7].x - corns[6].x) < 0))
+                  {
+                    actnum[index] = 0;
+                    wrong_cells ++;
+                    continue;
+                  }
+
+                // check Y
+                if (((corns[2].y - corns[0].y) * (corns[3].y - corns[1].y) < 0) ||
+                    ((corns[2].y - corns[0].y) * (corns[7].y - corns[5].y) < 0) ||
+                    ((corns[2].y - corns[0].y) * (corns[6].y - corns[4].y) < 0))
+                  {
+                    actnum[index] = 0;
+                    wrong_cells ++;
+                    continue;
+                  }
+                
+                
+                // check Z
+                if (((corns[4].z - corns[0].z) * (corns[5].z - corns[1].z) < 0) ||
+                    ((corns[4].z - corns[0].z) * (corns[6].z - corns[2].z) < 0) ||
+                    ((corns[4].z - corns[0].z) * (corns[7].z - corns[3].z) < 0))
+                  {
+                    actnum[index] = 0;
+                    wrong_cells ++;
+                    continue;
+                  }
+              }
+        }
+    }
+
+  if (wrong_cells)
+    BOSOUT (section::mesh, level::medium) << "% wrong (nonconvex) cells found! Marked inactive." << wrong_cells << bs_end;
 }
-
-
 
 inline void
 mesh_grdecl::calc_corner_point(const t_float z, const t_float *coord, fpoint3d_t &p)const
@@ -1854,6 +1908,25 @@ int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr
   #endif //BS_MESH_WRITE_TRANSMISS_MATRIX 
 
   //return (int) boundary_array->size();
+  return 0;
+}
+
+
+int mesh_grdecl::intersect_trajectories ()
+{
+  int n_range_cells = 1000;
+
+  int n_x_ranges = std::ceil (nx / std::pow(float(n_range_cells), float(1/3)));
+  int n_y_ranges = std::ceil (ny / std::pow(float(n_range_cells), float(1/3)));
+  int n_z_ranges = std::ceil (nz / std::pow(float(n_range_cells), float(1/3)));
+
+
+
+
+
+
+
+
   return 0;
 }
 

@@ -117,6 +117,8 @@ namespace blue_sky
       //! allocate jacobian 
       virtual int build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, const sp_flux_conn_iface_t flux_conn, spv_long boundary_array) = 0;
 
+      //! find well`s trajectories and mesh cells intersection
+      virtual int intersect_trajectories () = 0;
     };
 
 };//namespace blue_sky
