@@ -1,5 +1,5 @@
-#ifndef __READ_CLASS
-#define __READ_CLASS
+#ifndef __READ_CLASS_SQL_WELL
+#define __READ_CLASS_SQL_WELL
 
 /*!
   \file read_class.h

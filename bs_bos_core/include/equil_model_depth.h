@@ -16,6 +16,8 @@
 #include "scal_dummy_iface.h"
 #include "pvt_dummy_iface.h"
 
+#include "bs_serialize_decl.h"
+
 namespace blue_sky
 {
 	typedef boost::array <t_long, FI_PHASE_TOT>			phase_d_t;
@@ -87,6 +89,8 @@ namespace blue_sky
 		spv_double                      saturation;
 	public:
 		BLUE_SKY_TYPE_DECL (equil_model_depth);
+
+		friend class blue_sky::bs_serialize;
 	};
 }
 

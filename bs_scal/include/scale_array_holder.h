@@ -10,6 +10,7 @@
 #include "scale_arrays_placement_strategies.h"
 #include "shared_vector.h"
 #include "vartype_table_iface.h"
+#include "bs_serialize_decl.h"
 
 namespace blue_sky
   {
@@ -90,6 +91,8 @@ private:
     public:
 
       BLUE_SKY_TYPE_DECL (scale_array_holder);
+
+      friend class blue_sky::bs_serialize;
     };
 
 

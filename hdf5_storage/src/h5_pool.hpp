@@ -15,6 +15,7 @@
 #include <string>
 #include "pool_iface.h"
 
+#include "bs_serialize_decl.h"
 const int BUF_SIZE = 1024; //!< size of buffer for script
 
 namespace blue_sky
@@ -369,6 +370,8 @@ namespace blue_sky
 
       //blue-sky class declaration
       BLUE_SKY_TYPE_DECL (h5_pool);
+
+      friend class blue_sky::bs_serialize;
     };
 
 }//namespace blue_sky

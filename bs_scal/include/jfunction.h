@@ -8,6 +8,7 @@
 #define BS_JFUNCTION_H_
 
 #include "plane_orientation.h"
+#include "bs_serialize_decl.h"
 
 namespace blue_sky
   {
@@ -94,6 +95,7 @@ private:
 
       JFUNC_PERM_TYPE_ENUM  perm_type;
 
+      friend class blue_sky::bs_serialize;
     };
 
 

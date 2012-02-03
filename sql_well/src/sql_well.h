@@ -16,8 +16,11 @@
 #include <fstream>
 #include <sqlite3.h>
 
-#include "read_class.h"
+#include "read_class_sql_well.h"
 #include "well_pool_iface.h"
+
+#include <boost/serialization/access.hpp>
+#include "bs_serialize_decl.h"
 
 namespace blue_sky
 {
@@ -215,6 +218,9 @@ namespace blue_sky
       FRead *fr_file;                    //!< read from ascii helper
 
       BLUE_SKY_TYPE_DECL (sql_well);
+
+      friend class boost::serialization::access;
+      friend class blue_sky::bs_serialize;
     };
 
 }; //end of blue_sky namespace

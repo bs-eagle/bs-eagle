@@ -4,6 +4,8 @@
 #include "interpolation_macro.h"
 #include "conf.h"
 
+#include "bs_serialize_decl.h"
+
 namespace blue_sky
   {
   /**
@@ -56,6 +58,8 @@ namespace blue_sky
 
       std::vector<column> columns;      //!< list of columns
       t_int n_rows;                       //!< number of rows
+
+      friend class blue_sky::bs_serialize;
     };
 
   

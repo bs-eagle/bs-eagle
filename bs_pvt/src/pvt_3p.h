@@ -9,6 +9,8 @@
 #include "pvt_water.h"
 #include "pvt_dummy_iface.h"
 
+#include "bs_serialize_decl.h"
+
 namespace blue_sky
   {
     class BS_API_PLUGIN idata;
@@ -123,6 +125,7 @@ namespace blue_sky
 
         BLUE_SKY_TYPE_DECL (pvt_3p);
 
+        friend class blue_sky::bs_serialize;
     };
     
 } // namespace blue_sky

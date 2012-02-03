@@ -26,6 +26,9 @@ if build_kind == 'init':
     includes["sql_well_src"]                = Dir("sql_well/src")
     includes["hdm_fluid"]                   = Dir("hdm_fluid/include")
     includes["bs_hdf5_storage"]             = Dir("hdf5_storage/src")
+    includes["bs_pvt_src"]                  = Dir("bs_pvt/src")
+    includes["bs_scal_src"]                 = Dir("bs_scal/src")
+    includes["common_types_src"]            = Dir("common_types/src")
     Export ("includes")
 
 else :

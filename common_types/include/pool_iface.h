@@ -35,7 +35,7 @@ namespace blue_sky
 /** 
  * @brief 
  */
-class h5_pool_iface : public bs_node
+class h5_pool_iface : public objbase
   {
     // --------------------------------
     // METHODS

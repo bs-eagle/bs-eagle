@@ -14,16 +14,27 @@ env.Append (CPPPATH = ["include",
     includes["bs_pvt"],
     includes["sql_well"],
     includes["bs_scal"],
-    includes["bs_bos_core"]
-    ] + includes["kernel"])
+    includes["bs_bos_core"],
+    includes["bs_hdf5_storage"],
+    includes["sql_well_src"],
+    includes["bs_pvt_src"],
+    includes["bs_scal_src"],
+    includes["common_types_src"]
+    ] + includes["kernel"]
+    )
 
 libs = ["blue_sky", "bs_bos_core_base"]
 
+boost_libs = ["serialization"]
+boost_libs = list_suffix(list_prefix(boost_libs, 'boost_'), env["boost_suffix"]);
+
 if (build_kind == "debug") :
     env.AppendUnique (LIBS = list_suffix (libs, "_d"))
+    env.AppendUnique (LIBS = list_suffix(boost_libs, '-d'))
     lib_name += "_d"
 elif (build_kind == "release") :
     env.AppendUnique (LIBS = libs)
+    env.AppendUnique (LIBS = boost_libs)
 
 bs_bos_core_data_storage = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
 

@@ -7,6 +7,8 @@
 #ifndef BS_PVT_BASE_H_
 #define BS_PVT_BASE_H_
 
+#include "bs_serialize_decl.h"
+
 namespace blue_sky
   {
 
@@ -147,6 +149,7 @@ namespace blue_sky
       //! pvt properties in table format
       sp_table pvt_props_table;
       
+      friend class blue_sky::bs_serialize;
     };
 
   //! register all pvt_* types
