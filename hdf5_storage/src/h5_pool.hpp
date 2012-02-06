@@ -37,6 +37,7 @@ namespace blue_sky
 
       bool      var_dims;       // flag is true if array has variable dimensions depend on pool dimensions.
       bool      diff_from_base; // flag if array was changed
+      hid_t     group_id;
     /*
       void save (toa_t &ar) const
         {
@@ -334,6 +335,7 @@ namespace blue_sky
 
       template <class T>
       map_t::iterator add_node (const std::string &name,
+                                const hid_t group_id,
                                 const hid_t dset,
                                 const hid_t dspace,
                                 const hid_t dtype,

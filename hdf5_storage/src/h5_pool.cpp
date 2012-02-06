@@ -72,7 +72,7 @@ namespace blue_sky
       hsize_t dims_[10] = {0};
       // FIXME: check 
       int n_dims = H5Sget_simple_extent_dims (dspace, dims_, NULL);
-      map_t::iterator it = ((h5_pool *)m)->add_node (name, dset, dspace, dtype, plist, n_dims, dims_, 0);
+      map_t::iterator it = ((h5_pool *)m)->add_node (name, g_id, dset, dspace, dtype, plist, n_dims, dims_, 0);
 
       BOSOUT (section::h5, level::low) 
         << "Node from file: " << name << bs_end;
@@ -80,7 +80,8 @@ namespace blue_sky
     }
 
   template <class T> h5_pool::map_t::iterator 
-  h5_pool::add_node (const std::string &name, const hid_t dset, const hid_t dspace, 
+  h5_pool::add_node (const std::string &name, const hid_t group_id,
+                     const hid_t dset, const hid_t dspace, 
                      const hid_t dtype, const hid_t plist, 
                      const int n_dims, const T *dims, const bool var_dims)
     {
@@ -97,6 +98,7 @@ namespace blue_sky
       p.second.var_dims = var_dims;
       p.second.size = 0;
       p.second.diff_from_base = true;
+      p.second.group_id = group_id;
       if (var_dims)
         {
           for (int i = 0; i < 6; ++i)
@@ -502,7 +504,7 @@ namespace blue_sky
             bs_throw_exception (boost::format ("Can't copy datatype for %s in group %d") % name % group);
           }
 
-        add_node (name, -1, -1, dtype_copy, plist, n_dims, dims, var_dims);
+        add_node (name, group, -1, -1, dtype_copy, plist, n_dims, dims, var_dims);
       }
   }
 
@@ -578,6 +580,7 @@ namespace blue_sky
           }
       }
 
+    p.group_id = group;
     return p;
   }
 
