@@ -129,5 +129,5 @@ BLUE_SKY_CLASS_SRZ_FCN_END
 BOOST_SERIALIZATION_ASSUME_ABSTRACT(vartype_table_iface)
 //BLUE_SKY_TYPE_SERIALIZE_IMPL_T(vartype_table, 1)
 // instantiate for t_float
-BLUE_SKY_TYPE_SERIALIZE_EXPORT_T(vartype_table, t_float)
+BLUE_SKY_TYPE_SERIALIZE_IMPL_T(vartype_table, t_float)
 
