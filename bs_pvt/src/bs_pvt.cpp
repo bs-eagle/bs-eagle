@@ -8,6 +8,7 @@
 #include "pvt_3p.h"
 #include "py_pvt.h"
 #include "pvt_keywords.hpp"
+#include "bs_serialize_decl.h"
 
 namespace blue_sky
 {
@@ -21,6 +22,9 @@ namespace blue_sky
 
     res &= blue_sky::pvt_register_types (pd); BS_ASSERT (res); 
     res &= BS_KERNEL.register_type (pd, blue_sky::pvt_keywords::bs_type ()); BS_ASSERT (res);
+
+    // force serialization typeinfo registering
+    serialize_register_eti< pvt_3p >();
 
     return res;
   }

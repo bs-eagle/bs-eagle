@@ -15,10 +15,6 @@
 #include "prop.h"
 #include "vartype_table.h"
 
-BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::table)
-BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::prop)
-BLUE_SKY_CLASS_SRZ_FCN_DECL_T(serialize, blue_sky::vartype_table, 1)
-
 // for GUID use std boost::serialization macro, cause we declare it for interface
 //BOOST_CLASS_EXPORT_KEY2(blue_sky::table_iface, "table_iface")
 //BLUE_SKY_TYPE_SERIALIZE_DECL_NOGUID(blue_sky::table_iface)

@@ -16,6 +16,10 @@
 using namespace blue_sky;
 namespace boser = boost::serialization;
 
+BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::table)
+BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::prop)
+BLUE_SKY_CLASS_SRZ_FCN_DECL_T(serialize, blue_sky::vartype_table, 1)
+
 /*-----------------------------------------------------------------
  * serialize table_iface
  *----------------------------------------------------------------*/

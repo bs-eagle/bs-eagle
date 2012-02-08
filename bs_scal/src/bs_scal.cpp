@@ -5,6 +5,7 @@
 #include "scal_3p.h"
 #include "py_scal_wrapper.h"
 #include "scal_keywords.hpp"
+#include "bs_serialize_decl.h"
 
 namespace blue_sky
 {
@@ -19,7 +20,10 @@ namespace blue_sky
     res &= blue_sky::scal_register_types (pd); BS_ASSERT (res);
     res &= BS_KERNEL.register_type (pd, scal_keywords::bs_type ()); BS_ASSERT (res);
 
-    return res;
+    // force serialization typeinfo registering
+    serialize_register_eti< scal_3p >();
+
+	return res;
   }
   }
 

@@ -9,6 +9,7 @@
 #include "py_pool.h"
 
 #include "hdf5_group_impl.hpp"
+#include "bs_serialize_decl.h"
 
 using namespace blue_sky;
 using namespace blue_sky::python;
@@ -25,6 +26,9 @@ namespace blue_sky {
       bool res = true; 
       res &= BLUE_SKY_REGISTER_TYPE (pd, h5_pool); BS_ASSERT (res);
       res &= BLUE_SKY_REGISTER_TYPE (pd, hdf5_group_impl); BS_ASSERT (res);
+
+      // force serialization typeinfo registering
+      serialize_register_eti< h5_pool >();
 
       return res;
     }

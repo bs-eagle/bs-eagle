@@ -21,6 +21,7 @@
 #include "py_perf.h"
 #include "py_traj.h"
 #include "vartype_table.h"
+#include "bs_serialize_decl.h"
 
 using namespace blue_sky;
 using namespace blue_sky::python;
@@ -45,6 +46,11 @@ namespace blue_sky {
     REG_TYPE (perf)
     REG_TYPE (traj)
     res &= BS_KERNEL.register_type (pd, vartype_table <t_float>::bs_type ());
+
+    // force serialization typeinfo registering
+    serialize_register_eti< table >();
+    serialize_register_eti< prop >();
+    serialize_register_eti< vartype_table< t_float > >();
 
     return res;
   }
