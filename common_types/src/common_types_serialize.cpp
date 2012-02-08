@@ -16,9 +16,9 @@
 using namespace blue_sky;
 namespace boser = boost::serialization;
 
-BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::table)
-BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::prop)
-BLUE_SKY_CLASS_SRZ_FCN_DECL_T(serialize, blue_sky::vartype_table, 1)
+//BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::table)
+//BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::prop)
+//BLUE_SKY_CLASS_SRZ_FCN_DECL_T(serialize, blue_sky::vartype_table, 1)
 
 /*-----------------------------------------------------------------
  * serialize table_iface
@@ -114,7 +114,8 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN_T(load, vartype_table, 1)
 		// column = v
 		if(column->size() != v.size())
 			column->resize(v.size());
-		std::copy(v.begin(), v.end(), column->begin());
+		if(column->size()) {
+			std::copy(v.begin(), v.end(), column->begin());
 		// add column
 		t.add_col_vector(i, col_name, column);
 	}
