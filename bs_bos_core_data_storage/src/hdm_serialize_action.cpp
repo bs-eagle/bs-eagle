@@ -66,6 +66,9 @@ namespace python {
 BS_API_PLUGIN void py_export_hdm_serialize() {
 	bp::def("hdm_serialize_save", &hdm_serialize_save);
 	bp::def("hdm_serialize_load", &hdm_serialize_load);
+    // register pvt to/from str serialization
+	bp::def("serialize_to_str", &blue_sky::serialize_to_str< hdm >);
+	bp::def("serialize_from_str", &blue_sky::serialize_from_str< hdm >);
 }
 
 } /* python */

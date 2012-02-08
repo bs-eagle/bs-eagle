@@ -8,6 +8,7 @@
 
 #include "py_sql_well.h"
 #include "sql_well.h"
+#include "sql_well_serialize.h"
 
 using namespace boost::python;
 #ifdef BSPY_EXPORTING_PLUGIN
@@ -29,6 +30,9 @@ namespace python {
     class_exporter <sql_well, well_pool_iface, py_sql_well_exporter>::export_class ("sql_well");
 
     py_export_compdat_ident();
+
+    def("serialize_to_str", &blue_sky::serialize_to_str< well_pool_iface >);
+    def("serialize_from_str", &blue_sky::serialize_from_str< well_pool_iface >);
   }
 
 }	// namespace python

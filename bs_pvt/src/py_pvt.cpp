@@ -19,6 +19,7 @@
 #include "pvt_water.h"
 #include "pvt_dummy.h"
 #include "pvt_3p.h"
+#include "pvt_3p_serialize.h"
 
 #include "export_python_wrapper.h"
 #include "py_list_converter.h"
@@ -70,6 +71,10 @@ namespace python    {
 	  typedef bspy_converter< list_traits< std::list<smart_ptr<table_iface> > > > spv_table_list_converter;
 	  spv_table_list_converter::register_from_py ();
 	  spv_table_list_converter::register_to_py ();
+
+    // register pvt to/from str serialization
+	def("serialize_to_str", &blue_sky::serialize_to_str< pvt_3p_iface >);
+	def("serialize_from_str", &blue_sky::serialize_from_str< pvt_3p_iface >);
   }
 
 } // namespace python

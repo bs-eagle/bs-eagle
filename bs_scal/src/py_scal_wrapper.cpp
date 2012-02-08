@@ -10,6 +10,7 @@
 
 #include "py_scal_wrapper.h"
 #include "scal_save_data.h"
+#include "scal_3p_serialize.h"
 
 #include "export_python_wrapper.h"
 
@@ -82,6 +83,10 @@ namespace blue_sky
       base_exporter<scal_2p_data_holder, scal_data_holder_exporter>::export_class ("scal_data");
       base_exporter<scal_3p_iface, default_exporter>::export_class ("scal_3p_iface");
       class_exporter<scal_3p, scal_3p_iface, scal_3p_exporter>::export_class ("scal_3p");
+
+      // register pvt to/from str serialization
+      def("serialize_to_str", &blue_sky::serialize_to_str< scal_3p_iface >);
+      def("serialize_from_str", &blue_sky::serialize_from_str< scal_3p_iface >);
     }
   }
 }
