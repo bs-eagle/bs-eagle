@@ -9,10 +9,17 @@
 //#include "bs_bos_core_data_storage_stdafx.h"
 
 #include "h5_pool_serialize.h"
-//#include "hdf5_functions.h"
+#include "bs_prop_base.h"
 
 #include <boost/serialization/array.hpp>
 #include <boost/serialization/map.hpp>
+
+// path separator
+#ifdef UNIX
+#define PATHSEP '/'
+#else
+#define PATHSEP '\\'
+#endif
 
 using namespace blue_sky;
 namespace boser = boost::serialization;
@@ -34,6 +41,14 @@ hid_t demand_h5_group(hid_t file_id, const std::string& g_name) {
 	return g_id;
 }
 
+std::string basename(const std::string& fname) {
+	std::size_t sep_pos = fname.rfind(PATHSEP);
+	if(sep_pos == std::string::npos)
+		return fname;
+	else
+		return fname.substr(sep_pos + 1, std::string::npos);
+}
+
 }
 
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, h5_pair)
@@ -49,6 +64,8 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, h5_pool)
 	bool is_open = (t.file_id != 0);
 	ar << is_open;
 	ar << t.fname;
+	// also save base name
+	ar << (const std::string&)basename(t.fname);
 
 	// we should only dump group names
 	typedef h5_pool::map_hid_t::const_iterator g_iterator;
@@ -96,9 +113,25 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, h5_pool)
 	ar >> do_open;
 	ar >> t.fname;
 
+	// load base name
+	std::string h5_basename;
+	ar >> h5_basename;
+
 	// open file
 	if(do_open) {
-		t.file_id = H5Fopen(t.fname.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+		t.file_id = -1;
+		// first try to open base name relative to project path
+		kernel::idx_dt_ptr kdt = BS_KERNEL.pert_idx_dt(BS_KERNEL.find_type("hdm").td_);
+		if(kdt && kdt->size< std::string >()) {
+			std::string prj_path = kdt->ss< std::string >(0);
+			h5_basename = prj_path + PATHSEP + h5_basename;
+			t.file_id = H5Fopen(h5_basename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+			if(t.file_id >= 0)
+				t.fname = h5_basename;
+		}
+
+		if(t.file_id < 0)
+			t.file_id = H5Fopen(t.fname.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
 		if(t.file_id < 0) // try to create file
 			t.open_file(t.fname.c_str());
 		// something really bad

@@ -37,13 +37,17 @@ void hdm_serialize_save(
 	const std::string& prj_path,
 	const std::string& prj_name
 ){
+	// save project path for serialization code
+	kernel::idx_dt_ptr p_dt = BS_KERNEL.pert_idx_dt(hdm::bs_type());
+	//std::string well_pool_filename = prj_name + "_well_pool.db";
+	p_dt->insert< std::string >(prj_path);
+	// and project name
+	p_dt->insert< std::string >(prj_name);
+
+	// make archive
 	std::string fname = prj_path + PATHSEP + prj_name + HDM_DUMP_EXT;
 	std::ofstream f(fname.c_str());
 	boarch::polymorphic_text_oarchive oa(f);
-	// save db filename for sql_well object
-	BS_KERNEL.pert_idx_dt(t->well_pool_->bs_resolve_type())->insert< std::string >(
-		prj_path + PATHSEP + prj_name + "_well_pool.db"
-	);
 	oa << t;
 }
 
@@ -51,6 +55,14 @@ smart_ptr< hdm > hdm_serialize_load(
 	const std::string& prj_path,
 	const std::string& prj_name
 ){
+	// save project path for serialization code
+	kernel::idx_dt_ptr p_dt = BS_KERNEL.pert_idx_dt(hdm::bs_type());
+	//std::string well_pool_filename = prj_name + "_well_pool.db";
+	p_dt->insert< std::string >(prj_path);
+	// and project name
+	p_dt->insert< std::string >(prj_name);
+
+	// load archive
 	std::ifstream f((prj_path + PATHSEP + prj_name + HDM_DUMP_EXT).c_str());
 	boarch::polymorphic_text_iarchive ia(f);
 	smart_ptr< hdm > t;
