@@ -114,7 +114,7 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN_T(load, vartype_table, 1)
 		// column = v
 		if(column->size() != v.size())
 			column->resize(v.size());
-		if(column->size()) {
+		if(column->size())
 			std::copy(v.begin(), v.end(), column->begin());
 		// add column
 		t.add_col_vector(i, col_name, column);
