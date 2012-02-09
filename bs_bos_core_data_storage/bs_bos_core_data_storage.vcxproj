@@ -150,25 +150,36 @@
     <ClInclude Include="include\prvd_table.h" />
     <ClInclude Include="include\numpy_tools.h" />
     <ClInclude Include="include\py_data_class.h" />
+    <ClInclude Include="src\convert_units_serialize.h" />
     <ClInclude Include="src\equil_keywords.hpp" />
     <ClInclude Include="src\explicit_keywords.hpp" />
     <ClInclude Include="include\keyword_manager.h" />
+    <ClInclude Include="src\hdm_serialize.h" />
+    <ClInclude Include="src\idata_serialize.h" />
+    <ClInclude Include="src\locale_keeper_serialize.h" />
     <ClInclude Include="src\py_keyword_manager.h" />
     <ClInclude Include="include\hdm.h" />
     <ClInclude Include="include\hdm_iface.h" />
     <ClInclude Include="include\py_hdm.h" />
+    <ClInclude Include="src\rocktab_table_serialize.h" />
     <ClInclude Include="src\well.h" />
     <ClInclude Include="src\py_well.h" />
     <ClInclude Include="include\bs_bos_core_data_storage_stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\convert_units.cpp" />
+    <ClCompile Include="src\convert_units_serialize.cpp" />
+    <ClCompile Include="src\hdm_serialize.cpp" />
+    <ClCompile Include="src\hdm_serialize_action.cpp" />
+    <ClCompile Include="src\idata_serialize.cpp" />
     <ClCompile Include="src\lc_messages_eng.cpp" />
     <ClCompile Include="src\lc_messages_rus_alt.cpp" />
     <ClCompile Include="src\lc_messages_rus_koi.cpp" />
     <ClCompile Include="src\lc_messages_rus_win.cpp" />
+    <ClCompile Include="src\locale_keeper_serialize.cpp" />
     <ClCompile Include="src\localization.cpp" />
     <ClCompile Include="src\read_class.cpp" />
+    <ClCompile Include="src\rocktab_table_serialize.cpp" />
     <ClCompile Include="src\table_upper.cpp" />
     <ClCompile Include="src\py_read_class.cpp" />
     <ClCompile Include="src\rock_grid.cpp" />

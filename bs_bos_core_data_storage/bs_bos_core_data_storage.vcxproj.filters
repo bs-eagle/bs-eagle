@@ -112,6 +112,21 @@
       <Filter>well storage\python</Filter>
     </ClInclude>
     <ClInclude Include="include\bs_bos_core_data_storage_stdafx.h" />
+    <ClInclude Include="src\rocktab_table_serialize.h">
+      <Filter>data reader</Filter>
+    </ClInclude>
+    <ClInclude Include="src\convert_units_serialize.h">
+      <Filter>data reader</Filter>
+    </ClInclude>
+    <ClInclude Include="src\hdm_serialize.h">
+      <Filter>data reader</Filter>
+    </ClInclude>
+    <ClInclude Include="src\idata_serialize.h">
+      <Filter>data reader</Filter>
+    </ClInclude>
+    <ClInclude Include="src\locale_keeper_serialize.h">
+      <Filter>data reader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\convert_units.cpp">
@@ -191,5 +206,23 @@
     </ClCompile>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
+    <ClCompile Include="src\convert_units_serialize.cpp">
+      <Filter>data reader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hdm_serialize.cpp">
+      <Filter>data reader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hdm_serialize_action.cpp">
+      <Filter>data reader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\idata_serialize.cpp">
+      <Filter>data reader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\locale_keeper_serialize.cpp">
+      <Filter>data reader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rocktab_table_serialize.cpp">
+      <Filter>data reader</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

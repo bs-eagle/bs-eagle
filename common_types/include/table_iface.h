@@ -73,6 +73,11 @@ class table_iface : public objbase
       virtual std::string get_col_name (const t_long col) const = 0;
 
       /** 
+       * @brief return col names
+       */
+      virtual std::vector<std::string> get_col_names () const = 0;
+
+      /** 
        * @brief return pointer to the column <col> data 
        * 
        * @param col -- <INPUT> column index
@@ -140,6 +145,11 @@ class table_iface : public objbase
        * 
        */
       virtual t_double get_value (const t_long row, const t_long col) const = 0;
+
+      /** 
+       * @brief return values 
+       */
+      virtual std::vector<vector_t> get_values () const = 0;
 
       /** 
        * @brief set new value at given #row and #col

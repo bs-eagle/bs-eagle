@@ -31,8 +31,8 @@ namespace python {
 
     py_export_compdat_ident();
 
-    def("serialize_to_str", &blue_sky::serialize_to_str< well_pool_iface >);
-    def("serialize_from_str", &blue_sky::serialize_from_str< well_pool_iface >);
+    def("serialize_to_str", &blue_sky::serialize_to_str< sql_well >);
+    def("serialize_from_str", &blue_sky::serialize_from_str< sql_well >);
   }
 
 }	// namespace python

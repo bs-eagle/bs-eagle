@@ -93,6 +93,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\common_types_serialize.cpp" />
     <ClCompile Include="src\frac.cpp" />
     <ClCompile Include="src\gis.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -110,6 +111,7 @@
     <ClCompile Include="src\vartype_table.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\common_types_serialize.h" />
     <ClInclude Include="src\gis.h" />
     <ClInclude Include="src\prop.h" />
     <ClInclude Include="src\prop_impl.h" />

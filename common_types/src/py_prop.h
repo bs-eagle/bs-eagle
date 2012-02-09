@@ -8,6 +8,7 @@
  */
 #include <string>
 #include "prop_iface.h"
+#include "prop.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "dummy_base.h"
@@ -22,7 +23,6 @@ namespace blue_sky
   {
   namespace python
     {
-
     // Sergey Miryanov at 07.04.2008
     // Refactored at 16.10.2009
     // for casting into python from child classes to parent class

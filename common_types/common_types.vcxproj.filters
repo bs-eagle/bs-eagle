@@ -60,6 +60,9 @@
     <ClCompile Include="src\vartype_table.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\common_types_serialize.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\gis.h">
@@ -115,6 +118,9 @@
     </ClInclude>
     <ClInclude Include="include\vartype_table_iface.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common_types_serialize.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

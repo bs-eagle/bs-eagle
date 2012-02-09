@@ -97,8 +97,9 @@
     <ClCompile Include="src\localization.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\py_sql_well.cpp" />
-    <ClCompile Include="src\read_class.cpp" />
+    <ClCompile Include="src\read_class_sql_well.cpp" />
     <ClCompile Include="src\sql_well.cpp" />
+    <ClCompile Include="src\sql_well_serialize.cpp" />
     <ClCompile Include="src\table_upper.cpp" />
     <ClCompile Include="src\timer.cpp" />
     <ClCompile Include="src\well_keywords.cpp" />
@@ -112,7 +113,7 @@
     <ClInclude Include="src\localization.h" />
     <ClInclude Include="src\main_def.h" />
     <ClInclude Include="src\py_sql_well.h" />
-    <ClInclude Include="src\read_class.h" />
+    <ClInclude Include="src\read_class_sql_well.h" />
     <ClInclude Include="src\sql_well.h" />
     <ClInclude Include="src\table_upper.h" />
     <ClInclude Include="src\timer.h" />

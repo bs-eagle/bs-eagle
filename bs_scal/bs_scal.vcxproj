@@ -154,7 +154,9 @@
     <ClInclude Include="include\scal_dummy_iface.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\scal_2p_data_holder.cpp" />
     <ClCompile Include="src\scal_3p.cpp" />
+    <ClCompile Include="src\scal_3p_serialize.cpp" />
     <ClCompile Include="src\scal_test_model.cpp" />
     <ClCompile Include="src\py_scal_wrapper.cpp" />
     <ClCompile Include="src\jfunction.cpp" />

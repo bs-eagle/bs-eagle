@@ -44,6 +44,9 @@
     </ClCompile>
     <ClCompile Include="src\bs_pvt.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
+    <ClCompile Include="src\pvt_3p_serialize.cpp">
+      <Filter>pvt</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\pvt_3p.h">
@@ -84,5 +87,8 @@
     </ClInclude>
     <ClInclude Include="include\bs_pvt_stdafx.h" />
     <ClInclude Include="include\pvt_dummy_iface.h" />
+    <ClInclude Include="src\pvt_3p_serialize.h">
+      <Filter>pvt</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

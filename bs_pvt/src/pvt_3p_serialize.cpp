@@ -6,7 +6,7 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
-#include "bs_bos_core_data_storage_stdafx.h"
+//#include "bs_bos_core_data_storage_stdafx.h"
 #include "bs_pvt_stdafx.h"
 
 #include "pvt_3p_serialize.h"
@@ -61,7 +61,7 @@ BLUE_SKY_TYPE_SERIALIZE_IMPL(pvt_gas)
  *----------------------------------------------------------------*/
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, pvt_oil)
 	// just redirect to base class
-	ar & boser::bs_base_object< pvt_base >(t);
+	ar & boser::bs_base_object< pvt_dead_oil >(t);
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 BLUE_SKY_TYPE_SERIALIZE_DECL(pvt_oil)

@@ -88,6 +88,14 @@ namespace blue_sky
         }
 
       /** 
+       * @brief return col names
+       */
+      virtual std::vector<std::string> get_col_names () const
+        {
+          return col_names;
+        }
+
+      /** 
        * @brief return pointer to the column <col> data 
        * 
        * @param col -- <INPUT> column index
@@ -197,6 +205,15 @@ namespace blue_sky
         {
           return (values[col])[row];
         }
+
+      /** 
+       * @brief return values 
+       */
+      virtual table_t get_values () const 
+        {
+          return values;
+        }
+
 
       /** 
        * @brief set new value at given #row and #col

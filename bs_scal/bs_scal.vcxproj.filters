@@ -87,5 +87,11 @@
     </ClCompile>
     <ClCompile Include="src\bs_scal.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
+    <ClCompile Include="src\scal_3p_serialize.cpp">
+      <Filter>scal</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scal_2p_data_holder.cpp">
+      <Filter>scal</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -257,6 +257,9 @@
     <ClCompile Include="src\well_process_completions.cpp">
       <Filter>data\wells\compute factors</Filter>
     </ClCompile>
+    <ClCompile Include="src\equil_model_serialize.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\data_saver.h">

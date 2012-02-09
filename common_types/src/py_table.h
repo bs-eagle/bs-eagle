@@ -11,6 +11,7 @@
 
 #include <string>
 #include "table_iface.h"
+#include "table.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "dummy_base.h"
@@ -25,6 +26,95 @@ namespace blue_sky
   {
   namespace python
     {
+#if 0 
+      struct table_pickle_suite : boost::python::pickle_suite
+        {
+          static
+          boost::python::tuple
+          getinitargs(const table &w)
+          {
+            return boost::python::make_tuple();
+          }
+
+#if 0         
+          static boost::python::tuple getstate (const table &w)
+          {
+            std::string &str = w.to_str ();
+            return boost::python::make_tuple (str);
+          }
+          static void setstate(table &w, boost::python::tuple state)
+          {
+            using namespace boost::python;
+            if (len(state) != 1)
+            {
+              PyErr_SetObject(PyExc_ValueError,
+                ("expected 1-item tuple in call to __setstate__; got %s"
+                % state).ptr()
+                );
+              throw_error_already_set();
+            }
+
+            std::string str = extract<std::string>(state[0]);
+            w.from_str (str);
+
+          }
+#else
+          static boost::python::tuple getstate (boost::python::object w_obj)
+          {
+            using namespace boost::python;
+            table const& w = extract<table const&>(w_obj)();
+            dict d = extract<dict>(w_obj.attr("__dict__"))();
+            //std::string prj_file = extract<std::string>(w_obj.attr ("project_filename") );
+            /*
+            list iterkeys = (list) d.keys();
+            for (int i = 0; i < len(iterkeys); i++)
+              {
+                std::string key = extract<std::string>(iterkeys[i]);
+                if (key == "project_filename")
+                  {
+                    std::string value = extract<std::string>(d[iterkeys[i]]);
+                  }
+              }
+            */
+            std::string &str = w.to_str ();
+            return make_tuple (w_obj.attr("__dict__"), str);
+          }
+
+          static
+          void
+          setstate(boost::python::object w_obj, boost::python::tuple state)
+          {
+            using namespace boost::python;
+            table& w = extract<table&>(w_obj)();
+
+            if (len(state) != 2)
+            {
+              PyErr_SetObject(PyExc_ValueError,
+                ("expected 2-item tuple in call to __setstate__; got %s"
+                % state).ptr()
+                );
+              throw_error_already_set();
+            }
+
+            // restore the object's __dict__
+            dict d = extract<dict>(w_obj.attr("__dict__"))();
+            d.update(state[0]);
+
+            // restore the internal state of the C++ object
+            std::string str = extract<std::string>(state[1]);
+            w.from_str (str);
+          }
+
+          static bool getstate_manages_dict() { return true; }
+#endif
+
+        };
+#endif 
+      //using namespace ::boost::python;
+      //class_<table_iface>("table_iface")
+        // ...
+        //.def_pickle(table_pickle_suite ());
+        // ...
 
   PY_EXPORTER (py_table_exporter, default_exporter)
     .def ("init",                               &T::init, 

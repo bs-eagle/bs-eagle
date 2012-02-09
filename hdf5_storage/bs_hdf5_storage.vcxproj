@@ -96,7 +96,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\bs_hdf5_storage_v2.h" />
+    <ClInclude Include="src\date_helper.h" />
     <ClInclude Include="src\h5_helper.h" />
+    <ClInclude Include="src\h5_pool_serialize.h" />
     <ClInclude Include="src\hdf5_functions.h" />
     <ClInclude Include="src\hdf5_group_impl.hpp" />
     <ClInclude Include="src\hdf5_hid_holder.hpp" />
@@ -107,7 +109,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\bs_hdf5_storage_v2.cpp" />
+    <ClCompile Include="src\date_helper.cpp" />
     <ClCompile Include="src\h5_pool.cpp" />
+    <ClCompile Include="src\h5_pool_serialize.cpp" />
     <ClCompile Include="src\py_pool.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>

@@ -200,6 +200,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\data_saver.cpp" />
+    <ClCompile Include="src\equil_model_serialize.cpp" />
     <ClCompile Include="src\event_base.cpp" />
     <ClCompile Include="src\event_filter.cpp" />
     <ClCompile Include="src\event_manager.cpp" />

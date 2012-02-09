@@ -134,6 +134,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\pvt_3p.cpp" />
+    <ClCompile Include="src\pvt_3p_serialize.cpp" />
     <ClCompile Include="src\pvt_base.cpp" />
     <ClCompile Include="src\pvt_blue_sky_impl.cpp" />
     <ClCompile Include="src\pvt_dead_oil.cpp" />
@@ -155,6 +156,7 @@
     <ClInclude Include="include\pvt_3p_iface.h" />
     <ClInclude Include="include\pvt_base.h" />
     <ClInclude Include="include\pvt_dead_oil.h" />
+    <ClInclude Include="src\pvt_3p_serialize.h" />
     <ClInclude Include="src\pvt_dummy.h" />
     <ClInclude Include="include\pvt_gas.h" />
     <ClInclude Include="include\pvt_interpolator.h" />

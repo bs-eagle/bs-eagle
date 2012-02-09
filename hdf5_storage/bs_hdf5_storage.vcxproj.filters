@@ -39,6 +39,12 @@
     <ClInclude Include="src\py_pool.h">
       <Filter>python</Filter>
     </ClInclude>
+    <ClInclude Include="src\date_helper.h">
+      <Filter>hdf5_storage</Filter>
+    </ClInclude>
+    <ClInclude Include="src\h5_pool_serialize.h">
+      <Filter>hdf5_storage</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\bs_hdf5_storage_v2.cpp">
@@ -51,5 +57,11 @@
       <Filter>python</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\date_helper.cpp">
+      <Filter>hdf5_storage</Filter>
+    </ClCompile>
+    <ClCompile Include="src\h5_pool_serialize.cpp">
+      <Filter>hdf5_storage</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

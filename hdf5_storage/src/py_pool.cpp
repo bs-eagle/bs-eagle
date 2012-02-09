@@ -30,8 +30,8 @@ namespace python {
 
     class_exporter <h5_pool, h5_pool_iface, py_pool_exporter>::export_class ("h5_pool");
 
-    def("serialize_to_str", &blue_sky::serialize_to_str< h5_pool_iface >);
-    def("serialize_from_str", &blue_sky::serialize_from_str< h5_pool_iface >);
+    def("serialize_to_str", &blue_sky::serialize_to_str< h5_pool >);
+    def("serialize_from_str", &blue_sky::serialize_from_str< h5_pool >);
   }
 
 }	// namespace python
