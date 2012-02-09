@@ -14,6 +14,8 @@
 #include <boost/serialization/array.hpp>
 #include <boost/serialization/map.hpp>
 
+#include <algorithm>
+
 // path separator
 #ifdef UNIX
 #define PATHSEP '/'
@@ -26,8 +28,11 @@ namespace boser = boost::serialization;
 
 // helper functions
 namespace {
+using namespace std;
 
-hid_t demand_h5_group(hid_t file_id, const std::string& g_name) {
+hid_t demand_h5_group(hid_t file_id, const std::string& g_name, bool* is_created = NULL) {
+	if(is_created)
+		*is_created = false;
 	// try to open group
 	hid_t g_id = H5Gopen(file_id, g_name.c_str());
 	if(g_id < 0) {
@@ -37,6 +42,8 @@ hid_t demand_h5_group(hid_t file_id, const std::string& g_name) {
 			bs_throw_exception(
 				boost::format ("h5_pool_serialize: Can't create group: %s") % g_name
 			);
+		if(is_created)
+			*is_created = true;
 	}
 	return g_id;
 }
@@ -48,6 +55,88 @@ std::string basename(const std::string& fname) {
 	else
 		return fname.substr(sep_pos + 1, std::string::npos);
 }
+
+// helper struct to find group name that match best with given name
+struct grp_match {
+	// max difference between existing and given group names
+	const float tol_;
+
+	// file handle
+	hid_t f_;
+	// group names contained in file
+	set< string > gnames_;
+	typedef set< string >::const_iterator gn_iterator;
+
+	// resolves group name -> ID
+	typedef pair< hid_t, const string& > g_info;
+	typedef map< string, g_info > resolver_t;
+	typedef resolver_t::iterator r_iterator;
+	resolver_t r_;
+
+	grp_match(float diff_tol) : tol_(diff_tol) {};
+
+	void init(hid_t file_id) {
+		f_ = file_id;
+		discover_groups();
+	}
+
+	g_info& operator[](const string& gkey) {
+		typedef set< string >::const_iterator n_iterator;
+		typedef pair< string::const_iterator, string::const_iterator > mis_pair;
+
+		r_iterator phid = r_.find(gkey);
+		if(phid != r_.end())
+			return phid->second;
+
+		// if we are here then group name wasn't resolved yet
+		// first try to find exact match
+		string res_name;
+		n_iterator gn = gnames_.find(gkey);
+		if(gn != gnames_.end()) {
+			res_name = *gn;
+		}
+		else {
+			// try to find group with best match
+			size_t match_len = 0;
+			for(set< string >::const_iterator gn = gnames_.begin(), end = gnames_.end(); gn != end; ++gn) {
+				size_t len = min(gkey.size(), gn->size());
+				mis_pair mp = mismatch(gn->begin(), gn->begin() + len, gkey.begin());
+				size_t cur_match_len = mp.first - gn->begin();
+				if(cur_match_len > match_len) {
+					res_name = *gn;
+					match_len = cur_match_len;
+				}
+			}
+
+			// if difference is more than tolerance - then try to create group with key name
+			if(gkey.size() - match_len > gkey.size() * tol_)
+				res_name = gkey;
+		}
+
+		// open/create group
+		bool is_created;
+		hid_t res_hid = demand_h5_group(f_, res_name.c_str(), &is_created);
+		// if new group was created - update dict
+		if(is_created)
+			gnames_.insert(res_name);
+
+		return r_.insert(make_pair(gkey, g_info(res_hid, *gnames_.find(res_name)))).first->second;
+	}
+
+	void discover_groups() {
+		gnames_.clear();
+		hid_t root_gid = H5Gopen(f_, "/");
+		H5Literate(
+			root_gid, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, &(grp_match::enumerator), this
+		);
+	}
+
+	static herr_t enumerator(hid_t root_gid, const char* gname, const H5L_info_t*, void* m) {
+		grp_match& self = *static_cast< grp_match* >(m);
+		self.gnames_.insert(string(gname));
+		return 0;
+	}
+};
 
 }
 
@@ -142,30 +231,38 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, h5_pool)
 			);
 	}
 
+	// create matcher object
+	// note tolerance value = 0.5 by default
+	// if set to zero only absolute matches accepted
+	grp_match grp_dict(0.5);
+	if(do_open)
+		grp_dict.init(t.file_id);
+
 	// build groups map
 	std::size_t g_size;
 	std::string g_name;
-	hid_t g_id;
 	ar >> g_size;
 	for(std::size_t i = 0; i < g_size; ++i) {
 		ar >> g_name;
-		g_id = -1;
-		if(do_open) {
-			g_id = demand_h5_group(t.file_id, g_name);
-			t.fill_map(g_id);
-		}
 		// add group to map
-		t.group_id[g_name] = g_id;
+		if(do_open) {
+			grp_match::g_info& gi = grp_dict[g_name];
+			t.fill_map(gi.first);
+			t.group_id[gi.second] = gi.first;
+		}
+		else
+			t.group_id[g_name] = -1;
 	}
 
 	// read and build h5_map
-	ar >> g_size;
+	hid_t g_id;
 	h5_pair p;
 	std::string d_name;
 	// type info
 	H5T_class_t type_class;
 	size_t type_size;
 	// fill h5_map
+	ar >> g_size;
 	for(std::size_t i = 0; i < g_size; ++i) {
 		ar >> d_name; // dataset name
 		ar >> p;      // h5_pair
@@ -194,10 +291,8 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, h5_pool)
 		// if we are lucky, then all hids are filled from open dataset
 		hid_t dset_tmp = -1;
 		if(p.dset >= 0 && g_name.size()) {
-			// find corresponding group
-			g_id = t.group_id[g_name];
-			if(g_id < 0)
-				g_id = demand_h5_group(t.file_id, g_name);
+			// find corresponding group id
+			g_id = grp_dict[g_name].first;
 
 			// try to open dataset
 			dset_tmp = H5Dopen(g_id, d_name.c_str());
