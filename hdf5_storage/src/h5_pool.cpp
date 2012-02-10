@@ -125,6 +125,11 @@ namespace blue_sky
   h5_pool::fill_map (hid_t group)
   {
     BS_ASSERT (group);
+    // dont walk inside group whose name begins with '_'
+    char gname[3] = {0, 0, 0};
+    H5Iget_name(group, &gname[0], 3);
+    if(gname[1] == '_') return;
+
     clear_map ();
     herr_t r = H5Literate (group, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, &(h5_pool::it_group), this);
     if (r < 0)

@@ -13,6 +13,7 @@
 
 #include <boost/serialization/array.hpp>
 #include <boost/serialization/map.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <algorithm>
 
@@ -162,10 +163,16 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, h5_pool)
 	for(g_iterator pg = t.group_id.begin(); pg != t.group_id.end(); ++pg)
 		ar << pg->first;
 
-	// dumb nodes
+	// dump nodes
 	typedef h5_pool::map_t::const_iterator m_iterator;
+	// name of group that will contain committed dtypes
+	const std::string dtype_grp = "_dtype";
+	hid_t dtype_grp_hid = -1;
+	std::string g_name, dtype_name;
+	unsigned long dtype_idx = 0;
+	vector< char > dtype_ex_name(16);
+
 	ar << (const std::size_t&)t.h5_map.size();
-	std::string g_name;
 	for(m_iterator pm = t.h5_map.begin(); pm != t.h5_map.end(); ++pm) {
 		ar << pm->first;
 		ar << pm->second;
@@ -184,8 +191,46 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, h5_pool)
 		// save dataset type info
 		hid_t dtype = pm->second.dtype;
 		if(is_open && dtype >= 0) {
-			ar << (const H5T_class_t&)H5Tget_class(dtype);
-			ar << (const hid_t&)H5Tget_size(dtype);
+			// create group to hide all dtypes
+			if(dtype_grp_hid < 0) {
+				try {
+					dtype_grp_hid = demand_h5_group(t.file_id, dtype_grp);
+				}
+				catch(bs_exception& e) {
+					BSERR
+						<< "h5 pool serialize: WARNING! can't create group for storing data types"
+						<< bs_end;
+				}
+				catch(...) {
+					throw;
+				}
+			}
+
+			dtype_name.clear();
+			// check if dtype already has associated name
+			if(H5Tcommitted(dtype)) {
+				ssize_t sz = H5Iget_name(dtype, NULL, 0);
+				if(dtype_ex_name.size() < std::size_t(sz + 1))
+					dtype_ex_name.resize(sz + 1);
+				H5Iget_name(dtype, &dtype_ex_name[0], sz + 1);
+				dtype_name = &dtype_ex_name[0];
+			}
+			else if(dtype_grp_hid >= 0) {
+				while(1 > 0) {
+					// commit type into H5 as named type
+					dtype_name = dtype_grp + "/_dtype" + boost::lexical_cast< std::string >(dtype_idx++);
+					if(H5Lexists(t.file_id, dtype_name.c_str(), 0)) {
+						continue;
+						//H5Ldelete(t.file_id, dtype_name.c_str(), 0);
+					}
+					H5Tcommit(t.file_id, dtype_name.c_str(), dtype);
+					break;
+				}
+			}
+			ar << dtype_name;
+
+			//ar << (const H5T_class_t&)H5Tget_class(dtype);
+			//ar << (const hid_t&)H5Tget_size(dtype);
 		}
 	}
 
@@ -257,10 +302,10 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, h5_pool)
 	// read and build h5_map
 	hid_t g_id;
 	h5_pair p;
-	std::string d_name;
+	std::string d_name, dtype_name;
 	// type info
-	H5T_class_t type_class;
-	size_t type_size;
+	//H5T_class_t type_class;
+	//size_t type_size;
 	// fill h5_map
 	ar >> g_size;
 	for(std::size_t i = 0; i < g_size; ++i) {
@@ -277,8 +322,9 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, h5_pool)
 
 		// read type info
 		if(p.dtype >= 0) {
-			ar >> type_class;
-			ar >> type_size;
+			ar >> dtype_name;
+			//ar >> type_class;
+			//ar >> type_size;
 		}
 
 		// init group id to first group in list
@@ -300,28 +346,28 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, h5_pool)
 				p.dset = dset_tmp;
 				// open other attributes
 				p.dspace = H5Dget_space(dset_tmp);
-				if(p.dspace < 0) {
+				if(p.dspace < 0)
 					bs_throw_exception(
 						boost::format("Can't get dataspace for dataset %s in group %d")
 						% d_name % g_name
 					);
-				}
 
 				p.dtype = H5Dget_type(dset_tmp);
-				if(p.dtype < 0) {
+				if(p.dtype < 0)
 					bs_throw_exception(
 						boost::format("Can't get datatype for dataset %s in group %d")
 						% d_name % g_name
 					);
-				}
+				// type open from dataset, so delete unused named entry
+				if(dtype_name.size())
+					H5Ldelete(t.file_id, dtype_name.c_str(), 0);
 
 				p.plist = H5Dget_create_plist(dset_tmp);
-				if(p.plist < 0) {
+				if(p.plist < 0)
 					bs_throw_exception(
 						boost::format("Can't get property list for dataset %s in group %d")
 						% d_name % g_name
 					);
-				}
 			}
 		}
 
@@ -329,50 +375,59 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, h5_pool)
 		// try to create plist & dtype manually
 		if(dset_tmp < 0) {
 			p.plist = H5Pcreate(H5P_DATASET_CREATE);
-			if(p.plist < 0) {
+			if(p.plist < 0)
 				bs_throw_exception(
 					boost::format("Can't create property for dataset %s in group %d")
 					% d_name % g_name
 				);
+
+			// if we have to restore data type - try to open it
+			if(p.dtype >= 0) {
+				if(dtype_name.size()) {
+					p.dtype = H5Topen(t.file_id, dtype_name.c_str());
+					if(p.dtype < 0)
+						BSERR << "h5_pool serialization: WARNING! Can't open data type "
+							<< dtype_name << bs_end;
+				}
+				else {
+					p.dtype = -1;
+					BSERR << "h5_pool serialization: WARNING! Can't open unknown data type" << bs_end;
+				}
 			}
 
-			// create type
-			if(
-				type_class == H5T_COMPOUND ||
-				type_class == H5T_OPAQUE ||
-				type_class == H5T_ENUM ||
-				type_class == H5T_STRING
-			)
-				p.dtype = H5Tcreate(type_class, type_size);
-			else
-				p.dtype = H5Tcopy(p.dtype);
-			if(p.dtype < 0) {
-				bs_throw_exception(
-					boost::format("Can't create datatype of class %d and size %d")
-					% type_class % type_size
-				);
-			}
+			//if(
+			//	type_class == H5T_COMPOUND ||
+			//	type_class == H5T_OPAQUE ||
+			//	type_class == H5T_ENUM ||
+			//	type_class == H5T_STRING
+			//)
+			//	p.dtype = H5Tcreate(type_class, type_size);
+			//else
+			//	p.dtype = H5Tcopy(p.dtype);
+
+				//bs_throw_exception(
+				//	boost::format("Can't create datatype of class %d and size %d")
+				//	% type_class % type_size
+				//);
 
 			// if during saving dataset was open but we failed to open it now
 			// try to create it
 			if(p.dset >= 0 && g_name.size()) {
 				// try to create dataspace
 				p.dspace = H5Screate_simple(p.n_dims, p.h5_dims, NULL);
-				if(p.dspace < 0) {
+				if(p.dspace < 0)
 					bs_throw_exception(
 						boost::format("Can't create simple dataspace for dataset %s in group %d")
 						% d_name % g_name
 					);
-				}
 
 				// and finally dataset
 				p.dset = H5Dcreate(g_id, d_name.c_str(), p.dtype, p.dspace, p.plist);
-				if(p.dset < 0) {
+				if(p.dset < 0)
 					bs_throw_exception(
 						boost::format("Can't create dataset %s in group %d")
 						% d_name % g_name
 					);
-				}
 			}
 			else
 				p.dspace = -1;
@@ -385,6 +440,7 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, h5_pool)
 
 	ar >> t.pool_dims;
 	ar >> t.n_pool_dims;
+	t.flush();
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, h5_pool)
