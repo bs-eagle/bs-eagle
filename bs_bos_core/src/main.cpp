@@ -372,7 +372,7 @@ namespace blue_sky
     res &= BS_KERNEL.register_type (pd, equil_model_depth::bs_type ()); BS_ASSERT (res);
 
     // force serialization typeinfo registering
-    serialize_register_eti< equil_model_depth >();
+    //serialize_register_eti< equil_model_depth >();
 
     return res;
   }

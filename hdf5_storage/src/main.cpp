@@ -28,7 +28,7 @@ namespace blue_sky {
       res &= BLUE_SKY_REGISTER_TYPE (pd, hdf5_group_impl); BS_ASSERT (res);
 
       // force serialization typeinfo registering
-      serialize_register_eti< h5_pool >();
+      //serialize_register_eti< h5_pool >();
 
       return res;
     }

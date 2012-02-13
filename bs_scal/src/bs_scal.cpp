@@ -21,7 +21,7 @@ namespace blue_sky
     res &= BS_KERNEL.register_type (pd, scal_keywords::bs_type ()); BS_ASSERT (res);
 
     // force serialization typeinfo registering
-    serialize_register_eti< scal_3p >();
+    //serialize_register_eti< scal_3p >();
 
 	return res;
   }

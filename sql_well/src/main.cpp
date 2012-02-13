@@ -35,7 +35,7 @@ namespace blue_sky {
 //res &= BS_KERNEL.register_type (pd, vartype_table <t_float>::bs_type ());
     
     // force serialization typeinfo registering
-    serialize_register_eti< sql_well >();
+    //serialize_register_eti< sql_well >();
 
     return res;
   }
