@@ -8,12 +8,13 @@
 
 #include "bs_bos_core_data_storage_stdafx.h"
 
-#include "sql_well_serialize.h"
+#include "bs_serialize.h"
+#include "sql_well.h"
 
 #include <boost/serialization/string.hpp>
 
 #include <boost/uuid/uuid.hpp>
-#include <boost/uuid/string_generator.hpp>
+//#include <boost/uuid/string_generator.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
@@ -171,5 +172,6 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, blue_sky::sql_well)
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 // instantiate serialization code
+BLUE_SKY_TYPE_SERIALIZE_DECL(blue_sky::sql_well)
 BLUE_SKY_TYPE_SERIALIZE_IMPL(blue_sky::sql_well)
 
