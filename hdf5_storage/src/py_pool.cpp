@@ -11,7 +11,7 @@
 
 #include "py_pool.h"
 #include "h5_pool.hpp"
-#include "h5_pool_serialize.h"
+#include "bs_serialize.h"
 
 using namespace boost::python;
 #ifdef BSPY_EXPORTING_PLUGIN
@@ -30,8 +30,14 @@ namespace python {
 
     class_exporter <h5_pool, h5_pool_iface, py_pool_exporter>::export_class ("h5_pool");
 
-    def("serialize_to_str", &blue_sky::serialize_to_str< h5_pool >);
-    def("serialize_from_str", &blue_sky::serialize_from_str< h5_pool >);
+    def("serialize_to_str", &blue_sky::serialize_to_str< h5_pool_iface >);
+    def("serialize_from_str", &blue_sky::serialize_from_str< h5_pool_iface >);
+
+    // register implicit conversion to interface
+    implicitly_convertible<
+      smart_ptr< h5_pool >,
+      smart_ptr< h5_pool_iface >
+    >();
   }
 
 }	// namespace python
