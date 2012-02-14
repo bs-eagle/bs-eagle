@@ -6,11 +6,10 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
-//#include "bs_bos_core_data_storage_stdafx.h"
 #include "bs_pvt_stdafx.h"
 
-#include "pvt_3p_serialize.h"
-//#include "common_types_serialize.h"
+#include "bs_serialize.h"
+#include "pvt_3p.h"
 
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>
@@ -97,6 +96,6 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, pvt_3p)
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 BOOST_SERIALIZATION_ASSUME_ABSTRACT(pvt_3p_iface)
-
+BLUE_SKY_TYPE_SERIALIZE_DECL(pvt_3p)
 BLUE_SKY_TYPE_SERIALIZE_IMPL(pvt_3p)
 
