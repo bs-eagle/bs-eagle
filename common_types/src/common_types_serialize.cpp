@@ -6,19 +6,17 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
-#include "common_types_serialize.h"
+#include "bs_serialize.h"
+
 #include "table.h"
 #include "prop.h"
+#include "vartype_table.h"
 
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>
 
 using namespace blue_sky;
 namespace boser = boost::serialization;
-
-//BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::table)
-//BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::prop)
-//BLUE_SKY_CLASS_SRZ_FCN_DECL_T(serialize, blue_sky::vartype_table, 1)
 
 /*-----------------------------------------------------------------
  * serialize table_iface
@@ -43,12 +41,10 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, table)
 	boser::split_free(ar, t, version);
 BLUE_SKY_CLASS_SRZ_FCN_END
 
-//BLUE_SKY_CLASS_SERIALIZE_SPLIT(table_iface)
-
 // instantiate code using _BYNAME macro
 BOOST_SERIALIZATION_ASSUME_ABSTRACT(table_iface)
+BLUE_SKY_TYPE_SERIALIZE_DECL(table)
 BLUE_SKY_TYPE_SERIALIZE_IMPL(table)
-//BLUE_SKY_TYPE_SERIALIZE_IMPL_BYNAME(table_iface, "table")
 
 /*-----------------------------------------------------------------
  * serialize prop_iface
@@ -73,12 +69,10 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, prop)
 	boser::split_free(ar, t, version);
 BLUE_SKY_CLASS_SRZ_FCN_END
 
-//BLUE_SKY_CLASS_SERIALIZE_SPLIT(prop_iface)
-
 // instantiate code using _BYNAME macro
 BOOST_SERIALIZATION_ASSUME_ABSTRACT(prop_iface)
+BLUE_SKY_TYPE_SERIALIZE_DECL(prop)
 BLUE_SKY_TYPE_SERIALIZE_IMPL(prop)
-//BLUE_SKY_TYPE_SERIALIZE_IMPL_BYNAME(prop, "prop")
 
 /*-----------------------------------------------------------------
  * serialize vartype_table_iface
@@ -129,10 +123,9 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN_T(serialize, vartype_table, 1)
 	);
 	boser::split_free(ar, t, version);
 BLUE_SKY_CLASS_SRZ_FCN_END
-//BLUE_SKY_CLASS_SERIALIZE_SPLIT_T(vartype_table_iface, 1)
 
 BOOST_SERIALIZATION_ASSUME_ABSTRACT(vartype_table_iface)
-//BLUE_SKY_TYPE_SERIALIZE_IMPL_T(vartype_table, 1)
 // instantiate for t_float
-BLUE_SKY_TYPE_SERIALIZE_IMPL_T(vartype_table, t_float)
+BLUE_SKY_TYPE_SERIALIZE_DECL_T(vartype_table, 1)
+BLUE_SKY_TYPE_SERIALIZE_EXPORT_T(vartype_table, t_float)
 
