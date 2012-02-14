@@ -6,8 +6,9 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
-#include "bs_serialize.h"
-#include "h5_pool.hpp"
+//#include "bs_bos_core_data_storage_stdafx.h"
+
+#include "h5_pool_serialize.h"
 #include "bs_prop_base.h"
 
 #include <boost/serialization/array.hpp>
@@ -452,6 +453,5 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, h5_pool)
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 BOOST_SERIALIZATION_ASSUME_ABSTRACT(h5_pool_iface)
-BLUE_SKY_TYPE_SERIALIZE_DECL(h5_pool)
 BLUE_SKY_TYPE_SERIALIZE_IMPL(h5_pool)
 
