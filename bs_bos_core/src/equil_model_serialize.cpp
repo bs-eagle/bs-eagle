@@ -7,8 +7,8 @@
 ///            the BSD License. See LICENSE for more details.
 
 #include "stdafx.h"
-#include "equil_model_serialize.h"
-//#include "common_types_serialize.h"
+#include "bs_serialize.h"
+#include "equil_model_depth.h"
 
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>
