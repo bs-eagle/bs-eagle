@@ -10,7 +10,7 @@
 
 #include "py_scal_wrapper.h"
 #include "scal_save_data.h"
-#include "scal_3p_serialize.h"
+#include "bs_serialize.h"
 
 #include "export_python_wrapper.h"
 

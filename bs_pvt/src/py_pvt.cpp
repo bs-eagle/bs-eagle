@@ -19,7 +19,7 @@
 #include "pvt_water.h"
 #include "pvt_dummy.h"
 #include "pvt_3p.h"
-#include "pvt_3p_serialize.h"
+#include "bs_serialize.h"
 
 #include "export_python_wrapper.h"
 #include "py_list_converter.h"
