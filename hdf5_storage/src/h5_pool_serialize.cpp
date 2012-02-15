@@ -34,7 +34,9 @@ hid_t demand_h5_group(hid_t file_id, const std::string& g_name, bool* is_created
 	if(is_created)
 		*is_created = false;
 	// try to open group
-	hid_t g_id = H5Gopen(file_id, g_name.c_str());
+	hid_t g_id = -1;
+	if(H5Lexists(file_id, g_name.c_str(), 0))
+		g_id = H5Gopen(file_id, g_name.c_str());
 	if(g_id < 0) {
 		// try to create group
 		g_id = H5Gcreate(file_id, g_name.c_str (), -1);
