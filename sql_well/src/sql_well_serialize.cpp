@@ -53,13 +53,15 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 	}
 
 	// flag indicating whether we should backup db
-	bool do_write_db = false;
+	bool do_write_db = true;
 
 	// if db not open now, we're done
 	if(opres != SQLITE_OK) {
+		do_write_db = false;
 		ar << do_write_db;
 		return;
 	}
+	ar << do_write_db;
 
 	// check db has an associated filename
 	// strangely there is no such API function though it is documented
@@ -86,6 +88,10 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 		db_fname = std::string("file:") + db_basename;
 	}
 
+	// save basename first
+	ar << db_basename;
+	ar << db_fname;
+
 	// open db for backup
 	sqlite3* save_db = NULL;
 	sqlite3_backup* save_bu = NULL;
@@ -94,8 +100,8 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 	if(opres == SQLITE_OK)
 		save_bu = sqlite3_backup_init(save_db, "main", src_db, "main");
 	if(!save_bu) {
+		// probably source & dest db are the same
 		sqlite3_close(save_db);
-		ar << do_write_db;
 		return;
 	}
 
@@ -103,19 +109,15 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 	while((opres = sqlite3_backup_step(save_bu, -1)) == SQLITE_OK) {}
 	sqlite3_backup_finish(save_bu);
 	sqlite3_close(save_db);
-	if(opres != SQLITE_DONE) {
-		// if error happens
+	// SQLITE_BUSY returned if we're trying to backup into source db
+	if(opres != SQLITE_DONE && opres != SQLITE_BUSY) {
+		// if error happens - kill db file
 		::remove(db_fname.c_str());
-		ar << do_write_db;
-		return;
 	}
 
 	// save flag that db backup was successful and filename of backup db
-	do_write_db = true;
-	ar << do_write_db;
-	// save basename first
-	ar << db_basename;
-	ar << db_fname;
+	//do_write_db = true;
+	//ar << do_write_db;
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, blue_sky::sql_well)
