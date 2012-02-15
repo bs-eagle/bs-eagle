@@ -42,5 +42,7 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load_construct_data, convert_units)
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 BOOST_CLASS_EXPORT_IMPLEMENT(physical_constants)
+BLUE_SKY_CLASS_SERIALIZE_INST(physical_constants)
 BOOST_CLASS_EXPORT_IMPLEMENT(convert_units)
+BLUE_SKY_CLASS_SERIALIZE_INST(convert_units)
 

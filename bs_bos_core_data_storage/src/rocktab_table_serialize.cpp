@@ -49,6 +49,7 @@ BLUE_SKY_CLASS_SRZ_FCN_END
 BLUE_SKY_CLASS_SERIALIZE_SPLIT(bs_table)
 
 BOOST_CLASS_EXPORT_IMPLEMENT(bs_table)
+BLUE_SKY_CLASS_SERIALIZE_INST(bs_table)
 
 /*-----------------------------------------------------------------
  * serialize rocktab_table
@@ -59,4 +60,5 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, rocktab_table)
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 BOOST_CLASS_EXPORT_IMPLEMENT(rocktab_table)
+BLUE_SKY_CLASS_SERIALIZE_INST(rocktab_table)
 
