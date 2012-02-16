@@ -170,7 +170,7 @@ void mesh_grdecl::check_data() const
   if (!zcorn_array)
     bs_throw_exception ("ZCORN array is not initialized");
 
-  // check if all cells are convex
+  // 1. check if all cells are convex
 
   element_t element;
   t_long wrong_cells = 0;
@@ -184,40 +184,59 @@ void mesh_grdecl::check_data() const
             t_long index = k + j * nz + i * ny * nz;
 
             // miss inactive blocks
-            if (actnum[index])
+            if (actnum[index] || k == 0 || k == nz - 1)
               {
                 calc_element (i, j, k, element);
                 mesh_element3d::corners_t corns = element.get_corners();
-				
-                // check X
-                if (((corns[1].x - corns[0].x) * (corns[3].x - corns[2].x) < 0) ||
-                    ((corns[1].x - corns[0].x) * (corns[5].x - corns[4].x) < 0) ||
-                    ((corns[1].x - corns[0].x) * (corns[7].x - corns[6].x) < 0))
-                  {
-                    actnum[index] = 0;
-                    wrong_cells ++;
-                    continue;
-                  }
 
-                // check Y
-                if (((corns[2].y - corns[0].y) * (corns[3].y - corns[1].y) < 0) ||
-                    ((corns[2].y - corns[0].y) * (corns[7].y - corns[5].y) < 0) ||
-                    ((corns[2].y - corns[0].y) * (corns[6].y - corns[4].y) < 0))
+                if (k == 0)
                   {
-                    actnum[index] = 0;
-                    wrong_cells ++;
-                    continue;
-                  }
+                    t_long cindex = 6 * (i + j * (nx + 1));
+
+                    coord_array[cindex] = corns[0].x;
+                    coord_array[cindex + 1] = corns[0].y;
+                    coord_array[cindex + 2] = corns[0].z;
+
+                    cindex += 6;
+
+
+                    calc_corner_point (zcorn_array[index1 + 1], &coord_array[(iCOORD + 1) * 6], corners[1]);
+                    calc_corner_point (zcorn_array[index1 + 2 * nx], &coord_array[(iCOORD + (nx + 1)) * 6], corners[2]);
+                    calc_corner_point (zcorn_array[index1 + 2 * nx + 1], &coord_array[(iCOORD + (nx + 1) + 1) * 6], corners[3]);
+
+
+                if (actnum[index])
+                  {
+                    // check X
+                    if (((corns[1].x - corns[0].x) * (corns[3].x - corns[2].x) < 0) ||
+                        ((corns[1].x - corns[0].x) * (corns[5].x - corns[4].x) < 0) ||
+                        ((corns[1].x - corns[0].x) * (corns[7].x - corns[6].x) < 0))
+                      {
+                        actnum[index] = 0;
+                        wrong_cells ++;
+                        continue;
+                      }
+
+                    // check Y
+                    if (((corns[2].y - corns[0].y) * (corns[3].y - corns[1].y) < 0) ||
+                        ((corns[2].y - corns[0].y) * (corns[7].y - corns[5].y) < 0) ||
+                        ((corns[2].y - corns[0].y) * (corns[6].y - corns[4].y) < 0))
+                      {
+                        actnum[index] = 0;
+                        wrong_cells ++;
+                        continue;
+                      }
                 
                 
-                // check Z
-                if (((corns[4].z - corns[0].z) * (corns[5].z - corns[1].z) < 0) ||
-                    ((corns[4].z - corns[0].z) * (corns[6].z - corns[2].z) < 0) ||
-                    ((corns[4].z - corns[0].z) * (corns[7].z - corns[3].z) < 0))
-                  {
-                    actnum[index] = 0;
-                    wrong_cells ++;
-                    continue;
+                    // check Z
+                    if (((corns[4].z - corns[0].z) * (corns[5].z - corns[1].z) < 0) ||
+                        ((corns[4].z - corns[0].z) * (corns[6].z - corns[2].z) < 0) ||
+                        ((corns[4].z - corns[0].z) * (corns[7].z - corns[3].z) < 0))
+                      {
+                        actnum[index] = 0;
+                        wrong_cells ++;
+                        continue;
+                      }
                   }
               }
         }
@@ -225,6 +244,31 @@ void mesh_grdecl::check_data() const
 
   if (wrong_cells)
     BOSOUT (section::mesh, level::medium) << "% wrong (nonconvex) cells found! Marked inactive." << wrong_cells << bs_end;
+
+  // 2. check for ZCORN intersections (and correct them)
+
+  for (t_long i = 0; i < 2 * nx; ++i)
+    for (t_long j = 0; j < 2 * ny; ++j)
+      for (t_long k = 1; k < nz; ++k)
+        {
+          t_long z_index = i + 2 * nx * j + 4 * nx * ny * (2 * k - 1);
+          if (zcorn_array[z_index] > zcorn_array[z_index + 4 * nx * ny])
+            {
+               t_long index1 = k + std::ceil(j / 2) * nz + std::ceil(i / 2) * ny * nz - 1;
+               t_long index2 = index1 + 1;
+
+               if (actnum[index1] == 0)
+                 zcorn_array[z_index] = zcorn_array[z_index + 4 * nx * ny];
+               else if (actnum[index2] == 0)
+                 zcorn_array[z_index + 4 * nx * ny] = zcorn_array[z_index]
+               else
+                 {
+                   t_float middle = (zcorn_array[z_index + 4 * nx * ny] + zcorn_array[z_index]) / 2;
+                   zcorn_array[z_index + 4 * nx * ny] = zcorn_array[z_index] = middle;
+                 }
+            }
+        };
+
 }
 
 inline void
@@ -1920,9 +1964,57 @@ int mesh_grdecl::intersect_trajectories ()
   int n_y_ranges = std::ceil (ny / std::pow(float(n_range_cells), float(1/3)));
   int n_z_ranges = std::ceil (nz / std::pow(float(n_range_cells), float(1/3)));
 
+  element_t element;
+  t_int *actnum = actnum_array->data ();
 
+  for (t_long i = 0; i < nx; ++i)
+    for (t_long j = 0; j < ny; ++j)
+      {
+        for (t_long k = 0; k < nz; ++k)
+          {
+            t_long index = k + j * nz + i * ny * nz;
 
+            // miss inactive blocks
+            if (actnum[index])
+              {
+                calc_element (i, j, k, element);
+                mesh_element3d::corners_t corns = element.get_corners();
+				
+                // check X
+                if (((corns[1].x - corns[0].x) * (corns[3].x - corns[2].x) < 0) ||
+                    ((corns[1].x - corns[0].x) * (corns[5].x - corns[4].x) < 0) ||
+                    ((corns[1].x - corns[0].x) * (corns[7].x - corns[6].x) < 0))
+                  {
+                    actnum[index] = 0;
+                    wrong_cells ++;
+                    continue;
+                  }
 
+                // check Y
+                if (((corns[2].y - corns[0].y) * (corns[3].y - corns[1].y) < 0) ||
+                    ((corns[2].y - corns[0].y) * (corns[7].y - corns[5].y) < 0) ||
+                    ((corns[2].y - corns[0].y) * (corns[6].y - corns[4].y) < 0))
+                  {
+                    actnum[index] = 0;
+                    wrong_cells ++;
+                    continue;
+                  }
+                
+                
+                // check Z
+                if (((corns[4].z - corns[0].z) * (corns[5].z - corns[1].z) < 0) ||
+                    ((corns[4].z - corns[0].z) * (corns[6].z - corns[2].z) < 0) ||
+                    ((corns[4].z - corns[0].z) * (corns[7].z - corns[3].z) < 0))
+                  {
+                    actnum[index] = 0;
+                    wrong_cells ++;
+                    continue;
+                  }
+              }
+        }
+    }
+
+  
 
 
 
