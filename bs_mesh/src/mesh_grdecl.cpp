@@ -188,7 +188,7 @@ void mesh_grdecl::check_data() const
               {
                 calc_element (i, j, k, element);
                 mesh_element3d::corners_t corns = element.get_corners();
-
+                /*
                 if (k == 0)
                   {
                     t_long cindex = 6 * (i + j * (nx + 1));
@@ -204,7 +204,7 @@ void mesh_grdecl::check_data() const
                     calc_corner_point (zcorn_array[index1 + 2 * nx], &coord_array[(iCOORD + (nx + 1)) * 6], corners[2]);
                     calc_corner_point (zcorn_array[index1 + 2 * nx + 1], &coord_array[(iCOORD + (nx + 1) + 1) * 6], corners[3]);
 
-
+                */
                 if (actnum[index])
                   {
                     // check X
@@ -246,7 +246,7 @@ void mesh_grdecl::check_data() const
     BOSOUT (section::mesh, level::medium) << "% wrong (nonconvex) cells found! Marked inactive." << wrong_cells << bs_end;
 
   // 2. check for ZCORN intersections (and correct them)
-
+/*
   for (t_long i = 0; i < 2 * nx; ++i)
     for (t_long j = 0; j < 2 * ny; ++j)
       for (t_long k = 1; k < nz; ++k)
@@ -268,6 +268,7 @@ void mesh_grdecl::check_data() const
                  }
             }
         };
+  */
 
 }
 
@@ -1959,6 +1960,7 @@ int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr
 int mesh_grdecl::intersect_trajectories ()
 {
   int n_range_cells = 1000;
+  int wrong_cells = 0;
 
   int n_x_ranges = std::ceil (nx / std::pow(float(n_range_cells), float(1/3)));
   int n_y_ranges = std::ceil (ny / std::pow(float(n_range_cells), float(1/3)));
