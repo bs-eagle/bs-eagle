@@ -1743,10 +1743,20 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
       for (di = dates.begin (); di != de; ++di)
         {
           char d_buf[1024];
-          print_date_ecl (*di, d_buf);
-          printf ("DATE %s\n", d_buf);
-          fprintf (fp, "DATES\n%s\n/\n\n", d_buf);
-
+          if (*di - int(*di) == 0) // if *di is integer
+            {
+              print_date_ecl (*di, d_buf);
+              printf ("DATE %s\n", d_buf);
+              fprintf (fp, "DATES\n%s\n/\n\n", d_buf);
+            }
+          else
+            {
+        	  std::list<double>::iterator di_prev = di;
+        	  di_prev--;
+              double dt = *di - *di_prev;
+              printf ("TSTEP %lf\n", dt);
+              fprintf (fp, "TSTEP\n%lf\n/\n\n", dt);
+            }
           // Building compdat to put first completion I, J to WELLSPECS
           compl_n_frac.clear ();
           cd = compl_n_frac.compl_build (*di);
