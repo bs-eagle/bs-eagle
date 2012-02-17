@@ -517,7 +517,6 @@ namespace blue_sky
   h5_pool::open_data (std::string const &name, const std::string &group_name)
   {
 	hid_t group = group_id.find (group_name)->second;
-	hid_t group_actual = group_id.find ("actual")->second;
 
     map_t::iterator it = h5_map.find (name);
     if (it == h5_map.end ())
@@ -567,9 +566,7 @@ namespace blue_sky
             p.dspace = dspace;
             p.dset = dset;
             BS_ASSERT (p.dset >= 0) (name);
-
-            //H5Lcreate_soft(("/actual/" + name).c_str (), group_actual, name.c_str ());
-          }
+         }
         else 
           {
             hid_t dset = detail::open_dataset (group, name.c_str ());
@@ -722,12 +719,26 @@ namespace blue_sky
     	    //create new base group
     	    last_base_name = "base_" + get_date_time_str();
 
+    	    // add suffix if group already exist (date_time not changed)
+    	    std::string last_base_name2 = last_base_name;
+    	    int i = 2;
+    	    while (detail::is_object_exists (file_id, last_base_name2.c_str()))
+    	      {
+        	    std::stringstream ss;
+    	    	ss << i;
+    	    	last_base_name2 = last_base_name + "_" + ss.str();
+    	    	i += 1;
+    	      }
+    	    last_base_name = last_base_name2;
+
+    		//std::cout<<"set_data created_base "<<last_base_name.c_str()<<"\n";
+
     	    hid_t base_id = H5Gcreate (file_id, last_base_name.c_str(), -1);
     	    group_id.insert (pair<std::string, hid_t>(last_base_name, base_id));
 
     	    std::string comment = "# Created " + last_base_name + "\n";
     	    // add "\n" before script if not first line
-    	    comment = strlen(get_script ()) > 0 ? "\n" : "" + comment;
+    	    comment = (strlen(get_script ()) > 0 ? "\n" : "") + comment;
     	    add_script (comment, false);
 
     	    // set other array's flags difference from (new) base is false
@@ -763,6 +774,46 @@ namespace blue_sky
       {
         bs_throw_exception (boost::format ("Can't write data (%s)") % name);
       }
+  }
+
+  // calls H5Gget_objname_by_idx and return as std::string
+  std::string get_obj_name_by_idx (hid_t &location, hsize_t idx)
+  {
+    char name[256];
+    int name_size = H5Gget_objname_by_idx (location, idx, NULL, 0) + 1;//get size of the name, +1 - hdf5 specification
+    H5Gget_objname_by_idx (location, idx, name, name_size);//get name
+    return std::string (name);
+  }
+
+  // delete all items from group 'actual'
+  void
+  h5_pool::clear_actual ()
+  {
+    if (detail::is_object_exists (file_id, "actual"))// group actual exist
+      {
+    	hid_t group_actual = group_id.find ("actual")->second;
+	    hsize_t num_obj;
+	    std::string array_name;
+
+	    // get number of objects in 'actual' group
+	    H5G_info_t group_info;
+	    H5Gget_info (group_actual, &group_info);
+	    num_obj = group_info.nlinks;
+
+	    // get object names of items in 'actual' group
+	    std::vector<std::string> array_names;
+	    for (hsize_t i = 0; i < num_obj; i++)
+	      {
+	    	array_name = get_obj_name_by_idx (group_actual, i);
+	    	array_names.push_back (array_name);
+	      }
+	    // delete objects
+	    for (hsize_t i = 0; i < num_obj; i++)
+	      {
+	    	array_name = array_names[i];
+	    	herr_t status = H5Ldelete (group_actual, array_name.c_str (), H5P_DEFAULT);
+	      }
+	  }
   }
 
   void

@@ -36,6 +36,8 @@ namespace blue_sky
         args (""), "Flush buffers to the file")
     .def ("finish_base",                        &T::finish_base,
         args (""), "Finish editing current base group")
+    .def ("clear_actual",                       &T::clear_actual,
+        args (""), "Delete items in group actual")
     .def ("add_script",                         &T::add_script,
         args ("string", "bool"), "Add string to script dataset")
     .def ("get_script",                         &T::get_script,
