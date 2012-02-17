@@ -49,6 +49,9 @@ void hdm_serialize_save(
 	std::ofstream f(fname.c_str());
 	boarch::polymorphic_text_oarchive oa(f);
 	oa << t;
+
+	// clear kernel table to not confuse with further saves
+	p_dt->clear< std::string >();
 }
 
 smart_ptr< hdm > hdm_serialize_load(
@@ -67,6 +70,12 @@ smart_ptr< hdm > hdm_serialize_load(
 	boarch::polymorphic_text_iarchive ia(f);
 	smart_ptr< hdm > t;
 	ia >> t;
+
+	// clear kernel table
+	p_dt->clear< std::string >();
+	// clear dangling refs of loaded in kernel
+	BS_KERNEL.tree_gc();
+
 	return t;
 }
 
