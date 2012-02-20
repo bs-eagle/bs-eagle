@@ -1708,7 +1708,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
       // interface to mesh
       sp_himesh himesh = BS_KERNEL.create_object("handy_mesh_iface");
       BS_ASSERT(himesh);
-
+      const double eps = 1e-10;
 
       if (!fp)
         {
@@ -1784,8 +1784,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                 return -1;
               for (; !step_sql ();)
                 {
-                  point_ptr[0] = get_sql_real (1);
-                  point_ptr[1] = get_sql_real (2);
+                  point_ptr[0] = get_sql_real (1) + eps;
+                  point_ptr[1] = get_sql_real (2) + eps;
                   point_ptr[2] = prop->get_f ("min_z");
                   point_ptr += 3;
                 }
