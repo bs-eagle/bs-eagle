@@ -27,6 +27,16 @@ namespace python {
     .def("get_well_pool", &T::get_well_pool)
     .def("get_keyword_manager", &T::get_keyword_manager)
     .def("get_equil_model", &T::get_equil_model)
+    .def_readwrite("scal", &T::scal_3p_)
+    .def_readwrite("pvt", &T::pvt_3p_)
+    .def_readwrite("init_model", &T::init_model_)
+    .def_readwrite("event_manager", &T::event_manager_)
+    .def_readwrite("well_pool", &T::well_pool_)
+    .def_readwrite("equil_model", &T::equil_model_)
+    .def_readwrite("mesh", &T::mesh)
+    .def_readwrite("keyword_manager", &T::km)
+    .def_readwrite("reader", &T::reader)
+    .def_readwrite("data", &T::data)
   PY_EXPORTER_END;
 
   void py_export_hdm ()
