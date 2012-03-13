@@ -10,6 +10,8 @@
 #include "mesh_ijk_keywords.h"
 #include "mesh_grdecl_keywords.h"
 
+#include "upsc.h"
+
 #include "py_rs_mesh.h"
 
 namespace blue_sky
@@ -43,6 +45,9 @@ namespace blue_sky
     res &= BS_KERNEL.register_type(pd, mesh_grdecl_keywords::bs_type()); BS_ASSERT (res);
     
     //mpi_mesh_grdecl
+
+    res &= BS_KERNEL.register_type(pd, upsc::bs_type()); BS_ASSERT (res);
+
 #ifdef _MPI_MY
     res &= BS_KERNEL.register_type(pd, mpi_mesh_grdecl<base_strategy_fif>::bs_type()); BS_ASSERT (res);
     res &= BS_KERNEL.register_type(pd, mpi_mesh_grdecl<base_strategy_did>::bs_type()); BS_ASSERT (res);
@@ -73,8 +78,8 @@ void py_export_mesh_grdecl();
 void py_export_flux_connections();
 void py_export_czt();
 void py_export_wpi();
-
 void py_export_well_edit();
+void py_export_upsc();
 }}
 
 /*-----------------------------------------------------------------
@@ -92,6 +97,7 @@ namespace {
 	python::py_export_czt();
 	python::py_export_wpi();
 	python::py_export_well_edit();
+    python::py_export_upsc();
   }
 }
 BLUE_SKY_INIT_PY_FUN

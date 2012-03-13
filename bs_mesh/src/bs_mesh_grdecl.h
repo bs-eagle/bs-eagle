@@ -67,6 +67,7 @@ namespace blue_sky
 	return wrapped.init_props(nx, ny, coord, zcorn);
       }
 
+
       //! reset internal state and release memory
       void clear() {
 	wrapped.clear();
@@ -173,6 +174,10 @@ namespace blue_sky
       const spv_float get_volumes () const
         {return wrapped.get_volumes ();};
 
+      //! get cell volumes
+      spv_float get_cell_volumes(const t_long Nx, const t_long Ny, const t_long Nz) const {
+          return wrapped.get_cell_volumes(Nx, Ny, Nz);
+      }
 
       //! return depths of cell centers (length n_active_elements)
       const spv_float get_depths () const

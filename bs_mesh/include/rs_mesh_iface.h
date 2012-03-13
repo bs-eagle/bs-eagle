@@ -83,6 +83,9 @@ namespace blue_sky
       //! get mesh elements volumes
       virtual const spv_float get_volumes () const = 0;
       
+      //! get cell volumes
+      virtual spv_float get_cell_volumes(const t_long Nx, const t_long Ny, const t_long Nz) const = 0;
+      
       
       //! set darcy constant for correct transmissibility calculation 
       virtual void set_darcy (double darcy_constant_) = 0;

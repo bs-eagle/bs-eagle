@@ -16,101 +16,101 @@ const char filename_hdf5[] = "grid_swap.h5";
 #endif //BS_MESH_WRITE_TRANSMISS_MATRIX 
 
 struct mesh_grdecl::inner {
-	// shorter aliases
-	typedef t_long int_t;
-	typedef t_double fp_t;
-	typedef t_float fp_stor_t;
+    // shorter aliases
+    typedef t_long int_t;
+    typedef t_double fp_t;
+    typedef t_float fp_stor_t;
 
-	void init_minmax(mesh_grdecl& m) const {
-		int_t i, n;
-		fp_stor_t *it;
+    void init_minmax(mesh_grdecl& m) const {
+        int_t i, n;
+        fp_stor_t *it;
 
-		// init ZCORN
-		m.min_z = *(std::min_element(zcorn_->begin(), zcorn_->end()));
-		m.max_z = *(std::max_element(zcorn_->begin(), zcorn_->end()));
+        // init ZCORN
+        m.min_z = *(std::min_element(zcorn_->begin(), zcorn_->end()));
+        m.max_z = *(std::max_element(zcorn_->begin(), zcorn_->end()));
 
-		n = (int_t) coord_->size();
+        n = (int_t) coord_->size();
 
-		m.max_x = m.min_x = m.coord_array[0];
-		m.max_y = m.min_y = m.coord_array[1];
+        m.max_x = m.min_x = m.coord_array[0];
+        m.max_y = m.min_y = m.coord_array[1];
 
-		for (i = 0; i < n; i += 6) {
-			it = m.coord_array + i;
-			// move matching points apart
-			if (it[2] == it[5])
-				it[5] += 1.0f;
+        for (i = 0; i < n; i += 6) {
+            it = m.coord_array + i;
+            // move matching points apart
+            if (it[2] == it[5])
+                it[5] += 1.0f;
 
-			//looking for max&min coordinates
-			if (m.min_x > it[0]) m.min_x = it[0];
-			if (m.min_x > it[3]) m.min_x = it[3];
+            //looking for max&min coordinates
+            if (m.min_x > it[0]) m.min_x = it[0];
+            if (m.min_x > it[3]) m.min_x = it[3];
 
-			if (m.min_y > it[1]) m.min_y = it[1];
-			if (m.min_y > it[4]) m.min_y = it[4];
+            if (m.min_y > it[1]) m.min_y = it[1];
+            if (m.min_y > it[4]) m.min_y = it[4];
 
-			if (m.max_x < it[0]) m.max_x = it[0];
-			if (m.max_x < it[3]) m.max_x = it[3];
+            if (m.max_x < it[0]) m.max_x = it[0];
+            if (m.max_x < it[3]) m.max_x = it[3];
 
-			if (m.max_y < it[1]) m.max_y = it[1];
-			if (m.max_y < it[4]) m.max_y = it[4];
-		}
-	}
+            if (m.max_y < it[1]) m.max_y = it[1];
+            if (m.max_y < it[4]) m.max_y = it[4];
+        }
+    }
 
-	// hold reference to coord and czron arrays if generated internally
-	spv_float coord_;
-	spv_float zcorn_;
+    // hold reference to coord and czron arrays if generated internally
+    spv_float coord_;
+    spv_float zcorn_;
 };
 
 mesh_grdecl::mesh_grdecl ()
-	: pinner_(new inner), coord_array(0), zcorn_array(0)
+    : pinner_(new inner), coord_array(0), zcorn_array(0)
 {}
 
 void mesh_grdecl::init_props(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
-	if(coord && coord->size()) {
-		pinner_->coord_ = coord;
-		coord_array = &pinner_->coord_->ss(0);
-	}
-	if(zcorn && zcorn->size()) {
-		pinner_->zcorn_ = zcorn;
-		zcorn_array = &pinner_->zcorn_->ss(0);
-	}
-	this->nx = nx;
-	this->ny = ny;
-	this->nz = (zcorn->size() / nx / ny) >> 3;
-	this->n_elements = nx * ny * nz;
+    if(coord && coord->size()) {
+        pinner_->coord_ = coord;
+        coord_array = &pinner_->coord_->ss(0);
+    }
+    if(zcorn && zcorn->size()) {
+        pinner_->zcorn_ = zcorn;
+        zcorn_array = &pinner_->zcorn_->ss(0);
+    }
+    this->nx = nx;
+    this->ny = ny;
+    this->nz = (zcorn->size() / nx / ny) >> 3;
+    this->n_elements = nx * ny * nz;
 
-	// postinit
-	pinner_->init_minmax(*this);
+    // postinit
+    pinner_->init_minmax(*this);
 }
 
 void mesh_grdecl::clear() {
-	// free coord
-	if(pinner_->coord_ && pinner_->coord_->size()) {
-		pinner_->coord_->clear();
-		pinner_->coord_.release();
-		coord_array = NULL;
-	}
+    // free coord
+    if(pinner_->coord_ && pinner_->coord_->size()) {
+        pinner_->coord_->clear();
+        pinner_->coord_.release();
+        coord_array = NULL;
+    }
 
-	// free zcorn
-	if(pinner_->zcorn_ && pinner_->zcorn_->size()) {
-		pinner_->zcorn_->clear();
-		pinner_->zcorn_.release();
-		zcorn_array = NULL;
-	}
+    // free zcorn
+    if(pinner_->zcorn_ && pinner_->zcorn_->size()) {
+        pinner_->zcorn_->clear();
+        pinner_->zcorn_.release();
+        zcorn_array = NULL;
+    }
 
-	this->nx = 0;
-	this->ny = 0;
-	this->nz = 0;
-	this->n_elements = 0;
+    this->nx = 0;
+    this->ny = 0;
+    this->nz = 0;
+    this->n_elements = 0;
 
-	// zero bounds
-	this->max_x = this->max_y = this->max_z = 0;
-	this->min_x = this->min_y = this->min_z = 0;
+    // zero bounds
+    this->max_x = this->max_y = this->max_z = 0;
+    this->min_x = this->min_y = this->min_z = 0;
 }
 
 void mesh_grdecl::init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz) {
-	// generate COORD & ZCORN
-	std::pair< spv_float, spv_float > cz = gen_coord_zcorn(nx, ny, nz, dx, dy, dz);
-	init_props(nx, ny, cz.first, cz.second);
+    // generate COORD & ZCORN
+    std::pair< spv_float, spv_float > cz = gen_coord_zcorn(nx, ny, nz, dx, dy, dz);
+    init_props(nx, ny, cz.first, cz.second);
 }
 
 void mesh_grdecl::init_props(const sp_hdm_t hdm)
@@ -123,14 +123,14 @@ void mesh_grdecl::init_props(const sp_hdm_t hdm)
   // init ZCORN
   data_array = hdm->get_pool ()->get_fp_data("ZCORN");
   if (data_array->size()) {
-	  pinner_->zcorn_ = data_array;
-	  zcorn_array = &(*data_array)[0];
+      pinner_->zcorn_ = data_array;
+      zcorn_array = &(*data_array)[0];
   }
   // init COORD
   data_array = hdm->get_pool ()->get_fp_data("COORD");
   if (data_array->size()) {
-	  pinner_->coord_ = data_array;
-	  coord_array = &(*data_array)[0];
+      pinner_->coord_ = data_array;
+      coord_array = &(*data_array)[0];
   }
 
   // postinit
@@ -432,8 +432,8 @@ bool mesh_grdecl::is_small(const t_long i, const t_long j, const t_long k, t_dou
 
     t_double dz1, dz2, dz3, dz4; //height for each coord
     //define index
-    t_long index1 = i*2+j*4*nx+k*8*nx*ny;	//lower side
-    t_long index2 = index1+4*nx*ny;			//upper side
+    t_long index1 = i*2+j*4*nx+k*8*nx*ny;   //lower side
+    t_long index2 = index1+4*nx*ny;         //upper side
     dz1 = zcorn_array[index2]-zcorn_array[index1];
     dz2 = zcorn_array[index2+1]-zcorn_array[index1+1];
     dz3 = zcorn_array[index2+2*nx]-zcorn_array[index1+2*nx];
@@ -681,6 +681,26 @@ bool mesh_grdecl::check_adjacency(int shift_zcorn)
   return (n_adjacent == n_active_elements);
 }
 
+spv_float mesh_grdecl::get_cell_volumes (const t_long Nx, const t_long Ny, const t_long Nz) const
+{
+    t_long i, j, k, ind;
+    element_t element;
+
+    spv_float volumes = BS_KERNEL.create_object(v_float::bs_type());
+    volumes->resize(Nx*Ny*Nz);
+
+    // important: XYZ order
+
+    ind = 0;
+    for (k = 0; k < Nz; ++k)
+        for (j = 0; j < Ny; ++j)
+            for (i = 0; i < Nx; ++i)
+              {
+                calc_element (i, j, k, element);
+                (*volumes)[(ind++)] = element.calc_volume ();
+              }
+    return volumes;
+}
 
 int mesh_grdecl::splicing(stdv_float& volumes_temp)
 {
@@ -1033,14 +1053,14 @@ void mesh_grdecl::get_block_dx_dy_dz (t_long n_elem, t_double &dx, t_double &dy,
   
 spv_double mesh_grdecl::get_element_sizes (const t_long n_element) const
   {
-	  double dx, dy, dz;
-	  get_block_dx_dy_dz(n_element, dx, dy, dz);
-	  spv_double sizes = BS_KERNEL.create_object(v_double::bs_type());
-	  sizes->resize(3);
-	  (*sizes)[0] = dx;
-	  (*sizes)[1] = dy;
-	  (*sizes)[2] = dz;
-	  return sizes;
+      double dx, dy, dz;
+      get_block_dx_dy_dz(n_element, dx, dy, dz);
+      spv_double sizes = BS_KERNEL.create_object(v_double::bs_type());
+      sizes->resize(3);
+      (*sizes)[0] = dx;
+      (*sizes)[1] = dy;
+      (*sizes)[2] = dz;
+      return sizes;
   }
 
 
@@ -1103,12 +1123,12 @@ boost::python::list mesh_grdecl::calc_element_tops ()
    
   t_float const *poro = poro_array->data ();
   for (i = 0; i < nx; ++i)
-	  for (j = 0; j < ny; ++j)
-		  for (k = 0; k < nz; ++k, ++ind)
-		    {
-			
-				/*
-			  // check blocks adjacency
+      for (j = 0; j < ny; ++j)
+          for (k = 0; k < nz; ++k, ++ind)
+            {
+            
+                /*
+              // check blocks adjacency
           zindex = i * 2 + j * 4 * nx + k * 8 *nx * ny;
           zindex1 = zindex + 2; // check next by x
          
@@ -1129,60 +1149,60 @@ boost::python::list mesh_grdecl::calc_element_tops ()
                     n_adjacent++;
                   }
             }
-	*/
-		      calc_element (i, j, k, element);
-			  prop_data[ind] = poro[ind];
-			  for (c = 0; c < 8; ++c)
-				{
-				  tops_data[8 * 3 * ind + 3 * c] = element.get_corners()[c].x;
-				  tops_data[8 * 3 * ind + 3 * c + 1] = element.get_corners()[c].y;
-				  tops_data[8 * 3 * ind + 3 * c + 2] = element.get_corners()[c].z * 10;
-				}
+    */
+              calc_element (i, j, k, element);
+              prop_data[ind] = poro[ind];
+              for (c = 0; c < 8; ++c)
+                {
+                  tops_data[8 * 3 * ind + 3 * c] = element.get_corners()[c].x;
+                  tops_data[8 * 3 * ind + 3 * c + 1] = element.get_corners()[c].y;
+                  tops_data[8 * 3 * ind + 3 * c + 2] = element.get_corners()[c].z * 10;
+                }
 
-				
-			  indexes_data[8 * ind] = 8 * ind;
-			  indexes_data[8 * ind + 1] = 8 * ind + 1;
-			  indexes_data[8 * ind + 2] = 8 * ind + 3;
-			  indexes_data[8 * ind + 3] = 8 * ind + 2;
+                
+              indexes_data[8 * ind] = 8 * ind;
+              indexes_data[8 * ind + 1] = 8 * ind + 1;
+              indexes_data[8 * ind + 2] = 8 * ind + 3;
+              indexes_data[8 * ind + 3] = 8 * ind + 2;
 
-			  indexes_data[8 * ind + 4] = 8 * ind + 4;
-			  indexes_data[8 * ind + 5] = 8 * ind + 5;
-			  indexes_data[8 * ind + 6] = 8 * ind + 7;
-			  indexes_data[8 * ind + 7] = 8 * ind + 6;
+              indexes_data[8 * ind + 4] = 8 * ind + 4;
+              indexes_data[8 * ind + 5] = 8 * ind + 5;
+              indexes_data[8 * ind + 6] = 8 * ind + 7;
+              indexes_data[8 * ind + 7] = 8 * ind + 6;
 
-/*			  
-			  // planes indexes
-			  indexes_data[24 * ind] = 8 * ind;
-			  indexes_data[24 * ind + 1] = 8 * ind + 1;
-			  indexes_data[24 * ind + 2] = 8 * ind + 3;
-			  indexes_data[24 * ind + 3] = 8 * ind + 2;
+/*            
+              // planes indexes
+              indexes_data[24 * ind] = 8 * ind;
+              indexes_data[24 * ind + 1] = 8 * ind + 1;
+              indexes_data[24 * ind + 2] = 8 * ind + 3;
+              indexes_data[24 * ind + 3] = 8 * ind + 2;
 
-			  indexes_data[24 * ind + 4] = 8 * ind + 4;
-			  indexes_data[24 * ind + 5] = 8 * ind + 5;
-			  indexes_data[24 * ind + 6] = 8 * ind + 7;
-			  indexes_data[24 * ind + 7] = 8 * ind + 6;
+              indexes_data[24 * ind + 4] = 8 * ind + 4;
+              indexes_data[24 * ind + 5] = 8 * ind + 5;
+              indexes_data[24 * ind + 6] = 8 * ind + 7;
+              indexes_data[24 * ind + 7] = 8 * ind + 6;
 
-			  indexes_data[24 * ind + 8] = 8 * ind;
-			  indexes_data[24 * ind + 9] = 8 * ind + 2;
-			  indexes_data[24 * ind + 10] = 8 * ind + 6;
-			  indexes_data[24 * ind + 11] = 8 * ind + 4;
+              indexes_data[24 * ind + 8] = 8 * ind;
+              indexes_data[24 * ind + 9] = 8 * ind + 2;
+              indexes_data[24 * ind + 10] = 8 * ind + 6;
+              indexes_data[24 * ind + 11] = 8 * ind + 4;
 
-			  indexes_data[24 * ind + 12] = 8 * ind + 1;
-			  indexes_data[24 * ind + 13] = 8 * ind + 3;
-			  indexes_data[24 * ind + 14] = 8 * ind + 7;
-			  indexes_data[24 * ind + 15] = 8 * ind + 5;
+              indexes_data[24 * ind + 12] = 8 * ind + 1;
+              indexes_data[24 * ind + 13] = 8 * ind + 3;
+              indexes_data[24 * ind + 14] = 8 * ind + 7;
+              indexes_data[24 * ind + 15] = 8 * ind + 5;
 
-			  indexes_data[24 * ind + 16] = 8 * ind ;
-			  indexes_data[24 * ind + 17] = 8 * ind + 1;
-			  indexes_data[24 * ind + 18] = 8 * ind + 5;
-			  indexes_data[24 * ind + 19] = 8 * ind + 4;
+              indexes_data[24 * ind + 16] = 8 * ind ;
+              indexes_data[24 * ind + 17] = 8 * ind + 1;
+              indexes_data[24 * ind + 18] = 8 * ind + 5;
+              indexes_data[24 * ind + 19] = 8 * ind + 4;
 
-			  indexes_data[24 * ind + 20] = 8 * ind + 2;
-			  indexes_data[24 * ind + 21] = 8 * ind + 3;
-			  indexes_data[24 * ind + 22] = 8 * ind + 7;
-			  indexes_data[24 * ind + 23] = 8 * ind + 6;
+              indexes_data[24 * ind + 20] = 8 * ind + 2;
+              indexes_data[24 * ind + 21] = 8 * ind + 3;
+              indexes_data[24 * ind + 22] = 8 * ind + 7;
+              indexes_data[24 * ind + 23] = 8 * ind + 6;
 */
-			}
+            }
 
   myavi_list.append(tops);
   myavi_list.append(indexes);
@@ -1200,19 +1220,19 @@ spv_float mesh_grdecl::calc_cells_vertices() {
 
   element_t element;
   for (t_long i = 0; i < nx; ++i)
-	  for (t_long j = 0; j < ny; ++j)
-		  for (t_long k = 0; k < nz; ++k, ++ind)
-		    {
-		      calc_element (i, j, k, element);
-			  for (t_long c = 0; c < 8; ++c)
-				{
-				  const t_long offs = 8 * 3 * ind + 3 * c;
-				  const element_t::fpoint3d_t& cur_corner = element.get_corners()[c];
-				  tops_data[offs]     = cur_corner.x;
-				  tops_data[offs + 1] = cur_corner.y;
-				  tops_data[offs + 2] = cur_corner.z;
-				}
-			}
+      for (t_long j = 0; j < ny; ++j)
+          for (t_long k = 0; k < nz; ++k, ++ind)
+            {
+              calc_element (i, j, k, element);
+              for (t_long c = 0; c < 8; ++c)
+                {
+                  const t_long offs = 8 * 3 * ind + 3 * c;
+                  const element_t::fpoint3d_t& cur_corner = element.get_corners()[c];
+                  tops_data[offs]     = cur_corner.x;
+                  tops_data[offs + 1] = cur_corner.y;
+                  tops_data[offs + 2] = cur_corner.z;
+                }
+            }
 
   return tops;
 }
@@ -1228,17 +1248,17 @@ spv_float mesh_grdecl::calc_cells_vertices_xyz() {
   for (t_long k = 0; k < nz; ++k)
     for (t_long j = 0; j < ny; ++j)
       for (t_long i = 0; i < nx; ++i, ++ind)
-		  {
-		      calc_element (i, j, k, element);
-			  for (t_long c = 0; c < 8; ++c)
-				{
-				  const t_long offs = 8 * 3 * ind + 3 * c;
-				  const element_t::fpoint3d_t& cur_corner = element.get_corners()[c];
-				  tops_data[offs]     = cur_corner.x;
-				  tops_data[offs + 1] = cur_corner.y;
-				  tops_data[offs + 2] = cur_corner.z;
-				}
-			}
+          {
+              calc_element (i, j, k, element);
+              for (t_long c = 0; c < 8; ++c)
+                {
+                  const t_long offs = 8 * 3 * ind + 3 * c;
+                  const element_t::fpoint3d_t& cur_corner = element.get_corners()[c];
+                  tops_data[offs]     = cur_corner.x;
+                  tops_data[offs + 1] = cur_corner.y;
+                  tops_data[offs + 2] = cur_corner.z;
+                }
+            }
 
   return tops;
 }
@@ -1263,14 +1283,14 @@ boost::python::list mesh_grdecl::calc_element_center ()
   ind = 0;
    
   for (i = 0; i < nx; ++i)
-	  for (j = 0; j < ny; ++j)
-		  for (k = 0; k < nz; ++k, ++ind)
-		    {
-		      calc_element (i, j, k, element);
-			  centers_data[3 * ind] = element.get_center().x;
-			  centers_data[3 * ind + 1] = element.get_center().y;
-			  centers_data[3 * ind + 2] = element.get_center().z;
-			}
+      for (j = 0; j < ny; ++j)
+          for (k = 0; k < nz; ++k, ++ind)
+            {
+              calc_element (i, j, k, element);
+              centers_data[3 * ind] = element.get_center().x;
+              centers_data[3 * ind + 1] = element.get_center().y;
+              centers_data[3 * ind + 2] = element.get_center().z;
+            }
 
   myavi_list.append(centers);
   myavi_list.append(prop);
@@ -1981,7 +2001,7 @@ int mesh_grdecl::intersect_trajectories ()
               {
                 calc_element (i, j, k, element);
                 mesh_element3d::corners_t corns = element.get_corners();
-				
+                
                 // check X
                 if (((corns[1].x - corns[0].x) * (corns[3].x - corns[2].x) < 0) ||
                     ((corns[1].x - corns[0].x) * (corns[5].x - corns[4].x) < 0) ||

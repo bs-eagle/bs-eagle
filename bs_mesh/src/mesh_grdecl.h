@@ -133,6 +133,9 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
 		spv_long hit_idx = NULL,
 		t_double cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, t_double band_thresh = DEF_BAND_THRESHOLD);
 
+    //! get cell volumes
+    spv_float get_cell_volumes (const t_long Nx, const t_long Ny, const t_long Nz) const;
+
     //! get vertex of cube [i,j,k]
     void calc_element (const t_long i, const t_long j, const t_long k, element_t &element) const;
 

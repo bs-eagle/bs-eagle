@@ -153,6 +153,11 @@ namespace blue_sky
       //! get mesh elements volumes
       const spv_float get_volumes () const
       {return wrapped.get_volumes ();};
+      
+      //! get cell volumes
+      spv_float get_cell_volumes(const t_long Nx, const t_long Ny, const t_long Nz) const {
+          return 0;
+      }
 
 
       //! return depths of cell centers (length n_active_elements)
