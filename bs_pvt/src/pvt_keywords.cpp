@@ -11,7 +11,7 @@
 #include "pvt_keywords.hpp"
 #include "keyword_manager_iface.h"
 #include "data_class.h"
-#include "read_class.h"
+#include "bos_reader_iface.h"
 #include "pvt_3p_iface.h"
 #include "table_iface.h"
 
@@ -20,23 +20,22 @@ namespace blue_sky
   void
   DENSITY (std::string const &keyword, keyword_params &params)
   {
-    BS_SP (FRead) reader = params.hdm->get_reader ();
+    BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
     BS_SP (pvt_3p_iface) pvt = params.hdm->get_pvt ();
 
     t_long n_pvt_region = params.hdm->get_prop()->get_i ("pvt_region");
     spv_float sp_density = pvt->get_density();
 
     sp_density->resize (3 * n_pvt_region);
+    t_float *dens = &(*sp_density)[0];
     for (t_long i = 0; i < n_pvt_region; ++i)
       {
-        if (reader->read_array (keyword, *sp_density, 3 * i, 3) != 3)
+        if (reader->read_fp_array (keyword.c_str (), dens + 3 * i, 3) != 3)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
               % reader->get_prefix () % keyword);
           }
       }
-
-    
     pvt->set_density_to_pvt_internal();
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
@@ -44,7 +43,7 @@ namespace blue_sky
   void
   PVTO (std::string const &keyword, keyword_params &params)
   {
-    BS_SP (FRead) reader = params.hdm->get_reader ();
+    BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
     BS_SP (pvt_3p_iface) pvt = params.hdm->get_pvt ();
     BS_SP(table_iface) tbl;
     
@@ -123,7 +122,7 @@ namespace blue_sky
   void
   PVDO (std::string const &keyword, keyword_params &params)
   {
-    BS_SP (FRead) reader = params.hdm->get_reader ();
+    BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
     BS_SP (pvt_3p_iface) pvt = params.hdm->get_pvt ();
     BS_SP(table_iface) tbl;
     int n_cols = 3;
@@ -169,7 +168,7 @@ namespace blue_sky
   void
   PVTW (std::string const &keyword, keyword_params &params)
   {
-    BS_SP (FRead) reader = params.hdm->get_reader ();
+    BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
     BS_SP (pvt_3p_iface) pvt = params.hdm->get_pvt ();
     BS_SP(table_iface) tbl;
     int n_rows = 0, n_cols = 5;
@@ -226,7 +225,7 @@ namespace blue_sky
   void
   PVDG (std::string const &keyword, keyword_params &params)
   {
-    BS_SP (FRead) reader = params.hdm->get_reader ();
+    BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
     BS_SP (pvt_3p_iface) pvt = params.hdm->get_pvt ();
     BS_SP(table_iface) tbl;
     int n_cols = 3;
@@ -270,7 +269,7 @@ namespace blue_sky
   void
   ROCK (std::string const &keyword, keyword_params &params)
   {
-    BS_SP (FRead) reader = params.hdm->get_reader ();
+    BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
     BS_SP (idata) idata = params.hdm->get_data ();
 
     t_float *p_ref = idata->p_ref->data ();
@@ -280,7 +279,7 @@ namespace blue_sky
     for (t_int i = 0; i < n_pvt_region; ++i)
       {
         boost::array <t_float, 2> dbuf;
-        if (reader->read_array (keyword, dbuf) != 2)
+        if (reader->read_fp_array (keyword.c_str (), &dbuf[0], 2) != 2)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
               % reader->get_prefix () % keyword);
@@ -302,7 +301,7 @@ namespace blue_sky
   }
 
   void
-  pvt_keywords::register_keywords (sp_objbase &km, std::string provider) const
+  pvt_keywords::register_keywords (sp_objbase &km, std::string /*provider*/) const
   {
     BS_SP (keyword_manager_iface) keyword_manager (km, bs_dynamic_cast ());
     BS_ASSERT (keyword_manager);

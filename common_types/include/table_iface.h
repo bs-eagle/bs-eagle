@@ -164,6 +164,8 @@ class table_iface : public objbase
         \brief convert table from array 
       */
       virtual void convert_from_array (const t_long n_rows, const t_long n_cols, spv_double data) = 0;
+
+      virtual void convert_from_tf_array (const t_long n_rows, const t_long n_cols, t_float *data) = 0;
       
       /*!
         \brief convert table to array 

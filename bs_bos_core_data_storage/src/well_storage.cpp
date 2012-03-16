@@ -1,7 +1,7 @@
 #include "bs_bos_core_data_storage_stdafx.h"
 
 #include "well_storage.h"
-#include "main_def.h"
+//#include "main_def.h"
 
 #include "write_time_to_log.h"
 
@@ -21,6 +21,7 @@ namespace blue_sky
   }
 
   well_storage::well_storage(const well_storage& src)
+    :bs_refcounter ()
   {
     *this = src;
   }

@@ -142,8 +142,8 @@ namespace blue_sky
     public:
       
       virtual sp_connection_t 
-      add_completion (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block,
-                      completion_coords_t &completion_data)
+      add_completion (index_t /*i_coord*/, index_t /*j_coord*/, index_t /*k_coord*/, index_t /*n_block*/,
+                      completion_coords_t & /*completion_data*/)
         {
           bs_throw_exception ("PURE CALL");
         }
@@ -157,7 +157,7 @@ namespace blue_sky
        * \return Created connection
        * */
       virtual sp_connection_t
-      add_primary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
+      add_primary_connection (index_t /*i_coord*/, index_t /*j_coord*/, index_t /*k_coord*/, index_t /*n_block*/)
       {
         bs_throw_exception ("PURE CALL");
       }
@@ -170,7 +170,7 @@ namespace blue_sky
        * \return Created connection
        * */
       virtual sp_connection_t
-      add_secondary_connection (index_t i_coord, index_t j_coord, index_t k_coord, index_t n_block)
+      add_secondary_connection (index_t /*i_coord*/, index_t /*j_coord*/, index_t /*k_coord*/, index_t /*n_block*/)
       {
         bs_throw_exception ("PURE CALL");
       }
@@ -180,7 +180,7 @@ namespace blue_sky
        * \return connection instance on success otherwise null pointer
        * */
       virtual sp_connection_t
-      get_connection_map (index_t n_block) const
+      get_connection_map (index_t /*n_block*/) const
       {
         bs_throw_exception ("PURE CALL");
       }
@@ -245,7 +245,7 @@ namespace blue_sky
        * \return True if connection is in primary_connection list
        * */
       virtual bool
-      is_primary_connection (index_t n_block) const
+      is_primary_connection (index_t /*n_block*/) const
       {
         bs_throw_exception ("PURE CALL");
       }
@@ -257,7 +257,7 @@ namespace blue_sky
        * \return True if connection is in primary_connection list
        * */
       virtual bool
-      is_primary_connection (const connection_iterator_t &it) const
+      is_primary_connection (const connection_iterator_t & /*it*/) const
       {
         bs_throw_exception ("PURE CALL");
       }
@@ -519,7 +519,7 @@ namespace blue_sky
        * \param  rows Array of Jacobian Rows
        * */
       virtual void
-      fill_rows (index_array_t &rows) const
+      fill_rows (index_array_t & /*rows*/) const
       {
         bs_throw_exception ("PURE CALL");
       }
@@ -535,7 +535,8 @@ namespace blue_sky
        * \param  markers
        * */
       virtual void
-      fill_jacobian (double dt, index_t block_size, const spv_long &rows, spv_long &cols, spv_double &values, stdv_long &markers) const
+      fill_jacobian (double /*dt*/, index_t /*block_size*/, const spv_long & /*rows*/, spv_long & /*cols*/, 
+                     spv_double & /*values*/, stdv_long & /*markers*/) const
       {
         bs_throw_exception ("PURE CALL");
       }
@@ -550,7 +551,8 @@ namespace blue_sky
        * \param  rhs Array of rhs values
        * */
       virtual void
-      fill_rhs (double dt, index_t n_phases, bool is_g, bool is_o, bool is_w, rhs_item_array_t &rhs) const
+      fill_rhs (double /*dt*/, index_t /*n_phases*/, bool /*is_g*/, bool /*is_o*/, bool /*is_w*/, 
+                rhs_item_array_t & /*rhs*/) const
       {
         bs_throw_exception ("PURE CALL");
       }

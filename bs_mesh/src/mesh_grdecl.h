@@ -8,6 +8,7 @@
 
 #include "rs_smesh_base.h"
 #include "flux_connections_iface.h"
+#include "bos_reader_iface.h"
 
 #include "mesh_element3d.h"
 
@@ -66,7 +67,7 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     typedef boost::array <t_long, 4>         plane_zcorn_t_long;
     typedef boost::array <t_double, 3>                point3d_t;
 
-    typedef blue_sky::smart_ptr <blue_sky::FRead, true> sp_fread_t;
+    typedef blue_sky::smart_ptr <blue_sky::bos_reader_iface, true> sp_fread_t;
 
 //-------------------------------------------
 //  METHODS

@@ -14,7 +14,7 @@
 namespace blue_sky
   {
 
-  class FRead;
+  class bos_reader_iface;
 
   class /*BS_API_PLUGIN*/ rs_mesh_iface : public bs_node
     {
@@ -26,22 +26,22 @@ namespace blue_sky
       // OWN TYPES
       ///////////////////////
       
-      typedef rs_mesh_iface                  this_t;
-      typedef smart_ptr <this_t, true>                    sp_this_t;
+      typedef rs_mesh_iface                                 this_t;
+      typedef smart_ptr <this_t, true>                      sp_this_t;
         
-      //typedef std::vector<t_long>                       index_array_t;
+      //typedef std::vector<t_long>                         index_array_t;
       
-      typedef flux_connections_iface                      flux_conn_iface_t;
-      typedef smart_ptr <flux_conn_iface_t, true>         sp_flux_conn_iface_t;
+      typedef flux_connections_iface                        flux_conn_iface_t;
+      typedef smart_ptr <flux_conn_iface_t, true>           sp_flux_conn_iface_t;
       
-      typedef bcsr_matrix_iface                           csr_matrix_t;
-      typedef smart_ptr <csr_matrix_t, true>              sp_bcsr_t;
+      typedef bcsr_matrix_iface                             csr_matrix_t;
+      typedef smart_ptr <csr_matrix_t, true>                sp_bcsr_t;
 
       
-      typedef smart_ptr <hdm_iface, true>    sp_hdm_t;
+      typedef smart_ptr <hdm_iface, true>                   sp_hdm_t;
       
-      typedef boost::array <t_float, 3>                 point3d_t;
-      typedef smart_ptr <FRead, true>										  sp_reader;
+      typedef boost::array <t_float, 3>                     point3d_t;
+      typedef smart_ptr <bos_reader_iface, true>			sp_reader;
       
     public:
 

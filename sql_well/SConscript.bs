@@ -8,6 +8,7 @@ env = custom_env.Clone ()
 env.AppendUnique (CPPPATH = ["include", "src",
     includes["bs_bos_core_base"],
     includes["common_types"],
+    includes["common_alg"],
     includes["bs_bos_core_data_storage"],
 	includes["bs_mesh"],
 	includes["bs_mesh_src"],

@@ -12,7 +12,7 @@ namespace blue_sky
   namespace scal
     {
 
-    test_model::test_model (bs_type_ctor_param param /* = NULL */)
+    test_model::test_model (bs_type_ctor_param /*param = NULL */)
         : n_phases (0)
         , cell_count (0)
     {

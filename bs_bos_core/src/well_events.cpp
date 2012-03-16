@@ -34,10 +34,10 @@ namespace blue_sky
       }
   }
   void
-  well_event::apply_internal (const BS_SP (reservoir) &reservoir, 
-                              const BS_SP (rs_mesh_iface) &mesh,
-                              const BS_SP (calc_model) &calc_model, 
-                              const BS_SP (idata) &data) const
+  well_event::apply_internal (const BS_SP (reservoir) & /*reservoir*/, 
+                              const BS_SP (rs_mesh_iface) & /*mesh*/,
+                              const BS_SP (calc_model) & /*calc_model*/, 
+                              const BS_SP (idata) & /*data*/) const
   {
     BS_ASSERT (false && "BASE METHOD CALL");
   }
@@ -63,7 +63,7 @@ namespace blue_sky
 
 
   //constructors
-  WELSPECS_event::WELSPECS_event(bs_type_ctor_param param)
+  WELSPECS_event::WELSPECS_event(bs_type_ctor_param /*param*/)
   : main_params_ (BS_KERNEL.create_object (main_params_class::bs_type ()))
   {
   }
@@ -75,7 +75,7 @@ namespace blue_sky
 
 //========================================================================
 
-  WELLCON_event::WELLCON_event(bs_type_ctor_param param)
+  WELLCON_event::WELLCON_event(bs_type_ctor_param /*param*/)
   : main_params_ (BS_KERNEL.create_object (main_params_class::bs_type ()))
   {
   }
@@ -87,7 +87,7 @@ namespace blue_sky
 
 //========================================================================
 
-  COMPDAT_event::COMPDAT_event(bs_type_ctor_param param)
+  COMPDAT_event::COMPDAT_event(bs_type_ctor_param /*param*/)
   : main_params_ (BS_KERNEL.create_object (main_params_class::bs_type ()))
   {
   }
@@ -99,7 +99,7 @@ namespace blue_sky
 
 //========================================================================
 
-  WCONPROD_event::WCONPROD_event(bs_type_ctor_param param)
+  WCONPROD_event::WCONPROD_event(bs_type_ctor_param /*param*/)
   : main_params_ (BS_KERNEL.create_object (main_params_class::bs_type ()))
   {
   }
@@ -111,7 +111,7 @@ namespace blue_sky
 
 //========================================================================
 
-  WCONHIST_event::WCONHIST_event(bs_type_ctor_param param)
+  WCONHIST_event::WCONHIST_event(bs_type_ctor_param /*param*/)
   : main_params_ (BS_KERNEL.create_object (main_params_class::bs_type ()))
   {
   }
@@ -123,7 +123,7 @@ namespace blue_sky
 
 //========================================================================
 
-  WCONINJE_event::WCONINJE_event(bs_type_ctor_param param)
+  WCONINJE_event::WCONINJE_event(bs_type_ctor_param /*param*/)
   : main_params_ (BS_KERNEL.create_object (main_params_class::bs_type ()))
   {
   }
@@ -135,7 +135,7 @@ namespace blue_sky
 
   //========================================================================
 
-  WECON_event::WECON_event(bs_type_ctor_param param)
+  WECON_event::WECON_event(bs_type_ctor_param /*param*/)
   : main_params_ (BS_KERNEL.create_object (main_params_class::bs_type ()))
   {
   }
@@ -147,7 +147,7 @@ namespace blue_sky
 
   //========================================================================
 
-  WECONINJ_event::WECONINJ_event(bs_type_ctor_param param)
+  WECONINJ_event::WECONINJ_event(bs_type_ctor_param /*param*/)
   : main_params_ (BS_KERNEL.create_object (main_params_class::bs_type ()))
   {
   }
@@ -159,7 +159,7 @@ namespace blue_sky
 
   //========================================================================
 
-  WEFAC_event::WEFAC_event(bs_type_ctor_param param)
+  WEFAC_event::WEFAC_event(bs_type_ctor_param /*param*/)
   : main_params_ (BS_KERNEL.create_object (main_params_class::bs_type ()))
   {
   }
@@ -171,7 +171,7 @@ namespace blue_sky
 
   //========================================================================
 
-  WELTARG_event::WELTARG_event(bs_type_ctor_param param)
+  WELTARG_event::WELTARG_event(bs_type_ctor_param /*param*/)
   : main_params_ (BS_KERNEL.create_object (main_params_class::bs_type ()))
   {
   }
@@ -184,7 +184,7 @@ namespace blue_sky
 
 //========================================================================
 
-  WPIMULT_event::WPIMULT_event(bs_type_ctor_param param)
+  WPIMULT_event::WPIMULT_event(bs_type_ctor_param /*param*/)
   : main_params_ (BS_KERNEL.create_object (main_params_class::bs_type ()))
   {
   }
@@ -196,7 +196,7 @@ namespace blue_sky
 
 //========================================================================
 
-  COMPENSATION_event::COMPENSATION_event(bs_type_ctor_param param)
+  COMPENSATION_event::COMPENSATION_event(bs_type_ctor_param /*param*/)
   : main_params_ (BS_KERNEL.create_object (main_params_class::bs_type ()))
   {
   }
@@ -208,7 +208,7 @@ namespace blue_sky
 
 //========================================================================
 
-  PERMFRAC_event::PERMFRAC_event(bs_type_ctor_param param)
+  PERMFRAC_event::PERMFRAC_event(bs_type_ctor_param /*param*/)
   : main_params_ (BS_KERNEL.create_object (main_params_class::bs_type ()))
   {
   }

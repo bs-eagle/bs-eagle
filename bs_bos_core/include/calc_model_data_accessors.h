@@ -65,7 +65,7 @@ namespace blue_sky
   struct BOOST_PP_CAT (hx_, BOOST_PP_TUPLE_ELEM (3, 0, iter_data)) <phase>                                          \
   {                                                                                                                 \
     static t_double                                                                              \
-    get (const calc_model_data &data, const boost::array <t_long, FI_PHASE_TOT> &phase_d)                  \
+    get (const calc_model_data &data, const boost::array <t_long, FI_PHASE_TOT> & /*phase_d*/)                  \
     {                                                                                                               \
       return data.BOOST_PP_TUPLE_ELEM (3, 1, iter_data) [phase] * data.BOOST_PP_TUPLE_ELEM (3, 2, iter_data) [phase]; \
     }                                                                                                               \
@@ -105,7 +105,7 @@ namespace blue_sky
   struct BOOST_PP_CAT (hx_, name)                                                                                   \
   {                                                                                                                 \
     static t_double                                                                              \
-    get (const calc_model_data &data, const boost::array <t_long, FI_PHASE_TOT> &phase_d)                 \
+    get (const calc_model_data &data, const boost::array <t_long, FI_PHASE_TOT> & /*phase_d*/)                 \
     {                                                                                                               \
       class inclomplete_type_1;                                                                                     \
       inclomplete_type_1 invalid_phase_value;                                                                       \

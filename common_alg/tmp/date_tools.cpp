@@ -8,10 +8,11 @@
 #include <stdarg.h>
 #include <string.h>
 #include <math.h>
+#include <ctype.h>
 #include <time.h>
 #include "date_tools.h"
 #include "main_def.h"
-#include "localization.h"
+//#include "localization.h"
 //#include "error_num_def.h"
 #include "timer.h"
 
@@ -22,6 +23,14 @@ except every 100th isn't, and every 400th is).  */
   ((YEAR) % 4 == 0 && ((YEAR) % 100 != 0 || (YEAR) % 400 == 0))
 
  
+void 
+locale_ucase (char *s)
+{
+  char *ptr = s;
+  for (; *ptr != '\0'; ++ptr)
+    *ptr = toupper (*ptr);
+}
+
 /*!
   \brief Date in format %d %s %d (1 jan 2000) (reads from text buffer BUF\n
          into structure START

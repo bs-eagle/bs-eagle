@@ -23,7 +23,7 @@ namespace blue_sky
      * \brief  'default' ctor for wellbore_density_calc
      * \param  param Additional parameters for ctor
      * */
-  wellbore_density_calc::wellbore_density_calc (bs_type_ctor_param param /* = NULL */)
+  wellbore_density_calc::wellbore_density_calc (bs_type_ctor_param /*param = NULL */)
   {
 
   }

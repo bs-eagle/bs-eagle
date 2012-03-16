@@ -9,7 +9,7 @@
 #ifndef KEYWORD_MANAGER_H_
 #define KEYWORD_MANAGER_H_
 
-#include "main_def.h"
+//#include "main_def.h"
 
 #include "keyword_manager_iface.h"
 #include "date_sim.h"

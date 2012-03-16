@@ -13,7 +13,7 @@
 #include "explicit_keywords.hpp"
 #include "keyword_manager_iface.h"
 #include "init_model_iface.hpp"
-#include "read_class.h"
+#include "bos_reader_iface.h"
 #include "data_class.h"
 
 namespace blue_sky
@@ -32,27 +32,28 @@ namespace blue_sky
     void
     PRVD (std::string const &keyword, keyword_params &params)
     {
-      BS_SP (FRead) reader = params.hdm->get_reader ();
+      BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
       BS_SP (idata) idata = params.hdm->get_data ();
 
       t_long eql_region = idata->props->get_i ("eql_region");
       if (eql_region == 0)
         {
           bs_throw_exception (boost::format ("Error in %s: eql_region == 0 (keyword: %s)")
-            % reader->get_prefix () % keyword);
+            % reader->get_prefix ().c_str () % keyword);
         }
 
       idata->prvd.resize(eql_region);
 
       // Read table for each of region
-      std::vector <double> dbuf;
+      std::vector <t_float> dbuf;
+      dbuf.resize (4096);
       for (t_long i = 0; i < eql_region; ++i)
         {
-          t_long len = reader->read_table (keyword, dbuf, 2);
+          t_long len = reader->read_fp_table (keyword.c_str (), &dbuf[0], 4096, 2);
           if (len < 1)
             {
               bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
-                % reader->get_prefix () % keyword);
+                % reader->get_prefix ().c_str () % keyword);
             }
 
           idata->prvd[i].set_table_len (len);

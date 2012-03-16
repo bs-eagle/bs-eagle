@@ -106,7 +106,7 @@ namespace blue_sky
   void
   read_keyword_file (const std::string &filename, 
     const smart_ptr <hdm_iface, true> &hdm_, 
-    const smart_ptr <event_manager, true> &em)
+    const smart_ptr <event_manager, true> & /*em*/)
   {
     hdm_iface::sp_reader_t reader = hdm_->get_reader ();
     hdm_iface::sp_km_t keywords = hdm_->get_keyword_manager ();
@@ -119,7 +119,7 @@ namespace blue_sky
     
     write_time_to_log init_time ("Read model", "");
 
-    reader->init (filename, filename);
+    reader->open (filename.c_str (), filename.c_str ());
 
     // start of loop for data file reading
     flag = 1;
@@ -589,7 +589,7 @@ namespace blue_sky
    * \return may throw exception
    * */
   void 
-  check_geometry (const smart_ptr <rs_mesh_iface, true> &mesh, const smart_ptr <idata, true> &data)
+  check_geometry (const smart_ptr <rs_mesh_iface, true> &mesh, const smart_ptr <idata, true> & /*data*/)
   {
     if (!mesh->get_n_elements ())
       {

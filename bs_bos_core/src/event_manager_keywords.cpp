@@ -9,7 +9,7 @@
 
 #include "stdafx.h"
 #include "event_manager_keywords.hpp"
-#include "read_class.h"
+#include "bos_reader_iface.h"
 #include "event_manager_iface.hpp"
 #include "event_manager.h"
 
@@ -18,17 +18,23 @@ namespace blue_sky
   void
   DATE (std::string const &keyword, keyword_params &params)
   {
-    BS_SP (FRead) reader = params.hdm->get_reader ();
+    BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
     BS_SP (event_manager_iface) em = params.hdm->get_event_manager ();
 
     char buf[4096] = {0};
     if (reader->read_line (buf, 4096) <= 0)
       {
         bs_throw_exception (boost::format ("Error in %s: can't read arguments for keyword %s")
-          % reader->get_prefix () % keyword);
+          % reader->get_prefix ().c_str () % keyword);
       }
 
-    event_manager::date_t date (reader->read_date (buf));
+    event_manager::date_t date;
+    if (reader->get_dt ()->cstr2d (buf, date))
+      {
+        bs_throw_exception (boost::format ("Error in %s: can't read arguments for keyword %s")
+          % reader->get_prefix ().c_str () % keyword);
+      }
+
     em->set_current_date (date);
     BOSOUT (section::read_data, level::medium) << keyword << " " << date << bs_end;
   }
@@ -36,11 +42,11 @@ namespace blue_sky
   void
   TSTEP (std::string const &keyword, keyword_params &params)
   {
-    BS_SP (FRead) reader = params.hdm->get_reader ();
+    BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
     BS_SP (event_manager_iface) em = params.hdm->get_event_manager ();
 
-    boost::array <double, 128> tmp;
-    t_long len = reader->read_array (keyword, tmp);
+    boost::array <t_float, 4096> tmp;
+    t_long len = reader->read_fp_array (keyword.c_str (), &tmp[0], 4096);
     if (len < 1)
       {
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
@@ -54,7 +60,8 @@ namespace blue_sky
     for (t_long i = 0; i < len; ++i)
       {
         event_manager::date_t date = em->get_current_date ();
-        date += boost::posix_time::millisec (tmp[i] * 24 * 60 * 60 * 1000);
+        //date += boost::posix_time::millisec (tmp[i] * 24 * 60 * 60 * 1000);
+        date += tmp[i];
         em->set_current_date (date);
       }
 
@@ -71,7 +78,7 @@ namespace blue_sky
   }
 
   void
-  event_manager_keywords::register_keywords (sp_objbase &km, std::string provider) const
+  event_manager_keywords::register_keywords (sp_objbase &km, std::string /*provider*/) const
   {
     BS_SP (keyword_manager_iface) keyword_manager (km, bs_dynamic_cast ());
     BS_ASSERT (keyword_manager);

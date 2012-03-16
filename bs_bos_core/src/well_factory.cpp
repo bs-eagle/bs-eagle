@@ -16,7 +16,7 @@
 namespace blue_sky
   {
 
-  well_factory::well_factory (bs_type_ctor_param param /* = NULL */)
+  well_factory::well_factory (bs_type_ctor_param /*param  = NULL */)
   {
 
   }
@@ -27,7 +27,7 @@ namespace blue_sky
   }
 
   well_factory::sp_well_t
-  well_factory::create_well (const std::string &group_name, const std::string &well_name) const
+  well_factory::create_well (const std::string & /*group_name*/, const std::string &well_name) const
     {
       BS_ASSERT (well_name.size ());
 

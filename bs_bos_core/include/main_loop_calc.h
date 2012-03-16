@@ -844,8 +844,8 @@ namespace blue_sky
           item_t user_omega;
           item_t alpha;
           item_t alpha2;
-          index_t ds_w, ds_g;
-          index_t flag = 0;
+          //index_t ds_w, ds_g;
+          //index_t flag = 0;
           index_t dp_i = 0, ds_i = 0, drs_i = 0;
           index_t n_left = 0, n_right = 0;
 
@@ -869,8 +869,8 @@ namespace blue_sky
               user_ds = params_->get_float (fi_params::TS_DS);
               user_drs = params_->get_float (fi_params::TS_DRS);
               user_omega = params_->get_float (fi_params::TS_OMEGA);
-              ds_w = calc_model_->sat_d[FI_PHASE_WATER];
-              ds_g = calc_model_->sat_d[FI_PHASE_GAS];
+              //ds_w = calc_model_->sat_d[FI_PHASE_WATER];
+              //ds_g = calc_model_->sat_d[FI_PHASE_GAS];
 
               n = (int)mesh_->get_n_active_elements();
 
@@ -958,12 +958,12 @@ namespace blue_sky
                 if (ds < alpha)
                   {
                     alpha = ds;
-                    flag = 1;
+                    //flag = 1;
                   }
               if (drs < alpha)
                 {
                   alpha = drs;
-                  flag = 2;
+                  //flag = 2;
                 }
               //printf ("FLAG = %d\n", flag);
               if (alpha < 1)
@@ -1079,14 +1079,15 @@ namespace blue_sky
        * \return True if length of time-step positive
        * */
       BS_FORCE_INLINE bool
-      update_large_time_step_length (const ptime &current_time, const ptime &next_time)
+      update_large_time_step_length (double current_time, double next_time)
       {
-        using namespace boost::posix_time;
+        //using namespace boost::posix_time;
 
-        time_period tp (current_time, next_time);
-        time_duration td (tp.length ());
+        //time_period tp (current_time, next_time);
+        //time_duration td (tp.length ());
 
-        large_time_step_length_ = item_t (td.total_milliseconds ()) / item_t (24.0 * 60 * 60 * 1000);
+        //large_time_step_length_ = item_t (td.total_milliseconds ()) / item_t (24.0 * 60 * 60 * 1000);
+        large_time_step_length_ = next_time - current_time;
 
         if (large_time_step_length_ > 0)
           {
@@ -1144,10 +1145,10 @@ namespace blue_sky
        * \param  event_list
        * */
       inline void
-      iteration (const ptime &current_time, const ptime &next_time, const event_list_t &event_list)
+      iteration (double current_time, double next_time, const event_list_t &event_list)
       {
         using namespace boost::posix_time;
-        BOSOUT (section::main_loop, level::high) << "\nTIMESTEP " << boost::posix_time::to_simple_string (current_time) << "\n" << bs_end;
+        BOSOUT (section::main_loop, level::high) << "\nTIMESTEP " /*<< boost::posix_time::to_simple_string (current_time) */<< "\n" << bs_end;
 
         if (update_large_time_step_length (current_time, next_time))
           {

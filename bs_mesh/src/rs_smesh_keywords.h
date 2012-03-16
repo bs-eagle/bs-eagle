@@ -36,7 +36,7 @@ namespace blue_sky
         
         typedef smart_ptr <hdm_iface, true>    sp_hdm_t;
 
-        typedef FRead                                  reader_t;
+        typedef bos_reader_iface                       reader_t;
         typedef smart_ptr <reader_t, true>	           sp_reader_t;
       
       public:

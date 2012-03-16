@@ -27,7 +27,7 @@ namespace tools {
     }
 
     void
-    fpe_handler (int sig_num)
+    fpe_handler (int /*sig_num*/)
     {
       bs_throw_exception ("FPU exception occured");
       //  << kernel_tools::get_backtrace (72)

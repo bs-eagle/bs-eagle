@@ -8,7 +8,7 @@
  * */
 #include "bs_bos_core_data_storage_stdafx.h"
 #include "keyword_manager.h"
-#include "read_class.h"
+#include "bos_reader_iface.h"
 #include "data_class.h"
 
 namespace blue_sky
@@ -30,18 +30,18 @@ namespace blue_sky
   bool 
   keyword_manager ::is_keyword_supported (const std::string &keyword, keyword_params_t &params) const
   {
-    BS_SP (FRead) reader = params.hdm->get_reader ();
+    BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
 
     supported_keywords_t::const_iterator sup_it = supported_keywords.find (keyword);
     if (sup_it == supported_keywords.end ())
       {  
-        BOSWARN (section::keywords, level::warning) << (boost::format ("Keyword %s wasn't registered (%s)") % keyword % reader->get_prefix ()) << bs_end;
+        BOSWARN (section::keywords, level::warning) << (boost::format ("Keyword %s wasn't registered (%s)") % keyword % reader->get_prefix ().c_str ()) << bs_end;
         return false;
       }
     else
       {
         std::list<std::string>::const_iterator i;
-        BOSWARN (section::keywords, level::warning) << (boost::format ("Keyword %s is supported, but inactive now (%s). This keyword is supported by:") % keyword % reader->get_prefix ()) << bs_end;
+        BOSWARN (section::keywords, level::warning) << (boost::format ("Keyword %s is supported, but inactive now (%s). This keyword is supported by:") % keyword % reader->get_prefix ().c_str ()) << bs_end;
         for (i = sup_it->second.begin(); i != sup_it->second.end(); ++i)
           BOSWARN (section::keywords, level::warning) << *i << bs_end;
 
@@ -60,7 +60,7 @@ namespace blue_sky
   void keyword_manager::handle_keyword (const std::string &keyword, keyword_params_t &params)
   {
     handlers_t::iterator it = handlers.find(keyword);
-    BS_SP (FRead) reader = params.hdm->get_reader ();
+    //BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
 
     if (it == handlers.end ())
       {
@@ -89,7 +89,7 @@ namespace blue_sky
   void keyword_manager::handle_keyword_reactor (const std::string &keyword, keyword_params_t &params)
   {
     handlers_t::iterator it = handlers.find(keyword);
-    BS_SP (FRead) reader = params.hdm->get_reader ();
+    //BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
 
     if (it == handlers.end ())
       {

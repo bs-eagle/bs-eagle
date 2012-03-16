@@ -147,7 +147,7 @@ namespace blue_sky
       PBASE_ACCESS_MS(fi_params)
 
     public:
-      typedef smart_ptr<FRead, true> sp_reader_t;
+      typedef smart_ptr<bos_reader_iface, true> sp_reader_t;
 
       //! Assignment operator
       const fi_params &operator=(const fi_params&);

@@ -19,7 +19,7 @@ namespace blue_sky
   namespace wells
     {
 
-    well_serializer::well_serializer (bs_type_ctor_param param /* = NULL */)
+    well_serializer::well_serializer (bs_type_ctor_param /*param = NULL */)
     {
       handled_type_ = well::bs_type ();
     }

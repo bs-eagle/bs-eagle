@@ -10,7 +10,7 @@
 #include "fi_params.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
-#include "read_class.h"
+#include "bos_reader_iface.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 namespace blue_sky
@@ -328,8 +328,8 @@ namespace blue_sky
     char buf[CHAR_BUF_LEN];
     int len, i;
     char *strt, *end_ptr;
-    double d_tmp;
-    int i_tmp;
+    t_double d_tmp;
+    t_long i_tmp;
     int flag;
     std::ostringstream out_s;
     const sp_reader_t &lreader (r);
@@ -357,7 +357,7 @@ namespace blue_sky
           break;
 
         // Read connection info
-        unwrap (buf, 2);
+        lreader->unwrap (buf, 2);
         //if ((current_error_num = lreader->) != YS_SUCCESS)
         //  {
         //    out_s << "Error in " << lreader->get_prefix() << ": bad string " << buf;
@@ -366,7 +366,7 @@ namespace blue_sky
         //    BOSERR (section::read_data, level::error) << out_s << bs_end;
         //  }
         strt = buf;
-        scanf_s (strt, &end_ptr, key);
+        lreader->scanf_s (strt, &end_ptr, key);
         //if (lreader-> != YS_SUCCESS)
         //  {
         //    out_s << "Error in " << lreader->get_prefix() << ": can't read parameter name from " << strt;
@@ -379,10 +379,10 @@ namespace blue_sky
 
         for (i = FI_PARAMS_START+1; i < D_TOTAL && flag; ++i)
           {
-            if (!COMPARE_KEYWORD (key, this->get_name((named_pbase::idx_type)i).c_str()))
+            if (!strcmp (key, this->get_name((named_pbase::idx_type)i).c_str()))
               {
                 // read value
-                scanf_d (strt, &end_ptr, &d_tmp);
+                lreader->scanf_fp (strt, &end_ptr, &d_tmp);
                 //if (lreader-> != YS_SUCCESS)
                 //  {
                 //    out_s << "Error in " <<lreader->get_prefix() << ": can't read value for parameter " << key
@@ -401,10 +401,10 @@ namespace blue_sky
         // loop through integer params
         for (i = D_TOTAL+1; i < I_TOTAL && flag; ++i)
           {
-            if (!COMPARE_KEYWORD (key, this->get_name((named_pbase::idx_type)i).c_str()))
+            if (!strcmp (key, this->get_name((named_pbase::idx_type)i).c_str()))
               {
                 // read value
-                scanf_u (strt, &end_ptr, &i_tmp);
+                lreader->scanf_int (strt, &end_ptr, &i_tmp);
                 //if (lreader-> != YS_SUCCESS)
                 //  {
                 //    out_s << "Error in " <<lreader->get_prefix() << ": can't read value for parameter " << key
@@ -422,10 +422,10 @@ namespace blue_sky
         // loop through boolian params
         for (i = I_TOTAL; i < B_TOTAL && flag; ++i)
           {
-            if (!COMPARE_KEYWORD (key, this->get_name((named_pbase::idx_type)i).c_str()))
+            if (!strcmp (key, this->get_name((named_pbase::idx_type)i).c_str()))
               {
                 // read value
-                scanf_s (strt, &end_ptr, key1);
+                lreader->scanf_s (strt, &end_ptr, key1);
                 //if (lreader-> != YS_SUCCESS)
                 //  {
                 //    out_s << "Error in " << lreader->get_prefix() << ": can't read value for parameter " << key

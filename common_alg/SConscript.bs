@@ -1,0 +1,29 @@
+import os
+Import ("*")
+
+lib_name = "common_alg"
+tar_name = "common_alg"
+
+env = custom_env.Clone ()
+env.Append (CPPPATH = ["include", "src",
+    includes["bs_bos_core_base"]
+    ] + includes["kernel"],
+	CPPDEFINES = [],
+    LIBS=[])
+
+libs = ["blue_sky"]
+
+if (build_kind == "debug") :
+    env.AppendUnique (LIBS = list_suffix (libs, "_d"))
+    lib_name += "_d"
+elif (build_kind == "release") :
+    env.AppendUnique (LIBS = libs)
+
+common_alg = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
+
+env.Alias (tar_name, common_alg)
+Export ("common_alg")
+
+if (env["install"] == 1) :
+    inst_tar = env.Install ("$plugins_prefix", common_alg)
+    env.Alias (tar_name, inst_tar)

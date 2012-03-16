@@ -11,7 +11,7 @@
 #include "hdm_iface.h"
 #include "locale_keeper.h"
 #include "rs_mesh_iface.h"
-#include "read_class.h"
+#include "bos_reader_iface.h"
 #include "scal_3p_iface.hpp"
 #include "pvt_3p_iface.h"
 #include "init_model_iface.hpp"
@@ -26,10 +26,10 @@ namespace blue_sky {
     {
     public:
 
-      typedef smart_ptr <idata, true>										      sp_idata ;
-      typedef smart_ptr <FRead, true>													sp_reader_t;
-      typedef smart_ptr <keyword_manager_iface, true>					sp_km_t;
-      typedef smart_ptr <rs_mesh_iface, true>		              sp_mesh_iface_t;
+      typedef smart_ptr <idata, true>                               sp_idata ;
+      typedef smart_ptr <bos_reader_iface, true>                    sp_reader_t;
+      typedef smart_ptr <keyword_manager_iface, true>               sp_km_t;
+      typedef smart_ptr <rs_mesh_iface, true>                       sp_mesh_iface_t;
 
       //METHODS
       ~hdm();
@@ -96,7 +96,7 @@ namespace blue_sky {
       BLUE_SKY_TYPE_DECL (hdm)
 
     public:
-      sp_idata                  data;												//!< data storage
+      sp_idata                  data;                                               //!< data storage
       sp_reader_t               reader;                     //!< parser
       sp_km_t                   km;                         //!< keyword manager
       sp_mesh_iface_t           mesh;                       //!< mesh

@@ -157,10 +157,11 @@ namespace blue_sky {
      * \todo        Describe return type
      * */
     fi_operator_return_type
-    fi_operator (double &dt, index_t istart, index_t istart_well_contr, index_t &, bool update_rhs_after_gauss_elimination, bool save_debug_files)
+    fi_operator (double &dt, index_t istart, index_t istart_well_contr, index_t &, 
+                 bool update_rhs_after_gauss_elimination, bool /*save_debug_files*/)
     {
-      save_debug_files;
-      item_t mult = 1.0;
+      //save_debug_files;
+      //item_t mult = 1.0;
       bool tuning = calc_model_->ts_params->get_bool (fi_params::NEWTON_TUNING);
 
       static norms_storage_t base_norm;
@@ -173,7 +174,7 @@ namespace blue_sky {
       index_t n_approx = 5;
       for (index_t i = 0; i < n_approx; ++i)
         {
-          mult = 1.0;
+          //mult = 1.0;
 
           // prepare well jacobian part
           // FIXME:
@@ -286,7 +287,7 @@ namespace blue_sky {
      * \return
      * */
     void
-    fi_operator_cells (index_t istart, const item_t dt)
+    fi_operator_cells (index_t /*istart*/, const item_t dt)
     {
       // set flag to 0 at newton iteration
       calc_model_->lsearch_force_newton_step = 0;
@@ -751,7 +752,7 @@ namespace blue_sky {
       item_t p_water = 0;
       item_t p_gas = 0;
       item_t p_oil = 0;
-      index_t i_temp = 0;
+      //index_t i_temp = 0;
 
       item_t gor = 0.0;
       item_t d_gor = 0.0;
@@ -779,7 +780,7 @@ namespace blue_sky {
         }
 
       // calculate pvt properties
-      i_temp = n_phases * i;
+      //i_temp = n_phases * i;
       if (is_w)
         {
           pvt_water_array[pvt_reg]->calc(

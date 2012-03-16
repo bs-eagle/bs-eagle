@@ -101,7 +101,7 @@
       delete[] buffer;                                                                \
     }                                                                                 \
     void                                                                              \
-    print (const columns_type &columns, const data_type &data, const type &ds,        \
+    print (const columns_type &columns, const data_type & data, const type &ds,        \
       bool do_print_line = true) const                                                \
     {                                                                                 \
       size_t len = 1                                                                  \
@@ -422,7 +422,7 @@ namespace blue_sky {
   {
     template <typename data_source_t>
     const char *
-    data (const column_t &c, const data_source_t &ds, float, float) const
+    data (const column_t & /*c*/, const data_source_t & /*ds*/, float, float) const
     {
       return "RESERVOIR";
     }
@@ -432,7 +432,7 @@ namespace blue_sky {
   {
     template <typename data_source_t>
     const char *
-    data (const column_t &c, const data_source_t &ds, float, float) const
+    data (const column_t & /*c*/, const data_source_t & /*ds*/, float, float) const
     {
       return "";
     }
@@ -443,7 +443,7 @@ namespace blue_sky {
   {
     template <typename data_source_t>
     float
-    data (const column_t &c, const data_source_t &ds, float mult, float a_mult) const
+    data (const column_t & /*c*/, const data_source_t &ds, float mult, float a_mult) const
     {
       const typename data_source_t::rate_data_t::rate_data_inner &rate = get_inner_rate_data_t::get (get_rate_data_t::get (ds));
       return rate.liquid * mult * a_mult;
@@ -454,7 +454,7 @@ namespace blue_sky {
   {
     template <typename data_source_t>
     float
-    data (const column_t &c, const data_source_t &ds, float mult, float a_mult) const
+    data (const column_t & /*c*/, const data_source_t &ds, float mult, float a_mult) const
     {
       const typename data_source_t::rate_data_t::rate_data_inner &rate = get_inner_rate_data_t::get (get_rate_data_t::get (ds));
       return rate.oil * mult * a_mult;
@@ -465,7 +465,7 @@ namespace blue_sky {
   {
     template <typename data_source_t>
     float
-    data (const column_t &c, const data_source_t &ds, float mult, float a_mult) const
+    data (const column_t & /*c*/, const data_source_t &ds, float mult, float a_mult) const
     {
       const typename data_source_t::rate_data_t::rate_data_inner &rate = get_inner_rate_data_t::get (get_rate_data_t::get (ds));
       return rate.water * mult * a_mult;
@@ -476,7 +476,7 @@ namespace blue_sky {
   {
     template <typename data_source_t>
     float
-    data (const column_t &c, const data_source_t &ds, float mult, float a_mult) const
+    data (const column_t & /*c*/, const data_source_t &ds, float mult, float a_mult) const
     {
       const typename data_source_t::rate_data_t::rate_data_inner &rate = get_inner_rate_data_t::get (get_rate_data_t::get (ds));
       return rate.gas * mult * a_mult;
@@ -495,7 +495,7 @@ namespace blue_sky {
 
     template <typename data_source_t>
     float
-    data (const column_t &c, const data_source_t &ds, float mult, float a_mult) const
+    data (const column_t & /*c*/, const data_source_t &ds, float mult, float a_mult) const
     {
       return (rate_t::get (ds).free_gas * gas_liquid_rate_mult 
         + rate_t::get (ds).prod.water 
@@ -514,7 +514,7 @@ namespace blue_sky {
 
     template <typename data_source_t>
     float
-    data (const column_t &c, const data_source_t &ds, float mult, float a_mult) const
+    data (const column_t & /*c*/, const data_source_t &ds, float mult, float a_mult) const
     {
       return (rate_t::get (ds).inj.gas * gas_liquid_rate_mult 
         + rate_t::get (ds).inj.water 
@@ -527,7 +527,7 @@ namespace blue_sky {
   {
     template <typename data_source_t>
     float
-    data (const column_t &c, const data_source_t &ds, float, float) const
+    data (const column_t & /*c*/, const data_source_t &ds, float, float) const
     {
       const typename data_source_t::rate_data_t::rate_data_inner &rate = get_inner_rate_data_t::get (get_rate_data_t::get (ds));
       return (rate.water * rate.oil) != 0.0 ? (rate.water / (rate.water + rate.oil)) : 0;
@@ -539,7 +539,7 @@ namespace blue_sky {
   {
     template <typename data_source_t>
     float
-    data (const column_t &c, const data_source_t &ds, float mult, float) const
+    data (const column_t & /*c*/, const data_source_t &ds, float mult, float) const
     {
       const typename data_source_t::rate_data_t::rate_data_inner &rate = get_inner_rate_data_t::get (get_rate_data_t::get (ds));
       return fabs (rate.oil) > 0 ? (rate.gas * mult / rate.oil) : 0;
@@ -551,7 +551,7 @@ namespace blue_sky {
   {
     template <typename data_source_t>
     float
-    data (const column_t &c, const data_source_t &ds, float mult, float) const
+    data (const column_t & /*c*/, const data_source_t &ds, float mult, float) const
     {
       const typename data_source_t::rate_data_t::rate_data_inner &rate = get_inner_rate_data_t::get (get_rate_data_t::get (ds));
       return fabs (rate.gas) > 0 ? (rate.water * mult / rate.gas) : 0;
@@ -562,7 +562,7 @@ namespace blue_sky {
   {
     template <typename data_source_t>
     float
-    data (const column_t &c, const data_source_t &ds, float, float) const
+    data (const column_t & /*c*/, const data_source_t &ds, float, float) const
     {
       return ds.exploitation_factor_;
     }
@@ -572,7 +572,7 @@ namespace blue_sky {
   {
     template <typename data_source_t>
     const char *
-    data (const column_t &c, const data_source_t &ds, float, float) const
+    data (const column_t & /*c*/, const data_source_t &ds, float, float) const
     {
       return ds.name ().c_str ();
     }
@@ -582,7 +582,7 @@ namespace blue_sky {
   {
     template <typename data_source_t>
     const char *
-    data (const column_t &c, const data_source_t &ds, float, float) const
+    data (const column_t & /*c*/, const data_source_t &ds, float, float) const
     {
       if (ds.is_shut ())
         return "SHUT";
@@ -622,7 +622,7 @@ namespace blue_sky {
   {
     template <typename data_source_t>
     const char *
-    data (const column_t &c, const data_source_t &ds, float, float) const
+    data (const column_t & /*c*/, const data_source_t &ds, float, float) const
     {
       if (ds.is_shut ())
         return "SHUTED WELL";
@@ -682,7 +682,7 @@ namespace blue_sky {
   {
     template <typename data_source_t>
     float
-    data (const column_t &c, const data_source_t &ds, float mult, float a_mult) const
+    data (const column_t & /*c*/, const data_source_t &ds, float mult, float /*a_mult*/) const
     {
       return fabs (ds.rate ().prod.oil) > 0 ? (ds.gor_ * mult) : 0;
     }
@@ -692,7 +692,7 @@ namespace blue_sky {
   {
     template <typename data_source_t>
     float
-    data (const column_t &c, const data_source_t &ds, float mult, float) const
+    data (const column_t & /*c*/, const data_source_t &ds, float mult, float) const
     {
       return !ds.is_no_primary_connections () ? (ds.get_first_connection ()->get_cur_bhp () * mult) : 0;
     }
@@ -702,7 +702,7 @@ namespace blue_sky {
   {
     template <typename data_source_t>
     float
-    data (const column_t &c, const data_source_t &ds, float mult, float) const
+    data (const column_t & /*c*/, const data_source_t &ds, float mult, float) const
     {
       return !ds.is_no_primary_connections () ? (ds.get_first_connection ()->get_bulkp () * mult) : 0;
     }
@@ -714,14 +714,14 @@ namespace blue_sky {
     mutable char format [128 * 3 + 1];
 
     const char *
-    format_string (const column_t &c)
+    format_string (const column_t & /*c*/)
     {
       return "%s";
     }
 
     template <typename data_source_t>
     const char *
-    data (const column_t &c, const data_source_t &ds, float mult, float) const
+    data (const column_t &c, const data_source_t &ds, float /*mult*/, float) const
     {
       memset (buffer, 0, sizeof (buffer));
       memset (format, 0, sizeof (format));
@@ -746,7 +746,7 @@ namespace blue_sky {
 
     template <typename data_source_t>
     float
-    data (const column_t &c, const data_source_t &ds, float mult, float) const
+    data (const column_t & /*c*/, const data_source_t &ds, float mult, float) const
     {
       return (ds.get_cur_bhp () + ds.get_density () * gravity * ds.get_connection_depth () * 0.5) * mult;
     }
@@ -756,7 +756,7 @@ namespace blue_sky {
   {
     template <typename data_source_t>
     float
-    data (const column_t &c, const data_source_t &ds, float mult, float) const
+    data (const column_t & /*c*/, const data_source_t &ds, float mult, float) const
     {
       return ds.get_bulkp () * mult;
     }
@@ -1152,7 +1152,7 @@ namespace blue_sky {
      * \param  data Data holder
      * \param  rs Instance of reservoir_simulator
      * */
-    inj_printer (const sp_data_t &data, const smart_ptr <reservoir_t, true> &rs)
+    inj_printer (const sp_data_t & data, const smart_ptr <reservoir_t, true> &rs)
     {
       columns.WELL_NAME           (column (12, 0, "WELL NAME"),                               unit (""));
       columns.GRID_BLOCK          (column (15, 0, "LOCATION (I,J,K)"),                        unit (""));
@@ -1264,7 +1264,7 @@ namespace blue_sky {
      * \param  data Data holder
      * \param  rs Instance of reservoir_simulator
      * */
-    prod_total_printer (const sp_data_t &data, const smart_ptr <reservoir_t, true> &rs)
+    prod_total_printer (const sp_data_t & data, const smart_ptr <reservoir_t, true> &rs)
     {
       columns.WELL_NAME   (column (12, 0, "WELL NAME"),                                     unit (""));
       columns.CTRL_MODE   (column (22, 0, "Current CTRL MODE and status:"),                 unit (""));

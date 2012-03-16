@@ -537,7 +537,7 @@ namespace wells {
 
         static index_t bw_iter_max = 20;
         static item_t bw_eps = 1.0e-7f;
-        item_t prev_bw_value = bw_value;
+        //item_t prev_bw_value = bw_value;
 
         for (index_t bw_iter = 0; bw_iter < bw_iter_max; ++bw_iter)
           {
@@ -550,7 +550,7 @@ namespace wells {
               }
 
             ww_value += bw_eps;
-            prev_bw_value = bw_value;
+            //prev_bw_value = bw_value;
             item_t bw_ww_dx = bw_value / ww_value;
 #ifdef _DEBUG
             BOSOUT (section::wells, level::debug) << "[" << this->name_ << "] bw: " << bw_value << bs_end;

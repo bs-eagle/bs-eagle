@@ -157,10 +157,10 @@ class well_pool_iface : public objbase
        */
       virtual int save_to_bos_ascii_file (const std::string &fname, sp_pool_t pool, sp_prop_t prop) = 0;
 #ifdef BSPY_EXPORTING_PLUGIN
-      virtual boost::python::list d2date (double d) const = 0;
-      virtual double date2d (int year, int month, int day, int hour, int minute, int second) const = 0;
-      virtual std::string d2str (double d) const = 0;
-      virtual std::string t2str (double d) const = 0;
+      //virtual boost::python::list d2date (double d) const = 0;
+      //virtual double date2d (int year, int month, int day, int hour, int minute, int second) const = 0;
+      //virtual std::string d2str (double d) const = 0;
+      //virtual std::string t2str (double d) const = 0;
 
       /**
        * @brief python print wrapper

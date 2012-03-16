@@ -1,7 +1,7 @@
 #include "bs_bos_core_data_storage_stdafx.h"
 
 #include "well_branch.h"
-#include "main_def.h"
+//#include "main_def.h"
 
 
  
@@ -25,7 +25,8 @@ namespace blue_sky
     sp_prop->add_property_f (0, "md", "measured depth of parent branch point");
   }
 
-  well_branch::well_branch(const well_branch& src)
+  well_branch::well_branch(const well_branch& src) 
+    :bs_refcounter ()
   {
     *this = src;
   }

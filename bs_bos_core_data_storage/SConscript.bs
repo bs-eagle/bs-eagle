@@ -7,8 +7,9 @@ tar_name = "bs_bos_core_data_storage"
 env = custom_env.Clone ()
 env.Append (CPPPATH = ["include",
 	includes["common_types"],
+    includes["common_alg"],
     includes["bs_bos_core_base"],
-    includes["common_types"],
+    #includes["common_types"],
     includes["bs_mtx"],
     includes["bs_mesh"],
     includes["bs_pvt"],
@@ -16,10 +17,10 @@ env.Append (CPPPATH = ["include",
     includes["bs_scal"],
     includes["bs_bos_core"],
     includes["bs_hdf5_storage"],
-    includes["sql_well_src"],
+    #includes["sql_well_src"],
     includes["bs_pvt_src"],
-    includes["bs_scal_src"],
-    includes["common_types_src"]
+    includes["bs_scal_src"]
+    #includes["common_types_src"]
     ] + includes["kernel"]
     )
 

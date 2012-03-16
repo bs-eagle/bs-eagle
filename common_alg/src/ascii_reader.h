@@ -1,15 +1,16 @@
-#ifndef __READ_CLASS_SQL_WELL
-#define __READ_CLASS_SQL_WELL
+#ifndef ASCII_READER_XCUW9UDS
+
+#define ASCII_READER_XCUW9UDS
 
 /*!
-  \file read_class.h
+  \file ascii_reader.h
   \brief Read functions for Keyword Input Language -- class #FRead, list of file included -- class #include_files
 */
 #include <stdio.h>
 #include <string.h>
+#include "conf.h"
 
-#include "date_tools.h"
-#include "localization.h"
+//#include "date_tools.h"
 
 #define FREAD_CONVERT_CASE 1
 #define FREAD_DONT_CONVERT_CASE 0
@@ -40,11 +41,11 @@ trim_left_s (char *s, const char ch = ' ')
 static inline char *
 trim_right_s (char *s, const char ch = ' ')
 {
-  int str_pos, length;
+  t_long str_pos, length;
 
   if (s == NULL)
     return NULL;
-  if ((length = (int)strlen (s)) == 0)
+  if ((length = (t_long)strlen (s)) == 0)
     return s;
 
   str_pos = length - 1;
@@ -60,11 +61,11 @@ trim_right_s (char *s, const char ch = ' ')
 }
 
 static inline int
-get_next_not_empty_line (char *string, int MaxLen, FILE * fp, int *len)
+get_next_not_empty_line (char *string, t_long MaxLen, FILE * fp, t_long *len)
 {
   char *ptr_s = string;
   int ch;
-  int disp = 0;
+  t_long disp = 0;
 
   if ((ptr_s == NULL) || (fp < 0))
     return -1;
@@ -125,99 +126,6 @@ trim_left (char **start_ptr)
   return 0;
 }
 
-static inline int
-get_phrase (char **next, char delim = ';')
-{
-  if (!(*next))
-    return -1;
-  char *start = *next;
-  while ((**next) != delim && (**next) != '\0')
-    {
-      ++(*next);
-    }
-  if (**next != '\0')
-    {
-      **next = '\0';
-      ++(*next);
-    }
-  trim_right_s (start);
-  trim_left (next);
-  return 0;
-}
-
-static inline int
-get_phrase_str (char **next, char *buf, char delim = ';')
-{
-  trim_left (next);
-  char *start = *next;
-  if (get_phrase (next, delim))
-    return -2;
-  //printf ("NAMEMMMM: %s\n", start);
-  if (*start == '*' || *start == '\0')
-    return 0;
-  strcpy (buf, start);
-  return 0;
-}
-
-static inline int
-get_phrase_filepath (char **next, char *buf, char delim = ';')
-{
-  int rc = get_phrase_str (next, buf, delim);
-  if (rc)
-    return rc;
-
-  size_t n = strlen (buf);
-#ifdef BOOST_POSIX_API
-  for (size_t i = 0; i < n; ++i)
-    {
-      if (buf[i] == '\\')
-        buf[i] = '/';
-    }
-#else // WINDOWS
-  for (size_t i = 0; i < n; ++i)
-    {
-      if (buf[i] == '/')
-        buf[i] = '\\';
-    }
-#endif //BOOST_POSIX_API
-  return 0;
-}
-
-static inline int
-get_phrase_int (char **next, int *i, char delim = ';')
-{
-  trim_left (next);
-  char *start = *next;
-  if (get_phrase (next, delim))
-    return -2;
-  if (*start == '*' || *start == '\0')
-    return 0;
-  if (sscanf (start, "%d", i) < 1)
-    {
-      fprintf (stderr, "Error: can not read int from %s\n", start);
-      return -1;
-    }
-  return 0;
-}
-static inline int
-get_phrase_double (char **next, double *d, char delim = ';')
-{
-  trim_left (next);
-  char *start = *next;
-  if (get_phrase (next, delim))
-    {
-      //printf ("get_phrase kkkkkk\n");
-      return -2;
-    }
-  if (*start == '*' || *start == '\0')
-    return 0;
-  if (sscanf (start, "%lf", d) < 1)
-    {
-      fprintf (stderr, "Error: can not read double from %s\n", start);
-      return -1;
-    }
-  return 0;
-}
 
 /*!
   \class R_FILE
@@ -270,12 +178,12 @@ class R_FILE
       }
     int set_name (const char *Name)       //! set new name
       {
-        int l;
+        t_long l;
         if (!Name)
           return -1;
         if (name)
           delete[]name;
-        l = (int) strlen (Name) + 1;
+        l = (t_long) strlen (Name) + 1;
         name = new char[l];
         if (!name)
           return -2;
@@ -286,7 +194,7 @@ class R_FILE
       {
         return name;
       }
-    int nstr;                     //! position in the file
+    t_long nstr;                     //! position in the file
   private:
     char *name;                   //! file name
     FILE *fp;                     //! file descriptor
@@ -328,7 +236,7 @@ public:
   //! set new file name, return 0 if success, <0 if error occur
   int set_file (const char *new_file)
   {
-    int len;
+    t_long len;
 
     if (full_file_name)
       delete[]full_file_name;
@@ -336,7 +244,7 @@ public:
     file_name = 0;
     if (!new_file)
       return -1;
-    len = (int) strlen (new_file) + 1;
+    len = (t_long) strlen (new_file) + 1;
 
     // memory allocation
     full_file_name = new char[len];
@@ -473,48 +381,31 @@ public:
   void close_all ();
   int push (const char *fname, int main_file_p = 0);
   int pop ();
-  int skip_d (char *start_ptr, char **end_ptr, int count);
-  int skip_u (char *start_ptr, char **end_ptr, int count);
-  int skip_s (char *start_ptr, char **end_ptr, int count);
+  int skip_d (char *start_ptr, char **end_ptr, const t_long count) const;
+  int skip_u (char *start_ptr, char **end_ptr, const t_long count) const;
+  int skip_s (char *start_ptr, char **end_ptr, const t_long count) const;
 
 
   // read line from file
-  int read_line (char *line, int max_len, int flg = FREAD_CONVERT_CASE);
+  t_long read_line (char *line, const t_long max_len, const int flg = FREAD_CONVERT_CASE);
   // read text block from file
-  int read_text_block (char *line, int max_len);
-
-  // For keyword KEY read array from file stream FP to buffer ARRAY.
-  int read_int_array (const char *key,  //!< Name of calling keyword
-                      int *array,       //!< string buffer
-                      int len_array     //!< lenght of buffer
-    );
-
-  //! For keyword KEY read array from file stream FP to buffer ARRAY.
-  int read_float_array (const char *key,       //!< Name of calling keyword
-                         float *array, //!< string buffer
-                         int len_array, //!< lenght of buffer
-                         int first_flag = 0);
-  //! For keyword KEY read array from file stream FP to buffer ARRAY.
-  int read_double_array (const char *key,       //!< Name of calling keyword
-                         double *array, //!< string buffer
-                         int len_array, //!< lenght of buffer
-                         int first_flag = 0);
-
-  //! For keyword KEY read table from file stream FP to buffer DBUF.
-  //! Each string contained NUM_COL double values.
-  int read_double_table (const char *key,       //!< Input string of table
-                         double *dbuf,  //!< Array for output
-                         int max_len,   //!< Dimension for array DBUF
-                         int num_col    //!< Number of column in string of table
-    );
+  t_long read_text_block (char *line, t_long const max_len);
 
   // Turn on conversion and set conversion multiplier
-  static int unwrap (char *s, const int flag = 0);
-  static int scanf_s (char *start_ptr, char **end_ptr, char *dest, int no_default_p = 0, int *is_default = 0);
-  static int scanf_text (char *start_ptr, char **end_ptr, char *dest);
-  static int scanf_u (char *start_ptr, char **end_ptr, int *dest, int *is_default = 0);
-  static int scanf_d (char *start_ptr, char **end_ptr, double *dest, int no_default_p = 0, int *is_default = 0);
-  static int scanf_file_name (char *dest, char *source);
+  int unwrap (char *s, const int flag = 0) const;
+  int scanf_s (char *start_ptr, char **end_ptr, char *dest, int no_default_p = 0, int *is_default = 0) const;
+  int scanf_text (char *start_ptr, char **end_ptr, char *dest) const;
+  int scanf_u (char *start_ptr, char **end_ptr, t_long *dest, int *is_default = 0) const;
+  int scanf_d (char *start_ptr, char **end_ptr, t_double *dest, int no_default_p = 0, int *is_default = 0) const;
+  int scanf_file_name (char *dest, char *source) const;
+  
+  t_long convert_f (t_float *array, const t_long len_array, t_long pos, char *buf,
+                 const char *key);
+  //t_long convert_d (t_double *array, const long len_array, long pos, char *buf,
+  //               const char *key);
+  t_long convert_u (t_int *array, const t_long len_array, t_long pos, char *buf,
+                 const char *key);
+
   char *get_prefix ();
 
   int eof ()
@@ -529,33 +420,27 @@ public:
   }
 private:
 
-  void IncrLineNumInFile (const int val)        //!
+  void IncrLineNumInFile (const t_long val)        //!
   {
     if (top > 0)
       F[top - 1].nstr += val;
   }
-  int convert_f (float *array, int len_array, int pos, char *buf,
-                 const char *key);
-  int convert_d (double *array, int len_array, int pos, char *buf,
-                 const char *key);
-  int convert_u (int *array, int len_array, int pos, char *buf,
-                 const char *key);
 
   //---------------------------------------
   // VARIABLES
   // --------------------------------------
 public:
 
-  int inc_num;                  //!< number of included files
+  t_long inc_num;                  //!< number of included files
   include_files inc_list;
 private:
   FILE *fp;
   char *incdir;
   include_files *out_inc_list;
-  int top;
-  int total;
+  t_long top;
+  t_long total;
   char prefix[2048];
   R_FILE *F;
 };
 
-#endif
+#endif /* end of include guard: ASCII_READER_XCUW9UDS */

@@ -233,7 +233,7 @@ namespace blue_sky {
                     item_t poro, item_t *sat, item_t *pc_limit) const
     {
       item_t cap, cap_min, cap_max;
-      item_t mult;
+      //item_t mult;
 
       BS_ASSERT (pressure);
       BS_ASSERT (sat);
@@ -316,7 +316,7 @@ namespace blue_sky {
         }
 
       const scal_region_t w_region = water_data->get_region (sat_reg);
-      const scal_region_t g_region = gas_data->get_region (sat_reg);
+      //const scal_region_t g_region = gas_data->get_region (sat_reg);
 
       n_table = w_region.Sp.size ();
       pcgw_table.resize (n_table, 0);
@@ -329,7 +329,7 @@ namespace blue_sky {
       //complete gas-water cap pressure table
       for (i_table = 0; i_table < n_table; i_table++)
         {
-          sat_cell[i_s_w] = scale_not_table (swl, sw_min, swu, sw_max, w_region.Sp[i_table]);
+          sat_cell[i_s_w] = scale_not_table (swl, sw_min, swu, sw_max, w_region.Sp[i_table], true);
           sat_cell[i_s_g] = 1. - sat_cell[i_s_w];
 
           process_capillary (cell_index, sat_cell, sat_reg, perm_array, poro, cap_cell, 0);
@@ -339,7 +339,7 @@ namespace blue_sky {
 
       interpolate (pcgw_table, w_region.Sp, pcgw, s, std::greater <item_t> ());
 
-      sw = scale_not_table (swl, sw_min, swu, sw_max, s);
+      sw = scale_not_table (swl, sw_min, swu, sw_max, s, true);
       sg = (1.0 - sw > 0.) ? 1.0 - sw : 0.;
     }
 
@@ -349,7 +349,7 @@ namespace blue_sky {
       std::vector <item_t> pcgw_table;
       size_t n_table, i_table;
       item_t sat_cell[2], cap_cell[2];
-      item_t sw_max, sw_min, swu, swl, s;
+      item_t sw_max, sw_min;//, swu, swl, s;
 
       if (!(is_w && is_g))
         {
@@ -357,7 +357,7 @@ namespace blue_sky {
         }
 
       const scal_region_t w_region = water_data->get_region (sat_reg);
-      const scal_region_t g_region = gas_data->get_region (sat_reg);
+      //const scal_region_t g_region = gas_data->get_region (sat_reg);
 
       n_table = w_region.Sp.size ();
       pcgw_table.resize (n_table, 0);
@@ -368,7 +368,7 @@ namespace blue_sky {
       //complete gas-water cap pressure table
       for (i_table = 0; i_table < n_table; i_table++)
         {
-          sat_cell[i_s_w] = scale_not_table (sw_min, sw_min, sw_max, sw_max, w_region.Sp[i_table]);
+          sat_cell[i_s_w] = scale_not_table (sw_min, sw_min, sw_max, sw_max, w_region.Sp[i_table], true);
           sat_cell[i_s_g] = 1. - sat_cell[i_s_w];
 
           process_capillary_2 (sat_cell, sat_reg, perm, poro, cap_cell, 0);

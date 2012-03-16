@@ -30,7 +30,7 @@ namespace blue_sky
       // TODO: in the future we can remove static modifier and made this class a stateful
       static
       void
-      do_switch (bool is_w, bool is_g, bool is_o,
+      do_switch (bool /*is_w*/, bool is_g, bool is_o,
                  index_t i_o, index_t i_g, index_t i_w,
                  const sp_pvt_oil_t &pvt, item_t p,
                  // results
@@ -67,7 +67,8 @@ namespace blue_sky
 private:
 
       static void
-      momg_case (index_t i_o, index_t i_g, index_t i_w, item_t *sat_3p, item_t &gas_oil_ratio, main_var_type &main_var, index_t &count, index_t cell_index)
+      momg_case (index_t i_o, index_t i_g, index_t i_w, item_t *sat_3p, item_t &gas_oil_ratio, 
+                 main_var_type &main_var, index_t &count, index_t /*cell_index*/)
       {
         sat_3p[i_g] = 0;
         sat_3p[i_w] = 1;

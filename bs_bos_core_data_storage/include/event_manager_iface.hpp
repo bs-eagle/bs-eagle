@@ -14,7 +14,7 @@ namespace blue_sky
   class BS_API_PLUGIN event_manager_iface : public objbase
   {
   public:
-    typedef boost::posix_time::ptime date_t;             //!< shortname for time
+    typedef double date_t;             //!< shortname for time
 
     /**
      * \brief  ends processing of event
@@ -48,12 +48,12 @@ namespace blue_sky
      * \param date 
      * */
     virtual void
-    set_current_date (date_t const &date) = 0;
+    set_current_date (date_t date) = 0;
 
     /**
      * \brief returns current date
      * */
-    virtual date_t const &
+    virtual date_t 
     get_current_date () const = 0;
   };
 

@@ -64,8 +64,8 @@ namespace blue_sky
         args ("Column"), "Return bool value of column")
     .def ("get_sql_str",                        &T::get_sql_str,
         args ("Column"), "Return text value of column")
-	.def ("get_sql_exist",						&T::get_sql_exist,
-		args ("Column"), "Return existance of value in column")
+    .def ("get_sql_exist",                      &T::get_sql_exist,
+        args ("Column"), "Return existance of value in column")
     .def ("get_table",                          &T::get_table,
         args ("Table_name", "Column list", "Filter"), "Return nparray of values in columns list")
     .def ("exec_sql",                           &T::exec_sql,
@@ -74,16 +74,16 @@ namespace blue_sky
         args ("File_name", "starting_date"), "Read data from ascii file")
     .def ("save_to_bos_ascii_file",             &T::save_to_bos_ascii_file,
         args ("File_name", "h5_pool", "hdm_prop"),                  "Save data to ascii file in BOS format")
-	.def ("insert_or_update",					&T::insert_or_update,
-		args ("select", "insert", "update"), "Insert or update data")
-	.def ("d2date",					            &T::d2date,
-		args ("d"), "convert d to list (year, month, day, hour, minute, second)")
-	.def ("date2d",					            &T::date2d,
-		args ("year", "month", "day", "hour", "minute", "second"), "date and time to double")
-	.def ("d2str",					            &T::d2str,
-		args ("d"), "convert date from double to str")
-	.def ("t2str",					            &T::t2str,
-		args ("d"), "convert time from double to str")
+    .def ("insert_or_update",                   &T::insert_or_update,
+        args ("select", "insert", "update"), "Insert or update data")
+    //.def ("d2date",                               &T::d2date,
+    //  args ("d"), "convert d to list (year, month, day, hour, minute, second)")
+    //.def ("date2d",                               &T::date2d,
+    //  args ("year", "month", "day", "hour", "minute", "second"), "date and time to double")
+    //.def ("d2str",                                &T::d2str,
+    //  args ("d"), "convert date from double to str")
+    //.def ("t2str",                                &T::t2str,
+    //  args ("d"), "convert time from double to str")
     .def ("__str__",                            &T::py_str)
   PY_EXPORTER_END;
 

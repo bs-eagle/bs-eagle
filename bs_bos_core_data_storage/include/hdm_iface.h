@@ -9,7 +9,7 @@
 namespace blue_sky {
 
   class keyword_manager_iface;
-  class FRead;
+  class bos_reader_iface;
   class idata;
   class rs_mesh_iface;
   class h5_pool_iface;
@@ -26,7 +26,7 @@ namespace blue_sky {
     public:
 
       typedef smart_ptr <idata, true>                       sp_idata ;
-      typedef smart_ptr <FRead, true>                       sp_reader_t;
+      typedef smart_ptr <bos_reader_iface, true>            sp_reader_t;
       typedef smart_ptr <keyword_manager_iface, true>       sp_km_t;
       typedef smart_ptr <rs_mesh_iface, true>               sp_mesh_iface_t;
       typedef smart_ptr <h5_pool_iface, true>               sp_h5_pool_t;

@@ -41,7 +41,7 @@ namespace blue_sky {
     }
 
 
-    void process_vertical_scaling (t_long cell_index, item_t sat, item_t sat_scale,
+    void process_vertical_scaling (t_long /*cell_index*/, item_t sat, item_t sat_scale,
                                    item_t su, item_t t_sr_phase,
                                    item_t t_krp, item_t krp_max,
                                    item_t t_krpr, item_t krp_sr,
@@ -326,7 +326,7 @@ namespace blue_sky {
       item_t su     = scale_arrays.get (blue_sky::su, s_max) [cell_index];
       item_t sl     = scale_arrays.get (blue_sky::sl, s_min) [cell_index];
 
-      sat = scale_not_table (sl, s_min, su, s_max, s);
+      sat = scale_not_table (sl, s_min, su, s_max, s, true);
     }
 
     void process_init_2 (const item_t cap, item_t &sat) const

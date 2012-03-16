@@ -1,9 +1,9 @@
 #include "bs_bos_core_data_storage_stdafx.h"
 
 #include "hdm.h"
-#include "main_def.h"
+//#include "main_def.h"
 #include "arrays.h"
-#include "localization.h"
+//#include "localization.h"
 #include "arrays_tables.h"
 #include "data_class.h"
 
@@ -59,7 +59,7 @@ namespace blue_sky
   
   hdm::hdm(bs_type_ctor_param /*param*/): lkeeper ("C", LC_ALL)
   {
-    this->reader = BS_KERNEL.create_object(FRead::bs_type());
+    this->reader = BS_KERNEL.create_object("bos_reader");
     this->data = BS_KERNEL.create_object(idata::bs_type());
     this->km = BS_KERNEL.create_object(keyword_manager::bs_type());
     
@@ -163,7 +163,7 @@ namespace blue_sky
     
     write_time_to_log init_time ("Read model", "");
   
-    reader->init (filename, filename);
+    reader->open (filename.c_str (), filename.c_str ());
     model_name = filename.substr(0,filename.find_last_of("."));
     data->props->add_property_s(filename.substr(0,filename.find_last_of("/\\") + 1), "model_path", "model_path");
     

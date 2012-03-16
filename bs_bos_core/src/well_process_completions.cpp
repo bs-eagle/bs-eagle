@@ -14,7 +14,7 @@
 #include "fi_params.h"
 #include "well_connection.h"
 #include "well_pool_iface.h"
-#include "frac_comp_ident.h"
+//#include "frac_comp_ident.h"
 
 namespace blue_sky
   {
@@ -28,7 +28,7 @@ namespace blue_sky
                                       const stdv_float &ntg,
                                       sp_well_t &well,
                                       std::vector <wpi::well_hit_cell_3d> &well_path_segs,
-                                      t_uint con_branch,
+                                      t_uint /*con_branch*/,
                                       t_float con_md,
                                       t_float con_len)
         {
@@ -44,8 +44,8 @@ namespace blue_sky
               well_seg_start_point[0] = well_path_segs[i].where.x ();
               well_seg_start_point[1] = well_path_segs[i].where.y ();
               well_seg_start_point[2] = well_path_segs[i].where.z ();
-              uint facet      = well_path_segs[i].facet;
-              bool is_node    = well_path_segs[i].is_node;
+              //uint facet      = well_path_segs[i].facet;
+              //bool is_node    = well_path_segs[i].is_node;
 
               t_float well_md_next = 0;
               t_float well_length = 0;

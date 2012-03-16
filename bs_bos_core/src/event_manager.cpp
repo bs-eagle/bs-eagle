@@ -66,7 +66,7 @@ namespace blue_sky
   }
 
   event_manager::sp_event_base
-  event_manager::create_event (const boost::posix_time::ptime &date, const std::string & event_name, const std::string & event_params)
+  event_manager::create_event (const double date, const std::string & event_name, const std::string & event_params)
   {
     BS_SP (event_base) event = BS_KERNEL.create_object (event_name);
     if (!event)
@@ -83,7 +83,7 @@ namespace blue_sky
   }
 
   void
-  event_manager::set_current_date (date_t const &date)
+  event_manager::set_current_date (date_t date)
   {
     if (event_list.find (date) == event_list.end ())
       {
@@ -92,7 +92,7 @@ namespace blue_sky
       }
   }
 
-  event_manager::date_t const &
+  event_manager::date_t
   event_manager::get_current_date () const
   {
     return current_date_;
@@ -109,7 +109,7 @@ namespace blue_sky
     event_map::reverse_iterator it = event_list.rbegin ();
     if (it->second.size ())
       {
-        event_list.insert (std::make_pair (it->first + pt::hours (30 * 24), event_list_t ()));
+        event_list.insert (std::make_pair (it->first + 30.0, event_list_t ()));
       }
   }
 

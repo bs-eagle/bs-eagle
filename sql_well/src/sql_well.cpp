@@ -126,9 +126,6 @@ namespace blue_sky
     }
   sql_well::~sql_well ()
     {
-      if (fr_file)
-        delete fr_file;
-      fr_file = 0;
     }
 
   int
@@ -945,9 +942,11 @@ COMMIT;\
   int
   sql_well::read_from_ascii_file (const std::string &fname, double starting_date)
     {
-      if (fr_file)
-        delete fr_file;
-      fr_file = new FRead (fname.c_str (), fname.c_str ());
+      //if (fr_file)
+      //  delete fr_file;
+      //fr_file = new FRead (fname.c_str (), fname.c_str ());
+      fr_file = BS_KERNEL.create_object ("bos_reader");
+      fr_file->open (fname.c_str (), fname.c_str ());
 
       int rc = 0;
       char buf[4096];
@@ -967,13 +966,13 @@ COMMIT;\
           if (rc)
             return -4;
           // read id
-          rc = trim_left (&id);
+          fr_file->trim_left (&id);
           other = id;
-          rc |= get_phrase (&other);
+          rc |= fr_file->get_phrase (&other);
           if (rc)
             return -1;
           //trim_right_s (id);
-          locale_ucase (id);
+          fr_file->locale_ucase (id);
 
           if (!strcmp (id, "W_SPEC"))
             {
@@ -1034,7 +1033,7 @@ COMMIT;\
       wname[0] = '\0';
       nx = buf;
       // read well name
-      rc = get_phrase_str (&nx, wname);
+      rc = fr_file->get_phrase_str (&nx, wname);
       if (rc || wname[0] == '\0')
         {
           fprintf (stderr, "Error: well name in keyword W_BRANCH_F can not be set by default\n");
@@ -1042,7 +1041,7 @@ COMMIT;\
         }
       // read branch
       strcpy (branch, "main");
-      rc = get_phrase_str (&nx, branch);
+      rc = fr_file->get_phrase_str (&nx, branch);
       if (rc)
         {
           fprintf (stderr, "Error: W_BRANCH_F can not read branch name\n");
@@ -1050,14 +1049,14 @@ COMMIT;\
         }
       // read parent
       parent[0] = '\0';
-      rc = get_phrase_str (&nx, parent);
+      rc = fr_file->get_phrase_str (&nx, parent);
       if (rc)
         {
           fprintf (stderr, "Error: W_BRANCH_F can not read parent name\n");
           return -1;
         }
       //read md
-      rc = get_phrase_double (&nx, &md);
+      rc = fr_file->get_phrase_double (&nx, &md);
       if (rc)
         {
           fprintf (stderr, "Error: W_BRANCH_F\n");
@@ -1065,7 +1064,7 @@ COMMIT;\
         }
       // read file name
       fname[0] = '\0';
-      rc = get_phrase_filepath (&nx, fname);
+      rc = fr_file->get_phrase_filepath (&nx, fname);
       if (rc)
         {
           fprintf (stderr, "Error: W_BRANCH_F can not read file name\n");
@@ -1073,7 +1072,7 @@ COMMIT;\
         }
       // read well_log file name
       fname2[0] = '\0';
-      rc = get_phrase_filepath (&nx, fname2);
+      rc = fr_file->get_phrase_filepath (&nx, fname2);
       if (rc)
         {
           fprintf (stderr, "Error: W_BRANCH_F can not read file name\n");
@@ -1088,7 +1087,7 @@ COMMIT;\
       if (fname[0] != '\0')
         {
           sp_traj_t sp_traj = BS_KERNEL.create_object ("traj");
-          rc = sp_traj->read_from_dev_file (std::string(fr_file->get_incdir()) + std::string(fname));
+          rc = sp_traj->read_from_dev_file (fr_file->get_incdir() + std::string(fname));
           if (rc)
             {
               return rc;
@@ -1100,7 +1099,7 @@ COMMIT;\
       if (fname2[0] != '\0')
         {
           sp_gis_t sp_gis = BS_KERNEL.create_object ("gis");
-          rc = sp_gis->read_from_las_file (std::string(fr_file->get_incdir()) + std::string(fname2));
+          rc = sp_gis->read_from_las_file (fr_file->get_incdir() + std::string(fname2));
           if (rc)
             {
               return rc;
@@ -1124,16 +1123,16 @@ COMMIT;\
       // read well name
       wname[0] = '\0';
       nx = buf;
-      rc = get_phrase_str (&nx, wname);
+      rc = fr_file->get_phrase_str (&nx, wname);
       //printf ("WNAME: %s\n", wname);
       if (rc || wname[0] == '\0')
         {
           fprintf (stderr, "Error: well name in keyword W_SPEC can not be set by default\n");
           return -1;
         }
-      rc = get_phrase_double (&nx, &x);
+      rc = fr_file->get_phrase_double (&nx, &x);
       //printf ("rc: %lf\n", x);
-      rc |= get_phrase_double (&nx, &y);
+      rc |= fr_file->get_phrase_double (&nx, &y);
       //printf ("rc: %lf\n", y);
       if (rc)
         {
@@ -1167,7 +1166,7 @@ COMMIT;\
       // read well name
       wname[0] = '\0';
       nx = buf;
-      rc = get_phrase_str (&nx, wname);
+      rc = fr_file->get_phrase_str (&nx, wname);
       //printf ("WNAME: %s\n", wname);
       if (rc || wname[0] == '\0')
         {
@@ -1175,7 +1174,7 @@ COMMIT;\
           return -1;
         }
       strcpy (branch, "main");
-      rc = get_phrase_str (&nx, branch);
+      rc = fr_file->get_phrase_str (&nx, branch);
       //printf ("WNAME: %s\n", wname);
       if (rc)
         {
@@ -1183,7 +1182,7 @@ COMMIT;\
           return -1;
         }
       strcpy (status, "SHUT");
-      rc = get_phrase_str (&nx, status);
+      rc = fr_file->get_phrase_str (&nx, status);
       //printf ("WNAME: %s\n", wname);
       if (rc)
         {
@@ -1191,21 +1190,21 @@ COMMIT;\
           return -1;
         }
 
-      rc = get_phrase_double (&nx, &md);
-      rc |= get_phrase_double (&nx, &angle);
-      rc |= get_phrase_double (&nx, &half_length_1);
-      rc |= get_phrase_double (&nx, &half_length_2);
-      rc |= get_phrase_double (&nx, &half_up);
-      rc |= get_phrase_double (&nx, &half_down);
-      rc |= get_phrase_double (&nx, &perm);
-      rc |= get_phrase_double (&nx, &half_thin);
+      rc = fr_file->get_phrase_double (&nx, &md);
+      rc |= fr_file->get_phrase_double (&nx, &angle);
+      rc |= fr_file->get_phrase_double (&nx, &half_length_1);
+      rc |= fr_file->get_phrase_double (&nx, &half_length_2);
+      rc |= fr_file->get_phrase_double (&nx, &half_up);
+      rc |= fr_file->get_phrase_double (&nx, &half_down);
+      rc |= fr_file->get_phrase_double (&nx, &perm);
+      rc |= fr_file->get_phrase_double (&nx, &half_thin);
       if (rc)
         {
           fprintf (stderr, "Error: W_SPEC\n");
           return -1;
         }
       // check input data
-      locale_ucase (status);
+      fr_file->locale_ucase (status);
       if (status[0] == 'S')
         i_status = STATUS_CON_SHUT;
       //else if (status[0] == 'C') // close
@@ -1274,7 +1273,7 @@ VALUES ('%s', '%s', %lf, %lf, %d, %lf, %lf, %lf, %lf, %lf, %lf, %lf)",
       // read well name
       wname[0] = '\0';
       nx = buf;
-      rc = get_phrase_str (&nx, wname);
+      rc = fr_file->get_phrase_str (&nx, wname);
       //printf ("WNAME: %s\n", wname);
       if (rc || wname[0] == '\0')
         {
@@ -1282,7 +1281,7 @@ VALUES ('%s', '%s', %lf, %lf, %d, %lf, %lf, %lf, %lf, %lf, %lf, %lf)",
           return -1;
         }
       strcpy (branch, "main");
-      rc = get_phrase_str (&nx, branch);
+      rc = fr_file->get_phrase_str (&nx, branch);
       //printf ("WNAME: %s\n", wname);
       if (rc)
         {
@@ -1290,7 +1289,7 @@ VALUES ('%s', '%s', %lf, %lf, %d, %lf, %lf, %lf, %lf, %lf, %lf, %lf)",
           return -1;
         }
       strcpy (status, "SHUT");
-      rc = get_phrase_str (&nx, status);
+      rc = fr_file->get_phrase_str (&nx, status);
       //printf ("WNAME: %s\n", wname);
       if (rc)
         {
@@ -1298,18 +1297,18 @@ VALUES ('%s', '%s', %lf, %lf, %d, %lf, %lf, %lf, %lf, %lf, %lf, %lf)",
           return -1;
         }
 
-      rc = get_phrase_double (&nx, &md);
-      rc |= get_phrase_double (&nx, &length);
-      rc |= get_phrase_double (&nx, &rw);
-      rc |= get_phrase_double (&nx, &skin);
-      rc |= get_phrase_double (&nx, &khmult);
+      rc = fr_file->get_phrase_double (&nx, &md);
+      rc |= fr_file->get_phrase_double (&nx, &length);
+      rc |= fr_file->get_phrase_double (&nx, &rw);
+      rc |= fr_file->get_phrase_double (&nx, &skin);
+      rc |= fr_file->get_phrase_double (&nx, &khmult);
       if (rc)
         {
           fprintf (stderr, "Error: W_SPEC\n");
           return -1;
         }
       // check input data
-      locale_ucase (status);
+      fr_file->locale_ucase (status);
       if (status[0] == 'S')
         i_status = STATUS_CON_SHUT;
       //else if (status[0] == 'C') // close
@@ -1378,7 +1377,7 @@ VALUES ('%s', '%s', %lf, %lf, %d, %lf, %lf, %lf, %lf, %lf, %lf, %lf)",
       // read well name
       wname[0] = '\0';
       nx = buf;
-      rc = get_phrase_str (&nx, wname);
+      rc = fr_file->get_phrase_str (&nx, wname);
       //printf ("WNAME: %s\n", wname);
       if (rc || wname[0] == '\0')
         {
@@ -1386,7 +1385,7 @@ VALUES ('%s', '%s', %lf, %lf, %d, %lf, %lf, %lf, %lf, %lf, %lf, %lf)",
           return -1;
         }
       strcpy (status, "SHUT");
-      rc = get_phrase_str (&nx, status);
+      rc = fr_file->get_phrase_str (&nx, status);
       //printf ("WNAME: %s\n", wname);
       if (rc)
         {
@@ -1394,34 +1393,34 @@ VALUES ('%s', '%s', %lf, %lf, %d, %lf, %lf, %lf, %lf, %lf, %lf, %lf)",
           return -1;
         }
       strcpy (ctrl, "BHP");
-      rc = get_phrase_str (&nx, ctrl);
+      rc = fr_file->get_phrase_str (&nx, ctrl);
       if (rc)
         {
           fprintf (stderr, "Error: well control in keyword W_INJ\n");
           return -1;
         }
       strcpy (fluid, "WATER");
-      rc = get_phrase_str (&nx, ctrl);
+      rc = fr_file->get_phrase_str (&nx, ctrl);
       if (rc)
         {
           fprintf (stderr, "Error: well control in keyword W_INJ\n");
           return -1;
         }
 
-      rc = get_phrase_double (&nx, &bhp);
-      rc |= get_phrase_double (&nx, &rate);
-      rc = get_phrase_double  (&nx, &lim_bhp);
-      rc |= get_phrase_double (&nx, &lim_rate);
-      rc |= get_phrase_double (&nx, &wefac);
+      rc = fr_file->get_phrase_double (&nx, &bhp);
+      rc |= fr_file->get_phrase_double (&nx, &rate);
+      rc = fr_file->get_phrase_double  (&nx, &lim_bhp);
+      rc |= fr_file->get_phrase_double (&nx, &lim_rate);
+      rc |= fr_file->get_phrase_double (&nx, &wefac);
       if (rc)
         {
           fprintf (stderr, "Error: W_PROD\n");
           return -1;
         }
       // check input data
-      locale_ucase (status);
-      locale_ucase (ctrl);
-      locale_ucase (fluid);
+      fr_file->locale_ucase (status);
+      fr_file->locale_ucase (ctrl);
+      fr_file->locale_ucase (fluid);
       if (status[0] == 'S')
         i_status = STATUS_SHUT;
       else if (status[0] == 'C') // close
@@ -1526,7 +1525,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf)",
       // read well name
       wname[0] = '\0';
       nx = buf;
-      rc = get_phrase_str (&nx, wname);
+      rc = fr_file->get_phrase_str (&nx, wname);
       //printf ("WNAME: %s\n", wname);
       if (rc || wname[0] == '\0')
         {
@@ -1534,7 +1533,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf)",
           return -1;
         }
       strcpy (status, "SHUT");
-      rc = get_phrase_str (&nx, status);
+      rc = fr_file->get_phrase_str (&nx, status);
       //printf ("WNAME: %s\n", wname);
       if (rc)
         {
@@ -1542,33 +1541,33 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf)",
           return -1;
         }
       strcpy (ctrl, "BHP");
-      rc = get_phrase_str (&nx, ctrl);
+      rc = fr_file->get_phrase_str (&nx, ctrl);
       if (rc)
         {
           fprintf (stderr, "Error: well control in keyword W_PROD\n");
           return -1;
         }
 
-      rc = get_phrase_double (&nx, &bhp);
-      rc |= get_phrase_double (&nx, &wrate);
-      rc |= get_phrase_double (&nx, &orate);
-      rc |= get_phrase_double (&nx, &grate);
-      rc |= get_phrase_double (&nx, &lrate);
-      rc = get_phrase_double  (&nx, &lim_bhp);
-      rc |= get_phrase_double (&nx, &lim_wrate);
-      rc |= get_phrase_double (&nx, &lim_orate);
-      rc |= get_phrase_double (&nx, &lim_grate);
-      rc |= get_phrase_double (&nx, &lim_lrate);
+      rc = fr_file->get_phrase_double (&nx, &bhp);
+      rc |= fr_file->get_phrase_double (&nx, &wrate);
+      rc |= fr_file->get_phrase_double (&nx, &orate);
+      rc |= fr_file->get_phrase_double (&nx, &grate);
+      rc |= fr_file->get_phrase_double (&nx, &lrate);
+      rc = fr_file->get_phrase_double  (&nx, &lim_bhp);
+      rc |= fr_file->get_phrase_double (&nx, &lim_wrate);
+      rc |= fr_file->get_phrase_double (&nx, &lim_orate);
+      rc |= fr_file->get_phrase_double (&nx, &lim_grate);
+      rc |= fr_file->get_phrase_double (&nx, &lim_lrate);
 
-      rc |= get_phrase_double (&nx, &wefac);
+      rc |= fr_file->get_phrase_double (&nx, &wefac);
       if (rc)
         {
           fprintf (stderr, "Error: W_PROD\n");
           return -1;
         }
       // check input data
-      locale_ucase (status);
-      locale_ucase (ctrl);
+      fr_file->locale_ucase (status);
+      fr_file->locale_ucase (ctrl);
       if (status[0] == 'S')
         i_status = STATUS_SHUT;
       else if (status[0] == 'C') // close
@@ -1664,26 +1663,26 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
       char *nx;
 
       *next_start = buf;
-      rc = trim_left (next_start);
+      fr_file->trim_left (next_start);
       nx = *next_start;
-      rc |= get_phrase (&nx);
+      rc |= fr_file->get_phrase (&nx);
       if (**next_start == '*')
         days = 0;
       else
         {
-          rc |= key_read_date (*next_start, days);
+          rc |= fr_file->get_dt ()->cstr2d (*next_start, days);
           *dd = (double)days;
         }
 
       *next_start = nx;
-      rc = trim_left (next_start);
+      fr_file->trim_left (next_start);
       nx = *next_start;
-      rc |= get_phrase (&nx);
+      rc |= fr_file->get_phrase (&nx);
       if (**next_start == '*')
         t = 0;
       else
         {
-          rc |= key_read_time (*next_start, t);
+          rc |= fr_file->get_dt ()->cstr2t (*next_start, t);
         }
       *next_start = nx;
 
@@ -1709,6 +1708,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
       sp_himesh himesh = BS_KERNEL.create_object("handy_mesh_iface");
       BS_ASSERT(himesh);
       const double eps = 1e-10;
+      sp_dt_t dt_t = BS_KERNEL.create_object ("dt_tools");
 
       if (!fp)
         {
@@ -1745,7 +1745,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           char d_buf[1024];
           if (*di - int(*di) == 0) // if *di is integer
             {
-              print_date_ecl (*di, d_buf);
+              dt_t->d2ecl (*di, d_buf);
               printf ("DATE %s\n", d_buf);
               fprintf (fp, "DATES\n%s\n/\n\n", d_buf);
             }
@@ -1821,11 +1821,13 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             cde = cd.end();
             for (cdi = cd.begin(); cdi != cde; ++cdi)
             {
-              if (std::abs(cdi->kh_mult) > eps)
-                if (cdi->status)
-                  fprintf (fp, "\'%s\' %lu %lu %lu %lu \'OPEN\' 2* %lf 1* %lf 1* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
-                else
-                  fprintf (fp, "\'%s\' %lu %lu %lu %lu \'SHUT\' 2* %lf 1* %lf 1* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
+              if (fabs(cdi->kh_mult) > eps)
+                {
+                  if (cdi->status)
+                    fprintf (fp, "\'%s\' %lu %lu %lu %lu \'OPEN\' 2* %lf 1* %lf 1* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
+                  else
+                    fprintf (fp, "\'%s\' %lu %lu %lu %lu \'SHUT\' 2* %lf 1* %lf 1* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
+                }
             }
             fprintf (fp, "/\n\n");
           }

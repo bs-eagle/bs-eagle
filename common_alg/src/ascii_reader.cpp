@@ -16,14 +16,14 @@
 #endif
 #include <fcntl.h>
 
-#include "read_class_sql_well.h"
+#include "ascii_reader.h"
 
 
-#include "date_tools.h"
+//#include "date_tools.h"
 #include "main_def.h"
 #include "timer.h"
-#include "localization.h"
-
+#include "toupper.h"
+//#include "localization.h"
 
 /*!
   \brief Constructor -- make a new object of class FRead
@@ -73,12 +73,12 @@ FRead::FRead (const char *fname, const char *dir)
 int
 FRead::set_incdir (const char *dir)
 {
-  int i, l = 0;
+  t_long i, l = 0;
   // check pointer
   if (!dir)
     return -1;
   // allocate memory
-  l = (int)strlen (dir) + 1;
+  l = (t_long)strlen (dir) + 1;
   incdir = new char[l];
   if (!incdir)
     return -2;
@@ -110,7 +110,7 @@ FRead::get_incdir () const
 */
 FRead::~FRead ()
 {
-  int i;
+  t_long i;
 
   // Pointer to current file - this is cpy of one of the pointers in F
   fp = 0;
@@ -141,7 +141,7 @@ FRead::~FRead ()
 void
 FRead::close_all ()
 {
-  int i;
+  t_long i;
   fp = 0;
   // Close all files
   for (i = 0; i < top; ++i)
@@ -161,7 +161,7 @@ FRead::close_all ()
 int
 FRead::push (const char *fname, int main_file_p)
 {
-  int i;
+  t_long i;
   char F_Buf[1024];
 
   if (fname == 0 || strlen (fname) == 0)
@@ -266,17 +266,17 @@ FRead::pop ()
    if end of file and nothing have been read       -2\n
    if can not open include file                    -5
 */
-int
-FRead::read_line (char *buf, int MaxLen, int flg)
+t_long
+FRead::read_line (char *buf, const t_long MaxLen, const int flg)
 {
   const char *inc =  ("include");
   const char *INC =  ("INCLUDE");
-  const int inc_len = 7;	// length of word include
-  const int f_len = 512;	// max length of file name
+  const t_long inc_len = 7;	// length of word include
+  const t_long f_len = 512;	// max length of file name
   char *word_cand;		// temporary buffer for reading            
-  int word_len;
+  t_long word_len;
   char *fln;			// buffer for include file files name
-  int disp;
+  t_long disp;
   int current_error_num = 0;
 
   if (!buf)
@@ -314,7 +314,7 @@ FRead::read_line (char *buf, int MaxLen, int flg)
 	       !(word_cand[0] == '-' && word_cand[1] == '-'))
 	{
 	  word_cand = trim_right_s (word_cand);
-	  word_len = (int) strlen(word_cand);
+	  word_len = (t_long) strlen(word_cand);
 	  if (!((word_len == 1) && (*word_cand == '/')))
 	    word_cand = trim_right_s (word_cand, '/');
 	  break;
@@ -335,12 +335,12 @@ FRead::read_line (char *buf, int MaxLen, int flg)
    if reading error                                -1 \n
    if end of file and nothing have been read       -2\n
 */
-int
-FRead::read_text_block (char *buf, int MaxLen)
+t_long
+FRead::read_text_block (char *buf, const t_long MaxLen)
 {
   char *word_cand;		// temporary buffer for reading            
-  int word_len, len = 0;
-  int disp;
+  t_long word_len, len = 0;
+  t_long disp;
   char *end_block;
 
   if (!buf)
@@ -364,7 +364,7 @@ FRead::read_text_block (char *buf, int MaxLen)
           end_block = strchr (word_cand, '/');
           if (end_block != NULL)
             {
-              int pos = (int)(end_block - word_cand);
+              t_long pos = (t_long)(end_block - word_cand);
               word_cand[pos] = '\0';
               len += pos;
               break;
@@ -379,188 +379,6 @@ FRead::read_text_block (char *buf, int MaxLen)
   return len;
 }
 
-/*!
-  \brief For keyword KEY read table from
-         file stream this->fp to buffer DBUF.\n
-         Each string contained NUM_COL
-         double values.
-  \param key      Input string of table
-  \param dbuf     Array for output
-  \param max_len  Dimension for array DBUF
-  \param num_col  Number of column in string of table
-
-  \result Number of readed values in case of success\n
-          -2 in case of reading error
-*/
-
-
-int
-FRead::read_double_table (const char *key, double *dbuf, int max_len,
-                          int num_col)
-{
-  int i;
-  int skip_flag = 1;
-  // read double values string till the end of bufer
-  for (i = 0; i < max_len / num_col; i++)
-    {
-      // if number of values not equal to needed number - break
-      if ((int) (this->read_double_array (key, dbuf + i * num_col,
-                                          num_col, skip_flag)) != num_col)
-        break;
-      skip_flag = 0;
-    }
-  // if end of buffer was reached - return error
-  if (i > max_len / num_col)
-    {
-      return -2;
-    }
-  return i;
-}
-
-/*!
-  \brief For keyword KEY read array from
-         file stream this->fp to buffer ARRAY.\n
-         string format: 2*15.8 3*{12 2*5.6 2*{1.1 1.2}} is equals\n
-         15.8 15.8 12 5.6 5.6 1.1 1.2 1.1 1.2 12 5.6 5.6 1.1 1.2 1.1 1.2 12 5.6 5.6 1.1 1.2 1.1 1.2
-  \param key    Name of calling keyword
-  \param array  string buffer
-  \param len_array  lenght of buffer
-  \param first_flag -- if this flag > 0 skip first line starting with '/'
-  \return Number of readed values in case of success\n
-          -2 in case of reading error
-*/
-int
-FRead::read_float_array (const char *key, float *array, int len_array, int first_flag)
-{
-  int i;
-  int j;
-  char buf[CHAR_BUF_LEN];
-
-  if (array == 0)               // Check pointer array
-    return -1;
-  if (key == 0)                 // Check pointer to keyword
-    return -2;
-  if (len_array == 0)           // Check array length
-    return -3;
-
-  for (i = 0; i < len_array;)
-    {
-      // Read line to chracter buffer.
-      // If error for reading line -  return error
-      if ((this->read_line (buf, CHAR_BUF_LEN)) < 0)
-        return -2;
-      if (buf[0] == '/' && i == 0 && first_flag)        // End of reading array data
-        {
-          continue;
-        }
-      else if (buf[0] == '/')
-        {
-          return i;
-        }
-      j = convert_f (array, len_array, i, buf, key);    // Call function to convert string to
-      // double array
-      if (j < 0)                // Check for error
-        return -3;
-      else
-        i += (int) j;           // add number of read double to counter
-    }
-  return i;                     // return number of read double
-}
-/*!
-  \brief For keyword KEY read array from
-         file stream this->fp to buffer ARRAY.\n
-         string format: 2*15.8 3*{12 2*5.6 2*{1.1 1.2}} is equals\n
-         15.8 15.8 12 5.6 5.6 1.1 1.2 1.1 1.2 12 5.6 5.6 1.1 1.2 1.1 1.2 12 5.6 5.6 1.1 1.2 1.1 1.2
-  \param key    Name of calling keyword
-  \param array  string buffer
-  \param len_array  lenght of buffer
-  \param first_flag -- if this flag > 0 skip first line starting with '/'
-  \return Number of readed values in case of success\n
-          -2 in case of reading error
-*/
-int
-FRead::read_double_array (const char *key, double *array, int len_array, int first_flag)
-{
-  int i;
-  int j;
-  char buf[CHAR_BUF_LEN];
-
-  if (array == 0)               // Check pointer array
-    return -1;
-  if (key == 0)                 // Check pointer to keyword
-    return -2;
-  if (len_array == 0)           // Check array length
-    return -3;
-
-  for (i = 0; i < len_array;)
-    {
-      // Read line to chracter buffer.
-      // If error for reading line -  return error
-      if ((this->read_line (buf, CHAR_BUF_LEN)) < 0)
-        return -2;
-      if (buf[0] == '/' && i == 0 && first_flag)        // End of reading array data
-        {
-          continue;
-        }
-      else if (buf[0] == '/')
-        {
-          return i;
-        }
-      j = convert_d (array, len_array, i, buf, key);    // Call function to convert string to
-      // double array
-      if (j < 0)                // Check for error
-        return -3;
-      else
-        i += (int) j;           // add number of read double to counter
-    }
-  return i;                     // return number of read double
-}
-
-/*!
-  \brief For keyword KEY read array from
-         file stream this->fp to buffer ARRAY.
-  \param key    Name of calling keyword
-  \param array  string buffer
-  \param len_array  lenght of buffer
-
-  \return Number of readed values in case of success\n
-          -2 in case of reading error
-*/
-int
-FRead::read_int_array (const char *key, int *array, int len_array)
-{
-  int i;
-  int j;
-  char buf[CHAR_BUF_LEN];
-
-  if (array == 0)               // Check pointer array
-    return -1;
-  if (key == 0)                 // Check pointer to keyword
-    return -2;
-  if (len_array == 0)           // Check array length
-    return -3;
-
-  for (i = 0; i < len_array;)
-    {
-      // Read line to character buffer.
-      // If error for reading line -  return error
-      if ((this->read_line (buf, CHAR_BUF_LEN)) < 0)
-        {
-          return -2; 
-        }
-      if (buf[0] == '/')        // End of reading array data
-        return i;
-      j = convert_u (array, len_array, i, buf, key);    // Call function to convert string to
-      // int array
-      if (j < 0)                // Check for error
-        {
-          return -3;
-        }
-      else
-        i += (int) j;           // add number of read double to counter
-    }
-  return i;
-}
 
 /*!
   \brief   Recursive function\n
@@ -581,15 +399,14 @@ FRead::read_int_array (const char *key, int *array, int len_array)
 *         if cann't allocate memory                       -3\n
 *         if string format error                          -4
 */
-int
-FRead::convert_f (float *array, int len_array, int pos, char *buf,
+t_long
+FRead::convert_f (t_float *array, const t_long len_array, t_long pos, char *buf,
                   const char *key)
 {
   char *sbuf;
-  int cb, c, i, j, counter;
-  int k;
+  t_long c, i, counter;
   char *start_ptr, *end_ptr = 0;
-  float t;
+  t_float t;
   // check section
   if (array == 0)               // check array pointer
     return -1;
@@ -623,7 +440,7 @@ FRead::convert_f (float *array, int len_array, int pos, char *buf,
         }
       if (trim_left (&start_ptr))
         return -50;
-      t = (float)strtod (start_ptr, &end_ptr); // try to read double from buf
+      t = (t_float)strtod (start_ptr, &end_ptr); // try to read double from buf
       if (trim_left (&end_ptr))
         return -50;
       if (*start_ptr == '\0')
@@ -641,94 +458,39 @@ FRead::convert_f (float *array, int len_array, int pos, char *buf,
           ++end_ptr;
           if (trim_left (&end_ptr))
             return -50;
-          if (*end_ptr == '{')
+          start_ptr = end_ptr;
+          if (pos < len_array)
+            array[pos] = (t_float)strtod (start_ptr, &end_ptr);      // try to read double from buf
+          else
             {
-              ++end_ptr;
-              cb = 1;
-              k = 0;
-              while (cb != 0 && *end_ptr != '\0')
-                {
-                  if (*end_ptr == '{')
-                    ++cb;
-                  else if (*end_ptr == '}')
-                    --cb;
-                  sbuf[k] = *end_ptr;
-                  ++k;
-                  ++end_ptr;
-                }
-              if (sbuf[k - 1] == '}' && k > 0)
-                {
-                  --k;
-                  sbuf[k] = '\0';
-                }
-              else
-                {
-                  delete[]sbuf;
-                  return -40;
-                }
-              k = convert_f (array, len_array, pos, sbuf, key);
-              if (k <= 0)
-                {
-                  delete[]sbuf;
-                  return k;
-                }
-              c = pos;
-              pos += (int) k;
-              counter += (int) k;
-              for (i = 0; i < (int) floor (t - 1 + 0.5); ++i)
-                {
-                  for (j = 0; j < (int) k; ++j)
-                    {
-                      if (pos < len_array)
-                        array[pos] = array[c + j];
-                      else
-                        {
-                          fprintf (stderr, "Error: in %s: trailing garbage %s is ignored for keyword %s\n",
-                                   get_prefix (), end_ptr, key);
-                          delete[]sbuf;
-                          return counter;
-                        }
-                      ++pos;
-                      ++counter;
-                    }
-                }
+              fprintf (stderr, "Error: in %s: trailing garbage %s is ignored for keyword %s\n",
+                       get_prefix (), end_ptr, key);
+              delete[]sbuf;
+              return counter;
+            }
+          c = pos;
+          ++pos;
+          ++counter;
+          if (start_ptr == end_ptr) // if have not read return error -4
+            {
+              delete[]sbuf;
+              return -4;
             }
           else
             {
-              start_ptr = end_ptr;
-              if (pos < len_array)
-                array[pos] = (float)strtod (start_ptr, &end_ptr);      // try to read double from buf
-              else
+              for (i = 0; i < (t_long) floor (t - 1 + 0.5); ++i)
                 {
-                  fprintf (stderr, "Error: in %s: trailing garbage %s is ignored for keyword %s\n",
-                           get_prefix (), end_ptr, key);
-                  delete[]sbuf;
-                  return counter;
-                }
-              c = pos;
-              ++pos;
-              ++counter;
-              if (start_ptr == end_ptr) // if have not read return error -4
-                {
-                  delete[]sbuf;
-                  return -4;
-                }
-              else
-                {
-                  for (i = 0; i < (int) floor (t - 1 + 0.5); ++i)
+                  if (pos < len_array)
+                    array[pos] = array[c];
+                  else
                     {
-                      if (pos < len_array)
-                        array[pos] = array[c];
-                      else
-                        {
-                          fprintf (stderr, "Error: in %s: trailing garbage %s is ignored for keyword %s\n",
-                                   get_prefix (), end_ptr, key);
-                          delete[]sbuf;
-                          return counter;
-                        }
-                      ++pos;
-                      ++counter;
+                      fprintf (stderr, "Error: in %s: trailing garbage %s is ignored for keyword %s\n",
+                               get_prefix (), end_ptr, key);
+                      delete[]sbuf;
+                      return counter;
                     }
+                  ++pos;
+                  ++counter;
                 }
             }
         }
@@ -756,6 +518,7 @@ FRead::convert_f (float *array, int len_array, int pos, char *buf,
 //  delete[] sbuf;
 //  return 0;
 }
+#if 0
 /*!
   \brief   Recursive function\n
 *          For keyword KEY read array from
@@ -775,13 +538,12 @@ FRead::convert_f (float *array, int len_array, int pos, char *buf,
 *         if cann't allocate memory                       -3\n
 *         if string format error                          -4
 */
-int
-FRead::convert_d (double *array, int len_array, int pos, char *buf,
+long
+FRead::convert_d (double *array, const long len_array, long pos, char *buf,
                   const char *key)
 {
   char *sbuf;
-  int cb, c, i, j, counter;
-  int k;
+  long c, i, counter;
   char *start_ptr, *end_ptr = 0;
   double t;
   // check section
@@ -835,94 +597,39 @@ FRead::convert_d (double *array, int len_array, int pos, char *buf,
           ++end_ptr;
           if (trim_left (&end_ptr))
             return -50;
-          if (*end_ptr == '{')
+          start_ptr = end_ptr;
+          if (pos < len_array)
+            array[pos] = strtod (start_ptr, &end_ptr);      // try to read double from buf
+          else
             {
-              ++end_ptr;
-              cb = 1;
-              k = 0;
-              while (cb != 0 && *end_ptr != '\0')
-                {
-                  if (*end_ptr == '{')
-                    ++cb;
-                  else if (*end_ptr == '}')
-                    --cb;
-                  sbuf[k] = *end_ptr;
-                  ++k;
-                  ++end_ptr;
-                }
-              if (sbuf[k - 1] == '}' && k > 0)
-                {
-                  --k;
-                  sbuf[k] = '\0';
-                }
-              else
-                {
-                  delete[]sbuf;
-                  return -40;
-                }
-              k = convert_d (array, len_array, pos, sbuf, key);
-              if (k <= 0)
-                {
-                  delete[]sbuf;
-                  return k;
-                }
-              c = pos;
-              pos += (int) k;
-              counter += (int) k;
-              for (i = 0; i < (int) floor (t - 1 + 0.5); ++i)
-                {
-                  for (j = 0; j < (int) k; ++j)
-                    {
-                      if (pos < len_array)
-                        array[pos] = array[c + j];
-                      else
-                        {
-                          fprintf (stderr, "Error: in %s: trailing garbage %s is ignored for keyword %s\n",
-                                   get_prefix (), end_ptr, key);
-                          delete[]sbuf;
-                          return counter;
-                        }
-                      ++pos;
-                      ++counter;
-                    }
-                }
+              fprintf (stderr, "Error: in %s: trailing garbage %s is ignored for keyword %s\n",
+                       get_prefix (), end_ptr, key);
+              delete[]sbuf;
+              return counter;
+            }
+          c = pos;
+          ++pos;
+          ++counter;
+          if (start_ptr == end_ptr) // if have not read return error -4
+            {
+              delete[]sbuf;
+              return -4;
             }
           else
             {
-              start_ptr = end_ptr;
-              if (pos < len_array)
-                array[pos] = strtod (start_ptr, &end_ptr);      // try to read double from buf
-              else
+              for (i = 0; i < (long) floor (t - 1 + 0.5); ++i)
                 {
-                  fprintf (stderr, "Error: in %s: trailing garbage %s is ignored for keyword %s\n",
-                           get_prefix (), end_ptr, key);
-                  delete[]sbuf;
-                  return counter;
-                }
-              c = pos;
-              ++pos;
-              ++counter;
-              if (start_ptr == end_ptr) // if have not read return error -4
-                {
-                  delete[]sbuf;
-                  return -4;
-                }
-              else
-                {
-                  for (i = 0; i < (int) floor (t - 1 + 0.5); ++i)
+                  if (pos < len_array)
+                    array[pos] = array[c];
+                  else
                     {
-                      if (pos < len_array)
-                        array[pos] = array[c];
-                      else
-                        {
-                          fprintf (stderr, "Error: in %s: trailing garbage %s is ignored for keyword %s\n",
-                                   get_prefix (), end_ptr, key);
-                          delete[]sbuf;
-                          return counter;
-                        }
-                      ++pos;
-                      ++counter;
+                      fprintf (stderr, "Error: in %s: trailing garbage %s is ignored for keyword %s\n",
+                               get_prefix (), end_ptr, key);
+                      delete[]sbuf;
+                      return counter;
                     }
+                  ++pos;
+                  ++counter;
                 }
             }
         }
@@ -950,7 +657,7 @@ FRead::convert_d (double *array, int len_array, int pos, char *buf,
 //  delete[] sbuf;
 //  return 0;
 }
-
+#endif //0
 /*!
   \brief   Recursiv function\n
 *          For keyword KEY read array from
@@ -971,15 +678,14 @@ FRead::convert_d (double *array, int len_array, int pos, char *buf,
 *         if string format error                          -4
 */
 
-int
-FRead::convert_u (int *array, int len_array, int pos, char *buf,
+t_long
+FRead::convert_u (t_int *array, const t_long len_array, t_long pos, char *buf,
                   const char *key)
 {
   char *sbuf;
-  int cb, c, i, j, counter;
-  int k;
+  t_long c, i, counter;
   char *start_ptr, *end_ptr = 0;
-  int t;
+  t_int t;
 
   // check section
   if (array == 0)               // check array pointer
@@ -1016,7 +722,7 @@ FRead::convert_u (int *array, int len_array, int pos, char *buf,
           delete[]sbuf;
           return -4;
         }
-      t = strtol (start_ptr, &end_ptr, 10);     // try to read int from buf
+      t = (t_int)strtol (start_ptr, &end_ptr, 10);     // try to read int from buf
       if (trim_left (&end_ptr))
         return -50;
       if (start_ptr == end_ptr) // if have not read return error -4
@@ -1029,101 +735,46 @@ FRead::convert_u (int *array, int len_array, int pos, char *buf,
           ++end_ptr;
           if (trim_left (&end_ptr))
             return -50;
-          if (*end_ptr == '{')
+          start_ptr = end_ptr;
+          if (*start_ptr == '-')    // negative values
             {
-              ++end_ptr;
-              cb = 1;
-              k = 0;
-              while (cb != 0 && *end_ptr != '\0')
-                {
-                  if (*end_ptr == '{')
-                    ++cb;
-                  else if (*end_ptr == '}')
-                    --cb;
-                  sbuf[k] = *end_ptr;
-                  ++k;
-                  ++end_ptr;
-                }
-              if (sbuf[k - 1] == '}' && k > 0)
-                {
-                  --k;
-                  sbuf[k] = '\0';
-                }
-              else
-                {
-                  delete[]sbuf;
-                  return -4;
-                }
-              k = convert_u (array, len_array, pos, sbuf, key);
-              if (k <= 0)
-                {
-                  delete[]sbuf;
-                  return k;
-                }
-              c = pos;
-              pos += (int) k;
-              counter += (int) k;
-              for (i = 0; i < t - 1; ++i)
-                {
-                  for (j = 0; j < (int) k; ++j)
-                    {
-                      if (pos < len_array)
-                        array[pos] = array[c + j];
-                      else
-                        {
-                          fprintf (stderr, "Error: in %s: trailing garbage %s is ignored for keyword %s\n",
-                                   get_prefix (), end_ptr, key);
-                          delete[]sbuf;
-                          return counter;
-                        }
-                      ++pos;
-                      ++counter;
-                    }
-                }
+              delete[]sbuf;
+              return -4;
+            }
+          if (pos < len_array)
+            {
+              array[pos] = (t_int)strtol (start_ptr, &end_ptr, 10);        // try to read int from buf
             }
           else
             {
-              start_ptr = end_ptr;
-              if (*start_ptr == '-')    // negative values
+              fprintf (stderr, "Error: in %s: trailing garbage %s is ignored for keyword %s\n",
+                       get_prefix (), end_ptr, key);
+              delete[]sbuf;
+              return counter;
+            }
+          c = pos;
+          ++pos;
+          ++counter;
+          if (start_ptr == end_ptr) // if have not read return error -4
+            {
+              delete[]sbuf;
+              return -4;
+            }
+          else
+            {
+              for (i = 0; i < t - 1; ++i)
                 {
-                  delete[]sbuf;
-                  return -4;
-                }
-              if (pos < len_array)
-                {
-                  array[pos] = strtol (start_ptr, &end_ptr, 10);        // try to read int from buf
-                }
-              else
-                {
-                  fprintf (stderr, "Error: in %s: trailing garbage %s is ignored for keyword %s\n",
-                           get_prefix (), end_ptr, key);
-                  delete[]sbuf;
-                  return counter;
-                }
-              c = pos;
-              ++pos;
-              ++counter;
-              if (start_ptr == end_ptr) // if have not read return error -4
-                {
-                  delete[]sbuf;
-                  return -4;
-                }
-              else
-                {
-                  for (i = 0; i < t - 1; ++i)
+                  if (pos < len_array)
+                    array[pos] = array[c];
+                  else
                     {
-                      if (pos < len_array)
-                        array[pos] = array[c];
-                      else
-                        {
-                          fprintf (stderr, "Error: in %s: trailing garbage %s is ignored for keyword %s\n",
-                                   get_prefix (), end_ptr, key);
-                          delete[]sbuf;
-                          return counter;
-                        }
-                      ++pos;
-                      ++counter;
+                      fprintf (stderr, "Error: in %s: trailing garbage %s is ignored for keyword %s\n",
+                               get_prefix (), end_ptr, key);
+                      delete[]sbuf;
+                      return counter;
                     }
+                  ++pos;
+                  ++counter;
                 }
             }
         }
@@ -1162,14 +813,14 @@ FRead::convert_u (int *array, int len_array, int pos, char *buf,
 *         if bad input pointer                    -2
 */
 int
-FRead::unwrap (char *s, const int flag)
+FRead::unwrap (char *s, const int flag) const
 {
   char *ptr = 0;
   char *ptr_new = 0;
   char *ns_ptr = 0;
   char ns[CHAR_BUF_LEN];
-  int n, i;
-  int words_number = 0;
+  t_long n, i;
+  t_long words_number = 0;
 
   if (!s)
     {
@@ -1253,7 +904,7 @@ FRead::unwrap (char *s, const int flag)
          if trim_left return error  code         -3
 */
 int
-FRead::scanf_s (char *start_ptr, char **end_ptr, char *dest, int no_default_p, int *is_default)
+FRead::scanf_s (char *start_ptr, char **end_ptr, char *dest, int no_default_p, int *is_default) const
 {
   char *dest_ptr = 0;
   char *ptr = 0;
@@ -1310,7 +961,7 @@ FRead::scanf_s (char *start_ptr, char **end_ptr, char *dest, int no_default_p, i
 
 //read word in text with commas
 int
-FRead::scanf_text (char *start_ptr, char **end_ptr, char *dest)
+FRead::scanf_text (char *start_ptr, char **end_ptr, char *dest) const
 {
   char *dest_ptr = 0;
   int current_error_num;
@@ -1373,9 +1024,9 @@ FRead::scanf_text (char *start_ptr, char **end_ptr, char *dest)
          if trim_left return error  code         -3
 */
 int
-FRead::scanf_u (char *start_ptr, char **end_ptr, int *dest, int *is_default)
+FRead::scanf_u (char *start_ptr, char **end_ptr, t_long *dest, int *is_default) const
 {
-  int t;
+  t_long t;
   int current_error_num;
   //check all
   if (!start_ptr || !dest)
@@ -1404,7 +1055,7 @@ FRead::scanf_u (char *start_ptr, char **end_ptr, int *dest, int *is_default)
         *is_default = 1;
       return 0;
     }
-  t = strtol (start_ptr, end_ptr, 10);
+  t = (t_long)strtol (start_ptr, end_ptr, 10);
   if (start_ptr == *end_ptr)
     {
       // Cannot read integer: error output should be done by caller
@@ -1425,7 +1076,7 @@ FRead::scanf_u (char *start_ptr, char **end_ptr, int *dest, int *is_default)
          if trim_left return error  code         current_error_num
 */
 int
-FRead::scanf_d (char *start_ptr, char **end_ptr, double *dest, int no_default_p, int *is_default)
+FRead::scanf_d (char *start_ptr, char **end_ptr, t_double *dest, int no_default_p, int *is_default) const
 {
   double t;
   int current_error_num;
@@ -1465,7 +1116,7 @@ FRead::scanf_d (char *start_ptr, char **end_ptr, double *dest, int no_default_p,
       return 0;
     }
   // try to read double value from input string
-  t = strtod (start_ptr, end_ptr);
+  t = (t_double)strtod (start_ptr, end_ptr);
   // check reading result
   // if have read nothing return -3
   if (start_ptr == *end_ptr)
@@ -1484,14 +1135,14 @@ FRead::scanf_d (char *start_ptr, char **end_ptr, double *dest, int no_default_p,
 char *
 FRead::get_prefix ()
 {
-  int i;
+  t_long i;
   char s[512];
 
   prefix[0] = '\0';
   for (i = 0; i < top; ++i)
     {
-      sprintf (s, "%s '%s' %s %d ",  ("File"), F[i].get_name (),
-                ("Line"), F[i].nstr);
+      sprintf (s, "%s '%s' %s %ld ",  ("File"), F[i].get_name (),
+                ("Line"), (long)F[i].nstr);
       strcat (prefix, s);
     }
   return prefix;
@@ -1504,11 +1155,10 @@ FRead::get_prefix ()
   \return 0 if success < 0 else
 */
 int
-FRead::scanf_file_name (char *dest, char *source)
+FRead::scanf_file_name (char *dest, char *source) const
 {
   char *d_ptr;
   char *s_ptr = source;
-  int flag = 0;
 
   if (!dest || !source)
     return -1;
@@ -1518,7 +1168,6 @@ FRead::scanf_file_name (char *dest, char *source)
 
   if ((*s_ptr)== '\"' || (*s_ptr)== '\'')
     {
-      flag = 1;
       ++s_ptr;
     }
   for (d_ptr = dest; (*s_ptr) != '\"' && (*s_ptr) != '\'' && (*s_ptr) != '\0'; ++s_ptr, ++d_ptr)
@@ -1534,11 +1183,10 @@ FRead::scanf_file_name (char *dest, char *source)
   \return 0 if success < 0 if error occur 
 */
 int
-FRead::skip_d (char *start_ptr, char **end_ptr, int count)
+FRead::skip_d (char *start_ptr, char **end_ptr, const t_long count) const 
 {
-  double t;
   int current_error_num;
-  int i;
+  t_long i;
   
   //check input pointers
   if (!start_ptr || !end_ptr)
@@ -1572,10 +1220,11 @@ FRead::skip_d (char *start_ptr, char **end_ptr, int count)
           return -1;
         }
       // try to read double value from input string
-      t = strtod (start_ptr, end_ptr);
+      double t = strtod (start_ptr, end_ptr);
+
       if (start_ptr == *end_ptr)
         {
-          return -1;
+          return -1 * (int)t * 0 - 1;  // just make compiller happy (unused t)
         }
       start_ptr = *end_ptr;
     }
@@ -1591,10 +1240,10 @@ FRead::skip_d (char *start_ptr, char **end_ptr, int count)
   \return 0 if success < 0 if error occur 
 */
 int
-FRead::skip_u (char *start_ptr, char **end_ptr, int count)
+FRead::skip_u (char *start_ptr, char **end_ptr, const t_long count) const
 {
-  int i;
-  int buf;
+  t_long i;
+  t_long buf;
 
   for (i = count; i > 0; --i)
     {
@@ -1614,7 +1263,7 @@ FRead::skip_u (char *start_ptr, char **end_ptr, int count)
   \return 0 if success < 0 if error occur 
 */
 int
-FRead::skip_s (char *start_ptr, char **end_ptr, int count)
+FRead::skip_s (char *start_ptr, char **end_ptr, const t_long count) const
 {
   int i;
   char buf[CHAR_BUF_LEN];

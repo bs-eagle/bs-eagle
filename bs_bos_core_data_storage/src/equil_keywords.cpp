@@ -13,7 +13,7 @@
 #include "equil_keywords.hpp"
 #include "keyword_manager_iface.h"
 #include "init_model_iface.hpp"
-#include "read_class.h"
+#include "bos_reader_iface.h"
 #include "data_class.h"
 #include "constants.h"
 #include "equil_model_iface.h"
@@ -36,39 +36,39 @@ namespace blue_sky
     void
     EQUIL (std::string const &keyword, keyword_params &params)
     {
-      BS_SP (FRead) reader = params.hdm->get_reader ();
+      BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
       BS_SP (idata) idata = params.hdm->get_data ();
       if (!idata->pvto.size())
         {
           bs_throw_exception (boost::format ("Error in %s: PVT table for oil has not been initialized yet (keyword: %s")
-            % reader->get_prefix () % keyword);
+            % reader->get_prefix ().c_str () % keyword);
         }
       if (!idata->pvtw.size())
         {
           bs_throw_exception (boost::format ("Error in %s: PVT table for water has not been initialized yet (keyword: %s")
-            % reader->get_prefix () % keyword);
+            % reader->get_prefix ().c_str ()  % keyword);
         }
       if (!idata->pvtg.size())
         {
           bs_throw_exception (boost::format ("Error in %s: PVT table for gas has not been initialized yet (keyword: %s)")
-            % reader->get_prefix () % keyword);
+            % reader->get_prefix ().c_str ()  % keyword);
         }
       if (!idata->rock->size())
         {
           bs_throw_exception (boost::format ("Error in %s: rock properties have not been initialized yet (keyword: %s)")
-            % reader->get_prefix () % keyword);
+            % reader->get_prefix ().c_str ()  % keyword);
         }
 
       t_long eql_region = idata->props->get_i ("eql_region");
       if (eql_region == 0)
         {
           bs_throw_exception (boost::format ("Error in %s: eql_region == 0 (keyword: %s)")
-            % reader->get_prefix () % keyword);
+            % reader->get_prefix ().c_str ()  % keyword);
         }
       if (static_cast <t_long> (idata->equil->size ()) != eql_region * EQUIL_TOTAL)
         {
           bs_throw_exception (boost::format ("Error in %s: EQUIL table size mismatch (keyword: %s), %d == %d")
-            % reader->get_prefix () % keyword % idata->equil->size () % (eql_region * EQUIL_TOTAL));
+            % reader->get_prefix ().c_str ()  % keyword % idata->equil->size () % (eql_region * EQUIL_TOTAL));
         }
 
 
@@ -80,11 +80,11 @@ namespace blue_sky
           if (buf[0] == '/')
             {
               bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
-                % reader->get_prefix () % keyword);
+                % reader->get_prefix ().c_str ()  % keyword);
             }
 
           // Values by default
-          boost::array <double, EQUIL_TOTAL> dbuf;
+          boost::array <t_double, EQUIL_TOTAL> dbuf;
           dbuf[EQUIL_DAT_DEPTH] = -1.0; //Ddat
           dbuf[EQUIL_DAT_PRESS] = 0.0;  //Pdat
           dbuf[EQUIL_WOC_DEPTH] = -1.0; //Dwoc
@@ -98,31 +98,35 @@ namespace blue_sky
           dbuf[EQUIL_COMP_ARG]  = 0;    // composition argument initialization
 
           char *end_ptr = 0;
-          unwrap (buf);
-          scanf_d (buf,     &end_ptr, &dbuf[EQUIL_DAT_DEPTH], 0, 0, "Can't read EQUIL_DEPTH");
-          scanf_d (end_ptr, &end_ptr, &dbuf[EQUIL_DAT_PRESS], 0, 0, "Can't read EQUIL_DEPTH_PRESSURE");
-          scanf_d (end_ptr, &end_ptr, &dbuf[EQUIL_WOC_DEPTH], 0, 0, "Can't read EQUIL_WOC_DEPTH");
-          scanf_d (end_ptr, &end_ptr, &dbuf[EQUIL_WOC_PRESS], 0, 0, "Can't read EQUIL_WOC_DEPTH_PRESSURE");
-          scanf_d (end_ptr, &end_ptr, &dbuf[EQUIL_GOC_DEPTH], 0, 0, "Can't read EQUIL_GOC_DEPTH");
-          scanf_d (end_ptr, &end_ptr, &dbuf[EQUIL_GOC_PRESS], 0, 0, "Can't read EQUIL_GOC_DEPTH_PRESSURE");
-          scanf_d (end_ptr, &end_ptr, &dbuf[EQUIL_RS_TYPE],   0, 0, "Can't read RS initialization type at GOC depth");
+          reader->unwrap (buf);
+          if (reader->scanf_fp (buf,     &end_ptr, &dbuf[EQUIL_DAT_DEPTH], 0, 0)
+              || reader->scanf_fp (end_ptr, &end_ptr, &dbuf[EQUIL_DAT_PRESS], 0, 0)
+              || reader->scanf_fp (end_ptr, &end_ptr, &dbuf[EQUIL_WOC_DEPTH], 0, 0)
+              || reader->scanf_fp (end_ptr, &end_ptr, &dbuf[EQUIL_WOC_PRESS], 0, 0)
+              || reader->scanf_fp (end_ptr, &end_ptr, &dbuf[EQUIL_GOC_DEPTH], 0, 0)
+              || reader->scanf_fp (end_ptr, &end_ptr, &dbuf[EQUIL_GOC_PRESS], 0, 0)
+              || reader->scanf_fp (end_ptr, &end_ptr, &dbuf[EQUIL_RS_TYPE],   0, 0))
+            {
+              bs_throw_exception (boost::format ("Error in %s: Cannot read values")
+                % reader->get_prefix ().c_str ());
+            }
 
           if (dbuf[EQUIL_DAT_DEPTH] < 0) // Ddat
             {
               bs_throw_exception (boost::format ("Error in %s: incorrect value of EQUIL_DEPTH %f")
-                % reader->get_prefix () % dbuf[EQUIL_DAT_DEPTH]);
+                % reader->get_prefix ().c_str ()  % dbuf[EQUIL_DAT_DEPTH]);
             }
 
           if (dbuf[EQUIL_DAT_PRESS] < 0) //Pdat
             {
               bs_throw_exception (boost::format ("Error in %s: incorrect pressure value at datum depth %f")
-                % reader->get_prefix () % dbuf[EQUIL_DAT_PRESS]);
+                % reader->get_prefix ().c_str ()  % dbuf[EQUIL_DAT_PRESS]);
             }
 
           if (dbuf[EQUIL_WOC_DEPTH] < 0)
             {
               bs_throw_exception (boost::format ("Error in %s: incorrect value of WOC depth %f")
-                % reader->get_prefix () % dbuf[EQUIL_WOC_DEPTH]);
+                % reader->get_prefix ().c_str ()  % dbuf[EQUIL_WOC_DEPTH]);
             }
 
           if (dbuf[EQUIL_GOC_DEPTH] < 0)
@@ -172,27 +176,28 @@ namespace blue_sky
     void
     RSVD (std::string const &keyword, keyword_params &params)
     {
-      BS_SP (FRead) reader = params.hdm->get_reader ();
+      BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
       BS_SP (idata) idata = params.hdm->get_data ();
 
       t_long eql_region = idata->props->get_i ("eql_region");
       if (eql_region == 0)
         {
           bs_throw_exception (boost::format ("Error in %s: eql_region == 0 (keyword: %s)")
-            % reader->get_prefix () % keyword);
+            % reader->get_prefix ().c_str ()  % keyword);
         }
 
       idata->rsvd.resize (eql_region);
 
       // Read table for each of region
-      std::vector <double> dbuf;
+      std::vector <t_float> dbuf;
+      dbuf.resize (4096);
       for (t_long i = 0; i < eql_region; ++i)
         {
-          t_long len = reader->read_table (keyword, dbuf, 2);
+          t_long len = reader->read_fp_table (keyword.c_str (), &(dbuf[0]), 4096, 2);
           if (len < 1)
             {
               bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
-                % reader->get_prefix () % keyword);
+                % reader->get_prefix ().c_str ()  % keyword);
             }
 
           idata->rsvd[i].set_table_len (len);
@@ -215,27 +220,28 @@ namespace blue_sky
     void
     PBVD (std::string const &keyword, keyword_params &params)
     {
-      BS_SP (FRead) reader = params.hdm->get_reader ();
+      BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
       BS_SP (idata) idata = params.hdm->get_data ();
 
       t_long eql_region = idata->props->get_i ("eql_region");
       if (eql_region == 0)
         {
           bs_throw_exception (boost::format ("Error in %s: eql_region == 0 (keyword: %s)")
-            % reader->get_prefix () % keyword);
+            % reader->get_prefix ().c_str ()  % keyword);
         }
 
       idata->pbvd.resize (eql_region);
 
       // Read table for each of region
-      std::vector <double> dbuf;
+      std::vector <t_float> dbuf;
+      dbuf.resize (4096);
       for (t_long i = 0; i < eql_region; ++i)
         {
-          t_long len = reader->read_table (keyword, dbuf, 2);
+          t_long len = reader->read_fp_table (keyword.c_str (), &dbuf[0], 4096, 2);
           if (len < 1)
             {
               bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
-                % reader->get_prefix () % keyword);
+                % reader->get_prefix ().c_str ()  % keyword);
             }
 
           idata->pbvd[i].set_table_len (len);

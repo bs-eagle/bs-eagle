@@ -41,7 +41,7 @@ namespace blue_sky {
   }
 
   void
-  data_saver::write_fip_results (const sp_calc_model_t &calc_model)
+  data_saver::write_fip_results (const sp_calc_model_t & /*calc_model*/)
   {
     BS_ASSERT (impl_);
     //! \todo Should be implemented

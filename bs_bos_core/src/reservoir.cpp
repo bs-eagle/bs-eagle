@@ -186,7 +186,7 @@ namespace blue_sky
 
   // FIXME: remove, obsolete
   void
-  reservoir::init_jacobian (const BS_SP (jacobian) &jacobian, index_t n_cells)
+  reservoir::init_jacobian (const BS_SP (jacobian) & /*jacobian*/, index_t /*n_cells*/)
   {
   }
 
@@ -248,7 +248,8 @@ namespace blue_sky
   }
 
   void
-  reservoir::fill_rhs_wells (double dt, const sp_calc_model_t &calc_model, rhs_item_array_t &rhs, bool update_after_gauss_elimination) const
+  reservoir::fill_rhs_wells (double dt, const sp_calc_model_t &calc_model, rhs_item_array_t &rhs, 
+                             bool /*update_after_gauss_elimination*/) const
   {
     index_t n_phases = calc_model->n_phases;
     bool is_g = calc_model->is_gas ();
@@ -306,7 +307,7 @@ namespace blue_sky
 
   void
   reservoir::write_step_to_storage (const sp_calc_model_t &calc_model, 
-    const sp_mesh_iface_t &mesh, 
+    const sp_mesh_iface_t & /*mesh*/, 
     const BS_SP (jacobian) &jacobian, 
     size_t large_time_step_num, 
     size_t total_time_step_num, 

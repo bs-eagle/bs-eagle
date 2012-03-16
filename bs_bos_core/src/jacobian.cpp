@@ -74,7 +74,7 @@ namespace blue_sky
   }
 
   void
-  jacobian::setup_preconditioner (const BS_SP (fi_params) &ts_params)
+  jacobian::setup_preconditioner (const BS_SP (fi_params) & /*ts_params*/)
   {
 //    //set up preconditioner
 //    if (prec_is_cpr_flag)
@@ -95,7 +95,7 @@ namespace blue_sky
   }
 
   int 
-  jacobian::setup_solver_params (well_model_type model_type, int n_phases, const BS_SP (fi_params) &ts_params)
+  jacobian::setup_solver_params (well_model_type /*model_type*/, int /*n_phases*/, const BS_SP (fi_params) &ts_params)
   {
 
     if (!ts_params)

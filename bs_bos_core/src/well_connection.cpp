@@ -63,7 +63,7 @@ namespace blue_sky
      * \brief  'default' ctor for connection
      * \param  param Additional params for ctor
      * */
-    connection::connection (blue_sky::bs_type_ctor_param param /* = NULL */)
+    connection::connection (blue_sky::bs_type_ctor_param /* param = NULL */)
     : n_block_ (-1)
     {
     }
@@ -146,7 +146,7 @@ namespace blue_sky
           // compute this factor only once 
           completion_connection_factor::compute (*this, internal_constants, params, mesh, perm, ntg);
         }
-      else if (HORIZ_WELL_MODEL_PEACEMAN || dir_ == direction_z  && this->completion_data.use_CCF_flag == false)
+      else if (HORIZ_WELL_MODEL_PEACEMAN || (dir_ == direction_z  && this->completion_data.use_CCF_flag == false))
         {
           peaceman_model::compute (*this, internal_constants, params, mesh, perm, ntg, ro_calc_flag);
         }
@@ -278,7 +278,7 @@ namespace blue_sky
       bulkp = b;
     }
     void
-    connection::set_rate (item_t rate)
+    connection::set_rate (item_t /*rate*/)
     {
       BS_ASSERT (false && "NOT IMPL YET");
     }

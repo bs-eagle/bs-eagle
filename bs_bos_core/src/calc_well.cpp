@@ -228,7 +228,7 @@ namespace blue_sky
     }
 
   bool
-  well::check_connections_bhp (const spv_double &pressure) const
+  well::check_connections_bhp (const spv_double & /*pressure*/) const
     {
       BS_ASSERT (!is_shut ()) (name ());
       if (is_no_connections ())

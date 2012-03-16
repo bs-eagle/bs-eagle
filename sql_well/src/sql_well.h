@@ -16,7 +16,7 @@
 #include <fstream>
 #include <sqlite3.h>
 
-#include "read_class_sql_well.h"
+#include "bos_reader_iface.h"
 #include "well_pool_iface.h"
 
 #include <boost/serialization/access.hpp>
@@ -33,7 +33,9 @@ namespace blue_sky
       typedef BS_SP (table_iface)                       sp_table_t;
       typedef BS_SP (gis_iface)                         sp_gis_t;
       typedef BS_SP (traj_iface)                        sp_traj_t;
-      typedef BS_SP (h5_pool_iface)           					sp_pool_t;
+      typedef BS_SP (h5_pool_iface)           			sp_pool_t;
+      typedef BS_SP (bos_reader_iface)                  sp_reader_t;
+      typedef BS_SP (dt_tools_iface)                    sp_dt_t;
 
       // ------------------------------------
       // METHODS
@@ -148,6 +150,7 @@ namespace blue_sky
       virtual int save_to_bos_ascii_file (const std::string &fname, sp_pool_t pool, sp_prop_t prop);
     public:
 #ifdef BSPY_EXPORTING_PLUGIN
+#if 0
       virtual boost::python::list d2date (double d) const
         {
           boost::python::list l;
@@ -185,7 +188,7 @@ namespace blue_sky
           sprintf (b, "Time: %02d:%02d:%02d", hour, minute, second);
           return std::string (b);
         }
-
+#endif //0
       /**
        * @brief python print wrapper
        *
@@ -215,7 +218,7 @@ namespace blue_sky
       std::string   file_name;          //!< database filename
       sqlite3       *db;                //!< database pointer
       sqlite3_stmt  *stmp_sql;
-      FRead *fr_file;                    //!< read from ascii helper
+      sp_reader_t   fr_file;            //!< read from ascii helper
 
       BLUE_SKY_TYPE_DECL (sql_well);
 

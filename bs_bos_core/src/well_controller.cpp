@@ -95,7 +95,7 @@ namespace blue_sky
 
     ///////////////////////////////////////////////////////////////////////////
 
-    well_controller::well_controller (bs_type_ctor_param param /* = NULL */)
+    well_controller::well_controller (bs_type_ctor_param /*param = NULL */)
     : bhp_ (0)
     , bhp_history_ (0)
     , injection_type_ (injection_none)
@@ -411,7 +411,7 @@ namespace blue_sky
 
     //////////////////////////////////////////////////////////////////////////
 
-    well_controller_factory::well_controller_factory (bs_type_ctor_param param /* = NULL */)
+    well_controller_factory::well_controller_factory (bs_type_ctor_param /*param = NULL */)
     {
 
     }

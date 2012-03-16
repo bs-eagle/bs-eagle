@@ -67,7 +67,7 @@ namespace blue_sky {
 
 
       bool
-      operator== (const this_t &rhs)
+      operator== (const this_t & /*rhs*/)
       {
         bs_throw_exception ("calc_model_data objects are not comparable");
       }

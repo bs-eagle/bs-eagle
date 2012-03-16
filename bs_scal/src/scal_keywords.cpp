@@ -11,77 +11,79 @@
 #include "scal_keywords.hpp"
 #include "keyword_manager_iface.h"
 #include "data_class.h"
-#include "read_class.h"
+#include "bos_reader_iface.h"
 #include "scal_3p_iface.hpp"
 
 namespace blue_sky 
 {
-  typedef void (*handler_callback) (BS_SP (scal_3p_iface), spv_float &, t_int, t_int, t_int);
+  typedef void (*handler_callback) (BS_SP (scal_3p_iface), t_float *, t_int, t_int, t_int);
 
   void
   handler (std::string const &keyword, keyword_params &params, handler_callback callback, const t_int n_columns)
   {
-    BS_SP (FRead) reader = params.hdm->get_reader ();
+    BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
     BS_SP (idata) idata = params.hdm->get_data ();
     BS_SP (scal_3p_iface) scal = params.hdm->get_scal ();
 
     t_int regions = idata->props->get_i ("sat_region");
     t_int n_rows;
     
-    spv_float data = BS_KERNEL.create_object (v_float::bs_type ());
+    //spv_float data = BS_KERNEL.create_object (v_float::bs_type ());
+    std::vector<t_float> d;
+    d.resize (4096);
+
     for (t_long i = 0; i < regions; ++i)
       {
-        if ((n_rows = reader->read_table (keyword, *data, n_columns)) < 1)
+        if ((n_rows = reader->read_fp_table (keyword.c_str (), &d[0], 4096, n_columns)) < 1)
           {
             bs_throw_exception (boost::format ("Error in %s: not enough arguments for keyword %s")
                                 % reader->get_prefix () % keyword);
           }
 
-        callback (scal, data, i, n_rows, n_columns);
-        data->clear ();
+        callback (scal, &d[0], i, n_rows, n_columns);
       }
   }
 
   void
-  SWOF_callback (BS_SP (scal_3p_iface) scal, spv_float &data, t_int region_index, t_int n_rows, t_int n_cols)
+  SWOF_callback (BS_SP (scal_3p_iface) scal, t_float *data, t_int region_index, t_int n_rows, t_int n_cols)
   {
     BS_SP (table_iface) tbl = scal->get_table (FI_PHASE_WATER, region_index);
-    tbl->convert_from_array(n_rows, n_cols, data);
+    tbl->convert_from_tf_array(n_rows, n_cols, data);
   }
   void
-  SGOF_callback (BS_SP (scal_3p_iface) scal, spv_float &data, t_int region_index, t_int n_rows, t_int n_cols)
+  SGOF_callback (BS_SP (scal_3p_iface) scal, t_float *data, t_int region_index, t_int n_rows, t_int n_cols)
   {
     BS_SP (table_iface) tbl = scal->get_table (FI_PHASE_GAS, region_index);
-    tbl->convert_from_array(n_rows, n_cols, data);
+    tbl->convert_from_tf_array(n_rows, n_cols, data);
   }
 
   void
-  SWFN_callback (BS_SP (scal_3p_iface) scal, spv_float &data, t_int region_index, t_int n_rows, t_int n_cols)
+  SWFN_callback (BS_SP (scal_3p_iface) scal, t_float *data, t_int region_index, t_int n_rows, t_int n_cols)
   {
     BS_SP (table_iface) tbl = scal->get_table (FI_PHASE_WATER, region_index);
-    tbl->convert_from_array(n_rows, n_cols, data);
+    tbl->convert_from_tf_array(n_rows, n_cols, data);
   }
   void
-  SGFN_callback (BS_SP (scal_3p_iface) scal, spv_float &data, t_int region_index, t_int n_rows, t_int n_cols)
+  SGFN_callback (BS_SP (scal_3p_iface) scal, t_float *data, t_int region_index, t_int n_rows, t_int n_cols)
   {
     BS_SP (table_iface) tbl = scal->get_table (FI_PHASE_GAS, region_index);
-    tbl->convert_from_array(n_rows, n_cols, data);
+    tbl->convert_from_tf_array(n_rows, n_cols, data);
   }
 
   void
-  SOF3_callback (BS_SP (scal_3p_iface) scal, spv_float &data, t_int region_index, t_int n_rows, t_int n_cols)
+  SOF3_callback (BS_SP (scal_3p_iface) scal, t_float *data, t_int region_index, t_int n_rows, t_int n_cols)
   {
     BS_SP (table_iface) tbl = scal->get_table (FI_PHASE_OIL, region_index);
-    tbl->convert_from_array(n_rows, n_cols, data);
+    tbl->convert_from_tf_array(n_rows, n_cols, data);
   }
 
   void
-  SOF2_callback (BS_SP (scal_3p_iface) scal, spv_float &data, t_int region_index, t_int n_rows, t_int n_cols)
+  SOF2_callback (BS_SP (scal_3p_iface) scal, t_float *data, t_int region_index, t_int n_rows, t_int n_cols)
   {
     // TODO: sof2 for 2-phase models only => need check for phases
     // currently write this table for both water and gas data and use one of them (depends on phase which is present)
     BS_SP (table_iface) tbl = scal->get_table (FI_PHASE_OIL, region_index);
-    tbl->convert_from_array(n_rows, n_cols, data);
+    tbl->convert_from_tf_array(n_rows, n_cols, data);
   }
   
  void

@@ -144,7 +144,7 @@ namespace blue_sky {
    * */
   template <typename item_t>
   BS_FORCE_INLINE item_t
-  scale_not_table (item_t a, item_t b, item_t c, item_t d, item_t s, bool is_table_value_calc = true)
+  scale_not_table (item_t a, item_t b, item_t c, item_t d, item_t s, bool /*is_table_value_calc = true*/)
   {
     BS_ASSERT (d != b) (d) (b);
     return a + (s - b) * (c - a) / (d - b);

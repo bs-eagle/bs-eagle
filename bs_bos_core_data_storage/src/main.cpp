@@ -6,14 +6,14 @@
 #include "hdm.h"
 #include "well.h"
 #include "data_class.h"
-#include "read_class.h"
+//#include "bos_reader_iface.h"
 
 #include "py_hdm.h"
 #include "py_well.h"
 #include "py_well_storage.h"
 #include "py_keyword_manager.h"
 #include "py_data_class.h"
-#include "py_read_class.h"
+//#include "py_read_class.h"
 #include "equil_keywords.hpp"
 #include "explicit_keywords.hpp"
 
@@ -32,7 +32,7 @@ namespace blue_sky
 
     res &= BS_KERNEL.register_type (pd, idata::bs_type ()); BS_ASSERT (res);
     
-    res &= BS_KERNEL.register_type(pd, FRead::bs_type()); BS_ASSERT (res);
+    //res &= BS_KERNEL.register_type(pd, FRead::bs_type()); BS_ASSERT (res);
     res &= BS_KERNEL.register_type (pd, equil_keywords::bs_type ()); BS_ASSERT (res);
     res &= BS_KERNEL.register_type (pd, explicit_keywords::bs_type ()); BS_ASSERT (res);
     return res;
@@ -56,7 +56,7 @@ namespace {
   {
     using namespace blue_sky;
 
-    python::export_FRead ();
+    //python::export_FRead ();
     python::py_export_hdm ();
     python::py_export_idata ();
     python::export_keyword_manager();

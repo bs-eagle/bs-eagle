@@ -114,7 +114,7 @@ namespace blue_sky
   void
   calc_equil_vs_depth (bool is_o, bool is_g, bool is_w,
                        const phase_d_t &phase_d, const sat_d_t &sat_d,
-					             t_long n_phases, t_long phases, t_long sat_counter,
+					             t_long n_phases, t_long phases, t_long /*sat_counter*/,
 					             t_long n_depth,
                        //t_long ds_w, t_long ds_g,
                        const t_long n_eql,               //!< number of equil regions      
@@ -133,7 +133,7 @@ namespace blue_sky
                        spv_double saturation         //!< (n_phases * n_eql * n_depth)
                       )
   {
-    const t_long n_layer = 10;
+    //const t_long n_layer = 10;
     t_long ds_w, ds_g;
     t_long i_depth;
     t_long i_eql, i_pvt, i_sat = 0;
@@ -152,9 +152,9 @@ namespace blue_sky
     t_long d_w = phase_d[FI_PHASE_WATER];
     t_long d_g = phase_d[FI_PHASE_GAS];
     
-    const t_long N_equil = 2;
+    //const t_long N_equil = 2;
 
-    t_double s_water, s_gas;
+    //t_double s_water, s_gas;
     stdv_double press_w, press_g, press_o;
     spv_float pcw = BS_KERNEL.create_object (v_float::bs_type ());
 
@@ -628,7 +628,7 @@ namespace blue_sky
 
   void 
   equil_model_depth::init_equil_model (const t_long n_equil_regions_, 
-                                       t_int n_phases)
+                                       t_int /*n_phases*/)
     {
       BS_ASSERT (n_equil_regions_ > 0);
       n_equil_regions = n_equil_regions_;
@@ -674,8 +674,8 @@ namespace blue_sky
 				const stdv_float &poro,
 				t_long n_depth,
 				//stdv_double density,
-				sp_jfunction jfunc_water,
-				sp_jfunction jfunc_oil)
+				sp_jfunction /*jfunc_water*/,
+				sp_jfunction /*jfunc_oil*/)
   {
 	  t_long n_eql = 1;
 	  stdv_long sat_regions, pvt_regions;
@@ -712,7 +712,7 @@ namespace blue_sky
 
       for (size_t i = 0, sat_counter = 0; i < FI_PHASE_TOT; ++i)
       {
-        if ((phases & (1 << i)) && (sat_counter < n_phases ))
+        if ((phases & (1 << i)) && ((t_long)sat_counter < (t_long)n_phases ))
           sat_d[i] = sat_counter++;
         else
           sat_d[i] = -1;

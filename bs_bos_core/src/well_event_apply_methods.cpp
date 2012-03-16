@@ -76,7 +76,7 @@ namespace blue_sky
 
   //////////////////////////////////////////////////////////////////////////
   void
-  WELLCON_event::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
+  WELLCON_event::apply_internal (const sp_top & /*top*/, const sp_mesh_iface_t &/*msh*/,
                              const sp_calc_model_t &/*calc_model*/, const smart_ptr <idata, true> &/*data*/) const
   {
     //const sp_top &locked (top);
@@ -105,7 +105,7 @@ namespace blue_sky
   //////////////////////////////////////////////////////////////////////////
   void
   COMPDAT_event::apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
-                             const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &/*data*/) const
+                             const sp_calc_model_t & /*calc_model*/, const smart_ptr <idata, true> &/*data*/) const
   {
     const sp_top &locked (top);
     const sp_smesh_iface_t struct_msh (msh, bs_dynamic_cast());

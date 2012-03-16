@@ -31,7 +31,7 @@ namespace blue_sky
       typedef event_manager                           self_t;             //!< shortname for this type
       typedef self_t                                  this_t;             //!< shortname for this type
       typedef std::list < sp_event_base >             event_list_t; //!< list of events
-      typedef boost::posix_time::ptime                date_t;             //!< shortname for time
+      typedef double                                  date_t;             //!< shortname for time
       typedef std::map <date_t, event_list_t>         event_map;          //!< events map by date
 
       //-----------------------------------------
@@ -70,11 +70,9 @@ namespace blue_sky
       void
       end_event ();
 
-      void
-      set_current_date (date_t const &date);
+      void set_current_date (date_t date);
 
-      date_t const &
-      get_current_date () const;
+      date_t get_current_date () const;
 
       /**
        * \brief  creats new event or adds event to previous one
@@ -85,7 +83,7 @@ namespace blue_sky
        * \return may throw exception
        * */
       sp_event_base 
-      create_event(const boost::posix_time::ptime &date, const std::string & event_name, const std::string & event_params);
+      create_event(const double date, const std::string & event_name, const std::string & event_params);
 
 
       /**

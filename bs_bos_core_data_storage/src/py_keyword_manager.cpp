@@ -10,7 +10,7 @@
 #include "bs_bos_core_data_storage_stdafx.h"
 #include "py_keyword_manager.h"
 #include "keyword_manager.h"
-#include "read_class.h"
+//#include "read_class.h"
 #include "data_class.h"
 #include "rs_mesh_iface.h"
 
@@ -56,7 +56,7 @@ namespace python {
   //{
   //  t->register_keyword (keyword, handler, replace_existing);
   //}
-
+#if 0    //FREAD REMOVED!!!!!!!!!!!!!!
   template <typename T>
   smart_ptr <FRead, true>
   get_reader (T *t)
@@ -71,7 +71,7 @@ namespace python {
 
     return reader;
   }
-
+#endif //0
   /*
   template <typename T>
   smart_ptr <idata<typename T::strategy_type>, true>

@@ -31,9 +31,9 @@ namespace blue_sky {
     typedef data_vector <item_t>                    data_vector_t;
     typedef v_double                                item_array_t;
     typedef smart_ptr <item_array_t, true>          sp_array_item_t;
-    typedef std::vector <scal_region_info_t>      region_vector_t;
-    typedef std::vector <scal_region_t *>         region_vector_2_t;
-    typedef smart_ptr <this_t, true>								sp_scal_data_t;
+    typedef std::vector <scal_region_info_t>        region_vector_t;
+    typedef std::vector <scal_region_t *>           region_vector_2_t;
+    typedef smart_ptr <this_t, true>				sp_scal_data_t;
     typedef BS_SP (table_iface)                     sp_table;
     typedef std::vector <sp_table>                  sp_table_array_t;
     
@@ -249,12 +249,12 @@ namespace blue_sky {
   private:
 
     item_t 
-    get_phase_sat (item_t spr) const
+    get_phase_sat (item_t /*spr*/) const
     {
       return 0.0;
     }
     item_t 
-    get_oil_sat (item_t sorp)  const
+    get_oil_sat (item_t /*sorp*/)  const
     {
       return 0.0;
     }

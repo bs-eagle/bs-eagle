@@ -136,7 +136,7 @@ namespace blue_sky
   void 
   table::convert_from_array (const t_long n_rows, const t_long n_cols, spv_double data) 
     {
-      BS_ASSERT (n_rows * n_cols == data->size ());
+      BS_ASSERT (n_rows * n_cols == (int)(data->size ()));
       t_double *data_array = &(*data)[0];
       
       init(0, n_cols);
@@ -148,6 +148,21 @@ namespace blue_sky
         for (t_long j = 0; j < n_cols; ++j)
           values[j].push_back (data_array[i * n_cols + j]);
     }    
+
+  void 
+  table::convert_from_tf_array (const t_long n_rows, const t_long n_cols, t_float *data)
+    {
+      //BS_ASSERT (n_rows * n_cols == data->size ());
+      
+      init(0, n_cols);
+      
+      for (t_long j = 0; j < n_cols; ++j)
+        values[j].reserve(n_rows);
+        
+      for (t_long i = 0; i < n_rows; ++i)
+        for (t_long j = 0; j < n_cols; ++j)
+          values[j].push_back (data[i * n_cols + j]);
+    }
 
   void 
   table::save (toa_t &ar) const

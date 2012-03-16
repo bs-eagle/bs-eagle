@@ -8,6 +8,7 @@ env = custom_env.Clone ()
 env.Append (CPPPATH = ["include",
     includes["bs_bos_core_base"],
     includes["common_types"],
+    includes["common_alg"],
     includes["bs_mtx"],
     includes["bs_lsolvers"],
     #includes["bs_csr_ilu_prec"],
@@ -19,7 +20,7 @@ env.Append (CPPPATH = ["include",
     includes["bs_mesh"],
     includes["bs_mesh_src"],
     includes["sql_well"],
-    includes["sql_well_src"]
+ #   includes["sql_well_src"]
     ])
 
 libs = ["blue_sky", 

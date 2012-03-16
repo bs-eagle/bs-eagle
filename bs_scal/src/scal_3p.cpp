@@ -29,7 +29,7 @@ namespace blue_sky
 
   //////////////////////////////////////////////////////////////////////////
 
-  scale_array_holder::scale_array_holder (bs_type_ctor_param param /* = NULL */)
+  scale_array_holder::scale_array_holder (bs_type_ctor_param /*param  = NULL */)
   {
     data_pool = BS_KERNEL.create_object ("float_var_table");
     BS_ASSERT (data_pool);
@@ -55,7 +55,7 @@ namespace blue_sky
   }
 
   //////////////////////////////////////////////////////////////////////////
-  scal_3p::scal_3p (bs_type_ctor_param param /* = NULL */)
+  scal_3p::scal_3p (bs_type_ctor_param /*param  = NULL */)
   : water_data  (BS_KERNEL.create_object (scal_2p_data_holder_t::bs_type ()))
   , gas_data    (BS_KERNEL.create_object (scal_2p_data_holder_t::bs_type ()))
   , water_scale (BS_KERNEL.create_object (scale_array_holder_t::bs_type ()))
@@ -227,8 +227,8 @@ namespace blue_sky
 	  phase_d_t phase_d;
 	  sat_d_t sat_d;
 	  t_long n_phases = 0;
-    t_long phases = 0;
-	  t_long sat_counter = 0;    
+      t_long phases = 0;
+	  //t_long sat_counter = 0;    
       if (is_water)
       {
         phase_d[0] = n_phases++;
@@ -255,7 +255,7 @@ namespace blue_sky
 
       for (size_t i = 0, sat_counter = 0; i < FI_PHASE_TOT; ++i)
       {
-        if ((phases & (1 << i)) && (sat_counter < n_phases ))
+        if ((phases & (1 << i)) && ((t_long)sat_counter < (t_long)n_phases ))
           sat_d[i] = sat_counter++;
         else
           sat_d[i] = -1;

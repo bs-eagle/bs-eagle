@@ -346,7 +346,7 @@ namespace blue_sky {
        * \return Deriv by water saturation for water phase
        * */
       inline item_t
-      wat_sw_deriv (index_t k_cell, main_var_type main_var, item_t truns)
+      wat_sw_deriv (index_t k_cell, main_var_type /*main_var*/, item_t truns)
       {
         return MOBILITY_UP_W * truns * S_DERIV_CAP_PRESSURE_K_W;
       }
@@ -359,6 +359,7 @@ namespace blue_sky {
       {
         return SW_DERIV_MOBILITY_UP_W * PSI_W;
       }
+
       /**
        * \brief  Calculates deriv by pressure for water phase
        * \param  k_cell
@@ -367,7 +368,7 @@ namespace blue_sky {
        * \return Deriv by pressure for water phase
        * */
       inline item_t
-      wat_po_deriv (index_t k_cell, main_var_type main_var, item_t truns)
+      wat_po_deriv (index_t /*k_cell*/, main_var_type /*main_var*/, item_t truns)
       {
         return MOBILITY_UP_W * truns;
       }
@@ -416,7 +417,7 @@ namespace blue_sky {
        * \return Deriv by pressure for gas phase
        * */
       inline item_t
-      gas_po_deriv (index_t k_cell, main_var_type main_var, item_t truns)
+      gas_po_deriv (index_t /*k_cell*/, main_var_type /*main_var*/, item_t truns)
       {
         return MOBILITY_UP_G * truns;
       }
@@ -477,7 +478,7 @@ namespace blue_sky {
        * \return Deriv by pressure for oil phase
        * */
       inline item_t
-      oil_po_deriv (index_t k_cell, main_var_type main_var, item_t truns)
+      oil_po_deriv (index_t /*k_cell*/, main_var_type /*main_var*/, item_t truns)
       {
         return MOBILITY_UP_O * truns;
       }

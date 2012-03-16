@@ -78,7 +78,7 @@
   #include <omp.h>
 #endif // #ifdef _OPENMP
 
-#pragma intrinsic (memset, memcpy)
+//#pragma intrinsic (memset, memcpy)
 
 #include "bs_common.h"
 #include "smart_ptr.h"
@@ -136,7 +136,7 @@
 
 #include "bos_map.h"
 #include "constants.h"
-#include "main_def.h"
+//#include "main_def.h"
 #include "err_num_def.h"
 #include "vector_assign.h"
 //#include "save_seq_vector.h"
@@ -157,7 +157,7 @@
 #include "interpolation_macro.h"
 #include "rs_mesh_iface.h"
 #include "rs_smesh_iface.h"
-#include "localization.h"
+//#include "localization.h"
 #include "arrays.h"
 #include "arrays_tables.h"
 #include "convert_units.h"

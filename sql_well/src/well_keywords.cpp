@@ -28,7 +28,7 @@ namespace blue_sky
   }
 
   void
-  well_keywords::register_keywords (sp_objbase &km, std::string provider) const
+  well_keywords::register_keywords (sp_objbase &km, std::string /*provider*/) const
   {
     BS_SP (keyword_manager_iface) keyword_manager (km, bs_dynamic_cast ());
     BS_ASSERT (keyword_manager);
@@ -42,7 +42,7 @@ namespace blue_sky
   }
   
   void
-  well_keywords::CSV_SHEDULE_reactor (std::string const &keyword, keyword_params &params)
+  well_keywords::CSV_SHEDULE_reactor (std::string const & /*keyword*/, keyword_params &params)
   {
     char prop_name[50];
     char prop_name_last[50];
