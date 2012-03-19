@@ -1,3 +1,4 @@
+import sys
 import bs
 import numpy
 
@@ -7,7 +8,7 @@ hdm.get_prop().add_property_i (0, "mesh", "mesh type")
 hdm.get_prop().set_i ("mesh", 1)
 
 #hdm.init("lalala.h5")
-hdm.read_keyword_file('D:\\projects\\UfaSolver\\tests\\bos\\model.data')
+hdm.read_keyword_file(sys.argv[1])
 
 #hdm.read_keyword_file('G:\\projects\\UfaSolver\\tests\\Frac\\Test2.ppp.files\\bos\\model.data')
 
@@ -24,10 +25,13 @@ mesh.init_ext_to_int()
 
 mesh.check_data()
 
-#jac = bs.mx.bcsr_matrix_dif()
-#flux_conn = bs.bs_mesh.flux_conn_dif()
+#jac = bs.mx.bcsr_matrix()
+#flux_conn = bs.bs_mesh.flux_conn()
 #bound = numpy.arange(1)
 #mesh.build_jacobian_and_flux_connections(jac, flux_conn, bound)
+
+#t = bs.mx.bcsr_matrix_tools ()
+#t.ascii_write_to_csr_format (jac, "reg", 0)
 
 
 #arrays = mesh.calc_element_tops()
