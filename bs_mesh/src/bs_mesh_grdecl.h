@@ -28,7 +28,7 @@ namespace blue_sky
       // BASE TYPES
       ///////////////////////
       typedef rs_smesh_iface                  base_t;
-
+      typedef mesh_grdecl wrapped_t;
 
       ///////////////////////
       // OWN TYPES
@@ -273,9 +273,17 @@ namespace blue_sky
     // wrapped class
     ///////////////////
 
+    // direct access to wrapped class
+    const wrapped_t& get_wrapped() const {
+      return wrapped;
+    }
+
+    wrapped_t& get_wrapped() {
+      return wrapped;
+    }
+
     private:
 
-		typedef mesh_grdecl wrapped_t;
 		wrapped_t wrapped;
     };
 
