@@ -5,7 +5,7 @@
  * @version 
  * @date 2012-20-02
  */
-
+#include "bs_mesh_stdafx.h"
 #include "py_upsc.h"
 #include "upsc.h"
 

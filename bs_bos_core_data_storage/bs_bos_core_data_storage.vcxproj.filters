@@ -39,23 +39,8 @@
     <ClInclude Include="include\convert_units.h">
       <Filter>data reader</Filter>
     </ClInclude>
-    <ClInclude Include="include\lc_messages.h">
-      <Filter>data reader</Filter>
-    </ClInclude>
-    <ClInclude Include="include\localization.h">
-      <Filter>data reader</Filter>
-    </ClInclude>
-    <ClInclude Include="include\read_class.h">
-      <Filter>data reader</Filter>
-    </ClInclude>
     <ClInclude Include="include\str_tools.h">
       <Filter>data reader</Filter>
-    </ClInclude>
-    <ClInclude Include="include\table_upper.h">
-      <Filter>data reader</Filter>
-    </ClInclude>
-    <ClInclude Include="include\py_read_class.h">
-      <Filter>data reader\python</Filter>
     </ClInclude>
     <ClInclude Include="include\rock_grid.h">
       <Filter>rock</Filter>
@@ -131,30 +116,6 @@
   <ItemGroup>
     <ClCompile Include="src\convert_units.cpp">
       <Filter>data reader</Filter>
-    </ClCompile>
-    <ClCompile Include="src\lc_messages_eng.cpp">
-      <Filter>data reader</Filter>
-    </ClCompile>
-    <ClCompile Include="src\lc_messages_rus_alt.cpp">
-      <Filter>data reader</Filter>
-    </ClCompile>
-    <ClCompile Include="src\lc_messages_rus_koi.cpp">
-      <Filter>data reader</Filter>
-    </ClCompile>
-    <ClCompile Include="src\lc_messages_rus_win.cpp">
-      <Filter>data reader</Filter>
-    </ClCompile>
-    <ClCompile Include="src\localization.cpp">
-      <Filter>data reader</Filter>
-    </ClCompile>
-    <ClCompile Include="src\read_class.cpp">
-      <Filter>data reader</Filter>
-    </ClCompile>
-    <ClCompile Include="src\table_upper.cpp">
-      <Filter>data reader</Filter>
-    </ClCompile>
-    <ClCompile Include="src\py_read_class.cpp">
-      <Filter>data reader\python</Filter>
     </ClCompile>
     <ClCompile Include="src\rock_grid.cpp">
       <Filter>rock</Filter>
