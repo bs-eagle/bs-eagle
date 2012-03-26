@@ -7,11 +7,17 @@
   \date 2009-07-20
  */
 
-#include "flux_connections_iface.h"
-#include "well_pool_iface.h"
-#include "mesh_base.h"
 
-using namespace blue_sky;
+#ifndef PURE_MESH
+  #include "flux_connections_iface.h"
+  #include "well_pool_iface.h"
+
+  using namespace blue_sky;
+#else
+  #include "pure_mesh.h"
+#endif
+
+  #include "mesh_base.h"
 
 
 class BS_API_PLUGIN rs_mesh_base : public mesh_base
@@ -31,11 +37,14 @@ class BS_API_PLUGIN rs_mesh_base : public mesh_base
     // OWN TYPES
     ///////////////////////
 
-    
+#ifndef PURE_MESH    
     typedef flux_connections_iface                      flux_conn_iface_t;
     typedef smart_ptr <flux_conn_iface_t, true>         sp_flux_conn_iface_t;
     
     typedef BS_SP(well_pool_iface)                      sp_well_pool_t;
+#else
+    typedef csr_matrix                                  flux_conn_iface_t;
+#endif
     
     
   //-----------------------------------------
@@ -53,7 +62,7 @@ class BS_API_PLUGIN rs_mesh_base : public mesh_base
 
     //! default destructor
     virtual ~rs_mesh_base ()	{};
-    
+
     //! init mesh from pool
     void init_props (const sp_hdm_t hdm);
     
@@ -104,8 +113,10 @@ class BS_API_PLUGIN rs_mesh_base : public mesh_base
 
   protected:
 
+#ifndef PURE_MESH
     sp_well_pool_t well_pool; //!< sql well pool
-    
+#endif
+
     t_double minpv;	  //!< minimum pore volume
     t_double minsv;	  //!< minimum volume for splicing
     t_double max_thickness;	  //!< maximum thickness between blocks for splicing

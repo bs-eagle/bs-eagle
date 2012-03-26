@@ -3,6 +3,7 @@
  * \brief precompiled header
  * \author Sergey Miryanov
  * */
+#ifndef PURE_MESH
 #ifndef BS_MESH_PRECOMPILED_HEADERS_H_
 #define BS_MESH_PRECOMPILED_HEADERS_H_
 
@@ -99,3 +100,4 @@
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #endif // #ifndef BS_MESH_PRECOMPILED_HEADERS_H_
+#endif

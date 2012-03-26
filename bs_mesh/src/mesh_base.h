@@ -7,10 +7,18 @@
 	\date 2009-07-16
  */
 
-#include "conf.h"
-#include "hdm_iface.h"
+#ifndef PURE_MESH
+  #include "conf.h"
+  #include "hdm_iface.h"
 
-using namespace blue_sky;
+  using namespace blue_sky;
+#else
+  #include "pure_mesh.h"
+#endif
+
+
+
+
 
   
   class BS_API_PLUGIN mesh_base
@@ -26,8 +34,12 @@ using namespace blue_sky;
       // OWN TYPES
       ///////////////////////
 
+#ifndef PURE_MESH
       typedef smart_ptr <hdm_iface, true>    sp_hdm_t;
       typedef smart_ptr <bcsr_matrix_iface, true>           sp_bcsr_t;
+#else
+      typedef csr_matrix           sp_bcsr_t;
+#endif
 
     //-----------------------------------------
     //  METHODS
@@ -47,7 +59,7 @@ using namespace blue_sky;
 
       //! init mesh
       virtual void init_props (const sp_hdm_t /*hdm*/) = 0;
-      
+
       //! initialize ext_to_int indexation
       virtual int init_ext_to_int() = 0;
       
@@ -78,13 +90,21 @@ using namespace blue_sky;
       //! get const ext_to_int
       t_long convert_ext_to_int (const t_long n_element) const
       {
+#ifndef PURE_MESH
         return (*ext_to_int)[n_element];
+#else
+        return ext_to_int[n_element];
+#endif
       }
       
       //! get const int_to_ext
       t_long get_element_int_to_ext (const t_long n_element) const
       {
+#ifndef PURE_MESH
         return (*int_to_ext)[n_element];
+#else
+        return int_to_ext[n_element];
+#endif
       }
 
       //! get const int_to_ext

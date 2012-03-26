@@ -7,18 +7,25 @@
 	\date 2008-05-20
  */
 
-#include "flux_connections.h"
+#ifndef PURE_MESH
+  #include "flux_connections_iface.h"
+
+  using namespace blue_sky;
+#else
+  #include "pure_mesh.h"
+#endif
+
+
 #include "rs_mesh_base.h"
 
-using namespace blue_sky;
 
-  //! enum for define direction
-  enum direction
-  {
-    along_dim1 = 0,
-    along_dim2,
-    along_dim3
-  };
+//! enum for define direction
+enum direction
+{
+  along_dim1 = 0,
+  along_dim2,
+  along_dim3
+};
 
 
 
