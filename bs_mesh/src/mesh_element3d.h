@@ -125,6 +125,9 @@ using namespace blue_sky;
 inline void get_plane_center (const boost::array <grd_ecl::fpoint3d, N_PLANE_CORNERS> &plane, grd_ecl::fpoint3d& center)
   {
     t_int i;
+    center.x = 0.;
+    center.y = 0.;
+    center.z = 0.;
     for (i = 0; i < N_PLANE_CORNERS; i++)
       {
         center += plane[i];

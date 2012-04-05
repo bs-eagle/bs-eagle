@@ -324,6 +324,8 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     	\return transmissiblity value between 2 blocks */
       t_double calc_tran (const t_long ext_index1, const t_long ext_index2, const plane_t &plane1,
                           const fpoint3d_t &center1, const fpoint3d_t &center2, direction d_dir, plane_t *plane2  = 0) const;
+      
+      t_double calc_tran_boundary (const t_long ext_index1, const plane_t &plane1, const fpoint3d_t &center1, direction d_dir) const;
 
 
 //-------------------------------------------

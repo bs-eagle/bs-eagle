@@ -1032,6 +1032,55 @@ mesh_grdecl::calc_tran(const t_long ext_index1, const t_long ext_index2, const p
 }
 
 
+t_double 
+mesh_grdecl::calc_tran_boundary (const t_long ext_index1, const plane_t &plane1, const fpoint3d_t &center1, direction d_dir) const
+{
+  t_double tran;
+  fpoint3d_t D1, A, plane_contact_center;
+  
+  get_plane_center(plane1, plane_contact_center);
+  plane_contact_center.distance_to_point (center1, D1);
+  A = get_projection_on_all_axis_for_one_side(plane1);
+  
+  t_double koef1; //koef = (A,Di)/(Di,Di)
+  
+  koef1 = A*D1 / (D1*D1);
+  
+  t_double Ti;
+
+  // FIXME: ntg_array and etc access
+  t_double ntg_index1 = 1;
+  if (ntg_array)
+    {
+      ntg_index1 = ntg_array->data ()[ext_index1];
+    }
+
+  if (d_dir == along_dim1) //lengthwise OX
+    {
+      Ti = permx_array->data ()[ext_index1]*ntg_index1*koef1;
+      tran = darcy_constant / (2 / Ti);
+      if (multx_array)
+        tran *= multx_array->data ()[ext_index1];
+    }
+  else if (d_dir == along_dim2) //lengthwise OY
+    {
+      Ti = permy_array->data ()[ext_index1]*ntg_index1*koef1;
+      tran = darcy_constant / (2 / Ti);
+      if (multy_array)
+        tran *= multy_array->data ()[ext_index1];
+    }
+  else //lengthwise OZ
+    {
+      Ti = permz_array->data ()[ext_index1]*koef1;
+      tran = darcy_constant / (2 / Ti);
+      if (multz_array)
+        tran *= multz_array->data ()[ext_index1];
+    }
+  
+  return tran;
+}
+
+
 
 
 int mesh_grdecl::build_jacobian_and_flux_connections (const sp_bcsr_t jacobian,const sp_flux_conn_iface_t flux_conn,
