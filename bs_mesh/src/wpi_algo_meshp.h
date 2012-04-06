@@ -34,6 +34,13 @@ struct mesh_tools : public helpers< strat_t > {
 	typedef typename pods_t::trim_iterator trim_iterator;
 	typedef typename pods_t::ctrim_iterator ctrim_iterator;
 
+	// import helper functions
+	typedef helpers< strat_t > base_t;
+	using base_t::ca_assign;
+	using base_t::encode_cell_id;
+	using base_t::decode_cell_id;
+	using base_t::vertex_pos2bbox;
+
 	/*-----------------------------------------------------------------
 	* represent rectangular part of mesh with splitting support
 	*----------------------------------------------------------------*/

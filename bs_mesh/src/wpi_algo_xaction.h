@@ -55,6 +55,11 @@ public:
 	typedef typename pods_t::well_hit_cell well_hit_cell;
 	typedef typename pods_t::intersect_path intersect_path;
 
+	// import helper functions
+	typedef helpers< strat_t > base_t;
+	using base_t::ca_assign;
+	using base_t::decode_cell_id;
+
 	// mesh_part
 	typedef mesh_tools< strat_t > mesh_tools_t;
 	typedef typename mesh_tools_t::mesh_part mesh_part;

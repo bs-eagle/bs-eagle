@@ -14,12 +14,6 @@
 using namespace boost::python;
 namespace czt = blue_sky::coord_zcorn_tools;
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_deltas_s2_overl1, wave_mesh_deltas_s2_o1, 6, 8)
-BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_deltas_s2_overl2, wave_mesh_deltas_s2_o2, 5, 7)
-BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_overl, wave_mesh, 8, 11)
-BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_ij_overl, wave_mesh_ij, 9, 12)
-BOOST_PYTHON_FUNCTION_OVERLOADS(find_hit_idx_overl, find_hit_idx1, 3, 5)
-
 namespace {
 
 typedef t_long int_t;
@@ -127,7 +121,13 @@ spi_arr_t find_hit_idx2(
 	return czt::find_hit_idx(nx, ny, coord, points_pos);
 }
 
-}
+}  // eof hidden namespace
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_deltas_s2_overl1, wave_mesh_deltas_s2_o1, 6, 8)
+BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_deltas_s2_overl2, wave_mesh_deltas_s2_o2, 5, 7)
+BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_overl, wave_mesh, 8, 11)
+BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_ij_overl, wave_mesh_ij, 9, 12)
+BOOST_PYTHON_FUNCTION_OVERLOADS(find_hit_idx_overl, find_hit_idx1, 3, 5)
 
 namespace blue_sky { namespace python {
 
