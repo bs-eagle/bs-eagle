@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pure_mesh", "pure_mesh.vcxproj", "{CE770FDD-686B-48FB-9DFA-B660196BEF89}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release_WO_Python|Win32 = Release_WO_Python|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CE770FDD-686B-48FB-9DFA-B660196BEF89}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CE770FDD-686B-48FB-9DFA-B660196BEF89}.Debug|Win32.Build.0 = Debug|Win32
+		{CE770FDD-686B-48FB-9DFA-B660196BEF89}.Release_WO_Python|Win32.ActiveCfg = Release_WO_Python|Win32
+		{CE770FDD-686B-48FB-9DFA-B660196BEF89}.Release_WO_Python|Win32.Build.0 = Release_WO_Python|Win32
+		{CE770FDD-686B-48FB-9DFA-B660196BEF89}.Release|Win32.ActiveCfg = Release|Win32
+		{CE770FDD-686B-48FB-9DFA-B660196BEF89}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

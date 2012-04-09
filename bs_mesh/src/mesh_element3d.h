@@ -7,9 +7,16 @@
 	\date 2009-09-23
  */
 
+#ifndef PURE_MESH
+  using namespace blue_sky;
+#else
+  #include "pure_mesh.h"
+#endif
+
 #include "fpoint3d.h"
 
-using namespace blue_sky;
+
+
 
   //! element plane orientation
   enum element_plane_orientation_t

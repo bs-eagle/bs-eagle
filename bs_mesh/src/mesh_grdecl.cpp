@@ -7,13 +7,19 @@
 #include <iterator>
 
 using namespace grd_ecl;
-using namespace blue_sky;
+#ifndef PURE_MESH
+  using namespace blue_sky;
+#else
+#include <set>
+#endif
 
 const char filename_hdf5[] = "grid_swap.h5";
 
 #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX
   FILE*  fp;
 #endif //BS_MESH_WRITE_TRANSMISS_MATRIX 
+
+#ifndef PURE_MESH
 
 struct mesh_grdecl::inner {
     // shorter aliases
@@ -112,6 +118,7 @@ void mesh_grdecl::init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_
     std::pair< spv_float, spv_float > cz = gen_coord_zcorn(nx, ny, nz, dx, dy, dz);
     init_props(nx, ny, cz.first, cz.second);
 }
+#endif
 
 void mesh_grdecl::init_props(const sp_hdm_t hdm)
 {
@@ -119,7 +126,8 @@ void mesh_grdecl::init_props(const sp_hdm_t hdm)
   spv_float data_array;
   //t_long i, n;
   //t_float *it;
-  
+#ifndef PURE_MESH
+
   // init ZCORN
   data_array = hdm->get_pool ()->get_fp_data("ZCORN");
   if (data_array->size()) {
@@ -150,13 +158,20 @@ void mesh_grdecl::init_props(const sp_hdm_t hdm)
   hdm->get_prop()->set_f("max_x", max_x);
   hdm->get_prop()->set_f("max_y", max_y);
   hdm->get_prop()->set_f("max_z", max_z);
+#else
+
+   zcorn_array = hdm->zcorn_array;
+   coord_array = hdm->coord_array;
+#endif
+
 }
 
 
 void mesh_grdecl::check_data() const
 {
+
+#ifndef PURE_MESH
   write_time_to_log init_time ("Mesh check", ""); 
-  base_t::check_data ();
 
   if (min_x < 0)
     bs_throw_exception (boost::format ("min_x = %d is out of range")% min_x);
@@ -164,6 +179,9 @@ void mesh_grdecl::check_data() const
     bs_throw_exception (boost::format ("min_y = %d is out of range")% min_y);
   if (min_z < 0)
     bs_throw_exception (boost::format ("min_z = %d is out of range")% min_z);
+#endif
+
+  base_t::check_data ();
 
   if (!coord_array)
     bs_throw_exception ("COORD array is not initialized");
@@ -174,7 +192,11 @@ void mesh_grdecl::check_data() const
 
   element_t element;
   t_long wrong_cells = 0;
+#ifndef PURE_MESH
   t_int *actnum = actnum_array->data ();
+#else
+  t_int *actnum = actnum_array;
+#endif
 
   for (t_long i = 0; i < nx; ++i)
     for (t_long j = 0; j < ny; ++j)
@@ -242,8 +264,12 @@ void mesh_grdecl::check_data() const
         }
     }
 
+#ifndef PURE_MESH
   if (wrong_cells)
     BOSOUT (section::mesh, level::medium) << "% wrong (nonconvex) cells found! Marked inactive." << wrong_cells << bs_end;
+#else
+    printf("%d wrong (nonconvex) cells found! Marked inactive.", wrong_cells);
+#endif
 
   // 2. check for ZCORN intersections (and correct them)
 /*
@@ -512,13 +538,25 @@ int mesh_grdecl::init_ext_to_int()
   check_adjacency ();
   
   //make proxy array
+#ifndef PURE_MESH
   ext_to_int->resize(n_elements);
   ext_to_int->assign(0);
   t_long *ext_to_int_data = ext_to_int->data ();
+  t_int const *actnum = actnum_array->data ();
+#else
+  int r_code;
+  FI_LONG_ARRAY_REALLOCATOR (ext_to_int, n_elements, r_code);
+  FI_FILL_ARRAY (ext_to_int, 0, n_elements, 0);
+  t_long *ext_to_int_data = ext_to_int;
+  t_int const *actnum = actnum_array;
+#endif
+
+  
+  
   size_t n_count = 0;
 
   t_long nn_active = 0; //number of non-active previous cells
-  t_int const *actnum = actnum_array->data ();
+  
   for (t_long i = 0; i < nx; ++i)
     {
       for (t_long j = 0; j < ny; ++j)
@@ -539,11 +577,21 @@ int mesh_grdecl::init_ext_to_int()
   //tools::save_seq_vector ("ext_to_int.bs.txt").save (ext_to_int);
 
   init_int_to_ext();
+#ifndef PURE_MESH
   t_long *int_to_ext_data = int_to_ext->data ();
-  
+
   //fill volume array (except non-active block and using proxy array)
   volumes->resize(n_active_elements);
   t_float *volumes_data = volumes->data ();
+#else
+  t_long *int_to_ext_data = int_to_ext;
+  //fill volume array (except non-active block and using proxy array)
+  FI_DOUBLE_ARRAY_REALLOCATOR (volumes, n_active_elements, r_code);
+  t_float *volumes_data = volumes;
+#endif
+  
+  
+  
   
   // FIXME: init volumes_temp
   for (int i = 0; i < n_active_elements; ++i)
@@ -625,9 +673,14 @@ bool mesh_grdecl::are_two_blocks_close (const t_long i, const t_long j, const t_
 bool mesh_grdecl::check_adjacency(int shift_zcorn)
 {
   t_long n_adjacent = 0;
-   
+#ifndef PURE_MESH
   t_int const *actnum = actnum_array->data ();
   t_float *zcorn = pinner_->zcorn_->data ();
+#else
+  t_int const *actnum = actnum_array;
+  t_float *zcorn = zcorn_array;
+#endif 
+  
   for (t_long i = 0; i < nx; ++i)
     for (t_long j = 0; j < ny; ++j)
       for (t_long k = 0; k < nz; ++k)
@@ -677,7 +730,10 @@ bool mesh_grdecl::check_adjacency(int shift_zcorn)
               }
        }
   
+  
+#ifndef PURE_MESH
   BOSOUT (section::mesh, level::medium) << "  adjacent cells:"<< n_adjacent <<" ("<< n_adjacent * 100 / (n_active_elements)<<"% active)" << bs_end;
+#endif 
   return (n_adjacent == n_active_elements);
 }
 
@@ -686,8 +742,14 @@ spv_float mesh_grdecl::get_cell_volumes (const t_long Nx, const t_long Ny, const
     t_long i, j, k, ind;
     element_t element;
 
+#ifndef PURE_MESH
     spv_float volumes = BS_KERNEL.create_object(v_float::bs_type());
     volumes->resize(Nx*Ny*Nz);
+#else
+    spv_float volumes;
+    int r_code;
+    FI_DOUBLE_ARRAY_ALLOCATOR (volumes, Nx*Ny*Nz, r_code);
+#endif 
 
     // important: XYZ order
 
@@ -697,7 +759,11 @@ spv_float mesh_grdecl::get_cell_volumes (const t_long Nx, const t_long Ny, const
             for (i = 0; i < Nx; ++i)
               {
                 calc_element (i, j, k, element);
+#ifndef PURE_MESH
                 (*volumes)[(ind++)] = element.calc_volume ();
+#else
+                volumes[(ind++)] = element.calc_volume ();
+#endif 
               }
     return volumes;
 }
@@ -715,8 +781,14 @@ int mesh_grdecl::splicing(stdv_float& volumes_temp)
   t_long n_incative_splice = 0;
 
   // FIXME: how to check ranges?
+#ifndef PURE_MESH
   t_int *actnum = actnum_array->data ();
   t_float const *poro = poro_array->data ();
+#else
+  t_int *actnum = actnum_array;
+  t_float const *poro = poro_array;
+#endif 
+  
   for (t_long i = 0; i < nx; ++i)
     for (t_long j = 0; j < ny; ++j)
       {
@@ -851,14 +923,17 @@ int mesh_grdecl::splicing(stdv_float& volumes_temp)
       return -1;
     }  
   */      
-  
+#ifndef PURE_MESH
   BOSOUT (section::mesh, level::medium) << "Mesh cells info:" << bs_end;
   BOSOUT (section::mesh, level::medium) << "  total: "<< n_total << bs_end; 
   BOSOUT (section::mesh, level::medium) << "  initial active: "<< n_active_elements <<" ("<< n_active_elements * 100 / (n_total)<<"%)" << bs_end;
   BOSOUT (section::mesh, level::medium) << "  marked inactive: "<< nCount << " (" << n_inactive_vol << " by volume, " << n_incative_splice << " by splice)" << bs_end;
   n_active_elements -= nCount;
   BOSOUT (section::mesh, level::medium) << "  total active: "<< n_active_elements <<" ("<< n_active_elements * 100 / (n_total)<<"%)" << bs_end;
-  
+#else
+  n_active_elements -= nCount;
+#endif 
+
   return nCount;
 }
 
@@ -866,11 +941,22 @@ int mesh_grdecl::splicing(stdv_float& volumes_temp)
 
 int mesh_grdecl::calc_depths ()
 {
+
+#ifndef PURE_MESH
   depths->resize (n_active_elements);
 
   t_float *depths_data = depths->data ();
   t_long const *ext_to_int_data = ext_to_int->data ();
   t_int const *actnum = actnum_array->data ();
+#else
+  int r_code;
+  FI_DOUBLE_ARRAY_REALLOCATOR(depths, n_active_elements, r_code);
+
+  t_float *depths_data = depths;
+  t_long const *ext_to_int_data = ext_to_int;
+  t_int const *actnum = actnum_array;
+#endif 
+  
 
   t_long index = 0;
   for (t_long i = 0; i < nx; ++i)
@@ -993,33 +1079,65 @@ mesh_grdecl::calc_tran(const t_long ext_index1, const t_long ext_index2, const p
   t_double ntg_index2 = 1;
   if (ntg_array)
     {
+#ifndef PURE_MESH
       ntg_index1 = ntg_array->data ()[ext_index1];
       ntg_index2 = ntg_array->data ()[ext_index2];
+#else
+      ntg_index1 = ntg_array[ext_index1];
+      ntg_index2 = ntg_array[ext_index2];
+#endif 
     }
 
   if (d_dir == along_dim1) //lengthwise OX
     {
+#ifndef PURE_MESH
       Ti = permx_array->data ()[ext_index1]*ntg_index1*koef1;
       Tj = permx_array->data ()[ext_index2]*ntg_index2*koef2;
       tran = darcy_constant / (1 / Ti + 1 / Tj);
       if (multx_array)
         tran *= multx_array->data ()[ext_index1];
+#else
+      Ti = permx_array[ext_index1]*ntg_index1*koef1;
+      Tj = permx_array[ext_index2]*ntg_index2*koef2;
+      tran = darcy_constant / (1 / Ti + 1 / Tj);
+      if (multx_array)
+        tran *= multx_array[ext_index1];
+#endif       
+      
     }
   else if (d_dir == along_dim2) //lengthwise OY
     {
+#ifndef PURE_MESH
       Ti = permy_array->data ()[ext_index1]*ntg_index1*koef1;
       Tj = permy_array->data ()[ext_index2]*ntg_index2*koef2;
       tran = darcy_constant / (1 / Ti + 1 / Tj);
       if (multy_array)
         tran *= multy_array->data ()[ext_index1];
+#else
+      Ti = permy_array[ext_index1]*ntg_index1*koef1;
+      Tj = permy_array[ext_index2]*ntg_index2*koef2;
+      tran = darcy_constant / (1 / Ti + 1 / Tj);
+      if (multy_array)
+        tran *= multy_array[ext_index1];
+#endif 
+      
     }
   else //lengthwise OZ
     {
+#ifndef PURE_MESH
       Ti = permz_array->data ()[ext_index1]*koef1;
       Tj = permz_array->data ()[ext_index2]*koef2;
       tran = darcy_constant / (1 / Ti + 1 / Tj);
       if (multz_array)
         tran *= multz_array->data ()[ext_index1];
+#else
+      Ti = permz_array[ext_index1]*koef1;
+      Tj = permz_array[ext_index2]*koef2;
+      tran = darcy_constant / (1 / Ti + 1 / Tj);
+      if (multz_array)
+        tran *= multz_array[ext_index1];
+#endif 
+      
     }
   
   /*
@@ -1104,11 +1222,18 @@ spv_double mesh_grdecl::get_element_sizes (const t_long n_element) const
   {
       double dx, dy, dz;
       get_block_dx_dy_dz(n_element, dx, dy, dz);
+#ifndef PURE_MESH
       spv_double sizes = BS_KERNEL.create_object(v_double::bs_type());
       sizes->resize(3);
       (*sizes)[0] = dx;
       (*sizes)[1] = dy;
       (*sizes)[2] = dz;
+#else
+      spv_double sizes = new double[3];
+      sizes[0] = dx;
+      sizes[1] = dy;
+      sizes[2] = dz;
+#endif 
       return sizes;
   }
 
@@ -1146,7 +1271,7 @@ t_double  mesh_grdecl::get_dtop(t_long n_elem) const
   return elem.get_center().z - elem.get_dz();
 }
 
-
+#ifndef PURE_MESH
 boost::python::list mesh_grdecl::calc_element_tops ()
 {
   element_t element;
@@ -1259,12 +1384,22 @@ boost::python::list mesh_grdecl::calc_element_tops ()
 
   return myavi_list;
 }
+#endif 
 
 spv_float mesh_grdecl::calc_cells_vertices() {
+#ifndef PURE_MESH
   spv_float tops = give_kernel::Instance().create_object(v_float::bs_type());
   tops->resize (n_elements * 8 * 3);
 
   t_float* tops_data = &(*tops)[0];
+#else
+  spv_float tops;
+  int r_code;
+  FI_DOUBLE_ARRAY_ALLOCATOR(tops, n_elements * 8 * 3, r_code);
+  
+  t_float* tops_data = tops;
+#endif 
+  
   t_long ind = 0;
 
   element_t element;
@@ -1287,10 +1422,18 @@ spv_float mesh_grdecl::calc_cells_vertices() {
 }
 
 spv_float mesh_grdecl::calc_cells_vertices_xyz() {
+#ifndef PURE_MESH
   spv_float tops = give_kernel::Instance().create_object(v_float::bs_type());
   tops->resize (n_elements * 8 * 3);
 
   t_float* tops_data = &(*tops)[0];
+#else
+  spv_float tops;
+  int r_code;
+  FI_DOUBLE_ARRAY_ALLOCATOR(tops, n_elements * 8 * 3, r_code);
+  
+  t_float* tops_data = tops;
+#endif
   t_long ind = 0;
 
   element_t element;
@@ -1311,7 +1454,7 @@ spv_float mesh_grdecl::calc_cells_vertices_xyz() {
 
   return tops;
 }
-
+#ifndef PURE_MESH
 boost::python::list mesh_grdecl::calc_element_center ()
 {
   element_t element;
@@ -1346,7 +1489,7 @@ boost::python::list mesh_grdecl::calc_element_center ()
 
   return myavi_list;
 }
-
+#endif 
 
 
 void mesh_grdecl::generate_array()
@@ -1388,8 +1531,12 @@ struct build_jacobian_rows_class
   typedef mesh_grdecl                 mesh_t;
   typedef  mesh_t::plane_t                plane_t;
   typedef  mesh_t::element_zcorn_t_long  element_zcorn_t_long;
-
+#ifndef PURE_MESH
   build_jacobian_rows_class (mesh_grdecl  *mesh, loop_t *loop, std::set <t_long, std::less <t_long> > &boundary_set, t_long *rows_ptr)
+#else
+  build_jacobian_rows_class (mesh_grdecl  *mesh, loop_t *loop, std::set <t_long, std::less <t_long> > &boundary_set, t_int *rows_ptr)
+#endif 
+  
   : mesh (mesh)
   , loop (loop)
   , boundary_set (boundary_set)
@@ -1415,8 +1562,14 @@ struct build_jacobian_rows_class
     bool flag = true;
     t_long k, zindex, zindex1, index;
          
+#ifndef PURE_MESH
     t_int const *actnum = mesh->actnum_array->data ();
     t_float const *zcorn = mesh->pinner_->zcorn_->data ();
+#else
+    t_int const *actnum = mesh->actnum_array;
+    t_float const *zcorn = mesh->zcorn_array;
+#endif 
+    
     for (k = 0; k < nz; ++k)
       {
         index = k + (nz * j) + (i * ny * nz);
@@ -1493,7 +1646,12 @@ struct build_jacobian_rows_class
   mesh_grdecl                   *mesh;
   loop_t                                    *loop;
   std::set <t_long, std::less <t_long> >  &boundary_set;
+#ifndef PURE_MESH
   t_long                                   *rows_ptr;
+#else
+  t_int                                   *rows_ptr;
+#endif 
+  
   t_long                                   nx;
   t_long                                   ny;
   t_long                                   nz;
@@ -1514,10 +1672,16 @@ struct build_jacobian_cols_class
   typedef  mesh_t::element_t              element_t;
   typedef  mesh_t::plane_t                plane_t;
   typedef  mesh_t::element_zcorn_t_long  element_zcorn_t_long;
-
+#ifndef PURE_MESH
   build_jacobian_cols_class (mesh_t *mesh, loop_t *loop, t_long *rows_ptr, t_long *cols_ind,
     t_long *cols_ind_transmis, t_float *values_transmis,
     t_long *matrix_block_idx_minus, t_long *matrix_block_idx_plus)
+#else
+  build_jacobian_cols_class (mesh_t *mesh, loop_t *loop, t_int *rows_ptr, t_int *cols_ind,
+    t_int *cols_ind_transmis, t_float *values_transmis,
+    t_long *matrix_block_idx_minus, t_long *matrix_block_idx_plus)
+#endif 
+  
   : mesh (mesh)
   , loop (loop)
   , rows_ptr (rows_ptr)
@@ -1702,9 +1866,16 @@ struct build_jacobian_cols_class
 
   mesh_t              *mesh;
   loop_t              *loop;
+#ifndef PURE_MESH
   t_long             *rows_ptr;
   t_long             *cols_ind;
   t_long             *cols_ind_transmis;
+#else
+  t_int               *rows_ptr;
+  t_int               *cols_ind;
+  t_int               *cols_ind_transmis;
+#endif   
+  
   t_float   *values_transmis;
   t_long             *matrix_block_idx_minus;
   t_long             *matrix_block_idx_plus;
@@ -1730,12 +1901,21 @@ build_jacobian_cols_class <L>
 build_jacobian_cols (mesh_grdecl *m, L *l, RP *rp, CI *ci, CT &conn_trans, FC &flux_conn)
 {
   return build_jacobian_cols_class <L> (m, l, rp, ci,
+#ifndef PURE_MESH
     &(*conn_trans->get_cols_ind ())[0], &(*conn_trans->get_values ())[0],
     &(*flux_conn->get_matrix_block_idx_minus ())[0], &(*flux_conn->get_matrix_block_idx_plus ())[0]);
+#else
+    conn_trans->get_cols_ind (), conn_trans->get_values (),
+    flux_conn->matrix_block_idx_plus, flux_conn->matrix_block_idx_minus);
+#endif 
+    
 }
 
-
+#ifndef PURE_MESH
 struct build_jacobian_and_flux : boost::noncopyable
+#else
+struct build_jacobian_and_flux
+#endif 
 {
   typedef mesh_grdecl                 mesh_t;
   typedef  mesh_t::plane_t                plane_t;
@@ -1911,7 +2091,12 @@ struct build_jacobian_and_flux : boost::noncopyable
     t_long n_adj_elems = 0, n_non_adj_elems = 0;
     
     t_float *zcorn_array = mesh->zcorn_array;
+#ifndef PURE_MESH
     t_int const *actnum = mesh->actnum_array->data ();
+#else
+    t_int const *actnum = mesh->actnum_array;
+#endif 
+    
 
     for (t_long i = 0; i < nx; ++i)
       {
@@ -1929,16 +2114,18 @@ struct build_jacobian_and_flux : boost::noncopyable
               }
           }
       }
+#ifndef PURE_MESH
     BOSWARN (section::mesh, level::warning)<< boost::format ("MESH_GRDECL: elements adj %d, non-adj %d, total %d") \
             % n_adj_elems % n_non_adj_elems % (n_adj_elems + n_non_adj_elems) << bs_end;  
     BOSWARN (section::mesh, level::warning)<< boost::format ("MESH_GRDECL: number of tran calcs is %d") % n_tran_calc << bs_end;  
+#endif
   }
 
   mesh_grdecl     *mesh;
   t_long                     nx;
   t_long                     ny;
   t_long                     nz;
-  shared_vector <bool>        is_column_adjacent;
+  std::vector <bool>         is_column_adjacent;
   t_long                     con_num;
 };
 
@@ -1955,11 +2142,17 @@ int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr
   sp_bcsr_t conn_trans;
   
   n_connections = 0;
+#ifndef PURE_MESH
   jacobian->get_cols_ind()->clear();
   jacobian->get_rows_ptr()->clear();
-  jacobian->init_struct(n_active_elements, n_active_elements, n_active_elements);
-  
+#endif 
+  jacobian->alloc_rows_ptr(n_active_elements);
+#ifndef PURE_MESH
   t_long *rows_ptr = jacobian->get_rows_ptr()->data ();
+#else
+  t_int *rows_ptr = jacobian->get_rows_ptr();
+#endif   
+  
   // FIXME: check size of rows_ptr
   rows_ptr[0] = 0;
 
@@ -1987,6 +2180,7 @@ int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr
   n_connections = (n_non_zeros - n_active_elements) / 2;
     
   //create cols_ind
+#ifndef PURE_MESH
   jacobian->get_cols_ind()->resize(n_non_zeros);
   t_long *cols_ind = jacobian->get_cols_ind()->data ();
 
@@ -1997,6 +2191,21 @@ int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr
 
   flux_conn->get_matrix_block_idx_minus ()->resize(n_connections * 2);
   flux_conn->get_matrix_block_idx_plus ()->resize(n_connections * 2);
+#else
+  int r_code;
+  jacobian->alloc_cols_ind(n_non_zeros);
+  t_int *cols_ind = jacobian->get_cols_ind();
+
+
+  ////////transmis/////////////////////////
+  conn_trans = &flux_conn->conn_trans;
+  conn_trans->init (n_connections, 2 * n_connections, 1, 2 * n_connections);
+
+  FI_LONG_ARRAY_REALLOCATOR(flux_conn->matrix_block_idx_minus, n_connections * 2, r_code);
+  FI_LONG_ARRAY_REALLOCATOR(flux_conn->matrix_block_idx_plus, n_connections * 2, r_code);
+  
+#endif 
+  
   
   if (!n_connections)
     {
@@ -2004,8 +2213,12 @@ int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr
         cols_ind[i] = i;
       return 0;
     }
-
+#ifndef PURE_MESH
   t_long *rows_ptr_transmis = conn_trans->get_rows_ptr()->data ();
+#else
+  t_int *rows_ptr_transmis = conn_trans->get_rows_ptr();
+#endif 
+  
   for (i = 0; i < n_connections + 1; ++i)
     rows_ptr_transmis[i] = i * 2;
 
@@ -2036,7 +2249,12 @@ int mesh_grdecl::intersect_trajectories ()
   int n_z_ranges = std::ceil (nz / std::pow(float(n_range_cells), float(1/3)));
 
   element_t element;
+#ifndef PURE_MESH
   t_int *actnum = actnum_array->data ();
+#else
+  t_int *actnum = actnum_array;
+#endif 
+  
 
   for (t_long i = 0; i < nx; ++i)
     for (t_long j = 0; j < ny; ++j)

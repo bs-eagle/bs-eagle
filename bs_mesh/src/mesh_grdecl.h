@@ -6,10 +6,15 @@
 	\author Iskhakov Ruslan
 	\date 2008-05-20 */
 
-#include "rs_smesh_base.h"
-#include "flux_connections_iface.h"
-#include "bos_reader_iface.h"
+#ifndef PURE_MESH
+  #include "flux_connections_iface.h"
+  #include "bos_reader_iface.h"
+#else
+  #include "pure_mesh.h"
+#endif
 
+#include "fpoint3d.h"
+#include "rs_smesh_base.h"
 #include "mesh_element3d.h"
 
 #ifdef _HDF5_MY //!< using HDF5 or not
@@ -37,8 +42,10 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     template <class L> friend struct build_jacobian_rows_class;
     template <class L> friend struct build_jacobian_cols_class;
   private:
+#ifndef PURE_MESH
 	  struct inner;
 	  st_smart_ptr< inner > pinner_;
+#endif
 
 //+++++++++++++++++++++++++++++++++++++++++++
 //  INTERNAL TYPE DECLARATION
@@ -55,7 +62,6 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     ///////////////////////
 
     typedef mesh_element3d                  element_t;
-    typedef smart_ptr <element_t, true>                 sp_element_t;
     typedef element_t::corners_t               corners_t;
     typedef element_t::plane_t                 plane_t;
 
@@ -67,8 +73,6 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     typedef boost::array <t_long, 4>         plane_zcorn_t_long;
     typedef boost::array <t_double, 3>                point3d_t;
 
-    typedef blue_sky::smart_ptr <blue_sky::bos_reader_iface, true> sp_fread_t;
-
 //-------------------------------------------
 //  METHODS
 //===========================================
@@ -79,60 +83,61 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     //! default destructor
     ~mesh_grdecl () {};
 
-    //! read zcorn from FRead
-    //void read_zcorn(const sp_fread_t &r);
-
+   
     //! init arrays of properties
     void init_props (const sp_hdm_t hdm);
 
-	//! init COORD & ZCORN via gen_coord_zcorn
-	void init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz);
 
-	//! init COORD & ZCORN directly
-	void init_props(t_long nx, t_long ny, spv_float coord, spv_float zcorn);
-	//! free COORD & ZCORN arrays
-	void clear();
+#ifndef PURE_MESH
+	  //! init COORD & ZCORN via gen_coord_zcorn
+	  void init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz);
 
-	//! init COORD & ZCORN from (nx, ny, nz, dx, dy, dz)
-	//! (x0, y0, z0) - beginning of coordinate system (mesh offset)
-	//! return: first -- coord, second -- zcorn
-	static std::pair< spv_float, spv_float >
-	gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz,
-		t_float x0 = 0, t_float y0 = 0, t_float z0 = 0);
+	  //! init COORD & ZCORN directly
+	  void init_props(t_long nx, t_long ny, spv_float coord, spv_float zcorn);
+	  //! free COORD & ZCORN arrays
+	  void clear();
 
-  //! init coord
-	static spv_float
-	gen_coord2(spv_float x, spv_float y);
+	  //! init COORD & ZCORN from (nx, ny, nz, dx, dy, dz)
+	  //! (x0, y0, z0) - beginning of coordinate system (mesh offset)
+	  //! return: first -- coord, second -- zcorn
+	  static std::pair< spv_float, spv_float >
+	  gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz,
+		  t_float x0 = 0, t_float y0 = 0, t_float z0 = 0);
 
-	//! return refined dx and dy for given COORD
-	static std::pair< spv_float, spv_float >
-	refine_mesh_deltas(t_long& nx, t_long& ny, spv_float coord, spv_float points,
-		spv_long hit_idx = NULL,
-		t_double cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, t_double band_thresh = DEF_BAND_THRESHOLD);
+    //! init coord
+	  static spv_float
+	  gen_coord2(spv_float x, spv_float y);
 
-	//! return refined dx and dy for given COORD
-	//! points are given in (i,j) format
-	static std::pair< spv_float, spv_float >
-	refine_mesh_deltas(t_long& nx, t_long& ny, spv_float coord,
-		spv_long points_pos, spv_float points_param,
-		spv_long hit_idx = NULL,
-		t_double cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, t_double band_thresh = DEF_BAND_THRESHOLD);
+	  //! return refined dx and dy for given COORD
+	  static std::pair< spv_float, spv_float >
+	  refine_mesh_deltas(t_long& nx, t_long& ny, spv_float coord, spv_float points,
+		  spv_long hit_idx = NULL,
+		  t_double cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, t_double band_thresh = DEF_BAND_THRESHOLD);
 
-	//! refine_mesh = refine_mesh_deltas + gen_coord_zcorn
-	//! return COORD & ZCORN of refined mesh
-	static std::pair< spv_float, spv_float >
-	refine_mesh(t_long& nx, t_long& ny, spv_float coord, spv_float zcorn, spv_float points,
-		spv_long hit_idx = NULL,
-		t_double cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, t_double band_thresh = DEF_BAND_THRESHOLD);
+	  //! return refined dx and dy for given COORD
+	  //! points are given in (i,j) format
+	  static std::pair< spv_float, spv_float >
+	  refine_mesh_deltas(t_long& nx, t_long& ny, spv_float coord,
+		  spv_long points_pos, spv_float points_param,
+		  spv_long hit_idx = NULL,
+		  t_double cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, t_double band_thresh = DEF_BAND_THRESHOLD);
 
-	//! refine_mesh = refine_mesh_deltas + gen_coord_zcorn
-	//! points are given in (i,j) format
-	//! return COORD & ZCORN of refined mesh
-	static std::pair< spv_float, spv_float >
-	refine_mesh(t_long& nx, t_long& ny, spv_float coord, spv_float zcorn,
-		spv_long points_pos, spv_float points_param,
-		spv_long hit_idx = NULL,
-		t_double cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, t_double band_thresh = DEF_BAND_THRESHOLD);
+	  //! refine_mesh = refine_mesh_deltas + gen_coord_zcorn
+	  //! return COORD & ZCORN of refined mesh
+	  static std::pair< spv_float, spv_float >
+	  refine_mesh(t_long& nx, t_long& ny, spv_float coord, spv_float zcorn, spv_float points,
+		  spv_long hit_idx = NULL,
+		  t_double cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, t_double band_thresh = DEF_BAND_THRESHOLD);
+
+	  //! refine_mesh = refine_mesh_deltas + gen_coord_zcorn
+	  //! points are given in (i,j) format
+	  //! return COORD & ZCORN of refined mesh
+	  static std::pair< spv_float, spv_float >
+	  refine_mesh(t_long& nx, t_long& ny, spv_float coord, spv_float zcorn,
+		  spv_long points_pos, spv_float points_param,
+		  spv_long hit_idx = NULL,
+		  t_double cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, t_double band_thresh = DEF_BAND_THRESHOLD);
+#endif
 
     //! get cell volumes
     spv_float get_cell_volumes (const t_long Nx, const t_long Ny, const t_long Nz) const;
@@ -212,10 +217,12 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
 
     //! find well`s trajectories and mesh cells intersection
     int intersect_trajectories ();
+#ifndef PURE_MESH
 
 	  boost::python::list calc_element_tops ();
 
 	  boost::python::list calc_element_center ();
+#endif
 
 	  // same as calc_element_tops, but only return tops coordinates
 	  spv_float calc_cells_vertices();
@@ -249,7 +256,11 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
 
     t_double get_depth(t_long n_elem) const
       {
+#ifndef PURE_MESH
         return (*depths)[n_elem];
+#else
+        return depths[n_elem];
+#endif
       };
 
     t_double get_dtop(t_long n_elem) const;

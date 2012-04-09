@@ -19,6 +19,7 @@ void
 rs_smesh_base ::init_props (const sp_hdm_t hdm)
 {
   base_t::init_props (hdm);
+#ifndef PURE_MESH  
   
   nx = hdm->get_prop ()->get_i("nx");
   ny = hdm->get_prop ()->get_i("ny");
@@ -30,12 +31,29 @@ rs_smesh_base ::init_props (const sp_hdm_t hdm)
   multx_array = hdm->get_pool ()->get_fp_data("MULTX");
   multy_array = hdm->get_pool ()->get_fp_data("MULTY");
   multz_array = hdm->get_pool ()->get_fp_data("MULTZ");
+#else
+  nx = hdm->nx;
+  ny = hdm->ny;
+  nz = hdm->nz;
+  
+  permx_array = hdm->permx_array;
+  permy_array = hdm->permy_array;
+  permz_array = hdm->permz_array;
+  multx_array = hdm->multx_array;
+  multy_array = hdm->multy_array;
+  multz_array = hdm->multz_array;
+#endif
 }
 
 
 void rs_smesh_base::inside_to_XYZ(const t_long index, t_long &i1,t_long &j1, t_long &k1) const
   {
+    
+#ifndef PURE_MESH
     t_long r_index = (*base_t::base_t::int_to_ext)[index];
+#else
+    t_long r_index = base_t::base_t::int_to_ext[index];
+#endif
     k1 = r_index / (nx*ny);
     j1 = (r_index - k1*nx*ny) / nx;
     i1 = r_index - k1*nx*ny - j1*nx;
@@ -66,14 +84,16 @@ int rs_smesh_base::init_int_to_ext()
 void rs_smesh_base::check_data() const
 {
   base_t::check_data ();
-  
+
+#ifndef PURE_MESH  
   if (nx <= 0)
     bs_throw_exception (boost::format ("nx = %d is out of range")% nx);
   if (ny <= 0)
     bs_throw_exception (boost::format ("ny = %d is out of range")% ny);
   if (nz <= 0)
     bs_throw_exception (boost::format ("nz = %d is out of range")% nz);
-    
+#endif
+
   // FIXME: init_props will raise exceptions if no array in hdm
   if (!permx_array)
     bs_throw_exception ("PERMX array is not initialized");
@@ -87,7 +107,12 @@ void rs_smesh_base::check_data() const
 int rs_smesh_base::get_elems_n_in_layers(const direction d_dir, stdv_int &elem_in_layers) const
 {
   t_long i_index;
+#ifndef PURE_MESH
   t_int const *actnum = base_t::actnum_array->data ();
+#else
+  t_int const *actnum = base_t::actnum_array;
+#endif
+
   if (d_dir == along_dim3)
     {
       elem_in_layers.resize(nz, 0);

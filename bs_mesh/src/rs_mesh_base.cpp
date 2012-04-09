@@ -13,12 +13,14 @@
 
 #include "rs_mesh_base.h"
 
-#ifndef PURE_MESH
+
 rs_mesh_base ::rs_mesh_base ()
+#ifndef PURE_MESH
 : depths (give_kernel::Instance().create_object(v_float::bs_type ()))
+#endif
 {
 }
-#endif
+
 
 void
 rs_mesh_base ::init_props (const sp_hdm_t hdm)

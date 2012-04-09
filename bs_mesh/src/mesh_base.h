@@ -38,7 +38,7 @@
       typedef smart_ptr <hdm_iface, true>    sp_hdm_t;
       typedef smart_ptr <bcsr_matrix_iface, true>           sp_bcsr_t;
 #else
-      typedef csr_matrix           sp_bcsr_t;
+      typedef csr_matrix *          sp_bcsr_t;
 #endif
 
     //-----------------------------------------
