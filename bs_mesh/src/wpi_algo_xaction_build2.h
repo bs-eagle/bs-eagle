@@ -50,31 +50,11 @@ public:
 	* Box description
 	*----------------------------------------------------------------*/
 	enum fish_id {
-		CELL_BOX,
-		WELL_BOX,
-		MESH_BOX
+		CELL_BOX = 0,
+		WELL_BOX = 1,
+		MESH_BOX = 2
 	};
 
-#ifdef _WIN32
-	template< fish_id Id >
-	struct fish2box {
-		// default value
-		typedef ulong fish_t;
-		typedef cell_data data_t;
-	};
-	// overload for well path
-	template< >
-	struct fish2box< WELL_BOX > {
-		typedef ulong fish_t;
-		typedef well_data data_t;
-	};
-	// overload for mesh_part
-	template< >
-	struct fish2box< MESH_BOX > {
-		typedef const mesh_part* fish_t;
-		typedef mesh_part data_t;
-	};
-#else
 	template< class Id, class = void >
 	struct fish2box {
 		// default value
@@ -83,17 +63,16 @@ public:
 	};
 	// overload for well path
 	template< class unused >
-	struct fish2box< Loki::Int2Type< WELL_BOX >, unused > {
+	struct fish2box< Loki::Int2Type< 1 >, unused > {
 		typedef ulong fish_t;
 		typedef well_data data_t;
 	};
 	// overload for mesh_part
 	template< class unused >
-	struct fish2box< Loki::Int2Type< MESH_BOX >, unused > {
+	struct fish2box< Loki::Int2Type< 2 >, unused > {
 		typedef const mesh_part* fish_t;
 		typedef mesh_part data_t;
 	};
-#endif
 
 	// structure to help identify given boxes
 	class box_handle {
@@ -104,7 +83,7 @@ public:
 	// pointer is really stored as box handle
 	typedef st_smart_ptr< box_handle > sp_bhandle;
 
-	template< fish_id Id >
+	template< int Id >
 	class box_handle_impl : public box_handle {
 		typedef fish2box< Loki::Int2Type< Id > > fish2box_t;
 
