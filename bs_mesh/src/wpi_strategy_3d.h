@@ -255,57 +255,17 @@ struct strategy_3d {
 		//Segment s = w.segment();
 		uint tri_count = 0;
 		for(tri_iterator tri = c.cover.begin(), end = c.cover.end(); tri != end; ++tri, ++tri_count) {
+			// test intersection
+			//if(!CGAL::do_intersect(well_seg, *tri)) continue;
 			// really do intersection
-			if(!tri->is_degenerate()) {
-				// case for good (non-degenerated) triangles
-				if(!well_seg.is_degenerate()) {
-					// and good segment
-					Object xres = CGAL::intersection(well_seg, *tri);
-					// in 99% of cases we should get a point of intersection
-					if(const Point* xpoint = CGAL::object_cast< Point >(&xres))
-						res.push_back(std::make_pair(*xpoint, tri_count >> 1));
-					else if(const Segment* xseg = CGAL::object_cast< Segment >(&xres)) {
-						// in rare 1% of segment lying on the facet, add begin and end of segment
-						res.push_back(std::make_pair(xseg->source(), tri_count >> 1));
-						res.push_back(std::make_pair(xseg->target(), tri_count >> 1));
-					}
-				}
-				else if(tri->has_on(well_seg[0])) {
-					// good triangle and degenerated segment (point)
-					res.push_back(std::make_pair(well_seg[0], tri_count >> 1));
-				}
-			}
-			else {
-				// degenerated triangle - line, containing all 3 vertices
-				// find the longest segment, containing all vertices
-				Segment tri_seg;
-				double max_len = 0;
-				for(uint i = 0; i < 3; ++i) {
-					Segment e_seg = Segment((*tri)[i], (*tri)[(i + 1) % 3]);
-					double e_len = e_seg.squared_length();
-					if(e_len > max_len) {
-						tri_seg = e_seg;
-						max_len = e_len;
-					}
-				}
-
-				// find intersection of triangle segment & well segment
-				if(!well_seg.is_degenerate()) {
-					// good segment
-					Object xres = CGAL::intersection(well_seg, tri_seg);
-					// in 99% of cases we should get a point of intersection
-					if(const Point* xpoint = CGAL::object_cast< Point >(&xres))
-						res.push_back(std::make_pair(*xpoint, tri_count >> 1));
-					else if(const Segment* xseg = CGAL::object_cast< Segment >(&xres)) {
-						// in rare 1% of segment lying on the facet, add begin and end of segment
-						res.push_back(std::make_pair(xseg->source(), tri_count >> 1));
-						res.push_back(std::make_pair(xseg->target(), tri_count >> 1));
-					}
-				}
-				else if(tri_seg.has_on(well_seg[0])) {
-					// degenerated segment - point
-					res.push_back(std::make_pair(well_seg[0], tri_count >> 1));
-				}
+			Object xres = CGAL::intersection(well_seg, *tri);
+			// in 99% of cases we should get a point of intersection
+			if(const Point* xpoint = CGAL::object_cast< Point >(&xres))
+				res.push_back(std::make_pair(*xpoint, tri_count >> 1));
+			else if(const Segment* xseg = CGAL::object_cast< Segment >(&xres)) {
+				// in rare 1% of segment lying on the facet, add begin and end of segment
+				res.push_back(std::make_pair(xseg->source(), tri_count >> 1));
+				res.push_back(std::make_pair(xseg->target(), tri_count >> 1));
 			}
 		}
 		return res;
