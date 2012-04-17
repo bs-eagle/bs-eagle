@@ -64,7 +64,7 @@
     <ClCompile>
       <AdditionalOptions>/Zm1000</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include;$(ProjectDir)/../bs_bos_core/include/;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../bs_pvt/include/;$(ProjectDir)/../bs_scal/include/;$(ProjectDir)/../sql_well/include/;$(ProjectDir)/../bs_mesh/include/;$(ProjectDir)/../common_types/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(HDF5_PATH)/include;$(NUMPY_PATH)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include;$(ProjectDir)/../bs_bos_core/include/;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../bs_pvt/include/;$(ProjectDir)/../bs_scal/include/;$(ProjectDir)/../sql_well/include/;$(ProjectDir)/../bs_mesh/include/;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../common_alg/include//;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(HDF5_PATH)/include;$(NUMPY_PATH)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_EXCEPTION_USE_BOOST_FORMAT;_SCL_SECURE_NO_WARNINGS;NOMINMAX;%(PreprocessorDefinitions);BOOST_ALL_DYN_LINK;BOOST_ALL_DYN_LINK;_SCL_SECURE_NO_WARNINGS; _SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -88,7 +88,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalOptions>/Zm1000</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include;$(ProjectDir)/../bs_bos_core/include/;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../bs_pvt/include/;$(ProjectDir)/../sql_well/include/;$(ProjectDir)/../bs_scal/include/;$(ProjectDir)/../bs_mesh/include/;$(ProjectDir)/../common_types/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(HDF5_PATH)/include;$(NUMPY_PATH)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include;$(ProjectDir)/../bs_bos_core/include/;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../bs_pvt/include/;$(ProjectDir)/../sql_well/include/;$(ProjectDir)/../bs_scal/include/;$(ProjectDir)/../bs_mesh/include/;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../common_alg/include//;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(HDF5_PATH)/include;$(NUMPY_PATH)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS; _SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -135,12 +135,7 @@
   <ItemGroup>
     <ClInclude Include="include\convert_str_to_array.h" />
     <ClInclude Include="include\convert_units.h" />
-    <ClInclude Include="include\lc_messages.h" />
-    <ClInclude Include="include\localization.h" />
-    <ClInclude Include="include\read_class.h" />
     <ClInclude Include="include\str_tools.h" />
-    <ClInclude Include="include\table_upper.h" />
-    <ClInclude Include="include\py_read_class.h" />
     <ClInclude Include="include\rock_grid.h" />
     <ClInclude Include="include\rocktab_table.h" />
     <ClInclude Include="include\arrays.h" />
@@ -172,16 +167,8 @@
     <ClCompile Include="src\hdm_serialize.cpp" />
     <ClCompile Include="src\hdm_serialize_action.cpp" />
     <ClCompile Include="src\idata_serialize.cpp" />
-    <ClCompile Include="src\lc_messages_eng.cpp" />
-    <ClCompile Include="src\lc_messages_rus_alt.cpp" />
-    <ClCompile Include="src\lc_messages_rus_koi.cpp" />
-    <ClCompile Include="src\lc_messages_rus_win.cpp" />
     <ClCompile Include="src\locale_keeper_serialize.cpp" />
-    <ClCompile Include="src\localization.cpp" />
-    <ClCompile Include="src\read_class.cpp" />
     <ClCompile Include="src\rocktab_table_serialize.cpp" />
-    <ClCompile Include="src\table_upper.cpp" />
-    <ClCompile Include="src\py_read_class.cpp" />
     <ClCompile Include="src\rock_grid.cpp" />
     <ClCompile Include="src\rocktab_table.cpp" />
     <ClCompile Include="src\arrays_tables.cpp" />

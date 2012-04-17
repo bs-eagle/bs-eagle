@@ -99,6 +99,8 @@
     <ClCompile Include="src\bs_mesh.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
     <ClCompile Include="src\i_cant_link_2_mesh.cpp" />
+    <ClCompile Include="src\py_upsc.cpp" />
+    <ClCompile Include="src\upsc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\fpoint2d.h">

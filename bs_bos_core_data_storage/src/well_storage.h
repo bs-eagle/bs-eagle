@@ -84,7 +84,7 @@ namespace blue_sky {
         params_t* get_params (data_set_t &data, const std::string &well, t_double date);
       
       template <typename data_set_t, typename vector_t, int ni, int nf>
-        blue_sky::smart_ptr< vector_t > get_values (const std::string &name, data_set_t &data, int col, int type);
+        blue_sky::smart_ptr< vector_t > get_values (const std::string &name, data_set_t &data, int col, int type = 0);
         
         
       //! set exact param on specified date
@@ -96,21 +96,21 @@ namespace blue_sky {
       //! type - parameter type, floating point with type = 0 and integer with type = 1
       //! operation - operation type, assignment with operation = 0 and addition with operation = 1
       template <typename params_t, typename data_t, typename data_set_t, int ni, int nf>
-        void set_param (data_set_t &data, const std::string &name, t_double date, int col, data_t &val, int type, int operation);
+        void set_param (data_set_t &data, const std::string &name, t_double date, int col, data_t &val, int type = 0, int operation = 0);
       
       template <typename params_t, typename vector_t, typename data_set_t, int ni, int nf>
-        void set_params (data_set_t &data, const std::string &name, t_double date, blue_sky::smart_ptr< vector_t > vals, int type, int operation);
+        void set_params (data_set_t &data, const std::string &name, t_double date, blue_sky::smart_ptr< vector_t > vals, int type = 0, int operation = 0);
         
       //! set exact param to child and take this change into account for all parents
       template <typename child_params_t, typename parent_params_t, typename data_t,typename child_data_set_t, typename parent_data_set_t, 
                 int child_ni, int child_nf, int parent_ni, int parent_nf>
         void set_child_param (child_data_set_t &child_data, parent_data_set_t &parent_data, str_map &parent_map, const std::string &child_name, 
-                                           t_double date, int col, data_t val, int type);
+                                           t_double date, int col, data_t val, int type = 0);
         
       template <typename child_params_t, typename parent_params_t, typename vector_t,typename child_data_set_t, typename parent_data_set_t, 
                 int child_ni, int child_nf, int parent_ni, int parent_nf>
         void set_child_params (child_data_set_t &child_data, parent_data_set_t &parent_data, str_map &parent_map, const std::string &child_name, 
-                             t_double date, blue_sky::smart_ptr< vector_t > vals, int type);
+                             t_double date, blue_sky::smart_ptr< vector_t > vals, int type = 0);
      
      
       

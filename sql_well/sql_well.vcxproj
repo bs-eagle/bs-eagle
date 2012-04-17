@@ -48,7 +48,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)/../bs_mesh/include;$(CGAL_DIR)/auxiliary/gmp/include;$(CGAL_DIR)/include;$(ProjectDir)/../bs_mesh/src/;$(ProjectDir)/../bs_mtx/include/;$(ProjectDir)/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../bs_bos_core_data_storage/include;$(ProjectDir)/../bs_bos_core_base/include;$(BOOST_PATH);$(PYTHON_PATH)/include;$(NUMPY_PATH)/include;$(HDF5_PATH)/include;$(LOKI_PATH)/include;.\sqlite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)/../bs_mesh/include;$(CGAL_DIR)/auxiliary/gmp/include;$(CGAL_DIR)/include;$(ProjectDir)/../bs_mesh/src/;$(ProjectDir)/../bs_mtx/include/;$(ProjectDir)/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../common_alg/include/;$(ProjectDir)/../bs_bos_core_data_storage/include;$(ProjectDir)/../bs_bos_core_base/include;$(BOOST_PATH);$(PYTHON_PATH)/include;$(NUMPY_PATH)/include;$(HDF5_PATH)/include;$(LOKI_PATH)/include;.\sqlite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING;BSPY_EXPORTING_PLUGIN;_HDF5;H5_USE_16_API;_HDF5USEDLL_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_BOS_CORE_COLLECT_BACKTRACE_;BS_EXCEPTION_USE_BOOST_FORMAT;%(PreprocessorDefinitions);BOOST_ALL_DYN_LINK;_SCL_SECURE_NO_WARNINGS;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -71,7 +71,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)\include;$(LOKI_PATH)/include;$(BOOST_PATH);$(NUMPY_PATH)/include;$(PYTHON_PATH)/include;$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;.\include;$(HDF5_PATH)/include;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(ProjectDir)/../bs_mesh/include;$(ProjectDir)/../bs_mesh/src;$(ProjectDir)/../bs_mtx/include/;$(ProjectDir)/../bs_bos_core_base/include/;.\sqlite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)\include;$(LOKI_PATH)/include;$(BOOST_PATH);$(NUMPY_PATH)/include;$(PYTHON_PATH)/include;$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;.\include;$(HDF5_PATH)/include;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../common_alg/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(ProjectDir)/../bs_mesh/include;$(ProjectDir)/../bs_mesh/src;$(ProjectDir)/../bs_mtx/include/;$(ProjectDir)/../bs_bos_core_base/include/;.\sqlite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING;BSPY_EXPORTING_PLUGIN;_HDF5;H5_USE_16_API;_HDF5USEDLL_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_BOS_CORE_COLLECT_BACKTRACE_;BS_EXCEPTION_USE_BOOST_FORMAT;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -92,30 +92,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\date_tools.cpp" />
     <ClCompile Include="src\frac_comp_ident.cpp" />
-    <ClCompile Include="src\localization.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\py_sql_well.cpp" />
-    <ClCompile Include="src\read_class_sql_well.cpp" />
     <ClCompile Include="src\sql_well.cpp" />
     <ClCompile Include="src\sql_well_serialize.cpp" />
-    <ClCompile Include="src\table_upper.cpp" />
     <ClCompile Include="src\timer.cpp" />
     <ClCompile Include="src\well_keywords.cpp" />
     <ClCompile Include="sqlite\sqlite3.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\compdat_traits.h" />
-    <ClInclude Include="src\date_tools.h" />
     <ClInclude Include="src\fracture_traits.h" />
     <ClInclude Include="src\frac_comp_ident.h" />
-    <ClInclude Include="src\localization.h" />
     <ClInclude Include="src\main_def.h" />
     <ClInclude Include="src\py_sql_well.h" />
-    <ClInclude Include="src\read_class_sql_well.h" />
     <ClInclude Include="src\sql_well.h" />
-    <ClInclude Include="src\table_upper.h" />
     <ClInclude Include="src\timer.h" />
     <ClInclude Include="src\well_keywords.hpp" />
     <ClInclude Include="include\well_pool_iface.h" />

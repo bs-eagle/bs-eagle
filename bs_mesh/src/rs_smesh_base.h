@@ -7,18 +7,25 @@
 	\date 2008-05-20
  */
 
-#include "flux_connections.h"
+#ifndef PURE_MESH
+  #include "flux_connections_iface.h"
+
+  using namespace blue_sky;
+#else
+  #include "pure_mesh.h"
+#endif
+
+
 #include "rs_mesh_base.h"
 
-using namespace blue_sky;
 
-  //! enum for define direction
-  enum direction
-  {
-    along_dim1 = 0,
-    along_dim2,
-    along_dim3
-  };
+//! enum for define direction
+enum direction
+{
+  along_dim1 = 0,
+  along_dim2,
+  along_dim3
+};
 
 
 
@@ -108,13 +115,22 @@ class BS_API_PLUGIN rs_smesh_base : public rs_mesh_base
       {
         if (i < 0 || j < 0 || k < 0 || i >= nx || j >= ny || k >= nz)
           return -1;
+#ifndef PURE_MESH
         return (*base_t::base_t::ext_to_int)[i + j*nx + k*nx*ny];
+#else
+        return base_t::base_t::ext_to_int[i + j*nx + k*nx*ny];
+#endif
       }
 
     //! convert global [i+j*nx+k*nx*ny] to local indexing
     t_long XYZ_to_inside(const t_long i) const
       {
+        
+#ifndef PURE_MESH
         return (*base_t::base_t::ext_to_int)[i];
+#else
+        return base_t::base_t::ext_to_int[i];
+#endif
       }
 
     //! convert local index to global [i,j,k]
@@ -123,8 +139,12 @@ class BS_API_PLUGIN rs_smesh_base : public rs_mesh_base
     //! convert local index to global [i+j*nx+k*nx*ny]
     t_long inside_to_XYZ(const t_long index) const
       {
+#ifndef PURE_MESH
         return (*base_t::base_t::int_to_ext)[index];
-      }
+#else
+        return base_t::base_t::int_to_ext[index];
+#endif        
+}
 
     /*
     //! make ext_to_int of num (int_to_ext)  (like original_elements_num in old mesh)

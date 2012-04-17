@@ -76,6 +76,16 @@ struct pods : public helpers< strat_t > {
 	typedef typename strat_t::vertex_pos   vertex_pos;
 	typedef typename strat_t::vertex_pos_i vertex_pos_i;
 
+	// import base functions
+	typedef helpers< strat_t > base_t;
+	using base_t::decode_cell_id;
+	using base_t::encode_cell_id;
+	using base_t::vertex_pos2bbox;
+	using base_t::vertex_pos2point;
+	using base_t::rawptr2point;
+	using base_t::ca_assign;
+	using base_t::vertex_pos2rect;
+
 	// import global consts
 	enum { D = strat_t::D };
 	//typedef helpers< strat_t > helper_t;

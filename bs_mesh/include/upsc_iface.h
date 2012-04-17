@@ -42,10 +42,17 @@ class upsc_iface : public objbase
        */
       virtual sp_prop_t get_prop () = 0;
       virtual boost::python::tuple king_method ( t_long nx, t_long ny, t_long nz, t_long nz_upsc,
-                            spv_float vol, spv_float ntg, spv_float poro, spv_float perm, 
-                            spv_float swat ) = 0;
+                            spv_float vol, spv_float ntg, spv_float poro, spv_float perm) = 0; 
+                            //spv_float swat ) = 0;
       
       virtual spv_float upscale_grid ( t_long Nx, t_long Ny, t_long Nz, spv_float zcorn, spv_uint layers ) = 0;
+      
+      //virtual t_int upscale_perm (t_long Nx, t_long Ny, t_long Nz, spv_uint layers, spv_float perm, BS_SP(rs_mesh_iface) mesh) = 0;
+      
+      virtual boost::python::tuple upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint layers, spv_float permx_, spv_float permz_, spv_float actnum_, BS_SP(rs_mesh_iface) sp_mesh_iface) = 0;
+      
+      virtual spv_float upscale_saturation_cube (t_long Nx, t_long Ny, t_long Nz, t_long Nz_upsc,
+                                         spv_uint layers_, spv_float vol_, spv_float ntg_, spv_float poro_, spv_float sat_) = 0;
 
 #ifdef BSPY_EXPORTING_PLUGIN
       /** 

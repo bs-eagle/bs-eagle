@@ -131,7 +131,7 @@ namespace blue_sky
   }
   
   template <typename data_set_t, typename vector_t, int ni, int nf>
-  blue_sky::smart_ptr< vector_t > well_storage::get_values (const std::string &name, data_set_t &data, int col, int type = 0)
+  blue_sky::smart_ptr< vector_t > well_storage::get_values (const std::string &name, data_set_t &data, int col, int type)
   {
     typename data_set_t::template nth_index<0>::type& name_index = data.get<0>();
     typename data_set_t::template nth_index<0>::type::iterator name_it, name_b, name_e;
@@ -189,7 +189,7 @@ namespace blue_sky
   
   
   template <typename params_t, typename data_t, typename data_set_t, int ni, int nf>
-  void well_storage::set_param (data_set_t &data, const std::string &name, t_double date, int col, data_t &val, int type = 0, int operation = 0)
+  void well_storage::set_param (data_set_t &data, const std::string &name, t_double date, int col, data_t &val, int type, int operation)
   {
     params_t *params;
     data_t tmp;
@@ -231,7 +231,7 @@ namespace blue_sky
   }
   
   template <typename params_t, typename vector_t, typename data_set_t, int ni, int nf>
-  void well_storage::set_params (data_set_t &data, const std::string &name, t_double date, blue_sky::smart_ptr< vector_t > vals, int type = 0, int operation = 0)
+  void well_storage::set_params (data_set_t &data, const std::string &name, t_double date, blue_sky::smart_ptr< vector_t > vals, int type, int operation)
   {
     params_t *params;
     typename vector_t::value_type *vals_data;
@@ -285,7 +285,7 @@ namespace blue_sky
   template <typename child_params_t, typename parent_params_t, typename data_t,typename child_data_set_t, typename parent_data_set_t, 
             int child_ni, int child_nf, int parent_ni, int parent_nf>
   void well_storage::set_child_param (child_data_set_t &child_data, parent_data_set_t &parent_data, str_map &parent_map, const std::string &child_name, 
-                                           t_double date, int col, data_t val, int type = 0)
+                                           t_double date, int col, data_t val, int type)
   {
     str_map::iterator it, b, e;
     
@@ -306,7 +306,7 @@ namespace blue_sky
   template <typename child_params_t, typename parent_params_t, typename vector_t,typename child_data_set_t, typename parent_data_set_t, 
             int child_ni, int child_nf, int parent_ni, int parent_nf>
   void well_storage::set_child_params (child_data_set_t &child_data, parent_data_set_t &parent_data, str_map &parent_map, const std::string &child_name, 
-                                           t_double date, blue_sky::smart_ptr< vector_t > vals, int type = 0)
+                                           t_double date, blue_sky::smart_ptr< vector_t > vals, int type)
   {
     str_map::iterator it, b, e;
     
