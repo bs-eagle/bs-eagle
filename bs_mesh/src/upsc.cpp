@@ -53,7 +53,7 @@ namespace blue_sky
 
     }
 
-spv_float upsc::upscale_grid ( t_long Nx, t_long Ny, t_long Nz, spv_float zcorn_, spv_uint layers_ )
+spv_float upsc::upscale_grid_zcolumn ( t_long Nx, t_long Ny, t_long Nz, spv_float zcorn_, spv_uint layers_ )
 {   
     t_int k1, k2, new_k;
     t_int new_Nz, new_zcorn_size, layer_size;
@@ -81,7 +81,7 @@ spv_float upsc::upscale_grid ( t_long Nx, t_long Ny, t_long Nz, spv_float zcorn_
                 k2 = (*lit_next);
             else
                 k2 = Nz;
-            printf("\n k1 = %d k2 = %d", k1, k2);
+            //printf("\n k1 = %d k2 = %d", k1, k2);
             std::copy ( &zcorn[2*k1*layer_size], &zcorn[(2*k1+1)*layer_size], &(*new_zcorn)[(new_k++)*layer_size] );
             std::copy ( &zcorn[(2*k2-1)*layer_size], &zcorn[2*k2*layer_size], &(*new_zcorn)[(new_k++)*layer_size] );
         }
@@ -200,16 +200,15 @@ spv_float upsc::upscale_saturation_cube (t_long Nx, t_long Ny, t_long Nz, t_long
 }
 
 int upsc::upscale_cubes ( t_long k1, t_long k2, t_long Nx, t_long Ny, 
-                          spv_float vol_, spv_float ntg_, spv_float poro_, /*spv_float swat_,*/ spv_float permx_ )
+                          spv_float vol_, spv_float ntg_, spv_float poro_, spv_float permx_ )
 {
     v_float& vol = *vol_;
     v_float& ntg = *ntg_;
     v_float& poro = *poro_;
-    //v_float& swat = *swat_;
     v_float& permx = *permx_;
     
     t_long i, j, index[2], z1, z2, layer_size;
-    t_double vol_sum, ntg_vol_sum, poro_ntg_vol_sum, permx_ntg_vol_sum; //, swat_poro_ntg_vol_sum; 
+    t_double vol_sum, ntg_vol_sum, poro_ntg_vol_sum, permx_ntg_vol_sum;
 
     layer_size = Nx*Ny;
     z1 = k1*layer_size;
@@ -226,8 +225,6 @@ int upsc::upscale_cubes ( t_long k1, t_long k2, t_long Nx, t_long Ny,
             ntg_vol_sum = ntg[index[0]]*vol[index[0]] +  ntg[index[1]]*vol[index[1]];
             poro_ntg_vol_sum = poro[index[0]]*ntg[index[0]]*vol[index[0]] + poro[index[1]]*ntg[index[1]]*vol[index[1]];
             permx_ntg_vol_sum = permx[index[0]]*ntg[index[0]]*vol[index[0]] + permx[index[1]]*ntg[index[1]]*vol[index[1]];
-            //swat_poro_ntg_vol_sum =swat[index[0]]*poro[index[0]]*ntg[index[0]]*vol[index[0]] + swat[index[1]]*poro[index[1]]*ntg[index[1]]*vol[index[1]]; 
-
             
             vol[index[0]] = vol_sum;
             if (vol_sum != 0)
@@ -244,13 +241,6 @@ int upsc::upscale_cubes ( t_long k1, t_long k2, t_long Nx, t_long Ny,
                     poro[index[0]] = 0;
                     permx[index[0]] = 0;
                 }
-            /*
-            if (swat_poro_ntg_vol_sum != 0)
-                swat[index[0]] = swat_poro_ntg_vol_sum/poro_ntg_vol_sum;
-            else
-                swat[index[0]] = 0;
-                */
-
           }
       }
     return 0;
@@ -298,7 +288,6 @@ t_double upsc::upsc_permz_zcolumn (t_long Ny, t_long Nz, t_long i, t_long j, t_l
     
     // FIXME
     b[0] = -tz*p_left;
-    //index  =  k1 + k1*size;
     A[0] -= tz;          
     
     // k1 < k < k2 /////////////////////////////////////////////////////////////////////////////////////
@@ -349,8 +338,8 @@ t_double upsc::upsc_permz_zcolumn (t_long Ny, t_long Nz, t_long i, t_long j, t_l
     solver->setup (tran);
     solver->solve (tran, rhs, p);
 
-    for (k=0;k<size;k++)
-        printf("\n p[%d] = %f", k, (*p)[k]);
+    //for (k=0;k<size;k++)
+        //printf("\n p[%d] = %f", k, (*p)[k]);
 
     //index = k1 + j * Nz + i * Ny * Nz;
     dp = (p_left - (*p)[0]);
@@ -369,16 +358,17 @@ t_double upsc::upsc_permz_zcolumn (t_long Ny, t_long Nz, t_long i, t_long j, t_l
     
     dL = get_len(center[0], center[1]);
 
-    printf("\n dl=%f dL=%f", dl, dL);
+    //printf("\n dl=%f dL=%f", dl, dL);
     
     K = (dp/dl)/(dP/dL);
     
     return K;
 }
 
-t_double upsc::upsc_permx_zcolumn (t_long Nx, t_long Ny, t_int i, t_int j, t_int k1, t_int k2, spv_float permx_, BS_SP(rs_mesh_iface) sp_mesh_iface)
+t_double upsc::upsc_permx_zcolumn (t_long Nx, t_long Ny, t_long i, t_long j, t_long k1, t_long k2, 
+                                   spv_float permx_, BS_SP(rs_mesh_iface) sp_mesh_iface)
 {
-    t_int k, xyz_ind; //zyx_ind;
+    t_int k, xyz_ind; 
     t_double dl, dL, a, A, sum, K;
     
     plane_t plane;
@@ -396,7 +386,6 @@ t_double upsc::upsc_permx_zcolumn (t_long Nx, t_long Ny, t_int i, t_int j, t_int
 
     for (k = k1; k <= k2; ++k)
         {
-            //zyx_ind = k + j * Nz + i * Ny * Nz;
             xyz_ind = i + j * Nx + k * Nx * Ny;
             
             mesh.calc_element (i, j, k, element);
@@ -451,7 +440,7 @@ bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint 
             else
                 k2 = layers[n+1] - 1;
 
-            printf("\n k1 = %d k2 = %d", k1, k2);
+            //printf("\n k1 = %d k2 = %d", k1, k2);
         
             if (k1 != k2)
                 {
@@ -460,7 +449,7 @@ bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint 
                         for (i = 0; i < Nx; ++i)
                             {
                                 index = i + j * Nx + z1;
-                                printf("\n index = %d pz = %f px = %f", index, permz[index], permx[index]);
+                                //printf("\n index = %d pz = %f px = %f", index, permz[index], permx[index]);
 
                                 // FIXME: in general case call function that finds isolated bodies
                                 for (k = k1; k <= k2; k++)
@@ -475,7 +464,7 @@ bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint 
                                 if (permz[index])
                                     {
                                         upsc_factor = upsc_permz_zcolumn (Ny, Nz, i, j, k1, k2, sp_mesh_iface);
-                                        printf("\n %d %d upsc_factor = %f", i, j, upsc_factor);
+                                        //printf("\n %d %d upsc_factor = %f", i, j, upsc_factor);
                                         permz[index] *= upsc_factor;
                                     }
 
@@ -699,17 +688,14 @@ bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint 
 
   bp::tuple
   upsc::king_method (t_long Nx, t_long Ny, t_long Nz, t_long Nz_upsc,
-                            spv_float vol_, spv_float ntg_, spv_float poro_, 
-                            spv_float permx_ /*, spv_float swat_*/ )
+                            spv_float vol_, spv_float ntg_, spv_float poro_, spv_float permx_)
   {
     t_int i, k, n, k0, k1, k2, k3;
     t_int layer_size, new_cube_size;
     t_float sum_dW;
     
-    //v_float& vol = *vol_;
     v_float& ntg = *ntg_;
     v_float& poro = *poro_;
-    //v_float& swat = *swat_;
 
     std::list <t_int> layers;
     std::list <t_int>::iterator lit, tmp_it;
@@ -719,10 +705,8 @@ bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint 
     layer_map_t layer2mmap_it;
     layer_map_it_t lmit;
     
-    //spv_float new_vol = BS_KERNEL.create_object(v_float::bs_type());
     spv_float new_ntg = BS_KERNEL.create_object(v_float::bs_type());
     spv_float new_poro = BS_KERNEL.create_object(v_float::bs_type());
-    //spv_float new_swat = BS_KERNEL.create_object(v_float::bs_type());
     spv_uint layers_v = BS_KERNEL.create_object(v_uint::bs_type());
 
     layer_size = Nx*Ny;
@@ -760,7 +744,7 @@ bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint 
         // FIXME: if (k1 != k2)
 
         // upscaling of cubes
-        upscale_cubes (k1, k2, Nx, Ny, vol_, ntg_, poro_, /*swat_,*/ permx_ );
+        upscale_cubes (k1, k2, Nx, Ny, vol_, ntg_, poro_, permx_ );
         
         // erase sum_dW for (k1; k2) pair of layers
         mit = layer2mmap_it[k1];
@@ -810,27 +794,22 @@ bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint 
     
     new_cube_size = Nz_upsc*layer_size;
 
-    //new_vol->resize(new_cube_size);
     new_ntg->resize(new_cube_size);
     new_poro->resize(new_cube_size);
-    //new_swat->resize(new_cube_size);
     layers_v->resize(Nz_upsc);
 
     i = 0;
     for (lit=layers.begin();lit!=layers.end();lit++)
         {
             k = (*lit);
-            //std::copy ( &vol[k*layer_size], &vol[(k+1)*layer_size], &(*new_vol)[i*layer_size] );
             std::copy ( &ntg[k*layer_size], &ntg[(k+1)*layer_size], &(*new_ntg)[i*layer_size] );
             std::copy ( &poro[k*layer_size], &poro[(k+1)*layer_size], &(*new_poro)[i*layer_size] );
-            //std::copy ( &swat[k*layer_size], &swat[(k+1)*layer_size], &(*new_swat)[i*layer_size] );
-            
             i++;
         }
 
     std::copy ( layers.begin(), layers.end(), &(*layers_v)[0] );
     
-    return bp::make_tuple (layers_v, /*new_vol,*/ new_ntg, new_poro/*, new_swat*/) ;
+    return bp::make_tuple (layers_v, new_ntg, new_poro) ;
   }
 
 #ifdef BSPY_EXPORTING_PLUGIN
