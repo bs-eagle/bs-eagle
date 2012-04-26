@@ -48,7 +48,7 @@ class upsc_iface : public objbase
       
       //virtual t_int upscale_perm (t_long Nx, t_long Ny, t_long Nz, spv_uint layers, spv_float perm, BS_SP(rs_mesh_iface) mesh) = 0;
       
-      virtual boost::python::tuple upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint layers, spv_float permx_, spv_float permz_, spv_float actnum_, BS_SP(rs_mesh_iface) sp_mesh_iface) = 0;
+      virtual boost::python::tuple upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint layers, spv_float permx_, spv_float permz_, spv_uint actnum_, BS_SP(rs_mesh_iface) sp_mesh_iface) = 0;
       
       virtual spv_float upscale_saturation_cube (t_long Nx, t_long Ny, t_long Nz, t_long Nz_upsc, spv_uint layers_, spv_float vol_, spv_float ntg_, spv_float poro_, spv_float sat_) = 0;
 

@@ -69,7 +69,7 @@ namespace blue_sky
       
       virtual bp::tuple upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, 
                                               spv_uint layers, spv_float permx_, spv_float permz_, 
-                                              spv_float actnum_, BS_SP(rs_mesh_iface) sp_mesh_iface);
+                                              spv_uint actnum_, BS_SP(rs_mesh_iface) sp_mesh_iface);
 
       virtual spv_float upscale_saturation_cube (t_long Nx, t_long Ny, t_long Nz, t_long Nz_upsc,
                                                  spv_uint layers_, spv_float vol_, spv_float ntg_, spv_float poro_, spv_float sat_);
