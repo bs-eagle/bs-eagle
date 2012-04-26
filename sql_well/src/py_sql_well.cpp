@@ -9,6 +9,7 @@
 #include "py_sql_well.h"
 #include "sql_well.h"
 #include "bs_serialize.h"
+#include "bs_prop_base.h"
 
 using namespace boost::python;
 #ifdef BSPY_EXPORTING_PLUGIN
@@ -18,6 +19,27 @@ namespace python {
   void py_export_compdat_ident();
 
   //////////////////////////////////////////////////////////////////////////
+
+  // helper function to write well_pool to given fname
+  std::string serialize_to_str_fname(
+      smart_ptr< well_pool_iface > wp,
+      const std::string& prj_path,
+      const std::string& prj_name
+  ) {
+    // save project path for serialization code
+    kernel::idx_dt_ptr p_dt = BS_KERNEL.pert_idx_dt(BS_KERNEL.find_type("hdm").td_);
+    //std::string well_pool_filename = prj_name + "_well_pool.db";
+    p_dt->insert< std::string >(prj_path);
+    // and project name
+    p_dt->insert< std::string >(prj_name);
+
+    // invoke serializetion
+    std::string res = serialize_to_str< well_pool_iface >(wp);
+    // clear table
+    p_dt->clear< std::string >();
+
+    return res;
+  }
 
   //////////////////////////////////////////////////////////////////////////
   //! export matrices to python
@@ -33,6 +55,7 @@ namespace python {
 
     def("serialize_to_str", &blue_sky::serialize_to_str< well_pool_iface >);
     def("serialize_from_str", &blue_sky::serialize_from_str< well_pool_iface >);
+    def("serialize_to_str_fname", &serialize_to_str_fname);
 
     // register implicit conversion to interface
     implicitly_convertible<

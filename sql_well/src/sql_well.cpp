@@ -815,6 +815,9 @@ COMMIT;\
       int n_rows = get_sql_int(0);
       finalize_sql ();
 
+      if (n_rows < 1)
+        return BS_KERNEL.create_object (v_double::bs_type());
+
       int n_cols = boost::python::len (table_columns);
       spv_double table = BS_KERNEL.create_object (v_double::bs_type());
       table->resize (n_rows * n_cols);
@@ -832,14 +835,13 @@ COMMIT;\
       request_str = request_str + " FROM " + table_name + " " + filter;
       prepare_sql (request_str);
 
-      int i = 0;
-      while (!step_sql ())
+      
+      for (int i = 0; (i < n_rows) && (!step_sql ()); ++i)
         {
           for (int j = 0; j < n_cols; j++)
             {
               table_values[i * n_cols + j] = get_sql_real(j);
             }
-          i++;
         }
       finalize_sql ();
 
