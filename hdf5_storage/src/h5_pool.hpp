@@ -327,6 +327,12 @@ namespace blue_sky
               i->second = 0;
             }
           file_id = 0;
+          edit_base = false;
+          n_pool_dims = 0;
+          for (int i = 0; i < 3; ++i)
+            {
+              pool_dims[i] = 0;
+            }
         }
 
       void fill_map (hid_t);

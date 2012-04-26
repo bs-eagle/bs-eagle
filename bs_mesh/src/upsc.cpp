@@ -407,7 +407,7 @@ t_double upsc::upsc_permx_zcolumn (t_long Nx, t_long Ny, t_long i, t_long j, t_l
     return K;
 }
 
-bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint layers_, spv_float permx_, spv_float permz_, spv_float actnum_, BS_SP(rs_mesh_iface) sp_mesh_iface)
+bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint layers_, spv_float permx_, spv_float permz_, spv_uint actnum_, BS_SP(rs_mesh_iface) sp_mesh_iface)
   {
     t_int i, j, k, n, Nz_upsc, k1, k2, z1, ind, index;
     t_int layer_size, new_cube_size;
@@ -418,7 +418,7 @@ bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint 
     spv_float new_permx = BS_KERNEL.create_object(v_float::bs_type());
     v_float& permz = *permz_;
     v_float& permx = *permx_;
-    v_float& actnum = *actnum_;
+    v_uint& actnum = *actnum_;
     v_uint& layers = *layers_;
     
     smart_ptr<bs_mesh_grdecl> sp_mesh(sp_mesh_iface, bs_static_cast());
