@@ -212,7 +212,7 @@ namespace blue_sky
     {
       double d, n, hh, mm, ss;
       
-      d = modf (tm + 1.0e-12, &n);
+      d = modf (tm + 1.0e-13, &n);
       d = modf (d * 24.0, &hh);
       d = modf (d * 60.0, &mm);
       d = modf (d * 60.0, &ss);
