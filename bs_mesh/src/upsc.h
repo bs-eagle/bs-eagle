@@ -67,8 +67,8 @@ namespace blue_sky
       
       //virtual t_int upscale_perm (t_long Nx, t_long Ny, t_long Nz, spv_uint layers, spv_float perm, BS_SP(rs_mesh_iface) mesh);
       
-      virtual bp::tuple upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, 
-                                              spv_uint layers, spv_float permx_, spv_float permz_, 
+      virtual spv_float upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, 
+                                              spv_uint layers, spv_float permz_, 
                                               spv_uint actnum_, BS_SP(rs_mesh_iface) sp_mesh_iface);
 
       virtual spv_float upscale_saturation_cube (t_long Nx, t_long Ny, t_long Nz, t_long Nz_upsc,
@@ -93,9 +93,9 @@ namespace blue_sky
 
       t_int upscale_cubes ( t_long k1, t_long k2, t_long Nx, t_long Ny, spv_float vol, spv_float ntg, spv_float poro, spv_float permx );
 
-      t_double upsc_permz_zcolumn (t_long Ny, t_long Nz, t_long i, t_long j, t_long k1, t_long k2, BS_SP(rs_mesh_iface) sp_mesh_iface);
+      t_double solve_pressure_eq (t_long Ny, t_long Nz, t_long i, t_long j, t_long k1, t_long k2, BS_SP(rs_mesh_iface) sp_mesh_iface);
       
-      t_double upsc_permx_zcolumn (t_long Nx, t_long Ny, t_long i, t_long j, t_long k1, t_long k2, spv_float permx_, BS_SP(rs_mesh_iface) sp_mesh_iface);
+      //t_double upsc_permx_zcolumn (t_long Nx, t_long Ny, t_long i, t_long j, t_long k1, t_long k2, spv_float permx_, BS_SP(rs_mesh_iface) sp_mesh_iface);
       
   
       // ------------------------------

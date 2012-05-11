@@ -231,6 +231,7 @@ int upsc::upscale_cubes ( t_long k1, t_long k2, t_long Nx, t_long Ny,
                 ntg[index[0]] = ntg_vol_sum/vol_sum;
             else
                 ntg[index[0]] = 0;
+            
             if (ntg_vol_sum != 0)
                 {
                     poro[index[0]] = poro_ntg_vol_sum/ntg_vol_sum;
@@ -241,11 +242,16 @@ int upsc::upscale_cubes ( t_long k1, t_long k2, t_long Nx, t_long Ny,
                     poro[index[0]] = 0;
                     permx[index[0]] = 0;
                 }
+            
+            if (i == 0 && j == 0)
+                printf("\n permx=%f", permx[index[0]]);
           }
       }
+
+
     return 0;
 }
-t_double upsc::upsc_permz_zcolumn (t_long Ny, t_long Nz, t_long i, t_long j, t_long k1, t_long k2, BS_SP(rs_mesh_iface) sp_mesh_iface)
+t_double upsc::solve_pressure_eq (t_long Ny, t_long Nz, t_long i, t_long j, t_long k1, t_long k2, BS_SP(rs_mesh_iface) sp_mesh_iface)
 {
     t_long size, k, n, index, ext_ind[2];
     plane_t plane[2];
@@ -305,7 +311,7 @@ t_double upsc::upsc_permz_zcolumn (t_long Ny, t_long Nz, t_long i, t_long j, t_l
             
             center[1] = element[1].get_center();
             // FIXME don't pass plane[1] to calc_tran
-            // for zcolumn cells are always fully adjacent
+            // because zcolumn cells are always fully adjacent
             //tz = mesh.calc_tran(ext_ind[0], ext_ind[1], plane[0], center[0], center[1], along_dim3, &plane[1]);
             tz = mesh.calc_tran(ext_ind[0], ext_ind[1], plane[0], center[0], center[1], along_dim3);
             
@@ -351,6 +357,12 @@ t_double upsc::upsc_permz_zcolumn (t_long Ny, t_long Nz, t_long i, t_long j, t_l
     get_plane_center (plane[0],  center[0]);
     
     dl = get_len(center[0], center[1])*2;
+
+    //if (dl == 0)
+    //    {
+    //        dl = EPSILON;
+    //        printf("\n epsilon=%e", EPSILON);
+    //    }
         
     mesh.calc_element (i, j, k2, element[1]);
     element[1].get_plane (z_axis_plus, plane[1]);
@@ -358,13 +370,13 @@ t_double upsc::upsc_permz_zcolumn (t_long Ny, t_long Nz, t_long i, t_long j, t_l
     
     dL = get_len(center[0], center[1]);
 
-    //printf("\n dl=%f dL=%f", dl, dL);
+    //printf("\n dp=%e dl=%e dP=%e dL=%e", dp, dl, dP, dL);
     
     K = (dp/dl)/(dP/dL);
     
     return K;
 }
-
+/*
 t_double upsc::upsc_permx_zcolumn (t_long Nx, t_long Ny, t_long i, t_long j, t_long k1, t_long k2, 
                                    spv_float permx_, BS_SP(rs_mesh_iface) sp_mesh_iface)
 {
@@ -406,8 +418,8 @@ t_double upsc::upsc_permx_zcolumn (t_long Nx, t_long Ny, t_long i, t_long j, t_l
     
     return K;
 }
-
-bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint layers_, spv_float permx_, spv_float permz_, spv_uint actnum_, BS_SP(rs_mesh_iface) sp_mesh_iface)
+*/
+spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint layers_, spv_float permz_, spv_uint actnum_, BS_SP(rs_mesh_iface) sp_mesh_iface)
   {
     t_int i, j, k, n, Nz_upsc, k1, k2, z1, ind, index;
     t_int layer_size, new_cube_size;
@@ -415,9 +427,7 @@ bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint 
     t_double upsc_factor;
     
     spv_float new_permz = BS_KERNEL.create_object(v_float::bs_type());
-    spv_float new_permx = BS_KERNEL.create_object(v_float::bs_type());
     v_float& permz = *permz_;
-    v_float& permx = *permx_;
     v_uint& actnum = *actnum_;
     v_uint& layers = *layers_;
     
@@ -463,12 +473,11 @@ bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint 
                                     }
                                 if (permz[index])
                                     {
-                                        upsc_factor = upsc_permz_zcolumn (Ny, Nz, i, j, k1, k2, sp_mesh_iface);
-                                        //printf("\n %d %d upsc_factor = %f", i, j, upsc_factor);
+                                        upsc_factor = solve_pressure_eq (Ny, Nz, i, j, k1, k2, sp_mesh_iface);
+                                        //printf("\n %d %d %d %d upsc_factor = %f", i, j, k1, k2, upsc_factor);
                                         permz[index] *= upsc_factor;
                                     }
 
-                                permx[index] = upsc_permx_zcolumn (Nx, Ny, i, j, k1, k2, permx_, sp_mesh_iface);
                             }
                 }   
         }
@@ -476,18 +485,16 @@ bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint 
     
 
     new_cube_size = Nz_upsc*layer_size;
-    new_permx->resize(new_cube_size);
     new_permz->resize(new_cube_size);
     
     i = 0;
     for ( n = 0; n < Nz_upsc; n++)
         {
-            std::copy ( &permx[n*layer_size], &permx[(n+1)*layer_size], &(*new_permx)[i*layer_size] );
             std::copy ( &permz[n*layer_size], &permz[(n+1)*layer_size], &(*new_permz)[i*layer_size] );
             i++;
         }
     
-    return bp::make_tuple (new_permx, new_permz);
+    return new_permz;
   }
 
 /*
@@ -696,6 +703,7 @@ bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint 
     
     v_float& ntg = *ntg_;
     v_float& poro = *poro_;
+    v_float& permx = *permx_;
 
     std::list <t_int> layers;
     std::list <t_int>::iterator lit, tmp_it;
@@ -707,6 +715,7 @@ bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint 
     
     spv_float new_ntg = BS_KERNEL.create_object(v_float::bs_type());
     spv_float new_poro = BS_KERNEL.create_object(v_float::bs_type());
+    spv_float new_permx = BS_KERNEL.create_object(v_float::bs_type());
     spv_uint layers_v = BS_KERNEL.create_object(v_uint::bs_type());
 
     layer_size = Nx*Ny;
@@ -742,7 +751,7 @@ bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint 
         k2 = (*tmp_it);
 
         // FIXME: if (k1 != k2)
-
+        printf("\n n=%d k1=%d k2=%d", n, k1, k2);
         // upscaling of cubes
         upscale_cubes (k1, k2, Nx, Ny, vol_, ntg_, poro_, permx_ );
         
@@ -796,6 +805,7 @@ bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint 
 
     new_ntg->resize(new_cube_size);
     new_poro->resize(new_cube_size);
+    new_permx->resize(new_cube_size);
     layers_v->resize(Nz_upsc);
 
     i = 0;
@@ -804,12 +814,13 @@ bp::tuple upsc::upscale_perm_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint 
             k = (*lit);
             std::copy ( &ntg[k*layer_size], &ntg[(k+1)*layer_size], &(*new_ntg)[i*layer_size] );
             std::copy ( &poro[k*layer_size], &poro[(k+1)*layer_size], &(*new_poro)[i*layer_size] );
+            std::copy ( &permx[k*layer_size], &permx[(k+1)*layer_size], &(*new_permx)[i*layer_size] );
             i++;
         }
 
     std::copy ( layers.begin(), layers.end(), &(*layers_v)[0] );
     
-    return bp::make_tuple (layers_v, new_ntg, new_poro) ;
+    return bp::make_tuple (layers_v, new_ntg, new_poro, new_permx) ;
   }
 
 #ifdef BSPY_EXPORTING_PLUGIN
