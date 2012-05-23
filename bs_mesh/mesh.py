@@ -8,9 +8,9 @@ hdm.get_prop().add_property_i (0, "mesh", "mesh type")
 hdm.get_prop().set_i ("mesh", 1)
 
 #hdm.init("lalala.h5")
-hdm.read_keyword_file(sys.argv[1])
+#hdm.read_keyword_file(sys.argv[1])
 
-#hdm.read_keyword_file('G:\\projects\\UfaSolver\\tests\\Frac\\Test2.ppp.files\\bos\\model.data')
+hdm.read_keyword_file('D:\\Models\\RexLab\\asdfasdfas.rex.exp\\HDM_MODEL_1.DATA')
 
 
 #pool = hdm.get_pool()
@@ -18,12 +18,15 @@ hdm.read_keyword_file(sys.argv[1])
 #act = pool.get_i_data("ACTNUM")
 
 mesh = hdm.get_mesh()
-
 mesh.init_props(hdm)
-
 mesh.init_ext_to_int()
+#mesh.check_data()
 
-mesh.check_data()
+ws = bs.sql_well.sql_well ()
+ws.open_db ('D:\\Models\\RexLab\\asdfasdfas.rex.inc\\hdm_model_1_well_pool.db')
+
+mesh.intersect_trajectories(ws)
+
 
 #jac = bs.mx.bcsr_matrix()
 #flux_conn = bs.bs_mesh.flux_conn()

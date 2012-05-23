@@ -72,7 +72,7 @@ class  mesh_ijk : public rs_smesh_base
                                              spv_long boundary_array);
 
     //! find well`s trajectories and mesh cells intersection
-    int intersect_trajectories () {return 0;};
+    int intersect_trajectories (sp_well_pool_t well_pool) {return 0;};
 
     /*!	\brief  find neighbours (adjacency matrix)
     	\param neig_matrix - bcsr adjacency matrix

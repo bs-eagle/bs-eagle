@@ -34,6 +34,7 @@ namespace blue_sky
       // OWN TYPES
       ///////////////////////
 
+
     public:
       //! blue-sky class declaration
       BLUE_SKY_TYPE_DECL(bs_mesh_grdecl);
@@ -200,7 +201,7 @@ namespace blue_sky
         {return wrapped.build_jacobian_and_flux_connections (jacobian, flux_conn, boundary_array);};
 
       //! find well`s trajectories and mesh cells intersection
-      int intersect_trajectories () {return wrapped.intersect_trajectories();};
+      int intersect_trajectories (sp_well_pool_t well_pool) {return wrapped.intersect_trajectories(well_pool);};
 
       boost::python::list calc_element_tops ()
       {return wrapped.calc_element_tops();};

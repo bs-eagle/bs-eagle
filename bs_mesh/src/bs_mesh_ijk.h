@@ -181,7 +181,7 @@ namespace blue_sky
       {return wrapped.build_jacobian_and_flux_connections (jacobian, flux_conn, boundary_array);};
 
       //! find well`s trajectories and mesh cells intersection
-      int intersect_trajectories () {return wrapped.intersect_trajectories();};
+      int intersect_trajectories (sp_well_pool_t well_pool) {return wrapped.intersect_trajectories(well_pool);};
 
 	  spv_double
 	  get_element_sizes (const t_long n_element) const

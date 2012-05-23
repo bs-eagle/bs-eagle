@@ -105,7 +105,7 @@ class BS_API_PLUGIN rs_mesh_base : public mesh_base
                                                      spv_long /*boundary_array*/) = 0;
 
     //! find well`s trajectories and mesh cells intersection
-    virtual int intersect_trajectories () = 0;
+    virtual int intersect_trajectories (sp_well_pool_t well_pool) = 0;
 
   //-----------------------------------------
   //  VARIABLES

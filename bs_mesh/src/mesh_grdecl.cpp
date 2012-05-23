@@ -172,13 +172,6 @@ void mesh_grdecl::check_data() const
 
 #ifndef PURE_MESH
   write_time_to_log init_time ("Mesh check", ""); 
-
-  if (min_x < 0)
-    bs_throw_exception (boost::format ("min_x = %d is out of range")% min_x);
-  if (min_y < 0)
-    bs_throw_exception (boost::format ("min_y = %d is out of range")% min_y);
-  if (min_z < 0)
-    bs_throw_exception (boost::format ("min_z = %d is out of range")% min_z);
 #endif
 
   base_t::check_data ();
@@ -2256,77 +2249,82 @@ int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr
 }
 
 
-int mesh_grdecl::intersect_trajectories ()
+int mesh_grdecl::intersect_trajectories (sp_well_pool_t well_pool)
 {
-  int n_range_cells = 1000;
-  int wrong_cells = 0;
-
-  int n_x_ranges = std::ceil (nx / std::pow(float(n_range_cells), float(1/3)));
-  int n_y_ranges = std::ceil (ny / std::pow(float(n_range_cells), float(1/3)));
-  int n_z_ranges = std::ceil (nz / std::pow(float(n_range_cells), float(1/3)));
-
   element_t element;
-#ifndef PURE_MESH
-  t_int *actnum = actnum_array->data ();
-#else
-  t_int *actnum = actnum_array;
-#endif 
+  using namespace std;
+  typedef map <string, string> wb_storage_t;
+  typedef vector<fpoint3d> v_traj_t;
+  typedef vector<t_double> v_md_t;
+  v_traj_t v_traj;
+  v_md_t v_md;
+
+  wb_storage_t well_branch;
   
+	typedef BS_SP (table_iface) sp_table_t;
+  typedef BS_SP (traj_iface)  sp_traj_t;
+	
+ 
 
   for (t_long i = 0; i < nx; ++i)
     for (t_long j = 0; j < ny; ++j)
-      {
-        for (t_long k = 0; k < nz; ++k)
-          {
-            t_long index = k + j * nz + i * ny * nz;
+      for (t_long k = 0; k < nz; ++k)
+        {
+          //t_long index = k + j * nz + i * ny * nz;
+          calc_element (i, j, k, element);
 
-            // miss inactive blocks
-            if (actnum[index])
-              {
-                calc_element (i, j, k, element);
-                mesh_element3d::corners_t corns = element.get_corners();
-                
-                // check X
-                if (((corns[1].x - corns[0].x) * (corns[3].x - corns[2].x) < 0) ||
-                    ((corns[1].x - corns[0].x) * (corns[5].x - corns[4].x) < 0) ||
-                    ((corns[1].x - corns[0].x) * (corns[7].x - corns[6].x) < 0))
-                  {
-                    actnum[index] = 0;
-                    wrong_cells ++;
-                    continue;
-                  }
-
-                // check Y
-                if (((corns[2].y - corns[0].y) * (corns[3].y - corns[1].y) < 0) ||
-                    ((corns[2].y - corns[0].y) * (corns[7].y - corns[5].y) < 0) ||
-                    ((corns[2].y - corns[0].y) * (corns[6].y - corns[4].y) < 0))
-                  {
-                    actnum[index] = 0;
-                    wrong_cells ++;
-                    continue;
-                  }
-                
-                
-                // check Z
-                if (((corns[4].z - corns[0].z) * (corns[5].z - corns[1].z) < 0) ||
-                    ((corns[4].z - corns[0].z) * (corns[6].z - corns[2].z) < 0) ||
-                    ((corns[4].z - corns[0].z) * (corns[7].z - corns[3].z) < 0))
-                  {
-                    actnum[index] = 0;
-                    wrong_cells ++;
-                    continue;
-                  }
-              }
+          mesh_element3d::corners_t corns = element.get_corners();
         }
+
+  well_pool->prepare_sql("SELECT DISTINCT well_name, branch_name FROM branches");
+  while(well_pool->step_sql() == 0) 
+    {
+		  well_branch.insert(	pair<string, string>(well_pool->get_sql_str(0), well_pool->get_sql_str(1)));
+		}
+  well_pool->finalize_sql();
+
+  sp_table_t result = BS_KERNEL.create_object ("table");
+  result->init(0, 3);
+
+  for(wb_storage_t::iterator pwb = well_branch.begin(), wb_end = well_branch.end(); pwb != wb_end; ++pwb)
+    {
+      sp_traj_t traj = well_pool->get_branch_traj(pwb->first, pwb->second);
+			if(!traj) 
+        return -1;
+			sp_table_t table = traj->get_table();
+			if(!table) 
+        return -1;
+      v_traj.resize (table->get_n_rows());
+      v_md.resize (table->get_n_rows());
+      
+      for (int i = 0, trows = table->get_n_rows(); i < trows; ++i) 
+        {
+          v_traj[i].x = table->get_value(i, 1);
+          v_traj[i].y = table->get_value(i, 2);
+          v_traj[i].z = table->get_value(i, 3);
+          v_md[i] = table->get_value(i, 0);
+				}
+      
+      /*
+        YOUR_FUNC(v_traj, v_md, result);
+          {
+            vector<t_double, 3> intersection;
+            intersection[0] = n_element;
+            intersection[1] = md_in;
+            intersection[2] = md_out;
+            result->push_back(intersection);
+          }
+      */
+      
+      //BOSWARN (section::mesh, level::warning)<< pwb->first << "  " << pwb->second << bs_end;  
     }
-
-  
-
-
-
 
   return 0;
 }
+
+
+
+
 
 #ifdef _HDF5_MY
 

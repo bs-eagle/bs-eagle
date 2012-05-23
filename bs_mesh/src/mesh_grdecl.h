@@ -216,7 +216,7 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
                                                           spv_long boundary_array);
 
     //! find well`s trajectories and mesh cells intersection
-    int intersect_trajectories ();
+    int intersect_trajectories (sp_well_pool_t well_pool);
 #ifndef PURE_MESH
 
 	  boost::python::list calc_element_tops ();

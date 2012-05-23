@@ -41,6 +41,7 @@ PY_EXPORTER (mesh_grdecl_exporter, rs_mesh_iface_exporter)
 	.def ("init_props", &init_props2)
   .def ("check_data", &T::check_data)
 	.def ("get_element_sizes", &T::get_element_sizes)
+  .def ("intersect_trajectories", &T::intersect_trajectories)
 	;
 PY_EXPORTER_END;
 
