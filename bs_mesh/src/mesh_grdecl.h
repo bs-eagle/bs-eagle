@@ -271,6 +271,10 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     //! check mesh data
     void check_data () const;
 
+    //! fix mesh data
+    int fix_data () const;
+
+
   protected:
     /*! \brief fill given array with block centers (only activ block) and according local bypass
     	\return 0 if success */

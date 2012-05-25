@@ -158,6 +158,13 @@ void mesh_grdecl::init_props(const sp_hdm_t hdm)
   hdm->get_prop()->set_f("max_x", max_x);
   hdm->get_prop()->set_f("max_y", max_y);
   hdm->get_prop()->set_f("max_z", max_z);
+
+  if (fix_data())
+    {
+      hdm->get_pool ()->set_fp_data("COORD", pinner_->coord_);
+    }
+
+
 #else
 
    zcorn_array = hdm->zcorn_array;
@@ -165,6 +172,65 @@ void mesh_grdecl::init_props(const sp_hdm_t hdm)
 #endif
 
 }
+
+int mesh_grdecl::fix_data() const
+{
+  // 1. change COORD points to lie either on min_z or max_z plane
+  
+  t_double prop;
+  t_int index;
+  int res = 0;
+  for (t_long j = 0; j < ny + 1; ++j)
+    for (t_long i = 0; i < nx + 1; ++i)
+      {
+        index = (i + j * (nx + 1)) * 6;
+        if (coord_array[index + 2] != min_z)
+          {
+            
+            prop = (coord_array[index + 2] - min_z) / (coord_array[index + 5] - coord_array[index + 2]);
+            coord_array[index + 0] = prop *(coord_array[index + 3] - coord_array[index + 0]) + coord_array[index + 0];
+            coord_array[index + 1] = prop *(coord_array[index + 4] - coord_array[index + 1]) + coord_array[index + 1];
+            coord_array[index + 2] = min_z;
+            res = 1;
+          }
+        
+        if (coord_array[index + 5] != max_z)
+          {
+            prop = (max_z - coord_array[index + 2]) / (coord_array[index + 5] - coord_array[index + 2]);
+            coord_array[index + 3] = prop *(coord_array[index + 3] - coord_array[index + 0]) + coord_array[index + 0];
+            coord_array[index + 4] = prop *(coord_array[index + 4] - coord_array[index + 1]) + coord_array[index + 1];
+            coord_array[index + 5] = max_z;
+            res = 1;
+          }
+      }
+        
+
+  // 2. check for ZCORN intersections (and correct them)
+/*
+  for (t_long i = 0; i < 2 * nx; ++i)
+    for (t_long j = 0; j < 2 * ny; ++j)
+      for (t_long k = 1; k < nz; ++k)
+        {
+          t_long z_index = i + 2 * nx * j + 4 * nx * ny * (2 * k - 1);
+          if (zcorn_array[z_index] > zcorn_array[z_index + 4 * nx * ny])
+            {
+               t_long index1 = k + std::ceil(j / 2) * nz + std::ceil(i / 2) * ny * nz - 1;
+               t_long index2 = index1 + 1;
+
+               if (actnum[index1] == 0)
+                 zcorn_array[z_index] = zcorn_array[z_index + 4 * nx * ny];
+               else if (actnum[index2] == 0)
+                 zcorn_array[z_index + 4 * nx * ny] = zcorn_array[z_index]
+               else
+                 {
+                   t_float middle = (zcorn_array[z_index + 4 * nx * ny] + zcorn_array[z_index]) / 2;
+                   zcorn_array[z_index + 4 * nx * ny] = zcorn_array[z_index] = middle;
+                 }
+            }
+        };
+  */
+    return res;
+  }
 
 
 void mesh_grdecl::check_data() const
@@ -180,6 +246,7 @@ void mesh_grdecl::check_data() const
     bs_throw_exception ("COORD array is not initialized");
   if (!zcorn_array)
     bs_throw_exception ("ZCORN array is not initialized");
+
 
   // 1. check if all cells are convex
 
@@ -264,30 +331,7 @@ void mesh_grdecl::check_data() const
     printf("%d wrong (nonconvex) cells found! Marked inactive.", wrong_cells);
 #endif
 
-  // 2. check for ZCORN intersections (and correct them)
-/*
-  for (t_long i = 0; i < 2 * nx; ++i)
-    for (t_long j = 0; j < 2 * ny; ++j)
-      for (t_long k = 1; k < nz; ++k)
-        {
-          t_long z_index = i + 2 * nx * j + 4 * nx * ny * (2 * k - 1);
-          if (zcorn_array[z_index] > zcorn_array[z_index + 4 * nx * ny])
-            {
-               t_long index1 = k + std::ceil(j / 2) * nz + std::ceil(i / 2) * ny * nz - 1;
-               t_long index2 = index1 + 1;
-
-               if (actnum[index1] == 0)
-                 zcorn_array[z_index] = zcorn_array[z_index + 4 * nx * ny];
-               else if (actnum[index2] == 0)
-                 zcorn_array[z_index + 4 * nx * ny] = zcorn_array[z_index]
-               else
-                 {
-                   t_float middle = (zcorn_array[z_index + 4 * nx * ny] + zcorn_array[z_index]) / 2;
-                   zcorn_array[z_index + 4 * nx * ny] = zcorn_array[z_index] = middle;
-                 }
-            }
-        };
-  */
+   
 
 }
 
@@ -592,6 +636,8 @@ int mesh_grdecl::init_ext_to_int()
     
   calc_depths();
   
+  
+  check_data();
 
   //bs_throw_exception ("NOT IMPL YET");
   return n_active_elements;
