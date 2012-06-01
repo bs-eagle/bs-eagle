@@ -124,7 +124,7 @@ figs-within-sections
 \end_inset
 
 , при котором значение величины 
-\begin_inset Formula $\sum_{i,,j}\delta W_{i,j,k}$
+\begin_inset Formula $\sum_{i,\, j}\delta W_{i,\, j,\, k}$
 \end_inset
 
  будет минимальным.
@@ -145,21 +145,21 @@ figs-within-sections
 \end_layout
 
 \begin_layout Itemize
-\begin_inset Formula $NTG_{new}=\frac{NTG_{1}*V_{1}+NTG_{2}*V_{2}}{V_{1}+V_{2}}$
+\begin_inset Formula $NTG_{new}=\frac{NTG_{1}\times V_{1}+NTG_{2}\times V_{2}}{V_{1}+V_{2}}$
 \end_inset
 
 
 \end_layout
 
 \begin_layout Itemize
-\begin_inset Formula $\phi_{new}=\frac{\phi_{1}*NTG_{1}*V_{1}+\phi_{2}*NTG_{2}*V_{2}}{NTG_{1}*V_{1}+NTG_{2}*V_{2}}$
+\begin_inset Formula $\phi_{new}=\frac{\phi_{1}\times NTG_{1}\times V_{1}+\phi_{2}\times NTG_{2}\times V_{2}}{NTG_{1}\times V_{1}+NTG_{2}\times V_{2}}$
 \end_inset
 
 
 \end_layout
 
 \begin_layout Itemize
-\begin_inset Formula $SWAT_{new}=\frac{SWAT_{1}*\phi_{1}*NTG_{1}*V_{1}+SWAT_{2}*\phi_{2}*NTG_{2}*V_{2}}{\phi_{1}*NTG_{1}*V_{1}+\phi_{2}*NTG_{2}*V_{2}}$
+\begin_inset Formula $SWAT_{new}=\frac{SWAT_{1}\times\phi_{1}\times NTG_{1}\times V_{1}+SWAT_{2}\times\phi_{2}\times NTG_{2}\times V_{2}}{\phi_{1}\times NTG_{1}\times V_{1}+\phi_{2}\times NTG_{2}\times V_{2}}$
 \end_inset
 
 
@@ -244,7 +244,7 @@ status open
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename upsc_inc/upsc.JPG
+	filename upsc.JPG
 	scale 50
 
 \end_inset
@@ -426,7 +426,7 @@ k_{z}^{*}=\frac{dp}{dl}/\frac{dP}{dL}.\]
 \end_layout
 
 \begin_layout Standard
-Ремасштабированное значение проницаемостей вдоль осей 
+Ремасштабированные значения проницаемостей вдоль осей 
 \begin_inset Formula $Ox$
 \end_inset
 
@@ -434,12 +434,12 @@ k_{z}^{*}=\frac{dp}{dl}/\frac{dP}{dL}.\]
 \begin_inset Formula $Oy$
 \end_inset
 
- находится как средневзвешенное по объему песчанника:
+ находятся как средневзвешенные по объему песчанника:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \[
-k_{x}^{*}=\frac{\sum_{i}k_{x}^{i}*NTG_{i}*V_{i}}{\sum_{i}NTG_{i}*V_{i}},\]
+k_{x}^{*}=\frac{\sum_{i}k_{x}^{i}\times NTG_{i}\times V_{i}}{\sum_{i}NTG_{i}*V_{i}},\]
 
 \end_inset
 
@@ -448,7 +448,7 @@ k_{x}^{*}=\frac{\sum_{i}k_{x}^{i}*NTG_{i}*V_{i}}{\sum_{i}NTG_{i}*V_{i}},\]
 
 \begin_layout Standard
 \begin_inset Formula \[
-k_{y}^{*}=\frac{\sum_{i}k_{y}^{i}*NTG_{i}*V_{i}}{\sum_{i}NTG_{i}*V_{i}}.\]
+k_{y}^{*}=\frac{\sum_{i}k_{y}^{i}\times NTG_{i}\times V_{i}}{\sum_{i}NTG_{i}\times V_{i}}.\]
 
 \end_inset
 

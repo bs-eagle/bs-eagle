@@ -70,18 +70,14 @@ spv_float upsc::upscale_grid_zcolumn ( t_long Nx, t_long Ny, t_long Nz, spv_floa
     
     new_k = 0;
 
-    // FIXME if layers.size()==1 
-
     for (lit=layers.begin();lit!=layers.end();lit++)
         {
             k1 = (*lit);
             lit_next = lit + 1;
-            //lit_next++;
             if (lit_next!=layers.end())
                 k2 = (*lit_next);
             else
                 k2 = Nz;
-            //printf("\n k1 = %d k2 = %d", k1, k2);
             std::copy ( &zcorn[2*k1*layer_size], &zcorn[(2*k1+1)*layer_size], &(*new_zcorn)[(new_k++)*layer_size] );
             std::copy ( &zcorn[(2*k2-1)*layer_size], &zcorn[2*k2*layer_size], &(*new_zcorn)[(new_k++)*layer_size] );
         }
@@ -243,11 +239,8 @@ int upsc::upscale_cubes ( t_long k1, t_long k2, t_long Nx, t_long Ny,
                     permx[index[0]] = 0;
                 }
             
-            if (i == 0 && j == 0)
-                printf("\n permx=%f", permx[index[0]]);
           }
       }
-
 
     return 0;
 }
@@ -310,7 +303,7 @@ t_double upsc::solve_pressure_eq (t_long Ny, t_long Nz, t_long i, t_long j, t_lo
             //element[1].get_plane (z_axis_minus, plane[1]);
             
             center[1] = element[1].get_center();
-            // FIXME don't pass plane[1] to calc_tran
+            // don't pass plane[1] to calc_tran
             // because zcolumn cells are always fully adjacent
             //tz = mesh.calc_tran(ext_ind[0], ext_ind[1], plane[0], center[0], center[1], along_dim3, &plane[1]);
             tz = mesh.calc_tran(ext_ind[0], ext_ind[1], plane[0], center[0], center[1], along_dim3);
@@ -459,7 +452,7 @@ spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint
                         for (i = 0; i < Nx; ++i)
                             {
                                 index = i + j * Nx + z1;
-                                //printf("\n index = %d pz = %f px = %f", index, permz[index], permx[index]);
+                                //printf("\n index = %d pz = %f", index, permz[index]);
 
                                 // FIXME: in general case call function that finds isolated bodies
                                 for (k = k1; k <= k2; k++)
@@ -480,9 +473,7 @@ spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint
 
                             }
                 }   
-        }
-
-    
+        }  
 
     new_cube_size = Nz_upsc*layer_size;
     new_permz->resize(new_cube_size);
@@ -490,10 +481,11 @@ spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint
     i = 0;
     for ( n = 0; n < Nz_upsc; n++)
         {
-            std::copy ( &permz[n*layer_size], &permz[(n+1)*layer_size], &(*new_permz)[i*layer_size] );
+            k = layers[n];
+            std::copy ( &permz[k*layer_size], &permz[(k+1)*layer_size], &(*new_permz)[i*layer_size] );
             i++;
         }
-    
+
     return new_permz;
   }
 
@@ -750,8 +742,6 @@ spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint
         tmp_it ++;
         k2 = (*tmp_it);
 
-        // FIXME: if (k1 != k2)
-        printf("\n n=%d k1=%d k2=%d", n, k1, k2);
         // upscaling of cubes
         upscale_cubes (k1, k2, Nx, Ny, vol_, ntg_, poro_, permx_ );
         
