@@ -1081,13 +1081,15 @@ mesh_grdecl::calc_tran(const t_long ext_index1, const t_long ext_index2, const p
 
  t_double koef1, koef2 ; //koef = (A,Di)/(Di,Di)
 
- //fpoint3d E = fpoint3d(EPSILON, EPSILON, EPSILON);
-
- //if (D1.x == 0 && D1.y == 0 && D1.z == 0)
- //    D1 = E;
- //
- //if (D2.x == 0 && D2.y == 0 && D2.z == 0)
- //    D2 = E;
+ if (D1.get_length() < 10*EPSILON)
+     {
+        D1.z = EPSILON;
+     }
+ 
+ if (D2.get_length() < 10*EPSILON)
+     {
+        D2.z = EPSILON;
+     }
   
   koef1 = A*D1 / (D1*D1);
   koef2 = A*D2 / (D2*D2);
@@ -1209,14 +1211,10 @@ mesh_grdecl::calc_tran_boundary (const t_long ext_index1, const plane_t &plane1,
   
   t_double koef1; //koef = (A,Di)/(Di,Di)
   
-  //fpoint3d E = fpoint3d(EPSILON, EPSILON, EPSILON);
-
-  //if (D1.x == 0 && D1.y == 0 && D1.z == 0)
-  //    {
-  //  //D1 = E;
-  //      D1.z = EPSILON;
-  //      printf("\n epsilon=%e", EPSILON);
-  //    }
+  if (D1.get_length() < 10*EPSILON)
+      {
+        D1.z = EPSILON;
+      }
 
   koef1 = A*D1 / (D1*D1);
   

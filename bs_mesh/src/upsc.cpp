@@ -284,7 +284,7 @@ t_double upsc::solve_pressure_eq (t_long Ny, t_long Nz, t_long i, t_long j, t_lo
     center[0] = element[0].get_center();
     element[0].get_plane (z_axis_minus, plane[0]);
     tz = mesh.calc_tran_boundary (ext_ind[0], plane[0], center[0], along_dim3);
-    
+
     // FIXME
     b[0] = -tz*p_left;
     A[0] -= tz;          
@@ -338,7 +338,7 @@ t_double upsc::solve_pressure_eq (t_long Ny, t_long Nz, t_long i, t_long j, t_lo
     solver->solve (tran, rhs, p);
 
     //for (k=0;k<size;k++)
-        //printf("\n p[%d] = %f", k, (*p)[k]);
+    //    printf("\n p[%d] = %f", k, (*p)[k]);
 
     //index = k1 + j * Nz + i * Ny * Nz;
     dp = (p_left - (*p)[0]);
@@ -350,22 +350,22 @@ t_double upsc::solve_pressure_eq (t_long Ny, t_long Nz, t_long i, t_long j, t_lo
     get_plane_center (plane[0],  center[0]);
     
     dl = get_len(center[0], center[1])*2;
-
-    //if (dl == 0)
-    //    {
-    //        dl = EPSILON;
-    //        printf("\n epsilon=%e", EPSILON);
-    //    }
         
     mesh.calc_element (i, j, k2, element[1]);
     element[1].get_plane (z_axis_plus, plane[1]);
     get_plane_center (plane[1],  center[1]);
     
     dL = get_len(center[0], center[1]);
-
-    //printf("\n dp=%e dl=%e dP=%e dL=%e", dp, dl, dP, dL);
     
+    if (dl < 10*EPSILON)
+        {
+            dl = 2*EPSILON;
+            dL += EPSILON;
+        }
+
     K = (dp/dl)/(dP/dL);
+
+    //printf("\n dp=%e dl=%e dP=%e dL=%e K=%e", dp, dl, dP, dL, K);
     
     return K;
 }
