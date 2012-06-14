@@ -65,6 +65,13 @@ bs_bos_core = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_
 env.Alias (tar_name, bs_bos_core)
 Export ("bs_bos_core")
 
+if env['deps'] != 'off' :
+	Depends(bs_bos_core, common_alg);
+	Depends(bs_bos_core, sql_well);
+	Depends(bs_bos_core, bs_hdf5_storage);
+	Depends(bs_bos_core, bs_swift);
+#	Depends(bs_bos_core, hdm_fluid);
+
 if (env["install"] == 1) :
     inst_tar = env.Install ("$plugins_prefix", bs_bos_core)
     env.Alias (tar_name, inst_tar)
