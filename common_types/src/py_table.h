@@ -121,6 +121,8 @@ namespace blue_sky
         args ("n_rows", "n_cols"), "Initialize table n_rows * n_cols")
     .def ("clear",                               &T::clear, 
         args (""), "Clear all")
+    .def ("copy",                               &T::copy, 
+        args ("table"), "Copy from another table")
     .def ("set_col_name",                       &T::set_col_name, 
         args ("col_idx", "name"), "Set name for the col_idx column")
     .def ("get_col_name",                       &T::get_col_name, 
