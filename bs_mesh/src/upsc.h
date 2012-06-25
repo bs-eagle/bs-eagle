@@ -65,6 +65,9 @@ namespace blue_sky
       
       virtual spv_float upscale_grid_zcolumn ( t_long Nx, t_long Ny, t_long Nz, spv_float zcorn, spv_uint layers );
       
+      virtual bp::tuple upscale_grid ( t_long Nx, t_long Ny, t_long Nz, t_long ux, t_long uy, 
+                                       spv_float coord, spv_float zcorn, spv_uint layers );
+      
       //virtual t_int upscale_perm (t_long Nx, t_long Ny, t_long Nz, spv_uint layers, spv_float perm, BS_SP(rs_mesh_iface) mesh);
       
       virtual spv_float upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, 

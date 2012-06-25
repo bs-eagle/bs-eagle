@@ -46,6 +46,9 @@ class upsc_iface : public objbase
       
       virtual spv_float upscale_grid_zcolumn ( t_long Nx, t_long Ny, t_long Nz, spv_float zcorn, spv_uint layers ) = 0;
       
+      virtual boost::python::tuple upscale_grid ( t_long Nx, t_long Ny, t_long Nz, t_long ux, t_long uy, 
+                                       spv_float coord, spv_float zcorn, spv_uint layers ) = 0;
+
       //virtual t_int upscale_perm (t_long Nx, t_long Ny, t_long Nz, spv_uint layers, spv_float perm, BS_SP(rs_mesh_iface) mesh) = 0;
       
       virtual spv_float upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint layers, spv_float permz_, spv_uint actnum_, BS_SP(rs_mesh_iface) sp_mesh_iface) = 0;

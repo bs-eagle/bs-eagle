@@ -85,6 +85,165 @@ spv_float upsc::upscale_grid_zcolumn ( t_long Nx, t_long Ny, t_long Nz, spv_floa
    return new_zcorn; 
 }
 
+bp::tuple upsc::upscale_grid ( t_long Nx, t_long Ny, t_long Nz, t_long ux, t_long uy, 
+                               spv_float coord_, spv_float zcorn_, spv_uint layers_ )
+{   
+    t_int i, j, n, k1, k2, k, ind;
+    t_int new_Nx, new_Ny, new_Nz, new_coord_size, new_zcorn_size, layer_size;
+    v_uint& layers = *layers_;
+    v_uint::iterator lit, lit_next;
+    v_float& coord = *coord_;
+    v_float& zcorn = *zcorn_;
+    
+    new_Nx = ceil(double(Nx)/double(ux));
+    new_Ny = ceil(double(Ny)/double(uy));
+    new_Nz = layers.size(); 
+    new_coord_size = 6*(new_Nx+1)*(new_Ny+1);
+    new_zcorn_size = 8*new_Nx*new_Ny*new_Nz; 
+    layer_size = 4*Nx*Ny;
+    
+    spv_float new_coord = BS_KERNEL.create_object(v_float::bs_type());
+    new_coord->resize(new_coord_size);
+    spv_float new_zcorn = BS_KERNEL.create_object(v_float::bs_type());
+    new_zcorn->resize(new_zcorn_size);
+
+    n = 0;
+    for (j=0; j<new_Ny; j++)
+        {
+            for (i=0; i<new_Nx; i++)
+                {
+                    std::copy ( &coord[6*(uy*j*(Nx+1)+ux*i)], &coord[6*(uy*j*(Nx+1)+ux*i+1)], &(*new_coord)[n] );
+                    n += 6;
+                }
+            std::copy ( &coord[6*(uy*j*(Nx+1)+Nx)], &coord[6*(uy*j*(Nx+1)+Nx+1)], &(*new_coord)[n] );
+            n += 6;
+        }
+    for (i=0; i<new_Nx; i++)
+        {
+            std::copy ( &coord[6*(Ny*(Nx+1)+ux*i)], &coord[6*(Ny*(Nx+1)+ux*i+1)], &(*new_coord)[n] );
+            n += 6;
+        }
+
+    k = 0;
+    for (lit=layers.begin();lit!=layers.end();lit++)
+        {
+            k1 = (*lit);
+            lit_next = lit + 1;
+            if (lit_next!=layers.end())
+                k2 = (*lit_next);
+            else
+                k2 = Nz;
+
+            //printf("\n %d %d %d %d %d %d", Nx, Ny, new_Nx, new_Ny, ux, uy);
+
+            // tops
+            for (j=0; j<new_Ny-1; j++)
+                {
+                    for (i=0; i<new_Nx-1; i++)
+                        {
+                            ind = 2*k1*layer_size + 4*uy*j*Nx;
+                            (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*i];
+                            (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(i+1) - 1];
+                            //printf("\n %d %d %d %d %d", i, j, ind,ind + 2*ux*i, ind + 2*ux*(i+1) - 1);
+                        }
+                    ind = 2*k1*layer_size + 4*uy*j*Nx;
+                    (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(new_Nx-1)];
+                    (*new_zcorn)[(k++)] = zcorn[ind + 2*Nx - 1];
+                    //printf("\n %d %d %d %d %d", i, j, ind, ind + 2*ux*(new_Nx-1), ind + 2*Nx - 1);
+                    
+                    for (i=0; i<new_Nx-1; i++)
+                        {
+                            ind = 2*k1*layer_size + (2*uy*(j+1)-1)*2*Nx;
+                            (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*i];
+                            (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(i+1) - 1];
+                           // printf("\n %d %d %d %d %d", i, j, ind, ind + 2*ux*i, ind + 2*ux*(i+1) - 1);
+                        }
+                    ind = 2*k1*layer_size + (2*uy*(j+1)-1)*2*Nx;
+                    (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(new_Nx-1)];
+                    (*new_zcorn)[(k++)] = zcorn[ind + 2*Nx - 1];
+                    //printf("\n %d %d %d %d %d", i, j, ind, ind + 2*ux*(new_Nx-1), ind + 2*Nx - 1);
+                }
+            
+            for (i=0; i<new_Nx-1; i++)
+                {
+                    ind = 2*k1*layer_size + 4*uy*(new_Ny-1)*Nx;
+                    (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*i];
+                    (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(i+1) - 1];
+                    //printf("\n %d %d %d %d %d", i,j,ind,ind + 2*ux*i, ind + 2*ux*(i+1) - 1);
+                }
+            ind = 2*k1*layer_size + 4*uy*(new_Ny-1)*Nx;
+            (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(new_Nx-1)];
+            (*new_zcorn)[(k++)] = zcorn[ind + 2*Nx - 1];
+           // printf("\n %d %d %d %d %d", i,j,ind,ind + 2*Nx - 1, ind + 2*Nx - 1);
+            
+            for (i=0; i<new_Nx-1; i++)
+                {
+                    ind = 2*k1*layer_size + (2*Ny-1)*2*Nx;
+                    (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*i];
+                    (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(i+1) - 1];
+                    //printf("\n %d %d %d %d %d", i,j,ind,ind + 2*ux*i, ind + 2*ux*(i+1) - 1);
+                }
+            ind = 2*k1*layer_size + (2*Ny-1)*2*Nx;
+            (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(new_Nx - 1)];
+            (*new_zcorn)[(k++)] = zcorn[ind + 2*Nx - 1];
+            //printf("\n %d %d %d %d %d", i,j,ind,ind + 2*Nx - 1, ind + 2*Nx - 1);
+            
+            // bottoms
+            for (j=0; j<new_Ny-1; j++)
+                {
+                    for (i=0; i<new_Nx-1; i++)
+                        {
+                            ind = (2*k2-1)*layer_size + 4*uy*j*Nx;
+                            (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*i];
+                            (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(i+1) - 1];
+                            //printf("\n %d %d %d %d %d", i, j, ind,ind + 2*ux*i, ind + 2*ux*(i+1) - 1);
+                        }
+                    ind = (2*k2-1)*layer_size + 4*uy*j*Nx;
+                    (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(new_Nx-1)];
+                    (*new_zcorn)[(k++)] = zcorn[ind + 2*Nx - 1];
+                    //printf("\n %d %d %d %d %d", i, j, ind, ind + 2*ux*(new_Nx-1), ind + 2*Nx - 1);
+                    
+                    for (i=0; i<new_Nx-1; i++)
+                        {
+                            ind = (2*k2-1)*layer_size + (2*uy*(j+1)-1)*2*Nx;
+                            (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*i];
+                            (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(i+1) - 1];
+                           // printf("\n %d %d %d %d %d", i, j, ind, ind + 2*ux*i, ind + 2*ux*(i+1) - 1);
+                        }
+                    ind = (2*k2-1)*layer_size + (2*uy*(j+1)-1)*2*Nx;
+                    (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(new_Nx-1)];
+                    (*new_zcorn)[(k++)] = zcorn[ind + 2*Nx - 1];
+                    //printf("\n %d %d %d %d %d", i, j, ind, ind + 2*ux*(new_Nx-1), ind + 2*Nx - 1);
+                }
+            
+            for (i=0; i<new_Nx-1; i++)
+                {
+                    ind = (2*k2-1)*layer_size + 4*uy*(new_Ny-1)*Nx;
+                    (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*i];
+                    (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(i+1) - 1];
+                    //printf("\n %d %d %d %d %d", i,j,ind,ind + 2*ux*i, ind + 2*ux*(i+1) - 1);
+                }
+            ind = (2*k2-1)*layer_size + 4*uy*(new_Ny-1)*Nx;
+            (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(new_Nx-1)];
+            (*new_zcorn)[(k++)] = zcorn[ind + 2*Nx - 1];
+           // printf("\n %d %d %d %d %d", i,j,ind,ind + 2*Nx - 1, ind + 2*Nx - 1);
+            
+            for (i=0; i<new_Nx-1; i++)
+                {
+                    ind = (2*k2-1)*layer_size + (2*Ny-1)*2*Nx;
+                    (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*i];
+                    (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(i+1) - 1];
+                    //printf("\n %d %d %d %d %d", i,j,ind,ind + 2*ux*i, ind + 2*ux*(i+1) - 1);
+                }
+            ind = (2*k2-1)*layer_size + (2*Ny-1)*2*Nx;
+            (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(new_Nx - 1)];
+            (*new_zcorn)[(k++)] = zcorn[ind + 2*Nx - 1];
+            //printf("\n %d %d %d %d %d", i,j,ind,ind + 2*Nx - 1, ind + 2*Nx - 1);
+        }
+   //printf("\n %d %d %d %d", new_coord_size, new_zcorn_size, (*new_coord).size(), (*new_zcorn).size());
+   return bp::make_tuple (new_coord, new_zcorn); 
+}
+
 t_double upsc::calc_sum_dW ( t_long k1, t_long k2, t_long Nx, t_long Ny, 
                                           spv_float vol_, spv_float ntg_, spv_float poro_, spv_float permx_ )
 {

@@ -32,6 +32,7 @@ namespace blue_sky
         args (""), "Return upsc properties")
     .def ("__str__",                            &T::py_str)
     .def ("upscale_grid_zcolumn", &T::upscale_grid_zcolumn)
+    .def ("upscale_grid", &T::upscale_grid)
     .def ("upscale_permz_zcolumn", &T::upscale_permz_zcolumn)
     .def ("upscale_saturation_cube", &T::upscale_saturation_cube)
     .def ("king_method", &T::king_method)
