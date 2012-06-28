@@ -62,14 +62,19 @@ struct compl_traits {
 		if(px == xp.end()) return;
 
 		// always start with prev intersection
-		x_iterator pnext_x = px;
+		//x_iterator pnext_x = px;
 		if(px != xp.begin())
 			--px;
-		else
-			++pnext_x;
+		//else
+		//	++pnext_x;
 
 		// 3.4.2 consider all intersections between begin_j and end_j
 		for(; px != xend; ++px) {
+			// position to next intersection
+			x_iterator pnext_x = px;
+			if(++pnext_x == xp.end())
+				break;
+
 			// prepare compdat
 			compdat cf(well_name, branch_name, px->cell, fcb.m_size_);
 
@@ -124,10 +129,10 @@ struct compl_traits {
 				}
 			}
 			// set next element
-			if((pnext_x != xp.end()) && (++pnext_x == xp.end())) {
-				pnext_x = px;
-				++pnext_x;
-			}
+			//if((pnext_x != xp.end()) && (++pnext_x == xp.end())) {
+			//	pnext_x = px;
+			//	++pnext_x;
+			//}
 
 			// 3.4.3.2 if delta == 1 mark direction as 'X'
 			//         else if delta == dx direction = 'Y'
