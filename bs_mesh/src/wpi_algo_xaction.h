@@ -216,12 +216,14 @@ public:
 			// we need prev intersection
 			//if(px != x_.begin()) --px;
 
-			px = insert_wp_node(hit_idx[i], i, px);
+			if(hit_idx[i] < hit_idx.size())
+				px = insert_wp_node(hit_idx[i], i, px);
 		}
 
 		// well path doesn't contain the end-point of trajectory
 		// add it manually
-		insert_wp_node(hit_idx[hit_idx.size() - 1], wp_.size() - 1, x_.end(), true);
+		if(hit_idx[hit_idx.size() - 1] < hit_idx.size())
+			insert_wp_node(hit_idx[hit_idx.size() - 1], wp_.size() - 1, x_.end(), true);
 	}
 
 	//template< int N >
