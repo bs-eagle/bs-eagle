@@ -124,7 +124,7 @@ struct compl_traits {
 				}
 			}
 			// set next element
-			if(++pnext_x == xp.end()) {
+			if((pnext_x != xp.end()) && (++pnext_x == xp.end())) {
 				pnext_x = px;
 				++pnext_x;
 			}

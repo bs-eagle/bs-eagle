@@ -71,7 +71,9 @@ spv_uint where_is_points(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 	// return result
 	spv_uint res = BS_KERNEL.create_object(v_uint::bs_type());
 	res->resize(hit_idx.size());
-	std::copy(hit_idx.begin(), hit_idx.end(), res->begin());
+  if (hit_idx.size()) {
+	  std::copy(hit_idx.begin(), hit_idx.end(), res->begin());
+  }
 	return res;
 }
 
