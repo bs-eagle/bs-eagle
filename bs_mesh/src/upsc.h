@@ -67,12 +67,21 @@ namespace blue_sky
       
       virtual bp::tuple upscale_grid ( t_long Nx, t_long Ny, t_long Nz, t_long ux, t_long uy, 
                                        spv_float coord, spv_float zcorn, spv_uint layers );
+
+      virtual bp::tuple upscale_cubes_xy ( t_long Nx, t_long Ny, t_long Nz, t_long ux, t_long uy,
+                                           spv_float vol_, spv_float ntg_, spv_float poro_);
       
+      virtual spv_float upscale_sat_cube_xy (t_long Nx, t_long Ny, t_long ux, t_long uy, t_long Nz, 
+                                             spv_uint layers_, spv_float vol_, spv_float ntg_, spv_float poro_, spv_float sat_);
       //virtual t_int upscale_perm (t_long Nx, t_long Ny, t_long Nz, spv_uint layers, spv_float perm, BS_SP(rs_mesh_iface) mesh);
       
       virtual spv_float upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, 
                                               spv_uint layers, spv_float permz_, 
                                               spv_uint actnum_, BS_SP(rs_mesh_iface) sp_mesh_iface);
+
+      virtual spv_float upscale_perm_block (t_int dir, t_long Nx, t_long Ny, t_long ux, t_long uy, t_long Nz, 
+                                       spv_uint layers_, spv_float ntg_, spv_uint actnum_, 
+                                       BS_SP(rs_mesh_iface) sp_mesh_iface);
 
       virtual spv_float upscale_saturation_cube (t_long Nx, t_long Ny, t_long Nz, t_long Nz_upsc,
                                                  spv_uint layers_, spv_float vol_, spv_float ntg_, spv_float poro_, spv_float sat_);
@@ -90,13 +99,15 @@ namespace blue_sky
       
     protected:
       void init_prop ();
-      t_float calc_sum_dW ( t_long k1, t_long k2, t_long Nx, t_long Ny,  
+      t_double calc_sum_dW ( t_long k1, t_long k2, t_long Nx, t_long Ny,  
                                                 spv_float vol, spv_float ntg, 
                                                 spv_float poro, spv_float permx );
 
       t_int upscale_cubes ( t_long k1, t_long k2, t_long Nx, t_long Ny, spv_float vol, spv_float ntg, spv_float poro, spv_float permx );
 
-      t_double solve_pressure_eq (t_long Ny, t_long Nz, t_long i, t_long j, t_long k1, t_long k2, BS_SP(rs_mesh_iface) sp_mesh_iface);
+      t_double solve_pressure_zcolumn (t_long Ny, t_long Nz, t_long i, t_long j, t_long k1, t_long k2, BS_SP(rs_mesh_iface) sp_mesh_iface);
+
+      t_double solve_pressure_block (t_int dir, t_long Ny, t_long Nz, t_long i1, t_long i2, t_long j1, t_long j2, t_long k1, t_long k2, spv_float ntg_, BS_SP(rs_mesh_iface) sp_mesh_iface);
       
       //t_double upsc_permx_zcolumn (t_long Nx, t_long Ny, t_long i, t_long j, t_long k1, t_long k2, spv_float permx_, BS_SP(rs_mesh_iface) sp_mesh_iface);
       

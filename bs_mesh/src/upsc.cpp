@@ -56,7 +56,7 @@ namespace blue_sky
 spv_float upsc::upscale_grid_zcolumn ( t_long Nx, t_long Ny, t_long Nz, spv_float zcorn_, spv_uint layers_ )
 {   
     t_int k1, k2, new_k;
-    t_int new_Nz, new_zcorn_size, layer_size;
+    t_long new_Nz, new_zcorn_size, layer_size;
     v_uint& layers = *layers_;
     v_uint::iterator lit, lit_next;
     v_float& zcorn = *zcorn_;
@@ -89,7 +89,7 @@ bp::tuple upsc::upscale_grid ( t_long Nx, t_long Ny, t_long Nz, t_long ux, t_lon
                                spv_float coord_, spv_float zcorn_, spv_uint layers_ )
 {   
     t_int i, j, n, k1, k2, k, ind;
-    t_int new_Nx, new_Ny, new_Nz, new_coord_size, new_zcorn_size, layer_size;
+    t_long new_Nx, new_Ny, new_Nz, new_coord_size, new_zcorn_size, layer_size;
     v_uint& layers = *layers_;
     v_uint::iterator lit, lit_next;
     v_float& coord = *coord_;
@@ -123,6 +123,7 @@ bp::tuple upsc::upscale_grid ( t_long Nx, t_long Ny, t_long Nz, t_long ux, t_lon
             std::copy ( &coord[6*(Ny*(Nx+1)+ux*i)], &coord[6*(Ny*(Nx+1)+ux*i+1)], &(*new_coord)[n] );
             n += 6;
         }
+    std::copy ( &coord[6*(Ny*(Nx+1)+Nx)], &coord[6*(Ny*(Nx+1)+Nx+1)], &(*new_coord)[n] );
 
     k = 0;
     for (lit=layers.begin();lit!=layers.end();lit++)
@@ -292,7 +293,7 @@ spv_float upsc::upscale_saturation_cube (t_long Nx, t_long Ny, t_long Nz, t_long
                                          spv_uint layers_, spv_float vol_, spv_float ntg_, spv_float poro_, spv_float sat_)
 {
     t_int i, j, k, n, k1, k2, ind, z;
-    t_int layer_size, new_cube_size;
+    t_long layer_size, new_cube_size;
     t_double sum_sat_poro_ntg_vol, sum_poro_ntg_vol;
 
     v_uint& layers = *layers_;
@@ -354,6 +355,157 @@ spv_float upsc::upscale_saturation_cube (t_long Nx, t_long Ny, t_long Nz, t_long
     return new_sat;
 }
 
+spv_float upsc::upscale_sat_cube_xy (t_long Nx, t_long Ny, t_long ux, t_long uy, t_long Nz, 
+                                     spv_uint layers_, spv_float vol_, spv_float ntg_, spv_float poro_, spv_float sat_)
+{
+    t_int i, j, ii, jj, k, new_k, n, k1, k2, index, ind, new_ind;
+    t_long new_Nx, new_Ny, new_Nz;
+    t_long layer_size, new_layer_size, new_cube_size;
+    t_double sum_sat_poro_ntg_vol, sum_poro_ntg_vol;
+
+    v_uint& layers = *layers_;
+    v_float& vol = *vol_;
+    v_float& ntg = *ntg_;
+    v_float& poro = *poro_;
+    v_float& sat = *sat_;
+    
+    t_int rx, ry;
+    rx = Nx % ux;
+    ry = Ny % uy;
+    new_Nx = ceil(double(Nx)/double(ux));
+    new_Ny = ceil(double(Ny)/double(uy));
+    new_Nz = layers.size(); 
+    
+    spv_float new_sat = BS_KERNEL.create_object(v_float::bs_type());
+    new_cube_size = new_Nx*new_Ny*new_Nz;
+    new_sat->resize(new_cube_size);
+    
+    // important: XYZ order
+    // index <-- (i, j, k)
+    // index = i + j*Nx + k*Nx*Ny;
+    
+    layer_size = Nx * Ny;
+    new_layer_size = new_Nx * new_Ny;
+
+    new_k = 0;
+    for (n = 0; n < new_Nz; ++n)
+      {
+        k1 = layers[n];
+
+        if (n == new_Nz-1)
+            k2 = Nz;
+        else
+            k2 = layers[n+1];
+
+        for (j = 0; j < new_Ny-1; ++j)
+          {
+            for (i = 0; i < new_Nx-1; ++i)
+              {
+                index  = ux*i + uy*j*Nx + k1*layer_size;
+                new_ind = i + j*new_Nx + new_k*new_layer_size;
+                
+                sum_sat_poro_ntg_vol = 0;
+                sum_poro_ntg_vol = 0;
+        
+                for (k = 0; k < (k2-k1); ++k)
+                  {
+                    for (jj = 0; jj < uy; jj++)
+                      {
+                        for (ii = 0; ii < ux; ii++)
+                          {
+                            ind = index + ii + jj*Nx + k*layer_size;
+                            sum_sat_poro_ntg_vol += sat[ind]*poro[ind]*ntg[ind]*vol[ind];
+                            sum_poro_ntg_vol += poro[ind]*ntg[ind]*vol[ind];
+                          }
+                      }
+                  }
+
+                if (sum_sat_poro_ntg_vol != 0)
+                    (*new_sat)[new_ind] = sum_sat_poro_ntg_vol/sum_poro_ntg_vol;
+                else
+                    (*new_sat)[new_ind] = 0;
+              }
+
+            index  = ux*(new_Nx-1) + uy*j*Nx + k1*layer_size;
+            new_ind = new_Nx-1 + j*new_Nx + new_k*new_layer_size;
+            
+            sum_sat_poro_ntg_vol = 0;
+            sum_poro_ntg_vol = 0;
+    
+            for (k = 0; k < (k2-k1); ++k)
+              {
+                for (jj = 0; jj < uy; jj++)
+                  {
+                    for (ii = 0; ii < rx; ii++)
+                      {
+                        ind = index + ii + jj*Nx + k*layer_size;
+                        sum_sat_poro_ntg_vol += sat[ind]*poro[ind]*ntg[ind]*vol[ind];
+                        sum_poro_ntg_vol += poro[ind]*ntg[ind]*vol[ind];
+                      }
+                  }
+              }
+            
+            if (sum_sat_poro_ntg_vol != 0)
+                (*new_sat)[new_ind] = sum_sat_poro_ntg_vol/sum_poro_ntg_vol;
+            else
+                (*new_sat)[new_ind] = 0;
+          }
+        
+        for (i = 0; i < new_Nx-1; ++i)
+          {
+            index  = ux*i + uy*(new_Ny-1)*Nx + k1*layer_size;
+            new_ind = i + (new_Ny-1)*new_Nx + new_k*new_layer_size;
+            
+            sum_sat_poro_ntg_vol = 0;
+            sum_poro_ntg_vol = 0;
+    
+            for (k = 0; k < (k2-k1); ++k)
+              {
+                for (jj = 0; jj < ry; jj++)
+                  {
+                    for (ii = 0; ii < ux; ii++)
+                      {
+                        ind = index + ii + jj*Nx + k*layer_size;
+                        sum_sat_poro_ntg_vol += sat[ind]*poro[ind]*ntg[ind]*vol[ind];
+                        sum_poro_ntg_vol += poro[ind]*ntg[ind]*vol[ind];
+                      }
+                  }
+              }
+            if (sum_sat_poro_ntg_vol != 0)
+                (*new_sat)[new_ind] = sum_sat_poro_ntg_vol/sum_poro_ntg_vol;
+            else
+                (*new_sat)[new_ind] = 0;
+          }
+
+        index  = ux*(new_Nx-1) + uy*(new_Ny-1)*Nx + k1*layer_size;
+        new_ind = new_Nx-1 + (new_Ny-1)*new_Nx + new_k*new_layer_size;
+        
+        sum_sat_poro_ntg_vol = 0;
+        sum_poro_ntg_vol = 0;
+
+        for (k = 0; k < (k2-k1); ++k)
+          {
+            for (jj = 0; jj < ry; jj++)
+              {
+                for (ii = 0; ii < rx; ii++)
+                  {
+                    ind = index + ii + jj*Nx + k*layer_size;
+                    sum_sat_poro_ntg_vol += sat[ind]*poro[ind]*ntg[ind]*vol[ind];
+                    sum_poro_ntg_vol += poro[ind]*ntg[ind]*vol[ind];
+                  }
+              }
+          }  
+        if (sum_sat_poro_ntg_vol != 0)
+            (*new_sat)[new_ind] = sum_sat_poro_ntg_vol/sum_poro_ntg_vol;
+        else
+            (*new_sat)[new_ind] = 0;
+
+        new_k ++;
+      }
+
+    return new_sat;
+}
+
 int upsc::upscale_cubes ( t_long k1, t_long k2, t_long Nx, t_long Ny, 
                           spv_float vol_, spv_float ntg_, spv_float poro_, spv_float permx_ )
 {
@@ -403,7 +555,192 @@ int upsc::upscale_cubes ( t_long k1, t_long k2, t_long Nx, t_long Ny,
 
     return 0;
 }
-t_double upsc::solve_pressure_eq (t_long Ny, t_long Nz, t_long i, t_long j, t_long k1, t_long k2, BS_SP(rs_mesh_iface) sp_mesh_iface)
+
+bp::tuple upsc::upscale_cubes_xy ( t_long Nx, t_long Ny, t_long Nz, t_long ux, t_long uy,
+                                   spv_float vol_, spv_float ntg_, spv_float poro_)
+{
+    v_float& vol = *vol_;
+    v_float& ntg = *ntg_;
+    v_float& poro = *poro_;
+    
+    spv_float new_vol = BS_KERNEL.create_object(v_float::bs_type());
+    spv_float new_ntg = BS_KERNEL.create_object(v_float::bs_type());
+    spv_float new_poro = BS_KERNEL.create_object(v_float::bs_type());
+
+    t_long new_cube_size, new_Nx, new_Ny;
+    t_int rx, ry;
+    new_Nx = ceil(double(Nx)/double(ux));
+    new_Ny = ceil(double(Ny)/double(uy));
+    rx = Nx % ux;
+    ry = Ny % uy;
+    new_cube_size = new_Nx*new_Ny*Nz;
+    
+    new_vol->resize(new_cube_size);
+    new_ntg->resize(new_cube_size);
+    new_poro->resize(new_cube_size);
+    
+    t_long i, j, ii, jj, k, layer_size, new_layer_size;
+    t_long ind, index, new_ind;
+    t_double vol_sum, ntg_vol_sum, poro_ntg_vol_sum;
+    layer_size = Nx*Ny;
+    new_layer_size = new_Nx*new_Ny;
+
+    for (k = 0; k < Nz; k++)
+      {
+        for (j = 0; j < new_Ny-1; j++)
+          {
+            for (i = 0; i < new_Nx-1; i++)
+              {
+                ind  = ux*i + uy*j*Nx + k*layer_size;
+                new_ind = i + j*new_Nx + k*new_layer_size;
+                //printf("\n ind=%d newind=%d", ind, new_ind);
+
+                vol_sum = 0;
+                ntg_vol_sum = 0;
+                poro_ntg_vol_sum = 0; 
+
+                for (jj = 0; jj < uy; jj++)
+                  {
+                    for (ii = 0; ii < ux; ii++)
+                      {
+                        index = ind + ii;
+                        //printf("\n %d %f", index, ntg[index]);
+                        vol_sum += vol[index];
+                        ntg_vol_sum += ntg[index]*vol[index];
+                        poro_ntg_vol_sum += poro[index]*ntg[index]*vol[index];
+                      }
+                    ind  += Nx;
+                  }
+                (*new_vol)[new_ind] = vol_sum;
+                
+                if (vol_sum != 0)
+                    (*new_ntg)[new_ind] = ntg_vol_sum/vol_sum;
+                else
+                    (*new_ntg)[new_ind] = 0;
+                
+                if (ntg_vol_sum != 0)
+                  {
+                    (*new_poro)[new_ind] = poro_ntg_vol_sum/ntg_vol_sum;
+                  }
+                else
+                  {
+                    (*new_poro)[new_ind] = 0;
+                  }
+              }
+            
+            ind  = ux*(new_Nx-1) + uy*j*Nx + k*layer_size;
+            new_ind = new_Nx-1 + j*new_Nx + k*new_layer_size;
+
+            vol_sum = 0;
+            ntg_vol_sum = 0;
+            poro_ntg_vol_sum = 0; 
+
+            for (jj = 0; jj < uy; jj++)
+              {
+                for (ii = 0; ii < rx; ii++)
+                  {
+                    index = ind + ii;
+                    vol_sum += vol[index];
+                    ntg_vol_sum += ntg[index]*vol[index];
+                    poro_ntg_vol_sum += poro[index]*ntg[index]*vol[index];
+                  }
+                ind  += Nx;
+              }
+            (*new_vol)[new_ind] = vol_sum;
+            
+            if (vol_sum != 0)
+                (*new_ntg)[new_ind] = ntg_vol_sum/vol_sum;
+            else
+                (*new_ntg)[new_ind] = 0;
+            
+            if (ntg_vol_sum != 0)
+              {
+                (*new_poro)[new_ind] = poro_ntg_vol_sum/ntg_vol_sum;
+              }
+            else
+              {
+                (*new_poro)[new_ind] = 0;
+              }
+          }
+        
+        for (i = 0; i < new_Nx-1; i++)
+          {
+            ind  = ux*i + uy*(new_Ny-1)*Nx + k*layer_size;
+            new_ind = i + (new_Ny-1)*new_Nx + k*new_layer_size;
+            //printf("\n ind=%d newind=%d", ind, new_ind);
+
+            vol_sum = 0;
+            ntg_vol_sum = 0;
+            poro_ntg_vol_sum = 0; 
+
+            for (jj = 0; jj < ry; jj++)
+              {
+                for (ii = 0; ii < ux; ii++)
+                  {
+                    index = ind + ii;
+                    //printf("\n %d", index);
+                    vol_sum += vol[index];
+                    ntg_vol_sum += ntg[index]*vol[index];
+                    poro_ntg_vol_sum += poro[index]*ntg[index]*vol[index];
+                  }
+                ind  += Nx;
+              }
+            (*new_vol)[new_ind] = vol_sum;
+            
+            if (vol_sum != 0)
+                (*new_ntg)[new_ind] = ntg_vol_sum/vol_sum;
+            else
+                (*new_ntg)[new_ind] = 0;
+            
+            if (ntg_vol_sum != 0)
+              {
+                (*new_poro)[new_ind] = poro_ntg_vol_sum/ntg_vol_sum;
+              }
+            else
+              {
+                (*new_poro)[new_ind] = 0;
+              }
+          }
+        
+        ind  = ux*(new_Nx-1) + uy*(new_Ny-1)*Nx + k*layer_size;
+        new_ind = new_Nx-1 + (new_Ny-1)*new_Nx + k*new_layer_size;
+
+        vol_sum = 0;
+        ntg_vol_sum = 0;
+        poro_ntg_vol_sum = 0; 
+
+        for (jj = 0; jj < ry; jj++)
+          {
+            for (ii = 0; ii < rx; ii++)
+              {
+                index = ind + ii;
+                vol_sum += vol[index];
+                ntg_vol_sum += ntg[index]*vol[index];
+                poro_ntg_vol_sum += poro[index]*ntg[index]*vol[index];
+              }
+            ind  += Nx;
+          }
+        (*new_vol)[new_ind] = vol_sum;
+        
+        if (vol_sum != 0)
+            (*new_ntg)[new_ind] = ntg_vol_sum/vol_sum;
+        else
+            (*new_ntg)[new_ind] = 0;
+        
+        if (ntg_vol_sum != 0)
+          {
+            (*new_poro)[new_ind] = poro_ntg_vol_sum/ntg_vol_sum;
+          }
+        else
+          {
+            (*new_poro)[new_ind] = 0;
+          }
+      }
+
+    return bp::make_tuple(new_ntg, new_poro);
+}
+
+t_double upsc::solve_pressure_zcolumn (t_long Ny, t_long Nz, t_long i, t_long j, t_long k1, t_long k2, BS_SP(rs_mesh_iface) sp_mesh_iface)
 {
     t_long size, k, n, index, ext_ind[2];
     plane_t plane[2];
@@ -528,129 +865,355 @@ t_double upsc::solve_pressure_eq (t_long Ny, t_long Nz, t_long i, t_long j, t_lo
     
     return K;
 }
-/*
-t_double upsc::upsc_permx_zcolumn (t_long Nx, t_long Ny, t_long i, t_long j, t_long k1, t_long k2, 
-                                   spv_float permx_, BS_SP(rs_mesh_iface) sp_mesh_iface)
+
+t_double upsc::solve_pressure_block (t_int direction, t_long Ny, t_long Nz, t_long i1, t_long i2, t_long j1, t_long j2, t_long k1, t_long k2, spv_float ntg_, BS_SP(rs_mesh_iface) sp_mesh_iface)
 {
-    t_int k, xyz_ind; 
-    t_double dl, dL, a, A, sum, K;
-    
-    plane_t plane;
-    mesh_element3d element;
+    const t_double cdarcy = 0.008640;
+    t_long size, i, j, k, ind[2], ext_ind[2], index, ny, nz;
+    plane_t plane[2];
+    mesh_element3d element[2];
     fpoint3d_t center[2];
+
+    t_double tz, ty, tx;
+    t_double p_left = 1, p_right = 0;
+    t_double dL, dP, S, K, Q;
+
+    spv_float p = BS_KERNEL.create_object(v_float::bs_type());
+    spv_float rhs = BS_KERNEL.create_object(v_float::bs_type());
+    spv_float tran_vals = BS_KERNEL.create_object(v_float::bs_type());
+    sp_dens_mtx_t tran = BS_KERNEL.create_object("dens_matrix");
+    sp_blu_solver_t solver = BS_KERNEL.create_object("blu_solver");
+
+    size = (i2-i1)*(j2-j1)*(k2-k1);
+    ny = j2 - j1;
+    nz = k2 - k1;
     
+    p->resize(size);
+    rhs->resize(size);
+
+    tran->init(size, size, 60);
+    tran_vals = tran->get_values();
+    
+    v_float& A = *tran_vals;
+    v_float& b = *rhs;
+    v_float& ntg = *ntg_;
+
     smart_ptr<bs_mesh_grdecl> sp_mesh(sp_mesh_iface, bs_static_cast());
     mesh_grdecl mesh = sp_mesh->get_wrapped();
     
-    v_float& permx = *permx_;
+    // important: ZYX order
+
+    // direction dir along_dim1->X (2->Y, 3->Z) 
+ 
+    //ind = 0;
+    for (i = i1; i < i2; ++i)
+        for (j = j1; j < j2; ++j)
+            for (k = k1; k < k2; ++k)
+              {
+                ext_ind[0] = k + j * Nz + i * Ny * Nz;
+                ind[0] = (k-k1) + (j-j1)*nz + (i-i1)*ny*nz;
+                mesh.calc_element (i, j, k, element[0]);
+                center[0] = element[0].get_center();
+                
+                // TRANZ /////////////////////////////////////////////////////////////////////////////////////////////
+                if (k!=k2-1)
+                    {
+                        ext_ind[1] = ext_ind[0] + 1;
+                        ind[1] = ind[0] + 1;
+                        mesh.calc_element (i, j, k + 1, element[1]);
+                        element[0].get_plane (z_axis_plus, plane[0]);
+                        element[1].get_plane (z_axis_minus, plane[1]);
+                        center[1] = element[1].get_center();
+                        tz = mesh.calc_tran(ext_ind[0], ext_ind[1], plane[0], center[0], center[1], along_dim3, &plane[1]);
+                        
+                        // Z-
+                        //index = ext_ind[0] + ext_ind[1]*size;
+                        index = ind[0] + ind[1]*size;
+                        A[index] = tz;
+                        index += 1;
+                        A[index] -= tz;
+                        
+                        // Z+
+                        //index = ext_ind[1] + ext_ind[0]*size;
+                        index = ind[1] + ind[0]*size;
+                        A[index] = tz;
+                        index -= 1;
+                        A[index] -= tz;
+                    }
+                
+                // TRANY /////////////////////////////////////////////////////////////////////////////////////////////
+                if (j != j2-1)
+                    {
+                        ext_ind[1] = ext_ind[0] + Nz;
+                        ind[1] = ind[0] + nz;
+                        mesh.calc_element (i, j + 1, k, element[1]);
+                        element[0].get_plane (y_axis_plus, plane[0]);
+                        element[1].get_plane (y_axis_minus, plane[1]);
+                        center[1] = element[1].get_center();
+                        ty = mesh.calc_tran(ext_ind[0], ext_ind[1], plane[0], center[0], center[1], along_dim2, &plane[1]);          
+                        
+                        // Y- 
+                        //index = ext_ind[0] + ext_ind[1]*size;
+                        index = ind[0] + ind[1]*size;
+                        A[index] = ty;
+                        //index += Nz;
+                        index += nz;
+                        A[index] -= ty;
+                        
+                        // Y+
+                        //index = ext_ind[1] + ext_ind[0]*size;
+                        index = ind[1] + ind[0]*size;
+                        A[index] = ty;
+                        //index -= Nz;
+                        index -= nz;
+                        A[index] -= ty;
+                    }
+
+                // TRANX /////////////////////////////////////////////////////////////////////////////////////////////
+                if (i != i2-1)
+                    {
+                        ext_ind[1] = ext_ind[0] + Ny * Nz;
+                        ind[1] = ind[0] + ny*nz;
+                        mesh.calc_element (i + 1, j, k, element[1]);
+                        element[0].get_plane (x_axis_plus, plane[0]);
+                        element[1].get_plane (x_axis_minus, plane[1]);
+                        center[1] = element[1].get_center();
+                        tx = mesh.calc_tran(ext_ind[0], ext_ind[1], plane[0], center[0], center[1], along_dim1, &plane[1]);
+                        
+                        // X-
+                        //index = ext_ind[0] + ext_ind[1]*size;
+                        index = ind[0] + ind[1]*size;
+                        A[index] = tx;
+                        //index += Ny * Nz;
+                        index += ny*nz;
+                        A[index] -= tx;
+                                                
+                        // X+
+                        //index = ext_ind[1] + ext_ind[0]*size;
+                        index = ind[1] + ind[0]*size;
+                        A[index] = tx;
+                        //index -= Ny * Nz;
+                        index -= ny*nz;
+                        A[index] -= tx;
+
+                    }
+               // Boundary Conditions /////////////////////////////////////////////////////////////////////////////////
+               if (direction == 1)
+                 {
+                    if (i == i1)
+                        {
+                           element[0].get_plane (x_axis_minus, plane[0]);
+                           tx = mesh.calc_tran_boundary (ext_ind[0], plane[0], center[0], along_dim1);
+                           //b[ext_ind[0]] = -tx*p_left;
+                           //index  =  ext_ind[0] + ext_ind[0]*size;
+                           b[ind[0]] = -tx*p_left;
+                           index  =  ind[0] + ind[0]*size;
+                           A[index] -= tx;          
+                        }
+                    if (i == i2-1)
+                        {  
+                           element[0].get_plane (x_axis_plus, plane[0]);
+                           tx = mesh.calc_tran_boundary (ext_ind[0], plane[0], center[0], along_dim1);
+                           //b[ext_ind[0]] = -tx*p_right;
+                           //index  =  ext_ind[0] + ext_ind[0]*size;
+                           b[ind[0]] = -tx*p_right;
+                           index  =  ind[0] + ind[0]*size;
+                           A[index] -= tx;          
+                        }
+                 }
+               else if (direction == 2)
+                 {
+                    if (j == j1)
+                        {
+                           element[0].get_plane (y_axis_minus, plane[0]);
+                           ty = mesh.calc_tran_boundary (ext_ind[0], plane[0], center[0], along_dim2);
+                           //b[ext_ind[0]] = -ty*p_left;
+                           //index  =  ext_ind[0] + ext_ind[0]*size;
+                           b[ind[0]] = -ty*p_left;
+                           index  =  ind[0] + ind[0]*size;
+                           A[index] -= ty;          
+                        }
+                    if (j == j2-1)
+                        {  
+                           element[0].get_plane (y_axis_plus, plane[0]);
+                           ty = mesh.calc_tran_boundary (ext_ind[0], plane[0], center[0], along_dim2);
+                           //b[ext_ind[0]] = -ty*p_right;
+                           //index  =  ext_ind[0] + ext_ind[0]*size;
+                           b[ind[0]] = -ty*p_right;
+                           index  =  ind[0] + ind[0]*size;
+                           A[index] -= ty;          
+                        }
+                 }
+               else if (direction == 3)
+                 {
+                    if (k == k1)
+                        {
+                           element[0].get_plane (z_axis_minus, plane[0]);
+                           tz = mesh.calc_tran_boundary (ext_ind[0], plane[0], center[0], along_dim3);
+                           //b[ext_ind[0]] = -tz*p_left;
+                           //index  =  ext_ind[0] + ext_ind[0]*size;
+                           b[ind[0]] = -tz*p_left;
+                           index  =  ind[0] + ind[0]*size;
+                           A[index] -= tz;          
+                        }
+                    if (k == k2-1)
+                        {  
+                           element[0].get_plane (z_axis_plus, plane[0]);
+                           tz = mesh.calc_tran_boundary (ext_ind[0], plane[0], center[0], along_dim3);
+                           //b[ext_ind[0]] = -tz*p_right;
+                           //index  =  ext_ind[0] + ext_ind[0]*size;
+                           b[ind[0]] = -tz*p_right;
+                           index  =  ind[0] + ind[0]*size;
+                           A[index] -= tz;          
+                        }
+                 }
+
+              }
+
+    solver->setup (tran);
+    solver->solve (tran, rhs, p);
+
+    //for (i=0;i<size;i++)
+      //  printf("\n p[%d]=%f", i, (*p)[i]);
+
+    // Q=sum(q) q=T*dp
+    // Q=k*S*dP/dL
+    // for permx and permy don't forget NTG! 
     
-    dL = 0;
-    A = 0;
-    sum = 0;
+    Q = 0;
+    S = 0;
+    
+    if (direction == 1)
+      {
+        i = i1;
+        for (j = j1; j < j2; ++j)
+            for (k = k1; k < k2; ++k)
+              {
+                mesh.calc_element (i, j, k, element[0]);
+                element[0].get_plane (x_axis_minus, plane[0]);
+                center[0] = element[0].get_center ();
+                get_plane_center (plane[0],  center[1]);
+                
+                index = k + j * Nz + i * Ny * Nz;
+                S += ntg[index]*find_area_of_side (plane[0][0], plane[0][1], plane[0][2], plane[0][3]);
+                tx = mesh.calc_tran_boundary (index, plane[0], center[0], along_dim1);
 
-    for (k = k1; k <= k2; ++k)
-        {
-            xyz_ind = i + j * Nx + k * Nx * Ny;
-            
-            mesh.calc_element (i, j, k, element);
-            center[0] = element.get_center();
-            
-            element.get_plane (x_axis_minus, plane);
-            get_plane_center (plane, center[1]);
+                index = (k-k1) + (j-j1)*nz + (i-i1)*ny*nz;
+                dP = (p_left - (*p)[index]);
+                Q += tx*dP;
+              }
+      }
+    else if (direction == 2)
+      {
+        j = j1;
+        for (i = i1; i < i2; ++i)
+            for (k = k1; k < k2; ++k)
+              {
+                mesh.calc_element (i, j, k, element[0]);
+                element[0].get_plane (y_axis_minus, plane[0]);
+                center[0] = element[0].get_center ();
+                get_plane_center (plane[0],  center[1]);
+                
+                index = k + j * Nz + i * Ny * Nz;
+                S += ntg[index]*find_area_of_side (plane[0][0], plane[0][1], plane[0][2], plane[0][3]);
+                ty = mesh.calc_tran_boundary (index, plane[0], center[0], along_dim2);
+                
+                index = (k-k1) + (j-j1)*nz + (i-i1)*ny*nz;
+                dP = (p_left - (*p)[index]);
+                Q += ty*dP;
+              }
+      }
+    else if (direction == 3)
+      {
+        k = k1;
+        for (i = i1; i < i2; ++i)
+            for (j = j1; j < j2; ++j)
+              {
+                mesh.calc_element (i, j, k, element[0]);
+                element[0].get_plane (z_axis_minus, plane[0]);
+                center[0] = element[0].get_center ();
+                get_plane_center (plane[0],  center[1]);
+                
+                index = k + j * Nz + i * Ny * Nz;
+                S += find_area_of_side (plane[0][0], plane[0][1], plane[0][2], plane[0][3]);
+                tz = mesh.calc_tran_boundary (index, plane[0], center[0], along_dim3);
+                
+                index = (k-k1) + (j-j1)*nz + (i-i1)*ny*nz;
+                dP = (p_left - (*p)[index]);
+                Q += tz*dP;
+              }
+      }
+    
+    //printf("\n S = %f Q = %f", S, Q);
+    //dP = ( (p_left + (*p)[0])/2 - ((*p)[Ny*Nz] + p_right)/2 );
 
-            dl = get_len (center[0], center[1]);
-            dL += dl;
-            a = find_area_of_side (plane[0], plane[1], plane[2], plane[3]);
-            A += a;
-            sum += permx[xyz_ind]*a/dl;
-        }
+    i = i1; j = j1; k = k1;
+    if (direction == 1)
+      {
+        mesh.calc_element (i, j, k, element[0]);
+        element[0].get_plane (x_axis_minus, plane[0]);
+        get_plane_center (plane[0],  center[0]);
+        
+        index = (k-k1) + (j-j1)*nz + (i-i1)*ny*nz;
+        dP = (p_left + (*p)[index])/2;
+        
+        i = i2-1;
+        mesh.calc_element (i, j, k, element[1]);
+        element[1].get_plane (x_axis_plus, plane[1]);
+        get_plane_center (plane[1],  center[1]);
+        
+        index = (k-k1) + (j-j1)*nz + (i-i1)*ny*nz;
+        dP -= ((*p)[index] + p_right)/2;
+      }
+    else if (direction == 2)
+      {
+        mesh.calc_element (i, j, k, element[0]);
+        element[0].get_plane (y_axis_minus, plane[0]);
+        get_plane_center (plane[0],  center[0]);
+        
+        index = (k-k1) + (j-j1)*nz + (i-i1)*ny*nz;
+        dP = (p_left + (*p)[index])/2;
+        
+        j = j2-1; 
+        mesh.calc_element (i, j, k, element[1]);
+        element[1].get_plane (y_axis_plus, plane[1]);
+        get_plane_center (plane[1],  center[1]);
+        
+        index = (k-k1) + (j-j1)*nz + (i-i1)*ny*nz;
+        dP -= ((*p)[index] + p_right)/2;
+      }
+    else if (direction == 3)
+      {
+        mesh.calc_element (i, j, k, element[0]);
+        element[0].get_plane (z_axis_minus, plane[0]);
+        get_plane_center (plane[0],  center[0]);
+        
+        index = (k-k1) + (j-j1)*nz + (i-i1)*ny*nz;
+        dP = (p_left + (*p)[index])/2;
+        
+        k = k2-1;
+        mesh.calc_element (i, j, k, element[1]);
+        element[1].get_plane (z_axis_plus, plane[1]);
+        get_plane_center (plane[1],  center[1]);
+        
+        index = (k-k1) + (j-j1)*nz + (i-i1)*ny*nz;
+        dP -= ((*p)[index] + p_right)/2;
+      }
 
-    dL /= k2 - k1 + 1;
-    K = sum*dL/A;
+    //printf("\n dP = %f", dP);
+    dL = get_len(center[0], center[1]);
+    //printf("\n dL = %f", dL);
+    K = Q*dL/(cdarcy*S*dP);
+    //printf("\n K = %f", K);
     
     return K;
+
 }
-*/
-spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint layers_, spv_float permz_, spv_uint actnum_, BS_SP(rs_mesh_iface) sp_mesh_iface)
-  {
-    t_int i, j, k, n, Nz_upsc, k1, k2, z1, ind, index;
-    t_int layer_size, new_cube_size;
 
-    t_double upsc_factor;
-    
-    spv_float new_permz = BS_KERNEL.create_object(v_float::bs_type());
-    v_float& permz = *permz_;
-    v_uint& actnum = *actnum_;
-    v_uint& layers = *layers_;
-    
-    smart_ptr<bs_mesh_grdecl> sp_mesh(sp_mesh_iface, bs_static_cast());
-    mesh_grdecl mesh = sp_mesh->get_wrapped();
-    
-    Nz_upsc = layers.size();
-    layer_size = Nx*Ny;
-    
-    // important: XYZ order
-    // index <-- (i, j, k)
-    // index = i + j*Nx + k*Nx*Ny;
-    
-    for (n = 0; n < Nz_upsc; ++n)
-        {
-            k1 = layers[n];
-
-            if (n == Nz_upsc-1)
-                k2 = Nz - 1;
-            else
-                k2 = layers[n+1] - 1;
-
-            //printf("\n k1 = %d k2 = %d", k1, k2);
-        
-            if (k1 != k2)
-                {
-                    z1 = k1*layer_size;
-                    for (j = 0; j < Ny; ++j)
-                        for (i = 0; i < Nx; ++i)
-                            {
-                                index = i + j * Nx + z1;
-                                //printf("\n index = %d pz = %f", index, permz[index]);
-
-                                // FIXME: in general case call function that finds isolated bodies
-                                for (k = k1; k <= k2; k++)
-                                    {
-                                        ind = i + j * Nx + k * Nx * Ny;
-                                        if (!actnum [ind])
-                                            {
-                                                permz[index] = 0;
-                                                break;
-                                            }
-                                    }
-                                if (permz[index])
-                                    {
-                                        upsc_factor = solve_pressure_eq (Ny, Nz, i, j, k1, k2, sp_mesh_iface);
-                                        //printf("\n %d %d %d %d upsc_factor = %f", i, j, k1, k2, upsc_factor);
-                                        permz[index] *= upsc_factor;
-                                    }
-
-                            }
-                }   
-        }  
-
-    new_cube_size = Nz_upsc*layer_size;
-    new_permz->resize(new_cube_size);
-    
-    i = 0;
-    for ( n = 0; n < Nz_upsc; n++)
-        {
-            k = layers[n];
-            std::copy ( &permz[k*layer_size], &permz[(k+1)*layer_size], &(*new_permz)[i*layer_size] );
-            i++;
-        }
-
-    return new_permz;
-  }
 
 /*
-  t_int upsc::upscale_perm (t_long Nx, t_long Ny, t_long Nz, spv_uint layers, spv_float perm_, BS_SP(rs_mesh_iface) sp_mesh_iface)
-  {
+t_double upsc::solve_pressure (t_long Nx, t_long Ny, t_long Nz, spv_uint layers, spv_float perm_, BS_SP(rs_mesh_iface) sp_mesh_iface)
+{
     t_long size, i, j, k, ind, ext_ind[2], index;
     plane_t plane[2];
     mesh_element3d element[2];
@@ -658,7 +1221,7 @@ spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint
 
     t_double tz, ty, tx;
     t_double p_left = 1, p_right = 0;
-    t_double dL, dP, S, K;
+    t_double dL, dP, S, K, Q;
 
     spv_float p = BS_KERNEL.create_object(v_float::bs_type());
     spv_float rhs = BS_KERNEL.create_object(v_float::bs_type());
@@ -791,6 +1354,8 @@ spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint
     solver->setup (tran);
     solver->solve (tran, rhs, p);
 
+    Q = 0;
+    S = 0;
     i = 0;
     for (j = 0; j < Ny; ++j)
         for (k = 0; k < Nz; ++k)
@@ -798,32 +1363,59 @@ spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint
                 ind = k + j * Nz;  //+ i * Ny * Nz;
                 mesh.calc_element (i, j, k, element[0]);
                 element[0].get_plane (x_axis_minus, plane[0]);
+                center[0] = element[0].get_center ();
+                get_plane_center (plane[0],  center[1]);
                 
                 // FIXME: q=k*S*dP/dL -> q=T*dP
                 // FIXME: for permx and permy don't forget NTG! 
                 
-                S = find_area_of_side (plane[0][0], plane[0][1], plane[0][2], plane[0][3]);
-                q[ind] = S; 
-                q[ind] *= perm[ind];
+                S += find_area_of_side (plane[0][0], plane[0][1], plane[0][2], plane[0][3]);
                 
+                //q[ind] = S; 
+                //q[ind] *= perm[ind];
+                
+                tx = mesh.calc_tran_boundary (ext_ind[0], plane[0], center[0], along_dim1);
                 dP = (p_left - (*p)[ind]);
                
-                q[ind] *= dP;
+                q[ind] = tx*dP;
+                printf("\n ind=%d tx=%f dp=%f q=%f", ind, tx, dP, q[ind]);
                 
-                center[0] = element[0].get_center ();
-                get_plane_center (plane[0],  center[1]);
-                
-                dL = get_len(center[0], center[1]);
-                printf("\n dL = %f", dL);
+                //dL = get_len(center[0], center[1]);
+                //printf("\n dL = %f", dL);
 
-                q[ind] /= 2*dL;
+                //q[ind] /= 2*dL;
 
-                            
+                Q += q[ind];                        
             }
+
+    printf("\n S = %f Q = %f", S, Q);
     dP = ( (p_left + (*p)[0])/2 - ((*p)[Ny*Nz] + p_right)/2 );
-    printf("\n dP = %f, dL = %f, S = %f", dP, dL*2*Nx, S*Ny*Nz);
-    K = q[0]*dL*2*Nx/(S*Ny*Nz*dP);
+    printf("\n dP = %f", dP);
+    //printf("\n dP = %f, dL = %f, S = %f", dP, dL*2*Nx, S*Ny*Nz);
+    //K = q[0]*dL*2*Nx/(S*Ny*Nz*dP);
+
+    i = 0;
+    j = 0;
+    k = 0;
+    ind = k + j * Nz + i * Ny * Nz;
+    mesh.calc_element (i, j, k, element[0]);
+    element[0].get_plane (x_axis_minus, plane[0]);
+    get_plane_center (plane[0],  center[0]);
+    i = Nx-1;
+    j = 0;
+    k = 0;
+    ind = k + j * Nz + i * Ny * Nz;
+    mesh.calc_element (i, j, k, element[1]);
+    element[1].get_plane (x_axis_plus, plane[1]);
+    get_plane_center (plane[1],  center[1]);
+    dL = get_len(center[0], center[1]);
+    printf("\n dL = %f", dL);
+
+    t_double cdarcy = 0.008640;
+    K = Q*dL/(cdarcy*S*dP);
+
     printf("\n Kx = %f", K);
+    
     
     for (i=0;i<size;i++)
         {
@@ -833,7 +1425,7 @@ spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint
         }
     for (i=0;i<size;i++)
         printf("\n %.2f", b[i]);
-    
+ 
     for (i=0;i<size;i++)
         printf("\n %.2f", (*p)[i]);
     
@@ -841,17 +1433,224 @@ spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint
         printf("\n %.2f", q[i]);
 
     return 0;
-  }
+
+}
 */
+
+/*
+t_double upsc::upsc_permx_zcolumn (t_long Nx, t_long Ny, t_long i, t_long j, t_long k1, t_long k2, 
+                                   spv_float permx_, BS_SP(rs_mesh_iface) sp_mesh_iface)
+{
+    t_int k, xyz_ind; 
+    t_double dl, dL, a, A, sum, K;
+    
+    plane_t plane;
+    mesh_element3d element;
+    fpoint3d_t center[2];
+    
+    smart_ptr<bs_mesh_grdecl> sp_mesh(sp_mesh_iface, bs_static_cast());
+    mesh_grdecl mesh = sp_mesh->get_wrapped();
+    
+    v_float& permx = *permx_;
+    
+    dL = 0;
+    A = 0;
+    sum = 0;
+
+    for (k = k1; k <= k2; ++k)
+        {
+            xyz_ind = i + j * Nx + k * Nx * Ny;
+            
+            mesh.calc_element (i, j, k, element);
+            center[0] = element.get_center();
+            
+            element.get_plane (x_axis_minus, plane);
+            get_plane_center (plane, center[1]);
+
+            dl = get_len (center[0], center[1]);
+            dL += dl;
+            a = find_area_of_side (plane[0], plane[1], plane[2], plane[3]);
+            A += a;
+            sum += permx[xyz_ind]*a/dl;
+        }
+
+    dL /= k2 - k1 + 1;
+    K = sum*dL/A;
+    
+    return K;
+}
+*/
+spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint layers_, spv_float permz_, spv_uint actnum_, BS_SP(rs_mesh_iface) sp_mesh_iface)
+  {
+    t_int i, j, k, n, Nz_upsc, k1, k2, z1, ind, index;
+    t_long layer_size, new_cube_size;
+
+    t_double upsc_factor;
+    
+    spv_float new_permz = BS_KERNEL.create_object(v_float::bs_type());
+    v_float& permz = *permz_;
+    v_uint& actnum = *actnum_;
+    v_uint& layers = *layers_;
+    
+    smart_ptr<bs_mesh_grdecl> sp_mesh(sp_mesh_iface, bs_static_cast());
+    mesh_grdecl mesh = sp_mesh->get_wrapped();
+    
+    Nz_upsc = layers.size();
+    layer_size = Nx*Ny;
+    
+    // important: XYZ order
+    // index <-- (i, j, k)
+    // index = i + j*Nx + k*Nx*Ny;
+    
+    for (n = 0; n < Nz_upsc; ++n)
+        {
+            k1 = layers[n];
+
+            if (n == Nz_upsc-1)
+                k2 = Nz - 1;
+            else
+                k2 = layers[n+1] - 1;
+
+            //printf("\n k1 = %d k2 = %d", k1, k2);
+        
+            if (k1 != k2)
+                {
+                    z1 = k1*layer_size;
+                    for (j = 0; j < Ny; ++j)
+                        for (i = 0; i < Nx; ++i)
+                            {
+                                index = i + j * Nx + z1;
+                                //printf("\n index = %d pz = %f", index, permz[index]);
+
+                                // FIXME: in general case call function that finds isolated bodies
+                                for (k = k1; k <= k2; k++)
+                                    {
+                                        ind = i + j * Nx + k * Nx * Ny;
+                                        if (!actnum [ind])
+                                            {
+                                                permz[index] = 0;
+                                                break;
+                                            }
+                                    }
+                                if (permz[index])
+                                    {
+                                        upsc_factor = solve_pressure_zcolumn (Ny, Nz, i, j, k1, k2, sp_mesh_iface);
+                                        //printf("\n %d %d %d %d upsc_factor = %f", i, j, k1, k2, upsc_factor);
+                                        permz[index] *= upsc_factor;
+                                    }
+
+                            }
+                }   
+        }  
+
+    new_cube_size = Nz_upsc*layer_size;
+    new_permz->resize(new_cube_size);
+    
+    i = 0;
+    for ( n = 0; n < Nz_upsc; n++)
+        {
+            k = layers[n];
+            std::copy ( &permz[k*layer_size], &permz[(k+1)*layer_size], &(*new_permz)[i*layer_size] );
+            i++;
+        }
+
+    return new_permz;
+  }
+
+spv_float upsc::upscale_perm_block (t_int dir, t_long Nx, t_long Ny, t_long ux, t_long uy, t_long Nz, spv_uint layers_, spv_float ntg_, spv_uint actnum_, BS_SP(rs_mesh_iface) sp_mesh_iface)
+  {
+    t_int i, j, n, i1, i2, j1, j2, k1, k2, new_k, new_ind;
+    t_long new_Nx, new_Ny, new_Nz;
+    t_long new_layer_size, new_cube_size;
+
+    spv_float new_perm = BS_KERNEL.create_object(v_float::bs_type());
+    v_uint& actnum = *actnum_;
+    v_uint& layers = *layers_;
+    
+    smart_ptr<bs_mesh_grdecl> sp_mesh(sp_mesh_iface, bs_static_cast());
+    mesh_grdecl mesh = sp_mesh->get_wrapped();
+    
+    t_int rx, ry;
+    rx = Nx % ux;
+    ry = Ny % uy;
+    new_Nx = ceil(double(Nx)/double(ux));
+    new_Ny = ceil(double(Ny)/double(uy));
+    new_Nz = layers.size(); 
+    new_layer_size = new_Nx * new_Ny;
+    new_cube_size = new_Nx*new_Ny*new_Nz;
+    new_perm->resize(new_cube_size);
+    
+    // important: XYZ order
+    // index <-- (i, j, k)
+    // index = i + j*Nx + k*Nx*Ny;
+
+    new_k = 0;
+    for (n = 0; n < new_Nz; ++n)
+      {
+        k1 = layers[n];
+
+        if (n == new_Nz-1)
+            k2 = Nz;
+        else
+            k2 = layers[n+1] - 1;
+
+        //printf("\n k1 = %d k2 = %d", k1, k2);
+    
+        for (j = 0; j < new_Ny-1; ++j)
+          {
+            for (i = 0; i < new_Nx-1; ++i)
+              {
+                i1 = ux*i;
+                i2 = i1 + ux;
+                j1 = uy*j;
+                j2 = j1 + uy;
+                new_ind = i + j*new_Nx + new_k*new_layer_size;
+                (*new_perm)[new_ind] = solve_pressure_block (dir, Ny, Nz, i1, i2, j1, j2, k1, k2, ntg_, sp_mesh_iface);
+              }
+
+            i1 = ux*(new_Nx-1);
+            i2 = i1 + rx;
+            j1 = uy*j;
+            j2 = j1 + uy;
+            new_ind = new_Nx-1 + j*new_Nx + new_k*new_layer_size;
+            (*new_perm)[new_ind] = solve_pressure_block (dir, Ny, Nz, i1, i2, j1, j2, k1, k2, ntg_, sp_mesh_iface);
+
+          }
+            
+        for (i = 0; i < new_Nx-1; ++i)
+          {
+            i1 = ux*i;
+            i2 = i1 + ux;
+            j1 = uy*(new_Ny-1);
+            j2 = j1 + ry;
+            new_ind = i + (new_Ny-1)*new_Nx + new_k*new_layer_size;
+            (*new_perm)[new_ind] = solve_pressure_block (dir, Ny, Nz, i1, i2, j1, j2, k1, k2, ntg_, sp_mesh_iface);
+
+          }
+        
+        i1 = ux*(new_Nx-1);
+        i2 = i1 + rx;
+        j1 = uy*(new_Ny-1);
+        j2 = j1 + ry;
+        new_ind = new_Nx-1 + (new_Ny-1)*new_Nx + new_k*new_layer_size;
+        (*new_perm)[new_ind] = solve_pressure_block (dir, Ny, Nz, i1, i2, j1, j2, k1, k2, ntg_, sp_mesh_iface);
+        
+        new_k ++;
+      }
+    
+    return new_perm;
+  }
+
 
   bp::tuple
   upsc::king_method (t_long Nx, t_long Ny, t_long Nz, t_long Nz_upsc,
                             spv_float vol_, spv_float ntg_, spv_float poro_, spv_float permx_)
   {
     t_int i, k, n, k0, k1, k2, k3;
-    t_int layer_size, new_cube_size;
+    t_long layer_size, new_cube_size;
     t_float sum_dW;
     
+    v_float& vol = *vol_;
     v_float& ntg = *ntg_;
     v_float& poro = *poro_;
     v_float& permx = *permx_;
@@ -864,6 +1663,7 @@ spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint
     layer_map_t layer2mmap_it;
     layer_map_it_t lmit;
     
+    spv_float new_vol = BS_KERNEL.create_object(v_float::bs_type());
     spv_float new_ntg = BS_KERNEL.create_object(v_float::bs_type());
     spv_float new_poro = BS_KERNEL.create_object(v_float::bs_type());
     spv_float new_permx = BS_KERNEL.create_object(v_float::bs_type());
@@ -952,6 +1752,7 @@ spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint
     
     new_cube_size = Nz_upsc*layer_size;
 
+    new_vol->resize(new_cube_size);
     new_ntg->resize(new_cube_size);
     new_poro->resize(new_cube_size);
     new_permx->resize(new_cube_size);
@@ -961,6 +1762,7 @@ spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint
     for (lit=layers.begin();lit!=layers.end();lit++)
         {
             k = (*lit);
+            std::copy ( &vol[k*layer_size], &vol[(k+1)*layer_size], &(*new_vol)[i*layer_size] );
             std::copy ( &ntg[k*layer_size], &ntg[(k+1)*layer_size], &(*new_ntg)[i*layer_size] );
             std::copy ( &poro[k*layer_size], &poro[(k+1)*layer_size], &(*new_poro)[i*layer_size] );
             std::copy ( &permx[k*layer_size], &permx[(k+1)*layer_size], &(*new_permx)[i*layer_size] );
@@ -969,7 +1771,7 @@ spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint
 
     std::copy ( layers.begin(), layers.end(), &(*layers_v)[0] );
     
-    return bp::make_tuple (layers_v, new_ntg, new_poro, new_permx) ;
+    return bp::make_tuple (layers_v, new_vol, new_ntg, new_poro, new_permx) ;
   }
 
 #ifdef BSPY_EXPORTING_PLUGIN

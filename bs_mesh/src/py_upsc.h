@@ -33,7 +33,10 @@ namespace blue_sky
     .def ("__str__",                            &T::py_str)
     .def ("upscale_grid_zcolumn", &T::upscale_grid_zcolumn)
     .def ("upscale_grid", &T::upscale_grid)
+    .def ("upscale_cubes_xy", &T::upscale_cubes_xy)
+    .def ("upscale_sat_cube_xy", &T::upscale_sat_cube_xy)
     .def ("upscale_permz_zcolumn", &T::upscale_permz_zcolumn)
+    .def ("upscale_perm_block", &T::upscale_perm_block)
     .def ("upscale_saturation_cube", &T::upscale_saturation_cube)
     .def ("king_method", &T::king_method)
   PY_EXPORTER_END;                               
