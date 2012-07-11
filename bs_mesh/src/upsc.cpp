@@ -135,8 +135,6 @@ bp::tuple upsc::upscale_grid ( t_long Nx, t_long Ny, t_long Nz, t_long ux, t_lon
             else
                 k2 = Nz;
 
-            //printf("\n %d %d %d %d %d %d", Nx, Ny, new_Nx, new_Ny, ux, uy);
-
             // tops
             for (j=0; j<new_Ny-1; j++)
                 {
@@ -145,24 +143,20 @@ bp::tuple upsc::upscale_grid ( t_long Nx, t_long Ny, t_long Nz, t_long ux, t_lon
                             ind = 2*k1*layer_size + 4*uy*j*Nx;
                             (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*i];
                             (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(i+1) - 1];
-                            //printf("\n %d %d %d %d %d", i, j, ind,ind + 2*ux*i, ind + 2*ux*(i+1) - 1);
                         }
                     ind = 2*k1*layer_size + 4*uy*j*Nx;
                     (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(new_Nx-1)];
                     (*new_zcorn)[(k++)] = zcorn[ind + 2*Nx - 1];
-                    //printf("\n %d %d %d %d %d", i, j, ind, ind + 2*ux*(new_Nx-1), ind + 2*Nx - 1);
                     
                     for (i=0; i<new_Nx-1; i++)
                         {
                             ind = 2*k1*layer_size + (2*uy*(j+1)-1)*2*Nx;
                             (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*i];
                             (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(i+1) - 1];
-                           // printf("\n %d %d %d %d %d", i, j, ind, ind + 2*ux*i, ind + 2*ux*(i+1) - 1);
                         }
                     ind = 2*k1*layer_size + (2*uy*(j+1)-1)*2*Nx;
                     (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(new_Nx-1)];
                     (*new_zcorn)[(k++)] = zcorn[ind + 2*Nx - 1];
-                    //printf("\n %d %d %d %d %d", i, j, ind, ind + 2*ux*(new_Nx-1), ind + 2*Nx - 1);
                 }
             
             for (i=0; i<new_Nx-1; i++)
@@ -170,24 +164,20 @@ bp::tuple upsc::upscale_grid ( t_long Nx, t_long Ny, t_long Nz, t_long ux, t_lon
                     ind = 2*k1*layer_size + 4*uy*(new_Ny-1)*Nx;
                     (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*i];
                     (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(i+1) - 1];
-                    //printf("\n %d %d %d %d %d", i,j,ind,ind + 2*ux*i, ind + 2*ux*(i+1) - 1);
                 }
             ind = 2*k1*layer_size + 4*uy*(new_Ny-1)*Nx;
             (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(new_Nx-1)];
             (*new_zcorn)[(k++)] = zcorn[ind + 2*Nx - 1];
-           // printf("\n %d %d %d %d %d", i,j,ind,ind + 2*Nx - 1, ind + 2*Nx - 1);
             
             for (i=0; i<new_Nx-1; i++)
                 {
                     ind = 2*k1*layer_size + (2*Ny-1)*2*Nx;
                     (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*i];
                     (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(i+1) - 1];
-                    //printf("\n %d %d %d %d %d", i,j,ind,ind + 2*ux*i, ind + 2*ux*(i+1) - 1);
                 }
             ind = 2*k1*layer_size + (2*Ny-1)*2*Nx;
             (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(new_Nx - 1)];
             (*new_zcorn)[(k++)] = zcorn[ind + 2*Nx - 1];
-            //printf("\n %d %d %d %d %d", i,j,ind,ind + 2*Nx - 1, ind + 2*Nx - 1);
             
             // bottoms
             for (j=0; j<new_Ny-1; j++)
@@ -197,24 +187,20 @@ bp::tuple upsc::upscale_grid ( t_long Nx, t_long Ny, t_long Nz, t_long ux, t_lon
                             ind = (2*k2-1)*layer_size + 4*uy*j*Nx;
                             (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*i];
                             (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(i+1) - 1];
-                            //printf("\n %d %d %d %d %d", i, j, ind,ind + 2*ux*i, ind + 2*ux*(i+1) - 1);
                         }
                     ind = (2*k2-1)*layer_size + 4*uy*j*Nx;
                     (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(new_Nx-1)];
                     (*new_zcorn)[(k++)] = zcorn[ind + 2*Nx - 1];
-                    //printf("\n %d %d %d %d %d", i, j, ind, ind + 2*ux*(new_Nx-1), ind + 2*Nx - 1);
                     
                     for (i=0; i<new_Nx-1; i++)
                         {
                             ind = (2*k2-1)*layer_size + (2*uy*(j+1)-1)*2*Nx;
                             (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*i];
                             (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(i+1) - 1];
-                           // printf("\n %d %d %d %d %d", i, j, ind, ind + 2*ux*i, ind + 2*ux*(i+1) - 1);
                         }
                     ind = (2*k2-1)*layer_size + (2*uy*(j+1)-1)*2*Nx;
                     (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(new_Nx-1)];
                     (*new_zcorn)[(k++)] = zcorn[ind + 2*Nx - 1];
-                    //printf("\n %d %d %d %d %d", i, j, ind, ind + 2*ux*(new_Nx-1), ind + 2*Nx - 1);
                 }
             
             for (i=0; i<new_Nx-1; i++)
@@ -222,26 +208,21 @@ bp::tuple upsc::upscale_grid ( t_long Nx, t_long Ny, t_long Nz, t_long ux, t_lon
                     ind = (2*k2-1)*layer_size + 4*uy*(new_Ny-1)*Nx;
                     (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*i];
                     (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(i+1) - 1];
-                    //printf("\n %d %d %d %d %d", i,j,ind,ind + 2*ux*i, ind + 2*ux*(i+1) - 1);
                 }
             ind = (2*k2-1)*layer_size + 4*uy*(new_Ny-1)*Nx;
             (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(new_Nx-1)];
             (*new_zcorn)[(k++)] = zcorn[ind + 2*Nx - 1];
-           // printf("\n %d %d %d %d %d", i,j,ind,ind + 2*Nx - 1, ind + 2*Nx - 1);
             
             for (i=0; i<new_Nx-1; i++)
                 {
                     ind = (2*k2-1)*layer_size + (2*Ny-1)*2*Nx;
                     (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*i];
                     (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(i+1) - 1];
-                    //printf("\n %d %d %d %d %d", i,j,ind,ind + 2*ux*i, ind + 2*ux*(i+1) - 1);
                 }
             ind = (2*k2-1)*layer_size + (2*Ny-1)*2*Nx;
             (*new_zcorn)[(k++)] = zcorn[ind + 2*ux*(new_Nx - 1)];
             (*new_zcorn)[(k++)] = zcorn[ind + 2*Nx - 1];
-            //printf("\n %d %d %d %d %d", i,j,ind,ind + 2*Nx - 1, ind + 2*Nx - 1);
         }
-   //printf("\n %d %d %d %d", new_coord_size, new_zcorn_size, (*new_coord).size(), (*new_zcorn).size());
    return bp::make_tuple (new_coord, new_zcorn); 
 }
 
@@ -593,7 +574,6 @@ bp::tuple upsc::upscale_cubes_xy ( t_long Nx, t_long Ny, t_long Nz, t_long ux, t
               {
                 ind  = ux*i + uy*j*Nx + k*layer_size;
                 new_ind = i + j*new_Nx + k*new_layer_size;
-                //printf("\n ind=%d newind=%d", ind, new_ind);
 
                 vol_sum = 0;
                 ntg_vol_sum = 0;
@@ -604,7 +584,6 @@ bp::tuple upsc::upscale_cubes_xy ( t_long Nx, t_long Ny, t_long Nz, t_long ux, t
                     for (ii = 0; ii < ux; ii++)
                       {
                         index = ind + ii;
-                        //printf("\n %d %f", index, ntg[index]);
                         vol_sum += vol[index];
                         ntg_vol_sum += ntg[index]*vol[index];
                         poro_ntg_vol_sum += poro[index]*ntg[index]*vol[index];
@@ -667,7 +646,6 @@ bp::tuple upsc::upscale_cubes_xy ( t_long Nx, t_long Ny, t_long Nz, t_long ux, t
           {
             ind  = ux*i + uy*(new_Ny-1)*Nx + k*layer_size;
             new_ind = i + (new_Ny-1)*new_Nx + k*new_layer_size;
-            //printf("\n ind=%d newind=%d", ind, new_ind);
 
             vol_sum = 0;
             ntg_vol_sum = 0;
@@ -678,7 +656,6 @@ bp::tuple upsc::upscale_cubes_xy ( t_long Nx, t_long Ny, t_long Nz, t_long ux, t
                 for (ii = 0; ii < ux; ii++)
                   {
                     index = ind + ii;
-                    //printf("\n %d", index);
                     vol_sum += vol[index];
                     ntg_vol_sum += ntg[index]*vol[index];
                     poro_ntg_vol_sum += poro[index]*ntg[index]*vol[index];
@@ -833,10 +810,6 @@ t_double upsc::solve_pressure_zcolumn (t_long Ny, t_long Nz, t_long i, t_long j,
     solver->setup (tran);
     solver->solve (tran, rhs, p);
 
-    //for (k=0;k<size;k++)
-    //    printf("\n p[%d] = %f", k, (*p)[k]);
-
-    //index = k1 + j * Nz + i * Ny * Nz;
     dp = (p_left - (*p)[0]);
     dP = ( (p_left + (*p)[0])/2 - ((*p)[size-1] + p_right)/2 );
     
@@ -861,8 +834,6 @@ t_double upsc::solve_pressure_zcolumn (t_long Ny, t_long Nz, t_long i, t_long j,
 
     K = (dp/dl)/(dP/dL);
 
-    //printf("\n dp=%e dl=%e dP=%e dL=%e K=%e", dp, dl, dP, dL, K);
-    
     return K;
 }
 
@@ -905,7 +876,6 @@ t_double upsc::solve_pressure_block (t_int direction, t_long Ny, t_long Nz, t_lo
 
     // direction dir along_dim1->X (2->Y, 3->Z) 
  
-    //ind = 0;
     for (i = i1; i < i2; ++i)
         for (j = j1; j < j2; ++j)
             for (k = k1; k < k2; ++k)
@@ -927,14 +897,12 @@ t_double upsc::solve_pressure_block (t_int direction, t_long Ny, t_long Nz, t_lo
                         tz = mesh.calc_tran(ext_ind[0], ext_ind[1], plane[0], center[0], center[1], along_dim3, &plane[1]);
                         
                         // Z-
-                        //index = ext_ind[0] + ext_ind[1]*size;
                         index = ind[0] + ind[1]*size;
                         A[index] = tz;
                         index += 1;
                         A[index] -= tz;
                         
                         // Z+
-                        //index = ext_ind[1] + ext_ind[0]*size;
                         index = ind[1] + ind[0]*size;
                         A[index] = tz;
                         index -= 1;
@@ -953,18 +921,14 @@ t_double upsc::solve_pressure_block (t_int direction, t_long Ny, t_long Nz, t_lo
                         ty = mesh.calc_tran(ext_ind[0], ext_ind[1], plane[0], center[0], center[1], along_dim2, &plane[1]);          
                         
                         // Y- 
-                        //index = ext_ind[0] + ext_ind[1]*size;
                         index = ind[0] + ind[1]*size;
                         A[index] = ty;
-                        //index += Nz;
                         index += nz;
                         A[index] -= ty;
                         
                         // Y+
-                        //index = ext_ind[1] + ext_ind[0]*size;
                         index = ind[1] + ind[0]*size;
                         A[index] = ty;
-                        //index -= Nz;
                         index -= nz;
                         A[index] -= ty;
                     }
@@ -981,18 +945,14 @@ t_double upsc::solve_pressure_block (t_int direction, t_long Ny, t_long Nz, t_lo
                         tx = mesh.calc_tran(ext_ind[0], ext_ind[1], plane[0], center[0], center[1], along_dim1, &plane[1]);
                         
                         // X-
-                        //index = ext_ind[0] + ext_ind[1]*size;
                         index = ind[0] + ind[1]*size;
                         A[index] = tx;
-                        //index += Ny * Nz;
                         index += ny*nz;
                         A[index] -= tx;
                                                 
                         // X+
-                        //index = ext_ind[1] + ext_ind[0]*size;
                         index = ind[1] + ind[0]*size;
                         A[index] = tx;
-                        //index -= Ny * Nz;
                         index -= ny*nz;
                         A[index] -= tx;
 
@@ -1004,8 +964,6 @@ t_double upsc::solve_pressure_block (t_int direction, t_long Ny, t_long Nz, t_lo
                         {
                            element[0].get_plane (x_axis_minus, plane[0]);
                            tx = mesh.calc_tran_boundary (ext_ind[0], plane[0], center[0], along_dim1);
-                           //b[ext_ind[0]] = -tx*p_left;
-                           //index  =  ext_ind[0] + ext_ind[0]*size;
                            b[ind[0]] = -tx*p_left;
                            index  =  ind[0] + ind[0]*size;
                            A[index] -= tx;          
@@ -1014,8 +972,6 @@ t_double upsc::solve_pressure_block (t_int direction, t_long Ny, t_long Nz, t_lo
                         {  
                            element[0].get_plane (x_axis_plus, plane[0]);
                            tx = mesh.calc_tran_boundary (ext_ind[0], plane[0], center[0], along_dim1);
-                           //b[ext_ind[0]] = -tx*p_right;
-                           //index  =  ext_ind[0] + ext_ind[0]*size;
                            b[ind[0]] = -tx*p_right;
                            index  =  ind[0] + ind[0]*size;
                            A[index] -= tx;          
@@ -1027,8 +983,6 @@ t_double upsc::solve_pressure_block (t_int direction, t_long Ny, t_long Nz, t_lo
                         {
                            element[0].get_plane (y_axis_minus, plane[0]);
                            ty = mesh.calc_tran_boundary (ext_ind[0], plane[0], center[0], along_dim2);
-                           //b[ext_ind[0]] = -ty*p_left;
-                           //index  =  ext_ind[0] + ext_ind[0]*size;
                            b[ind[0]] = -ty*p_left;
                            index  =  ind[0] + ind[0]*size;
                            A[index] -= ty;          
@@ -1037,8 +991,6 @@ t_double upsc::solve_pressure_block (t_int direction, t_long Ny, t_long Nz, t_lo
                         {  
                            element[0].get_plane (y_axis_plus, plane[0]);
                            ty = mesh.calc_tran_boundary (ext_ind[0], plane[0], center[0], along_dim2);
-                           //b[ext_ind[0]] = -ty*p_right;
-                           //index  =  ext_ind[0] + ext_ind[0]*size;
                            b[ind[0]] = -ty*p_right;
                            index  =  ind[0] + ind[0]*size;
                            A[index] -= ty;          
@@ -1050,8 +1002,6 @@ t_double upsc::solve_pressure_block (t_int direction, t_long Ny, t_long Nz, t_lo
                         {
                            element[0].get_plane (z_axis_minus, plane[0]);
                            tz = mesh.calc_tran_boundary (ext_ind[0], plane[0], center[0], along_dim3);
-                           //b[ext_ind[0]] = -tz*p_left;
-                           //index  =  ext_ind[0] + ext_ind[0]*size;
                            b[ind[0]] = -tz*p_left;
                            index  =  ind[0] + ind[0]*size;
                            A[index] -= tz;          
@@ -1060,8 +1010,6 @@ t_double upsc::solve_pressure_block (t_int direction, t_long Ny, t_long Nz, t_lo
                         {  
                            element[0].get_plane (z_axis_plus, plane[0]);
                            tz = mesh.calc_tran_boundary (ext_ind[0], plane[0], center[0], along_dim3);
-                           //b[ext_ind[0]] = -tz*p_right;
-                           //index  =  ext_ind[0] + ext_ind[0]*size;
                            b[ind[0]] = -tz*p_right;
                            index  =  ind[0] + ind[0]*size;
                            A[index] -= tz;          
@@ -1072,9 +1020,6 @@ t_double upsc::solve_pressure_block (t_int direction, t_long Ny, t_long Nz, t_lo
 
     solver->setup (tran);
     solver->solve (tran, rhs, p);
-
-    //for (i=0;i<size;i++)
-      //  printf("\n p[%d]=%f", i, (*p)[i]);
 
     // Q=sum(q) q=T*dp
     // Q=k*S*dP/dL
@@ -1143,9 +1088,6 @@ t_double upsc::solve_pressure_block (t_int direction, t_long Ny, t_long Nz, t_lo
                 Q += tz*dP;
               }
       }
-    
-    //printf("\n S = %f Q = %f", S, Q);
-    //dP = ( (p_left + (*p)[0])/2 - ((*p)[Ny*Nz] + p_right)/2 );
 
     i = i1; j = j1; k = k1;
     if (direction == 1)
@@ -1200,286 +1142,13 @@ t_double upsc::solve_pressure_block (t_int direction, t_long Ny, t_long Nz, t_lo
         dP -= ((*p)[index] + p_right)/2;
       }
 
-    //printf("\n dP = %f", dP);
     dL = get_len(center[0], center[1]);
-    //printf("\n dL = %f", dL);
     K = Q*dL/(cdarcy*S*dP);
-    //printf("\n K = %f", K);
     
     return K;
 
 }
 
-
-/*
-t_double upsc::solve_pressure (t_long Nx, t_long Ny, t_long Nz, spv_uint layers, spv_float perm_, BS_SP(rs_mesh_iface) sp_mesh_iface)
-{
-    t_long size, i, j, k, ind, ext_ind[2], index;
-    plane_t plane[2];
-    mesh_element3d element[2];
-    fpoint3d_t center[2];
-
-    t_double tz, ty, tx;
-    t_double p_left = 1, p_right = 0;
-    t_double dL, dP, S, K, Q;
-
-    spv_float p = BS_KERNEL.create_object(v_float::bs_type());
-    spv_float rhs = BS_KERNEL.create_object(v_float::bs_type());
-    spv_float flux = BS_KERNEL.create_object(v_float::bs_type());
-    spv_float tran_vals = BS_KERNEL.create_object(v_float::bs_type());
-    sp_dens_mtx_t tran = BS_KERNEL.create_object("dens_matrix");
-    sp_blu_solver_t solver = BS_KERNEL.create_object("blu_solver");
-
-    size = Nx*Ny*Nz;
-    
-    p->resize(size);
-    rhs->resize(size);
-    flux->resize(size);
-
-    tran->init(size, size, 60);
-    tran_vals = tran->get_values();
-    
-    v_float& A = *tran_vals;
-    v_float& b = *rhs;
-    v_float& q = *flux;
-    v_float& perm = *perm_;
-
-    smart_ptr<bs_mesh_grdecl> sp_mesh(sp_mesh_iface, bs_static_cast());
-    mesh_grdecl mesh = sp_mesh->get_wrapped();
-    
-    // important: ZYX order
-
-    // direction dir along_dim1->X (2->Y, 3->Z) 
-
-    ind = 0;
-    for (i = 0; i < Nx; ++i)
-        for (j = 0; j < Ny; ++j)
-            for (k = 0; k < Nz; ++k, ++ind)
-              {
-                ext_ind[0] = k + j * Nz + i * Ny * Nz;
-                mesh.calc_element (i, j, k, element[0]);
-                center[0] = element[0].get_center();
-                
-                // TRANZ /////////////////////////////////////////////////////////////////////////////////////////////
-
-                if (k!=Nz-1)
-                    {
-                        ext_ind[1] = ext_ind[0] + 1;
-                        mesh.calc_element (i, j, k + 1, element[1]);
-                        element[0].get_plane (z_axis_plus, plane[0]);
-                        element[1].get_plane (z_axis_minus, plane[1]);
-                        center[1] = element[1].get_center();
-                        tz = mesh.calc_tran(ext_ind[0], ext_ind[1], plane[0], center[0], center[1], along_dim3, &plane[1]);
-                        
-                        // Z-
-                        index = ext_ind[0] + ext_ind[1]*size;
-                        A[index] = tz;
-                        index += 1;
-                        A[index] -= tz;
-                        
-                        // Z+
-                        index = ext_ind[1] + ext_ind[0]*size;
-                        A[index] = tz;
-                        index -= 1;
-                        A[index] -= tz;
-                    }
-                
-                // TRANY /////////////////////////////////////////////////////////////////////////////////////////////
-                if (j != Ny-1)
-                    {
-                        ext_ind[1] = ext_ind[0] + Nz;
-                        mesh.calc_element (i, j + 1, k, element[1]);
-                        element[0].get_plane (y_axis_plus, plane[0]);
-                        element[1].get_plane (y_axis_minus, plane[1]);
-                        center[1] = element[1].get_center();
-                        ty = mesh.calc_tran(ext_ind[0], ext_ind[1], plane[0], center[0], center[1], along_dim2, &plane[1]);          
-                        
-                        // Y- 
-                        index = ext_ind[0] + ext_ind[1]*size;
-                        A[index] = ty;
-                        index += Nz;
-                        A[index] -= ty;
-                        
-                        // Y+
-                        index = ext_ind[1] + ext_ind[0]*size;
-                        A[index] = ty;
-                        index -= Nz;
-                        A[index] -= ty;
-                    }
-
-                // TRANX /////////////////////////////////////////////////////////////////////////////////////////////
-                if (i == 0)
-                    {
-                       element[0].get_plane (x_axis_minus, plane[0]);
-                       tx = mesh.calc_tran_boundary (ext_ind[0], plane[0], center[0], along_dim1);
-                       b[ext_ind[0]] = -tx*p_left;
-                       index  =  ext_ind[0] + ext_ind[0]*size;
-                       A[index] -= tx;          
-                    }
-
-                if (i != Nx-1)
-                    {
-                        ext_ind[1] = ext_ind[0] + Ny * Nz;
-                        mesh.calc_element (i + 1, j, k, element[1]);
-                        element[0].get_plane (x_axis_plus, plane[0]);
-                        element[1].get_plane (x_axis_minus, plane[1]);
-                        center[1] = element[1].get_center();
-                        tx = mesh.calc_tran(ext_ind[0], ext_ind[1], plane[0], center[0], center[1], along_dim1, &plane[1]);
-                        
-                        // X-
-                        index = ext_ind[0] + ext_ind[1]*size;
-                        A[index] = tx;
-                        index += Ny * Nz;
-                        A[index] -= tx;
-                                                
-                        // X+
-                        index = ext_ind[1] + ext_ind[0]*size;
-                        A[index] = tx;
-                        index -= Ny * Nz;
-                        A[index] -= tx;
-
-                    }
-                
-                if (i == Nx-1)
-                    {  
-                       element[0].get_plane (x_axis_plus, plane[0]);
-                       tx = mesh.calc_tran_boundary (ext_ind[0], plane[0], center[0], along_dim1);
-                       b[ext_ind[0]] = -tx*p_right;
-                       index  =  ext_ind[0] + ext_ind[0]*size;
-                       A[index] -= tx;          
-                    }
-
-              }
-
-    solver->setup (tran);
-    solver->solve (tran, rhs, p);
-
-    Q = 0;
-    S = 0;
-    i = 0;
-    for (j = 0; j < Ny; ++j)
-        for (k = 0; k < Nz; ++k)
-            {
-                ind = k + j * Nz;  //+ i * Ny * Nz;
-                mesh.calc_element (i, j, k, element[0]);
-                element[0].get_plane (x_axis_minus, plane[0]);
-                center[0] = element[0].get_center ();
-                get_plane_center (plane[0],  center[1]);
-                
-                // FIXME: q=k*S*dP/dL -> q=T*dP
-                // FIXME: for permx and permy don't forget NTG! 
-                
-                S += find_area_of_side (plane[0][0], plane[0][1], plane[0][2], plane[0][3]);
-                
-                //q[ind] = S; 
-                //q[ind] *= perm[ind];
-                
-                tx = mesh.calc_tran_boundary (ext_ind[0], plane[0], center[0], along_dim1);
-                dP = (p_left - (*p)[ind]);
-               
-                q[ind] = tx*dP;
-                printf("\n ind=%d tx=%f dp=%f q=%f", ind, tx, dP, q[ind]);
-                
-                //dL = get_len(center[0], center[1]);
-                //printf("\n dL = %f", dL);
-
-                //q[ind] /= 2*dL;
-
-                Q += q[ind];                        
-            }
-
-    printf("\n S = %f Q = %f", S, Q);
-    dP = ( (p_left + (*p)[0])/2 - ((*p)[Ny*Nz] + p_right)/2 );
-    printf("\n dP = %f", dP);
-    //printf("\n dP = %f, dL = %f, S = %f", dP, dL*2*Nx, S*Ny*Nz);
-    //K = q[0]*dL*2*Nx/(S*Ny*Nz*dP);
-
-    i = 0;
-    j = 0;
-    k = 0;
-    ind = k + j * Nz + i * Ny * Nz;
-    mesh.calc_element (i, j, k, element[0]);
-    element[0].get_plane (x_axis_minus, plane[0]);
-    get_plane_center (plane[0],  center[0]);
-    i = Nx-1;
-    j = 0;
-    k = 0;
-    ind = k + j * Nz + i * Ny * Nz;
-    mesh.calc_element (i, j, k, element[1]);
-    element[1].get_plane (x_axis_plus, plane[1]);
-    get_plane_center (plane[1],  center[1]);
-    dL = get_len(center[0], center[1]);
-    printf("\n dL = %f", dL);
-
-    t_double cdarcy = 0.008640;
-    K = Q*dL/(cdarcy*S*dP);
-
-    printf("\n Kx = %f", K);
-    
-    
-    for (i=0;i<size;i++)
-        {
-            printf("\n");
-            for(j=0;j<size;j++)
-                printf("%.2f\t", A[i*size+j]);
-        }
-    for (i=0;i<size;i++)
-        printf("\n %.2f", b[i]);
- 
-    for (i=0;i<size;i++)
-        printf("\n %.2f", (*p)[i]);
-    
-    for (i=0;i<size;i++)
-        printf("\n %.2f", q[i]);
-
-    return 0;
-
-}
-*/
-
-/*
-t_double upsc::upsc_permx_zcolumn (t_long Nx, t_long Ny, t_long i, t_long j, t_long k1, t_long k2, 
-                                   spv_float permx_, BS_SP(rs_mesh_iface) sp_mesh_iface)
-{
-    t_int k, xyz_ind; 
-    t_double dl, dL, a, A, sum, K;
-    
-    plane_t plane;
-    mesh_element3d element;
-    fpoint3d_t center[2];
-    
-    smart_ptr<bs_mesh_grdecl> sp_mesh(sp_mesh_iface, bs_static_cast());
-    mesh_grdecl mesh = sp_mesh->get_wrapped();
-    
-    v_float& permx = *permx_;
-    
-    dL = 0;
-    A = 0;
-    sum = 0;
-
-    for (k = k1; k <= k2; ++k)
-        {
-            xyz_ind = i + j * Nx + k * Nx * Ny;
-            
-            mesh.calc_element (i, j, k, element);
-            center[0] = element.get_center();
-            
-            element.get_plane (x_axis_minus, plane);
-            get_plane_center (plane, center[1]);
-
-            dl = get_len (center[0], center[1]);
-            dL += dl;
-            a = find_area_of_side (plane[0], plane[1], plane[2], plane[3]);
-            A += a;
-            sum += permx[xyz_ind]*a/dl;
-        }
-
-    dL /= k2 - k1 + 1;
-    K = sum*dL/A;
-    
-    return K;
-}
-*/
 spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint layers_, spv_float permz_, spv_uint actnum_, BS_SP(rs_mesh_iface) sp_mesh_iface)
   {
     t_int i, j, k, n, Nz_upsc, k1, k2, z1, ind, index;
@@ -1511,8 +1180,6 @@ spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint
             else
                 k2 = layers[n+1] - 1;
 
-            //printf("\n k1 = %d k2 = %d", k1, k2);
-        
             if (k1 != k2)
                 {
                     z1 = k1*layer_size;
@@ -1520,9 +1187,8 @@ spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint
                         for (i = 0; i < Nx; ++i)
                             {
                                 index = i + j * Nx + z1;
-                                //printf("\n index = %d pz = %f", index, permz[index]);
 
-                                // FIXME: in general case call function that finds isolated bodies
+                                // in general case call function that finds isolated bodies
                                 for (k = k1; k <= k2; k++)
                                     {
                                         ind = i + j * Nx + k * Nx * Ny;
@@ -1535,7 +1201,6 @@ spv_float upsc::upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, spv_uint
                                 if (permz[index])
                                     {
                                         upsc_factor = solve_pressure_zcolumn (Ny, Nz, i, j, k1, k2, sp_mesh_iface);
-                                        //printf("\n %d %d %d %d upsc_factor = %f", i, j, k1, k2, upsc_factor);
                                         permz[index] *= upsc_factor;
                                     }
 
@@ -1583,6 +1248,8 @@ spv_float upsc::upscale_perm_block (t_int dir, t_long Nx, t_long Ny, t_long ux, 
     // important: XYZ order
     // index <-- (i, j, k)
     // index = i + j*Nx + k*Nx*Ny;
+    
+    // FIXME: call function that finds isolated bodies
 
     new_k = 0;
     for (n = 0; n < new_Nz; ++n)
@@ -1594,8 +1261,6 @@ spv_float upsc::upscale_perm_block (t_int dir, t_long Nx, t_long Ny, t_long ux, 
         else
             k2 = layers[n+1] - 1;
 
-        //printf("\n k1 = %d k2 = %d", k1, k2);
-    
         for (j = 0; j < new_Ny-1; ++j)
           {
             for (i = 0; i < new_Nx-1; ++i)

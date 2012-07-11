@@ -73,7 +73,6 @@ namespace blue_sky
       
       virtual spv_float upscale_sat_cube_xy (t_long Nx, t_long Ny, t_long ux, t_long uy, t_long Nz, 
                                              spv_uint layers_, spv_float vol_, spv_float ntg_, spv_float poro_, spv_float sat_);
-      //virtual t_int upscale_perm (t_long Nx, t_long Ny, t_long Nz, spv_uint layers, spv_float perm, BS_SP(rs_mesh_iface) mesh);
       
       virtual spv_float upscale_permz_zcolumn (t_long Nx, t_long Ny, t_long Nz, 
                                               spv_uint layers, spv_float permz_, 
@@ -109,9 +108,6 @@ namespace blue_sky
 
       t_double solve_pressure_block (t_int dir, t_long Ny, t_long Nz, t_long i1, t_long i2, t_long j1, t_long j2, t_long k1, t_long k2, spv_float ntg_, BS_SP(rs_mesh_iface) sp_mesh_iface);
       
-      //t_double upsc_permx_zcolumn (t_long Nx, t_long Ny, t_long i, t_long j, t_long k1, t_long k2, spv_float permx_, BS_SP(rs_mesh_iface) sp_mesh_iface);
-      
-  
       // ------------------------------
       // VARIABLES
       // ------------------------------
