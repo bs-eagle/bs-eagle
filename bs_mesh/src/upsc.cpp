@@ -1143,7 +1143,10 @@ t_double upsc::solve_pressure_block (t_int direction, t_long Ny, t_long Nz, t_lo
       }
 
     dL = get_len(center[0], center[1]);
-    K = Q*dL/(cdarcy*S*dP);
+    if (S < EPSILON || dP < EPSILON)
+        K = 0;
+    else
+        K = Q*dL/(cdarcy*S*dP);
     
     return K;
 
@@ -1272,34 +1275,42 @@ spv_float upsc::upscale_perm_block (t_int dir, t_long Nx, t_long Ny, t_long ux, 
                 new_ind = i + j*new_Nx + new_k*new_layer_size;
                 (*new_perm)[new_ind] = solve_pressure_block (dir, Ny, Nz, i1, i2, j1, j2, k1, k2, ntg_, sp_mesh_iface);
               }
-
-            i1 = ux*(new_Nx-1);
-            i2 = i1 + rx;
-            j1 = uy*j;
-            j2 = j1 + uy;
-            new_ind = new_Nx-1 + j*new_Nx + new_k*new_layer_size;
-            (*new_perm)[new_ind] = solve_pressure_block (dir, Ny, Nz, i1, i2, j1, j2, k1, k2, ntg_, sp_mesh_iface);
-
-          }
             
-        for (i = 0; i < new_Nx-1; ++i)
-          {
-            i1 = ux*i;
-            i2 = i1 + ux;
-            j1 = uy*(new_Ny-1);
-            j2 = j1 + ry;
-            new_ind = i + (new_Ny-1)*new_Nx + new_k*new_layer_size;
-            (*new_perm)[new_ind] = solve_pressure_block (dir, Ny, Nz, i1, i2, j1, j2, k1, k2, ntg_, sp_mesh_iface);
-
+            if (rx)
+              {
+                i1 = ux*(new_Nx-1);
+                i2 = i1 + rx;
+                j1 = uy*j;
+                j2 = j1 + uy;
+                new_ind = new_Nx-1 + j*new_Nx + new_k*new_layer_size;
+                (*new_perm)[new_ind] = solve_pressure_block (dir, Ny, Nz, i1, i2, j1, j2, k1, k2, ntg_, sp_mesh_iface);
+              }
           }
-        
-        i1 = ux*(new_Nx-1);
-        i2 = i1 + rx;
-        j1 = uy*(new_Ny-1);
-        j2 = j1 + ry;
-        new_ind = new_Nx-1 + (new_Ny-1)*new_Nx + new_k*new_layer_size;
-        (*new_perm)[new_ind] = solve_pressure_block (dir, Ny, Nz, i1, i2, j1, j2, k1, k2, ntg_, sp_mesh_iface);
-        
+           
+        if (ry)
+          {
+            for (i = 0; i < new_Nx-1; ++i)
+              {
+                i1 = ux*i;
+                i2 = i1 + ux;
+                j1 = uy*(new_Ny-1);
+                j2 = j1 + ry;
+                new_ind = i + (new_Ny-1)*new_Nx + new_k*new_layer_size;
+                (*new_perm)[new_ind] = solve_pressure_block (dir, Ny, Nz, i1, i2, j1, j2, k1, k2, ntg_, sp_mesh_iface);
+
+              }
+
+            if (rx)
+              {
+                i1 = ux*(new_Nx-1);
+                i2 = i1 + rx;
+                j1 = uy*(new_Ny-1);
+                j2 = j1 + ry;
+                new_ind = new_Nx-1 + (new_Ny-1)*new_Nx + new_k*new_layer_size;
+                (*new_perm)[new_ind] = solve_pressure_block (dir, Ny, Nz, i1, i2, j1, j2, k1, k2, ntg_, sp_mesh_iface);
+              }
+          }
+
         new_k ++;
       }
     
