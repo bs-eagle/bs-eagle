@@ -5,7 +5,7 @@
 #include "bs_mesh_stdafx.h"
 #include "mesh_grdecl.h"
 #include <iterator>
-
+#include <conio.h>
 using namespace grd_ecl;
 #ifndef PURE_MESH
   using namespace blue_sky;
@@ -246,7 +246,6 @@ void mesh_grdecl::check_data() const
     bs_throw_exception ("COORD array is not initialized");
   if (!zcorn_array)
     bs_throw_exception ("ZCORN array is not initialized");
-
 
   // 1. check if all cells are convex
 
@@ -2292,6 +2291,1332 @@ int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr
   return 0;
 }
 
+ 
+
+ void saveNcub(double *gogo, double *Ncubs,long flag, double *mdpoints,long &cubFlag)
+{
+	Ncubs[cubFlag]=mdpoints[long(flag/3)];
+	Ncubs[cubFlag+1]=gogo[1];
+	Ncubs[cubFlag+2]=gogo[2];
+	Ncubs[cubFlag+3]=gogo[3];
+}
+
+	//Функция поиска первого пересечения.
+double* mesh_grdecl::search1per(double ncub[],double *curve,double d[], struct tri *ara,  BS_SP (table_iface) table,std::vector<fpoint3d> v_traj,std::vector<t_double> &v_md)//поиск первого пересечения.
+{
+  element_t element;
+	//for(ara->keys1=0;ara->keys1<=LEN*3;ara->keys1+=3)
+	for(ara->keys1=0;ara->keys1<=table->get_n_rows();ara->keys1+=1)
+	{
+		for(ara->i=0;ara->i<ny;ara->i++)
+	{
+		for(ara->j=0;ara->j<nx;ara->j++)
+		{
+		  calc_element (ara->j, ara->i, 0, element);
+          mesh_element3d::corners_t corns = element.get_corners();
+		  ara->as1[0]=corns[0].x;
+		  ara->as1[1]=corns[0].y;
+		  ara->as1[2]=corns[0].z;
+		  ara->as1[3]=corns[1].x;
+		  ara->as1[4]=corns[1].y;
+		  ara->as1[5]=corns[1].z;
+		  ara->as1[6]=corns[3].x;
+		  ara->as1[7]=corns[3].y;
+		  ara->as1[8]=corns[3].z;
+		  ara->as1[9]=corns[2].x;
+		  ara->as1[10]=corns[2].y;
+		  ara->as1[11]=corns[2].z;
+
+		/*	for(ara->k=0;ara->k<12;ara->k+=3)
+			{
+				ara->as1[ara->k]=ncub[ara->k]+d[0]*ara->j;
+				ara->as1[ara->k+1]=ncub[ara->k+1]+d[1]*ara->i;
+			    ara->as1[ara->k+2]=ncub[ara->k+2]+d[2]*Nz;
+			}*/
+			ara->points1=res(v_traj,ara->as1,ara->keys1,1,ara);
+			if(ara->points1!=NULL)
+			{
+				ara->ret[0]=ara->keys1;
+				ara->ret[1]=ara->j;//номер куба по x
+				ara->ret[2]=ara->i;//номер куба по y
+				ara->ret[3]=0;//номер куба по z
+
+				ara->ret[4]=ara->points1[0];//координата x пересечения
+				ara->ret[5]=ara->points1[1];//координата y пересечения
+				ara->ret[6]=ara->points1[2];//координата z пересечения
+				//ara->ret[7]=grd_ecl::sq(curve,ara->points1,ara->keys1);
+				ara->ret[8]=ara->points1[3];//тип пересечения
+				return ara->ret;
+			}
+				ara->as1[3]=ara->as1[9];
+				ara->as1[4]=ara->as1[10];
+				ara->as1[5]=ara->as1[11];
+			ara->points1=res(v_traj,ara->as1,ara->keys1,1,ara);
+			if(ara->points1!=NULL)
+			{
+				ara->ret[0]=ara->keys1;
+				ara->ret[1]=ara->j;//номер куба по x 
+				ara->ret[2]=ara->i;//номер куба по y
+				ara->ret[3]=0;//номер куба по z
+
+				ara->ret[4]=ara->points1[0];//координата x пересечения
+				ara->ret[5]=ara->points1[1];//координата y пересечения
+				ara->ret[6]=ara->points1[2];//координата z пересечения
+				//ara->ret[7]=grd_ecl::sq(curve,ara->points1,ara->keys1);
+				ara->ret[8]=ara->points1[3];//тип пересечения
+				return ara->ret;
+			}
+		}
+	}
+	}
+	return NULL;
+}
+//Конец функции поиска первого пересечения
+
+
+double mesh_grdecl::mod(double *gogo,double ncub[],double d[],double *curve,double *points,long int flag,double *mdpoints,double *md, struct tri *ara,BS_SP (table_iface) table,std::vector<fpoint3d> &v_traj,std::vector<t_double> &v_md,long &cubFlag,double *Ncubs)
+{
+	using namespace std;
+	long sizeX,sizeY,sizeZ,NsizeX,NsizeY,NsizeZ;
+	 element_t element;
+	 double b[9];
+	long key_27=0;//счётчик точек пересечения для алгоритма по прохождению 27 кубов
+	double i,j,k;//позже их надо куда нить в структура засунуть
+	ara->lwt=0;//флаг пересечения с отрезком
+	double counter1,counter2,counter3;
+//начиная с номера flag массив points является доступным для заполнения
+	if((gogo[0]==(table->get_n_rows()-1))||(gogo[1]>=nx)||(gogo[2]>=ny)||(gogo[3]>=nz))//если достигли конца ломанной то завершаем выполнение
+	{
+		return 0;
+	}
+	//ex(ara->b,ncub,gogo[1],gogo[2],gogo[3],d);//послали массив в который сохраним новый куб,послали начальный куб, номер куба, номер требуемуго куба и размеры
+		
+	
+	 calc_element (gogo[1], gogo[2], gogo[3], element);
+          mesh_element3d::corners_t corns = element.get_corners();
+		/* for(int t=0;t<8;t++)
+		 {
+			 cout<<t+1<<"   "<<corns[t].x<<"   "<<corns[t].y<<"   "<<corns[t].z<<endl<<endl;
+		 }*/
+
+	/*for(ara->i=0;ara->i<3;ara->i++)//сохранение координат точек куба в различные массивы (необходимо для проходки по граням)
+		{
+			ara->b1[ara->i]=ara->b[ara->i];
+			ara->b2[ara->i]=ara->b[ara->i+3];
+			ara->b3[ara->i]=ara->b[ara->i+6];
+			ara->b4[ara->i]=ara->b[ara->i+9];
+			ara->b5[ara->i]=ara->b[ara->i+12];
+			ara->b6[ara->i]=ara->b[ara->i+15];
+			ara->b7[ara->i]=ara->b[ara->i+18];
+			ara->b8[ara->i]=ara->b[ara->i+21];
+		}*/
+    b[0]=corns[4].x;
+	b[1]=corns[4].y;
+	b[2]=corns[4].z;
+	b[3]=corns[5].x;
+	b[4]=corns[5].y;
+	b[5]=corns[5].z;
+	b[6]=corns[6].x;
+	b[7]=corns[6].y;
+	b[8]=corns[6].z;
+		//***************************Плоскость 1********************************//
+ara->point=res(v_traj,b,long(gogo[0]),1,ara);//находим точку пересечения
+if(ara->point!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(grd_ecl::func(ara->point,gogo)==0)
+{
+	if(ara->point[3]==1)
+	{
+		grd_ecl::cpypoint(points,ara->point,flag,gogo);
+	gogo[3]=gogo[3]+1; //если не вышли то значит идём на верх, к следующему кубу
+	gogo[4]=ara->point[0];   //x   и сохраняем новую точку входа
+	gogo[5]=ara->point[1];	//y
+	gogo[6]=ara->point[2];	//z
+	//копируем найденную точку в результирующий массив выходных точек
+	mdpoints[flag/3]=grd_ecl::countmd(curve,gogo[0],ara->point,md,v_traj,v_md);//копируем значение md соответствующее данному отрезку
+				saveNcub(gogo,Ncubs,flag,mdpoints,cubFlag);
+			cubFlag=cubFlag+4;
+	flag=flag+3; //сдигаем флаг управления результирующим массивом
+	return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara,table,v_traj,v_md,cubFlag,Ncubs);//ищем пересечение этого же отрезка но уже со следующим кубом
+}
+	else//обработка случая пересечения с отрезком.
+	{
+		ara->pointkey=ara->point;
+		ara->lwt=1;
+	}
+}
+}
+//ara->b[3]=ara->b4[0];
+//ara->b[4]=ara->b4[1];
+//ara->b[5]=ara->b4[2];
+b[0]=corns[7].x;
+b[1]=corns[7].y;
+b[2]=corns[7].z;
+ara->point=res(v_traj,b,long(gogo[0]),1,ara);
+if(ara->point!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(grd_ecl::func(ara->point,gogo)==0)
+{
+	if(ara->point[3]==1)
+	{
+		grd_ecl::cpypoint(points,ara->point,flag,gogo);
+	gogo[3]=gogo[3]+1;
+	gogo[4]=ara->point[0];
+	gogo[5]=ara->point[1];
+	gogo[6]=ara->point[2];
+	//grd_ecl::cpypoint(points,ara->point,flag);
+    mdpoints[flag/3]=grd_ecl::countmd(curve,gogo[0],ara->point,md,v_traj,v_md);
+				saveNcub(gogo,Ncubs,flag,mdpoints,cubFlag);
+			cubFlag=cubFlag+4;
+	flag=flag+3;
+	return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara,table,v_traj,v_md,cubFlag,Ncubs);
+}
+	else {//обработка случая пересечения с отрезком.
+	ara->lwt=1;//флаг попадания в область обработки случая пересечения с отрезком
+	ara->pointkey=ara->point;//сохранение точки пересечения с отрезком
+	}
+}
+}
+//***************************Плоскость 3********************************//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//ara->b[6]=ara->b5[0];
+//ara->b[7]=ara->b5[1];
+//ara->b[8]=ara->b5[2];
+    b[0]=corns[3].x;
+	b[1]=corns[3].y;
+	b[2]=corns[3].z;
+	b[3]=corns[7].x;
+	b[4]=corns[7].y;
+	b[5]=corns[7].z;
+	b[6]=corns[5].x;
+	b[7]=corns[5].y;
+	b[8]=corns[5].z;
+
+ara->point=res(v_traj,b,long(gogo[0]),3,ara);
+if(ara->point!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(grd_ecl::func(ara->point,gogo)==0)
+{
+	if(ara->point[3]==1)
+	{
+		grd_ecl::cpypoint(points,ara->point,flag,gogo);
+	gogo[1]=gogo[1]+1;
+	gogo[4]=ara->point[0];
+	gogo[5]=ara->point[1];
+	gogo[6]=ara->point[2];
+	//grd_ecl::cpypoint(points,ara->point,flag);
+	mdpoints[flag/3]=grd_ecl::countmd(curve,gogo[0],ara->point,md,v_traj,v_md);
+				saveNcub(gogo,Ncubs,flag,mdpoints,cubFlag);
+			cubFlag=cubFlag+4;
+	flag=flag+3;
+	return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara,table,v_traj,v_md,cubFlag,Ncubs);
+}
+	else {//обработка случая пересечения с отрезком.
+	
+	ara->pointkey=ara->point;
+	ara->lwt=1;
+	
+	}
+	
+}
+}
+//ara->b[0]=ara->b8[0];
+//ara->b[1]=ara->b8[1];
+//ara->b[2]=ara->b8[2];
+
+b[3]=corns[1].x;
+b[4]=corns[1].y;
+b[5]=corns[1].z;
+
+ara->point=res(v_traj,b,long(gogo[0]),3,ara);
+if(ara->point!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(grd_ecl::func(ara->point,gogo)==0)
+{
+	if(ara->point[3]==1)
+	{
+		grd_ecl::cpypoint(points,ara->point,flag,gogo);
+	gogo[1]=gogo[1]+1;
+	gogo[4]=ara->point[0];
+	gogo[5]=ara->point[1];
+	gogo[6]=ara->point[2];
+	//grd_ecl::cpypoint(points,ara->point,flag);
+	mdpoints[flag/3]=grd_ecl::countmd(curve,gogo[0],ara->point,md,v_traj,v_md);
+			saveNcub(gogo,Ncubs,flag,mdpoints,cubFlag);
+			cubFlag=cubFlag+4;
+	flag=flag+3;
+	return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara,table,v_traj,v_md,cubFlag,Ncubs);
+}
+	else{
+	ara->pointkey=ara->point;
+	ara->lwt=1;	
+	}
+}
+}
+//***************************Плоскость 5********************************//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//ara->b[6]=ara->b7[0];
+//ara->b[7]=ara->b7[1];
+//ara->b[8]=ara->b7[2];
+    b[0]=corns[2].x;
+	b[1]=corns[2].y;
+	b[2]=corns[2].z;
+	b[3]=corns[6].x;
+	b[4]=corns[6].y;
+	b[5]=corns[6].z;
+	b[6]=corns[7].x;
+	b[7]=corns[7].y;
+	b[8]=corns[7].z;
+
+ara->point=res(v_traj,b,long(gogo[0]),5,ara);
+if(ara->point!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(grd_ecl::func(ara->point,gogo)==0)
+{
+	if(ara->point[3]==1)
+	{
+		grd_ecl::cpypoint(points,ara->point,flag,gogo);
+	gogo[2]=gogo[2]+1;
+	gogo[4]=ara->point[0];
+	gogo[5]=ara->point[1];
+	gogo[6]=ara->point[2];
+	//grd_ecl::cpypoint(points,ara->point,flag);
+	mdpoints[flag/3]=grd_ecl::countmd(curve,gogo[0],ara->point,md,v_traj,v_md);
+		saveNcub(gogo,Ncubs,flag,mdpoints,cubFlag);
+			cubFlag=cubFlag+4;
+	flag=flag+3;
+	return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara,table,v_traj,v_md,cubFlag,Ncubs);
+}
+	else{
+		ara->pointkey=ara->point;
+		ara->lwt=1;
+	}
+}
+}
+//ara->b[0]=ara->b3[0];
+//ara->b[1]=ara->b3[1];
+//ara->b[2]=ara->b3[2];
+	b[3]=corns[3].x;
+	b[4]=corns[3].y;
+	b[5]=corns[3].z;
+ara->point=res(v_traj,b,long(gogo[0]),5,ara);
+if(ara->point!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(grd_ecl::func(ara->point,gogo)==0)
+{
+	if(ara->point[3]==1)
+	{
+		grd_ecl::cpypoint(points,ara->point,flag,gogo);
+	gogo[2]=gogo[2]+1;
+	gogo[4]=ara->point[0];
+	gogo[5]=ara->point[1];
+	gogo[6]=ara->point[2];
+	//grd_ecl::cpypoint(points,ara->point,flag);
+	mdpoints[flag/3]=grd_ecl::countmd(curve,gogo[0],ara->point,md,v_traj,v_md);	
+				saveNcub(gogo,Ncubs,flag,mdpoints,cubFlag);
+			cubFlag=cubFlag+4;
+	flag=flag+3;
+	return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara,table,v_traj,v_md,cubFlag,Ncubs);
+}
+	else{
+		ara->pointkey=ara->point;
+		ara->lwt=1;
+	}
+}
+}
+//***************************Плоскость 4********************************//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//ara->b[3]=ara->b6[0];
+//ara->b[4]=ara->b6[1];
+//ara->b[5]=ara->b6[2];
+    b[0]=corns[2].x;
+	b[1]=corns[2].y;
+	b[2]=corns[2].z;
+	b[3]=corns[6].x;
+	b[4]=corns[6].y;
+	b[5]=corns[6].z;
+	b[6]=corns[4].x;
+	b[7]=corns[4].y;
+	b[8]=corns[4].z;
+
+ara->point=res(v_traj,b,long(gogo[0]),4,ara);
+if(ara->point!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(grd_ecl::func(ara->point,gogo)==0)
+{
+	if(ara->point[3]==1)
+	{
+		grd_ecl::cpypoint(points,ara->point,flag,gogo);
+	gogo[1]=gogo[1]-1;
+	gogo[4]=ara->point[0];
+	gogo[5]=ara->point[1];
+	gogo[6]=ara->point[2];
+	//grd_ecl::cpypoint(points,ara->point,flag);
+	mdpoints[flag/3]=grd_ecl::countmd(curve,gogo[0],ara->point,md,v_traj,v_md);
+			saveNcub(gogo,Ncubs,flag,mdpoints,cubFlag);
+			cubFlag=cubFlag+4;
+	flag=flag+3;
+	return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara,table,v_traj,v_md,cubFlag,Ncubs);
+}
+	else{
+		ara->pointkey=ara->point;
+		ara->lwt=1;
+
+	}
+}
+}
+//ara->b[6]=ara->b2[0];
+//ara->b[7]=ara->b2[1];
+//ara->b[8]=ara->b2[2];
+
+	b[3]=corns[0].x;
+	b[4]=corns[0].y;
+	b[5]=corns[0].z;
+ara->point=res(v_traj,b,long(gogo[0]),4,ara);
+if(ara->point!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(grd_ecl::func(ara->point,gogo)==0)
+{
+	if(ara->point[3]==1)
+	{
+		grd_ecl::cpypoint(points,ara->point,flag,gogo);
+	gogo[1]=gogo[1]-1;
+	gogo[4]=ara->point[0];
+	gogo[5]=ara->point[1];
+	gogo[6]=ara->point[2];
+	//grd_ecl::cpypoint(points,ara->point,flag);
+	mdpoints[flag/3]=grd_ecl::countmd(curve,gogo[0],ara->point,md,v_traj,v_md);
+	saveNcub(gogo,Ncubs,flag,mdpoints,cubFlag);
+			cubFlag=cubFlag+4;
+	flag=flag+3;
+	return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara,table,v_traj,v_md,cubFlag,Ncubs);
+}
+	else{
+		ara->pointkey=ara->point;
+		ara->lwt=1;
+
+	}
+}
+}
+//***************************Плоскость 6********************************//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//ara->b[0]=ara->b1[0];
+//ara->b[1]=ara->b1[1];
+//ara->b[2]=ara->b1[2];
+    b[0]=corns[0].x;
+	b[1]=corns[0].y;
+	b[2]=corns[0].z;
+	b[3]=corns[4].x;
+	b[4]=corns[4].y;
+	b[5]=corns[4].z;
+	b[6]=corns[5].x;
+	b[7]=corns[5].y;
+	b[8]=corns[5].z;
+
+ara->point=res(v_traj,b,long(gogo[0]),6,ara);
+if(ara->point!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(grd_ecl::func(ara->point,gogo)==0)
+{
+	if(ara->point[3]==1)
+	{
+		grd_ecl::cpypoint(points,ara->point,flag,gogo);
+	gogo[2]=gogo[2]-1;
+	gogo[4]=ara->point[0];
+	gogo[5]=ara->point[1];
+	gogo[6]=ara->point[2];
+	//grd_ecl::cpypoint(points,ara->point,flag);
+	mdpoints[flag/3]=grd_ecl::countmd(curve,gogo[0],ara->point,md,v_traj,v_md);
+			saveNcub(gogo,Ncubs,flag,mdpoints,cubFlag);
+			cubFlag=cubFlag+4;
+	flag=flag+3;
+	return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara,table,v_traj,v_md,cubFlag,Ncubs);
+}
+	else{
+
+		ara->pointkey=ara->point;
+		ara->lwt=1;
+
+	}
+}
+}
+//ara->b[6]=ara->b5[0];
+//ara->b[7]=ara->b5[1];
+//ara->b[8]=ara->b5[2];
+	b[3]=corns[1].x;
+	b[4]=corns[1].y;
+	b[5]=corns[1].z;
+
+ara->point=res(v_traj,b,long(gogo[0]),6,ara);
+if(ara->point!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(grd_ecl::func(ara->point,gogo)==0)
+{
+	if(ara->point[3]==1)
+	{
+		grd_ecl::cpypoint(points,ara->point,flag,gogo);
+	gogo[2]=gogo[2]-1;
+	gogo[4]=ara->point[0];
+	gogo[5]=ara->point[1];
+	gogo[6]=ara->point[2];
+	//grd_ecl::cpypoint(points,ara->point,flag);
+		mdpoints[flag/3]=grd_ecl::countmd(curve,gogo[0],ara->point,md,v_traj,v_md);
+					saveNcub(gogo,Ncubs,flag,mdpoints,cubFlag);
+			cubFlag=cubFlag+4;
+	flag=flag+3;
+	return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara,table,v_traj,v_md,cubFlag,Ncubs);
+}
+	else{
+		ara->pointkey=ara->point;
+		ara->lwt=1;
+
+	}
+}
+}
+//***************************Плоскость 2********************************//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//ara->b[0]=ara->b7[0];
+//ara->b[1]=ara->b7[1];
+//ara->b[2]=ara->b7[2];
+    b[0]=corns[0].x;
+	b[1]=corns[0].y;
+	b[2]=corns[0].z;
+	b[3]=corns[1].x;
+	b[4]=corns[1].y;
+	b[5]=corns[1].z;
+	b[6]=corns[2].x;
+	b[7]=corns[2].y;
+	b[8]=corns[2].z;
+
+
+ara->point=res(v_traj,b,long(gogo[0]),2,ara);
+if(ara->point!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(grd_ecl::func(ara->point,gogo)==0)
+{
+	if(ara->point[3]==1)
+	{
+		grd_ecl::cpypoint(points,ara->point,flag,gogo);
+	gogo[3]=gogo[3]-1;
+	gogo[4]=ara->point[0];
+	gogo[5]=ara->point[1];
+	gogo[6]=ara->point[2];
+	//grd_ecl::cpypoint(points,ara->point,flag);
+		mdpoints[flag/3]=grd_ecl::countmd(curve,gogo[0],ara->point,md,v_traj,v_md);
+					saveNcub(gogo,Ncubs,flag,mdpoints,cubFlag);
+			cubFlag=cubFlag+4;
+	flag=flag+3;
+	return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara,table,v_traj,v_md,cubFlag,Ncubs);
+}
+	else{
+
+		ara->pointkey=ara->point;
+		ara->lwt=1;
+
+	}
+}
+}
+//ara->b[3]=ara->b8[0];
+//ara->b[4]=ara->b8[1];
+//ara->b[5]=ara->b8[2];
+    b[0]=corns[3].x;
+	b[1]=corns[3].y;
+	b[2]=corns[3].z;
+ara->point=res(v_traj,b,long(gogo[0]),2,ara);
+if(ara->point!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(grd_ecl::func(ara->point,gogo)==0)
+{
+	if(ara->point[3]==1)
+	{
+		grd_ecl::cpypoint(points,ara->point,flag,gogo);
+	gogo[3]=gogo[3]-1;
+	gogo[4]=ara->point[0];
+	gogo[5]=ara->point[1];
+	gogo[6]=ara->point[2];
+	//grd_ecl::cpypoint(points,ara->point,flag);
+		mdpoints[flag/3]=grd_ecl::countmd(curve,gogo[0],ara->point,md,v_traj,v_md);
+					saveNcub(gogo,Ncubs,flag,mdpoints,cubFlag);
+			cubFlag=cubFlag+4;
+	flag=flag+3;
+	return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara,table,v_traj,v_md,cubFlag,Ncubs);
+}
+	else{
+		ara->lwt=1;
+		ara->pointkey=ara->point;
+
+	}
+}
+}
+
+
+if(ara->lwt==1)//если попали в ребро то
+{
+	ara->lwt=0;//сбиваем флаг что следующий раз мы не в ребре
+		grd_ecl::cpypoint(points,ara->point,flag,gogo);
+		//grd_ecl::cpypoint(points,ara->pointkey,flag);//сохраняем найденную точку
+		mdpoints[flag/3]=grd_ecl::countmd(curve,gogo[0],ara->pointkey,md,v_traj,v_md);//сохраняем md найденной точки
+		flag=flag+3;//сдвигаем флаг 
+	gogo[4]=ara->pointkey[0];//сохраняем координаты точки и тип точки
+	gogo[5]=ara->pointkey[1];
+	gogo[6]=ara->pointkey[2];
+	gogo[8]=ara->pointkey[3];//это тип точки т.е. точка на грани или на ребре (подробнее см. функцию res)
+	ara->rast=grd_ecl::rastmd(ara,v_traj,gogo);//считаем расстояние от начальной точки отрезка до точки пересечения
+
+	for(i=0;i<9;i++)//переприсваиваем локальный массив gogo
+	{
+	ara->localgo[long(i)]=gogo[long(i)];
+	}
+	ara->keyF=0;
+	while(gogo[0]!=(table->get_n_rows()-1))//пока не конец кривой крутимся в алгоритме т.е. если кривая зайдёт в куб через ребро и внутри него будет постоянно крутится
+	{
+		//ara->localgo[0]=gogo[0];
+			for(i=0;i<9;i++)//переприсваиваем локальный массив gogo в случае если мы нашли точку пересечения типа "ребро". т.е. мы остаемся в алгоритме
+				//но меняем номер центрального куба и последнюю точку пересечения
+	{
+	ara->localgo[long(i)]=gogo[long(i)];
+	}
+		//	counter1=gogo[1];
+		//	counter2=gogo[2];
+		//	counter3=gogo[3];
+			if(gogo[1]+1<=nx)
+	{
+		sizeX=long(gogo[1])+1;
+	}
+	else
+	{
+		sizeX=long(gogo[1]);
+	}
+	if(gogo[2]+1<=ny)
+	{
+		sizeY=long(gogo[2])+1;
+	}
+	else
+	{
+		sizeY=long(gogo[2]);
+	}
+	if(gogo[3]+1<=nz)
+	{
+		sizeZ=long(gogo[3])+1;
+	}
+	else
+	{
+		sizeZ=long(gogo[3]);
+	}
+
+	if(gogo[1]-1>=0)
+	{
+		NsizeX=long(gogo[1])-1;
+	}
+	else
+	{
+		NsizeX=long(gogo[1]);
+	}
+		if(gogo[2]-1>=0)
+	{
+		NsizeY=long(gogo[2])-1;
+	}
+	else
+	{
+		NsizeY=long(gogo[2]);
+	}
+		if(gogo[3]-1>=0)
+	{
+		NsizeZ=long(gogo[3])-1;
+	}
+	else
+	{
+		NsizeZ=long(gogo[3]);
+	}
+
+
+		for(i=NsizeX;i<=sizeX;i++)//пошли по кубам
+		{
+			ara->localgo[1]=i;//номер куба сохраняется в локальный gogo
+		for(j=NsizeY;j<=sizeY;j++)
+		{
+			ara->localgo[2]=j;
+		for(k=NsizeZ;k<=sizeZ;k++)
+		{
+			ara->localgo[3]=k;
+			//	if((ara->localgo[1]!=gogo[1])||(ara->localgo[2]!=gogo[2])||(ara->localgo[3]!=gogo[3]))
+			//	{
+				if(mod12(ara->localgo,ncub,d,curve,ara,points,flag,table,v_traj,v_md)==1)//если мы нашли точку пересечения типа "грань"
+				{
+			//	cpypoint(points,ara->point1,flag);//сохраняем точку
+			//	mdpoints[flag/3]=countmd(curve,gogo[0],ara->point1,md);//сохраняем её md
+			//	flag=flag+3;//сдвигаем флаг
+				gogo[1]=ara->localgo[1];//сохраняем номер куба
+				gogo[2]=ara->localgo[2];
+				gogo[3]=ara->localgo[3];
+				gogo[4]=ara->point1[0];//сохраняем точку
+				gogo[5]=ara->point1[1];
+				gogo[6]=ara->point1[2];
+				gogo[8]=1;//сохраняем тип точки
+			//	ara->keyF=0;
+				//Вроде правильный алгоритм
+				ara->local27cubs[key_27*8]=ara->point1[0];
+				ara->local27cubs[key_27*8+1]=ara->point1[1];
+				ara->local27cubs[key_27*8+2]=ara->point1[2];
+				ara->local27cubs[key_27*8+3]=ara->emdina;
+				ara->local27cubs[key_27*8+4]=ara->localgo[1];
+				ara->local27cubs[key_27*8+5]=ara->localgo[2];
+				ara->local27cubs[key_27*8+6]=ara->localgo[3];
+				ara->local27cubs[key_27*8+7]=1;
+				key_27++;
+/*				if(ara->per==1)
+				{
+					gogo[3]=gogo[3]-1;
+					ara->per=0;
+				}*/
+				//cout<<"  "<<gogo[1]<<"   "<<gogo[2]<<"   "<<gogo[3]<<"  Fuck"<<endl;
+			//	return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara);//завершаем эту эволюцию и переходим к следующей.
+				}
+				else if(mod12(ara->localgo,ncub,d,curve,ara,points,flag,table,v_traj,v_md)==2)//если мы  нашли точку типа "ребро", то мы повторяем этот алгоритм но уже взяв
+				{//некий другой куб за центральный
+//				cpypoint(points,ara->point1,flag);//сохраняем точку
+//				mdpoints[flag/3]=countmd(curve,gogo[0],ara->point1,md);//сохраняем md
+//				flag=flag+3;//сдвигаем флаг
+				gogo[1]=ara->localgo[1];//сохраняем номер куба
+				gogo[2]=ara->localgo[2];
+				gogo[3]=ara->localgo[3];
+				gogo[4]=ara->point1[0];//сохраняем точку
+				gogo[5]=ara->point1[1];
+				gogo[6]=ara->point1[2];
+				gogo[8]=0;//сохраняем типа точки.
+
+				ara->local27cubs[key_27*8]=ara->point1[0];
+				ara->local27cubs[key_27*8+1]=ara->point1[1];
+				ara->local27cubs[key_27*8+2]=ara->point1[2];
+				ara->local27cubs[key_27*8+3]=ara->emdina;
+				ara->local27cubs[key_27*8+4]=ara->localgo[1];
+				ara->local27cubs[key_27*8+5]=ara->localgo[2];
+				ara->local27cubs[key_27*8+6]=ara->localgo[3];
+				ara->local27cubs[key_27*8+7]=0;
+				key_27++;
+
+				}
+				}
+
+		}
+
+	}
+
+		if(key_27==0)
+		{
+			gogo[0]=gogo[0]+1;
+			ara->rast=0;
+		}
+		else
+		{
+						//ara->localpoint[0]=gogo[4];
+			//ara->localpoint[1]=gogo[5];
+			//ara->localpoint[2]=gogo[6];
+			ara->localpoint[0]=v_md[long(gogo[0])];
+			ara->result27cubs=grd_ecl::inf27points(ara->local27cubs,key_27,ara->rast);
+			gogo[1]=ara->local27cubs[ara->result27cubs*8+4];//[4];
+			gogo[2]=ara->local27cubs[ara->result27cubs*8+5];//[5];
+			gogo[3]=ara->local27cubs[ara->result27cubs*8+6];//[6];
+			gogo[4]=ara->local27cubs[ara->result27cubs*8+0];//[0];
+			gogo[5]=ara->local27cubs[ara->result27cubs*8+1];//[1];
+			gogo[6]=ara->local27cubs[ara->result27cubs*8+2];//[2];
+			gogo[8]=ara->local27cubs[ara->result27cubs*8+7];//[7];
+			ara->rast=ara->local27cubs[ara->result27cubs*8+3];//[3];
+			ara->point2[0]=gogo[4];
+			ara->point2[1]=gogo[5];
+			ara->point2[2]=gogo[6];
+			key_27=0;
+	if((gogo[0]==(table->get_n_rows()-1))||(gogo[1]>=nx)||(gogo[2]>=ny)||(gogo[3]>=nz))//если достигли конца ломанной то завершаем выполнение
+	{
+		return 0;
+	}
+
+			grd_ecl::cpypoint(points,ara->point2,flag,gogo);
+			//grd_ecl::cpypoint(points,ara->point2,flag);//сохраняем точку
+			mdpoints[flag/3]=grd_ecl::countmd(curve,gogo[0],ara->point2,md,v_traj,v_md);//сохраняем её md
+			saveNcub(gogo,Ncubs,flag,mdpoints,cubFlag);
+			cubFlag=cubFlag+4;
+			flag=flag+3;
+			if(gogo[8]==1)
+			{
+				return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara,table,v_traj,v_md,cubFlag,Ncubs);//завершаем эту эволюцию и переходим к следующей.
+			}
+		}
+
+	}
+}
+
+
+
+	if(gogo[0]==(table->get_n_rows()-1))//если достигли конца ломанной то завершаем выполнение
+	{
+		return 0;
+	}
+gogo[0]=gogo[0]+1;//двигаемся по ломанной дальше если не нашли пересечения отрезка с кубом
+//ara->cheu=0;//не надо считать md в плохом случае. т.е. в случае если мы новым отрезком выходя из куба попали в ребро
+return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara,table,v_traj,v_md,cubFlag,Ncubs);
+}
+
+//Конец основного алгоритма.
+
+
+//начало вспомогательного функции для основного алгоритма
+
+double mesh_grdecl::mod12(double *gogo,double ncub[],double d[],double *curve, struct tri *ara,double *points, long flag,BS_SP (table_iface) table, std::vector<fpoint3d> &v_traj,std::vector<t_double> &v_md)
+{
+	 element_t element;
+	 double b[9];
+//начиная с номера flag массив points является доступным для заполнения
+	//ex(ara->b,ncub,gogo[1],gogo[2],gogo[3],d);
+	/*	for(ara->i=0;ara->i<3;ara->i++)
+		{
+			ara->b1[ara->i]=ara->b[ara->i];
+			ara->b2[ara->i]=ara->b[ara->i+3];
+			ara->b3[ara->i]=ara->b[ara->i+6];
+			ara->b4[ara->i]=ara->b[ara->i+9];
+			ara->b5[ara->i]=ara->b[ara->i+12];
+			ara->b6[ara->i]=ara->b[ara->i+15];
+			ara->b7[ara->i]=ara->b[ara->i+18];
+			ara->b8[ara->i]=ara->b[ara->i+21];
+		}	
+		*/
+	calc_element (gogo[1], gogo[2], gogo[3], element);
+    mesh_element3d::corners_t corns = element.get_corners();
+    b[0]=corns[4].x;
+	b[1]=corns[4].y;
+	b[2]=corns[4].z;
+	b[3]=corns[5].x;
+	b[4]=corns[5].y;
+	b[5]=corns[5].z;
+	b[6]=corns[6].x;
+	b[7]=corns[6].y;
+	b[8]=corns[6].z;
+
+		//***************************Плоскость 1********************************//
+ara->point1=res(v_traj,b,long(gogo[0]),1,ara);//находим точку пересечения
+if(ara->point1!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+//if(func(ara->point1,gogo)==1)
+if(func1(points,flag,ara,v_traj,gogo)==1)//если нашли точку которая дальше чем точка пересечения с ребром
+	{
+		if(ara->point1[3]==1)//если пересечение с гранью
+		return 1;
+		//если пересечение с ребром
+		return 2;
+	}
+}
+/*ara->b[3]=ara->b4[0];
+ara->b[4]=ara->b4[1];
+ara->b[5]=ara->b4[2];*/
+    b[0]=corns[7].x;
+	b[1]=corns[7].y;
+	b[2]=corns[7].z;
+ara->point1=res(v_traj,b,long(gogo[0]),1,ara);
+if(ara->point1!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+//if(func(ara->point1,gogo)==0)
+if(func1(points,flag,ara,v_traj,gogo)==1)//если нашли точку которая дальше чем точка пересечения с ребром
+	{
+		if(ara->point1[3]==1)//если пересечение с гранью
+		return 1;
+		//если пересечение с ребром
+		return 2;
+	}
+}
+//***************************Плоскость 3********************************//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//ara->b[6]=ara->b5[0];
+//ara->b[7]=ara->b5[1];
+//ara->b[8]=ara->b5[2];
+
+    b[0]=corns[1].x;
+	b[1]=corns[1].y;
+	b[2]=corns[1].z;
+	b[3]=corns[3].x;
+	b[4]=corns[3].y;
+	b[5]=corns[3].z;
+	b[6]=corns[5].x;
+	b[7]=corns[5].y;
+	b[8]=corns[5].z;
+ara->point1=res(v_traj,b,long(gogo[0]),3,ara);
+if(ara->point1!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(func1(points,flag,ara,v_traj,gogo)==1)//если нашли точку которая дальше чем точка пересечения с ребром
+	{
+		if(ara->point1[3]==1)//если пересечение с гранью
+		return 1;
+		//если пересечение с ребром
+		return 2;
+	}
+}
+
+
+
+/*ara->b[0]=ara->b8[0];
+ara->b[1]=ara->b8[1];
+ara->b[2]=ara->b8[2];*/
+
+    b[0]=corns[7].x;
+	b[1]=corns[7].y;
+	b[2]=corns[7].z;
+ara->point1=res(v_traj,b,long(gogo[0]),3,ara);
+if(ara->point1!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(func1(points,flag,ara,v_traj,gogo)==1)//если нашли точку которая дальше чем точка пересечения с ребром
+	{
+		if(ara->point1[3]==1)//если пересечение с гранью
+		return 1;
+		//если пересечение с ребром
+		return 2;
+	}
+}
+//***************************Плоскость 5********************************//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*ara->b[6]=ara->b7[0];
+ara->b[7]=ara->b7[1];
+ara->b[8]=ara->b7[2];*/
+
+    b[0]=corns[2].x;
+	b[1]=corns[2].y;
+	b[2]=corns[2].z;
+	b[3]=corns[3].x;
+	b[4]=corns[3].y;
+	b[5]=corns[3].z;
+	b[6]=corns[6].x;
+	b[7]=corns[6].y;
+	b[8]=corns[6].z;
+ara->point1=res(v_traj,b,long(gogo[0]),5,ara);
+if(ara->point1!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(func1(points,flag,ara,v_traj,gogo)==1)//если нашли точку которая дальше чем точка пересечения с ребром
+	{
+		if(ara->point1[3]==1)//если пересечение с гранью
+		return 1;
+		//если пересечение с ребром
+		return 2;
+	}
+}
+/*ara->b[0]=ara->b3[0];
+ara->b[1]=ara->b3[1];
+ara->b[2]=ara->b3[2];*/
+
+
+    b[0]=corns[7].x;
+	b[1]=corns[7].y;
+	b[2]=corns[7].z;
+
+ara->point1=res(v_traj,b,long(gogo[0]),5,ara);
+if(ara->point1!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(func1(points,flag,ara,v_traj,gogo)==1)//если нашли точку которая дальше чем точка пересечения с ребром
+	{
+		if(ara->point1[3]==1)//если пересечение с гранью
+		return 1;
+	//если пересечение с ребром
+		return 2;
+	}
+}
+//***************************Плоскость 4********************************//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*ara->b[3]=ara->b6[0];
+ara->b[4]=ara->b6[1];
+ara->b[5]=ara->b6[2];*/
+
+    b[0]=corns[0].x;
+	b[1]=corns[0].y;
+	b[2]=corns[0].z;
+	b[3]=corns[2].x;
+	b[4]=corns[2].y;
+	b[5]=corns[2].z;
+	b[6]=corns[4].x;
+	b[7]=corns[4].y;
+	b[8]=corns[4].z;
+ara->point1=res(v_traj,b,long(gogo[0]),4,ara);
+if(ara->point1!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(func1(points,flag,ara,v_traj,gogo)==1)//если нашли точку которая дальше чем точка пересечения с ребром
+	{
+		if(ara->point1[3]==1)//если пересечение с гранью
+		return 1;
+	//если пересечение с ребром
+		return 2;
+	}
+}
+/*ara->b[6]=ara->b2[0];
+ara->b[7]=ara->b2[1];
+ara->b[8]=ara->b2[2];*/
+
+    b[0]=corns[6].x;
+	b[1]=corns[6].y;
+	b[2]=corns[6].z;
+ara->point1=res(v_traj,b,long(gogo[0]),4,ara);
+if(ara->point1!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(func1(points,flag,ara,v_traj,gogo)==1)//если нашли точку которая дальше чем точка пересечения с ребром
+	{
+		if(ara->point1[3]==1)//если пересечение с гранью
+		return 1;
+		//если пересечение с ребром
+		return 2;
+	}
+}
+//***************************Плоскость 6********************************//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*ara->b[0]=ara->b1[0];
+ara->b[1]=ara->b1[1];
+ara->b[2]=ara->b1[2];*/
+
+   b[0]=corns[0].x;
+	b[1]=corns[0].y;
+	b[2]=corns[0].z;
+	b[3]=corns[1].x;
+	b[4]=corns[1].y;
+	b[5]=corns[1].z;
+	b[6]=corns[4].x;
+	b[7]=corns[4].y;
+	b[8]=corns[4].z;
+ara->point1=res(v_traj,b,long(gogo[0]),6,ara);
+if(ara->point1!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(func1(points,flag,ara,v_traj,gogo)==1)//если нашли точку которая дальше чем точка пересечения с ребром
+	{
+		if(ara->point1[3]==1)//если пересечение с гранью
+		return 1;
+		//если пересечение с ребром
+		return 2;
+	}
+}
+/*ara->b[6]=ara->b5[0];
+ara->b[7]=ara->b5[1];
+ara->b[8]=ara->b5[2];*/
+
+b[0]=corns[5].x;
+	b[1]=corns[5].y;
+	b[2]=corns[5].z;
+ara->point1=res(v_traj,b,long(gogo[0]),6,ara);
+if(ara->point1!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(func1(points,flag,ara,v_traj,gogo)==1)//если нашли точку которая дальше чем точка пересечения с ребром
+	{
+		if(ara->point1[3]==1)//если пересечение с гранью
+		return 1;
+		//если пересечение с ребром
+		return 2;
+	}
+}
+//***************************Плоскость 2********************************//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*ara->b[0]=ara->b7[0];
+ara->b[1]=ara->b7[1];
+ara->b[2]=ara->b7[2];*/
+
+
+    b[0]=corns[0].x;
+	b[1]=corns[0].y;
+	b[2]=corns[0].z;
+	b[3]=corns[1].x;
+	b[4]=corns[1].y;
+	b[5]=corns[1].z;
+	b[6]=corns[2].x;
+	b[7]=corns[2].y;
+	b[8]=corns[2].z;
+ara->point1=res(v_traj,b,long(gogo[0]),2,ara);
+if(ara->point1!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(func1(points,flag,ara,v_traj,gogo)==1)//если нашли точку которая дальше чем точка пересечения с ребром
+	{
+		if(ara->point1[3]==1)//если пересечение с гранью
+		return 1;
+		//если пересечение с ребром
+		return 2;
+	}
+}
+/*ara->b[3]=ara->b8[0];
+ara->b[4]=ara->b8[1];
+ara->b[5]=ara->b8[2];*/
+  b[0]=corns[3].x;
+	b[1]=corns[3].y;
+	b[2]=corns[3].z;
+
+ara->point1=res(v_traj,b,long(gogo[0]),2,ara);
+if(ara->point1!=NULL)//проверяем найдена ли точка и не совпадает ли она с точкой входа
+{
+if(func1(points,flag,ara,v_traj,gogo)==1)//если нашли точку которая дальше чем точка пересечения с ребром
+	{
+		if(ara->point1[3]==1)//если пересечение с гранью
+		return 1;
+		//если пересечение с ребром
+		return 2;
+	}
+}
+
+return 0;
+}
+//конец вспомогательной функции для основного алгоритма
+
+
+double mesh_grdecl::badCurve(double *gogo,double ncub[],double d[],double *curve,double *points,long int flag,double *mdpoints,double *md, struct tri *ara,BS_SP (table_iface) table, std::vector<fpoint3d> &v_traj,std::vector<t_double> &v_md,long &cubFlag,double *Ncubs)
+{
+	long sizeX,sizeY,sizeZ,NsizeX,NsizeY,NsizeZ;
+	long i,j,k,key_27=0;
+	double counter=gogo[3],counter2=gogo[2],counter1=gogo[1];
+	if(gogo[8]==1)
+	{
+		return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara,table,v_traj,v_md,cubFlag,Ncubs);
+	}
+	else
+	{
+	ara->pointkey[0]=gogo[4];//сохраняем координаты точки и тип точки
+	ara->pointkey[1]=gogo[5];
+	ara->pointkey[2]=gogo[6];
+	ara->pointkey[3]=gogo[8];//это тип точки т.е. точка на грани или на ребре (подробнее см. функцию res)
+	ara->rast=rastmd(ara,v_traj,gogo);//считаем расстояние от начальной точки отрезка до точки пересечения
+	//std::cout<<gogo[8];
+	//_getch();
+	for(i=0;i<9;i++)//переприсваиваем локальный массив gogo
+	{
+	ara->localgo[long(i)]=gogo[long(i)];
+	}
+	ara->keyF=0;
+	while(gogo[0]!=(table->get_n_rows()-1))//пока не конец кривой крутимся в алгоритме т.е. если кривая зайдёт в куб через ребро и внутри него будет постоянно крутится
+	{
+					ara->localpoint[0]=v_md[long(gogo[0])];
+		//ara->localgo[0]=gogo[0];
+			for(i=0;i<9;i++)//переприсваиваем локальный массив gogo в случае если мы нашли точку пересечения типа "ребро". т.е. мы остаемся в алгоритме
+				//но меняем номер центрального куба и последнюю точку пересечения
+	{
+	ara->localgo[long(i)]=gogo[long(i)];
+	}
+	if(gogo[1]+1<=nx)
+	{
+		sizeX=long(gogo[1])+1;
+	}
+	else
+	{
+		sizeX=long(gogo[1]);
+	}
+	if(gogo[2]+1<=ny)
+	{
+		sizeY=long(gogo[2])+1;
+	}
+	else
+	{
+		sizeY=long(gogo[2]);
+	}
+	if(gogo[3]+1<=nz)
+	{
+		sizeZ=long(gogo[3])+1;
+	}
+	else
+	{
+		sizeZ=long(gogo[3]);
+	}
+
+	if(gogo[1]-1>=0)
+	{
+		NsizeX=long(gogo[1])-1;
+	}
+	else
+	{
+		NsizeX=long(gogo[1]);
+	}
+		if(gogo[2]-1>=0)
+	{
+		NsizeY=long(gogo[2])-1;
+	}
+	else
+	{
+		NsizeY=long(gogo[2]);
+	}
+		if(gogo[3]-1>=0)
+	{
+		NsizeZ=long(gogo[3])-1;
+	}
+	else
+	{
+		NsizeZ=long(gogo[3]);
+	}
+
+		 counter=gogo[3];
+		 counter2=gogo[2];
+		 counter1=gogo[1];
+		for(i=NsizeX;i<=sizeX;i++)//пошли по кубам
+		{
+			ara->localgo[1]=i;//номер куба сохраняется в локальный gogo
+		for(j=NsizeY;j<=sizeY;j++)
+		{
+			ara->localgo[2]=j;
+		for(k=NsizeZ;k<=sizeZ;k++)
+		{
+			ara->localgo[3]=k;
+				if((ara->localgo[1]!=counter1)||(ara->localgo[2]!=counter2)||(ara->localgo[3]!=counter)||(flag==3))
+				{
+				if(mod12(ara->localgo,ncub,d,curve,ara,points,flag,table,v_traj,v_md)==1)//если мы нашли точку пересечения типа "грань"
+				{
+				//gogo[1]=ara->localgo[1];//сохраняем номер куба
+				//gogo[2]=ara->localgo[2];
+				//gogo[3]=ara->localgo[3];
+				//gogo[4]=ara->point1[0];//сохраняем точку
+				//gogo[5]=ara->point1[1];
+				//gogo[6]=ara->point1[2];
+				gogo[8]=1;//сохраняем тип точки
+
+				ara->local27cubs[key_27*8]=ara->point1[0];
+				ara->local27cubs[key_27*8+1]=ara->point1[1];
+				ara->local27cubs[key_27*8+2]=ara->point1[2];
+				ara->local27cubs[key_27*8+3]=ara->emdina;
+				ara->local27cubs[key_27*8+4]=ara->localgo[1];
+				ara->local27cubs[key_27*8+5]=ara->localgo[2];
+				ara->local27cubs[key_27*8+6]=ara->localgo[3];
+				ara->local27cubs[key_27*8+7]=1;
+				key_27++;
+
+
+	//			ara->keyF=0;
+	//			ara->per=0;
+	//			if(gogo[3]<=Nz)
+	//			return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara);//завершаем эту эволюцию и переходим к следующей.
+				}
+				else if(mod12(ara->localgo,ncub,d,curve,ara,points,flag,table,v_traj,v_md)==2)//если мы  нашли точку типа "ребро", то мы повторяем этот алгоритм но уже взяв
+				{//некий другой куб за центральный
+				//gogo[1]=ara->localgo[1];//сохраняем номер куба
+				//gogo[2]=ara->localgo[2];
+				//gogo[3]=ara->localgo[3];
+				//gogo[4]=ara->point1[0];//сохраняем точку
+				//gogo[5]=ara->point1[1];
+				//gogo[6]=ara->point1[2];
+				gogo[8]=0;//сохраняем типа точки.
+
+				ara->local27cubs[key_27*8]=ara->point1[0];
+				ara->local27cubs[key_27*8+1]=ara->point1[1];
+				ara->local27cubs[key_27*8+2]=ara->point1[2];
+				ara->local27cubs[key_27*8+3]=ara->emdina;
+				ara->local27cubs[key_27*8+4]=ara->localgo[1];
+				ara->local27cubs[key_27*8+5]=ara->localgo[2];
+				ara->local27cubs[key_27*8+6]=ara->localgo[3];
+				ara->local27cubs[key_27*8+7]=0;
+				key_27++;
+				}
+				}
+
+			
+		}
+		
+		}
+	}
+
+		if(key_27==0)
+		{
+			gogo[0]=gogo[0]+1;
+			ara->rast=0;
+		}
+		else
+		{
+			//ara->localpoint[0]=gogo[4];
+			//ara->localpoint[1]=gogo[5];
+			//ara->localpoint[2]=gogo[6];
+			//ara->localpoint[0]=points[flag-3];
+			//ara->localpoint[1]=points[flag-2];
+			//ara->localpoint[2]=points[flag-1];
+
+			ara->result27cubs=grd_ecl::inf27points(ara->local27cubs,key_27,ara->rast);
+			gogo[1]=ara->local27cubs[ara->result27cubs*8+4];//[4];
+			gogo[2]=ara->local27cubs[ara->result27cubs*8+5];//[5];
+			gogo[3]=ara->local27cubs[ara->result27cubs*8+6];//[6];
+			gogo[4]=ara->local27cubs[ara->result27cubs*8+0];//[0];
+			gogo[5]=ara->local27cubs[ara->result27cubs*8+1];//[1];
+			gogo[6]=ara->local27cubs[ara->result27cubs*8+2];//[2];
+			gogo[8]=ara->local27cubs[ara->result27cubs*8+7];//[7];
+			ara->rast=ara->local27cubs[ara->result27cubs*8+3];//[3];
+			//cout<<gogo[5]<<endl;
+			ara->point2[0]=gogo[4];
+			ara->point2[1]=gogo[5];
+			ara->point2[2]=gogo[6];
+			//
+	if((gogo[0]==(table->get_n_rows()-1))||(gogo[1]>=nx)||(gogo[2]>=ny)||(gogo[3]>=nz))//если достигли конца ломанной то завершаем выполнение
+	{
+		return 0;
+	}
+	
+			grd_ecl::cpypoint(points,ara->point2,flag,gogo);
+	//grd_ecl::cpypoint(points,ara->point2,flag);//сохраняем точку
+			mdpoints[flag/3]=grd_ecl::countmd(curve,gogo[0],ara->point2,md,v_traj,v_md);//сохраняем её md
+			saveNcub(gogo,Ncubs,flag,mdpoints,cubFlag);
+			cubFlag=cubFlag+4;
+			//std::cout<<points[flag]<<"  "<<points[flag+1]<<"  "<<points[flag+2]<<std::endl;
+		//	_getch();
+			flag=flag+3;
+			
+			if(gogo[8]==1)
+			{
+				return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara,table,v_traj,v_md,cubFlag,Ncubs);//завершаем эту эволюцию и переходим к следующей.
+			}
+		/*	if(gogo[3]>0)
+			{
+			
+				return mod(gogo,ncub,d,curve,points,flag,mdpoints,md,ara,table,v_traj,v_md);
+			}	*/
+		}
+		key_27=0;
+	}
+
+
+	}
+
+}
+
+
+
 
 int mesh_grdecl::intersect_trajectories (sp_well_pool_t well_pool)
 {
@@ -2314,7 +3639,7 @@ int mesh_grdecl::intersect_trajectories (sp_well_pool_t well_pool)
     for (t_long j = 0; j < ny; ++j)
       for (t_long k = 0; k < nz; ++k)
         {
-          //t_long index = k + j * nz + i * ny * nz;
+          t_long index = k + j * nz + i * ny * nz;
           calc_element (i, j, k, element);
 
           mesh_element3d::corners_t corns = element.get_corners();
@@ -2346,9 +3671,66 @@ int mesh_grdecl::intersect_trajectories (sp_well_pool_t well_pool)
           v_traj[i].x = table->get_value(i, 1);
           v_traj[i].y = table->get_value(i, 2);
           v_traj[i].z = table->get_value(i, 3);
-          v_md[i] = table->get_value(i, 0);
+			    v_md[i] = table->get_value(i, 0);
 				}
-      
+
+	    long int i,k=0;
+	    double *gogo,man,*points,*finish,*mdpoints;
+
+	    double z=10;
+	    long cubFlag,flag;
+	    double ncub[24]={10,0,z,0,0,z,0,10,z,10,10,z,10,0,0,0,0,0,0,10,0,10,10,0};//начальный куб, от него пляшем
+	    double d[3];
+	    double *curve,*md,*test,points69,*Ncubs;
+	    curve=NULL;
+	    struct tri pon;
+	    md=new double[table->get_n_rows()];
+	    points=new double[(table->get_n_rows())*100*3];//Здесь сохраняются точки пересечения отрезков с нашими кубами
+	    Ncubs=new double[(table->get_n_rows())*100*3];
+	    //finish=new double[LEN*1000*3];
+	    mdpoints=new double[table->get_n_rows()*100];//md соответствующие points
+	    gogo=new double[9];//Здесь находятся координаты куба, номер отрезка и точка пересечения
+	    struct tri ara;
+	    ara.points1=new double[4];
+	    ara.point1=new double[4];
+	    ara.point2=new double[4];
+	    ara.ret=new double[9];
+	    ara.point=new double[4];
+	    ara.localgo=new double[9];
+	    ara.pointkey=new double[4];
+	    test=new double[24];
+	    d[0]=fabs(ncub[0]-ncub[3]);//dx
+	    d[1]=fabs(ncub[1]-ncub[7]);//dy
+	    d[2]=fabs(ncub[14]-z);//dz
+	    //determcur(curve,md);//определение кривой и значений md
+	    mdpoints[0]=0;
+	    md[0]=0;
+	    gogo=search1per(ncub,curve,d,&ara,table,v_traj,v_md);//поиск первого пересечения
+	    //cout<<gogo[1]<<"  "<<gogo[2]<<"  "<<gogo[3]<<"  "<<gogo[4]<<"  "<<gogo[5]<<"  "<<gogo[6]<<endl;
+	    //cout<<table->get_n_rows();
+	    //_getch();
+	    if(!gogo)//It's work!
+	    {
+		    cout<<"Missing curve"<<endl;//если пересечения нет
+		    return 0;
+	    }
+	    points[0]=gogo[4];//сохранили первую точку.
+	    points[1]=gogo[5];
+	    points[2]=gogo[6];
+	    flag=0;
+	    cubFlag=0;
+	    mdpoints[0]=countmd(curve,gogo[0],points,md,v_traj,v_md);
+		  saveNcub(gogo,Ncubs,flag,mdpoints,cubFlag);
+		  cubFlag=cubFlag+4;
+
+
+	    points69=badCurve(gogo,ncub,d,curve,points,3,mdpoints,md,&ara,table,v_traj,v_md,cubFlag,Ncubs);
+	    for(long i=0;i<cubFlag;i+=4)
+	    {  
+		    cout<<Ncubs[i]<<"    "<<Ncubs[i+1]<<"     "<<Ncubs[i+2]<<"         "<<Ncubs[i+3]<<endl;
+		
+	    }
+      _getch();
       /*
         YOUR_FUNC(v_traj, v_md, result);
           {

@@ -16,6 +16,8 @@
 #include "fpoint3d.h"
 #include "rs_smesh_base.h"
 #include "mesh_element3d.h"
+#include "vector"
+#include "bs_vector_shared.h"
 
 #ifdef _HDF5_MY //!< using HDF5 or not
 #include "H5Cpp.h"
@@ -31,7 +33,6 @@
 
 #define DEF_CELL_MERGE_THRESHOLD 0.8
 #define DEF_BAND_THRESHOLD 0.2
-
 //! class for basic work with mesh based on ZCORN&COORD and tpfa calculating
 
 class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
@@ -60,7 +61,7 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     ///////////////////////
     // OWN TYPES
     ///////////////////////
-
+	
     typedef mesh_element3d                  element_t;
     typedef element_t::corners_t               corners_t;
     typedef element_t::plane_t                 plane_t;
@@ -86,8 +87,10 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
    
     //! init arrays of properties
     void init_props (const sp_hdm_t hdm);
-
-
+	double badCurve(double *gogo,double ncub[],double d[],double *curve,double *points,long int flag,double *mdpoints,double *md, struct tri *ara,BS_SP (table_iface) table, std::vector<fpoint3d_t> &v_traj,std::vector<t_double> &v_md,long &cubFlag,double *Ncubs);
+	double mod12(double *gogo,double ncub[],double d[],double *curve, struct tri *ara,double *points, long flag,BS_SP (table_iface) table, std::vector<fpoint3d_t> &v_traj,std::vector<t_double> &v_md);
+	double mod(double *gogo,double ncub[],double d[],double *curve,double *points,long int flag,double *mdpoints,double *md, struct tri *ara,BS_SP (table_iface) table,std::vector<fpoint3d_t> &v_traj,std::vector<t_double> &v_md,long &cubFlag,double *Ncubs);
+	double* search1per(double ncub[],double *curve,double d[], struct tri *ara,  BS_SP (table_iface) table,std::vector<fpoint3d_t> v_traj,std::vector<t_double> &v_md);//поиск первого пересечения.
 #ifndef PURE_MESH
 	  //! init COORD & ZCORN via gen_coord_zcorn
 	  void init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz);
@@ -270,10 +273,6 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
 
     //! check mesh data
     void check_data () const;
-
-    //! fix mesh data
-    int fix_data () const;
-
 
   protected:
     /*! \brief fill given array with block centers (only activ block) and according local bypass
