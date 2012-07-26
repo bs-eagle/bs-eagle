@@ -5,7 +5,9 @@
 #include "bs_mesh_stdafx.h"
 #include "mesh_grdecl.h"
 #include <iterator>
+#ifdef WIN32
 #include <conio.h>
+#endif
 using namespace grd_ecl;
 #ifndef PURE_MESH
   using namespace blue_sky;
@@ -3612,6 +3614,7 @@ double mesh_grdecl::badCurve(double *gogo,double ncub[],double d[],double *curve
 
 
 	}
+	return 0;
 
 }
 
@@ -3730,7 +3733,7 @@ int mesh_grdecl::intersect_trajectories (sp_well_pool_t well_pool)
 		    cout<<Ncubs[i]<<"    "<<Ncubs[i+1]<<"     "<<Ncubs[i+2]<<"         "<<Ncubs[i+3]<<endl;
 		
 	    }
-      _getch();
+      //_getch();
       /*
         YOUR_FUNC(v_traj, v_md, result);
           {

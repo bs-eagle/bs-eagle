@@ -341,6 +341,8 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
       
       t_double calc_tran_boundary (const t_long ext_index1, const plane_t &plane1, const fpoint3d_t &center1, direction d_dir) const;
 
+	  int fix_data() const;
+
 
 //-------------------------------------------
 //  VARIABLES
