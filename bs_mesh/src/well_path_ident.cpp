@@ -18,6 +18,75 @@ namespace blue_sky {
 // alias
 namespace bp = boost::python;
 
+namespace {
+template< class strat_t >
+spv_uint where_is_points_impl(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
+	//typedef wpi::strategy_3d strat_t;
+	typedef wpi::pods< strat_t > pods_t;
+	typedef wpi::mesh_tools< strat_t > mesh_tools_t;
+	typedef wpi::algo< strat_t > algo;
+
+	typedef wpi::ulong ulong;
+	typedef typename pods_t::trimesh trimesh;
+	typedef typename strat_t::vertex_pos_i vertex_pos_i;
+	typedef typename strat_t::Point Point;
+
+	//enum { D = strat_t::D };
+
+	// convert coord & zcorn to tops
+	trimesh M;
+	vertex_pos_i mesh_size;
+	spv_float tops = algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
+
+	// convert plain array of coords to array of Point objects
+	// points are always specified in 3D
+	ulong pnum = points->size() / 3;
+	std::vector< Point > P(pnum);
+	v_float::const_iterator p = points->begin();
+	for(ulong i = 0; i < pnum; ++i) {
+		P[i] = pods_t::rawptr2point(&*p);
+		p += 3;
+	}
+
+	// real action
+	const std::vector< ulong >& hit_idx = mesh_tools_t::where_is_point(M, mesh_size, P);
+
+	// return result
+	spv_uint res = BS_KERNEL.create_object(v_uint::bs_type());
+	res->resize(hit_idx.size());
+  if (hit_idx.size()) {
+	  std::copy(hit_idx.begin(), hit_idx.end(), res->begin());
+  }
+	return res;
+}
+
+template< class strat_t >
+t_uint where_is_point_impl(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) {
+	//typedef wpi::strategy_3d strat_t;
+	typedef wpi::pods< strat_t > pods_t;
+	typedef wpi::mesh_tools< strat_t > mesh_tools_t;
+	typedef wpi::algo< strat_t > algo;
+
+	typedef typename pods_t::trimesh trimesh;
+	typedef typename strat_t::vertex_pos_i vertex_pos_i;
+	typedef typename strat_t::Point Point;
+
+	//enum { D = strat_t::D };
+
+	// convert coord & zcorn to tops
+	trimesh M;
+	vertex_pos_i mesh_size;
+	spv_float tops = algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
+
+	// convert plain array of coords to Point object
+	Point P = pods_t::rawptr2point(&*point->begin());
+
+	// real action
+	return mesh_tools_t::where_is_point(M, mesh_size, P);
+}
+
+} /* hidden implementation */
+
 // specialization for 3D
 spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 	spv_float well_info, bool include_well_nodes)
@@ -38,67 +107,22 @@ spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zc
 	);
 }
 
+// 3D
 spv_uint where_is_points(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
-	typedef wpi::strategy_3d strat_t;
-	typedef wpi::pods< strat_t > pods_t;
-	typedef wpi::mesh_tools< strat_t > mesh_tools_t;
-	typedef wpi::algo< strat_t > algo;
-
-	typedef wpi::ulong ulong;
-	typedef pods_t::trimesh trimesh;
-	typedef strat_t::vertex_pos_i vertex_pos_i;
-	typedef strat_t::Point Point;
-
-	enum { D = strat_t::D };
-
-	// convert coord & zcorn to tops
-	trimesh M;
-	vertex_pos_i mesh_size;
-	spv_float tops = algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
-
-	// convert plain array of coords to array of Point objects
-	ulong pnum = points->size() / D;
-	std::vector< Point > P(pnum);
-	v_float::const_iterator p = points->begin();
-	for(ulong i = 0; i < pnum; ++i) {
-		P[i] = pods_t::rawptr2point(&*p);
-		p += D;
-	}
-
-	// real action
-	const std::vector< ulong >& hit_idx = mesh_tools_t::where_is_point(M, mesh_size, P);
-
-	// return result
-	spv_uint res = BS_KERNEL.create_object(v_uint::bs_type());
-	res->resize(hit_idx.size());
-  if (hit_idx.size()) {
-	  std::copy(hit_idx.begin(), hit_idx.end(), res->begin());
-  }
-	return res;
+	return where_is_points_impl< wpi::strategy_3d >(nx, ny, coord, zcorn, points);
+}
+// 2D
+spv_uint where_is_points_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
+	return where_is_points_impl< wpi::strategy_2d >(nx, ny, coord, zcorn, points);
 }
 
+// 3D
 t_uint where_is_point(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) {
-	typedef wpi::strategy_3d strat_t;
-	typedef wpi::pods< strat_t > pods_t;
-	typedef wpi::mesh_tools< strat_t > mesh_tools_t;
-	typedef wpi::algo< strat_t > algo;
-
-	typedef pods_t::trimesh trimesh;
-	typedef strat_t::vertex_pos_i vertex_pos_i;
-	typedef strat_t::Point Point;
-
-	enum { D = strat_t::D };
-
-	// convert coord & zcorn to tops
-	trimesh M;
-	vertex_pos_i mesh_size;
-	spv_float tops = algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
-
-	// convert plain array of coords to Point object
-	Point P = pods_t::rawptr2point(&*point->begin());
-
-	// real action
-	return mesh_tools_t::where_is_point(M, mesh_size, P);
+	return where_is_point_impl< wpi::strategy_3d >(nx, ny, coord, zcorn, point);
+}
+// 2D
+t_uint where_is_point_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) {
+	return where_is_point_impl< wpi::strategy_2d >(nx, ny, coord, zcorn, point);
 }
 
 /*-----------------------------------------------------------------
@@ -141,6 +165,8 @@ void py_export_wpi() {
 	bp::def("well_path_ident_2d_old", &well_path_ident_2d_old, well_path_ident_overl_2d_old());
 	bp::def("where_is_point", &where_is_point);
 	bp::def("where_is_points", &where_is_points);
+	bp::def("where_is_point_2d", &where_is_point_2d);
+	bp::def("where_is_points_2d", &where_is_points_2d);
 }
 
 }

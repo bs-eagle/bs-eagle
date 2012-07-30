@@ -26,12 +26,22 @@ public:
 		return grd_src->calc_cells_vertices_xyz();
 	}
 
+	// 3D
 	spv_uint where_is_points(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
 		return blue_sky::where_is_points(nx, ny, coord, zcorn, points);
 	}
+	// 2D
+	spv_uint where_is_points_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
+		return blue_sky::where_is_points_2d(nx, ny, coord, zcorn, points);
+	}
 
+	// 3D
 	t_uint where_is_point(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) {
 		return blue_sky::where_is_point(nx, ny, coord, zcorn, point);
+	}
+	// 2D
+	t_uint where_is_point_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) {
+		return blue_sky::where_is_point_2d(nx, ny, coord, zcorn, point);
 	}
 
 	BLUE_SKY_TYPE_DECL(handy_object)

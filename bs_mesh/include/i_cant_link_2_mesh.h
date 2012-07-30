@@ -15,7 +15,9 @@ class handy_mesh_iface : public objbase {
 public:
 	virtual spv_float calc_cells_vertices_xyz(t_long nx, t_long ny, spv_float coord, spv_float zcorn) = 0;
 	virtual spv_uint where_is_points(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) = 0;
+	virtual spv_uint where_is_points_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) = 0;
 	virtual t_uint where_is_point(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) = 0;
+	virtual t_uint where_is_point_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) = 0;
 };
 typedef smart_ptr< handy_mesh_iface > sp_himesh;
 
