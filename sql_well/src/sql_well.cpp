@@ -1793,7 +1793,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                 }
               finalize_sql ();
 
-              spv_uint cells = himesh->where_is_points(nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), point);
+              spv_uint cells = himesh->where_is_points_2d(nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), point);
 
               if (prepare_sql ("SELECT name FROM wells ORDER BY name ASC"))
                 return -1;
