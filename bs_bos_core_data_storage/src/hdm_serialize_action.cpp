@@ -10,6 +10,7 @@
 
 #include "hdm_serialize.h"
 #include <fstream>
+#include <sstream>
 
 // save to and load from text archives
 #include <boost/archive/polymorphic_text_iarchive.hpp>
@@ -32,7 +33,11 @@ namespace bp = boost::python;
 
 namespace blue_sky {
 
-void hdm_serialize_save(
+namespace  {
+
+template< class dst_stream >
+dst_stream& hdm_serialize_save_impl(
+	dst_stream& f,
 	smart_ptr< hdm > t,
 	const std::string& prj_path,
 	const std::string& prj_name,
@@ -49,16 +54,17 @@ void hdm_serialize_save(
 		p_dt->insert< std::string >("deep_copy");
 
 	// make archive
-	std::string fname = prj_path + PATHSEP + prj_name + HDM_DUMP_EXT;
-	std::ofstream f(fname.c_str());
 	boarch::polymorphic_text_oarchive oa(f);
 	oa << t;
 
 	// clear kernel table to not confuse with further saves
 	p_dt->clear< std::string >();
+	return f;
 }
 
-smart_ptr< hdm > hdm_serialize_load(
+template< class src_stream >
+smart_ptr< hdm > hdm_serialize_load_impl(
+	src_stream& f,
 	const std::string& prj_path,
 	const std::string& prj_name,
 	bool deep_copy
@@ -74,7 +80,6 @@ smart_ptr< hdm > hdm_serialize_load(
 		p_dt->insert< std::string >("deep_copy");
 
 	// load archive
-	std::ifstream f((prj_path + PATHSEP + prj_name + HDM_DUMP_EXT).c_str());
 	boarch::polymorphic_text_iarchive ia(f);
 	smart_ptr< hdm > t;
 	ia >> t;
@@ -87,11 +92,61 @@ smart_ptr< hdm > hdm_serialize_load(
 	return t;
 }
 
+} /* hidden namespace */
+
+/*-----------------------------------------------------------------
+ * save hdm
+ *----------------------------------------------------------------*/
+void hdm_serialize_save(
+	smart_ptr< hdm > t,
+	const std::string& prj_path,
+	const std::string& prj_name,
+	bool deep_copy
+){
+	std::string fname = prj_path + PATHSEP + prj_name + HDM_DUMP_EXT;
+	std::ofstream f(fname.c_str());
+	hdm_serialize_save_impl(f, t, prj_path, prj_name, deep_copy);
+}
+
+std::string hdm_serialize_to_str(
+	smart_ptr< hdm > t,
+	const std::string& prj_path,
+	const std::string& prj_name,
+	bool deep_copy
+){
+	std::ostringstream f;
+	return hdm_serialize_save_impl(f, t, prj_path, prj_name, deep_copy).str();
+}
+
+/*-----------------------------------------------------------------
+ * load hdm
+ *----------------------------------------------------------------*/
+smart_ptr< hdm > hdm_serialize_load(
+	const std::string& prj_path,
+	const std::string& prj_name,
+	bool deep_copy
+){
+	std::ifstream f((prj_path + PATHSEP + prj_name + HDM_DUMP_EXT).c_str());
+	return hdm_serialize_load_impl(f, prj_path, prj_name, deep_copy);
+}
+
+smart_ptr< hdm > hdm_serialize_from_str(
+	const std::string& hdm_dump,
+	const std::string& prj_path,
+	const std::string& prj_name,
+	bool deep_copy
+){
+	std::istringstream f(hdm_dump);
+	return hdm_serialize_load_impl(f, prj_path, prj_name, deep_copy);
+}
+
 /*-----------------------------------------------------------------
  * export save & load to python
  *----------------------------------------------------------------*/
 BOOST_PYTHON_FUNCTION_OVERLOADS(hdm_serialize_save_overl, hdm_serialize_save, 3, 4)
 BOOST_PYTHON_FUNCTION_OVERLOADS(hdm_serialize_load_overl, hdm_serialize_load, 2, 3)
+BOOST_PYTHON_FUNCTION_OVERLOADS(hdm_serialize_to_str_overl, hdm_serialize_to_str, 3, 4)
+BOOST_PYTHON_FUNCTION_OVERLOADS(hdm_serialize_from_str_overl, hdm_serialize_from_str, 3, 4)
 
 namespace python {
 
@@ -99,8 +154,8 @@ BS_API_PLUGIN void py_export_hdm_serialize() {
 	bp::def("hdm_serialize_save", &hdm_serialize_save, hdm_serialize_save_overl());
 	bp::def("hdm_serialize_load", &hdm_serialize_load, hdm_serialize_load_overl());
     // register pvt to/from str serialization
-	bp::def("serialize_to_str", &blue_sky::serialize_to_str< hdm >);
-	bp::def("serialize_from_str", &blue_sky::serialize_from_str< hdm >);
+	bp::def("serialize_to_str", &blue_sky::hdm_serialize_to_str, hdm_serialize_to_str_overl());
+	bp::def("serialize_from_str", &blue_sky::hdm_serialize_from_str, hdm_serialize_from_str_overl());
 }
 
 } /* python */

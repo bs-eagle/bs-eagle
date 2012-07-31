@@ -38,6 +38,20 @@ BS_API_PLUGIN smart_ptr< hdm > hdm_serialize_load(
 	bool deep_copy = false
 );
 
+std::string hdm_serialize_to_str(
+	smart_ptr< hdm > t,
+	const std::string& prj_path,
+	const std::string& prj_name,
+	bool deep_copy = false
+);
+
+smart_ptr< hdm > hdm_serialize_from_str(
+	const std::string& hdm_dump,
+	const std::string& prj_path,
+	const std::string& prj_name,
+	bool deep_copy = false
+);
+
 } /* blue_sky */
 
 #endif /* end of include guard: HDM_SERIALIZE_B9ETGFM9 */
