@@ -35,7 +35,8 @@ namespace blue_sky {
 void hdm_serialize_save(
 	smart_ptr< hdm > t,
 	const std::string& prj_path,
-	const std::string& prj_name
+	const std::string& prj_name,
+	bool deep_copy
 ){
 	// save project path for serialization code
 	kernel::idx_dt_ptr p_dt = BS_KERNEL.pert_idx_dt(hdm::bs_type());
@@ -43,6 +44,9 @@ void hdm_serialize_save(
 	p_dt->insert< std::string >(prj_path);
 	// and project name
 	p_dt->insert< std::string >(prj_name);
+	// inform to explicitly copy storage files
+	if(deep_copy)
+		p_dt->insert< std::string >("deep_copy");
 
 	// make archive
 	std::string fname = prj_path + PATHSEP + prj_name + HDM_DUMP_EXT;
@@ -56,7 +60,8 @@ void hdm_serialize_save(
 
 smart_ptr< hdm > hdm_serialize_load(
 	const std::string& prj_path,
-	const std::string& prj_name
+	const std::string& prj_name,
+	bool deep_copy
 ){
 	// save project path for serialization code
 	kernel::idx_dt_ptr p_dt = BS_KERNEL.pert_idx_dt(hdm::bs_type());
@@ -64,6 +69,9 @@ smart_ptr< hdm > hdm_serialize_load(
 	p_dt->insert< std::string >(prj_path);
 	// and project name
 	p_dt->insert< std::string >(prj_name);
+	// inform to explicitly load storage files
+	if(deep_copy)
+		p_dt->insert< std::string >("deep_copy");
 
 	// load archive
 	std::ifstream f((prj_path + PATHSEP + prj_name + HDM_DUMP_EXT).c_str());
@@ -82,11 +90,14 @@ smart_ptr< hdm > hdm_serialize_load(
 /*-----------------------------------------------------------------
  * export save & load to python
  *----------------------------------------------------------------*/
+BOOST_PYTHON_FUNCTION_OVERLOADS(hdm_serialize_save_overl, hdm_serialize_save, 3, 4)
+BOOST_PYTHON_FUNCTION_OVERLOADS(hdm_serialize_load_overl, hdm_serialize_load, 2, 3)
+
 namespace python {
 
 BS_API_PLUGIN void py_export_hdm_serialize() {
-	bp::def("hdm_serialize_save", &hdm_serialize_save);
-	bp::def("hdm_serialize_load", &hdm_serialize_load);
+	bp::def("hdm_serialize_save", &hdm_serialize_save, hdm_serialize_save_overl());
+	bp::def("hdm_serialize_load", &hdm_serialize_load, hdm_serialize_load_overl());
     // register pvt to/from str serialization
 	bp::def("serialize_to_str", &blue_sky::serialize_to_str< hdm >);
 	bp::def("serialize_from_str", &blue_sky::serialize_from_str< hdm >);

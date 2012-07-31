@@ -67,24 +67,25 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 	// strangely there is no such API function though it is documented
 	//std::string db_fname(sqlite3_db_filename(t.db, "main"));
 	std::string db_fname, prj_path, prj_name, db_basename;
+	bu::uuid db_uuid = bu::random_generator()();
 	// check if hdm serializer saved filename for us
 	kernel::idx_dt_ptr kdt = BS_KERNEL.pert_idx_dt(BS_KERNEL.find_type("hdm").td_);
 	if(kdt && kdt->size< std::string >()) {
 		prj_path = kdt->ss< std::string >(0);
 		prj_name = kdt->ss< std::string >(1);
-		db_basename = prj_name + "_well_pool.db";
+		db_basename = prj_name;
+		// if we should make a deep copy of well pool - add a random salt to filename
+		if(kdt->size< std::string >() > 2 && kdt->ss< std::string >(2) == "deep_copy")
+			db_basename += std::string("_") + bu::to_string(db_uuid);
+		db_basename += "_well_pool.db";
 		db_fname = prj_path + PATHSEP + db_basename;
 	}
 	else
 		db_basename = t.file_name;
+
 	// generate uuid that is part of filename
-	// if db_fname != "", uuid is generated based on it
-	// otherwise it is random
-		//if(db_fname.size())
-	//	db_uuid = bu::string_generator()(db_fname);
 	if(db_basename.empty()) {
-		bu::uuid db_uuid = bu::random_generator()();
-		db_basename = std::string("well_pool_") + bu::to_string(db_uuid) + ".db";
+		db_basename = bu::to_string(db_uuid) + "_well_pool.db";
 		db_fname = std::string("file:") + db_basename;
 	}
 

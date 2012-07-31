@@ -28,12 +28,14 @@ namespace blue_sky {
 BS_API_PLUGIN void hdm_serialize_save(
 	smart_ptr< hdm > t,
 	const std::string& prj_path,
-	const std::string& prj_name
+	const std::string& prj_name,
+	bool deep_copy = false
 );
 
 BS_API_PLUGIN smart_ptr< hdm > hdm_serialize_load(
 	const std::string& prj_path,
-	const std::string& prj_name
+	const std::string& prj_name,
+	bool deep_copy = false
 );
 
 } /* blue_sky */
