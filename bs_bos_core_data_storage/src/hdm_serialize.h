@@ -29,27 +29,25 @@ BS_API_PLUGIN void hdm_serialize_save(
 	smart_ptr< hdm > t,
 	const std::string& prj_path,
 	const std::string& prj_name,
-	bool deep_copy = false
+	const std::string& deep_copy_suffix = ""  // h5 & well pool files should be copied using this suffix
 );
 
 BS_API_PLUGIN smart_ptr< hdm > hdm_serialize_load(
 	const std::string& prj_path,
-	const std::string& prj_name,
-	bool deep_copy = false
+	const std::string& prj_name
 );
 
 std::string hdm_serialize_to_str(
 	smart_ptr< hdm > t,
 	const std::string& prj_path,
 	const std::string& prj_name,
-	bool deep_copy = false
+	const std::string& deep_copy_suffix = "" // h5 & well pool files should be copied using this suffix
 );
 
 smart_ptr< hdm > hdm_serialize_from_str(
 	const std::string& hdm_dump,
 	const std::string& prj_path,
-	const std::string& prj_name,
-	bool deep_copy = false
+	const std::string& prj_name
 );
 
 } /* blue_sky */

@@ -161,40 +161,25 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, h5_pool)
 	// save flag if h5 is open
 	bool is_open = (t.file_id != 0);
 	ar << is_open;
-	ar << t.fname;
+	//ar << t.fname;
+
+	std::string h5_fname = t.fname;
+	std::string h5_basename = (const std::string&)basename(t.fname);
 
 	// check if we should explicitly copy h5 storage instead of referencing existing file
 	kernel::idx_dt_ptr kdt = BS_KERNEL.pert_idx_dt(BS_KERNEL.find_type("hdm").td_);
-	if(is_open && kdt && kdt->size< std::string >() > 2
-		&& kdt->ss< std::string >(2) == "deep_copy") {
+	const bool do_deep_copy = is_open && kdt && kdt->size< std::string >() > 2;
+	if(do_deep_copy) {
 		// randomly generate h5 filename
-		bu::uuid cpy_uuid = bu::random_generator()();
+		// bu::uuid cpy_uuid = bu::random_generator()();
 		// filename = project path + basename
-		std::string cpy_basename = kdt->ss< std::string >(1) + '_' + bu::to_string(cpy_uuid) + ".h5";
-		std::string cpy_fname = kdt->ss< std::string >(0) + PATHSEP + cpy_basename;
-
-		// copy file via memory -- probably bad for big h5
-		// first create new h5
-		//hid_t cpy_id = H5Fcreate(cpy_fname.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT);
-		//if(cpy_id < 0)
-		//	bs_throw_exception(
-		//		boost::format ("h5_pool_serialize: Can't create h5 file %s to store copy of source %s") % cpy_fname % t.fname
-		//	);
-
-		// make a copy of h5 file
-		std::ifstream src_h5(t.fname.c_str(), std::ios::binary);
-		std::ofstream dst_h5(cpy_fname.c_str(), std::ios::trunc | std::ios::binary);
-		dst_h5 << src_h5.rdbuf();
-
-		// save name of copy
-		ar << cpy_fname;
-		ar << cpy_basename;
+		h5_basename = kdt->ss< std::string >(1) + '_' + kdt->ss< std::string >(2) + ".h5";
+		h5_fname = kdt->ss< std::string >(0) + PATHSEP + h5_basename;
 	}
-	else {
-		ar << t.fname;
-		// also save base name
-		ar << (const std::string&)basename(t.fname);
-	}
+
+	// save full filename & basename
+	ar << h5_fname;
+	ar << h5_basename;
 
 	// we should only dump group names
 	typedef h5_pool::map_hid_t::const_iterator g_iterator;
@@ -279,6 +264,23 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, h5_pool)
 	ar << t.n_pool_dims;
 	// flush buffers
 	const_cast< h5_pool& >(t).flush();
+
+	// explicitly copy src h5 if we're doing deep copy
+	if(do_deep_copy) {
+		// copy file via memory -- probably bad for big h5
+		// first create new h5
+		//hid_t cpy_id = H5Fcreate(cpy_fname.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT);
+		//if(cpy_id < 0)
+		//	bs_throw_exception(
+		//		boost::format ("h5_pool_serialize: Can't create h5 file %s to store copy of source %s") % cpy_fname % t.fname
+		//	);
+
+		// make a copy of h5 file
+		std::ifstream src_h5(t.fname.c_str(), std::ios::binary);
+		std::ofstream dst_h5(h5_fname.c_str(), std::ios::trunc | std::ios::binary);
+		dst_h5 << src_h5.rdbuf();
+		dst_h5.flush();
+	}
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, h5_pool)
