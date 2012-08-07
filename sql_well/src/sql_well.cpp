@@ -1764,6 +1764,9 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           cd = compl_n_frac.compl_build (*di);
           cde = cd.end();
 
+          // wells in mesh come here
+          std::set< std::string > good_wells;
+
           if (!w_spec_flag)
             {
               w_spec_flag = 1;
@@ -1797,18 +1800,24 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 
               if (prepare_sql ("SELECT name FROM wells ORDER BY name ASC"))
                 return -1;
-              
+
               for (int i = 0; !step_sql (); i++)
                 {
                   std::string s = get_sql_str (0);
                   BSOUT << "Writing well " << s << bs_end;
                   int cell = (*cells)[i];
-                  if (cell >= nx_ny * nz)
-                    throw bs_exception ("", "Well's X Y is out of mesh!");
+                  if (cell >= nx_ny * nz) {
+                    // don't write out of mesh wells
+                    BSERR << std::string("Well ") + s + "is out of mesh! Omitting from WELLSPEC section" << bs_end;
+                    continue;
+                    //throw bs_exception ("", "Well's X Y is out of mesh!");
+                  }
                   int k1 = cell / nx_ny;
                   int j1 = (cell - k1 * nx_ny) / nx;
                   int i1 = cell - k1 * nx_ny - j1 * nx;
                   fprintf (fp, "\'%s\' \'FIELD\' %u %u /\n", s.c_str (), i1 + 1, j1 + 1);
+                  // remember well's name for filtering COMPDATS
+                  good_wells.insert(s);
                 }
               fprintf (fp, "/\n\n");
               finalize_sql ();
@@ -1816,14 +1825,16 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 
           
           // COMPDAT
-          double eps = 1.0e-5;
+          const double eps = 1.0e-5;
+          const std::set< std::string >::const_iterator good_wells_end = good_wells.end();
           if (!cd.empty ())
           {
             fprintf (fp, "COMPDAT\n");
             cde = cd.end();
             for (cdi = cd.begin(); cdi != cde; ++cdi)
             {
-              if (fabs(cdi->kh_mult) > eps)
+              // skip out of mesh wells
+              if (fabs(cdi->kh_mult) > eps && good_wells.find(cdi->well_name) != good_wells_end)
                 {
                   if (cdi->status)
                     fprintf (fp, "\'%s\' %lu %lu %lu %lu \'OPEN\' 2* %lf 1* %lf 1* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
@@ -1844,7 +1855,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             int wpimult_exist = 0;
             for (cdi = cd.begin(); cdi != cde; ++cdi)
             {
-              if (cdi->kh_mult != 1 && std::abs(cdi->kh_mult) > eps)
+              if (cdi->kh_mult != 1 && std::abs(cdi->kh_mult) > eps && good_wells.find(cdi->well_name) != good_wells_end)
                 {
                   if (!wpimult_exist)
                     fprintf (fp, "WPIMULT\n");
@@ -1867,6 +1878,10 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             fte = ft.end ();
             for (fti = ft.begin (); fti != fte; ++fti)
             {
+              // skip out-of-mesh wells
+              if(good_wells.find(fti->well_name) == good_wells_end)
+                continue;
+
               if (fti->frac_perm > 0)
                 sprintf (perm_str, "%lf %lf", fti->frac_half_thin, fti->frac_perm);
               else
@@ -1907,6 +1922,11 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   wconinje_flag++;
                 }
               std::string s = get_sql_str (0);
+
+              // skip out-of-mesh wells
+              if(good_wells.find(s) == good_wells_end)
+                continue;
+
               int status = get_sql_int (14);
               int ctrl = get_sql_int (13);
               double i_or = get_sql_real (8);
@@ -1980,6 +2000,11 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   wconprod_flag++;
                 }
               std::string s = get_sql_str (0);
+
+              // skip out-of-mesh wells
+              if(good_wells.find(s) == good_wells_end)
+                continue;
+
               int status = get_sql_int (14);
               int ctrl = get_sql_int (13);
               double p_or = get_sql_real (2);
@@ -2069,7 +2094,11 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   wefac_flag++;
                 }
               std::string s = get_sql_str (0);
-              
+
+              // skip out-of-mesh wells
+              if(good_wells.find(s) == good_wells_end)
+                continue;
+
               fprintf (fp, "\'%s\' %lf", s.c_str (), wefac);
               fprintf (fp, "/\n");
             }
