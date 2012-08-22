@@ -42,6 +42,9 @@ namespace blue_sky {
       
       // initialize data manager
       void init(const std::string &model_name);
+
+      // initialize process params
+      void init_proc_params();
       
       // read keyword file 
       void read_keyword_file(const std::string filename);
@@ -65,6 +68,8 @@ namespace blue_sky {
       sp_h5_pool_t get_pool () {return data->h5_pool;};
 
       sp_prop_t get_prop () {return data->props;};
+
+      sp_prop_t get_proc_params () {return data->proc_params;};
 
       t_double get_darcy_constant () {return ph_const.darcy_constant;};
 

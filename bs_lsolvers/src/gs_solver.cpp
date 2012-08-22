@@ -4,7 +4,7 @@
  * @date 2009-12-16
  */
 
-#include "lsolvers_stdafx.h"
+#include "bs_lsolvers_stdafx.h"
 
 #include "gs_solver.h"
 #include "mv_functions.h"

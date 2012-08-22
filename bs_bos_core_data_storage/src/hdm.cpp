@@ -96,6 +96,163 @@ namespace blue_sky
   }
   
   void 
+  hdm::init_proc_params()
+  {
+    data->proc_params->add_property_b (1, "PRINT_PVTO_TABLE",               "if this item is set print PVTO to LOG file");
+    data->proc_params->add_property_b (1, "PRINT_PVTW_TABLE",               "print pvtw interpolation table");
+    data->proc_params->add_property_b (1, "PRINT_PVDG_TABLE",               "print pvtg interpolation table");
+    data->proc_params->add_property_b (0, "STORE_PANE_FLOW_RATES",          "");
+    data->proc_params->add_property_b (1, "NEW_TS_SELECTION",               "use new algorithm for ts selection");
+    data->proc_params->add_property_b (1, "SAVE_STEP_MAPS",                 "save maps on time step in the rst file");
+    data->proc_params->add_property_b (1, "SAVE_INITIAL_DATA",              "save initial data in the rst file");
+    data->proc_params->add_property_b (1, "SAVE_RESTART_DATA",              "save restart information");
+    data->proc_params->add_property_b (1, "NEWTRANS",                       "correct transmissibility calculation between cells");
+    data->proc_params->add_property_b (1, "CHECK_FOR_MULTY_CONN",           "check for multi connections in one cell");
+    data->proc_params->add_property_b (1, "SIMPLE_GET_CELL_SOLUTION",       "save time steps into *tsl file");
+    data->proc_params->add_property_b (0, "USE_TIMESTEP_FILES",             "enable simple solution restore algorithm");
+    data->proc_params->add_property_b (1, "USE_LOW_SKIN_TRANS_MULT",        "if this item is set use calculation of trans mults for low skin");
+    data->proc_params->add_property_b (1, "SAVE_MESH_DATA",                 "save initial data in the rst file");
+    data->proc_params->add_property_b (0, "SAVE_CALC_DATA",                 "save solution vector at each large time step into .dmp file");
+    data->proc_params->add_property_b (0, "LOAD_CALC_DATA",                 "load initial guesses for Newton iterations from .dmp file");
+    data->proc_params->add_property_b (0, "SAVE_NORM_DATA",                 "save cells norms to .cel file");
+    data->proc_params->add_property_b (1, "DENS_JAC_SCALE",                 "enable densities based multiplier's for gas and oil equation's in Jacobian");
+    data->proc_params->add_property_b (0, "NEWTON_TUNING",                  "");
+    data->proc_params->add_property_b (0, "SAVE_CROSSFLOW",                 "");
+    data->proc_params->add_property_b (0, "G_FRACTURE",                     "");
+    data->proc_params->add_property_b (0, "CLAMP_PRESSURE",                 "clamp pressure values at each Newton iteration between possible min and max");
+    data->proc_params->add_property_b (0, "G_FRACTURE_FINAL",               "");
+    data->proc_params->add_property_b (1, "SAVE_CONN_DATA",                 "save connection rates to rst file");
+    data->proc_params->add_property_b (0, "DISABLE_FRACTURE_CHECK",         "");
+    data->proc_params->add_property_b (0, "COMPRESS_IRR",                   "compress irregular matrix");
+    data->proc_params->add_property_b (0, "REMOVE_ISOLATED_REGIONS",        "make isolated regions with out wells inactive");
+    data->proc_params->add_property_b (1, "SAVE_WRATES_TO_ASCII_FILE",      "save well rates to ascii file");
+    data->proc_params->add_property_b (1, "CREATE_HDF5_FILE",               "create hdf5 file");
+    data->proc_params->add_property_b (1, "WRITE_PRESSURE_TO_HDF5",         "write pressure to hdf5");
+    data->proc_params->add_property_b (1, "WRITE_SATURATION_TO_HDF5",       "write saturation to hdf5");
+    data->proc_params->add_property_b (1, "FIX_SOIL_BUG",                   "");
+    data->proc_params->add_property_b (0, "DISABLE_CROSSFLOW",              "");
+    data->proc_params->add_property_b (0, "DEBUG_EQUIL",                    "write equil debug info");
+    data->proc_params->add_property_b (1, "WRITE_GAS_OIL_RATIO_TO_HDF5",    "write gas_oil_ratio to hdf5");
+    data->proc_params->add_property_b (0, "FIX_GRID",                       "calc dx dy dz as in PPP");
+    data->proc_params->add_property_b (1, "WRITE_WELL_RESULTS_TO_HDF5",     "save well results to hdf5 file");
+    data->proc_params->add_property_b (1, "WRITE_CONN_RESULTS_TO_HDF5",     "save connection results to hdf5 file");
+    data->proc_params->add_property_b (1, "WRITE_FIP_RESULTS_TO_HDF5",      "save fip results to hdf5 file");
+    data->proc_params->add_property_b (0, "WRITE_ECL_CONN_DATA",            "write connection data in ECL COMPDAT format");
+    data->proc_params->add_property_b (0, "WRITE_INITIAL_DATA_TO_HDF5",     "save initial data to hdf5 file");
+    data->proc_params->add_property_b (0, "READ_INITIAL_DATA_FROM_HDF5",    "read initial data from hdf5 file");
+    data->proc_params->add_property_b (1, "WRITE_MESH_DATA_TO_HDF5",        "save mesh data to hdf5 file");
+    data->proc_params->add_property_b (1, "WRITE_PLANE_FLOW_RATES_TO_HDF5", "write plane flow rates to hdf5 file");
+    data->proc_params->add_property_b (0, "DISABLE_GRAVITY",                "if ON, disable gravitation");
+    data->proc_params->add_property_b (0, "PARALLEL_ILU",                   "if ON, enable parallel ilu preconditioner");
+    data->proc_params->add_property_b (0, "USE_IRR_MATRIX_IN_ILU",          "if OFF, only diagonal from irregular matrix will be used in ILU decomposition ");
+    data->proc_params->add_property_b (0, "FIX_WELL_DENSITY_BUG",           "");
+    data->proc_params->add_property_b (1, "WBP",                            "calc average well pressure only in well blocks");
+    data->proc_params->add_property_b (0, "WBP4",                           "calc average well pressure only in 4 well neighbours");
+    data->proc_params->add_property_b (0, "WBP5",                           "calc average well pressure in well blocks and 4 well neighbours");
+    data->proc_params->add_property_b (1, "WBP9",                           "calc average well pressure in well blocks and 8 well neighbours");
+    data->proc_params->add_property_b (0, "PURE_NEWTON",                    "disable all hacks ");
+    data->proc_params->add_property_b (0, "WRITE_CNORM_TO_ASCII_FILE",      "in true C norm of all components will be save to ascii file in format i j k Cw Cg Co");
+    data->proc_params->add_property_b (0, "P_INIT_APPROX",                  "if true also initialize pressure");
+    data->proc_params->add_property_b (0, "PV_WEIGHTED_PRESSURE",           "pore volume weighted pressure calculation");
+    data->proc_params->add_property_b (0, "CRS_SCAL_SCALE",                 "enable 3-point scal scale");
+    data->proc_params->add_property_b (1, "SAVE_PCW",                       "save calculated PCW to hdf5");
+    data->proc_params->add_property_b (0, "SAVE_PCG",                       "save calculated PCG to hdf5");
+    data->proc_params->add_property_b (0, "NEGATIVE_BHP",                   "WELL BHP could be negative if ON");
+    data->proc_params->add_property_b (0, "WRITE_PLANE_FLOW_VOLS_TO_HDF5",  "write total plane mass flow volumes to hdf5 file");
+    data->proc_params->add_property_b (0, "SET_ACTIVE_FRACTURE_CELLS",      "set actnum = 1 for cells, where fractures defined");
+    data->proc_params->add_property_b (0, "FRACTURE_HORIZ_WELL",            "enable fracture for horiz wells, which grows up and down by z-layer ");
+    data->proc_params->add_property_b (1, "WRITE_BHP_0_FOR_CLOSED_WELLS",   "if true, write well_bhp=0 to h5 file for shutted wells");
+    data->proc_params->add_property_b (1, "MULTI_CONNECTION",               "if true, allow adding multiple connections to one cell");
+    data->proc_params->add_property_b (0, "FIX_PCW_BUG",                    "if true, set default psw and pcg values to 0.0");
+    data->proc_params->add_property_b (0, "FIX_WPIMULT_BUG",                "if true, do not apply WPIMULT to fracture's connections");
+    data->proc_params->add_property_b (1, "FIX_ARITH_BUG",                  "if true, add brackets around function and around it's arguments in arithmetic");
+    data->proc_params->add_property_b (0, "USE_NITERS_VOLUMETRIC_NORM",     "use volumetric norm calculation as in Eclipse");
+    data->proc_params->add_property_b (0, "FRACTURE_USE_FABS",               "use absolute coordinates of points in calculating fracture's connection factors");
+
+
+
+    data->proc_params->add_property_i (20,    "PVT_INTERP_POINTS",        "number of interpolation points");
+    data->proc_params->add_property_i (12,    "NITERS_NUM",               "maximum allowed newton iterations number");
+    data->proc_params->add_property_i (30,    "LITERS_NUM",               "maximum allowed linear iterations number");
+    data->proc_params->add_property_i (6,     "NITERS_INC",               "number of newton iterations to increment step length");
+    data->proc_params->add_property_i (20,    "NITERS_AMG",               "number of newton iterations to build full amg setup");
+    data->proc_params->add_property_i (0,     "APPROX_STEPS",             "number of approximation steps");
+    data->proc_params->add_property_i (2,     "SELECT_SOL_STEPS",         "number of steps to select newton correction force term");
+    data->proc_params->add_property_i (1,     "LSOLV_TYPE",               "type of linear solver");
+    data->proc_params->add_property_i (10,    "GMRES_STACK_LEN",          "number of vectors in GMRES to ortonorm");
+    data->proc_params->add_property_i (10,    "AMG_LITERS_NUM",           "maximum allowed AMG solver iterations");
+    data->proc_params->add_property_i (20,    "WELL_NITERS_NUM",          "maximum number of well internal newton iterations");
+    data->proc_params->add_property_i (0,     "PREC_TYPE",                "type of the preconditioner for linear solver");
+    data->proc_params->add_property_i (0,     "MIN_CELLS_IN_REGION",      "minimum allowed cells in region for ACTNUM = 1");
+    data->proc_params->add_property_i (1,     "SAVE_STEP_DATA_PERIOD",    "save step data every n step");
+    data->proc_params->add_property_i (10,    "SAVE_WELL_RESULTS_PERIOD", "save well results every n step");
+    data->proc_params->add_property_i (10,    "SAVE_FIP_RESULTS_PERIOD",  "save fip results every n step");
+    data->proc_params->add_property_i (20000, "FRACTURE_SERIES_NUMBER",   "number of elemements in calculating of series for fracture calculation");
+    data->proc_params->add_property_i (3,     "NEWTON_ITERS_GCONTROL",    "number of newton iterations to consider group control (equal to NUPCOL, used with GCONINJE and GPMAINT)");
+    data->proc_params->add_property_i (0,     "FRACTURE_ANGLE_AXIS",      "fracture angle counting: 0-from mesh-based X-axis (by first cell), 1-from X axis, 2-from Y axis (azimut)");
+    data->proc_params->add_property_i (2,     "1PHASE_LSOLV_TYPE",        "type of linear solver for 1 phase systems");
+    data->proc_params->add_property_i (4,     "1PHASE_PREC_TYPE",         "type of the preconditioner for linear solver for 1 phase systems");
+    data->proc_params->add_property_i (0,     "WRITE_NORM_TO_HDF5",       "write norm to hdf5 file flag. 1-write each large step, 2-write at each newton iteration");
+    data->proc_params->add_property_i (0,     "TIMESTEP_ON_NORM_SELECT",  "timestep depends from cnorm calculated on first iteration");
+                                               
+                                                      
+    data->proc_params->add_property_f (1000,    "PVT_PRESSURE_MAX",               "PVT tables maximum pressure");
+    data->proc_params->add_property_f (1,       "PVT_PRESSURE_MIN",               "PVT tables minimal pressure");
+    data->proc_params->add_property_f (1,       "PVTO_RS_MAX",                    "PVTO maximum RS for slop table");
+    data->proc_params->add_property_f (400,     "PVTO_RS_MIN",                    "PVTO minimum RS for slop table");
+    data->proc_params->add_property_f (100,     "TS_MAX",                         "maximum allowed time step length");
+    data->proc_params->add_property_f (5.0e-6,  "TS_MIN",                         "minimum allowed time step length");
+    data->proc_params->add_property_f (1,       "TS_FIRST",                       "first simulation time step length");
+    data->proc_params->add_property_f (1.0e-4,  "LITERS_RESID",                   "tolerance for linear solver");
+    data->proc_params->add_property_f (1.0e-2,  "NITERS_RESID",                   "tolerance for newton process");
+    data->proc_params->add_property_f (2,       "TS_INC_MULT",                    "multiplier for incrementing time step length");
+    data->proc_params->add_property_f (0.5,     "TS_DEC_MULT",                    "multiplier for decrementing time step length");
+    data->proc_params->add_property_f (1.4,     "TS_OVERDRAFT",                   "overdraft factor (any time step could be multiplied by this factor to achieve end of report time step)");
+    data->proc_params->add_property_f (300,     "P_CORR_MAX",                     "maximum allowed newton correction for pressure");
+    data->proc_params->add_property_f (1,       "S_CORR_MAX",                     "maximum allowed newton correction for saturation");
+    data->proc_params->add_property_f (1000,    "RS_CORR_MAX",                    "maximum allowed newton correction for gas oil ratio");
+    data->proc_params->add_property_f (3000,    "WELL_P_CORR_MAX",                "maximum allowed newton correction for well pressure");
+    data->proc_params->add_property_f (1.0,     "WAT_ROW_MULT",                   "multiplier for water equation in Jacobian");
+    data->proc_params->add_property_f (1.0,     "GAS_ROW_MULT",                   "multiplier for gas equation in Jacobian");
+    data->proc_params->add_property_f (1.0,     "OIL_ROW_MULT",                   "multiplier for oil equation in Jacobian");
+    data->proc_params->add_property_f (1.0,     "P_COL_MULT",                     "multiplier for pressure derivates column in Jacobian");
+    data->proc_params->add_property_f (0.5,     "TS_OMEGA",                       "omega coef in time step controling");
+    data->proc_params->add_property_f (60,      "TS_DP",                          "pressure change for time step controling");
+    data->proc_params->add_property_f (0.5,     "TS_DS",                          "saturation change for time step controling");
+    data->proc_params->add_property_f (1e-5,    "DP_MIN_CHOP",                    "minimum pressure chop");
+    data->proc_params->add_property_f (1e-7,    "DS_MIN_CHOP",                    "minimum saturation chop");
+    data->proc_params->add_property_f (0.05,    "LITERS_MAX_RESID",               "maximum allowed residual");
+    data->proc_params->add_property_f (1.0e-1,  "AMG_RESID",                      "tolerance for AMG preconditioner");
+    data->proc_params->add_property_f (10,      "TS_DRS",                         "Rs change for time step controling");
+    data->proc_params->add_property_f (10,      "MAX_NORM_ON_TS",                 "if norm on time step is greater than this value restart occur");
+    data->proc_params->add_property_f (-1,      "DRSDT",                          "Maximum rate of increase of solution GOR");
+    data->proc_params->add_property_f (1,       "GAS_NORM_MULT",                  "multiplier for gas norm");
+    data->proc_params->add_property_f (0.99995, "FRACTURE_LAMBDA",                "the minimum value for lambda in fracture calculation, than less lambda than less accuracy, must be more than 0.99");
+    data->proc_params->add_property_f (0.01,    "COMP_MASS_BALANCE",              "Scaled mass balance equation residuals. Equations are scaled by the accumulation terms (component mass dividing timestep size).");
+    data->proc_params->add_property_f (0.02,    "COMP_PHASE_EQUIL",               "Scaled phase equilibrium relation residuals. These are scaled by the component fugacities in the gas phase");
+    data->proc_params->add_property_f (0.0001,  "COMP_MAX_DP",                    "The maximum scaled pressure change (absolute pressure change divided by the average reservoir pressure)");
+    data->proc_params->add_property_f (0.005,   "COMP_MAX_DS",                    "The maximum absolute saturation change");
+    data->proc_params->add_property_f (0.001,   "COMP_MAX_DXCP",                  "The maximum absolute component mole fraction change");
+    data->proc_params->add_property_f (20,      "COMP_TS_DP",                     "time step controling pressure change");
+    data->proc_params->add_property_f (0.2,     "COMP_TS_DS",                     "time step controling saturation change");
+    data->proc_params->add_property_f (0.02,    "COMP_TS_DXCP",                   "time step controling mole fraction change");
+    data->proc_params->add_property_f (200,     "COMP_MAX_P_CORRECTION",          "maximum allowed newton correction for pressure");
+    data->proc_params->add_property_f (0.5,     "COMP_MAX_S_CORRECTION",          "maximum allowed newton correction for saturation");
+    data->proc_params->add_property_f (0.2,     "COMP_MAX_XCP_CORRECTION",        "maximum allowed newton correction for mole fraction");
+    data->proc_params->add_property_f (1.0e-5,  "MASS_BALANS_ERROR",              "maximum allowed mass balans error");
+    data->proc_params->add_property_f (1,       "MAX_NORM_ON_FIRST_N",            "maximum allowed norm on first newton iteration");
+    data->proc_params->add_property_f (0.001,   "P_DIMENSION_LESS_SCALE_FACTOR",  "scale factor for dimension less pressure");
+    data->proc_params->add_property_f (0.3,     "APPL_CHOP_PERC",                 "tipicaly (0.25-0.4)");
+    data->proc_params->add_property_f (0.2,     "APPL_CHOP_BND",                  "tipicaly (0.1-0.25)");
+    data->proc_params->add_property_f (0.0,     "FRACTURE_MIN_DELTA",             "if dist(A-B) < min_delta => connection will not added to this block, A,B- fracture and block intersection points");
+    data->proc_params->add_property_f (100,     "TIMESTEP_ON_NORM_RESIDUAL_MULT", "Multiplier for NEWTON_RESIDUAL");
+    data->proc_params->add_property_f (0.1,     "TIMESTEP_ON_NORM_MIN_MULT",      "minimum multiplier for current timestep");
+    data->proc_params->add_property_f (0.5,     "TIMESTEP_ON_NORM_MAX_MULT",      "maximum multiplier for current timestep");
+    data->proc_params->add_property_f (0.01,    "TIMESTEP_ON_NORM_RESTART_MULT",  "restart multiplier for current timestep");
+    data->proc_params->add_property_f (100,     "MAX_PCW_WARNING_VALUE",          "maximum PCW value to print warning messages in log-file");
+  }
+
+  void 
   hdm::init_equil (t_int n_equil_regions)
   {
     int n_phases;

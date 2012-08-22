@@ -186,6 +186,8 @@ enum   //! indexes for dimension parameters
     public:
       sp_prop_t props;
 
+      sp_prop_t proc_params ;
+
       
       
 

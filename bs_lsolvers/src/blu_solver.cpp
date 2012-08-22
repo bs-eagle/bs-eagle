@@ -4,7 +4,7 @@
  * @date 2009-12-09
  */
 
-#include "lsolvers_stdafx.h"
+#include "bs_lsolvers_stdafx.h"
 
 #include "blu_solver.h"
 

@@ -5,7 +5,7 @@
  * \date 11.02.2009
  * */
 
-#include "lsolvers_stdafx.h"
+#include "bs_lsolvers_stdafx.h"
 
 #include "gmres_solver.h"
 #include "mv_functions.h"
