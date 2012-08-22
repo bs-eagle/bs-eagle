@@ -80,6 +80,8 @@ void py_export_czt();
 void py_export_wpi();
 void py_export_well_edit();
 void py_export_upsc();
+void py_export_handymesh();
+
 }}
 
 /*-----------------------------------------------------------------
@@ -94,10 +96,12 @@ namespace {
     python::py_export_mesh ();
     python::py_export_mesh_grdecl ();
     python::py_export_flux_connections ();
-	python::py_export_czt();
-	python::py_export_wpi();
-	python::py_export_well_edit();
+    python::py_export_czt();
+    python::py_export_wpi();
+    python::py_export_well_edit();
     python::py_export_upsc();
+    python::py_export_handymesh();
+
   }
 }
 BLUE_SKY_INIT_PY_FUN

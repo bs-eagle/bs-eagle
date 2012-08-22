@@ -62,7 +62,10 @@ struct BS_API_PLUGIN compdat {
 	void init(ulong cell_id, const pos_i& mesh_size);
 
 	bool operator<(const compdat& rhs) const {
-		return cell_id_ < rhs.cell_id_;
+		if(well_name == rhs.well_name)
+			return cell_id_ < rhs.cell_id_;
+		else
+			return well_name < rhs.well_name;
 	}
 
 private:

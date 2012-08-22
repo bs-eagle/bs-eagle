@@ -14,16 +14,22 @@
 namespace blue_sky {
 
 namespace {
+
+// separate function for Python export
+spv_float calc_cells_vertices_xyz_impl(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
+	typedef smart_ptr< bs_mesh_grdecl, true > sp_grd_mesh;
+	// build mesh_grdecl around given mesh
+	sp_grd_mesh grd_src = BS_KERNEL.create_object(bs_mesh_grdecl::bs_type());
+	if(!grd_src) return NULL;
+	grd_src->init_props(nx, ny, coord, zcorn);
+	// obtain coordinates for all vertices of all cells
+	return grd_src->calc_cells_vertices_xyz();
+}
+
 class BS_API_PLUGIN handy_object : public handy_mesh_iface {
 public:
 	spv_float calc_cells_vertices_xyz(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
-		typedef smart_ptr< bs_mesh_grdecl, true > sp_grd_mesh;
-		// build mesh_grdecl around given mesh
-		sp_grd_mesh grd_src = BS_KERNEL.create_object(bs_mesh_grdecl::bs_type());
-		if(!grd_src) return NULL;
-		grd_src->init_props(nx, ny, coord, zcorn);
-		// obtain coordinates for all vertices of all cells
-		return grd_src->calc_cells_vertices_xyz();
+		return calc_cells_vertices_xyz_impl(nx, ny, coord, zcorn);
 	}
 
 	// 3D
@@ -64,5 +70,15 @@ BLUE_SKY_TYPE_STD_COPY(handy_object)
 bool register_handy_mesh_iface(const plugin_descriptor& pd) {
 	return BS_KERNEL.register_type(pd, handy_object::bs_type());
 }
+
+#ifdef BSPY_EXPORTING_PLUGIN
+namespace python {
+	using namespace boost::python;
+
+	void py_export_handymesh() {
+		def("calc_cells_vertices_xyz", &calc_cells_vertices_xyz_impl);
+	}
+} /* python */
+#endif
 
 } /* blue_sky */
