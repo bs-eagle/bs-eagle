@@ -61,6 +61,7 @@ namespace blue_sky
   {
     this->reader = BS_KERNEL.create_object("bos_reader");
     this->data = BS_KERNEL.create_object(idata::bs_type());
+    init_proc_params();
     this->km = BS_KERNEL.create_object(keyword_manager::bs_type());
     
     this->pvt_3p_ = BS_KERNEL.create_object ("pvt_3p");

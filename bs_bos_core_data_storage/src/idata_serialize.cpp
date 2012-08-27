@@ -51,6 +51,7 @@ BLUE_SKY_CLASS_SRZ_FCN_END
  *----------------------------------------------------------------*/
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, idata)
 	ar & t.props;
+  ar & t.proc_params;
 	ar & t.h5_pool;
 	ar & t.input_units_converter;
 	ar & t.output_units_converter;

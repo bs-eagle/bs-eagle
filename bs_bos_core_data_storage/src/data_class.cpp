@@ -74,6 +74,7 @@ namespace blue_sky
   idata::idata(bs_type_ctor_param /*param*/)
   : bs_node(bs_node::create_node (new this_t::idata_traits ())),
   props (BS_KERNEL.create_object ("prop")),
+  proc_params (BS_KERNEL.create_object ("prop")),
   h5_pool (BS_KERNEL.create_object ("h5_pool")),
   equil_regions (BS_KERNEL.create_object (v_int::bs_type ())),
   rock (BS_KERNEL.create_object (v_float::bs_type ())),
