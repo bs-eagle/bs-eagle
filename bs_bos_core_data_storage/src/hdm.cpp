@@ -199,8 +199,8 @@ namespace blue_sky
                                                       
     data->proc_params->add_property_f (1000,    "PVT_PRESSURE_MAX",               "PVT tables maximum pressure");
     data->proc_params->add_property_f (1,       "PVT_PRESSURE_MIN",               "PVT tables minimal pressure");
-    data->proc_params->add_property_f (1,       "PVTO_RS_MAX",                    "PVTO maximum RS for slop table");
-    data->proc_params->add_property_f (400,     "PVTO_RS_MIN",                    "PVTO minimum RS for slop table");
+    data->proc_params->add_property_f (400,       "PVTO_RS_MAX",                    "PVTO maximum RS for slop table");
+    data->proc_params->add_property_f (1,     "PVTO_RS_MIN",                    "PVTO minimum RS for slop table");
     data->proc_params->add_property_f (100,     "TS_MAX",                         "maximum allowed time step length");
     data->proc_params->add_property_f (5.0e-6,  "TS_MIN",                         "minimum allowed time step length");
     data->proc_params->add_property_f (1,       "TS_FIRST",                       "first simulation time step length");
@@ -219,7 +219,7 @@ namespace blue_sky
     data->proc_params->add_property_f (1.0,     "P_COL_MULT",                     "multiplier for pressure derivates column in Jacobian");
     data->proc_params->add_property_f (0.5,     "TS_OMEGA",                       "omega coef in time step controling");
     data->proc_params->add_property_f (60,      "TS_DP",                          "pressure change for time step controling");
-    data->proc_params->add_property_f (0.5,     "TS_DS",                          "saturation change for time step controling");
+    data->proc_params->add_property_f (0.05,     "TS_DS",                          "saturation change for time step controling");
     data->proc_params->add_property_f (1e-5,    "DP_MIN_CHOP",                    "minimum pressure chop");
     data->proc_params->add_property_f (1e-7,    "DS_MIN_CHOP",                    "minimum saturation chop");
     data->proc_params->add_property_f (0.05,    "LITERS_MAX_RESID",               "maximum allowed residual");
