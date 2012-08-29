@@ -1789,8 +1789,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                 return -1;
               for (; !step_sql ();)
                 {
-                  point_ptr[0] = get_sql_real (1) + eps;
-                  point_ptr[1] = get_sql_real (2) + eps;
+                  point_ptr[0] = get_sql_real (1);
+                  point_ptr[1] = get_sql_real (2);
                   point_ptr[2] = prop->get_f ("min_z");
                   point_ptr += 3;
                 }
