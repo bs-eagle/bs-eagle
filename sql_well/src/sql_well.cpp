@@ -1805,16 +1805,16 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                 {
                   std::string s = get_sql_str (0);
                   BSOUT << "Writing well " << s << bs_end;
-                  int cell = (*cells)[i];
+                  unsigned long cell = (*cells)[i];
                   if (cell >= nx_ny * nz) {
                     // don't write out of mesh wells
                     BSERR << std::string("Well ") + s + "is out of mesh! Omitting from WELLSPEC section" << bs_end;
                     continue;
                     //throw bs_exception ("", "Well's X Y is out of mesh!");
                   }
-                  int k1 = cell / nx_ny;
-                  int j1 = (cell - k1 * nx_ny) / nx;
-                  int i1 = cell - k1 * nx_ny - j1 * nx;
+                  unsigned long k1 = cell / nx_ny;
+                  unsigned long j1 = (cell - k1 * nx_ny) / nx;
+                  unsigned long i1 = cell - k1 * nx_ny - j1 * nx;
                   fprintf (fp, "\'%s\' \'FIELD\' %u %u /\n", s.c_str (), i1 + 1, j1 + 1);
                   // remember well's name for filtering COMPDATS
                   good_wells.insert(s);
