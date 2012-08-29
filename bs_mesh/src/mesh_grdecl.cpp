@@ -180,28 +180,37 @@ int mesh_grdecl::fix_data() const
   // 1. change COORD points to lie either on min_z or max_z plane
   
   t_double prop;
-  t_int index;
+  t_long index, i1, j1, index_z_top, index_z_bottom;
   int res = 0;
   for (t_long j = 0; j < ny + 1; ++j)
     for (t_long i = 0; i < nx + 1; ++i)
       {
         index = (i + j * (nx + 1)) * 6;
-        if (coord_array[index + 2] != min_z)
+        i1 = i;
+        j1 = j;
+        if (i == nx)
+          i1 -=1;
+        if (j == ny)
+          j1 -=1;
+        index_z_top = 2 * i1 + 4 * j1 * nx;
+        index_z_bottom = index_z_top + 8 * nx * ny * (nz - 0.5);
+
+        if (coord_array[index + 2] != zcorn_array[index_z_top])
           {
             
-            prop = (coord_array[index + 2] - min_z) / (coord_array[index + 5] - coord_array[index + 2]);
+            prop = (coord_array[index + 2] - zcorn_array[index_z_top]) / (coord_array[index + 5] - coord_array[index + 2]);
             coord_array[index + 0] = prop *(coord_array[index + 3] - coord_array[index + 0]) + coord_array[index + 0];
             coord_array[index + 1] = prop *(coord_array[index + 4] - coord_array[index + 1]) + coord_array[index + 1];
-            coord_array[index + 2] = min_z;
+            coord_array[index + 2] = zcorn_array[index_z_top];
             res = 1;
           }
         
-        if (coord_array[index + 5] != max_z)
+        if (coord_array[index + 5] != zcorn_array[index_z_bottom])
           {
-            prop = (max_z - coord_array[index + 2]) / (coord_array[index + 5] - coord_array[index + 2]);
+            prop = (zcorn_array[index_z_bottom] - coord_array[index + 2]) / (coord_array[index + 5] - coord_array[index + 2]);
             coord_array[index + 3] = prop *(coord_array[index + 3] - coord_array[index + 0]) + coord_array[index + 0];
             coord_array[index + 4] = prop *(coord_array[index + 4] - coord_array[index + 1]) + coord_array[index + 1];
-            coord_array[index + 5] = max_z;
+            coord_array[index + 5] = zcorn_array[index_z_bottom];
             res = 1;
           }
       }
