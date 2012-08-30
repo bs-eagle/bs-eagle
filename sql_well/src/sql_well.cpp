@@ -835,7 +835,7 @@ COMMIT;\
       request_str = request_str + " FROM " + table_name + " " + filter;
       prepare_sql (request_str);
 
-      
+
       for (int i = 0; (i < n_rows) && (!step_sql ()); ++i)
         {
           for (int j = 0; j < n_cols; j++)
@@ -1823,7 +1823,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               finalize_sql ();
             }
 
-          
+
           // COMPDAT
           const double eps = 1.0e-5;
           const std::set< std::string >::const_iterator good_wells_end = good_wells.end();
@@ -1845,7 +1845,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             fprintf (fp, "/\n\n");
           }
 
-         
+
           // WPIMULT
 
           if (!cd.empty ())
@@ -1855,7 +1855,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             int wpimult_exist = 0;
             for (cdi = cd.begin(); cdi != cde; ++cdi)
             {
-              if (cdi->kh_mult != 1 && std::abs(cdi->kh_mult) > eps && good_wells.find(cdi->well_name) != good_wells_end)
+              if (fabs(cdi->kh_mult - 1.0) > 1e-6 && std::abs(cdi->kh_mult) > eps && good_wells.find(cdi->well_name) != good_wells_end)
                 {
                   if (!wpimult_exist)
                     fprintf (fp, "WPIMULT\n");
@@ -1867,7 +1867,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               fprintf (fp, "/\n\n");
           }
 
-         
+
           // FRACTURES
           ft = compl_n_frac.frac_build(*di);
           if (!ft.empty ())
@@ -1908,7 +1908,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             }
             fprintf (fp, "/\n\n");
           }
-         
+
           // WCONINJE
           sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND ctrl < 0 ORDER BY well_name ASC", *di);
           if (prepare_sql (s_buf))
@@ -1985,7 +1985,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           if (wconinje_flag)
             fprintf (fp, "/\n\n");
           finalize_sql ();
-          
+
           // WCONPROD
           sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND ctrl > 0 ORDER BY well_name ASC", *di);
           if (prepare_sql (s_buf))
@@ -2071,7 +2071,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               fprintf (fp, "/\n");
             }
 
-        
+
           if (wconprod_flag)
             fprintf (fp, "/\n\n");
           finalize_sql ();
@@ -2103,7 +2103,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               fprintf (fp, "/\n");
             }
 
-        
+
           if (wefac_flag)
             fprintf (fp, "/\n\n");
           finalize_sql ();
