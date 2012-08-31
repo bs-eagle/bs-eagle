@@ -35,34 +35,6 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 	// save file_name
 	ar << t.file_name;
 
-	// check if database is open
-	int cur_s, hiwtr, opres = SQLITE_OK + 1;
-	sqlite3* src_db = t.db;
-	if(src_db)
-		opres = sqlite3_db_status(src_db, 0, &cur_s, &hiwtr, 0);
-	if(opres != SQLITE_OK) {
-		// probably db is closed or not open or whatever
-		// try to open it using contained file_name
-		if(t.file_name.size()) {
-			opres = sqlite3_open(t.file_name.c_str(), &src_db);
-			if(opres != SQLITE_OK) {
-				sqlite3_close(src_db);
-				src_db = 0;
-			}
-		}
-	}
-
-	// flag indicating whether we should backup db
-	bool do_write_db = true;
-
-	// if db not open now, we're done
-	if(opres != SQLITE_OK) {
-		do_write_db = false;
-		ar << do_write_db;
-		return;
-	}
-	ar << do_write_db;
-
 	// check db has an associated filename
 	// strangely there is no such API function though it is documented
 	//std::string db_fname(sqlite3_db_filename(t.db, "main"));
@@ -88,6 +60,33 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 		db_basename = bu::to_string(db_uuid) + "_well_pool.db";
 		db_fname = std::string("file:") + db_basename;
 	}
+
+	// flag indicating whether we should backup db
+	bool do_write_db = true;
+	// check if database is open
+	int cur_s, hiwtr, opres = SQLITE_OK + 1;
+	sqlite3* src_db = t.db;
+	if(src_db)
+		opres = sqlite3_db_status(src_db, 0, &cur_s, &hiwtr, 0);
+	if(opres != SQLITE_OK) {
+		// probably db is closed or not open or whatever
+		// try to open it using contained file_name
+		// or db_basename
+		if(t.file_name.size()) {
+			opres = sqlite3_open(t.file_name.c_str(), &src_db);
+			if(opres != SQLITE_OK)
+				opres = sqlite3_open(db_fname.c_str(), &src_db);
+			if(opres != SQLITE_OK) {
+				sqlite3_close(src_db);
+				do_write_db = false;
+			}
+		}
+	}
+
+	ar << do_write_db;
+	// if db not open now, we're done
+	if(!do_write_db)
+		return;
 
 	// save basename first
 	ar << db_basename;
@@ -137,7 +136,7 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, blue_sky::sql_well)
 	std::string db_basename, db_fname;
 	ar >> db_basename >> db_fname;
 
-	// check if hdm serializer saved filename for us
+	// check if hdm serializer saved project path for us
 	kernel::idx_dt_ptr kdt = BS_KERNEL.pert_idx_dt(BS_KERNEL.find_type("hdm").td_);
 	if(kdt && kdt->size< std::string >()) {
 		std::string prj_path = kdt->ss< std::string >(0);
@@ -154,12 +153,18 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, blue_sky::sql_well)
 	}
 
 	opres = sqlite3_open(db_fname.c_str(), &bu_db);
-	if(opres != SQLITE_OK) {
-		sqlite3_close(bu_db);
+	if(opres == SQLITE_OK) {
+		// just save handle to db into sql_well and we're done
+		t.db = bu_db;
 		return;
 	}
-	// just save handle to db into sql_well and we're done
-	t.db = bu_db;
+	// finally try to open db from stored path t.file_name
+	sqlite3_close(bu_db);
+	opres = sqlite3_open(t.file_name.c_str(), &bu_db);
+	if(opres == SQLITE_OK)
+		t.db = bu_db;
+	else
+		sqlite3_close(bu_db);
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 // generate serialize() function that uses save & load
