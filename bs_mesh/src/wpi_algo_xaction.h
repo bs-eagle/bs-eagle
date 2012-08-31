@@ -208,6 +208,7 @@ public:
 
 		//wp_iterator pw = wp_.begin();
 		//ulong node_idx = 0;
+		ulong mesh_sz = m_.size();
 		for(ulong i = 0; i < wp_.size(); ++i) {
 			//const well_data& wseg = pw->second;
 			// upper_bound
@@ -216,13 +217,13 @@ public:
 			// we need prev intersection
 			//if(px != x_.begin()) --px;
 
-			if(hit_idx[i] < hit_idx.size())
+			if(hit_idx[i] < mesh_sz)
 				px = insert_wp_node(hit_idx[i], i, px);
 		}
 
 		// well path doesn't contain the end-point of trajectory
 		// add it manually
-		if(hit_idx[hit_idx.size() - 1] < hit_idx.size())
+		if(hit_idx[hit_idx.size() - 1] < mesh_sz)
 			insert_wp_node(hit_idx[hit_idx.size() - 1], wp_.size() - 1, x_.end(), true);
 	}
 
