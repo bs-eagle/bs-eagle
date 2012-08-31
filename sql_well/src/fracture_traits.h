@@ -59,13 +59,24 @@ struct fract_traits  {
 		t_double frac_skin     = sw->get_sql_real (9);
 		x_iterator px = xp.upper_bound(whc(md));
 
-		if (px == xp.end ())
-			return;
 		// position to next point
 		x_iterator pnext_x = px;
 		// always start with prev intersection
 		if(px != xp.begin())
 			--px;
+		else
+			// even if md == xp.begin().md then px should be xp.begin() + 1
+			// so we shurely have md < xp.begin().md here
+			return;
+
+		// check for special case when md lies exactly on last intersection
+		if(pnext_x == xp.end()) {
+			if(md == px->md)
+				pnext_x = px;
+			else
+				// in that case md > last intersection md
+				return;
+		}
 
 		// prepare compdat
 		fracture frac(well_name, branch_name, px->cell, fcb.m_size_);
@@ -88,12 +99,12 @@ struct fract_traits  {
 		frac.frac_main_k = cell_pos[2];
 
 		for (t_uint j = 0; j < strat_t::D; ++j) {
-			frac_coords[j] = px->where[j] + (md - px->md) /
-				(pnext_x->md - px->md) * (pnext_x->where[j] - px->where[j]);
+			if(pnext_x != px)
+				frac_coords[j] = px->where[j] + (md - px->md) /
+					(pnext_x->md - px->md) * (pnext_x->where[j] - px->where[j]);
+			else
+				frac_coords[j] = px->where[j];
 		}
-
-		//std::cout<<"up "<<half_up<<" down "<<half_down<<"\n";
-
 
 		t_uint kw1_flag = 0;
 		// find kw1 position of fracture
