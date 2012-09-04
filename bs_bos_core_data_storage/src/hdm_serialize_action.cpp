@@ -49,9 +49,15 @@ dst_stream& hdm_serialize_save_impl(
 	p_dt->insert< std::string >(prj_path);
 	// and project name
 	p_dt->insert< std::string >(prj_name);
+	// DEBUG
+	BSERR << "hdm_serialie_save invoked with" << bs_end;
+	BSERR << "project path: " << prj_path << bs_end;
+	BSERR << "model path: " << prj_name << bs_end;
 	// inform to explicitly copy storage files
-	if(deep_copy_suffix.size())
+	if(deep_copy_suffix.size()) {
 		p_dt->insert< std::string >(deep_copy_suffix);
+		BSERR << "!model name suffix!: " << deep_copy_suffix << bs_end;
+	}
 
 	// make archive
 	boarch::polymorphic_text_oarchive oa(f);
