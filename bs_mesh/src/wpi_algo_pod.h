@@ -298,7 +298,7 @@ public:
 		assert(D < N && "vertex_pos overflow!");
 		va_list arg_list;
 		va_start(arg_list, N);
-		for(uint i = 0; i < N; ++i) {
+		for(int i = 0; i < N; ++i) {
 			elems[i] = va_arg(arg_list, value_type);
 		}
 		va_end(arg_list);

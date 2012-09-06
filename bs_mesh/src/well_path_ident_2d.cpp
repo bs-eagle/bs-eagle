@@ -329,6 +329,7 @@ public:
 	};
 
 	virtual int type() const = 0;
+	virtual ~box_handle() {};
 
 protected:
 	template< class fish_t, class = void >

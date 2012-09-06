@@ -80,7 +80,7 @@ namespace blue_sky
   template <typename data_set, int ni, int nf>
   std::list<std::string> well_storage::get_names (data_set data)
   {
-    typename data_set::template nth_index<0>::type& name_index = data.get<0>();
+    typename data_set::template nth_index<0>::type& name_index = data.template get<0>();
     typename data_set::template nth_index<0>::type::iterator name_it, name_b, name_e;
     std::list<std::string> names;
     long n = 0;
@@ -104,7 +104,7 @@ namespace blue_sky
   template <typename data_set, int ni, int nf>
   spv_double well_storage::get_dates (const std::string &name, data_set data)
   {
-    typename data_set::template nth_index<0>::type& name_index = data.get<0>();
+    typename data_set::template nth_index<0>::type& name_index = data.template get<0>();
     typename data_set::template nth_index<0>::type::iterator name_it, name_b, name_e;
     spv_double res;
     t_double *res_data;
@@ -133,7 +133,7 @@ namespace blue_sky
   template <typename data_set_t, typename vector_t, int ni, int nf>
   blue_sky::smart_ptr< vector_t > well_storage::get_values (const std::string &name, data_set_t &data, int col, int type)
   {
-    typename data_set_t::template nth_index<0>::type& name_index = data.get<0>();
+    typename data_set_t::template nth_index<0>::type& name_index = data.template get<0>();
     typename data_set_t::template nth_index<0>::type::iterator name_it, name_b, name_e;
     blue_sky::smart_ptr< vector_t > res;
     typename vector_t::value_type *res_data;
@@ -171,7 +171,7 @@ namespace blue_sky
   params_t*
   well_storage::get_params (data_set_t &data, const std::string &well, t_double date)
   {
-    typename data_set_t::template nth_index<0>::type& name_index = data.get<0>();
+    typename data_set_t::template nth_index<0>::type& name_index = data.template get<0>();
     typename data_set_t::iterator name_it, name_b, name_e;
      
     name_b = name_index.lower_bound (well, comp_name<ni,nf>());
@@ -194,7 +194,7 @@ namespace blue_sky
     params_t *params;
     data_t tmp;
      
-    params = get_params<params_t, data_set_t, ni, nf>(data, name, date);
+    params = this->get_params<params_t, data_set_t, ni, nf>(data, name, date);
     
     if (params)
       {
@@ -238,7 +238,7 @@ namespace blue_sky
     typename vector_t::value_type tmp;
     int i;
      
-    params = get_params<params_t, data_set_t, ni, nf>(data, name, date);
+    params = this->get_params<params_t, data_set_t, ni, nf>(data, name, date);
     vals_data = &(*vals)[0];
     
     if (params)

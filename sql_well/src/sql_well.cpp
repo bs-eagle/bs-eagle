@@ -1709,7 +1709,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
       // interface to mesh
       sp_himesh himesh = BS_KERNEL.create_object("handy_mesh_iface");
       BS_ASSERT(himesh);
-      const double eps = 1e-10;
+      //const double eps = 1e-10;
       sp_dt_t dt_t = BS_KERNEL.create_object ("dt_tools");
 
       if (!fp)
@@ -1734,7 +1734,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
       nx = boost::python::extract<int>(dims[0]);
       ny = boost::python::extract<int>(dims[1]);
       nz = boost::python::extract<int>(dims[2]);
-      int nx_ny = nx * ny;
+      unsigned long nx_ny = nx * ny;
       BS_SP (well_pool_iface) sp_wp = this;
 #if 0
       fci::compdat_builder compdats (nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), sp_wp);
@@ -1806,7 +1806,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   std::string s = get_sql_str (0);
                   BSOUT << "Writing well " << s << bs_end;
                   unsigned long cell = (*cells)[i];
-                  if (cell >= nx_ny * nz) {
+                  if (cell >= nx_ny * (unsigned long)nz) {
                     // don't write out of mesh wells
                     BSERR << std::string("Well ") + s + "is out of mesh! Omitting from WELLSPEC section" << bs_end;
                     continue;
@@ -1815,7 +1815,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   unsigned long k1 = cell / nx_ny;
                   unsigned long j1 = (cell - k1 * nx_ny) / nx;
                   unsigned long i1 = cell - k1 * nx_ny - j1 * nx;
-                  fprintf (fp, "\'%s\' \'FIELD\' %u %u /\n", s.c_str (), i1 + 1, j1 + 1);
+                  fprintf (fp, "\'%s\' \'FIELD\' %lu %lu /\n", s.c_str (), i1 + 1, j1 + 1);
                   // remember well's name for filtering COMPDATS
                   good_wells.insert(s);
                 }
