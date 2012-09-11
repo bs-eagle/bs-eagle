@@ -22,7 +22,7 @@
 typedef int           t_int;
 
 //! this type should be using for indexing (matrix, arrays, ...)
-typedef long          t_long;
+typedef long long     t_long;
 
 #ifndef T_FLOAT_IS_DOUBLE
 #define T_FLOAT_IS_DOUBLE 1

@@ -466,10 +466,17 @@ namespace blue_sky {
 
       if (impl_->grub_call_stack_)
         {
+#ifdef BS_BOS_CORE_COLLECT_BACKTRACE
           BOSOUT (section::save_data, level::critical)
             << boost::format ("HDF5 error occured (context: %s): \n%sCall stack which prevents to error: %s")
                 % impl_->error_context_ % hdf5_stack_walk % kernel_tools::get_backtrace (128)
-            << bs_end;
+                << bs_end;
+#else
+          BOSOUT (section::save_data, level::critical)
+            << boost::format ("HDF5 error occured (context: %s): \n%sCall stack which prevents to error: %s")
+                % impl_->error_context_ % hdf5_stack_walk % "no backtrace"
+                << bs_end;
+#endif
         }
       else
         {

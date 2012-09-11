@@ -8,7 +8,7 @@
  * */
 #include "stdafx.h"
 #include <boost/spirit.hpp>
-#include <boost/spirit/core.hpp>
+//#include <boost/spirit/core.hpp>
 
 #include "event_base.h"
 #include "str_functor.h"
