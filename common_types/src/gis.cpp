@@ -109,10 +109,12 @@ namespace blue_sky
       std::string units;
       std::string data;
 
+      std::cout << "SEC VER:" << s << std::endl;
+
       split_str (s, name, units, data, description);
       if (name == "VERS")
         {
-          prop->add_property_f (0, name, description);
+          //prop->add_property_f (0, name, description);
           prop->set_f (name, str2T<double>(data));
         }
       else
@@ -130,6 +132,8 @@ namespace blue_sky
       std::string name;
       std::string units;
       std::string data;
+
+      std::cout << "SEC WELL:" << s << std::endl;
 
       split_str (s, name, units, data, description);
       if (name == "STRT"
@@ -169,6 +173,12 @@ namespace blue_sky
       std::string units;
       std::string data;
 
+      std::cout << "SEC PAR:" << s << std::endl;
+      if (s[0]='-')
+        {
+          return 0;
+        }
+
       split_str (s, name, units, data, description);
       if (ver <= 1.2 && data == "")
         {
@@ -190,6 +200,7 @@ namespace blue_sky
       std::string name;
       std::string units;
       std::string data;
+      std::cout << "SEC CUR:" << s << std::endl;
 
       std::string param = std::string ("param") 
                          + boost::lexical_cast<std::string> (n);
@@ -208,6 +219,7 @@ namespace blue_sky
       namespace qi = boost::spirit::qi;
       using boost::spirit::ascii::space;
 
+      std::cout << "SEC ASCII:" << s << std::endl;
       for (;!file.eof ();)
         {
           std::string::iterator begin = s.begin();
@@ -252,6 +264,8 @@ namespace blue_sky
       std::vector <t_double> v;
       namespace fs = boost::filesystem;
       fs::path p(fname);
+      std::cout << "Start:"  << '\n';
+      sp_prop->add_property_f (2.0, "VERS", "Version information");
       try
         {
           if (!fs::exists (p) || !is_regular_file (p))
@@ -266,7 +280,7 @@ namespace blue_sky
         }
       catch (const fs::filesystem_error& ex)
         {
-          std::cout << ex.what() << '\n';
+          std::cout << "Error:" <<ex.what() << '\n';
           return -1;
         }
 
