@@ -19,7 +19,7 @@ std::string get_date_time_str ()
   time ( &rawtime );
   timeinfo = localtime ( &rawtime );
 
-  char str[20];
+  char str[1024];
   int2str(timeinfo->tm_mday, &str[0]);
   int2str(1 + timeinfo->tm_mon, &str[3]);
   int2str(1900 + timeinfo->tm_year, &str[6]);

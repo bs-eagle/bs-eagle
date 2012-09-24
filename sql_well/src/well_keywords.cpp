@@ -44,8 +44,8 @@ namespace blue_sky
   void
   well_keywords::CSV_SHEDULE_reactor (std::string const & /*keyword*/, keyword_params &params)
   {
-    char prop_name[50];
-    char prop_name_last[50];
+    char prop_name[1024];
+    char prop_name_last[1024];
     t_int j = 1;
     
     sprintf (prop_name, "csv_schedule");

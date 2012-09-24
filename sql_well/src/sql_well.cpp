@@ -1872,8 +1872,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           ft = compl_n_frac.frac_build(*di);
           if (!ft.empty ())
           {
-            char main_k_str[20];
-            char perm_str[20];
+            char main_k_str[1024];
+            char perm_str[1024];
             fprintf (fp, "FRACTURE\n");
             fte = ft.end ();
             for (fti = ft.begin (); fti != fte; ++fti)
@@ -1934,10 +1934,10 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               double i_gr = get_sql_real (10);
               double i_bhp = get_sql_real (11);
               double rate = i_wr;
-              char s_status[10];
-              char s_ctrl[10];
-              char s_phase[10];
-              char s_params[20];
+              char s_status[1024];
+              char s_ctrl[1024];
+              char s_phase[1024];
+              char s_params[1024];
               if (status == STATUS_OPEN)
                 sprintf (s_status, "OPEN");
               else
@@ -2012,9 +2012,9 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               double p_gr = get_sql_real (4);
               double p_lr = get_sql_real (5);
               double p_bhp = get_sql_real (6);
-              char s_status[10];
-              char s_ctrl[10];
-              char s_params[30];
+              char s_status[1024];
+              char s_ctrl[1024];
+              char s_params[1024];
               if (status == STATUS_OPEN)
                 sprintf (s_status, "OPEN");
               else

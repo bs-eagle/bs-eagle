@@ -3937,7 +3937,7 @@ bool mesh_grdecl::file_open_cube_with_hdf5_swap(const char* file_name)
       H5::DataSet *dataset_coords = 0;
       H5::DataSet *dataset_zcorn = 0;
 
-      char buf[100];
+      char buf[1024];
       item_array_t buf_array;
       bool array_end;
 
@@ -4037,7 +4037,7 @@ bool mesh_grdecl::file_open_actnum(const char* /*file_name*/)
 {
 #if 0
   fstream file(file_name,  ios::in);
-  char buf[255];
+  char buf[1024];
   char *start_ptr,*end_ptr;
   if (!file.is_open())
     {
@@ -4067,7 +4067,7 @@ bool mesh_grdecl::file_open_cube(const char* /*file_name*/)
   /*
   using namespace std;
   fstream file(file_name,  ios::in);
-  char buf[100];
+  char buf[1024];
   char *start_ptr, *end_ptr;
   if (!file.is_open())
     return false;

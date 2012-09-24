@@ -779,7 +779,7 @@ namespace blue_sky
   // calls H5Gget_objname_by_idx and return as std::string
   std::string get_obj_name_by_idx (hid_t &location, hsize_t idx)
   {
-    char name[256];
+    char name[1024];
     int name_size = H5Gget_objname_by_idx (location, idx, NULL, 0) + 1;//get size of the name, +1 - hdf5 specification
     H5Gget_objname_by_idx (location, idx, name, name_size);//get name
     return std::string (name);
