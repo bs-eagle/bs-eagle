@@ -22,7 +22,11 @@
 typedef int           t_int;
 
 //! this type should be using for indexing (matrix, arrays, ...)
+#ifdef _WIN32
 typedef long long     t_long;
+#else
+typedef long          t_long;
+#endif
 
 #ifndef T_FLOAT_IS_DOUBLE
 #define T_FLOAT_IS_DOUBLE 1
@@ -39,7 +43,11 @@ typedef float         t_float;
 typedef double        t_double;
 
 typedef unsigned long               t_uint;
+#ifdef _WIN32
+typedef unsigned long long          t_ulong;
+#else
 typedef unsigned long               t_ulong;
+#endif
 
 #define BS_EAGLE_ARRAY_TRAITS blue_sky::bs_npvec_shared
 typedef blue_sky::bs_array< t_int    , BS_EAGLE_ARRAY_TRAITS >    v_int;
