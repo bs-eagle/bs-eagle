@@ -31,8 +31,10 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, convert_units)
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save_construct_data, convert_units)
-	ar << (const int&)t->get_input_units();
-	ar << (const int&)t->get_output_units();
+	int units = t->get_input_units();
+	ar << units;
+	units = t->get_output_units();
+	ar << units;
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load_construct_data, convert_units)

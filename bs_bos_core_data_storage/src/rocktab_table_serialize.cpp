@@ -15,7 +15,7 @@
 
 using namespace blue_sky;
 namespace boser = boost::serialization;
-typedef unsigned long ulong;
+typedef t_ulong ulong;
 
 /*-----------------------------------------------------------------
  * serialize bs_table
@@ -23,10 +23,11 @@ typedef unsigned long ulong;
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, bs_table)
 	// save rows num and col num
 	ar << t.n_rows;
-	ar << (const ulong&)t.columns.size();
+	const ulong col_num = ulong(t.columns.size());
+	ar << col_num;
 
 	// save data
-	for(ulong i = 0; i < t.columns.size(); ++i) {
+	for(ulong i = 0; i < col_num; ++i) {
 		ar << t.columns[i].name;
 		ar << t.columns[i].data;
 	}

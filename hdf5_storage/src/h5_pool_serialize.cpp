@@ -183,7 +183,8 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, h5_pool)
 
 	// we should only dump group names
 	typedef h5_pool::map_hid_t::const_iterator g_iterator;
-	ar << (const std::size_t&)t.group_id.size();
+	const std::size_t sz = t.group_id.size();
+	ar << sz;
 	for(g_iterator pg = t.group_id.begin(); pg != t.group_id.end(); ++pg)
 		ar << pg->first;
 
@@ -193,7 +194,7 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, h5_pool)
 	const std::string dtype_grp = "_dtype";
 	hid_t dtype_grp_hid = -1;
 	std::string g_name, dtype_name;
-	unsigned long dtype_idx = 0;
+	t_ulong dtype_idx = 0;
 	vector< char > dtype_ex_name(16);
 
 	ar << (const std::size_t&)t.h5_map.size();

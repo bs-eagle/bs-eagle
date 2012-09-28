@@ -38,18 +38,25 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, hdm)
 
 	// save number of pvt regions
 	const t_long long_zero = 0;
-	if(t.pvt_3p_)
-		ar << (const t_long&)t.pvt_3p_->get_n_pvt_regions();
+	t_long n_regions;
+	if(t.pvt_3p_) {
+		n_regions = t.pvt_3p_->get_n_pvt_regions();
+		ar << n_regions;
+	}
 	else
 		ar << long_zero;
 	// save number of scal regions
-	if(t.scal_3p_)
-		ar << (const t_long&)t.scal_3p_->get_n_scal_regions();
+	if(t.scal_3p_) {
+		n_regions = t.scal_3p_->get_n_scal_regions();
+		ar << n_regions;
+	}
 	else
 		ar << long_zero;
 	// save number of equil regions
-	if(t.equil_model_)
-		ar << (const t_long&)t.equil_model_->get_n_equil_regions();
+	if(t.equil_model_) {
+		n_regions = t.equil_model_->get_n_equil_regions();
+		ar << n_regions;
+	}
 	else
 		ar << long_zero;
 BLUE_SKY_CLASS_SRZ_FCN_END

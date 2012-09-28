@@ -23,7 +23,8 @@ namespace boser = boost::serialization;
  *----------------------------------------------------------------*/
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, table)
 	// dump all info to string and save it
-	ar << (const std::string&)t.to_str();
+	const std::string prop_data = t.to_str();
+	ar << prop_data;
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, table)
@@ -51,7 +52,8 @@ BLUE_SKY_TYPE_SERIALIZE_IMPL(table)
  *----------------------------------------------------------------*/
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, prop)
 	// dump all info to string and save it
-	ar << (const std::string&)t.to_str();
+	const std::string prop_data = t.to_str();
+	ar << prop_data;
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, prop)
@@ -79,11 +81,13 @@ BLUE_SKY_TYPE_SERIALIZE_IMPL(prop)
  *----------------------------------------------------------------*/
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN_T(save, vartype_table, 1)
 	// save columns number
-	t_long num_cols = t.get_n_cols();
+	const t_long num_cols = t.get_n_cols();
 	ar << num_cols;
 	// save data
+	std::string col_name;
 	for(t_long i = 0; i < num_cols; ++i) {
-		ar << (const std::string&)t.get_col_name(i);
+		col_name = t.get_col_name(i);
+		ar << col_name;
 		ar << const_cast< type& >(t).get_col_vector(i);
 	}
 BLUE_SKY_CLASS_SRZ_FCN_END
