@@ -50,18 +50,32 @@ dst_stream& hdm_serialize_save_impl(
 	// and project name
 	p_dt->insert< std::string >(prj_name);
 	// DEBUG
-	BSERR << "hdm_serialie_save invoked with" << bs_end;
-	BSERR << "project path: " << prj_path << bs_end;
-	BSERR << "model path: " << prj_name << bs_end;
+	//BSERR << "hdm_serialize_save invoked with" << bs_end;
+	//BSERR << "project path: " << prj_path << bs_end;
+	//BSERR << "model path: " << prj_name << bs_end;
 	// inform to explicitly copy storage files
 	if(deep_copy_suffix.size()) {
 		p_dt->insert< std::string >(deep_copy_suffix);
-		BSERR << "!model name suffix!: " << deep_copy_suffix << bs_end;
+		//BSERR << "!model name suffix!: " << deep_copy_suffix << bs_end;
 	}
 
 	// make archive
-	boarch::polymorphic_text_oarchive oa(f);
-	oa << t;
+	try {
+		boarch::polymorphic_text_oarchive oa(f);
+		oa << t;
+	}
+	catch(const bs_exception& e) {
+		BSERR << std::string("Error during hdm_serialize_save: ") + e.what() << bs_end;
+	}
+	catch(const std::exception& e) {
+		BSERR << std::string("Error during hdm_serialize_save: ") + e.what() << bs_end;
+	}
+	catch(...) {
+		BSERR << "Unknown error during hdm_serialize_save!" << bs_end;
+		// clear kernel table to not confuse with further saves
+		p_dt->clear< std::string >();
+		throw;
+	}
 
 	// clear kernel table to not confuse with further saves
 	p_dt->clear< std::string >();
@@ -82,14 +96,39 @@ smart_ptr< hdm > hdm_serialize_load_impl(
 	p_dt->insert< std::string >(prj_name);
 
 	// load archive
-	boarch::polymorphic_text_iarchive ia(f);
+	// actually need to rethrow all exceptions
 	smart_ptr< hdm > t;
-	ia >> t;
+	try {
+		boarch::polymorphic_text_iarchive ia(f);
+		ia >> t;
+	}
+	catch(const bs_exception& e) {
+		BSERR << std::string("Error during hdm_serialize_load: ") + e.what() << bs_end;
+		// clear kernel table
+		p_dt->clear< std::string >();
+		throw;
+		//t = BS_KERNEL.create_object(hdm::bs_type());
+		//t.release();
+	}
+	catch(const std::exception& e) {
+		BSERR << std::string("Error during hdm_serialize_load: ") + e.what() << bs_end;
+		// clear kernel table
+		p_dt->clear< std::string >();
+		throw;
+		//t = BS_KERNEL.create_object(hdm::bs_type());
+		//t.release();
+	}
+	catch(...) {
+		BSERR << "Unknown error during hdm_serialize_save!" << bs_end;
+		// clear kernel table
+		p_dt->clear< std::string >();
+		throw;
+	}
 
 	// clear kernel table
 	p_dt->clear< std::string >();
 	// clear dangling refs of loaded in kernel
-	BS_KERNEL.tree_gc();
+	//BS_KERNEL.tree_gc();
 
 	return t;
 }
