@@ -944,6 +944,29 @@ COMMIT;\
     }
 
   int
+  sql_well::exec_sql_and_return_rowid (const std::string &sql)
+    {
+      if (!db)
+        return 0;
+      if (stmp_sql)
+        finalize_sql ();
+
+      int rc = 0;
+      char *zErrMsg = 0;
+      int rowid = -1;
+
+      rc = sqlite3_exec (db, sql.c_str (), NULL, 0, &zErrMsg);
+      rowid = sqlite3_last_insert_rowid(db);
+      if( rc != SQLITE_OK )
+        {
+          fprintf (stderr, "SQL error: %s\n", zErrMsg);
+          sqlite3_free (zErrMsg);
+          return -4;
+        }
+      return rowid;
+    }
+
+  int
   sql_well::read_from_ascii_file (const std::string &fname, double starting_date)
     {
       //if (fr_file)

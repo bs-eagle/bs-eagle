@@ -70,6 +70,8 @@ namespace blue_sky
         args ("Table_name", "Column list", "Filter"), "Return nparray of values in columns list")
     .def ("exec_sql",                           &T::exec_sql,
         args ("Sql_string"), "Execute SQL")
+    .def ("exec_sql_and_return_rowid",          &T::exec_sql_and_return_rowid,
+        args ("Sql_string"), "Execute SQL and return ROWID")
     .def ("read_from_ascii_file",               &T::read_from_ascii_file,
         args ("File_name", "starting_date"), "Read data from ascii file")
     .def ("save_to_bos_ascii_file",             &T::save_to_bos_ascii_file,
