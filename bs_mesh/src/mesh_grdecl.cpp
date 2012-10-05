@@ -179,8 +179,8 @@ int mesh_grdecl::fix_data() const
 {
   // 1. change COORD points to lie either on min_z or max_z plane
   
-  t_double prop;
-  t_long index, i1, j1, index_z_top, index_z_bottom;
+  t_double prop, i1, j1;
+  t_long index, index_z_top, index_z_bottom;
   int res = 0;
   for (t_long j = 0; j < ny + 1; ++j)
     for (t_long i = 0; i < nx + 1; ++i)
@@ -189,9 +189,9 @@ int mesh_grdecl::fix_data() const
         i1 = i;
         j1 = j;
         if (i == nx)
-          i1 -=1;
+          i1 -=0.5;
         if (j == ny)
-          j1 -=1;
+          j1 -=0.5;
         index_z_top = 2 * i1 + 4 * j1 * nx;
         index_z_bottom = index_z_top + 8 * nx * ny * (nz - 0.5);
 
