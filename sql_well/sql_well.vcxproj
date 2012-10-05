@@ -154,6 +154,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalOptions> /Zm1000</AdditionalOptions>
+      <DisableSpecificWarnings>4003;4520</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalDependencies>hdf5dll.lib;libCGAL_Core-vc100-mt-4.0.lib;libCGAL-vc100-mt-4.0.lib;libgmp-10.lib;libmpfr-4.lib;%(AdditionalDependencies)</AdditionalDependencies>
