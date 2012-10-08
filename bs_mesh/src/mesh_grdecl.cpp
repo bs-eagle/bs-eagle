@@ -192,7 +192,7 @@ int mesh_grdecl::fix_data() const
           i1 -=0.1;
         if (j == ny)
           j1 -=0.1;
-        index_z_top = 2 * i1 + 4 * j1 * nx;
+        index_z_top = (int)(2 * i1) + 2 * (int)(2 * j1) * nx;
         index_z_bottom = index_z_top + 8 * nx * ny * (nz - 0.5);
 
         if (coord_array[index + 2] != zcorn_array[index_z_top])
