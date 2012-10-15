@@ -1883,7 +1883,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                 continue;
 
               if (fti->frac_perm > 0)
-                sprintf (perm_str, "%lf %lf", fti->frac_half_thin, fti->frac_perm);
+                sprintf (perm_str, "%lf", fti->frac_perm);
               else
                 sprintf (perm_str, " *   * ");
 
@@ -1903,8 +1903,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               else
                 sprintf (main_k_str, " * ");
 
-              fprintf (fp, "\'%s\' %lu %lu %lu %lu %lf %lf %lf \'%s\' %s %s %s %s /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1,
-                fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle - 90, fti->frac_skin, fti->frac_status == 0 ? "SHUT" : "OPEN", perm_str, " * ", " * ", main_k_str);
+              fprintf (fp, "\'%s\' %lu %lu %lu %lu %lf %lf %lf \'%s\' %lf %s %s %s %s /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1,
+                fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle - 90, fti->frac_skin, fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin, perm_str, " * ", " * ", main_k_str);
             }
             fprintf (fp, "/\n\n");
           }
