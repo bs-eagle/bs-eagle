@@ -123,5 +123,8 @@ BS_API_PLUGIN coord_zcorn_pair refine_wave_mesh_deltas(
 	fp_stor_t max_dx, fp_stor_t max_dy,
 	spfp_storarr_t points_pos, spfp_storarr_t points_param);
 
+// convert array of cell's tops coord to structured grid representation
+spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float tops);
+
 }}  // eof namespace blue_sky::coord_zcorn_tools
 

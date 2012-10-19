@@ -115,6 +115,11 @@ public:
 		return *this;
 	}
 
+	slice_iterator& operator=(const iterator_t& lhs) {
+		p_ = lhs;
+		return *this;
+	}
+
 	bool operator<(const slice_iterator& rhs) {
 		return p_ < rhs.p_;
 	}
@@ -334,7 +339,7 @@ spfp_storarr_t gen_coord(int_t nx, int_t ny, spfp_storarr_t dx, spfp_storarr_t d
 	if(!coord) return NULL;
 
 	// DEBUG
-	BSOUT << "gen_coord: creation starts..." << bs_end;
+	//BSOUT << "gen_coord: creation starts..." << bs_end;
 	// fill coord
 	// coord is simple grid
 	coord->resize((nx + 1)*(ny + 1)*6, value_t(0));
@@ -350,7 +355,7 @@ spfp_storarr_t gen_coord(int_t nx, int_t ny, spfp_storarr_t dx, spfp_storarr_t d
 		dxs.reset();
 	}
 	// DEBUG
-	BSOUT << "gen_coord: creation finished" << bs_end;
+	//BSOUT << "gen_coord: creation finished" << bs_end;
 
 	return coord;
 }
@@ -362,8 +367,8 @@ spfp_storarr_t gen_coord2(spfp_storarr_t x, spfp_storarr_t y) {
   value_t *ys, *xs;
 
 	// DEBUG
-	BSOUT << "gen_coord: init stage" << bs_end;
-	
+	//BSOUT << "gen_coord: init stage" << bs_end;
+
 	// if dimension offset is given as array, then size should be taken from array size
 	if(x->size() > 1) nx = (int_t) x->size() - 1;
 	if(y->size() > 1) ny = (int_t) y->size() - 1;
@@ -378,7 +383,7 @@ spfp_storarr_t gen_coord2(spfp_storarr_t x, spfp_storarr_t y) {
 	if(!coord) return NULL;
 
 	// DEBUG
-	BSOUT << "gen_coord: creation starts..." << bs_end;
+	//BSOUT << "gen_coord: creation starts..." << bs_end;
 	// fill coord
 	// coord is simple grid
 	coord->resize((nx + 1)*(ny + 1)*6, value_t(0));
@@ -393,7 +398,7 @@ spfp_storarr_t gen_coord2(spfp_storarr_t x, spfp_storarr_t y) {
 		}
 	}
 	// DEBUG
-	BSOUT << "gen_coord: creation finished" << bs_end;
+	//BSOUT << "gen_coord: creation finished" << bs_end;
 
 	return coord;
 }
@@ -405,7 +410,7 @@ coord_zcorn_pair gen_coord_zcorn(int_t nx, int_t ny, int_t nz, spv_float dx, spv
     spv_float null_arr = 0;
 
 	// DEBUG
-	BSOUT << "gen_coord_zcorn: init stage" << bs_end;
+	//BSOUT << "gen_coord_zcorn: init stage" << bs_end;
 	// create subscripter
 	if(!dx || !dy || !dz) return ret_t(null_arr, null_arr);
 	if(!dx->size() || !dy->size() || !dz->size()) return ret_t(null_arr, null_arr);
@@ -426,7 +431,7 @@ coord_zcorn_pair gen_coord_zcorn(int_t nx, int_t ny, int_t nz, spv_float dx, spv
 	zcorn->resize(nx * ny * nz * 8);
 
 	// DEBUG
-	BSOUT << "gen_coord_zcorn: ZCORN creating starts..." << bs_end;
+	//BSOUT << "gen_coord_zcorn: ZCORN creating starts..." << bs_end;
 	v_float::iterator pcd = zcorn->begin();
 	const t_long plane_size = nx * ny * 4;
 	t_float z_cache = dzs[0];
@@ -438,10 +443,86 @@ coord_zcorn_pair gen_coord_zcorn(int_t nx, int_t ny, int_t nz, spv_float dx, spv
 		pcd += plane_size;
 	}
 	// DEBUG
-	BSOUT << "gen_coord_zcorn: ZCORN creating finished" << bs_end;
-	BSOUT << "gen_coord_zcorn: COORD creating starts..." << bs_end;
+	//BSOUT << "gen_coord_zcorn: ZCORN creating finished" << bs_end;
+	//BSOUT << "gen_coord_zcorn: COORD creating starts..." << bs_end;
 
 	return ret_t(gen_coord(nx, ny, dx, dy, x0, y0), zcorn);
+}
+
+struct extract_plane {
+	uint_t nx, ny;
+
+	extract_plane(uint_t nx_, uint_t ny_) : nx(nx_), ny(ny_) {};
+
+	template< class input_iter, class outp_iter >
+	void copy_row(input_iter& start, outp_iter& tgt) {
+		typedef slice_iterator< input_iter > input_slice;
+		typedef slice_iterator< outp_iter > outp_slice;
+
+		// some consts
+		const uint_t row_sz = nx * 24;
+		const uint_t srow_sz = (nx + 1)*3;
+
+		input_slice pin(start, 24);
+		outp_slice pout(tgt, 3);
+		// add top left corner of every cell
+		// x
+		copy(pin, pin + nx, pout);
+		// y
+		pin = start + 1; pout.backend() = tgt + 1;
+		copy(pin, pin + nx, pout);
+		// z
+		pin = start + 2; pout = tgt + 2;
+		copy(pin, pin + nx, pout);
+
+		// last point is top right corner
+		tgt = std::copy(start + row_sz - 21, start + row_sz - 18, tgt + srow_sz - 3);
+		//tgt += srow_sz;
+		start += row_sz;
+	}
+
+	template< class input_iter, class outp_iter >
+	void go(input_iter& start, outp_iter& tgt) {
+		// copy first ny rows from plane
+		for(t_ulong y = 0; y < ny; ++y)
+			copy_row(start, tgt);
+
+		// last row is point 2 on cell cube
+		// don't mess original start
+		input_iter start_ = start - nx*24 + 2*3;
+		copy_row(start_, tgt);
+	}
+};
+
+// convert tops array to structured grid representation
+spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float tops) {
+	typedef v_float::iterator v_iterator;
+	typedef v_float::const_iterator cv_iterator;
+	using namespace std;
+
+	// sanity check
+	if(!nx || !ny)
+		return spv_float();
+
+	const uint_t plane_sz = nx * ny * 24;
+	const uint_t nz = uint_t(tops->size() / plane_sz);
+	const uint_t splane_sz = (nx + 1)*(ny + 1)*3;
+
+	// resulting array
+	spv_float res = BS_KERNEL.create_object(v_float::bs_type());
+	res->resize(splane_sz * (nz + 1));
+	v_iterator tgt = res->begin();
+	cv_iterator start = tops->begin();
+
+	// loop over z layers
+	extract_plane ex(nx, ny);
+	for(t_ulong i = 0; i < nz; ++i)
+		ex.go(start, tgt);
+	// last plane is bootom of the hole cube
+	start -= plane_sz - 4*3;
+	ex.go(start, tgt);
+
+	return res;
 }
 
 /*-----------------------------------------------------------------
@@ -1433,84 +1514,6 @@ coord_zcorn_pair refine_mesh(int_t& nx, int_t& ny, spfp_storarr_t coord, spfp_st
 		point_index2coord(nx, ny, coord, points_pos, points_param),
 		cell_merge_thresh, band_thresh, hit_idx
 	);
-}
-
-namespace {
-/*-----------------------------------------------------------------
- * unused deprecated code
- *----------------------------------------------------------------*/
-void insert_column(int_t nx, int_t ny, fp_storvec_t& coord, fp_storvec_t& zcorn, fp_stor_t where) {
-	using namespace std;
-
-	typedef fp_storvec_t::iterator v_iterator;
-	typedef slice_iterator< v_iterator, 6 > dim_iterator;
-
-	// reserve mem for insterts
-	coord.reserve((nx + 2)*(ny + 1)*6);
-
-	// find a place to insert
-	dim_iterator pos = lower_bound(dim_iterator(coord.begin()), dim_iterator(coord.begin()) + (nx + 1), where);
-	//if(pos == dim_iterator(coord.begin()) + (nx + 1)) return;
-	int_t ins_offset = pos.backend() - coord.begin();
-
-	// process all rows
-	fp_stor_t y, z1, z2;
-	v_iterator vpos;
-	for(int_t i = ny; i >= 0; --i) {
-		// save y and z values
-		vpos = coord.begin() + i*(nx + 1)*6 + ins_offset;
-		if(ins_offset == (nx + 1)*6) {
-			// insert at the boundary
-			y = *(vpos - 5); z1 = *(vpos - 4); z2 = *(vpos - 1);
-		}
-		else {
-			// insert in the beginning/middle of row
-			y = *(vpos + 1); z1 = *(vpos + 2); z2 = *(vpos + 5);
-		}
-		// insert new vector
-		insert_iterator< fp_storvec_t > ipos(coord, vpos);
-		*ipos++ = where; *ipos++ = y; *ipos++ = z1;
-		*ipos++ = where; *ipos++ = y; *ipos = z2;
-	}
-
-	// update zcorn
-	resize_zcorn(zcorn, nx, ny, nx + 1, ny);
-}
-
-void insert_row(int_t nx, int_t ny, fp_storvec_t& coord, fp_storvec_t& zcorn, fp_stor_t where) {
-	using namespace std;
-	typedef fp_storvec_t::iterator v_iterator;
-	typedef slice_iterator< v_iterator > dim_iterator;
-	const int_t ydim_step = 6 * (nx + 1);
-
-	// reserve mem for insterts
-	coord.reserve((nx + 1)*(ny + 2)*6);
-
-	// find a place to insert
-	const dim_iterator search_end = dim_iterator(coord.begin() + 1, ydim_step) + (ny + 1);
-	dim_iterator pos = lower_bound(dim_iterator(coord.begin() + 1, ydim_step), search_end, where);
-	//if(pos == search_end) return;
-	v_iterator ins_point = pos.backend() - 1;
-
-	// make cache of x values from first row
-	spfp_storvec_t cache_x = BS_KERNEL.create_object(fp_storvec_t::bs_type());
-	cache_x->resize(nx + 1);
-	typedef slice_iterator< v_iterator, 3 > hdim_iterator;
-	copy(hdim_iterator(coord.begin()), hdim_iterator(coord.begin() + (nx + 1)*6), cache_x->begin());
-
-	// insert row
-	insert_iterator< fp_storvec_t > ipos(coord, ins_point);
-	v_iterator p_x = cache_x->begin();
-	fp_stor_t z1 = *(coord.begin() + 2), z2 = *(coord.begin() + 5);
-	for(int_t i = 0; i <= nx; ++i) {
-		*ipos++ = *p_x++; *ipos++ = where; *ipos++ = z1;
-		*ipos++ = *p_x++; *ipos++ = where; *ipos++ = z2;
-	}
-
-	// update zcorn
-	resize_zcorn(zcorn, nx, ny, nx, ny + 1);
-}
-
 }
 
 spi_arr_t find_hit_idx(
