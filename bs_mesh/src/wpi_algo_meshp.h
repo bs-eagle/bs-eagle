@@ -107,10 +107,19 @@ struct mesh_tools : public helpers< strat_t > {
 				return hi[D - 1] - lo[D - 1];
 		}
 
+		// size of this mesh part
 		ulong size() const {
 			ulong res = 1;
 			for(uint i = 0; i < D; ++i)
 				res *= side_len(i);
+			return res;
+		}
+
+		// size of the full mesh
+		ulong fullm_size() const {
+			ulong res = 1;
+			for(uint i = 0; i < D; ++i)
+				res *= m_size_(i);
 			return res;
 		}
 
@@ -123,14 +132,9 @@ struct mesh_tools : public helpers< strat_t > {
 		}
 
 		ulong ss_id(ulong offset) const {
-			// size of this part
-			vertex_pos_i part_size;
-			for(uint i = 0; i < D; ++i)
-				part_size[i] = side_len(i);
-
 			// plain id -> vertex_pos_i
 			vertex_pos_i part_pos;
-			decode_cell_id(offset, part_pos, part_size);
+			decode_cell_id(offset, part_pos, mp_size_);
 			// part_pos -> cell
 			return ss_id(part_pos);
 		}
@@ -149,6 +153,17 @@ struct mesh_tools : public helpers< strat_t > {
 
 		ctrim_iterator ss_iter(ulong offset) const {
 			return m_.begin() + ss_id(offset);
+		}
+
+		// access to individual cells
+		template< class index_t >
+		cell_data& operator[](index_t idx) {
+			return *(m_.begin() + ss_id(idx));
+		}
+
+		template< class index_t >
+		const cell_data& operator[](index_t idx) const {
+			return *(m_.begin() + ss_id(idx));
 		}
 
 		Iso_bbox iso_bbox() const {
@@ -242,15 +257,21 @@ struct mesh_tools : public helpers< strat_t > {
 
 	private:
 		trimesh& m_;
-		vertex_pos_i m_size_;
+		vertex_pos_i m_size_, mp_size_;
 		vertex_pos lo_bnd, hi_bnd;
 
 		const cell_data& ss(ulong idx) const {
 			// idx SHOULD BE IN MESH!
 			return m_[idx];
 		}
+		cell_data& ss(ulong idx) {
+			return m_[idx];
+		}
 
 		const cell_data& ss(const vertex_pos_i& idx) const {
+			return m_[encode_cell_id(idx, m_size_)];
+		}
+		cell_data ss(const vertex_pos_i& idx) {
 			return m_[encode_cell_id(idx, m_size_)];
 		}
 
@@ -266,6 +287,10 @@ struct mesh_tools : public helpers< strat_t > {
 		}
 
 		void calc_bounds() {
+			// calc size of this mesh part
+			for(uint i = 0; i < D; ++i)
+				mp_size_[i] = side_len(i);
+
 			// init bounds from first cell
 			ss(lo).lo(lo_bnd); ss(lo).hi(hi_bnd);
 
