@@ -46,20 +46,6 @@ struct helpers {
 		return strat_t::vertex_pos2point(reinterpret_cast< const vertex_pos& >(*p));
 	}
 
-	// assign for c arrays
-	// fun with returning reference to array :)
-	template< class T >
-	static T (&ca_assign(T (&lhs)[D], const T (&rhs)[D]))[D] {
-		std::copy(&rhs[0], &rhs[D], &lhs[0]);
-		return lhs;
-	}
-
-	template< class T >
-	static T (&ca_assign(T (&lhs)[D], const T& v))[D] {
-		std::fill(&lhs[0], &lhs[D], v);
-		return lhs;
-	}
-
 	static Iso_bbox vertex_pos2rect(const vertex_pos& lo, const vertex_pos& hi) {
 		return Iso_bbox(vertex_pos2point(lo), vertex_pos2point(hi));
 	}
@@ -83,7 +69,6 @@ struct pods : public helpers< strat_t > {
 	using base_t::vertex_pos2bbox;
 	using base_t::vertex_pos2point;
 	using base_t::rawptr2point;
-	using base_t::ca_assign;
 	using base_t::vertex_pos2rect;
 
 	// import global consts

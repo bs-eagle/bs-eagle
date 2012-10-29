@@ -31,6 +31,20 @@ typedef t_float cell_pos[8][3];
 typedef CGAL::Object                                        Object;
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 
+// assign for c arrays
+// fun with returning reference to array :)
+template< class T, int L >
+static T (&ca_assign(T (&lhs)[L], const T (&rhs)[L]))[L] {
+	std::copy(&rhs[0], &rhs[L], &lhs[0]);
+	return lhs;
+}
+
+template< class T, int L >
+static T (&ca_assign(T (&lhs)[L], const T& v))[L] {
+	std::fill(&lhs[0], &lhs[L], v);
+	return lhs;
+}
+
 }} /* { namespace blue_sky::wpi */
 
 #endif /* end of include guard: WPI_COMMON_Y614D09T */
