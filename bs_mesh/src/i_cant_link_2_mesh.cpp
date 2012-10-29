@@ -30,13 +30,6 @@ spv_float calc_cells_vertices_xyz_impl(t_long nx, t_long ny, spv_float coord, sp
 	return grd_src->calc_cells_vertices_xyz();
 }
 
-spv_long enum_border_facets_vtk(t_long nx, t_long ny, spv_float tops, spv_int mask) {
-	typedef wpi::strategy_3d strat_t;
-	typedef wpi::algo< strat_t > wpi_algo;
-
-	return wpi_algo::enum_border_facets_vtk(nx, ny, tops, mask);
-}
-
 class BS_API_PLUGIN handy_object : public handy_mesh_iface {
 public:
 	spv_float calc_cells_vertices_xyz(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
@@ -85,6 +78,15 @@ bool register_handy_mesh_iface(const plugin_descriptor& pd) {
 #ifdef BSPY_EXPORTING_PLUGIN
 namespace python {
 	using namespace boost::python;
+
+	tuple enum_border_facets_vtk(t_long nx, t_long ny, spv_float tops, spv_int mask) {
+		typedef wpi::strategy_3d strat_t;
+		typedef wpi::algo< strat_t > wpi_algo;
+
+		spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
+		spv_long res = wpi_algo::enum_border_facets_vtk(nx, ny, tops, mask, cell_idx);
+		return make_tuple(res, cell_idx);
+	}
 
 	void py_export_handymesh() {
 		def("calc_cells_vertices_xyz", &calc_cells_vertices_xyz_impl);

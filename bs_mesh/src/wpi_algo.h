@@ -212,7 +212,7 @@ struct algo : public helpers< strat_t > {
 	/*-----------------------------------------------------------------
 	 * Enumerate border cell facets for drawing mesh in VTK
 	 *----------------------------------------------------------------*/
-	static spv_long enum_border_facets_vtk(t_long nx, t_long ny, spv_float tops, spv_int mask) {
+	static spv_long enum_border_facets_vtk(t_long nx, t_long ny, spv_float tops, spv_int mask, spv_long cell_idx) {
 		// 1) build trimesh from given tops
 		trimesh M;
 		vertex_pos_i mesh_size = {ulong(nx), ulong(ny), tops->size() / (nx * ny * 24)};
@@ -233,12 +233,14 @@ struct algo : public helpers< strat_t > {
 		enum { n_facets = cell_data::n_facets };
 		enum { n_fv = cell_data::n_facet_vertex };
 
-		typedef bs_array< t_long, vector_traits > bs_uvector;
-		smart_ptr< bs_uvector > vtk_idx = BS_KERNEL.create_object(bs_uvector::bs_type());
+		typedef bs_array< t_long, vector_traits > bs_lvector;
+		smart_ptr< bs_lvector > vtk_idx = BS_KERNEL.create_object(bs_lvector::bs_type());
+		smart_ptr< bs_lvector > vtk_cell_idx = BS_KERNEL.create_object(bs_lvector::bs_type());
 
 		cell_nb_enum cell_nb;
 		facet_vid_t cell_fvid;
 		const ulong mask_sz = mask->size();
+		cell_idx->clear();
 		for(ulong i = 0; i < n_cells; ++i) {
 			// skip masked cells
 			if(i < mask_sz && mask->ss(i) == 0)
@@ -247,18 +249,19 @@ struct algo : public helpers< strat_t > {
 			// 2.1) if some facet has no neighbors - include it in results
 			MP.cell_neighbours(i, cell_nb);
 			for(ulong j = 0; j < n_facets; ++j) {
+				// skip facet if it has non-masked neighbour
 				if(cell_nb[j] < n_cells && (cell_nb[j] >= mask_sz || mask->ss(cell_nb[j]) != 0))
 					continue;
+				// store cell index inside cell_idx - for proper coloring on client side
+				vtk_cell_idx->push_back(i);
 				// add facet to resulting array
-				//vtk_idx->reserve(vtk_idx->size() + 1 + n_fv);
+				//vtk_idx->reserve(vtk_idx->size() + 1 + n_fv); -- slows things badly
 				vtk_idx->push_back(n_fv);
-				//*std::insert_iterator< v_ulong >(*res, res->end()) = n_fv;
-				//res->push_back(n_fv);
 				cell_data::facet_vid(j, cell_fvid);
 				// res = vertex_id + i
 				std::transform(
 					&cell_fvid[0], &cell_fvid[n_fv],
-					std::back_insert_iterator< bs_uvector >(*vtk_idx),
+					std::back_insert_iterator< bs_lvector >(*vtk_idx),
 					std::bind2nd(std::plus< ulong >(), i * 8)
 				);
 			}
@@ -266,6 +269,7 @@ struct algo : public helpers< strat_t > {
 
 		spv_long res = BS_KERNEL.create_object(v_long::bs_type());
 		res->init_inplace(vtk_idx);
+		cell_idx->init_inplace(vtk_cell_idx);
 		return res;
 	}
 };
