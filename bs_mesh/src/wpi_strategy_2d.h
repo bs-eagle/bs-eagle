@@ -61,12 +61,78 @@ struct strategy_2d {
 	// cell_data specific in 2D
 	template< class base_t >
 	struct cell_data : public base_t {
+		enum { n_vertex = 4 };
+		enum { n_facets = 4 };
+		enum { n_facet_vertex = 2 };
+		enum { n_edges = 4 };
+		// array to hold facet vertices IDs
+		typedef ulong facet_vid_t[n_facet_vertex];
+
 		// empty ctor for map
 		cell_data() {}
 		// std ctor
 		cell_data(t_float *const cell) : base_t(cell) {}
 
 		using base_t::V;
+
+		/* nodes layout
+			*                             X
+			*                    0+-------+1
+			*                    /|     / |
+			*                  /  |   /   |
+			*               2/-------+3   |
+			*              Y |   4+--|----+5
+			*                |   /Z  |   /
+			*                | /     | /
+			*              6 /-------/7
+		*/
+		/* working with XY upper plane of cell (0-1-3-2)
+		*  facets (and edges) layout (nodes - facet id)
+		*  0-1 - 0
+		*  1-3 - 1
+		*  3-2 - 2
+		*  2-0 - 3
+		*  inside plane - 4
+		*/
+
+		static ulong facet_id(ulong dim, ulong facet) {
+			if(dim == 0) {
+				// X
+				return 3 - facet*2;
+			}
+			else if(dim == 1) {
+				// Y
+				return facet*2;
+			}
+			return ulong(-1);
+		}
+		// obtain IDs of given facet vertices
+		static void facet_vid(ulong facet, facet_vid_t& res) {
+			switch(facet) {
+				case 0 : {
+					facet_vid_t t = {0, 1};
+					ca_assign(res, t); }
+					break;
+				case 1 : {
+					facet_vid_t t = {1, 3};
+					ca_assign(res, t); }
+					break;
+				case 2 : {
+					facet_vid_t t = {3, 2};
+					ca_assign(res, t); }
+					break;
+				case 3 : {
+					facet_vid_t t = {2, 0};
+					ca_assign(res, t); }
+					break;
+				default : {
+					facet_vid_t t = {ulong(-1), ulong(-1)};
+					ca_assign(res, t); }
+			}
+		}
+		static void facet_vid(ulong dim, ulong facet, facet_vid_t& res) {
+			return facet_vid(facet_id(dim, facet, res));
+		}
 
 		Polygon_2 polygon() const {
 			// 2D upper plane of cell

@@ -67,6 +67,14 @@ struct strategy_3d {
 	struct cell_data : public base_t {
 		typedef std::vector< Tetrahedron > Tetrahedrons;
 
+		enum { n_vertex = 8 };
+		enum { n_facets = 6 };
+		enum { n_facet_vertex = 4 };
+		enum { n_edges = 12 };
+
+		// array to hold facet vertices IDs
+		typedef ulong facet_vid_t[n_facet_vertex];
+
 		// cell facets cover with triangles
 		Triangles cover;
 		// cell split into tetrahedrons
@@ -100,6 +108,60 @@ struct strategy_3d {
 		*  1-3-5-7 - 5
 		*  inside cell - 6
 		*/
+
+		// obtain facet idx from given axe ID (dimension)
+		// and facet ID (0 - starting from origin, 1 - opposite facet)
+		static ulong facet_id(ulong dim, ulong facet) {
+			switch(dim) {
+				// X
+				case 0 :
+					return 4 + facet;
+				// Y
+				case 1 :
+					return 1 + facet*2;
+				// Z
+				case 2 :
+					return 0 + facet*2;
+			}
+			return ulong(-1);
+		}
+
+		// obtain IDs of given facet vertices
+		static void facet_vid(ulong facet, facet_vid_t& res) {
+			//facet_vid res;
+			switch(facet) {
+				case 0 : {
+					facet_vid_t t = {0, 1, 3, 2};
+					ca_assign(res, t); }
+					break;
+				case 1 : {
+					facet_vid_t t = {0, 1, 5, 4};
+					ca_assign(res, t); }
+					break;
+				case 2 : {
+					facet_vid_t t = {4, 5, 7, 6};
+					ca_assign(res, t); }
+					break;
+				case 3 : {
+					facet_vid_t t = {2, 3, 7, 6};
+					ca_assign(res, t); }
+					break;
+				case 4 : {
+					facet_vid_t t = {0, 2, 6, 4};
+					ca_assign(res, t); }
+					break;
+				case 5 : {
+					facet_vid_t t = {1, 3, 7, 5};
+					ca_assign(res, t); }
+					break;
+				default : {
+					facet_vid_t t = {ulong(-1), ulong(-1), ulong(-1), ulong(-1)};
+					ca_assign(res, t); }
+			}
+		}
+		static void facet_vid(ulong dim, ulong facet, facet_vid_t& res) {
+			return facet_vid(facet_id(dim, facet, res));
+		}
 
 		// implement cell cover with triangles
 		// to find exact intersection points
