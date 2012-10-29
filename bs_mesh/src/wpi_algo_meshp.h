@@ -36,7 +36,6 @@ struct mesh_tools : public helpers< strat_t > {
 
 	// import helper functions
 	typedef helpers< strat_t > base_t;
-	using base_t::ca_assign;
 	using base_t::encode_cell_id;
 	using base_t::decode_cell_id;
 	using base_t::vertex_pos2bbox;
@@ -48,6 +47,11 @@ struct mesh_tools : public helpers< strat_t > {
 	// y_last = last_element + 1 = y_size
 	struct mesh_part : public helpers< strat_t > {
 		typedef std::set< mesh_part > container_t;
+
+		enum { n_facets = cell_data::n_facets };
+		enum { n_edges = cell_data::n_edges };
+		typedef ulong cell_neighb_enum[n_facets];
+		typedef ulong edge_neighb_enum[n_edges];
 
 		mesh_part(trimesh& m, const vertex_pos_i& mesh_size)
 			: m_(m)
@@ -250,6 +254,34 @@ struct mesh_tools : public helpers< strat_t > {
 
 		void cell_size(const vertex_pos_i& offset, vertex_pos& res) {
 			cell_size(ss_id(offset), res);
+		}
+
+		// returned indexes corresponds to offsets inside current mesh_part
+		// for full mesh equal to simple index
+		void cell_neighbours(ulong idx, cell_neighb_enum& res) const {
+			// init resulting array with invalid neighbours
+			//cell_neighb_enum res;
+			std::fill(&res[0], &res[n_facets], ulong(-1));
+
+			// sanity check
+			if(!size() || idx >= size())
+				return;
+
+			// obtain D-dim cell id and ref to cell
+			vertex_pos_i cell_id, nb;
+			decode_cell_id(idx, cell_id, mp_size_);
+			//const cell_data& = ss(ss_id(cell_id));
+
+			// vary different dims and check if cell is inside mesh
+			for(uint i = 0; i < D; ++i) {
+				ca_assign(nb, cell_id);
+				--nb[i];
+				if(nb[i] >= lo[i] && nb[i] < hi[i])
+					res[cell_data::facet_id(i, 0)] = encode_cell_id(nb, mp_size_);
+				nb[i] += 2;
+				if(nb[i] < hi[i] && nb[i] >= lo[i])
+					res[cell_data::facet_id(i, 1)] = encode_cell_id(nb, mp_size_);
+			}
 		}
 
 		// public members
