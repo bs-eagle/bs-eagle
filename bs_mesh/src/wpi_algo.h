@@ -21,7 +21,6 @@
 #include "wpi_algo_xaction_build3.h"
 
 #include "conf.h"
-//#include "bs_mesh_grdecl.h"
 #include "i_cant_link_2_mesh.h"
 
 // DEBUG
@@ -81,7 +80,7 @@ struct algo : public helpers< strat_t > {
 		//grd_src->init_props(nx, ny, coord, zcorn);
 
 		// init mesh size
-		const ulong full_sz[] = {nx, ny, (zcorn->size() / (nx * ny)) >> 3};
+		const ulong full_sz[] = {ulong(nx), ulong(ny), (zcorn->size() / (nx * ny)) >> 3};
 		const ulong n_cells = ulong(full_sz[0] * full_sz[1] * full_sz[2]);
 		std::copy(full_sz, full_sz + D, mesh_size);
 
@@ -176,7 +175,7 @@ struct algo : public helpers< strat_t > {
 		// 1) calculate mesh nodes coordinates and build initial trimesh
 		trimesh M;
 		vertex_pos_i mesh_size;
-		spv_float tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size, true);
+		spv_float tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
 		// DEBUG
 		//std::cout << "trimesh built" << std::endl;
 
@@ -208,6 +207,66 @@ struct algo : public helpers< strat_t > {
 		//std::cout << "well nodes inserted" << std::endl;
 
 		return wpi_return< pythonish >::make(A);
+	}
+
+	/*-----------------------------------------------------------------
+	 * Enumerate border cell facets for drawing mesh in VTK
+	 *----------------------------------------------------------------*/
+	static spv_long enum_border_facets_vtk(t_long nx, t_long ny, spv_float tops, spv_int mask) {
+		// 1) build trimesh from given tops
+		trimesh M;
+		vertex_pos_i mesh_size = {ulong(nx), ulong(ny), tops->size() / (nx * ny * 24)};
+		const ulong n_cells = tops->size() / 24;
+		M.resize(n_cells);
+		v_float::iterator pv = tops->begin();
+		for(ulong i = 0; i < n_cells; ++i) {
+			M[i] = cell_data(&*pv);
+			pv += 3*8;
+		}
+
+		// make mesh_part containing full mesh
+		mesh_part MP(M, mesh_size);
+
+		// 2) loop over all cells
+		typedef typename mesh_part::cell_neighb_enum cell_nb_enum;
+		typedef typename cell_data::facet_vid_t facet_vid_t;
+		enum { n_facets = cell_data::n_facets };
+		enum { n_fv = cell_data::n_facet_vertex };
+
+		typedef bs_array< t_long, vector_traits > bs_uvector;
+		smart_ptr< bs_uvector > vtk_idx = BS_KERNEL.create_object(bs_uvector::bs_type());
+
+		cell_nb_enum cell_nb;
+		facet_vid_t cell_fvid;
+		const ulong mask_sz = mask->size();
+		for(ulong i = 0; i < n_cells; ++i) {
+			// skip masked cells
+			if(i < mask_sz && mask->ss(i) == 0)
+				continue;
+
+			// 2.1) if some facet has no neighbors - include it in results
+			MP.cell_neighbours(i, cell_nb);
+			for(ulong j = 0; j < n_facets; ++j) {
+				if(cell_nb[j] < n_cells && (cell_nb[j] >= mask_sz || mask->ss(cell_nb[j]) != 0))
+					continue;
+				// add facet to resulting array
+				//vtk_idx->reserve(vtk_idx->size() + 1 + n_fv);
+				vtk_idx->push_back(n_fv);
+				//*std::insert_iterator< v_ulong >(*res, res->end()) = n_fv;
+				//res->push_back(n_fv);
+				cell_data::facet_vid(j, cell_fvid);
+				// res = vertex_id + i
+				std::transform(
+					&cell_fvid[0], &cell_fvid[n_fv],
+					std::back_insert_iterator< bs_uvector >(*vtk_idx),
+					std::bind2nd(std::plus< ulong >(), i * 8)
+				);
+			}
+		}
+
+		spv_long res = BS_KERNEL.create_object(v_long::bs_type());
+		res->init_inplace(vtk_idx);
+		return res;
 	}
 };
 

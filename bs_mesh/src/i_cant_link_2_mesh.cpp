@@ -6,6 +6,10 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
+#include <boost/python/detail/wrap_python.hpp>
+#include "wpi_strategy_3d.h"
+#include "wpi_algo.h"
+
 #include "bs_mesh_stdafx.h"
 #include "i_cant_link_2_mesh.h"
 #include "bs_mesh_grdecl.h"
@@ -24,6 +28,13 @@ spv_float calc_cells_vertices_xyz_impl(t_long nx, t_long ny, spv_float coord, sp
 	grd_src->init_props(nx, ny, coord, zcorn);
 	// obtain coordinates for all vertices of all cells
 	return grd_src->calc_cells_vertices_xyz();
+}
+
+spv_long enum_border_facets_vtk(t_long nx, t_long ny, spv_float tops, spv_int mask) {
+	typedef wpi::strategy_3d strat_t;
+	typedef wpi::algo< strat_t > wpi_algo;
+
+	return wpi_algo::enum_border_facets_vtk(nx, ny, tops, mask);
 }
 
 class BS_API_PLUGIN handy_object : public handy_mesh_iface {
@@ -77,6 +88,7 @@ namespace python {
 
 	void py_export_handymesh() {
 		def("calc_cells_vertices_xyz", &calc_cells_vertices_xyz_impl);
+		def("enum_border_facets_vtk", &enum_border_facets_vtk);
 	}
 } /* python */
 #endif

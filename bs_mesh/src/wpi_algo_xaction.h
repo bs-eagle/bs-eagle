@@ -57,7 +57,6 @@ public:
 
 	// import helper functions
 	typedef helpers< strat_t > base_t;
-	using base_t::ca_assign;
 	using base_t::decode_cell_id;
 
 	// mesh_part
