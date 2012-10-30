@@ -88,9 +88,19 @@ namespace python {
 		return make_tuple(res, cell_idx);
 	}
 
+	tuple enum_border_edges_vtk(t_long nx, t_long ny, spv_float tops, spv_int mask) {
+		typedef wpi::strategy_3d strat_t;
+		typedef wpi::algo< strat_t > wpi_algo;
+
+		spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
+		spv_long res = wpi_algo::enum_border_edges_vtk(nx, ny, tops, mask, cell_idx);
+		return make_tuple(res, cell_idx);
+	}
+
 	void py_export_handymesh() {
 		def("calc_cells_vertices_xyz", &calc_cells_vertices_xyz_impl);
 		def("enum_border_facets_vtk", &enum_border_facets_vtk);
+		def("enum_border_edges_vtk", &enum_border_edges_vtk);
 	}
 } /* python */
 #endif

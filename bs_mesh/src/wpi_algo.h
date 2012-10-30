@@ -11,6 +11,7 @@
 
 #include <iterator>
 #include <cmath>
+#include <algorithm>
 
 #include "wpi_common.h"
 #include "wpi_algo_pod.h"
@@ -210,9 +211,169 @@ struct algo : public helpers< strat_t > {
 	}
 
 	/*-----------------------------------------------------------------
+	 * vtk index storage backend for facets and edges
+	 *----------------------------------------------------------------*/
+	// implementation for drawing facets using vtkQuad
+	template< int prim_id, class unused = void >
+	struct vtk_index_backend {
+		enum { type = prim_id };
+		enum { n_fv = cell_data::n_facet_vertex };
+		typedef typename cell_data::facet_vid_t facet_vid_t;
+
+		typedef bs_array< t_long, vector_traits > bs_lvector;
+		smart_ptr< bs_lvector > idx_;
+		smart_ptr< bs_lvector > cell_idx_;
+
+		// unused for facets
+		//static spv_float tops_;
+
+		vtk_index_backend(const spv_float& tops)
+			: idx_(BS_KERNEL.create_object(bs_lvector::bs_type())),
+			cell_idx_(BS_KERNEL.create_object(bs_lvector::bs_type()))
+		{}
+
+		// return how many primitives from given v were inserted into index
+		int operator()(const facet_vid_t& v, ulong cell_id) {
+			// just store data inside idx_
+			idx_->push_back(n_fv);
+			// idx_[i] = vertex_id[i] + cell_id * 8
+			std::transform(
+				&v[0], &v[n_fv],
+				std::back_insert_iterator< bs_lvector >(*idx_),
+				std::bind2nd(std::plus< ulong >(), cell_id * 8)
+			);
+			// save cell id
+			cell_idx_->push_back(cell_id);
+			// we're alwais inserting values
+			return 1;
+		}
+
+		spv_long get(const spv_long& cell_ids) const {
+			spv_long res = BS_KERNEL.create_object(v_long::bs_type());
+			res->init_inplace(idx_);
+			cell_ids->init_inplace(cell_idx_);
+			return res;
+		}
+	};
+
+	// specialization for edges
+	// implementation for drawing facets using vtkQuad
+	template< class unused >
+	struct vtk_index_backend< 1, unused > {
+		enum { type = 1 };
+		enum { n_fv = cell_data::n_facet_vertex };
+		typedef typename cell_data::facet_vid_t facet_vid_t;
+
+		//typedef bs_array< t_long, vector_traits > bs_lvector;
+		//smart_ptr< bs_lvector > idx_;
+
+		const spv_float tops_;
+		//static spv_float tops(const spv_float Tops = NULL) {
+		//	static spv_float tops_;
+		//	if(Tops)
+		//		tops_ = Tops;
+		//	return tops_;
+		//}
+
+		// helper structure for filtering edges
+		struct edge_handle {
+			ulong v1, v2, cell_id;
+			const spv_float& tops_;
+
+			edge_handle(ulong v1_, ulong v2_, ulong cell_id_, const spv_float& tops)
+				: v1(v1_), v2(v2_), cell_id(cell_id_), tops_(tops)
+			{
+				if(!std::lexicographical_compare(
+					tops_->begin() + v1_ * 3, tops_->begin() + v1_ * 3 + 3,
+					tops_->begin() + v2_ * 3, tops_->begin() + v2_ * 3 + 3
+				))
+					// v1_ >= v_2
+					std::swap(v1, v2);
+			}
+
+			// sorting criteria
+			bool operator<(const edge_handle& rhs) const {
+				const int r = lexicographical_compare_3way(
+					tops_->begin() + v1 * 3, tops_->begin() + v1 * 3 + 3,
+					tops_->begin() + rhs.v1 * 3, tops_->begin() + rhs.v1 * 3 + 3
+				);
+				if(r == 0)
+					// v1 = rhs.v1, so check v2
+					return std::lexicographical_compare(
+						tops_->begin() + v2 * 3, tops_->begin() + v2 * 3 + 3,
+						tops_->begin() + rhs.v2 * 3, tops_->begin() + rhs.v2 * 3 + 3
+					);
+				else
+					return (r < 0);
+			}
+		};
+
+		typedef std::set< edge_handle > edge_storage;
+		typedef typename edge_storage::iterator edge_iterator;
+		typedef typename edge_storage::const_iterator edge_citerator;
+		typedef std::pair< edge_iterator, bool > ins_res;
+		edge_storage es_;
+
+		// ctor
+		vtk_index_backend(const spv_float& Tops) : tops_(Tops) {
+			// remember tops array
+			//tops(Tops);
+		}
+
+		inline int push_edge(const edge_handle& e) {
+			ins_res r = es_.insert(e);
+			// second insertion from DIFFERENT cell kills edge
+			if(!r.second && e.cell_id != r.first->cell_id) {
+				es_.erase(r.first);
+				return -1;
+			}
+			return int(r.second);
+		}
+
+		// return how many primitives from given v were inserted into index
+		int operator()(facet_vid_t& v, ulong cell_id) {
+			// vertex_id[i] = vertex_id[i] + i*8
+			std::transform(
+				&v[0], &v[n_fv], &v[0],
+				std::bind2nd(std::plus< ulong >(), cell_id * 8)
+			);
+
+			// facet consists of four edges, try to insert each of them
+			int cnt = 0;
+			cnt += push_edge(edge_handle(v[0], v[1], cell_id, tops_));
+			cnt += push_edge(edge_handle(v[1], v[2], cell_id, tops_));
+			cnt += push_edge(edge_handle(v[2], v[3], cell_id, tops_));
+			cnt += push_edge(edge_handle(v[3], v[0], cell_id, tops_));
+			return cnt;
+		}
+
+		spv_long get(const spv_long& cell_ids) const {
+			spv_long res = BS_KERNEL.create_object(v_long::bs_type());
+			// copy collected unique edges as lines to resulting index
+			res->resize(es_.size() * 3);
+			cell_ids->resize(es_.size());
+			v_long::iterator pres = res->begin();
+			v_long::iterator pcell = cell_ids->begin();
+			for(edge_citerator pe = es_.begin(), end = es_.end(); pe != end; ++pe) {
+				*pres++ = 2;
+				*pres++ = pe->v1; *pres++ = pe->v2;
+				*pcell++ = pe->cell_id;
+			}
+			return res;
+		}
+
+		void fill_cell_ids(const spv_long& cell_ids) const {
+
+		}
+	};
+
+	/*-----------------------------------------------------------------
 	 * Enumerate border cell facets for drawing mesh in VTK
 	 *----------------------------------------------------------------*/
-	static spv_long enum_border_facets_vtk(t_long nx, t_long ny, spv_float tops, spv_int mask, spv_long cell_idx) {
+	template< int prim_id >
+	static spv_long enum_border_vtk(t_long nx, t_long ny, spv_float tops, spv_int mask,
+		spv_long cell_idx, Loki::Int2Type< prim_id > prim)
+	{
 		// 1) build trimesh from given tops
 		trimesh M;
 		vertex_pos_i mesh_size = {ulong(nx), ulong(ny), tops->size() / (nx * ny * 24)};
@@ -231,16 +392,15 @@ struct algo : public helpers< strat_t > {
 		typedef typename mesh_part::cell_neighb_enum cell_nb_enum;
 		typedef typename cell_data::facet_vid_t facet_vid_t;
 		enum { n_facets = cell_data::n_facets };
-		enum { n_fv = cell_data::n_facet_vertex };
+		const ulong mask_sz = mask->size();
 
-		typedef bs_array< t_long, vector_traits > bs_lvector;
-		smart_ptr< bs_lvector > vtk_idx = BS_KERNEL.create_object(bs_lvector::bs_type());
-		smart_ptr< bs_lvector > vtk_cell_idx = BS_KERNEL.create_object(bs_lvector::bs_type());
+		// backend for storing index
+		vtk_index_backend< prim_id > vib(tops);
 
 		cell_nb_enum cell_nb;
 		facet_vid_t cell_fvid;
-		const ulong mask_sz = mask->size();
-		cell_idx->clear();
+
+		// loop over all cells
 		for(ulong i = 0; i < n_cells; ++i) {
 			// skip masked cells
 			if(i < mask_sz && mask->ss(i) == 0)
@@ -252,25 +412,26 @@ struct algo : public helpers< strat_t > {
 				// skip facet if it has non-masked neighbour
 				if(cell_nb[j] < n_cells && (cell_nb[j] >= mask_sz || mask->ss(cell_nb[j]) != 0))
 					continue;
-				// store cell index inside cell_idx - for proper coloring on client side
-				vtk_cell_idx->push_back(i);
-				// add facet to resulting array
-				//vtk_idx->reserve(vtk_idx->size() + 1 + n_fv); -- slows things badly
-				vtk_idx->push_back(n_fv);
+
 				cell_data::facet_vid(j, cell_fvid);
-				// res = vertex_id + i
-				std::transform(
-					&cell_fvid[0], &cell_fvid[n_fv],
-					std::back_insert_iterator< bs_lvector >(*vtk_idx),
-					std::bind2nd(std::plus< ulong >(), i * 8)
-				);
+				vib(cell_fvid, i);
 			}
 		}
 
-		spv_long res = BS_KERNEL.create_object(v_long::bs_type());
-		res->init_inplace(vtk_idx);
-		cell_idx->init_inplace(vtk_cell_idx);
-		return res;
+		cell_idx->clear();
+		return vib.get(cell_idx);
+	}
+
+	// specialization for facets
+	static spv_long enum_border_facets_vtk(t_long nx, t_long ny, spv_float tops, spv_int mask,
+		spv_long cell_idx) {
+		return enum_border_vtk(nx, ny, tops, mask, cell_idx, Loki::Int2Type< 0 >());
+	}
+
+	// specialization for edges
+	static spv_long enum_border_edges_vtk(t_long nx, t_long ny, spv_float tops, spv_int mask,
+		spv_long cell_idx) {
+		return enum_border_vtk(nx, ny, tops, mask, cell_idx, Loki::Int2Type< 1 >());
 	}
 };
 
