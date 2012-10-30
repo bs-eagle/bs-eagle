@@ -45,6 +45,28 @@ static T (&ca_assign(T (&lhs)[L], const T& v))[L] {
 	return lhs;
 }
 
+// implementation of SGI extension algorithm
+template< typename _InputIterator1, typename _InputIterator2 >
+int lexicographical_compare_3way(_InputIterator1 __first1,
+		_InputIterator1 __last1,
+		_InputIterator2 __first2,
+		_InputIterator2 __last2)
+{
+	while (__first1 != __last1 && __first2 != __last2)
+	{
+		if (*__first1 < *__first2)
+			return -1;
+		if (*__first2 < *__first1)
+			return 1;
+		++__first1;
+		++__first2;
+	}
+	if (__first2 == __last2)
+		return !(__first1 == __last1);
+	else
+		return -1;
+}
+
 }} /* { namespace blue_sky::wpi */
 
 #endif /* end of include guard: WPI_COMMON_Y614D09T */
