@@ -763,6 +763,7 @@ COMMIT;\
       if (rc)
         {
           fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
+          if(stmp) sqlite3_finalize (stmp);
           return -1;
         }
 
@@ -777,6 +778,7 @@ COMMIT;\
       if (rc)
         {
           fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
+          if(stmp) sqlite3_finalize (stmp);
           return -3;
         }
 
