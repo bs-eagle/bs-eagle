@@ -233,7 +233,7 @@ struct algo : public helpers< strat_t > {
 		{}
 
 		// return how many primitives from given v were inserted into index
-		int operator()(const facet_vid_t& v, ulong cell_id) {
+		int operator()(const facet_vid_t& v, ulong cell_id, ulong facet_id) {
 			// just store data inside idx_
 			idx_->push_back(n_fv);
 			// idx_[i] = vertex_id[i] + cell_id * 8
@@ -277,11 +277,11 @@ struct algo : public helpers< strat_t > {
 
 		// helper structure for filtering edges
 		struct edge_handle {
-			ulong v1, v2, cell_id;
+			ulong v1, v2, cell_id, facet_id;
 			const spv_float& tops_;
 
-			edge_handle(ulong v1_, ulong v2_, ulong cell_id_, const spv_float& tops)
-				: v1(v1_), v2(v2_), cell_id(cell_id_), tops_(tops)
+			edge_handle(ulong v1_, ulong v2_, ulong cell_id_, ulong facet_id_, const spv_float& tops)
+				: v1(v1_), v2(v2_), cell_id(cell_id_), facet_id(facet_id_), tops_(tops)
 			{
 				if(!std::lexicographical_compare(
 					tops_->begin() + v1_ * 3, tops_->begin() + v1_ * 3 + 3,
@@ -322,8 +322,8 @@ struct algo : public helpers< strat_t > {
 
 		inline int push_edge(const edge_handle& e) {
 			ins_res r = es_.insert(e);
-			// second insertion from DIFFERENT cell kills edge
-			if(!r.second && e.cell_id != r.first->cell_id) {
+			// second insertion from DIFFERENT cell kills edge IF (!) we insert the same facet
+			if(!r.second && e.cell_id != r.first->cell_id && e.facet_id == r.first->facet_id) {
 				es_.erase(r.first);
 				return -1;
 			}
@@ -331,7 +331,7 @@ struct algo : public helpers< strat_t > {
 		}
 
 		// return how many primitives from given v were inserted into index
-		int operator()(facet_vid_t& v, ulong cell_id) {
+		int operator()(facet_vid_t& v, ulong cell_id, ulong facet_id) {
 			// vertex_id[i] = vertex_id[i] + i*8
 			std::transform(
 				&v[0], &v[n_fv], &v[0],
@@ -340,10 +340,10 @@ struct algo : public helpers< strat_t > {
 
 			// facet consists of four edges, try to insert each of them
 			int cnt = 0;
-			cnt += push_edge(edge_handle(v[0], v[1], cell_id, tops_));
-			cnt += push_edge(edge_handle(v[1], v[2], cell_id, tops_));
-			cnt += push_edge(edge_handle(v[2], v[3], cell_id, tops_));
-			cnt += push_edge(edge_handle(v[3], v[0], cell_id, tops_));
+			cnt += push_edge(edge_handle(v[0], v[1], cell_id, facet_id, tops_));
+			cnt += push_edge(edge_handle(v[1], v[2], cell_id, facet_id, tops_));
+			cnt += push_edge(edge_handle(v[2], v[3], cell_id, facet_id, tops_));
+			cnt += push_edge(edge_handle(v[3], v[0], cell_id, facet_id, tops_));
 			return cnt;
 		}
 
@@ -414,7 +414,7 @@ struct algo : public helpers< strat_t > {
 					continue;
 
 				cell_data::facet_vid(j, cell_fvid);
-				vib(cell_fvid, i);
+				vib(cell_fvid, i, j);
 			}
 		}
 
