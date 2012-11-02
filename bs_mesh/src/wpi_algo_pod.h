@@ -24,6 +24,8 @@ struct helpers {
 	typedef typename strat_t::vertex_pos   vertex_pos;
 	typedef typename strat_t::vertex_pos_i vertex_pos_i;
 
+	typedef typename strat_t::traits_t strat_traits;
+
 	// import global consts
 	enum { D = strat_t::D };
 
@@ -43,7 +45,8 @@ struct helpers {
 	}
 
 	static Point rawptr2point(const t_float* p) {
-		return strat_t::vertex_pos2point(reinterpret_cast< const vertex_pos& >(*p));
+		return strat_t::vertex_pos2point(strat_traits::template iter2pos< const vertex_pos >(p));
+		//return strat_t::vertex_pos2point(reinterpret_cast< const vertex_pos& >(*p));
 	}
 
 	static Iso_bbox vertex_pos2rect(const vertex_pos& lo, const vertex_pos& hi) {
@@ -61,6 +64,11 @@ struct pods : public helpers< strat_t > {
 
 	typedef typename strat_t::vertex_pos   vertex_pos;
 	typedef typename strat_t::vertex_pos_i vertex_pos_i;
+
+	typedef typename strat_t::cell_vertex_iterator cell_vertex_iterator;
+	typedef typename strat_t::well_traj_iterator   well_traj_iterator;
+
+	typedef typename strat_t::traits_t strat_traits;
 
 	// import base functions
 	typedef helpers< strat_t > base_t;
@@ -82,12 +90,13 @@ struct pods : public helpers< strat_t > {
 		// actual vertex number
 		enum { N = (1 << D) };
 		// vertex coord
-		t_float* V;
+		//t_float* V;
+		cell_vertex_iterator V;
 
 		// empty ctor for map
 		cell_data_base() : V(NULL) {}
 		// std ctor
-		cell_data_base(t_float *const cell) : V(cell) {}
+		cell_data_base(const cell_vertex_iterator& cell) : V(cell) {}
 
 		void lo(vertex_pos& b) const {
 			bound< std::less >(b);
@@ -98,11 +107,13 @@ struct pods : public helpers< strat_t > {
 		}
 
 		cell_pos& cpos() {
-			return reinterpret_cast< cell_pos& >(*V);
+			return strat_traits::template iter2pos< cell_pos& >(V);
+			//return reinterpret_cast< cell_pos& >(*V);
 		}
 
 		const cell_pos& cpos() const {
-			return reinterpret_cast< const cell_pos& >(*V);
+			return strat_traits::template iter2pos< const cell_pos& >(V);
+			//return reinterpret_cast< const cell_pos& >(*V);
 		}
 
 		Bbox bbox() const {
@@ -155,12 +166,12 @@ struct pods : public helpers< strat_t > {
 	*----------------------------------------------------------------*/
 	struct well_data_base {
 		// segment begin, end and md in raw vector
-		t_float* W;
+		well_traj_iterator W;
 
 		//empty ctor for map
 		well_data_base() : W(NULL) {}
 		//std ctor
-		well_data_base(t_float *const segment) : W(segment) {}
+		well_data_base(const well_traj_iterator& segment) : W(segment) {}
 
 		vertex_pos& cstart() {
 			return reinterpret_cast< vertex_pos& >(*W);

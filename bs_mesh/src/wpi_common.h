@@ -67,6 +67,22 @@ int lexicographical_compare_3way(_InputIterator1 __first1,
 		return -1;
 }
 
+// simple traits for strategies
+// assuming that cells vertices and well path are represented as continous C-arrays
+struct carray_traits {
+	// iterator over raw tops array - simple pointer
+	typedef t_float* cell_vertex_iterator;
+	typedef t_float* well_traj_iterator;
+
+	// generic converter from iterator to vertex_pos
+	// return reference to array to prevent data copying
+	template< class pos_t, class iterator_t >
+	static pos_t& iter2pos(iterator_t& src) {
+		// for simple arrays we can simply use reinterpret_cast
+		return reinterpret_cast< pos_t& >(*src);
+	}
+};
+
 }} /* { namespace blue_sky::wpi */
 
 #endif /* end of include guard: WPI_COMMON_Y614D09T */

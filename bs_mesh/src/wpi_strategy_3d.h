@@ -20,24 +20,30 @@
 
 namespace blue_sky { namespace wpi {
 
-struct strategy_3d {
+template< class strat_traits >
+struct strategy_3d_ex {
 	// main typedefs
-	typedef Kernel::Point_3                                     Point;
-	typedef Kernel::Segment_3                                   Segment;
-	typedef CGAL::Bbox_3                                        Bbox;
-	typedef Kernel::Iso_cuboid_3                                Iso_bbox;
+	typedef typename Kernel::Point_3                                     Point;
+	typedef typename Kernel::Segment_3                                   Segment;
+	typedef typename CGAL::Bbox_3                                        Bbox;
+	typedef typename Kernel::Iso_cuboid_3                                Iso_bbox;
 
 	// 3D specific typedefs
-	typedef Kernel::Triangle_3                                  Triangle;
-	typedef Kernel::Tetrahedron_3                               Tetrahedron;
-	typedef std::vector<Triangle>                               Triangles;
-	typedef Triangles::iterator                                 tri_iterator;
+	typedef typename Kernel::Triangle_3                                  Triangle;
+	typedef typename Kernel::Tetrahedron_3                               Tetrahedron;
+	typedef typename std::vector<Triangle>                               Triangles;
+	typedef typename Triangles::iterator                                 tri_iterator;
 
 	// dimens num, inner point id
 	enum { D = 3, inner_point_id = 6 };
 
 	typedef t_float vertex_pos[D];
 	typedef ulong   vertex_pos_i[D];
+
+	// iterator over source arrays come from traits
+	typedef strat_traits traits_t;
+	typedef typename traits_t::cell_vertex_iterator cell_vertex_iterator;
+	typedef typename traits_t::well_traj_iterator   well_traj_iterator;
 
 	// misc helper functions
 
@@ -83,7 +89,7 @@ struct strategy_3d {
 		// empty ctor for map
 		cell_data() {}
 		// std ctor
-		cell_data(t_float *const cell) : base_t(cell) {}
+		cell_data(const cell_vertex_iterator& cell) : base_t(cell) {}
 
 		using base_t::cpos;
 		using base_t::ss;
@@ -290,7 +296,7 @@ struct strategy_3d {
 		// ctors
 		well_data() {}
 
-		well_data(t_float *const segment, const well_data* prev = NULL) : base_t(segment) {}
+		well_data(const well_traj_iterator& segment, const well_data* prev = NULL) : base_t(segment) {}
 
 		// MD access
 		using base_t::W;
@@ -371,6 +377,9 @@ struct strategy_3d {
 		);
 	}
 };
+
+// shortcoming typedef
+typedef strategy_3d_ex< carray_traits > strategy_3d;
 
 }} // eof blue_sky::wpi
 
