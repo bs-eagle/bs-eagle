@@ -155,11 +155,73 @@ struct pods : public helpers< strat_t > {
 
 	typedef typename strat_t::template cell_data< cell_data_base > cell_data;
 	typedef st_smart_ptr< cell_data > sp_cell_data;
+
 	// storage for representing mesh
-	//typedef std::map< t_ulong, cell_data > trimesh;
-	typedef std::vector< cell_data > trimesh;
-	typedef typename trimesh::iterator trim_iterator;
-	typedef typename trimesh::const_iterator ctrim_iterator;
+	//template< class cell_data, class strat_traits >
+	class BS_API_PLUGIN trimesh {
+	public:
+		typedef cell_data value_type;
+		typedef value_type& reference;
+		typedef const value_type& const_reference;
+		typedef value_type* pointer;
+
+		// empty ctor
+		trimesh();
+		// ctor from given COORD & ZCORN
+		trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn);
+
+		void init(t_long nx, t_long ny, spv_float coord, spv_float zcorn);
+
+		const vertex_pos_i& size() const {
+			return size_;
+		}
+
+		ulong size_flat() const {
+			ulong sz = 1;
+			for(uint i = 0; i < D; ++i)
+				sz *= size_[i];
+			return sz;
+		}
+
+		// direct subscript via backend ignoring cache
+		// calls pimpl actually
+		value_type ss_backend(ulong idx) const;
+
+		// subscripting operator - returns a new _copy_ of cell every time!
+		// if cell was already cached, return a copy from cache
+		value_type ss(ulong idx) const {
+			typename cache_t::const_iterator r = cache_.find(idx);
+			if(r != cache_.end())
+				return r->second;
+			return ss_backend(idx);
+		}
+
+		// the same in operator form
+		value_type operator[](ulong idx) const {
+			return ss(idx);
+		}
+
+		// if cell was modified, we can return cached version instead of subscripting backend
+		void cache_cell(ulong idx, const value_type& cell) {
+			cache_[idx] = cell;
+		}
+
+		// obtain iterators on backend
+		cell_vertex_iterator begin() const;
+		cell_vertex_iterator end() const;
+
+	private:
+		struct impl;
+		st_smart_ptr< impl > pimpl_;
+
+		vertex_pos_i size_;
+		typedef std::map< ulong, value_type > cache_t;
+		cache_t cache_;
+	};
+
+	//typedef std::vector< cell_data > trimesh;
+	//typedef typename trimesh::iterator trim_iterator;
+	//typedef typename trimesh::const_iterator ctrim_iterator;
 
 	/*-----------------------------------------------------------------
 	* well description
