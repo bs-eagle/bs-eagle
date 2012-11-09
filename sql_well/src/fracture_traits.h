@@ -21,6 +21,7 @@ struct fract_traits  {
 	typedef wpi_algo::intersect_path xpath;
 	typedef xpath::iterator x_iterator;
 	typedef wpi_algo::well_hit_cell whc;
+	typedef strat_t::cell_vertex_iterator cellv_iterator;
 
 	typedef frac_comp_builder< fract_traits > fcb_t;
 
@@ -79,11 +80,11 @@ struct fract_traits  {
 		}
 
 		// prepare compdat
-		fracture frac(well_name, branch_name, px->cell, fcb.m_size_);
+		fracture frac(well_name, branch_name, px->cell, fcb.m_.size());
 
 		vertex_pos   frac_coords;
 		vertex_pos_i cell_pos;
-		wpi_algo::decode_cell_id (px->cell, cell_pos, fcb.m_size_);
+		wpi_algo::decode_cell_id (px->cell, cell_pos, fcb.m_.size());
 
 		frac.md_cell_pos[0] = frac.cell_pos[0] = cell_pos[0];   // I - position
 		frac.md_cell_pos[1] = frac.cell_pos[1] = cell_pos[1];   // J - position
@@ -115,9 +116,10 @@ struct fract_traits  {
 			copy (&cell_pos[0], &cell_pos[strat_t::D], &cell_up[0]);
 			cell_up[2] = kw;
 
-			t_long k_cell_id_ = wpi_algo::encode_cell_id (cell_up, fcb.m_size_);
+			t_long k_cell_id_ = wpi_algo::encode_cell_id (cell_up, fcb.m_.size());
 			t_double z_top = 0;
-			t_float* tops_data = &(*fcb.tops_)[0];
+			cellv_iterator tops_data = fcb.m_.begin();
+			//t_float* tops_data = &(*fcb.tops_)[0];
 
 			// get mean of Z top plane
 			for (t_uint j = 0; j < 4; ++j) {
@@ -142,16 +144,17 @@ struct fract_traits  {
 
 		t_uint kw2_flag = 0;
 		// find kw2 position of fracture
-		for (t_ulong kw = cell_pos[2]; kw < fcb.m_size_[2]; kw++) {
+		for (t_ulong kw = cell_pos[2]; kw < fcb.m_.size()[2]; kw++) {
 			//std::cout<<"kw "<<kw<<"m_size "<<fcb.m_size_[2];
 
 			vertex_pos_i cell_down;
 			copy (&cell_pos[0], &cell_pos[strat_t::D], &cell_down[0]);
 			cell_down[2] = kw;
 
-			t_ulong k_cell_id_ = wpi_algo::encode_cell_id (cell_down, fcb.m_size_);
+			t_ulong k_cell_id_ = wpi_algo::encode_cell_id (cell_down, fcb.m_.size());
 			t_double z_down = 0;
-			t_float* tops_data = &(*fcb.tops_)[0];
+			cellv_iterator tops_data = fcb.m_.begin();
+			//t_float* tops_data = &(*fcb.tops_)[0];
 
 			// get mean of Z bottom plane
 			for (t_uint j = 4; j < 8; ++j) {
@@ -171,7 +174,7 @@ struct fract_traits  {
 		}
 		if (kw2_flag == 0) {
 			// reach bottom of reservoir
-			frac.cell_pos[3] = fcb.m_size_[2] - 1;
+			frac.cell_pos[3] = fcb.m_.size()[2] - 1;
 		}
 
 		if (!half_down)
