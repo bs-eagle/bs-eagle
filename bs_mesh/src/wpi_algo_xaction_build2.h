@@ -43,7 +43,7 @@ public:
 	// base members
 	using base_t::hit_idx_;
 	using base_t::m_;
-	using base_t::m_size_;
+	//using base_t::m_size_;
 	using base_t::wp_;
 
 	/*-----------------------------------------------------------------
@@ -122,7 +122,7 @@ public:
 		//typedef xbbox< D > xbbox_t;
 
 		leafs_builder(intersect_builder2& A, const Segments& s, std::vector< ulong >& hit, parts_container& leafs)
-			: A_(A), s_(s), hit_(hit), leafs_(leafs)
+			: A_(A), s_(s), hit_(hit), leafs_(leafs), m_size_(A.m_.size_flat())
 		{}
 
 		//leafs_builder(const leafs_builder& rhs)
@@ -137,9 +137,9 @@ public:
 			// otherwise check for real intersections
 			if(pm->size() == 1) {
 				ulong cell_id = pm->ss_id(0);
-				cell_data& cell = A_.m_[cell_id];
+				cell_data cell = A_.m_[cell_id];
 				// check if segment start & finish are inside the cell
-				if(hit_[wseg_id] >= A_.m_.size()) {
+				if(hit_[wseg_id] >= m_size_) {
 					const Point& start = A_.wp_[wseg_id].start();
 					if(
 						mesh_tools_t::point_inside_bbox(cell.bbox(), start) &&
@@ -148,7 +148,7 @@ public:
 						hit_[wseg_id] = cell_id;
 				}
 				// check segment end for last segment
-				if(wseg_id == A_.wp_.size() - 1 && hit_[wseg_id + 1] >= A_.m_.size()) {
+				if(wseg_id == A_.wp_.size() - 1 && hit_[wseg_id + 1] >= m_size_) {
 					const Point& finish = A_.wp_[wseg_id].finish();
 					if(
 						mesh_tools_t::point_inside_bbox(cell.bbox(), finish) &&
@@ -170,14 +170,15 @@ public:
 		const Segments& s_;
 		std::vector< ulong >& hit_;
 		parts_container& leafs_;
+		const ulong m_size_;
 	};
 
 	/*-----------------------------------------------------------------
 	 * main body
 	 *----------------------------------------------------------------*/
 	// propagate ctor
-	intersect_builder2(trimesh& mesh, well_path& wp, const vertex_pos_i& mesh_size)
-		: base_t(mesh, wp, mesh_size)
+	intersect_builder2(trimesh& mesh, well_path& wp)
+		: base_t(mesh, wp)
 	{}
 
 	// branch & bound algorithm for finding cells that really intersect with well
@@ -201,11 +202,11 @@ public:
 
 		// list of mesh parts
 		parts_container parts;
-		parts.insert(mesh_part(m_, m_size_));
+		parts.insert(mesh_part(m_));
 
 		// result - hit index
 		hit_idx_.resize(wp_.size() + 1);
-		std::fill(hit_idx_.begin(), hit_idx_.end(), m_.size());
+		std::fill(hit_idx_.begin(), hit_idx_.end(), m_.size_flat());
 
 		// let's go
 		leafs_builder B(*this, wseg, hit_idx_, parts);

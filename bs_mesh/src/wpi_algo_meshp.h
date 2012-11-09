@@ -31,8 +31,8 @@ struct mesh_tools : public helpers< strat_t > {
 	typedef typename pods_t::cell_data cell_data;
 	typedef typename pods_t::well_data well_data;
 	typedef typename pods_t::trimesh trimesh;
-	typedef typename pods_t::trim_iterator trim_iterator;
-	typedef typename pods_t::ctrim_iterator ctrim_iterator;
+	//typedef typename pods_t::trim_iterator trim_iterator;
+	//typedef typename pods_t::ctrim_iterator ctrim_iterator;
 
 	// import helper functions
 	typedef helpers< strat_t > base_t;
@@ -53,12 +53,12 @@ struct mesh_tools : public helpers< strat_t > {
 		typedef ulong cell_neighb_enum[n_facets];
 		typedef ulong edge_neighb_enum[n_edges];
 
-		mesh_part(trimesh& m, const vertex_pos_i& mesh_size)
+		mesh_part(trimesh& m)
 			: m_(m)
 		{
 			ca_assign(lo, ulong(0));
-			ca_assign(hi, mesh_size);
-			ca_assign(m_size_, mesh_size);
+			ca_assign(hi, m.size());
+			//ca_assign(m_size_, mesh_size);
 			calc_bounds();
 		}
 
@@ -68,8 +68,8 @@ struct mesh_tools : public helpers< strat_t > {
 
 			// sanity checks
 			for(uint i = 0; i < D; ++i) {
-				lo[i] = std::min(lo[i], m_size_[i] - 1);
-				hi[i] = std::min(hi[i], m_size_[i]);
+				lo[i] = std::min(lo[i], m_.size()[i] - 1);
+				hi[i] = std::min(hi[i], m_.size()[i]);
 				hi[i] = std::max(lo[i] + 1, hi[i]);
 			}
 
@@ -81,7 +81,7 @@ struct mesh_tools : public helpers< strat_t > {
 			vertex_pos_i lower, upper, p;
 			// search for bounds
 			for(ulong i = 0; i < cell_idx.size(); ++i) {
-				decode_cell_id(cell_idx[i], p, m_size_);
+				decode_cell_id(cell_idx[i], p, m_.size());
 				if(i == 0)
 					ca_assign(lower, ca_assign(upper, p));
 				else {
@@ -121,10 +121,11 @@ struct mesh_tools : public helpers< strat_t > {
 
 		// size of the full mesh
 		ulong fullm_size() const {
-			ulong res = 1;
-			for(uint i = 0; i < D; ++i)
-				res *= m_size_(i);
-			return res;
+			return m_.size_flat();
+			//ulong res = 1;
+			//for(uint i = 0; i < D; ++i)
+			//	res *= m_size_(i);
+			//return res;
 		}
 
 		ulong ss_id(const vertex_pos_i& offset) const {
@@ -132,7 +133,7 @@ struct mesh_tools : public helpers< strat_t > {
 			ca_assign(cell, lo);
 			for(uint i = 0; i < D; ++i)
 				cell[i] += offset[i];
-			return encode_cell_id(cell, m_size_);
+			return encode_cell_id(cell, m_.size());
 		}
 
 		ulong ss_id(ulong offset) const {
@@ -143,32 +144,32 @@ struct mesh_tools : public helpers< strat_t > {
 			return ss_id(part_pos);
 		}
 
-		trim_iterator ss_iter(const vertex_pos_i& offset) {
-			return m_.begin() + ss_id(offset);
-		}
+		//trim_iterator ss_iter(const vertex_pos_i& offset) {
+		//	return m_.begin() + ss_id(offset);
+		//}
 
-		trim_iterator ss_iter(ulong offset) {
-			return m_.begin() + ss_id(offset);
-		}
+		//trim_iterator ss_iter(ulong offset) {
+		//	return m_.begin() + ss_id(offset);
+		//}
 
-		ctrim_iterator ss_iter(const vertex_pos_i& offset) const {
-			return m_.begin() + ss_id(offset);
-		}
+		//ctrim_iterator ss_iter(const vertex_pos_i& offset) const {
+		//	return m_.begin() + ss_id(offset);
+		//}
 
-		ctrim_iterator ss_iter(ulong offset) const {
-			return m_.begin() + ss_id(offset);
-		}
+		//ctrim_iterator ss_iter(ulong offset) const {
+		//	return m_.begin() + ss_id(offset);
+		//}
 
 		// access to individual cells
 		template< class index_t >
-		cell_data& operator[](index_t idx) {
-			return *(m_.begin() + ss_id(idx));
+		cell_data operator[](index_t idx) const {
+			return m_[ss_id(idx)];
 		}
 
-		template< class index_t >
-		const cell_data& operator[](index_t idx) const {
-			return *(m_.begin() + ss_id(idx));
-		}
+		//template< class index_t >
+		//const cell_data& operator[](index_t idx) const {
+		//	return m_[ss_id(idx)];
+		//}
 
 		Iso_bbox iso_bbox() const {
 			//vertex_pos lo_pos, hi_pos;
@@ -214,7 +215,7 @@ struct mesh_tools : public helpers< strat_t > {
 
 				// add new child cell
 				if(sz) {
-					*ii++ = mesh_part(m_, m_size_, spl_lo, spl_hi);
+					*ii++ = mesh_part(m_, spl_lo, spl_hi);
 					tot_sz += sz;
 				}
 			}
@@ -244,12 +245,18 @@ struct mesh_tools : public helpers< strat_t > {
 
 		// calc size of cell in x-y-z directions
 		void cell_size(ulong offset, vertex_pos& res) const {
-			ctrim_iterator pc = this->ss_iter(offset);
-			if(pc != m_.end()) {
+			if(offset < this->size()) {
+				const cell_data& c = (*this)[offset];
 				vertex_pos b1, b2;
-				pc->lo(b1); pc->hi(b2);
+				c.lo(b1); c.hi(b2);
 				std::transform(&b2[0], &b2[D], &b1[0], &res[0], std::minus< t_float >());
 			}
+			//ctrim_iterator pc = this->ss_iter(offset);
+			//if(pc != m_.end()) {
+			//	vertex_pos b1, b2;
+			//	pc->lo(b1); pc->hi(b2);
+			//	std::transform(&b2[0], &b2[D], &b1[0], &res[0], std::minus< t_float >());
+			//}
 		}
 
 		void cell_size(const vertex_pos_i& offset, vertex_pos& res) {
@@ -289,32 +296,32 @@ struct mesh_tools : public helpers< strat_t > {
 
 	private:
 		trimesh& m_;
-		vertex_pos_i m_size_, mp_size_;
+		vertex_pos_i mp_size_;
 		vertex_pos lo_bnd, hi_bnd;
 
+		// idx SHOULD BE IN MESH!
 		const cell_data& ss(ulong idx) const {
-			// idx SHOULD BE IN MESH!
 			return m_[idx];
 		}
-		cell_data& ss(ulong idx) {
+		cell_data ss(ulong idx) {
 			return m_[idx];
 		}
 
 		const cell_data& ss(const vertex_pos_i& idx) const {
-			return m_[encode_cell_id(idx, m_size_)];
+			return m_[encode_cell_id(idx, m_.size())];
 		}
 		cell_data ss(const vertex_pos_i& idx) {
-			return m_[encode_cell_id(idx, m_size_)];
+			return m_[encode_cell_id(idx, m_.size())];
 		}
 
-		mesh_part(trimesh& m, const vertex_pos_i& mesh_size,
+		mesh_part(trimesh& m,
 				const vertex_pos_i& first_,
 				const vertex_pos_i& last_)
 			: m_(m)
 		{
 			ca_assign(lo, first_);
 			ca_assign(hi, last_);
-			ca_assign(m_size_, mesh_size);
+			//ca_assign(m_size_, mesh_size);
 			calc_bounds();
 		}
 
@@ -379,7 +386,7 @@ struct mesh_tools : public helpers< strat_t > {
 	}
 
 	static std::vector< ulong > where_is_point(
-		trimesh& m, const vertex_pos_i& m_size,
+		trimesh& m,
 		std::vector< Point > points)
 	{
 		// start with full mesh
@@ -389,7 +396,9 @@ struct mesh_tools : public helpers< strat_t > {
 		typedef typename mesh_part::container_t parts_container;
 		typedef typename mesh_part::container_t::iterator part_iterator;
 		parts_container parts;
-		parts.insert(mesh_part(m, m_size));
+		parts.insert(mesh_part(m));
+		// precalc mesh size
+		const ulong m_size = m.size_flat();
 
 		// found cell_ids stored here
 		std::vector< ulong > res(points.size(), -1);
@@ -413,7 +422,7 @@ struct mesh_tools : public helpers< strat_t > {
 				catched_points.clear();
 				for(ulong i = 0; i < points.size(); ++i) {
 					// skip already found points
-					if(res[i] < m.size()) continue;
+					if(res[i] < m_size) continue;
 					// check that point lies inside this part
 					if(point_inside_bbox(cur_rect, points[i])) {
 						catched_points.push_back(i);
@@ -431,9 +440,9 @@ struct mesh_tools : public helpers< strat_t > {
 				if(!catched_points.size())
 					leafs.erase(l++);
 				else if(l->size() == 1) {
-					ulong cell_id = encode_cell_id(l->lo, m_size);
+					ulong cell_id = encode_cell_id(l->lo, m.size());
 					//Polygon_2 cell_poly = m[cell_id].polygon();
-					cell_data& cell = m[cell_id];
+					cell_data cell = m[cell_id];
 					for(std::list< ulong >::iterator pp = catched_points.begin(),
 						cp_end = catched_points.end();
 						pp != cp_end; ++pp
@@ -453,8 +462,8 @@ struct mesh_tools : public helpers< strat_t > {
 		return res;
 	}
 
-	static ulong where_is_point(trimesh& m, const vertex_pos_i& m_size, Point point) {
-		return where_is_point(m, m_size, std::vector< Point >(1, point))[0];
+	static ulong where_is_point(trimesh& m, Point point) {
+		return where_is_point(m, std::vector< Point >(1, point))[0];
 	}
 
 };

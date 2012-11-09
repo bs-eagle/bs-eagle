@@ -43,12 +43,12 @@ public:
 	// base members
 	using base_t::hit_idx_;
 	using base_t::m_;
-	using base_t::m_size_;
+	//using base_t::m_size_;
 	using base_t::wp_;
 
 	// propagate ctor
-	intersect_builder3(trimesh& mesh, well_path& wp, const vertex_pos_i& mesh_size)
-		: base_t(mesh, wp, mesh_size)
+	intersect_builder3(trimesh& mesh, well_path& wp)
+		: base_t(mesh, wp)
 	{}
 
 	// branch & bound algorithm for finding cells that really intersect with well
@@ -61,7 +61,7 @@ public:
 
 		// list of mesh parts
 		parts_container parts;
-		parts.insert(mesh_part(m_, m_size_));
+		parts.insert(mesh_part(m_));
 
 		// cache list of normal well segments
 		std::vector< Segment > wseg;
@@ -141,7 +141,7 @@ public:
 					leafs.erase(l++);
 				else if(l->size() == 1) {
 					// check for contained points if any
-					ulong cell_id = encode_cell_id(l->lo, m_size_);
+					ulong cell_id = encode_cell_id(l->lo, m_.size_());
 					cell_data& cell = m_[cell_id];
 					for(std::list< ulong >::iterator pp = catched_points.begin(),
 						cp_end = catched_points.end();
