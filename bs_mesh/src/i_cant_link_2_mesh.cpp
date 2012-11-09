@@ -6,11 +6,10 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
-#include <boost/python/detail/wrap_python.hpp>
+#include "bs_mesh_stdafx.h"
 #include "wpi_strategy_3d.h"
 #include "wpi_algo.h"
 
-#include "bs_mesh_stdafx.h"
 #include "i_cant_link_2_mesh.h"
 #include "bs_mesh_grdecl.h"
 #include "well_path_ident.h"
@@ -79,22 +78,24 @@ bool register_handy_mesh_iface(const plugin_descriptor& pd) {
 namespace python {
 	using namespace boost::python;
 
-	tuple enum_border_facets_vtk(t_long nx, t_long ny, spv_float tops, spv_int mask) {
+	tuple enum_border_facets_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_int mask) {
 		typedef wpi::strategy_3d strat_t;
 		typedef wpi::algo< strat_t > wpi_algo;
 
 		spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
-		spv_long res = wpi_algo::enum_border_facets_vtk(nx, ny, tops, mask, cell_idx);
-		return make_tuple(res, cell_idx);
+		spv_float points = BS_KERNEL.create_object(v_float::bs_type());
+		spv_long res = wpi_algo::enum_border_facets_vtk(nx, ny, coord, zcorn, mask, cell_idx, points);
+		return make_tuple(res, cell_idx, points);
 	}
 
-	tuple enum_border_edges_vtk(t_long nx, t_long ny, spv_float tops, spv_int mask) {
+	tuple enum_border_edges_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_int mask) {
 		typedef wpi::strategy_3d strat_t;
 		typedef wpi::algo< strat_t > wpi_algo;
 
 		spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
-		spv_long res = wpi_algo::enum_border_edges_vtk(nx, ny, tops, mask, cell_idx);
-		return make_tuple(res, cell_idx);
+		spv_float points = BS_KERNEL.create_object(v_float::bs_type());
+		spv_long res = wpi_algo::enum_border_edges_vtk(nx, ny, coord, zcorn, mask, cell_idx, points);
+		return make_tuple(res, cell_idx, points);
 	}
 
 	void py_export_handymesh() {

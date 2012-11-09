@@ -10,6 +10,7 @@
 
 #include "well_path_ident.h"
 #include "wpi_iface.h"
+#include "wpi_trimesh_impl.h"
 #include "wpi_algo.h"
 
 #include "export_python_wrapper.h"
@@ -34,9 +35,9 @@ spv_uint where_is_points_impl(t_long nx, t_long ny, spv_float coord, spv_float z
 	//enum { D = strat_t::D };
 
 	// convert coord & zcorn to tops
-	trimesh M;
-	vertex_pos_i mesh_size;
-	spv_float tops = algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
+	trimesh M(nx, ny, coord, zcorn);
+	//vertex_pos_i mesh_size;
+	//spv_float tops = algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
 
 	// convert plain array of coords to array of Point objects
 	// points are always specified in 3D
@@ -49,7 +50,7 @@ spv_uint where_is_points_impl(t_long nx, t_long ny, spv_float coord, spv_float z
 	}
 
 	// real action
-	const std::vector< ulong >& hit_idx = mesh_tools_t::where_is_point(M, mesh_size, P);
+	const std::vector< ulong >& hit_idx = mesh_tools_t::where_is_point(M, P);
 
 	// return result
 	spv_uint res = BS_KERNEL.create_object(v_uint::bs_type());
@@ -74,15 +75,15 @@ t_uint where_is_point_impl(t_long nx, t_long ny, spv_float coord, spv_float zcor
 	//enum { D = strat_t::D };
 
 	// convert coord & zcorn to tops
-	trimesh M;
-	vertex_pos_i mesh_size;
-	spv_float tops = algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
+	trimesh M(nx, ny, coord, zcorn);
+	//vertex_pos_i mesh_size;
+	//spv_float tops = algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
 
 	// convert plain array of coords to Point object
 	Point P = pods_t::rawptr2point(&*point->begin());
 
 	// real action
-	return mesh_tools_t::where_is_point(M, mesh_size, P);
+	return mesh_tools_t::where_is_point(M, P);
 }
 
 } /* hidden implementation */
