@@ -83,6 +83,9 @@ struct carray_traits {
 	}
 };
 
+// forward declaration of online tops strategy traits
+struct online_tops_traits;
+
 }} /* { namespace blue_sky::wpi */
 
 #endif /* end of include guard: WPI_COMMON_Y614D09T */
