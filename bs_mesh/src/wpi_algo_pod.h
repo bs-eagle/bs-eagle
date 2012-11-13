@@ -25,6 +25,7 @@ struct helpers {
 	typedef typename strat_t::vertex_pos_i vertex_pos_i;
 
 	typedef typename strat_t::traits_t strat_traits;
+	typedef typename strat_traits::cell_vertex_iterator cell_vertex_iterator;
 
 	// import global consts
 	enum { D = strat_t::D };
@@ -45,8 +46,13 @@ struct helpers {
 	}
 
 	static Point rawptr2point(const t_float* p) {
+		//return strat_t::vertex_pos2point(strat_traits::template iter2pos< const vertex_pos >(p));
+		return strat_t::vertex_pos2point(reinterpret_cast< const vertex_pos& >(*p));
+	}
+
+	// cell_vertex_iterator -> point
+	static Point iter2point(const cell_vertex_iterator& p) {
 		return strat_t::vertex_pos2point(strat_traits::template iter2pos< const vertex_pos >(p));
-		//return strat_t::vertex_pos2point(reinterpret_cast< const vertex_pos& >(*p));
 	}
 
 	static Iso_bbox vertex_pos2rect(const vertex_pos& lo, const vertex_pos& hi) {
