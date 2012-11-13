@@ -140,7 +140,7 @@ struct strategy_2d_ex {
 			return facet_vid(facet_id(dim, facet, res));
 		}
 
-		Polygon_2 polygon() const {
+		Polygon_2 polygon() {
 			// 2D upper plane of cell
 			Point points[] = {
 				Point(V[0], V[1]),  Point(V[3], V[4]),
@@ -242,7 +242,8 @@ struct strategy_2d_ex {
 };
 
 // shortcoming typedef
-typedef strategy_2d_ex< carray_traits > strategy_2d;
+typedef strategy_2d_ex< online_tops_traits > strategy_2d;
+//typedef strategy_2d_ex< carray_traits > strategy_2d;
 
 }} // eof blue_sky::wpi
 

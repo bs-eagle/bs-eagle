@@ -379,7 +379,8 @@ struct strategy_3d_ex {
 };
 
 // shortcoming typedef
-typedef strategy_3d_ex< carray_traits > strategy_3d;
+typedef strategy_3d_ex< online_tops_traits > strategy_3d;
+//typedef strategy_3d_ex< carray_traits > strategy_3d;
 
 }} // eof blue_sky::wpi
 
