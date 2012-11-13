@@ -45,22 +45,24 @@ public:
 
 	// common iterator operations
 	reference operator*() {
+		switch_pos(pos_);
 		return data_[offs_];
 	}
 	const_reference operator*() const {
-		return data_[offs_];
+		return *const_cast< tops_iterator& >(*this);
 	}
 
 	pointer operator->() {
-		return &data_[offs_];
+		return &(**this);
 	}
 	const_pointer operator->() const {
-		return &data_[offs_];
+		return &(**this);
 	}
 
 	tops_iterator& operator++() {
-		if(++offs_ == n_cell_pts)
-			switch_cell(cid_ + 1);
+		++pos_;
+		//if(++offs_ == n_cell_pts)
+		//	switch_cell(cid_ + 1);
 		return *this;
 	}
 	tops_iterator operator++(int) {
@@ -70,12 +72,13 @@ public:
 	}
 
 	tops_iterator& operator--() {
-		if(offs_ == 0) {
-			switch_cell(cid_ - 1);
-			offs_ = n_cell_pts - 1;
-		}
-		else
-			--offs_;
+		--pos_;
+		//if(offs_ == 0) {
+		//	switch_cell(cid_ - 1);
+		//	offs_ = n_cell_pts - 1;
+		//}
+		//else
+		//	--offs_;
 		return *this;
 	}
 	tops_iterator operator--(int) {
@@ -85,7 +88,8 @@ public:
 	}
 
 	bool operator==(const tops_iterator& rhs) const {
-		return cid_ == rhs.cid_ && offs_ == rhs.offs_;
+		return pos_ == rhs.pos_;
+		//return cid_ == rhs.cid_ && offs_ == rhs.offs_;
 	}
 	bool operator!=(const tops_iterator& rhs) const {
 		return !(*this == rhs);
@@ -95,51 +99,59 @@ public:
 		mesh_ = rhs.mesh_;
 		cid_ = rhs.cid_;
 		offs_ = rhs.offs_;
+		pos_ = rhs.pos_;
 		std::copy(&rhs.data_[0], &rhs.data_[n_cell_pts], &data_[0]);
 	}
 
 	// random-access operations
 	// Element access operator can destroy iterator position!
-	reference operator[](const t_long n) {
-		if(offs_ + n < n_cell_pts)
+	reference operator[](const difference_type n) {
+		switch_pos(pos_);
+		if(ulong(offs_ + n) < n_cell_pts)
 			return data_[offs_ + n];
 		else {
-			switch_pos(cid_ * n_cell_pts + offs_ + n);
+			switch_pos(pos_ + n);
 			return data_[offs_];
 		}
 	}
 
-	tops_iterator& operator+=(const t_long n) {
-		if(fit2data(n))
-			offs_ += n;
-		else
-			switch_pos(cid_ * n_cell_pts + offs_ + n);
+	tops_iterator& operator+=(const difference_type n) {
+		pos_ += n;
+		//if(fit2data(n))
+		//	offs_ += n;
+		//else
+		//	switch_pos(cid_ * n_cell_pts + offs_ + n);
 		return *this;
 	}
-	tops_iterator& operator-=(const t_long n) {
-		return this->operator+=(-n);
+	tops_iterator& operator-=(const difference_type n) {
+		pos_ -= n;
+		return *this;
+		//return this->operator+=(-n);
 	}
 
-	tops_iterator operator+(const t_long n) const {
+	tops_iterator operator+(const difference_type n) const {
 		tops_iterator t(*this);
 		t += n;
 		return t;
 	}
-	tops_iterator operator-(const t_long n) const {
+	tops_iterator operator-(const difference_type n) const {
 		tops_iterator t(*this);
 		t -= n;
 		return t;
 	}
 
-	t_long operator-(const tops_iterator& rhs) const {
-		return (cid_ - rhs.cid_)* n_cell_pts + offs_ - rhs.offs_;
+	difference_type operator-(const tops_iterator& rhs) const {
+		return difference_type(pos_ - rhs.pos_);
+		//return (cid_ - rhs.cid_)* n_cell_pts + offs_ - rhs.offs_;
 	}
 
 	bool operator<(const tops_iterator& rhs) const {
-		return cid_ * n_cell_pts + offs_ < rhs.cid_ * n_cell_pts + rhs.offs_;
+		return pos_ < rhs.pos_;
+		//return cid_ * n_cell_pts + offs_ < rhs.cid_ * n_cell_pts + rhs.offs_;
 	}
 	bool operator>(const tops_iterator& rhs) const {
-		return cid_ * n_cell_pts + offs_ > rhs.cid_ * n_cell_pts + rhs.offs_;
+		return pos_ > rhs.pos_;
+		//return cid_ * n_cell_pts + offs_ > rhs.cid_ * n_cell_pts + rhs.offs_;
 	}
 	bool operator<=(const tops_iterator& rhs) const {
 		return !(*this > rhs);
@@ -148,17 +160,17 @@ public:
 		return !(*this < rhs);
 	}
 
-	bool fit2data(t_long n) const {
-		if(t_long(offs_ + n) < n_cell_pts && t_long(offs_ + n) >= 0)
-			return true;
-		return false;
-	}
+	//inline bool fit2data(difference_type n) const {
+	//	if(difference_type(offs_ + n) < n_cell_pts && difference_type(offs_ + n) >= 0)
+	//		return true;
+	//	return false;
+	//}
 
 private:
 	// ref to mesh object
 	rs_smesh_iface* mesh_;
 	// id of currently calculated cell
-	ulong cid_, offs_;
+	ulong cid_, offs_, pos_;
 	// cache of calculated cell corner coord
 	value_type data_[n_cell_pts];
 
@@ -194,11 +206,17 @@ private:
 		}
 	}
 
-	void switch_pos(const ulong pos) {
+	inline void switch_pos(const ulong pos) {
+		// check if new position fits in current data buffer
+		offs_ = pos - cid_ * n_cell_pts;
+		if(offs_ < n_cell_pts)
+			return;
+
+		// if we're here then we need to actually switch to new cell
 		const ulong cell_id = pos / n_cell_pts;
 		switch_cell(cell_id);
-		//if(cid_ != ulong(-1))
 		offs_ = pos - cell_id * n_cell_pts;
+		pos_ = pos;
 	}
 };
 

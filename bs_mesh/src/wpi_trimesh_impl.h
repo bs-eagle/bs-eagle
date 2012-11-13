@@ -69,7 +69,7 @@ struct pods< strat_t >::trimesh::impl {
 			return tops_iterator(mesh_);
 		}
 		iterator_t end() const {
-			return tops_iterator(mesh_, -1);
+			return tops_iterator(mesh_, mesh_->get_n_elements());
 		}
 
 		sp_smesh mesh_;
