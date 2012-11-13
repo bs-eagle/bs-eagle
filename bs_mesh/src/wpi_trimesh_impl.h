@@ -10,10 +10,10 @@
 #define WPI_TRIMESH_IMPL_1I00E960
 
 #include "wpi_algo_pod.h"
-//#include "wpi_strategy_3d.h"
-//#include "wpi_strategy_2d.h"
+#include "wpi_online_tops_traits.h"
 // we depend on mesh_grdecl
 #include "i_cant_link_2_mesh.h"
+#include "rs_smesh_iface.h"
 
 namespace blue_sky { namespace wpi {
 
@@ -36,15 +36,12 @@ struct pods< strat_t >::trimesh::impl {
 		// holder for tops array
 		spv_float tops_;
 
-		void init(t_long nx, t_long ny, spv_float coord, spv_float zcorn, vertex_pos_i& mesh_size) {
+		void init(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
 			using namespace blue_sky;
 
 			// obtain coordinates for all vertices of all cells
 			sp_himesh handy = BS_KERNEL.create_object("handy_mesh_iface");
 			tops_ = handy->calc_cells_vertices_xyz(nx, ny, coord, zcorn);
-			// set size
-			const ulong full_sz[] = {ulong(nx), ulong(ny), (zcorn->size() / (nx * ny)) >> 3};
-			std::copy(full_sz, full_sz + D, mesh_size);
 		}
 
 		iterator_t begin() const {
@@ -55,11 +52,34 @@ struct pods< strat_t >::trimesh::impl {
 		}
 	};
 
+	// specialization for online tops traits
+	template< class unused >
+	struct iimpl< online_tops_traits, unused > {
+		typedef smart_ptr< rs_smesh_iface, true > sp_smesh;
+
+		void init(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
+			using namespace blue_sky;
+			// build mesh_grdecl around given mesh
+			sp_himesh handy = BS_KERNEL.create_object("handy_mesh_iface");
+			mesh_ = handy->make_mesh_grdecl(nx, ny, coord, zcorn);
+			assert(mesh_);
+		}
+
+		iterator_t begin() const {
+			return tops_iterator(mesh_);
+		}
+		iterator_t end() const {
+			return tops_iterator(mesh_, -1);
+		}
+
+		sp_smesh mesh_;
+	};
+
 	// empty ctor
 	impl() {}
 
-	void init(t_long nx, t_long ny, spv_float coord, spv_float zcorn, vertex_pos_i& mesh_size) {
-		ii_.init(nx, ny, coord, zcorn, mesh_size);
+	void init(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
+		ii_.init(nx, ny, coord, zcorn);
 	}
 
 	value_type ss(ulong idx) const {
@@ -89,12 +109,15 @@ template< class strat_t >
 pods< strat_t >::trimesh::trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn)
 	: pimpl_(new impl)
 {
-	pimpl_->init(nx, ny, coord, zcorn, size_);
+	this->init(nx, ny, coord, zcorn);
 }
 
 template< class strat_t >
 void pods< strat_t >::trimesh::init(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
-	pimpl_->init(nx, ny, coord, zcorn, size_);
+	pimpl_->init(nx, ny, coord, zcorn);
+	// set size
+	const ulong full_sz[] = {ulong(nx), ulong(ny), (zcorn->size() / (nx * ny)) >> 3};
+	std::copy(full_sz, full_sz + D, size_);
 }
 
 template< class strat_t >
