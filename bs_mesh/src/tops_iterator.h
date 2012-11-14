@@ -11,42 +11,153 @@
 
 #include "conf.h"
 #include "rs_smesh_iface.h"
+#include <boost/pool/pool_alloc.hpp>
 
 namespace blue_sky { namespace wpi {
 
+template< class iterator_type >
+struct carray_ti_traits : public iterator_type {
+	typedef iterator_type iterator_t;
+	typedef typename iterator_t::value_type value_type;
+	typedef typename iterator_t::reference reference;
+	//typedef const value_type& const_reference;
+
+	enum { n_cell_pts = 24 };
+	typedef void ctor_param_t;
+
+	carray_ti_traits(ctor_param_t* = NULL) {}
+
+	reference ss(ulong offs) {
+		return data_[offs];
+	}
+	//const_reference ss(ulong idx) const {
+	//	return data_[idx];
+	//}
+
+	bool switch_buf(ulong cell_id) const {
+		return false;
+	}
+
+	void assign(const carray_ti_traits& rhs) {
+		std::copy(&rhs.data_[0], &rhs.data_[n_cell_pts], &data_[0]);
+	}
+
+	void operator=(const carray_ti_traits& rhs) {
+		assign(rhs);
+	}
+
+	value_type data_[n_cell_pts];
+};
+
+// bufpool strategy collects pool of unique cells buffers
+// and even more reduces memory consuption
+template< class iterator_type >
+struct bufpool_ti_traits : public iterator_type {
+	typedef iterator_type iterator_t;
+	typedef typename iterator_t::value_type value_type;
+	typedef typename iterator_t::reference reference;
+	typedef typename iterator_t::pointer pointer;
+	//typedef const value_type& const_reference;
+
+	// use simple traits as buffer holder
+	typedef carray_ti_traits< iterator_t > cell_buffer;
+	enum { n_cell_pts = cell_buffer::n_cell_pts };
+
+	// helper structure that actually contain cell data buffer
+	//typedef value_type cell_buffer[n_cell_pts];
+
+	typedef boost::fast_pool_allocator<
+		std::pair< ulong, cell_buffer >,
+		boost::default_user_allocator_new_delete,
+		boost::details::pool::null_mutex
+		> cell_buf_allocator;
+	typedef std::map< ulong, cell_buffer, std::less< ulong >, cell_buf_allocator > cell_buf_storage;
+	typedef typename cell_buf_storage::value_type cbs_value_type;
+	typedef typename cell_buf_storage::iterator cbs_iterator;
+	typedef std::pair< cbs_iterator, bool > cbs_ins_res;
+
+	typedef cell_buf_storage ctor_param_t;
+
+	bufpool_ti_traits(ctor_param_t* pstore = NULL) : store_(pstore) {}
+
+	reference ss(ulong offs) {
+		return *(data_ + offs);
+	}
+
+	bool switch_buf(ulong cell_id) {
+		static cell_buffer t;
+		if(!store_) return false;
+
+		// check if given cell is already cached
+		//cbs_iterator p_cb = store_->find(cell_id);
+		//if(p_cb != store_->end()) {
+		//	data_ = &p_cb->second[0];
+		//	return true;
+		//}
+		//else {
+		//	data_ = &(*store_)[cell_id][0];
+		//	return false;
+		//}
+		cbs_ins_res r = store_->insert(cbs_value_type(cell_id, t));
+		data_ = &r.first->second.data_[0];
+		return r.second;
+	}
+
+	void assign(const bufpool_ti_traits& rhs) {
+		store_ = rhs.store_;
+		data_ = rhs.data_;
+	}
+
+	cell_buf_storage* store_;
+	pointer data_;
+};
+
 // iterator to random access tops array calculated on the fly
-class tops_iterator : public std::iterator< std::random_access_iterator_tag, t_float > {
+template< template< class > class ti_strategy = carray_ti_traits >
+class tops_iterator : public ti_strategy< std::iterator< std::random_access_iterator_tag, t_float > >
+{
 public:
-	typedef std::iterator< std::random_access_iterator_tag, t_float > base_t;
-	typedef typename base_t::value_type value_type;
-	typedef typename base_t::pointer pointer;
-	typedef typename base_t::reference reference;
-	typedef typename base_t::difference_type difference_type;
+	typedef ti_strategy< std::iterator< std::random_access_iterator_tag, t_float > > strat_t;
+	typedef typename strat_t::ctor_param_t strat_ctor_param_t;
+	typedef typename strat_t::iterator_t iterator_t;
+
+	typedef typename iterator_t::value_type value_type;
+	typedef typename iterator_t::pointer pointer;
+	typedef typename iterator_t::reference reference;
+	typedef typename iterator_t::difference_type difference_type;
 
 	typedef const value_type& const_reference;
 	typedef const value_type* const_pointer;
 
 	typedef grd_ecl::fpoint3d fpoint3d_t;
 
-    typedef t_ulong ulong;
-    typedef t_uint uint;
+	typedef t_ulong ulong;
+	typedef t_uint uint;
 
 	typedef smart_ptr< rs_smesh_iface, true > sp_smesh;
 
-	enum { n_cell_pts = 24 };
+	enum { n_cell_pts = strat_t::n_cell_pts };
 
-	tops_iterator() : mesh_(NULL), cid_(0), offs_(0) {}
-	tops_iterator(rs_smesh_iface* mesh, const ulong pos = 0)
-		: mesh_(mesh)
+	//tops_iterator() : mesh_(NULL), cid_(0), offs_(0) {}
+	tops_iterator(rs_smesh_iface* mesh = NULL, strat_ctor_param_t* strat_param = NULL, const ulong pos = 0)
+		: strat_t(strat_param), mesh_(mesh)
 	{
-		switch_pos(pos);
+		if(mesh_) {
+			// force cell switching
+			cid_ = pos / n_cell_pts + 1;
+			switch_pos(pos);
+		}
+		else {
+			cid_ = 0; offs_ = 0;
+		}
 	}
 	// std copy ctor is fine
 
 	// common iterator operations
 	reference operator*() {
 		switch_pos(pos_);
-		return data_[offs_];
+		return strat_t::ss(offs_);
+		//return data_[offs_];
 	}
 	const_reference operator*() const {
 		return *const_cast< tops_iterator& >(*this);
@@ -100,7 +211,8 @@ public:
 		cid_ = rhs.cid_;
 		offs_ = rhs.offs_;
 		pos_ = rhs.pos_;
-		std::copy(&rhs.data_[0], &rhs.data_[n_cell_pts], &data_[0]);
+		strat_t::assign(rhs);
+		//std::copy(&rhs.data_[0], &rhs.data_[n_cell_pts], &data_[0]);
 	}
 
 	// random-access operations
@@ -108,10 +220,12 @@ public:
 	reference operator[](const difference_type n) {
 		switch_pos(pos_);
 		if(ulong(offs_ + n) < n_cell_pts)
-			return data_[offs_ + n];
+			return strat_t::ss(offs_ + n);
+			//return data_[offs_ + n];
 		else {
 			switch_pos(pos_ + n);
-			return data_[offs_];
+			return strat_t::ss(offs_);
+			//return data_[offs_];
 		}
 	}
 
@@ -172,7 +286,7 @@ private:
 	// id of currently calculated cell
 	ulong cid_, offs_, pos_;
 	// cache of calculated cell corner coord
-	value_type data_[n_cell_pts];
+	//value_type data_[n_cell_pts];
 
 	void switch_cell(const ulong cell_id) {
 		// offset is reset to 0
@@ -189,20 +303,23 @@ private:
 			return;
 		}
 
-		const ulong plane_sz = dims[0] * dims[1];
-		const ulong z = cell_id / plane_sz;
-		const ulong y = (cell_id - z * plane_sz) / dims[0];
+		if(!strat_t::switch_buf(cell_id)) {
+			const ulong plane_sz = dims[0] * dims[1];
+			const ulong z = cell_id / plane_sz;
+			const ulong y = (cell_id - z * plane_sz) / dims[0];
 
-		const grd_ecl::fpoint3d_vector corners = mesh_->calc_element(
-			cell_id - z * plane_sz - y * dims[0], y, z
-		);
-		// copy corners to plain data array
-		pointer pdata = &data_[0];
-		for(uint c = 0; c < 8; ++c) {
-			const fpoint3d_t& corner = corners[c];
-			*pdata++ = corner.x;
-			*pdata++ = corner.y;
-			*pdata++ = corner.z;
+			const grd_ecl::fpoint3d_vector corners = mesh_->calc_element(
+				cell_id - z * plane_sz - y * dims[0], y, z
+			);
+			// copy corners to plain data array
+			//pointer pdata = &data_[0];
+			pointer pdata = &strat_t::ss(0);
+			for(uint c = 0; c < 8; ++c) {
+				const fpoint3d_t& corner = corners[c];
+				*pdata++ = corner.x;
+				*pdata++ = corner.y;
+				*pdata++ = corner.z;
+			}
 		}
 	}
 
