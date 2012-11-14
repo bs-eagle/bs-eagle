@@ -14,6 +14,7 @@
 
 #include <iterator>
 #include <cmath>
+#include <boost/integer/static_min_max.hpp>
 
 #include "conf.h"
 //class bs_mesh_grdecl;
@@ -33,14 +34,14 @@ typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 
 // assign for c arrays
 // fun with returning reference to array :)
-template< class T, int L >
-static T (&ca_assign(T (&lhs)[L], const T (&rhs)[L]))[L] {
-	std::copy(&rhs[0], &rhs[L], &lhs[0]);
+template< class T, class X, int M, int N >
+static T (&ca_assign(T (&lhs)[M], const X (&rhs)[N]))[boost::static_unsigned_min< M, N >::value] {
+	std::copy(&rhs[0], &rhs[boost::static_unsigned_min< M, N >::value], &lhs[0]);
 	return lhs;
 }
 
-template< class T, int L >
-static T (&ca_assign(T (&lhs)[L], const T& v))[L] {
+template< class T, class X, int L >
+static T (&ca_assign(T (&lhs)[L], const X& v))[L] {
 	std::fill(&lhs[0], &lhs[L], v);
 	return lhs;
 }
