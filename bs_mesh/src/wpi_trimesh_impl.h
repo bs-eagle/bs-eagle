@@ -56,6 +56,7 @@ struct pods< strat_t >::trimesh::impl {
 	template< class unused >
 	struct iimpl< online_tops_traits, unused > {
 		typedef smart_ptr< rs_smesh_iface, true > sp_smesh;
+		typedef tops_iterator< carray_ti_traits > iterator_t;
 
 		void init(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
 			using namespace blue_sky;
@@ -66,13 +67,39 @@ struct pods< strat_t >::trimesh::impl {
 		}
 
 		iterator_t begin() const {
-			return tops_iterator(mesh_);
+			return iterator_t(mesh_, NULL);
 		}
 		iterator_t end() const {
-			return tops_iterator(mesh_, mesh_->get_n_elements());
+			return iterator_t(mesh_, NULL, mesh_->get_n_elements());
 		}
 
 		sp_smesh mesh_;
+	};
+
+	template< class unused >
+	struct iimpl< online_tops_traits_bufpool, unused > : public iimpl< online_tops_traits > {
+		typedef tops_iterator< bufpool_ti_traits > iterator_t;
+		typedef typename iterator_t::strat_ctor_param_t cell_buf_storage;
+		typedef iimpl< online_tops_traits > base_t;
+
+		using base_t::mesh_;
+		using base_t::init;
+
+		iterator_t begin() {
+			return iterator_t(mesh_, &store_);
+		}
+		iterator_t end() {
+			return iterator_t(mesh_, &store_, mesh_->get_n_elements());
+		}
+
+		~iimpl() {
+			// free memory allocated by cell buffers
+			typedef typename cell_buf_storage::allocator_type alloc;
+			typedef typename alloc::value_type V;
+			boost::singleton_pool< boost::fast_pool_allocator_tag, sizeof(V) >::release_memory();
+		}
+
+		cell_buf_storage store_;
 	};
 
 	// empty ctor
@@ -82,14 +109,14 @@ struct pods< strat_t >::trimesh::impl {
 		ii_.init(nx, ny, coord, zcorn);
 	}
 
-	value_type ss(ulong idx) const {
+	value_type ss(ulong idx) {
 		return value_type(ii_.begin() + 24 * idx);
 	}
 
-	iterator_t begin() const {
+	iterator_t begin() {
 		return ii_.begin();
 	}
-	iterator_t end() const {
+	iterator_t end() {
 		return ii_.end();
 	}
 
