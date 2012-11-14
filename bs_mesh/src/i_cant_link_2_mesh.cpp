@@ -8,7 +8,7 @@
 
 #include "bs_mesh_stdafx.h"
 #include "wpi_strategy_3d.h"
-#include "wpi_algo.h"
+#include "wpi_algo_vtk.h"
 
 #include "i_cant_link_2_mesh.h"
 #include "bs_mesh_grdecl.h"
@@ -93,7 +93,7 @@ namespace python {
 
 	tuple enum_border_facets_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_int mask) {
 		typedef wpi::strategy_3d_ex< wpi::online_tops_traits > strat_t;
-		typedef wpi::algo< strat_t > wpi_algo;
+		typedef wpi::algo_vtk< strat_t > wpi_algo;
 
 		spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
 		spv_float points = BS_KERNEL.create_object(v_float::bs_type());
@@ -105,7 +105,7 @@ namespace python {
 
 	tuple enum_border_edges_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_int mask) {
 		typedef wpi::strategy_3d_ex< wpi::online_tops_traits > strat_t;
-		typedef wpi::algo< strat_t > wpi_algo;
+		typedef wpi::algo_vtk< strat_t > wpi_algo;
 
 		spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
 		spv_float points = BS_KERNEL.create_object(v_float::bs_type());

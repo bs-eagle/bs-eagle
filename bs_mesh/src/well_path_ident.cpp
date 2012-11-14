@@ -15,6 +15,9 @@
 
 #include "export_python_wrapper.h"
 
+// profiling
+#include <google/profiler.h>
+
 namespace blue_sky {
 // alias
 namespace bp = boost::python;
@@ -93,9 +96,13 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 	spv_float well_info, bool include_well_nodes)
 {
 	//return well_path_ident_(nx, ny, coord, zcorn, well_info, include_well_nodes);
-	return wpi::algo< wpi::strategy_3d >::well_path_ident_d< true >(
+	typedef wpi::algo< wpi::strategy_3d_ex< wpi::online_tops_traits > > wpi_algo_t;
+	ProfilerStart("/home/uentity/my_projects/blue-sky.git/plugins/bs-eagle/examples/well_path_ident.prof");
+	spv_float res = wpi_algo_t::well_path_ident_d< true >(
 		nx, ny, coord, zcorn, well_info, include_well_nodes
 	);
+	ProfilerStop();
+	return res;
 }
 
 // specialization for 2D
