@@ -85,6 +85,7 @@ struct carray_traits {
 
 // forward declaration of online tops strategy traits
 struct online_tops_traits;
+struct online_tops_traits_bufpool;
 
 }} /* { namespace blue_sky::wpi */
 

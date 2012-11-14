@@ -15,8 +15,8 @@ namespace blue_sky { namespace wpi {
 
 // cell's vertices coords are calculated on the fly when accessing given cell
 struct online_tops_traits {
-	typedef tops_iterator cell_vertex_iterator;
-	typedef t_float*      well_traj_iterator;
+	typedef tops_iterator< carray_ti_traits > cell_vertex_iterator;
+	typedef t_float*                          well_traj_iterator;
 
 	template < typename T, size_t N > char (&array_sz(const T(&)[N]))[N];
 	template < typename T, size_t N, size_t M > char (&array_sz(const T(&)[N][M]))[N * M];
@@ -32,6 +32,10 @@ struct online_tops_traits {
 		// now we can safely use reinterpret_cast
 		return reinterpret_cast< pos_t& >(*src);
 	}
+};
+
+struct online_tops_traits_bufpool : public online_tops_traits {
+	typedef tops_iterator< bufpool_ti_traits > cell_vertex_iterator;
 };
 
 }} /* blue_sky::wpi */
