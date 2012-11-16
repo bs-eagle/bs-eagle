@@ -183,7 +183,7 @@ public:
 			wnodes[i] = wp_[i - 1].finish();
 
 			// calculate hit_idx
-			hit_idx_ = mesh_tools_t::where_is_point(m_, m_.size(), wnodes);
+			hit_idx_ = mesh_tools_t::where_is_point(m_, wnodes);
 		}
 
 		return hit_idx_;
@@ -380,7 +380,7 @@ protected:
 		const xpoints_list& res = strat_t::precise_intersection(c, well_seg);
 		// cache modified cell in order to omit polygon or triangulation recalc, used by
 		// precise_intersection
-		m_.cache_cell(cell_id, c);
+		//m_.cache_cell(cell_id, c);
 
 		// add all points to interscetion path
 		for(typename xpoints_list::const_iterator px = res.begin(), end = res.end(); px != end; ++px) {

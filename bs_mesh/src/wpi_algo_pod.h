@@ -10,6 +10,7 @@
 #define WPI_ALGO_POD_BDBOLFWA
 
 #include "wpi_common.h"
+//#include <boost/pool/pool_alloc.hpp>
 
 namespace blue_sky { namespace wpi {
 
@@ -195,9 +196,9 @@ struct pods : public helpers< strat_t > {
 		// subscripting operator - returns a new _copy_ of cell every time!
 		// if cell was already cached, return a copy from cache
 		value_type ss(ulong idx) const {
-			typename cache_t::const_iterator r = cache_.find(idx);
-			if(r != cache_.end())
-				return r->second;
+			//typename cache_t::const_iterator r = cache_.find(idx);
+			//if(r != cache_.end())
+			//	return r->second;
 			return ss_backend(idx);
 		}
 
@@ -207,9 +208,9 @@ struct pods : public helpers< strat_t > {
 		}
 
 		// if cell was modified, we can return cached version instead of subscripting backend
-		void cache_cell(ulong idx, const value_type& cell) {
-			cache_[idx] = cell;
-		}
+		//void cache_cell(ulong idx, const value_type& cell) {
+		//	cache_[idx] = cell;
+		//}
 
 		// obtain iterators on backend
 		cell_vertex_iterator begin() const;
@@ -220,8 +221,8 @@ struct pods : public helpers< strat_t > {
 		st_smart_ptr< impl > pimpl_;
 
 		vertex_pos_i size_;
-		typedef std::map< ulong, value_type > cache_t;
-		cache_t cache_;
+		//typedef std::map< ulong, value_type > cache_t;
+		//cache_t cache_;
 	};
 
 	//typedef std::vector< cell_data > trimesh;
@@ -321,6 +322,13 @@ struct pods : public helpers< strat_t > {
 
 	// storage of intersection points
 	typedef std::multiset< well_hit_cell > intersect_path;
+
+	//typedef boost::fast_pool_allocator<
+	//	well_hit_cell,
+	//	boost::default_user_allocator_new_delete,
+	//	boost::details::pool::null_mutex
+	//	> whc_allocator;
+	//typedef std::multiset< well_hit_cell, std::less< well_hit_cell >, whc_allocator > intersect_path;
 };
 
 // boost::array with opertator= and ctor with elements init
