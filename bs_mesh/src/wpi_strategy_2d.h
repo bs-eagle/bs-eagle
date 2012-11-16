@@ -21,7 +21,8 @@
 
 namespace blue_sky { namespace wpi {
 
-struct strategy_2d {
+template< class strat_traits >
+struct strategy_2d_ex {
 	// main typedefs
 	typedef Kernel::Point_2                                     Point;
 	typedef Kernel::Segment_2                                   Segment;
@@ -36,6 +37,11 @@ struct strategy_2d {
 
 	typedef t_float vertex_pos[D];
 	typedef ulong   vertex_pos_i[D];
+
+	// iterator over source arrays come from traits
+	typedef strat_traits traits_t;
+	typedef typename traits_t::cell_vertex_iterator cell_vertex_iterator;
+	typedef typename traits_t::well_traj_iterator   well_traj_iterator;
 
 	// misc helper functions
 
@@ -71,7 +77,7 @@ struct strategy_2d {
 		// empty ctor for map
 		cell_data() {}
 		// std ctor
-		cell_data(t_float *const cell) : base_t(cell) {}
+		cell_data(const cell_vertex_iterator& cell) : base_t(cell) {}
 
 		using base_t::V;
 
@@ -134,7 +140,7 @@ struct strategy_2d {
 			return facet_vid(facet_id(dim, facet, res));
 		}
 
-		Polygon_2 polygon() const {
+		Polygon_2 polygon() {
 			// 2D upper plane of cell
 			Point points[] = {
 				Point(V[0], V[1]),  Point(V[3], V[4]),
@@ -158,7 +164,7 @@ struct strategy_2d {
 		//empty ctor for map
 		well_data() : md_(0) {}
 		//std ctor
-		well_data(t_float *const segment, const well_data* prev = NULL)
+		well_data(const well_traj_iterator& segment, const well_data* prev = NULL)
 			: base_t(segment), md_(0)
 		{
 			if(prev)
@@ -234,6 +240,10 @@ struct strategy_2d {
 	}
 
 };
+
+// shortcoming typedef
+typedef strategy_2d_ex< online_tops_traits > strategy_2d;
+//typedef strategy_2d_ex< carray_traits > strategy_2d;
 
 }} // eof blue_sky::wpi
 

@@ -40,12 +40,12 @@ public:
 	// base members
 	using base_t::hit_idx_;
 	using base_t::m_;
-	using base_t::m_size_;
+	//using base_t::m_size_;
 	using base_t::wp_;
 
 	// propagate ctor
-	intersect_builder(trimesh& mesh, well_path& wp, const vertex_pos_i& mesh_size)
-		: base_t(mesh, wp, mesh_size)
+	intersect_builder(trimesh& mesh, well_path& wp)
+		: base_t(mesh, wp)
 	{}
 
 	hit_idx_t& build() {
@@ -59,7 +59,7 @@ public:
 		search_space space;
 		// create list of mesh parts for each well segment
 		for(ulong i = 0; i < hit_idx_.size() - 1; ++i) {
-			mesh_part seg_m(m_, m_size_);
+			mesh_part seg_m(m_);
 			seg_m.init(hit_idx_[i], hit_idx_[i + 1]);
 			space.insert(std::make_pair(i, seg_m));
 		}

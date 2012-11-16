@@ -45,7 +45,7 @@ struct compl_traits {
 		sp_srcwell sw = fcb.sw_;
 
 		// prepare mesh_part representing full mesh
-		mesh_part fullmesh(fcb.m_, fcb.m_size_);
+		mesh_part fullmesh(fcb.m_);
 
 		// 3.4.1 search for completion_j begin_j and end_j using md_j and lentgh_j
 		t_double md      = sw->get_sql_real (0);
@@ -76,7 +76,7 @@ struct compl_traits {
 				break;
 
 			// prepare compdat
-			compdat cf(well_name, branch_name, px->cell, fcb.m_size_);
+			compdat cf(well_name, branch_name, px->cell, fcb.m_.size());
 
 			// 3.4.3.1 calc delta between consequent xpoint_k and xpoint_(k - 1)
 			// position to previous point

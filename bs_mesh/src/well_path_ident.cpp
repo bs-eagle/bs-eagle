@@ -10,9 +10,13 @@
 
 #include "well_path_ident.h"
 #include "wpi_iface.h"
+#include "wpi_trimesh_impl.h"
 #include "wpi_algo.h"
 
 #include "export_python_wrapper.h"
+
+// profiling
+//#include <google/profiler.h>
 
 namespace blue_sky {
 // alias
@@ -34,9 +38,9 @@ spv_uint where_is_points_impl(t_long nx, t_long ny, spv_float coord, spv_float z
 	//enum { D = strat_t::D };
 
 	// convert coord & zcorn to tops
-	trimesh M;
-	vertex_pos_i mesh_size;
-	spv_float tops = algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
+	trimesh M(nx, ny, coord, zcorn);
+	//vertex_pos_i mesh_size;
+	//spv_float tops = algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
 
 	// convert plain array of coords to array of Point objects
 	// points are always specified in 3D
@@ -49,7 +53,7 @@ spv_uint where_is_points_impl(t_long nx, t_long ny, spv_float coord, spv_float z
 	}
 
 	// real action
-	const std::vector< ulong >& hit_idx = mesh_tools_t::where_is_point(M, mesh_size, P);
+	const std::vector< ulong >& hit_idx = mesh_tools_t::where_is_point(M, P);
 
 	// return result
 	spv_uint res = BS_KERNEL.create_object(v_uint::bs_type());
@@ -74,15 +78,15 @@ t_uint where_is_point_impl(t_long nx, t_long ny, spv_float coord, spv_float zcor
 	//enum { D = strat_t::D };
 
 	// convert coord & zcorn to tops
-	trimesh M;
-	vertex_pos_i mesh_size;
-	spv_float tops = algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
+	trimesh M(nx, ny, coord, zcorn);
+	//vertex_pos_i mesh_size;
+	//spv_float tops = algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
 
 	// convert plain array of coords to Point object
 	Point P = pods_t::rawptr2point(&*point->begin());
 
 	// real action
-	return mesh_tools_t::where_is_point(M, mesh_size, P);
+	return mesh_tools_t::where_is_point(M, P);
 }
 
 } /* hidden implementation */
@@ -92,9 +96,13 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 	spv_float well_info, bool include_well_nodes)
 {
 	//return well_path_ident_(nx, ny, coord, zcorn, well_info, include_well_nodes);
-	return wpi::algo< wpi::strategy_3d >::well_path_ident_d< true >(
+	typedef wpi::algo< wpi::strategy_3d_ex< wpi::online_tops_traits > > wpi_algo_t;
+	//ProfilerStart("/home/uentity/my_projects/blue-sky.git/plugins/bs-eagle/examples/well_path_ident.prof");
+	spv_float res = wpi_algo_t::well_path_ident_d< true >(
 		nx, ny, coord, zcorn, well_info, include_well_nodes
 	);
+	//ProfilerStop();
+	return res;
 }
 
 // specialization for 2D

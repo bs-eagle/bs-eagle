@@ -60,7 +60,8 @@ public:
 
 	void init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
 		// build trimesh for given coord+zcorn
-		tops_ = wpi_algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, m_, m_size_);
+		m_.init(nx, ny, coord, zcorn);
+		//tops_ = wpi_algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, m_, m_size_);
 	}
 
 	void init(smart_ptr< well_pool_iface, true > src_well) {
@@ -140,7 +141,7 @@ public:
 				if(!wpi_algo::fill_well_path(traj_v, W)) return;
 
 				// 3.2 find intersections of given branch with mesh (well_path_ident)
-				sp_A = new xbuilder(m_, W, m_size_);
+				sp_A = new xbuilder(m_, W);
 				hit_idx_t& hi = sp_A->build();
 				//sp_A->remove_dups2();
 				sp_A->append_wp_nodes(hi);
@@ -168,9 +169,9 @@ public:
 	}
 
 	trimesh m_;
-	vertex_pos_i m_size_;
+	//vertex_pos_i m_size_;
 	// tops should live as long as mesh lives
-	spv_float tops_;
+	//spv_float tops_;
 	// copy of source sql_well
 	sp_srcwell sw_;
 	// storage for compdat records

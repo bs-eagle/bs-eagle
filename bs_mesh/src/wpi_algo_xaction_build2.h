@@ -13,6 +13,8 @@
 #include "loki/TypeManip.h"
 #include "wpi_algo_xaction.h"
 
+#include <boost/pool/object_pool.hpp>
+
 namespace blue_sky { namespace wpi {
 
 template< class strat_t >
@@ -33,6 +35,9 @@ public:
 	typedef typename strat_t::Segment      Segment;
 
 	typedef typename base_t::mesh_tools_t mesh_tools_t;
+	typedef typename mesh_part::container_t parts_container;
+	typedef typename parts_container::iterator part_iterator;
+	typedef typename parts_container::const_iterator part_citerator;
 
 	enum { D = strat_t::D };
 	typedef typename base_t::template xbbox< D > xbbox_t;
@@ -43,7 +48,7 @@ public:
 	// base members
 	using base_t::hit_idx_;
 	using base_t::m_;
-	using base_t::m_size_;
+	//using base_t::m_size_;
 	using base_t::wp_;
 
 	/*-----------------------------------------------------------------
@@ -111,18 +116,18 @@ public:
 	typedef box_handle_impl< MESH_BOX > mesh_box_handle;
 
 	// box intersections storage
-	typedef CGAL::Box_intersection_d::Box_with_handle_d< double, D, sp_bhandle > Box;
+	typedef CGAL::Box_intersection_d::Box_with_handle_d< double, D, box_handle* > Box;
+	//typedef CGAL::Box_intersection_d::Box_with_handle_d< double, D, sp_bhandle > Box;
 
 	/*-----------------------------------------------------------------
 	 * action taken when boxes intersection detected
 	 *----------------------------------------------------------------*/
 	struct leafs_builder {
-		typedef typename mesh_part::container_t parts_container;
 		typedef std::vector< Segment > Segments;
 		//typedef xbbox< D > xbbox_t;
 
 		leafs_builder(intersect_builder2& A, const Segments& s, std::vector< ulong >& hit, parts_container& leafs)
-			: A_(A), s_(s), hit_(hit), leafs_(leafs)
+			: A_(A), s_(s), hit_(hit), leafs_(leafs), m_size_(A.m_.size_flat())
 		{}
 
 		//leafs_builder(const leafs_builder& rhs)
@@ -130,16 +135,20 @@ public:
 		//{}
 
 		void operator()(const Box* mb, const Box* wb) {
-			const mesh_part* pm = static_cast< mesh_box_handle* >(mb->handle().get())->data();
-			ulong wseg_id = static_cast< well_box_handle* >(wb->handle().get())->data();
+			// Box handles are raw pointers
+			const mesh_part* pm = static_cast< mesh_box_handle* >(mb->handle())->data();
+			ulong wseg_id = static_cast< well_box_handle* >(wb->handle())->data();
+			// Box handlex are st_smart_ptrs
+			//const mesh_part* pm = static_cast< mesh_box_handle* >(mb->handle().get())->data();
+			//ulong wseg_id = static_cast< well_box_handle* >(wb->handle().get())->data();
 
 			// if mesh_part contains > 1 cells then just push it for further splitting
 			// otherwise check for real intersections
 			if(pm->size() == 1) {
 				ulong cell_id = pm->ss_id(0);
-				cell_data& cell = A_.m_[cell_id];
+				cell_data cell = A_.m_[cell_id];
 				// check if segment start & finish are inside the cell
-				if(hit_[wseg_id] >= A_.m_.size()) {
+				if(hit_[wseg_id] >= m_size_) {
 					const Point& start = A_.wp_[wseg_id].start();
 					if(
 						mesh_tools_t::point_inside_bbox(cell.bbox(), start) &&
@@ -148,7 +157,7 @@ public:
 						hit_[wseg_id] = cell_id;
 				}
 				// check segment end for last segment
-				if(wseg_id == A_.wp_.size() - 1 && hit_[wseg_id + 1] >= A_.m_.size()) {
+				if(wseg_id == A_.wp_.size() - 1 && hit_[wseg_id + 1] >= m_size_) {
 					const Point& finish = A_.wp_[wseg_id].finish();
 					if(
 						mesh_tools_t::point_inside_bbox(cell.bbox(), finish) &&
@@ -170,46 +179,52 @@ public:
 		const Segments& s_;
 		std::vector< ulong >& hit_;
 		parts_container& leafs_;
+		const ulong m_size_;
 	};
 
 	/*-----------------------------------------------------------------
 	 * main body
 	 *----------------------------------------------------------------*/
 	// propagate ctor
-	intersect_builder2(trimesh& mesh, well_path& wp, const vertex_pos_i& mesh_size)
-		: base_t(mesh, wp, mesh_size)
+	intersect_builder2(trimesh& mesh, well_path& wp)
+		: base_t(mesh, wp)
 	{}
 
 	// branch & bound algorithm for finding cells that really intersect with well
 	// works using boxes intersection
 	hit_idx_t& build() {
-		typedef typename mesh_part::container_t parts_container;
-		typedef typename parts_container::iterator part_iterator;
 		typedef std::vector< Segment > Segments;
 
-		// cache well segments
-		// and make boxes for them
 		Segments wseg(wp_.size());
 		std::vector< Box > well_boxes(wp_.size());
 		std::vector< Box* > well_boxes_p(wp_.size());
-		//wseg.reserve(wp_.size());
+		// pool for allocating well box handles
+		// they all will be detroyed automatically on exit
+		boost::object_pool< well_box_handle > wbh_pool;
+		// cache well segments
+		// and make boxes for them
 		for(ulong i = 0; i < wp_.size(); ++i) {
 			wseg[i] = wp_[i].segment();
-			well_boxes[i] = Box(wp_[i].bbox(), new well_box_handle(i));
+			well_boxes[i] = Box(wp_[i].bbox(), new(wbh_pool.malloc()) well_box_handle(i));
+			//well_boxes[i] = Box(wp_[i].bbox(), new well_box_handle(i));
 			well_boxes_p[i] = &well_boxes[i];
 		}
 
 		// list of mesh parts
 		parts_container parts;
-		parts.insert(mesh_part(m_, m_size_));
+		parts.insert(mesh_part(m_));
 
 		// result - hit index
 		hit_idx_.resize(wp_.size() + 1);
-		std::fill(hit_idx_.begin(), hit_idx_.end(), m_.size());
+		std::fill(hit_idx_.begin(), hit_idx_.end(), m_.size_flat());
+
+		// actual intersector object
+		leafs_builder B(*this, wseg, hit_idx_, parts);
+		// pool for allocating mesh box handles
+		// they all will be detroyed automatically on exit
+		boost::object_pool< mesh_box_handle > mbh_pool;
 
 		// let's go
-		leafs_builder B(*this, wseg, hit_idx_, parts);
-		//std::vector< Box > mp_boxes;
 		while(parts.size()) {
 			// we need container to hold all mesh parts
 			parts_container leafs;
@@ -218,8 +233,6 @@ public:
 			// and make boxes around splitted parts
 			// try to use single boxes container over all iterations - no profit
 			const ulong max_boxes = parts.size() * (1 << D);
-			//if(mp_boxes.size() < max_boxes)
-			//	mp_boxes.resize(max_boxes);
 			std::vector< Box > mp_boxes;
 			std::vector< Box* > mp_boxes_p;
 			mp_boxes.reserve(max_boxes);
@@ -227,25 +240,25 @@ public:
 
 			//ulong i = 0;
 			for(part_iterator p = parts.begin(), end = parts.end(); p != end; ++p) {
-				parts_container kids = p->divide();
+				const parts_container kids = p->divide();
 				//ulong i = 0;
-				for(part_iterator pk = kids.begin(), kend = kids.end(); pk != kend; ++pk) {
-					mp_boxes.push_back(Box(pk->bbox(), new mesh_box_handle(&*leafs.insert(*pk).first)));
+				for(part_citerator pk = kids.begin(), kend = kids.end(); pk != kend; ++pk) {
+					mp_boxes.push_back(
+						Box(pk->bbox(),
+						new(mbh_pool.malloc()) mesh_box_handle(&*leafs.insert(*pk).first))
+					);
 					mp_boxes_p.push_back(&mp_boxes[mp_boxes.size() - 1]);
 				}
 			}
 
-			// do intersect boxes
-			//parts_container new_kids;
+			// clear parts container before storing boxes to split on next step
 			parts.clear();
+			// do intersect boxes
 			CGAL::box_intersection_d(
-				mp_boxes_p.begin(), mp_boxes_p.end(),
+				mp_boxes_p.begin(),   mp_boxes_p.end(),
 				well_boxes_p.begin(), well_boxes_p.end(),
 				B
 			);
-
-			// update parts
-			//parts = new_kids;
 		}
 
 		return hit_idx_;

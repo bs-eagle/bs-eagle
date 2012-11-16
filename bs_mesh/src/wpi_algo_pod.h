@@ -10,6 +10,7 @@
 #define WPI_ALGO_POD_BDBOLFWA
 
 #include "wpi_common.h"
+//#include <boost/pool/pool_alloc.hpp>
 
 namespace blue_sky { namespace wpi {
 
@@ -23,6 +24,9 @@ struct helpers {
 
 	typedef typename strat_t::vertex_pos   vertex_pos;
 	typedef typename strat_t::vertex_pos_i vertex_pos_i;
+
+	typedef typename strat_t::traits_t strat_traits;
+	typedef typename strat_traits::cell_vertex_iterator cell_vertex_iterator;
 
 	// import global consts
 	enum { D = strat_t::D };
@@ -43,7 +47,13 @@ struct helpers {
 	}
 
 	static Point rawptr2point(const t_float* p) {
+		//return strat_t::vertex_pos2point(strat_traits::template iter2pos< const vertex_pos >(p));
 		return strat_t::vertex_pos2point(reinterpret_cast< const vertex_pos& >(*p));
+	}
+
+	// cell_vertex_iterator -> point
+	static Point iter2point(const cell_vertex_iterator& p) {
+		return strat_t::vertex_pos2point(strat_traits::template iter2pos< const vertex_pos >(p));
 	}
 
 	static Iso_bbox vertex_pos2rect(const vertex_pos& lo, const vertex_pos& hi) {
@@ -61,6 +71,11 @@ struct pods : public helpers< strat_t > {
 
 	typedef typename strat_t::vertex_pos   vertex_pos;
 	typedef typename strat_t::vertex_pos_i vertex_pos_i;
+
+	typedef typename strat_t::cell_vertex_iterator cell_vertex_iterator;
+	typedef typename strat_t::well_traj_iterator   well_traj_iterator;
+
+	typedef typename strat_t::traits_t strat_traits;
 
 	// import base functions
 	typedef helpers< strat_t > base_t;
@@ -82,12 +97,13 @@ struct pods : public helpers< strat_t > {
 		// actual vertex number
 		enum { N = (1 << D) };
 		// vertex coord
-		t_float* V;
+		//t_float* V;
+		cell_vertex_iterator V;
 
 		// empty ctor for map
 		cell_data_base() : V(NULL) {}
 		// std ctor
-		cell_data_base(t_float *const cell) : V(cell) {}
+		cell_data_base(const cell_vertex_iterator& cell) : V(cell) {}
 
 		void lo(vertex_pos& b) const {
 			bound< std::less >(b);
@@ -98,11 +114,13 @@ struct pods : public helpers< strat_t > {
 		}
 
 		cell_pos& cpos() {
-			return reinterpret_cast< cell_pos& >(*V);
+			return strat_traits::template iter2pos< cell_pos& >(V);
+			//return reinterpret_cast< cell_pos& >(*V);
 		}
 
 		const cell_pos& cpos() const {
-			return reinterpret_cast< const cell_pos& >(*V);
+			return strat_traits::template iter2pos< const cell_pos& >(V);
+			//return reinterpret_cast< const cell_pos& >(*V);
 		}
 
 		Bbox bbox() const {
@@ -129,10 +147,9 @@ struct pods : public helpers< strat_t > {
 		void bound(vertex_pos& b) const {
 			pred< t_float > p = pred< t_float >();
 			const cell_pos& cV = cpos();
-			// actual vertex number to search
-			//const uint N = (1 << D);
+			t_float c;
 			for(uint i = 0; i < D; ++i) {
-				t_float c = cV[0][i];
+				c = cV[0][i];
 				for(uint j = 1; j < N; ++j) {
 					if(p(cV[j][i], c))
 						c = cV[j][i];
@@ -144,23 +161,85 @@ struct pods : public helpers< strat_t > {
 
 	typedef typename strat_t::template cell_data< cell_data_base > cell_data;
 	typedef st_smart_ptr< cell_data > sp_cell_data;
+
 	// storage for representing mesh
-	//typedef std::map< t_ulong, cell_data > trimesh;
-	typedef std::vector< cell_data > trimesh;
-	typedef typename trimesh::iterator trim_iterator;
-	typedef typename trimesh::const_iterator ctrim_iterator;
+	//template< class cell_data, class strat_traits >
+	class BS_API_PLUGIN trimesh {
+	public:
+		typedef cell_data value_type;
+		typedef value_type& reference;
+		typedef const value_type& const_reference;
+		typedef value_type* pointer;
+
+		// empty ctor
+		trimesh();
+		// ctor from given COORD & ZCORN
+		trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn);
+
+		void init(t_long nx, t_long ny, spv_float coord, spv_float zcorn);
+
+		const vertex_pos_i& size() const {
+			return size_;
+		}
+
+		ulong size_flat() const {
+			ulong sz = 1;
+			for(uint i = 0; i < D; ++i)
+				sz *= size_[i];
+			return sz;
+		}
+
+		// direct subscript via backend ignoring cache
+		// calls pimpl actually
+		value_type ss_backend(ulong idx) const;
+
+		// subscripting operator - returns a new _copy_ of cell every time!
+		// if cell was already cached, return a copy from cache
+		value_type ss(ulong idx) const {
+			//typename cache_t::const_iterator r = cache_.find(idx);
+			//if(r != cache_.end())
+			//	return r->second;
+			return ss_backend(idx);
+		}
+
+		// the same in operator form
+		value_type operator[](ulong idx) const {
+			return ss(idx);
+		}
+
+		// if cell was modified, we can return cached version instead of subscripting backend
+		//void cache_cell(ulong idx, const value_type& cell) {
+		//	cache_[idx] = cell;
+		//}
+
+		// obtain iterators on backend
+		cell_vertex_iterator begin() const;
+		cell_vertex_iterator end() const;
+
+	private:
+		struct impl;
+		st_smart_ptr< impl > pimpl_;
+
+		vertex_pos_i size_;
+		//typedef std::map< ulong, value_type > cache_t;
+		//cache_t cache_;
+	};
+
+	//typedef std::vector< cell_data > trimesh;
+	//typedef typename trimesh::iterator trim_iterator;
+	//typedef typename trimesh::const_iterator ctrim_iterator;
 
 	/*-----------------------------------------------------------------
 	* well description
 	*----------------------------------------------------------------*/
 	struct well_data_base {
 		// segment begin, end and md in raw vector
-		t_float* W;
+		well_traj_iterator W;
 
 		//empty ctor for map
 		well_data_base() : W(NULL) {}
 		//std ctor
-		well_data_base(t_float *const segment) : W(segment) {}
+		well_data_base(const well_traj_iterator& segment) : W(segment) {}
 
 		vertex_pos& cstart() {
 			return reinterpret_cast< vertex_pos& >(*W);
@@ -243,6 +322,13 @@ struct pods : public helpers< strat_t > {
 
 	// storage of intersection points
 	typedef std::multiset< well_hit_cell > intersect_path;
+
+	//typedef boost::fast_pool_allocator<
+	//	well_hit_cell,
+	//	boost::default_user_allocator_new_delete,
+	//	boost::details::pool::null_mutex
+	//	> whc_allocator;
+	//typedef std::multiset< well_hit_cell, std::less< well_hit_cell >, whc_allocator > intersect_path;
 };
 
 // boost::array with opertator= and ctor with elements init

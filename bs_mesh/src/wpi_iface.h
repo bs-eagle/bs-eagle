@@ -10,6 +10,7 @@
 #define WPI_IFACE_NSM6SQCA
 
 #include "wpi_algo_pod.h"
+#include "wpi_online_tops_traits.h"
 #include "wpi_strategy_3d.h"
 #include "wpi_strategy_2d.h"
 

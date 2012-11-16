@@ -1,0 +1,354 @@
+/// @file tops_iterator.h
+/// @brief Simulate iterator over tops array with on-line calculation of needed cell vertices
+/// @author uentity
+/// @version 1.0
+/// @date 02.11.2012
+/// @copyright This source code is released under the terms of
+///            the BSD License. See LICENSE for more details.
+
+#ifndef TOPS_ITERATOR_Q81ZI8GM
+#define TOPS_ITERATOR_Q81ZI8GM
+
+#include "conf.h"
+#include "rs_smesh_iface.h"
+#include <boost/pool/pool_alloc.hpp>
+
+namespace blue_sky { namespace wpi {
+
+template< class iterator_type >
+struct carray_ti_traits : public iterator_type {
+	typedef iterator_type iterator_t;
+	typedef typename iterator_t::value_type value_type;
+	typedef typename iterator_t::reference reference;
+	//typedef const value_type& const_reference;
+
+	enum { n_cell_pts = 24 };
+	typedef void ctor_param_t;
+
+	carray_ti_traits(ctor_param_t* = NULL) {}
+	//carray_ti_traits(ctor_param_t* = NULL) : just_born(true) {}
+
+	reference ss(ulong offs) {
+		return data_[offs];
+	}
+	//const_reference ss(ulong idx) const {
+	//	return data_[idx];
+	//}
+
+	bool switch_buf(ulong cell_id) const {
+		return false;
+	}
+
+	void assign(const carray_ti_traits& rhs) {
+		std::copy(&rhs.data_[0], &rhs.data_[n_cell_pts], &data_[0]);
+	}
+
+	void operator=(const carray_ti_traits& rhs) {
+		assign(rhs);
+	}
+
+	value_type data_[n_cell_pts];
+	// flag to help bufpool determine if buffer was just created
+	//bool just_born;
+};
+
+// bufpool strategy collects pool of unique cells buffers
+// and even more reduces memory consuption
+template< class iterator_type >
+struct bufpool_ti_traits : public iterator_type {
+	typedef iterator_type iterator_t;
+	typedef typename iterator_t::value_type value_type;
+	typedef typename iterator_t::reference reference;
+	typedef typename iterator_t::pointer pointer;
+	//typedef const value_type& const_reference;
+
+	// use simple traits as buffer holder
+	typedef carray_ti_traits< iterator_t > cell_buffer;
+	enum { n_cell_pts = cell_buffer::n_cell_pts };
+
+	// helper structure that actually contain cell data buffer
+	//typedef value_type cell_buffer[n_cell_pts];
+
+	typedef boost::fast_pool_allocator<
+		std::pair< ulong, cell_buffer >,
+		boost::default_user_allocator_new_delete,
+		boost::details::pool::null_mutex
+		> cell_buf_allocator;
+	typedef std::map< ulong, cell_buffer, std::less< ulong >, cell_buf_allocator > cell_buf_storage;
+	typedef typename cell_buf_storage::value_type cbs_value_type;
+	typedef typename cell_buf_storage::iterator cbs_iterator;
+	typedef std::pair< cbs_iterator, bool > cbs_ins_res;
+
+	typedef cell_buf_storage ctor_param_t;
+
+	bufpool_ti_traits(ctor_param_t* pstore = NULL) : store_(pstore) {}
+
+	reference ss(ulong offs) {
+		return *(data_ + offs);
+	}
+
+	// return true, if given cell is FOUND in cache
+	// true prevents recalc
+	bool switch_buf(ulong cell_id) {
+		static cell_buffer t;
+		if(!store_) return false;
+
+		//cell_buffer& b = (*store_)[cell_id];
+		//data_ = &b.data_[0];
+		//const bool res = !b.just_born;
+		//b.just_born = false;
+		//return res;
+		////if(b.just_born) {
+		////	b.just_born = false;
+		////	return false;
+		////}
+		////return true;
+
+		// check if given cell is already cached
+		//cbs_iterator p_cb = store_->find(cell_id);
+		//if(p_cb != store_->end()) {
+		//	data_ = &p_cb->second.data_[0];
+		//	return true;
+		//}
+		//else {
+		//	data_ = &(*store_)[cell_id].data_[0];
+		//	return false;
+		//}
+
+		cbs_ins_res r = store_->insert(cbs_value_type(cell_id, t));
+		data_ = &r.first->second.data_[0];
+		return !r.second;
+	}
+
+	void assign(const bufpool_ti_traits& rhs) {
+		store_ = rhs.store_;
+		data_ = rhs.data_;
+	}
+
+	cell_buf_storage* store_;
+	pointer data_;
+};
+
+// iterator to random access tops array calculated on the fly
+template< template< class > class ti_strategy = carray_ti_traits >
+class tops_iterator : public ti_strategy< std::iterator< std::random_access_iterator_tag, t_float > >
+{
+public:
+	typedef ti_strategy< std::iterator< std::random_access_iterator_tag, t_float > > strat_t;
+	typedef typename strat_t::ctor_param_t strat_ctor_param_t;
+	typedef typename strat_t::iterator_t iterator_t;
+
+	typedef typename iterator_t::value_type value_type;
+	typedef typename iterator_t::pointer pointer;
+	typedef typename iterator_t::reference reference;
+	typedef typename iterator_t::difference_type difference_type;
+
+	typedef const value_type& const_reference;
+	typedef const value_type* const_pointer;
+
+	typedef grd_ecl::fpoint3d fpoint3d_t;
+
+	typedef t_ulong ulong;
+	typedef t_uint uint;
+
+	typedef smart_ptr< rs_smesh_iface, true > sp_smesh;
+
+	enum { n_cell_pts = strat_t::n_cell_pts };
+
+	//tops_iterator() : mesh_(NULL), cid_(0), offs_(0) {}
+	tops_iterator(rs_smesh_iface* mesh = NULL, strat_ctor_param_t* strat_param = NULL, const ulong pos = 0)
+		: strat_t(strat_param), mesh_(mesh)
+	{
+		if(mesh_) {
+			// force cell switching
+			cid_ = pos / n_cell_pts + 1;
+			switch_pos(pos);
+		}
+		else {
+			cid_ = 0; offs_ = 0;
+		}
+	}
+	// std copy ctor is fine
+
+	// common iterator operations
+	reference operator*() {
+		switch_pos(pos_);
+		return strat_t::ss(offs_);
+		//return data_[offs_];
+	}
+	const_reference operator*() const {
+		return *const_cast< tops_iterator& >(*this);
+	}
+
+	pointer operator->() {
+		return &(**this);
+	}
+	const_pointer operator->() const {
+		return &(**this);
+	}
+
+	tops_iterator& operator++() {
+		++pos_;
+		//if(++offs_ == n_cell_pts)
+		//	switch_cell(cid_ + 1);
+		return *this;
+	}
+	tops_iterator operator++(int) {
+		tops_iterator t = *this;
+		++(*this);
+		return t;
+	}
+
+	tops_iterator& operator--() {
+		--pos_;
+		//if(offs_ == 0) {
+		//	switch_cell(cid_ - 1);
+		//	offs_ = n_cell_pts - 1;
+		//}
+		//else
+		//	--offs_;
+		return *this;
+	}
+	tops_iterator operator--(int) {
+		tops_iterator t = *this;
+		--(*this);
+		return t;
+	}
+
+	bool operator==(const tops_iterator& rhs) const {
+		return pos_ == rhs.pos_;
+		//return cid_ == rhs.cid_ && offs_ == rhs.offs_;
+	}
+	bool operator!=(const tops_iterator& rhs) const {
+		return !(*this == rhs);
+	}
+
+	void operator=(const tops_iterator& rhs) {
+		mesh_ = rhs.mesh_;
+		cid_ = rhs.cid_;
+		offs_ = rhs.offs_;
+		pos_ = rhs.pos_;
+		strat_t::assign(rhs);
+		//std::copy(&rhs.data_[0], &rhs.data_[n_cell_pts], &data_[0]);
+	}
+
+	// random-access operations
+	// Element access operator can destroy iterator position!
+	reference operator[](const difference_type n) {
+		switch_pos(pos_);
+		if(ulong(offs_ + n) < n_cell_pts)
+			return strat_t::ss(offs_ + n);
+			//return data_[offs_ + n];
+		else {
+			switch_pos(pos_ + n);
+			return strat_t::ss(offs_);
+			//return data_[offs_];
+		}
+	}
+
+	tops_iterator& operator+=(const difference_type n) {
+		pos_ += n;
+		//if(fit2data(n))
+		//	offs_ += n;
+		//else
+		//	switch_pos(cid_ * n_cell_pts + offs_ + n);
+		return *this;
+	}
+	tops_iterator& operator-=(const difference_type n) {
+		pos_ -= n;
+		return *this;
+		//return this->operator+=(-n);
+	}
+
+	tops_iterator operator+(const difference_type n) const {
+		tops_iterator t(*this);
+		t += n;
+		return t;
+	}
+	tops_iterator operator-(const difference_type n) const {
+		tops_iterator t(*this);
+		t -= n;
+		return t;
+	}
+
+	difference_type operator-(const tops_iterator& rhs) const {
+		return difference_type(pos_ - rhs.pos_);
+		//return (cid_ - rhs.cid_)* n_cell_pts + offs_ - rhs.offs_;
+	}
+
+	bool operator<(const tops_iterator& rhs) const {
+		return pos_ < rhs.pos_;
+		//return cid_ * n_cell_pts + offs_ < rhs.cid_ * n_cell_pts + rhs.offs_;
+	}
+	bool operator>(const tops_iterator& rhs) const {
+		return pos_ > rhs.pos_;
+		//return cid_ * n_cell_pts + offs_ > rhs.cid_ * n_cell_pts + rhs.offs_;
+	}
+	bool operator<=(const tops_iterator& rhs) const {
+		return !(*this > rhs);
+	}
+	bool operator>=(const tops_iterator& rhs) const {
+		return !(*this < rhs);
+	}
+
+private:
+	// ref to mesh object
+	rs_smesh_iface* mesh_;
+	// id of currently calculated cell
+	ulong cid_, offs_, pos_;
+	// cache of calculated cell corner coord
+	//value_type data_[n_cell_pts];
+
+	void switch_cell(const ulong cell_id) {
+		// offset is reset to 0
+		offs_ = 0;
+		cid_ = cell_id;
+		// obtain mesh dimensions
+		rs_smesh_iface::index_point3d_t dims = mesh_->get_dimens();
+		const ulong sz = dims[0] * dims[1] * dims[2];
+
+		// are we inside mesh bounds?
+		if(cell_id >= sz) {
+			// cid_ == -1 marks end() interator -- NO! just return and don't update data
+			//cid_ = ulong(-1);
+			return;
+		}
+
+		if(!strat_t::switch_buf(cell_id)) {
+			const ulong plane_sz = dims[0] * dims[1];
+			const ulong z = cell_id / plane_sz;
+			const ulong y = (cell_id - z * plane_sz) / dims[0];
+
+			const grd_ecl::fpoint3d_vector corners = mesh_->calc_element(
+				cell_id - z * plane_sz - y * dims[0], y, z
+			);
+			// copy corners to plain data array
+			//pointer pdata = &data_[0];
+			pointer pdata = &strat_t::ss(0);
+			for(uint c = 0; c < 8; ++c) {
+				const fpoint3d_t& corner = corners[c];
+				*pdata++ = corner.x;
+				*pdata++ = corner.y;
+				*pdata++ = corner.z;
+			}
+		}
+	}
+
+	inline void switch_pos(const ulong pos) {
+		// check if new position fits in current data buffer
+		offs_ = pos - cid_ * n_cell_pts;
+		if(offs_ < n_cell_pts)
+			return;
+
+		// if we're here then we need to actually switch to new cell
+		const ulong cell_id = pos / n_cell_pts;
+		switch_cell(cell_id);
+		offs_ = pos - cell_id * n_cell_pts;
+		pos_ = pos;
+	}
+};
+
+}} // blue_sky::wpi
+
+#endif /* end of include guard: TOPS_ITERATOR_Q81ZI8GM */
+

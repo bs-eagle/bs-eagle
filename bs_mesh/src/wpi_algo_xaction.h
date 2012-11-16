@@ -44,8 +44,8 @@ public:
 	typedef typename pods_t::cell_data cell_data;
 	typedef typename pods_t::sp_cell_data sp_cell_data;
 	typedef typename pods_t::trimesh trimesh;
-	typedef typename pods_t::trim_iterator trim_iterator;
-	typedef typename pods_t::ctrim_iterator ctrim_iterator;
+	//typedef typename pods_t::trim_iterator trim_iterator;
+	//typedef typename pods_t::ctrim_iterator ctrim_iterator;
 
 	typedef typename pods_t::well_data well_data;
 	typedef typename pods_t::well_path well_path;
@@ -156,10 +156,10 @@ public:
 	};
 
 	// ctor
-	intersect_base(trimesh& mesh, well_path& wp, const vertex_pos_i& mesh_size)
+	intersect_base(trimesh& mesh, well_path& wp)
 		: m_(mesh), wp_(wp)
 	{
-		ca_assign(m_size_, mesh_size);
+		//ca_assign(m_size_, mesh_size);
 	}
 
 	static double distance(const Point& p1, const Point& p2) {
@@ -183,7 +183,7 @@ public:
 			wnodes[i] = wp_[i - 1].finish();
 
 			// calculate hit_idx
-			hit_idx_ = mesh_tools_t::where_is_point(m_, m_size_, wnodes);
+			hit_idx_ = mesh_tools_t::where_is_point(m_, wnodes);
 		}
 
 		return hit_idx_;
@@ -207,7 +207,7 @@ public:
 
 		//wp_iterator pw = wp_.begin();
 		//ulong node_idx = 0;
-		ulong mesh_sz = m_.size();
+		ulong mesh_sz = m_.size_flat();
 		for(ulong i = 0; i < wp_.size(); ++i) {
 			//const well_data& wseg = pw->second;
 			// upper_bound
@@ -276,7 +276,7 @@ public:
 			for(uint i = 0; i < D; ++i)
 				dir[i] = start[i] <= finish[i] ? 0 : 1;
 			// judge
-			top_surv judge(dir, x_, m_size_);
+			top_surv judge(dir, x_, m_.size());
 
 			// remove dups lying on current well segment
 			max_md = seg.md() + seg.len();
@@ -376,7 +376,11 @@ protected:
 		typedef typename strat_t::xpoints_list xpoints_list;
 
 		// find intersection points coord if any
-		const xpoints_list& res = strat_t::precise_intersection(m_[cell_id], well_seg);
+		cell_data c = m_[cell_id];
+		const xpoints_list& res = strat_t::precise_intersection(c, well_seg);
+		// cache modified cell in order to omit polygon or triangulation recalc, used by
+		// precise_intersection
+		//m_.cache_cell(cell_id, c);
 
 		// add all points to interscetion path
 		for(typename xpoints_list::const_iterator px = res.begin(), end = res.end(); px != end; ++px) {
@@ -394,7 +398,7 @@ protected:
 					dir[i] = start[i] <= finish[i] ? 0 : 1;
 
 				// if new_x > p_samex then replace p_samex with new_x
-				if(spatial_sort(dir, m_size_).greater(new_x, *p_samex)) {
+				if(spatial_sort(dir, m_.size()).greater(new_x, *p_samex)) {
 					x_.insert(new_x);
 					x_.erase(p_samex);
 				}
@@ -419,7 +423,7 @@ protected:
 	// well-mesh intersection path
 	intersect_path x_;
 	// mesh size
-	vertex_pos_i m_size_;
+	//vertex_pos_i m_size_;
 	// cell IDs of where each well node is located
 	hit_idx_t hit_idx_;
 };

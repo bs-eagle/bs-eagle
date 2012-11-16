@@ -14,6 +14,7 @@
 
 #include <iterator>
 #include <cmath>
+#include <boost/integer/static_min_max.hpp>
 
 #include "conf.h"
 //class bs_mesh_grdecl;
@@ -33,14 +34,14 @@ typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 
 // assign for c arrays
 // fun with returning reference to array :)
-template< class T, int L >
-static T (&ca_assign(T (&lhs)[L], const T (&rhs)[L]))[L] {
-	std::copy(&rhs[0], &rhs[L], &lhs[0]);
+template< class T, class X, int M, int N >
+static T (&ca_assign(T (&lhs)[M], const X (&rhs)[N]))[boost::static_unsigned_min< M, N >::value] {
+	std::copy(&rhs[0], &rhs[boost::static_unsigned_min< M, N >::value], &lhs[0]);
 	return lhs;
 }
 
-template< class T, int L >
-static T (&ca_assign(T (&lhs)[L], const T& v))[L] {
+template< class T, class X, int L >
+static T (&ca_assign(T (&lhs)[L], const X& v))[L] {
 	std::fill(&lhs[0], &lhs[L], v);
 	return lhs;
 }
@@ -66,6 +67,26 @@ int lexicographical_compare_3way(_InputIterator1 __first1,
 	else
 		return -1;
 }
+
+// simple traits for strategies
+// assuming that cells vertices and well path are represented as continous C-arrays
+struct carray_traits {
+	// iterator over raw tops array - simple pointer
+	typedef t_float* cell_vertex_iterator;
+	typedef t_float* well_traj_iterator;
+
+	// generic converter from iterator to vertex_pos
+	// return reference to array to prevent data copying
+	template< class pos_t, class iterator_t >
+	static pos_t& iter2pos(iterator_t& src) {
+		// for simple arrays we can simply use reinterpret_cast
+		return reinterpret_cast< pos_t& >(*src);
+	}
+};
+
+// forward declaration of online tops strategy traits
+struct online_tops_traits;
+struct online_tops_traits_bufpool;
 
 }} /* { namespace blue_sky::wpi */
 

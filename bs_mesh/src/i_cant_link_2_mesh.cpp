@@ -8,11 +8,15 @@
 
 #include "bs_mesh_stdafx.h"
 #include "wpi_strategy_3d.h"
-#include "wpi_algo.h"
+#include "wpi_algo_vtk.h"
 
 #include "i_cant_link_2_mesh.h"
 #include "bs_mesh_grdecl.h"
 #include "well_path_ident.h"
+
+// profiling
+//#include <google/profiler.h>
+//#include <google/heap-profiler.h>
 
 namespace blue_sky {
 
@@ -53,6 +57,15 @@ public:
 		return blue_sky::where_is_point_2d(nx, ny, coord, zcorn, point);
 	}
 
+	sp_smesh make_mesh_grdecl(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
+		typedef smart_ptr< bs_mesh_grdecl, true > sp_grd_mesh;
+		// build mesh_grdecl around given mesh
+		sp_grd_mesh grd_src = BS_KERNEL.create_object(bs_mesh_grdecl::bs_type());
+		if(!grd_src) return NULL;
+		grd_src->init_props(nx, ny, coord, zcorn);
+		return grd_src;
+	}
+
 	BLUE_SKY_TYPE_DECL(handy_object)
 };
 
@@ -78,22 +91,29 @@ bool register_handy_mesh_iface(const plugin_descriptor& pd) {
 namespace python {
 	using namespace boost::python;
 
-	tuple enum_border_facets_vtk(t_long nx, t_long ny, spv_float tops, spv_int mask) {
-		typedef wpi::strategy_3d strat_t;
-		typedef wpi::algo< strat_t > wpi_algo;
+	tuple enum_border_facets_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_int mask) {
+		typedef wpi::strategy_3d_ex< wpi::online_tops_traits > strat_t;
+		typedef wpi::algo_vtk< strat_t > wpi_algo;
 
 		spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
-		spv_long res = wpi_algo::enum_border_facets_vtk(nx, ny, tops, mask, cell_idx);
-		return make_tuple(res, cell_idx);
+		spv_float points = BS_KERNEL.create_object(v_float::bs_type());
+		//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_facets_vtk.prof");
+		spv_long res = wpi_algo::enum_border_facets_vtk(nx, ny, coord, zcorn, mask, cell_idx, points);
+		//ProfilerStop();
+		return make_tuple(res, cell_idx, points);
 	}
 
-	tuple enum_border_edges_vtk(t_long nx, t_long ny, spv_float tops, spv_int mask) {
-		typedef wpi::strategy_3d strat_t;
-		typedef wpi::algo< strat_t > wpi_algo;
+	tuple enum_border_edges_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_int mask) {
+		typedef wpi::strategy_3d_ex< wpi::online_tops_traits > strat_t;
+		typedef wpi::algo_vtk< strat_t > wpi_algo;
 
 		spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
-		spv_long res = wpi_algo::enum_border_edges_vtk(nx, ny, tops, mask, cell_idx);
-		return make_tuple(res, cell_idx);
+		spv_float points = BS_KERNEL.create_object(v_float::bs_type());
+		//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk.prof");
+		//HeapProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk");
+		spv_long res = wpi_algo::enum_border_edges_vtk(nx, ny, coord, zcorn, mask, cell_idx, points);
+		//ProfilerStop();
+		return make_tuple(res, cell_idx, points);
 	}
 
 	void py_export_handymesh() {
