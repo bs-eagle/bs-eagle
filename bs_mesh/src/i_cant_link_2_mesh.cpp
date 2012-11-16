@@ -15,8 +15,8 @@
 #include "well_path_ident.h"
 
 // profiling
-#include <google/profiler.h>
-#include <google/heap-profiler.h>
+//#include <google/profiler.h>
+//#include <google/heap-profiler.h>
 
 namespace blue_sky {
 
@@ -112,7 +112,7 @@ namespace python {
 		//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk.prof");
 		//HeapProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk");
 		spv_long res = wpi_algo::enum_border_edges_vtk(nx, ny, coord, zcorn, mask, cell_idx, points);
-		//HeapProfilerStop();
+		//ProfilerStop();
 		return make_tuple(res, cell_idx, points);
 	}
 
