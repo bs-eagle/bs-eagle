@@ -26,6 +26,7 @@ struct carray_ti_traits : public iterator_type {
 	typedef void ctor_param_t;
 
 	carray_ti_traits(ctor_param_t* = NULL) {}
+	//carray_ti_traits(ctor_param_t* = NULL) : just_born(true) {}
 
 	reference ss(ulong offs) {
 		return data_[offs];
@@ -47,6 +48,8 @@ struct carray_ti_traits : public iterator_type {
 	}
 
 	value_type data_[n_cell_pts];
+	// flag to help bufpool determine if buffer was just created
+	//bool just_born;
 };
 
 // bufpool strategy collects pool of unique cells buffers
@@ -84,23 +87,37 @@ struct bufpool_ti_traits : public iterator_type {
 		return *(data_ + offs);
 	}
 
+	// return true, if given cell is FOUND in cache
+	// true prevents recalc
 	bool switch_buf(ulong cell_id) {
 		static cell_buffer t;
 		if(!store_) return false;
 
+		//cell_buffer& b = (*store_)[cell_id];
+		//data_ = &b.data_[0];
+		//const bool res = !b.just_born;
+		//b.just_born = false;
+		//return res;
+		////if(b.just_born) {
+		////	b.just_born = false;
+		////	return false;
+		////}
+		////return true;
+
 		// check if given cell is already cached
 		//cbs_iterator p_cb = store_->find(cell_id);
 		//if(p_cb != store_->end()) {
-		//	data_ = &p_cb->second[0];
+		//	data_ = &p_cb->second.data_[0];
 		//	return true;
 		//}
 		//else {
-		//	data_ = &(*store_)[cell_id][0];
+		//	data_ = &(*store_)[cell_id].data_[0];
 		//	return false;
 		//}
+
 		cbs_ins_res r = store_->insert(cbs_value_type(cell_id, t));
 		data_ = &r.first->second.data_[0];
-		return r.second;
+		return !r.second;
 	}
 
 	void assign(const bufpool_ti_traits& rhs) {
@@ -273,12 +290,6 @@ public:
 	bool operator>=(const tops_iterator& rhs) const {
 		return !(*this < rhs);
 	}
-
-	//inline bool fit2data(difference_type n) const {
-	//	if(difference_type(offs_ + n) < n_cell_pts && difference_type(offs_ + n) >= 0)
-	//		return true;
-	//	return false;
-	//}
 
 private:
 	// ref to mesh object
