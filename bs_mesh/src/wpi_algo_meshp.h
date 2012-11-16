@@ -39,6 +39,7 @@ struct mesh_tools : public helpers< strat_t > {
 	using base_t::encode_cell_id;
 	using base_t::decode_cell_id;
 	using base_t::vertex_pos2bbox;
+	using base_t::vertex_pos2rect;
 
 	/*-----------------------------------------------------------------
 	* represent rectangular part of mesh with splitting support
@@ -46,6 +47,10 @@ struct mesh_tools : public helpers< strat_t > {
 	// x_last = last_element + 1 = x_size
 	// y_last = last_element + 1 = y_size
 	struct mesh_part : public helpers< strat_t > {
+		// CGAL intersection algorithm can find that the same mesh part
+		// intersects with different well segments many times,
+		// but we need to process only unique mesh_parts,
+		// so use std::set instead of std::list as mesh_parts container
 		typedef std::set< mesh_part > container_t;
 
 		enum { n_facets = cell_data::n_facets };
@@ -113,19 +118,15 @@ struct mesh_tools : public helpers< strat_t > {
 
 		// size of this mesh part
 		ulong size() const {
-			ulong res = 1;
-			for(uint i = 0; i < D; ++i)
-				res *= side_len(i);
-			return res;
+			return sz_flat_;
+			//return std::accumulate(
+			//	&mp_size_[0], &mp_size_[D], 1, std::multiplies< ulong >()
+			//);
 		}
 
 		// size of the full mesh
 		ulong fullm_size() const {
 			return m_.size_flat();
-			//ulong res = 1;
-			//for(uint i = 0; i < D; ++i)
-			//	res *= m_size_(i);
-			//return res;
 		}
 
 		ulong ss_id(const vertex_pos_i& offset) const {
@@ -143,22 +144,6 @@ struct mesh_tools : public helpers< strat_t > {
 			// part_pos -> cell
 			return ss_id(part_pos);
 		}
-
-		//trim_iterator ss_iter(const vertex_pos_i& offset) {
-		//	return m_.begin() + ss_id(offset);
-		//}
-
-		//trim_iterator ss_iter(ulong offset) {
-		//	return m_.begin() + ss_id(offset);
-		//}
-
-		//ctrim_iterator ss_iter(const vertex_pos_i& offset) const {
-		//	return m_.begin() + ss_id(offset);
-		//}
-
-		//ctrim_iterator ss_iter(ulong offset) const {
-		//	return m_.begin() + ss_id(offset);
-		//}
 
 		// access to individual cells
 		template< class index_t >
@@ -194,7 +179,7 @@ struct mesh_tools : public helpers< strat_t > {
 			ca_assign(split_p[2], hi);
 			// middle
 			for(uint i = 0; i < D; ++i)
-				split_p[1][i] = lo[i] + (side_len(i) >> 1);
+				split_p[1][i] = lo[i] + (mp_size_[i] >> 1);
 
 			// make splitting only if split containt more than 1 cell
 			const ulong cube_num = 1 << D;
@@ -226,21 +211,42 @@ struct mesh_tools : public helpers< strat_t > {
 
 		// for sorted containers
 		bool operator <(const mesh_part& rhs) const {
-			// if same objects
-			if(&lo[0] == &rhs.lo[0] || &hi[0] == &rhs.hi[0])
-				return false;
 			// per-element lexicographical compare
-			for(uint i = 0; i < D; ++i) {
-				if(lo[i] < rhs.lo[i])
-					return true;
-				else if(lo[i] > rhs.lo[i])
-					return false;
-				else if(hi[i] < rhs.hi[i])
-					return true;
-				else if(hi[i] > rhs.hi[i])
-					return false;
-			}
-			return false;
+			const int r = lexicographical_compare_3way(
+				&lo[0], &lo[D], &rhs.lo[0], &rhs.lo[D]
+			);
+			if(r == 0)
+				return std::lexicographical_compare(
+					&hi[0], &hi[D], &rhs.hi[0], &rhs.hi[D]
+				);
+			else
+				return (r < 0);
+
+			// if same objects
+			//if(&lo[0] == &rhs.lo[0] || &hi[0] == &rhs.hi[0])
+			//	return false;
+			//for(uint i = 0; i < D; ++i) {
+			//	if(lo[i] < rhs.lo[i])
+			//		return true;
+			//	else if(lo[i] > rhs.lo[i])
+			//		return false;
+			//	else if(hi[i] < rhs.hi[i])
+			//		return true;
+			//	else if(hi[i] > rhs.hi[i])
+			//		return false;
+			//}
+			//return false;
+		}
+
+		// assignment operator for containers
+		// assign only mesh_parts that belong to the same mesh!
+		mesh_part& operator=(const mesh_part& rhs) {
+			ca_assign(lo, rhs.lo);
+			ca_assign(hi, rhs.hi);
+			ca_assign(mp_size_, rhs.mp_size_);
+			ca_assign(lo_bnd, rhs.lo_bnd);
+			ca_assign(hi_bnd, rhs.hi_bnd);
+			return *this;
 		}
 
 		// calc size of cell in x-y-z directions
@@ -298,6 +304,7 @@ struct mesh_tools : public helpers< strat_t > {
 		trimesh& m_;
 		vertex_pos_i mp_size_;
 		vertex_pos lo_bnd, hi_bnd;
+		ulong sz_flat_;
 
 		// idx SHOULD BE IN MESH!
 		const cell_data& ss(ulong idx) const {
@@ -327,8 +334,11 @@ struct mesh_tools : public helpers< strat_t > {
 
 		void calc_bounds() {
 			// calc size of this mesh part
-			for(uint i = 0; i < D; ++i)
+			sz_flat_ = 1;
+			for(uint i = 0; i < D; ++i) {
 				mp_size_[i] = side_len(i);
+				sz_flat_ *= mp_size_[i];
+			}
 
 			// init bounds from first cell
 			ss(lo).lo(lo_bnd); ss(lo).hi(hi_bnd);
