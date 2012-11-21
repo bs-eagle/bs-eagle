@@ -41,9 +41,9 @@ public:
 
 	//tops_iterator() : mesh_(NULL), cid_(0), offs_(0) {}
 	tops_iterator(rs_smesh_iface* mesh = NULL, strat_ctor_param_t* strat_param = NULL, const ulong pos = 0)
-		: strat_t(strat_param), mesh_(mesh)
+		: strat_t(mesh, strat_param) //, mesh_(mesh)
 	{
-		if(mesh_) {
+		if(mesh) {
 			// force cell switching
 			cid_ = pos / n_cell_pts + 1;
 			switch_pos(pos);
@@ -108,7 +108,7 @@ public:
 	}
 
 	void operator=(const tops_iterator& rhs) {
-		mesh_ = rhs.mesh_;
+		//mesh_ = rhs.mesh_;
 		cid_ = rhs.cid_;
 		offs_ = rhs.offs_;
 		pos_ = rhs.pos_;
@@ -177,46 +177,53 @@ public:
 
 private:
 	// ref to mesh object
-	rs_smesh_iface* mesh_;
+	//rs_smesh_iface* mesh_;
 	// id of currently calculated cell
 	ulong cid_, offs_, pos_;
 	// cache of calculated cell corner coord
 	//value_type data_[n_cell_pts];
 
+	//template< template< class > class S >
+	//friend void ti_switch_cell(tops_iterator< S >&, const ulong);
+
 	void switch_cell(const ulong cell_id) {
-		// offset is reset to 0
-		offs_ = 0;
-		cid_ = cell_id;
-		// obtain mesh dimensions
-		rs_smesh_iface::index_point3d_t dims = mesh_->get_dimens();
-		const ulong sz = dims[0] * dims[1] * dims[2];
-
-		// are we inside mesh bounds?
-		if(cell_id >= sz) {
-			// cid_ == -1 marks end() interator -- NO! just return and don't update data
-			//cid_ = ulong(-1);
-			return;
-		}
-
-		if(!strat_t::switch_buf(cell_id)) {
-			const ulong plane_sz = dims[0] * dims[1];
-			const ulong z = cell_id / plane_sz;
-			const ulong y = (cell_id - z * plane_sz) / dims[0];
-
-			const grd_ecl::fpoint3d_vector corners = mesh_->calc_element(
-				cell_id - z * plane_sz - y * dims[0], y, z
-			);
-			// copy corners to plain data array
-			//pointer pdata = &data_[0];
-			pointer pdata = &strat_t::ss(0);
-			for(uint c = 0; c < 8; ++c) {
-				const fpoint3d_t& corner = corners[c];
-				*pdata++ = corner.x;
-				*pdata++ = corner.y;
-				*pdata++ = corner.z;
-			}
-		}
+		ti_switch_cell(*this, cell_id);
 	}
+
+	//void switch_cell(const ulong cell_id) {
+	//	// offset is reset to 0
+	//	offs_ = 0;
+	//	cid_ = cell_id;
+	//	// obtain mesh dimensions
+	//	rs_smesh_iface::index_point3d_t dims = mesh_->get_dimens();
+	//	const ulong sz = dims[0] * dims[1] * dims[2];
+
+	//	// are we inside mesh bounds?
+	//	if(cell_id >= sz) {
+	//		// cid_ == -1 marks end() interator -- NO! just return and don't update data
+	//		//cid_ = ulong(-1);
+	//		return;
+	//	}
+
+	//	if(!strat_t::switch_buf(cell_id)) {
+	//		const ulong plane_sz = dims[0] * dims[1];
+	//		const ulong z = cell_id / plane_sz;
+	//		const ulong y = (cell_id - z * plane_sz) / dims[0];
+
+	//		const grd_ecl::fpoint3d_vector corners = mesh_->calc_element(
+	//			cell_id - z * plane_sz - y * dims[0], y, z
+	//		);
+	//		// copy corners to plain data array
+	//		//pointer pdata = &data_[0];
+	//		pointer pdata = &strat_t::ss(0);
+	//		for(uint c = 0; c < 8; ++c) {
+	//			const fpoint3d_t& corner = corners[c];
+	//			*pdata++ = corner.x;
+	//			*pdata++ = corner.y;
+	//			*pdata++ = corner.z;
+	//		}
+	//	}
+	//}
 
 	inline void switch_pos(const ulong pos) {
 		// check if new position fits in current data buffer
@@ -225,9 +232,9 @@ private:
 			return;
 
 		// if we're here then we need to actually switch to new cell
-		const ulong cell_id = pos / n_cell_pts;
-		switch_cell(cell_id);
-		offs_ = pos - cell_id * n_cell_pts;
+		cid_ = pos / n_cell_pts;
+		switch_cell(cid_);
+		offs_ = pos - cid_ * n_cell_pts;
 		pos_ = pos;
 	}
 };

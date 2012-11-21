@@ -20,12 +20,14 @@ struct carray_ti_traits : public iterator_type {
 	typedef iterator_type iterator_t;
 	typedef typename iterator_t::value_type value_type;
 	typedef typename iterator_t::reference reference;
-	//typedef const value_type& const_reference;
+	typedef typename iterator_t::pointer pointer;
 
 	enum { n_cell_pts = 24 };
 	typedef void ctor_param_t;
 
-	carray_ti_traits(ctor_param_t* = NULL) {}
+	carray_ti_traits(rs_smesh_iface* mesh, ctor_param_t*)
+		: mesh_(mesh)
+	{}
 	//carray_ti_traits(ctor_param_t* = NULL) : just_born(true) {}
 
 	reference ss(ulong offs) {
@@ -40,13 +42,11 @@ struct carray_ti_traits : public iterator_type {
 	}
 
 	void assign(const carray_ti_traits& rhs) {
+		mesh_ = rhs.mesh_;
 		std::copy(&rhs.data_[0], &rhs.data_[n_cell_pts], &data_[0]);
 	}
 
-	void operator=(const carray_ti_traits& rhs) {
-		assign(rhs);
-	}
-
+	rs_smesh_iface* mesh_;
 	value_type data_[n_cell_pts];
 	// flag to help bufpool determine if buffer was just created
 	//bool just_born;
@@ -81,7 +81,9 @@ struct bufpool_ti_traits : public iterator_type {
 
 	typedef cell_buf_storage ctor_param_t;
 
-	bufpool_ti_traits(ctor_param_t* pstore = NULL) : store_(pstore) {}
+	bufpool_ti_traits(rs_smesh_iface* mesh, ctor_param_t* pstore = NULL) 
+		: mesh_(mesh), store_(pstore)
+	{}
 
 	reference ss(ulong offs) {
 		return *(data_ + offs);
@@ -121,13 +123,56 @@ struct bufpool_ti_traits : public iterator_type {
 	}
 
 	void assign(const bufpool_ti_traits& rhs) {
+		mesh_ = rhs.mesh_;
 		store_ = rhs.store_;
 		data_ = rhs.data_;
 	}
 
+	rs_smesh_iface* mesh_;
 	cell_buf_storage* store_;
 	pointer data_;
 };
+
+
+// forward definition of tops_iterator
+//template< template< class > class ti_strategy >
+//class tops_iterator;
+
+template< class ti_strategy >
+void ti_switch_cell(ti_strategy& ti, const ulong cell_id) {
+	typedef typename ti_strategy::pointer pointer;
+	typedef grd_ecl::fpoint3d fpoint3d_t;
+
+	// obtain mesh dimensions
+	rs_smesh_iface::index_point3d_t dims = ti.mesh_->get_dimens();
+	const ulong sz = dims[0] * dims[1] * dims[2];
+
+	// are we inside mesh bounds?
+	if(cell_id >= sz) {
+		// cid_ == -1 marks end() interator -- NO! just return and don't update data
+		//cid_ = ulong(-1);
+		return;
+	}
+
+	if(!ti.switch_buf(cell_id)) {
+		const ulong plane_sz = dims[0] * dims[1];
+		const ulong z = cell_id / plane_sz;
+		const ulong y = (cell_id - z * plane_sz) / dims[0];
+
+		const grd_ecl::fpoint3d_vector corners = ti.mesh_->calc_element(
+			cell_id - z * plane_sz - y * dims[0], y, z
+		);
+		// copy corners to plain data array
+		//pointer pdata = &data_[0];
+		pointer pdata = &ti.ss(0);
+		for(uint c = 0; c < 8; ++c) {
+			const fpoint3d_t& corner = corners[c];
+			*pdata++ = corner.x;
+			*pdata++ = corner.y;
+			*pdata++ = corner.z;
+		}
+	}
+}
 
 }} /* blue_sky::wpi */
 
