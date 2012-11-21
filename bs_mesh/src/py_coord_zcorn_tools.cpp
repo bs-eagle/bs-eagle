@@ -145,8 +145,10 @@ void py_export_czt() {
 
 	spv_float (*tops2sgrid1)(uint_t, uint_t, spv_float) = &czt::tops2struct_grid;
 	spv_float (*tops2sgrid2)(uint_t, uint_t, spv_float, spv_float) = &czt::tops2struct_grid;
+	spv_float (*tops2sgrid3)(smart_ptr< rs_smesh_iface >) = &czt::tops2struct_grid;
 	def("tops2struct_grid", tops2sgrid1);
 	def("tops2struct_grid", tops2sgrid2);
+	def("tops2struct_grid", tops2sgrid3);
 }
 
 }} 	// eof blue_sky::python

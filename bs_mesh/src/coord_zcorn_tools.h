@@ -9,6 +9,7 @@
 #define COORD_ZCORN_TOOLS_1M4YIRKV
 
 #include "bs_mesh_stdafx.h"
+#include "rs_smesh_iface.h"
 #include <iterator>
 #include <cmath>
 
@@ -130,6 +131,8 @@ BS_API_PLUGIN coord_zcorn_pair refine_wave_mesh_deltas(
 spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float tops);
 // memory-efficient implementation directly from COORD and ZCORN using tops_iterator
 spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float coord, spv_float zcorn);
+// same as above using provided rs_smesh_iface object
+spv_float tops2struct_grid(smart_ptr< rs_smesh_iface > mesh);
 
 }}  // eof namespace blue_sky::coord_zcorn_tools
 

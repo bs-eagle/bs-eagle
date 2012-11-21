@@ -550,6 +550,17 @@ spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float coord, spv_float zcor
 	);
 }
 
+spv_float tops2struct_grid(smart_ptr< rs_smesh_iface > mesh) {
+	if(!mesh) return NULL;
+	typedef wpi::tops_iterator< wpi::carray_ti_traits > iterator_t;
+
+	// obtain mesh dimensions
+	rs_smesh_iface::index_point3d_t dims = mesh->get_dimens();
+	// go
+	return tops2struct_grid_impl(
+		uint_t(dims[0]), uint_t(dims[1]), uint_t(dims[2]), iterator_t(mesh.lock(), NULL)
+	);
+}
 
 /*-----------------------------------------------------------------
  * helper structure related to first refine_mesh algorithm
