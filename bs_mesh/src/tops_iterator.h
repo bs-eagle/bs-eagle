@@ -187,7 +187,8 @@ private:
 	//friend void ti_switch_cell(tops_iterator< S >&, const ulong);
 
 	void switch_cell(const ulong cell_id) {
-		ti_switch_cell(*this, cell_id);
+		strat_t::switch_cell(cell_id);
+		//ti_switch_cell(*this, cell_id);
 	}
 
 	//void switch_cell(const ulong cell_id) {

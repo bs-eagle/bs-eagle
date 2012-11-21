@@ -11,42 +11,40 @@
 
 #include "conf.h"
 #include "rs_smesh_iface.h"
+#include "coord_zcorn_tools.h"
 #include <boost/pool/pool_alloc.hpp>
 
 namespace blue_sky { namespace wpi {
 
+/*-----------------------------------------------------------------
+ * Strategies that describe tops_iterator local buffer managing policy
+ *----------------------------------------------------------------*/
+
 template< class iterator_type >
-struct carray_ti_traits : public iterator_type {
+struct carray_ti_buf_traits : public iterator_type {
 	typedef iterator_type iterator_t;
 	typedef typename iterator_t::value_type value_type;
 	typedef typename iterator_t::reference reference;
-	typedef typename iterator_t::pointer pointer;
 
 	enum { n_cell_pts = 24 };
 	typedef void ctor_param_t;
 
-	carray_ti_traits(rs_smesh_iface* mesh, ctor_param_t*)
-		: mesh_(mesh)
+	carray_ti_buf_traits(ctor_param_t*)
 	{}
-	//carray_ti_traits(ctor_param_t* = NULL) : just_born(true) {}
+	//carray_ti_buf_traits(ctor_param_t* = NULL) : just_born(true) {}
 
 	reference ss(ulong offs) {
 		return data_[offs];
 	}
-	//const_reference ss(ulong idx) const {
-	//	return data_[idx];
-	//}
 
 	bool switch_buf(ulong cell_id) const {
 		return false;
 	}
 
-	void assign(const carray_ti_traits& rhs) {
-		mesh_ = rhs.mesh_;
+	void assign(const carray_ti_buf_traits& rhs) {
 		std::copy(&rhs.data_[0], &rhs.data_[n_cell_pts], &data_[0]);
 	}
 
-	rs_smesh_iface* mesh_;
 	value_type data_[n_cell_pts];
 	// flag to help bufpool determine if buffer was just created
 	//bool just_born;
@@ -55,15 +53,14 @@ struct carray_ti_traits : public iterator_type {
 // bufpool strategy collects pool of unique cells buffers
 // and even more reduces memory consuption
 template< class iterator_type >
-struct bufpool_ti_traits : public iterator_type {
+struct bufpool_ti_buf_traits : public iterator_type {
 	typedef iterator_type iterator_t;
 	typedef typename iterator_t::value_type value_type;
 	typedef typename iterator_t::reference reference;
 	typedef typename iterator_t::pointer pointer;
-	//typedef const value_type& const_reference;
 
 	// use simple traits as buffer holder
-	typedef carray_ti_traits< iterator_t > cell_buffer;
+	typedef carray_ti_buf_traits< iterator_t > cell_buffer;
 	enum { n_cell_pts = cell_buffer::n_cell_pts };
 
 	// helper structure that actually contain cell data buffer
@@ -81,8 +78,8 @@ struct bufpool_ti_traits : public iterator_type {
 
 	typedef cell_buf_storage ctor_param_t;
 
-	bufpool_ti_traits(rs_smesh_iface* mesh, ctor_param_t* pstore = NULL) 
-		: mesh_(mesh), store_(pstore)
+	bufpool_ti_buf_traits(ctor_param_t* pstore = NULL) 
+		: store_(pstore)
 	{}
 
 	reference ss(ulong offs) {
@@ -122,57 +119,91 @@ struct bufpool_ti_traits : public iterator_type {
 		return !r.second;
 	}
 
-	void assign(const bufpool_ti_traits& rhs) {
-		mesh_ = rhs.mesh_;
+	void assign(const bufpool_ti_buf_traits& rhs) {
 		store_ = rhs.store_;
 		data_ = rhs.data_;
 	}
 
-	rs_smesh_iface* mesh_;
 	cell_buf_storage* store_;
 	pointer data_;
 };
 
+/*-----------------------------------------------------------------
+ * switch_cell calculating cell vertices through mesh object
+ *----------------------------------------------------------------*/
+template< class buf_traits >
+struct mesh_ti_sc_traits : public buf_traits {
+	typedef typename buf_traits::ctor_param_t strat_ctor_param_t;
+	typedef typename buf_traits::pointer pointer;
 
-// forward definition of tops_iterator
-//template< template< class > class ti_strategy >
-//class tops_iterator;
+	mesh_ti_sc_traits(rs_smesh_iface* mesh, strat_ctor_param_t* strat_param)
+		: buf_traits(strat_param), mesh_(mesh)
+	{}
 
-template< class ti_strategy >
-void ti_switch_cell(ti_strategy& ti, const ulong cell_id) {
-	typedef typename ti_strategy::pointer pointer;
-	typedef grd_ecl::fpoint3d fpoint3d_t;
+	void switch_cell(const ulong cell_id) {
+		typedef grd_ecl::fpoint3d fpoint3d_t;
 
-	// obtain mesh dimensions
-	rs_smesh_iface::index_point3d_t dims = ti.mesh_->get_dimens();
-	const ulong sz = dims[0] * dims[1] * dims[2];
+		// obtain mesh dimensions
+		rs_smesh_iface::index_point3d_t dims = mesh_->get_dimens();
+		const ulong sz = dims[0] * dims[1] * dims[2];
 
-	// are we inside mesh bounds?
-	if(cell_id >= sz) {
-		// cid_ == -1 marks end() interator -- NO! just return and don't update data
-		//cid_ = ulong(-1);
-		return;
-	}
+		// are we inside mesh bounds?
+		if(cell_id >= sz)
+			return;
 
-	if(!ti.switch_buf(cell_id)) {
-		const ulong plane_sz = dims[0] * dims[1];
-		const ulong z = cell_id / plane_sz;
-		const ulong y = (cell_id - z * plane_sz) / dims[0];
+		if(!buf_traits::switch_buf(cell_id)) {
+			const ulong plane_sz = dims[0] * dims[1];
+			const ulong z = cell_id / plane_sz;
+			const ulong y = (cell_id - z * plane_sz) / dims[0];
 
-		const grd_ecl::fpoint3d_vector corners = ti.mesh_->calc_element(
-			cell_id - z * plane_sz - y * dims[0], y, z
-		);
-		// copy corners to plain data array
-		//pointer pdata = &data_[0];
-		pointer pdata = &ti.ss(0);
-		for(uint c = 0; c < 8; ++c) {
-			const fpoint3d_t& corner = corners[c];
-			*pdata++ = corner.x;
-			*pdata++ = corner.y;
-			*pdata++ = corner.z;
+			const grd_ecl::fpoint3d_vector corners = mesh_->calc_element(
+				cell_id - z * plane_sz - y * dims[0], y, z
+			);
+			// copy corners to plain data array
+			pointer pdata = &buf_traits::ss(0);
+			for(uint c = 0; c < 8; ++c) {
+				const fpoint3d_t& corner = corners[c];
+				*pdata++ = corner.x;
+				*pdata++ = corner.y;
+				*pdata++ = corner.z;
+			}
 		}
 	}
-}
+
+protected:
+	rs_smesh_iface* mesh_;
+};
+
+// shortcuts for use in clients
+template< class iterator_type >
+struct carray_ti_traits : public mesh_ti_sc_traits< carray_ti_buf_traits< iterator_type > > {
+	typedef carray_ti_buf_traits< iterator_type > buf_traits_t;
+	typedef mesh_ti_sc_traits< buf_traits_t > sc_traits_t;
+	typedef typename buf_traits_t::ctor_param_t strat_ctor_param_t;
+
+	carray_ti_traits(rs_smesh_iface* mesh, strat_ctor_param_t* p)
+		: sc_traits_t(mesh, p)
+	{}
+};
+
+template< class iterator_type >
+struct bufpool_ti_traits : public mesh_ti_sc_traits< bufpool_ti_buf_traits< iterator_type > > {
+	typedef bufpool_ti_buf_traits< iterator_type > buf_traits_t;
+	typedef mesh_ti_sc_traits< buf_traits_t > sc_traits_t;
+	typedef typename buf_traits_t::ctor_param_t strat_ctor_param_t;
+
+	bufpool_ti_traits(rs_smesh_iface* mesh, strat_ctor_param_t* p)
+		: sc_traits_t(mesh, p)
+	{}
+};
+
+/*-----------------------------------------------------------------
+ * Strategy that calculate cell vertices using structured grid representation
+ *----------------------------------------------------------------*/
+template< class buf_traits >
+struct sgrid_ti_sc_traits : public buf_traits {
+	typedef typename buf_traits::ctor_param_t strat_ctor_param_t;
+};
 
 }} /* blue_sky::wpi */
 
