@@ -142,7 +142,11 @@ void py_export_czt() {
 	def("find_hit_idx", &find_hit_idx2);
 	def("refine_wave_mesh", &czt::refine_wave_mesh);
 	def("refine_wave_mesh_deltas", &czt::refine_wave_mesh_deltas);
-	def("tops2struct_grid", &czt::tops2struct_grid);
+
+	spv_float (*tops2sgrid1)(uint_t, uint_t, spv_float) = &czt::tops2struct_grid;
+	spv_float (*tops2sgrid2)(uint_t, uint_t, spv_float, spv_float) = &czt::tops2struct_grid;
+	def("tops2struct_grid", tops2sgrid1);
+	def("tops2struct_grid", tops2sgrid2);
 }
 
 }} 	// eof blue_sky::python

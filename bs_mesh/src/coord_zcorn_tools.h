@@ -125,6 +125,8 @@ BS_API_PLUGIN coord_zcorn_pair refine_wave_mesh_deltas(
 
 // convert array of cell's tops coord to structured grid representation
 spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float tops);
+// memory-efficient implementation directly from COORD and ZCORN using tops_iterator
+spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float coord, spv_float zcorn);
 
 }}  // eof namespace blue_sky::coord_zcorn_tools
 
