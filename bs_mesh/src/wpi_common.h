@@ -34,11 +34,21 @@ typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 
 // assign for c arrays
 // fun with returning reference to array :)
+#if defined(_MSC_VER)
+// dumb Visual Studio cannot calc min array length
+template< class T, class X, int N >
+static T (&ca_assign(T (&lhs)[N], const X (&rhs)[N]))[N] {
+	std::copy(&rhs[0], &rhs[N], &lhs[0]);
+	return lhs;
+}
+#else
+// auto-deduce min array length in compile-time
 template< class T, class X, int M, int N >
 static T (&ca_assign(T (&lhs)[M], const X (&rhs)[N]))[boost::static_unsigned_min< M, N >::value] {
 	std::copy(&rhs[0], &rhs[boost::static_unsigned_min< M, N >::value], &lhs[0]);
 	return lhs;
 }
+#endif
 
 template< class T, class X, int L >
 static T (&ca_assign(T (&lhs)[L], const X& v))[L] {
