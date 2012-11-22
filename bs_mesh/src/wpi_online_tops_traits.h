@@ -35,7 +35,19 @@ struct online_tops_traits {
 };
 
 struct online_tops_traits_bufpool : public online_tops_traits {
+	// add this typedef for tops_iterator::impl::iimpl
+	// it needs to know corresponding uncached strategy
+	typedef online_tops_traits uncached_traits;
 	typedef tops_iterator< bufpool_ti_traits > cell_vertex_iterator;
+};
+
+struct online_sgrid_traits : public online_tops_traits {
+	typedef tops_iterator< carray_sgrid_ti_traits > cell_vertex_iterator;
+};
+
+struct online_sgrid_traits_bufpool : public online_tops_traits {
+	typedef online_sgrid_traits uncached_traits;
+	typedef tops_iterator< bufpool_sgrid_ti_traits > cell_vertex_iterator;
 };
 
 }} /* blue_sky::wpi */
