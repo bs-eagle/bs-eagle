@@ -11,7 +11,6 @@
 
 #include "conf.h"
 #include "rs_smesh_iface.h"
-#include "coord_zcorn_tools.h"
 #include <boost/pool/pool_alloc.hpp>
 
 namespace blue_sky { namespace wpi {
@@ -133,11 +132,40 @@ struct bufpool_ti_buf_traits : public iterator_type {
  *----------------------------------------------------------------*/
 template< class buf_traits >
 struct mesh_ti_sc_traits : public buf_traits {
-	typedef typename buf_traits::ctor_param_t strat_ctor_param_t;
+	typedef buf_traits buf_traits_t;
+	typedef typename buf_traits::ctor_param_t buf_ctor_param_t;
 	typedef typename buf_traits::pointer pointer;
 
-	mesh_ti_sc_traits(rs_smesh_iface* mesh, strat_ctor_param_t* strat_param)
-		: buf_traits(strat_param), mesh_(mesh)
+	// if buf_ctor_param_t is void, we can omit it
+	template< class Sc_param, class Buf_param, class = void >
+	struct deduce_ctor_param {
+		typedef std::pair< Sc_param, Buf_param > type;
+
+		static Sc_param& sc_param(type& t) {
+			return t.first;
+		}
+		static Buf_param& buf_param(type& t) {
+			return t.second;
+		}
+	};
+	template< class Sc_param, class unused >
+	struct deduce_ctor_param< Sc_param, void*, unused > {
+		typedef Sc_param type;
+
+		static Sc_param& sc_param(type& t) {
+			return t;
+		}
+		static void* buf_param(type& t) {
+			return NULL;
+		}
+	};
+	typedef deduce_ctor_param< rs_smesh_iface*, buf_ctor_param_t* > ctor_param_deducer;
+	// actually deduce traits ctor param
+	typedef typename ctor_param_deducer::type ctor_param_t;
+
+	mesh_ti_sc_traits(ctor_param_t p)
+		: buf_traits(ctor_param_deducer::buf_param(p)),
+		  mesh_(ctor_param_deducer::sc_param(p))
 	{}
 
 	void switch_cell(const ulong cell_id) {
@@ -170,6 +198,11 @@ struct mesh_ti_sc_traits : public buf_traits {
 		}
 	}
 
+	void assign(const mesh_ti_sc_traits& rhs) {
+		buf_traits::assign(rhs);
+		mesh_ = rhs.mesh_;
+	}
+
 protected:
 	rs_smesh_iface* mesh_;
 };
@@ -179,10 +212,10 @@ template< class iterator_type >
 struct carray_ti_traits : public mesh_ti_sc_traits< carray_ti_buf_traits< iterator_type > > {
 	typedef carray_ti_buf_traits< iterator_type > buf_traits_t;
 	typedef mesh_ti_sc_traits< buf_traits_t > sc_traits_t;
-	typedef typename buf_traits_t::ctor_param_t strat_ctor_param_t;
+	typedef typename sc_traits_t::ctor_param_t ctor_param_t;
 
-	carray_ti_traits(rs_smesh_iface* mesh, strat_ctor_param_t* p)
-		: sc_traits_t(mesh, p)
+	carray_ti_traits(ctor_param_t p)
+		: sc_traits_t(p)
 	{}
 };
 
@@ -190,10 +223,10 @@ template< class iterator_type >
 struct bufpool_ti_traits : public mesh_ti_sc_traits< bufpool_ti_buf_traits< iterator_type > > {
 	typedef bufpool_ti_buf_traits< iterator_type > buf_traits_t;
 	typedef mesh_ti_sc_traits< buf_traits_t > sc_traits_t;
-	typedef typename buf_traits_t::ctor_param_t strat_ctor_param_t;
+	typedef typename sc_traits_t::ctor_param_t ctor_param_t;
 
-	bufpool_ti_traits(rs_smesh_iface* mesh, strat_ctor_param_t* p)
-		: sc_traits_t(mesh, p)
+	bufpool_ti_traits(ctor_param_t p)
+		: sc_traits_t(p)
 	{}
 };
 
@@ -202,7 +235,99 @@ struct bufpool_ti_traits : public mesh_ti_sc_traits< bufpool_ti_buf_traits< iter
  *----------------------------------------------------------------*/
 template< class buf_traits >
 struct sgrid_ti_sc_traits : public buf_traits {
-	typedef typename buf_traits::ctor_param_t strat_ctor_param_t;
+	typedef buf_traits buf_traits_t;
+	typedef typename buf_traits::ctor_param_t buf_ctor_param_t;
+	typedef typename buf_traits::pointer pointer;
+	typedef typename v_float::const_iterator cvf_iterator;
+
+	// traits should be initialized with iterator to beginning of sgrid
+	// + dimeshions of original mesh
+	struct sgrid_handle {
+		cvf_iterator sgrid;
+		ulong nx, ny, size;
+	};
+
+	typedef typename mesh_ti_sc_traits< buf_traits >::template
+		deduce_ctor_param< sgrid_handle, buf_ctor_param_t* > ctor_param_deducer;
+	// actually deduce ctor parameter
+	typedef typename ctor_param_deducer::type ctor_param_t;
+
+	sgrid_ti_sc_traits(ctor_param_t p)
+		: buf_traits(ctor_param_deducer::buf_param(p)),
+		  start_(ctor_param_deducer::sc_param(p).sgrid),
+		  nx_(ctor_param_deducer::sc_param(p).nx),
+		  ny_(ctor_param_deducer::sc_param(p).ny),
+		  sz_(ctor_param_deducer::sc_param(p).size)
+	{}
+
+	template< class inp_iterator, class outp_iterator >
+	static void copy_points(const inp_iterator& src, outp_iterator& dst, ulong n = 1) {
+		dst = std::copy(src, src + n*3, dst);
+	}
+
+	void switch_cell(const ulong cell_id) {
+		// are we inside mesh bounds?
+		if(cell_id >= sz_)
+			return;
+
+		if(buf_traits::switch_buf(cell_id)) return;
+
+		// calc offset of cell beginning in structured grid
+		const ulong plane_sz = nx_ * ny_;
+		const ulong z = cell_id / plane_sz;
+		const ulong y = (cell_id - plane_sz * z) / nx_;
+		const ulong x = cell_id - plane_sz * z - nx_ * y;
+
+		const cvf_iterator start = start_ +
+			(z * (nx_ + 1) * (ny_ + 1) + y * (nx_ + 1) + x) * 3;
+
+		// fill local tops_iterator buffer
+		pointer pdata = &buf_traits::ss(0);
+		// vert 0, 1;
+		pdata = std::copy(start, start + 6, pdata);
+		//*pdata++ = *start; *pdata++ = *(start + 1);
+		// vert 2, 3
+		pdata = std::copy(start + (nx_ + 1)*3, start + (nx_ + 3)*3, pdata);
+		//*pdata++ = *(start + (nx_ + 1)); *pdata++ = *(start + (nx_ + 2));
+		// vert 4, 5
+		pdata = std::copy(start + (nx_ + 1)*(ny_ + 1)*3, start + ((nx_ + 1)*(ny_ + 1) + 2)*3, pdata);
+		//*pdata++ = *(start + (nx_ + 1)*(ny_ + 1));
+		// vert 5
+		//*pdata++ = *(start + ((nx_ + 1)*(ny_ + 1) + 1));
+		// vert 6
+		std::copy(start + (nx_ + 1)*(ny_ + 2)*3, start + ((nx_ + 1)*(ny_ + 2) + 2)*3, pdata);
+		//*pdata++ = *(start + (nx_ + 1)*(ny_ + 2));
+		// vert 7
+		//*pdata++ = *(start + ((nx_ + 1)*(ny_ + 2) + 1));
+	}
+
+protected:
+	// pointer to the beginning of structured grid array
+	cvf_iterator start_;
+	ulong nx_, ny_, sz_;
+};
+
+// shortcuts for use in clients
+template< class iterator_type >
+struct carray_sgrid_ti_traits : public sgrid_ti_sc_traits< carray_ti_buf_traits< iterator_type > > {
+	typedef carray_ti_buf_traits< iterator_type > buf_traits_t;
+	typedef sgrid_ti_sc_traits< buf_traits_t > sc_traits_t;
+	typedef typename sc_traits_t::ctor_param_t ctor_param_t;
+
+	carray_sgrid_ti_traits(ctor_param_t p)
+		: sc_traits_t(p)
+	{}
+};
+
+template< class iterator_type >
+struct bufpool_sgrid_ti_traits : public sgrid_ti_sc_traits< bufpool_ti_buf_traits< iterator_type > > {
+	typedef bufpool_ti_buf_traits< iterator_type > buf_traits_t;
+	typedef sgrid_ti_sc_traits< buf_traits_t > sc_traits_t;
+	typedef typename sc_traits_t::ctor_param_t ctor_param_t;
+
+	bufpool_sgrid_ti_traits(ctor_param_t p)
+		: sc_traits_t(p)
+	{}
 };
 
 }} /* blue_sky::wpi */

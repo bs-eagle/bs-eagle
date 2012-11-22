@@ -39,18 +39,14 @@ public:
 
 	enum { n_cell_pts = strat_t::n_cell_pts };
 
-	//tops_iterator() : mesh_(NULL), cid_(0), offs_(0) {}
-	tops_iterator(rs_smesh_iface* mesh = NULL, strat_ctor_param_t* strat_param = NULL, const ulong pos = 0)
-		: strat_t(mesh, strat_param) //, mesh_(mesh)
+	tops_iterator() : strat_t(strat_ctor_param_t()), cid_(0), offs_(0) {}
+
+	tops_iterator(strat_ctor_param_t strat_param, const ulong pos = 0)
+		: strat_t(strat_param)
 	{
-		if(mesh) {
-			// force cell switching
-			cid_ = pos / n_cell_pts + 1;
-			switch_pos(pos);
-		}
-		else {
-			cid_ = 0; offs_ = 0;
-		}
+		// force cell switching
+		cid_ = pos / n_cell_pts + 1;
+		switch_pos(pos);
 	}
 	// std copy ctor is fine
 
