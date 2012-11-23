@@ -7,6 +7,8 @@
 #include "bs_mesh_stdafx.h"
 #include "coord_zcorn_tools.h"
 #include "mesh_grdecl.h"
+#include "tops_iterator.h"
+#include "i_cant_link_2_mesh.h"
 
 #define BOUND_MERGE_THRESHOLD 0.8
 #define DEFAULT_SMOOTH_RATIO 0.1
@@ -103,10 +105,10 @@ public:
 		return tmp;
 	}
 
-	pointer operator->() const {
+	pointer operator->() {
 		return p_.operator->();
 	}
-	reference operator*() const {
+	reference operator*() {
 		return *p_;
 	}
 
@@ -495,9 +497,10 @@ struct extract_plane {
 };
 
 // convert tops array to structured grid representation
-spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float tops) {
+template< class src_iterator_t >
+spv_float tops2struct_grid_impl(const uint_t nx, const uint_t ny, const uint_t nz, src_iterator_t tops) {
 	typedef v_float::iterator v_iterator;
-	typedef v_float::const_iterator cv_iterator;
+	//typedef v_float::const_iterator cv_iterator;
 	using namespace std;
 
 	// sanity check
@@ -505,14 +508,14 @@ spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float tops) {
 		return spv_float();
 
 	const uint_t plane_sz = nx * ny * 24;
-	const uint_t nz = uint_t(tops->size() / plane_sz);
+	//const uint_t nz = uint_t(tops->size() / plane_sz);
 	const uint_t splane_sz = (nx + 1)*(ny + 1)*3;
 
 	// resulting array
 	spv_float res = BS_KERNEL.create_object(v_float::bs_type());
 	res->resize(splane_sz * (nz + 1));
 	v_iterator tgt = res->begin();
-	cv_iterator start = tops->begin();
+	src_iterator_t start = tops;
 
 	// loop over z layers
 	extract_plane ex(nx, ny);
@@ -523,6 +526,40 @@ spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float tops) {
 	ex.go(start, tgt);
 
 	return res;
+}
+
+// specialization for plain tops array
+spv_float tops2struct_grid(const uint_t nx, const uint_t ny, spv_float tops) {
+	return tops2struct_grid_impl(
+		nx, ny, uint_t(tops->size() / (nx * ny * 24)), tops->begin()
+	);
+}
+
+// direct conversion from COORD & ZCORN using tops_iterator
+spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float coord, spv_float zcorn) {
+	typedef smart_ptr< rs_smesh_iface, true > sp_smesh;
+	typedef wpi::tops_iterator< wpi::carray_ti_traits > iterator_t;
+
+	// build mesh_grdecl around given mesh
+	sp_himesh handy = BS_KERNEL.create_object("handy_mesh_iface");
+	sp_smesh mesh = handy->make_mesh_grdecl(nx, ny, coord, zcorn);
+	assert(mesh);
+
+	return tops2struct_grid_impl(
+		nx, ny, uint_t(mesh->get_n_elements() / (nx * ny)), iterator_t(mesh)
+	);
+}
+
+spv_float tops2struct_grid(smart_ptr< rs_smesh_iface > mesh) {
+	if(!mesh) return NULL;
+	typedef wpi::tops_iterator< wpi::carray_ti_traits > iterator_t;
+
+	// obtain mesh dimensions
+	rs_smesh_iface::index_point3d_t dims = mesh->get_dimens();
+	// go
+	return tops2struct_grid_impl(
+		uint_t(dims[0]), uint_t(dims[1]), uint_t(dims[2]), iterator_t(mesh.lock())
+	);
 }
 
 /*-----------------------------------------------------------------

@@ -90,11 +90,11 @@ bool register_handy_mesh_iface(const plugin_descriptor& pd) {
 #ifdef BSPY_EXPORTING_PLUGIN
 namespace python {
 	using namespace boost::python;
+	//typedef wpi::strategy_3d_ex< wpi::online_tops_traits > strat_t;
+	typedef wpi::strategy_3d_ex< wpi::sgrid_traits > strat_t;
+	typedef wpi::algo_vtk< strat_t > wpi_algo;
 
 	tuple enum_border_facets_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_int mask) {
-		typedef wpi::strategy_3d_ex< wpi::online_tops_traits > strat_t;
-		typedef wpi::algo_vtk< strat_t > wpi_algo;
-
 		spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
 		spv_float points = BS_KERNEL.create_object(v_float::bs_type());
 		//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_facets_vtk.prof");
@@ -104,9 +104,6 @@ namespace python {
 	}
 
 	tuple enum_border_edges_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_int mask) {
-		typedef wpi::strategy_3d_ex< wpi::online_tops_traits > strat_t;
-		typedef wpi::algo_vtk< strat_t > wpi_algo;
-
 		spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
 		spv_float points = BS_KERNEL.create_object(v_float::bs_type());
 		//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk.prof");
@@ -125,3 +122,4 @@ namespace python {
 #endif
 
 } /* blue_sky */
+

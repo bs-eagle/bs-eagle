@@ -40,14 +40,17 @@ struct algo_vtk : helpers< strat_t > {
 
 	// helper structure for filtering vertices
 	struct vertex_handle {
+		typedef std::set< vertex_handle > vertex_storage;
+		typedef typename vertex_storage::iterator vertex_iterator;
+
 		// position of vertex coordinates
 		cell_vertex_iterator pv_;
 		// offset of this handle in vertex storage
 		// filled during exporting step
 		ulong offs;
 
-		vertex_handle(const cell_vertex_iterator& V, ulong offs_ = -1)
-			: pv_(V), offs(offs_)
+		vertex_handle(const cell_vertex_iterator& V)
+			: pv_(V), offs(-1)
 		{}
 
 		// sorting criteria
@@ -58,26 +61,84 @@ struct algo_vtk : helpers< strat_t > {
 			);
 		}
 
-		const cell_vertex_iterator& ptr() const {
-			return pv_;
+		// 3way comparison
+		int operator<<(const vertex_handle& rhs) const {
+			return lexicographical_compare_3way(
+				pv_, pv_ + 3, rhs.pv_, rhs.pv_ + 3
+			);
+		}
+
+		static vertex_iterator push_back(vertex_storage& vs, const vertex_handle& vh) {
+			return vs.insert(vh).first;
+		}
+
+		static spv_float export_vertex_storage(trimesh&, vertex_storage& vs) {
+			// export array of unique points and calc their offsets
+			spv_float points = BS_KERNEL.create_object(v_float::bs_type());
+			points->resize(vs.size() * 3);
+			v_float::iterator p_dst = points->begin();
+			ulong cnt = 0;
+			for(vertex_iterator p_src = vs.begin(), end = vs.end(); p_src != end; ++p_src, ++cnt) {
+				p_dst = std::copy(p_src->pv_, p_src->pv_ + 3, p_dst);
+				const_cast< vertex_handle& >(*p_src).offs = cnt;
+			}
+			return points;
+		}
+
+		//const cell_vertex_iterator& ptr() const {
+		//	return pv_;
+		//}
+	};
+
+	struct vertex_handle_sgrid {
+		typedef std::list< vertex_handle_sgrid > vertex_storage;
+		typedef typename vertex_storage::iterator vertex_iterator;
+
+		// we don't need to store anything besides cell index in sgrid
+		ulong offs;
+
+		vertex_handle_sgrid(cell_vertex_iterator& V)
+			: offs(V.backend_index() / 3)
+		{}
+
+		bool operator<(const vertex_handle_sgrid& rhs) const {
+			return offs < rhs.offs;
+		}
+
+		// 3way comparison like lexicographical_compare_3way
+		int operator<<(const vertex_handle_sgrid& rhs) const {
+			return offs < rhs.offs ? -1 :
+				(offs == rhs.offs ? 0 : 1);
+		}
+
+		static vertex_iterator push_back(vertex_storage& vs, const vertex_handle_sgrid& vh) {
+			return vs.insert(vs.end(), vh);
+		}
+
+		static spv_float export_vertex_storage(trimesh& M, vertex_storage&) {
+			// just return trimesh backend which is actually a structured grid array
+			return M.backend();
 		}
 	};
 
-	typedef std::set< vertex_handle > vertex_storage;
+	// helper to decide what implementation of vertex_handle to use
+	// depending on strategy
+	template< class strat_traits, class = void >
+	struct choose_vertex_handle {
+		typedef vertex_handle type;
+	};
+	// select sepcial impl for sgrid-based strategy
+	template< class unused >
+	struct choose_vertex_handle< sgrid_traits, unused > {
+		typedef vertex_handle_sgrid type;
+	};
+
+	//typedef std::set< vertex_handle > vertex_storage;
+	typedef typename choose_vertex_handle< typename strat_t::traits_t >::type vertex_handle_t;
+	typedef typename vertex_handle_t::vertex_storage vertex_storage;
 	typedef typename vertex_storage::iterator vertex_iterator;
 	typedef typename vertex_storage::const_iterator vertex_citerator;
-	typedef std::pair< vertex_iterator, bool > ins_res;
-
-	static void export_vertex_storage(vertex_storage& vs, spv_float points) {
-		// export array of unique points and calc their offsets
-		points->resize(vs.size() * 3);
-		v_float::iterator p_dst = points->begin();
-		ulong cnt = 0;
-		for(vertex_iterator p_src = vs.begin(), end = vs.end(); p_src != end; ++p_src, ++cnt) {
-			p_dst = std::copy(p_src->ptr(), p_src->ptr() + 3, p_dst);
-			const_cast< vertex_handle& >(*p_src).offs = cnt;
-		}
-	}
+	//typedef std::pair< vertex_iterator, bool > ins_res;
 
 	// implementation for drawing facets using vtkQuad
 	template< int prim_id, class unused = void >
@@ -89,6 +150,8 @@ struct algo_vtk : helpers< strat_t > {
 		typedef bs_array< t_long, vector_traits > bs_lvector;
 		//smart_ptr< bs_lvector > idx_;
 		smart_ptr< bs_lvector > cell_idx_;
+		trimesh& M_;
+		// cache beginning of mesh only to avoid multimple calls to M_.begin() in operator()
 		cell_vertex_iterator tops_;
 		vertex_storage vs_;
 
@@ -97,22 +160,21 @@ struct algo_vtk : helpers< strat_t > {
 		index_storage idx_;
 
 		// ctor
-		vtk_index_backend(const cell_vertex_iterator& Tops)
+		vtk_index_backend(trimesh& M)
 			: cell_idx_(BS_KERNEL.create_object(bs_lvector::bs_type())),
-			tops_(Tops)
+			M_(M), tops_(M.begin())
 		{}
-
-		// try to insert vertex to storage, return index to be pushed to idx_
-		ulong push_vertex(ulong vid) {
-			ins_res r = vs_.insert(vertex_handle(vid, tops_));
-			return r.first->v_id;
-		}
 
 		// return how many primitives from given v were inserted into index
 		int operator()(const facet_vid_t& v, ulong cell_id, ulong facet_id) {
+			cell_vertex_iterator p_cell;
 			for(uint i = 0; i < n_fv; ++i) {
 				// save only unique vertices
-				idx_.push_back(vs_.insert(vertex_handle(tops_ + v[i]*3)).first);
+				p_cell = tops_ + v[i]*3;
+				idx_.push_back(
+					vertex_handle_t::push_back(vs_, p_cell)
+					//vs_.insert(vertex_handle(tops_ + v[i]*3)).first
+					);
 			}
 			// save cell id
 			cell_idx_->push_back(cell_id);
@@ -120,10 +182,13 @@ struct algo_vtk : helpers< strat_t > {
 			return 1;
 		}
 
-		spv_long get(spv_long cell_ids, spv_float points) {
+		spv_float get_points() {
 			// export unque points
-			export_vertex_storage(vs_, points);
+			return vertex_handle_t::export_vertex_storage(M_, vs_);
+		}
 
+		// return VTK primitives indices for vtkCellArray and cell indices in cell_ids
+		spv_long get_index(spv_long cell_ids) {
 			// export point ids for vtkQuads
 			spv_long res = BS_KERNEL.create_object(v_long::bs_type());
 			// each facet reqire a prefix denoting number of facet vertices
@@ -154,6 +219,7 @@ struct algo_vtk : helpers< strat_t > {
 		//typedef bs_array< t_long, vector_traits > bs_lvector;
 		//smart_ptr< bs_lvector > idx_;
 
+		trimesh& M_;
 		cell_vertex_iterator tops_;
 		vertex_storage vs_;
 
@@ -174,9 +240,7 @@ struct algo_vtk : helpers< strat_t > {
 
 			// sorting criteria
 			bool operator<(const edge_handle& rhs) const {
-				const int r = lexicographical_compare_3way(
-					beg_->ptr(), beg_->ptr() + 3, rhs.beg_->ptr(), rhs.beg_->ptr() + 3
-				);
+				const int r = *beg_ << *rhs.beg_;
 				if(r == 0)
 					// v1 = rhs.v1, so check v2
 					return *end_ < *rhs.end_;
@@ -192,7 +256,9 @@ struct algo_vtk : helpers< strat_t > {
 		edge_storage es_;
 
 		// ctor
-		vtk_index_backend(const cell_vertex_iterator& Tops) : tops_(Tops) {}
+		vtk_index_backend(trimesh& M)
+			: M_(M), tops_(M.begin())
+		{}
 
 		inline int push_edge(const edge_handle& e) {
 			ins_res r = es_.insert(e);
@@ -208,25 +274,37 @@ struct algo_vtk : helpers< strat_t > {
 		int operator()(const facet_vid_t& v, ulong cell_id, ulong facet_id) {
 			// try to insert each edge of given facet
 			int cnt = 0;
+			cell_vertex_iterator e_start, e_finish;
 			for(uint i = 0; i < n_fv - 1; ++i) {
+				e_start = tops_ + v[i]*3;
+				e_finish = tops_ + v[i + 1]*3;
 				cnt += push_edge(edge_handle(
 					cell_id, facet_id,
-					vs_.insert(tops_ + v[i]*3).first, vs_.insert(tops_ + v[i + 1]*3).first
+					vertex_handle_t::push_back(vs_, e_start),
+					vertex_handle_t::push_back(vs_, e_finish)
+					//vs_.insert(tops_ + v[i]*3).first, vs_.insert(tops_ + v[i + 1]*3).first
 				));
 			}
-			if(n_fv > 2)
+			if(n_fv > 2) {
+				e_start = tops_ + v[0]*3;
+				e_finish = tops_ + v[n_fv - 1]*3;
 				cnt += push_edge(edge_handle(
 					cell_id, facet_id,
-					vs_.insert(tops_ + v[0]*3).first, vs_.insert(tops_ + v[n_fv - 1]*3).first
+					vertex_handle_t::push_back(vs_, e_start),
+					vertex_handle_t::push_back(vs_, e_finish)
+					//vs_.insert(tops_ + v[0]*3).first, vs_.insert(tops_ + v[n_fv - 1]*3).first
 				));
+			}
 
 			return cnt;
 		}
 
-		spv_long get(spv_long cell_ids, spv_float points) {
+		spv_float get_points() {
 			// export unque points
-			export_vertex_storage(vs_, points);
+			return vertex_handle_t::export_vertex_storage(M_, vs_);
+		}
 
+		spv_long get_index(spv_long cell_ids) {
 			spv_long res = BS_KERNEL.create_object(v_long::bs_type());
 			// copy collected unique edges as lines to resulting index
 			res->resize(es_.size() * 3);
@@ -252,14 +330,6 @@ struct algo_vtk : helpers< strat_t > {
 		// 1) build trimesh from given tops
 		trimesh M(nx, ny, coord, zcorn);
 		const ulong n_cells = M.size_flat();
-		//vertex_pos_i mesh_size = {ulong(nx), ulong(ny), tops->size() / (nx * ny * 24)};
-		//const ulong n_cells = tops->size() / 24;
-		//M.resize(n_cells);
-		//v_float::iterator pv = tops->begin();
-		//for(ulong i = 0; i < n_cells; ++i) {
-		//	M[i] = cell_data(&*pv);
-		//	pv += 3*8;
-		//}
 
 		// make mesh_part containing full mesh
 		mesh_part MP(M);
@@ -272,7 +342,7 @@ struct algo_vtk : helpers< strat_t > {
 		const ulong mask_sz = mask->size();
 
 		// backend for storing index
-		vtk_index_backend< prim_id > vib(M.begin());
+		vtk_index_backend< prim_id > vib(M);
 
 		cell_nb_enum cell_nb;
 		facet_vid_t cell_fvid;
@@ -300,8 +370,9 @@ struct algo_vtk : helpers< strat_t > {
 			}
 		}
 
-		//cell_idx->clear();
-		return vib.get(cell_idx, points);
+		// share the same buffer for points
+		points->init_inplace(vib.get_points());
+		return vib.get_index(cell_idx);
 	}
 
 	// specialization for facets
