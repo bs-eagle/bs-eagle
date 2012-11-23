@@ -60,6 +60,9 @@ struct pods< strat_t >::trimesh::impl {
 		typename v_float::const_iterator data() const {
 			return tops_->begin();
 		}
+		spv_float backend() const {
+			return tops_;
+		}
 	};
 
 	// specialization for online tops traits
@@ -85,6 +88,9 @@ struct pods< strat_t >::trimesh::impl {
 		}
 		rs_smesh_iface* data() const {
 			return mesh_.lock();
+		}
+		sp_smesh backend() const {
+			return mesh_;
 		}
 
 		sp_smesh mesh_;
@@ -116,6 +122,9 @@ struct pods< strat_t >::trimesh::impl {
 		}
 		sgrid_handle data() const {
 			return h_;
+		}
+		spv_float backend() const {
+			return sgrid_;
 		}
 
 		spv_float sgrid_;
@@ -183,6 +192,10 @@ struct pods< strat_t >::trimesh::impl {
 		return ii_.end();
 	}
 
+	sp_obj backend() const {
+		return ii_.backend();
+	}
+
 	iimpl< strat_traits > ii_;
 };
 
@@ -212,7 +225,7 @@ void pods< strat_t >::trimesh::init(t_long nx, t_long ny, spv_float coord, spv_f
 
 template< class strat_t >
 typename pods< strat_t >::trimesh::value_type
-pods< strat_t >::trimesh::ss_backend(ulong idx) const {
+pods< strat_t >::trimesh::ss(ulong idx) const {
 	return pimpl_->ss(idx);
 }
 
@@ -228,6 +241,10 @@ pods< strat_t >::trimesh::end() const {
 	return pimpl_->end();
 }
 
+template< class strat_t >
+sp_obj pods< strat_t >::trimesh::backend() const {
+	return pimpl_->backend();
+}
 // instantiate trimesh for known strategies
 //template class pods< strategy_3d >::trimesh;
 //template class pods< strategy_2d >::trimesh;

@@ -191,43 +191,32 @@ struct pods : public helpers< strat_t > {
 
 		// direct subscript via backend ignoring cache
 		// calls pimpl actually
-		value_type ss_backend(ulong idx) const;
+		value_type ss(ulong idx) const;
 
 		// subscripting operator - returns a new _copy_ of cell every time!
-		// if cell was already cached, return a copy from cache
-		value_type ss(ulong idx) const {
-			//typename cache_t::const_iterator r = cache_.find(idx);
-			//if(r != cache_.end())
-			//	return r->second;
-			return ss_backend(idx);
-		}
+		//value_type ss(ulong idx) const {
+		//	return ss_backend(idx);
+		//}
 
 		// the same in operator form
 		value_type operator[](ulong idx) const {
 			return ss(idx);
 		}
 
-		// if cell was modified, we can return cached version instead of subscripting backend
-		//void cache_cell(ulong idx, const value_type& cell) {
-		//	cache_[idx] = cell;
-		//}
-
 		// obtain iterators on backend
 		cell_vertex_iterator begin() const;
 		cell_vertex_iterator end() const;
+
+		// access to backend object
+		// float array or rs_smesh_iface object now
+		sp_obj backend() const;
 
 	private:
 		struct impl;
 		st_smart_ptr< impl > pimpl_;
 
 		vertex_pos_i size_;
-		//typedef std::map< ulong, value_type > cache_t;
-		//cache_t cache_;
 	};
-
-	//typedef std::vector< cell_data > trimesh;
-	//typedef typename trimesh::iterator trim_iterator;
-	//typedef typename trimesh::const_iterator ctrim_iterator;
 
 	/*-----------------------------------------------------------------
 	* well description
