@@ -125,9 +125,6 @@ struct pods< strat_t >::trimesh::impl {
 	template< class unused >
 	struct iimpl< sgrid_traits, unused > : public iimpl_sgrid< sgrid_traits > {};
 
-	template< class unused >
-	struct iimpl< online_sgrid_traits, unused > : public iimpl_sgrid< online_sgrid_traits > {};
-
 	// bufpool-related strategies can utilize the same code :)
 	// can't stop pushing the template limits :)
 	// implementation is base on simple ti_traits without _bofpool postfix
@@ -163,11 +160,6 @@ struct pods< strat_t >::trimesh::impl {
 	template< class unused >
 	struct iimpl< online_tops_traits_bufpool, unused >
 		: public iimpl_bufpool< online_tops_traits_bufpool >
-	{};
-
-	template< class unused >
-	struct iimpl< online_sgrid_traits_bufpool, unused >
-		: public iimpl_bufpool< online_sgrid_traits_bufpool >
 	{};
 
 	/*-----------------------------------------------------------------

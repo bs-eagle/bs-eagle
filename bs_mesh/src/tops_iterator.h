@@ -171,6 +171,14 @@ public:
 		return !(*this < rhs);
 	}
 
+	// if tops_iterator has an underlying backend storage
+	// then return index in this storage current iterator points to
+	// this can be useful, for ex. for structured grid backend representation
+	ulong backend_index() const {
+		switch_pos(pos_);
+		return strat_t::backend_index(offs_);
+	}
+
 private:
 	// ref to mesh object
 	//rs_smesh_iface* mesh_;
