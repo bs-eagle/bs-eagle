@@ -285,20 +285,12 @@ struct sgrid_ti_sc_traits : public buf_traits {
 		pointer pdata = &buf_traits::ss(0);
 		// vert 0, 1;
 		pdata = std::copy(start, start + 6, pdata);
-		//*pdata++ = *start; *pdata++ = *(start + 1);
 		// vert 2, 3
 		pdata = std::copy(start + (nx_ + 1)*3, start + (nx_ + 3)*3, pdata);
-		//*pdata++ = *(start + (nx_ + 1)); *pdata++ = *(start + (nx_ + 2));
 		// vert 4, 5
 		pdata = std::copy(start + (nx_ + 1)*(ny_ + 1)*3, start + ((nx_ + 1)*(ny_ + 1) + 2)*3, pdata);
-		//*pdata++ = *(start + (nx_ + 1)*(ny_ + 1));
-		// vert 5
-		//*pdata++ = *(start + ((nx_ + 1)*(ny_ + 1) + 1));
-		// vert 6
+		// vert 6, 7
 		std::copy(start + (nx_ + 1)*(ny_ + 2)*3, start + ((nx_ + 1)*(ny_ + 2) + 2)*3, pdata);
-		//*pdata++ = *(start + (nx_ + 1)*(ny_ + 2));
-		// vert 7
-		//*pdata++ = *(start + ((nx_ + 1)*(ny_ + 2) + 1));
 	}
 
 protected:
@@ -328,6 +320,77 @@ struct bufpool_sgrid_ti_traits : public sgrid_ti_sc_traits< bufpool_ti_buf_trait
 	bufpool_sgrid_ti_traits(ctor_param_t p)
 		: sc_traits_t(p)
 	{}
+};
+
+// another traits for sgrid
+template< class iterator_type >
+struct sgrid_ti_traits : public iterator_type {
+	typedef iterator_type iterator_t;
+	typedef typename iterator_t::value_type value_type;
+	typedef typename iterator_t::reference reference;
+	typedef typename v_float::iterator vf_iterator;
+
+	// use simple traits as buffer holder
+	typedef carray_ti_buf_traits< iterator_t > carray_traits;
+	enum { n_cell_pts = carray_traits::n_cell_pts };
+	typedef ulong cellv_index[n_cell_pts];
+
+	// traits should be initialized with iterator to beginning of sgrid
+	// + dimeshions of original mesh
+	struct sgrid_handle {
+		vf_iterator sgrid;
+		ulong nx, ny, size;
+	};
+	typedef sgrid_handle ctor_param_t;
+
+	// ctor
+	sgrid_ti_traits(const sgrid_handle& h)
+		: nx_(h.nx), ny_(h.ny), sz_(h.size), start_(h.sgrid), cell_offs_(0)
+	{
+		const ulong line = (nx_ + 1)*3;
+		const ulong plane = (nx_ + 1)*(ny_ + 1)*3;
+		const ulong lplane = (nx_ + 1)*(ny_ + 2)*3;
+		const cellv_index t = {
+			// vert 0, 1
+			0, 1, 2, 3, 4, 5,
+			// vert 2, 3
+			line, line + 1, line + 2, line + 3, line + 4, line + 5,
+			// vert 4, 5
+			plane, plane + 1, plane + 2, plane + 3, plane + 4, plane + 5,
+			// vert 6, 7
+			lplane, lplane + 1, lplane + 2, lplane + 3, lplane + 4, lplane + 5
+		};
+		std::copy(&t[0], &t[n_cell_pts], &vidx_[0]);
+	}
+
+	void switch_cell(const ulong cell_id) {
+		// are we inside mesh bounds?
+		if(cell_id >= sz_)
+			return;
+
+		// calc offset of cell beginning in structured grid
+		const ulong plane_sz = nx_ * ny_;
+		const ulong z = cell_id / plane_sz;
+		const ulong y = (cell_id - plane_sz * z) / nx_;
+		const ulong x = cell_id - plane_sz * z - nx_ * y;
+
+		cell_offs_ = (z * (nx_ + 1) * (ny_ + 1) + y * (nx_ + 1) + x) * 3;
+	}
+
+	reference ss(ulong offs) {
+		return *(start_ + cell_offs_ + vidx_[offs]);
+	}
+
+	void assign(const sgrid_ti_traits& rhs) {
+		nx_ = rhs.nx_; ny_ = rhs.ny_; sz_ = rhs.sz_;
+		start_ = rhs.start_; cell_offs_ = rhs.cell_offs_;
+		std::copy(&rhs.vidx_[0], &rhs.vidx_[n_cell_pts], &vidx_[0]);
+	}
+
+	ulong nx_, ny_, sz_;
+	vf_iterator start_;
+	ulong cell_offs_;
+	cellv_index vidx_;
 };
 
 }} /* blue_sky::wpi */

@@ -92,9 +92,9 @@ struct pods< strat_t >::trimesh::impl {
 
 	// specialization for sgrid_ti_traits
 	// holds structured grid array of size (nx + 1)*(ny + 1)*(nz + 1)
-	template< class unused >
-	struct iimpl< online_sgrid_traits, unused > {
-		typedef typename online_sgrid_traits::cell_vertex_iterator iterator_t;
+	template< class traits_t >
+	struct iimpl_sgrid {
+		typedef typename traits_t::cell_vertex_iterator iterator_t;
 		typedef typename iterator_t::strat_ctor_param_t sgrid_handle;
 
 		void init(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
@@ -121,6 +121,12 @@ struct pods< strat_t >::trimesh::impl {
 		spv_float sgrid_;
 		sgrid_handle h_;
 	};
+
+	template< class unused >
+	struct iimpl< sgrid_traits, unused > : public iimpl_sgrid< sgrid_traits > {};
+
+	template< class unused >
+	struct iimpl< online_sgrid_traits, unused > : public iimpl_sgrid< online_sgrid_traits > {};
 
 	// bufpool-related strategies can utilize the same code :)
 	// can't stop pushing the template limits :)

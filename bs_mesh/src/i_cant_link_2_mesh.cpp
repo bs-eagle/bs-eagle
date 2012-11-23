@@ -91,7 +91,7 @@ bool register_handy_mesh_iface(const plugin_descriptor& pd) {
 namespace python {
 	using namespace boost::python;
 	//typedef wpi::strategy_3d_ex< wpi::online_tops_traits > strat_t;
-	typedef wpi::strategy_3d_ex< wpi::online_sgrid_traits > strat_t;
+	typedef wpi::strategy_3d_ex< wpi::sgrid_traits > strat_t;
 	typedef wpi::algo_vtk< strat_t > wpi_algo;
 
 	tuple enum_border_facets_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_int mask) {
