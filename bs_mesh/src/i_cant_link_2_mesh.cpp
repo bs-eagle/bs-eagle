@@ -15,7 +15,7 @@
 #include "well_path_ident.h"
 
 // profiling
-#include <google/profiler.h>
+//#include <google/profiler.h>
 //#include <google/heap-profiler.h>
 
 namespace blue_sky {
@@ -97,19 +97,19 @@ namespace python {
 	tuple enum_border_facets_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_int mask) {
 		spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
 		spv_float points = BS_KERNEL.create_object(v_float::bs_type());
-		ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_facets_vtk.prof");
+		//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_facets_vtk.prof");
 		spv_long res = wpi_algo::enum_border_facets_vtk(nx, ny, coord, zcorn, mask, cell_idx, points);
-		ProfilerStop();
+		//ProfilerStop();
 		return make_tuple(res, cell_idx, points);
 	}
 
 	tuple enum_border_edges_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_int mask) {
 		spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
 		spv_float points = BS_KERNEL.create_object(v_float::bs_type());
-		ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk.prof");
+		//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk.prof");
 		//HeapProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk");
 		spv_long res = wpi_algo::enum_border_edges_vtk(nx, ny, coord, zcorn, mask, cell_idx, points);
-		ProfilerStop();
+		//ProfilerStop();
 		return make_tuple(res, cell_idx, points);
 	}
 
