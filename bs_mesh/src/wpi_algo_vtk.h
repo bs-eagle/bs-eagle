@@ -29,10 +29,14 @@ struct algo_vtk : helpers< strat_t > {
 	typedef typename pods_t::cell_data cell_data;
 	typedef typename pods_t::sp_cell_data sp_cell_data;
 	typedef typename pods_t::trimesh trimesh;
+	typedef typename pods_t::vertex_pos_i vertex_pos_i;
 
 	// import mesh_part
 	typedef mesh_tools< strat_t > mesh_tools_t;
 	typedef typename mesh_tools_t::mesh_part mesh_part;
+
+	typedef helpers< strat_t > base_t;
+	using base_t::decode_cell_id;
 
 	/*-----------------------------------------------------------------
 	 * vtk index storage backend for facets and edges
@@ -324,8 +328,9 @@ struct algo_vtk : helpers< strat_t > {
 	 * Enumerate border cell facets for drawing mesh in VTK
 	 *----------------------------------------------------------------*/
 	template< int prim_id >
-	static spv_long enum_border_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_int mask,
-		spv_long cell_idx, spv_float points, Loki::Int2Type< prim_id > prim)
+	static spv_long enum_border_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+		spv_int mask, spv_long cell_idx, spv_float points, Loki::Int2Type< prim_id > prim,
+		int slice_dim = -1, ulong slice_idx = 0)
 	{
 		// 1) build trimesh from given tops
 		trimesh M(nx, ny, coord, zcorn);
@@ -333,6 +338,11 @@ struct algo_vtk : helpers< strat_t > {
 
 		// make mesh_part containing full mesh
 		mesh_part MP(M);
+		// slice sanity checks
+		if(slice_dim >= 0) {
+			slice_dim = std::min(slice_dim, D - 1);
+			slice_idx = std::min(slice_idx, MP.side_len(slice_dim) - 1);
+		}
 
 		// 2) loop over all cells
 		typedef typename mesh_part::cell_neighb_enum cell_nb_enum;
@@ -348,9 +358,18 @@ struct algo_vtk : helpers< strat_t > {
 		facet_vid_t cell_fvid;
 
 		// loop over all cells
+		vertex_pos_i cell_id;
 		for(ulong i = 0; i < n_cells; ++i) {
+			// check if cell is inside slice
+			bool out_of_slice = false;
+			if(slice_dim >= 0) {
+				decode_cell_id(i, cell_id, M.size());
+				if(cell_id[slice_dim] != slice_idx)
+					out_of_slice = true;
+			}
+
 			// skip masked cells
-			if(i < mask_sz && mask->ss(i) == 0)
+			if((i < mask_sz && mask->ss(i) == 0) || out_of_slice)
 				continue;
 
 			// 2.1) if some facet has no neighbors - include it in results
@@ -376,15 +395,25 @@ struct algo_vtk : helpers< strat_t > {
 	}
 
 	// specialization for facets
-	static spv_long enum_border_facets_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_int mask,
-		spv_long cell_idx, spv_float points) {
-		return enum_border_vtk(nx, ny, coord, zcorn, mask, cell_idx, points, Loki::Int2Type< 0 >());
+	static spv_long enum_border_facets_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+		spv_int mask, spv_long cell_idx, spv_float points,
+		int slice_dim = -1, ulong slice_idx = 0)
+	{
+		return enum_border_vtk(
+			nx, ny, coord, zcorn, mask, cell_idx, points, Loki::Int2Type< 0 >(),
+			slice_dim, slice_idx
+		);
 	}
 
 	// specialization for edges
-	static spv_long enum_border_edges_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_int mask,
-		spv_long cell_idx, spv_float points) {
-		return enum_border_vtk(nx, ny, coord, zcorn, mask, cell_idx, points, Loki::Int2Type< 1 >());
+	static spv_long enum_border_edges_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+		spv_int mask, spv_long cell_idx, spv_float points,
+		int slice_dim = -1, ulong slice_idx = 0)
+	{
+		return enum_border_vtk(
+			nx, ny, coord, zcorn, mask, cell_idx, points, Loki::Int2Type< 1 >(),
+			slice_dim, slice_idx
+		);
 	}
 
 }; // algo_vtk
