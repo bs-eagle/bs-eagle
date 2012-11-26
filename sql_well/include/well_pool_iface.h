@@ -122,8 +122,10 @@ class well_pool_iface : public objbase
       virtual bool get_sql_bool (t_int col) = 0;
       virtual std::string get_sql_str (t_int col) = 0;
 	  virtual bool get_sql_exist (t_int col) = 0;
+      virtual int merge_with_db (const std::string &dbname) = 0;
       virtual int exec_sql (const std::string &sql) = 0;
       virtual int exec_sql_and_return_rowid (const std::string &sql) = 0;
+      virtual void backup_to_file (const std::string &filename) = 0;
       virtual int insert_or_update (const std::string &select_sql,
                                     const std::string &insert_sql,
                                     const std::string &update_sql) = 0;

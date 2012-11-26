@@ -266,14 +266,17 @@ namespace blue_sky
   }
   
    void
-  hdm::init(const std::string &model_name)
+  hdm::init(const std::string &model_name, bool use_memory)
   {
     smart_ptr <hdm_iface, true> hdm = this;
     keyword_params kp;
     
     kp.hdm = this;
-    data->h5_pool->open_file (model_name + "_rex.h5");
-    this->well_pool_->open_db (model_name + "_well_pool.db");
+    if (use_memory)
+        this->well_pool_->open_db (":memory:");
+    else
+        data->h5_pool->open_file (model_name + "_rex.h5");
+        this->well_pool_->open_db (model_name + "_well_pool.db");
     data->props->add_property_s(model_name.substr(0,model_name.find_last_of("/\\") + 1), "model_path", "model_path");
     km->init(hdm);
     

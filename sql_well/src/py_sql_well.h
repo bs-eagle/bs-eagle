@@ -70,6 +70,8 @@ namespace blue_sky
         args ("Table_name", "Column list", "Filter"), "Return nparray of values in columns list")
     .def ("exec_sql",                           &T::exec_sql,
         args ("Sql_string"), "Execute SQL")
+    .def ("merge_with_db",                      &T::merge_with_db,
+        args ("DB_name"), "Merge two DBs")
     .def ("exec_sql_and_return_rowid",          &T::exec_sql_and_return_rowid,
         args ("Sql_string"), "Execute SQL and return ROWID")
     .def ("read_from_ascii_file",               &T::read_from_ascii_file,
@@ -78,6 +80,8 @@ namespace blue_sky
         args ("File_name", "h5_pool", "hdm_prop"),                  "Save data to ascii file in BOS format")
     .def ("insert_or_update",                   &T::insert_or_update,
         args ("select", "insert", "update"), "Insert or update data")
+    .def ("backup_to_file",                     &T::backup_to_file,
+        args ("filename"), "Backup memory DB to disk")
     //.def ("d2date",                               &T::d2date,
     //  args ("d"), "convert d to list (year, month, day, hour, minute, second)")
     //.def ("date2d",                               &T::date2d,

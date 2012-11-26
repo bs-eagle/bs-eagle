@@ -169,6 +169,7 @@ namespace blue_sky
             }
         }
 
+
 #if 0
       char buf[2048];
       rc = sqlite3_open (":memory:", &db);
@@ -205,6 +206,63 @@ namespace blue_sky
       return 0;
     }
 
+  void
+  sql_well::backup_to_file (const std::string &filename)
+    {
+      if (!db)
+        return;
+      sqlite3 *ddb = 0;
+      int rc = sqlite3_open (filename.c_str (), &ddb);
+      if (rc)
+        {
+          fprintf (stderr, "Can't open database: %s\n", sqlite3_errmsg (ddb));
+          sqlite3_close (ddb);
+          ddb = 0;
+          return;
+        }
+      sqlite3_backup *b = sqlite3_backup_init(ddb, "main", db, "main");
+      if (b)
+        {
+          sqlite3_backup_step(b, -1);
+          sqlite3_backup_finish(b);
+        }
+      rc = sqlite3_errcode(ddb);
+      sqlite3_close(ddb);
+      //db->sqlite_backup_to_file(filename);
+    }
+
+
+  int
+  sql_well::merge_with_db(const std::string& dbname)
+    {
+      if (!db)
+        return 0;
+      if (stmp_sql)
+        finalize_sql ();
+
+      int rc = 0;
+      char *zErrMsg = 0;
+
+      std::string sql = "attach '" + dbname + "' as tomerge;    insert or ignore into groups select * from tomerge.groups; \
+                                                                insert or ignore into wells select * from tomerge.wells; \
+                                                                insert or ignore into completions select * from tomerge.completions; \
+                                                                insert or ignore into dates select * from tomerge.dates; \
+                                                                insert or ignore into fractures select * from tomerge.fractures; \
+                                                                insert or ignore into permfrac select * from tomerge.permfrac; \
+                                                                insert or ignore into well_hist select * from tomerge.well_hist; \
+                                                                insert or ignore into wells_in_group select * from tomerge.wells_in_group; \
+                                                                insert or replace into branches select * from tomerge.branches; \
+                                                                detach database tomerge";
+
+      rc = sqlite3_exec (db, sql.c_str (), NULL, 0, &zErrMsg);
+      if( rc != SQLITE_OK )
+      {
+        fprintf (stderr, "SQL error: %s\n", zErrMsg);
+        sqlite3_free (zErrMsg);
+        return -4;
+      }
+      return 0;
+    }
 
   int
   sql_well::create_db (sqlite3 *db_in)
