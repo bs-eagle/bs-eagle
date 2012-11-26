@@ -88,35 +88,45 @@ bool register_handy_mesh_iface(const plugin_descriptor& pd) {
 }
 
 #ifdef BSPY_EXPORTING_PLUGIN
+
 namespace python {
 	using namespace boost::python;
 	//typedef wpi::strategy_3d_ex< wpi::online_tops_traits > strat_t;
 	typedef wpi::strategy_3d_ex< wpi::sgrid_traits > strat_t;
 	typedef wpi::algo_vtk< strat_t > wpi_algo;
 
-	tuple enum_border_facets_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_int mask) {
+	tuple enum_border_facets_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+		spv_int mask, int slice_dim = -1, ulong slice_idx = 0)
+	{
 		spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
 		spv_float points = BS_KERNEL.create_object(v_float::bs_type());
 		//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_facets_vtk.prof");
-		spv_long res = wpi_algo::enum_border_facets_vtk(nx, ny, coord, zcorn, mask, cell_idx, points);
+		spv_long res = wpi_algo::enum_border_facets_vtk(nx, ny, coord, zcorn, mask, cell_idx,
+			points, slice_dim, slice_idx);
 		//ProfilerStop();
 		return make_tuple(res, cell_idx, points);
 	}
 
-	tuple enum_border_edges_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_int mask) {
+	tuple enum_border_edges_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+		spv_int mask, int slice_dim = -1, ulong slice_idx = 0)
+	{
 		spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
 		spv_float points = BS_KERNEL.create_object(v_float::bs_type());
 		//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk.prof");
 		//HeapProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk");
-		spv_long res = wpi_algo::enum_border_edges_vtk(nx, ny, coord, zcorn, mask, cell_idx, points);
+		spv_long res = wpi_algo::enum_border_edges_vtk(nx, ny, coord, zcorn, mask, cell_idx,
+			points, slice_dim, slice_idx);
 		//ProfilerStop();
 		return make_tuple(res, cell_idx, points);
 	}
 
+	BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_facets_overl, enum_border_facets_vtk, 5, 7);
+	BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_edges_overl, enum_border_edges_vtk, 5, 7);
+
 	void py_export_handymesh() {
 		def("calc_cells_vertices_xyz", &calc_cells_vertices_xyz_impl);
-		def("enum_border_facets_vtk", &enum_border_facets_vtk);
-		def("enum_border_edges_vtk", &enum_border_edges_vtk);
+		def("enum_border_facets_vtk", &enum_border_facets_vtk, enumb_facets_overl());
+		def("enum_border_edges_vtk", &enum_border_edges_vtk, enumb_edges_overl());
 	}
 } /* python */
 #endif
