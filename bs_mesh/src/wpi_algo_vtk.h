@@ -334,15 +334,21 @@ struct algo_vtk : helpers< strat_t > {
 	{
 		// 1) build trimesh from given tops
 		trimesh M(nx, ny, coord, zcorn);
-		const ulong n_cells = M.size_flat();
 
 		// make mesh_part containing full mesh
 		mesh_part MP(M);
-		// slice sanity checks
+		// cut the slice from whole mesh
 		if(slice_dim >= 0) {
+			// slice sanity checks
 			slice_dim = std::min(slice_dim, D - 1);
 			slice_idx = std::min(slice_idx, MP.side_len(slice_dim) - 1);
+			// reinit mesh_part
+			vertex_pos_i slice_lo, slice_hi;
+			ca_assign(slice_lo, 0); slice_lo[slice_dim] = slice_idx;
+			ca_assign(slice_hi, MP.hi); slice_hi[slice_dim] = slice_idx + 1;
+			MP.init(slice_lo, slice_hi);
 		}
+		const ulong n_cells = MP.size();
 
 		// 2) loop over all cells
 		typedef typename mesh_part::cell_neighb_enum cell_nb_enum;
@@ -358,18 +364,20 @@ struct algo_vtk : helpers< strat_t > {
 		facet_vid_t cell_fvid;
 
 		// loop over all cells
-		vertex_pos_i cell_id;
+		//vertex_pos_i cell_id;
+		//ulong cell_id;
 		for(ulong i = 0; i < n_cells; ++i) {
 			// check if cell is inside slice
-			bool out_of_slice = false;
-			if(slice_dim >= 0) {
-				decode_cell_id(i, cell_id, M.size());
-				if(cell_id[slice_dim] != slice_idx)
-					out_of_slice = true;
-			}
+			//bool out_of_slice = false;
+			//if(slice_dim >= 0) {
+			//	decode_cell_id(i, cell_id, M.size());
+			//	if(cell_id[slice_dim] != slice_idx)
+			//		out_of_slice = true;
+			//}
 
 			// skip masked cells
-			if((i < mask_sz && mask->ss(i) == 0) || out_of_slice)
+			const ulong cell_id = MP.ss_id(i);
+			if(cell_id < mask_sz && mask->ss(cell_id) == 0)
 				continue;
 
 			// 2.1) if some facet has no neighbors - include it in results
@@ -380,12 +388,12 @@ struct algo_vtk : helpers< strat_t > {
 					continue;
 
 				cell_data::facet_vid(j, cell_fvid);
-				// vertex_id[i] = vertex_id[i] + i*8
+				// vertex_id[cell_id] = vertex_id[cell_id] + cell_id*8
 				std::transform(
 					&cell_fvid[0], &cell_fvid[n_fv], &cell_fvid[0],
-					std::bind2nd(std::plus< ulong >(), i * 8)
+					std::bind2nd(std::plus< ulong >(), cell_id * 8)
 				);
-				vib(cell_fvid, i, j);
+				vib(cell_fvid, cell_id, j);
 			}
 		}
 
