@@ -8,6 +8,7 @@
 #include "data_class.h"
 
 #include "write_time_to_log.h"
+#include <stdio.h>
 
 
     #include <iostream>
@@ -272,7 +273,7 @@ namespace blue_sky
     keyword_params kp;
     
     kp.hdm = this;
-    if (model_name == std::string(":memory:"))
+    if (!strcmp(model_name.c_str(),":memory:"))
         this->well_pool_->open_db (model_name);
     else
         data->h5_pool->open_file (model_name + "_rex.h5");
