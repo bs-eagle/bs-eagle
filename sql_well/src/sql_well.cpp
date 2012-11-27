@@ -855,11 +855,12 @@ COMMIT;\
         finalize_sql ();
       const char *ttt;
       int rc = 0;
-
+      
       rc = sqlite3_prepare_v2 (db, sql.c_str (), sql.length () + 1, &stmp_sql, &ttt);
       if (rc)
         {
-          fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
+          fprintf (stderr, "Can't make select: %s (%d)\n", sqlite3_errmsg (db), rc);
+          fprintf (stderr, "Query: %s\n", sql.c_str());
           return -1;
         }
       return 0;
