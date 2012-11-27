@@ -9,8 +9,6 @@
 #ifdef BSPY_EXPORTING_PLUGIN
 using namespace boost::python;
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(init_overloads, init, 1, 2)
-
 namespace blue_sky {
 namespace python {
 
@@ -18,7 +16,7 @@ namespace python {
     //.add_property ("data", get_data <T, strategy_t>)
     .def("init_fluids", &T::init_fluids)
     .def("init_equil", &T::init_equil)
-    .def("init", &T::init, init_overloads())
+    .def("init", &T::init)
     .def("read_keyword_file", &T::read_keyword_file)
     .def("get_pool", &T::get_pool)
     .def("get_reader", &T::get_reader)
