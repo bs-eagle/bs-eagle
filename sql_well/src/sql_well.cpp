@@ -223,10 +223,16 @@ namespace blue_sky
       sqlite3_backup *b = sqlite3_backup_init(ddb, "main", db, "main");
       if (b)
         {
-          sqlite3_backup_step(b, -1);
+          while(sqlite3_backup_step(b, -1) == SQLITE_OK) {}
+	        //while (sqlite3_backup_remaining(b) > 0)
           sqlite3_backup_finish(b);
         }
+
       rc = sqlite3_errcode(ddb);
+      if( rc != SQLITE_OK )
+      {
+        fprintf (stderr, "SQL error with backup_to_file: %d\n", rc);
+      }
       sqlite3_close(ddb);
       //db->sqlite_backup_to_file(filename);
     }
@@ -257,7 +263,7 @@ namespace blue_sky
       rc = sqlite3_exec (db, sql.c_str (), NULL, 0, &zErrMsg);
       if( rc != SQLITE_OK )
       {
-        fprintf (stderr, "SQL error: %s\n", zErrMsg);
+        fprintf (stderr, "SQL error with tomerge: %s\n", zErrMsg);
         sqlite3_free (zErrMsg);
         return -4;
       }
@@ -995,7 +1001,7 @@ COMMIT;\
       rc = sqlite3_exec (db, sql.c_str (), NULL, 0, &zErrMsg);
       if( rc != SQLITE_OK )
         {
-          fprintf (stderr, "SQL error: %s\n", zErrMsg);
+          fprintf (stderr, "SQL error: %s, when query \"%s\"\n", zErrMsg, sql.c_str());
           sqlite3_free (zErrMsg);
           return -4;
         }

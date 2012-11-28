@@ -273,11 +273,14 @@ namespace blue_sky
     keyword_params kp;
     
     kp.hdm = this;
-    if (!strcmp(model_name.c_str(),":memory:"))
-        this->well_pool_->open_db (model_name);
+    if (model_name == std::string(":memory:")) {
+        this->well_pool_->open_db ("mem_well_pool.db");
+      }
     else
+      {
         data->h5_pool->open_file (model_name + "_rex.h5");
         this->well_pool_->open_db (model_name + "_well_pool.db");
+      }
     data->props->add_property_s(model_name.substr(0,model_name.find_last_of("/\\") + 1), "model_path", "model_path");
     km->init(hdm);
     
