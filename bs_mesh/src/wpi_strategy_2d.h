@@ -239,6 +239,19 @@ struct strategy_2d_ex {
 		);
 	}
 
+	// look into wpi_strategy_3d.h for description of this function
+	typedef int bbox_bnd_offs[2][D];
+	static const bbox_bnd_offs& bbox_boundary_offs(const uint dim, const uint bnd_id) {
+		static const bbox_bnd_offs t[4] = {
+			// X
+			{ {0, 1}, {0, -1} },
+			{ {0, 0}, {0, -1} },
+			// Y
+			{ {0, 0}, {-1, 0} },
+			{ {0, 0}, { 0, 0} },
+		};
+		return t[dim*2 + bnd_id];
+	}
 };
 
 // shortcoming typedef

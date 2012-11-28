@@ -376,6 +376,34 @@ struct strategy_3d_ex {
 			s.min(), s.max()
 		);
 	}
+
+	// This function designed for use in mesh_part::boundary
+	// we need to cover mesh_part bbox with non-intersecting mesh_parts,
+	// representing original mesh_part boundary
+	// if we define boundaries like (example for X dimension):
+	// lo_1 = [0, 0, 0], hi_1 = [1, n, n]
+	// lo_2 = [n - 1, 0, 0], hi_2 = [n, n, n]
+	// then what offsets should we add to each bounday to prevent them
+	// from finally intersecting?
+	// Purpose of this function is to return needed differencies for each boundary
+	// in each dimension.
+	// I decided to place it into strategy, because generic dimension-independant algo
+	// for calculating boundary isn't obvious to me right now
+	typedef int bbox_bnd_offs[2][D];
+	static const bbox_bnd_offs& bbox_boundary_offs(const uint dim, const uint bnd_id) {
+		static const bbox_bnd_offs t[6] = {
+			// X
+			{ {0, 1, 1}, {0, -1,  0} },
+			{ {0, 0, 0}, {0, -1, -1} },
+			// Y
+			{ {0, 0, 1}, {-1, 0, 0} },
+			{ {0, 0, 0}, { 0, 0, 0} },
+			// Z
+			{ {0, 0, 0}, {-1, -1, 0} },
+			{ {1, 1, 0}, { 0,  0, 0} }
+		};
+		return t[dim*2 + bnd_id];
+	}
 };
 
 // shortcoming typedef

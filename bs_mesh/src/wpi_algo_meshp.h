@@ -310,30 +310,37 @@ struct mesh_tools : public helpers< strat_t > {
 				}
 			}
 
+			typedef typename strat_t::bbox_bnd_offs bbox_bnd_offs;
 			// we have two boundary planes for each dimension
-			// TODO : eliminate double-inclusion of cells where boundary planes intersects
-			//res.resize(D << 1);
 			vertex_pos_i bnd_hi, bnd_lo;
 			//uint bnd_idx = 0;
 			for(uint i = 0; i < D; ++i) {
 				// first boundary - all dims, besides i, from 0 to size
 				// i-th dim from 0 to 1
-				// bnd_lo = lo + 1
-				//std::transform(&lo[0], &lo[D], &bnd_lo[0], std::bind2nd(std::plus< ulong >(), 1));
 				// bnd_lo = lo;
 				ca_assign(bnd_lo, lo);
 				ca_assign(bnd_hi, hi);
 				bnd_hi[i] = lo[i] + 1;
+				// correct dims of 1st boundary using strategy-specific offsets
+				// to make them finally non-intersecting
+				const bbox_bnd_offs& offs0 = strat_t::bbox_boundary_offs(i, 0);
+				std::transform(&bnd_lo[0], &bnd_lo[D], &offs0[0][0], &bnd_lo[0], std::plus< long >());
+				std::transform(&bnd_hi[0], &bnd_hi[D], &offs0[1][0], &bnd_hi[0], std::plus< long >());
+				// save resulting boundary
 				res.push_back(mesh_part(m_, bnd_lo, bnd_hi));
 
 				// first boundary - all dims, besides i, from 0 to size
 				// i-th dim from size - 1 to size
 				ca_assign(bnd_lo, lo);
 				bnd_lo[i] = hi[i] - 1;
-				// bnd_hi = hi - 1
-				// std::transform(&hi[0], &hi[D], &bnd_hi[0], std::bind2nd(std::minus< ulong >(), 1));
 				// bnd_hi = hi
 				ca_assign(bnd_hi, hi);
+				// correct dims of 1st boundary using strategy-specific offsets
+				// to make them finally non-intersecting
+				const bbox_bnd_offs& offs1 = strat_t::bbox_boundary_offs(i, 1);
+				std::transform(&bnd_lo[0], &bnd_lo[D], &offs1[0][0], &bnd_lo[0], std::plus< long >());
+				std::transform(&bnd_hi[0], &bnd_hi[D], &offs1[1][0], &bnd_hi[0], std::plus< long >());
+				// save resulting boundary
 				res.push_back(mesh_part(m_, bnd_lo, bnd_hi));
 			}
 			return res;
