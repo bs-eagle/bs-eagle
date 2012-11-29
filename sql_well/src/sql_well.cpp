@@ -1898,9 +1898,10 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   BSOUT << "Writing well " << s << bs_end;
                   unsigned long cell = (*cells)[i];
                   if (cell >= nx_ny * (unsigned long)nz) {
-                    // don't write out of mesh wells
-                    BSERR << std::string("Well ") + s + "is out of mesh! Omitting from WELLSPEC section" << bs_end;
-                    continue;
+                    // place of mesh wells into the last cell and print warning
+                    BSERR << std::string("WARNING! Well ") + s + " is out of mesh boundary! Placing it to the last cell in WELSPECS." << bs_end;
+                    cell = nx_ny * (unsigned long)nz - 1;
+                    //continue;
                     //throw bs_exception ("", "Well's X Y is out of mesh!");
                   }
                   unsigned long k1 = cell / nx_ny;
@@ -2007,16 +2008,17 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           t_uint wconinje_flag = 0;
           for (; !step_sql ();)
             {
-              if (wconinje_flag == 0)
-                {
-                  fprintf (fp, "WCONINJE\n");
-                  wconinje_flag++;
-                }
               std::string s = get_sql_str (0);
 
               // skip out-of-mesh wells
               if(good_wells.find(s) == good_wells_end)
                 continue;
+
+              if (wconinje_flag == 0)
+                {
+                  fprintf (fp, "WCONINJE\n");
+                  wconinje_flag++;
+                }
 
               int status = get_sql_int (14);
               int ctrl = get_sql_int (13);
@@ -2085,16 +2087,17 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           t_uint wconprod_flag = 0;
           for (; !step_sql ();)
             {
-              if (wconprod_flag == 0)
-                {
-                  fprintf (fp, "WCONPROD\n");
-                  wconprod_flag++;
-                }
               std::string s = get_sql_str (0);
 
               // skip out-of-mesh wells
               if(good_wells.find(s) == good_wells_end)
                 continue;
+
+              if (wconprod_flag == 0)
+                {
+                  fprintf (fp, "WCONPROD\n");
+                  wconprod_flag++;
+                }
 
               int status = get_sql_int (14);
               int ctrl = get_sql_int (13);
@@ -2179,16 +2182,17 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               double wefac = get_sql_real (1);
               if (wefac == 1.0)
                 continue;
+
+              std::string s = get_sql_str (0);
+              // skip out-of-mesh wells
+              if(good_wells.find(s) == good_wells_end)
+                continue;
+
               if (wefac_flag == 0)
                 {
                   fprintf (fp, "WEFAC\n");
                   wefac_flag++;
                 }
-              std::string s = get_sql_str (0);
-
-              // skip out-of-mesh wells
-              if(good_wells.find(s) == good_wells_end)
-                continue;
 
               fprintf (fp, "\'%s\' %lf", s.c_str (), wefac);
               fprintf (fp, "/\n");
