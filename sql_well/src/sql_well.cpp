@@ -1832,6 +1832,10 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 #else
       fci::compl_n_frac_builder compl_n_frac (nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), sp_wp);
 #endif
+      // wells in mesh come here
+      std::set< std::string > good_wells;
+
+      // iterate over all dates
       for (di = dates.begin (); di != de; ++di)
         {
           char d_buf[1024];
@@ -1843,8 +1847,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             }
           else
             {
-        	  std::list<double>::iterator di_prev = di;
-        	  di_prev--;
+              std::list<double>::iterator di_prev = di;
+              di_prev--;
               double dt = *di - *di_prev;
               printf ("TSTEP %lf\n", dt);
               fprintf (fp, "TSTEP\n%lf\n/\n\n", dt);
@@ -1853,9 +1857,6 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           compl_n_frac.clear ();
           cd = compl_n_frac.compl_build (*di);
           cde = cd.end();
-
-          // wells in mesh come here
-          std::set< std::string > good_wells;
 
           if (!w_spec_flag)
             {
