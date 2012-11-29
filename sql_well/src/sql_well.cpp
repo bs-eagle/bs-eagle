@@ -250,14 +250,14 @@ namespace blue_sky
       char *zErrMsg = 0;
 
       std::string sql = "attach '" + dbname + "' as tomerge;    insert or ignore into groups select * from tomerge.groups; \
-                                                                insert or ignore into wells select * from tomerge.wells; \
-                                                                insert or ignore into completions select * from tomerge.completions; \
                                                                 insert or ignore into dates select * from tomerge.dates; \
+                                                                insert or ignore into wells select * from tomerge.wells; \
+                                                                insert or replace into branches select * from tomerge.branches; \
+                                                                insert or ignore into completions select * from tomerge.completions; \
                                                                 insert or ignore into fractures select * from tomerge.fractures; \
                                                                 insert or ignore into permfrac select * from tomerge.permfrac; \
                                                                 insert or ignore into well_hist select * from tomerge.well_hist; \
                                                                 insert or ignore into wells_in_group select * from tomerge.wells_in_group; \
-                                                                insert or replace into branches select * from tomerge.branches; \
                                                                 detach database tomerge";
 
       rc = sqlite3_exec (db, sql.c_str (), NULL, 0, &zErrMsg);

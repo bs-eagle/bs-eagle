@@ -274,7 +274,8 @@ namespace blue_sky
     
     kp.hdm = this;
     if (model_name == std::string(":memory:")) {
-        this->well_pool_->open_db ("mem_well_pool.db");
+        this->well_pool_->open_db (model_name); //"mem_well_pool.db");
+        //this->well_pool_->open_db ("mem2_well_pool.db");
       }
     else
       {
