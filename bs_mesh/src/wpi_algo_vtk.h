@@ -324,6 +324,46 @@ struct algo_vtk : helpers< strat_t > {
 		}
 	};
 
+	// helper to process given mesh_part
+	template< class vib_backend_t >
+	static void process_mesh_part(vib_backend_t& vib, const mesh_part& MP, const spv_int& mask) {
+		typedef typename mesh_part::cell_neighb_enum cell_nb_enum;
+		typedef typename cell_data::facet_vid_t facet_vid_t;
+		enum { n_facets = cell_data::n_facets };
+		enum { n_fv = cell_data::n_facet_vertex };
+
+		const ulong n_cells = MP.size();
+		const ulong mask_sz = mask->size();
+
+		cell_nb_enum cell_nb;
+		facet_vid_t cell_fvid;
+
+		// loop over all cells
+		for(ulong i = 0; i < n_cells; ++i) {
+			// skip masked cells
+			const ulong cell_id = MP.ss_id(i);
+			if(cell_id < mask_sz && mask->ss(cell_id) == 0)
+				continue;
+
+			// 2.1) if some facet has no neighbors - include it in results
+			MP.cell_neighbours(i, cell_nb);
+			for(ulong j = 0; j < n_facets; ++j) {
+				// skip facet if it has non-masked neighbour
+				const ulong cell_nb_id = MP.ss_id(cell_nb[j]);
+				if(cell_nb[j] < n_cells && (cell_nb_id >= mask_sz || mask->ss(cell_nb_id) != 0))
+					continue;
+
+				cell_data::facet_vid(j, cell_fvid);
+				// vertex_id[cell_id] = vertex_id[cell_id] + cell_id*8
+				std::transform(
+					&cell_fvid[0], &cell_fvid[n_fv], &cell_fvid[0],
+					std::bind2nd(std::plus< ulong >(), cell_id * 8)
+				);
+				vib(cell_fvid, cell_id, j);
+			}
+		}
+	}
+
 	/*-----------------------------------------------------------------
 	 * Enumerate border cell facets for drawing mesh in VTK
 	 *----------------------------------------------------------------*/
@@ -348,53 +388,15 @@ struct algo_vtk : helpers< strat_t > {
 			ca_assign(slice_hi, MP.hi); slice_hi[slice_dim] = slice_idx + 1;
 			MP.init(slice_lo, slice_hi);
 		}
-		const ulong n_cells = MP.size();
-
-		// 2) loop over all cells
-		typedef typename mesh_part::cell_neighb_enum cell_nb_enum;
-		typedef typename cell_data::facet_vid_t facet_vid_t;
-		enum { n_facets = cell_data::n_facets };
-		enum { n_fv = cell_data::n_facet_vertex };
-		const ulong mask_sz = mask->size();
 
 		// backend for storing index
 		vtk_index_backend< prim_id > vib(M);
 
-		cell_nb_enum cell_nb;
-		facet_vid_t cell_fvid;
-
-		// loop over all cells
-		//vertex_pos_i cell_id;
-		//ulong cell_id;
-		for(ulong i = 0; i < n_cells; ++i) {
-			// check if cell is inside slice
-			//bool out_of_slice = false;
-			//if(slice_dim >= 0) {
-			//	decode_cell_id(i, cell_id, M.size());
-			//	if(cell_id[slice_dim] != slice_idx)
-			//		out_of_slice = true;
-			//}
-
-			// skip masked cells
-			const ulong cell_id = MP.ss_id(i);
-			if(cell_id < mask_sz && mask->ss(cell_id) == 0)
-				continue;
-
-			// 2.1) if some facet has no neighbors - include it in results
-			MP.cell_neighbours(i, cell_nb);
-			for(ulong j = 0; j < n_facets; ++j) {
-				// skip facet if it has non-masked neighbour
-				if(cell_nb[j] < n_cells && (cell_nb[j] >= mask_sz || mask->ss(cell_nb[j]) != 0))
-					continue;
-
-				cell_data::facet_vid(j, cell_fvid);
-				// vertex_id[cell_id] = vertex_id[cell_id] + cell_id*8
-				std::transform(
-					&cell_fvid[0], &cell_fvid[n_fv], &cell_fvid[0],
-					std::bind2nd(std::plus< ulong >(), cell_id * 8)
-				);
-				vib(cell_fvid, cell_id, j);
-			}
+		// obtain mesh boundary
+		std::list< mesh_part > bnd = MP.boundary();
+		for(typename std::list< mesh_part >::const_iterator pb = bnd.begin(), end = bnd.end(); pb != end; ++pb) {
+			// process mesh_part
+			process_mesh_part(vib, *pb, mask);
 		}
 
 		// share the same buffer for points
