@@ -238,10 +238,12 @@ public:
 	}
 	impl(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
 		init(nx, ny, coord, zcorn);
+		init_cache();
 	}
 	impl(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn, const sp_srcwell& src_well) {
 		init(nx, ny, coord, zcorn);
 		init(src_well);
+		init_cache();
 	}
 
 	void init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
@@ -255,8 +257,8 @@ public:
 
 	void init_cache() {
 		xp_cache_ = new xp_cache_t;
-		cb_.init_cache(xp_cache_);
-		fb_.init_cache(xp_cache_);
+		cb_.init_cache(xp_cache_, 0);
+		fb_.init_cache(xp_cache_, 0);
 	}
 
 	const cd_storage& compl_build(double date) {
