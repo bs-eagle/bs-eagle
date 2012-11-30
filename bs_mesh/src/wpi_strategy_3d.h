@@ -133,37 +133,43 @@ struct strategy_3d_ex {
 		}
 
 		// obtain IDs of given facet vertices
-		static void facet_vid(ulong facet, facet_vid_t& res) {
+		static const facet_vid_t& facet_vid(ulong facet) {
+			static const facet_vid_t t[6] = {
+				{0, 1, 3, 2}, {0, 1, 5, 4}, {4, 5, 7, 6},
+				{2, 3, 7, 6}, {0, 2, 6, 4}, {1, 3, 7, 5}
+				//{ulong(-1), ulong(-1), ulong(-1), ulong(-1)}
+			};
+			return t[facet];
 			//facet_vid res;
-			switch(facet) {
-				case 0 : {
-					facet_vid_t t = {0, 1, 3, 2};
-					ca_assign(res, t); }
-					break;
-				case 1 : {
-					facet_vid_t t = {0, 1, 5, 4};
-					ca_assign(res, t); }
-					break;
-				case 2 : {
-					facet_vid_t t = {4, 5, 7, 6};
-					ca_assign(res, t); }
-					break;
-				case 3 : {
-					facet_vid_t t = {2, 3, 7, 6};
-					ca_assign(res, t); }
-					break;
-				case 4 : {
-					facet_vid_t t = {0, 2, 6, 4};
-					ca_assign(res, t); }
-					break;
-				case 5 : {
-					facet_vid_t t = {1, 3, 7, 5};
-					ca_assign(res, t); }
-					break;
-				default : {
-					facet_vid_t t = {ulong(-1), ulong(-1), ulong(-1), ulong(-1)};
-					ca_assign(res, t); }
-			}
+			//switch(facet) {
+			//	case 0 : {
+			//		facet_vid_t t = {0, 1, 3, 2};
+			//		ca_assign(res, t); }
+			//		break;
+			//	case 1 : {
+			//		facet_vid_t t = {0, 1, 5, 4};
+			//		ca_assign(res, t); }
+			//		break;
+			//	case 2 : {
+			//		facet_vid_t t = {4, 5, 7, 6};
+			//		ca_assign(res, t); }
+			//		break;
+			//	case 3 : {
+			//		facet_vid_t t = {2, 3, 7, 6};
+			//		ca_assign(res, t); }
+			//		break;
+			//	case 4 : {
+			//		facet_vid_t t = {0, 2, 6, 4};
+			//		ca_assign(res, t); }
+			//		break;
+			//	case 5 : {
+			//		facet_vid_t t = {1, 3, 7, 5};
+			//		ca_assign(res, t); }
+			//		break;
+			//	default : {
+			//		facet_vid_t t = {ulong(-1), ulong(-1), ulong(-1), ulong(-1)};
+			//		ca_assign(res, t); }
+			//}
 		}
 		static void facet_vid(ulong dim, ulong facet, facet_vid_t& res) {
 			return facet_vid(facet_id(dim, facet, res));

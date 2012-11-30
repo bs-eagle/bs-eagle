@@ -353,7 +353,7 @@ struct algo_vtk : helpers< strat_t > {
 				if(cell_nb[j] < n_cells && (cell_nb_id >= mask_sz || mask->ss(cell_nb_id) != 0))
 					continue;
 
-				cell_data::facet_vid(j, cell_fvid);
+				ca_assign(cell_fvid, cell_data::facet_vid(j));
 				// vertex_id[cell_id] = vertex_id[cell_id] + cell_id*8
 				std::transform(
 					&cell_fvid[0], &cell_fvid[n_fv], &cell_fvid[0],
