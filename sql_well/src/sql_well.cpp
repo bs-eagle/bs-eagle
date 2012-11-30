@@ -19,8 +19,9 @@
 #include "boost/filesystem/fstream.hpp"
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
-
-
+#include <boost/type_traits/is_floating_point.hpp>
+#include <boost/mpl/bool.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "bs_kernel.h"
 #include "sql_well.h"
@@ -37,9 +38,41 @@ using namespace boost::python;
 
 #endif //BSPY_EXPORTING_PLUGIN
 
+// shorthand macro to pass values via val2str filter
+#define V2S(t) val2str::go(t).c_str()
 
 namespace blue_sky
 {
+
+// hidden details
+namespace {
+
+// the purpose of this helper is to print '1*' if argument == -1
+// otherwise number converted to string is unchanged
+struct val2str {
+  // specialization for floating-point numbers
+  template< class T >
+  static std::string do_fix(const T& v, const boost::true_type) {
+    if(v == -1.0)
+      return "1*";
+    else
+      return boost::lexical_cast< std::string >(v);
+  }
+
+  // specialization for other types
+  template< class T >
+  static std::string do_fix(const T& v, const boost::false_type) {
+      return boost::lexical_cast< std::string >(v);
+  }
+
+  // main operator
+  template< class T >
+  static std::string go(const T& v) {
+    return do_fix(v, boost::is_floating_point< T >());
+  }
+};
+
+}
 
   int clear_table (void *pData, int nColumns,
                    char **values, char ** /*columns*/)
@@ -1929,9 +1962,11 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               if (fabs(cdi->kh_mult) > eps && good_wells.find(cdi->well_name) != good_wells_end)
                 {
                   if (cdi->status)
-                    fprintf (fp, "\'%s\' %lu %lu %lu %lu \'OPEN\' 2* %lf 1* %lf 1* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
+                    fprintf (fp, "\'%s\' %lu %lu %lu %lu \'OPEN\' 2* %lf 1* %lf 1* \'%c\' /\n",
+                      cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
                   else
-                    fprintf (fp, "\'%s\' %lu %lu %lu %lu \'SHUT\' 2* %lf 1* %lf 1* \'%c\' /\n", cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
+                    fprintf (fp, "\'%s\' %lu %lu %lu %lu \'SHUT\' 2* %lf 1* %lf 1* \'%c\' /\n",
+                      cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
                 }
             }
             fprintf (fp, "/\n\n");
@@ -1995,8 +2030,11 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               else
                 sprintf (main_k_str, " * ");
 
-              fprintf (fp, "\'%s\' %lu %lu %lu %lu %lf %lf %lf \'%s\' %lf %s %s %s %s /\n", fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1,
-                fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle - 90, fti->frac_skin, fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin, perm_str, " * ", " * ", main_k_str);
+              fprintf (fp, "\'%s\' %lu %lu %lu %lu %lf %lf %lf \'%s\' %lf %s %s %s %s /\n",
+                fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1,
+                fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle - 90, fti->frac_skin,
+                fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin, perm_str, " * ", " * ", main_k_str
+              );
             }
             fprintf (fp, "/\n\n");
           }
@@ -2060,7 +2098,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   else
                     sprintf (s_phase, "WATER");
 
-                  sprintf (s_params, "%lf 1* %lf", rate, i_bhp);
+                  sprintf (s_params, "%s 1* %s", V2S(rate), V2S(i_bhp));
                 }
               fprintf (fp, "\'%s\' \'%s\' \'%s\' \'%s\' %s ", s.c_str (), s_phase, s_status, s_ctrl, s_params);
               /*
@@ -2116,27 +2154,27 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               if (ctrl == CTRL_P_LRATE)
                 {
                   sprintf (s_ctrl, "LRAT");
-                  sprintf (s_params, "3* %lf 1* %lf", p_lr, p_bhp);
+                  sprintf (s_params, "3* %s 1* %s", V2S(p_lr), V2S(p_bhp));
                 }
               else if (ctrl == CTRL_P_BHP)
                 {
                   sprintf (s_ctrl, "BHP");
-                  sprintf (s_params, "5* %lf", p_bhp);
+                  sprintf (s_params, "5* %s", V2S(p_bhp));
                 }
               else if (ctrl == CTRL_P_ORATE)
                 {
                   sprintf (s_ctrl, "ORAT");
-                  sprintf (s_params, "%lf 4* %lf", p_or, p_bhp);
+                  sprintf (s_params, "%s 4* %s", V2S(p_or), V2S(p_bhp));
                 }
               else if (ctrl == CTRL_P_WRATE)
                 {
                   sprintf (s_ctrl, "WRAT");
-                  sprintf (s_params, "1* %lf 3* %lf", p_wr, p_bhp);
+                  sprintf (s_params, "1* %s 3* %s", V2S(p_wr), V2S(p_bhp));
                 }
               else if (ctrl == CTRL_P_GRATE)
                 {
                   sprintf (s_ctrl, "GRAT");
-                  sprintf (s_params, "2* %lf 2* %lf", p_gr, p_bhp);
+                  sprintf (s_params, "2* %s 2* %s", V2S(p_gr), V2S(p_bhp));
                 }
 
               fprintf (fp, "\'%s\' \'%s\' \'%s\' %s ", s.c_str (), s_status, s_ctrl, s_params);
