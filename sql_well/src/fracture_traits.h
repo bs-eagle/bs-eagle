@@ -123,7 +123,7 @@ struct fract_traits  {
 
 			// get mean of Z top plane
 			for (t_uint j = 0; j < 4; ++j) {
-				z_top += 0.25 * tops_data[24 * k_cell_id_ + 3 * j + 2];
+				z_top += *(tops_data + (24 * k_cell_id_ + 3 * j + 2)) * 0.25;
 			}
 			//std::cout<<" frac "<<frac_coords[2] - half_up<<" z_down "<<z_top<<"\n";
 
@@ -158,7 +158,7 @@ struct fract_traits  {
 
 			// get mean of Z bottom plane
 			for (t_uint j = 4; j < 8; ++j) {
-				z_down += 0.25 * tops_data[24 * k_cell_id_ + 3 * j + 2];
+				z_down += *(tops_data + (24 * k_cell_id_ + 3 * j + 2)) * 0.25;
 			}
 
 			//std::cout<<" frac "<<frac_coords[2] + half_down<<" z_down "<<z_down<<"\n";
