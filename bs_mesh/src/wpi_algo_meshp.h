@@ -60,7 +60,7 @@ struct mesh_tools : public helpers< strat_t > {
 		typedef ulong edge_neighb_enum[n_edges];
 
 		// ctor 1 - mesh part coincide with full mesh
-		mesh_part(trimesh& m)
+		mesh_part(const trimesh& m)
 			: m_(m)
 		{
 			ca_assign(lo, ulong(0));
@@ -118,7 +118,7 @@ struct mesh_tools : public helpers< strat_t > {
 				return hi[D - 1] - lo[D - 1];
 		}
 
-		// size of this mesh part
+		// flat size of this mesh part
 		ulong size() const {
 			return sz_flat_;
 			//return std::accumulate(
@@ -126,10 +126,10 @@ struct mesh_tools : public helpers< strat_t > {
 			//);
 		}
 
-		// size of the full mesh
-		ulong fullm_size() const {
-			return m_.size_flat();
-		}
+		// flat size of the full mesh
+		//ulong fullm_size() const {
+		//	return m_.size_flat();
+		//}
 
 		ulong ss_id(const vertex_pos_i& offset) const {
 			vertex_pos_i cell;
@@ -349,11 +349,29 @@ struct mesh_tools : public helpers< strat_t > {
 			return res;
 		}
 
+		// access to underlying trimesh object
+		const trimesh& backend() const {
+			return m_;
+		}
+
+		// functions to convert global cell offset to local offset in this mesh_part
+		void local_cid(const ulong global_cid, vertex_pos_i& res) const {
+			decode_cell_id(global_cid, res, m_.size());
+			// res -= lo
+			std::transform(&res[0], &res[D], &lo[0], &res[0], std::minus< ulong >());
+		}
+
+		ulong local_cid(const ulong global_cid) const {
+			vertex_pos_i loc_cid;
+			local_cid(global_cid, loc_cid);
+			return encode_cell_id(loc_cid, mp_size_);
+		}
+
 		// public members
 		vertex_pos_i lo, hi;
 
 	private:
-		trimesh& m_;
+		const trimesh& m_;
 		vertex_pos_i mp_size_;
 		vertex_pos lo_bbox_, hi_bbox_;
 		ulong sz_flat_;
@@ -373,7 +391,7 @@ struct mesh_tools : public helpers< strat_t > {
 			return m_[encode_cell_id(idx, m_.size())];
 		}
 
-		mesh_part(trimesh& m,
+		mesh_part(const trimesh& m,
 				const vertex_pos_i& first_,
 				const vertex_pos_i& last_)
 			: m_(m)
