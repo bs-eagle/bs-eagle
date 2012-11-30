@@ -326,7 +326,14 @@ struct algo_vtk : helpers< strat_t > {
 
 	// helper to process given mesh_part
 	template< class vib_backend_t >
-	static void process_mesh_part(vib_backend_t& vib, const mesh_part& MP, const spv_int& mask) {
+	static void process_mesh_part(vib_backend_t& vib,
+		const mesh_part& MP, // mesh_part with source cells to iterate over
+		const mesh_part& M,  // and surrounding "full" mesh to check cell's neighbours
+		const spv_int& mask)
+	{
+		// idea is that we iterate over cells in given mesh part
+		// but check neighbours in full mesh, so all mesh parts gets merged together finally
+
 		typedef typename mesh_part::cell_neighb_enum cell_nb_enum;
 		typedef typename cell_data::facet_vid_t facet_vid_t;
 		enum { n_facets = cell_data::n_facets };
@@ -335,22 +342,30 @@ struct algo_vtk : helpers< strat_t > {
 		const ulong n_cells = MP.size();
 		const ulong mask_sz = mask->size();
 
+		// reconstruct full mesh from mesh_part
+		//const mesh_part M(MP.backend());
+		const ulong n_all_cells = M.size();
+
 		cell_nb_enum cell_nb;
 		facet_vid_t cell_fvid;
 
 		// loop over all cells
 		for(ulong i = 0; i < n_cells; ++i) {
 			// skip masked cells
+			// cell_id is GLOBAL
 			const ulong cell_id = MP.ss_id(i);
 			if(cell_id < mask_sz && mask->ss(cell_id) == 0)
 				continue;
 
 			// 2.1) if some facet has no neighbors - include it in results
-			MP.cell_neighbours(i, cell_nb);
+			// NOTE! calc neighbours using FULL MESH!
+			// convert global id cell_id to local id of M
+			M.cell_neighbours(M.local_cid(cell_id), cell_nb);
 			for(ulong j = 0; j < n_facets; ++j) {
 				// skip facet if it has non-masked neighbour
-				const ulong cell_nb_id = MP.ss_id(cell_nb[j]);
-				if(cell_nb[j] < n_cells && (cell_nb_id >= mask_sz || mask->ss(cell_nb_id) != 0))
+				// first convert neighbor local id (in M) to GLOBAL id
+				const ulong cell_nb_id = M.ss_id(cell_nb[j]);
+				if(cell_nb[j] < n_all_cells && (cell_nb_id >= mask_sz || mask->ss(cell_nb_id) != 0))
 					continue;
 
 				ca_assign(cell_fvid, cell_data::facet_vid(j));
@@ -396,7 +411,7 @@ struct algo_vtk : helpers< strat_t > {
 		std::list< mesh_part > bnd = MP.boundary();
 		for(typename std::list< mesh_part >::const_iterator pb = bnd.begin(), end = bnd.end(); pb != end; ++pb) {
 			// process mesh_part
-			process_mesh_part(vib, *pb, mask);
+			process_mesh_part(vib, *pb, MP, mask);
 		}
 
 		// share the same buffer for points
