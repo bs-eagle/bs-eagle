@@ -161,13 +161,13 @@ struct mesh_tools : public helpers< strat_t > {
 		Iso_bbox iso_bbox() const {
 			//vertex_pos lo_pos, hi_pos;
 			//bounds(lo_pos, hi_pos);
-			return vertex_pos2rect(lo_bbox, hi_bbox);
+			return vertex_pos2rect(lo_bbox_, hi_bbox_);
 		}
 
 		Bbox bbox() const {
 			//vertex_pos lo_pos, hi_pos;
 			//bounds(lo_pos, hi_pos);
-			return vertex_pos2bbox(lo_bbox, hi_bbox);
+			return vertex_pos2bbox(lo_bbox_, hi_bbox_);
 		}
 
 		container_t divide() const {
@@ -246,8 +246,8 @@ struct mesh_tools : public helpers< strat_t > {
 			ca_assign(lo, rhs.lo);
 			ca_assign(hi, rhs.hi);
 			ca_assign(mp_size_, rhs.mp_size_);
-			ca_assign(lo_bbox, rhs.lo_bbox);
-			ca_assign(hi_bbox, rhs.hi_bbox);
+			ca_assign(lo_bbox_, rhs.lo_bbox_);
+			ca_assign(hi_bbox_, rhs.hi_bbox_);
 			return *this;
 		}
 
@@ -271,8 +271,8 @@ struct mesh_tools : public helpers< strat_t > {
 			cell_size(ss_id(offset), res);
 		}
 
-		// returned indexes corresponds to offsets inside current mesh_part
-		// for full mesh equal to simple index
+		// returned indexes corresponds to offsets inside this mesh_part!
+		// for full mesh correspond to simple index
 		void cell_neighbours(ulong idx, cell_neighb_enum& res) const {
 			// init resulting array with invalid neighbours
 			//cell_neighb_enum res;
@@ -282,20 +282,23 @@ struct mesh_tools : public helpers< strat_t > {
 			if(!size() || idx >= size())
 				return;
 
-			// obtain D-dim cell id and ref to cell
+			// obtain D-dim cell id
 			vertex_pos_i cell_id, nb;
 			decode_cell_id(idx, cell_id, mp_size_);
-			//const cell_data& = ss(ss_id(cell_id));
 
-			// vary different dims and check if cell is inside mesh
+			// vary different dims and check if cell is inside this mesh_part
+			ca_assign(nb, cell_id);
 			for(uint i = 0; i < D; ++i) {
-				ca_assign(nb, cell_id);
 				--nb[i];
-				if(nb[i] >= lo[i] && nb[i] < hi[i])
+				//if(nb[i] >= lo[i] && nb[i] < hi[i])
+				if(nb[i] < mp_size_[i])
 					res[cell_data::facet_id(i, 0)] = encode_cell_id(nb, mp_size_);
 				nb[i] += 2;
-				if(nb[i] < hi[i] && nb[i] >= lo[i])
+				//if(nb[i] < hi[i] && nb[i] >= lo[i])
+				if(nb[i] < mp_size_[i])
 					res[cell_data::facet_id(i, 1)] = encode_cell_id(nb, mp_size_);
+				// return nb[i] to initial state
+				--nb[i];
 			}
 		}
 
@@ -352,7 +355,7 @@ struct mesh_tools : public helpers< strat_t > {
 	private:
 		trimesh& m_;
 		vertex_pos_i mp_size_;
-		vertex_pos lo_bbox, hi_bbox;
+		vertex_pos lo_bbox_, hi_bbox_;
 		ulong sz_flat_;
 
 		// idx SHOULD BE IN MESH!
@@ -383,29 +386,40 @@ struct mesh_tools : public helpers< strat_t > {
 
 		void calc_bbox() {
 			// calc size of this mesh part
+			// and check if it is bigger than conjunction of boundaries
+			bool is_exact_boundary = false;
 			sz_flat_ = 1;
 			for(uint i = 0; i < D; ++i) {
 				mp_size_[i] = side_len(i);
+				if(mp_size_[i] < 3)
+					is_exact_boundary = true;
 				sz_flat_ *= mp_size_[i];
 			}
 
-			// find boundary and update bounds based on it
+			// if mesh consists only from boundaries, then calc bounds
+			// by simply iterating over all cells
+			if(is_exact_boundary) {
+				calc_bbox_raw(lo_bbox_, hi_bbox_);
+				return;
+			}
+
+			// otherwise extract boundary and calc bounds based on it
 			typedef std::list< mesh_part > boundary_cont;
 			typedef typename boundary_cont::const_iterator cb_iterator;
 			const boundary_cont& B = boundary();
-			vertex_pos lo_bbox, hi_bbox;
+			//vertex_pos lo_part_bbox, hi_part_bbox;
 			for(cb_iterator pb = B.begin(), end = B.end(); pb != end; ++pb) {
-				pb->calc_bbox_raw(lo_bbox, hi_bbox);
+				//pb->calc_bbox_raw(lo_part_bbox, hi_part_bbox);
 				if(pb == B.begin()) {
-					ca_assign(lo_bbox, lo_bbox);
-					ca_assign(hi_bbox, hi_bbox);
+					ca_assign(lo_bbox_, pb->lo_bbox_);
+					ca_assign(hi_bbox_, pb->hi_bbox_);
 				}
 				else {
-					// lo_bbox = min(lo_bbox, lo_bbox)
-					std::transform(&lo_bbox[0], &lo_bbox[D], &lo_bbox[0], &lo_bbox[0],
+					// lo_bbox_ = min(lo_bbox_, lo_part_bbox)
+					std::transform(&lo_bbox_[0], &lo_bbox_[D], &pb->lo_bbox_[0], &lo_bbox_[0],
 						std::ptr_fun(std::min< t_float >));
-					// hi_bbox = max(hi_bbox, hi_bbox)
-					std::transform(&hi_bbox[0], &hi_bbox[D], &hi_bbox[0], &hi_bbox[0],
+					// hi_bbox_ = max(hi_bbox_, hi_part_bbox)
+					std::transform(&hi_bbox_[0], &hi_bbox_[D], &pb->hi_bbox_[0], &hi_bbox_[0],
 						std::ptr_fun(std::max< t_float >));
 				}
 			}
