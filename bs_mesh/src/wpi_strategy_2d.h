@@ -244,11 +244,11 @@ struct strategy_2d_ex {
 	static const bbox_bnd_offs& bbox_boundary_offs(const uint dim, const uint bnd_id) {
 		static const bbox_bnd_offs t[4] = {
 			// X
-			{ {0, 1}, {0, -1} },
+			{ {0, 1}, {0,  0} },
 			{ {0, 0}, {0, -1} },
 			// Y
 			{ {0, 0}, {-1, 0} },
-			{ {0, 0}, { 0, 0} },
+			{ {1, 0}, { 0, 0} },
 		};
 		return t[dim*2 + bnd_id];
 	}
