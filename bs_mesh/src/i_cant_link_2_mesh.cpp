@@ -96,32 +96,34 @@ namespace python {
 	typedef wpi::algo_vtk< strat_t > wpi_algo;
 
 	tuple enum_border_facets_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
-		spv_int mask, int slice_dim = -1, ulong slice_idx = 0)
+		spv_int mask, int slice_dim = -1, ulong slice_idx = 0,
+		const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
 	{
 		spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
 		spv_float points = BS_KERNEL.create_object(v_float::bs_type());
 		//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_facets_vtk.prof");
 		spv_long res = wpi_algo::enum_border_facets_vtk(nx, ny, coord, zcorn, mask, cell_idx,
-			points, slice_dim, slice_idx);
+			points, slice_dim, slice_idx, min_split_threshold);
 		//ProfilerStop();
 		return make_tuple(res, cell_idx, points);
 	}
 
 	tuple enum_border_edges_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
-		spv_int mask, int slice_dim = -1, ulong slice_idx = 0)
+		spv_int mask, int slice_dim = -1, ulong slice_idx = 0,
+		const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
 	{
 		spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
 		spv_float points = BS_KERNEL.create_object(v_float::bs_type());
 		//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk.prof");
 		//HeapProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk");
 		spv_long res = wpi_algo::enum_border_edges_vtk(nx, ny, coord, zcorn, mask, cell_idx,
-			points, slice_dim, slice_idx);
+			points, slice_dim, slice_idx, min_split_threshold);
 		//ProfilerStop();
 		return make_tuple(res, cell_idx, points);
 	}
 
-	BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_facets_overl, enum_border_facets_vtk, 5, 7);
-	BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_edges_overl, enum_border_edges_vtk, 5, 7);
+	BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_facets_overl, enum_border_facets_vtk, 5, 8);
+	BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_edges_overl, enum_border_edges_vtk, 5, 8);
 
 	void py_export_handymesh() {
 		def("calc_cells_vertices_xyz", &calc_cells_vertices_xyz_impl);
