@@ -60,16 +60,16 @@ struct mesh_tools : public helpers< strat_t > {
 		typedef ulong edge_neighb_enum[n_edges];
 
 		// ctor 1 - mesh part coincide with full mesh
-		mesh_part(const trimesh& m)
+		mesh_part(const trimesh& m, bool dont_calc_bbox = false)
 			: m_(m)
 		{
 			ca_assign(lo, ulong(0));
 			ca_assign(hi, m.size());
 			//ca_assign(m_size_, mesh_size);
-			calc_bbox();
+			calc_bounds(dont_calc_bbox);
 		}
 
-		void init(const vertex_pos_i& lower, const vertex_pos_i& upper) {
+		void init(const vertex_pos_i& lower, const vertex_pos_i& upper, bool dont_calc_bbox = false) {
 			ca_assign(lo, lower);
 			ca_assign(hi, upper);
 
@@ -81,10 +81,10 @@ struct mesh_tools : public helpers< strat_t > {
 			}
 
 			// precalc bounds
-			calc_bbox();
+			calc_bounds(dont_calc_bbox);
 		}
 
-		void init(const std::vector< ulong >& cell_idx) {
+		void init(const std::vector< ulong >& cell_idx, bool dont_calc_bbox = false) {
 			vertex_pos_i lower, upper, p;
 			// search for bounds
 			for(ulong i = 0; i < cell_idx.size(); ++i) {
@@ -102,13 +102,13 @@ struct mesh_tools : public helpers< strat_t > {
 			for(uint i = 0; i < D; ++i)
 				++upper[i];
 			// finally usual init
-			init(lower, upper);
+			init(lower, upper, dont_calc_bbox);
 		}
 
-		void init(ulong lower, ulong upper) {
+		void init(ulong lower, ulong upper, bool dont_calc_bbox = false) {
 			std::vector< ulong > idx(2);
 			idx[0] = lower; idx[1] = upper;
-			init(idx);
+			init(idx, dont_calc_bbox);
 		}
 
 		ulong side_len(uint dim) const {
@@ -121,15 +121,7 @@ struct mesh_tools : public helpers< strat_t > {
 		// flat size of this mesh part
 		ulong size() const {
 			return sz_flat_;
-			//return std::accumulate(
-			//	&mp_size_[0], &mp_size_[D], 1, std::multiplies< ulong >()
-			//);
 		}
-
-		// flat size of the full mesh
-		//ulong fullm_size() const {
-		//	return m_.size_flat();
-		//}
 
 		ulong ss_id(const vertex_pos_i& offset) const {
 			vertex_pos_i cell;
@@ -170,7 +162,7 @@ struct mesh_tools : public helpers< strat_t > {
 			return vertex_pos2bbox(lo_bbox_, hi_bbox_);
 		}
 
-		container_t divide() const {
+		container_t divide(bool dont_calc_bbox = false) const {
 			// resulting split
 			container_t res;
 			std::insert_iterator< container_t > ii(res, res.begin());
@@ -202,7 +194,7 @@ struct mesh_tools : public helpers< strat_t > {
 
 				// add new child cell
 				if(sz) {
-					*ii++ = mesh_part(m_, spl_lo, spl_hi);
+					*ii++ = mesh_part(m_, spl_lo, spl_hi, dont_calc_bbox);
 					tot_sz += sz;
 				}
 			}
@@ -302,15 +294,23 @@ struct mesh_tools : public helpers< strat_t > {
 			}
 		}
 
+		// check that mesh_part consists only of boundaries
+		bool is_pure_boundary() const {
+			// if any dimesnsion is of size <= 2 then boundary is entirely *this
+			for(uint i = 0; i < D; ++i) {
+				if(mp_size_[i] < 3)
+					return true;
+			}
+			return false;
+		}
+
 		// return array of mesh_parts representing boundary of this mesh
 		std::list< mesh_part > boundary() const {
 			// if any dimesnsion is of size <= 2 then boundary is entirely *this
 			std::list< mesh_part > res;
-			for(uint i = 0; i < D; ++i) {
-				if(mp_size_[i] < 3) {
-					res.push_back(*this);
-					return res;
-				}
+			if(is_pure_boundary()) {
+				res.push_back(*this);
+				return res;
 			}
 
 			typedef typename strat_t::bbox_bnd_offs bbox_bnd_offs;
@@ -393,16 +393,17 @@ struct mesh_tools : public helpers< strat_t > {
 
 		mesh_part(const trimesh& m,
 				const vertex_pos_i& first_,
-				const vertex_pos_i& last_)
+				const vertex_pos_i& last_,
+				bool dont_calc_bbox = false)
 			: m_(m)
 		{
 			ca_assign(lo, first_);
 			ca_assign(hi, last_);
 			//ca_assign(m_size_, mesh_size);
-			calc_bbox();
+			calc_bounds(dont_calc_bbox);
 		}
 
-		void calc_bbox() {
+		void calc_bounds(bool dont_calc_bbox) {
 			// calc size of this mesh part
 			// and check if it is bigger than conjunction of boundaries
 			bool is_exact_boundary = false;
@@ -413,6 +414,8 @@ struct mesh_tools : public helpers< strat_t > {
 					is_exact_boundary = true;
 				sz_flat_ *= mp_size_[i];
 			}
+
+			if(dont_calc_bbox) return;
 
 			// if mesh consists only from boundaries, then calc bounds
 			// by simply iterating over all cells
