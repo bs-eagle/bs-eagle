@@ -113,28 +113,32 @@ struct strategy_2d_ex {
 			return ulong(-1);
 		}
 		// obtain IDs of given facet vertices
-		static void facet_vid(ulong facet, facet_vid_t& res) {
-			switch(facet) {
-				case 0 : {
-					facet_vid_t t = {0, 1};
-					ca_assign(res, t); }
-					break;
-				case 1 : {
-					facet_vid_t t = {1, 3};
-					ca_assign(res, t); }
-					break;
-				case 2 : {
-					facet_vid_t t = {3, 2};
-					ca_assign(res, t); }
-					break;
-				case 3 : {
-					facet_vid_t t = {2, 0};
-					ca_assign(res, t); }
-					break;
-				default : {
-					facet_vid_t t = {ulong(-1), ulong(-1)};
-					ca_assign(res, t); }
-			}
+		static facet_vid_t& facet_vid(ulong facet) {
+			static const facet_vid_t t[4] = {
+				{0, 1}, {1, 3}, {3, 2}, {2, 0}
+			};
+			return t[facet];
+			//switch(facet) {
+			//	case 0 : {
+			//		facet_vid_t t = {0, 1};
+			//		ca_assign(res, t); }
+			//		break;
+			//	case 1 : {
+			//		facet_vid_t t = {1, 3};
+			//		ca_assign(res, t); }
+			//		break;
+			//	case 2 : {
+			//		facet_vid_t t = {3, 2};
+			//		ca_assign(res, t); }
+			//		break;
+			//	case 3 : {
+			//		facet_vid_t t = {2, 0};
+			//		ca_assign(res, t); }
+			//		break;
+			//	default : {
+			//		facet_vid_t t = {ulong(-1), ulong(-1)};
+			//		ca_assign(res, t); }
+			//}
 		}
 		static void facet_vid(ulong dim, ulong facet, facet_vid_t& res) {
 			return facet_vid(facet_id(dim, facet, res));
@@ -239,6 +243,19 @@ struct strategy_2d_ex {
 		);
 	}
 
+	// look into wpi_strategy_3d.h for description of this function
+	typedef int bbox_bnd_offs[2][D];
+	static const bbox_bnd_offs& bbox_boundary_offs(const uint dim, const uint bnd_id) {
+		static const bbox_bnd_offs t[4] = {
+			// X
+			{ {0, 1}, {0,  0} },
+			{ {0, 0}, {0, -1} },
+			// Y
+			{ {0, 0}, {-1, 0} },
+			{ {1, 0}, { 0, 0} },
+		};
+		return t[dim*2 + bnd_id];
+	}
 };
 
 // shortcoming typedef

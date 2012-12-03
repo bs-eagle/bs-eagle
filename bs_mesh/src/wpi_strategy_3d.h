@@ -133,37 +133,43 @@ struct strategy_3d_ex {
 		}
 
 		// obtain IDs of given facet vertices
-		static void facet_vid(ulong facet, facet_vid_t& res) {
+		static const facet_vid_t& facet_vid(ulong facet) {
+			static const facet_vid_t t[6] = {
+				{0, 1, 3, 2}, {0, 1, 5, 4}, {4, 5, 7, 6},
+				{2, 3, 7, 6}, {0, 2, 6, 4}, {1, 3, 7, 5}
+				//{ulong(-1), ulong(-1), ulong(-1), ulong(-1)}
+			};
+			return t[facet];
 			//facet_vid res;
-			switch(facet) {
-				case 0 : {
-					facet_vid_t t = {0, 1, 3, 2};
-					ca_assign(res, t); }
-					break;
-				case 1 : {
-					facet_vid_t t = {0, 1, 5, 4};
-					ca_assign(res, t); }
-					break;
-				case 2 : {
-					facet_vid_t t = {4, 5, 7, 6};
-					ca_assign(res, t); }
-					break;
-				case 3 : {
-					facet_vid_t t = {2, 3, 7, 6};
-					ca_assign(res, t); }
-					break;
-				case 4 : {
-					facet_vid_t t = {0, 2, 6, 4};
-					ca_assign(res, t); }
-					break;
-				case 5 : {
-					facet_vid_t t = {1, 3, 7, 5};
-					ca_assign(res, t); }
-					break;
-				default : {
-					facet_vid_t t = {ulong(-1), ulong(-1), ulong(-1), ulong(-1)};
-					ca_assign(res, t); }
-			}
+			//switch(facet) {
+			//	case 0 : {
+			//		facet_vid_t t = {0, 1, 3, 2};
+			//		ca_assign(res, t); }
+			//		break;
+			//	case 1 : {
+			//		facet_vid_t t = {0, 1, 5, 4};
+			//		ca_assign(res, t); }
+			//		break;
+			//	case 2 : {
+			//		facet_vid_t t = {4, 5, 7, 6};
+			//		ca_assign(res, t); }
+			//		break;
+			//	case 3 : {
+			//		facet_vid_t t = {2, 3, 7, 6};
+			//		ca_assign(res, t); }
+			//		break;
+			//	case 4 : {
+			//		facet_vid_t t = {0, 2, 6, 4};
+			//		ca_assign(res, t); }
+			//		break;
+			//	case 5 : {
+			//		facet_vid_t t = {1, 3, 7, 5};
+			//		ca_assign(res, t); }
+			//		break;
+			//	default : {
+			//		facet_vid_t t = {ulong(-1), ulong(-1), ulong(-1), ulong(-1)};
+			//		ca_assign(res, t); }
+			//}
 		}
 		static void facet_vid(ulong dim, ulong facet, facet_vid_t& res) {
 			return facet_vid(facet_id(dim, facet, res));
@@ -375,6 +381,34 @@ struct strategy_3d_ex {
 			Point(b.max(0), b.max(1), b.max(2)),
 			s.min(), s.max()
 		);
+	}
+
+	// This function designed for use in mesh_part::boundary
+	// we need to cover mesh_part bbox with non-intersecting mesh_parts,
+	// representing original mesh_part boundary
+	// if we define boundaries like (example for X dimension):
+	// lo_1 = [0, 0, 0], hi_1 = [1, n, n]
+	// lo_2 = [n - 1, 0, 0], hi_2 = [n, n, n]
+	// then what offsets should we add to each bounday to prevent them
+	// from finally intersecting?
+	// Purpose of this function is to return needed differencies for each boundary
+	// in each dimension.
+	// I decided to place it into strategy, because generic dimension-independant algo
+	// for calculating boundary isn't obvious to me right now
+	typedef int bbox_bnd_offs[2][D];
+	static const bbox_bnd_offs& bbox_boundary_offs(const uint dim, const uint bnd_id) {
+		static const bbox_bnd_offs t[6] = {
+			// X
+			{ {0, 1, 0}, {0,  0,  0} },
+			{ {0, 0, 0}, {0, -1,  0} },
+			// Y
+			{ {0, 0, 0}, {-1, 0, 0} },
+			{ {1, 0, 0}, { 0, 0, 0} },
+			// Z
+			{ {1, 1, 0}, {-1, -1, 0} },
+			{ {1, 1, 0}, {-1, -1, 0} }
+		};
+		return t[dim*2 + bnd_id];
 	}
 };
 

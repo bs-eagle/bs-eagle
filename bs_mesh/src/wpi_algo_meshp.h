@@ -10,6 +10,7 @@
 #define WPI_ALGO_MESHP_RIC3ZQNS
 
 #include "wpi_algo_pod.h"
+#include <algorithm>
 
 namespace blue_sky { namespace wpi {
 
@@ -58,16 +59,17 @@ struct mesh_tools : public helpers< strat_t > {
 		typedef ulong cell_neighb_enum[n_facets];
 		typedef ulong edge_neighb_enum[n_edges];
 
-		mesh_part(trimesh& m)
+		// ctor 1 - mesh part coincide with full mesh
+		mesh_part(const trimesh& m, bool dont_calc_bbox = false)
 			: m_(m)
 		{
 			ca_assign(lo, ulong(0));
 			ca_assign(hi, m.size());
 			//ca_assign(m_size_, mesh_size);
-			calc_bounds();
+			calc_bounds(dont_calc_bbox);
 		}
 
-		void init(const vertex_pos_i& lower, const vertex_pos_i& upper) {
+		void init(const vertex_pos_i& lower, const vertex_pos_i& upper, bool dont_calc_bbox = false) {
 			ca_assign(lo, lower);
 			ca_assign(hi, upper);
 
@@ -79,10 +81,10 @@ struct mesh_tools : public helpers< strat_t > {
 			}
 
 			// precalc bounds
-			calc_bounds();
+			calc_bounds(dont_calc_bbox);
 		}
 
-		void init(const std::vector< ulong >& cell_idx) {
+		void init(const std::vector< ulong >& cell_idx, bool dont_calc_bbox = false) {
 			vertex_pos_i lower, upper, p;
 			// search for bounds
 			for(ulong i = 0; i < cell_idx.size(); ++i) {
@@ -100,13 +102,13 @@ struct mesh_tools : public helpers< strat_t > {
 			for(uint i = 0; i < D; ++i)
 				++upper[i];
 			// finally usual init
-			init(lower, upper);
+			init(lower, upper, dont_calc_bbox);
 		}
 
-		void init(ulong lower, ulong upper) {
+		void init(ulong lower, ulong upper, bool dont_calc_bbox = false) {
 			std::vector< ulong > idx(2);
 			idx[0] = lower; idx[1] = upper;
-			init(idx);
+			init(idx, dont_calc_bbox);
 		}
 
 		ulong side_len(uint dim) const {
@@ -116,17 +118,9 @@ struct mesh_tools : public helpers< strat_t > {
 				return hi[D - 1] - lo[D - 1];
 		}
 
-		// size of this mesh part
+		// flat size of this mesh part
 		ulong size() const {
 			return sz_flat_;
-			//return std::accumulate(
-			//	&mp_size_[0], &mp_size_[D], 1, std::multiplies< ulong >()
-			//);
-		}
-
-		// size of the full mesh
-		ulong fullm_size() const {
-			return m_.size_flat();
 		}
 
 		ulong ss_id(const vertex_pos_i& offset) const {
@@ -159,16 +153,16 @@ struct mesh_tools : public helpers< strat_t > {
 		Iso_bbox iso_bbox() const {
 			//vertex_pos lo_pos, hi_pos;
 			//bounds(lo_pos, hi_pos);
-			return vertex_pos2rect(lo_bnd, hi_bnd);
+			return vertex_pos2rect(lo_bbox_, hi_bbox_);
 		}
 
 		Bbox bbox() const {
 			//vertex_pos lo_pos, hi_pos;
 			//bounds(lo_pos, hi_pos);
-			return vertex_pos2bbox(lo_bnd, hi_bnd);
+			return vertex_pos2bbox(lo_bbox_, hi_bbox_);
 		}
 
-		container_t divide() const {
+		container_t divide(bool dont_calc_bbox = false) const {
 			// resulting split
 			container_t res;
 			std::insert_iterator< container_t > ii(res, res.begin());
@@ -200,7 +194,7 @@ struct mesh_tools : public helpers< strat_t > {
 
 				// add new child cell
 				if(sz) {
-					*ii++ = mesh_part(m_, spl_lo, spl_hi);
+					*ii++ = mesh_part(m_, spl_lo, spl_hi, dont_calc_bbox);
 					tot_sz += sz;
 				}
 			}
@@ -244,8 +238,8 @@ struct mesh_tools : public helpers< strat_t > {
 			ca_assign(lo, rhs.lo);
 			ca_assign(hi, rhs.hi);
 			ca_assign(mp_size_, rhs.mp_size_);
-			ca_assign(lo_bnd, rhs.lo_bnd);
-			ca_assign(hi_bnd, rhs.hi_bnd);
+			ca_assign(lo_bbox_, rhs.lo_bbox_);
+			ca_assign(hi_bbox_, rhs.hi_bbox_);
 			return *this;
 		}
 
@@ -269,8 +263,8 @@ struct mesh_tools : public helpers< strat_t > {
 			cell_size(ss_id(offset), res);
 		}
 
-		// returned indexes corresponds to offsets inside current mesh_part
-		// for full mesh equal to simple index
+		// returned indexes corresponds to offsets inside this mesh_part!
+		// for full mesh correspond to simple index
 		void cell_neighbours(ulong idx, cell_neighb_enum& res) const {
 			// init resulting array with invalid neighbours
 			//cell_neighb_enum res;
@@ -280,68 +274,182 @@ struct mesh_tools : public helpers< strat_t > {
 			if(!size() || idx >= size())
 				return;
 
-			// obtain D-dim cell id and ref to cell
+			// obtain D-dim cell id
 			vertex_pos_i cell_id, nb;
 			decode_cell_id(idx, cell_id, mp_size_);
-			//const cell_data& = ss(ss_id(cell_id));
 
-			// vary different dims and check if cell is inside mesh
+			// vary different dims and check if cell is inside this mesh_part
+			ca_assign(nb, cell_id);
 			for(uint i = 0; i < D; ++i) {
-				ca_assign(nb, cell_id);
 				--nb[i];
-				if(nb[i] >= lo[i] && nb[i] < hi[i])
+				//if(nb[i] >= lo[i] && nb[i] < hi[i])
+				if(nb[i] < mp_size_[i])
 					res[cell_data::facet_id(i, 0)] = encode_cell_id(nb, mp_size_);
 				nb[i] += 2;
-				if(nb[i] < hi[i] && nb[i] >= lo[i])
+				//if(nb[i] < hi[i] && nb[i] >= lo[i])
+				if(nb[i] < mp_size_[i])
 					res[cell_data::facet_id(i, 1)] = encode_cell_id(nb, mp_size_);
+				// return nb[i] to initial state
+				--nb[i];
 			}
+		}
+
+		// check that mesh_part consists only of boundaries
+		bool is_pure_boundary() const {
+			// if any dimesnsion is of size <= 2 then boundary is entirely *this
+			for(uint i = 0; i < D; ++i) {
+				if(mp_size_[i] < 3)
+					return true;
+			}
+			return false;
+		}
+
+		// return array of mesh_parts representing boundary of this mesh
+		std::list< mesh_part > boundary() const {
+			// if any dimesnsion is of size <= 2 then boundary is entirely *this
+			std::list< mesh_part > res;
+			if(is_pure_boundary()) {
+				res.push_back(*this);
+				return res;
+			}
+
+			typedef typename strat_t::bbox_bnd_offs bbox_bnd_offs;
+			// we have two boundary planes for each dimension
+			vertex_pos_i bnd_hi, bnd_lo;
+			//uint bnd_idx = 0;
+			for(uint i = 0; i < D; ++i) {
+				// first boundary - all dims, besides i, from 0 to size
+				// i-th dim from 0 to 1
+				// bnd_lo = lo;
+				ca_assign(bnd_lo, lo);
+				ca_assign(bnd_hi, hi);
+				bnd_hi[i] = lo[i] + 1;
+				// correct dims of 1st boundary using strategy-specific offsets
+				// to make them finally non-intersecting
+				const bbox_bnd_offs& offs0 = strat_t::bbox_boundary_offs(i, 0);
+				std::transform(&bnd_lo[0], &bnd_lo[D], &offs0[0][0], &bnd_lo[0], std::plus< long >());
+				std::transform(&bnd_hi[0], &bnd_hi[D], &offs0[1][0], &bnd_hi[0], std::plus< long >());
+				// save resulting boundary
+				res.push_back(mesh_part(m_, bnd_lo, bnd_hi));
+
+				// first boundary - all dims, besides i, from 0 to size
+				// i-th dim from size - 1 to size
+				ca_assign(bnd_lo, lo);
+				bnd_lo[i] = hi[i] - 1;
+				// bnd_hi = hi
+				ca_assign(bnd_hi, hi);
+				// correct dims of 1st boundary using strategy-specific offsets
+				// to make them finally non-intersecting
+				const bbox_bnd_offs& offs1 = strat_t::bbox_boundary_offs(i, 1);
+				std::transform(&bnd_lo[0], &bnd_lo[D], &offs1[0][0], &bnd_lo[0], std::plus< long >());
+				std::transform(&bnd_hi[0], &bnd_hi[D], &offs1[1][0], &bnd_hi[0], std::plus< long >());
+				// save resulting boundary
+				res.push_back(mesh_part(m_, bnd_lo, bnd_hi));
+			}
+			return res;
+		}
+
+		// access to underlying trimesh object
+		const trimesh& backend() const {
+			return m_;
+		}
+
+		// functions to convert global cell offset to local offset in this mesh_part
+		void local_cid(const ulong global_cid, vertex_pos_i& res) const {
+			decode_cell_id(global_cid, res, m_.size());
+			// res -= lo
+			std::transform(&res[0], &res[D], &lo[0], &res[0], std::minus< ulong >());
+		}
+
+		ulong local_cid(const ulong global_cid) const {
+			vertex_pos_i loc_cid;
+			local_cid(global_cid, loc_cid);
+			return encode_cell_id(loc_cid, mp_size_);
 		}
 
 		// public members
 		vertex_pos_i lo, hi;
 
 	private:
-		trimesh& m_;
+		const trimesh& m_;
 		vertex_pos_i mp_size_;
-		vertex_pos lo_bnd, hi_bnd;
+		vertex_pos lo_bbox_, hi_bbox_;
 		ulong sz_flat_;
 
 		// idx SHOULD BE IN MESH!
-		const cell_data& ss(ulong idx) const {
-			return m_[idx];
-		}
-		cell_data ss(ulong idx) {
+		//const cell_data& ss(ulong idx) const {
+		//	return m_[idx];
+		//}
+		cell_data ss(ulong idx) const {
 			return m_[idx];
 		}
 
-		const cell_data& ss(const vertex_pos_i& idx) const {
-			return m_[encode_cell_id(idx, m_.size())];
-		}
-		cell_data ss(const vertex_pos_i& idx) {
+		//const cell_data& ss(const vertex_pos_i& idx) const {
+		//	return m_[encode_cell_id(idx, m_.size())];
+		//}
+		cell_data ss(const vertex_pos_i& idx) const {
 			return m_[encode_cell_id(idx, m_.size())];
 		}
 
-		mesh_part(trimesh& m,
+		mesh_part(const trimesh& m,
 				const vertex_pos_i& first_,
-				const vertex_pos_i& last_)
+				const vertex_pos_i& last_,
+				bool dont_calc_bbox = false)
 			: m_(m)
 		{
 			ca_assign(lo, first_);
 			ca_assign(hi, last_);
 			//ca_assign(m_size_, mesh_size);
-			calc_bounds();
+			calc_bounds(dont_calc_bbox);
 		}
 
-		void calc_bounds() {
+		void calc_bounds(bool dont_calc_bbox) {
 			// calc size of this mesh part
+			// and check if it is bigger than conjunction of boundaries
+			bool is_exact_boundary = false;
 			sz_flat_ = 1;
 			for(uint i = 0; i < D; ++i) {
 				mp_size_[i] = side_len(i);
+				if(mp_size_[i] < 3)
+					is_exact_boundary = true;
 				sz_flat_ *= mp_size_[i];
 			}
 
+			if(dont_calc_bbox) return;
+
+			// if mesh consists only from boundaries, then calc bounds
+			// by simply iterating over all cells
+			if(is_exact_boundary) {
+				calc_bbox_raw(lo_bbox_, hi_bbox_);
+				return;
+			}
+
+			// otherwise extract boundary and calc bounds based on it
+			typedef std::list< mesh_part > boundary_cont;
+			typedef typename boundary_cont::const_iterator cb_iterator;
+			const boundary_cont& B = boundary();
+			//vertex_pos lo_part_bbox, hi_part_bbox;
+			for(cb_iterator pb = B.begin(), end = B.end(); pb != end; ++pb) {
+				//pb->calc_bbox_raw(lo_part_bbox, hi_part_bbox);
+				if(pb == B.begin()) {
+					ca_assign(lo_bbox_, pb->lo_bbox_);
+					ca_assign(hi_bbox_, pb->hi_bbox_);
+				}
+				else {
+					// lo_bbox_ = min(lo_bbox_, lo_part_bbox)
+					std::transform(&lo_bbox_[0], &lo_bbox_[D], &pb->lo_bbox_[0], &lo_bbox_[0],
+						std::ptr_fun(std::min< t_float >));
+					// hi_bbox_ = max(hi_bbox_, hi_part_bbox)
+					std::transform(&hi_bbox_[0], &hi_bbox_[D], &pb->hi_bbox_[0], &hi_bbox_[0],
+						std::ptr_fun(std::max< t_float >));
+				}
+			}
+		}
+
+		// find bounds by iterating over all mesh_part cells
+		void calc_bbox_raw(vertex_pos& lo_bbox, vertex_pos& hi_bbox) const {
 			// init bounds from first cell
-			ss(lo).lo(lo_bnd); ss(lo).hi(hi_bnd);
+			ss(lo).lo(lo_bbox); ss(lo).hi(hi_bbox);
 
 			// walk all other cells
 			vertex_pos lo_cell, hi_cell;
@@ -350,10 +458,10 @@ struct mesh_tools : public helpers< strat_t > {
 				const cell_data& cell = ss(ss_id(i));
 				cell.lo(lo_cell); cell.hi(hi_cell);
 				for(uint i = 0; i < D; ++i) {
-					if(lo_cell[i] < lo_bnd[i])
-						lo_bnd[i] = lo_cell[i];
-					if(hi_cell[i] > hi_bnd[i])
-						hi_bnd[i] = hi_cell[i];
+					if(lo_cell[i] < lo_bbox[i])
+						lo_bbox[i] = lo_cell[i];
+					if(hi_cell[i] > hi_bbox[i])
+						hi_bbox[i] = hi_cell[i];
 				}
 			}
 		}
@@ -367,7 +475,7 @@ struct mesh_tools : public helpers< strat_t > {
 			// last = hi - 1
 			vertex_pos_i last;
 			ca_assign(last, hi);
-			std::transform(&last[0], &last[D], &last[0], bind2nd(std::minus< ulong >(), 1));
+			std::transform(&last[0], &last[D], &last[0], std::bind2nd(std::minus< ulong >(), 1));
 			ss(last).lo (hi_lo_pos);
 			ss(last).hi (hi_hi_pos);
 
