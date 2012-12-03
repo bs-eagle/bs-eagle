@@ -21,7 +21,7 @@
 #include "wpi_algo_xaction_build.h"
 #include "wpi_algo_xaction_build2.h"
 #include "wpi_algo_xaction_build3.h"
-#include "wpi_algo_vtk.h"
+//#include "wpi_algo_vtk.h"
 
 #include "conf.h"
 #include "i_cant_link_2_mesh.h"
@@ -75,52 +75,6 @@ struct algo : public helpers< strat_t > {
 	typedef intersect_base< strat_t > xbase;
 	typedef typename xbase::hit_idx_t hit_idx_t;
 	typedef intersect_builder2< strat_t > xbuilder;
-
-	// import VTK algorithms
-	typedef algo_vtk< strat_t > algo_vtk_t;
-
-	// helper to create initial cell_data for each cell
-	//static spv_float coord_zcorn2trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
-	//		trimesh& res, vertex_pos_i& mesh_size, bool free_cz_mem = false)
-	//{
-	//	//typedef smart_ptr< bs_mesh_grdecl, true > sp_grd_mesh;
-	//	// build mesh_grdecl around given mesh
-	//	//sp_grd_mesh grd_src = BS_KERNEL.create_object(bs_mesh_grdecl::bs_type());
-	//	//grd_src->init_props(nx, ny, coord, zcorn);
-
-	//	// init mesh size
-	//	const ulong full_sz[] = {ulong(nx), ulong(ny), (zcorn->size() / (nx * ny)) >> 3};
-	//	const ulong n_cells = ulong(full_sz[0] * full_sz[1] * full_sz[2]);
-	//	std::copy(full_sz, full_sz + D, mesh_size);
-
-	//	// obtain coordinates for all vertices of all cells
-	//	sp_himesh handy = BS_KERNEL.create_object("handy_mesh_iface");
-	//	spv_float tops = handy->calc_cells_vertices_xyz(nx, ny, coord, zcorn);
-	//	// clear COORD & ZCORN arrays
-	//	if(free_cz_mem) {
-	//		spv_float t = BS_KERNEL.create_object(v_float::bs_type());
-	//		t->swap(*coord);
-	//		t = BS_KERNEL.create_object(v_float::bs_type());
-	//		t->swap(*zcorn);
-	//	}
-
-	//	// fill trimesh with triangles corresponding to each cell
-	//	res.resize(n_cells);
-	//	v_float::iterator pv = tops->begin();
-	//	for(ulong i = 0; i < n_cells; ++i) {
-	//		// DEBUG
-	//		//if(i < 100) {
-	//		//	std::cout << std::fixed << std::setprecision(2);
-	//		//	for(uint j = 0; j < 24; ++j)
-	//		//		std::cout << *(pv + j) << ' ';
-	//		//	std::cout << std::endl;
-	//		//}
-	//		res[i] = cell_data(&*pv);
-	//		pv += 3*8;
-	//	}
-
-	//	return tops;
-	//}
 
 	static ulong fill_well_path(spv_float well_info, well_path& W) {
 		ulong well_node_num = well_info->size() >> 2;
