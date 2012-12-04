@@ -97,23 +97,23 @@ t_uint where_is_point_impl(t_long nx, t_long ny, spv_float coord, spv_float zcor
 #ifdef BSPY_EXPORTING_PLUGIN
 
 //typedef wpi::strategy_3d_ex< wpi::online_tops_traits > strat_t;
-typedef wpi::strategy_3d_ex< wpi::sgrid_traits > strat_t;
-typedef wpi::algo_vtk< strat_t > wpi_algo;
+typedef wpi::strategy_3d_ex< wpi::sgrid_traits > vtk_strat_t;
+typedef wpi::algo_vtk< vtk_strat_t > wpi_algo_vtk;
 
-bp::tuple enum_border_facets_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+bp::tuple enum_border_facets_vtk(t_long nx, t_long ny, sp_obj trim_backend,
 	spv_int mask, int slice_dim = -1, ulong slice_idx = 0,
 	const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
 {
 	spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
 	spv_float points = BS_KERNEL.create_object(v_float::bs_type());
 	//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_facets_vtk.prof");
-	spv_long res = wpi_algo::enum_border_facets_vtk(nx, ny, coord, zcorn, mask, cell_idx,
+	spv_long res = wpi_algo_vtk::enum_border_facets_vtk(nx, ny, trim_backend, mask, cell_idx,
 		points, slice_dim, slice_idx, min_split_threshold);
 	//ProfilerStop();
 	return bp::make_tuple(res, cell_idx, points);
 }
 
-bp::tuple enum_border_edges_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+bp::tuple enum_border_edges_vtk(t_long nx, t_long ny, sp_obj trim_backend,
 	spv_int mask, int slice_dim = -1, ulong slice_idx = 0,
 	const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
 {
@@ -121,7 +121,7 @@ bp::tuple enum_border_edges_vtk(t_long nx, t_long ny, spv_float coord, spv_float
 	spv_float points = BS_KERNEL.create_object(v_float::bs_type());
 	//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk.prof");
 	//HeapProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk");
-	spv_long res = wpi_algo::enum_border_edges_vtk(nx, ny, coord, zcorn, mask, cell_idx,
+	spv_long res = wpi_algo_vtk::enum_border_edges_vtk(nx, ny, trim_backend, mask, cell_idx,
 		points, slice_dim, slice_idx, min_split_threshold);
 	//ProfilerStop();
 	return bp::make_tuple(res, cell_idx, points);
@@ -205,8 +205,8 @@ std::vector< well_hit_cell_2d > well_path_ident_2d(t_long nx, t_long ny, spv_flo
 BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl, well_path_ident, 5, 6)
 BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl_2d, well_path_ident_2d, 5, 6)
 BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl_2d_old, well_path_ident_2d_old, 5, 6)
-BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_facets_overl, enum_border_facets_vtk, 5, 8)
-BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_edges_overl, enum_border_edges_vtk, 5, 8)
+BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_facets_overl, enum_border_facets_vtk, 4, 7)
+BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_edges_overl, enum_border_edges_vtk, 4, 7)
 
 namespace python {
 
@@ -219,8 +219,11 @@ void py_export_wpi() {
 	bp::def("where_is_point_2d", &where_is_point_2d);
 	bp::def("where_is_points_2d", &where_is_points_2d);
 
-	def("enum_border_facets_vtk", &enum_border_facets_vtk, enumb_facets_overl());
-	def("enum_border_edges_vtk", &enum_border_edges_vtk, enumb_edges_overl());
+	// export trimesh backend creation fcn
+	bp::def("make_trimesh_backend", &wpi::pods< vtk_strat_t >::trimesh::create_backend);
+
+	bp::def("enum_border_facets_vtk", &enum_border_facets_vtk, enumb_facets_overl());
+	bp::def("enum_border_edges_vtk", &enum_border_edges_vtk, enumb_edges_overl());
 }
 
 }	// eof python namespace

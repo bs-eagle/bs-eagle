@@ -129,7 +129,7 @@ protected:
 		assert(sgrid_);
 
 		// save handle
-		sgrid_handle h = { sgrid_->begin(), ulong(nx), ulong(ny), zcorn->size() / (nx * ny * 8) };
+		sgrid_handle h = { sgrid_->begin(), ulong(nx), ulong(ny), zcorn->size() >> 3 };
 		h_ = h;
 	}
 
@@ -139,11 +139,12 @@ protected:
 			throw bs_exception("trimesh::impl", "Incompatible backend passed");
 
 		// save handle
+		const ulong nz = sgrid_->size() / ((nx + 1)*(ny + 1)*3) - 1;
 		sgrid_handle h = {
-			sgrid_->begin(), ulong(nx), ulong(ny), sgrid_->size() / ((nx + 1)*(ny + 1)) - 1
+			sgrid_->begin(), ulong(nx), ulong(ny), nx * ny * nz
 		};
 		h_ = h;
-		return h_[2];
+		return nz;
 	}
 };
 

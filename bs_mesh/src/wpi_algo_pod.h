@@ -183,6 +183,10 @@ struct pods : public helpers< strat_t > {
 		trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
 			init(nx, ny, coord, zcorn);
 		}
+		// ctor from given backend
+		trimesh(t_long nx, t_long ny, sp_obj backend) {
+			init(nx, ny, backend);
+		}
 
 		void init(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
 			base_t::init(nx, ny, coord, zcorn);

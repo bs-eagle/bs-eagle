@@ -430,7 +430,7 @@ struct algo_vtk : helpers< strat_t > {
 	}
 
 	template< int prim_id >
-	static spv_long enum_border_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+	static spv_long enum_border_vtk(t_long nx, t_long ny, sp_obj trim_backend,
 		spv_int mask, spv_long cell_idx, spv_float points, Loki::Int2Type< prim_id > prim,
 		int slice_dim = -1, ulong slice_idx = 0, const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
 	{
@@ -438,7 +438,8 @@ struct algo_vtk : helpers< strat_t > {
 		typedef typename mesh_part::container_t::iterator part_iterator;
 
 		// 1) build trimesh from given tops
-		trimesh M(nx, ny, coord, zcorn);
+		//trimesh M(nx, ny, coord, zcorn);
+		trimesh M(nx, ny, trim_backend);
 		// make mesh_part containing full mesh, skip bbox calculation
 		mesh_part MP(M, true);
 		// cut the slice from whole mesh
@@ -528,23 +529,45 @@ struct algo_vtk : helpers< strat_t > {
 	}
 
 	// specialization for facets
+	static spv_long enum_border_facets_vtk(t_long nx, t_long ny, sp_obj trim_backend,
+		spv_int mask, spv_long cell_idx, spv_float points,
+		int slice_dim = -1, ulong slice_idx = 0,  const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
+	{
+		return enum_border_vtk(
+			nx, ny, trim_backend, mask, cell_idx, points, Loki::Int2Type< 0 >(),
+			slice_dim, slice_idx, min_split_threshold
+		);
+	}
+
 	static spv_long enum_border_facets_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 		spv_int mask, spv_long cell_idx, spv_float points,
 		int slice_dim = -1, ulong slice_idx = 0,  const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
 	{
 		return enum_border_vtk(
-			nx, ny, coord, zcorn, mask, cell_idx, points, Loki::Int2Type< 0 >(),
+			nx, ny, trimesh::create_backend(nx, ny, coord, zcorn),
+			mask, cell_idx, points, Loki::Int2Type< 0 >(),
 			slice_dim, slice_idx, min_split_threshold
 		);
 	}
 
 	// specialization for edges
+	static spv_long enum_border_edges_vtk(t_long nx, t_long ny, sp_obj trim_backend,
+		spv_int mask, spv_long cell_idx, spv_float points,
+		int slice_dim = -1, ulong slice_idx = 0,  const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
+	{
+		return enum_border_vtk(
+			nx, ny, trim_backend, mask, cell_idx, points, Loki::Int2Type< 1 >(),
+			slice_dim, slice_idx, min_split_threshold
+		);
+	}
+
 	static spv_long enum_border_edges_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 		spv_int mask, spv_long cell_idx, spv_float points,
 		int slice_dim = -1, ulong slice_idx = 0,  const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
 	{
 		return enum_border_vtk(
-			nx, ny, coord, zcorn, mask, cell_idx, points, Loki::Int2Type< 1 >(),
+			nx, ny, trimesh::create_backend(nx, ny, coord, zcorn),
+			mask, cell_idx, points, Loki::Int2Type< 1 >(),
 			slice_dim, slice_idx, min_split_threshold
 		);
 	}
