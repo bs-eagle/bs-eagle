@@ -13,6 +13,26 @@
 
 namespace blue_sky { namespace wpi {
 
+// simple traits for strategies
+// assuming that cells vertices and well path are represented as continous C-arrays
+struct carray_traits {
+	// iterator over raw tops array - simple pointer
+	typedef t_float* cell_vertex_iterator;
+	typedef t_float* well_traj_iterator;
+
+	// generic converter from iterator to vertex_pos
+	// return reference to array to prevent data copying
+	template< class pos_t, class iterator_t >
+	static pos_t& iter2pos(iterator_t& src) {
+		// for simple arrays we can simply use reinterpret_cast
+		return reinterpret_cast< pos_t& >(*src);
+	}
+
+	static const char* name() {
+		return "carray";
+	}
+};
+
 // cell's vertices coords are calculated on the fly when accessing given cell
 struct online_tops_traits {
 	typedef tops_iterator< carray_ti_traits > cell_vertex_iterator;
@@ -32,6 +52,10 @@ struct online_tops_traits {
 		// now we can safely use reinterpret_cast
 		return reinterpret_cast< pos_t& >(*src);
 	}
+
+	static const char* name() {
+		return "online_tops";
+	}
 };
 
 struct online_tops_traits_bufpool : public online_tops_traits {
@@ -39,10 +63,18 @@ struct online_tops_traits_bufpool : public online_tops_traits {
 	// it needs to know corresponding uncached strategy
 	typedef online_tops_traits uncached_traits;
 	typedef tops_iterator< bufpool_ti_traits > cell_vertex_iterator;
+
+	static const char* name() {
+		return "online_tops_bufpool";
+	}
 };
 
 struct sgrid_traits : public online_tops_traits {
 	typedef tops_iterator< sgrid_ti_traits > cell_vertex_iterator;
+
+	static const char* name() {
+		return "sgrid";
+	}
 };
 
 }} /* blue_sky::wpi */

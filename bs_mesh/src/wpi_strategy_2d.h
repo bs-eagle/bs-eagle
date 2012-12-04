@@ -10,10 +10,6 @@
 #define WPI_STRATEGY_2D_C5EHIKCY
 
 #include "wpi_common.h"
-//#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-//#include <CGAL/Object.h>
-//#include <CGAL/box_intersection_d.h>
-//#include <CGAL/intersections.h>
 #include <CGAL/Bbox_2.h>
 #include <CGAL/Polygon_2.h>
 
@@ -44,6 +40,10 @@ struct strategy_2d_ex {
 	typedef typename traits_t::well_traj_iterator   well_traj_iterator;
 
 	// misc helper functions
+	static const char* name() {
+		static std::string name_ = std::string("2D:") + traits_t::name();
+		return name_.c_str();
+	}
 
 	// X-Y-Z order!
 	static void decode_cell_id(ulong id, vertex_pos_i& res, const vertex_pos_i& m_size) {
@@ -118,27 +118,6 @@ struct strategy_2d_ex {
 				{0, 1}, {1, 3}, {3, 2}, {2, 0}
 			};
 			return t[facet];
-			//switch(facet) {
-			//	case 0 : {
-			//		facet_vid_t t = {0, 1};
-			//		ca_assign(res, t); }
-			//		break;
-			//	case 1 : {
-			//		facet_vid_t t = {1, 3};
-			//		ca_assign(res, t); }
-			//		break;
-			//	case 2 : {
-			//		facet_vid_t t = {3, 2};
-			//		ca_assign(res, t); }
-			//		break;
-			//	case 3 : {
-			//		facet_vid_t t = {2, 0};
-			//		ca_assign(res, t); }
-			//		break;
-			//	default : {
-			//		facet_vid_t t = {ulong(-1), ulong(-1)};
-			//		ca_assign(res, t); }
-			//}
 		}
 		static void facet_vid(ulong dim, ulong facet, facet_vid_t& res) {
 			return facet_vid(facet_id(dim, facet, res));

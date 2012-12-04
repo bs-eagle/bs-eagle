@@ -17,7 +17,6 @@
 #include <boost/integer/static_min_max.hpp>
 
 #include "conf.h"
-//class bs_mesh_grdecl;
 
 namespace blue_sky { namespace wpi {
 
@@ -78,27 +77,10 @@ int lexicographical_compare_3way(_InputIterator1 __first1,
 		return -1;
 }
 
-// simple traits for strategies
-// assuming that cells vertices and well path are represented as continous C-arrays
-struct carray_traits {
-	// iterator over raw tops array - simple pointer
-	typedef t_float* cell_vertex_iterator;
-	typedef t_float* well_traj_iterator;
-
-	// generic converter from iterator to vertex_pos
-	// return reference to array to prevent data copying
-	template< class pos_t, class iterator_t >
-	static pos_t& iter2pos(iterator_t& src) {
-		// for simple arrays we can simply use reinterpret_cast
-		return reinterpret_cast< pos_t& >(*src);
-	}
-};
-
-// forward declaration of online tops strategy traits
+// forward declaraions of strategy traits
+struct carray_traits;
 struct online_tops_traits;
 struct online_tops_traits_bufpool;
-struct online_sgrid_traits;
-struct online_sgrid_traits_bufpool;
 struct sgrid_traits;
 
 }} /* { namespace blue_sky::wpi */

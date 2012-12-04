@@ -10,7 +10,7 @@
 #define WPI_TRIMESH_IMPL_1I00E960
 
 #include "wpi_algo_pod.h"
-#include "wpi_online_tops_traits.h"
+#include "wpi_strategy_traits.h"
 // we depend on mesh_grdecl
 #include "i_cant_link_2_mesh.h"
 #include "rs_smesh_iface.h"

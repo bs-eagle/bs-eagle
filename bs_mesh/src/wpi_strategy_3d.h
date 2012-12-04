@@ -10,13 +10,7 @@
 #define WPI_STRATEGY_3D_SJLKT8NL
 
 #include "wpi_common.h"
-//#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-//#include <CGAL/Object.h>
 #include <CGAL/Bbox_3.h>
-//#include <CGAL/box_intersection_d.h>
-//#include <CGAL/intersections.h>
-
-//#include "conf.h"
 
 namespace blue_sky { namespace wpi {
 
@@ -46,6 +40,10 @@ struct strategy_3d_ex {
 	typedef typename traits_t::well_traj_iterator   well_traj_iterator;
 
 	// misc helper functions
+	static const char* name() {
+		static std::string name_ = std::string("3D:") + traits_t::name();
+		return name_.c_str();
+	}
 
 	// X-Y-Z order!
 	static void decode_cell_id(ulong id, vertex_pos_i& res, const vertex_pos_i& m_size) {
@@ -140,36 +138,6 @@ struct strategy_3d_ex {
 				//{ulong(-1), ulong(-1), ulong(-1), ulong(-1)}
 			};
 			return t[facet];
-			//facet_vid res;
-			//switch(facet) {
-			//	case 0 : {
-			//		facet_vid_t t = {0, 1, 3, 2};
-			//		ca_assign(res, t); }
-			//		break;
-			//	case 1 : {
-			//		facet_vid_t t = {0, 1, 5, 4};
-			//		ca_assign(res, t); }
-			//		break;
-			//	case 2 : {
-			//		facet_vid_t t = {4, 5, 7, 6};
-			//		ca_assign(res, t); }
-			//		break;
-			//	case 3 : {
-			//		facet_vid_t t = {2, 3, 7, 6};
-			//		ca_assign(res, t); }
-			//		break;
-			//	case 4 : {
-			//		facet_vid_t t = {0, 2, 6, 4};
-			//		ca_assign(res, t); }
-			//		break;
-			//	case 5 : {
-			//		facet_vid_t t = {1, 3, 7, 5};
-			//		ca_assign(res, t); }
-			//		break;
-			//	default : {
-			//		facet_vid_t t = {ulong(-1), ulong(-1), ulong(-1), ulong(-1)};
-			//		ca_assign(res, t); }
-			//}
 		}
 		static void facet_vid(ulong dim, ulong facet, facet_vid_t& res) {
 			return facet_vid(facet_id(dim, facet, res));
