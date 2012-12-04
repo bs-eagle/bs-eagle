@@ -9,6 +9,8 @@
 #ifndef I_CANT_LINK_2_MESH_KXZEOZXG
 #define I_CANT_LINK_2_MESH_KXZEOZXG
 
+#include "rs_smesh_iface.h"
+
 namespace blue_sky {
 
 class handy_mesh_iface : public objbase {

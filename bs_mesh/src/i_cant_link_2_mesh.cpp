@@ -7,20 +7,16 @@
 ///            the BSD License. See LICENSE for more details.
 
 #include "bs_mesh_stdafx.h"
-#include "wpi_strategy_3d.h"
-#include "wpi_algo_vtk.h"
 
 #include "i_cant_link_2_mesh.h"
 #include "bs_mesh_grdecl.h"
 #include "well_path_ident.h"
 
-// profiling
-//#include <google/profiler.h>
-//#include <google/heap-profiler.h>
-
 namespace blue_sky {
 
 namespace {
+
+#ifdef BSPY_EXPORTING_PLUGIN
 
 // separate function for Python export
 spv_float calc_cells_vertices_xyz_impl(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
@@ -32,6 +28,8 @@ spv_float calc_cells_vertices_xyz_impl(t_long nx, t_long ny, spv_float coord, sp
 	// obtain coordinates for all vertices of all cells
 	return grd_src->calc_cells_vertices_xyz();
 }
+
+#endif
 
 class BS_API_PLUGIN handy_object : public handy_mesh_iface {
 public:
@@ -90,47 +88,13 @@ bool register_handy_mesh_iface(const plugin_descriptor& pd) {
 #ifdef BSPY_EXPORTING_PLUGIN
 
 namespace python {
-	using namespace boost::python;
-	//typedef wpi::strategy_3d_ex< wpi::online_tops_traits > strat_t;
-	typedef wpi::strategy_3d_ex< wpi::sgrid_traits > strat_t;
-	typedef wpi::algo_vtk< strat_t > wpi_algo;
-
-	tuple enum_border_facets_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
-		spv_int mask, int slice_dim = -1, ulong slice_idx = 0,
-		const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
-	{
-		spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
-		spv_float points = BS_KERNEL.create_object(v_float::bs_type());
-		//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_facets_vtk.prof");
-		spv_long res = wpi_algo::enum_border_facets_vtk(nx, ny, coord, zcorn, mask, cell_idx,
-			points, slice_dim, slice_idx, min_split_threshold);
-		//ProfilerStop();
-		return make_tuple(res, cell_idx, points);
-	}
-
-	tuple enum_border_edges_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
-		spv_int mask, int slice_dim = -1, ulong slice_idx = 0,
-		const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
-	{
-		spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
-		spv_float points = BS_KERNEL.create_object(v_float::bs_type());
-		//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk.prof");
-		//HeapProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk");
-		spv_long res = wpi_algo::enum_border_edges_vtk(nx, ny, coord, zcorn, mask, cell_idx,
-			points, slice_dim, slice_idx, min_split_threshold);
-		//ProfilerStop();
-		return make_tuple(res, cell_idx, points);
-	}
-
-	BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_facets_overl, enum_border_facets_vtk, 5, 8);
-	BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_edges_overl, enum_border_edges_vtk, 5, 8);
-
 	void py_export_handymesh() {
+		using namespace boost::python;
+
 		def("calc_cells_vertices_xyz", &calc_cells_vertices_xyz_impl);
-		def("enum_border_facets_vtk", &enum_border_facets_vtk, enumb_facets_overl());
-		def("enum_border_edges_vtk", &enum_border_edges_vtk, enumb_edges_overl());
 	}
 } /* python */
+
 #endif
 
 } /* blue_sky */

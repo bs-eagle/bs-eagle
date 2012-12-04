@@ -12,6 +12,7 @@
 #include "wpi_iface.h"
 #include "wpi_trimesh_impl.h"
 #include "wpi_algo.h"
+#include "wpi_algo_vtk.h"
 
 #include "export_python_wrapper.h"
 
@@ -23,6 +24,7 @@ namespace blue_sky {
 namespace bp = boost::python;
 
 namespace {
+
 template< class strat_t >
 spv_uint where_is_points_impl(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
 	//typedef wpi::strategy_3d strat_t;
@@ -88,6 +90,44 @@ t_uint where_is_point_impl(t_long nx, t_long ny, spv_float coord, spv_float zcor
 	// real action
 	return mesh_tools_t::where_is_point(M, P);
 }
+
+/*-----------------------------------------------------------------
+ * VTK-related algorithms wrappers for Python
+ *----------------------------------------------------------------*/
+#ifdef BSPY_EXPORTING_PLUGIN
+
+//typedef wpi::strategy_3d_ex< wpi::online_tops_traits > strat_t;
+typedef wpi::strategy_3d_ex< wpi::sgrid_traits > strat_t;
+typedef wpi::algo_vtk< strat_t > wpi_algo;
+
+bp::tuple enum_border_facets_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+	spv_int mask, int slice_dim = -1, ulong slice_idx = 0,
+	const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
+{
+	spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
+	spv_float points = BS_KERNEL.create_object(v_float::bs_type());
+	//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_facets_vtk.prof");
+	spv_long res = wpi_algo::enum_border_facets_vtk(nx, ny, coord, zcorn, mask, cell_idx,
+		points, slice_dim, slice_idx, min_split_threshold);
+	//ProfilerStop();
+	return bp::make_tuple(res, cell_idx, points);
+}
+
+bp::tuple enum_border_edges_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+	spv_int mask, int slice_dim = -1, ulong slice_idx = 0,
+	const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
+{
+	spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
+	spv_float points = BS_KERNEL.create_object(v_float::bs_type());
+	//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk.prof");
+	//HeapProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk");
+	spv_long res = wpi_algo::enum_border_edges_vtk(nx, ny, coord, zcorn, mask, cell_idx,
+		points, slice_dim, slice_idx, min_split_threshold);
+	//ProfilerStop();
+	return bp::make_tuple(res, cell_idx, points);
+}
+
+#endif
 
 } /* hidden implementation */
 
@@ -158,12 +198,15 @@ std::vector< well_hit_cell_2d > well_path_ident_2d(t_long nx, t_long ny, spv_flo
 
 } /* wpi */
 
+#ifdef BSPY_EXPORTING_PLUGIN
 /*-----------------------------------------------------------------
  * Python bindings
  *----------------------------------------------------------------*/
 BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl, well_path_ident, 5, 6)
 BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl_2d, well_path_ident_2d, 5, 6)
 BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl_2d_old, well_path_ident_2d_old, 5, 6)
+BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_facets_overl, enum_border_facets_vtk, 5, 8)
+BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_edges_overl, enum_border_edges_vtk, 5, 8)
 
 namespace python {
 
@@ -175,9 +218,13 @@ void py_export_wpi() {
 	bp::def("where_is_points", &where_is_points);
 	bp::def("where_is_point_2d", &where_is_point_2d);
 	bp::def("where_is_points_2d", &where_is_points_2d);
+
+	def("enum_border_facets_vtk", &enum_border_facets_vtk, enumb_facets_overl());
+	def("enum_border_edges_vtk", &enum_border_edges_vtk, enumb_edges_overl());
 }
 
-}
+}	// eof python namespace
+#endif
 
 }	// eof blue-sky namespace
 
