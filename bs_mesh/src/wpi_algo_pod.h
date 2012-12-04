@@ -10,6 +10,7 @@
 #define WPI_ALGO_POD_BDBOLFWA
 
 #include "wpi_common.h"
+#include "wpi_trimesh_impl.h"
 //#include <boost/pool/pool_alloc.hpp>
 
 namespace blue_sky { namespace wpi {
@@ -164,20 +165,36 @@ struct pods : public helpers< strat_t > {
 
 	// storage for representing mesh
 	//template< class cell_data, class strat_traits >
-	class BS_API_PLUGIN trimesh {
+	class trimesh : public detail::trimpl< typename strat_t::traits_t > {
 	public:
 		typedef cell_data value_type;
 		typedef value_type& reference;
 		typedef const value_type& const_reference;
 		typedef value_type* pointer;
 
-		// empty ctor
-		trimesh();
-		// ctor from given COORD & ZCORN
-		trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn);
+		typedef detail::trimpl< typename strat_t::traits_t > base_t;
+		using base_t::begin;
 
-		void init(t_long nx, t_long ny, spv_float coord, spv_float zcorn);
-		void init(t_long nx, t_long ny, sp_obj backend);
+		// empty ctor
+		trimesh() {
+			ca_assign(size_, ulong(0));
+		}
+		// ctor from given COORD & ZCORN
+		trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
+			init(nx, ny, coord, zcorn);
+		}
+
+		void init(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
+			base_t::init(nx, ny, coord, zcorn);
+			// set size
+			size_[0] = nx; size_[1] = ny;
+			size_[2] = zcorn->size() / (nx * ny * 8);
+		}
+
+		void init(t_long nx, t_long ny, sp_obj backend) {
+			size_[2] = base_t::init(nx, ny, backend);
+			size_[0] = nx; size_[1] = ny;
+		}
 
 		const vertex_pos_i& size() const {
 			return size_;
@@ -190,14 +207,10 @@ struct pods : public helpers< strat_t > {
 			return sz;
 		}
 
-		// direct subscript via backend ignoring cache
-		// calls pimpl actually
-		value_type ss(ulong idx) const;
-
-		// subscripting operator - returns a new _copy_ of cell every time!
-		//value_type ss(ulong idx) const {
-		//	return ss_backend(idx);
-		//}
+		// subscripting - returns a new _copy_ of cell every time!
+		value_type ss(ulong idx) const {
+			return value_type(begin() + 24 * idx);
+		}
 
 		// the same in operator form
 		value_type operator[](ulong idx) const {
@@ -205,12 +218,12 @@ struct pods : public helpers< strat_t > {
 		}
 
 		// obtain iterators on backend
-		cell_vertex_iterator begin() const;
-		cell_vertex_iterator end() const;
+		//cell_vertex_iterator begin() const;
+		//cell_vertex_iterator end() const;
 
 		// access to backend object
 		// float array or rs_smesh_iface object now
-		sp_obj backend() const;
+		//sp_obj backend() const;
 
 		static sp_obj create_backend(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
 			trimesh M(nx, ny, coord, zcorn);
@@ -218,8 +231,8 @@ struct pods : public helpers< strat_t > {
 		}
 
 	private:
-		struct impl;
-		st_smart_ptr< impl > pimpl_;
+		//struct impl;
+		//st_smart_ptr< impl > pimpl_;
 
 		vertex_pos_i size_;
 	};
