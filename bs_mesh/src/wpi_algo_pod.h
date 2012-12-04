@@ -212,6 +212,11 @@ struct pods : public helpers< strat_t > {
 		// float array or rs_smesh_iface object now
 		sp_obj backend() const;
 
+		static sp_obj create_backend(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
+			trimesh M(nx, ny, coord, zcorn);
+			return M.backend();
+		}
+
 	private:
 		struct impl;
 		st_smart_ptr< impl > pimpl_;
