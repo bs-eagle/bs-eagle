@@ -177,6 +177,7 @@ struct pods : public helpers< strat_t > {
 		trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn);
 
 		void init(t_long nx, t_long ny, spv_float coord, spv_float zcorn);
+		void init(t_long nx, t_long ny, sp_obj backend);
 
 		const vertex_pos_i& size() const {
 			return size_;

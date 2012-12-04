@@ -51,6 +51,12 @@ struct pods< strat_t >::trimesh::impl {
 			tops_ = handy->calc_cells_vertices_xyz(nx, ny, coord, zcorn);
 		}
 
+		void init(t_long, t_long, const sp_obj& backend) {
+			tops_ = backend;
+			if(!tops_)
+				throw bs_exception("trimesh::impl: Incompatible backend passed");
+		}
+
 		iterator_t begin() const {
 			return tops_->begin();
 		}
@@ -78,6 +84,12 @@ struct pods< strat_t >::trimesh::impl {
 			sp_himesh handy = BS_KERNEL.create_object("handy_mesh_iface");
 			mesh_ = handy->make_mesh_grdecl(nx, ny, coord, zcorn);
 			assert(mesh_);
+		}
+
+		void init(t_long, t_long, const sp_obj& backend) {
+			mesh_ = backend;
+			if(!mesh_)
+				throw bs_exception("trimesh::impl: Incompatible backend passed");
 		}
 
 		iterator_t begin() const {
@@ -111,6 +123,18 @@ struct pods< strat_t >::trimesh::impl {
 
 			// save handle
 			sgrid_handle h = { sgrid_->begin(), ulong(nx), ulong(ny), zcorn->size() >> 3 };
+			h_ = h;
+		}
+
+		void init(t_long nx, t_long ny, const sp_obj& backend) {
+			sgrid_ = backend;
+			if(!sgrid_)
+				throw bs_exception("trimesh::impl: Incompatible backend passed");
+
+			// save handle
+			sgrid_handle h = {
+				sgrid_->begin(), ulong(nx), ulong(ny), sgrid_->size() / ((nx + 1)*(ny + 1)) - 1
+			};
 			h_ = h;
 		}
 
@@ -181,6 +205,10 @@ struct pods< strat_t >::trimesh::impl {
 		ii_.init(nx, ny, coord, zcorn);
 	}
 
+	void init(t_long nx, t_long ny, const sp_obj& backend) {
+		ii_.init(nx, ny, backend);
+	}
+
 	value_type ss(ulong idx) {
 		return value_type(ii_.begin() + 24 * idx);
 	}
@@ -221,6 +249,11 @@ void pods< strat_t >::trimesh::init(t_long nx, t_long ny, spv_float coord, spv_f
 	// set size
 	const ulong full_sz[] = {ulong(nx), ulong(ny), (zcorn->size() / (nx * ny)) >> 3};
 	std::copy(full_sz, full_sz + D, size_);
+}
+
+template< class strat_t >
+void pods< strat_t >::trimesh::init(t_long nx, t_long ny, sp_obj backend) {
+	return pimpl_->init(nx, ny, backend);
 }
 
 template< class strat_t >
