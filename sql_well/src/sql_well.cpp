@@ -1819,19 +1819,12 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
   sql_well::save_to_bos_ascii_file (const std::string &fname, sp_pool_t pool, sp_prop_t prop)
     {
       FILE *fp = fopen (fname.c_str (), "w");
-      std::list<double> dates;
-      std::list<double>::iterator di, de;
-      boost::python::list dims;
-      fci::cd_storage cd;
-      fci::cd_storage::iterator cdi, cde;
-      fci::frac_storage ft;
-      fci::frac_storage::iterator fti, fte;
-      int w_spec_flag = 0;
       char s_buf[2048];
-      int nx, ny, nz;
+
       // interface to mesh
       sp_himesh himesh = BS_KERNEL.create_object("handy_mesh_iface");
       BS_ASSERT(himesh);
+
       //const double eps = 1e-10;
       sp_dt_t dt_t = BS_KERNEL.create_object ("dt_tools");
 
@@ -1840,36 +1833,73 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           printf ("Error: Can not open destination file %s\n", fname.c_str ());
           return -1;
         }
+
+      // obtain model dimensions
+      boost::python::list dims;
+      dims = pool->py_get_pool_dims();
+      t_long nx = boost::python::extract<int>(dims[0]);
+      t_long ny = boost::python::extract<int>(dims[1]);
+      //nz = boost::python::extract<int>(dims[2]);
+      //unsigned long nx_ny = nx * ny;
+      BS_SP (well_pool_iface) sp_wp = this;
+
+      // precalc trimesh backend to share among all compl & frac builders
+      sp_obj trim_backend = fci::wpi_algo::trimesh::create_backend(nx, ny,
+          pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"));
+
+      // here we wil store builders on every date
+      typedef std::list< fci::compl_n_frac_builder > cfb_storage_t;
+      typedef cfb_storage_t::iterator cfb_iterator;
+      typedef cfb_storage_t::const_iterator cfb_citerator;
+      cfb_storage_t cfb_storage;
+
       // get dates list
       std::string sql = "SELECT d FROM dates ORDER BY d ASC";
-
       if (prepare_sql (sql.c_str ()))
         return -1;
+
+      // fill dates array & calc COMPDATs on every date
+      std::list<double> dates;
       for (; !step_sql ();)
         {
           double d = get_sql_real (0);
           dates.push_back (d);
+
+          // prepare builder
+          fci::compl_n_frac_builder cfb;
+          cfb.init(nx, ny, trim_backend);
+          cfb.init(sp_wp);
+          if(cfb_storage.size() != 0)
+            cfb.share_cache_with(cfb_storage.front());
+
+          // find completions & save
+          cfb.compl_build(d);
+          cfb_storage.push_back(cfb);
         }
       finalize_sql ();
-      de = dates.end ();
 
-      dims = pool->py_get_pool_dims();
-      nx = boost::python::extract<int>(dims[0]);
-      ny = boost::python::extract<int>(dims[1]);
-      nz = boost::python::extract<int>(dims[2]);
-      unsigned long nx_ny = nx * ny;
-      BS_SP (well_pool_iface) sp_wp = this;
-#if 0
-      fci::compdat_builder compdats (nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), sp_wp);
-      fci::fracture_builder fractures (nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), sp_wp);
-#else
-      fci::compl_n_frac_builder compl_n_frac (nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), sp_wp);
-#endif
       // wells in mesh come here
       std::set< std::string > good_wells;
 
-      // iterate over all dates
-      for (di = dates.begin (); di != de; ++di)
+      // check how many wells do we have
+      prepare_sql("SELECT COUNT(*) FROM wells");
+      if (!step_sql ())
+        {
+          BSOUT << "Wells count " << get_sql_int(0) << bs_end;
+          //point->resize (3 * get_sql_int(0));
+        }
+      else {
+        finalize_sql();
+        return -1;
+      }
+      finalize_sql();
+
+
+      /*-----------------------------------------------------------------
+       * Main cycle - iterate over all dates
+       *----------------------------------------------------------------*/
+      cfb_iterator p_cfb = cfb_storage.begin();
+      for (std::list<double>::const_iterator di = dates.begin(), de = dates.end(); di != de; ++di, ++p_cfb)
         {
           char d_buf[1024];
           if (*di - int(*di) == 0) // if *di is integer
@@ -1880,83 +1910,56 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             }
           else
             {
-              std::list<double>::iterator di_prev = di;
+              std::list<double>::const_iterator di_prev = di;
               di_prev--;
               double dt = *di - *di_prev;
               printf ("TSTEP %lf\n", dt);
               fprintf (fp, "TSTEP\n%lf\n/\n\n", dt);
             }
-          // Building compdat to put first completion I, J to WELLSPECS
-          compl_n_frac.clear ();
-          cd = compl_n_frac.compl_build (*di);
-          cde = cd.end();
 
-          if (!w_spec_flag)
-            {
-              w_spec_flag = 1;
-              spv_double point = BS_KERNEL.create_object (v_double::bs_type ());
-              prepare_sql("SELECT COUNT(*) FROM wells");
-              if (!step_sql ())
-                {
-                  BSOUT << "Wells count " << get_sql_int(0) << bs_end;
-                  point->resize (3 * get_sql_int(0));
-                }
-              else
-                return -1;
+          // WELSPECS only on first date
+          if(di == dates.begin()) {
+            fprintf (fp, "WELSPECS\n");
 
-              finalize_sql();
-              t_double *point_ptr = &(*point)[0];
-              // well specs
-              fprintf (fp, "WELSPECS\n");
+            if (prepare_sql ("SELECT name FROM wells ORDER BY name ASC"))
+              return -1;
 
-              if (prepare_sql ("SELECT name, x, y FROM wells ORDER BY name ASC"))
-                return -1;
-              for (; !step_sql ();)
-                {
-                  point_ptr[0] = get_sql_real (1);
-                  point_ptr[1] = get_sql_real (2);
-                  point_ptr[2] = prop->get_f ("min_z");
-                  point_ptr += 3;
-                }
-              finalize_sql ();
+            for (int i = 0; !step_sql (); i++)
+              {
+                // obtain well name
+                std::string s = get_sql_str (0);
+                // we can really just skip wells without any COMPDATs
+                // so we need to check compdats on every date
+                for(cfb_citerator p_cfb = cfb_storage.begin(), cfb_end = cfb_storage.end(); p_cfb != cfb_end; ++p_cfb) {
+                  const fci::cd_storage& cd = p_cfb->storage_compdat();
+                  fci::cd_storage::const_iterator p_cd = fci::compdat::find_first_cd(cd, s);
+                  if(p_cd != cd.end()) {
+                    // well has at least one COMPDAT, so write it to WELLSPEC
+                    // using first COMPDAT cell_id as well's position
+                    BSOUT << "Writing well " << s << bs_end;
+                    fprintf (fp, "\'%s\' \'FIELD\' %lu %lu /\n", s.c_str (),
+                        p_cd->cell_pos[0] + 1, p_cd->cell_pos[1] + 1);
 
-              spv_uint cells = himesh->where_is_points_2d(nx, ny, pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"), point);
-
-              if (prepare_sql ("SELECT name FROM wells ORDER BY name ASC"))
-                return -1;
-
-              for (int i = 0; !step_sql (); i++)
-                {
-                  std::string s = get_sql_str (0);
-                  BSOUT << "Writing well " << s << bs_end;
-                  unsigned long cell = (*cells)[i];
-                  if (cell >= nx_ny * (unsigned long)nz) {
-                    // place of mesh wells into the last cell and print warning
-                    BSERR << std::string("WARNING! Well ") + s + " is out of mesh boundary! Placing it to the last cell in WELSPECS." << bs_end;
-                    cell = nx_ny * (unsigned long)nz - 1;
-                    //continue;
-                    //throw bs_exception ("", "Well's X Y is out of mesh!");
+                    // remember well as good -- not really needed now
+                    good_wells.insert(s);
+                    break;
                   }
-                  unsigned long k1 = cell / nx_ny;
-                  unsigned long j1 = (cell - k1 * nx_ny) / nx;
-                  unsigned long i1 = cell - k1 * nx_ny - j1 * nx;
-                  fprintf (fp, "\'%s\' \'FIELD\' %lu %lu /\n", s.c_str (), i1 + 1, j1 + 1);
-                  // remember well's name for filtering COMPDATS
-                  good_wells.insert(s);
                 }
-              fprintf (fp, "/\n\n");
-              finalize_sql ();
-            }
-
+              }
+            fprintf (fp, "/\n\n");
+            finalize_sql ();
+          }
 
           // COMPDAT
+          // Building compdat to put first completion I, J to WELLSPECS
+          const fci::cd_storage& cd = p_cfb->storage_compdat();
+          const fci::cd_storage::const_iterator cde = cd.end();
           const double eps = 1.0e-5;
           const std::set< std::string >::const_iterator good_wells_end = good_wells.end();
           if (!cd.empty ())
           {
             fprintf (fp, "COMPDAT\n");
-            cde = cd.end();
-            for (cdi = cd.begin(); cdi != cde; ++cdi)
+            for (fci::cd_storage::const_iterator cdi = cd.begin(); cdi != cde; ++cdi)
             {
               // skip out of mesh wells
               if (fabs(cdi->kh_mult) > eps && good_wells.find(cdi->well_name) != good_wells_end)
@@ -1977,10 +1980,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 
           if (!cd.empty ())
           {
-
-            cde = cd.end();
             int wpimult_exist = 0;
-            for (cdi = cd.begin(); cdi != cde; ++cdi)
+            for (fci::cd_storage::const_iterator cdi = cd.begin(); cdi != cde; ++cdi)
             {
               if (fabs(cdi->kh_mult - 1.0) > 1e-6 && std::abs(cdi->kh_mult) > eps && good_wells.find(cdi->well_name) != good_wells_end)
                 {
@@ -1996,14 +1997,15 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 
 
           // FRACTURES
-          ft = compl_n_frac.frac_build(*di);
+          const fci::frac_storage& ft = p_cfb->frac_build(*di);
+          const fci::frac_storage::const_iterator fte = ft.end();
+
           if (!ft.empty ())
           {
             char main_k_str[1024];
             char perm_str[1024];
             fprintf (fp, "FRACTURE\n");
-            fte = ft.end ();
-            for (fti = ft.begin (); fti != fte; ++fti)
+            for (fci::frac_storage::const_iterator fti = ft.begin (); fti != fte; ++fti)
             {
               // skip out-of-mesh wells
               if(good_wells.find(fti->well_name) == good_wells_end)
@@ -2240,7 +2242,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           if (wefac_flag)
             fprintf (fp, "/\n\n");
           finalize_sql ();
-        }
+        }   // eof main cycle over dates
 
       fclose (fp);
       return 0;
