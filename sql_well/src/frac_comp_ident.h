@@ -71,6 +71,16 @@ struct BS_API_PLUGIN compdat {
 			return well_name < rhs.well_name;
 	}
 
+	static storage_t::const_iterator find_first_cd(const storage_t& cds, const std::string& well_name) {
+		compdat t(0);
+		t.well_name = well_name;
+		const storage_t::const_iterator p_cd = cds.lower_bound(t);
+		if(p_cd != cds.end() && p_cd->well_name == well_name)
+			return p_cd;
+		else
+			return cds.end();
+	}
+
 private:
 	ulong cell_id_;
 };
@@ -129,11 +139,14 @@ typedef fracture::storage_t frac_storage;
 template< class brick >
 class BS_API_PLUGIN builder {
 public:
+	template< class B > friend class builder;
+
 	typedef typename brick::storage_t storage_t;
 
 	builder();
 
 	void init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
+	void init(t_ulong nx, t_ulong ny, sp_obj trim_backend);
 	void init(smart_ptr< well_pool_iface, true > src_well);
 
 	// invoke main algo
@@ -144,6 +157,9 @@ public:
 
 	// storage getter
 	const storage_t& storage() const;
+
+	template< class B >
+	void share_cache_with(const builder< B >& rhs);
 
 private:
 	class impl;
@@ -195,6 +211,7 @@ public:
 		smart_ptr< well_pool_iface, true > src_well);
 
 	void init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn);
+	void init(t_ulong nx, t_ulong ny, sp_obj trim_backend);
 	void init(smart_ptr< well_pool_iface, true > src_well);
 
 	// compdat build
@@ -211,6 +228,9 @@ public:
 
 	// storage getter
 	const frac_storage& storage_fracture() const;
+
+	// use single cache among multiple instances
+	void share_cache_with(const compl_n_frac_builder& rhs);
 
 private:
 	class impl;

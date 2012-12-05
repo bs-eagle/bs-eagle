@@ -166,6 +166,11 @@ void builder< brick >::init(t_ulong nx, t_ulong ny, spv_float coord, spv_float z
 }
 
 template< class brick >
+void builder< brick >::init(t_ulong nx, t_ulong ny, sp_obj trim_backend) {
+	pimpl_->init(nx, ny, trim_backend);
+}
+
+template< class brick >
 void builder< brick >::init(smart_ptr< well_pool_iface, true > src_well) {
 	pimpl_->init(src_well);
 }
@@ -184,6 +189,12 @@ const typename builder< brick >::storage_t& builder< brick >::storage() const {
 template< class brick >
 void builder< brick >::clear() {
 	pimpl_->s_.clear();
+}
+
+template< class brick >
+template< class B >
+void builder< brick >::share_cache_with(const builder< B >& rhs) {
+	pimpl_->init_cache(rhs->pimpl_->xp_cache_, rhs->pimpl_->cache_limit_);
 }
 
 /*-----------------------------------------------------------------
@@ -236,29 +247,40 @@ public:
 	impl() {
 		init_cache();
 	}
-	impl(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
+	impl(t_ulong nx, t_ulong ny, const spv_float& coord, const spv_float& zcorn) {
 		init(nx, ny, coord, zcorn);
 		init_cache();
 	}
-	impl(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn, const sp_srcwell& src_well) {
+	impl(t_ulong nx, t_ulong ny, const spv_float& coord, const spv_float& zcorn,
+		const sp_srcwell& src_well)
+	{
 		init(nx, ny, coord, zcorn);
 		init(src_well);
 		init_cache();
 	}
 
-	void init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
+	void init(t_ulong nx, t_ulong ny, const spv_float& coord, const spv_float& zcorn) {
 		cb_.init(nx, ny, coord, zcorn);
 		fb_.init(nx, ny, coord, zcorn);
 	}
+
+	void init(t_ulong nx, t_ulong ny, const sp_obj& trim_backend) {
+		cb_.init(nx, ny, trim_backend);
+		fb_.init(nx, ny, trim_backend);
+	}
+
 	void init(const sp_srcwell& src_well) {
 		cb_.init(src_well);
 		fb_.init(src_well);
 	}
 
-	void init_cache() {
-		xp_cache_ = new xp_cache_t;
-		cb_.init_cache(xp_cache_, 0);
-		fb_.init_cache(xp_cache_, 0);
+	void init_cache(const spxp_cache_t xc = NULL, const ulong cache_limit = 0) {
+		if(xc)
+			xp_cache_ = xc;
+		else
+			xp_cache_ = new xp_cache_t;
+		cb_.init_cache(xp_cache_, cache_limit);
+		fb_.init_cache(xp_cache_, cache_limit);
 	}
 
 	const cd_storage& compl_build(double date) {
@@ -275,12 +297,20 @@ public:
 		cb_.s_.clear();
 		fb_.s_.clear();
 	}
+
+	void share_cache_with(const compl_n_frac_builder& rhs) {
+		init_cache(rhs.pimpl_->xp_cache_, rhs.pimpl_->cb_.cache_limit_);
+	}
 };
 
 
 /*-----------------------------------------------------------------
  * comp_n_frac_builder implementation
  *----------------------------------------------------------------*/
+compl_n_frac_builder::compl_n_frac_builder()
+	: pimpl_(new impl())
+{}
+
 compl_n_frac_builder::compl_n_frac_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn)
 	: pimpl_(new impl(nx, ny, coord, zcorn))
 {}
@@ -292,6 +322,10 @@ compl_n_frac_builder::compl_n_frac_builder(t_ulong nx, t_ulong ny, spv_float coo
 
 void compl_n_frac_builder::init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
 	pimpl_->init(nx, ny, coord, zcorn);
+}
+
+void compl_n_frac_builder::init(t_ulong nx, t_ulong ny, sp_obj trim_backend) {
+	pimpl_->init(nx, ny, trim_backend);
 }
 
 void compl_n_frac_builder::init(smart_ptr< well_pool_iface, true > src_well) {
@@ -316,6 +350,10 @@ const frac_storage& compl_n_frac_builder::storage_fracture () const {
 
 void compl_n_frac_builder::clear() {
 	pimpl_->clear();
+}
+
+void compl_n_frac_builder::share_cache_with(const compl_n_frac_builder& rhs) {
+	pimpl_->share_cache_with(rhs);
 }
 
 /*-----------------------------------------------------------------
@@ -383,11 +421,13 @@ void py_export_compdat_ident() {
 
 	void (compdat_builder::*init1)(t_ulong, t_ulong, spv_float, spv_float) = &compdat_builder::init;
 	void (compdat_builder::*init2)(smart_ptr< well_pool_iface, true >) = &compdat_builder::init;
+	void (compdat_builder::*init3)(t_ulong, t_ulong, sp_obj) = &compdat_builder::init;
 	bp::class_< compdat_builder >("compdat_builder",
 		bp::init< t_ulong, t_ulong, spv_float, spv_float >())
 		.def(bp::init< t_ulong, t_ulong, spv_float, spv_float, smart_ptr< well_pool_iface, true> >())
 		.def("init", init1)
 		.def("init", init2)
+		.def("init", init3)
 		.def("build", &compdat_builder::build,
 			bp::return_value_policy< bp::copy_const_reference >(),
 			cdb_build_overl())
@@ -410,13 +450,15 @@ void py_export_compdat_ident() {
 	py_fracs_conv::register_from_py();
 
 	// export fracture_builder
-	void (fracture_builder::*init3)(t_ulong, t_ulong, spv_float, spv_float) = &fracture_builder::init;
-	void (fracture_builder::*init4)(smart_ptr< well_pool_iface, true >) = &fracture_builder::init;
+	void (fracture_builder::*init4)(t_ulong, t_ulong, spv_float, spv_float) = &fracture_builder::init;
+	void (fracture_builder::*init5)(smart_ptr< well_pool_iface, true >) = &fracture_builder::init;
+	void (fracture_builder::*init6)(t_ulong, t_ulong, sp_obj) = &fracture_builder::init;
 	bp::class_< fracture_builder >("fracture_builder",
 			bp::init< t_ulong, t_ulong, spv_float, spv_float >())
 		.def(bp::init< t_ulong, t_ulong, spv_float, spv_float, smart_ptr< well_pool_iface, true> >())
-		.def("init", init3)
 		.def("init", init4)
+		.def("init", init5)
+		.def("init", init6)
 		.def("build", &fracture_builder::build,
 			bp::return_value_policy< bp::copy_const_reference >(),
 			cdb_build_overl())
@@ -426,13 +468,15 @@ void py_export_compdat_ident() {
 		;
 
 	// export compl_n_frac_builder
-	void (compl_n_frac_builder::*init5)(t_ulong, t_ulong, spv_float, spv_float) = &compl_n_frac_builder::init;
-	void (compl_n_frac_builder::*init6)(smart_ptr< well_pool_iface, true >) = &compl_n_frac_builder::init;
+	void (compl_n_frac_builder::*init7)(t_ulong, t_ulong, spv_float, spv_float) = &compl_n_frac_builder::init;
+	void (compl_n_frac_builder::*init8)(smart_ptr< well_pool_iface, true >) = &compl_n_frac_builder::init;
+	void (compl_n_frac_builder::*init9)(t_ulong, t_ulong, sp_obj) = &compl_n_frac_builder::init;
 	bp::class_< compl_n_frac_builder >("compl_n_frac_builder",
 			bp::init< t_ulong, t_ulong, spv_float, spv_float >())
 		.def(bp::init< t_ulong, t_ulong, spv_float, spv_float, smart_ptr< well_pool_iface, true> >())
-		.def("init", init5)
-		.def("init", init6)
+		.def("init", init7)
+		.def("init", init8)
+		.def("init", init9)
 		.def("compl_build", &compl_n_frac_builder::compl_build,
 			bp::return_value_policy< bp::copy_const_reference >(),
 			cdb_build_overl())

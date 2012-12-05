@@ -47,21 +47,24 @@ public:
 
 	frac_comp_builder() {}
 
-	frac_comp_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
+	frac_comp_builder(t_ulong nx, t_ulong ny, const spv_float& coord, const spv_float& zcorn) {
 		init(nx, ny, coord, zcorn);
 	}
 
-	frac_comp_builder(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
+	frac_comp_builder(t_ulong nx, t_ulong ny, const spv_float& coord, const spv_float& zcorn,
 		smart_ptr< well_pool_iface, true > src_well)
 	{
 		init(nx, ny, coord, zcorn);
 		init(src_well);
 	}
 
-	void init(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn) {
+	void init(t_ulong nx, t_ulong ny, const spv_float& coord, const spv_float& zcorn) {
 		// build trimesh for given coord+zcorn
 		m_.init(nx, ny, coord, zcorn);
-		//tops_ = wpi_algo::coord_zcorn2trimesh(nx, ny, coord, zcorn, m_, m_size_);
+	}
+
+	void init(t_long nx, t_long ny, const sp_obj& trim_backend) {
+		m_.init(nx, ny, trim_backend);
 	}
 
 	void init(smart_ptr< well_pool_iface, true > src_well) {
@@ -76,7 +79,7 @@ public:
 		cache_limit_ = cache_limit;
 	}
 
-	void build(double date, const cd_traits& t = cd_traits()) {
+	void build(double date) {
 		//s_.clear();
 
 		// 1 fill storage with all unique well+branch
