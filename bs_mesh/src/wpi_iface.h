@@ -13,7 +13,7 @@
 #include "wpi_strategy_traits.h"
 #include "wpi_strategy_3d.h"
 #include "wpi_strategy_2d.h"
-#include "wpi_trimesh_impl.h"
+//#include "wpi_trimesh_impl.h"
 
 namespace blue_sky { namespace wpi {
 // handy typedefs
