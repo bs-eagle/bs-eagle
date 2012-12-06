@@ -63,7 +63,7 @@ protected:
 // holds pointer to rs_smesh_iface
 template<  >
 struct trimpl< online_tops_traits > {
-	typedef typename online_tops_traits::cell_vertex_iterator iterator_t;
+	typedef online_tops_traits::cell_vertex_iterator iterator_t;
 	typedef smart_ptr< rs_smesh_iface, true > sp_smesh;
 
 	iterator_t begin() const {
