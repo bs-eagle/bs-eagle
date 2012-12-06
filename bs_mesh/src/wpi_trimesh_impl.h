@@ -15,7 +15,8 @@
 #include "rs_smesh_iface.h"
 #include "coord_zcorn_tools.h"
 
-namespace blue_sky { namespace wpi { namespace detail {
+namespace blue_sky { namespace detail { namespace wpi {
+using namespace blue_sky::wpi;
 /*-----------------------------------------------------------------
  * internals trimesh implementation for different traits
  *----------------------------------------------------------------*/

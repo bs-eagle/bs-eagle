@@ -13,13 +13,14 @@
 //#include "wpi_trimesh_impl.h"
 //#include <boost/pool/pool_alloc.hpp>
 
-namespace blue_sky { namespace wpi {
-
+namespace blue_sky {
 // forward declaration of trimesh implementation
-namespace detail {
+namespace detail { namespace wpi {
 	template< class strat_traits >
 	struct trimpl;
-} /* detail */
+}} /* detail::wpi */
+
+namespace wpi {
 
 template< class strat_t >
 struct helpers {
@@ -170,14 +171,14 @@ struct pods : public helpers< strat_t > {
 	typedef st_smart_ptr< cell_data > sp_cell_data;
 
 	// storage for representing mesh
-	class trimesh : public detail::trimpl< typename strat_t::traits_t > {
+	class trimesh : public detail::wpi::trimpl< typename strat_t::traits_t > {
 	public:
 		typedef cell_data value_type;
 		typedef value_type& reference;
 		typedef const value_type& const_reference;
 		typedef value_type* pointer;
 
-		typedef detail::trimpl< typename strat_t::traits_t > base_t;
+		typedef detail::wpi::trimpl< typename strat_t::traits_t > base_t;
 		using base_t::begin;
 
 		// empty ctor
