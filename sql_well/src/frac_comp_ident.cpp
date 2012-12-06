@@ -24,9 +24,8 @@
 namespace blue_sky { namespace fci {
 // impl details
 using namespace std;
-using namespace wpi;
 
-typedef algo< strategy_3d > wpi_algo;
+typedef wpi::algo< wpi::strategy_3d > wpi_algo;
 
 // hidden details
 namespace {
@@ -146,7 +145,7 @@ void fracture::init(ulong cell_id, const pos_i& mesh_size) {
 	wpi_algo::decode_cell_id(cell_id, cell_pos_, mesh_size);
 	copy(&cell_pos_[0], &cell_pos_[strategy_3d::D], &cell_pos[0]);
 	cell_pos[3] = cell_pos[2];
-  copy(&cell_pos_[0], &cell_pos_[strategy_3d::D], &md_cell_pos[0]);
+	copy(&cell_pos_[0], &cell_pos_[strategy_3d::D], &md_cell_pos[0]);
 	// store cell_id
 	cell_id_ = cell_id;
 }
