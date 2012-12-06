@@ -10,10 +10,16 @@
 #define WPI_ALGO_POD_BDBOLFWA
 
 #include "wpi_common.h"
-#include "wpi_trimesh_impl.h"
+//#include "wpi_trimesh_impl.h"
 //#include <boost/pool/pool_alloc.hpp>
 
 namespace blue_sky { namespace wpi {
+
+// forward declaration of trimesh implementation
+namespace detail {
+	template< class strat_traits >
+	struct trimpl;
+} /* detail */
 
 template< class strat_t >
 struct helpers {
@@ -164,7 +170,6 @@ struct pods : public helpers< strat_t > {
 	typedef st_smart_ptr< cell_data > sp_cell_data;
 
 	// storage for representing mesh
-	//template< class cell_data, class strat_traits >
 	class trimesh : public detail::trimpl< typename strat_t::traits_t > {
 	public:
 		typedef cell_data value_type;
