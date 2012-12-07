@@ -202,18 +202,18 @@ std::vector< well_hit_cell_2d > well_path_ident_2d(t_long nx, t_long ny, spv_flo
 /*-----------------------------------------------------------------
  * Python bindings
  *----------------------------------------------------------------*/
-BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl, well_path_ident, 5, 6)
-BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl_2d, well_path_ident_2d, 5, 6)
-BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl_2d_old, well_path_ident_2d_old, 5, 6)
+BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl, ::blue_sky::well_path_ident, 5, 6)
+BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl_2d, ::blue_sky::well_path_ident_2d, 5, 6)
+BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl_2d_old, ::blue_sky::well_path_ident_2d_old, 5, 6)
 BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_facets_overl, enum_border_facets_vtk, 4, 7)
 BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_edges_overl, enum_border_edges_vtk, 4, 7)
 
 namespace python {
 
 void py_export_wpi() {
-	bp::def("well_path_ident", &well_path_ident, well_path_ident_overl());
-	bp::def("well_path_ident_2d", &well_path_ident_2d, well_path_ident_overl_2d());
-	bp::def("well_path_ident_2d_old", &well_path_ident_2d_old, well_path_ident_overl_2d_old());
+	bp::def("well_path_ident", &::blue_sky::well_path_ident, well_path_ident_overl());
+	bp::def("well_path_ident_2d", &::blue_sky::well_path_ident_2d, well_path_ident_overl_2d());
+	bp::def("well_path_ident_2d_old", &::blue_sky::well_path_ident_2d_old, well_path_ident_overl_2d_old());
 	bp::def("where_is_point", &where_is_point);
 	bp::def("where_is_points", &where_is_points);
 	bp::def("where_is_point_2d", &where_is_point_2d);
