@@ -51,7 +51,7 @@ namespace blue_sky
   blu_solver::init_prop ()
     {
       prop->add_property_i (true, std::string ("block_size"),
-                            std::string ("Size of calculation block"));
+                            L"Size of calculation block");
     }
 
 

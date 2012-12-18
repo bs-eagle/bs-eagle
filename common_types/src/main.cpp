@@ -30,6 +30,13 @@ using namespace boost::python;
 #define REG_TYPE(S)                     \
     res &= BS_KERNEL.register_type(pd, S::bs_type()); BS_ASSERT (res);
 
+std::string wtos(const std::wstring &s)
+  {
+    std::string d (s.length(), L' ');
+    std::copy (s.begin(), s.end(), d.begin());
+    return d;
+  }
+
 namespace blue_sky {
   BLUE_SKY_PLUGIN_DESCRIPTOR_EXT ("comm", "1.0.0", "Common data types", "Common data types", "comm")
 

@@ -65,7 +65,7 @@ namespace blue_sky
   bcsr_ilu_prec::init_prop ()
     {
       prop->add_property_b (true, use_internal_matrix, 
-                            std::string ("If True preconditioner will copy matrix given in setup method"));
+                            L"If True preconditioner will copy matrix given in setup method");
     }
 
   

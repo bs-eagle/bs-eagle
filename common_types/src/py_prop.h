@@ -29,7 +29,7 @@ namespace blue_sky
     // we should export base class
     
   PY_EXPORTER (py_prop_exporter, default_exporter)
-    .def ("add_property_f",                     &T::add_property_f, 
+    .def ("add_property_f",                     &T::add_property_f,
         args ("default_value", "name", "description"), "Add fp type property")
     .def ("add_property_i",                     &T::add_property_i, 
         args ("default_value", "name", "description"), "Add integer type property")

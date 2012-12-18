@@ -57,7 +57,7 @@ namespace blue_sky
      void
     two_stage_prec::init_prop ()
       {
-        prop->add_property_b (false, success_idx, std::string ("True if solver successfully convergent"));
+        prop->add_property_b (false, success_idx, L"True if solver successfully convergent");
       }
     
     int two_stage_prec::solve (sp_matrix_t matrix, 

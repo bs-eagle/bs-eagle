@@ -20,6 +20,8 @@
 
 #include "throw_exception.h"
 
+std::string wtos(const std::wstring &s);
+
 template <class type_t>
 class prop_impl
 {
@@ -33,7 +35,7 @@ class prop_impl
         type_t def_value;
         bool flag;
         std::string short_name;
-        std::string description;
+        std::wstring description;
         
         template<class Archive>
         void serialize(Archive & ar, const unsigned int /*version*/)
@@ -58,7 +60,7 @@ class prop_impl
     ~prop_impl () {};
 
     // add new property
-    void add (const type_t def_value, const std::string &short_name, const std::string &description);
+    void add (const type_t def_value, const std::string &short_name, const std::wstring &description);
 
     //! clear all
     void clear ()
@@ -159,7 +161,7 @@ class prop_impl
       }
 
     //! return default value for given name
-    const std::string get_description (const std::string &name) const
+    const std::wstring get_description (const std::string &name) const
       {
         typename map_t::const_iterator i;
 
@@ -215,7 +217,7 @@ prop_impl<type_t>::py_str () const
           s << i->second.short_name;
           s << "|";
           s.width (30);
-          s << i->second.description << "|\n";
+          s << wtos(i->second.description) << "|\n";
     }
   s << "+----------------------------------------------------------------------+\n";
   return s.str ();
@@ -231,7 +233,7 @@ prop_impl<type_t>::py_str () const
  * @return 0 if success
  */
 template <class type_t> void 
-prop_impl<type_t>::add (const type_t def_value, const std::string &short_name, const std::string &description)
+prop_impl<type_t>::add (const type_t def_value, const std::string &short_name, const std::wstring &description)
 {
   typename map_t::iterator i, e;
   std::pair<std::string, prop_storage> p;

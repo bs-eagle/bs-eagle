@@ -72,18 +72,18 @@ namespace blue_sky
     cgs_solver::init_prop ()
       {
         prop->add_property_f (1.0e-4, tol_idx, 
-                              std::string ("Target tolerance for linear solver"));
+                              L"Target tolerance for linear solver");
 
-        prop->add_property_f (1, final_res_idx, std::string ("Solution residual"));
+        prop->add_property_f (1, final_res_idx, L"Solution residual");
 
         prop->add_property_i (20, max_iters_idx, 
-                              std::string ("Maximum allowed number of iterations"));
+                              L"Maximum allowed number of iterations");
 
         prop->add_property_i (0, iters_idx, 
-                              std::string ("Total number of used solver iterations"));
+                              L"Total number of used solver iterations");
 
         prop->add_property_b (false, success_idx, 
-                              std::string ("True if solver successfully convergent"));
+                              L"True if solver successfully convergent");
       }
 
     

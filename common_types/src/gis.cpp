@@ -36,6 +36,13 @@ using namespace boost::python;
 namespace blue_sky
 {
 
+  std::wstring stow(const std::string &s)
+    {
+      std::wstring d (s.length(), L' ');
+      std::copy (s.begin(), s.end(), d.begin());
+      return d;
+    }
+
   gis::gis (bs_type_ctor_param) 
     {
       sp_prop = BS_KERNEL.create_object ("prop");
@@ -119,7 +126,7 @@ namespace blue_sky
         }
       else
         {
-          prop->add_property_s ("", name, description);
+          prop->add_property_s ("", name, stow(description));
           prop->set_s (name, data);
         }
       return 0;
@@ -141,24 +148,24 @@ namespace blue_sky
           || name == "STEP"
           || name == "NULL")
         {
-          prop->add_property_f (0, name, units);
+          prop->add_property_f (0, name, stow(units));
           prop->set_f (name, str2T<double> (data));
         }
       else if (name == "LIC")
         {
-          prop->add_property_i (0, name, description);
+          prop->add_property_i (0, name, stow(description));
           prop->set_i (name, str2T<int> (data));
         }
       else
         {
           if (ver <= 1.2 && data == "")
             {
-              prop->add_property_s ("", name, "");
+              prop->add_property_s ("", name, L"");
               prop->set_s (name, description);
             }
           else if (data != "")
             {
-              prop->add_property_s ("", name, description);
+              prop->add_property_s ("", name, stow(description));
               prop->set_s (name, data);
             }
         }
@@ -182,12 +189,12 @@ namespace blue_sky
       split_str (s, name, units, data, description);
       if (ver <= 1.2 && data == "")
         {
-          prop->add_property_s ("", name, "");
+          prop->add_property_s ("", name, L"");
           prop->set_s (name, description);
         }
       else if (data != "")
         {
-          prop->add_property_s ("", name, description);
+          prop->add_property_s ("", name, stow(description));
           prop->set_s (name, data);
         }
       return 0;
@@ -208,7 +215,7 @@ namespace blue_sky
 
       if (units != "")
         name = name + " (" + units + ")";
-      prop->add_property_s ("", param, description);
+      prop->add_property_s ("", param, stow(description));
       prop->set_s (param, name);
       return 0;
     }
@@ -265,7 +272,7 @@ namespace blue_sky
       namespace fs = boost::filesystem;
       fs::path p(fname);
       std::cout << "Start:"  << '\n';
-      sp_prop->add_property_f (2.0, "VERS", "Version information");
+      sp_prop->add_property_f (2.0, "VERS", L"Version information");
       try
         {
           if (!fs::exists (p) || !is_regular_file (p))

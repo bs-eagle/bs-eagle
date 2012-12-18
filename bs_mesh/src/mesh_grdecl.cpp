@@ -145,13 +145,13 @@ void mesh_grdecl::init_props(const sp_hdm_t hdm)
 
   // postinit
   pinner_->init_minmax(*this);
-  hdm->get_prop()->add_property_f(0, "min_x", std::string ("Minimum X coordinate for current mesh"));
-  hdm->get_prop()->add_property_f(0, "min_y", std::string ("Minimum Y coordinate for current mesh"));
-  hdm->get_prop()->add_property_f(0, "min_z", std::string ("Minimum Z coordinate for current mesh"));
+  hdm->get_prop()->add_property_f(0, "min_x", L"Minimum X coordinate for current mesh");
+  hdm->get_prop()->add_property_f(0, "min_y", L"Minimum Y coordinate for current mesh");
+  hdm->get_prop()->add_property_f(0, "min_z", L"Minimum Z coordinate for current mesh");
 
-  hdm->get_prop()->add_property_f(0, "max_x", std::string ("Maximum X coordinate for current mesh"));
-  hdm->get_prop()->add_property_f(0, "max_y", std::string ("Maximum Y coordinate for current mesh"));
-  hdm->get_prop()->add_property_f(0, "max_z", std::string ("Maximum Z coordinate for current mesh"));
+  hdm->get_prop()->add_property_f(0, "max_x", L"Maximum X coordinate for current mesh");
+  hdm->get_prop()->add_property_f(0, "max_y", L"Maximum Y coordinate for current mesh");
+  hdm->get_prop()->add_property_f(0, "max_z", L"Maximum Z coordinate for current mesh");
 
   hdm->get_prop()->set_f("min_x", min_x);
   hdm->get_prop()->set_f("min_y", min_y);

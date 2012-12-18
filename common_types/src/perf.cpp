@@ -45,21 +45,21 @@ namespace blue_sky
   perf::init_prop ()
     {
       sp_prop->add_property_f (-1, "parent_md", 
-                               std::string ("Position of the fracture center in the well branch (m.)"));
+                               L"Position of the fracture center in the well branch (m.)");
       sp_prop->add_property_s ("main", "parent", 
-                               std::string ("Parent well branch (m.)"));
+                               L"Parent well branch (m.)");
       sp_prop->add_property_f (1, "length", 
-                               std::string ("Length (m.) of perforation interval"));
+                               L"Length (m.) of perforation interval");
       sp_prop->add_property_f (0.06, "radius", 
-                               std::string ("Radius (m.) of the wellbore"));
+                               L"Radius (m.) of the wellbore");
       sp_prop->add_property_f (-1, "trans", 
-                               std::string ("Transmissibility (cP-m3/day-bars) of the perforation"));
+                               L"Transmissibility (cP-m3/day-bars) of the perforation");
       sp_prop->add_property_f (-1, "kh", 
-                               std::string ("Effective Kh (mD-m) of the perforation"));
+                               L"Effective Kh (mD-m) of the perforation");
       sp_prop->add_property_f (0, "skin", 
-                               std::string ("Skin factor of the perforation"));
+                               L"Skin factor of the perforation");
       sp_prop->add_property_f (-1, "r0", 
-                               std::string ("Pressure equivalent radius"));
+                               L"Pressure equivalent radius");
 
     }
 

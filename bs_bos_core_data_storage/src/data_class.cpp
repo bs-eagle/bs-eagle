@@ -103,24 +103,24 @@ namespace blue_sky
     //depth.resize((nx+1) * (ny+1) * (nz+1));
     //h5_pool->open_file ("bs_data_storage.h5", "/pool");
     
-    props->add_property_i (0, "rpo_model", "3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
-    props->add_property_i (1, "pvt_region", "Number of PVT regions in simulation");
-    props->add_property_i (1, "sat_region", "Number of saturation regions in simulation");
-    props->add_property_i (1, "eql_region", "Number of equilibrium regions in simulation");
-    props->add_property_i (1, "fip_region", "Number of FIP regions in simulation");
-    props->add_property_i (1, "rock_region", "Number of ROCK regions");
-    props->add_property_i (0, "init_section", "flag indicating whether we have init section");
-    props->add_property_i (0, "scal_family", "flag indicating swof/sgof (0) or swfn/sgfn/sof2/sof3 (1) family");
+    props->add_property_i (0, "rpo_model", L"3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
+    props->add_property_i (1, "pvt_region", L"Number of PVT regions in simulation");
+    props->add_property_i (1, "sat_region", L"Number of saturation regions in simulation");
+    props->add_property_i (1, "eql_region", L"Number of equilibrium regions in simulation");
+    props->add_property_i (1, "fip_region", L"Number of FIP regions in simulation");
+    props->add_property_i (1, "rock_region", L"Number of ROCK regions");
+    props->add_property_i (0, "init_section", L"flag indicating whether we have init section");
+    props->add_property_i (0, "scal_family", L"flag indicating swof/sgof (0) or swfn/sgfn/sof2/sof3 (1) family");
     
-    props->add_property_s ("", "title", "Current model title");
-    props->add_property_b (0, "oil_phase", "True if oil phase exists");
-    props->add_property_b (0, "water_phase", "True if water phase exists");
-    props->add_property_b (0, "gas_phase", "True if gas phase exists");
-    props->add_property_b (0, "scalecrs", "True if SCALECRS is enabled");
+    props->add_property_s ("", "title", L"Current model title");
+    props->add_property_b (0, "oil_phase", L"True if oil phase exists");
+    props->add_property_b (0, "water_phase", L"True if water phase exists");
+    props->add_property_b (0, "gas_phase", L"True if gas phase exists");
+    props->add_property_b (0, "scalecrs", L"True if SCALECRS is enabled");
 
-    props->add_property_f (DEFAULT_MINIMAL_PORE_VOLUME,       "minimal_pore_volume", "Default minimal pore volume allowed for active cells");
-    props->add_property_f (DEFAULT_MINIMAL_SPLICE_VOLUME,     "minimal_splice_volume", "Default minimal pore volume allowed for active cells to splice with other cells");
-    props->add_property_f (DEFAULT_MAXIMUM_SPLICE_THICKNESS,  "maximum_splice_thickness", "Default maximum thickness allowed between active cells to be coupled");
+    props->add_property_f (DEFAULT_MINIMAL_PORE_VOLUME,       "minimal_pore_volume", L"Default minimal pore volume allowed for active cells");
+    props->add_property_f (DEFAULT_MINIMAL_SPLICE_VOLUME,     "minimal_splice_volume", L"Default minimal pore volume allowed for active cells to splice with other cells");
+    props->add_property_f (DEFAULT_MAXIMUM_SPLICE_THICKNESS,  "maximum_splice_thickness", L"Default maximum thickness allowed between active cells to be coupled");
   }
 
   void idata::flush_pool()

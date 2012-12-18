@@ -275,7 +275,7 @@ namespace blue_sky
       keyword_manager->register_keyword ("EQUIL", keyword_manager_iface::keyword_handler (EQUIL, 0));
       keyword_manager->register_keyword ("RSVD", keyword_manager_iface::keyword_handler (RSVD, 0));
       keyword_manager->register_keyword ("PBVD", keyword_manager_iface::keyword_handler (PBVD, 0));
-      params.hdm->get_prop()->add_property_i(1, "init", "init type");
+      params.hdm->get_prop()->add_property_i(1, "init", L"init type");
     }
   }
 

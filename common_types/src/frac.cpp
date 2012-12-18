@@ -45,31 +45,31 @@ namespace blue_sky
   frac::init_prop ()
     {
       sp_prop->add_property_b (true, "is_vertical", 
-                               std::string ("Should be true if fracture is vertical"));
+                               L"Should be true if fracture is vertical");
       sp_prop->add_property_b (true, "is_symmetric", 
-                               std::string ("Is fracture is symmetrical"));
+                               L"Is fracture is symmetrical");
       sp_prop->add_property_b (true, "inf_perm", 
-                               std::string ("If true use infinum permeability for fracture"));
+                               L"If true use infinum permeability for fracture");
       sp_prop->add_property_f (100000.0, "perm", 
-                               std::string ("Permiability (mD) for fracture (only if inf_perm == false)"));
+                               L"Permiability (mD) for fracture (only if inf_perm == false)");
       sp_prop->add_property_f (0.005, "wf", 
-                               std::string ("Width of the fracture (m.) (only if inf_perm == false)"));
+                               L"Width of the fracture (m.) (only if inf_perm == false)");
       sp_prop->add_property_f (50, "half_length", 
-                               std::string ("Half length of the fracture (m.)"));
+                               L"Half length of the fracture (m.)");
       sp_prop->add_property_f (20, "up_half_height", 
-                               std::string ("Half height in up direction of the fracture (m.)"));
+                               L"Half height in up direction of the fracture (m.)");
       sp_prop->add_property_f (20, "down_half_height", 
-                               std::string ("Half height in down direction of the fracture (m.)"));
+                               L"Half height in down direction of the fracture (m.)");
       sp_prop->add_property_f (0, "angle", 
-                               std::string ("Fracture angle (grad)"));
+                               L"Fracture angle (grad)");
       sp_prop->add_property_f (50, "hor_main_radius", 
-                               std::string ("Main radius for horizontal well (m.)"));
+                               L"Main radius for horizontal well (m.)");
       sp_prop->add_property_f (50, "hor_sec_radius", 
-                               std::string ("Secondary radius for horizontal well (m.)"));
+                               L"Secondary radius for horizontal well (m.)");
       sp_prop->add_property_f (-1, "parent_md", 
-                               std::string ("Position of the fracture center in the well branch (m.)"));
+                               L"Position of the fracture center in the well branch (m.)");
       sp_prop->add_property_s ("main", "parent", 
-                               std::string ("Parent well branch (m.)"));
+                               L"Parent well branch (m.)");
 
     }
 

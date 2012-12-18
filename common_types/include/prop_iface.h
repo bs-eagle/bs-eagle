@@ -36,16 +36,16 @@ namespace blue_sky
       // ------------------------------------
     public:
       //! add new floating point property to the list (return index of the property or < 0 if error occur)
-      virtual void add_property_f (const t_double def_value, const std::string  &short_name, const std::string  &description) = 0;
+      virtual void add_property_f (const t_double def_value, const std::string  &short_name, const std::wstring  &description) = 0;
       
       //! add new integer property to the list (return index of the property or < 0 if error occur)
-      virtual void add_property_i (const t_long def_value, const std::string  &short_name, const std::string  &description) = 0; 
+      virtual void add_property_i (const t_long def_value, const std::string  &short_name, const std::wstring  &description) = 0; 
 
       //! add new string property to the list (return index of the property or < 0 if error occur)
-      virtual void add_property_s (const std::string def_value, const std::string  &short_name, const std::string  &description) = 0; 
+      virtual void add_property_s (const std::string def_value, const std::string  &short_name, const std::wstring  &description) = 0; 
 
       //! add new string property to the list (return index of the property or < 0 if error occur)
-      virtual void add_property_b (const bool def_value, const std::string  &short_name, const std::string  &description) = 0; 
+      virtual void add_property_b (const bool def_value, const std::string  &short_name, const std::wstring  &description) = 0; 
  
       //! clear all
       virtual void clear () = 0;

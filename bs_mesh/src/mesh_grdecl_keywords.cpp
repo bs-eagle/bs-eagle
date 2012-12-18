@@ -61,7 +61,7 @@ namespace blue_sky
       params.hdm->set_mesh (mesh_grdecl);
       activate_keywords (params.hdm->get_keyword_manager());
       base_t::activate_keywords (params.hdm->get_keyword_manager());
-      params.hdm->get_prop()->add_property_i(1, "mesh", "mesh type");
+      params.hdm->get_prop()->add_property_i(1, "mesh", L"mesh type");
     }
 
   BLUE_SKY_TYPE_STD_CREATE (mesh_grdecl_keywords)

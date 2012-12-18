@@ -65,19 +65,19 @@ namespace blue_sky
     gmres_solver::init_prop ()
       {
         prop->add_property_f (1.0e-4, tol_idx,
-                              std::string ("Target tolerance for linear solver"));
+                              L"Target tolerance for linear solver");
         prop->add_property_f (1, final_res_idx,
-                              std::string ("Solution residual"));
+                              L"Solution residual");
         prop->add_property_i (200, max_iters_idx,
-                              std::string ("Maximum allowed number of iterations"));
+                              L"Maximum allowed number of iterations");
         prop->add_property_i (0,iters_idx,
-                              std::string ("Total number of used solver iterations"));
+                              L"Total number of used solver iterations");
         prop->add_property_i (30, m_idx,
-                              std::string ("Number of vectors used for ortogonalization"));
+                              L"Number of vectors used for ortogonalization");
         prop->add_property_b (false, success_idx,
-                              std::string ("True if solver successfully convergent"));
+                              L"True if solver successfully convergent");
         prop->add_property_i (0, ortonorm_vlen,
-                              std::string ("ORTONORM_VLEN (for JACOBIAN)"));
+                              L"ORTONORM_VLEN (for JACOBIAN)");
       }
 
     /**

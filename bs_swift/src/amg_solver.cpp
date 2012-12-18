@@ -85,33 +85,33 @@ namespace blue_sky
     amg_solver::init_prop ()
       {
         prop->add_property_f (1.0e-4, tol_idx,
-                              std::string ("Target tolerance for linear solver"));
+                              L"Target tolerance for linear solver");
         prop->add_property_f (1, final_res_idx,
-                              std::string ("Solution residual"));
+                              L"Solution residual");
         prop->add_property_i (200, max_iters_idx,
-                              std::string ("Maximum allowed number of iterations"));
+                              L"Maximum allowed number of iterations");
         prop->add_property_i (0,iters_idx,
-                              std::string ("Total number of used solver iterations"));
+                              L"Total number of used solver iterations");
         prop->add_property_b (false, success_idx,
-                              std::string ("True if solver successfully convergent"));
+                              L"True if solver successfully convergent");
         // AMG input props
         prop->add_property_f (0.75, strength_threshold_idx,
-                              std::string ("Threshold for strength matrix"));
+                              L"Threshold for strength matrix");
         prop->add_property_f (0.01, max_row_sum_idx,
-                              std::string ("Row sum threshold for strength matrix"));
+                              L"Row sum threshold for strength matrix");
         prop->add_property_i (100, n_last_level_points_idx,
-                              std::string ("Minimal number of points in coarse grid"));
+                              L"Minimal number of points in coarse grid");
         prop->add_property_i (1, n_pre_smooth_iters_idx,
-                              std::string ("Number of pre-smooth iterations"));
+                              L"Number of pre-smooth iterations");
         prop->add_property_i (1, n_post_smooth_iters_idx,
-                              std::string ("Number of post-smooth iterations"));
+                              L"Number of post-smooth iterations");
         // AMG output props
         prop->add_property_f (0, cop_idx,
-                              std::string ("Operator compexity"));
+                              L"Operator compexity");
         prop->add_property_i (0, n_levels_idx,
-                              std::string ("Number of coarse levels"));
+                              L"Number of coarse levels");
         prop->add_property_i (0, n_levels_max_idx,
-                              std::string ("Maximal number of coarse levels"));
+                              L"Maximal number of coarse levels");
       }
 
     int amg_solver::solve (sp_matrix_t matrix_, spv_double sp_rhs, spv_double sp_sol)

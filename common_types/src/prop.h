@@ -33,25 +33,25 @@ namespace blue_sky
       // ------------------------------------
     public:
       //! add new floating point property to the list (return index of the property or < 0 if error occur)
-      virtual void add_property_f (const t_double def_value, const std::string &short_name, const std::string &description)
+      virtual void add_property_f (const t_double def_value, const std::string &short_name, const std::wstring &description)
         {
           fp_impl.add (def_value, short_name, description);
         }
-      
+
       //! add new integer property to the list (return index of the property or < 0 if error occur)
-      virtual void add_property_i (const t_long def_value, const std::string &short_name, const std::string &description) 
+      virtual void add_property_i (const t_long def_value, const std::string &short_name, const std::wstring &description) 
         {
           i_impl.add (def_value, short_name, description);
         }
 
       //! add new string property to the list (return index of the property or < 0 if error occur)
-      virtual void add_property_s (const std::string def_value, const std::string &short_name, const std::string &description) 
+      virtual void add_property_s (const std::string def_value, const std::string &short_name, const std::wstring &description) 
         {
           s_impl.add (def_value, short_name, description);
         }
 
       //! add new string property to the list (return index of the property or < 0 if error occur)
-      virtual void add_property_b (const bool def_value, const std::string &short_name, const std::string &description) 
+      virtual void add_property_b (const bool def_value, const std::string &short_name, const std::wstring &description) 
         {
           b_impl.add (def_value, short_name, description);
         }
@@ -231,13 +231,13 @@ namespace blue_sky
       std::string get_def_val_s (const std::string &name) const
         {return s_impl.get_def_val (name);}
 
-      std::string get_description_f (const std::string &name) const
+      std::wstring get_description_f (const std::string &name) const
         {return fp_impl.get_description (name);}
-      std::string get_description_i (const std::string &name) const
+      std::wstring get_description_i (const std::string &name) const
         {return i_impl.get_description (name);}
-      std::string get_description_b (const std::string &name) const
+      std::wstring get_description_b (const std::string &name) const
         {return b_impl.get_description (name);}
-      std::string get_description_s (const std::string &name) const
+      std::wstring get_description_s (const std::string &name) const
         {return s_impl.get_description (name);}
 
 

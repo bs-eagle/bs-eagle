@@ -80,7 +80,7 @@ namespace blue_sky
 
       BS_SP (init_model_iface) init_model (BS_KERNEL.create_object ("explicit_init_model"), bs_dynamic_cast ());
       params.hdm->set_init_model (init_model);
-      params.hdm->get_prop()->add_property_i(0, "init", "init type");
+      params.hdm->get_prop()->add_property_i(0, "init", L"init type");
       // FIXME: npy_intp
       npy_intp dimens[] = {1, 0, 1, 0, 1, 0};
       int n_phases;

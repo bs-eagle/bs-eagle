@@ -21,8 +21,8 @@ namespace blue_sky
       {
         bs_throw_exception ("Type (prop) not registered");
       }
-    sp_prop->add_property_s ("", "parent", "name of parent branch");
-    sp_prop->add_property_f (0, "md", "measured depth of parent branch point");
+    sp_prop->add_property_s ("", "parent", L"name of parent branch");
+    sp_prop->add_property_f (0, "md", L"measured depth of parent branch point");
   }
 
   well_branch::well_branch(const well_branch& src) 
