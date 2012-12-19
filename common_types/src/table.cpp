@@ -13,6 +13,7 @@
 
 #include "bs_kernel.h"
 #include "table.h"
+#include "misc.h"
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/serialization/vector.hpp>
@@ -28,7 +29,6 @@ using namespace std;
 using namespace boost::python;
 
 #endif //BSPY_EXPORTING_PLUGIN
-
 
 namespace blue_sky
 {
@@ -257,7 +257,7 @@ namespace blue_sky
       s << "========================\n";
       for (i = 0; i < nc; ++i)
         {
-          s << "|" << std::setw (fw) << col_names[i];
+          s << "|" << std::setw (fw) << wtos(col_names[i]);
           s_line << "|" ;
           for (j = 0; j < fw; ++j)
             {

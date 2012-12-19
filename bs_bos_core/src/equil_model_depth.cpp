@@ -638,15 +638,15 @@ namespace blue_sky
         {
           equil_data[region] = BS_KERNEL.create_object ("table");
           equil_data[region]->init (1, EQUIL_TOTAL_BLACK_OIL);
-          equil_data[region]->set_col_name (EQUIL_DAT_DEPTH, "Datum depth");
-          equil_data[region]->set_col_name (EQUIL_DAT_PRESS, "Datum pressure");
-          equil_data[region]->set_col_name (EQUIL_WOC_DEPTH, "WOC depth");
-          equil_data[region]->set_col_name (EQUIL_WOC_PRESS, "WOC pressure");
-          equil_data[region]->set_col_name (EQUIL_GOC_DEPTH, "GOC depth");
-          equil_data[region]->set_col_name (EQUIL_GOC_PRESS, "GOC pressure");
-          equil_data[region]->set_col_name (EQUIL_RS_TYPE, "RS type");
-          equil_data[region]->set_col_name (EQUIL_RV_TYPE, "RV type");
-          equil_data[region]->set_col_name (EQUIL_NUM_SEC, "Section's number");
+          equil_data[region]->set_col_name (EQUIL_DAT_DEPTH, L"Datum depth");
+          equil_data[region]->set_col_name (EQUIL_DAT_PRESS, L"Datum pressure");
+          equil_data[region]->set_col_name (EQUIL_WOC_DEPTH, L"WOC depth");
+          equil_data[region]->set_col_name (EQUIL_WOC_PRESS, L"WOC pressure");
+          equil_data[region]->set_col_name (EQUIL_GOC_DEPTH, L"GOC depth");
+          equil_data[region]->set_col_name (EQUIL_GOC_PRESS, L"GOC pressure");
+          equil_data[region]->set_col_name (EQUIL_RS_TYPE, L"RS type");
+          equil_data[region]->set_col_name (EQUIL_RV_TYPE, L"RV type");
+          equil_data[region]->set_col_name (EQUIL_NUM_SEC, L"Section's number");
         }  
     }
     

@@ -21,7 +21,7 @@
 
 #include "bs_kernel.h"
 #include "gis.h"
-
+#include "misc.h"
 
 using namespace boost;
 
@@ -35,14 +35,6 @@ using namespace boost::python;
 
 namespace blue_sky
 {
-
-  std::wstring stow(const std::string &s)
-    {
-      std::wstring d (s.length(), L' ');
-      std::copy (s.begin(), s.end(), d.begin());
-      return d;
-    }
-
   gis::gis (bs_type_ctor_param) 
     {
       sp_prop = BS_KERNEL.create_object ("prop");
@@ -340,7 +332,7 @@ namespace blue_sky
                     {
                       std::string name = std::string ("param") 
                                          + boost::lexical_cast<std::string> (i);
-                      sp_table->set_col_name (i, sp_prop->get_s (name));
+                      sp_table->set_col_name (i, stow(sp_prop->get_s (name)));
                     }
                 }
               else

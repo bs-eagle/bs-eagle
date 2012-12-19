@@ -56,10 +56,10 @@ namespace blue_sky
         throw bs_exception ("pvt_oil::insert_vector in table", "Error: initializing table of properties");
       }
 
-    pvt_input_props->set_col_name (PVT_OIL_INPUT_GPR, "gor");
-    pvt_input_props->set_col_name (PVT_OIL_INPUT_PRESSURE, "pressure");
-    pvt_input_props->set_col_name (PVT_OIL_INPUT_FVF, "fvf");   
-    pvt_input_props->set_col_name (PVT_OIL_INPUT_VISC, "visc");
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_GPR, L"gor");
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_PRESSURE, L"pressure");
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_FVF, L"fvf");   
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_VISC, L"visc");
 
     vector_t &main_gpr_          = pvt_input_props->get_col_vector (PVT_OIL_INPUT_GPR);
     vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_OIL_INPUT_PRESSURE);
@@ -94,11 +94,11 @@ namespace blue_sky
     if (main_pressure_.empty ())
       return ;
 
-    if (pvt_props_table->add_col_vector ("compress_fvf") != PVT_OIL_COMPRESS_FVF) 
+    if (pvt_props_table->add_col_vector (L"compress_fvf") != PVT_OIL_COMPRESS_FVF) 
       {
         bs_throw_exception ("Error: initializing vector of fvf compressibility");
       }  
-    if (pvt_props_table->add_col_vector ("compress_visc") != PVT_OIL_COMPRESS_VISC)
+    if (pvt_props_table->add_col_vector (L"compress_visc") != PVT_OIL_COMPRESS_VISC)
       {
         bs_throw_exception ("Error: initializing vector of viscosity compressibility");
       }  

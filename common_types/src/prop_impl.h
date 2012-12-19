@@ -19,8 +19,7 @@
 #include <boost/serialization/string.hpp>
 
 #include "throw_exception.h"
-
-std::string wtos(const std::wstring &s);
+#include "misc.h"
 
 template <class type_t>
 class prop_impl

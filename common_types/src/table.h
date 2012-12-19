@@ -63,7 +63,7 @@ namespace blue_sky
        * 
        * @return 0 if success
        */
-      virtual int set_col_name (const t_long col, const std::string &name)
+      virtual int set_col_name (const t_long col, const std::wstring &name)
         {
           col_names[col] = name;
           return 0;
@@ -82,7 +82,7 @@ namespace blue_sky
        * 
        * @return name
        */
-      virtual std::string get_col_name (const t_long col) const
+      virtual std::wstring get_col_name (const t_long col) const
         {
           return col_names[col];
         }
@@ -90,7 +90,7 @@ namespace blue_sky
       /** 
        * @brief return col names
        */
-      virtual std::vector<std::string> get_col_names () const
+      virtual std::vector<std::wstring> get_col_names () const
         {
           return col_names;
         }
@@ -125,7 +125,7 @@ namespace blue_sky
        * 
        * @return last added column index
        */
-      virtual t_long add_col_vector (const std::string &name)
+      virtual t_long add_col_vector (const std::wstring &name)
         {
           if (values.empty ())
             return -1;
@@ -141,7 +141,7 @@ namespace blue_sky
         }
 
       virtual void 
-      add_col_vector (t_long col, const std::string &name, spv_double new_vector)
+      add_col_vector (t_long col, const std::wstring &name, spv_double new_vector)
         {
           t_double *new_vector_ = new_vector->data ();
           t_long size = values.size ();
@@ -301,7 +301,7 @@ namespace blue_sky
       // VARIABLES
       // ------------------------------
     protected:
-      std::vector<std::string> col_names;
+      std::vector<std::wstring> col_names;
       table_t values;
 
       BLUE_SKY_TYPE_DECL (table);

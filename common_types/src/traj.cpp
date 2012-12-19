@@ -21,7 +21,7 @@
 
 #include "bs_kernel.h"
 #include "traj.h"
-
+#include "misc.h"
 
 using namespace boost;
 
@@ -35,7 +35,6 @@ using namespace boost::python;
 
 namespace blue_sky
 {
-
   traj::traj (bs_type_ctor_param) 
     {
       sp_table = BS_KERNEL.create_object ("table");
@@ -118,7 +117,7 @@ namespace blue_sky
               boost::split (sv, s, boost::is_any_of("\t "), boost::token_compress_on);
               sp_table->init (0, sv.size ());
               for (size_t i = 0; i < sv.size (); ++i)
-                sp_table->set_col_name (i, sv[i]); 
+                sp_table->set_col_name (i, stow(sv[i])); 
               state = 1;
             }
           else

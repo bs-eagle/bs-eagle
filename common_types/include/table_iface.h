@@ -61,7 +61,7 @@ class table_iface : public objbase
        * 
        * @return 0 if success
        */
-      virtual int set_col_name (const t_long col, const std::string &name) = 0;
+      virtual int set_col_name (const t_long col, const std::wstring &name) = 0;
 
       /** 
        * @brief return name of the <col> column
@@ -70,12 +70,12 @@ class table_iface : public objbase
        * 
        * @return name
        */
-      virtual std::string get_col_name (const t_long col) const = 0;
+      virtual std::wstring get_col_name (const t_long col) const = 0;
 
       /** 
        * @brief return col names
        */
-      virtual std::vector<std::string> get_col_names () const = 0;
+      virtual std::vector<std::wstring> get_col_names () const = 0;
 
       /** 
        * @brief return pointer to the column <col> data 
@@ -109,9 +109,9 @@ class table_iface : public objbase
        * 
        * @return pointer
        */
-      virtual t_long add_col_vector (const std::string &name) = 0;
+      virtual t_long add_col_vector (const std::wstring &name) = 0;
 
-      virtual void add_col_vector (t_long col, std::string const &name, spv_double array) = 0;
+      virtual void add_col_vector (t_long col, std::wstring const &name, spv_double array) = 0;
       
       /** 
        * @brief get numver of rows in table

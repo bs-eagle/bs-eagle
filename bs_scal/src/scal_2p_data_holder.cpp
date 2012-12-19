@@ -123,19 +123,19 @@ namespace blue_sky {
         sp_table scal_table = scal_table_array[region_index]; 
         if (is_water)
           {
-            scal_table->add_col_vector (SCAL_TABLE_SP, "SW", sp);
-            scal_table->add_col_vector (SCAL_TABLE_SO, "SO", so);
-            scal_table->add_col_vector (SCAL_TABLE_KRP, "KRW", krp);
-            scal_table->add_col_vector (SCAL_TABLE_KROP, "KROW", krop);  
-            scal_table->add_col_vector (SCAL_TABLE_PCP, "PCW", pcp);
+            scal_table->add_col_vector (SCAL_TABLE_SP, L"SW", sp);
+            scal_table->add_col_vector (SCAL_TABLE_SO, L"SO", so);
+            scal_table->add_col_vector (SCAL_TABLE_KRP, L"KRW", krp);
+            scal_table->add_col_vector (SCAL_TABLE_KROP, L"KROW", krop);  
+            scal_table->add_col_vector (SCAL_TABLE_PCP, L"PCW", pcp);
           }
         else
           {
-            scal_table->add_col_vector (SCAL_TABLE_SP, "SG", sp);
-            scal_table->add_col_vector (SCAL_TABLE_SO, "SO", so);
-            scal_table->add_col_vector (SCAL_TABLE_KRP, "KRG", krp);
-            scal_table->add_col_vector (SCAL_TABLE_KROP, "KROG", krop);  
-            scal_table->add_col_vector (SCAL_TABLE_PCP, "PCG", pcp);
+            scal_table->add_col_vector (SCAL_TABLE_SP, L"SG", sp);
+            scal_table->add_col_vector (SCAL_TABLE_SO, L"SO", so);
+            scal_table->add_col_vector (SCAL_TABLE_KRP, L"KRG", krp);
+            scal_table->add_col_vector (SCAL_TABLE_KROP, L"KROG", krop);  
+            scal_table->add_col_vector (SCAL_TABLE_PCP, L"PCG", pcp);
           }      
       }
     ///////////////////////////////////////////////////////////////////////////////    
@@ -214,15 +214,15 @@ namespace blue_sky {
         sp_table scal_table = scal_table_array[region_index]; 
         if (is_water)
           {
-            scal_table->add_col_vector (SCAL_TABLE_SP, "SW", sp);
-            scal_table->add_col_vector (SCAL_TABLE_KRP, "KRW", krp);
-            scal_table->add_col_vector (SCAL_TABLE_PCP, "PCW", pcp);
+            scal_table->add_col_vector (SCAL_TABLE_SP, L"SW", sp);
+            scal_table->add_col_vector (SCAL_TABLE_KRP, L"KRW", krp);
+            scal_table->add_col_vector (SCAL_TABLE_PCP, L"PCW", pcp);
           }
         else
           {
-            scal_table->add_col_vector (SCAL_TABLE_SP, "SG", sp);
-            scal_table->add_col_vector (SCAL_TABLE_KRP, "KRG", krp);
-            scal_table->add_col_vector (SCAL_TABLE_PCP, "PCG", pcp);
+            scal_table->add_col_vector (SCAL_TABLE_SP, L"SG", sp);
+            scal_table->add_col_vector (SCAL_TABLE_KRP, L"KRG", krp);
+            scal_table->add_col_vector (SCAL_TABLE_PCP, L"PCG", pcp);
           }      
       }
     ///////////////////////////////////////////////////////////////////////////////    
@@ -299,13 +299,13 @@ namespace blue_sky {
         sp_table scal_table = scal_table_array[region_index]; 
         if (is_water)
           {
-            scal_table->add_col_vector (SCAL_TABLE_SO, "SO", so);
-            scal_table->add_col_vector (SCAL_TABLE_KROP, "KROW", krop);  
+            scal_table->add_col_vector (SCAL_TABLE_SO, L"SO", so);
+            scal_table->add_col_vector (SCAL_TABLE_KROP, L"KROW", krop);  
           }
         else
           {
-            scal_table->add_col_vector (SCAL_TABLE_SO, "SO", so);
-            scal_table->add_col_vector (SCAL_TABLE_KROP, "KROG", krop);  
+            scal_table->add_col_vector (SCAL_TABLE_SO, L"SO", so);
+            scal_table->add_col_vector (SCAL_TABLE_KROP, L"KROG", krop);  
           }      
       }
     ///////////////////////////////////////////////////////////////////////////////    
@@ -382,13 +382,13 @@ namespace blue_sky {
         sp_table scal_table = scal_table_array[region_index]; 
         if (is_water)
           {
-            scal_table->add_col_vector (SCAL_TABLE_SO, "SO", so);
-            scal_table->add_col_vector (SCAL_TABLE_KROP, "KROW", krop);  
+            scal_table->add_col_vector (SCAL_TABLE_SO, L"SO", so);
+            scal_table->add_col_vector (SCAL_TABLE_KROP, L"KROW", krop);  
           }
         else
           {
-            scal_table->add_col_vector (SCAL_TABLE_SO, "SO", so);
-            scal_table->add_col_vector (SCAL_TABLE_KROP, "KROG", krop);  
+            scal_table->add_col_vector (SCAL_TABLE_SO, L"SO", so);
+            scal_table->add_col_vector (SCAL_TABLE_KROP, L"KROG", krop);  
           }      
       }
     ///////////////////////////////////////////////////////////////////////////////    

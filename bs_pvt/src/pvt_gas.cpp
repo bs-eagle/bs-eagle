@@ -65,9 +65,9 @@ namespace blue_sky
         throw bs_exception ("pvt_gas::insert_vector in table", "Error: initializing table of properties");
       }
     
-    pvt_input_props->set_col_name (PVT_GAS_INPUT_PRESSURE, "pressure");
-    pvt_input_props->set_col_name (PVT_GAS_INPUT_FVF, "fvf");   
-    pvt_input_props->set_col_name (PVT_GAS_INPUT_VISC, "visc");
+    pvt_input_props->set_col_name (PVT_GAS_INPUT_PRESSURE, L"pressure");
+    pvt_input_props->set_col_name (PVT_GAS_INPUT_FVF, L"fvf");   
+    pvt_input_props->set_col_name (PVT_GAS_INPUT_VISC, L"visc");
 
     vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_GAS_INPUT_PRESSURE);
     vector_t &main_fvf_          = pvt_input_props->get_col_vector (PVT_GAS_INPUT_FVF);
@@ -95,10 +95,10 @@ namespace blue_sky
             throw bs_exception ("pvt_gas::init table", "Error: initializing table of properties");
           }
         
-        pvt_props_table->set_col_name (PVT_GAS_PRESSURE, "pressure");
-        pvt_props_table->set_col_name (PVT_GAS_INV_FVF, "inv_fvf");   
-        pvt_props_table->set_col_name (PVT_GAS_INV_VISC, "inv_visc");
-        pvt_props_table->set_col_name (PVT_GAS_INV_VISC_FVF, "inv_visc_fvf");
+        pvt_props_table->set_col_name (PVT_GAS_PRESSURE, L"pressure");
+        pvt_props_table->set_col_name (PVT_GAS_INV_FVF, L"inv_fvf");   
+        pvt_props_table->set_col_name (PVT_GAS_INV_VISC, L"inv_visc");
+        pvt_props_table->set_col_name (PVT_GAS_INV_VISC_FVF, L"inv_visc_fvf");
         
         this->init_dependent = false;
       }

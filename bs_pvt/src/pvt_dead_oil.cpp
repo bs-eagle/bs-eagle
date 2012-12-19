@@ -69,10 +69,10 @@ namespace blue_sky
     if (n_cols == 3)
       shift = 1;
 
-    pvt_input_props->set_col_name (PVT_OIL_INPUT_GPR, "gor");
-    pvt_input_props->set_col_name (PVT_OIL_INPUT_PRESSURE - shift, "pressure");
-    pvt_input_props->set_col_name (PVT_OIL_INPUT_FVF - shift, "fvf");
-    pvt_input_props->set_col_name (PVT_OIL_INPUT_VISC - shift, "visc");
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_GPR, L"gor");
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_PRESSURE - shift, L"pressure");
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_FVF - shift, L"fvf");
+    pvt_input_props->set_col_name (PVT_OIL_INPUT_VISC - shift, L"visc");
 
     vector_t &main_gpr_        = pvt_input_props->get_col_vector (PVT_OIL_INPUT_GPR);
     vector_t &main_pressure_     = pvt_input_props->get_col_vector (PVT_OIL_INPUT_PRESSURE - shift);
@@ -173,11 +173,11 @@ namespace blue_sky
         throw bs_exception ("pvt_dead_oil::init table", "Error: initializing table of properties");
       }
 
-    pvt_props_table->set_col_name (PVT_OIL_PRESSURE, "pressure");
-    pvt_props_table->set_col_name (PVT_OIL_INV_FVF, "inv_fvf");
-    pvt_props_table->set_col_name (PVT_OIL_INV_VISC, "inv_visc");
-    pvt_props_table->set_col_name (PVT_OIL_INV_VISC_FVF, "inv_visc_fvf");
-    pvt_props_table->set_col_name (PVT_OIL_GOR, "gor");
+    pvt_props_table->set_col_name (PVT_OIL_PRESSURE, L"pressure");
+    pvt_props_table->set_col_name (PVT_OIL_INV_FVF, L"inv_fvf");
+    pvt_props_table->set_col_name (PVT_OIL_INV_VISC, L"inv_visc");
+    pvt_props_table->set_col_name (PVT_OIL_INV_VISC_FVF, L"inv_visc_fvf");
+    pvt_props_table->set_col_name (PVT_OIL_GOR, L"gor");
 
     vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_OIL_PRESSURE);
     vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_OIL_INV_FVF);

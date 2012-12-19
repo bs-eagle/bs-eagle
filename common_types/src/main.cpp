@@ -8,6 +8,7 @@
 #include <boost/python.hpp>
 #endif
 
+#include "misc.h"
 #include "prop.h"
 #include "table.h"
 #include "gis.h"
@@ -33,6 +34,13 @@ using namespace boost::python;
 std::string wtos(const std::wstring &s)
   {
     std::string d (s.length(), L' ');
+    std::copy (s.begin(), s.end(), d.begin());
+    return d;
+  }
+
+std::wstring stow(const std::string &s)
+  {
+    std::wstring d (s.length(), L' ');
     std::copy (s.begin(), s.end(), d.begin());
     return d;
   }
