@@ -557,16 +557,16 @@ namespace blue_sky
     const BS_SP (scale_array_holder_iface) &gas_scale_ = scal_prop->get_gas_scale ();
     const BS_SP (scale_array_holder_iface) &water_scale_ = scal_prop->get_water_scale ();
 
-    if (input_data->is_set ("SOGCR"))   gas_scale_->set (socr, "SOGCR", input_data->get_fp_array ("SOGCR"));
-    if (input_data->is_set ("SGCR"))    gas_scale_->set (scr, "SGCR", input_data->get_fp_array ("SGCR"));
-    if (input_data->is_set ("SGU"))     gas_scale_->set (su, "SGU", input_data->get_fp_array ("SGU"));
-    if (input_data->is_set ("SGL"))     gas_scale_->set (sl, "SGL", input_data->get_fp_array ("SGL"));
+    if (input_data->is_set ("SOGCR"))   gas_scale_->set (socr, L"SOGCR", input_data->get_fp_array ("SOGCR"));
+    if (input_data->is_set ("SGCR"))    gas_scale_->set (scr, L"SGCR", input_data->get_fp_array ("SGCR"));
+    if (input_data->is_set ("SGU"))     gas_scale_->set (su, L"SGU", input_data->get_fp_array ("SGU"));
+    if (input_data->is_set ("SGL"))     gas_scale_->set (sl, L"SGL", input_data->get_fp_array ("SGL"));
 
-    if (input_data->is_set ("SOWCR"))   water_scale_->set (socr, "SOWCR", input_data->get_fp_array ("SOWCR"));
-    if (input_data->is_set ("SWCR"))    water_scale_->set (scr, "SWCR", input_data->get_fp_array ("SWCR"));
-    if (input_data->is_set ("SWU"))     water_scale_->set (su, "SWU", input_data->get_fp_array ("SWU"));
-    if (input_data->is_set ("SWL"))     water_scale_->set (sl, "SWL", input_data->get_fp_array ("SWL"));
-    if (input_data->is_set ("PCW"))     water_scale_->set (pcp, "PCW", input_data->get_fp_array ("PCW"));
+    if (input_data->is_set ("SOWCR"))   water_scale_->set (socr, L"SOWCR", input_data->get_fp_array ("SOWCR"));
+    if (input_data->is_set ("SWCR"))    water_scale_->set (scr, L"SWCR", input_data->get_fp_array ("SWCR"));
+    if (input_data->is_set ("SWU"))     water_scale_->set (su, L"SWU", input_data->get_fp_array ("SWU"));
+    if (input_data->is_set ("SWL"))     water_scale_->set (sl, L"SWL", input_data->get_fp_array ("SWL"));
+    if (input_data->is_set ("PCW"))     water_scale_->set (pcp, L"PCW", input_data->get_fp_array ("PCW"));
 
   }
 

@@ -11,6 +11,7 @@
 #include "table.h"
 #include "prop.h"
 #include "vartype_table.h"
+#include "misc.h"
 
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>
@@ -86,7 +87,7 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN_T(save, vartype_table, 1)
 	// save data
 	std::string col_name;
 	for(t_long i = 0; i < num_cols; ++i) {
-		col_name = t.get_col_name(i);
+		col_name = wtos(t.get_col_name(i));
 		ar << col_name;
 		ar << const_cast< type& >(t).get_col_vector(i);
 	}
@@ -115,7 +116,7 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN_T(load, vartype_table, 1)
 		if(column->size())
 			std::copy(v.begin(), v.end(), column->begin());
 		// add column
-		t.add_col_vector(i, col_name, column);
+		t.add_col_vector(i, stow(col_name), column);
 	}
 BLUE_SKY_CLASS_SRZ_FCN_END
 

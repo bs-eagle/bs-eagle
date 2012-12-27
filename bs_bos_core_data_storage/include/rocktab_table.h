@@ -36,10 +36,10 @@ namespace blue_sky
       void clear();
 
       // returns name of the column with given index
-      const std::string &get_col_name (const t_int col_num);
+      const std::wstring &get_col_name (const t_int col_num);
 
       //returns name of current column
-      void set_col_name(const t_int col_num, const std::string &new_name);
+      void set_col_name(const t_int col_num, const std::wstring &new_name);
 
       //returns current data array from column
       std::vector<t_float> &get_column(const t_int col_num);
@@ -52,7 +52,7 @@ namespace blue_sky
     protected:
       struct column
         {
-          std::string name;               //!< column name
+          std::wstring name;               //!< column name
           std::vector<t_float> data;       //!< data array stored in one column
         };
 

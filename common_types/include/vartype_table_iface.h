@@ -52,7 +52,7 @@ namespace blue_sky
        * 
        * @return 0 if success
        */
-      virtual int set_col_name (const t_long col, const std::string &name) = 0;
+      virtual int set_col_name (const t_long col, const std::wstring &name) = 0;
 
       /** 
        * @brief return name of the <col> column
@@ -61,7 +61,7 @@ namespace blue_sky
        * 
        * @return name
        */
-      virtual std::string get_col_name (const t_long col) const = 0;
+      virtual std::wstring get_col_name (const t_long col) const = 0;
 
       /** 
        * @brief return pointer to the column <col> data 
@@ -89,7 +89,7 @@ namespace blue_sky
        * 
        * @return pointer
        */
-      virtual t_long add_col_vector (const t_long col, const std::string &name, sp_var_type_array_t new_vector) = 0;
+      virtual t_long add_col_vector (const t_long col, const std::wstring &name, sp_var_type_array_t new_vector) = 0;
       
       /** 
        * @brief get number of rows in table in column col

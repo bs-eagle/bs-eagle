@@ -36,15 +36,15 @@ namespace blue_sky
 
     data_pool->init ( scale_array_name_total);
     
-    data_pool->set_col_name (socr, "SOCR");
-    data_pool->set_col_name (scr, "SCR");
-    data_pool->set_col_name (su, "SU");
-    data_pool->set_col_name (sl, "SL");
-    data_pool->set_col_name (pcp, "PCP");
-    data_pool->set_col_name (krp, "KRP");
-    data_pool->set_col_name (krop, "KROP");
-    data_pool->set_col_name (krpr, "KRPR");
-    data_pool->set_col_name (krorp, "KRORP");
+    data_pool->set_col_name (socr, L"SOCR");
+    data_pool->set_col_name (scr, L"SCR");
+    data_pool->set_col_name (su, L"SU");
+    data_pool->set_col_name (sl, L"SL");
+    data_pool->set_col_name (pcp, L"PCP");
+    data_pool->set_col_name (krp, L"KRP");
+    data_pool->set_col_name (krop, L"KROP");
+    data_pool->set_col_name (krpr, L"KRPR");
+    data_pool->set_col_name (krorp, L"KRORP");
     BOOST_STATIC_ASSERT (krorp == scale_array_name_total - 1);
   }
 

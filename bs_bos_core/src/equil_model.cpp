@@ -829,7 +829,7 @@ namespace blue_sky
       }
 
     if (pcw->size ())
-      scal_prop->get_water_scale ()->set (pcp, "PCW", pcw);
+      scal_prop->get_water_scale ()->set (pcp, L"PCW", pcw);
   }
 
 

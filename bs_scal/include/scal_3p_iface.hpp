@@ -50,7 +50,7 @@ namespace blue_sky
     virtual t_double get_sl (t_long cell, t_double value) const = 0;
     virtual t_double get_su (t_long cell, t_double value) const = 0;
 
-    virtual void set (scale_array_name array, std::string const &name, spv_float const &data) = 0;
+    virtual void set (scale_array_name array, std::wstring const &name, spv_float const &data) = 0;
   };
 
   class BS_API_PLUGIN scal_2p_data_holder_iface : public objbase

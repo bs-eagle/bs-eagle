@@ -55,7 +55,7 @@ namespace blue_sky
        * 
        * @return 0 if success
        */
-      virtual int set_col_name (const t_long col, const std::string &name)
+      virtual int set_col_name (const t_long col, const std::wstring &name)
         {
           col_names[col] = name;
           return 0;
@@ -68,7 +68,7 @@ namespace blue_sky
        * 
        * @return name
        */
-      virtual std::string get_col_name (const t_long col) const
+      virtual std::wstring get_col_name (const t_long col) const
         {
           return col_names[col];
         }
@@ -103,7 +103,7 @@ namespace blue_sky
        * 
        * @return last added column index
        */
-      virtual t_long add_col_vector (const t_long col, const std::string &name, sp_var_type_array_t new_vector)
+      virtual t_long add_col_vector (const t_long col, const std::wstring &name, sp_var_type_array_t new_vector)
         {
           var_type_array_t &new_vector_ = *new_vector;
           t_long size = values.size ();
@@ -181,7 +181,7 @@ namespace blue_sky
       // VARIABLES
       // ------------------------------
     protected:
-      std::vector<std::string> col_names;
+      std::vector<std::wstring> col_names;
       std::vector<std::vector<var_type_t> > values;
 
       BLUE_SKY_TYPE_DECL (vartype_table);

@@ -54,7 +54,7 @@ private:
       }
 
       void
-      set (scale_array_name array, std::string const &name, spv_float const &data)
+      set (scale_array_name array, std::wstring const &name, spv_float const &data)
       {
         if (data->size ())
           data_pool->add_col_vector (array, name, data);
