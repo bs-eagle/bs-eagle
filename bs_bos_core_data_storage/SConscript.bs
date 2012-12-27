@@ -24,7 +24,7 @@ env.Append (CPPPATH = ["include",
     ] + includes["kernel"]
     )
 
-libs = ["blue_sky", "bs_bos_core_base"]
+libs = ["blue_sky", "bs_bos_core_base", "common_types"]
 
 boost_libs = ["serialization"]
 boost_libs = list_suffix(list_prefix(boost_libs, 'boost_'), env["boost_suffix"]);
