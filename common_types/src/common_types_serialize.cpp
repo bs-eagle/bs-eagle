@@ -87,7 +87,7 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN_T(save, vartype_table, 1)
 	// save data
 	std::string col_name;
 	for(t_long i = 0; i < num_cols; ++i) {
-		col_name = wtos(t.get_col_name(i));
+		wtos(col_name, t.get_col_name(i));
 		ar << col_name;
 		ar << const_cast< type& >(t).get_col_vector(i);
 	}
@@ -116,7 +116,9 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN_T(load, vartype_table, 1)
 		if(column->size())
 			std::copy(v.begin(), v.end(), column->begin());
 		// add column
-		t.add_col_vector(i, stow(col_name), column);
+		std::wstring tmp;
+		stow(tmp, col_name);
+		t.add_col_vector(i, tmp, column);
 	}
 BLUE_SKY_CLASS_SRZ_FCN_END
 

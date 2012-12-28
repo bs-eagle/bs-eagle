@@ -257,7 +257,9 @@ namespace blue_sky
       s << "========================\n";
       for (i = 0; i < nc; ++i)
         {
-          s << "|" << std::setw (fw) << wtos(col_names[i]);
+		  std::string tmp;
+		  wtos(tmp, col_names[i]);
+          s << "|" << std::setw (fw) << tmp;
           s_line << "|" ;
           for (j = 0; j < fw; ++j)
             {

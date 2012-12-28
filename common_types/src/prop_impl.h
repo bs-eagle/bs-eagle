@@ -216,7 +216,9 @@ prop_impl<type_t>::py_str () const
           s << i->second.short_name;
           s << "|";
           s.width (30);
-          s << wtos(i->second.description) << "|\n";
+		  std::string tmp;
+		  wtos(tmp, i->second.description);
+          s << tmp << "|\n";
     }
   s << "+----------------------------------------------------------------------+\n";
   return s.str ();

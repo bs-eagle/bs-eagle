@@ -118,7 +118,9 @@ namespace blue_sky
         }
       else
         {
-          prop->add_property_s ("", name, stow(description));
+		  std::wstring tmp;
+		  stow(tmp, description);
+          prop->add_property_s ("", name, tmp);
           prop->set_s (name, data);
         }
       return 0;
@@ -140,12 +142,16 @@ namespace blue_sky
           || name == "STEP"
           || name == "NULL")
         {
-          prop->add_property_f (0, name, stow(units));
+		  std::wstring tmp;
+		  stow(tmp, units);
+          prop->add_property_f (0, name, tmp);
           prop->set_f (name, str2T<double> (data));
         }
       else if (name == "LIC")
         {
-          prop->add_property_i (0, name, stow(description));
+		  std::wstring tmp;
+		  stow(tmp, description);
+          prop->add_property_i (0, name, tmp);
           prop->set_i (name, str2T<int> (data));
         }
       else
@@ -157,7 +163,9 @@ namespace blue_sky
             }
           else if (data != "")
             {
-              prop->add_property_s ("", name, stow(description));
+			  std::wstring tmp;
+			  stow(tmp, description);
+              prop->add_property_s ("", name, tmp);
               prop->set_s (name, data);
             }
         }
@@ -186,7 +194,9 @@ namespace blue_sky
         }
       else if (data != "")
         {
-          prop->add_property_s ("", name, stow(description));
+		  std::wstring tmp;
+		  stow(tmp, description);
+          prop->add_property_s ("", name, tmp);
           prop->set_s (name, data);
         }
       return 0;
@@ -207,7 +217,9 @@ namespace blue_sky
 
       if (units != "")
         name = name + " (" + units + ")";
-      prop->add_property_s ("", param, stow(description));
+	  std::wstring tmp;
+	  stow(tmp, description);
+      prop->add_property_s ("", param, tmp);
       prop->set_s (param, name);
       return 0;
     }
@@ -332,7 +344,9 @@ namespace blue_sky
                     {
                       std::string name = std::string ("param") 
                                          + boost::lexical_cast<std::string> (i);
-                      sp_table->set_col_name (i, stow(sp_prop->get_s (name)));
+					  std::wstring tmp;
+                      stow(tmp, sp_prop->get_s (name));
+                      sp_table->set_col_name (i, tmp);
                     }
                 }
               else

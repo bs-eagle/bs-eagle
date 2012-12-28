@@ -83,7 +83,9 @@ namespace blue_sky
     column last_column;
 
     columns.push_back (last_column);
-    columns.back ().name = stow(_name);
+	std::wstring tmp;
+    stow(tmp, _name);
+    columns.back ().name = tmp;
     columns.back ().data.resize (n_rows);
   }
 

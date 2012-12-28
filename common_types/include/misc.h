@@ -11,8 +11,24 @@
 
 #include <string>
 
-std::wstring stow(const std::string &s);
-std::string wtos(const std::wstring &s);
+//std::wstring stow(const std::string &s);
+//std::string wtos(const std::wstring &s);
+
+#define wtos(ret, s_)\
+  {\
+    std::wstring s = std::wstring (s_);\
+    std::string d (s.length(), L' ');\
+    std::copy (s.begin(), s.end(), d.begin());\
+    ret = d;\
+  }\
+
+#define stow(ret, s_)\
+  {\
+    std::string s = std::string (s_);\
+    std::wstring d (s.length(), L' ');\
+    std::copy (s.begin(), s.end(), d.begin());\
+    ret = d;\
+  }\
 
 #endif 
 
