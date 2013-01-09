@@ -1935,7 +1935,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   if(p_cd != cd.end()) {
                     // well has at least one COMPDAT, so write it to WELLSPEC
                     // using first COMPDAT cell_id as well's position
-                    BSOUT << "Writing well " << s << bs_end;
+                    BSOUT << "Exporting well " << s << bs_end;
                     fprintf (fp, "\'%s\' \'FIELD\' %lu %lu /\n", s.c_str (),
                         p_cd->cell_pos[0] + 1, p_cd->cell_pos[1] + 1);
 
@@ -1943,6 +1943,10 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                     good_wells.insert(s);
                     break;
                   }
+                }
+                // quick and dirty check if well is good enough
+                if(good_wells.find(s) == good_wells.end()) {
+                  BSOUT << "Warning! Well " << s << " has no active COMPDATs on any date and won't be exported!" << bs_end;
                 }
               }
             fprintf (fp, "/\n\n");
