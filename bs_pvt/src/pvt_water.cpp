@@ -176,9 +176,9 @@ namespace blue_sky
 
   void
   pvt_water::calc (const t_double p,
-                               t_double *inv_fvf, t_double *d_inv_fvf,
-                               t_double *inv_visc, t_double *d_inv_visc,
-                               t_double *inv_visc_fvf, t_double *d_inv_visc_fvf) const
+                               t_float *inv_fvf, t_float *d_inv_fvf,
+                               t_float *inv_visc, t_float *d_inv_visc,
+                               t_float *inv_visc_fvf, t_float *d_inv_visc_fvf) const
     {
       vector_t &pressure_     = pvt_props_table->get_col_vector (PVT_WATER_PRESSURE);
       vector_t &inv_fvf_      = pvt_props_table->get_col_vector (PVT_WATER_INV_FVF);

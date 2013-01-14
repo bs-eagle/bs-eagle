@@ -69,9 +69,9 @@ namespace blue_sky
        * \param[out] inv_visc_fvf
        * \param[out] d_inv_visc_fvf
        */
-      virtual void calc (const t_double p, t_double  *inv_fvf, t_double *d_inv_fvf,
-                         t_double *inv_visc, t_double *d_inv_visc,
-                         t_double *inv_visc_fvf, t_double *d_inv_visc_fvf) const;
+      virtual void calc (const t_double p, t_float  *inv_fvf, t_float *d_inv_fvf,
+                         t_float *inv_visc, t_float *d_inv_visc,
+                         t_float *inv_visc_fvf, t_float *d_inv_visc_fvf) const;
 
       virtual void
       print () const;

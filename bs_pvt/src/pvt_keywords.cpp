@@ -78,7 +78,7 @@ namespace blue_sky
             bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
               % reader->get_prefix () % keyword);
           }
-        tbl->push_back(dbuf);
+        tbl->push_back_f(dbuf);
         for (;;)
           {
             if (reader->read_line (buf, CHAR_BUF_LEN) <= 0)
@@ -110,7 +110,7 @@ namespace blue_sky
                       % reader->get_prefix () % keyword);
                   }
               }
-            tbl->push_back(dbuf);
+            tbl->push_back_f(dbuf);
           }
 
         BOSOUT (section::read_data, level::medium) << " i=" << i << bs_end;
@@ -159,7 +159,7 @@ namespace blue_sky
                     bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
                       % reader->get_prefix () % keyword);
                   }
-            tbl->push_back(dbuf);
+            tbl->push_back_f(dbuf);
           }
       }
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
@@ -216,7 +216,7 @@ namespace blue_sky
                         % reader->get_prefix () % keyword);
                   }
               }
-            tbl->push_back(dbuf);
+            tbl->push_back_f(dbuf);
           }
       }
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;
@@ -260,7 +260,7 @@ namespace blue_sky
                     bs_throw_exception (boost::format ("Error in %s: not enough valid argument for keyword %s")
                       % reader->get_prefix () % keyword);
                   }
-            tbl->push_back(dbuf);
+            tbl->push_back_f(dbuf);
           }
       }
     BOSOUT (section::read_data, level::medium) <<  keyword << bs_end;

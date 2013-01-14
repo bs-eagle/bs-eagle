@@ -297,10 +297,10 @@ namespace blue_sky
 
   bool
   pvt_dead_oil::calc (const bool is_g, const int main_var, const t_double p, const t_double gor,
-                                  t_double *inv_fvf, t_double *d_inv_fvf, t_double *gor_d_inv_fvf,
-                                  t_double *inv_visc, t_double *d_inv_visc, t_double *gor_d_inv_visc,
-                                  t_double *inv_visc_fvf, t_double *d_inv_visc_fvf, t_double *gor_d_inv_visc_fvf,
-                                  t_double *gas_oil_ratio, t_double *d_gas_oil_ratio,
+                                  t_float *inv_fvf, t_float *d_inv_fvf, t_float *gor_d_inv_fvf,
+                                  t_float *inv_visc, t_float *d_inv_visc, t_float *gor_d_inv_visc,
+                                  t_float *inv_visc_fvf, t_float *d_inv_visc_fvf, t_float *gor_d_inv_visc_fvf,
+                                  t_float *gas_oil_ratio, t_float *d_gas_oil_ratio,
                                   const t_double drsdt /* = -1.0 */, const t_double dt /* = 0 */,
                                   const t_double old_gas_oil_ratio /* = 0  */) const
     {
@@ -312,10 +312,10 @@ namespace blue_sky
 
   bool
   pvt_dead_oil::calc_saturated_oil (const bool /*is_g*/, const int /*main_var*/, const t_double p, const t_double /*gor*/,
-      t_double *inv_fvf, t_double *d_inv_fvf, t_double *gor_d_inv_fvf,
-      t_double *inv_visc, t_double *d_inv_visc, t_double *gor_d_inv_visc,
-      t_double *inv_visc_fvf, t_double *d_inv_visc_fvf, t_double *gor_d_inv_visc_fvf,
-      t_double *gas_oil_ratio, t_double *d_gas_oil_ratio,
+      t_float *inv_fvf, t_float *d_inv_fvf, t_float *gor_d_inv_fvf,
+      t_float *inv_visc, t_float *d_inv_visc, t_float *gor_d_inv_visc,
+      t_float *inv_visc_fvf, t_float *d_inv_visc_fvf, t_float *gor_d_inv_visc_fvf,
+      t_float *gas_oil_ratio, t_float *d_gas_oil_ratio,
       const t_double /*drsdt = -1.0 */, const t_double /*dt = 0 */,
       const t_double /*old_gas_oil_ratio = 0 */) const
     {
