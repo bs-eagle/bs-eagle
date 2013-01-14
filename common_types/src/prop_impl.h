@@ -56,7 +56,7 @@ class prop_impl
     // constructor
     prop_impl () {};
     // destructor
-    ~prop_impl () {};
+    virtual ~prop_impl () {};
 
     // add new property
     void add (const type_t def_value, const std::string &short_name, const std::wstring &description);
