@@ -597,7 +597,7 @@ namespace wells {
           wat_sw = !is_1p ? b_sqr + wat_idx : -1,
         };
 
-    calc_rate_and_derivs_t (const sp_calc_model_t &calc_model, const spv_double &sp_diagonal_, const spv_double &sec_rhs_, well_t *well)
+    calc_rate_and_derivs_t (const sp_calc_model_t &calc_model, const spv_float &sp_diagonal_, const spv_float &sec_rhs_, well_t *well)
     : cell_data_ (calc_model->data)
     , main_vars_ (calc_model->main_variable)
     , pressure_ (calc_model->pressure->data ())
@@ -637,8 +637,8 @@ namespace wells {
     wells::injection_type     injection_type_;
     wells::rate_control_type  control_type_;
 
-    const spv_double          &sp_diagonal_;
-    const spv_double          &sec_rhs_;
+    const spv_float           &sp_diagonal_;
+    const spv_float           &sec_rhs_;
     int                       n_sec_vars_;
 
     item_t                    krow_tetaow;

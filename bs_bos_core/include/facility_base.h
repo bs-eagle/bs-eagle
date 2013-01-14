@@ -59,7 +59,7 @@ namespace blue_sky {
       index_t         block_size, 
       const spv_long  &rows, 
       spv_long        &cols, 
-      spv_double      &values, 
+      spv_float       &values, 
       stdv_long       &markers) const = 0;
 
     /**

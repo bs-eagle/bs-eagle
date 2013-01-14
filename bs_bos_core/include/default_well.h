@@ -244,7 +244,7 @@ namespace wells {
      * \param  markers
      * */
     virtual void 
-    fill_jacobian (double dt, index_t block_size, const spv_long &rows, spv_long &cols, spv_double &values, stdv_long &markers) const;
+    fill_jacobian (double dt, index_t block_size, const spv_long &rows, spv_long &cols, spv_float &values, stdv_long &markers) const;
 
     /**
      * \brief  Fills rhs array with rate values

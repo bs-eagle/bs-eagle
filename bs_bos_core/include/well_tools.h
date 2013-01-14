@@ -32,7 +32,7 @@ namespace detail {
     t_long                                    block_size,
     const spv_long                            &rows,
     spv_long                                  &cols,
-    spv_double                                &values, 
+    spv_float                                 &values, 
     stdv_long                                 &markers)
   {
     typedef default_connection_iterator_impl <well_t, connection_t> iterator_t;

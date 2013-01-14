@@ -27,8 +27,8 @@ namespace blue_sky
       /*output*/ t_double &p, t_double *rs = 0)
   {
     t_double p0, p1, rho, pb;
-    t_double invers_fvf = 0;
-    t_double rs_max;
+    t_float invers_fvf = 0;
+    t_float rs_max;
     t_double gravity_constant = EQUIL_PI_METRIC;
 
     if (phase == FI_PHASE_OIL && is_g)
@@ -143,8 +143,8 @@ namespace blue_sky
     t_double prev_d, prev_p, cur_d;
     t_long main_phase;
     stdv_double depth, press, rs;      // array of depthes, phases pressure, gas oil ratios
-    t_double p_oil, p_water, p_gas;
-    t_double p_p[3], s_p[2], pc_limit[2];
+    t_float p_oil, p_water, p_gas;
+    t_float p_p[3], s_p[2], pc_limit[2];
 	
     ds_w = sat_d[FI_PHASE_WATER];
     ds_g = sat_d[FI_PHASE_GAS];
@@ -576,8 +576,8 @@ namespace blue_sky
               {
                 scal_prop->process_init_2 (p_p, i_sat, perm[i_eql], poro[i_eql], s_p, pc_limit);
               }
-            t_double s_water = s_p[ds_w];
-			t_double s_gas = 0.0;
+            t_float s_water = s_p[ds_w];
+			t_float s_gas = 0.0;
 			if (is_g)
 				s_gas = s_p[ds_g];
 

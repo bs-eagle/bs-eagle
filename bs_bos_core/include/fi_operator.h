@@ -35,10 +35,10 @@ namespace blue_sky {
   template <bool is_w, bool is_g, bool is_o>
   struct fi_operator_impl
   {
-    typedef t_double                        item_t;
+    typedef t_float                         item_t;
     typedef t_float                         rhs_item_t;
     typedef t_long                          index_t;
-    typedef spv_double                      item_array_t;
+    typedef spv_float                       item_array_t;
     typedef spv_float                       rhs_item_array_t;
     typedef spv_long                        index_array_t;
     typedef bcsr_matrix_iface               bcsr_matrix_t;
@@ -292,7 +292,11 @@ namespace blue_sky {
       // set flag to 0 at newton iteration
       calc_model_->lsearch_force_newton_step = 0;
 
-      boost::array <item_t, FI_PHASE_TOT> &invers_fvf_average = calc_model_->invers_fvf_average;
+      //boost::array <item_t, FI_PHASE_TOT> &invers_fvf_average = calc_model_->invers_fvf_average;
+      boost::array <item_t, FI_PHASE_TOT> invers_fvf_average;
+      std::copy(calc_model_->invers_fvf_average.begin(), calc_model_->invers_fvf_average.end(),
+          invers_fvf_average.begin());
+
       assign (invers_fvf_average, 0);
 
       // loop through all cells
@@ -1217,11 +1221,11 @@ namespace blue_sky {
     const spv_long                m_array_;
     const spv_long                p_array_;
 
-    spv_float                     rhs_;
+    rhs_item_array_t              rhs_;
     spv_double                    sol_;
-    spv_float                     flux_rhs_;
+    rhs_item_array_t              flux_rhs_;
     spv_float                     sp_diag_;
-    spv_float                     s_rhs_;
+    rhs_item_array_t              s_rhs_;
 
     const t_float                 *depths_;
 
@@ -1267,7 +1271,7 @@ namespace blue_sky {
     item_t                        s_rhs_norm_;
 
     norms_storage_t               &norm_;
-    spv_float                     cfl_;
+    spv_double                    cfl_;
   };
 
 } // namespace blue_sky

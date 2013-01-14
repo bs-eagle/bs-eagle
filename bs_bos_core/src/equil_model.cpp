@@ -22,8 +22,8 @@ namespace blue_sky
       /*output*/ t_double &p, t_double *rs = 0)
   {
     t_double p0, p1, rho, pb;
-    t_double invers_fvf = 0;
-    t_double rs_max;
+    t_float invers_fvf = 0;
+    t_float rs_max;
     t_long is_g = model->is_gas ();
 
     if (phase == FI_PHASE_OIL && is_g)
@@ -119,11 +119,12 @@ namespace blue_sky
     t_double prev_d, prev_p, cur_d;
     t_long main_phase;
     stdv_double depth, press, rs;      // array of depthes, phases pressure, gas oil ratios
-    t_double p_oil, p_water, p_gas;
-    t_double p_p[3], s_p[2], pc_limit[2], dcoef;
+    t_float p_oil, p_water, p_gas;
+    t_float p_p[3], s_p[2], pc_limit[2];
+    t_double dcoef;
 
-    const stdv_double &perm = model->rock_grid_prop->permeability;
-    const stdv_double &poro = model->rock_grid_prop->porosity_p_ref;
+    const stdv_float &perm = model->rock_grid_prop->permeability;
+    const stdv_float &poro = model->rock_grid_prop->porosity_p_ref;
     idata::vval_vs_depth &rsvd = data->get_rsvd ();
     idata::vval_vs_depth &pbvd = data->get_pbvd ();
     const spv_int &equil_regions = data->equil_regions;
@@ -146,7 +147,7 @@ namespace blue_sky
     t_long i_original_cell, i_layer;
     t_double depth_top, depth_bottom, depth_center;
     t_double depth_step, layer_center;
-    t_double s_water, s_gas;
+    t_float s_water, s_gas;
     stdv_double press_w, press_g, press_o;
     spv_float swatinit;
     spv_float pcw = BS_KERNEL.create_object (v_float::bs_type ());

@@ -40,7 +40,7 @@ namespace blue_sky {
         // get region
         index_t reg = (*calc_model_->rock_regions)[i];
         // interpolate
-        calc_model_->rocktab[reg].interpolate (pressure_[i], &phi_m, &d_phi_m, t_mult, dp_t_mult);
+        calc_model_->rocktab[reg].interpolate (item_t(pressure_[i]), &phi_m, &d_phi_m, t_mult, dp_t_mult);
         // calculate porosity
         *poro = poro_array_[i] * phi_m;
         if (*poro > 1)

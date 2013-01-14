@@ -77,27 +77,27 @@ namespace blue_sky
       *this = c;
     }
 
-    shared_vector <t_double>
+    shared_vector <connection::item_t>
     connection::get_rw_value ()
     {
       return shared_array <item_t> (0, 0);
     }
-    shared_vector <t_double>
+    shared_vector <connection::item_t>
     connection::get_wr_value ()
     {
       return shared_array <item_t> (0, 0);
     }
-    shared_vector <t_double>
+    shared_vector <connection::item_t>
     connection::get_rr_value ()
     {
       return shared_array <item_t> (0, 0);
     }
-    shared_vector <t_double>
+    shared_vector <connection::item_t>
     connection::get_ps_value ()
     {
       return shared_array <item_t> (0, 0);
     }
-    shared_vector <t_double>
+    shared_vector <connection::rhs_item_t>
     connection::get_rate_value ()
     {
       return shared_array <rhs_item_t> (0, 0);

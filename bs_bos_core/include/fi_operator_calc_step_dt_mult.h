@@ -18,7 +18,7 @@ namespace blue_sky {
    * \return New dt multiplier
    * */
   template <bool is_w, bool is_g, bool is_o>
-  BS_FORCE_INLINE t_double
+  BS_FORCE_INLINE typename fi_operator_impl <is_w, is_g, is_o>::item_t
   fi_operator_impl <is_w, is_g, is_o>::calc_step_dt_mult (item_t prev_mult, item_t max_res)
   {
     item_t coef = 1.0, m_r, d, d_mult;

@@ -82,6 +82,8 @@ namespace blue_sky
       spv_float get_sec_rhs ();
       spv_float get_rhs ();
       spv_float get_rhs_flux ();
+      // online rhs convirsion for solver methods
+      spv_double get_rhs_dbl() const;
 
       spv_double get_cfl_vector ();
       spv_double get_solution ();

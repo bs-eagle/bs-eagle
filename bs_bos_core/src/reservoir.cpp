@@ -197,7 +197,7 @@ namespace blue_sky
 
     spv_long rows = mx->get_rows_ptr ();
     spv_long cols = mx->get_cols_ind ();
-    spv_double values = mx->get_values ();
+    spv_float values = mx->get_values ();
 
     blue_sky::detail::init_rows (facility_list_, rows, cells);
     if (rows->empty ())

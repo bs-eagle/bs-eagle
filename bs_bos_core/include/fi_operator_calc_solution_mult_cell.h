@@ -17,7 +17,7 @@ namespace blue_sky {
    * \return Calculated multiplier
    * */
   template <bool is_w, bool is_g, bool is_o>
-  BS_FORCE_INLINE t_double
+  BS_FORCE_INLINE typename fi_operator_impl <is_w, is_g, is_o>::item_t
   fi_operator_impl <is_w, is_g, is_o>::calc_solution_mult_cell (const norms_storage_t &old_norm)
   {
     item_t d = 0.0;

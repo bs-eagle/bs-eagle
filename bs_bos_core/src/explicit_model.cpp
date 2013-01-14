@@ -91,13 +91,13 @@ namespace blue_sky
         bs_throw_exception ("Not enought phases saturations specified");
       }
 
-    spv_double soil_ = data->get_fp_array ("SOIL");
-    spv_double swat_ = data->get_fp_array ("SWAT");
-    spv_double sgas_ = data->get_fp_array ("SGAS");
+    spv_float soil_ = data->get_fp_array ("SOIL");
+    spv_float swat_ = data->get_fp_array ("SWAT");
+    spv_float sgas_ = data->get_fp_array ("SGAS");
 
-    t_double const *soil = soil_->data ();
-    t_double const *swat = swat_->data ();
-    t_double const *sgas = sgas_->data ();
+    t_float const *soil = soil_->data ();
+    t_float const *swat = swat_->data ();
+    t_float const *sgas = sgas_->data ();
 
     // FIXME: work with ->size ()!
 

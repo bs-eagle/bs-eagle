@@ -393,15 +393,15 @@ namespace blue_sky
         bs_throw_exception ("All dimensions should be greate than 0. Number of active elements = 0.");
       }
 
-    spv_double poro_ = data->get_fp_array ("PORO");
-    spv_double ntg_ = data->get_fp_array ("NTG");
-    spv_double multpv_ = data->get_fp_array ("MULTPV");
+    spv_float poro_ = data->get_fp_array ("PORO");
+    spv_float ntg_ = data->get_fp_array ("NTG");
+    spv_float multpv_ = data->get_fp_array ("MULTPV");
     spv_long original_element_num_ = mesh->get_int_to_ext();
 
     t_long const * original_element_num = &(*original_element_num_)[0];
-    t_double * poro = &(*poro_)[0];
-    t_double * ntg = &(*ntg_)[0];
-    t_double * multpv = multpv_ ? &(*multpv_)[0] : 0;
+    t_float * poro = &(*poro_)[0];
+    t_float * ntg = &(*ntg_)[0];
+    t_float * multpv = multpv_ ? &(*multpv_)[0] : 0;
 
     for (t_long i = 0; i < nb; ++i)
       {
@@ -670,8 +670,8 @@ namespace blue_sky
   {
     const smart_ptr <rs_smesh_iface, true> s_mesh(mesh, bs_dynamic_cast ());
     
-    const spv_double &mesh_volumes_ = mesh->get_volumes ();
-    t_double const *mesh_volumes = &(*mesh_volumes_)[0];
+    const spv_float &mesh_volumes_ = mesh->get_volumes ();
+    t_float const *mesh_volumes = &(*mesh_volumes_)[0];
     for (t_long i = 0, cnt = mesh->get_n_active_elements(); i < cnt; ++i)
       {
         if (mesh_volumes[i] < COMP_EPSILON)

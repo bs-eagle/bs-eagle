@@ -78,9 +78,9 @@ namespace blue_sky
       typedef main_loop_calc_base               base_t;
       typedef main_loop_calc <is_w, is_g, is_o> this_t;
 
-      typedef t_double                          item_t;
+      typedef t_float                           item_t;
       typedef t_long                            index_t;
-      typedef spv_double                        item_array_t;
+      typedef spv_float                         item_array_t;
 
       typedef calc_model                        calc_model_t;
       typedef event_manager                     event_manager_t;
@@ -558,7 +558,7 @@ namespace blue_sky
           }
 
         rs_->on_before_jacobian_solve ();
-        t_long solved = solver->solve (m, jacobian_->get_rhs (), jacobian_->get_solution ());
+        t_long solved = solver->solve (m, jacobian_->get_rhs_dbl (), jacobian_->get_solution ());
         t_double tolerance = 0;
         t_long n_current_liters = 0;
 

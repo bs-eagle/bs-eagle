@@ -160,7 +160,7 @@ namespace blue_sky
     accum->init (elements, elements, phases, elements);
     t_long *accum_rows = accum->get_rows_ptr ()->data ();
     t_long *accum_cols = accum->get_cols_ind ()->data ();
-    t_double *accum_vals = accum->get_values ()->data ();
+    t_float *accum_vals = accum->get_values ()->data ();
     // OPENMP
     for (t_long i = 0; i < elements + 1; ++i)
       {
@@ -258,13 +258,22 @@ namespace blue_sky
     return rhs;
   }
 
+  spv_double
+  jacobian::get_rhs_dbl () const
+  {
+    spv_double t = BS_KERNEL.create_object(v_double::bs_type());
+    t->resize(rhs->size());
+    std::copy(rhs->begin(), rhs->end(), t->begin());
+    return t;
+  }
+
   spv_float
   jacobian::get_rhs_flux ()
   {
     return rhs_flux;
   }
 
-  spv_float
+  spv_double
   jacobian::get_cfl_vector ()
   {
     return cfl_vector;
@@ -338,10 +347,10 @@ namespace blue_sky
   void
   jacobian::mult_flux_part (t_double mult)
   {
-    spv_double facility = matrix->get_matrix ("facility")->get_values ();
-    spv_double flux     = matrix->get_matrix ("flux")->get_values ();
-    t_double *facility_ = facility->data ();
-    t_double *flux_     = flux->data ();
+    spv_float facility  = matrix->get_matrix ("facility")->get_values ();
+    spv_float flux      = matrix->get_matrix ("flux")->get_values ();
+    t_float *facility_ = facility->data ();
+    t_float *flux_     = flux->data ();
     t_float *rhs_flux_  = rhs_flux->data ();
 
     // FIXME: should we multiply facility?

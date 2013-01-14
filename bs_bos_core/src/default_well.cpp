@@ -288,7 +288,7 @@ namespace wells {
     detail::fill_rows <default_well, default_connection_t> (this, *rows);
   }
   void
-  default_well::fill_jacobian (double dt, index_t block_size, const spv_long &rows, spv_long &cols, spv_double &values, stdv_long &markers) const
+  default_well::fill_jacobian (double dt, index_t block_size, const spv_long &rows, spv_long &cols, spv_float &values, stdv_long &markers) const
   {
     detail::fill_jacobian <default_well, default_connection_t> (this,
       dt, block_size, rows, cols, values, markers);
