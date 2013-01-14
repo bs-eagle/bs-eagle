@@ -29,7 +29,7 @@ class  mesh_ijk : public rs_smesh_base
     ///////////////////////
     typedef grd_ecl::fpoint3d                           fpoint3d;
     typedef std::vector<grd_ecl::fpoint2d>              g_fpoint2d_vector;
-    typedef boost::array <t_double, 3>                    center_t;
+    typedef boost::array <t_float, 3>                    center_t;
 
 //-------------------------------------------
 //  METHODS

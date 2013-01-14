@@ -31,6 +31,12 @@ namespace blue_sky
     static const hdf5_type type = hdf5_type_helper <typename T::value_type>::type;
   };
 
+  template< >
+  template< class T >
+  struct hdf5_type_helper< smart_ptr< T, true > > {
+    static const hdf5_type type = hdf5_type_helper <typename T::value_type>::type;
+  };
+
   template <>
   struct hdf5_type_helper <char>
   {

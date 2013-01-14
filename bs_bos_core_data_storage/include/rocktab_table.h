@@ -89,9 +89,9 @@ namespace blue_sky
                        T *dp_truns_m  //!< pressure derivation of transmissibility
                        )
       {
-        std::vector<t_double> &p = this->get_column (0);
-        std::vector<t_double> &phi = this->get_column (1);
-        std::vector<t_double> &truns = this->get_column (2);
+        std::vector<t_float> &p = this->get_column (0);
+        std::vector<t_float> &phi = this->get_column (1);
+        std::vector<t_float> &truns = this->get_column (2);
 
         if (this->n_rows < 1)
           return;

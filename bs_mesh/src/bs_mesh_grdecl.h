@@ -92,9 +92,9 @@ namespace blue_sky
         {return wrapped.get_n_connections ();};
 
       //! return mesh dimensions range
-      void get_dimensions_range (t_double &dim1_max, t_double &dim1_min,
-        t_double &dim2_max, t_double &dim2_min,
-        t_double &dim3_max, t_double &dim3_min) const
+      void get_dimensions_range (t_float& dim1_max, t_float &dim1_min,
+        t_float &dim2_max, t_float &dim2_min,
+        t_float &dim3_max, t_float &dim3_min) const
         {return wrapped.get_min_max_xyz (dim1_max, dim1_min, dim2_max, dim2_min, dim3_max, dim3_min);};
 
       //! get mesh dimensions
@@ -129,7 +129,7 @@ namespace blue_sky
         {return wrapped.get_depth(n_element);};
 
       //! return number of mesh elements connections
-      t_double get_element_dtop(const t_long n_element) const
+      t_float get_element_dtop(const t_long n_element) const
         {return wrapped.get_dtop(n_element);};
 
       //! get element internal number by external

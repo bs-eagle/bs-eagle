@@ -728,8 +728,8 @@ t_double upsc::solve_pressure_zcolumn (t_long Ny, t_long Nz, t_long i, t_long j,
     t_double p_left = 1, p_right = 0;
     t_double dl, dL, dp, dP, K;
 
-    spv_float p = BS_KERNEL.create_object(v_float::bs_type());
-    spv_float rhs = BS_KERNEL.create_object(v_float::bs_type());
+    spv_double p = BS_KERNEL.create_object(v_double::bs_type());
+    spv_double rhs = BS_KERNEL.create_object(v_double::bs_type());
     spv_float tran_vals = BS_KERNEL.create_object(v_float::bs_type());
     sp_dens_mtx_t tran = BS_KERNEL.create_object("dens_matrix");
     sp_blu_solver_t solver = BS_KERNEL.create_object("blu_solver");
@@ -743,7 +743,7 @@ t_double upsc::solve_pressure_zcolumn (t_long Ny, t_long Nz, t_long i, t_long j,
     tran_vals = tran->get_values();
     
     v_float& A = *tran_vals;  
-    v_float& b = *rhs;
+    v_double& b = *rhs;
 
     smart_ptr<bs_mesh_grdecl> sp_mesh(sp_mesh_iface, bs_static_cast());
     mesh_grdecl mesh = sp_mesh->get_wrapped();
@@ -849,8 +849,8 @@ t_double upsc::solve_pressure_block (t_int direction, t_long Ny, t_long Nz, t_lo
     t_double p_left = 1, p_right = 0;
     t_double dL, dP, S, K, Q;
 
-    spv_float p = BS_KERNEL.create_object(v_float::bs_type());
-    spv_float rhs = BS_KERNEL.create_object(v_float::bs_type());
+    spv_double p = BS_KERNEL.create_object(v_double::bs_type());
+    spv_double rhs = BS_KERNEL.create_object(v_double::bs_type());
     spv_float tran_vals = BS_KERNEL.create_object(v_float::bs_type());
     sp_dens_mtx_t tran = BS_KERNEL.create_object("dens_matrix");
     sp_blu_solver_t solver = BS_KERNEL.create_object("blu_solver");
@@ -866,7 +866,7 @@ t_double upsc::solve_pressure_block (t_int direction, t_long Ny, t_long Nz, t_lo
     tran_vals = tran->get_values();
     
     v_float& A = *tran_vals;
-    v_float& b = *rhs;
+    v_double& b = *rhs;
     v_float& ntg = *ntg_;
 
     smart_ptr<bs_mesh_grdecl> sp_mesh(sp_mesh_iface, bs_static_cast());

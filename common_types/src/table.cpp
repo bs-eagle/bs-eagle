@@ -133,6 +133,14 @@ namespace blue_sky
       return data;    
     } 
      
+  spv_float table::convert_to_array_f(const t_long n_rows, const t_long n_cols) const {
+    spv_double ddata = convert_to_array(n_rows, n_cols);
+    spv_float data = BS_KERNEL.create_object(v_float::bs_type());
+    data->resize(ddata->size());
+    std::copy(ddata->begin(), ddata->end(), data->begin());
+    return data;
+  }
+
   void 
   table::convert_from_array (const t_long n_rows, const t_long n_cols, spv_double data) 
     {

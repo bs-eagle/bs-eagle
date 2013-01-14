@@ -896,7 +896,7 @@ void make_wave(ray_t& ray, fp_t start_point, fp_stor_t d, fp_stor_t a,
 		if(abs(wave_front - max_front) < 1e-10)
 			break;
 		ref_ray.insert(wave_front);
-		cell_sz = min(cell_sz * a, max_sz);
+		cell_sz = min< fp_t >(cell_sz * a, max_sz);
 	}
 
 	// merge refinement with original grid - suppose that ray is a set

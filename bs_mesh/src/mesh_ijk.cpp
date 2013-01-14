@@ -84,7 +84,7 @@ int mesh_ijk::init_ext_to_int()
   
   //fill volume array (except non-active block and using proxy array)
   volumes->resize(n_active_elements);
-  t_double *volumes_data = &(*volumes)[0];
+  t_float *volumes_data = &(*volumes)[0];
   
   for (int i = 0; i < n_active_elements; ++i)
     volumes_data[i] = volumes_temp[int_to_ext_data[i]];
@@ -183,7 +183,7 @@ mesh_ijk::get_center (t_long i, t_long j, t_long k) const
 }
 
 
-int mesh_ijk::splicing(stdv_double& /*volumes_temp*/)
+int mesh_ijk::splicing(stdv_float& /*volumes_temp*/)
 {
   int splicing_num = 0;
   BS_ASSERT (false && "NOT IMPL YET");
@@ -300,7 +300,7 @@ int mesh_ijk::build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, con
 
   t_long *rows_ptr_tran = &(*conn_trans->get_rows_ptr())[0];
   t_long *cols_ind_tran = &(*conn_trans->get_cols_ind())[0];
-  t_double *values_tran =  &(*conn_trans->get_values())[0];
+  t_float *values_tran =  &(*conn_trans->get_values())[0];
   
   flux_conn->get_matrix_block_idx_plus ()->resize (n_connections * 2);
   flux_conn->get_matrix_block_idx_minus ()->resize (n_connections * 2);
@@ -375,7 +375,7 @@ int mesh_ijk::build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, con
 void mesh_ijk::set_neigbour_data (const t_long index1, const t_long index1_ext, const t_long index2_ext, t_long &conn_idx,
                                               const t_long *rows_ptr, t_long *cols_ind, stdv_long &tmp_rows_ptr,
                                               t_long *m_memory, t_long *p_memory,
-                                              t_long *cols_ind_tran, t_double *values_tran, direction dir)
+                                              t_long *cols_ind_tran, t_float *values_tran, direction dir)
 {
   //change jacobian
   t_long index2 = (*ext_to_int)[index2_ext];
@@ -410,10 +410,10 @@ int mesh_ijk::find_neighbours(sp_bcsr_t /*neig_matrix*/)
 
 // calculating method have been taken from td eclipse (page 893)
 
-t_double mesh_ijk::calculate_tran(const t_long i, const t_long j, const  direction d_dir) const
+t_float mesh_ijk::calculate_tran(const t_long i, const t_long j, const  direction d_dir) const
   {
     t_double tran;
-    t_double *depths_data = depths->data ();
+    t_float *depths_data = depths->data ();
     t_long *ext_to_int_data = ext_to_int->data ();
 
     t_double A; //area between i and j block
@@ -491,7 +491,7 @@ void mesh_ijk::get_block_dx_dy_dz(t_long n_elem, t_double &dx, t_double &dy, t_d
 int mesh_ijk::calc_depths ()
 {
   depths->resize (n_active_elements);
-  t_double *depths_data = &(*depths)[0];
+  t_float *depths_data = &(*depths)[0];
   t_long index; //index of current block
   t_long *ext_to_int_data = &(*ext_to_int)[0];
 

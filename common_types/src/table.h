@@ -239,12 +239,13 @@ namespace blue_sky
       */
       virtual spv_double convert_to_array (const t_long n_rows, const t_long n_cols) const;
 
+      virtual spv_float convert_to_array_f(const t_long n_rows, const t_long n_cols) const;
       /** 
        * @brief push back new row
        * 
        * @param v  -- <INPUT> row values
        */
-      virtual void push_back (std::vector<t_double> &v)
+      virtual void push_back (const std::vector<t_double> &v)
         {
           if (v.size () != values.size ())
             return;
@@ -255,6 +256,10 @@ namespace blue_sky
               values[i].push_back (v[i]);
             }
         }
+      virtual void push_back_f (const std::vector<t_float> &v) {
+        this->push_back(std::vector< t_double >(v.begin(), v.end()));
+      }
+
       virtual void save (toa_t &ar) const;
       virtual void load (tia_t &ar);
       virtual sp_table_t check_serial () const;

@@ -71,9 +71,9 @@ namespace blue_sky
       virtual t_long get_n_connections ()const = 0;
       
       //! //! return mesh dimensions range
-      virtual void get_dimensions_range (t_double &dim1_max, t_double &dim1_min,
-                                         t_double &dim2_max, t_double &dim2_min,
-                                         t_double &dim3_max, t_double &dim3_min) const = 0;
+      virtual void get_dimensions_range (t_float &dim1_max, t_float &dim1_min,
+                                         t_float &dim2_max, t_float &dim2_min,
+                                         t_float &dim3_max, t_float &dim3_min) const = 0;
       
       //! get const int_to_ext
       virtual const spv_long get_int_to_ext() const = 0;

@@ -171,14 +171,17 @@ class table_iface : public objbase
         \brief convert table to array 
       */
       virtual spv_double convert_to_array (const t_long n_rows, const t_long n_cols) const = 0;
+
+      virtual spv_float convert_to_array_f(const t_long n_rows, const t_long n_cols) const = 0;
       
       /** 
        * @brief push back new row
        * 
        * @param v  -- <INPUT> row values
        */
-      virtual void push_back (std::vector<t_double> &v) = 0;
+      virtual void push_back (const std::vector<t_double> &v) = 0;
 
+      virtual void push_back_f (const std::vector<t_float> &v) = 0;
 
       virtual void save (toa_t &ar) const = 0;
       virtual void load (tia_t &ar) = 0;

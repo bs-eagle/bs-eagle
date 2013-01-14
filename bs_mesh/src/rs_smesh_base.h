@@ -220,7 +220,7 @@ class BS_API_PLUGIN rs_smesh_base : public rs_mesh_base
       return 0;
     }
 
-    virtual boost::array <t_double, 3>
+    virtual boost::array <t_float, 3>
     get_center (t_long /*i*/, t_long /*j*/, t_long /*k*/) const
       {
         BS_ASSERT (false && "PURE CALL");
@@ -229,7 +229,7 @@ class BS_API_PLUGIN rs_smesh_base : public rs_mesh_base
         return dummy;
       }
 
-    virtual boost::array <t_double, 3>
+    virtual boost::array <t_float, 3>
     get_center (t_long /*n_element*/) const
       {
         BS_ASSERT (false && "PURE CALL");
