@@ -92,7 +92,7 @@ namespace blue_sky {
       {
         BS_ASSERT (region_index >= 0 && region_index < scal_table_array.size ());
         t_int table_len = (t_int) data->size () / 4;
-        t_double const *data_array = data->data ();
+        t_float const *data_array = data->data ();
         
         spv_double sp = BS_KERNEL.create_object (v_double::bs_type ()); 
         spv_double so = BS_KERNEL.create_object (v_double::bs_type ()); 
@@ -191,7 +191,7 @@ namespace blue_sky {
       {
         BS_ASSERT (region_index >= 0 && region_index < scal_table_array.size ());
         t_int table_len = (t_int) data->size () / 3;
-        t_double const *data_array = data->data ();
+        t_float const *data_array = data->data ();
         
         spv_double sp = BS_KERNEL.create_object (v_double::bs_type ()); 
         spv_double krp = BS_KERNEL.create_object (v_double::bs_type ()); 
@@ -280,7 +280,7 @@ namespace blue_sky {
       {
         BS_ASSERT (region_index >= 0 && region_index < scal_table_array.size ());
         t_int table_len = (t_int) data->size () / 3;
-        t_double const *data_array = data->data ();
+        t_float const *data_array = data->data ();
         
         spv_double so = BS_KERNEL.create_object (v_double::bs_type ()); 
         spv_double krop = BS_KERNEL.create_object (v_double::bs_type ()); 
@@ -363,7 +363,7 @@ namespace blue_sky {
       {
         BS_ASSERT (region_index >= 0 && region_index < scal_table_array.size ());
         t_int table_len = (t_int) data->size () / 2;
-        t_double const *data_array = data->data ();
+        t_float const *data_array = data->data ();
         
         spv_double so = BS_KERNEL.create_object (v_double::bs_type ()); 
         spv_double krop = BS_KERNEL.create_object (v_double::bs_type ()); 

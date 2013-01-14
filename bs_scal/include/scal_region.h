@@ -19,7 +19,7 @@ namespace blue_sky {
   {
   public:
     //typedef data_vector <strategy_t>          data_vector_t;
-    typedef t_double                          item_t;
+    typedef t_float                           item_t;
     typedef scale_array_holder                scale_array_holder_t;
     typedef scal_region                       this_t;
     typedef scal_region_info <item_t>         scal_region_info_t;

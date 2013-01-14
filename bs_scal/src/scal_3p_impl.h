@@ -23,10 +23,10 @@ namespace blue_sky {
   //template <bool is_w, bool is_g, bool is_o, RPO_MODEL_ENUM rpo_model>
   struct scal_3p_impl : scal_3p::scal_3p_impl_base
   {
-    typedef t_double                                      item_t;
+    typedef t_float                                       item_t;
     typedef t_long                                        index_t;
     typedef v_long                                        index_array_t;
-    typedef v_double                                      item_array_t;
+    typedef v_float                                       item_array_t;
     typedef scal_3p                                       scal_3p_t;
     typedef scal_3p_t::phase_d_t                          phase_d_t;
     typedef scal_3p_t::data_array_t                       data_array_t;
@@ -159,7 +159,7 @@ namespace blue_sky {
     }
 
     void
-    process (const spv_double &saturation,
+    process (const sp_array_item_t& saturation,
       const spv_long &sat_regions,
       const stdv_float &perm,
       const stdv_float &poro,

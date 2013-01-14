@@ -21,7 +21,7 @@ namespace blue_sky {
   class BS_API_PLUGIN scal_2p_data_holder : public scal_2p_data_holder_iface
   {
   public:
-    typedef t_double                                item_t;
+    typedef t_float                                 item_t;
     typedef t_int                                   index_t;
 
     typedef scal_2p_data_holder                     this_t;
@@ -29,7 +29,7 @@ namespace blue_sky {
     typedef scal_region                             scal_region_t;
     typedef scal_region_info <item_t>               scal_region_info_t;
     typedef data_vector <item_t>                    data_vector_t;
-    typedef v_double                                item_array_t;
+    typedef v_float                                 item_array_t;
     typedef smart_ptr <item_array_t, true>          sp_array_item_t;
     typedef std::vector <scal_region_info_t>        region_vector_t;
     typedef std::vector <scal_region_t *>           region_vector_2_t;
@@ -169,14 +169,34 @@ namespace blue_sky {
 		scal_table_array.resize (1);
 		scal_table_array[0] = scal_table;
 		scal_region_info_t info;
-		const item_t *sp_   = scal_table->get_col_ptr (SCAL_TABLE_SP2);
-          //const item_t *so_   = scal_table->get_col_ptr (SCAL_TABLE_SO); 
-        const item_t *krp_  = scal_table->get_col_ptr (SCAL_TABLE_KRP2); 
-        const item_t *krop_ = scal_table->get_col_ptr (SCAL_TABLE_KROP2); 
-        const item_t *pcp_  = scal_table->get_col_ptr (SCAL_TABLE_PCP2); 
-          
+
         const t_int sp_table_len = scal_table->get_n_rows (SCAL_TABLE_SP);
         const t_int so_table_len = sp_table_len;  //scal_table->get_n_rows (SCAL_TABLE_SO);
+
+		// do explicit conversion from doubles returned by scal_table
+		// into t_float required by data_vector_t
+
+		const t_double* sp__ = scal_table->get_col_ptr (SCAL_TABLE_SP2);
+		const std::vector< t_float > vsp_(sp__, sp__ + sp_table_len);
+		const item_t *sp_ = &vsp_[0];
+		//const item_t *sp_   = scal_table->get_col_ptr (SCAL_TABLE_SP2);
+          //const item_t *so_   = scal_table->get_col_ptr (SCAL_TABLE_SO); 
+
+		const t_double* krp__ = scal_table->get_col_ptr (SCAL_TABLE_KRP2);
+		const std::vector< t_float > vkrp_(krp__, krp__ + sp_table_len);
+		const item_t *krp_  = &vkrp_[0];
+		//const item_t *krp_  = scal_table->get_col_ptr (SCAL_TABLE_KRP2);
+
+		const t_double* krop__ = scal_table->get_col_ptr (SCAL_TABLE_KROP2);
+		const std::vector< t_float > vkrop_(krop__, krop__ + sp_table_len);
+		const item_t *krop_  = &vkrop_[0];
+		//const item_t *krop_ = scal_table->get_col_ptr (SCAL_TABLE_KROP2); 
+
+		const t_double* pcp__ = scal_table->get_col_ptr (SCAL_TABLE_PCP2);
+		const std::vector< t_float > vpcp_(pcp__, pcp__ + sp_table_len);
+		const item_t *pcp_  = &vpcp_[0];
+		//const item_t *pcp_  = scal_table->get_col_ptr (SCAL_TABLE_PCP2); 
+          
         item_t *so_ = new item_t[so_table_len];
 		item_t *_pcp_ = new item_t[sp_table_len];
 		for (int i = 0; i < sp_table_len; i++)
@@ -206,14 +226,35 @@ namespace blue_sky {
           const scal_region_info_t &info  = region_[i];
           sp_table scal_table = scal_table_array[i];
           
-          const item_t *sp_   = scal_table->get_col_ptr (SCAL_TABLE_SP);
-          const item_t *so_   = scal_table->get_col_ptr (SCAL_TABLE_SO); 
-          const item_t *krp_  = scal_table->get_col_ptr (SCAL_TABLE_KRP); 
-          const item_t *krop_ = scal_table->get_col_ptr (SCAL_TABLE_KROP); 
-          const item_t *pcp_  = scal_table->get_col_ptr (SCAL_TABLE_PCP); 
-          
           const t_int sp_table_len = scal_table->get_n_rows (SCAL_TABLE_SP);
           const t_int so_table_len = scal_table->get_n_rows (SCAL_TABLE_SO);
+
+          const t_double* sp__ = scal_table->get_col_ptr (SCAL_TABLE_SP);
+          const std::vector< t_float > vsp_(sp__, sp__ + sp_table_len);
+          const item_t *sp_ = &vsp_[0];
+
+          const t_double* so__ = scal_table->get_col_ptr (SCAL_TABLE_SO);
+          const std::vector< t_float > vso_(so__, so__ + so_table_len);
+          const item_t *so_ = &vso_[0];
+
+          const t_double* krp__ = scal_table->get_col_ptr (SCAL_TABLE_KRP);
+          const std::vector< t_float > vkrp_(krp__, krp__ + sp_table_len);
+          const item_t *krp_  = &vkrp_[0];
+          
+          const t_double* krop__ = scal_table->get_col_ptr (SCAL_TABLE_KROP);
+          const std::vector< t_float > vkrop_(krop__, krop__ + so_table_len);
+          const item_t *krop_  = &vkrop_[0];
+          
+          const t_double* pcp__ = scal_table->get_col_ptr (SCAL_TABLE_PCP);
+          const std::vector< t_float > vpcp_(pcp__, pcp__ + sp_table_len);
+          const item_t *pcp_  = &vpcp_[0];
+
+          //const item_t *sp_   = scal_table->get_col_ptr (SCAL_TABLE_SP);
+          //const item_t *so_   = scal_table->get_col_ptr (SCAL_TABLE_SO); 
+          //const item_t *krp_  = scal_table->get_col_ptr (SCAL_TABLE_KRP); 
+          //const item_t *krop_ = scal_table->get_col_ptr (SCAL_TABLE_KROP); 
+          //const item_t *pcp_  = scal_table->get_col_ptr (SCAL_TABLE_PCP); 
+          
           
           region_2_.push_back (new scal_region_t (info,
                               data_vector_t (sp_,   1, sp_table_len),

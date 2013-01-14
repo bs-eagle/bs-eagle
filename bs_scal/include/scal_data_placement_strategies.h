@@ -97,14 +97,14 @@ private:
       struct all_regions_t
         {
           typedef scal_2p_data_holder                           scal_2p_data_holder_t;
-          typedef v_double                                      array_item_t;
-          typedef smart_ptr <v_double, true>                    sp_array_item_t;
+          typedef v_float                                       array_item_t;
+          typedef smart_ptr <v_float, true>                     sp_array_item_t;
           
           static void
           place_spof_data (sp_array_item_t dst, scal::data_placement::scal_placement_info &info, const sp_array_item_t src, bool is_water)
           {
-            t_double *dst_array       = dst->data ();
-            t_double const *src_array = src->data ();
+            t_float *dst_array       = dst->data ();
+            t_float const *src_array = src->data ();
             size_t size = dst->size () - (5 * (src->size () / 4));
             size_t src_size = src->size ();
             for (size_t i = 0, j = 0, cnt = src->size (); i < cnt; i += 4, j += 5)

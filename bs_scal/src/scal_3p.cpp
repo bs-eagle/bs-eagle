@@ -183,13 +183,20 @@ namespace blue_sky
   }
 
   void
-  scal_3p::process (const spv_double &saturation,
+  scal_3p::process (const spv_double& saturation,
     const spv_long &sat_regions,
     const stdv_float &perm,
     const stdv_float &poro,
     data_array_t &data) const
   {
-    impl_->process (saturation, sat_regions, perm, poro, data);
+    //if(item_array_t::bs_type() != v_double::bs_type()) {
+      sp_array_item_t t = BS_KERNEL.create_object(item_array_t::bs_type());
+      t->resize(saturation->size());
+      std::copy(saturation->begin(), saturation->end(), t->begin());
+      impl_->process (t, sat_regions, perm, poro, data);
+    //}
+    //else
+    //  impl_->process (saturation, sat_regions, perm, poro, data);
   }
 
   void
@@ -410,22 +417,22 @@ namespace blue_sky
               t_long n_rows_water = water_input_table[region_index]->get_n_rows ();
               if (n_cols_water == SPOF_KEYWORD_COLUMNS)
                 {
-                  get_water_data ()->add_spof (water_input_table[region_index]->convert_to_array (n_rows_water, n_cols_water), region_index, true);
+                  get_water_data ()->add_spof (water_input_table[region_index]->convert_to_array_f (n_rows_water, n_cols_water), region_index, true);
                 }
               else 
                 {
-                  get_water_data ()->add_spfn (water_input_table[region_index]->convert_to_array (n_rows_water, n_cols_water), region_index, true);
+                  get_water_data ()->add_spfn (water_input_table[region_index]->convert_to_array_f (n_rows_water, n_cols_water), region_index, true);
                   if (oil_input_table[region_index].get ())
                     {
                       t_long n_cols_oil = oil_input_table[region_index]->get_n_cols ();
                       t_long n_rows_oil = oil_input_table[region_index]->get_n_rows ();
                       if (n_cols_oil == SOF3_KEYWORD_COLUMNS)
                         {
-                          get_water_data ()->add_sof3 (oil_input_table[region_index]->convert_to_array (n_rows_oil, n_cols_oil), region_index, true);
+                          get_water_data ()->add_sof3 (oil_input_table[region_index]->convert_to_array_f (n_rows_oil, n_cols_oil), region_index, true);
                         }
                       else 
                         {
-                          get_water_data ()->add_sof2 (oil_input_table[region_index]->convert_to_array (n_rows_oil, n_cols_oil), region_index, true);
+                          get_water_data ()->add_sof2 (oil_input_table[region_index]->convert_to_array_f (n_rows_oil, n_cols_oil), region_index, true);
                         }  
                     }  
                 }  
@@ -437,11 +444,11 @@ namespace blue_sky
               t_long n_rows_gas = gas_input_table[region_index]->get_n_rows ();
               if (n_cols_gas == SPOF_KEYWORD_COLUMNS)
                 {
-                  get_gas_data ()->add_spof (gas_input_table[region_index]->convert_to_array (n_rows_gas, n_cols_gas), region_index, false);
+                  get_gas_data ()->add_spof (gas_input_table[region_index]->convert_to_array_f (n_rows_gas, n_cols_gas), region_index, false);
                 }
               else 
                 {
-                  get_gas_data ()->add_spfn (gas_input_table[region_index]->convert_to_array (n_rows_gas, n_cols_gas), region_index, false);
+                  get_gas_data ()->add_spfn (gas_input_table[region_index]->convert_to_array_f (n_rows_gas, n_cols_gas), region_index, false);
                   if (oil_input_table[region_index].get ())
                     {
                       t_long n_cols_oil = oil_input_table[region_index]->get_n_cols ();
@@ -449,11 +456,11 @@ namespace blue_sky
                     
                       if (oil_input_table[region_index]->get_n_cols () == SOF3_KEYWORD_COLUMNS)
                         {
-                          get_gas_data ()->add_sof3 (oil_input_table[region_index]->convert_to_array (n_rows_oil, n_cols_oil), region_index, false);
+                          get_gas_data ()->add_sof3 (oil_input_table[region_index]->convert_to_array_f (n_rows_oil, n_cols_oil), region_index, false);
                         }
                       else 
                         {
-                          get_gas_data ()->add_sof2 (oil_input_table[region_index]->convert_to_array (n_rows_oil, n_cols_oil), region_index, false);
+                          get_gas_data ()->add_sof2 (oil_input_table[region_index]->convert_to_array_f (n_rows_oil, n_cols_oil), region_index, false);
                         }  
                     }  
                 }  

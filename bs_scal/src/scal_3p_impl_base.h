@@ -18,7 +18,7 @@ namespace blue_sky {
   //////////////////////////////////////////////////////////////////////////
   struct scal_3p::scal_3p_impl_base
   {
-    typedef t_double                          item_t;
+    typedef t_float                           item_t;
     typedef t_long                            index_t;
     typedef scal_3p                           scal_3p_t;
 

@@ -30,10 +30,10 @@ namespace blue_sky
     public:
       typedef scal_3p             											this_t;
 
-      typedef t_double                    							item_t;
+      typedef t_float                    							item_t;
       typedef t_long                       							index_t;
       typedef v_long                                    index_array_t;
-      typedef v_double                                  item_array_t;
+      typedef v_float                                   item_array_t;
       typedef smart_ptr <index_array_t, true>           sp_array_index_t;
       typedef smart_ptr <item_array_t, true>            sp_array_item_t;
 
@@ -113,7 +113,7 @@ namespace blue_sky
           sp_array_item_t s_deriv_cap) const;
 
       void
-      process (const spv_double &saturation, 
+      process (const spv_double& saturation, 
         const spv_long &sat_regions,
         const stdv_float &perm,
         const stdv_float &poro,

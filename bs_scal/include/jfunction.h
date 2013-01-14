@@ -31,7 +31,7 @@ namespace blue_sky
       //  init (perm_type);
       //}
 
-      typedef t_double                    item_t;
+      typedef t_float                     item_t;
       typedef jfunction                   this_t;
 
       void init (JFUNC_PERM_TYPE_ENUM perm_type_)

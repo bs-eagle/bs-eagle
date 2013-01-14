@@ -124,7 +124,7 @@ namespace blue_sky
     get_gas_jfunction () const = 0;
 
     virtual void
-    process (const spv_double & saturation, 
+    process (const spv_double& saturation, 
       const spv_long &          sat_regions,
       const stdv_float &        perm,
       const stdv_float &        poro,
@@ -133,47 +133,47 @@ namespace blue_sky
 
     virtual void
     process_init (t_long  cell_index, 
-      const t_double *    pressure, 
+      const t_float *    pressure, 
       t_long              sat_reg, 
-      const t_double *    perm_array, 
-      t_double            poro,
-      t_double *          sat, 
-      t_double *          pc_limit) const = 0;
+      const t_float *    perm_array, 
+      t_float            poro,
+      t_float *          sat, 
+      t_float *          pc_limit) const = 0;
 
     virtual void
     process_init_2 (
-      const t_double *    pressure, 
+      const t_float *    pressure, 
       t_long              sat_reg, 
-      t_double            perm, 
-      t_double            poro,
-      t_double *          sat, 
-      t_double *          pc_limit) const = 0;
+      t_float            perm, 
+      t_float            poro,
+      t_float *          sat, 
+      t_float *          pc_limit) const = 0;
 
 
     virtual void
     calc_pcp (t_long      cell_index, 
-      const t_double      sat, 
+      const t_float      sat, 
       t_long              sat_reg, 
-      t_double            cap, 
-      t_double &          pcp) const = 0;
+      t_float            cap, 
+      t_float &          pcp) const = 0;
 
     virtual void
     calc_gas_water_zone (t_long cell_index, 
       t_long              sat_reg, 
-      const t_double *    perm_array, 
-      t_double            poro, 
-      t_double            pcgw,
-      t_double &          sw, 
-      t_double &          sg) const = 0;
+      const t_float *    perm_array, 
+      t_float            poro, 
+      t_float            pcgw,
+      t_float &          sw, 
+      t_float &          sg) const = 0;
 
     virtual void
     calc_gas_water_zone_2 (
       t_long              sat_reg, 
-      t_double            perm, 
-      t_double            poro, 
-      t_double            pcgw,
-      t_double &          sw, 
-      t_double &          sg) const = 0;
+      t_float            perm, 
+      t_float            poro, 
+      t_float            pcgw,
+      t_float &          sw, 
+      t_float &          sg) const = 0;
 
 
     virtual void
