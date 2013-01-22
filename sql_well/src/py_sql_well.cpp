@@ -14,6 +14,9 @@
 using namespace boost::python;
 #ifdef BSPY_EXPORTING_PLUGIN
 
+BLUE_SKY_TYPE_SERIALIZE_GUID(blue_sky::sql_well)
+BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::sql_well)
+
 namespace blue_sky {
 namespace python {
   void py_export_compdat_ident();
@@ -53,8 +56,19 @@ namespace python {
 
     py_export_compdat_ident();
 
-    def("serialize_to_str", &blue_sky::serialize_to_str< well_pool_iface >);
-    def("serialize_from_str", &blue_sky::serialize_from_str< well_pool_iface >);
+
+    std::string (*s2s_wpi)(smart_ptr< well_pool_iface >&) = &blue_sky::serialize_to_str< well_pool_iface >;
+    std::string (*s2s_sqw)(smart_ptr< sql_well >&) = &blue_sky::serialize_to_str< sql_well >;
+    smart_ptr< well_pool_iface > (*sfs_wpi)(const std::string&) = &blue_sky::serialize_from_str< well_pool_iface >;
+    smart_ptr< sql_well > (*sfs_sqw)(const std::string&) = &blue_sky::serialize_from_str< sql_well >;
+
+    def("serialize_to_str", s2s_wpi);
+    def("serialize_to_str", s2s_sqw);
+    def("serialize_from_str", sfs_wpi);
+    def("serialize_from_str", sfs_sqw);
+
+    //def("serialize_to_str", &blue_sky::serialize_to_str< well_pool_iface >);
+    //def("serialize_from_str", &blue_sky::serialize_from_str< well_pool_iface >);
     def("serialize_to_str_fname", &serialize_to_str_fname);
 
     // register implicit conversion to interface
