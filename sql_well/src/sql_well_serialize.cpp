@@ -51,8 +51,10 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 		db_basename += "_well_pool.db";
 		db_fname = prj_path + PATHSEP + db_basename;
 	}
-	else
+	else {
 		db_basename = t.file_name;
+		db_fname = t.file_name;
+	}
 
 	// generate uuid that is part of filename
 	if(db_basename.empty()) {

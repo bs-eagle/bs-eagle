@@ -201,6 +201,8 @@ namespace blue_sky
 
 #endif //BSPY_EXPORTING_PLUGIN
 
+      std::string   file_name;          //!< database filename
+
     protected:
       int create_db (sqlite3 *db_in);
 
@@ -218,7 +220,6 @@ namespace blue_sky
       // ------------------------------
     protected:
       //sp_prop_t sp_prop;        //!< ptoperties pointer
-      std::string   file_name;          //!< database filename
       sqlite3       *db;                //!< database pointer
       sqlite3_stmt  *stmp_sql;
       sp_reader_t   fr_file;            //!< read from ascii helper
