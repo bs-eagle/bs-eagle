@@ -201,6 +201,7 @@ struct val2str {
             }
         }
 
+      file_name = file;
 
 #if 0
       char buf[2048];
