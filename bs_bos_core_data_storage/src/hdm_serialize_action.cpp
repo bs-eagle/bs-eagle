@@ -9,6 +9,7 @@
 #include "bs_bos_core_data_storage_stdafx.h"
 
 #include "hdm_serialize.h"
+#include "bs_misc.h"
 #include <fstream>
 #include <sstream>
 
@@ -189,12 +190,35 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(hdm_serialize_to_str_overl, hdm_serialize_to_str
 
 namespace python {
 
+// helper that allows to manually set project path and name for serialization process
+// invoke with empty strings to clear kernel table
+void hdm_serialize_set_project_prop(const std::string& prj_path, const std::string& prj_name) {
+	// save project path for serialization code
+	kernel::idx_dt_ptr p_dt = BS_KERNEL.pert_idx_dt(hdm::bs_type());
+	// clear kernel table to not confuse with further saves
+	p_dt->clear< std::string >();
+
+	// remember project path
+	if(prj_path.size() > 0)
+		p_dt->insert< std::string >(prj_path);
+	// and project name
+	if(prj_name.size() > 0)
+		p_dt->insert< std::string >(prj_name);
+}
+
+// wstring version
+void hdm_serialize_set_project_prop_w(const std::wstring& prj_path, const std::wstring& prj_name) {
+	hdm_serialize_set_project_prop(wstr2str(prj_path), wstr2str(prj_name));
+}
+
 BS_API_PLUGIN void py_export_hdm_serialize() {
 	bp::def("hdm_serialize_save", &hdm_serialize_save, hdm_serialize_save_overl());
 	bp::def("hdm_serialize_load", &hdm_serialize_load);
     // register pvt to/from str serialization
 	bp::def("serialize_to_str", &blue_sky::hdm_serialize_to_str, hdm_serialize_to_str_overl());
 	bp::def("serialize_from_str", &blue_sky::hdm_serialize_from_str);
+	bp::def("hdm_serialize_set_project_prop", &hdm_serialize_set_project_prop);
+	bp::def("hdm_serialize_set_project_prop", &hdm_serialize_set_project_prop_w);
 }
 
 } /* python */
