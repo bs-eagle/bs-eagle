@@ -75,10 +75,10 @@ namespace python {
     py_export_compdat_ident();
 
 
-    std::string (*s2s_wpi)(smart_ptr< well_pool_iface >&) = &blue_sky::serialize_to_str< well_pool_iface >;
-    std::string (*s2s_sqw)(smart_ptr< sql_well >&) = &blue_sky::serialize_to_str< sql_well >;
-    smart_ptr< well_pool_iface > (*sfs_wpi)(const std::string&) = &blue_sky::serialize_from_str< well_pool_iface >;
-    smart_ptr< sql_well > (*sfs_sqw)(const std::string&) = &blue_sky::serialize_from_str< sql_well >;
+    std::string (*s2s_wpi)(smart_ptr< well_pool_iface, true >&) = &blue_sky::serialize_to_str< well_pool_iface >;
+    std::string (*s2s_sqw)(smart_ptr< sql_well, true >&) = &blue_sky::serialize_to_str< sql_well >;
+    smart_ptr< well_pool_iface, true > (*sfs_wpi)(const std::string&) = &blue_sky::serialize_from_str< well_pool_iface >;
+    smart_ptr< sql_well, true > (*sfs_sqw)(const std::string&) = &blue_sky::serialize_from_str< sql_well >;
 
     def("serialize_to_str", s2s_wpi);
     def("serialize_to_str", s2s_sqw);
