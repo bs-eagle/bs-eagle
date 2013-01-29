@@ -51,16 +51,16 @@ namespace python {
     static_cast< sql_well& >(wp).file_name = new_fname;
   }
 
-  //template< typename T >
-  //struct sql_well_exporter_plus {
-  //  template< typename class_t >
-  //  static class_t &
-  //  export_class(class_t& class__) {
-  //    py_sql_well_exporter< T >::export_class(class__)
-  //      .add_property("file_name", &sqw_get_file_name, &sqw_set_file_name);
-  //    return class__;
-  //  }
-  //};
+  template< typename T >
+  struct sql_well_exporter_plus {
+    template< typename class_t >
+    static class_t &
+    export_class(class_t& class__) {
+      py_sql_well_exporter< T >::export_class(class__)
+        .add_property("file_name", &sqw_get_file_name, &sqw_set_file_name);
+      return class__;
+    }
+  };
 
   //////////////////////////////////////////////////////////////////////////
   //! export matrices to python
@@ -70,8 +70,7 @@ namespace python {
 
     base_exporter <well_pool_iface, py_sql_well_exporter>::export_class ("well_pool_iface");
 
-    //class_exporter <sql_well, well_pool_iface, sql_well_exporter_plus>::export_class ("sql_well");
-    class_exporter <sql_well, well_pool_iface, py_sql_well_exporter>::export_class ("sql_well");
+    class_exporter <sql_well, well_pool_iface, sql_well_exporter_plus>::export_class ("sql_well");
 
     py_export_compdat_ident();
 

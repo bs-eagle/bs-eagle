@@ -12,7 +12,6 @@
 
 #include <string>
 #include "well_pool_iface.h"
-#include "sql_well.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "dummy_base.h"
@@ -27,9 +26,6 @@ namespace blue_sky
   {
   namespace python
     {
-
-  std::string sqw_get_file_name(const sql_well& wp);
-  void sqw_set_file_name(sql_well& wp, const std::string new_fname);
 
   PY_EXPORTER (py_sql_well_exporter, default_exporter)
     .def ("open_db",                            &T::open_db,
@@ -95,7 +91,6 @@ namespace blue_sky
     //.def ("t2str",                                &T::t2str,
     //  args ("d"), "convert time from double to str")
     .def ("__str__",                            &T::py_str)
-    .add_property("file_name", &sqw_get_file_name, &sqw_set_file_name)
   PY_EXPORTER_END;
 
   //! export matrices to python
