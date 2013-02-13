@@ -436,12 +436,13 @@ struct mesh_tools : public helpers< strat_t > {
 					ca_assign(hi_bbox_, pb->hi_bbox_);
 				}
 				else {
+					typedef std::pointer_to_binary_function< const t_float&, const t_float&, const t_float& > bin_op_ptr;
 					// lo_bbox_ = min(lo_bbox_, lo_part_bbox)
 					std::transform(&lo_bbox_[0], &lo_bbox_[D], &pb->lo_bbox_[0], &lo_bbox_[0],
-						std::ptr_fun(std::min< t_float >));
+						bin_op_ptr(std::min< t_float >));
 					// hi_bbox_ = max(hi_bbox_, hi_part_bbox)
 					std::transform(&hi_bbox_[0], &hi_bbox_[D], &pb->hi_bbox_[0], &hi_bbox_[0],
-						std::ptr_fun(std::max< t_float >));
+						bin_op_ptr(std::max< t_float >));
 				}
 			}
 		}

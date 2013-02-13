@@ -630,8 +630,9 @@ struct proc_ray {
 		}
 	};
 
-	template< class ray_t, class predicate >
-	static fp_t find_cell(ray_t& coord, predicate p) {
+	typedef const fp_t& predicate_fcn_t(const fp_t&, const fp_t&);
+	template< class ray_t >
+	static fp_t find_cell(ray_t& coord, predicate_fcn_t p) {
 		typedef typename ray_t::iterator ray_iterator;
 		if(coord.size() < 2) return 0;
 		// find max cell size
@@ -646,12 +647,12 @@ struct proc_ray {
 
 	template< class ray_t >
 	static fp_t find_max_cell(ray_t& coord) {
-		return find_cell(coord, std::max< fp_t >);
+		return find_cell< ray_t > (coord, std::max< fp_t >);
 	}
 
 	template< class ray_t >
 	static fp_t find_min_cell(ray_t& coord) {
-		return find_cell(coord, std::min< fp_t >);
+		return find_cell< ray_t >(coord, std::min< fp_t >);
 	}
 
 	template< class ray_t, class dir_ray_t >
