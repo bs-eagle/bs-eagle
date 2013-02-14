@@ -227,7 +227,10 @@ public:
 		// let's go
 		while(parts.size()) {
 			// we need container to hold all mesh parts
-			parts_container leafs;
+			// list can be used because all mesh_parts in parts
+			// are different at this point, so results of division will also
+			// be unqie
+			std::list< mesh_part > leafs;
 
 			// split every part
 			// and make boxes around splitted parts
@@ -245,7 +248,7 @@ public:
 				for(part_citerator pk = kids.begin(), kend = kids.end(); pk != kend; ++pk) {
 					mp_boxes.push_back(
 						Box(pk->bbox(),
-						new(mbh_pool.malloc()) mesh_box_handle(&*leafs.insert(*pk).first))
+						new(mbh_pool.malloc()) mesh_box_handle(&*leafs.insert(leafs.end(),*pk)))
 					);
 					mp_boxes_p.push_back(&mp_boxes[mp_boxes.size() - 1]);
 				}
