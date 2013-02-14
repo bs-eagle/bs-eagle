@@ -388,8 +388,16 @@ protected:
 			well_hit_cell new_x(px->first, wseg_id, cell_id, calc_md(wseg_id, px->first), px->second);
 			// if intersection for that point exists
 			// append new intersection only if it is 'greater' than existing
-			x_iterator p_samex = x_.find(new_x);
-			if(p_samex != x_.end()) {
+			// btree: btree_multiset destroy iterators on insertion
+			// account that in spatial sorting algo
+			// first always insert new point
+			x_.insert(new_x);
+			// we expect here max 2 points with identical MD
+			// check for such case
+			auto eqx = x_.equal_range(new_x);
+			x_iterator p_secx = eqx.first;
+			++p_secx;
+			if(p_secx != eqx.second) {
 				// calc direction vector
 				dirvec_t dir;
 				Point start = wp_[wseg_id].start();
@@ -397,14 +405,13 @@ protected:
 				for(uint i = 0; i < D; ++i)
 					dir[i] = start[i] <= finish[i] ? 0 : 1;
 
-				// if new_x > p_samex then replace p_samex with new_x
-				if(spatial_sort(dir, m_.size()).greater(new_x, *p_samex)) {
-					x_.insert(new_x);
-					x_.erase(p_samex);
-				}
+				// because we expect max 2 equal points, compare them
+				// end remove one that is lower
+				if(spatial_sort(dir, m_.size()).greater(*eqx.first, *p_secx))
+					x_.erase(p_secx);
+				else
+					x_.erase(eqx.first);
 			}
-			else
-				x_.insert(new_x);
 		}
 	}
 
