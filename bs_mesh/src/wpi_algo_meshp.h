@@ -240,6 +240,7 @@ struct mesh_tools : public helpers< strat_t > {
 			ca_assign(mp_size_, rhs.mp_size_);
 			ca_assign(lo_bbox_, rhs.lo_bbox_);
 			ca_assign(hi_bbox_, rhs.hi_bbox_);
+			sz_flat_ = rhs.sz_flat_;
 			return *this;
 		}
 
@@ -251,12 +252,6 @@ struct mesh_tools : public helpers< strat_t > {
 				c.lo(b1); c.hi(b2);
 				std::transform(&b2[0], &b2[D], &b1[0], &res[0], std::minus< t_float >());
 			}
-			//ctrim_iterator pc = this->ss_iter(offset);
-			//if(pc != m_.end()) {
-			//	vertex_pos b1, b2;
-			//	pc->lo(b1); pc->hi(b2);
-			//	std::transform(&b2[0], &b2[D], &b1[0], &res[0], std::minus< t_float >());
-			//}
 		}
 
 		void cell_size(const vertex_pos_i& offset, vertex_pos& res) {
