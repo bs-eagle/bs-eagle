@@ -28,8 +28,7 @@ struct carray_ti_buf_traits : public iterator_type {
 	enum { n_cell_pts = 24 };
 	typedef void ctor_param_t;
 
-	carray_ti_buf_traits(ctor_param_t*)
-	{}
+	carray_ti_buf_traits(ctor_param_t* = NULL) {}
 	//carray_ti_buf_traits(ctor_param_t* = NULL) : just_born(true) {}
 
 	reference ss(const ulong offs) {
@@ -163,6 +162,10 @@ struct mesh_ti_sc_traits : public buf_traits {
 	// actually deduce traits ctor param
 	typedef typename ctor_param_deducer::type ctor_param_t;
 
+	// empty ctor
+	mesh_ti_sc_traits() : mesh_(NULL) {}
+
+	// std stor
 	mesh_ti_sc_traits(ctor_param_t p)
 		: buf_traits(ctor_param_deducer::buf_param(p)),
 		  mesh_(ctor_param_deducer::sc_param(p))
@@ -220,6 +223,9 @@ struct carray_ti_traits : public mesh_ti_sc_traits< carray_ti_buf_traits< iterat
 	typedef mesh_ti_sc_traits< buf_traits_t > sc_traits_t;
 	typedef typename sc_traits_t::ctor_param_t ctor_param_t;
 
+	// empty ctor
+	carray_ti_traits() {}
+
 	carray_ti_traits(ctor_param_t p)
 		: sc_traits_t(p)
 	{}
@@ -231,6 +237,9 @@ struct bufpool_ti_traits : public mesh_ti_sc_traits< bufpool_ti_buf_traits< iter
 	typedef mesh_ti_sc_traits< buf_traits_t > sc_traits_t;
 	typedef typename sc_traits_t::ctor_param_t ctor_param_t;
 
+	// empty ctor
+	bufpool_ti_traits() {}
+
 	bufpool_ti_traits(ctor_param_t p)
 		: sc_traits_t(p)
 	{}
@@ -239,16 +248,19 @@ struct bufpool_ti_traits : public mesh_ti_sc_traits< bufpool_ti_buf_traits< iter
 /*-----------------------------------------------------------------
  * Strategy that calculate cell vertices using structured grid representation
  *----------------------------------------------------------------*/
+// we SHOULD store final buffer, because later in wpi::cell direct
+// reinterpret_cast is used to access cell's vertex coords
+// so storing only offset indices in sgrid is not enough and lead to ERRORS
+// thats why we inherit from carray_ti_buf_traits
 template< class iterator_type >
-struct sgrid_ti_traits : public iterator_type {
+struct sgrid_ti_traits : public carray_ti_buf_traits< iterator_type > {
+	typedef carray_ti_buf_traits< iterator_type > base_t;
 	typedef iterator_type iterator_t;
 	typedef typename iterator_t::value_type value_type;
 	typedef typename iterator_t::reference reference;
 	typedef typename v_float::iterator vf_iterator;
 
-	// use simple traits as buffer holder
-	typedef carray_ti_buf_traits< iterator_t > carray_traits;
-	enum { n_cell_pts = carray_traits::n_cell_pts };
+	enum { n_cell_pts = base_t::n_cell_pts };
 	typedef ulong cellv_index[n_cell_pts];
 
 	// traits should be initialized with iterator to beginning of sgrid
@@ -257,15 +269,20 @@ struct sgrid_ti_traits : public iterator_type {
 		vf_iterator sgrid;
 		ulong nx, ny, size;
 	};
-	typedef sgrid_handle ctor_param_t;
+	typedef const sgrid_handle& ctor_param_t;
 
-	// ctor
+	using base_t::data_;
+
+	// empty ctor
+	sgrid_ti_traits() : h_(dumb_sh()), cell_offs_(0) {}
+
+	// std ctor
 	sgrid_ti_traits(const sgrid_handle& h)
-		: nx_(h.nx), ny_(h.ny), sz_(h.size), start_(h.sgrid), cell_offs_(0)
+		: h_(h), cell_offs_(0)
 	{
-		const ulong line = (nx_ + 1)*3;
-		const ulong plane = (nx_ + 1)*(ny_ + 1)*3;
-		const ulong lplane = (nx_ + 1)*(ny_ + 2)*3;
+		const ulong line =   (h_.nx + 1) * 3;
+		const ulong plane =  (h_.nx + 1) * (h_.ny + 1) * 3;
+		const ulong lplane = (h_.nx + 1) * (h_.ny + 2) * 3;
 		const cellv_index t = {
 			// vert 0, 1
 			0, 1, 2, 3, 4, 5,
@@ -281,26 +298,35 @@ struct sgrid_ti_traits : public iterator_type {
 
 	void switch_cell(const ulong cell_id) {
 		// are we inside mesh bounds?
-		if(cell_id >= sz_)
+		if(cell_id >= h_.size)
 			return;
 
 		// calc offset of cell beginning in structured grid
-		const ulong plane_sz = nx_ * ny_;
+		const ulong plane_sz = h_.nx * h_.ny;
 		const ulong z = cell_id / plane_sz;
-		const ulong y = (cell_id - plane_sz * z) / nx_;
-		const ulong x = cell_id - plane_sz * z - nx_ * y;
+		const ulong y = (cell_id - plane_sz * z) / h_.nx;
+		const ulong x = cell_id - plane_sz * z - h_.nx * y;
 
-		cell_offs_ = (z * (nx_ + 1) * (ny_ + 1) + y * (nx_ + 1) + x) * 3;
+		cell_offs_ = (z * (h_.nx + 1) * (h_.ny + 1) + y * (h_.nx + 1) + x) * 3;
+		// copy cell data from sgrid to local buffer
+		for(ulong i = 0; i < n_cell_pts; ++i)
+			data_[i] = *(h_.sgrid + cell_offs_ + vidx_[i]);
 	}
 
-	reference ss(const ulong offs) {
-		return *(start_ + cell_offs_ + vidx_[offs]);
-	}
+	// subscript comes from base buffer class
+	//reference ss(const ulong offs) {
+	//	return *(start_ + cell_offs_ + vidx_[offs]);
+	//}
 
+	// assign only iterators belonging to the same mesh!
+	// or, more precisely, to mesh with identical dimensions
 	void assign(const sgrid_ti_traits& rhs) {
-		nx_ = rhs.nx_; ny_ = rhs.ny_; sz_ = rhs.sz_;
-		start_ = rhs.start_; cell_offs_ = rhs.cell_offs_;
+		//nx_ = rhs.nx_; ny_ = rhs.ny_; sz_ = rhs.sz_;
+		//start_ = rhs.start_;
+		cell_offs_ = rhs.cell_offs_;
 		std::copy(&rhs.vidx_[0], &rhs.vidx_[n_cell_pts], &vidx_[0]);
+		// assign data buffer
+		base_t::assign(rhs);
 	}
 
 	ulong backend_index(const ulong offs) const {
@@ -308,10 +334,21 @@ struct sgrid_ti_traits : public iterator_type {
 		return cell_offs_ + vidx_[offs];
 	}
 
-	ulong nx_, ny_, sz_;
-	vf_iterator start_;
+	// don't copy handle in every tops_iterator -- store refernce to it
+	// because sgrid_handle for all iterators lives in trimesh
+	// and all iterators are invalid when trimesh is destroyed
+	const sgrid_handle& h_;
 	ulong cell_offs_;
 	cellv_index vidx_;
+
+private:
+	// just for empty ctor
+	static const sgrid_handle& dumb_sh() {
+		static const sgrid_handle h = {
+			vf_iterator(), 0, 0, 0
+		};
+		return h;
+	}
 };
 
 }} /* blue_sky::wpi */

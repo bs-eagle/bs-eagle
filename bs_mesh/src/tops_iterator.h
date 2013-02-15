@@ -39,7 +39,7 @@ public:
 
 	enum { n_cell_pts = strat_t::n_cell_pts };
 
-	tops_iterator() : strat_t(strat_ctor_param_t()), cid_(0), offs_(0) {}
+	tops_iterator() : cid_(0), offs_(0) {}
 
 	tops_iterator(strat_ctor_param_t strat_param, const ulong pos = 0)
 		: strat_t(strat_param)

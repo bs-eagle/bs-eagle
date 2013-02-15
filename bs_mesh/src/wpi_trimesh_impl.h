@@ -104,7 +104,7 @@ protected:
 template< class traits_t >
 struct trimpl_sgrid {
 	typedef typename traits_t::cell_vertex_iterator iterator_t;
-	typedef typename iterator_t::strat_ctor_param_t sgrid_handle;
+	typedef typename iterator_t::strat_t::sgrid_handle sgrid_handle;
 
 	iterator_t begin() const {
 		return iterator_t(h_);
