@@ -268,8 +268,10 @@ struct sgrid_ti_traits : public carray_ti_buf_traits< iterator_type > {
 	struct sgrid_handle {
 		vf_iterator sgrid;
 		ulong nx, ny, size;
+
+		//sgrid_handle() : sgrid(vf_iterator()), nx(0), ny(0), size(0) {}
 	};
-	typedef const sgrid_handle& ctor_param_t;
+	typedef const sgrid_handle ctor_param_t;
 
 	using base_t::data_;
 
@@ -314,15 +316,13 @@ struct sgrid_ti_traits : public carray_ti_buf_traits< iterator_type > {
 	}
 
 	// subscript comes from base buffer class
-	//reference ss(const ulong offs) {
-	//	return *(start_ + cell_offs_ + vidx_[offs]);
-	//}
 
 	// assign only iterators belonging to the same mesh!
 	// or, more precisely, to mesh with identical dimensions
 	void assign(const sgrid_ti_traits& rhs) {
 		//nx_ = rhs.nx_; ny_ = rhs.ny_; sz_ = rhs.sz_;
 		//start_ = rhs.start_;
+		h_ = rhs.h_;
 		cell_offs_ = rhs.cell_offs_;
 		std::copy(&rhs.vidx_[0], &rhs.vidx_[n_cell_pts], &vidx_[0]);
 		// assign data buffer
@@ -337,12 +337,16 @@ struct sgrid_ti_traits : public carray_ti_buf_traits< iterator_type > {
 	// don't copy handle in every tops_iterator -- store refernce to it
 	// because sgrid_handle for all iterators lives in trimesh
 	// and all iterators are invalid when trimesh is destroyed
-	const sgrid_handle& h_;
+	// update: storing references doen't work with google btree associative
+	// containers, because they construct elements using empty ctor + assignment operator
+	// that leads to mesh handle uninitialized in most iterators
+	// so we actually have to store a COPY of handle in every sgrid_traits
+	sgrid_handle h_;
 	ulong cell_offs_;
 	cellv_index vidx_;
 
 private:
-	// just for empty ctor
+	// solely for empty ctor
 	static const sgrid_handle& dumb_sh() {
 		static const sgrid_handle h = {
 			vf_iterator(), 0, 0, 0
