@@ -68,25 +68,21 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 	// check if database is open
 	int cur_s, hiwtr, opres = SQLITE_OK + 1;
 	sqlite3* src_db = t.db;
-	if(src_db) {
+	if(src_db)
 		opres = sqlite3_db_status(src_db, 0, &cur_s, &hiwtr, 0);
+	if(opres != SQLITE_OK) {
+		// probably db is closed or not open or whatever
+		// try to open it using contained file_name
+		// or db_basename
+		if(t.file_name.size())
+			opres = sqlite3_open(t.file_name.c_str(), &src_db);
+		if(opres != SQLITE_OK)
+			opres = sqlite3_open(db_fname.c_str(), &src_db);
 		if(opres != SQLITE_OK) {
-			// probably db is closed or not open or whatever
-			// try to open it using contained file_name
-			// or db_basename
-			if(t.file_name.size()) {
-				opres = sqlite3_open(t.file_name.c_str(), &src_db);
-				if(opres != SQLITE_OK)
-					opres = sqlite3_open(db_fname.c_str(), &src_db);
-				if(opres != SQLITE_OK) {
-					sqlite3_close(src_db);
-					do_write_db = false;
-				}
-			}
+			sqlite3_close(src_db);
+			do_write_db = false;
 		}
 	}
-	else
-		do_write_db = false;
 
 	ar << do_write_db;
 	// if db not open now, we're done
