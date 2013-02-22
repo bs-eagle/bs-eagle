@@ -200,6 +200,9 @@ class h5_pool_iface : public objbase
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual std::string py_str () const = 0;
       virtual boost::python::list py_list_data () const = 0;
+      virtual boost::python::list py_list_i_data () const = 0;
+      virtual boost::python::list py_list_fp_data () const = 0;
+      virtual boost::python::list py_list_cubes_data () const = 0;
       virtual void py_set_pool_dims (boost::python::list &dims) = 0;
       virtual boost::python::list py_get_pool_dims () const = 0;
       virtual boost::python::list py_get_data_dims (const std::string &name) const = 0;

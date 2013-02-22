@@ -61,6 +61,9 @@ namespace blue_sky
     .def ("get_data_type",                      &T::get_data_type, 
         args ("name"), "Get array data type")
     .def ("list_data",                          &T::py_list_data)
+    .def ("list_i_data",                        &T::py_list_i_data)
+    .def ("list_fp_data",                       &T::py_list_fp_data)
+    .def ("list_cubes_data",                    &T::py_list_cubes_data)
     .def ("py_set_pool_dims",                   &T::py_set_pool_dims, 
         args ("dims"), "Set pool dimensions")
     .def ("py_get_pool_dims",                   &T::py_get_pool_dims, 

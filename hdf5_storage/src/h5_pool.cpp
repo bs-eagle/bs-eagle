@@ -1026,6 +1026,58 @@ namespace blue_sky
       items.append(i->first);
     return items;
   }
+
+  boost::python::list 
+  h5_pool::py_list_i_data() const
+  {
+    map_t::const_iterator i, e;
+    boost::python::list items;
+    
+    e = h5_map.end ();
+    for (i = h5_map.begin (); i != e; ++i)
+      if (H5Tget_class (i->second.dtype) == H5T_INTEGER)
+        items.append(i->first);
+    return items;
+  }
+
+  boost::python::list 
+  h5_pool::py_list_fp_data() const
+  {
+    map_t::const_iterator i, e;
+    boost::python::list items;
+    
+    e = h5_map.end ();
+    for (i = h5_map.begin (); i != e; ++i)
+      if (H5Tget_class (i->second.dtype) == H5T_FLOAT)
+        items.append(i->first);
+    return items;
+  }
+
+  boost::python::list 
+  h5_pool::py_list_cubes_data() const
+  {
+    map_t::const_iterator i, e;
+    boost::python::list items;
+    int is_cube;
+    
+    e = h5_map.end ();
+    for (i = h5_map.begin (); i != e; ++i)
+      {
+        is_cube = 1;
+        if (i->second.n_dims == n_pool_dims)
+          for (int d = 0; d < n_pool_dims; ++d)
+            {
+              if (i->second.h5_dims[d] != pool_dims[d])
+                is_cube = 0;
+            }
+        else
+          is_cube = 0;
+        if (is_cube)
+          items.append(i->first);
+      }
+        
+    return items;
+  }
   
   void 
   h5_pool::py_set_pool_dims (boost::python::list &dims)

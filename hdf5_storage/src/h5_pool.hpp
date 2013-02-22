@@ -260,6 +260,9 @@ namespace blue_sky
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual std::string py_str () const;
       virtual boost::python::list py_list_data () const;
+      virtual boost::python::list py_list_i_data () const;
+      virtual boost::python::list py_list_fp_data () const;
+      virtual boost::python::list py_list_cubes_data () const;
       virtual void py_set_pool_dims (boost::python::list &dims);
       virtual boost::python::list py_get_pool_dims () const;
       virtual boost::python::list py_get_data_dims (const std::string &name) const;
