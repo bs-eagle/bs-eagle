@@ -394,7 +394,7 @@ protected:
 			x_.insert(new_x);
 			// we expect here max 2 points with identical MD
 			// check for such case
-			auto eqx = x_.equal_range(new_x);
+			std::pair< x_iterator, x_iterator > eqx = x_.equal_range(new_x);
 			x_iterator p_secx = eqx.first;
 			++p_secx;
 			if(p_secx != eqx.second) {
