@@ -14,6 +14,7 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <string>
 #include "pool_iface.h"
+#include <hdf5.h>
 
 #include "bs_serialize_decl.h"
 const int BUF_SIZE = 1024; //!< size of buffer for script

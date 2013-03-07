@@ -91,9 +91,9 @@
       <DisableSpecificWarnings>4520</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>hdf5dll.lib;loki_D.lib;ws2_32.lib;libCGAL-vc100-mt-gd-4.0.lib;libgmp-10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>loki_D.lib;ws2_32.lib;libCGAL-vc100-mt-gd-4.0.lib;libgmp-10.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>$(CGAL_DIR)/lib;$(CGAL_DIR)/auxiliary/gmp/lib;$(PYTHON_PATH)/libs;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/debug;$(HDF5_PATH)/dll;$(LOKI_PATH)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CGAL_DIR)/lib;$(CGAL_DIR)/auxiliary/gmp/lib;$(PYTHON_PATH)/libs;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/debug;$(HDF5_PATH)/lib;$(LOKI_PATH)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -102,7 +102,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)/../bs_mesh/include;$(CGAL_DIR)/auxiliary/gmp/include;$(CGAL_DIR)/include;$(ProjectDir)/../bs_mesh/src/;$(ProjectDir)/../bs_mtx/include/;$(ProjectDir)/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../common_alg/include/;$(ProjectDir)/../bs_bos_core_data_storage/include;$(ProjectDir)/../bs_bos_core_base/include;$(BOOST_PATH);$(PYTHON_PATH)/include;$(NUMPY_PATH)/include;$(HDF5_PATH)/include;$(LOKI_PATH)/include;.\sqlite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)/../bs_mesh/include;$(CGAL_DIR)/auxiliary/gmp/include;$(CGAL_DIR)/include;$(ProjectDir)/../bs_mesh/src/;$(ProjectDir)/../bs_mtx/include/;$(ProjectDir)/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../common_alg/include/;$(ProjectDir)/../bs_bos_core_data_storage/include;$(ProjectDir)/../bs_bos_core_base/include;$(BOOST_PATH);$(PYTHON_PATH)/include;$(NUMPY_PATH)/include;$(LOKI_PATH)/include;.\sqlite;%(AdditionalIncludeDirectories);$(HDF5_64_PATH)/include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NOMINMAX;_DEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING;BSPY_EXPORTING_PLUGIN;_HDF5;H5_USE_16_API;_HDF5USEDLL_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_BOS_CORE_COLLECT_BACKTRACE_;BS_EXCEPTION_USE_BOOST_FORMAT;%(PreprocessorDefinitions);BOOST_ALL_DYN_LINK;_SCL_SECURE_NO_WARNINGS;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -132,6 +132,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalOptions> /Zm1000</AdditionalOptions>
       <DisableSpecificWarnings>4003;4520</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>hdf5dll.lib;libCGAL_Core-vc100-mt-4.0.lib;libCGAL-vc100-mt-4.0.lib;libgmp-10.lib;libmpfr-4.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -146,7 +147,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)\include;$(LOKI_PATH)/include;$(BOOST_PATH);$(NUMPY_PATH)/include;$(PYTHON_PATH)/include;$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;.\include;$(HDF5_PATH)/include;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../common_alg/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(ProjectDir)/../bs_mesh/include;$(ProjectDir)/../bs_mesh/src;$(ProjectDir)/../bs_mtx/include/;$(ProjectDir)/../bs_bos_core_base/include/;.\sqlite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)\include;$(LOKI_PATH)/include;$(BOOST_PATH);$(NUMPY_PATH)/include;$(PYTHON_PATH)/include;$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;.\include;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../common_alg/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(ProjectDir)/../bs_mesh/include;$(ProjectDir)/../bs_mesh/src;$(ProjectDir)/../bs_mtx/include/;$(ProjectDir)/../bs_bos_core_base/include/;.\sqlite;%(AdditionalIncludeDirectories);$(HDF5_64_PATH)/include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NOMINMAX;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING;BSPY_EXPORTING_PLUGIN;_HDF5;H5_USE_16_API;_HDF5USEDLL_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_BOS_CORE_COLLECT_BACKTRACE_;BS_EXCEPTION_USE_BOOST_FORMAT;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>

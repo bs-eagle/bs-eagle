@@ -12,7 +12,6 @@
 //#ifdef USE_H5
 
 #include <string>
-#include <hdf5.h>
 
 #include "bs_assert.h"
 #include "bs_tree.h"

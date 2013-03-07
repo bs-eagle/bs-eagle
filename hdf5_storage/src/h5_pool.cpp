@@ -794,12 +794,13 @@ namespace blue_sky
     	hid_t group_actual = group_id.find ("actual")->second;
 	    hsize_t num_obj;
 	    std::string array_name;
+      herr_t status;
 
 	    // get number of objects in 'actual' group
 	    H5G_info_t group_info;
-	    H5Gget_info (group_actual, &group_info);
+	    status = H5Gget_info (group_actual, &group_info);
 	    num_obj = group_info.nlinks;
-
+      
 	    // get object names of items in 'actual' group
 	    std::vector<std::string> array_names;
 	    for (hsize_t i = 0; i < num_obj; i++)
