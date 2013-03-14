@@ -84,7 +84,7 @@
       ///////////////////////
       
       //! return element corners
-      corners_t 
+      corners_t const&
       get_corners ()const
       {
         return corners;
