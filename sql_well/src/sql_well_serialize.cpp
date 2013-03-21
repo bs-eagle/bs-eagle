@@ -75,9 +75,9 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 		// try to open it using contained file_name
 		// or db_basename
 		if(t.file_name.size())
-			opres = sqlite3_open(t.file_name.c_str(), &src_db);
+			opres = sqlite3_open_v2(t.file_name.c_str(), &src_db, SQLITE_OPEN_READONLY, NULL);
 		if(opres != SQLITE_OK)
-			opres = sqlite3_open(db_fname.c_str(), &src_db);
+			opres = sqlite3_open_v2(db_fname.c_str(), &src_db, SQLITE_OPEN_READONLY, NULL);
 		if(opres != SQLITE_OK) {
 			sqlite3_close(src_db);
 			do_write_db = false;
