@@ -384,6 +384,7 @@ namespace blue_sky
       BLUE_SKY_TYPE_DECL (h5_pool);
 
       friend class blue_sky::bs_serialize;
+      friend class boost::serialization::access;
     };
 
 }//namespace blue_sky
