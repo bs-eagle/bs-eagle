@@ -16,12 +16,10 @@
 using namespace boost::python;
 #ifdef BSPY_EXPORTING_PLUGIN
 
-BLUE_SKY_TYPE_SERIALIZE_GUID(blue_sky::h5_pool)
-BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::h5_pool)
-
 namespace blue_sky {
 namespace python {
   //////////////////////////////////////////////////////////////////////////
+  void py_export_h5_pool_serialize();
 
   //////////////////////////////////////////////////////////////////////////
   //! export matrices to python
@@ -33,15 +31,7 @@ namespace python {
 
     class_exporter <h5_pool, h5_pool_iface, py_pool_exporter>::export_class ("h5_pool");
 
-    std::string (*s2s_hpi)(smart_ptr< h5_pool_iface, true >&) = &blue_sky::serialize_to_str< h5_pool_iface >;
-    std::string (*s2s_pi)(smart_ptr< h5_pool, true >&) = &blue_sky::serialize_to_str< h5_pool >;
-    smart_ptr< h5_pool_iface, true > (*sfs_hpi)(const std::string&) = &blue_sky::serialize_from_str< h5_pool_iface >;
-    smart_ptr< h5_pool, true > (*sfs_pi)(const std::string&) = &blue_sky::serialize_from_str< h5_pool >;
-
-    def("serialize_to_str", s2s_hpi);
-    def("serialize_to_str", s2s_pi);
-    def("serialize_from_str", sfs_hpi);
-    def("serialize_from_str", sfs_pi);
+    py_export_h5_pool_serialize();
 
     // register implicit conversion to interface
     implicitly_convertible<

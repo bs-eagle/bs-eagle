@@ -185,6 +185,7 @@ BLUE_SKY_CLASS_SRZ_FCN_END
 BLUE_SKY_TYPE_SERIALIZE_DECL(blue_sky::sql_well)
 BLUE_SKY_TYPE_SERIALIZE_IMPL(blue_sky::sql_well)
 
+#ifdef BSPY_EXPORTING_PLUGIN
 namespace blue_sky { namespace python {
 
 // helper function to write well_pool to given fname
@@ -224,4 +225,5 @@ BS_API_PLUGIN void py_export_sql_well_serialize() {
 }
 
 }} /* blue_sky::python */
+#endif // #ifdef BSPY_EXPORTING_PLUGIN
 

@@ -498,3 +498,23 @@ BOOST_SERIALIZATION_ASSUME_ABSTRACT(h5_pool_iface)
 BLUE_SKY_TYPE_SERIALIZE_DECL(h5_pool)
 BLUE_SKY_TYPE_SERIALIZE_IMPL(h5_pool)
 
+#ifdef BSPY_EXPORTING_PLUGIN
+namespace blue_sky { namespace python {
+
+BS_API_PLUGIN void py_export_h5_pool_serialize() {
+	using namespace boost::python;
+
+	std::string (*s2s_hpi)(smart_ptr< h5_pool_iface, true >&) = &blue_sky::serialize_to_str< h5_pool_iface >;
+	std::string (*s2s_pi)(smart_ptr< h5_pool, true >&) = &blue_sky::serialize_to_str< h5_pool >;
+	smart_ptr< h5_pool_iface, true > (*sfs_hpi)(const std::string&) = &blue_sky::serialize_from_str< h5_pool_iface >;
+	smart_ptr< h5_pool, true > (*sfs_pi)(const std::string&) = &blue_sky::serialize_from_str< h5_pool >;
+
+	def("serialize_to_str", s2s_hpi);
+	def("serialize_to_str", s2s_pi);
+	def("serialize_from_str", sfs_hpi);
+	def("serialize_from_str", sfs_pi);
+}
+
+}} /* blue_sky::python */
+#endif // #ifdef BSPY_EXPORTING_PLUGIN
+
