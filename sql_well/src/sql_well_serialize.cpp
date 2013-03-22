@@ -17,6 +17,7 @@
 //#include <boost/uuid/string_generator.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <boost/python.hpp>
 
 #include <stdio.h>
 
@@ -123,7 +124,7 @@ BLUE_SKY_CLASS_SRZ_FCN_END
 
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, blue_sky::sql_well)
 	// load filename
-	ar >> (std::string&)t.file_name;
+	ar >> t.file_name;
 	// and flag if we should restore db
 	bool do_load_db;
 	ar >> do_load_db;
@@ -183,4 +184,44 @@ BLUE_SKY_CLASS_SRZ_FCN_END
 // instantiate serialization code
 BLUE_SKY_TYPE_SERIALIZE_DECL(blue_sky::sql_well)
 BLUE_SKY_TYPE_SERIALIZE_IMPL(blue_sky::sql_well)
+
+namespace blue_sky { namespace python {
+
+// helper function to write well_pool to given fname
+std::string serialize_to_str_fname(
+	smart_ptr< well_pool_iface > wp,
+		const std::string& prj_path,
+		const std::string& prj_name
+	) {
+	// save project path for serialization code
+	kernel::idx_dt_ptr p_dt = BS_KERNEL.pert_idx_dt(BS_KERNEL.find_type("hdm").td_);
+	//std::string well_pool_filename = prj_name + "_well_pool.db";
+	p_dt->insert< std::string >(prj_path);
+	// and project name
+	p_dt->insert< std::string >(prj_name);
+
+	// invoke serializetion
+	std::string res = serialize_to_str< well_pool_iface >(wp);
+	// clear table
+	p_dt->clear< std::string >();
+
+	return res;
+}
+
+BS_API_PLUGIN void py_export_sql_well_serialize() {
+	using namespace boost::python;
+
+	std::string (*s2s_wpi)(smart_ptr< well_pool_iface, true >&) = &blue_sky::serialize_to_str< well_pool_iface >;
+	std::string (*s2s_sqw)(smart_ptr< sql_well, true >&) = &blue_sky::serialize_to_str< sql_well >;
+	smart_ptr< well_pool_iface, true > (*sfs_wpi)(const std::string&) = &blue_sky::serialize_from_str< well_pool_iface >;
+	smart_ptr< sql_well, true > (*sfs_sqw)(const std::string&) = &blue_sky::serialize_from_str< sql_well >;
+
+	def("serialize_to_str", s2s_wpi);
+	def("serialize_to_str", s2s_sqw);
+	def("serialize_from_str", sfs_wpi);
+	def("serialize_from_str", sfs_sqw);
+	def("serialize_to_str_fname", &serialize_to_str_fname);
+}
+
+}} /* blue_sky::python */
 
