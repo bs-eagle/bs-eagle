@@ -504,10 +504,12 @@ namespace blue_sky { namespace python {
 BS_API_PLUGIN void py_export_h5_pool_serialize() {
 	using namespace boost::python;
 
-	std::string (*s2s_hpi)(smart_ptr< h5_pool_iface, true >&) = &blue_sky::serialize_to_str< h5_pool_iface >;
-	std::string (*s2s_pi)(smart_ptr< h5_pool, true >&) = &blue_sky::serialize_to_str< h5_pool >;
+	std::string (*s2s_hpi)(const smart_ptr< h5_pool_iface, true >&) = &blue_sky::serialize_to_str< h5_pool_iface >;
+	std::string (*s2s_pi)(const smart_ptr< h5_pool, true >&) =
+		&blue_sky::serialize_to_str_indirect< h5_pool, h5_pool_iface >;
 	smart_ptr< h5_pool_iface, true > (*sfs_hpi)(const std::string&) = &blue_sky::serialize_from_str< h5_pool_iface >;
-	smart_ptr< h5_pool, true > (*sfs_pi)(const std::string&) = &blue_sky::serialize_from_str< h5_pool >;
+	smart_ptr< h5_pool, true > (*sfs_pi)(const std::string&) =
+		&blue_sky::serialize_from_str_indirect< h5_pool, h5_pool_iface >;
 
 	def("serialize_to_str", s2s_hpi);
 	def("serialize_to_str", s2s_pi);

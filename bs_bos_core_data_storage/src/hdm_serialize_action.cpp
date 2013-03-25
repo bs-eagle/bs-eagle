@@ -217,6 +217,8 @@ BS_API_PLUGIN void py_export_hdm_serialize() {
     // register pvt to/from str serialization
 	bp::def("serialize_to_str", &blue_sky::hdm_serialize_to_str, hdm_serialize_to_str_overl());
 	bp::def("serialize_from_str", &blue_sky::hdm_serialize_from_str);
+
+	// export only wide-string version
 	//bp::def("hdm_serialize_set_project_prop", &hdm_serialize_set_project_prop);
 	bp::def("hdm_serialize_set_project_prop", &hdm_serialize_set_project_prop_w);
 }
