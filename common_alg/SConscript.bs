@@ -6,7 +6,7 @@ tar_name = "common_alg"
 
 env = custom_env.Clone ()
 env.Append (CPPPATH = ["include", "src",
-    includes["bs_bos_core_base"]
+    includes["bs_bos_core_base"], includes["common_types"]
     ] + includes["kernel"],
 	CPPDEFINES = [],
     LIBS=[])

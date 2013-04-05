@@ -11,6 +11,7 @@
 #include "dt_tools.h"
 #include "py_bos_reader.h"
 #include "py_dt_tools.h"
+#include "pool_iface.h"
 
 using namespace blue_sky;
 using namespace blue_sky::python;
@@ -51,6 +52,10 @@ namespace blue_sky {
   {
     return register_types (*bs_init.pd_);
   }
+
+  // forward declaration to export to python
+  void read_grdecl(const std::string& fname, const std::string dir, ulong nx, ulong ny, ulong nz,
+    smart_ptr< h5_pool_iface > pool);
 }
 
 #ifdef BSPY_EXPORTING_PLUGIN
@@ -62,6 +67,8 @@ namespace {
 
     python::py_export_bos_reader ();
     python::py_export_dt_tools ();
+
+    def("read_grdecl", &blue_sky::read_grdecl);
     //python::py_export_table ();
     //python::py_export_gis ();
     //python::py_export_frac ();
