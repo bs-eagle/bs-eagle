@@ -21,6 +21,29 @@ namespace python {
   //////////////////////////////////////////////////////////////////////////
   void py_export_h5_pool_serialize();
 
+namespace {
+
+  hid_t get_file_id(const h5_pool& p) {
+    return p.file_id;
+  }
+  std::string get_fname(const h5_pool& p) {
+    return p.fname;
+  }
+
+}
+
+  template< typename T >
+  struct h5_pool_exporter_plus {
+    template< typename class_t >
+    static class_t &
+    export_class(class_t& class__) {
+      py_pool_exporter< T >::export_class(class__)
+        .add_property("file_id", &get_file_id)
+        .add_property("fname", &get_fname);
+      return class__;
+    }
+  };
+
   //////////////////////////////////////////////////////////////////////////
   //! export matrices to python
   void py_export_pool ()
@@ -29,7 +52,7 @@ namespace python {
 
     base_exporter <h5_pool_iface, py_pool_exporter>::export_class ("h5_pool_iface");
 
-    class_exporter <h5_pool, h5_pool_iface, py_pool_exporter>::export_class ("h5_pool");
+    class_exporter <h5_pool, h5_pool_iface, h5_pool_exporter_plus>::export_class ("h5_pool");
 
     py_export_h5_pool_serialize();
 
