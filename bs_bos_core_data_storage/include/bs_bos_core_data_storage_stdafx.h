@@ -37,15 +37,15 @@
 #include <pthread.h>
 #endif
 
-#include <sstream>
-#include <math.h>
-#include <stack>
-#include <set>
-#include <map>
-#include <list>
+//#include <sstream>
+//#include <math.h>
+//#include <stack>
+//#include <set>
+//#include <map>
+//#include <list>
 
 #include <boost/array.hpp>
-#include <boost/format.hpp>
+//#include <boost/format.hpp>
 
 #include "bs_common.h"
 #include "bs_prop_base.h"
@@ -53,10 +53,6 @@
 #include "aligned_allocator.h"
 #include "shared_vector.h"
 #include "bs_assert.h"
-
-#ifdef BSPY_EXPORTING_PLUGIN
-#include <boost/python.hpp>
-#endif
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "bos_report.h"
