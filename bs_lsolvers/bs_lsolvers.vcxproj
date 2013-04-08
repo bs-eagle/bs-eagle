@@ -193,7 +193,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions> /Zm1000</AdditionalOptions>
+      <AdditionalOptions>/Zm2000 /bigobj</AdditionalOptions>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
       <DisableSpecificWarnings>4003;4520</DisableSpecificWarnings>
     </ClCompile>

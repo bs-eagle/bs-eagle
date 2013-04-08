@@ -227,7 +227,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalOptions>/Zm1000  /I"D:\projects\blue_sky\plugins\bs-eagle\bs_bos_core\/../sql_well/src/"</AdditionalOptions>
+      <AdditionalOptions>/Zm2000 /bigobj  /I"D:\projects\blue_sky\plugins\bs-eagle\bs_bos_core\/../sql_well/src/"</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
