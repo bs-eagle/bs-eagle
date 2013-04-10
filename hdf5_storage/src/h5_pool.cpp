@@ -1,4 +1,4 @@
-/** 
+/**
  * @file h5_pool.cpp
  * @brief implementation of #h5_pool_iface
  * @author Oleg Borschuk
@@ -34,12 +34,12 @@ namespace blue_sky
   {
   }
 
-  h5_pool::h5_pool (bs_type_ctor_param) 
+  h5_pool::h5_pool (bs_type_ctor_param)
         : h5_pool_iface ()
     {
       init_all ();
       mute_flag = 0;
-      
+
     }
   h5_pool::h5_pool (const h5_pool & /*src*/) : bs_refcounter ()
     {
@@ -47,7 +47,7 @@ namespace blue_sky
       mute_flag = 0;
     }
 
-  herr_t 
+  herr_t
   h5_pool::it_group (hid_t g_id, const char *name, const H5L_info_t * /*info*/, void * m)
     {
       hid_t dset = detail::open_dataset (g_id, name);
@@ -70,19 +70,19 @@ namespace blue_sky
         }
 
       hsize_t dims_[10] = {0};
-      // FIXME: check 
+      // FIXME: check
       int n_dims = H5Sget_simple_extent_dims (dspace, dims_, NULL);
       map_t::iterator it = ((h5_pool *)m)->add_node (name, g_id, dset, dspace, dtype, plist, n_dims, dims_, 0);
 
-      BOSOUT (section::h5, level::low) 
+      BOSOUT (section::h5, level::low)
         << "Node from file: " << name << bs_end;
-      return 0; 
+      return 0;
     }
 
-  template <class T> h5_pool::map_t::iterator 
+  template <class T> h5_pool::map_t::iterator
   h5_pool::add_node (const std::string &name, const hid_t group_id,
-                     const hid_t dset, const hid_t dspace, 
-                     const hid_t dtype, const hid_t plist, 
+                     const hid_t dset, const hid_t dspace,
+                     const hid_t dtype, const hid_t plist,
                      const int n_dims, const T *dims, const bool var_dims)
     {
       BS_ASSERT (dtype >= 0) (name);
@@ -121,7 +121,7 @@ namespace blue_sky
       return h5_map.insert (p).first;
     }
 
-  void 
+  void
   h5_pool::fill_map (hid_t group)
   {
     BS_ASSERT (group);
@@ -138,7 +138,7 @@ namespace blue_sky
       }
   }
 
-  void 
+  void
   h5_pool::close_node (h5_pair &p)
     {
       if (p.dset >= 0)
@@ -153,7 +153,7 @@ namespace blue_sky
         }
       if (p.dtype >= 0)
         {
-          H5Tclose (p.dtype); 
+          H5Tclose (p.dtype);
           p.dtype = -1;
         }
       if (p.plist >= 0)
@@ -163,7 +163,7 @@ namespace blue_sky
         }
     }
 
-  void 
+  void
   h5_pool::clear_map ()
     {
       map_t::iterator i, e;
@@ -173,17 +173,17 @@ namespace blue_sky
           close_node (i->second);
         }
       h5_map.clear ();
-
     }
-  void 
-  h5_pool::open_file (const std::string &fname_)
+
+  void
+  h5_pool::open_file (const std::string fname_)
     {
 	  //this function is not really open, it creates file
 	  //TODO: set edit_base = false; at open_file
       edit_base = true;
 
       // FIXME:
-      if (file_id)
+      if (file_id >= 0)
         {
           close_file ();
         }
@@ -191,7 +191,7 @@ namespace blue_sky
       file_id = H5Fcreate (fname_.c_str (), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
       if (file_id < 0)
         {
-          bs_throw_exception (boost::format ("Can't create h5 file: %s") % fname);
+          bs_throw_exception (boost::format ("Can't create h5 file: %s !") % fname_.c_str ());
         }
 
       fname = fname_;
@@ -225,8 +225,8 @@ namespace blue_sky
           fill_map (i->second);
         }
     }
-  
-  void 
+
+  void
   h5_pool::close_file ()
     {
       clear_map ();
@@ -238,8 +238,15 @@ namespace blue_sky
               H5Gclose (i->second);
             }
         }
-      if (file_id > 0)
+      if (file_id >= 0)
         {
+          std::cout<<"at H5Fclose: there are objs_all still opened: " <<H5Fget_obj_count(file_id, H5F_OBJ_ALL)<<"\n";
+          std::cout<<"at H5Fclose: there are files still opened: "    <<H5Fget_obj_count(file_id, H5F_OBJ_FILE)<<"\n";
+          std::cout<<"at H5Fclose: there are groups still opened: "   <<H5Fget_obj_count(file_id, H5F_OBJ_GROUP)<<"\n";
+          std::cout<<"at H5Fclose: there are datatypes still opened: "<<H5Fget_obj_count(file_id, H5F_OBJ_DATATYPE)<<"\n";
+          std::cout<<"at H5Fclose: there are attrs still opened: "    <<H5Fget_obj_count(file_id, H5F_OBJ_ATTR)<<"\n";
+          std::cout<<"at H5Fclose: there are datasets still opened: " <<H5Fget_obj_count(file_id, H5F_OBJ_DATASET)<<"\n";
+
           H5Fclose (file_id);
         }
       init_all ();
@@ -247,7 +254,7 @@ namespace blue_sky
 
   typedef hsize_t pool_dims_t[3];
   // calcs dims only for var_dims
-  t_long 
+  t_long
   calc_data_dims (std::string const &name, h5_pair &p, t_int n_dims, pool_dims_t const &pool_dims)
   {
     BOOST_STATIC_ASSERT (sizeof (t_long) >= sizeof (npy_intp));
@@ -273,8 +280,8 @@ namespace blue_sky
         p.size = -1; // set wrong size to push dataset recreation when next set_data is called
         return size;
       }
-      
-    return p.size;   
+
+    return p.size;
   }
 
   typedef hsize_t src_dims_t[6];
@@ -294,8 +301,8 @@ namespace blue_sky
     BS_ASSERT (size > 0) (size);
     return size;
   }
-  
-  t_long 
+
+  t_long
   h5_pool::calc_data_dims (const std::string &name)
   {
     map_t::iterator it = h5_map.find (name);
@@ -433,7 +440,7 @@ namespace blue_sky
     return a;
   }
 
-  spv_float 
+  spv_float
   h5_pool::get_fp_data_unsafe_group (const std::string &name, const std::string &group_name)
   {
     // FIXME: was <=
@@ -450,7 +457,7 @@ namespace blue_sky
     return get_data <v_float> (name, open_data (name, group_name));
   }
 
-  spv_int 
+  spv_int
   h5_pool::get_i_data_unsafe_group (const std::string &name, const std::string &group_name)
   {
     // FIXME: was <=
@@ -466,8 +473,8 @@ namespace blue_sky
 
     return get_data <v_int> (name, open_data (name, group_name));
   }
-    
-    
+
+
   void
   h5_pool::declare_data (std::string const &name, hid_t dtype, void *value, int n_dims, npy_intp *dims, int var_dims)
   {
@@ -529,7 +536,7 @@ namespace blue_sky
       {
         if (p.dset >= 0)
           {
-            H5Ldelete (group, name.c_str (), H5P_DEFAULT);
+            //!?H5Ldelete (group, name.c_str (), H5P_DEFAULT);
           }
 
         hid_t dtype = p.dtype;
@@ -548,6 +555,16 @@ namespace blue_sky
       {
         if (!detail::is_object_exists (group, name.c_str ()))
           {
+
+            hid_t dtype = p.dtype;
+            hid_t plist = p.plist;
+
+            p.dtype = p.plist = -1; // prevent closing of dtype and plist
+            close_node (p);
+
+            p.dtype = dtype;
+            p.plist = plist;
+
             hid_t dspace = H5Screate_simple (p.n_dims, p.h5_dims, NULL);
             if (dspace < 0)
               {
@@ -567,10 +584,12 @@ namespace blue_sky
             p.dset = dset;
             BS_ASSERT (p.dset >= 0) (name);
          }
-        else 
+        else
           {
-            hid_t dset = detail::open_dataset (group, name.c_str ());
-            hid_t dspace = H5Dget_space (dset);
+            hid_t dset = p.dset;
+            hid_t dspace = p.dspace;
+            ///hid_t dset = detail::open_dataset (group, name.c_str ());
+            ///hid_t dspace = H5Dget_space (dset);
             if (dspace < 0)
               {
                 bs_throw_exception (boost::format ("Can't get dataspace for dataset %s in group %d") % name % group);
@@ -600,13 +619,14 @@ namespace blue_sky
       {
         dset = detail::open_dataset (file_id, "script");
         herr_t r = H5Dread (dset, dtype, NULL, NULL, H5P_DEFAULT, buf);
+        H5Dclose (dset);
       }
     else
       return "";
     return buf;
   }
 
-  int 
+  int
   h5_pool::add_script (const std::string &script, bool replace)
   {
 	const hsize_t rank = 1;
@@ -641,6 +661,7 @@ namespace blue_sky
 
     sprintf (buf, "%s", script2.c_str ());
     herr_t r = H5Dwrite (dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    H5Dclose (dset);
 
     return 0;
   }
@@ -652,7 +673,7 @@ namespace blue_sky
     return 0;
   }
 
-  int 
+  int
   h5_pool::declare_fp_data (const std::string &name, t_float def_value, int n_dims, npy_intp *dims, int var_dims)
   {
     declare_data (name, get_hdf5_type <hdf5_type_helper <t_float>::type> (), &def_value, n_dims, dims, var_dims);
@@ -660,7 +681,7 @@ namespace blue_sky
   }
 
 #ifdef BSPY_EXPORTING_PLUGIN
-  int 
+  int
   h5_pool::py_declare_i_data (const std::string &name, t_int def_value, int n_dims, boost::python::list &dims, int var_dims)
   {
     t_int i;
@@ -676,12 +697,12 @@ namespace blue_sky
         {
           arr_dims[i] = boost::python::extract<int>(dims[i]);
         }
-      
+
     declare_data (name, get_hdf5_type <hdf5_type_helper <t_int>::type> (), &def_value, n_dims, arr_dims, var_dims);
     return 0;
   }
 
-  int 
+  int
   h5_pool::py_declare_fp_data (const std::string &name, t_float def_value, int n_dims, boost::python::list &dims, int var_dims)
   {
     t_int i;
@@ -697,7 +718,7 @@ namespace blue_sky
         {
           arr_dims[i] = boost::python::extract<int>(dims[i]);
         }
-      
+
     declare_data (name, get_hdf5_type <hdf5_type_helper <t_float>::type> (), &def_value, n_dims, arr_dims, var_dims);
     return 0;
   }
@@ -712,11 +733,15 @@ namespace blue_sky
       {
         declare_data (name, dtype, def_value, n_dims, dims);
       }
-    else if (create_base)// already exist and create_base=true
+    map_it = h5_map.find (name);
+
+    if (create_base)// already exist and create_base=true
       {
-		if (map_it->second.diff_from_base) // array in last base different from prev base
+        // if array exist in last base group or current is "actual" group
+		if ((detail::is_object_exists ((--group_id.end())->second, name.c_str()) ||
+             (--group_id.end())->first == "actual"))
     	  {
-    	    //create new base group
+    	    // create new base group
     	    last_base_name = "base_" + get_date_time_str();
 
     	    // add suffix if group already exist (date_time not changed)
@@ -731,7 +756,7 @@ namespace blue_sky
     	      }
     	    last_base_name = last_base_name2;
 
-    		//std::cout<<"set_data created_base "<<last_base_name.c_str()<<"\n";
+    		//std::cout<<"set_data: created_base "<<last_base_name<<"\n";
 
     	    hid_t base_id = H5Gcreate (file_id, last_base_name.c_str(), -1);
     	    group_id.insert (pair<std::string, hid_t>(last_base_name, base_id));
@@ -794,13 +819,13 @@ namespace blue_sky
     	hid_t group_actual = group_id.find ("actual")->second;
 	    hsize_t num_obj;
 	    std::string array_name;
-      herr_t status;
+        herr_t status;
 
 	    // get number of objects in 'actual' group
 	    H5G_info_t group_info;
 	    status = H5Gget_info (group_actual, &group_info);
 	    num_obj = group_info.nlinks;
-      
+
 	    // get object names of items in 'actual' group
 	    std::vector<std::string> array_names;
 	    for (hsize_t i = 0; i < num_obj; i++)
@@ -830,13 +855,13 @@ namespace blue_sky
       }
   }
 
-  int 
+  int
   h5_pool::set_i_data (const std::string &name, spv_int data, t_int def_value)
   {
-    set_data (name, 
-              get_hdf5_type <hdf5_type_helper <t_int>::type> (), 
-              data->data (), 
-              data->size (), 
+    set_data (name,
+              get_hdf5_type <hdf5_type_helper <t_int>::type> (),
+              data->data (),
+              data->size (),
               data->ndim (),
               data->dims (),
               &def_value, true);
@@ -856,14 +881,14 @@ namespace blue_sky
     return 0;
   }
 
-  int 
+  int
   h5_pool::set_fp_data (const std::string &name, spv_float data, t_float def_value)
   {
-    set_data (name, 
-              get_hdf5_type <hdf5_type_helper <t_float>::type> (), 
-              data->data (), 
-              data->size (), 
-              data->ndim (), 
+    set_data (name,
+              get_hdf5_type <hdf5_type_helper <t_float>::type> (),
+              data->data (),
+              data->size (),
+              data->ndim (),
               data->dims (),
               &def_value, true);
     return 0;
@@ -882,19 +907,19 @@ namespace blue_sky
     return 0;
   }
 
-  void 
+  void
   h5_pool::set_pool_dims (t_long *dims, int ndims)
   {
     BS_ASSERT (ndims == 3) (ndims);
     for (int i = 0; i < 3; i++)
       pool_dims[i] = 0;
-      
+
     n_pool_dims = ndims;
     for (int i = 0; i < ndims; i++)
       {
         pool_dims[i] = dims[i];
       }
-    
+
     map_t::iterator it = h5_map.begin (), e = h5_map.end ();
     for (; it != e; ++it)
       {
@@ -904,7 +929,7 @@ namespace blue_sky
           blue_sky::calc_data_dims (name, p, n_pool_dims, pool_dims);
       }
   }
-  
+
 
   // FIXME: obsolete
   void
@@ -947,8 +972,8 @@ namespace blue_sky
       {
         bs_throw_exception (boost::format ("Get data type %s: group not opened") % name);
       }
-      
-    i = h5_map.find (name);  
+
+    i = h5_map.find (name);
     if (i == h5_map.end ())
       {
         bs_throw_exception (boost::format ("Get data type %s: array not found") % name);
@@ -963,11 +988,11 @@ namespace blue_sky
   }
 
 #ifdef BSPY_EXPORTING_PLUGIN
-  std::string 
+  std::string
   h5_pool::py_str () const
     {
       std::stringstream s;
-      std::string ss; 
+      std::string ss;
       map_t::const_iterator i, e;
       H5T_class_t dt;
 
@@ -993,12 +1018,12 @@ namespace blue_sky
           else
             ss = "Unknown";
           s << std::setw (8) << ss << H5Tget_precision (i->second.dtype);
-           
+
           if (i->second.dset >= 0)
             s << std::setw (10) << " Created ";
           else
             s << std::setw (10) << " Declared ";
-          
+
           if (i->second.var_dims)
             {
               s << " Variable Dims ";
@@ -1007,33 +1032,33 @@ namespace blue_sky
                 s << ", " <<i->second.src_dims[j];
               s << "]\t";
            }
-          
+
           s << std::endl;
         }
       s << "-----------------------------------------------------------------------------------------\n";
       return s.str ();
     }
-    
-     
-  
-  boost::python::list 
+
+
+
+  boost::python::list
   h5_pool::py_list_data() const
   {
     map_t::const_iterator i, e;
     boost::python::list items;
-    
+
     e = h5_map.end ();
     for (i = h5_map.begin (); i != e; ++i)
       items.append(i->first);
     return items;
   }
 
-  boost::python::list 
+  boost::python::list
   h5_pool::py_list_i_data() const
   {
     map_t::const_iterator i, e;
     boost::python::list items;
-    
+
     e = h5_map.end ();
     for (i = h5_map.begin (); i != e; ++i)
       if (H5Tget_class (i->second.dtype) == H5T_INTEGER)
@@ -1041,12 +1066,12 @@ namespace blue_sky
     return items;
   }
 
-  boost::python::list 
+  boost::python::list
   h5_pool::py_list_fp_data() const
   {
     map_t::const_iterator i, e;
     boost::python::list items;
-    
+
     e = h5_map.end ();
     for (i = h5_map.begin (); i != e; ++i)
       if (H5Tget_class (i->second.dtype) == H5T_FLOAT)
@@ -1054,13 +1079,13 @@ namespace blue_sky
     return items;
   }
 
-  boost::python::list 
+  boost::python::list
   h5_pool::py_list_cubes_data() const
   {
     map_t::const_iterator i, e;
     boost::python::list items;
     int is_cube;
-    
+
     e = h5_map.end ();
     for (i = h5_map.begin (); i != e; ++i)
       {
@@ -1076,19 +1101,19 @@ namespace blue_sky
         if (is_cube)
           items.append(i->first);
       }
-        
+
     return items;
   }
-  
-  void 
+
+  void
   h5_pool::py_set_pool_dims (boost::python::list &dims)
   {
     t_long arr_dims[10];
     t_int i, n_dims = len(dims);
-    
+
     if (n_dims > 10)
       bs_throw_exception (boost::format ("py_set_pool_dims: too big dims number %d!") % n_dims);
-    
+
     for (i = 0; i < n_dims; ++i)
       {
         arr_dims[i] = boost::python::extract<int>(dims[i]);
@@ -1096,11 +1121,11 @@ namespace blue_sky
     set_pool_dims (arr_dims, n_dims);
   }
 
-  boost::python::list 
+  boost::python::list
   h5_pool::py_get_pool_dims () const
   {
     boost::python::list dims;
-    
+
     for (int i = 0; i < n_pool_dims; ++i)
       {
         dims.append(pool_dims[i]);
@@ -1108,11 +1133,11 @@ namespace blue_sky
     return dims;
   }
 
-  boost::python::list 
+  boost::python::list
   h5_pool::py_get_data_dims (const std::string &name) const
   {
     boost::python::list dims;
-    map_t::const_iterator ti, te; 
+    map_t::const_iterator ti, te;
     ti = h5_map.find (name);
     if (ti != h5_map.end ())
       {

@@ -95,7 +95,7 @@ namespace blue_sky
        *
        * @param fname   -- <INPUT> file name
        */
-      virtual void open_file (const std::string &fname);
+      virtual void open_file (const std::string fname);
 
       /**
        * @brief set pool dims to calculate each pool array size
@@ -115,7 +115,7 @@ namespace blue_sky
        */
       virtual void flush () const
         {
-          if (file_id > 0)
+          if (file_id >= 0)
             {
               H5Fflush (file_id, H5F_SCOPE_LOCAL);
             }
@@ -330,7 +330,7 @@ namespace blue_sky
             {
               i->second = 0;
             }
-          file_id = 0;
+          file_id = -1;
           edit_base = false;
           n_pool_dims = 0;
           for (int i = 0; i < 3; ++i)
