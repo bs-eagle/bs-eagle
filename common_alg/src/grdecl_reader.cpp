@@ -25,12 +25,13 @@ typedef smart_ptr< h5_pool_iface > sp_h5_pool;
 namespace {
 
 // convert array from fortran to C order
-spv_float convert_arrayF2C(const spv_float& src, const ulong nx, const ulong ny, const ulong nz) {
+template< class T >
+T convert_arrayF2C(const T& src, const ulong nx, const ulong ny, const ulong nz) {
 	if(src->size() != nx * ny * nz)
 		return src;
 
 	// convert to C order
-	spv_float dst = BS_KERNEL.create_object(v_float::bs_type());
+	T dst = BS_KERNEL.create_object(src->bs_resolve_type());
 	dst->resize(nx * ny * nz);
 	for (ulong i = 0; i < nx; i++)
 		for (ulong j = 0; j < ny; j++)
@@ -39,11 +40,22 @@ spv_float convert_arrayF2C(const spv_float& src, const ulong nx, const ulong ny,
 	return dst;
 }
 
-inline bool read_array(const sp_bos_reader& br, const char* array_name, const spv_float& dst, const ulong sz) {
+template< class T >
+inline bool read_array(const sp_bos_reader& br, const char* array_name, const T& dst, const ulong sz) {
+	struct array_reader {
+		static ulong go(const sp_bos_reader& br, const char* array_name, const spv_float& dst, const ulong sz) {
+			return (ulong)br->read_fp_array(array_name, &dst->ss(0), sz);
+		}
+		static ulong go(const sp_bos_reader& br, const char* array_name, const spv_int& dst, const ulong sz) {
+			return (ulong)br->read_int_array(array_name, &dst->ss(0), sz);
+		}
+	};
+
 	if(!sz) return true;
 	dst->resize(sz);
+	array_reader AR;
 	ulong N;
-	if((N = (ulong)br->read_fp_array(array_name, &dst->ss(0), sz)) != sz) {
+	if((N = AR.go(br, array_name, dst, sz)) != sz) {
 		BSERR << "Error reading " << array_name << " array, array size " << sz <<
 			", actually read " << N << " elements" << bs_end;
 		return false;
@@ -89,6 +101,7 @@ void read_grdecl(const std::string& fname, const std::string dir, ulong nx, ulon
 	std::string buf(MAX_LINE_LEN, ' ');
 	std::istringstream is;
 	spv_float databuf = BS_KERNEL.create_object(v_float::bs_type());
+	spv_int idatabuf = BS_KERNEL.create_object(v_int::bs_type());
 	bool is_mesh_read = false, is_pool_touched = false;
 	long N;
 	while((N = br->read_line(const_cast< char* >(buf.c_str()), MAX_LINE_LEN)) > 0) {
@@ -158,17 +171,34 @@ void read_grdecl(const std::string& fname, const std::string dir, ulong nx, ulon
 		// read array name
 		std::string prop_name;
 		is >> prop_name;
+
 		// read prop data
-		if(read_array(br, prop_name.c_str(), databuf, nx * ny * nz)) {
+		bool read_res = false;
+		if(prop_name == "ACTNUM")
+			read_res = read_array(br, prop_name.c_str(), idatabuf, nx * ny * nz);
+		else
+			read_res = read_array(br, prop_name.c_str(), databuf, nx * ny * nz);
+		if(!read_res)
+			continue;
+		// set dims once
+		if(!is_pool_touched) {
+			pool->set_pool_dims(&dims[0], 3);
+			is_pool_touched = true;
+		}
+
+		// save to pool
+		npy_intp prop_dims[6] = { 1, 0, 1, 0, 1, 0 };
+		if(prop_name == "ACTNUM") {
+			// store only C-ordered arrays
+			if(order == 'F')
+				idatabuf = convert_arrayF2C(idatabuf, nx, ny, nz);
+			pool->declare_i_data(prop_name, 0, 3, &prop_dims[0], 1);
+			pool->set_i_data(prop_name, idatabuf);
+		}
+		else {
 			// store only C-ordered arrays
 			if(order == 'F')
 				databuf = convert_arrayF2C(databuf, nx, ny, nz);
-			// save to pool
-			if(!is_pool_touched) {
-				pool->set_pool_dims(&dims[0], 3);
-				is_pool_touched = true;
-			}
-			npy_intp prop_dims[6] = { 1, 0, 1, 0, 1, 0 };
 			pool->declare_fp_data(prop_name, 0, 3, &prop_dims[0], 1);
 			pool->set_fp_data(prop_name, databuf);
 		}
