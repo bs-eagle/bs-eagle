@@ -93,7 +93,7 @@ namespace blue_sky
        *
        * @param fname   -- <INPUT> file name
        */
-      virtual void open_file (const std::string fname);
+      virtual void open_file (const std::string& fname);
 
       /**
        * @brief set pool dims to calculate each pool array size

@@ -179,7 +179,7 @@ namespace blue_sky
     }
 
   void
-  h5_pool::open_file (const std::string fname_)
+  h5_pool::open_file (const std::string& fname_)
     {
 	  //this function is not really open, it creates file
 	  //TODO: set edit_base = false; at open_file
