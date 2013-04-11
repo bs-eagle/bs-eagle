@@ -1,7 +1,7 @@
 /// @file h5_pool_serialize.cpp
 /// @brief h5_pool serialization implementation
 /// @author uentity
-/// @version 
+/// @version
 /// @date 24.01.2012
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
@@ -152,7 +152,7 @@ struct grp_match {
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, h5_pair)
 	ar & t.n_dims & t.size;
 	ar & t.py_dims & t.h5_dims & t.src_dims;
-	ar & t.var_dims & t.diff_from_base;
+	ar & t.var_dims;
 	// save hid to remember if corresponding item was open
 	ar & t.dset; ar & t.dtype; ar & t.plist;
 BLUE_SKY_CLASS_SRZ_FCN_END

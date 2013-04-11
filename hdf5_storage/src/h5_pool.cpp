@@ -46,6 +46,10 @@ namespace blue_sky
       init_all ();
       mute_flag = 0;
     }
+  h5_pool::~h5_pool ()
+    {
+      close_file ();
+    }
 
   herr_t
   h5_pool::it_group (hid_t g_id, const char *name, const H5L_info_t * /*info*/, void * m)
@@ -97,7 +101,6 @@ namespace blue_sky
       p.second.n_dims = n_dims;
       p.second.var_dims = var_dims;
       p.second.size = 0;
-      p.second.diff_from_base = true;
       p.second.group_id = group_id;
       if (var_dims)
         {
@@ -240,12 +243,12 @@ namespace blue_sky
         }
       if (file_id >= 0)
         {
-          std::cout<<"at H5Fclose: there are objs_all still opened: " <<H5Fget_obj_count(file_id, H5F_OBJ_ALL)<<"\n";
-          std::cout<<"at H5Fclose: there are files still opened: "    <<H5Fget_obj_count(file_id, H5F_OBJ_FILE)<<"\n";
-          std::cout<<"at H5Fclose: there are groups still opened: "   <<H5Fget_obj_count(file_id, H5F_OBJ_GROUP)<<"\n";
+          std::cout<<"at H5Fclose: there are objs_all  still opened: "<<H5Fget_obj_count(file_id, H5F_OBJ_ALL)<<"\n";
+          std::cout<<"at H5Fclose: there are files     still opened: "<<H5Fget_obj_count(file_id, H5F_OBJ_FILE)<<"\n";
+          std::cout<<"at H5Fclose: there are groups    still opened: "<<H5Fget_obj_count(file_id, H5F_OBJ_GROUP)<<"\n";
           std::cout<<"at H5Fclose: there are datatypes still opened: "<<H5Fget_obj_count(file_id, H5F_OBJ_DATATYPE)<<"\n";
-          std::cout<<"at H5Fclose: there are attrs still opened: "    <<H5Fget_obj_count(file_id, H5F_OBJ_ATTR)<<"\n";
-          std::cout<<"at H5Fclose: there are datasets still opened: " <<H5Fget_obj_count(file_id, H5F_OBJ_DATASET)<<"\n";
+          std::cout<<"at H5Fclose: there are attrs     still opened: "<<H5Fget_obj_count(file_id, H5F_OBJ_ATTR)<<"\n";
+          std::cout<<"at H5Fclose: there are datasets  still opened: "<<H5Fget_obj_count(file_id, H5F_OBJ_DATASET)<<"\n";
 
           H5Fclose (file_id);
         }
@@ -586,15 +589,19 @@ namespace blue_sky
          }
         else
           {
-            hid_t dset = p.dset;
-            hid_t dspace = p.dspace;
-            ///hid_t dset = detail::open_dataset (group, name.c_str ());
-            ///hid_t dspace = H5Dget_space (dset);
+            ///hid_t dset = p.dset;
+            ///hid_t dspace = p.dspace;
+            hid_t dset = detail::open_dataset (group, name.c_str ());
+            hid_t dspace = H5Dget_space (dset);
             if (dspace < 0)
               {
                 bs_throw_exception (boost::format ("Can't get dataspace for dataset %s in group %d") % name % group);
               }
 
+            if (p.dset >= 0)
+              H5Dclose(p.dset);
+            if (p.dspace >= 0)
+              H5Sclose(p.dspace);
             p.dspace = dspace;
             p.dset = dset;
             BS_ASSERT (p.dset >= 0) (name);
@@ -737,9 +744,16 @@ namespace blue_sky
 
     if (create_base)// already exist and create_base=true
       {
+        if (group_id.empty ())
+          bs_throw_exception (boost::format ("set data %s error: No groups in pool!") % name);
+
+        map_hid_t::iterator last_base = --group_id.end();
+        hid_t last_base_id = last_base->second;
+        last_base_name = last_base->first;
+
         // if array exist in last base group or current is "actual" group
-		if ((detail::is_object_exists ((--group_id.end())->second, name.c_str()) ||
-             (--group_id.end())->first == "actual"))
+		if ((detail::is_object_exists (last_base_id, name.c_str()) && !edit_base) ||
+             last_base_name == "actual")
     	  {
     	    // create new base group
     	    last_base_name = "base_" + get_date_time_str();
@@ -765,27 +779,7 @@ namespace blue_sky
     	    // add "\n" before script if not first line
     	    comment = (strlen(get_script ()) > 0 ? "\n" : "") + comment;
     	    add_script (comment, false);
-
-    	    // set other array's flags difference from (new) base is false
-    	    map_t::iterator it = h5_map.begin (), e = h5_map.end ();
-            for (; it != e; ++it)
-              {
-            	if (it != map_it)
-                  it->second.diff_from_base = false;
-              }
           }
-    	else
-    	  {
-    	    //set array path to last base instead of "actual"
-    	    map_hid_t::iterator e = group_id.end();
-    	    if (!group_id.empty ())
-    	      last_base_name = (--e)->first;
-    	    else
-    	      bs_throw_exception (boost::format ("set data %s error: No groups in pool!") % name);
-    	    //set flag current array is changed
-        	if (!edit_base)
-        	  map_it->second.diff_from_base = true;
-    	  }
       }
 
     const h5_pair &p = open_data (name, last_base_name);
@@ -846,13 +840,6 @@ namespace blue_sky
   h5_pool::finish_base ()
   {
 	edit_base = false;
-    // set flag difference from (new) base is true for all arrays
-	// next call of set_data will create new base
-    map_t::iterator it = h5_map.begin (), e = h5_map.end ();
-    for (; it != e; ++it)
-      {
-        it->second.diff_from_base = true;
-      }
   }
 
   int

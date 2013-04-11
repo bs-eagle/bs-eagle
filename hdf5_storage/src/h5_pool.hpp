@@ -37,7 +37,6 @@ namespace blue_sky
       hsize_t   src_dims[6];    // dims for array are calculated from pool_dims and src_dims: dims[i] = src_dims[2 * i] * pool_dims[i] + src_dims[i + 1]. i = 0..2
 
       bool      var_dims;       // flag is true if array has variable dimensions depend on pool dimensions.
-      bool      diff_from_base; // flag if array was changed
       hid_t     group_id;
     /*
       void save (toa_t &ar) const
@@ -87,8 +86,7 @@ namespace blue_sky
     public:
 
       //! destructor
-      virtual ~h5_pool ()
-        {};
+      virtual ~h5_pool ();
 
       /**
        * @brief create file for reading and writing
