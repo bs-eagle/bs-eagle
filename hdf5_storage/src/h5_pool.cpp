@@ -534,13 +534,9 @@ namespace blue_sky
       }
 
     h5_pair &p = it->second;
+
     if (p.var_dims && p.size != calc_size (n_pool_dims, pool_dims, p.src_dims))
       {
-        if (p.dset >= 0)
-          {
-            //!?H5Ldelete (group, name.c_str (), H5P_DEFAULT);
-          }
-
         hid_t dtype = p.dtype;
         hid_t plist = p.plist;
 
@@ -549,6 +545,11 @@ namespace blue_sky
 
         p.dtype = dtype;
         p.plist = plist;
+
+        if (detail::is_object_exists (group, name.c_str ()))
+          {
+            H5Ldelete (group, name.c_str (), H5P_DEFAULT);
+          }
 
         blue_sky::calc_data_dims (name, p, n_pool_dims, pool_dims);
       }
