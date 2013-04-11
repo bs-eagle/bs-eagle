@@ -182,7 +182,6 @@ namespace blue_sky
   h5_pool::open_file (const std::string& fname_)
     {
 	  //this function is not really open, it creates file
-	  //TODO: set edit_base = false; at open_file
       edit_base = true;
 
       // FIXME:
@@ -837,9 +836,9 @@ namespace blue_sky
   }
 
   void
-  h5_pool::finish_base ()
+  h5_pool::set_edit_base (bool edit_base_)
   {
-	edit_base = false;
+	edit_base = edit_base_;
   }
 
   int

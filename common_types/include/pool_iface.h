@@ -173,7 +173,7 @@ class h5_pool_iface : public objbase
       virtual int set_i_data (const std::string &name, spv_int data, t_int def_value = 0) = 0;
       virtual int set_i_data_script (const std::string &name, spv_int data, t_int def_value = 0) = 0;
 
-      virtual void finish_base () = 0;
+      virtual void set_edit_base (bool) = 0;
       virtual void clear_actual () = 0;
       virtual int add_script (const std::string &script, bool replace) = 0;
       virtual const char * get_script () = 0;

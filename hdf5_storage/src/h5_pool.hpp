@@ -235,7 +235,7 @@ namespace blue_sky
       virtual int set_i_data_script (const std::string &name, spv_int data, t_int def_value = 0);
 
       virtual void clear_actual ();
-      virtual void finish_base ();
+      virtual void set_edit_base (bool);
       virtual int add_script (const std::string &script, bool replace);
       virtual const char * get_script ();
 
