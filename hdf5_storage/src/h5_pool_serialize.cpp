@@ -159,7 +159,7 @@ BLUE_SKY_CLASS_SRZ_FCN_END
 
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, h5_pool)
 	// save flag if h5 is open
-	bool is_open = (t.file_id != 0);
+	bool is_open = (t.file_id >= 0);
 	ar << is_open;
 	//ar << t.fname;
 
