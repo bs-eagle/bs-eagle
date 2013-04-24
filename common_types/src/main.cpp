@@ -16,7 +16,6 @@
 #include "perf.h"
 #include "traj.h"
 #include "py_prop.h"
-#include "py_table.h"
 #include "py_gis.h"
 #include "py_frac.h"
 #include "py_perf.h"
@@ -78,6 +77,11 @@ namespace blue_sky {
 }
 
 #ifdef BSPY_EXPORTING_PLUGIN
+namespace blue_sky { namespace python {
+  // forward declaration
+  void py_export_table();
+}} /* blue_sky::python */
+
 namespace {
   void
   init_py_subsystem ()
