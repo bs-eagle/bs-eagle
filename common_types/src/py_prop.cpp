@@ -22,9 +22,6 @@ namespace python {
   {
     using namespace boost::python;
 
-    typedef bspy_converter< list_traits< std::list< std::string > > > hhh_converter;
-    hhh_converter::register_from_py();
-    hhh_converter::register_to_py();
     //base_exporter <matrix_iface <seq_vector<float>, seq_vector<int> >,   default_exporter>::export_class ("matrix_iface_fi"); 
     //matrix_exporter::export_base <matrix_iface, py_matrix_iface_exporter> ("matrix_iface");
     base_exporter <prop_iface, py_prop_exporter>::export_class ("prop_iface");

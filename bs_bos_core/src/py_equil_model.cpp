@@ -29,9 +29,6 @@ namespace blue_sky
 			base_exporter <equil_model_iface, equil_model_depth_exporter>::export_class ("equil_model_iface");
       class_exporter <equil_model_depth, equil_model_iface, equil_model_depth_exporter>::export_class ("equil_model_depth");
       
-			typedef bspy_converter< list_traits< std::vector<double> > > spv_table_list_converter;
-	        spv_table_list_converter::register_from_py ();
-	        spv_table_list_converter::register_to_py ();
 		}
 	}
 }
