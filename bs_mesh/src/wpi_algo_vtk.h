@@ -62,15 +62,15 @@ struct algo_vtk : helpers< strat_t > {
 		// sorting criteria
 		bool operator<(const vertex_handle& rhs) const {
 			return std::lexicographical_compare(
-				pv_, pv_ + 3,
-				rhs.pv_, rhs.pv_ + 3
+				pv_, pv_ + D,
+				rhs.pv_, rhs.pv_ + D
 			);
 		}
 
 		// 3way comparison
 		int operator<<(const vertex_handle& rhs) const {
 			return lexicographical_compare_3way(
-				pv_, pv_ + 3, rhs.pv_, rhs.pv_ + 3
+				pv_, pv_ + D, rhs.pv_, rhs.pv_ + D
 			);
 		}
 
@@ -81,11 +81,11 @@ struct algo_vtk : helpers< strat_t > {
 		static spv_float export_vertex_storage(trimesh&, vertex_storage& vs) {
 			// export array of unique points and calc their offsets
 			spv_float points = BS_KERNEL.create_object(v_float::bs_type());
-			points->resize(vs.size() * 3);
+			points->resize(vs.size() * D);
 			v_float::iterator p_dst = points->begin();
 			ulong cnt = 0;
 			for(vertex_iterator p_src = vs.begin(), end = vs.end(); p_src != end; ++p_src, ++cnt) {
-				p_dst = std::copy(p_src->pv_, p_src->pv_ + 3, p_dst);
+				p_dst = std::copy(p_src->pv_, p_src->pv_ + D, p_dst);
 				const_cast< vertex_handle& >(*p_src).offs = cnt;
 			}
 			return points;
@@ -180,7 +180,7 @@ struct algo_vtk : helpers< strat_t > {
 				idx_.push_back(
 					vertex_handle_t::push_back(vs_, p_cell)
 					//vs_.insert(vertex_handle(tops_ + v[i]*3)).first
-					);
+				);
 			}
 			// save cell id
 			cell_idx_->push_back(cell_id);
@@ -215,7 +215,6 @@ struct algo_vtk : helpers< strat_t > {
 	};
 
 	// specialization for edges
-	// implementation for drawing facets using vtkQuad
 	template< class unused >
 	struct vtk_index_backend< 1, unused > {
 		enum { type = 1 };
@@ -331,7 +330,8 @@ struct algo_vtk : helpers< strat_t > {
 	static void process_mesh_part(vib_backend_t& vib,
 		const mesh_part& MP, // mesh_part with source cells to iterate over
 		const mesh_part& M,  // and surrounding "full" mesh to check cell's neighbours
-		const t_int* mask, const ulong mask_sz)
+		const t_int* mask, const ulong mask_sz,
+		const int facet_filter)
 	{
 		// idea is that we iterate over cells in given mesh part
 		// but check neighbours in full mesh, so all mesh parts gets merged together finally
@@ -340,6 +340,7 @@ struct algo_vtk : helpers< strat_t > {
 		typedef typename cell_data::facet_vid_t facet_vid_t;
 		enum { n_facets = cell_data::n_facets };
 		enum { n_fv = cell_data::n_facet_vertex };
+		enum { n_vertex = cell_data::n_vertex };
 
 		const ulong n_cells = MP.size();
 		//const ulong mask_sz = mask->size();
@@ -364,6 +365,9 @@ struct algo_vtk : helpers< strat_t > {
 			// convert global id cell_id to local id of M
 			M.cell_neighbours(M.local_cid(cell_id), cell_nb);
 			for(ulong j = 0; j < n_facets; ++j) {
+				// skip facets not matching given filter
+				if(facet_filter >= 0 && int(j) != facet_filter)
+					continue;
 				// skip facet if it has non-masked neighbour
 				// first convert neighbor local id (in M) to GLOBAL id
 				const ulong cell_nb_id = M.ss_id(cell_nb[j]);
@@ -371,10 +375,10 @@ struct algo_vtk : helpers< strat_t > {
 					continue;
 
 				ca_assign(cell_fvid, cell_data::facet_vid(j));
-				// vertex_id[cell_id] = vertex_id[cell_id] + cell_id*8
+				// vertex_id[cell_id] = vertex_id[cell_id] + cell_id * n_vertex
 				std::transform(
 					&cell_fvid[0], &cell_fvid[n_fv], &cell_fvid[0],
-					std::bind2nd(std::plus< ulong >(), cell_id * 8)
+					std::bind2nd(std::plus< ulong >(), cell_id * n_vertex)
 				);
 				vib(cell_fvid, cell_id, j);
 			}
@@ -402,7 +406,7 @@ struct algo_vtk : helpers< strat_t > {
 	template< int prim_id >
 	static spv_long enum_border_vtk_simple(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 		spv_int mask, spv_long cell_idx, spv_float points, Loki::Int2Type< prim_id > prim,
-		int slice_dim = -1, ulong slice_idx = 0)
+		int slice_dim = -1, ulong slice_idx = 0, const int facet_filter = -1)
 	{
 		typedef typename mesh_part::container_t parts_container;
 		typedef typename mesh_part::container_t::iterator part_iterator;
@@ -422,7 +426,7 @@ struct algo_vtk : helpers< strat_t > {
 		const ulong mask_sz = mask->size();
 
 		// just process whole mesh part
-		process_mesh_part(vib, MP, MP, cmask, mask_sz);
+		process_mesh_part(vib, MP, MP, cmask, mask_sz, facet_filter);
 
 		// share the same buffer for points
 		points->init_inplace(vib.get_points());
@@ -432,7 +436,8 @@ struct algo_vtk : helpers< strat_t > {
 	template< int prim_id >
 	static spv_long enum_border_vtk(t_long nx, t_long ny, sp_obj trim_backend,
 		spv_int mask, spv_long cell_idx, spv_float points, Loki::Int2Type< prim_id > prim,
-		int slice_dim = -1, ulong slice_idx = 0, const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
+		int slice_dim = -1, ulong slice_idx = 0, const ulong min_split_threshold = MIN_SPLIT_THRESHOLD,
+		const int facet_filter = -1)
 	{
 		typedef typename mesh_part::container_t parts_container;
 		typedef typename mesh_part::container_t::iterator part_iterator;
@@ -472,7 +477,7 @@ struct algo_vtk : helpers< strat_t > {
 			for(part_iterator p = parts.begin(), pend = parts.end(); p != pend; ++p) {
 				// if mesh size is less than threshold or part is pure boundary, then draw directly
 				if(min_split_threshold == 0 || p->size() <= min_split_threshold || p->is_pure_boundary()) {
-					process_mesh_part(vib, *p, MP, cmask, mask_sz);
+					process_mesh_part(vib, *p, MP, cmask, mask_sz, facet_filter);
 					continue;
 				}
 
@@ -516,7 +521,7 @@ struct algo_vtk : helpers< strat_t > {
 					// draw it using efficient boundary method
 					std::list< mesh_part > bnd = p->boundary();
 					for(typename std::list< mesh_part >::const_iterator pb = bnd.begin(), bend = bnd.end(); pb != bend; ++pb)
-						process_mesh_part(vib, *pb, MP, cmask, mask_sz);
+						process_mesh_part(vib, *pb, MP, cmask, mask_sz, facet_filter);
 				}
 			}
 
@@ -531,44 +536,48 @@ struct algo_vtk : helpers< strat_t > {
 	// specialization for facets
 	static spv_long enum_border_facets_vtk(t_long nx, t_long ny, sp_obj trim_backend,
 		spv_int mask, spv_long cell_idx, spv_float points,
-		int slice_dim = -1, ulong slice_idx = 0,  const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
+		int slice_dim = -1, ulong slice_idx = 0,  const ulong min_split_threshold = MIN_SPLIT_THRESHOLD,
+		const int facet_filter = -1)
 	{
 		return enum_border_vtk(
 			nx, ny, trim_backend, mask, cell_idx, points, Loki::Int2Type< 0 >(),
-			slice_dim, slice_idx, min_split_threshold
+			slice_dim, slice_idx, min_split_threshold, facet_filter
 		);
 	}
 
 	static spv_long enum_border_facets_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 		spv_int mask, spv_long cell_idx, spv_float points,
-		int slice_dim = -1, ulong slice_idx = 0,  const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
+		int slice_dim = -1, ulong slice_idx = 0,  const ulong min_split_threshold = MIN_SPLIT_THRESHOLD,
+		const int facet_filter = -1)
 	{
 		return enum_border_vtk(
 			nx, ny, trimesh::create_backend(nx, ny, coord, zcorn),
 			mask, cell_idx, points, Loki::Int2Type< 0 >(),
-			slice_dim, slice_idx, min_split_threshold
+			slice_dim, slice_idx, min_split_threshold, facet_filter
 		);
 	}
 
 	// specialization for edges
 	static spv_long enum_border_edges_vtk(t_long nx, t_long ny, sp_obj trim_backend,
 		spv_int mask, spv_long cell_idx, spv_float points,
-		int slice_dim = -1, ulong slice_idx = 0,  const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
+		int slice_dim = -1, ulong slice_idx = 0,  const ulong min_split_threshold = MIN_SPLIT_THRESHOLD,
+		const int facet_filter = -1)
 	{
 		return enum_border_vtk(
 			nx, ny, trim_backend, mask, cell_idx, points, Loki::Int2Type< 1 >(),
-			slice_dim, slice_idx, min_split_threshold
+			slice_dim, slice_idx, min_split_threshold, facet_filter
 		);
 	}
 
 	static spv_long enum_border_edges_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 		spv_int mask, spv_long cell_idx, spv_float points,
-		int slice_dim = -1, ulong slice_idx = 0,  const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
+		int slice_dim = -1, ulong slice_idx = 0,  const ulong min_split_threshold = MIN_SPLIT_THRESHOLD,
+		const int facet_filter = -1)
 	{
 		return enum_border_vtk(
 			nx, ny, trimesh::create_backend(nx, ny, coord, zcorn),
 			mask, cell_idx, points, Loki::Int2Type< 1 >(),
-			slice_dim, slice_idx, min_split_threshold
+			slice_dim, slice_idx, min_split_threshold, facet_filter
 		);
 	}
 

@@ -102,27 +102,27 @@ typedef wpi::algo_vtk< vtk_strat_t > wpi_algo_vtk;
 
 bp::tuple enum_border_facets_vtk(t_long nx, t_long ny, sp_obj trim_backend,
 	spv_int mask, int slice_dim = -1, ulong slice_idx = 0,
-	const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
+	const ulong min_split_threshold = MIN_SPLIT_THRESHOLD, const int facet_filter = -1)
 {
 	spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
 	spv_float points = BS_KERNEL.create_object(v_float::bs_type());
 	//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_facets_vtk.prof");
 	spv_long res = wpi_algo_vtk::enum_border_facets_vtk(nx, ny, trim_backend, mask, cell_idx,
-		points, slice_dim, slice_idx, min_split_threshold);
+		points, slice_dim, slice_idx, min_split_threshold, facet_filter);
 	//ProfilerStop();
 	return bp::make_tuple(res, cell_idx, points);
 }
 
 bp::tuple enum_border_edges_vtk(t_long nx, t_long ny, sp_obj trim_backend,
 	spv_int mask, int slice_dim = -1, ulong slice_idx = 0,
-	const ulong min_split_threshold = MIN_SPLIT_THRESHOLD)
+	const ulong min_split_threshold = MIN_SPLIT_THRESHOLD, const int facet_filter = -1)
 {
 	spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
 	spv_float points = BS_KERNEL.create_object(v_float::bs_type());
 	//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk.prof");
 	//HeapProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk");
 	spv_long res = wpi_algo_vtk::enum_border_edges_vtk(nx, ny, trim_backend, mask, cell_idx,
-		points, slice_dim, slice_idx, min_split_threshold);
+		points, slice_dim, slice_idx, min_split_threshold, facet_filter);
 	//ProfilerStop();
 	return bp::make_tuple(res, cell_idx, points);
 }
@@ -206,8 +206,8 @@ std::vector< well_hit_cell_2d > well_path_ident_2d(t_long nx, t_long ny, spv_flo
 BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl, ::blue_sky::well_path_ident, 5, 6)
 BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl_2d, ::blue_sky::well_path_ident_2d, 5, 6)
 BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl_2d_old, ::blue_sky::well_path_ident_2d_old, 5, 6)
-BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_facets_overl, enum_border_facets_vtk, 4, 7)
-BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_edges_overl, enum_border_edges_vtk, 4, 7)
+BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_facets_overl, enum_border_facets_vtk, 4, 8)
+BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_edges_overl, enum_border_edges_vtk, 4, 8)
 
 namespace python {
 
