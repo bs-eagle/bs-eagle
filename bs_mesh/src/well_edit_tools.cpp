@@ -143,7 +143,7 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
     
     //////////////////////////////////////////////
 
-    t_int n_points, n_z_points, n_l_points;
+    t_int n_points, n_z_points, n_l_points = 0;
     n_z_points = z_end-z_start+2;
 
     list <t_float> points, wpoints, vals;
@@ -162,6 +162,10 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
     point2d M[2];
 
     t_float z1, z2;
+
+    // sanity check
+    if(n == 0)
+       return bp::make_tuple(proj_mesh, well_points, scalars, n_z_points, n_l_points);
 
     int faces2corners[5][4] = { {0,1,4,5},
                                 {1,3,5,7},
