@@ -117,8 +117,8 @@ void compdat::init(ulong cell_id, const pos_i& mesh_size) {
  * fracture
  *----------------------------------------------------------------*/
 fracture::fracture(const string& well_name_, const string& branch_name_, const pos_i& cell_pos_, const pos_i& mesh_size)
-	: well_name(well_name_), branch_name(branch_name_), frac_half_length_1 (0), frac_half_length_2 (0), 
-    frac_status(0), frac_angle (0), frac_half_thin (0), frac_perm (0), frac_main_k (-1)
+	: well_name(well_name_), branch_name(branch_name_), frac_status(0), frac_half_length_1 (0),
+	  frac_half_length_2 (0), frac_angle (0), frac_half_thin (0), frac_perm (0), frac_main_k (-1)
 {
 	copy(&cell_pos_[0], &cell_pos_[strategy_3d::D], &cell_pos[0]);
 	cell_pos[3] = cell_pos[2];
@@ -127,15 +127,15 @@ fracture::fracture(const string& well_name_, const string& branch_name_, const p
 }
 
 fracture::fracture(const string& well_name_, const string& branch_name_, ulong cell_id, const pos_i& mesh_size)
-	: well_name(well_name_), branch_name(branch_name_), frac_half_length_1 (0), frac_half_length_2 (0),
-     frac_status(0),  frac_angle (0), frac_half_thin (0), frac_perm (0), frac_main_k (-1)
+	: well_name(well_name_), branch_name(branch_name_),frac_status(0), frac_half_length_1 (0),
+	  frac_half_length_2 (0),  frac_angle (0), frac_half_thin (0), frac_perm (0), frac_main_k (-1)
 {
 	init(cell_id, mesh_size);
 }
 
 fracture::fracture(ulong cell_id)
-	: frac_half_length_1 (0), frac_half_length_2 (0),
-    frac_status(0),  frac_angle (0), frac_half_thin (0), frac_perm (0), frac_main_k (-1), cell_id_(cell_id)
+	: frac_status(0), frac_half_length_1 (0), frac_half_length_2 (0),
+	  frac_angle (0), frac_half_thin (0), frac_perm (0), frac_main_k (-1), cell_id_(cell_id)
 {
 }
 
