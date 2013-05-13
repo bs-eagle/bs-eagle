@@ -112,13 +112,16 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalOptions> /Zm1000</AdditionalOptions>
       <DisableSpecificWarnings>4520</DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>hdf5dll.lib;loki_D.lib;ws2_32.lib;CGAL-vc100-mt-gd.lib;mpir.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>hdf5dll.lib;libgmp-10.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>$(CGAL_DIR)/lib;$(CGAL_DIR)/auxiliary/gmp/lib;$(PYTHON_PATH)/libs;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/debug;$(HDF5_PATH)/dll;$(LOKI_PATH)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CGAL_DIR)/lib64;$(PYTHON64_PATH)/libs;$(BOOST_PATH)/lib64;$(ProjectDir)/../../../exe/debug;$(HDF5_64_PATH)/dll;$(LOKI_PATH)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

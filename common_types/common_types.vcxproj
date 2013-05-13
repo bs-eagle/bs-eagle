@@ -116,7 +116,7 @@
     <Link>
       <AdditionalDependencies>hdf5dll.lib;loki_D.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>$(PYTHON_PATH)/libs;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/debug;$(HDF5_PATH)/dll;$(LOKI_PATH)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(PYTHON64_PATH)/libs;$(BOOST_PATH)/lib64;$(ProjectDir)/../../../exe/debug;$(HDF5_64_PATH)/dll;$(LOKI_PATH)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
     </Link>
