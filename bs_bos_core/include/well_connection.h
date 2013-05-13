@@ -19,7 +19,7 @@
 #include "shared_vector.h"
 
 #include "well_controller.h"
-#include "well_process_completions.h"
+#include "well_completion_coords.h"
 
 
 namespace blue_sky

@@ -3,6 +3,7 @@
 
 #include "wpi_iface.h"
 #include "rs_mesh_iface.h"
+#include "well_completion_coords.h"
 
 namespace blue_sky
 {
@@ -11,18 +12,6 @@ namespace blue_sky
   namespace wells
   {
     class connection;
-    struct completion_coords 
-    {
-      auto_value <bool, false> use_CCF_flag; 
-      auto_value <t_float, 0> completion_length;  //!< length of current complition
-      t_float x1[3];   //!< start point of completion 
-      t_float x2[3];   //!< end point of completion 
-      t_float compute_length ()
-        {
-          return (completion_length = sqrt ((x2[0] - x1[0]) * (x2[0] - x1[0]) + (x2[1] - x1[1]) * (x2[1] - x1[1]) + (x2[2] - x1[2]) * (x2[2] - x1[2])));
-        }
-    };
-
     struct completion 
       {
         typedef v_float::iterator               vf_iterator;
