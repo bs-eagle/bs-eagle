@@ -10,19 +10,22 @@ env.AppendUnique (CPPPATH = ["include", "src",
     includes["common_types"],
     includes["common_alg"],
     includes["bs_bos_core_data_storage"],
-	includes["bs_mesh"],
-	includes["bs_mesh_src"],
-	includes["bs_mtx"]
+    includes["bs_mesh"],
+    includes["bs_mesh_src"],
+    includes["bs_mtx"]
     ] + includes["kernel"],
-	CPPDEFINES = ["_HDF5", 'H5_USE_16_API'],
+    CPPDEFINES = ["_HDF5", 'H5_USE_16_API'],
     LIBS=["sqlite3", "CGAL", "gmp", "boost_filesystem"],
-	CXXFLAGS = ["-frounding-math"])
+    CXXFLAGS = ["-frounding-math"])
 
 libs = ["blue_sky", "bs_bos_core_base"]
 boost_libs = list_suffix(["boost_serialization"], env["boost_suffix"]);
 
 if (build_kind == "debug") :
-    env.AppendUnique (LIBS = [list_suffix(libs, "_d"), list_suffix(boost_libs, "-d")])
+    env.AppendUnique (
+        LIBS = [list_suffix(libs, "_d"), list_suffix(boost_libs, "-d")],
+        CPPDEFINES = ["CGAL_DISABLE_ROUNDING_MATH_CHECK"]
+    )
     lib_name += "_d"
 elif (build_kind == "release") :
     env.AppendUnique (LIBS = [libs, boost_libs])

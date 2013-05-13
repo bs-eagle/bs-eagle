@@ -44,7 +44,10 @@ if ("cfl" in env and env["cfl"] == "1") :
 #    libs = libs + ["bs_hdf5_storage"]
 
 if (build_kind == "debug") :
-    env.AppendUnique (LIBS = list_suffix (libs, "_d") + list_suffix (boost_libs, "-d"))
+    env.AppendUnique (
+        LIBS = list_suffix (libs, "_d") + list_suffix (boost_libs, "-d"),
+        CPPDEFINES = ["CGAL_DISABLE_ROUNDING_MATH_CHECK"]
+    )
     lib_name += "_d"
 elif (build_kind == "release") :
     env.AppendUnique (LIBS = libs + boost_libs)
@@ -66,11 +69,11 @@ env.Alias (tar_name, bs_bos_core)
 Export ("bs_bos_core")
 
 if env['deps'] != 'off' :
-	Depends(bs_bos_core, common_alg);
-	Depends(bs_bos_core, sql_well);
-	Depends(bs_bos_core, bs_hdf5_storage);
-	Depends(bs_bos_core, bs_swift);
-#	Depends(bs_bos_core, hdm_fluid);
+    Depends(bs_bos_core, common_alg);
+    Depends(bs_bos_core, sql_well);
+    Depends(bs_bos_core, bs_hdf5_storage);
+    Depends(bs_bos_core, bs_swift);
+#   Depends(bs_bos_core, hdm_fluid);
 
 if (env["install"] == 1) :
     inst_tar = env.Install ("$plugins_prefix", bs_bos_core)
