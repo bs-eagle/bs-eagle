@@ -13,11 +13,13 @@
 
 #include "bs_kernel.h"
 #include "table.h"
-#include "misc.h"
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/string.hpp>
+#include "bs_serialize.h"
+
+#include "bs_misc.h"
+//#include <boost/archive/text_iarchive.hpp>
+//#include <boost/archive/text_oarchive.hpp>
+//#include <boost/serialization/vector.hpp>
+//#include <boost/serialization/string.hpp>
 
 
 
@@ -29,6 +31,9 @@ using namespace std;
 using namespace boost::python;
 
 #endif //BSPY_EXPORTING_PLUGIN
+
+BLUE_SKY_TYPE_SERIALIZE_DECL(blue_sky::table)
+BLUE_SKY_CLASS_SRZ_FCN_DECL(serialize, blue_sky::table)
 
 namespace blue_sky
 {
@@ -176,13 +181,15 @@ namespace blue_sky
   table::save (toa_t &ar) const
     {
       //using namespace boost::serialization;
-      ar & col_names & values;
+      //ar & col_names & values;
+      ar << *this;
     }
 
   void 
   table::load (tia_t &ar)
     {
-      ar & col_names & values;
+      //ar & col_names & values;
+      ar >> *this;
     }
 
   table::sp_table_t 
@@ -265,9 +272,9 @@ namespace blue_sky
       s << "========================\n";
       for (i = 0; i < nc; ++i)
         {
-		  std::string tmp;
-		  wtos(tmp, col_names[i]);
-          s << "|" << std::setw (fw) << tmp;
+		  //std::string tmp;
+		  //wtos(tmp, col_names[i]);
+          s << "|" << std::setw (fw) << wstr2str(col_names[i]);
           s_line << "|" ;
           for (j = 0; j < fw; ++j)
             {

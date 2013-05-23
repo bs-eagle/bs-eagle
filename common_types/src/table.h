@@ -13,6 +13,7 @@
 #include <sstream>
 #include <vector>
 
+#include "bs_serialize_decl.h"
 #include "table_iface.h"
 
 namespace blue_sky
@@ -310,6 +311,7 @@ namespace blue_sky
       table_t values;
 
       BLUE_SKY_TYPE_DECL (table);
+      friend class bs_serialize;
     };
 
 }; //end of blue_sky namespace

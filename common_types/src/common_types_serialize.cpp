@@ -11,7 +11,6 @@
 #include "table.h"
 #include "prop.h"
 #include "vartype_table.h"
-#include "misc.h"
 
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>
@@ -22,25 +21,27 @@ namespace boser = boost::serialization;
 /*-----------------------------------------------------------------
  * serialize table_iface
  *----------------------------------------------------------------*/
-BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, table)
-	// dump all info to string and save it
-	const std::string prop_data = t.to_str();
-	ar << prop_data;
-BLUE_SKY_CLASS_SRZ_FCN_END
-
-BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, table)
-	// dump all info to string and save it
-	std::string prop_data;
-	ar >> prop_data;
-	t.from_str(prop_data);
-BLUE_SKY_CLASS_SRZ_FCN_END
+//BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, table)
+//	// dump all info to string and save it
+//	const std::string prop_data = t.to_str();
+//	ar << prop_data;
+//BLUE_SKY_CLASS_SRZ_FCN_END
+//
+//BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, table)
+//	// dump all info to string and save it
+//	std::string prop_data;
+//	ar >> prop_data;
+//	t.from_str(prop_data);
+//BLUE_SKY_CLASS_SRZ_FCN_END
 
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, table)
 	boser::bs_void_cast_register(
 		static_cast< table* >(NULL),
 		static_cast< table_iface* >(NULL)
 	);
-	boser::split_free(ar, t, version);
+	//boser::split_free(ar, t, version);
+	// new version: detailed serialization
+	ar & t.col_names & t.values;
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 // instantiate code using _BYNAME macro
@@ -85,10 +86,10 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN_T(save, vartype_table, 1)
 	const t_long num_cols = t.get_n_cols();
 	ar << num_cols;
 	// save data
-	std::string col_name;
+	//std::string col_name;
 	for(t_long i = 0; i < num_cols; ++i) {
-		wtos(col_name, t.get_col_name(i));
-		ar << col_name;
+		//wtos(col_name, t.get_col_name(i));
+		ar << (const std::wstring&)t.get_col_name(i);
 		ar << const_cast< type& >(t).get_col_vector(i);
 	}
 BLUE_SKY_CLASS_SRZ_FCN_END
@@ -105,7 +106,7 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN_T(load, vartype_table, 1)
 	);
 	// load data
 	typename type::vector_t v;
-	std::string col_name;
+	std::wstring col_name;
 	for(t_long i = 0; i < num_cols; ++i) {
 		ar >> col_name;
 		ar >> v;
@@ -116,9 +117,9 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN_T(load, vartype_table, 1)
 		if(column->size())
 			std::copy(v.begin(), v.end(), column->begin());
 		// add column
-		std::wstring tmp;
-		stow(tmp, col_name);
-		t.add_col_vector(i, tmp, column);
+		//std::wstring tmp;
+		//stow(tmp, col_name);
+		t.add_col_vector(i, col_name, column);
 	}
 BLUE_SKY_CLASS_SRZ_FCN_END
 
