@@ -20,6 +20,35 @@
 
 #include "throw_exception.h"
 #include "misc.h"
+#include "bs_serialize.h"
+
+template< class type_t >
+struct prop_storage_
+  {
+    type_t value;
+    type_t def_value;
+    bool flag;
+    std::string short_name;
+    std::wstring description;
+    
+    //template<class Archive>
+    //void serialize(Archive & ar, const unsigned int /*version*/)
+    //  {
+    //    ar & value;
+    //    ar & def_value;
+    //    ar & flag;
+    //    ar & short_name;
+    //    ar & description;
+    //  }
+  };
+
+BLUE_SKY_CLASS_SRZ_FCN_BEGIN_T(serialize, prop_storage_, 1)
+  ar & t.value;
+  ar & t.def_value;
+  ar & t.flag;
+  ar & t.short_name;
+  ar & t.description;
+BLUE_SKY_CLASS_SRZ_FCN_END
 
 template <class type_t>
 class prop_impl
@@ -28,25 +57,8 @@ class prop_impl
   // TYPE DECL
   // ----------------------
   public:
-    struct prop_storage 
-      {
-        type_t value;
-        type_t def_value;
-        bool flag;
-        std::string short_name;
-        std::wstring description;
-        
-        template<class Archive>
-        void serialize(Archive & ar, const unsigned int /*version*/)
-          {
-            ar & value;
-            ar & def_value;
-            ar & flag;
-            ar & short_name;
-            ar & description;
-          }
-      };
 
+    typedef prop_storage_< type_t > prop_storage;
     typedef std::map<std::string, prop_storage> map_t;
     typedef std::list<std::string> list_t;
   // ----------------------
