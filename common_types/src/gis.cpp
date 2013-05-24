@@ -21,7 +21,7 @@
 
 #include "bs_kernel.h"
 #include "gis.h"
-#include "misc.h"
+#include "bs_misc.h"
 
 using namespace boost;
 
@@ -118,9 +118,7 @@ namespace blue_sky
         }
       else
         {
-		  std::wstring tmp;
-		  stow(tmp, description);
-          prop->add_property_s ("", name, tmp);
+          prop->add_property_s ("", name, str2wstr(description));
           prop->set_s (name, data);
         }
       return 0;
@@ -142,16 +140,12 @@ namespace blue_sky
           || name == "STEP"
           || name == "NULL")
         {
-		  std::wstring tmp;
-		  stow(tmp, units);
-          prop->add_property_f (0, name, tmp);
+          prop->add_property_f (0, name, str2wstr(units));
           prop->set_f (name, str2T<double> (data));
         }
       else if (name == "LIC")
         {
-		  std::wstring tmp;
-		  stow(tmp, description);
-          prop->add_property_i (0, name, tmp);
+          prop->add_property_i (0, name, str2wstr(description));
           prop->set_i (name, str2T<int> (data));
         }
       else
@@ -163,9 +157,7 @@ namespace blue_sky
             }
           else if (data != "")
             {
-			  std::wstring tmp;
-			  stow(tmp, description);
-              prop->add_property_s ("", name, tmp);
+              prop->add_property_s ("", name, str2wstr(description));
               prop->set_s (name, data);
             }
         }
@@ -194,9 +186,7 @@ namespace blue_sky
         }
       else if (data != "")
         {
-		  std::wstring tmp;
-		  stow(tmp, description);
-          prop->add_property_s ("", name, tmp);
+          prop->add_property_s ("", name, str2wstr(description));
           prop->set_s (name, data);
         }
       return 0;
@@ -217,9 +207,7 @@ namespace blue_sky
 
       if (units != "")
         name = name + " (" + units + ")";
-	  std::wstring tmp;
-	  stow(tmp, description);
-      prop->add_property_s ("", param, tmp);
+      prop->add_property_s ("", param, str2wstr(description));
       prop->set_s (param, name);
       return 0;
     }
@@ -344,9 +332,7 @@ namespace blue_sky
                     {
                       std::string name = std::string ("param") 
                                          + boost::lexical_cast<std::string> (i);
-					  std::wstring tmp;
-                      stow(tmp, sp_prop->get_s (name));
-                      sp_table->set_col_name (i, tmp);
+                      sp_table->set_col_name (i, str2wstr(sp_prop->get_s (name)));
                     }
                 }
               else

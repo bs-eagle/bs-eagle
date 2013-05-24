@@ -14,7 +14,7 @@
 #include "constants.h"
 #include "data_class.h"
 #include "bos_reader_iface.h"
-#include "misc.h"
+#include "bs_misc.h"
 
 namespace blue_sky
   {
@@ -27,14 +27,6 @@ namespace blue_sky
   size_t len;                                               \
   len = 0;
 
-/*
-  std::wstring stow(const std::string &s)
-  {
-    std::wstring d (s.length(), L' ');
-    std::copy (s.begin(), s.end(), d.begin());
-    return d;
-  }
-  */
   keyword_manager::~keyword_manager ()
   {
 
@@ -145,23 +137,17 @@ namespace blue_sky
         if (format[i] == 'i')
         {
           reader->scanf_int (start, &end, &i_prop);
-		  std::wstring tmp;
-          stow(tmp, names[i]);
-          idata->props->add_property_i (i_prop, names[i], tmp);
+          idata->props->add_property_i (i_prop, names[i], str2wstr(names[i]));
         }
         else if (format[i] == 'f')
         {
           reader->scanf_fp (start, &end, &f_prop);
-		  std::wstring tmp;
-          stow(tmp, names[i]);
-          idata->props->add_property_f (f_prop, names[i], tmp);
+          idata->props->add_property_f (f_prop, names[i], str2wstr(names[i]));
         }
         else if (format[i] == 's')
         {
           reader->scanf_s (start, &end, s_prop);
-		  std::wstring tmp;
-          stow(tmp, names[i]);
-          idata->props->add_property_s (s_prop, names[i], tmp);
+          idata->props->add_property_s (s_prop, names[i], str2wstr(names[i]));
         }
         else if (format[i] == 'S')
         {
@@ -182,15 +168,12 @@ namespace blue_sky
                   break;  
                 }
             }
-		  std::wstring tmp;
-          stow(tmp, prop_name);
-          idata->props->add_property_s (s_prop, prop_name, tmp);
+          idata->props->add_property_s (s_prop, prop_name, str2wstr(prop_name));
         }
         else if (format[i] == 'b')
         {
           reader->scanf_s (start, &end, s_prop);
-		  std::wstring tmp;
-          stow(tmp, names[i]);
+		  std::wstring tmp = str2wstr(names[i]);
           if (strcmp (s_prop, "YES") == 0 || strcmp (s_prop, "TRUE") == 0 || strcmp (s_prop, "1") == 0 )
             idata->props->add_property_b (1, names[i], tmp);
           else if (strcmp (s_prop, "NO") == 0 || strcmp (s_prop, "FALSE") == 0 || strcmp (s_prop, "0") == 0 )

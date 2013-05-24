@@ -19,8 +19,10 @@
 #include <boost/serialization/string.hpp>
 
 #include "throw_exception.h"
-#include "misc.h"
+#include "bs_misc.h"
 #include "bs_serialize.h"
+
+using namespace blue_sky;
 
 template< class type_t >
 struct prop_storage_
@@ -228,9 +230,7 @@ prop_impl<type_t>::py_str () const
           s << i->second.short_name;
           s << "|";
           s.width (30);
-		  std::string tmp;
-		  wtos(tmp, i->second.description);
-          s << tmp << "|\n";
+          s << wstr2str(i->second.description) << "|\n";
     }
   s << "+----------------------------------------------------------------------+\n";
   return s.str ();

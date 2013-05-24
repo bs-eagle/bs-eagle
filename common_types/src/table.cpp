@@ -14,14 +14,7 @@
 #include "bs_kernel.h"
 #include "table.h"
 #include "bs_serialize.h"
-
 #include "bs_misc.h"
-//#include <boost/archive/text_iarchive.hpp>
-//#include <boost/archive/text_oarchive.hpp>
-//#include <boost/serialization/vector.hpp>
-//#include <boost/serialization/string.hpp>
-
-
 
 using namespace std;
 
@@ -272,8 +265,6 @@ namespace blue_sky
       s << "========================\n";
       for (i = 0; i < nc; ++i)
         {
-		  //std::string tmp;
-		  //wtos(tmp, col_names[i]);
           s << "|" << std::setw (fw) << wstr2str(col_names[i]);
           s_line << "|" ;
           for (j = 0; j < fw; ++j)

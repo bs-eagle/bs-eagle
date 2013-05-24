@@ -6,7 +6,7 @@
  */
 #include "bs_bos_core_data_storage_stdafx.h"
 #include "rocktab_table.h"
-#include "misc.h"
+#include "bs_misc.h"
 
 namespace blue_sky
   {
@@ -83,9 +83,7 @@ namespace blue_sky
     column last_column;
 
     columns.push_back (last_column);
-	std::wstring tmp;
-    stow(tmp, _name);
-    columns.back ().name = tmp;
+    columns.back ().name = str2wstr(_name);
     columns.back ().data.resize (n_rows);
   }
 

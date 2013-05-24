@@ -21,7 +21,7 @@
 
 #include "bs_kernel.h"
 #include "traj.h"
-#include "misc.h"
+#include "bs_misc.h"
 
 using namespace boost;
 
@@ -118,9 +118,7 @@ namespace blue_sky
               sp_table->init (0, sv.size ());
               for (size_t i = 0; i < sv.size (); ++i)
 			    {
-				  std::wstring tmp;
-				  stow(tmp, sv[i]);
-                  sp_table->set_col_name (i, tmp); 
+                  sp_table->set_col_name (i, str2wstr(sv[i]));
 			    }
               state = 1;
             }
