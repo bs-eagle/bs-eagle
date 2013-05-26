@@ -17,8 +17,6 @@
 #include <fstream>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/fstream.hpp"
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
 #include <boost/type_traits/is_floating_point.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/lexical_cast.hpp>
@@ -677,10 +675,7 @@ COMMIT;\
           return -1;
         }
 
-      std::ostringstream oss;
-      boost::archive::text_oarchive oar(oss);
-      g->save (oar);
-      std::string s = oss.str ();
+      std::string s = g->to_str();
       std::vector<char> ch (s.begin (), s.end ());
       //printf ("GIS\n%s\n", s.c_str ());
       //printf ("GIS INT %d %d\n", (int)strlen (s.c_str ()), (int)s.length ());
@@ -732,10 +727,7 @@ COMMIT;\
           std::string s;
           s.assign (b, n);
           printf ("READ GIS %d\n", (int)s.length ());
-          std::istringstream iss;
-          iss.str (s);
-          boost::archive::text_iarchive iar(iss);
-          sp_gis->load (iar);
+          sp_gis->from_str(s);
 
         }
 	  else

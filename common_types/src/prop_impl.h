@@ -20,7 +20,6 @@
 
 #include "throw_exception.h"
 #include "bs_misc.h"
-#include "bs_serialize.h"
 
 using namespace blue_sky;
 
@@ -32,25 +31,7 @@ struct prop_storage_
     bool flag;
     std::string short_name;
     std::wstring description;
-    
-    //template<class Archive>
-    //void serialize(Archive & ar, const unsigned int /*version*/)
-    //  {
-    //    ar & value;
-    //    ar & def_value;
-    //    ar & flag;
-    //    ar & short_name;
-    //    ar & description;
-    //  }
   };
-
-BLUE_SKY_CLASS_SRZ_FCN_BEGIN_T(serialize, prop_storage_, 1)
-  ar & t.value;
-  ar & t.def_value;
-  ar & t.flag;
-  ar & t.short_name;
-  ar & t.description;
-BLUE_SKY_CLASS_SRZ_FCN_END
 
 template <class type_t>
 class prop_impl
@@ -191,11 +172,6 @@ class prop_impl
     // reset all
     void reset_all ();
 
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int /*version*/)
-      {
-        ar & data;
-      }
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual std::string py_str () const;
 #endif //BSPY_EXPORTING_PLUGIN

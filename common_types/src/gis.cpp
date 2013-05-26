@@ -22,6 +22,7 @@
 #include "bs_kernel.h"
 #include "gis.h"
 #include "bs_misc.h"
+#include "bs_serialize.h"
 
 using namespace boost;
 
@@ -374,41 +375,24 @@ namespace blue_sky
   gis::sp_gis_t 
   gis::check_serial () const
     {
-      std::ostringstream oss;
-      std::istringstream iss;
+      const std::string dump = to_str();
+      return serialize_from_str_indirect< gis, gis_iface >(dump);
+    }
 
-      boost::archive::text_oarchive oar(oss);
-
-      sp_gis_t sp_gis = BS_KERNEL.create_object ("gis");
-
-      save (oar);
-      iss.str (oss.str ());
-      boost::archive::text_iarchive iar(iss);
-      sp_gis->load (iar);
-      return sp_gis;
-
+  std::string
+  gis::to_str () const
+    {
+      return serialize_to_str_indirect< gis, gis_iface >(this);
+    }
+  void
+  gis::from_str (const std::string &s)
+    {
+      smart_ptr< gis > pv = serialize_from_str_indirect< gis, gis_iface >(s);
+      sp_table = pv->sp_table;
+      sp_prop = pv->sp_prop;
     }
 
 #ifdef BSPY_EXPORTING_PLUGIN
-  std::string 
-  gis::to_str () const
-    {
-      std::ostringstream oss;
-
-      boost::archive::text_oarchive oar(oss);
-
-      save (oar);
-      return oss.str ();
-    }
-  void 
-  gis::from_str (const std::string &s)
-    {
-      std::istringstream iss;
-
-      iss.str (s);
-      boost::archive::text_iarchive iar(iss);
-      load (iar);
-    }
   std::string 
   gis::py_str () const
     {

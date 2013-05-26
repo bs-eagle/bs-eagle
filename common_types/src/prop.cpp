@@ -10,6 +10,7 @@
 
 #include "bs_kernel.h"
 #include "prop.h"
+#include "bs_serialize.h"
 
 using namespace std;
 using namespace boost::python;
@@ -27,27 +28,20 @@ namespace blue_sky
       *this = rhs;
     }
 
-#ifdef BSPY_EXPORTING_PLUGIN
   std::string 
   prop::to_str () const
     {
-      std::ostringstream oss;
-
-      boost::archive::text_oarchive oar(oss);
-
-      save (oar);
-      return oss.str ();
+      return serialize_to_str_indirect< prop, prop_iface >(this);
     }
   void 
   prop::from_str (const std::string &s)
     {
-      std::istringstream iss;
-
-      iss.str (s);
-      boost::archive::text_iarchive iar(iss);
-      load (iar);
+      smart_ptr< prop > pv = serialize_from_str_indirect< prop, prop_iface >(s);
+      fp_impl = pv->fp_impl;
+      i_impl = pv->i_impl;
+      s_impl = pv->s_impl;
+      b_impl = pv->b_impl;
     }
-#endif //BSPY_EXPORTING_PLUGIN
 /////////////////////////////////BS Register
 /////////////////////////////////Stuff//////////////////////////
 

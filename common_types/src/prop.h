@@ -11,6 +11,7 @@
 
 #include "prop_iface.h"
 #include "prop_impl.h"
+#include "bs_serialize_decl.h"
 
 namespace blue_sky
 {
@@ -22,8 +23,6 @@ namespace blue_sky
       // ------------------------------------
     public:
       typedef std::list<std::string>                  list_t;
-      typedef boost::archive::text_iarchive           tia_t;
-      typedef boost::archive::text_oarchive           toa_t;
 
       // destructor
       virtual ~prop ()
@@ -170,21 +169,6 @@ namespace blue_sky
           b_impl.reset_all ();
         }
 
-      virtual void save (toa_t &ar) const
-        {
-          ar & fp_impl;
-          ar & i_impl;
-          ar & s_impl;
-          ar & b_impl;
-        }
-      virtual void load (tia_t &ar)
-        {
-          ar & fp_impl;
-          ar & i_impl;
-          ar & s_impl;
-          ar & b_impl;
-        }
-#ifdef BSPY_EXPORTING_PLUGIN
       /** 
        * @brief pack(serialize) all information of class to text string 
        * 
@@ -198,6 +182,8 @@ namespace blue_sky
        * @param s -- <INPUT> string
        */
       virtual void from_str (const std::string &s);
+
+#ifdef BSPY_EXPORTING_PLUGIN
       virtual std::string py_str () const
         {
           std::stringstream s;
@@ -252,6 +238,7 @@ namespace blue_sky
       prop_impl <bool>  b_impl;
 
       BLUE_SKY_TYPE_DECL (prop);
+      friend class bs_serialize;
     };
 
 }; //end of blue_sky namespace

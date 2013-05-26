@@ -11,6 +11,7 @@
 #include "table.h"
 #include "prop.h"
 #include "vartype_table.h"
+#include "gis.h"
 
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>
@@ -21,26 +22,13 @@ namespace boser = boost::serialization;
 /*-----------------------------------------------------------------
  * serialize table_iface
  *----------------------------------------------------------------*/
-//BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, table)
-//	// dump all info to string and save it
-//	const std::string prop_data = t.to_str();
-//	ar << prop_data;
-//BLUE_SKY_CLASS_SRZ_FCN_END
-//
-//BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, table)
-//	// dump all info to string and save it
-//	std::string prop_data;
-//	ar >> prop_data;
-//	t.from_str(prop_data);
-//BLUE_SKY_CLASS_SRZ_FCN_END
-
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, table)
+	// register conversion to interface
 	boser::bs_void_cast_register(
 		static_cast< table* >(NULL),
 		static_cast< table_iface* >(NULL)
 	);
-	//boser::split_free(ar, t, version);
-	// new version: detailed serialization
+	// serialize data
 	ar & t.col_names & t.values;
 BLUE_SKY_CLASS_SRZ_FCN_END
 
@@ -52,17 +40,16 @@ BLUE_SKY_TYPE_SERIALIZE_IMPL(table)
 /*-----------------------------------------------------------------
  * serialize prop_iface
  *----------------------------------------------------------------*/
-BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, prop)
-	// dump all info to string and save it
-	const std::string prop_data = t.to_str();
-	ar << prop_data;
+BLUE_SKY_CLASS_SRZ_FCN_BEGIN_T(serialize, prop_storage_, 1)
+	ar & t.value;
+	ar & t.def_value;
+	ar & t.flag;
+	ar & t.short_name;
+	ar & t.description;
 BLUE_SKY_CLASS_SRZ_FCN_END
 
-BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, prop)
-	// dump all info to string and save it
-	std::string prop_data;
-	ar >> prop_data;
-	t.from_str(prop_data);
+BLUE_SKY_CLASS_SRZ_FCN_BEGIN_T(serialize, prop_impl, 1)
+	ar & t.data;
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, prop)
@@ -70,7 +57,11 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, prop)
 		static_cast< prop* >(NULL),
 		static_cast< prop_iface* >(NULL)
 	);
-	boser::split_free(ar, t, version);
+
+	ar & t.fp_impl;
+	ar & t.i_impl;
+	ar & t.s_impl;
+	ar & t.b_impl;
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 // instantiate code using _BYNAME macro
@@ -132,4 +123,21 @@ BOOST_SERIALIZATION_ASSUME_ABSTRACT(vartype_table_iface)
 // instantiate for t_float
 BLUE_SKY_TYPE_SERIALIZE_DECL_T(vartype_table, 1)
 BLUE_SKY_TYPE_SERIALIZE_EXPORT_T(vartype_table, t_float)
+
+/*-----------------------------------------------------------------
+ * serialize gis_iface
+ *----------------------------------------------------------------*/
+BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, gis)
+	boser::bs_void_cast_register(
+		static_cast< gis* >(NULL),
+		static_cast< gis_iface* >(NULL)
+	);
+
+	ar & t.sp_table & t.sp_prop;
+BLUE_SKY_CLASS_SRZ_FCN_END
+
+// instantiate code using _BYNAME macro
+BOOST_SERIALIZATION_ASSUME_ABSTRACT(gis_iface)
+BLUE_SKY_TYPE_SERIALIZE_DECL(gis)
+BLUE_SKY_TYPE_SERIALIZE_IMPL(gis)
 
