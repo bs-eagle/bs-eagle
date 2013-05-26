@@ -16,6 +16,7 @@
 #include <fstream>
 
 #include "traj_iface.h"
+#include "bs_serialize_decl.h"
 
 namespace blue_sky
 {
@@ -26,8 +27,6 @@ namespace blue_sky
     public: 
 
       typedef BS_SP (table_iface)                     sp_table_t;
-      typedef boost::archive::text_iarchive           tia_t;
-      typedef boost::archive::text_oarchive           toa_t;
 
       // ------------------------------------
       // METHODS
@@ -55,16 +54,7 @@ namespace blue_sky
        * @return 0 if ok
        */
       virtual int read_from_dev_file (const std::string &fname);
-      virtual void save (toa_t &ar) const
-        {
-          sp_table->save (ar);
-        }
-      virtual void load (tia_t &ar)
-        {
-          sp_table->load (ar);
-        }
     public:
-#ifdef BSPY_EXPORTING_PLUGIN
       /** 
        * @brief pack(serialize) all information of class to text string 
        * 
@@ -78,6 +68,7 @@ namespace blue_sky
        * @param s -- <INPUT> string
        */
       virtual void from_str (const std::string &s);
+#ifdef BSPY_EXPORTING_PLUGIN
       /** 
        * @brief python print wrapper
        * 
@@ -96,6 +87,7 @@ namespace blue_sky
       sp_table_t sp_table;      //!< table pointer
 
       BLUE_SKY_TYPE_DECL (traj);
+	  friend class bs_serialize;
     };
 
 }; //end of blue_sky namespace

@@ -170,58 +170,24 @@ namespace blue_sky
           values[j].push_back (data[i * n_cols + j]);
     }
 
-  void 
-  table::save (toa_t &ar) const
-    {
-      //using namespace boost::serialization;
-      //ar & col_names & values;
-      ar << *this;
-    }
-
-  void 
-  table::load (tia_t &ar)
-    {
-      //ar & col_names & values;
-      ar >> *this;
-    }
-
   table::sp_table_t 
   table::check_serial () const
     {
-      std::ostringstream oss;
-      std::istringstream iss;
-
-      boost::archive::text_oarchive oar(oss);
-
-      sp_table_t sp_table = BS_KERNEL.create_object ("table");
-
-      save (oar);
-      iss.str (oss.str ());
-      boost::archive::text_iarchive iar(iss);
-      sp_table->load (iar);
-      return sp_table;
-
+      const std::string dump = to_str();
+      return serialize_from_str_indirect< table, table_iface >(dump);
     }
     
-#ifdef BSPY_EXPORTING_PLUGIN
   std::string 
   table::to_str () const
     {
-      std::ostringstream oss;
-
-      boost::archive::text_oarchive oar(oss);
-
-      save (oar);
-      return oss.str ();
+      return serialize_to_str_indirect< table, table_iface >(this);
     }
   void 
   table::from_str (const std::string &s)
     {
-      std::istringstream iss;
-
-      iss.str (s);
-      boost::archive::text_iarchive iar(iss);
-      load (iar);
+      smart_ptr< table > pv = serialize_from_str_indirect< table, table_iface >(s);
+      col_names = pv->col_names;
+      values = pv->values;
     }
 
   void 
@@ -251,6 +217,7 @@ namespace blue_sky
       return a;
     }
 
+#ifdef BSPY_EXPORTING_PLUGIN
   std::string 
   table::py_str () const
     {

@@ -761,10 +761,7 @@ COMMIT;\
           return -1;
         }
 
-      std::ostringstream oss;
-      boost::archive::text_oarchive oar(oss);
-      t->save (oar);
-      std::string s = oss.str ();
+      std::string s = t->to_str();
       std::vector<char> ch (s.begin (), s.end ());
       rc = sqlite3_bind_blob (stmp, 1, &ch[0], ch.size (), SQLITE_STATIC);
       //printf ("TRAJ\n%s\n", s.c_str ());
@@ -817,11 +814,7 @@ COMMIT;\
           std::string s;
           s.assign (b, n);
           printf ("READ TRAJ %d\n", (int)s.length ());
-          std::istringstream iss;
-          iss.str (s);
-          //printf ("hkdjhkf: %s\n", iss.str ().c_str ());
-          boost::archive::text_iarchive iar(iss);
-          sp_traj->load (iar);
+          sp_traj->from_str(s);
 
         }
 	  else
@@ -856,10 +849,7 @@ COMMIT;\
           return -1;
         }
 
-      std::ostringstream oss;
-      boost::archive::text_oarchive oar(oss);
-      t->save (oar);
-      std::string s = oss.str ();
+      std::string s = t->to_str();
       std::vector<char> ch (s.begin (), s.end ());
       rc = sqlite3_bind_blob (stmp, 1, &ch[0], ch.size (), SQLITE_STATIC);
       //printf ("TRAJ\n%s\n", s.c_str ());

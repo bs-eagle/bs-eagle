@@ -11,7 +11,6 @@
 
 #include "py_pool.h"
 #include "h5_pool.hpp"
-#include "bs_serialize.h"
 
 using namespace boost::python;
 #ifdef BSPY_EXPORTING_PLUGIN

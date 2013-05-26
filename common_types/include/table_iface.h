@@ -10,9 +10,6 @@
 #define TABLE_IFACE_EUVNSA26
 #include <string>
 #include <sstream>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-
 
 #include "bs_object_base.h"
 
@@ -28,8 +25,6 @@ class table_iface : public objbase
     public:
       typedef std::vector <t_double>                  vector_t;
       typedef BS_SP (table_iface)                     sp_table_t;
-      typedef boost::archive::text_iarchive           tia_t;
-      typedef boost::archive::text_oarchive           toa_t;
 
     public:
       /** 
@@ -183,11 +178,7 @@ class table_iface : public objbase
 
       virtual void push_back_f (const std::vector<t_float> &v) = 0;
 
-      virtual void save (toa_t &ar) const = 0;
-      virtual void load (tia_t &ar) = 0;
       virtual sp_table_t check_serial () const = 0;
-
-#ifdef BSPY_EXPORTING_PLUGIN
 
       /** 
        * @brief pack(serialize) all information of class to text string 
@@ -203,12 +194,14 @@ class table_iface : public objbase
        */
       virtual void from_str (const std::string &s) = 0;
 
+#ifdef BSPY_EXPORTING_PLUGIN
       /** 
        * @brief python print wrapper
        * 
        * @return return table description
        */
       virtual std::string py_str () const = 0;
+#endif //BSPY_EXPORTING_PLUGIN
 
       /** 
        * @brief set column <col> values by numpy array
@@ -226,7 +219,6 @@ class table_iface : public objbase
        * @return numpy array
        */
       virtual spv_double get_col_values (const t_long col) const = 0;
-#endif //BSPY_EXPORTING_PLUGIN
 };
 
 }  // end of bluesky name space

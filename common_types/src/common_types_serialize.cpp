@@ -12,6 +12,7 @@
 #include "prop.h"
 #include "vartype_table.h"
 #include "gis.h"
+#include "traj.h"
 
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>
@@ -140,4 +141,21 @@ BLUE_SKY_CLASS_SRZ_FCN_END
 BOOST_SERIALIZATION_ASSUME_ABSTRACT(gis_iface)
 BLUE_SKY_TYPE_SERIALIZE_DECL(gis)
 BLUE_SKY_TYPE_SERIALIZE_IMPL(gis)
+
+/*-----------------------------------------------------------------
+ * serialize traj_iface
+ *----------------------------------------------------------------*/
+BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, traj)
+	boser::bs_void_cast_register(
+		static_cast< traj* >(NULL),
+		static_cast< traj_iface* >(NULL)
+	);
+
+	ar & t.sp_table;
+BLUE_SKY_CLASS_SRZ_FCN_END
+
+// instantiate code using _BYNAME macro
+BOOST_SERIALIZATION_ASSUME_ABSTRACT(traj_iface)
+BLUE_SKY_TYPE_SERIALIZE_DECL(traj)
+BLUE_SKY_TYPE_SERIALIZE_IMPL(traj)
 

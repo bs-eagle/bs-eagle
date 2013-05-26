@@ -22,6 +22,7 @@
 #include "bs_kernel.h"
 #include "traj.h"
 #include "bs_misc.h"
+#include "bs_serialize.h"
 
 using namespace boost;
 
@@ -146,26 +147,18 @@ namespace blue_sky
       return 0;
     }
 
-#ifdef BSPY_EXPORTING_PLUGIN
   std::string 
   traj::to_str () const
     {
-      std::ostringstream oss;
-
-      boost::archive::text_oarchive oar(oss);
-
-      save (oar);
-      return oss.str ();
+      return serialize_to_str_indirect< traj, traj_iface >(this);
     }
   void 
   traj::from_str (const std::string &s)
     {
-      std::istringstream iss;
-
-      iss.str (s);
-      boost::archive::text_iarchive iar(iss);
-      load (iar);
+      smart_ptr< traj > pv = serialize_from_str_indirect< traj, traj_iface >(s);
+      sp_table = pv->sp_table;
     }
+#ifdef BSPY_EXPORTING_PLUGIN
   std::string 
   traj::py_str () const
     {

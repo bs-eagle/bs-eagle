@@ -27,8 +27,6 @@ namespace blue_sky
       typedef std::vector <t_double>                  vector_t;
       typedef std::vector <vector_t>                  table_t;
       typedef BS_SP (table_iface)                     sp_table_t;
-      typedef boost::archive::text_iarchive           tia_t;
-      typedef boost::archive::text_oarchive           toa_t;
 
       // ------------------------------------
       // METHODS
@@ -261,10 +259,8 @@ namespace blue_sky
         this->push_back(std::vector< t_double >(v.begin(), v.end()));
       }
 
-      virtual void save (toa_t &ar) const;
-      virtual void load (tia_t &ar);
       virtual sp_table_t check_serial () const;
-#ifdef BSPY_EXPORTING_PLUGIN
+
       /** 
        * @brief pack(serialize) all information of class to text string 
        * 
@@ -278,12 +274,15 @@ namespace blue_sky
        * @param s -- <INPUT> string
        */
       virtual void from_str (const std::string &s);
+
+#ifdef BSPY_EXPORTING_PLUGIN
       /** 
        * @brief python print wrapper
        * 
        * @return return table description
        */
       virtual std::string py_str () const;
+#endif //BSPY_EXPORTING_PLUGIN
 
       /** 
        * @brief set column <col> values by numpy array
@@ -293,6 +292,7 @@ namespace blue_sky
        */
       virtual void set_col_values (const t_long col, spv_double values);
 
+
       /** 
        * @brief return numpy array for given column <col>
        * 
@@ -301,7 +301,6 @@ namespace blue_sky
        * @return numpy array
        */
       virtual spv_double get_col_values (const t_long col) const;
-#endif //BSPY_EXPORTING_PLUGIN
       
       // ------------------------------
       // VARIABLES
