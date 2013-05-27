@@ -30,7 +30,7 @@ typedef std::vector <xpath>  xpath_storage;
  *----------------------------------------------------------------*/
 struct BS_API_PLUGIN compdat {
 	typedef std::set< compdat > storage_t;
-	typedef unsigned long ulong;
+	typedef wpi::ulong ulong;
 	typedef ulong cell_info[4];
 	typedef ulong pos_i[3];
 	typedef t_float coord[3];
@@ -92,7 +92,7 @@ typedef compdat::storage_t cd_storage;
  *----------------------------------------------------------------*/
 struct BS_API_PLUGIN fracture {
 	typedef std::set< fracture > storage_t;
-	typedef unsigned long ulong;
+	typedef wpi::ulong ulong;
 	typedef ulong cell_info[4];
 	typedef ulong pos_i[3];
 	typedef t_float coord[3];
