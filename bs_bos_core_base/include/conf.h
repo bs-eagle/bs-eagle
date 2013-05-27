@@ -13,20 +13,17 @@
 #endif
 #define BS_ARRAY_DEFAULT_TRAITS bs_nparray
 
+#include <cstddef>
 #include "bs_nparray.h"
 #include "bs_npvec.h"
 #include "bs_npvec_shared.h"
 #include "bs_array.h"
 
 //! using this type for small data
-typedef int           t_int;
+typedef int             t_int;
 
 //! this type should be using for indexing (matrix, arrays, ...)
-#ifdef _WIN32
-typedef long long     t_long;
-#else
-typedef long          t_long;
-#endif
+typedef std::ptrdiff_t  t_long;
 
 #ifndef T_FLOAT_IS_DOUBLE
 #define T_FLOAT_IS_DOUBLE 1
@@ -42,12 +39,8 @@ typedef float         t_float;
 //! this type should be using for double precision elements (calculed arrays, arrays of unknowns) 
 typedef double        t_double;
 
-typedef unsigned long               t_uint;
-#ifdef _WIN32
-typedef unsigned long long          t_ulong;
-#else
-typedef unsigned long               t_ulong;
-#endif
+typedef unsigned int                t_uint;
+typedef std::size_t                 t_ulong;
 
 #define BS_EAGLE_ARRAY_TRAITS blue_sky::bs_npvec_shared
 typedef blue_sky::bs_array< t_int    , BS_EAGLE_ARRAY_TRAITS >    v_int;
