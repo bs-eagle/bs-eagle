@@ -187,17 +187,17 @@ namespace blue_sky
 
     boundary = BS_KERNEL.create_object (v_long::bs_type ());
 
-    rhs->init (elements * phases, 0);
-    rhs_flux->init (elements * phases, 0);
-    cfl_vector->init (elements * phases, 0);
-    solution->init (elements * phases, 0);
+    rhs->init (elements * phases, 0.0);
+    rhs_flux->init (elements * phases, 0.0);
+    cfl_vector->init (elements * phases, 0.0);
+    solution->init (elements * phases, 0.0);
 
     if (secondary > 0)
       {
-        sec_rhs->init (secondary * phases, 0);
-        ss_diagonal->init (secondary * secondary * phases, 0);
-        sp_diagonal->init (secondary * phases * phases, 0);
-        sec_solution->init (secondary * phases, 0);
+        sec_rhs->init (secondary * phases, 0.0);
+        ss_diagonal->init (secondary * secondary * phases, 0.0);
+        sp_diagonal->init (secondary * phases * phases, 0.0);
+        sec_solution->init (secondary * phases, 0.0);
       }
     else
       {

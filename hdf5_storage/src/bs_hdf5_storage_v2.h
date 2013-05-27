@@ -77,11 +77,13 @@ namespace blue_sky {
     {
       return write_buffer (dataset, hdf5_buffer (data));
     }
+#if defined(UNIX) || defined(_WIN64)
     hdf5_group_v2 &
     write (const char *dataset, const spv_int &data)
     {
       return write_buffer (dataset, hdf5_buffer (data));
     }
+#endif
     template <typename T>
     hdf5_group_v2 &
     write (const char *dataset, const std::vector <T> &data)

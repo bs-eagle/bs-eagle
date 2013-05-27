@@ -258,34 +258,34 @@ namespace blue_sky
     data.resize (mesh->get_n_active_elements ());
 //#endif
 
-    fip_regions->init (mesh->get_n_active_elements(), 0);
-    sat_regions->init (mesh->get_n_active_elements(), 0);
-    pvt_regions->init (mesh->get_n_active_elements(), 0);
+    fip_regions->init (mesh->get_n_active_elements());
+    sat_regions->init (mesh->get_n_active_elements());
+    pvt_regions->init (mesh->get_n_active_elements());
 
-    pressure->init (mesh->get_n_active_elements(), 0);
-    old_data_.pressure->init (mesh->get_n_active_elements(), 0);
-    prev_niter_data_.pressure->init (mesh->get_n_active_elements(), 0);
+    pressure->init (mesh->get_n_active_elements(), 0.0);
+    old_data_.pressure->init (mesh->get_n_active_elements(), 0.0);
+    prev_niter_data_.pressure->init (mesh->get_n_active_elements(), 0.0);
 
     if (this->n_phases > 1)
       {
         t_long count = mesh->get_n_active_elements() * this->n_phases;
-        saturation_3p->init (count, 0);
-        old_data_.saturation_3p->init (count, 0);
-        prev_niter_data_.saturation_3p->init (count, 0);
+        saturation_3p->init (count, 0.0);
+        old_data_.saturation_3p->init (count, 0.0);
+        prev_niter_data_.saturation_3p->init (count, 0.0);
 
         //initialize gas-oil ratio array
         if (FI_CHK_OIL_GAS(this->phases))
           {
             t_long count = mesh->get_n_active_elements();
-            gas_oil_ratio->init (count, 0);
-            old_data_.gas_oil_ratio->init (count, 0);
-            prev_niter_data_.gas_oil_ratio->init (count, 0);
+            gas_oil_ratio->init (count, 0.0);
+            old_data_.gas_oil_ratio->init (count, 0.0);
+            prev_niter_data_.gas_oil_ratio->init (count, 0.0);
           }
       }
 
     if (input_data->props->get_i ("rock_region") > 0)
       {
-        rock_regions->init (mesh->get_n_active_elements(), 0);
+        rock_regions->init (mesh->get_n_active_elements());
 
         if (input_data->contains_i_array ("ROCKNUM"))
           {
@@ -294,7 +294,7 @@ namespace blue_sky
           }
         else
           {
-            rock_regions->init (mesh->get_n_active_elements (), 0);
+            rock_regions->init (mesh->get_n_active_elements ());
           }
         this->rocktab = input_data->rocktab;
       }

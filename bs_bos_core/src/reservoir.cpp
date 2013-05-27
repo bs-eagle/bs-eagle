@@ -167,7 +167,7 @@ namespace blue_sky
     void
     init_rows (BS_SP (facility_manager) &wells, spv_long &rows, t_long cells)
     {
-      rows->init (cells + 1, 0);
+      rows->init (cells + 1);
 
       facility_manager::well_const_iterator_t wit = wells->wells_begin ();
       facility_manager::well_const_iterator_t we = wells->wells_end ();
@@ -209,8 +209,9 @@ namespace blue_sky
         bs_throw_exception ("cols count is 0");
       }
 
-    cols->init (cols_count, -1);
-    values->init (cols_count * block_size * block_size, 0);
+    cols->init (cols_count);
+	cols->assign(-1);
+    values->init (cols_count * block_size * block_size, 0.0);
     markers_.assign (rows->size (), 0);
 
     mx->set_n_cols ((t_long)cols->size ());

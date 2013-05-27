@@ -147,7 +147,8 @@ namespace blue_sky
             // FIXME: 
             if (filter->size () == 0)
               {
-                filter->init (nr, 1);
+                filter->init (nr);
+				filter->assign(1);
                 flt = filter->data ();
               }
             else

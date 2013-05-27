@@ -183,7 +183,7 @@ namespace blue_sky
         bs_throw_exception ("One of init parameters <= 0");
       }
     
-    t_long def_val = -1;
+    t_float def_val = -1;
     
     rock->init (r_pvt, def_val);
     p_ref->init (r_pvt, def_val);

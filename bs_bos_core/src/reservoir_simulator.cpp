@@ -615,7 +615,7 @@ namespace blue_sky
   {
     t_long N_eq = 2; // number of regions (eql + pvt = 2)
     t_long eq_reg = N_eq * data->props->get_i ("eql_region");
-    data->equil_regions->init (eq_reg, 0);
+    data->equil_regions->init (eq_reg);
 
     if (!data->contains_i_array ("EQLNUM"))
       {

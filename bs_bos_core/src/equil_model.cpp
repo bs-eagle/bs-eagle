@@ -577,7 +577,7 @@ namespace blue_sky
 
             scal_prop->get_water_jfunction ()->set_valid (false);
             scal_prop->get_water_scale ()->remove (pcp);
-            pcw->init (n_cells, 0);
+            pcw->init (n_cells, 0.0);
           }
         else if (scal_prop->get_water_jfunction ()->valid ())
           scal_prop->get_water_scale ()->remove (pcp);
