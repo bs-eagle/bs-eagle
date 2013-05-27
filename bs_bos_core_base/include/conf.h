@@ -44,7 +44,7 @@ typedef double        t_double;
 
 typedef unsigned long               t_uint;
 #ifdef _WIN32
-typedef unsigned long          t_ulong;
+typedef unsigned long long          t_ulong;
 #else
 typedef unsigned long               t_ulong;
 #endif
