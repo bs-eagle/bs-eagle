@@ -178,43 +178,43 @@ smart_ptr< hdm > hdm_serialize_load_impl(
  *----------------------------------------------------------------*/
 void hdm_serialize_save(
 	smart_ptr< hdm > t,
-	const std::string& prj_path,
-	const std::string& prj_name,
-	const std::string& deep_copy_suffix
+	const std::wstring& prj_path,
+	const std::wstring& prj_name,
+	const std::wstring& deep_copy_suffix
 ){
-	std::string fname = prj_path + PATHSEP + prj_name + HDM_DUMP_EXT;
+	std::string fname = wstr2str(prj_path) + PATHSEP + wstr2str(prj_name) + HDM_DUMP_EXT;
 	std::ofstream f(fname.c_str());
-	hdm_serialize_save_impl(f, t, prj_path, prj_name, deep_copy_suffix);
+	hdm_serialize_save_impl(f, t, wstr2str (prj_path), wstr2str (prj_name), wstr2str (deep_copy_suffix));
 }
 
 std::string hdm_serialize_to_str(
 	smart_ptr< hdm > t,
-	const std::string& prj_path,
-	const std::string& prj_name,
-	const std::string& deep_copy_suffix
+	const std::wstring& prj_path,
+	const std::wstring& prj_name,
+	const std::wstring& deep_copy_suffix
 ){
 	std::ostringstream f;
-	return hdm_serialize_save_impl(f, t, prj_path, prj_name, deep_copy_suffix).str();
+	return hdm_serialize_save_impl(f, t, wstr2str (prj_path), wstr2str (prj_name), wstr2str (deep_copy_suffix)).str();
 }
 
 /*-----------------------------------------------------------------
  * load hdm
  *----------------------------------------------------------------*/
 smart_ptr< hdm > hdm_serialize_load(
-	const std::string& prj_path,
-	const std::string& prj_name
+	const std::wstring& prj_path,
+	const std::wstring& prj_name
 ){
-	std::ifstream f((prj_path + PATHSEP + prj_name + HDM_DUMP_EXT).c_str());
-	return hdm_serialize_load_impl(f, prj_path, prj_name);
+	std::ifstream f((wstr2str (prj_path) + PATHSEP + wstr2str (prj_name) + HDM_DUMP_EXT).c_str());
+	return hdm_serialize_load_impl(f, wstr2str (prj_path), wstr2str (prj_name));
 }
 
 smart_ptr< hdm > hdm_serialize_from_str(
 	const std::string& hdm_dump,
-	const std::string& prj_path,
-	const std::string& prj_name
+	const std::wstring& prj_path,
+	const std::wstring& prj_name
 ){
 	std::istringstream f(hdm_dump);
-	return hdm_serialize_load_impl(f, prj_path, prj_name);
+	return hdm_serialize_load_impl(f, wstr2str (prj_path), wstr2str (prj_name));
 }
 
 /*-----------------------------------------------------------------

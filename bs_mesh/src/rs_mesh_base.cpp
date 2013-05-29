@@ -27,9 +27,9 @@ rs_mesh_base ::init_props (const sp_hdm_t hdm)
 {
 #ifndef PURE_MESH  
   well_pool = hdm->get_well_pool();
-  minpv = hdm->get_prop ()->get_f ("minimal_pore_volume");
-  minsv = hdm->get_prop ()->get_f ("minimal_splice_volume");
-  max_thickness = hdm->get_prop ()->get_f ("maximum_splice_thickness");
+  minpv = hdm->get_prop ()->get_f (L"minimal_pore_volume");
+  minsv = hdm->get_prop ()->get_f (L"minimal_splice_volume");
+  max_thickness = hdm->get_prop ()->get_f (L"maximum_splice_thickness");
   darcy_constant = hdm->get_darcy_constant ();
   
   actnum_array = hdm->get_pool ()->get_i_data("ACTNUM");

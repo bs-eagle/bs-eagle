@@ -18,7 +18,7 @@
 namespace blue_sky
   {
 
-  const std::string use_internal_matrix = "use_internal_matrix";
+  const std::wstring use_internal_matrix = L"use_internal_matrix";
 
   /*!
    * \brief constructor

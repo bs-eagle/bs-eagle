@@ -23,12 +23,12 @@
 
 namespace blue_sky
 {
-  const std::string tol_idx = "tolerance";
-  const std::string max_iters_idx = "maxiters";
-  const std::string final_res_idx = "final_residual";
-  const std::string iters_idx = "iters";
-  const std::string success_idx = "is_success";
-  const std::string ortonorm_vlen = "ortonorm_vlen";
+  const std::wstring tol_idx = L"tolerance";
+  const std::wstring max_iters_idx = L"maxiters";
+  const std::wstring final_res_idx = L"final_residual";
+  const std::wstring iters_idx = L"iters";
+  const std::wstring success_idx = L"is_success";
+  const std::wstring ortonorm_vlen = L"ortonorm_vlen";
 
   /** 
    * @brief interface class for linear system solver and preconditioners 

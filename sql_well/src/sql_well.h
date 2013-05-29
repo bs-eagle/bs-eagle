@@ -62,7 +62,7 @@ namespace blue_sky
        *
        * @return 0 if success
        */
-      virtual int open_db (const std::string &file);
+      virtual int open_db (const std::wstring &file);
 
       /**
        * @brief close database connection
@@ -109,7 +109,7 @@ namespace blue_sky
 
       virtual int update_branch_traj (const std::string &wname, const std::string &branch, sp_traj_t t);
 
-      virtual void backup_to_file (const std::string &filename);
+      virtual void backup_to_file (const std::wstring &filename);
 
       virtual int prepare_sql (const std::string &sql);
       virtual int step_sql ();
@@ -121,7 +121,7 @@ namespace blue_sky
 	  virtual bool get_sql_exist (t_int col);
       virtual int exec_sql (const std::string &sql);
       virtual int exec_sql_and_return_rowid (const std::string &sql);
-      virtual int merge_with_db (const std::string &dbname);
+      virtual int merge_with_db (const std::wstring &dbname);
       virtual int insert_or_update (const std::string &select_sql,
                                     const std::string &insert_sql,
                                     const std::string &update_sql);
@@ -150,7 +150,7 @@ namespace blue_sky
        *
        * @return 0 if success
        */
-      virtual int save_to_bos_ascii_file (const std::string &fname, sp_pool_t pool, sp_prop_t prop);
+      virtual int save_to_bos_ascii_file (const std::wstring &fname, sp_pool_t pool, sp_prop_t prop);
     public:
 #ifdef BSPY_EXPORTING_PLUGIN
 #if 0

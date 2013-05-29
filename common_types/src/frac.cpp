@@ -44,31 +44,31 @@ namespace blue_sky
   void
   frac::init_prop ()
     {
-      sp_prop->add_property_b (true, "is_vertical", 
+      sp_prop->add_property_b (true, L"is_vertical", 
                                L"Should be true if fracture is vertical");
-      sp_prop->add_property_b (true, "is_symmetric", 
+      sp_prop->add_property_b (true, L"is_symmetric", 
                                L"Is fracture is symmetrical");
-      sp_prop->add_property_b (true, "inf_perm", 
+      sp_prop->add_property_b (true, L"inf_perm", 
                                L"If true use infinum permeability for fracture");
-      sp_prop->add_property_f (100000.0, "perm", 
+      sp_prop->add_property_f (100000.0, L"perm", 
                                L"Permiability (mD) for fracture (only if inf_perm == false)");
-      sp_prop->add_property_f (0.005, "wf", 
+      sp_prop->add_property_f (0.005, L"wf", 
                                L"Width of the fracture (m.) (only if inf_perm == false)");
-      sp_prop->add_property_f (50, "half_length", 
+      sp_prop->add_property_f (50, L"half_length", 
                                L"Half length of the fracture (m.)");
-      sp_prop->add_property_f (20, "up_half_height", 
+      sp_prop->add_property_f (20, L"up_half_height", 
                                L"Half height in up direction of the fracture (m.)");
-      sp_prop->add_property_f (20, "down_half_height", 
+      sp_prop->add_property_f (20, L"down_half_height", 
                                L"Half height in down direction of the fracture (m.)");
-      sp_prop->add_property_f (0, "angle", 
+      sp_prop->add_property_f (0, L"angle", 
                                L"Fracture angle (grad)");
-      sp_prop->add_property_f (50, "hor_main_radius", 
+      sp_prop->add_property_f (50, L"hor_main_radius", 
                                L"Main radius for horizontal well (m.)");
-      sp_prop->add_property_f (50, "hor_sec_radius", 
+      sp_prop->add_property_f (50, L"hor_sec_radius", 
                                L"Secondary radius for horizontal well (m.)");
-      sp_prop->add_property_f (-1, "parent_md", 
+      sp_prop->add_property_f (-1, L"parent_md", 
                                L"Position of the fracture center in the well branch (m.)");
-      sp_prop->add_property_s ("main", "parent", 
+      sp_prop->add_property_s (L"main", L"parent", 
                                L"Parent well branch (m.)");
 
     }
@@ -78,7 +78,7 @@ namespace blue_sky
   frac::py_str () const
     {
       std::stringstream s;
-      s << sp_prop->py_str () << "\n";
+      s << "\n";
       return s.str ();
     }
 #endif //BSPY_EXPORTING_PLUGIN

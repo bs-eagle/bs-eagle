@@ -11,6 +11,7 @@
 #include "keyword_manager_iface.h"
 #include "well_pool_iface.h"
 #include "prop_iface.h"
+#include "bs_misc.h"
 
 
 
@@ -54,7 +55,7 @@ namespace blue_sky
       {
         try
           {
-            params.hdm->get_prop()->get_s(prop_name);
+            params.hdm->get_prop()->get_s(str2wstr(std::string (prop_name)));
             sprintf (prop_name_last, "%s", prop_name);
             sprintf (prop_name, "%s_%d", "csv_schedule", j);
             j++; 
@@ -64,10 +65,10 @@ namespace blue_sky
             break;
           }
       }
-    std::string csv_schedule = params.hdm->get_prop()->get_s ("model_path") + params.hdm->get_prop()->get_s (prop_name_last);
-    t_double starting_date = params.hdm->get_prop()->get_f ("starting_date");
+    std::wstring csv_schedule = params.hdm->get_prop()->get_s (L"model_path") + params.hdm->get_prop()->get_s (str2wstr (std::string(prop_name_last)));
+    t_double starting_date = params.hdm->get_prop()->get_f (L"starting_date");
     //TODO: and reading error check
-    params.hdm->get_well_pool()->read_from_ascii_file(csv_schedule, starting_date);
+    params.hdm->get_well_pool()->read_from_ascii_file(wstr2str (csv_schedule), starting_date);
 
   }
 

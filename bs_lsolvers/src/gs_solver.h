@@ -7,6 +7,7 @@
  */
 #include <string>
 #include <sstream>
+#include "bs_misc.h"
 
 #include <amg_smoother_iface.h>
 #include BS_FORCE_PLUGIN_IMPORT ()
@@ -16,8 +17,8 @@
 
 namespace blue_sky
   {
-  const std::string invers_idx = "inverse";
-  const std::string cf_type_idx = "cf_type";
+  const std::wstring invers_idx = L"inverse";
+  const std::wstring cf_type_idx = L"cf_type";
 
 
   /**
@@ -105,7 +106,7 @@ namespace blue_sky
 
           s << "GS linear solver.\n";
           s << "Properties:\n";
-          s << prop->py_str ();
+          s << wstr2str (prop->py_str ());
 
           return s.str ();
         }

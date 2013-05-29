@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include "bs_misc.h"
 
 #include "lsolver_iface.h"
 
@@ -94,7 +95,7 @@ namespace blue_sky
               s << "preconditioned by:\n" << prec->py_str ();
             }
           s << "Properties:\n";
-          s << prop->py_str ();
+          s << wstr2str (prop->py_str ());
 
           return s.str ();
         }

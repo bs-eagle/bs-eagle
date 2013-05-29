@@ -39,9 +39,9 @@ namespace blue_sky
     sp_pool_t pool = params.hdm->get_pool ();
     t_int nx, ny, nz, i, j , k;
     
-    nx = params.hdm->get_prop ()->get_i("nx");
-    ny = params.hdm->get_prop ()->get_i("ny");
-    nz = params.hdm->get_prop ()->get_i("nz");
+    nx = params.hdm->get_prop ()->get_i(L"nx");
+    ny = params.hdm->get_prop ()->get_i(L"ny");
+    nz = params.hdm->get_prop ()->get_i(L"nz");
     spv_int data = BS_KERNEL.create_object (v_int::bs_type ());
     
     t_long ndim = pool->calc_data_dims (keyword);
@@ -80,9 +80,9 @@ namespace blue_sky
     sp_pool_t pool = params.hdm->get_pool ();
     t_int nx, ny, nz, i, j , k;
     
-    nx = params.hdm->get_prop ()->get_i("nx");
-    ny = params.hdm->get_prop ()->get_i("ny");
-    nz = params.hdm->get_prop ()->get_i("nz");
+    nx = params.hdm->get_prop ()->get_i(L"nx");
+    ny = params.hdm->get_prop ()->get_i(L"ny");
+    nz = params.hdm->get_prop ()->get_i(L"nz");
     
     t_long ndim = pool->calc_data_dims (keyword);
     std::vector <t_float> this_arr (ndim);
@@ -137,17 +137,17 @@ namespace blue_sky
         if (format[i] == 'i')
         {
           reader->scanf_int (start, &end, &i_prop);
-          idata->props->add_property_i (i_prop, names[i], str2wstr(names[i]));
+          idata->props->add_property_i (i_prop, str2wstr(names[i]), str2wstr(names[i]));
         }
         else if (format[i] == 'f')
         {
           reader->scanf_fp (start, &end, &f_prop);
-          idata->props->add_property_f (f_prop, names[i], str2wstr(names[i]));
+          idata->props->add_property_f (f_prop, str2wstr (names[i]), str2wstr(names[i]));
         }
         else if (format[i] == 's')
         {
           reader->scanf_s (start, &end, s_prop);
-          idata->props->add_property_s (s_prop, names[i], str2wstr(names[i]));
+          idata->props->add_property_s (str2wstr (s_prop), str2wstr (names[i]), str2wstr(names[i]));
         }
         else if (format[i] == 'S')
         {
@@ -159,7 +159,7 @@ namespace blue_sky
             {
               try
                 {
-                  idata->props->get_s(prop_name);
+                  idata->props->get_s(str2wstr (prop_name));
                   sprintf (prop_name, "%s_%ld", names[i].c_str(), (long)j);
                   j++;
                 }
@@ -168,16 +168,16 @@ namespace blue_sky
                   break;  
                 }
             }
-          idata->props->add_property_s (s_prop, prop_name, str2wstr(prop_name));
+          idata->props->add_property_s (str2wstr (s_prop), str2wstr (prop_name), str2wstr(prop_name));
         }
         else if (format[i] == 'b')
         {
           reader->scanf_s (start, &end, s_prop);
 		  std::wstring tmp = str2wstr(names[i]);
           if (strcmp (s_prop, "YES") == 0 || strcmp (s_prop, "TRUE") == 0 || strcmp (s_prop, "1") == 0 )
-            idata->props->add_property_b (1, names[i], tmp);
+            idata->props->add_property_b (1, str2wstr (names[i]), tmp);
           else if (strcmp (s_prop, "NO") == 0 || strcmp (s_prop, "FALSE") == 0 || strcmp (s_prop, "0") == 0 )
-            idata->props->add_property_b (0, names[i], tmp);
+            idata->props->add_property_b (0, str2wstr (names[i]), tmp);
           else bs_throw_exception ((boost::format ("Error in %s: not enough valid arguments for keyword %s") % reader->get_prefix() % keyword).str ());
         }
         else
@@ -230,7 +230,7 @@ namespace blue_sky
     BS_SP (idata) idata = params.hdm->get_data ();
     
     reader->read_line (buf, CHAR_BUF_LEN);
-    idata->props->set_s("title", std::string(buf)); // TODO: , len)
+    idata->props->set_s(L"title", str2wstr (std::string(buf))); // TODO: , len)
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
@@ -239,7 +239,7 @@ namespace blue_sky
   {
     BS_SP (idata) idata = params.hdm->get_data ();
 
-    idata->props->set_b("oil_phase", 1);
+    idata->props->set_b(L"oil_phase", 1);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
@@ -248,7 +248,7 @@ namespace blue_sky
   {
     BS_SP (idata) idata = params.hdm->get_data ();
 
-    idata->props->set_b("water_phase", 1);
+    idata->props->set_b(L"water_phase", 1);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
@@ -257,7 +257,7 @@ namespace blue_sky
   {
     BS_SP (idata) idata = params.hdm->get_data ();
     
-    idata->props->set_b("gas_phase", 1);
+    idata->props->set_b(L"gas_phase", 1);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
@@ -435,7 +435,7 @@ namespace blue_sky
   {
     BS_SP (idata) idata = params.hdm->get_data ();
     
-    idata->props->set_i("rpo_model ", STONE1_MODEL);
+    idata->props->set_i(L"rpo_model ", STONE1_MODEL);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
@@ -444,7 +444,7 @@ namespace blue_sky
   {
     BS_SP (idata) idata = params.hdm->get_data ();
     
-    idata->props->set_i("rpo_model ", STONE2_MODEL);
+    idata->props->set_i(L"rpo_model ", STONE2_MODEL);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
@@ -453,7 +453,7 @@ namespace blue_sky
   {
     BS_SP (idata) idata = params.hdm->get_data ();
     
-    idata->props->set_i("rpo_model ", RPO_DEFAULT_MODEL);
+    idata->props->set_i(L"rpo_model ", RPO_DEFAULT_MODEL);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
@@ -477,11 +477,11 @@ namespace blue_sky
 
         if (!strcmp (key1, "YES"))
           {
-            idata->props->set_b ("scalecrs", 1);
+            idata->props->set_b (L"scalecrs", 1);
           }
         else if (!strcmp (key1, "NO"))  
           {
-            idata->props->set_b ("scalecrs", 0);
+            idata->props->set_b (L"scalecrs", 0);
           }
         else
           {
@@ -575,7 +575,7 @@ namespace blue_sky
         bs_throw_exception (boost::format ("Error in %s: number of rock regions should be greater than 0 for keyword %s")
           % reader->get_prefix () % keyword);
       }
-    idata->props->set_i ("rock_region", rock_region);
+    idata->props->set_i (L"rock_region", rock_region);
     BOSOUT (section::read_data, level::medium) << keyword << bs_end;
   }
 
@@ -643,7 +643,7 @@ namespace blue_sky
         bs_throw_exception (boost::format ("Error in %s: not enough valid arguments for keyword %s")
           % reader->get_prefix() % keyword);
       }
-    idata->props->set_i("eql_region", itmp[0]);
+    idata->props->set_i(L"eql_region", itmp[0]);
     if (itmp[0] <= 0)
       {
         bs_throw_exception (boost::format ("Error in %s: number of equilibrium regions in %s must be positive")
@@ -704,7 +704,7 @@ namespace blue_sky
     //  }
 
     // Allocate memory for TABDIMS
-    itmp[2] = idata->props->get_i ("eql_region");
+    itmp[2] = idata->props->get_i (L"eql_region");
 
     idata->set_region(itmp[0],itmp[1],itmp[2],itmp[3]);
 
@@ -720,7 +720,7 @@ namespace blue_sky
   {
     KH_READER_DEF
     BS_SP (idata) idata = params.hdm->get_data ();
-    t_long n_rock_region = idata->props->get_i ("rock_region");
+    t_long n_rock_region = idata->props->get_i (L"rock_region");
     
     if (n_rock_region < 1)
       {
@@ -775,7 +775,7 @@ namespace blue_sky
         bs_throw_exception (boost::format ("Error in %s: can't read date for keyword %s")
           % reader->get_prefix () % keyword);
       }
-    params.hdm->get_prop()->add_property_f(d, "starting_date", L"starting_date");
+    params.hdm->get_prop()->add_property_f(d, L"starting_date", L"starting_date");
     //km->starting_date = boost::posix_time::ptime(start);        // set starting date
 
     // Current date

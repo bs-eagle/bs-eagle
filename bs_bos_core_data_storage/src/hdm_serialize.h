@@ -27,27 +27,27 @@ namespace blue_sky {
 //
 BS_API_PLUGIN void hdm_serialize_save(
 	smart_ptr< hdm > t,
-	const std::string& prj_path,
-	const std::string& prj_name,
-	const std::string& deep_copy_suffix = ""  // h5 & well pool files should be copied using this suffix
+	const std::wstring& prj_path,
+	const std::wstring& prj_name,
+	const std::wstring& deep_copy_suffix = L""  // h5 & well pool files should be copied using this suffix
 );
 
 BS_API_PLUGIN smart_ptr< hdm > hdm_serialize_load(
-	const std::string& prj_path,
-	const std::string& prj_name
+	const std::wstring& prj_path,
+	const std::wstring& prj_name
 );
 
 std::string hdm_serialize_to_str(
 	smart_ptr< hdm > t,
-	const std::string& prj_path,
-	const std::string& prj_name,
-	const std::string& deep_copy_suffix = "" // h5 & well pool files should be copied using this suffix
+	const std::wstring& prj_path,
+	const std::wstring& prj_name,
+	const std::wstring& deep_copy_suffix = L"" // h5 & well pool files should be copied using this suffix
 );
 
 smart_ptr< hdm > hdm_serialize_from_str(
 	const std::string& hdm_dump,
-	const std::string& prj_path,
-	const std::string& prj_name
+	const std::wstring& prj_path,
+	const std::wstring& prj_name
 );
 
 } /* blue_sky */

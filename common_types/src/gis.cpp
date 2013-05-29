@@ -115,12 +115,12 @@ namespace blue_sky
       if (name == "VERS")
         {
           //prop->add_property_f (0, name, description);
-          prop->set_f (name, str2T<double>(data));
+          prop->set_f (str2wstr (name), str2T<double>(data));
         }
       else
         {
-          prop->add_property_s ("", name, str2wstr(description));
-          prop->set_s (name, data);
+          prop->add_property_s (L"", str2wstr (name), str2wstr(description));
+          prop->set_s (str2wstr (name), str2wstr (data));
         }
       return 0;
     }
@@ -141,25 +141,25 @@ namespace blue_sky
           || name == "STEP"
           || name == "NULL")
         {
-          prop->add_property_f (0, name, str2wstr(units));
-          prop->set_f (name, str2T<double> (data));
+          prop->add_property_f (0, str2wstr (name), str2wstr(units));
+          prop->set_f (str2wstr (name), str2T<double> (data));
         }
       else if (name == "LIC")
         {
-          prop->add_property_i (0, name, str2wstr(description));
-          prop->set_i (name, str2T<int> (data));
+          prop->add_property_i (0, str2wstr (name), str2wstr(description));
+          prop->set_i (str2wstr (name), str2T<int> (data));
         }
       else
         {
           if (ver <= 1.2 && data == "")
             {
-              prop->add_property_s ("", name, L"");
-              prop->set_s (name, description);
+              prop->add_property_s (L"", str2wstr (name), L"");
+              prop->set_s (str2wstr (name), str2wstr (description));
             }
           else if (data != "")
             {
-              prop->add_property_s ("", name, str2wstr(description));
-              prop->set_s (name, data);
+              prop->add_property_s (L"", str2wstr (name), str2wstr(description));
+              prop->set_s (str2wstr (name), str2wstr (data));
             }
         }
       return 0;
@@ -182,13 +182,13 @@ namespace blue_sky
       split_str (s, name, units, data, description);
       if (ver <= 1.2 && data == "")
         {
-          prop->add_property_s ("", name, L"");
-          prop->set_s (name, description);
+          prop->add_property_s (L"", str2wstr (name), L"");
+          prop->set_s (str2wstr (name), str2wstr (description));
         }
       else if (data != "")
         {
-          prop->add_property_s ("", name, str2wstr(description));
-          prop->set_s (name, data);
+          prop->add_property_s (L"", str2wstr (name), str2wstr(description));
+          prop->set_s (str2wstr (name), str2wstr (data));
         }
       return 0;
     }
@@ -208,8 +208,8 @@ namespace blue_sky
 
       if (units != "")
         name = name + " (" + units + ")";
-      prop->add_property_s ("", param, str2wstr(description));
-      prop->set_s (param, name);
+      prop->add_property_s (L"", str2wstr (param), str2wstr(description));
+      prop->set_s (str2wstr (param), str2wstr (name));
       return 0;
     }
   int 
@@ -230,7 +230,7 @@ namespace blue_sky
             }
           if ((int)v.size () < n)
             {
-              if (sp_prop->get_s ("WRAP") != "YES")
+              if (sp_prop->get_s (L"WRAP") != L"YES")
                 {
                   std::cerr << "Error: wrong number of parameters " << v.size () 
                             << " should be " << n << std::endl;
@@ -265,7 +265,7 @@ namespace blue_sky
       namespace fs = boost::filesystem;
       fs::path p(fname);
       std::cout << "Start:"  << '\n';
-      sp_prop->add_property_f (2.0, "VERS", L"Version information");
+      sp_prop->add_property_f (2.0, L"VERS", L"Version information");
       try
         {
           if (!fs::exists (p) || !is_regular_file (p))
@@ -310,7 +310,7 @@ namespace blue_sky
                 }
               else if (s[1] == 'W') // well info
                 {
-                  ver = sp_prop->get_f ("VERS");
+                  ver = sp_prop->get_f (L"VERS");
                   state = 2;
                 }
               else if (s[1] == 'P') // well info
@@ -333,7 +333,7 @@ namespace blue_sky
                     {
                       std::string name = std::string ("param") 
                                          + boost::lexical_cast<std::string> (i);
-                      sp_table->set_col_name (i, str2wstr(sp_prop->get_s (name)));
+                      sp_table->set_col_name (i, sp_prop->get_s (str2wstr (name)));
                     }
                 }
               else
@@ -397,7 +397,7 @@ namespace blue_sky
   gis::py_str () const
     {
       std::stringstream s;
-      s << sp_prop->py_str () << "\n";
+      s << wstr2str(sp_prop->py_str ()) << "\n";
       s << sp_table->py_str () << std::endl;
       return s.str ();
     }

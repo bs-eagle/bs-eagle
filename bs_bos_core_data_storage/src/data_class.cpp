@@ -103,24 +103,24 @@ namespace blue_sky
     //depth.resize((nx+1) * (ny+1) * (nz+1));
     //h5_pool->open_file ("bs_data_storage.h5", "/pool");
     
-    props->add_property_i (0, "rpo_model", L"3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
-    props->add_property_i (1, "pvt_region", L"Number of PVT regions in simulation");
-    props->add_property_i (1, "sat_region", L"Number of saturation regions in simulation");
-    props->add_property_i (1, "eql_region", L"Number of equilibrium regions in simulation");
-    props->add_property_i (1, "fip_region", L"Number of FIP regions in simulation");
-    props->add_property_i (1, "rock_region", L"Number of ROCK regions");
-    props->add_property_i (0, "init_section", L"flag indicating whether we have init section");
-    props->add_property_i (0, "scal_family", L"flag indicating swof/sgof (0) or swfn/sgfn/sof2/sof3 (1) family");
+    props->add_property_i (0, L"rpo_model", L"3-ph oil relative permeability model: flag 0, 1 or 2 (stone model)");  
+    props->add_property_i (1, L"pvt_region", L"Number of PVT regions in simulation");
+    props->add_property_i (1, L"sat_region", L"Number of saturation regions in simulation");
+    props->add_property_i (1, L"eql_region", L"Number of equilibrium regions in simulation");
+    props->add_property_i (1, L"fip_region", L"Number of FIP regions in simulation");
+    props->add_property_i (1, L"rock_region", L"Number of ROCK regions");
+    props->add_property_i (0, L"init_section", L"flag indicating whether we have init section");
+    props->add_property_i (0, L"scal_family", L"flag indicating swof/sgof (0) or swfn/sgfn/sof2/sof3 (1) family");
     
-    props->add_property_s ("", "title", L"Current model title");
-    props->add_property_b (0, "oil_phase", L"True if oil phase exists");
-    props->add_property_b (0, "water_phase", L"True if water phase exists");
-    props->add_property_b (0, "gas_phase", L"True if gas phase exists");
-    props->add_property_b (0, "scalecrs", L"True if SCALECRS is enabled");
+    props->add_property_s (L"", L"title", L"Current model title");
+    props->add_property_b (0, L"oil_phase", L"True if oil phase exists");
+    props->add_property_b (0, L"water_phase", L"True if water phase exists");
+    props->add_property_b (0, L"gas_phase", L"True if gas phase exists");
+    props->add_property_b (0, L"scalecrs", L"True if SCALECRS is enabled");
 
-    props->add_property_f (DEFAULT_MINIMAL_PORE_VOLUME,       "minimal_pore_volume", L"Default minimal pore volume allowed for active cells");
-    props->add_property_f (DEFAULT_MINIMAL_SPLICE_VOLUME,     "minimal_splice_volume", L"Default minimal pore volume allowed for active cells to splice with other cells");
-    props->add_property_f (DEFAULT_MAXIMUM_SPLICE_THICKNESS,  "maximum_splice_thickness", L"Default maximum thickness allowed between active cells to be coupled");
+    props->add_property_f (DEFAULT_MINIMAL_PORE_VOLUME,       L"minimal_pore_volume", L"Default minimal pore volume allowed for active cells");
+    props->add_property_f (DEFAULT_MINIMAL_SPLICE_VOLUME,     L"minimal_splice_volume", L"Default minimal pore volume allowed for active cells to splice with other cells");
+    props->add_property_f (DEFAULT_MAXIMUM_SPLICE_THICKNESS,  L"maximum_splice_thickness", L"Default maximum thickness allowed between active cells to be coupled");
   }
 
   void idata::flush_pool()
@@ -172,10 +172,10 @@ namespace blue_sky
   
   void idata::set_region (int r_pvt,int r_sat, int r_eql, int r_fip)
   {
-    props->set_i ("pvt_region", r_pvt);
-    props->set_i ("fip_region", r_fip);
-    props->set_i ("sat_region", r_sat);
-    props->set_i ("eql_region", r_eql);
+    props->set_i (L"pvt_region", r_pvt);
+    props->set_i (L"fip_region", r_fip);
+    props->set_i (L"sat_region", r_sat);
+    props->set_i (L"eql_region", r_eql);
 
     // check
     if (r_pvt <= 0 || r_sat <= 0 || r_eql <= 0 || r_fip <= 0)
@@ -234,7 +234,7 @@ namespace blue_sky
     if (!equil->size())
       throw bs_exception("idata.set_density()","EQUIL table has not been initialized yet");
 
-    t_int n_pvt = props->get_i ("pvt_region");
+    t_int n_pvt = props->get_i (L"pvt_region");
 
     for (t_int i = 0; i < n_pvt; ++i)
       {
@@ -315,9 +315,9 @@ namespace blue_sky
     t_long n;
     npy_intp dims[3];
 
-    dims[0] = array_dimens[ARRAY_POOL_NX_A] * props->get_i ("nx") + array_dimens[ARRAY_POOL_NX_B];
-    dims[1] = array_dimens[ARRAY_POOL_NY_A] * props->get_i ("ny") + array_dimens[ARRAY_POOL_NY_B];
-    dims[2] = array_dimens[ARRAY_POOL_NZ_A] * props->get_i ("nz") + array_dimens[ARRAY_POOL_NZ_B];
+    dims[0] = array_dimens[ARRAY_POOL_NX_A] * props->get_i (L"nx") + array_dimens[ARRAY_POOL_NX_B];
+    dims[1] = array_dimens[ARRAY_POOL_NY_A] * props->get_i (L"ny") + array_dimens[ARRAY_POOL_NY_B];
+    dims[2] = array_dimens[ARRAY_POOL_NZ_A] * props->get_i (L"nz") + array_dimens[ARRAY_POOL_NZ_B];
     n = dims[0] * dims[1] * dims[2];
 
     new_array = BS_KERNEL.create_object (v_int::bs_type ());
@@ -334,9 +334,9 @@ namespace blue_sky
     spv_float new_array;
     t_long n;
     npy_intp dims[3];
-    dims[0] = array_dimens[ARRAY_POOL_NX_A] * props->get_i ("nx") + array_dimens[ARRAY_POOL_NX_B];
-    dims[1] = array_dimens[ARRAY_POOL_NY_A] * props->get_i ("ny") + array_dimens[ARRAY_POOL_NY_B];
-    dims[2] = array_dimens[ARRAY_POOL_NZ_A] * props->get_i ("nz") + array_dimens[ARRAY_POOL_NZ_B];
+    dims[0] = array_dimens[ARRAY_POOL_NX_A] * props->get_i (L"nx") + array_dimens[ARRAY_POOL_NX_B];
+    dims[1] = array_dimens[ARRAY_POOL_NY_A] * props->get_i (L"ny") + array_dimens[ARRAY_POOL_NY_B];
+    dims[2] = array_dimens[ARRAY_POOL_NZ_A] * props->get_i (L"nz") + array_dimens[ARRAY_POOL_NZ_B];
     n = dims[0] * dims[1] * dims[2];
 
     new_array = BS_KERNEL.create_object (v_float::bs_type ());

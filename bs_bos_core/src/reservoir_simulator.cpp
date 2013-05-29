@@ -245,7 +245,7 @@ namespace blue_sky
     const spv_long &original_element_num_ = mesh->get_int_to_ext();
     const t_long *original_element_num = &(*original_element_num_)[0];
 
-    if (!data->props->get_i ("init_section"))
+    if (!data->props->get_i (L"init_section"))
       {
         if (!data->contains_fp_array ("PRESSURE"))
           {
@@ -302,45 +302,45 @@ namespace blue_sky
     typedef idata::scal_vector    scal_vector;
     typedef idata::scal_info      scal_info;
 
-    bool is_water = data->props->get_b ("water_phase");
-    bool is_gas   = data->props->get_b ("gas_phase");
-    bool is_oil   = data->props->get_b ("oil_phase");
+    bool is_water = data->props->get_b (L"water_phase");
+    bool is_gas   = data->props->get_b (L"gas_phase");
+    bool is_oil   = data->props->get_b (L"oil_phase");
     
     if (is_water && is_gas && is_oil)
       {
         if (!data->swof.front ().main_data_->empty () && !data->sgof.front ().main_data_->empty ())
           {
-            data->props->set_i ("scal_family", 0);
+            data->props->set_i (L"scal_family", 0);
           }
         else if (!data->swfn.front ().main_data_->empty () && 
                  !data->sgfn.front ().main_data_->empty () &&
                  !data->sof3.front ().main_data_->empty ())
           {
-            data->props->set_i ("scal_family", 1);
+            data->props->set_i (L"scal_family", 1);
           }         
       } 
     else if (is_water && is_oil) 
       {
         if (!data->swof.front ().main_data_->empty ())
           {
-            data->props->set_i ("scal_family", 0);
+            data->props->set_i (L"scal_family", 0);
           }
         else if (!data->swfn.front ().main_data_->empty () && 
                  !data->sof2.front ().main_data_->empty ())         
           {
-            data->props->set_i ("scal_family", 1);
+            data->props->set_i (L"scal_family", 1);
           }       
       }  
     else if (is_oil && is_gas)
       {
         if (!data->sgof.front ().main_data_->empty ())
           {
-            data->props->set_i ("scal_family", 0);
+            data->props->set_i (L"scal_family", 0);
           }
         else if (!data->sgfn.front ().main_data_->empty () && 
                  !data->sof2.front ().main_data_->empty ())         
           {
-            data->props->set_i ("scal_family", 1);
+            data->props->set_i (L"scal_family", 1);
           }       
       }  
   }
@@ -470,7 +470,7 @@ namespace blue_sky
       {
         spv_int eqlnum_ = data->get_i_array ("EQLNUM");
         t_int const *eqlnum = &(*eqlnum_)[0];
-        t_long eql_region = data->props->get_i ("eql_region");
+        t_long eql_region = data->props->get_i (L"eql_region");
 
         // FIXME: check nb and array size
         for (t_long i = 0; i < nb; ++i)
@@ -489,7 +489,7 @@ namespace blue_sky
       {
         spv_int satnum_ = data->get_i_array ("SATNUM");
         t_int const *satnum = &(*satnum_)[0];
-        t_long sat_region = data->props->get_i ("sat_region");
+        t_long sat_region = data->props->get_i (L"sat_region");
 
         // FIXME: check nb and array size
         for (t_long i = 0; i < nb; ++i)
@@ -508,7 +508,7 @@ namespace blue_sky
       {
         spv_int pvtnum_ = data->get_i_array ("PVTNUM");
         t_int const *pvtnum = &(*pvtnum_)[0];
-        t_long pvt_region = data->props->get_i ("pvt_region");
+        t_long pvt_region = data->props->get_i (L"pvt_region");
 
         // FIXME: check nb and array size
         for (t_long i = 0; i < nb; ++i)
@@ -527,7 +527,7 @@ namespace blue_sky
       {
         spv_int fipnum_ = data->get_i_array ("FIPNUM");
         t_int const *fipnum = &(*fipnum_)[0];
-        t_long fip_region = data->props->get_i ("fip_region");
+        t_long fip_region = data->props->get_i (L"fip_region");
 
         // FIXME: check nb and array size
         for (t_long i = 0; i < nb; ++i)
@@ -558,7 +558,7 @@ namespace blue_sky
 
     t_float const *rock = &(*data->rock)[0];
     t_float const *p_ref = &(*data->p_ref)[0];
-    t_long pvt_region = data->props->get_i ("pvt_region");
+    t_long pvt_region = data->props->get_i (L"pvt_region");
     for (t_long i = 0; i < pvt_region; ++i)
       {
         if (rock[i] < 0)
@@ -614,7 +614,7 @@ namespace blue_sky
   check_equil (const smart_ptr <rs_mesh_iface, true> &mesh, const smart_ptr <idata, true> &data)
   {
     t_long N_eq = 2; // number of regions (eql + pvt = 2)
-    t_long eq_reg = N_eq * data->props->get_i ("eql_region");
+    t_long eq_reg = N_eq * data->props->get_i (L"eql_region");
     data->equil_regions->init (eq_reg);
 
     if (!data->contains_i_array ("EQLNUM"))
@@ -697,7 +697,7 @@ namespace blue_sky
     try
       {
         BOSOUT (section::check_data, level::medium) << description << bs_end;
-        if (check_init && !ldata->props->get_i ("init_section"))
+        if (check_init && !ldata->props->get_i (L"init_section"))
           {
             BOSOUT (section::check_data, level::medium) << " ...[ NOT INITED ]" << bs_end;
           }

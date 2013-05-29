@@ -151,7 +151,7 @@ namespace blue_sky
     BS_SP (init_model_iface) init_model = hdm->get_init_model ();
     BS_SP (rs_mesh_iface)    mesh       = hdm->get_mesh ();
     
-    if (input_data->props->get_b ("water_phase"))
+    if (input_data->props->get_b (L"water_phase"))
       {
         phase_d[0] = n_phases++;
         phases |= 1 << FI_PHASE_WATER;
@@ -159,7 +159,7 @@ namespace blue_sky
     else 
       phase_d[0] = -1;
 
-    if (input_data->props->get_b ("gas_phase"))
+    if (input_data->props->get_b (L"gas_phase"))
       {
         phase_d[1] = n_phases++;
         phases |= 1 << FI_PHASE_GAS;
@@ -167,7 +167,7 @@ namespace blue_sky
     else 
       phase_d[1] = -1;
 
-    if (input_data->props->get_b ("oil_phase"))
+    if (input_data->props->get_b (L"oil_phase"))
       {
         phase_d[2] = n_phases++;
         phases |= 1 << FI_PHASE_OIL;
@@ -283,7 +283,7 @@ namespace blue_sky
           }
       }
 
-    if (input_data->props->get_i ("rock_region") > 0)
+    if (input_data->props->get_i (L"rock_region") > 0)
       {
         rock_regions->init (mesh->get_n_active_elements());
 
@@ -300,7 +300,7 @@ namespace blue_sky
       }
 
     // initialize fip regions
-    this->n_fip_regions = input_data->props->get_i ("fip_region");
+    this->n_fip_regions = input_data->props->get_i (L"fip_region");
     if (!this->n_fip_regions)
       {
         bs_throw_exception ("Number of fip regions should be not 0");
@@ -316,7 +316,7 @@ namespace blue_sky
       }
 
     // initialize pvt regions
-    this->n_pvt_regions = input_data->props->get_i ("pvt_region");
+    this->n_pvt_regions = input_data->props->get_i (L"pvt_region");
     if (!this->n_pvt_regions)
       {
         bs_throw_exception ("Number of pvt regions should be not 0");
@@ -332,7 +332,7 @@ namespace blue_sky
       }
 
     // initialize sat regions
-    this->n_sat_regions = input_data->props->get_i ("sat_region");
+    this->n_sat_regions = input_data->props->get_i (L"sat_region");
     if (!this->n_sat_regions)
       {
         bs_throw_exception ("Number of sat regions should be not 0");
@@ -348,7 +348,7 @@ namespace blue_sky
       }
 
     // initialize rpo_model
-    this->rpo_model = (RPO_MODEL_ENUM)input_data->props->get_i ("rpo_model");
+    this->rpo_model = (RPO_MODEL_ENUM)input_data->props->get_i (L"rpo_model");
 
     // allocate rock grid data storage
     this->rock_grid_prop->init(input_data, mesh->get_n_active_elements(), this->n_pvt_regions);

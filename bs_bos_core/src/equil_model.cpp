@@ -164,7 +164,7 @@ namespace blue_sky
 
 
     //get num of eql regions
-    t_long n_eql = data->props->get_i ("eql_region"); 
+    t_long n_eql = data->props->get_i (L"eql_region"); 
     //get num of elements
     t_long n_cells = mesh->get_n_active_elements();
 

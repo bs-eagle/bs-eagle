@@ -87,7 +87,7 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, hdm)
 	keyword_params kp;
 	kp.hdm = &t;
 	t.km->init(sp_hdm(&t));
-	switch (t.data->props->get_i("mesh")) {
+	switch (t.data->props->get_i(L"mesh")) {
 	case 0:
 		t.km->handle_keyword_reactor ("MESH_IJK", kp);
 		t.mesh = BS_KERNEL.create_object("bs_mesh_ijk_fi");
@@ -99,7 +99,7 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, hdm)
 	default:
 		bs_throw_exception ("init: wrong mesh choice");
 	}
-	switch (t.data->props->get_i("init")) {
+	switch (t.data->props->get_i(L"init")) {
 	case 0:
 		t.km->handle_keyword_reactor ("EXPLICIT_MODEL", kp);
 		break;

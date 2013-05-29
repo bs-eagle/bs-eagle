@@ -9,6 +9,7 @@
 
 #include <string>
 #include <sstream>
+#include "bs_misc.h"
 
 #include "lsolver_iface.h"
 
@@ -18,7 +19,7 @@
 
 namespace blue_sky
   {
-  const std::string m_idx = "m_size";
+  const std::wstring m_idx = L"m_size";
   /**
   * @brief GMRES linear solver
   */
@@ -93,7 +94,7 @@ namespace blue_sky
               s << "preconditioned by:\n" << prec->py_str ();
             }
           s << "Properties:\n";
-          s << prop->py_str ();
+          s << wstr2str (prop->py_str ());
 
           return s.str ();
         }

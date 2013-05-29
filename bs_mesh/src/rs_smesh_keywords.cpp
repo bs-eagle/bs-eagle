@@ -93,9 +93,9 @@ namespace blue_sky
       t_long itmp[3];
       
 
-      itmp[0] = params.hdm->get_prop ()->get_i ("nx");
-      itmp[1] = params.hdm->get_prop ()->get_i ("ny");
-      itmp[2] = params.hdm->get_prop ()->get_i ("nz");
+      itmp[0] = params.hdm->get_prop ()->get_i (L"nx");
+      itmp[1] = params.hdm->get_prop ()->get_i (L"ny");
+      itmp[2] = params.hdm->get_prop ()->get_i (L"nz");
       
       params.hdm->get_pool()->set_pool_dims (itmp, 3);
       

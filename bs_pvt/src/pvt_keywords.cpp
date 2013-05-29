@@ -23,7 +23,7 @@ namespace blue_sky
     BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
     BS_SP (pvt_3p_iface) pvt = params.hdm->get_pvt ();
 
-    t_long n_pvt_region = params.hdm->get_prop()->get_i ("pvt_region");
+    t_long n_pvt_region = params.hdm->get_prop()->get_i (L"pvt_region");
     spv_float sp_density = pvt->get_density();
 
     sp_density->resize (3 * n_pvt_region);
@@ -48,7 +48,7 @@ namespace blue_sky
     BS_SP(table_iface) tbl;
     
     stdv_float dbuf;
-    t_long n_pvt_region = params.hdm->get_prop()->get_i("pvt_region");
+    t_long n_pvt_region = params.hdm->get_prop()->get_i(L"pvt_region");
     dbuf.resize(4);
     /*   
     if (!idata->pvto.size())
@@ -129,7 +129,7 @@ namespace blue_sky
     
     stdv_float dbuf;
     char buf[CHAR_BUF_LEN] = {0};
-    t_long n_pvt_region = params.hdm->get_prop()->get_i("pvt_region");
+    t_long n_pvt_region = params.hdm->get_prop()->get_i(L"pvt_region");
     
     dbuf.resize(n_cols);
     
@@ -175,7 +175,7 @@ namespace blue_sky
     
     stdv_float dbuf;
     char buf[CHAR_BUF_LEN] = {0};
-    t_long n_pvt_region = params.hdm->get_prop()->get_i("pvt_region");
+    t_long n_pvt_region = params.hdm->get_prop()->get_i(L"pvt_region");
     
     dbuf.resize(n_cols);
     
@@ -232,7 +232,7 @@ namespace blue_sky
     
     stdv_float dbuf;
     char buf[CHAR_BUF_LEN] = {0};
-    t_long n_pvt_region = params.hdm->get_prop()->get_i("pvt_region");
+    t_long n_pvt_region = params.hdm->get_prop()->get_i(L"pvt_region");
     
     dbuf.resize(n_cols);
     
@@ -274,7 +274,7 @@ namespace blue_sky
 
     t_float *p_ref = idata->p_ref->data ();
     t_float*rock = idata->rock->data ();
-    t_long n_pvt_region = idata->props->get_i("pvt_region");
+    t_long n_pvt_region = idata->props->get_i(L"pvt_region");
     
     for (t_int i = 0; i < n_pvt_region; ++i)
       {

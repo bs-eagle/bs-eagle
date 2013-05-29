@@ -44,21 +44,21 @@ namespace blue_sky
   void
   perf::init_prop ()
     {
-      sp_prop->add_property_f (-1, "parent_md", 
+      sp_prop->add_property_f (-1, L"parent_md", 
                                L"Position of the fracture center in the well branch (m.)");
-      sp_prop->add_property_s ("main", "parent", 
+      sp_prop->add_property_s (L"main", L"parent", 
                                L"Parent well branch (m.)");
-      sp_prop->add_property_f (1, "length", 
+      sp_prop->add_property_f (1, L"length", 
                                L"Length (m.) of perforation interval");
-      sp_prop->add_property_f (0.06, "radius", 
+      sp_prop->add_property_f (0.06, L"radius", 
                                L"Radius (m.) of the wellbore");
-      sp_prop->add_property_f (-1, "trans", 
+      sp_prop->add_property_f (-1, L"trans", 
                                L"Transmissibility (cP-m3/day-bars) of the perforation");
-      sp_prop->add_property_f (-1, "kh", 
+      sp_prop->add_property_f (-1, L"kh", 
                                L"Effective Kh (mD-m) of the perforation");
-      sp_prop->add_property_f (0, "skin", 
+      sp_prop->add_property_f (0, L"skin", 
                                L"Skin factor of the perforation");
-      sp_prop->add_property_f (-1, "r0", 
+      sp_prop->add_property_f (-1, L"r0", 
                                L"Pressure equivalent radius");
 
     }
@@ -68,7 +68,7 @@ namespace blue_sky
   perf::py_str () const
     {
       std::stringstream s;
-      s << sp_prop->py_str () << "\n";
+      s << "\n";
       return s.str ();
     }
 #endif //BSPY_EXPORTING_PLUGIN

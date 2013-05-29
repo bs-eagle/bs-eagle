@@ -29,7 +29,7 @@ struct prop_storage_
     type_t value;
     type_t def_value;
     bool flag;
-    std::string short_name;
+    std::wstring short_name;
     std::wstring description;
   };
 
@@ -42,8 +42,8 @@ class prop_impl
   public:
 
     typedef prop_storage_< type_t > prop_storage;
-    typedef std::map<std::string, prop_storage> map_t;
-    typedef std::list<std::string> list_t;
+    typedef std::map<std::wstring, prop_storage> map_t;
+    typedef std::list<std::wstring> list_t;
   // ----------------------
   // METHODS
   // ----------------------
@@ -54,7 +54,7 @@ class prop_impl
     virtual ~prop_impl () {};
 
     // add new property
-    void add (const type_t def_value, const std::string &short_name, const std::wstring &description);
+    void add (const type_t def_value, const std::wstring &short_name, const std::wstring &description);
 
     //! clear all
     void clear ()
@@ -63,7 +63,7 @@ class prop_impl
       }
 
     //! return property value
-    const type_t get (const std::string &name) const
+    const type_t get (const std::wstring &name) const
       {
         typename map_t::const_iterator i;
 
@@ -73,11 +73,11 @@ class prop_impl
             return i->second.value;
           }
         using namespace blue_sky;
-        bs_throw_exception (boost::format ("no property with name: %s") % name);
+        bs_throw_exception (boost::format ("no property with name: %s") % wstr2str (name));
       }
 
     //! set value
-    void set (const std::string &name, const type_t &value)
+    void set (const std::wstring &name, const type_t &value)
       {
         
         typename map_t::iterator i;
@@ -91,12 +91,12 @@ class prop_impl
         else
           {
             using namespace blue_sky;
-            bs_throw_exception (boost::format ("no property with name: %s") % name);
+            bs_throw_exception (boost::format ("no property with name: %s") % wstr2str (name));
           }
       }
 
     //! check (return false if property set by default or not exist, true otherwise
-    bool check (const std::string &name) const
+    bool check (const std::wstring &name) const
       {
         typename map_t::const_iterator i;
 
@@ -112,7 +112,7 @@ class prop_impl
       }
 
     //! reset to default value
-    void reset (const std::string  &name)
+    void reset (const std::wstring  &name)
       {
         typename map_t::iterator i;
 
@@ -125,7 +125,7 @@ class prop_impl
         else
           {
             using namespace blue_sky;
-            bs_throw_exception (boost::format ("no property with name: %s") % name);
+            bs_throw_exception (boost::format ("no property with name: %s") % wstr2str (name));
           }
       }
     //! return list of avalible names 
@@ -142,7 +142,7 @@ class prop_impl
       }
 
     //! return default value for given name
-    const type_t get_def_val (const std::string &name) const
+    const type_t get_def_val (const std::wstring &name) const
       {
         typename map_t::const_iterator i;
 
@@ -155,7 +155,7 @@ class prop_impl
       }
 
     //! return default value for given name
-    const std::wstring get_description (const std::string &name) const
+    const std::wstring get_description (const std::wstring &name) const
       {
         typename map_t::const_iterator i;
 
@@ -165,7 +165,7 @@ class prop_impl
             return i->second.description;
           }
         using namespace blue_sky;
-        bs_throw_exception (boost::format ("no property with name: %s") % name);
+        bs_throw_exception (boost::format ("no property with name: %s") % wstr2str (name));
       }
 
 
@@ -188,28 +188,29 @@ class prop_impl
 template <class type_t> std::string 
 prop_impl<type_t>::py_str () const 
 {
-  std::stringstream s;
-  typename map_t::const_iterator i, e;
-  int c = 0;
-  s << "+----------------------------------------------------------------------+\n";
-  s << "| Index |    Value   |    Short name    |         Description          |\n";
-  for (c = 1, i = data.begin (), e = data.end (); i != e; ++i, ++c)
-    {
-          s << "|";
-          s.width (7);
-          s << c; 
-          s << "|";
-          s.width (12);
-          s << i->second.value;
-          s << "|";
-          s.width (18);
-          s << i->second.short_name;
-          s << "|";
-          s.width (30);
-          s << wstr2str(i->second.description) << "|\n";
-    }
-  s << "+----------------------------------------------------------------------+\n";
-  return s.str ();
+  //std::stringstream s;
+  //typename map_t::const_iterator i, e;
+  //int c = 0;
+  //s << "+----------------------------------------------------------------------+\n";
+  //s << "| Index |    Value   |    Short name    |         Description          |\n";
+  //for (c = 1, i = data.begin (), e = data.end (); i != e; ++i, ++c)
+  //  {
+  //        s << "|";
+  //        s.width (7);
+  //        s << c; 
+  //        s << "|";
+  //        s.width (12);
+  //        s << i->second.value;
+  //        s << "|";
+  //        s.width (18);
+  //        s << i->second.short_name;
+  //        s << "|";
+  //        s.width (30);
+  //        s << wstr2str(i->second.description) << "|\n";
+  //  }
+  //s << "+----------------------------------------------------------------------+\n";
+  //return s.str ();
+  return "";
 }
 #endif //BSPY_EXPORTING_PLUGIN
 /** 
@@ -222,10 +223,10 @@ prop_impl<type_t>::py_str () const
  * @return 0 if success
  */
 template <class type_t> void 
-prop_impl<type_t>::add (const type_t def_value, const std::string &short_name, const std::wstring &description)
+prop_impl<type_t>::add (const type_t def_value, const std::wstring &short_name, const std::wstring &description)
 {
   typename map_t::iterator i, e;
-  std::pair<std::string, prop_storage> p;
+  std::pair<std::wstring, prop_storage> p;
   
   i = data.find (short_name);
   if (i == data.end ())

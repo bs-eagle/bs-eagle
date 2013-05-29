@@ -59,7 +59,7 @@ namespace blue_sky
             % reader->get_prefix ().c_str ()  % keyword);
         }
 
-      t_long eql_region = idata->props->get_i ("eql_region");
+      t_long eql_region = idata->props->get_i (L"eql_region");
       if (eql_region == 0)
         {
           bs_throw_exception (boost::format ("Error in %s: eql_region == 0 (keyword: %s)")
@@ -150,7 +150,7 @@ namespace blue_sky
         idata->pbvd.resize(0);
 
       // flag indicating init section
-      idata->props->set_i ("init_section", 1);
+      idata->props->set_i (L"init_section", 1);
 
 
       params.hdm->init_equil (eql_region);
@@ -179,7 +179,7 @@ namespace blue_sky
       BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
       BS_SP (idata) idata = params.hdm->get_data ();
 
-      t_long eql_region = idata->props->get_i ("eql_region");
+      t_long eql_region = idata->props->get_i (L"eql_region");
       if (eql_region == 0)
         {
           bs_throw_exception (boost::format ("Error in %s: eql_region == 0 (keyword: %s)")
@@ -223,7 +223,7 @@ namespace blue_sky
       BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
       BS_SP (idata) idata = params.hdm->get_data ();
 
-      t_long eql_region = idata->props->get_i ("eql_region");
+      t_long eql_region = idata->props->get_i (L"eql_region");
       if (eql_region == 0)
         {
           bs_throw_exception (boost::format ("Error in %s: eql_region == 0 (keyword: %s)")
@@ -275,7 +275,7 @@ namespace blue_sky
       keyword_manager->register_keyword ("EQUIL", keyword_manager_iface::keyword_handler (EQUIL, 0));
       keyword_manager->register_keyword ("RSVD", keyword_manager_iface::keyword_handler (RSVD, 0));
       keyword_manager->register_keyword ("PBVD", keyword_manager_iface::keyword_handler (PBVD, 0));
-      params.hdm->get_prop()->add_property_i(1, "init", L"init type");
+      params.hdm->get_prop()->add_property_i(1, L"init", L"init type");
     }
   }
 

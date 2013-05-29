@@ -35,7 +35,7 @@ namespace blue_sky
       BS_SP (bos_reader_iface) reader = params.hdm->get_reader ();
       BS_SP (idata) idata = params.hdm->get_data ();
 
-      t_long eql_region = idata->props->get_i ("eql_region");
+      t_long eql_region = idata->props->get_i (L"eql_region");
       if (eql_region == 0)
         {
           bs_throw_exception (boost::format ("Error in %s: eql_region == 0 (keyword: %s)")
@@ -80,23 +80,23 @@ namespace blue_sky
 
       BS_SP (init_model_iface) init_model (BS_KERNEL.create_object ("explicit_init_model"), bs_dynamic_cast ());
       params.hdm->set_init_model (init_model);
-      params.hdm->get_prop()->add_property_i(0, "init", L"init type");
+      params.hdm->get_prop()->add_property_i(0, L"init", L"init type");
       // FIXME: npy_intp
       npy_intp dimens[] = {1, 0, 1, 0, 1, 0};
       int n_phases;
 
-      n_phases = params.hdm->get_prop()->get_b("oil_phase");
-      n_phases += params.hdm->get_prop()->get_b("water_phase");
-      n_phases += params.hdm->get_prop()->get_b("gas_phase");
+      n_phases = params.hdm->get_prop()->get_b(L"oil_phase");
+      n_phases += params.hdm->get_prop()->get_b(L"water_phase");
+      n_phases += params.hdm->get_prop()->get_b(L"gas_phase");
 
       keyword_manager->register_fp_pool_keyword ("PRESSURE", dimens, 200.0, 0);
 
       if (n_phases > 1)
         {
-          if (params.hdm->get_prop()->get_b("water_phase"))
+          if (params.hdm->get_prop()->get_b(L"water_phase"))
             keyword_manager->register_fp_pool_keyword ("SWAT",    dimens, 0.3, 0);
 
-          if (params.hdm->get_prop()->get_b("gas_phase"))
+          if (params.hdm->get_prop()->get_b(L"gas_phase"))
             {
               keyword_manager->register_fp_pool_keyword ("SGAS",    dimens, 0, 0);
               keyword_manager->register_fp_pool_keyword ("SOIL",    dimens, 0, 0);

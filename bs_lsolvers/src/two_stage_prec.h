@@ -7,6 +7,7 @@
  */
 #include <string>
 #include <sstream>
+#include "bs_misc.h"
 
 #ifdef _MPI
 #include "mpi_csr_matrix.h"
@@ -102,7 +103,7 @@ namespace blue_sky
               s << "preconditioner 2:\n" << prec_2->py_str ();
             }
           s << "Properties:\n";
-          s << prop->py_str ();
+          s << wstr2str (prop->py_str ());
 
           return s.str ();
         }

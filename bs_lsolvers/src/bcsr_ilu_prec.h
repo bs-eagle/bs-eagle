@@ -9,6 +9,7 @@
 
 #include <string>
 #include <sstream>
+#include "bs_misc.h"
 
 #include "lsolver_iface.h"
 
@@ -90,7 +91,7 @@ namespace blue_sky
 
           s << "Incomplite LU decomposition for bloc CSR matrix.\n";
           s << "Properties:\n";
-          s << prop->py_str ();
+          s << wstr2str (prop->py_str ());
 
           return s.str ();
         }

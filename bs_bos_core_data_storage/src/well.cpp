@@ -1,6 +1,7 @@
 #include "bs_bos_core_data_storage_stdafx.h"
 
 #include "well.h"
+#include "bs_misc.h"
 //#include "main_def.h"
 
 
@@ -61,7 +62,7 @@ namespace blue_sky
   well_obj::py_str () const
     {
       std::stringstream s;
-      s << sp_prop->py_str () << "\n";
+      s << wstr2str(sp_prop->py_str ()) << "\n";
       return s.str ();
     }
 #endif //BSPY_EXPORTING_PLUGIN

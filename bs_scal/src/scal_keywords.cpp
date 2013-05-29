@@ -25,7 +25,7 @@ namespace blue_sky
     BS_SP (idata) idata = params.hdm->get_data ();
     BS_SP (scal_3p_iface) scal = params.hdm->get_scal ();
 
-    t_int regions = idata->props->get_i ("sat_region");
+    t_int regions = idata->props->get_i (L"sat_region");
     t_int n_rows;
     
     //spv_float data = BS_KERNEL.create_object (v_float::bs_type ());

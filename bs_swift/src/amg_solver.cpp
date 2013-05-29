@@ -49,8 +49,8 @@ namespace blue_sky
       pre_smoother_vec[0] = BS_KERNEL.create_object ("gs_solver");
       post_smoother_vec[0] = BS_KERNEL.create_object ("gs_solver");
       //set smoother prop
-      pre_smoother_vec[0]->get_prop ()->set_b ("inverse", false);
-      post_smoother_vec[0]->get_prop ()->set_b ("inverse", false);
+      pre_smoother_vec[0]->get_prop ()->set_b (L"inverse", false);
+      post_smoother_vec[0]->get_prop ()->set_b (L"inverse", false);
 
       lu_solver = BS_KERNEL.create_object ("blu_solver");
       lu_fact = BS_KERNEL.create_object ("dens_matrix");
@@ -187,16 +187,16 @@ namespace blue_sky
               sol[level + 1]->assign (0);
 
               // smooth all points
-              pre_smoother->get_prop ()->set_i ("cf_type", 0);
+              pre_smoother->get_prop ()->set_i (L"cf_type", 0);
               pre_smoother->smooth (a[level], NULL, prop->get_i (n_pre_smooth_iters_idx),
                                     rhs[level], sol[level]);
 /*
               // smooth C-points
-              pre_smoother->get_prop ()->set_i ("cf_type", 1);
+              pre_smoother->get_prop ()->set_i (L"cf_type", 1);
               pre_smoother->smooth (a[level], cf[level], get_n_pre_smooth_iters (),
                                     rhs[level], sol[level]);
               // smooth F-points
-              pre_smoother->get_prop ()->set_i ("cf_type", -1);
+              pre_smoother->get_prop ()->set_i (L"cf_type", -1);
               pre_smoother->smooth (a[level], cf[level], get_n_pre_smooth_iters (),
                                     rhs[level], sol[level]);
 */
@@ -222,16 +222,16 @@ namespace blue_sky
                 return -6;
 
               // smooth all points
-              post_smoother->get_prop ()->set_i ("cf_type", 0);
+              post_smoother->get_prop ()->set_i (L"cf_type", 0);
               post_smoother->smooth (a[level], NULL, prop->get_i (n_post_smooth_iters_idx),
                                      rhs[level], sol[level]);
 /*
               // smooth F-points
-              post_smoother->get_prop ()->set_i ("cf_type", -1);
+              post_smoother->get_prop ()->set_i (L"cf_type", -1);
               post_smoother->smooth (a[level], cf[level], get_n_post_smooth_iters (),
                                      rhs[level], sol[level]);
               // smooth C-points
-              post_smoother->get_prop ()->set_i ("cf_type", 1);
+              post_smoother->get_prop ()->set_i (L"cf_type", 1);
               post_smoother->smooth (a[level], cf[level], get_n_post_smooth_iters (),
                                      rhs[level], sol[level]);
 */

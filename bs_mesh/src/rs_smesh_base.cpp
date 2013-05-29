@@ -21,9 +21,9 @@ rs_smesh_base ::init_props (const sp_hdm_t hdm)
   base_t::init_props (hdm);
 #ifndef PURE_MESH  
   
-  nx = hdm->get_prop ()->get_i("nx");
-  ny = hdm->get_prop ()->get_i("ny");
-  nz = hdm->get_prop ()->get_i("nz");
+  nx = hdm->get_prop ()->get_i(L"nx");
+  ny = hdm->get_prop ()->get_i(L"ny");
+  nz = hdm->get_prop ()->get_i(L"nz");
   
   permx_array = hdm->get_pool ()->get_fp_data("PERMX");
   permy_array = hdm->get_pool ()->get_fp_data("PERMY");

@@ -14,6 +14,7 @@
 #include <map>
 
 #include "bs_kernel.h"
+#include "bs_misc.h"
 
 #include "upsc.h"
 #include "conf.h"
@@ -1455,7 +1456,7 @@ spv_float upsc::upscale_perm_block (t_int dir, t_long Nx, t_long Ny, t_long ux, 
   upsc::py_str () const
     {
       std::stringstream s;
-      s << sp_prop->py_str () << "\n";
+      s << wstr2str (sp_prop->py_str ()) << "\n";
       return s.str ();
     }
 #endif //BSPY_EXPORTING_PLUGIN

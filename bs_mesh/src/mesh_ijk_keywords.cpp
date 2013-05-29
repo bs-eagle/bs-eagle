@@ -33,7 +33,7 @@ namespace blue_sky
       params.hdm->set_mesh (ijk_mesh);
       activate_keywords (params.hdm->get_keyword_manager());
       base_t::activate_keywords (params.hdm->get_keyword_manager());
-      params.hdm->get_prop()->add_property_i(0, "mesh", L"mesh type");
+      params.hdm->get_prop()->add_property_i(0, L"mesh", L"mesh type");
     }
 
 
