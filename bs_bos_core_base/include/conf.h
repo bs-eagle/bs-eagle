@@ -23,7 +23,7 @@
 typedef int             t_int;
 
 //! this type should be using for indexing (matrix, arrays, ...)
-typedef std::ptrdiff_t  t_long;
+typedef long long  t_long;
 
 #ifndef T_FLOAT_IS_DOUBLE
 #define T_FLOAT_IS_DOUBLE 1
@@ -40,7 +40,7 @@ typedef float         t_float;
 typedef double        t_double;
 
 typedef unsigned int                t_uint;
-typedef std::size_t                 t_ulong;
+typedef unsigned long long          t_ulong;
 
 #define BS_EAGLE_ARRAY_TRAITS blue_sky::bs_npvec_shared
 typedef blue_sky::bs_array< t_int    , BS_EAGLE_ARRAY_TRAITS >    v_int;
