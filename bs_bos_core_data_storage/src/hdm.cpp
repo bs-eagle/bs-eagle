@@ -272,7 +272,7 @@ namespace blue_sky
   {
     smart_ptr <hdm_iface, true> hdm = this;
     keyword_params kp;
-    std::string model_name = wstr2str (model_name_);
+    std::string model_name = wstr2str (model_name_, "ru_RU.CP1251");
     kp.hdm = this;
     if (model_name == std::string(":memory:")) {
         this->well_pool_->open_db (model_name_); //"mem_well_pool.db");
@@ -280,8 +280,9 @@ namespace blue_sky
       }
     else
       {
+        const std::wstring well_db = model_name_ + L"_well_pool.db";
         data->h5_pool->open_file (model_name + "_rex.h5");
-        this->well_pool_->open_db (model_name_ + L"_well_pool.db");
+        this->well_pool_->open_db (well_db);
       }
     data->props->add_property_s(str2wstr(model_name.substr(0, model_name.find_last_of("/\\") + 1)), L"model_path", L"model_path");
     km->init(hdm);
