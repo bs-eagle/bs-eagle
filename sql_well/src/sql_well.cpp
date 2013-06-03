@@ -1803,7 +1803,11 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
   int
   sql_well::save_to_bos_ascii_file (const std::wstring &fname_, sp_pool_t pool, sp_prop_t prop)
     {
+#ifdef UNIX
       std::string fname = wstr2str (fname_);
+#else
+      std::string fname = wstr2str (fname_, "ru_RU.CP1251");
+#endif
       FILE *fp = fopen (fname.c_str (), "w");
       char s_buf[2048];
 
