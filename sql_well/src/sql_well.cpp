@@ -20,6 +20,7 @@
 #include <boost/type_traits/is_floating_point.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
 
 #include "bs_kernel.h"
 #include "sql_well.h"
@@ -1922,8 +1923,9 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                     // well has at least one COMPDAT, so write it to WELLSPEC
                     // using first COMPDAT cell_id as well's position
                     BSOUT << "Exporting well " << s << bs_end;
-                    fprintf (fp, "\'%s\' \'FIELD\' %lu %lu /\n", s.c_str (),
-                        p_cd->cell_pos[0] + 1, p_cd->cell_pos[1] + 1);
+                    fprintf (fp,
+                        (boost::format("\'%s\' \'FIELD\' %u %u /\n") % s %
+                        (p_cd->cell_pos[0] + 1) % (p_cd->cell_pos[1] + 1)).str().c_str());
 
                     // remember well as good -- not really needed now
                     good_wells.insert(s);
@@ -1954,11 +1956,15 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               if (fabs(cdi->kh_mult) > eps && good_wells.find(cdi->well_name) != good_wells_end)
                 {
                   if (cdi->status)
-                    fprintf (fp, "\'%s\' %lu %lu %lu %lu \'OPEN\' 2* %lf 1* %lf 1* \'%c\' /\n",
-                      cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
+                    fprintf (fp,
+                      (boost::format("\'%s\' %u %u %u %u \'OPEN\' 2* %lf 1* %lf 1* \'%c\' /\n") %
+                      cdi->well_name % (cdi->cell_pos[0] + 1) % (cdi->cell_pos[1] + 1) % (cdi->cell_pos[2] + 1) %
+                      (cdi->cell_pos[3] + 1) % cdi->diam % cdi->skin % cdi->dir).str().c_str());
                   else
-                    fprintf (fp, "\'%s\' %lu %lu %lu %lu \'SHUT\' 2* %lf 1* %lf 1* \'%c\' /\n",
-                      cdi->well_name.c_str(), cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1, cdi->cell_pos[3] + 1, cdi->diam, cdi->skin, cdi->dir);
+                    fprintf (fp,
+                      (boost::format("\'%s\' %u %u %u %u \'SHUT\' 2* %lf 1* %lf 1* \'%c\' /\n") %
+                      cdi->well_name % (cdi->cell_pos[0] + 1) % (cdi->cell_pos[1] + 1) %
+                      (cdi->cell_pos[2] + 1) % (cdi->cell_pos[3] + 1) % cdi->diam % cdi->skin % cdi->dir).str().c_str());
                 }
             }
             fprintf (fp, "/\n\n");
@@ -1977,7 +1983,9 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   if (!wpimult_exist)
                     fprintf (fp, "WPIMULT\n");
                   wpimult_exist = 1;
-                  fprintf (fp, "\'%s\' %lf %lu %lu %lu /\n", cdi->well_name.c_str(), cdi->kh_mult, cdi->cell_pos[0] + 1, cdi->cell_pos[1] + 1, cdi->cell_pos[2] + 1);
+                  fprintf (fp,
+                      (boost::format("\'%s\' %lf %u %u %u /\n") % cdi->well_name % cdi->kh_mult % (cdi->cell_pos[0] + 1) %
+                      (cdi->cell_pos[1] + 1) % (cdi->cell_pos[2] + 1)).str().c_str());
                 }
             }
             if (wpimult_exist)
@@ -2021,10 +2029,12 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               else
                 sprintf (main_k_str, " * ");
 
-              fprintf (fp, "\'%s\' %lu %lu %lu %lu %lf %lf %lf \'%s\' %lf %s %s %s %s /\n",
-                fti->well_name.c_str (), fti->cell_pos[0] + 1, fti->cell_pos[1] + 1, fti->cell_pos[2] + 1,
-                fti->cell_pos[3] + 1, fti->frac_half_length_1, fti->frac_angle - 90, fti->frac_skin,
-                fti->frac_status == 0 ? "SHUT" : "OPEN", fti->frac_half_thin, perm_str, " * ", " * ", main_k_str
+              fprintf (fp,
+                (boost::format("\'%s\' %u %u %u %u %lf %lf %lf \'%s\' %lf %s %s %s %s /\n") %
+                fti->well_name % (fti->cell_pos[0] + 1) % (fti->cell_pos[1] + 1) % (fti->cell_pos[2] + 1) %
+                (fti->cell_pos[3] + 1) % fti->frac_half_length_1 % (fti->frac_angle - 90) % fti->frac_skin %
+                (fti->frac_status == 0 ? "SHUT" : "OPEN") % fti->frac_half_thin % perm_str % " * " % " * " %
+                main_k_str).str().c_str()
               );
             }
             fprintf (fp, "/\n\n");
@@ -2056,42 +2066,43 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               double i_gr = get_sql_real (10);
               double i_bhp = get_sql_real (11);
               double rate = i_wr;
-              char s_status[1024];
-              char s_ctrl[1024];
-              char s_phase[1024];
-              char s_params[1024];
+              std::string s_status;
+              std::string s_ctrl;
+              std::string s_phase;
+              std::string s_params;
               if (status == STATUS_OPEN)
-                sprintf (s_status, "OPEN");
+                s_status = "OPEN";
               else
-                sprintf (s_status, "SHUT");
+                s_status = "SHUT";
               if (ctrl == CTRL_I_BHP)
                 {
-                  sprintf (s_ctrl, "BHP");
+                  s_ctrl = "BHP";
                   // TODO: add injection phase into DB
-                  sprintf (s_phase, "WATER");
-                  sprintf (s_params, "2* %lf", i_bhp);
+                  s_phase = "WATER";
+                  s_params = (boost::format("2* %lf") % i_bhp).str();
                 }
               else
                 {
-                  sprintf (s_ctrl, "RATE");
+                  s_ctrl = "RATE";
                   if (ctrl == CTRL_I_WRATE)
-                    sprintf (s_phase, "WATER");
+                    s_phase = "WATER";
                   else if (ctrl == CTRL_I_ORATE)
                     {
-                      sprintf (s_phase, "OIL");
+                      s_phase = "OIL";
                       rate = i_or;
                     }
                   else if (ctrl == CTRL_I_GRATE)
                     {
-                      sprintf (s_phase, "GAS");
+                      s_phase = "GAS";
                       rate = i_gr;
                     }
                   else
-                    sprintf (s_phase, "WATER");
+                    s_phase = "WATER";
 
-                  sprintf (s_params, "%s 1* %s", V2S(rate), V2S(i_bhp));
+                  s_params = (boost::format("%s 1* %s") % V2S(rate) % V2S(i_bhp)).str();
                 }
-              fprintf (fp, "\'%s\' \'%s\' \'%s\' \'%s\' %s ", s.c_str (), s_phase, s_status, s_ctrl, s_params);
+              fprintf (fp, "\'%s\' \'%s\' \'%s\' \'%s\' %s ", s.c_str (), s_phase.c_str(), s_status.c_str(),
+                  s_ctrl.c_str(), s_params.c_str());
               /*
               if (rate < 0)
                 fprintf (fp, "2* ");
@@ -2135,40 +2146,40 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               double p_gr = get_sql_real (4);
               double p_lr = get_sql_real (5);
               double p_bhp = get_sql_real (6);
-              char s_status[1024];
-              char s_ctrl[1024];
-              char s_params[1024];
+              std::string s_status;
+              std::string s_ctrl;
+              std::string s_params;
               if (status == STATUS_OPEN)
-                sprintf (s_status, "OPEN");
+                s_status = "OPEN";
               else
-                sprintf (s_status, "SHUT");
+                s_status = "SHUT";
               if (ctrl == CTRL_P_LRATE)
                 {
-                  sprintf (s_ctrl, "LRAT");
-                  sprintf (s_params, "3* %s 1* %s", V2S(p_lr), V2S(p_bhp));
+                  s_ctrl = "LRAT";
+                  s_params = (boost::format("3* %s 1* %s") % V2S(p_lr) % V2S(p_bhp)).str();
                 }
               else if (ctrl == CTRL_P_BHP)
                 {
-                  sprintf (s_ctrl, "BHP");
-                  sprintf (s_params, "5* %s", V2S(p_bhp));
+                  s_ctrl = "BHP";
+                  s_params = (boost::format("5* %s") % V2S(p_bhp)).str();
                 }
               else if (ctrl == CTRL_P_ORATE)
                 {
-                  sprintf (s_ctrl, "ORAT");
-                  sprintf (s_params, "%s 4* %s", V2S(p_or), V2S(p_bhp));
+                  s_ctrl = "ORAT";
+                  s_params = (boost::format("%s 4* %s") % V2S(p_or) % V2S(p_bhp)).str();
                 }
               else if (ctrl == CTRL_P_WRATE)
                 {
-                  sprintf (s_ctrl, "WRAT");
-                  sprintf (s_params, "1* %s 3* %s", V2S(p_wr), V2S(p_bhp));
+                  s_ctrl = "WRAT";
+                  s_params = (boost::format("1* %s 3* %s") % V2S(p_wr) % V2S(p_bhp)).str();
                 }
               else if (ctrl == CTRL_P_GRATE)
                 {
-                  sprintf (s_ctrl, "GRAT");
-                  sprintf (s_params, "2* %s 2* %s", V2S(p_gr), V2S(p_bhp));
+                  s_ctrl = "GRAT";
+                  s_params = (boost::format("2* %s 2* %s") % V2S(p_gr) % V2S(p_bhp)).str();
                 }
 
-              fprintf (fp, "\'%s\' \'%s\' \'%s\' %s ", s.c_str (), s_status, s_ctrl, s_params);
+              fprintf (fp, "\'%s\' \'%s\' \'%s\' %s ", s.c_str (), s_status.c_str(), s_ctrl.c_str(), s_params.c_str());
               /*
               if (p_or < 0)
                 fprintf (fp, "1* ");
