@@ -17,7 +17,6 @@
 #define MAX_LINE_LEN 65536
 
 namespace blue_sky {
-typedef t_ulong ulong;
 typedef smart_ptr< bos_reader_iface > sp_bos_reader;
 typedef smart_ptr< h5_pool_iface > sp_h5_pool;
 

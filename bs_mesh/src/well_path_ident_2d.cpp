@@ -50,8 +50,8 @@ typedef CGAL::Polygon_2< Kernel >                           Polygon_2;
 //typedef Triangles::iterator                                 tri_iterator;
 
 typedef smart_ptr< bs_mesh_grdecl > sp_grd_mesh;
-typedef t_ulong ulong;
-typedef t_uint uint;
+using blue_sky::ulong;
+using blue_sky::uint;
 typedef v_float::iterator vf_iterator;
 
 /*-----------------------------------------------------------------

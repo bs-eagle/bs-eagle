@@ -13,14 +13,12 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>
 
-using namespace blue_sky;
 namespace boser = boost::serialization;
-typedef t_ulong ulong;
 
 /*-----------------------------------------------------------------
  * serialize bs_table
  *----------------------------------------------------------------*/
-BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, bs_table)
+BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::bs_table)
 	// save rows num and col num
 	ar << t.n_rows;
 	const ulong col_num = ulong(t.columns.size());
@@ -33,7 +31,7 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, bs_table)
 	}
 BLUE_SKY_CLASS_SRZ_FCN_END
 
-BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, bs_table)
+BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, blue_sky::bs_table)
 	// restore rows num
 	ar >> t.n_rows;
 
@@ -47,19 +45,19 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, bs_table)
 	}
 BLUE_SKY_CLASS_SRZ_FCN_END
 
-BLUE_SKY_CLASS_SERIALIZE_SPLIT(bs_table)
+BLUE_SKY_CLASS_SERIALIZE_SPLIT(blue_sky::bs_table)
 
-BOOST_CLASS_EXPORT_IMPLEMENT(bs_table)
-BLUE_SKY_CLASS_SERIALIZE_INST(bs_table)
+BOOST_CLASS_EXPORT_IMPLEMENT(blue_sky::bs_table)
+BLUE_SKY_CLASS_SERIALIZE_INST(blue_sky::bs_table)
 
 /*-----------------------------------------------------------------
  * serialize rocktab_table
  *----------------------------------------------------------------*/
-BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, rocktab_table)
+BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, blue_sky::rocktab_table)
 	// just invoke base class serialization
 	ar & boser::base_object< bs_table >(t);
 BLUE_SKY_CLASS_SRZ_FCN_END
 
-BOOST_CLASS_EXPORT_IMPLEMENT(rocktab_table)
-BLUE_SKY_CLASS_SERIALIZE_INST(rocktab_table)
+BOOST_CLASS_EXPORT_IMPLEMENT(blue_sky::rocktab_table)
+BLUE_SKY_CLASS_SERIALIZE_INST(blue_sky::rocktab_table)
 

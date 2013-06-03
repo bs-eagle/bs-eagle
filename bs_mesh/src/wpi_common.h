@@ -21,11 +21,10 @@
 namespace blue_sky { namespace wpi {
 
 // common typedefs
-typedef t_ulong ulong;
-typedef t_uint uint;
 typedef v_float::iterator vf_iterator;
-
 typedef t_float cell_pos[8][3];
+using blue_sky::ulong;
+using blue_sky::uint;
 
 // CGAL common typedefs
 typedef CGAL::Object                                        Object;
