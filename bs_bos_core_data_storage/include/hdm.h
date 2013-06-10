@@ -18,6 +18,7 @@
 #include "event_manager_iface.hpp"
 #include "well_pool_iface.h"
 #include "equil_model_iface.h"
+#include "rock_grid.h"
 
 namespace blue_sky {
 
@@ -30,6 +31,7 @@ namespace blue_sky {
       typedef smart_ptr <bos_reader_iface, true>                    sp_reader_t;
       typedef smart_ptr <keyword_manager_iface, true>               sp_km_t;
       typedef smart_ptr <rs_mesh_iface, true>                       sp_mesh_iface_t;
+      typedef smart_ptr <rock_grid, true>                           sp_rock_grid_t;
 
       //METHODS
       ~hdm();
@@ -96,6 +98,12 @@ namespace blue_sky {
       void check_arrays_for_inactive_blocks () const;
       //void update_geometry() const;
       
+      // rock_grid get/set
+      void set_comp_ref_pressure (stdv_float v) { rock_grid_.lock()->comp_ref_pressure = v; }
+      stdv_float get_comp_ref_pressure () { return rock_grid_->comp_ref_pressure; }
+
+      void set_comp_const (stdv_float v) { rock_grid_.lock()->comp_const = v; }
+      stdv_float get_comp_const () { return rock_grid_->comp_const; }
 
     public:
       BLUE_SKY_TYPE_DECL (hdm)
@@ -113,6 +121,7 @@ namespace blue_sky {
       BS_SP (well_pool_iface)   well_pool_;                 //!< SQL well pool
       locale_keeper             lkeeper;
       physical_constants        ph_const;                //!< default physical constants
+      sp_rock_grid_t		rock_grid_;
     };
 
 } //ns bs

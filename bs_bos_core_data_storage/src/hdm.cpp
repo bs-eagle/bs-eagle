@@ -70,6 +70,7 @@ namespace blue_sky
     this->scal_3p_ = BS_KERNEL.create_object ("scal_3p");
     this->event_manager_ = BS_KERNEL.create_object ("event_manager");
     this->well_pool_ = BS_KERNEL.create_object ("sql_well");
+    this->rock_grid_ = BS_KERNEL.create_object ("rock_grid");
   }
 
   hdm::hdm(const hdm& src):bs_refcounter (src), lkeeper ("C", LC_ALL)
