@@ -60,30 +60,15 @@ namespace blue_sky {
     {
       return write_buffer (dataset, hdf5_buffer (data));
     }
+
+    // partial specialization for bs_array
+    template< class T, template< class > class cont_traits >
     hdf5_group_v2 &
-    write (const char *dataset, const spv_double &data)
+    write (const char *dataset, const smart_ptr< bs_array< T, cont_traits > > &data)
     {
       return write_buffer (dataset, hdf5_buffer (data));
     }
-#if !T_FLOAT_IS_DOUBLE
-    hdf5_group_v2 &
-    write (const char *dataset, const spv_float &data)
-    {
-      return write_buffer (dataset, hdf5_buffer (data));
-    }
-#endif
-    hdf5_group_v2 &
-    write (const char *dataset, const spv_long &data)
-    {
-      return write_buffer (dataset, hdf5_buffer (data));
-    }
-#if defined(UNIX) || defined(_WIN64)
-    hdf5_group_v2 &
-    write (const char *dataset, const spv_int &data)
-    {
-      return write_buffer (dataset, hdf5_buffer (data));
-    }
-#endif
+
     template <typename T>
     hdf5_group_v2 &
     write (const char *dataset, const std::vector <T> &data)

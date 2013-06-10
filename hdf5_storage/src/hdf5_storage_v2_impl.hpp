@@ -314,36 +314,33 @@ namespace blue_sky {
     return hdf5::private_::hdf5_buffer__ (T (), &t, 1, 0, 0);
   }
 
+  // partial specialization for bs_array
+  template< class T, template< class > class cont_traits >
+  inline hdf5::private_::hdf5_buffer__
+  hdf5_buffer (const smart_ptr< bs_array< T, cont_traits > > &data)
+  {
+    typedef bs_array< T, cont_traits > array_t;
+    typedef typename array_t::value_type value_t;
+    return hdf5::private_::hdf5_buffer__ (value_t(), data->data (), data->size (), 0, 0);
+  }
+
+  // force storing doubles as floats ?
   template <>
-  inline hdf5::private_::hdf5_buffer__ 
+  inline hdf5::private_::hdf5_buffer__
   hdf5_buffer (const spv_double &data)
   {
     return hdf5::private_::hdf5_buffer__ (float (), data->data (), data->size (), 0, 0);
   }
-#if !T_FLOAT_IS_DOUBLE 
+#if !T_FLOAT_IS_DOUBLE
   template <>
-  inline hdf5::private_::hdf5_buffer__ 
+  inline hdf5::private_::hdf5_buffer__
   hdf5_buffer (const spv_float &data)
   {
     return hdf5::private_::hdf5_buffer__ (float (), data->data (), data->size (), 0, 0);
   }
 #endif
-  template <>
-  inline hdf5::private_::hdf5_buffer__ 
-  hdf5_buffer (const spv_long &data)
-  {
-    return hdf5::private_::hdf5_buffer__ (long (), data->data (), data->size (), 0, 0);
-  }
-#if defined(UNIX) || defined(_WIN64)
-  template <>
-  inline hdf5::private_::hdf5_buffer__ 
-  hdf5_buffer (const spv_int &data)
-  {
-    return hdf5::private_::hdf5_buffer__ (int (), data->data (), data->size (), 0, 0);
-  }
-#endif
   template <typename T>
-  inline hdf5::private_::hdf5_buffer__ 
+  inline hdf5::private_::hdf5_buffer__
   hdf5_buffer (const std::vector <T> &data)
   {
     return hdf5::private_::hdf5_buffer__ (T (), &(data[0]), data.size (), 0, 0);
