@@ -59,6 +59,9 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, hdm)
 	}
 	else
 		ar << long_zero;
+
+	ar << t.get_comp_ref_pressure();
+	ar << t.get_comp_const();
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 /*-----------------------------------------------------------------
@@ -112,6 +115,12 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, hdm)
 	// init mesh
 	if(t.mesh)
 		t.mesh->init_props(sp_hdm(&t));
+
+	stdv_float tmp;
+	ar >> tmp;
+	t.set_comp_ref_pressure(tmp);
+	ar >> tmp;
+	t.set_comp_const(tmp);
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 /*-----------------------------------------------------------------

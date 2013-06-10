@@ -100,10 +100,10 @@ namespace blue_sky {
       
       // rock_grid get/set
       void set_comp_ref_pressure (stdv_float v) { rock_grid_.lock()->comp_ref_pressure = v; }
-      stdv_float get_comp_ref_pressure () { return rock_grid_->comp_ref_pressure; }
+      stdv_float get_comp_ref_pressure () const { return rock_grid_->comp_ref_pressure; }
 
       void set_comp_const (stdv_float v) { rock_grid_.lock()->comp_const = v; }
-      stdv_float get_comp_const () { return rock_grid_->comp_const; }
+      stdv_float get_comp_const () const { return rock_grid_->comp_const; }
 
     public:
       BLUE_SKY_TYPE_DECL (hdm)
