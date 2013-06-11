@@ -54,7 +54,8 @@ namespace blue_sky {
   }
 
   // forward declaration to export to python
-  void read_grdecl(const std::string& fname, const std::string dir, ulong nx, ulong ny, ulong nz,
+  // wide version
+  void read_grdecl_w(const std::wstring& fname, const std::wstring dir, ulong nx, ulong ny, ulong nz,
     smart_ptr< h5_pool_iface > pool);
 }
 
@@ -68,7 +69,7 @@ namespace {
     python::py_export_bos_reader ();
     python::py_export_dt_tools ();
 
-    def("read_grdecl", &blue_sky::read_grdecl);
+    def("read_grdecl", &blue_sky::read_grdecl_w);
     //python::py_export_table ();
     //python::py_export_gis ();
     //python::py_export_frac ();
