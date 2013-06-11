@@ -259,8 +259,7 @@ namespace blue_sky
   t_long
   calc_data_dims (std::string const &name, h5_pair &p, t_int n_dims, pool_dims_t const &pool_dims)
   {
-    BOOST_STATIC_ASSERT (sizeof (t_long) >= sizeof (npy_intp));
-    //BOOST_STATIC_ASSERT (sizeof (t_long) >= sizeof (hsize_t));
+    //BOOST_STATIC_ASSERT (sizeof (t_long) >= sizeof (npy_intp));
 
     p.n_dims = 0;
     p.size = 1;
@@ -480,8 +479,7 @@ namespace blue_sky
   void
   h5_pool::declare_data (std::string const &name, hid_t dtype, void *value, int n_dims, npy_intp *dims, int var_dims)
   {
-    BOOST_STATIC_ASSERT (sizeof (t_long) >= sizeof (npy_intp));
-    //BOOST_STATIC_ASSERT (sizeof (t_long) >= sizeof (hsize_t));
+    //BOOST_STATIC_ASSERT (sizeof (t_long) >= sizeof (npy_intp));
 
     hid_t group = group_id.find ("actual")->second;
 

@@ -28,8 +28,8 @@ namespace blue_sky
     {
 
   PY_EXPORTER (py_pool_exporter, default_exporter)
-    .def ("open_file",                          &T::open_file,
-        args ("fname", "path"), "Open or create h5 file")
+    //.def ("open_file",                          &T::open_file,
+    //    args ("fname", "path"), "Open or create h5 file")
     .def ("close_file",                         &T::close_file,
         args (""), "Close h5 file")
     .def ("flush",                              &T::flush,

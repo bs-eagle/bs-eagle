@@ -11,6 +11,7 @@
 
 #include "py_pool.h"
 #include "h5_pool.hpp"
+#include "bs_misc.h"
 
 using namespace boost::python;
 #ifdef BSPY_EXPORTING_PLUGIN
@@ -28,7 +29,16 @@ namespace {
   std::string get_fname(const h5_pool& p) {
     return p.fname;
   }
-
+  // wide string version of open_file
+  void open_file_w(h5_pool& p, const std::wstring& fname) {
+    p.open_file(
+#ifdef UNIX
+        wstr2str(fname)
+#else
+        wstr2str(fname, "ru_RU.CP1251")
+#endif
+    );
+  }
 }
 
   template< typename T >
@@ -38,7 +48,8 @@ namespace {
     export_class(class_t& class__) {
       py_pool_exporter< T >::export_class(class__)
         .add_property("file_id", &get_file_id)
-        .add_property("fname", &get_fname);
+        .add_property("fname", &get_fname)
+        .def("open_file", &open_file_w);
       return class__;
     }
   };
