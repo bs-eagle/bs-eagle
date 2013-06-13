@@ -314,6 +314,9 @@ namespace blue_sky
      default:
         bs_throw_exception ("init: wrong mesh choice");  
     }
+
+    rock_grid_.lock()->init(this->get_data(), this->get_mesh()->get_n_active_elements(), this->pvt_3p_->get_n_pvt_regions());
+    BSOUT << "n_pvt_regs " << rock_grid_->comp_ref_pressure.size() << bs_end;
     
   }
   

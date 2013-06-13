@@ -116,6 +116,7 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, hdm)
 	if(t.mesh)
 		t.mesh->init_props(sp_hdm(&t));
 
+	t.rock_grid_.lock()->init(t.get_data(), t.get_mesh()->get_n_active_elements(), t.pvt_3p_->get_n_pvt_regions());
 	stdv_float tmp;
 	ar >> tmp;
 	t.set_comp_ref_pressure(tmp);
