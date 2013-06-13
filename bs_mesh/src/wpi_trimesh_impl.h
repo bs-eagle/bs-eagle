@@ -17,6 +17,7 @@
 
 namespace blue_sky { namespace detail { namespace wpi {
 using namespace blue_sky::wpi;
+using blue_sky::wpi::ulong;
 /*-----------------------------------------------------------------
  * internals trimesh implementation for different traits
  *----------------------------------------------------------------*/
