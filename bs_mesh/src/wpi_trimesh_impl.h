@@ -167,10 +167,10 @@ struct trimpl_bufpool : public trimpl< typename traits_t::uncached_traits > {
 	using base_t::init;
 	using base_t::data;
 
-	iterator_t begin() {
+	iterator_t begin() const {
 		return iterator_t(std::make_pair(data(), &store_));
 	}
-	iterator_t end() {
+	iterator_t end() const {
 		return iterator_t(std::make_pair(data(), &store_),
 			base_t::end() - base_t::begin());
 	}
@@ -182,7 +182,7 @@ struct trimpl_bufpool : public trimpl< typename traits_t::uncached_traits > {
 		boost::singleton_pool< boost::fast_pool_allocator_tag, sizeof(V) >::release_memory();
 	}
 
-	cell_buf_storage store_;
+	mutable cell_buf_storage store_;
 };
 
 // specializations of the above for *_bufpool ti_traits

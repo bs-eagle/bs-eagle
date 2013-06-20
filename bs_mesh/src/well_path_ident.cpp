@@ -16,6 +16,8 @@
 
 #include "export_python_wrapper.h"
 
+#include <string.h>
+
 // profiling
 //#include <google/profiler.h>
 
@@ -25,8 +27,18 @@ namespace bp = boost::python;
 
 namespace {
 
+typedef wpi::strategy_3d_ex< wpi::carray_traits >              carray_3d;
+typedef wpi::strategy_3d_ex< wpi::online_tops_traits >         onlinett_3d;
+typedef wpi::strategy_3d_ex< wpi::online_tops_traits_bufpool > onlinett_bp_3d;
+typedef wpi::strategy_3d_ex< wpi::sgrid_traits >               sgrid_3d;
+
+typedef wpi::strategy_2d_ex< wpi::carray_traits >              carray_2d;
+typedef wpi::strategy_2d_ex< wpi::online_tops_traits >         onlinett_2d;
+typedef wpi::strategy_2d_ex< wpi::online_tops_traits_bufpool > onlinett_bp_2d;
+typedef wpi::strategy_2d_ex< wpi::sgrid_traits >               sgrid_2d;
+
 template< class strat_t >
-spv_uint where_is_points_impl(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
+spv_ulong where_is_points_impl(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
 	//typedef wpi::strategy_3d strat_t;
 	typedef wpi::pods< strat_t > pods_t;
 	typedef wpi::mesh_tools< strat_t > mesh_tools_t;
@@ -58,16 +70,16 @@ spv_uint where_is_points_impl(t_long nx, t_long ny, spv_float coord, spv_float z
 	const std::vector< ulong >& hit_idx = mesh_tools_t::where_is_point(M, P);
 
 	// return result
-	spv_uint res = BS_KERNEL.create_object(v_uint::bs_type());
+	spv_ulong res = BS_KERNEL.create_object(v_ulong::bs_type());
 	res->resize(hit_idx.size());
-  if (hit_idx.size()) {
-	  std::copy(hit_idx.begin(), hit_idx.end(), res->begin());
-  }
+	if (hit_idx.size()) {
+		std::copy(hit_idx.begin(), hit_idx.end(), res->begin());
+	}
 	return res;
 }
 
 template< class strat_t >
-t_uint where_is_point_impl(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) {
+t_ulong where_is_point_impl(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) {
 	//typedef wpi::strategy_3d strat_t;
 	typedef wpi::pods< strat_t > pods_t;
 	typedef wpi::mesh_tools< strat_t > mesh_tools_t;
@@ -96,14 +108,16 @@ t_uint where_is_point_impl(t_long nx, t_long ny, spv_float coord, spv_float zcor
  *----------------------------------------------------------------*/
 #ifdef BSPY_EXPORTING_PLUGIN
 
-//typedef wpi::strategy_3d_ex< wpi::online_tops_traits > strat_t;
-typedef wpi::strategy_3d_ex< wpi::sgrid_traits > vtk_strat_t;
-typedef wpi::algo_vtk< vtk_strat_t > wpi_algo_vtk;
+//typedef wpi::strategy_3d_ex< wpi::sgrid_traits > vtk_strat_t;
+//typedef wpi::algo_vtk< vtk_strat_t > wpi_algo_vtk;
 
-bp::tuple enum_border_facets_vtk(t_long nx, t_long ny, sp_obj trim_backend,
-	spv_int mask, int slice_dim = -1, ulong slice_idx = 0,
-	const ulong min_split_threshold = MIN_SPLIT_THRESHOLD, const int facet_filter = -1)
+template< class vtk_strat_t >
+bp::tuple enum_border_facets_vtk_impl(t_long nx, t_long ny, sp_obj trim_backend,
+	spv_int mask, int slice_dim, ulong slice_idx,
+	const ulong min_split_threshold, const int facet_filter)
 {
+	typedef wpi::algo_vtk< vtk_strat_t > wpi_algo_vtk;
+
 	spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
 	spv_float points = BS_KERNEL.create_object(v_float::bs_type());
 	//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_facets_vtk.prof");
@@ -113,10 +127,13 @@ bp::tuple enum_border_facets_vtk(t_long nx, t_long ny, sp_obj trim_backend,
 	return bp::make_tuple(res, cell_idx, points);
 }
 
-bp::tuple enum_border_edges_vtk(t_long nx, t_long ny, sp_obj trim_backend,
-	spv_int mask, int slice_dim = -1, ulong slice_idx = 0,
-	const ulong min_split_threshold = MIN_SPLIT_THRESHOLD, const int facet_filter = -1)
+template< class vtk_strat_t >
+bp::tuple enum_border_edges_vtk_impl(t_long nx, t_long ny, sp_obj trim_backend,
+	spv_int mask, int slice_dim, ulong slice_idx,
+	const ulong min_split_threshold, const int facet_filter)
 {
+	typedef wpi::algo_vtk< vtk_strat_t > wpi_algo_vtk;
+
 	spv_long cell_idx = BS_KERNEL.create_object(v_long::bs_type());
 	spv_float points = BS_KERNEL.create_object(v_float::bs_type());
 	//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk.prof");
@@ -133,45 +150,132 @@ bp::tuple enum_border_edges_vtk(t_long nx, t_long ny, sp_obj trim_backend,
 
 // specialization for 3D
 spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
-	spv_float well_info, bool include_well_nodes)
+	spv_float well_info, bool include_well_nodes, const char* strat_traits)
 {
-	//return well_path_ident_(nx, ny, coord, zcorn, well_info, include_well_nodes);
-	//typedef wpi::algo< wpi::strategy_3d_ex< wpi::online_tops_traits > > wpi_algo_t;
-	typedef wpi::algo< wpi::strategy_3d_ex< wpi::sgrid_traits > > wpi_algo_t;
 	//ProfilerStart("/home/uentity/my_projects/blue-sky.git/plugins/bs-eagle/examples/well_path_ident.prof");
-	spv_float res = wpi_algo_t::well_path_ident_d< true >(
-		nx, ny, coord, zcorn, well_info, include_well_nodes
-	);
+	if(strcmp(strat_traits, "online_tops") == 0) {
+		return  wpi::algo< onlinett_3d >::well_path_ident_d< true >(
+			nx, ny, coord, zcorn, well_info, include_well_nodes
+		);
+	}
+	else if(strcmp(strat_traits, "online_tops_bufpool") == 0) {
+		return  wpi::algo< onlinett_bp_3d >::well_path_ident_d< true >(
+			nx, ny, coord, zcorn, well_info, include_well_nodes
+		);
+	}
+	else if(strcmp(strat_traits, "sgrid") == 0) {
+		return  wpi::algo< sgrid_3d >::well_path_ident_d< true >(
+			nx, ny, coord, zcorn, well_info, include_well_nodes
+		);
+	}
+	else {
+		// fallback to carray traits
+		return  wpi::algo< carray_3d >::well_path_ident_d< true >(
+			nx, ny, coord, zcorn, well_info, include_well_nodes
+		);
+	}
 	//ProfilerStop();
-	return res;
 }
 
 // specialization for 2D
 spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
-	spv_float well_info, bool include_well_nodes)
+	spv_float well_info, bool include_well_nodes, const char* strat_traits)
 {
-	//return well_path_ident_(nx, ny, coord, zcorn, well_info, include_well_nodes);
-	return wpi::algo< wpi::strategy_2d_ex< wpi::online_tops_traits > >::well_path_ident_d< true >(
-		nx, ny, coord, zcorn, well_info, include_well_nodes
-	);
+	if(strcmp(strat_traits, "online_tops") == 0) {
+		return  wpi::algo< onlinett_2d >::well_path_ident_d< true >(
+			nx, ny, coord, zcorn, well_info, include_well_nodes
+		);
+	}
+	else if(strcmp(strat_traits, "online_tops_bufpool") == 0) {
+		return  wpi::algo< onlinett_bp_2d >::well_path_ident_d< true >(
+			nx, ny, coord, zcorn, well_info, include_well_nodes
+		);
+	}
+	else if(strcmp(strat_traits, "sgrid") == 0) {
+		return  wpi::algo< sgrid_2d >::well_path_ident_d< true >(
+			nx, ny, coord, zcorn, well_info, include_well_nodes
+		);
+	}
+	else {
+		// fallback to carray traits
+		return  wpi::algo< carray_2d >::well_path_ident_d< true >(
+			nx, ny, coord, zcorn, well_info, include_well_nodes
+		);
+	}
 }
 
 // 3D
-spv_uint where_is_points(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
-	return where_is_points_impl< wpi::strategy_3d >(nx, ny, coord, zcorn, points);
+spv_ulong where_is_points(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points,
+	const char* strat_traits)
+{
+	if(strcmp(strat_traits, "online_tops") == 0) {
+		return where_is_points_impl< onlinett_3d >(nx, ny, coord, zcorn, points);
+	}
+	else if(strcmp(strat_traits, "online_tops_bufpool") == 0) {
+		return where_is_points_impl< onlinett_bp_3d >(nx, ny, coord, zcorn, points);
+	}
+	else if(strcmp(strat_traits, "sgrid") == 0) {
+		return where_is_points_impl< sgrid_3d >(nx, ny, coord, zcorn, points);
+	}
+	else {
+		// fallback to carray traits
+		return where_is_points_impl< carray_3d >(nx, ny, coord, zcorn, points);
+	}
 }
 // 2D
-spv_uint where_is_points_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
-	return where_is_points_impl< wpi::strategy_2d >(nx, ny, coord, zcorn, points);
+spv_ulong where_is_points_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points,
+	const char* strat_traits)
+{
+	if(strcmp(strat_traits, "online_tops") == 0) {
+		return where_is_points_impl< onlinett_2d >(nx, ny, coord, zcorn, points);
+	}
+	else if(strcmp(strat_traits, "online_tops_bufpool") == 0) {
+		return where_is_points_impl< onlinett_bp_2d >(nx, ny, coord, zcorn, points);
+	}
+	else if(strcmp(strat_traits, "sgrid") == 0) {
+		return where_is_points_impl< sgrid_2d >(nx, ny, coord, zcorn, points);
+	}
+	else {
+		// fallback to carray traits
+		return where_is_points_impl< carray_2d >(nx, ny, coord, zcorn, points);
+	}
 }
 
 // 3D
-t_uint where_is_point(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) {
-	return where_is_point_impl< wpi::strategy_3d >(nx, ny, coord, zcorn, point);
+t_ulong where_is_point(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point,
+	const char* strat_traits)
+{
+	if(strcmp(strat_traits, "online_tops") == 0) {
+		return where_is_point_impl< onlinett_3d >(nx, ny, coord, zcorn, point);
+	}
+	else if(strcmp(strat_traits, "online_tops_bufpool") == 0) {
+		return where_is_point_impl< onlinett_bp_3d >(nx, ny, coord, zcorn, point);
+	}
+	else if(strcmp(strat_traits, "sgrid") == 0) {
+		return where_is_point_impl< sgrid_3d >(nx, ny, coord, zcorn, point);
+	}
+	else {
+		// fallback to carray traits
+		return where_is_point_impl< carray_3d >(nx, ny, coord, zcorn, point);
+	}
 }
 // 2D
-t_uint where_is_point_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) {
-	return where_is_point_impl< wpi::strategy_2d >(nx, ny, coord, zcorn, point);
+t_ulong where_is_point_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point,
+	const char* strat_traits)
+{
+	if(strcmp(strat_traits, "online_tops") == 0) {
+		return where_is_point_impl< onlinett_2d >(nx, ny, coord, zcorn, point);
+	}
+	else if(strcmp(strat_traits, "online_tops_bufpool") == 0) {
+		return where_is_point_impl< onlinett_bp_2d >(nx, ny, coord, zcorn, point);
+	}
+	else if(strcmp(strat_traits, "sgrid") == 0) {
+		return where_is_point_impl< sgrid_2d >(nx, ny, coord, zcorn, point);
+	}
+	else {
+		// fallback to carray traits
+		return where_is_point_impl< carray_2d >(nx, ny, coord, zcorn, point);
+	}
 }
 
 /*-----------------------------------------------------------------
@@ -200,28 +304,121 @@ std::vector< well_hit_cell_2d > well_path_ident_2d(t_long nx, t_long ny, spv_flo
 } /* wpi */
 
 #ifdef BSPY_EXPORTING_PLUGIN
+
+bp::tuple enum_border_facets_vtk(t_long nx, t_long ny, sp_obj trim_backend,
+	spv_int mask, int slice_dim = -1, ulong slice_idx = 0,
+	const ulong min_split_threshold = MIN_SPLIT_THRESHOLD, const int facet_filter = -1,
+	const char* strat_traits = "sgrid")
+{
+	if(strcmp(strat_traits, "online_tops") == 0) {
+		return enum_border_facets_vtk_impl< onlinett_3d >(
+			nx, ny, trim_backend, mask, slice_dim, slice_idx,
+			min_split_threshold, facet_filter
+		);
+	}
+	else if(strcmp(strat_traits, "online_tops_bufpool") == 0) {
+		return enum_border_facets_vtk_impl< onlinett_bp_3d >(
+			nx, ny, trim_backend, mask, slice_dim, slice_idx,
+			min_split_threshold, facet_filter
+		);
+	}
+	else if(strcmp(strat_traits, "sgrid") == 0) {
+		return enum_border_facets_vtk_impl< sgrid_3d >(
+			nx, ny, trim_backend, mask, slice_dim, slice_idx,
+			min_split_threshold, facet_filter
+		);
+	}
+	else {
+		// fallback to carray traits
+		return enum_border_facets_vtk_impl< carray_3d >(
+			nx, ny, trim_backend, mask, slice_dim, slice_idx,
+			min_split_threshold, facet_filter
+		);
+	}
+}
+
+bp::tuple enum_border_edges_vtk(t_long nx, t_long ny, sp_obj trim_backend,
+	spv_int mask, int slice_dim = -1, ulong slice_idx = 0,
+	const ulong min_split_threshold = MIN_SPLIT_THRESHOLD, const int facet_filter = -1,
+	const char* strat_traits = "sgrid")
+{
+	if(strcmp(strat_traits, "online_tops") == 0) {
+		return enum_border_edges_vtk_impl< onlinett_3d >(
+			nx, ny, trim_backend, mask, slice_dim, slice_idx,
+			min_split_threshold, facet_filter
+		);
+	}
+	else if(strcmp(strat_traits, "online_tops_bufpool") == 0) {
+		return enum_border_edges_vtk_impl< onlinett_bp_3d >(
+			nx, ny, trim_backend, mask, slice_dim, slice_idx,
+			min_split_threshold, facet_filter
+		);
+	}
+	else if(strcmp(strat_traits, "sgrid") == 0) {
+		return enum_border_edges_vtk_impl< sgrid_3d >(
+			nx, ny, trim_backend, mask, slice_dim, slice_idx,
+			min_split_threshold, facet_filter
+		);
+	}
+	else {
+		// fallback to carray traits
+		return enum_border_edges_vtk_impl< carray_3d >(
+			nx, ny, trim_backend, mask, slice_dim, slice_idx,
+			min_split_threshold, facet_filter
+		);
+	}
+}
+
+sp_obj make_trimesh_backend(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+	const char* strat_traits = "sgrid")
+{
+	if(strcmp(strat_traits, "online_tops") == 0) {
+		return wpi::pods< onlinett_3d >::trimesh::create_backend(
+			nx, ny, coord, zcorn
+		);
+	}
+	else if(strcmp(strat_traits, "online_tops_bufpool") == 0) {
+		return wpi::pods< onlinett_bp_3d >::trimesh::create_backend(
+			nx, ny, coord, zcorn
+		);
+	}
+	else if(strcmp(strat_traits, "sgrid") == 0) {
+		return wpi::pods< sgrid_3d >::trimesh::create_backend(
+			nx, ny, coord, zcorn
+		);
+	}
+	else {
+		return wpi::pods< carray_3d >::trimesh::create_backend(
+			nx, ny, coord, zcorn
+		);
+	}
+}
+
 /*-----------------------------------------------------------------
  * Python bindings
  *----------------------------------------------------------------*/
-BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl, ::blue_sky::well_path_ident, 5, 6)
-BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl_2d, ::blue_sky::well_path_ident_2d, 5, 6)
-BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl_2d_old, ::blue_sky::well_path_ident_2d_old, 5, 6)
-BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_facets_overl, enum_border_facets_vtk, 4, 8)
-BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_edges_overl, enum_border_edges_vtk, 4, 8)
+BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl, ::blue_sky::well_path_ident, 5, 7)
+BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl_2d, ::blue_sky::well_path_ident_2d, 5, 7)
+BOOST_PYTHON_FUNCTION_OVERLOADS(where_is_point_overl, where_is_point, 5, 6)
+BOOST_PYTHON_FUNCTION_OVERLOADS(where_is_points_overl, where_is_points, 5, 6)
+BOOST_PYTHON_FUNCTION_OVERLOADS(where_is_point_2d_overl, where_is_point_2d, 5, 6)
+BOOST_PYTHON_FUNCTION_OVERLOADS(where_is_points_2d_overl, where_is_points_2d, 5, 6)
+BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_facets_overl, enum_border_facets_vtk, 4, 9)
+BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_edges_overl, enum_border_edges_vtk, 4, 9)
+BOOST_PYTHON_FUNCTION_OVERLOADS(make_trimbe_overl, make_trimesh_backend, 4, 5)
 
 namespace python {
 
 void py_export_wpi() {
 	bp::def("well_path_ident", &::blue_sky::well_path_ident, well_path_ident_overl());
 	bp::def("well_path_ident_2d", &::blue_sky::well_path_ident_2d, well_path_ident_overl_2d());
-	bp::def("well_path_ident_2d_old", &::blue_sky::well_path_ident_2d_old, well_path_ident_overl_2d_old());
-	bp::def("where_is_point", &where_is_point);
-	bp::def("where_is_points", &where_is_points);
-	bp::def("where_is_point_2d", &where_is_point_2d);
-	bp::def("where_is_points_2d", &where_is_points_2d);
+	bp::def("where_is_point", &where_is_point, where_is_point_overl());
+	bp::def("where_is_points", &where_is_points, where_is_points_overl());
+	bp::def("where_is_point_2d", &where_is_point_2d, where_is_point_2d_overl());
+	bp::def("where_is_points_2d", &where_is_points_2d, where_is_points_2d_overl());
 
 	// export trimesh backend creation fcn
-	bp::def("make_trimesh_backend", &wpi::pods< vtk_strat_t >::trimesh::create_backend);
+	bp::def("make_trimesh_backend", &make_trimesh_backend, make_trimbe_overl());
 
 	bp::def("enum_border_facets_vtk", &enum_border_facets_vtk, enumb_facets_overl());
 	bp::def("enum_border_edges_vtk", &enum_border_edges_vtk, enumb_edges_overl());
