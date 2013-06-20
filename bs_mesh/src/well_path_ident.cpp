@@ -177,6 +177,34 @@ spv_float well_path_ident(t_long nx, t_long ny, spv_float coord, spv_float zcorn
 	//ProfilerStop();
 }
 
+spv_float well_path_ident(t_long nx, t_long ny, sp_obj trimesh_backend,
+	spv_float well_info, bool include_well_nodes, const char* strat_traits)
+{
+	//ProfilerStart("/home/uentity/my_projects/blue-sky.git/plugins/bs-eagle/examples/well_path_ident.prof");
+	if(strcmp(strat_traits, "online_tops") == 0) {
+		return  wpi::algo< onlinett_3d >::well_path_ident_d< true >(
+			nx, ny, trimesh_backend, well_info, include_well_nodes
+		);
+	}
+	else if(strcmp(strat_traits, "online_tops_bufpool") == 0) {
+		return  wpi::algo< onlinett_bp_3d >::well_path_ident_d< true >(
+			nx, ny, trimesh_backend, well_info, include_well_nodes
+		);
+	}
+	else if(strcmp(strat_traits, "sgrid") == 0) {
+		return  wpi::algo< sgrid_3d >::well_path_ident_d< true >(
+			nx, ny, trimesh_backend, well_info, include_well_nodes
+		);
+	}
+	else {
+		// fallback to carray traits
+		return  wpi::algo< carray_3d >::well_path_ident_d< true >(
+			nx, ny, trimesh_backend, well_info, include_well_nodes
+		);
+	}
+	//ProfilerStop();
+}
+
 // specialization for 2D
 spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
 	spv_float well_info, bool include_well_nodes, const char* strat_traits)
@@ -200,6 +228,32 @@ spv_float well_path_ident_2d(t_long nx, t_long ny, spv_float coord, spv_float zc
 		// fallback to carray traits
 		return  wpi::algo< carray_2d >::well_path_ident_d< true >(
 			nx, ny, coord, zcorn, well_info, include_well_nodes
+		);
+	}
+}
+
+spv_float well_path_ident_2d(t_long nx, t_long ny, sp_obj trimesh_backend,
+	spv_float well_info, bool include_well_nodes, const char* strat_traits)
+{
+	if(strcmp(strat_traits, "online_tops") == 0) {
+		return  wpi::algo< onlinett_2d >::well_path_ident_d< true >(
+			nx, ny, trimesh_backend, well_info, include_well_nodes
+		);
+	}
+	else if(strcmp(strat_traits, "online_tops_bufpool") == 0) {
+		return  wpi::algo< onlinett_bp_2d >::well_path_ident_d< true >(
+			nx, ny, trimesh_backend, well_info, include_well_nodes
+		);
+	}
+	else if(strcmp(strat_traits, "sgrid") == 0) {
+		return  wpi::algo< sgrid_2d >::well_path_ident_d< true >(
+			nx, ny, trimesh_backend, well_info, include_well_nodes
+		);
+	}
+	else {
+		// fallback to carray traits
+		return  wpi::algo< carray_2d >::well_path_ident_d< true >(
+			nx, ny, trimesh_backend, well_info, include_well_nodes
 		);
 	}
 }
@@ -397,8 +451,10 @@ sp_obj make_trimesh_backend(t_long nx, t_long ny, spv_float coord, spv_float zco
 /*-----------------------------------------------------------------
  * Python bindings
  *----------------------------------------------------------------*/
-BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl, ::blue_sky::well_path_ident, 5, 7)
-BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl_2d, ::blue_sky::well_path_ident_2d, 5, 7)
+BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl1, ::blue_sky::well_path_ident, 5, 7)
+BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_overl2, ::blue_sky::well_path_ident, 4, 6)
+BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_2d_overl1, ::blue_sky::well_path_ident_2d, 5, 7)
+BOOST_PYTHON_FUNCTION_OVERLOADS(well_path_ident_2d_overl2, ::blue_sky::well_path_ident_2d, 4, 6)
 BOOST_PYTHON_FUNCTION_OVERLOADS(where_is_point_overl, where_is_point, 5, 6)
 BOOST_PYTHON_FUNCTION_OVERLOADS(where_is_points_overl, where_is_points, 5, 6)
 BOOST_PYTHON_FUNCTION_OVERLOADS(where_is_point_2d_overl, where_is_point_2d, 5, 6)
@@ -410,8 +466,19 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(make_trimbe_overl, make_trimesh_backend, 4, 5)
 namespace python {
 
 void py_export_wpi() {
-	bp::def("well_path_ident", &::blue_sky::well_path_ident, well_path_ident_overl());
-	bp::def("well_path_ident_2d", &::blue_sky::well_path_ident_2d, well_path_ident_overl_2d());
+	spv_float (*wpi_3d_1)(t_long, t_long, spv_float, spv_float, spv_float, bool, const char*) =
+		&::blue_sky::well_path_ident;
+	spv_float (*wpi_3d_2)(t_long, t_long, sp_obj, spv_float, bool, const char*) =
+		&::blue_sky::well_path_ident;
+	spv_float (*wpi_2d_1)(t_long, t_long, spv_float, spv_float, spv_float, bool, const char*) =
+		&::blue_sky::well_path_ident_2d;
+	spv_float (*wpi_2d_2)(t_long, t_long, sp_obj, spv_float, bool, const char*) =
+		&::blue_sky::well_path_ident_2d;
+
+	bp::def("well_path_ident", wpi_3d_1, well_path_ident_overl1());
+	bp::def("well_path_ident", wpi_3d_2, well_path_ident_overl2());
+	bp::def("well_path_ident_2d", wpi_2d_1, well_path_ident_2d_overl1());
+	bp::def("well_path_ident_2d", wpi_2d_2, well_path_ident_2d_overl2());
 	bp::def("where_is_point", &where_is_point, where_is_point_overl());
 	bp::def("where_is_points", &where_is_points, where_is_points_overl());
 	bp::def("where_is_point_2d", &where_is_point_2d, where_is_point_2d_overl());

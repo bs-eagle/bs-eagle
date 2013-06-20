@@ -130,13 +130,13 @@ struct algo : public helpers< strat_t > {
 
 	template< bool pythonish >
 	static typename wpi_return< pythonish >::type well_path_ident_d(
-		t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+		t_long nx, t_long ny, sp_obj trim_backend,
 		spv_float well_info, bool include_well_nodes)
 	{
 		typedef typename wpi_return< pythonish >::type ret_t;
 
 		// 1) calculate mesh nodes coordinates and build initial trimesh
-		trimesh M(nx, ny, coord, zcorn);
+		trimesh M(nx, ny, trim_backend);
 		//vertex_pos_i mesh_size;
 		//spv_float tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
 		// DEBUG
@@ -171,6 +171,19 @@ struct algo : public helpers< strat_t > {
 
 		return wpi_return< pythonish >::make(A);
 	}
+
+	template< bool pythonish >
+	static typename wpi_return< pythonish >::type well_path_ident_d(
+		t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+		spv_float well_info, bool include_well_nodes)
+	{
+		// calculate mesh nodes coordinates and build initial trimesh
+		return well_path_ident_d< pythonish >(
+			nx, ny, trimesh::create_backend(nx, ny, coord, zcorn),
+			well_info, include_well_nodes
+		);
+	}
+
 }; // algo
 
 }} /* blue_sky::wpi */
