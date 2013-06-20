@@ -136,14 +136,27 @@ protected:
 	}
 
 	ulong init(t_long nx, t_long ny, const sp_obj& backend) {
-		sgrid_ = backend;
-		if(!sgrid_)
+		// backend can come from Python and be array with different traits
+		// so try to steal buffer instead of direct assignment
+		//sgrid_ = backend;
+		smart_ptr< bs_arrbase< t_float > > cont(backend, bs_dynamic_cast());
+		if(!cont)
 			throw bs_exception("trimesh::impl", "Incompatible backend passed");
+		sgrid_ = BS_KERNEL.create_object(v_float::bs_type());
+		sgrid_->init_inplace(cont);
 
 		// save handle
 		const ulong nz = sgrid_->size() / ((nx + 1)*(ny + 1)*3) - 1;
+		if(nz >= sgrid_->size())
+			throw bs_exception("trimesh::impl", "Sgrid backend with wrong dimensions passed");
+
+		// don'thave access to stratedy's dimensions num, so use this trick
+		ulong full_sz = nx * ny;
+		if(nz > 0)
+			full_sz *= nz;
+
 		sgrid_handle h = {
-			sgrid_->begin(), ulong(nx), ulong(ny), nx * ny * nz
+			sgrid_->begin(), ulong(nx), ulong(ny), full_sz
 		};
 		h_ = h;
 		return nz;
