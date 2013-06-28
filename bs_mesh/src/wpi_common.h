@@ -77,9 +77,13 @@ int lexicographical_compare_3way(_InputIterator1 __first1,
 }
 
 // forward declaraions of strategy traits
+template< uint >
 struct carray_traits;
+template< uint >
 struct online_tops_traits;
+template< uint >
 struct online_tops_traits_bufpool;
+template< uint >
 struct sgrid_traits;
 
 }} /* { namespace blue_sky::wpi */

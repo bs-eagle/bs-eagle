@@ -14,7 +14,7 @@
 
 namespace blue_sky { namespace wpi {
 
-template< class strat_traits >
+template< template< uint > class strat_traits >
 struct strategy_3d_ex {
 	// main typedefs
 	typedef typename Kernel::Point_3                                     Point;
@@ -35,7 +35,7 @@ struct strategy_3d_ex {
 	typedef ulong   vertex_pos_i[D];
 
 	// iterator over source arrays come from traits
-	typedef strat_traits traits_t;
+	typedef strat_traits< D > traits_t;
 	typedef typename traits_t::cell_vertex_iterator cell_vertex_iterator;
 	typedef typename traits_t::well_traj_iterator   well_traj_iterator;
 

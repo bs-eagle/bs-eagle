@@ -34,7 +34,7 @@ struct helpers {
 	typedef typename strat_t::vertex_pos_i vertex_pos_i;
 
 	typedef typename strat_t::traits_t strat_traits;
-	typedef typename strat_traits::cell_vertex_iterator cell_vertex_iterator;
+	typedef typename strat_t::cell_vertex_iterator cell_vertex_iterator;
 
 	// import global consts
 	enum { D = strat_t::D };

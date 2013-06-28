@@ -135,7 +135,7 @@ struct algo_vtk : helpers< strat_t > {
 	};
 	// select sepcial impl for sgrid-based strategy
 	template< class unused >
-	struct choose_vertex_handle< sgrid_traits, unused > {
+	struct choose_vertex_handle< sgrid_traits< D >, unused > {
 		typedef vertex_handle_sgrid type;
 	};
 

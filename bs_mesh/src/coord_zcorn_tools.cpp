@@ -538,7 +538,7 @@ spv_float tops2struct_grid(const uint_t nx, const uint_t ny, spv_float tops) {
 // direct conversion from COORD & ZCORN using tops_iterator
 spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float coord, spv_float zcorn) {
 	typedef smart_ptr< rs_smesh_iface, true > sp_smesh;
-	typedef wpi::tops_iterator< wpi::carray_ti_traits > iterator_t;
+	typedef wpi::tops_iterator< wpi::carray_ti_traits, 3 > iterator_t;
 
 	// build mesh_grdecl around given mesh
 	sp_himesh handy = BS_KERNEL.create_object("handy_mesh_iface");
@@ -552,7 +552,7 @@ spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float coord, spv_float zcor
 
 spv_float tops2struct_grid(smart_ptr< rs_smesh_iface > mesh) {
 	if(!mesh) return NULL;
-	typedef wpi::tops_iterator< wpi::carray_ti_traits > iterator_t;
+	typedef wpi::tops_iterator< wpi::carray_ti_traits, 3 > iterator_t;
 
 	// obtain mesh dimensions
 	rs_smesh_iface::index_point3d_t dims = mesh->get_dimens();

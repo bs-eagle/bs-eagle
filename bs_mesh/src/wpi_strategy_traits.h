@@ -15,10 +15,14 @@ namespace blue_sky { namespace wpi {
 
 // simple traits for strategies
 // assuming that cells vertices and well path are represented as continous C-arrays
+// D is dimensionality
+// need to introduce this template parameter because iterator can depend on dimesionality
+template< uint D_ >
 struct carray_traits {
 	// iterator over raw tops array - simple pointer
 	typedef t_float* cell_vertex_iterator;
 	typedef t_float* well_traj_iterator;
+	enum { D = D_ };
 
 	// generic converter from iterator to vertex_pos
 	// return reference to array to prevent data copying
@@ -34,9 +38,11 @@ struct carray_traits {
 };
 
 // cell's vertices coords are calculated on the fly when accessing given cell
+template< uint D_ >
 struct online_tops_traits {
-	typedef tops_iterator< carray_ti_traits > cell_vertex_iterator;
-	typedef t_float*                          well_traj_iterator;
+	typedef tops_iterator< carray_ti_traits, D_ > cell_vertex_iterator;
+	typedef t_float*                              well_traj_iterator;
+	enum { D = D_ };
 
 	template < typename T, size_t N > char (&array_sz(const T(&)[N]))[N];
 	template < typename T, size_t N, size_t M > char (&array_sz(const T(&)[N][M]))[N * M];
@@ -58,19 +64,21 @@ struct online_tops_traits {
 	}
 };
 
-struct online_tops_traits_bufpool : public online_tops_traits {
+template< uint D_ >
+struct online_tops_traits_bufpool : public online_tops_traits< D_ > {
 	// add this typedef for tops_iterator::impl::iimpl
 	// it needs to know corresponding uncached strategy
-	typedef online_tops_traits uncached_traits;
-	typedef tops_iterator< bufpool_ti_traits > cell_vertex_iterator;
+	typedef online_tops_traits< D_ > uncached_traits;
+	typedef tops_iterator< bufpool_ti_traits, D_ > cell_vertex_iterator;
 
 	static const char* name() {
 		return "online_tops_bufpool";
 	}
 };
 
-struct sgrid_traits : public online_tops_traits {
-	typedef tops_iterator< sgrid_ti_traits > cell_vertex_iterator;
+template< uint D_ >
+struct sgrid_traits : public online_tops_traits< D_ > {
+	typedef tops_iterator< sgrid_ti_traits, D_ > cell_vertex_iterator;
 
 	static const char* name() {
 		return "sgrid";
