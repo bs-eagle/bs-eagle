@@ -29,14 +29,14 @@ struct point2d
 class index2d
 {
     public:
-        t_int x, y;
+        t_ulong x, y;
 
         index2d()
         {
             x = 0;
             y = 0;
         }
-        index2d(t_int index, t_int nx)
+        index2d(t_ulong index, t_ulong nx)
         {
             x = index % nx;
             y = index / nx;
@@ -121,12 +121,12 @@ t_float find_point_z(point3d N1, point3d N2, point3d N3, point2d M)
 
 // finds well-mesh intersection
 // returns mesh_points, well_points
-bp::tuple make_projection(t_int nx, t_int ny, t_int nz, 
-                          spv_int indices_, spv_int faces_, 
+bp::tuple make_projection(t_ulong nx, t_ulong ny, t_ulong nz,
+                          spv_int indices_, spv_int faces_,
                           spv_int internal_,
-                          spv_float x_, spv_float y_,   
-                          spv_float tops_, spv_float values_, 
-                          t_int z_start, t_int z_end) 
+                          spv_float x_, spv_float y_,
+                          spv_float tops_, spv_float values_,
+                          t_ulong z_start, t_ulong z_end)
 {
     v_float& tops = *tops_;
     v_float& values = *values_;
@@ -137,13 +137,13 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
     v_int& internal = *internal_;
 
 
-    t_int i, ii, j, n, z; 
+    t_ulong i, ii, j, n, z;
     n = indices.size();
 
     
     //////////////////////////////////////////////
 
-    t_int n_points, n_z_points, n_l_points = 0;
+    t_ulong n_points, n_z_points, n_l_points = 0;
     n_z_points = z_end-z_start+2;
 
     list <t_float> points, wpoints, vals;
@@ -154,9 +154,9 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
     well_points = BS_KERNEL.create_object(v_float::bs_type());
     scalars = BS_KERNEL.create_object(v_float::bs_type());
 
-    t_int my_ind; 
+    t_ulong my_ind;
     index2d my;
-    t_int face_in, face_out;
+    t_ulong face_in, face_out;
 
     point3d P[8];
     point2d M[2];
@@ -167,16 +167,16 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
     if(n == 0)
        return bp::make_tuple(proj_mesh, well_points, scalars, n_z_points, n_l_points);
 
-    int faces2corners[5][4] = { {0,1,4,5},
-                                {1,3,5,7},
-                                {2,3,6,7},
-                                {0,2,4,6},
-                                {0,0,0,0}
-                              }; 
+    unsigned int faces2corners[5][4] = { {0,1,4,5},
+                                         {1,3,5,7},
+                                         {2,3,6,7},
+                                         {0,2,4,6},
+                                         {0,0,0,0}
+                                         };
 
-    int corners[4];
+    unsigned int corners[4];
 
-    t_int index;
+    t_ulong index;
 
     t_float L = 0, l = 0, dl = 10;
 
@@ -188,9 +188,9 @@ bp::tuple make_projection(t_int nx, t_int ny, t_int nz,
     my = index2d(my_ind, nx);
 
     //well-cell intersection points
-    M[0].x = cross_x[i]; 
+    M[0].x = cross_x[i];
     M[0].y = cross_y[i];
-    M[1].x = cross_x[ii]; 
+    M[1].x = cross_x[ii];
     M[1].y = cross_y[ii];
 
     // vertical well
