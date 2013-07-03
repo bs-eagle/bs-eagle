@@ -64,6 +64,9 @@ namespace python {
         boost::python::return_internal_reference<>())
     .def("add_col_vector", add_col_vector1)
     .def("add_col_vector", add_col_vector2)
+    .def("convert_to_array", &T::convert_to_array)
+    .def("convert_to_array_f", &T::convert_to_array_f)
+    .def("convert_from_array", &T::convert_from_array)
   PY_EXPORTER_END;                               
 
   //////////////////////////////////////////////////////////////////////////
