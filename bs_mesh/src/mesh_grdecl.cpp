@@ -1234,30 +1234,58 @@ mesh_grdecl::calc_tran_boundary (const t_long ext_index1, const plane_t &plane1,
   t_double ntg_index1 = 1;
   if (ntg_array)
     {
+#ifndef PURE_MESH
       ntg_index1 = ntg_array->data ()[ext_index1];
+
+      if (d_dir == along_dim1) //lengthwise OX
+        {
+          Ti = permx_array->data ()[ext_index1]*ntg_index1*koef1;
+          tran = darcy_constant / (2 / Ti);
+          if (multx_array)
+            tran *= multx_array->data ()[ext_index1];
+        }
+      else if (d_dir == along_dim2) //lengthwise OY
+        {
+          Ti = permy_array->data ()[ext_index1]*ntg_index1*koef1;
+          tran = darcy_constant / (2 / Ti);
+          if (multy_array)
+            tran *= multy_array->data ()[ext_index1];
+        }
+      else //lengthwise OZ
+        {
+          Ti = permz_array->data ()[ext_index1]*koef1;
+          tran = darcy_constant / (2 / Ti);
+          if (multz_array)
+            tran *= multz_array->data ()[ext_index1];
+        }
+#else
+      ntg_index1 = ntg_array[ext_index1];
+
+      if (d_dir == along_dim1) //lengthwise OX
+        {
+          Ti = permx_array[ext_index1]*ntg_index1*koef1;
+          tran = darcy_constant / (2 / Ti);
+          if (multx_array)
+            tran *= multx_array[ext_index1];
+        }
+      else if (d_dir == along_dim2) //lengthwise OY
+        {
+          Ti = permy_array[ext_index1]*ntg_index1*koef1;
+          tran = darcy_constant / (2 / Ti);
+          if (multy_array)
+            tran *= multy_array[ext_index1];
+        }
+      else //lengthwise OZ
+        {
+          Ti = permz_array[ext_index1]*koef1;
+          tran = darcy_constant / (2 / Ti);
+          if (multz_array)
+            tran *= multz_array[ext_index1];
+        }
+#endif
     }
 
-  if (d_dir == along_dim1) //lengthwise OX
-    {
-      Ti = permx_array->data ()[ext_index1]*ntg_index1*koef1;
-      tran = darcy_constant / (2 / Ti);
-      if (multx_array)
-        tran *= multx_array->data ()[ext_index1];
-    }
-  else if (d_dir == along_dim2) //lengthwise OY
-    {
-      Ti = permy_array->data ()[ext_index1]*ntg_index1*koef1;
-      tran = darcy_constant / (2 / Ti);
-      if (multy_array)
-        tran *= multy_array->data ()[ext_index1];
-    }
-  else //lengthwise OZ
-    {
-      Ti = permz_array->data ()[ext_index1]*koef1;
-      tran = darcy_constant / (2 / Ti);
-      if (multz_array)
-        tran *= multz_array->data ()[ext_index1];
-    }
+  
   
   return tran;
 }
@@ -2303,6 +2331,7 @@ int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr
 }
 
  
+#ifndef PURE_MESH
 
  void saveNcub(double *gogo, double *Ncubs,long flag, double *mdpoints,long &cubFlag)
 {
@@ -3760,7 +3789,7 @@ int mesh_grdecl::intersect_trajectories (sp_well_pool_t well_pool)
   return 0;
 }
 
-
+#endif //PURE_MESH
 
 
 

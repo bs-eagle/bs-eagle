@@ -9,6 +9,7 @@
 #ifndef PURE_MESH
   #include "flux_connections_iface.h"
   #include "bos_reader_iface.h"
+  #include "bs_vector_shared.h"
 #else
   #include "pure_mesh.h"
 #endif
@@ -17,7 +18,7 @@
 #include "rs_smesh_base.h"
 #include "mesh_element3d.h"
 #include "vector"
-#include "bs_vector_shared.h"
+
 
 #ifdef _HDF5_MY //!< using HDF5 or not
 #include "H5Cpp.h"

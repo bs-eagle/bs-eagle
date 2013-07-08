@@ -19,6 +19,8 @@
 #define write_time_to_log printf
 #define init_time
 #define CH_PTR
+#define BS_SP(T) T
+
 
 //! using this type for small data
 typedef int           t_int;
@@ -72,6 +74,10 @@ struct sp_flux_conn_iface
 
 typedef sp_hdm*             sp_hdm_t;
 typedef sp_flux_conn_iface* sp_flux_conn_iface_t;
+
+typedef void* sp_well_pool_t;
+typedef void * table_iface;
+
 
 
     
