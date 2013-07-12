@@ -199,7 +199,8 @@ namespace blue_sky
           // TODO: print error message
           throw "Invalid parameters in set_col_values"; 
         }
-      memcpy (&(values[col])[0], &(*val)[0], sizeof (t_double) * get_n_rows ()); 
+	  if(get_n_rows() > 0)
+		memcpy (&(values[col])[0], &(*val)[0], sizeof (t_double) * get_n_rows ()); 
     }
   
   spv_double 
@@ -212,8 +213,10 @@ namespace blue_sky
         }
       spv_double a = BS_KERNEL.create_object (v_double::bs_type ());
 
-      a->resize (get_n_rows ());
-      memcpy (&(*a)[0], &(values[col])[0], sizeof (t_double) * get_n_rows ()); 
+	  if(get_n_rows() > 0) {
+		a->resize (get_n_rows ());
+		memcpy (&(*a)[0], &(values[col])[0], sizeof (t_double) * get_n_rows ()); 
+	  }
       return a;
     }
 
