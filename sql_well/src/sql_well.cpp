@@ -2109,7 +2109,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 
 
           // WCONINJE
-          sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND (i_bhp = -1 AND ctrl < -1 OR ctrl = -1) ORDER BY well_name ASC", *di);
+          sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND (i_bhp <= 0 AND ctrl < -1 OR ctrl = -1) ORDER BY well_name ASC", *di);
           if (prepare_sql (s_buf))
             return -1;
           t_uint wconinje_flag = 0;
@@ -2133,6 +2133,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               double i_wr = get_sql_real (9);
               double i_gr = get_sql_real (10);
               double i_bhp = get_sql_real (11);
+              double lim_bhp = get_sql_real (11);
               double rate = i_wr;
               std::string s_status;
               std::string s_ctrl;
@@ -2172,7 +2173,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   else
                     s_phase = "WATER";
 
-                  s_params = (boost::format("%s 1* %s") % V2S(rate) % V2S(i_bhp)).str();
+                  s_params = (boost::format("%s 2*") % V2S(rate)).str();
                 }
               fprintf (fp, "\'%s\' \'%s\' \'%s\' \'%s\' %s ", s.c_str (), s_phase.c_str(), s_status.c_str(),
                   s_ctrl.c_str(), s_params.c_str());
@@ -2277,7 +2278,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 
 
           // WCONPROD
-          sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND (p_bhp = -1 AND ctrl > 1 OR ctrl = 1) ORDER BY well_name ASC", *di);
+          sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND (p_bhp <= 0 AND ctrl > 1 OR ctrl = 1) ORDER BY well_name ASC", *di);
           if (prepare_sql (s_buf))
             return -1;
 
@@ -2313,7 +2314,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               if (ctrl == CTRL_P_LRATE)
                 {
                   s_ctrl = "LRAT";
-                  s_params = (boost::format("3* %s 1* %s") % V2S(p_lr) % V2S(p_bhp)).str();
+                  s_params = (boost::format("3* %s 2* %s") % V2S(p_lr)).str();
                 }
               else if (ctrl == CTRL_P_BHP)
                 {
@@ -2323,17 +2324,17 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               else if (ctrl == CTRL_P_ORATE)
                 {
                   s_ctrl = "ORAT";
-                  s_params = (boost::format("%s 4* %s") % V2S(p_or) % V2S(p_bhp)).str();
+                  s_params = (boost::format("%s 5*") % V2S(p_or)).str();
                 }
               else if (ctrl == CTRL_P_WRATE)
                 {
                   s_ctrl = "WRAT";
-                  s_params = (boost::format("1* %s 3* %s") % V2S(p_wr) % V2S(p_bhp)).str();
+                  s_params = (boost::format("1* %s 4*") % V2S(p_wr)).str();
                 }
               else if (ctrl == CTRL_P_GRATE)
                 {
                   s_ctrl = "GRAT";
-                  s_params = (boost::format("2* %s 2* %s") % V2S(p_gr) % V2S(p_bhp)).str();
+                  s_params = (boost::format("2* %s 3*") % V2S(p_gr)).str();
                 }
 
               fprintf (fp, "\'%s\' \'%s\' \'%s\' %s ", s.c_str (), s_status.c_str(), s_ctrl.c_str(), s_params.c_str());
