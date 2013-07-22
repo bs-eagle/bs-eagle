@@ -39,8 +39,11 @@ namespace blue_sky
 
       
       typedef smart_ptr <hdm_iface, true>                   sp_hdm_t;
-      
+#ifdef PURE_MESH      
+      typedef std::array <t_float, 3>                     point3d_t;
+#else
       typedef boost::array <t_float, 3>                     point3d_t;
+#endif
       typedef smart_ptr <bos_reader_iface, true>			      sp_reader;
       typedef BS_SP(well_pool_iface)                        sp_well_pool_t;
       
@@ -121,8 +124,10 @@ namespace blue_sky
       //! allocate jacobian 
       virtual int build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, const sp_flux_conn_iface_t flux_conn, spv_long boundary_array) = 0;
 
+#ifndef PURE_MESH
       //! find well`s trajectories and mesh cells intersection
       virtual int intersect_trajectories (sp_well_pool_t well_pool) = 0;
+#endif
     };
 
 };//namespace blue_sky

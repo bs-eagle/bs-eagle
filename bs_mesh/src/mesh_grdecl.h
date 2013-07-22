@@ -71,9 +71,17 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     typedef grd_ecl::fpoint2d                  fpoint2d_t;
     typedef grd_ecl::quadrangle_t              quadrangle_t;
 
+
+#ifdef PURE_MESH  
+    typedef std::array <t_long, 8>         element_zcorn_t_long;
+    typedef std::array <t_long, 4>         plane_zcorn_t_long;
+    typedef std::array <t_double, 3>                point3d_t;
+#else
     typedef boost::array <t_long, 8>         element_zcorn_t_long;
     typedef boost::array <t_long, 4>         plane_zcorn_t_long;
     typedef boost::array <t_double, 3>                point3d_t;
+#endif
+    
 
 //-------------------------------------------
 //  METHODS
@@ -218,10 +226,10 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     	in all cases we using local indexing.*/
     int build_jacobian_and_flux_connections_add_boundary (const sp_bcsr_t jacobian, const sp_flux_conn_iface_t flux_conn,
                                                           spv_long boundary_array);
-
+#ifndef PURE_MESH
     //! find well`s trajectories and mesh cells intersection
     int intersect_trajectories (sp_well_pool_t well_pool);
-#ifndef PURE_MESH
+
 
 	  boost::python::list calc_element_tops ();
 

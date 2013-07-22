@@ -104,8 +104,10 @@ class BS_API_PLUGIN rs_mesh_base : public mesh_base
     virtual int build_jacobian_and_flux_connections (const sp_bcsr_t /*jacobian*/, const sp_flux_conn_iface_t/*flux_conn*/, 
                                                      spv_long /*boundary_array*/) = 0;
 
+#ifndef PURE_MESH
     //! find well`s trajectories and mesh cells intersection
     virtual int intersect_trajectories (sp_well_pool_t well_pool) = 0;
+#endif
 
   //-----------------------------------------
   //  VARIABLES

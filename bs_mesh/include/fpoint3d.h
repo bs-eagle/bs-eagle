@@ -227,12 +227,17 @@ namespace grd_ecl
     return fabs(volume/6.0f);
   }
   
-
+#ifdef PURE_MESH  
+  inline fpoint3d get_projection_on_all_axis_for_one_side(const std::array <fpoint3d, 4> &vec)
+{
+    std::array <fpoint2d, 4> vec2;
+#else
   inline fpoint3d get_projection_on_all_axis_for_one_side(const boost::array <fpoint3d, 4> &vec)
-  {
-    fpoint3d A;
-
+{
     boost::array <fpoint2d, 4> vec2;
+#endif
+
+    fpoint3d A;
     //YoZ
     for (size_t i = 0; i < vec.size(); i++)
       vec2[i] = fpoint2d(vec[i].y,vec[i].z);
@@ -327,7 +332,12 @@ namespace grd_ecl
       return false;
   }
 
+#ifdef PURE_MESH  
+  typedef std::array <fpoint3d, 8>  fpoint3d_vector;
+#else
   typedef boost::array <fpoint3d, 8>  fpoint3d_vector;
+#endif
+
 
  inline double rastmd(struct tri *ara ,std::vector<fpoint3d> &v_traj,double *m)//расстояние от начала отрезка до точки пересечения
 {

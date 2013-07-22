@@ -51,6 +51,12 @@ rs_mesh_base ::init_props (const sp_hdm_t hdm)
   multpv_array = hdm->multpv_array;
   
   n_elements = hdm->n_elements;
+
+  n_active_elements = 0;
+  for (long i = 0; i < n_elements; ++i)
+    {
+      n_active_elements += actnum_array[i];
+    }
   //n_active_elements =  std::accumulate (actnum_array->begin (), actnum_array->end (),0);
 #endif
 
@@ -74,8 +80,10 @@ int rs_mesh_base::init_int_to_ext()
 
 #else
   t_long n_ext = n_elements;
+  int r_code;
   if (!ext_to_int)
     return -1;
+  FI_LONG_ARRAY_ALLOCATOR (int_to_ext, n_active_elements, r_code);
 
   spv_long int_to_ext_data = int_to_ext;
   spv_long ext_to_int_data = ext_to_int;

@@ -120,6 +120,11 @@ void mesh_grdecl::init_props(t_long nx, t_long ny, t_long nz, spv_float dx, spv_
     std::pair< spv_float, spv_float > cz = gen_coord_zcorn(nx, ny, nz, dx, dy, dz);
     init_props(nx, ny, cz.first, cz.second);
 }
+#else
+mesh_grdecl::mesh_grdecl ()
+  {
+
+  }
 #endif
 
 void mesh_grdecl::init_props(const sp_hdm_t hdm)
@@ -338,7 +343,8 @@ void mesh_grdecl::check_data() const
   if (wrong_cells)
     BOSOUT (section::mesh, level::medium) << "% wrong (nonconvex) cells found! Marked inactive." << wrong_cells << bs_end;
 #else
-    printf("%d wrong (nonconvex) cells found! Marked inactive.", wrong_cells);
+  if (wrong_cells)
+    printf(" %d wrong (nonconvex) cells found! Marked inactive.", wrong_cells);
 #endif
 
    
@@ -633,7 +639,7 @@ int mesh_grdecl::init_ext_to_int()
 #else
   t_long *int_to_ext_data = int_to_ext;
   //fill volume array (except non-active block and using proxy array)
-  FI_DOUBLE_ARRAY_REALLOCATOR (volumes, n_active_elements, r_code);
+  FI_FLOAT_ARRAY_REALLOCATOR (volumes, n_active_elements, r_code);
   t_float *volumes_data = volumes;
 #endif
   
@@ -797,7 +803,7 @@ spv_float mesh_grdecl::get_cell_volumes (const t_long Nx, const t_long Ny, const
 #else
     spv_float volumes;
     int r_code;
-    FI_DOUBLE_ARRAY_ALLOCATOR (volumes, Nx*Ny*Nz, r_code);
+    FI_FLOAT_ARRAY_ALLOCATOR (volumes, Nx*Ny*Nz, r_code);
 #endif 
 
     // important: XYZ order
@@ -999,7 +1005,7 @@ int mesh_grdecl::calc_depths ()
   t_int const *actnum = actnum_array->data ();
 #else
   int r_code;
-  FI_DOUBLE_ARRAY_REALLOCATOR(depths, n_active_elements, r_code);
+  FI_FLOAT_ARRAY_ALLOCATOR(depths, n_active_elements, r_code);
 
   t_float *depths_data = depths;
   t_long const *ext_to_int_data = ext_to_int;
@@ -1487,7 +1493,7 @@ spv_float mesh_grdecl::calc_cells_vertices() {
 #else
   spv_float tops;
   int r_code;
-  FI_DOUBLE_ARRAY_ALLOCATOR(tops, n_elements * 8 * 3, r_code);
+  FI_FLOAT_ARRAY_ALLOCATOR(tops, n_elements * 8 * 3, r_code);
   
   t_float* tops_data = tops;
 #endif 
@@ -1522,7 +1528,7 @@ spv_float mesh_grdecl::calc_cells_vertices_xyz() {
 #else
   spv_float tops;
   int r_code;
-  FI_DOUBLE_ARRAY_ALLOCATOR(tops, n_elements * 8 * 3, r_code);
+  FI_FLOAT_ARRAY_ALLOCATOR(tops, n_elements * 8 * 3, r_code);
   
   t_float* tops_data = tops;
 #endif
@@ -1770,7 +1776,7 @@ struct build_jacobian_cols_class
     t_long *matrix_block_idx_minus, t_long *matrix_block_idx_plus)
 #else
   build_jacobian_cols_class (mesh_t *mesh, loop_t *loop, t_int *rows_ptr, t_int *cols_ind,
-    t_int *cols_ind_transmis, t_float *values_transmis,
+    t_int *cols_ind_transmis, double *values_transmis,
     t_long *matrix_block_idx_minus, t_long *matrix_block_idx_plus)
 #endif 
   
@@ -1968,7 +1974,7 @@ struct build_jacobian_cols_class
   t_int               *cols_ind_transmis;
 #endif   
   
-  t_float   *values_transmis;
+  double   *values_transmis;
   t_long             *matrix_block_idx_minus;
   t_long             *matrix_block_idx_plus;
 
@@ -2044,19 +2050,19 @@ struct build_jacobian_and_flux
           
         loop_body.prepare (i, j, k);
         
-        if (i+1 < nx && actnum[ext_index1 + 1])
+        if (i+1 < nx && actnum[ext_index1 + ny * nz])
           {
-            loop_body.change_by_x (i + 1, j, k, ext_index1 + 1, true);
+            loop_body.change_by_x (i + 1, j, k, ext_index1 + ny * nz, true);
           }
           
-        if (j+1 < ny && actnum[ext_index1 + nx])
+        if (j+1 < ny && actnum[ext_index1 + nz])
           {
-            loop_body.change_by_y (i, j + 1, k, ext_index1 + nx, true);
+            loop_body.change_by_y (i, j + 1, k, ext_index1 + nz, true);
           }
          
-        if (k+1 < nz && actnum[ext_index1 + nx * ny])
+        if (k+1 < nz && actnum[ext_index1 + 1])
           {
-            loop_body.change_by_z (i, j, k + 1, ext_index1 + nx * ny, true);
+            loop_body.change_by_z (i, j, k + 1, ext_index1 + 1, true);
           }
       }
   }
@@ -2237,12 +2243,11 @@ int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr
 #ifndef PURE_MESH
   jacobian->get_cols_ind()->clear();
   jacobian->get_rows_ptr()->clear();
-#endif 
-  jacobian->alloc_rows_ptr(n_active_elements);
-#ifndef PURE_MESH
   t_long *rows_ptr = jacobian->get_rows_ptr()->data ();
 #else
+  jacobian->alloc_rows_ptr(n_active_elements + 1);
   t_int *rows_ptr = jacobian->get_rows_ptr();
+  FI_FILL_ARRAY(rows_ptr, 0, n_active_elements + 1, 0);
 #endif   
   
   // FIXME: check size of rows_ptr
@@ -2287,15 +2292,24 @@ int mesh_grdecl::build_jacobian_and_flux_connections_add_boundary (const sp_bcsr
   int r_code;
   jacobian->alloc_cols_ind(n_non_zeros);
   t_int *cols_ind = jacobian->get_cols_ind();
+  FI_FILL_ARRAY(cols_ind, 0, n_non_zeros, 0);
 
 
   ////////transmis/////////////////////////
   conn_trans = &flux_conn->conn_trans;
   conn_trans->init (n_connections, 2 * n_connections, 1, 2 * n_connections);
 
-  FI_LONG_ARRAY_REALLOCATOR(flux_conn->matrix_block_idx_minus, n_connections * 2, r_code);
-  FI_LONG_ARRAY_REALLOCATOR(flux_conn->matrix_block_idx_plus, n_connections * 2, r_code);
-  
+  if (flux_conn->matrix_block_idx_minus)
+    {
+      FI_LONG_ARRAY_REALLOCATOR(flux_conn->matrix_block_idx_minus, n_connections * 2, r_code);
+      FI_LONG_ARRAY_REALLOCATOR(flux_conn->matrix_block_idx_plus, n_connections * 2, r_code);
+    }
+  else
+    {
+      FI_LONG_ARRAY_ALLOCATOR(flux_conn->matrix_block_idx_minus, n_connections * 2, r_code);
+      FI_LONG_ARRAY_ALLOCATOR(flux_conn->matrix_block_idx_plus, n_connections * 2, r_code);
+    }
+
 #endif 
   
   

@@ -10,7 +10,7 @@
 #include "csr_matrix.h"
 #include "memory_macroses.h"
 #include <stdio.h>
-#include <boost/array.hpp>
+//#include <boost/array.hpp>
 #include <vector>
 
 #define BS_API_PLUGIN 
@@ -28,11 +28,11 @@ typedef int           t_int;
 //! this type should be using for indexing (matrix, arrays, ...)
 typedef long          t_long;
 typedef double        t_double;
-typedef double        t_float;
+typedef float        t_float;
 
 typedef int*          spv_int;
 typedef long*         spv_long;
-typedef double*       spv_float;
+typedef float*       spv_float;
 typedef double*       spv_double;
 
 

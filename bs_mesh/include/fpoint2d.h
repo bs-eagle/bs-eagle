@@ -5,6 +5,7 @@
 	\brief addition structure for mesh_grdecl - point2d
 	\author Iskhakov Ruslan
 	\date 2008-05-01 */
+#include <array>
 
 namespace grd_ecl
   {
@@ -34,9 +35,13 @@ namespace grd_ecl
         return *this;
       }
     };
-  
+#ifdef PURE_MESH  
+  typedef std::array <fpoint2d, 4>       quadrangle_t;
+  typedef std::array <fpoint2d, 3>       triangle_t;
+#else
   typedef boost::array <fpoint2d, 4>       quadrangle_t;
   typedef boost::array <fpoint2d, 3>       triangle_t;
+#endif
   
   inline t_double get_sq_distance(const fpoint2d &a, const fpoint2d &b)
   {
@@ -102,7 +107,12 @@ namespace grd_ecl
 
   inline t_double get_triangle_crossing_area(const triangle_t &tri1, const  triangle_t &tri2, double eps, int are_opposed)
   {
-    boost::array <fpoint2d, 6> f;
+#ifdef PURE_MESH  
+  std::array <fpoint2d, 6> f;
+#else
+  boost::array <fpoint2d, 6> f;
+#endif
+    
     fpoint2d p, p1;
     int i, n = 0;
     int vertice_match1 = 0, vertice_match2 = 0;

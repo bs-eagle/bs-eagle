@@ -51,11 +51,19 @@
       ///////////////////////
 
       typedef grd_ecl::fpoint3d                             fpoint3d_t;
-      
+
+#ifdef PURE_MESH  
+      typedef std::array <fpoint3d_t, N_ELEMENT_CORNERS>  corners_t;
+      typedef std::array <fpoint3d_t, N_PLANE_CORNERS>    plane_t;
+      typedef std::array <t_double, 3>                     point3d_t;
+      typedef std::array <point3d_t, N_ELEMENT_CORNERS>   simple_corners_t;
+#else
       typedef boost::array <fpoint3d_t, N_ELEMENT_CORNERS>  corners_t;
       typedef boost::array <fpoint3d_t, N_PLANE_CORNERS>    plane_t;
       typedef boost::array <t_double, 3>                     point3d_t;
       typedef boost::array <point3d_t, N_ELEMENT_CORNERS>   simple_corners_t;
+#endif
+      
 
     //-----------------------------------------
     //  METHODS
@@ -129,7 +137,11 @@
     };
 
 //! get center of plane
+#ifdef PURE_MESH  
+inline void get_plane_center (const std::array <grd_ecl::fpoint3d, N_PLANE_CORNERS> &plane, grd_ecl::fpoint3d& center)
+#else
 inline void get_plane_center (const boost::array <grd_ecl::fpoint3d, N_PLANE_CORNERS> &plane, grd_ecl::fpoint3d& center)
+#endif
   {
     t_int i;
     center.x = 0.;

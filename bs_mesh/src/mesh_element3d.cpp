@@ -128,10 +128,12 @@ mesh_element3d::get_center () const
 t_double
 mesh_element3d::calc_volume()
 {
-    fpoint3d_t center = get_center ();
     t_double volume = 0.0;
 
     //share for 12 tetraidr (6 side -> 2 tetraidr for each)
+    /*
+    volume = 0;
+    fpoint3d_t center = get_center ();
     volume += calc_tetra_volume(corners[0],corners[1],corners[2], center);
     volume += calc_tetra_volume(corners[1],corners[2],corners[3], center);
 
@@ -149,8 +151,57 @@ mesh_element3d::calc_volume()
 
     volume += calc_tetra_volume(corners[2],corners[3],corners[6], center);
     volume += calc_tetra_volume(corners[3],corners[6],corners[7], center);
+    */
+    
+    /*
+    share for 5 tetraidr
+    volume += calc_tetra_volume(corners[0],corners[4],corners[5], corners[6]);
+    volume += calc_tetra_volume(corners[0],corners[5],corners[1], corners[3]);
+    volume += calc_tetra_volume(corners[0],corners[3],corners[2], corners[6]);
+    volume += calc_tetra_volume(corners[5],corners[7],corners[6], corners[3]);
+    volume += calc_tetra_volume(corners[0],corners[3],corners[5], corners[6]);
+    */
 
-    return volume;
+    
+    /*
+    share for 6 tetraidr
+    volume += calc_tetra_volume(corners[0],corners[1],corners[3], corners[7]);
+    volume += calc_tetra_volume(corners[0],corners[1],corners[5], corners[7]);
+    volume += calc_tetra_volume(corners[0],corners[4],corners[5], corners[7]);
+    volume += calc_tetra_volume(corners[0],corners[2],corners[3], corners[7]);
+    volume += calc_tetra_volume(corners[0],corners[2],corners[6], corners[7]);
+    volume += calc_tetra_volume(corners[0],corners[4],corners[6], corners[7]);
+    */
+    fpoint3d_t centerx1, centerx2;
+    fpoint3d_t centery1, centery2;
+    fpoint3d_t centerz1, centerz2;
+    plane_t plane;
+    get_plane(x_axis_minus, plane);
+    centerx1 = plane[0] + plane[1] + plane[2] + plane[3];
+    //get_plane_center (plane, centerx1);
+
+    get_plane(x_axis_plus, plane);
+    //get_plane_center (plane, centerx2);
+    centerx2 = plane[0] + plane[1] + plane[2] + plane[3];
+
+    get_plane(y_axis_minus, plane);
+    //get_plane_center (plane, centery1);
+    centery1 = plane[0] + plane[1] + plane[2] + plane[3];
+
+    get_plane(y_axis_plus, plane);
+    //get_plane_center (plane, centery2);
+    centery2 = plane[0] + plane[1] + plane[2] + plane[3];
+
+    get_plane(z_axis_minus, plane);
+    //get_plane_center (plane, centerz1);
+    centerz1 = plane[0] + plane[1] + plane[2] + plane[3];
+
+    get_plane(z_axis_plus, plane);
+    //get_plane_center (plane, centerz2);
+    centerz2 = plane[0] + plane[1] + plane[2] + plane[3];
+
+    volume = fpoint3d_mixed_multiplicate (centerx1 - centerx2, centery1 - centery2,centerz1 - centerz2);
+    return fabs(volume * 0.015625); // 0.25*0.25*0.25
 }
 
 

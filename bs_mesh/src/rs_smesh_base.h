@@ -13,6 +13,7 @@
   using namespace blue_sky;
 #else
   #include "pure_mesh.h"
+  #include <array>
 #endif
 
 
@@ -48,9 +49,15 @@ class BS_API_PLUGIN rs_smesh_base : public rs_mesh_base
     // OWN TYPES
     ///////////////////////
 
+
     typedef rs_smesh_base                    this_t;
+#ifdef PURE_MESH  
+    typedef std::array <t_long, 3>                   index_point3d_t;
+#else
     typedef boost::array <t_long, 3>                   index_point3d_t;
+#endif
     typedef std::pair<t_long, t_long>                elem_index;
+    
     //typedef boost::array <grd_ecl::fpoint3d, 8>         fpoint3d_vector;
 
 //-------------------------------------------
@@ -220,21 +227,38 @@ class BS_API_PLUGIN rs_smesh_base : public rs_mesh_base
       return 0;
     }
 
+#ifdef PURE_MESH  
+    virtual std::array <t_float, 3>
+#else
     virtual boost::array <t_float, 3>
+#endif
+    
     get_center (t_long /*i*/, t_long /*j*/, t_long /*k*/) const
       {
         BS_ASSERT (false && "PURE CALL");
 
+#ifdef PURE_MESH  
+        static std::array <t_float, 3> dummy;
+#else
         static boost::array <t_float, 3> dummy;
+#endif
         return dummy;
       }
 
+#ifdef PURE_MESH  
+    virtual std::array <t_float, 3>
+#else
     virtual boost::array <t_float, 3>
+#endif
     get_center (t_long /*n_element*/) const
       {
         BS_ASSERT (false && "PURE CALL");
 
+#ifdef PURE_MESH  
+        static std::array <t_float, 3> dummy;
+#else
         static boost::array <t_float, 3> dummy;
+#endif
         return dummy;
       }
 

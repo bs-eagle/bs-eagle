@@ -6,7 +6,10 @@
 	\date 2009-07-22
  * */
  
-#include "../../bs_mtx/include/bcsr_matrix_iface.h"
+#ifndef PURE_MESH
+      #include "../../bs_mtx/include/bcsr_matrix_iface.h"
+#endif
+
 
 namespace blue_sky
 {
@@ -18,8 +21,11 @@ namespace blue_sky
   ///////////////////////////////
   public:
     
-    typedef bcsr_matrix_iface                 csr_matrix_t;
-    typedef smart_ptr <csr_matrix_t, true>    sp_bcsr_t;
+#ifndef PURE_MESH
+      typedef smart_ptr <bcsr_matrix_iface, true>           sp_bcsr_t;
+#else
+      typedef csr_matrix *          sp_bcsr_t;
+#endif
 
     //-------------------------------------------
     //  METHODS
