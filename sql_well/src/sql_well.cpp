@@ -2314,7 +2314,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               if (ctrl == CTRL_P_LRATE)
                 {
                   s_ctrl = "LRAT";
-                  s_params = (boost::format("3* %s 2* %s") % V2S(p_lr)).str();
+                  s_params = (boost::format("3* %s 2*") % V2S(p_lr)).str();
                 }
               else if (ctrl == CTRL_P_BHP)
                 {
