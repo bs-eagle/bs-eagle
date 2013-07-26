@@ -27,7 +27,9 @@ struct carray_ti_buf_traits : public iterator_type {
 	enum { cell_buf_sz = cell_buf_sz_ };
 	typedef void ctor_param_t;
 
-	carray_ti_buf_traits(ctor_param_t* = NULL) {}
+	carray_ti_buf_traits(ctor_param_t* = NULL) {
+		std::fill(&data_[0], &data_[cell_buf_sz], 0);
+	}
 	//carray_ti_buf_traits(ctor_param_t* = NULL) : just_born(true) {}
 
 	reference ss(const ulong offs) {
@@ -259,6 +261,255 @@ struct bufpool_ti_traits :
 };
 
 /*-----------------------------------------------------------------
+ * Handles describing underlying structured grid for corresponding traits
+ *----------------------------------------------------------------*/
+// standard handle - describes structured grid represented as continuous array
+// handle should be initialized with iterator to beginning of sgrid
+// + dimenshions of original mesh
+template< uint D >
+struct sgrid_array_handle {
+	enum { cell_buf_sz = (1 << D) * 3 };
+	typedef ulong cellv_index[cell_buf_sz];
+	typedef typename v_float::iterator vf_iterator;
+
+private :
+	// helper for vidx initialization
+	template< uint D_, class = void >
+	struct init_vidx {
+		typedef ulong vertex_pos_i[D_];
+
+		init_vidx(const ulong nx, const ulong ny, cellv_index& res) {
+			const ulong line =   (nx + 1) * 3;
+			const ulong plane =  (nx + 1) * (ny + 1) * 3;
+			const ulong lplane = (nx + 1) * (ny + 2) * 3;
+			const cellv_index t = {
+				// vert 0, 1
+				0, 1, 2, 3, 4, 5,
+				// vert 2, 3
+				line, line + 1, line + 2, line + 3, line + 4, line + 5,
+				// vert 4, 5
+				plane, plane + 1, plane + 2, plane + 3, plane + 4, plane + 5,
+				// vert 6, 7
+				lplane, lplane + 1, lplane + 2, lplane + 3, lplane + 4, lplane + 5
+			};
+			std::copy(&t[0], &t[cell_buf_sz], &res[0]);
+		}
+
+		// convert mesh cell id to offset of cell's coord in srgid buffer
+		static ulong cell_id2offs(const ulong nx, const ulong ny, const ulong cell_id) {
+			// calc offset of cell beginning in structured grid
+			const ulong plane_sz = nx * ny;
+			const ulong z = cell_id / plane_sz;
+			const ulong y = (cell_id - plane_sz * z) / nx;
+			const ulong x = cell_id - plane_sz * z - nx * y;
+
+			return (z * (nx + 1) * (ny + 1) + y * (nx + 1) + x) * 3;
+		}
+
+		// convert point offset in sgrid to x, y, z offsets
+		static void offs2pos(const ulong nx, const ulong ny, const ulong offs, vertex_pos_i& res) {
+			const ulong plane_sz = (nx + 1) * (ny + 1);
+			res[2] = offs / plane_sz;
+			res[1] = (offs - plane_sz * res[2]) / (nx + 1);
+			res[0] = offs - plane_sz * res[2] - (nx + 1) * res[1];
+		}
+	};
+
+	// specialization for 2D
+	template< class unused >
+	struct init_vidx< 2, unused > {
+		typedef ulong vertex_pos_i[2];
+
+		init_vidx(const ulong nx, const ulong ny, cellv_index& res) {
+			const ulong line =   (nx + 1) * 3;
+			const cellv_index t = {
+				// vert 0, 1
+				0, 1, 2, 3, 4, 5,
+				// vert 2, 3
+				line, line + 1, line + 2, line + 3, line + 4, line + 5
+			};
+			std::copy(&t[0], &t[cell_buf_sz], &res[0]);
+		}
+
+		// convert mesh cell id to offset of cell's coord in srgid buffer
+		static ulong cell_id2offs(const ulong nx, const ulong ny, const ulong cell_id) {
+			// calc offset of cell beginning in structured grid
+			const ulong y = cell_id / nx;
+			return (y * (nx + 1) + cell_id - nx * y) * 3;
+		}
+
+		// convert point offset in sgrid to x, y offsets
+		static void offs2pos(const ulong nx, const ulong /* ny */, const ulong offs, vertex_pos_i& res) {
+			res[1] = offs / (nx + 1);
+			res[0] = offs - (nx + 1)*res[1];
+		}
+	};
+
+public :
+	typedef init_vidx< D > init_vidx_t;
+
+	vf_iterator sgrid;
+	ulong nx, ny, size;
+	cellv_index vidx;
+
+	// empty ctor
+	sgrid_array_handle()
+		: sgrid(vf_iterator()), nx(0), ny(0), size(0)
+	{}
+
+	// normal ctor
+	sgrid_array_handle(const vf_iterator& sgrid_, const ulong nx_, const ulong ny_, const ulong sz)
+		: sgrid(sgrid_), nx(nx_), ny(ny_), size(sz) {
+		// calc v_idx
+		init_vidx_t(nx, ny, vidx);
+	}
+
+	void init(const vf_iterator& sgrid_, const ulong nx_, const ulong ny_, const ulong sz) {
+		sgrid = sgrid_;
+		nx = nx_; ny = ny_; size = sz;
+		init_vidx_t(nx, ny, vidx);
+	}
+
+	// convert mesh cell id to offset of cell's coord in srgid buffer
+	ulong cell_id2offs(const ulong cell_id) const {
+		return init_vidx_t::cell_id2offs(nx, ny, cell_id);
+	}
+}; // eof sgrid_handle
+
+// sgrid abstraction handle representing rectangular grid
+// it actually differs from sgrid_array_handle only in type of sgrid member
+// which is not a simple iterator now
+template< uint D >
+struct rgrid_handle {
+	typedef sgrid_array_handle< D > sgrid_handle;
+	typedef typename sgrid_handle::cellv_index cellv_index;
+	typedef typename sgrid_handle::init_vidx_t init_vidx_t;
+	typedef typename init_vidx_t::vertex_pos_i vertex_pos_i;
+
+	// modified version of dim_subscript from coord_zcorn_tools
+	// doesn't store accumulated sum, thus allow random access
+	struct dim_subscript {
+		dim_subscript(const spv_float& dim = NULL, const t_float offset = 0) {
+			init(dim, offset);
+		}
+
+		void init(const spv_float& dim, const t_float offset) {
+			dim_ = dim; offset_ = offset;
+			if(!dim_)
+				ss_fcn_ = &dim_subscript::ss_null_dim;
+			else if(dim_->size() == 1)
+				ss_fcn_ = &dim_subscript::ss_const_dim;
+			else
+				ss_fcn_ = &dim_subscript::ss_array_dim;
+		}
+
+		// choke for empty rgrid ctor
+		t_float ss_null_dim(const ulong) const {
+			return 0.0;
+		}
+
+		t_float ss_const_dim(const ulong idx) const {
+			return offset_ + dim_->ss(0) * idx;
+		}
+
+		t_float ss_array_dim(const ulong idx) const {
+			t_float res = offset_;
+			for(ulong i = 0; i < idx; ++i)
+				res += dim_->ss(i);
+			return res;
+		}
+
+		t_float operator[](const ulong idx) const {
+			return (this->*ss_fcn_)(idx);
+		}
+
+	private:
+		spv_float dim_;
+		t_float (dim_subscript::*ss_fcn_)(const ulong) const;
+		t_float offset_;
+	};
+
+	// replace iterator over sgrid with this struct
+	// support minimal operators needed
+	struct r2s_adapter {
+		r2s_adapter(const rgrid_handle& h, const ulong offs = 0)
+			: h_(h), offs_(offs)
+		{}
+
+		// returns copy of r2s_adapter
+		r2s_adapter operator+(const t_long offs) const {
+			return r2s_adapter(h_, offs_ + offs);
+		}
+
+		r2s_adapter& operator++() {
+			offs_++;
+			return *this;
+		}
+
+		t_float operator*() const {
+			// calc point offset
+			// assume that we have N_coords_per_point = 3
+			const ulong pt_offs = offs_ / 3;
+			const ulong c_offs = offs_ - pt_offs * 3;
+			// convert offset to x, y, z coords
+			vertex_pos_i pos;
+			init_vidx_t::offs2pos(h_.dim[0], h_.dim[1], pt_offs, pos);
+
+			if(c_offs < D)
+				return h_.d_ss[c_offs][pos[c_offs]];
+			else
+				return 0;
+		}
+
+		const rgrid_handle& h_;
+		// offset is raw, not point offset!
+		ulong offs_;
+	};
+
+	// fake sgrid
+	r2s_adapter sgrid;
+	// dimensions
+	ulong dim[D];
+	ulong size;
+	// deltas subscript along each dimension
+	dim_subscript d_ss[D];
+	// like sgrid_array_handle
+	cellv_index vidx;
+
+	// empty ctor
+	rgrid_handle() : sgrid(*this) {
+		std::fill(&dim[0], &dim[D], 0);
+		size = 0;
+	}
+
+	// normal ctor via init
+	rgrid_handle(const ulong(& dim_)[D], const spv_float(& deltas_)[D],
+		const t_float(& min_pt_)[D]) : sgrid(*this)
+	{
+		init();
+	}
+
+	void init(const ulong(& dim_)[D], const spv_float(& deltas_)[D],
+		const t_float(& min_pt_)[D])
+	{
+		size = 1;
+		for(uint i = 0; i < D; ++i) {
+			dim[i] = dim_[i];
+			size *= dim[i];
+			d_ss[i].init(deltas_[i], min_pt_[i]);
+		}
+
+		// init vidx
+		init_vidx_t(dim[0], dim[1], vidx);
+	}
+
+	// convert mesh cell id to offset of cell's coord in srgid buffer
+	ulong cell_id2offs(const ulong cell_id) const {
+		return init_vidx_t::cell_id2offs(dim[0], dim[1], cell_id);
+	}
+};
+
+/*-----------------------------------------------------------------
  * Strategy that calculate cell vertices using structured grid representation
  *----------------------------------------------------------------*/
 // we SHOULD store final buffer, because later in wpi::cell direct
@@ -269,8 +520,8 @@ struct bufpool_ti_traits :
 // NOTE: sgrid trait actually depends on dimensionality
 // so we need to pass here dimensions num
 // strictly speaking we also need N_coord_per_point, but assume it = 3
-template< class iterator_type, uint D >
-struct sgrid_ti_traits : public carray_ti_buf_traits< iterator_type, (1 << D) * 3 > {
+template< class iterator_type, uint D, template< uint > class sgrid_handle_t = sgrid_array_handle >
+struct sgrid_ti_traits_impl : public carray_ti_buf_traits< iterator_type, (1 << D) * 3 > {
 	typedef carray_ti_buf_traits< iterator_type, (1 << D) * 3 > base_t;
 	typedef iterator_type iterator_t;
 	typedef typename iterator_t::value_type value_type;
@@ -280,103 +531,16 @@ struct sgrid_ti_traits : public carray_ti_buf_traits< iterator_type, (1 << D) * 
 	enum { n_cell_pts = 24 };
 	enum { cell_buf_sz = base_t::cell_buf_sz };
 
-	// traits should be initialized with iterator to beginning of sgrid
-	// + dimeshions of original mesh
-	struct sgrid_handle {
-		typedef ulong cellv_index[cell_buf_sz];
-
-		vf_iterator sgrid;
-		ulong nx, ny, size;
-		cellv_index vidx;
-
-		// empty ctor
-		sgrid_handle()
-			: sgrid(vf_iterator()), nx(0), ny(0), size(0)
-		{}
-
-		// normal ctor
-		sgrid_handle(const vf_iterator& sgrid_, const ulong nx_, const ulong ny_, const ulong sz)
-			: sgrid(sgrid_), nx(nx_), ny(ny_), size(sz) {
-			// calc v_idx
-			init_vidx< D >(nx, ny, vidx);
-		}
-
-		void init(const vf_iterator& sgrid_, const ulong nx_, const ulong ny_, const ulong sz) {
-			sgrid = sgrid_;
-			nx = nx_; ny = ny_; size = sz;
-			init_vidx< D >(nx, ny, vidx);
-		}
-
-		// convert mesh cell id to offset of cell's coord in srgid buffer
-		static ulong cell_id2offs(const ulong nx, const ulong ny, const ulong cell_id) {
-			return init_vidx< D >::cell_id2offs(nx, ny, cell_id);
-		}
-
-	private:
-		// helper for vidx initialization
-		template< uint D_, class = void >
-		struct init_vidx {
-			init_vidx(const ulong nx, const ulong ny, cellv_index& res) {
-				const ulong line =   (nx + 1) * 3;
-				const ulong plane =  (nx + 1) * (ny + 1) * 3;
-				const ulong lplane = (nx + 1) * (ny + 2) * 3;
-				const cellv_index t = {
-					// vert 0, 1
-					0, 1, 2, 3, 4, 5,
-					// vert 2, 3
-					line, line + 1, line + 2, line + 3, line + 4, line + 5,
-					// vert 4, 5
-					plane, plane + 1, plane + 2, plane + 3, plane + 4, plane + 5,
-					// vert 6, 7
-					lplane, lplane + 1, lplane + 2, lplane + 3, lplane + 4, lplane + 5
-				};
-				std::copy(&t[0], &t[cell_buf_sz], &res[0]);
-			}
-
-			// convert mesh cell id to offset of cell's coord in srgid buffer
-			static ulong cell_id2offs(const ulong nx, const ulong ny, const ulong cell_id) {
-				// calc offset of cell beginning in structured grid
-				const ulong plane_sz = nx * ny;
-				const ulong z = cell_id / plane_sz;
-				const ulong y = (cell_id - plane_sz * z) / nx;
-				const ulong x = cell_id - plane_sz * z - nx * y;
-
-				return (z * (nx + 1) * (ny + 1) + y * (nx + 1) + x) * 3;
-			}
-		};
-
-		// specialization for 2D
-		template< class unused >
-		struct init_vidx< 2, unused > {
-			init_vidx(const ulong nx, const ulong ny, cellv_index& res) {
-				const ulong line =   (nx + 1) * 3;
-				const cellv_index t = {
-					// vert 0, 1
-					0, 1, 2, 3, 4, 5,
-					// vert 2, 3
-					line, line + 1, line + 2, line + 3, line + 4, line + 5
-				};
-				std::copy(&t[0], &t[cell_buf_sz], &res[0]);
-			}
-
-			// convert mesh cell id to offset of cell's coord in srgid buffer
-			static ulong cell_id2offs(const ulong nx, const ulong ny, const ulong cell_id) {
-				// calc offset of cell beginning in structured grid
-				const ulong y = cell_id / nx;
-				return (y * (nx + 1) + cell_id - nx * y) * 3;
-			}
-		};
-	}; // eof sgrid_handle
-
+	typedef sgrid_handle_t< D > sgrid_handle;
 	typedef const sgrid_handle& ctor_param_t;
 	using base_t::data_;
 
 	// empty ctor
-	sgrid_ti_traits() : h_(NULL), cell_offs_(0) {}
+	sgrid_ti_traits_impl() : h_(NULL), cell_offs_(-1) {}
 
 	// std ctor
-	sgrid_ti_traits(const sgrid_handle& h)
-		: h_(&h), cell_offs_(0)
+	sgrid_ti_traits_impl(const sgrid_handle& h)
+		: h_(&h), cell_offs_(h_->size)
 	{}
 
 	void switch_cell(const ulong cell_id) {
@@ -384,17 +548,20 @@ struct sgrid_ti_traits : public carray_ti_buf_traits< iterator_type, (1 << D) * 
 		if(cell_id >= h_->size)
 			return;
 
-		cell_offs_ = sgrid_handle::cell_id2offs(h_->nx, h_->ny, cell_id);
+		const ulong new_offs = h_->cell_id2offs(cell_id);
+		if(new_offs == cell_offs_)
+			return;
+		cell_offs_ = new_offs;
 		// copy cell data from sgrid to local buffer
 		for(ulong i = 0; i < cell_buf_sz; ++i)
-			data_[i] = *(h_->sgrid + cell_offs_ + h_->vidx[i]);
+			data_[i] = *(h_->sgrid + (cell_offs_ + h_->vidx[i]));
 	}
 
 	// subscript comes from base buffer class
 
 	// assign only iterators belonging to the same mesh!
 	// or, more precisely, to mesh with identical dimensions
-	void assign(const sgrid_ti_traits& rhs) {
+	void assign(const sgrid_ti_traits_impl& rhs) {
 		h_ = rhs.h_;
 		cell_offs_ = rhs.cell_offs_;
 		// assign data buffer
@@ -418,15 +585,28 @@ struct sgrid_ti_traits : public carray_ti_buf_traits< iterator_type, (1 << D) * 
 	// update1: store pointer to sgrid_handle
 	const sgrid_handle* h_;
 	ulong cell_offs_;
+};
 
-//private:
-//	// solely for empty ctor
-//	static const sgrid_handle& dumb_sh() {
-//		static const sgrid_handle h = {
-//			vf_iterator(), 0, 0, 0
-//		};
-//		return h;
-//	}
+// classic sgrid
+template< class iterator_type, uint D >
+struct sgrid_ti_traits : public sgrid_ti_traits_impl< iterator_type, D > {
+	typedef sgrid_ti_traits_impl< iterator_type, D > impl_t;
+	typedef typename impl_t::sgrid_handle sgrid_handle;
+
+	sgrid_ti_traits() : impl_t() {}
+
+	sgrid_ti_traits(const sgrid_handle& h) : impl_t(h) {}
+};
+
+// rectangular grid
+template< class iterator_type, uint D >
+struct rgrid_ti_traits : public sgrid_ti_traits_impl< iterator_type, D, rgrid_handle > {
+	typedef sgrid_ti_traits_impl< iterator_type, D, rgrid_handle > impl_t;
+	typedef typename impl_t::sgrid_handle sgrid_handle;
+
+	rgrid_ti_traits() : impl_t() {}
+
+	rgrid_ti_traits(const sgrid_handle& h) : impl_t(h) {}
 };
 
 }} /* blue_sky::wpi */

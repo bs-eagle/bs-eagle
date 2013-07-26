@@ -10,6 +10,7 @@
 #define WPI_STRATEGY_2D_C5EHIKCY
 
 #include "wpi_common.h"
+#include "bos_report.h"
 #include <CGAL/Bbox_2.h>
 #include <CGAL/Polygon_2.h>
 
@@ -180,14 +181,22 @@ struct strategy_2d_ex {
 
 		xpoints_list res;
 		for(ulong i = 0; i < 4; ++i) {
-			Object xres = CGAL::intersection(p.edge(i), well_seg);
-			// in 99% of cases we should get a point of intersection
-			if(const Point* xpoint = CGAL::object_cast< Point >(&xres))
-				res.push_back(std::make_pair(*xpoint, i));
-			else if(const Segment* xseg = CGAL::object_cast< Segment >(&xres)) {
-				// in rare 1% of segment lying on the facet, add begin and end of segment
-				res.push_back(std::make_pair(xseg->source(), i));
-				res.push_back(std::make_pair(xseg->target(), i));
+			try {
+				Object xres = CGAL::intersection(p.edge(i), well_seg);
+				// in 99% of cases we should get a point of intersection
+				if(const Point* xpoint = CGAL::object_cast< Point >(&xres))
+					res.push_back(std::make_pair(*xpoint, i));
+				else if(const Segment* xseg = CGAL::object_cast< Segment >(&xres)) {
+					// in rare 1% of segment lying on the facet, add begin and end of segment
+					res.push_back(std::make_pair(xseg->source(), i));
+					res.push_back(std::make_pair(xseg->target(), i));
+				}
+			}
+			catch(std::exception& e) {
+				BOSERR << "WARNING! wpi::strategy_2d::precise_intersection: " << e.what() << bs_end;
+			}
+			catch(...) {
+				BOSERR << "WARNING! wpi::strategy_2d::precise_intersection: unknown error" << bs_end;
 			}
 		}
 		return res;

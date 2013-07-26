@@ -31,11 +31,13 @@ typedef wpi::strategy_3d_ex< wpi::carray_traits >              carray_3d;
 typedef wpi::strategy_3d_ex< wpi::online_tops_traits >         onlinett_3d;
 typedef wpi::strategy_3d_ex< wpi::online_tops_traits_bufpool > onlinett_bp_3d;
 typedef wpi::strategy_3d_ex< wpi::sgrid_traits >               sgrid_3d;
+typedef wpi::strategy_3d_ex< wpi::rgrid_traits >               rgrid_3d;
 
 typedef wpi::strategy_2d_ex< wpi::carray_traits >              carray_2d;
 typedef wpi::strategy_2d_ex< wpi::online_tops_traits >         onlinett_2d;
 typedef wpi::strategy_2d_ex< wpi::online_tops_traits_bufpool > onlinett_bp_2d;
 typedef wpi::strategy_2d_ex< wpi::sgrid_traits >               sgrid_2d;
+typedef wpi::strategy_2d_ex< wpi::rgrid_traits >               rgrid_2d;
 
 template< class strat_t >
 spv_ulong where_is_points_impl(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
@@ -196,6 +198,11 @@ spv_float well_path_ident(t_long nx, t_long ny, sp_obj trimesh_backend,
 			nx, ny, trimesh_backend, well_info, include_well_nodes
 		);
 	}
+	else if(strcmp(strat_traits, "rgrid") == 0) {
+		return  wpi::algo< rgrid_3d >::well_path_ident_d< true >(
+			nx, ny, trimesh_backend, well_info, include_well_nodes
+		);
+	}
 	else {
 		// fallback to carray traits
 		return  wpi::algo< carray_3d >::well_path_ident_d< true >(
@@ -247,6 +254,11 @@ spv_float well_path_ident_2d(t_long nx, t_long ny, sp_obj trimesh_backend,
 	}
 	else if(strcmp(strat_traits, "sgrid") == 0) {
 		return  wpi::algo< sgrid_2d >::well_path_ident_d< true >(
+			nx, ny, trimesh_backend, well_info, include_well_nodes
+		);
+	}
+	else if(strcmp(strat_traits, "rgrid") == 0) {
+		return  wpi::algo< rgrid_2d >::well_path_ident_d< true >(
 			nx, ny, trimesh_backend, well_info, include_well_nodes
 		);
 	}
@@ -382,6 +394,12 @@ bp::tuple enum_border_facets_vtk(t_long nx, t_long ny, sp_obj trim_backend,
 			min_split_threshold, facet_filter
 		);
 	}
+	else if(strcmp(strat_traits, "rgrid") == 0) {
+		return enum_border_facets_vtk_impl< rgrid_3d >(
+			nx, ny, trim_backend, mask, slice_dim, slice_idx,
+			min_split_threshold, facet_filter
+		);
+	}
 	else {
 		// fallback to carray traits
 		return enum_border_facets_vtk_impl< carray_3d >(
@@ -410,6 +428,12 @@ bp::tuple enum_border_edges_vtk(t_long nx, t_long ny, sp_obj trim_backend,
 	}
 	else if(strcmp(strat_traits, "sgrid") == 0) {
 		return enum_border_edges_vtk_impl< sgrid_3d >(
+			nx, ny, trim_backend, mask, slice_dim, slice_idx,
+			min_split_threshold, facet_filter
+		);
+	}
+	else if(strcmp(strat_traits, "rgrid") == 0) {
+		return enum_border_edges_vtk_impl< rgrid_3d >(
 			nx, ny, trim_backend, mask, slice_dim, slice_idx,
 			min_split_threshold, facet_filter
 		);

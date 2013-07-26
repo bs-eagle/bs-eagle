@@ -5,6 +5,11 @@
 #include <iostream>
 
 #include "conf.h"
+#include "wpi_iface.h"
+#include "wpi_trimesh_impl.h"
+#include "wpi_algo.h"
+#include "wpi_algo_vtk.h"
+
 #include "export_python_wrapper.h"
 
 namespace bp = boost::python;
@@ -117,7 +122,62 @@ t_float find_point_z(point3d N1, point3d N2, point3d N3, point2d M)
    return z;
 }
 
+using namespace blue_sky;
 
+typedef wpi::strategy_3d_ex< wpi::carray_traits >              carray_3d;
+typedef wpi::strategy_3d_ex< wpi::online_tops_traits >         onlinett_3d;
+typedef wpi::strategy_3d_ex< wpi::online_tops_traits_bufpool > onlinett_bp_3d;
+typedef wpi::strategy_3d_ex< wpi::sgrid_traits >               sgrid_3d;
+typedef wpi::strategy_3d_ex< wpi::rgrid_traits >               rgrid_3d;
+
+//typedef wpi::strategy_2d_ex< wpi::carray_traits >              carray_2d;
+//typedef wpi::strategy_2d_ex< wpi::online_tops_traits >         onlinett_2d;
+//typedef wpi::strategy_2d_ex< wpi::online_tops_traits_bufpool > onlinett_bp_2d;
+//typedef wpi::strategy_2d_ex< wpi::sgrid_traits >               sgrid_2d;
+//typedef wpi::strategy_2d_ex< wpi::rgrid_traits >               rgrid_2d;
+
+struct tops_adapter_iface {
+   //virtual create_trimesh(const ulong, const ulong, const sp_obj&) = 0;
+   virtual t_float ss(const ulong) const = 0;
+   virtual ~tops_adapter_iface() {};
+};
+typedef st_smart_ptr< tops_adapter_iface > sp_tops_adapter;
+
+template< class strat_t >
+struct tops_adapter : public tops_adapter_iface {
+   typedef wpi::pods< strat_t > pods_t;
+   typedef typename pods_t::trimesh trimesh;
+
+   tops_adapter(const ulong nx, const ulong ny, const sp_obj& trim_backend)
+      : M_(nx, ny, trim_backend)
+   {}
+
+   t_float ss(const ulong idx) const {
+      return *(M_.begin() + idx);
+   }
+
+   trimesh M_;
+};
+
+sp_tops_adapter create_tops_adapter_3d(
+   const ulong nx, const ulong ny, const sp_obj& trim_backend, const char* strat_traits
+) {
+   if(strcmp(strat_traits, "online_tops") == 0) {
+      return new tops_adapter< onlinett_3d >(nx, ny, trim_backend);
+   }
+   else if(strcmp(strat_traits, "online_tops_bufpool") == 0) {
+      return new tops_adapter< onlinett_bp_3d >(nx, ny, trim_backend);
+   }
+   else if(strcmp(strat_traits, "sgrid") == 0) {
+      return new tops_adapter< sgrid_3d >(nx, ny, trim_backend);
+   }
+   else if(strcmp(strat_traits, "rgrid") == 0) {
+      return new tops_adapter< rgrid_3d >(nx, ny, trim_backend);
+   }
+   else {
+      return new tops_adapter< carray_3d >(nx, ny, trim_backend);
+   }
+}
 
 // finds well-mesh intersection
 // returns mesh_points, well_points
@@ -125,10 +185,12 @@ bp::tuple make_projection(t_ulong nx, t_ulong ny, t_ulong nz,
                           spv_int indices_, spv_int faces_,
                           spv_int internal_,
                           spv_float x_, spv_float y_,
-                          spv_float tops_, spv_float values_,
-                          t_ulong z_start, t_ulong z_end)
+                          sp_obj tops_, spv_float values_,
+                          t_ulong z_start, t_ulong z_end,
+                          const char* strat_traits = "carray")
 {
-    v_float& tops = *tops_;
+    sp_tops_adapter tops = create_tops_adapter_3d(nx, ny, tops_, strat_traits);
+    //v_float& tops = *tops_;
     v_float& values = *values_;
     v_float& cross_x = *x_;
     v_float& cross_y = *y_;
@@ -211,9 +273,9 @@ bp::tuple make_projection(t_ulong nx, t_ulong ny, t_ulong nz,
 
         for (j=0;j<3;j++)
         {
-          P[j].x = tops[8*3*index + 3*j];
-          P[j].y = tops[8*3*index + 3*j + 1];
-          P[j].z = tops[8*3*index + 3*j + 2];
+           P[j].x = tops->ss(8*3*index + 3*j);
+           P[j].y = tops->ss(8*3*index + 3*j + 1);
+           P[j].z = tops->ss(8*3*index + 3*j + 2);
         }
        
         z1 = find_point_z(P[0],P[1], P[2], M[0]);
@@ -232,9 +294,9 @@ bp::tuple make_projection(t_ulong nx, t_ulong ny, t_ulong nz,
 
            for (j=4;j<7;j++)
            {
-              P[j].x = tops[8*3*index + 3*j];
-              P[j].y = tops[8*3*index + 3*j + 1];
-              P[j].z = tops[8*3*index + 3*j + 2];
+              P[j].x = tops->ss(8*3*index + 3*j);
+              P[j].y = tops->ss(8*3*index + 3*j + 1);
+              P[j].z = tops->ss(8*3*index + 3*j + 2);
            }
            
            z2 = find_point_z(P[4],P[5], P[6], M[0]);
@@ -296,14 +358,14 @@ bp::tuple make_projection(t_ulong nx, t_ulong ny, t_ulong nz,
         index = z_start + my.y*nz + my.x*nz*ny;
 
         j = corners[0];
-        P[j].x = tops[8*3*index + 3*j];
-        P[j].y = tops[8*3*index + 3*j + 1];
-        P[j].z = tops[8*3*index + 3*j + 2];
+        P[j].x = tops->ss(8*3*index + 3*j);
+        P[j].y = tops->ss(8*3*index + 3*j + 1);
+        P[j].z = tops->ss(8*3*index + 3*j + 2);
 
         j = corners[1];
-        P[j].x = tops[8*3*index + 3*j];
-        P[j].y = tops[8*3*index + 3*j + 1];
-        P[j].z = tops[8*3*index + 3*j + 2];
+        P[j].x = tops->ss(8*3*index + 3*j);
+        P[j].y = tops->ss(8*3*index + 3*j + 1);
+        P[j].z = tops->ss(8*3*index + 3*j + 2);
 
         z1 = find_edge_point_z(M[0], M[1], P[corners[0]], P[corners[1]]);
 
@@ -321,14 +383,14 @@ bp::tuple make_projection(t_ulong nx, t_ulong ny, t_ulong nz,
            vals.push_back(values[index]);
 
            j = corners[2];
-           P[j].x = tops[8*3*index + 3*j];
-           P[j].y = tops[8*3*index + 3*j + 1];
-           P[j].z = tops[8*3*index + 3*j + 2];
+           P[j].x = tops->ss(8*3*index + 3*j);
+           P[j].y = tops->ss(8*3*index + 3*j + 1);
+           P[j].z = tops->ss(8*3*index + 3*j + 2);
            
            j = corners[3];
-           P[j].x = tops[8*3*index + 3*j];
-           P[j].y = tops[8*3*index + 3*j + 1];
-           P[j].z = tops[8*3*index + 3*j + 2];
+           P[j].x = tops->ss(8*3*index + 3*j);
+           P[j].y = tops->ss(8*3*index + 3*j + 1);
+           P[j].z = tops->ss(8*3*index + 3*j + 2);
            
            z2 = find_edge_point_z(M[0], M[1], P[corners[2]], P[corners[3]]);
 
@@ -379,14 +441,14 @@ bp::tuple make_projection(t_ulong nx, t_ulong ny, t_ulong nz,
     if (face_out != 4)
     {
        j = corners[0];
-       P[j].x = tops[8*3*index + 3*j];
-       P[j].y = tops[8*3*index + 3*j + 1];
-       P[j].z = tops[8*3*index + 3*j + 2];
+       P[j].x = tops->ss(8*3*index + 3*j);
+       P[j].y = tops->ss(8*3*index + 3*j + 1);
+       P[j].z = tops->ss(8*3*index + 3*j + 2);
 
        j = corners[1];
-       P[j].x = tops[8*3*index + 3*j];
-       P[j].y = tops[8*3*index + 3*j + 1];
-       P[j].z = tops[8*3*index + 3*j + 2];
+       P[j].x = tops->ss(8*3*index + 3*j);
+       P[j].y = tops->ss(8*3*index + 3*j + 1);
+       P[j].z = tops->ss(8*3*index + 3*j + 2);
        
        z1 = find_edge_point_z(M[0], M[1], P[corners[0]], P[corners[1]]);
 
@@ -395,9 +457,9 @@ bp::tuple make_projection(t_ulong nx, t_ulong ny, t_ulong nz,
     {
        for (j=0;j<3;j++)
        {
-          P[j].x = tops[8*3*index + 3*j];
-          P[j].y = tops[8*3*index + 3*j + 1];
-          P[j].z = tops[8*3*index + 3*j + 2];
+          P[j].x = tops->ss(8*3*index + 3*j);
+          P[j].y = tops->ss(8*3*index + 3*j + 1);
+          P[j].z = tops->ss(8*3*index + 3*j + 2);
        }
        
        z1 = find_point_z(P[0],P[1], P[2], M[0]);
@@ -417,14 +479,14 @@ bp::tuple make_projection(t_ulong nx, t_ulong ny, t_ulong nz,
        if (face_out != 4)
        {
            j = corners[2];
-           P[j].x = tops[8*3*index + 3*j];
-           P[j].y = tops[8*3*index + 3*j + 1];
-           P[j].z = tops[8*3*index + 3*j + 2];
+           P[j].x = tops->ss(8*3*index + 3*j);
+           P[j].y = tops->ss(8*3*index + 3*j + 1);
+           P[j].z = tops->ss(8*3*index + 3*j + 2);
            
            j = corners[3];
-           P[j].x = tops[8*3*index + 3*j];
-           P[j].y = tops[8*3*index + 3*j + 1];
-           P[j].z = tops[8*3*index + 3*j + 2];
+           P[j].x = tops->ss(8*3*index + 3*j);
+           P[j].y = tops->ss(8*3*index + 3*j + 1);
+           P[j].z = tops->ss(8*3*index + 3*j + 2);
 
            z2 = find_edge_point_z(M[0], M[1], P[corners[2]], P[corners[3]]);
        }
@@ -432,9 +494,9 @@ bp::tuple make_projection(t_ulong nx, t_ulong ny, t_ulong nz,
        {
            for (j=4;j<7;j++)
            {
-              P[j].x = tops[8*3*index + 3*j];
-              P[j].y = tops[8*3*index + 3*j + 1];
-              P[j].z = tops[8*3*index + 3*j + 2];
+              P[j].x = tops->ss(8*3*index + 3*j);
+              P[j].y = tops->ss(8*3*index + 3*j + 1);
+              P[j].z = tops->ss(8*3*index + 3*j + 2);
            }
            z2 = find_point_z(P[4],P[5], P[6], M[0]);
        }
@@ -460,9 +522,10 @@ bp::tuple make_projection(t_ulong nx, t_ulong ny, t_ulong nz,
 }
 namespace blue_sky { namespace python {
 
- 
+BOOST_PYTHON_FUNCTION_OVERLOADS(make_projection_overl, make_projection, 12, 13)
+
 void py_export_well_edit() {
-    def("make_projection", &make_projection);
+    def("make_projection", &make_projection, make_projection_overl());
 }
 
 }} 	// eof blue_sky::python

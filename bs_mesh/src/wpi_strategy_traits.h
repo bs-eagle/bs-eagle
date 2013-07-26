@@ -85,6 +85,15 @@ struct sgrid_traits : public online_tops_traits< D_ > {
 	}
 };
 
+template< uint D_ >
+struct rgrid_traits : public online_tops_traits< D_ > {
+	typedef tops_iterator< rgrid_ti_traits, D_ > cell_vertex_iterator;
+
+	static const char* name() {
+		return "rgrid";
+	}
+};
+
 }} /* blue_sky::wpi */
 
 #endif /* end of include guard: WPI_ONLINE_TOPS_TRAITS_U2022LJY */

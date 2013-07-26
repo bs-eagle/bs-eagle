@@ -41,14 +41,13 @@ struct algo_vtk : helpers< strat_t > {
 	using base_t::decode_cell_id;
 
 	/*-----------------------------------------------------------------
-	 * vtk index storage backend for facets and edges
+	 * vertex handles to help store unique vertices depending on strat_traits
 	 *----------------------------------------------------------------*/
-
-	// helper structure for filtering vertices
+	// classic vertex handle contains full point coords
+	// unique check is based on comparing these coords (slow)
+	// needs an extra exporting stage to fill offsets in resulting array
+	// of unique points
 	struct vertex_handle {
-		typedef std::set< vertex_handle > vertex_storage;
-		typedef typename vertex_storage::iterator vertex_iterator;
-
 		// position of vertex coordinates
 		cell_vertex_iterator pv_;
 		// offset of this handle in vertex storage
@@ -73,33 +72,13 @@ struct algo_vtk : helpers< strat_t > {
 				pv_, pv_ + D, rhs.pv_, rhs.pv_ + D
 			);
 		}
-
-		static vertex_iterator push_back(vertex_storage& vs, const vertex_handle& vh) {
-			return vs.insert(vh).first;
-		}
-
-		static spv_float export_vertex_storage(trimesh&, vertex_storage& vs) {
-			// export array of unique points and calc their offsets
-			spv_float points = BS_KERNEL.create_object(v_float::bs_type());
-			points->resize(vs.size() * D);
-			v_float::iterator p_dst = points->begin();
-			ulong cnt = 0;
-			for(vertex_iterator p_src = vs.begin(), end = vs.end(); p_src != end; ++p_src, ++cnt) {
-				p_dst = std::copy(p_src->pv_, p_src->pv_ + D, p_dst);
-				const_cast< vertex_handle& >(*p_src).offs = cnt;
-			}
-			return points;
-		}
-
-		//const cell_vertex_iterator& ptr() const {
-		//	return pv_;
-		//}
 	};
 
+	// vertex handle for structured grids
+	// in sgrid we now vertex offset beforehand (via backend_index())
+	// and this offset allow to make unique check (fast)
+	// also latter stage of filling offsets isn't needed
 	struct vertex_handle_sgrid {
-		typedef std::list< vertex_handle_sgrid > vertex_storage;
-		typedef typename vertex_storage::iterator vertex_iterator;
-
 		// we don't need to store anything besides cell index in sgrid
 		ulong offs;
 
@@ -116,8 +95,46 @@ struct algo_vtk : helpers< strat_t > {
 			return offs < rhs.offs ? -1 :
 				(offs == rhs.offs ? 0 : 1);
 		}
+	};
 
-		static vertex_iterator push_back(vertex_storage& vs, const vertex_handle_sgrid& vh) {
+	/*-----------------------------------------------------------------
+	 * helper to decide what implementation of vertex_handle to use
+	 * depending on strategy traits
+	 *----------------------------------------------------------------*/
+	// classic implementation for tops-like calculated arrays
+	template< class strat_traits, class = void >
+	struct choose_vertex_handle {
+		typedef vertex_handle type;
+		typedef std::set< type > vertex_storage;
+		typedef typename vertex_storage::iterator vertex_iterator;
+
+		static vertex_iterator push_back(vertex_storage& vs, const type& vh) {
+			return vs.insert(vh).first;
+		}
+
+		static spv_float export_vertex_storage(trimesh&, vertex_storage& vs) {
+			// export array of unique points and calc their offsets
+			spv_float points = BS_KERNEL.create_object(v_float::bs_type());
+			points->resize(vs.size() * D);
+			v_float::iterator p_dst = points->begin();
+			ulong cnt = 0;
+			for(vertex_iterator p_src = vs.begin(), end = vs.end(); p_src != end; ++p_src, ++cnt) {
+				p_dst = std::copy(p_src->pv_, p_src->pv_ + D, p_dst);
+				const_cast< type& >(*p_src).offs = cnt;
+			}
+			return points;
+		}
+	};
+	// select sepcial impl for sgrid-based strategy
+	// don't need to check if point is unique, so use list
+	// export stage is noop and returns backend sgrid
+	template< class unused >
+	struct choose_vertex_handle< sgrid_traits< D >, unused > {
+		typedef vertex_handle_sgrid type;
+		typedef std::list< vertex_handle_sgrid > vertex_storage;
+		typedef typename vertex_storage::iterator vertex_iterator;
+
+		static vertex_iterator push_back(vertex_storage& vs, const type& vh) {
 			return vs.insert(vs.end(), vh);
 		}
 
@@ -126,26 +143,47 @@ struct algo_vtk : helpers< strat_t > {
 			return M.backend();
 		}
 	};
-
-	// helper to decide what implementation of vertex_handle to use
-	// depending on strategy
-	template< class strat_traits, class = void >
-	struct choose_vertex_handle {
-		typedef vertex_handle type;
-	};
-	// select sepcial impl for sgrid-based strategy
+	// rectangular grid is special case of sgrid, when backend sgrid array doesn't
+	// really exists and is calculated on-the-fly
+	// that's why we need to store unique points and need exporting stage
 	template< class unused >
-	struct choose_vertex_handle< sgrid_traits< D >, unused > {
+	struct choose_vertex_handle< rgrid_traits< D >, unused > {
 		typedef vertex_handle_sgrid type;
+		typedef std::set< vertex_handle_sgrid > vertex_storage;
+		typedef typename vertex_storage::iterator vertex_iterator;
+
+		static vertex_iterator push_back(vertex_storage& vs, const type& vh) {
+			return vs.insert(vh).first;
+		}
+
+		static spv_float export_vertex_storage(trimesh& M, vertex_storage& vs) {
+			// export array of unique points and calc their offsets
+			spv_float points = BS_KERNEL.create_object(v_float::bs_type());
+			points->resize(vs.size() * D);
+			v_float::iterator p_dst = points->begin();
+			ulong cnt = 0;
+			for(vertex_iterator p_src = vs.begin(), end = vs.end(); p_src != end; ++p_src, ++cnt) {
+				for(uint i = 0; i < D; ++i)
+					// NOTE: we need to subscript over rgrid's backend (which is actually
+					// sgrid-like adapter), because p_src stores BACKEND offset
+					*p_dst++ = M.backend_ss(p_src->offs * 3 + i);
+				// rewrite offset so that it points to correct point in exported array
+				const_cast< type& >(*p_src).offs = cnt;
+			}
+			return points;
+		}
 	};
 
-	//typedef std::set< vertex_handle > vertex_storage;
-	typedef typename choose_vertex_handle< typename strat_t::traits_t >::type vertex_handle_t;
-	typedef typename vertex_handle_t::vertex_storage vertex_storage;
+	typedef choose_vertex_handle< typename strat_t::traits_t > vh_traits;
+	typedef typename vh_traits::type vertex_handle_t;
+	typedef typename vh_traits::vertex_storage vertex_storage;
 	typedef typename vertex_storage::iterator vertex_iterator;
 	typedef typename vertex_storage::const_iterator vertex_citerator;
 	//typedef std::pair< vertex_iterator, bool > ins_res;
 
+	/*-----------------------------------------------------------------
+	 * vtk index storage backend for facets and edges
+	 *----------------------------------------------------------------*/
 	// implementation for drawing facets using vtkQuad
 	template< int prim_id, class unused = void >
 	struct vtk_index_backend {
@@ -178,7 +216,7 @@ struct algo_vtk : helpers< strat_t > {
 				// save only unique vertices
 				p_cell = tops_ + v[i]*3;
 				idx_.push_back(
-					vertex_handle_t::push_back(vs_, p_cell)
+					vh_traits::push_back(vs_, p_cell)
 					//vs_.insert(vertex_handle(tops_ + v[i]*3)).first
 				);
 			}
@@ -190,7 +228,7 @@ struct algo_vtk : helpers< strat_t > {
 
 		spv_float get_points() {
 			// export unque points
-			return vertex_handle_t::export_vertex_storage(M_, vs_);
+			return vh_traits::export_vertex_storage(M_, vs_);
 		}
 
 		// return VTK primitives indices for vtkCellArray and cell indices in cell_ids
@@ -285,8 +323,8 @@ struct algo_vtk : helpers< strat_t > {
 				e_finish = tops_ + v[i + 1]*3;
 				cnt += push_edge(edge_handle(
 					cell_id, facet_id,
-					vertex_handle_t::push_back(vs_, e_start),
-					vertex_handle_t::push_back(vs_, e_finish)
+					vh_traits::push_back(vs_, e_start),
+					vh_traits::push_back(vs_, e_finish)
 					//vs_.insert(tops_ + v[i]*3).first, vs_.insert(tops_ + v[i + 1]*3).first
 				));
 			}
@@ -295,8 +333,8 @@ struct algo_vtk : helpers< strat_t > {
 				e_finish = tops_ + v[n_fv - 1]*3;
 				cnt += push_edge(edge_handle(
 					cell_id, facet_id,
-					vertex_handle_t::push_back(vs_, e_start),
-					vertex_handle_t::push_back(vs_, e_finish)
+					vh_traits::push_back(vs_, e_start),
+					vh_traits::push_back(vs_, e_finish)
 					//vs_.insert(tops_ + v[0]*3).first, vs_.insert(tops_ + v[n_fv - 1]*3).first
 				));
 			}
@@ -306,7 +344,7 @@ struct algo_vtk : helpers< strat_t > {
 
 		spv_float get_points() {
 			// export unque points
-			return vertex_handle_t::export_vertex_storage(M_, vs_);
+			return vh_traits::export_vertex_storage(M_, vs_);
 		}
 
 		spv_long get_index(spv_long cell_ids) {

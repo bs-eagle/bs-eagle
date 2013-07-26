@@ -10,6 +10,7 @@
 #define WPI_STRATEGY_3D_SJLKT8NL
 
 #include "wpi_common.h"
+#include "bos_report.h"
 #include <CGAL/Bbox_3.h>
 
 namespace blue_sky { namespace wpi {
@@ -297,17 +298,26 @@ struct strategy_3d_ex {
 		//Segment s = w.segment();
 		uint tri_count = 0;
 		for(tri_iterator tri = c.cover.begin(), end = c.cover.end(); tri != end; ++tri, ++tri_count) {
-			// test intersection
-			//if(!CGAL::do_intersect(well_seg, *tri)) continue;
-			// really do intersection
-			Object xres = CGAL::intersection(well_seg, *tri);
-			// in 99% of cases we should get a point of intersection
-			if(const Point* xpoint = CGAL::object_cast< Point >(&xres))
-				res.push_back(std::make_pair(*xpoint, tri_count >> 1));
-			else if(const Segment* xseg = CGAL::object_cast< Segment >(&xres)) {
-				// in rare 1% of segment lying on the facet, add begin and end of segment
-				res.push_back(std::make_pair(xseg->source(), tri_count >> 1));
-				res.push_back(std::make_pair(xseg->target(), tri_count >> 1));
+			try {
+				// test intersection
+				//if(!CGAL::do_intersect(well_seg, *tri)) continue;
+				// really do intersection
+				Object xres = CGAL::intersection(well_seg, *tri);
+				// in 99% of cases we should get a point of intersection
+				if(const Point* xpoint = CGAL::object_cast< Point >(&xres))
+					res.push_back(std::make_pair(*xpoint, tri_count >> 1));
+				else if(const Segment* xseg = CGAL::object_cast< Segment >(&xres)) {
+					// in rare 1% of segment lying on the facet, add begin and end of segment
+					res.push_back(std::make_pair(xseg->source(), tri_count >> 1));
+					res.push_back(std::make_pair(xseg->target(), tri_count >> 1));
+				}
+			}
+			catch(const std::exception& e) {
+				BOSERR << "WARNING! wpi::strategy_3d::precise_intersection: " << e.what() << bs_end;
+			}
+			catch(...) {
+				BOSERR << "WARNING! wpi::strategy_3d::precise_intersection: unknown error" << bs_end;
+				//throw;
 			}
 		}
 		return res;

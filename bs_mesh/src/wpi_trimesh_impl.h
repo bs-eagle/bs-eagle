@@ -14,6 +14,7 @@
 #include "i_cant_link_2_mesh.h"
 #include "rs_smesh_iface.h"
 #include "coord_zcorn_tools.h"
+#include <iostream>
 
 namespace blue_sky { namespace detail { namespace wpi {
 using namespace blue_sky::wpi;
@@ -37,6 +38,9 @@ struct trimpl {
 	}
 	sp_obj backend() const {
 		return tops_;
+	}
+	t_float backend_ss(const ulong idx) const {
+		return *(begin() + idx);
 	}
 
 protected:
@@ -90,6 +94,9 @@ struct trimpl< online_tops_traits< D > > {
 	sp_obj backend() const {
 		return mesh_;
 	}
+	t_float backend_ss(const ulong idx) const {
+		return *(begin() + idx);
+	}
 
 protected:
 	sp_smesh mesh_;
@@ -128,6 +135,10 @@ struct trimpl_sgrid {
 	}
 	sp_obj backend() const {
 		return sgrid_;
+	}
+	t_float backend_ss(const ulong idx) const {
+		// NOTE: subscript over underlying sgrid
+		return *(h_.sgrid + idx);
 	}
 
 protected:
@@ -174,6 +185,107 @@ protected:
 
 template< uint D >
 struct trimpl< sgrid_traits< D > > : public trimpl_sgrid< sgrid_traits< D > > {};
+
+// specialization for rgrid_ti_traits
+// underlying structured grid array of size (nx + 1)*(ny + 1)*(nz + 1)
+// is calculated on-the-fly!
+template< class traits_t >
+struct trimpl_rgrid {
+	typedef typename traits_t::cell_vertex_iterator iterator_t;
+	typedef typename iterator_t::strat_t::sgrid_handle sgrid_handle;
+	typedef typename v_float::const_iterator cvf_iterator;
+
+	iterator_t begin() const {
+		return iterator_t(h_);
+	}
+	iterator_t end() const {
+		return iterator_t(h_, h_.size);
+	}
+	sgrid_handle data() const {
+		return h_;
+	}
+	sp_obj backend() const {
+		return rgrid_;
+	}
+	t_float backend_ss(const ulong idx) const {
+		// NOTE: subscript over underlying sgrid
+		return *(h_.sgrid + idx);
+	}
+
+protected:
+	spv_float rgrid_;
+	sgrid_handle h_;
+
+	enum { D = traits_t::D };
+
+	void init(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
+		// TODO:
+		// implement proper initialization from COORD & ZCORN
+		// COORD, ZCORN -> sgrid -> nx, ny, nz, dx, dy, dz, x0, y0, z0 -> rgrid_handle
+	}
+
+	ulong init(t_long nx, t_long ny, const sp_obj& backend) {
+		// backend can come from Python and be array with different traits
+		// so try to steal buffer instead of direct assignment
+		//sgrid_ = backend;
+		smart_ptr< bs_arrbase< t_float > > cont(backend, bs_dynamic_cast());
+		if(!cont)
+			throw bs_exception("trimesh::impl", "Incompatible backend passed");
+		rgrid_ = BS_KERNEL.create_object(v_float::bs_type());
+		rgrid_->init_inplace(cont);
+
+		// sanity
+		if(!rgrid_->size())
+			throw bs_exception("trimesh::impl", "Rgrid backend with wrong dimensions passed");
+
+		// prepare rgrid_handle init data
+		ulong dim[D];
+		spv_float deltas[D];
+		t_float min_pt[D];
+		cvf_iterator pr = rgrid_->begin();
+		for(uint i = 0; i < D; ++i) {
+			// format: size along dim, min point, size of deltas array, deltas array
+			dim[i] = ulong(*pr++);
+			min_pt[i] = *pr++;
+			const ulong sz_dim = ulong(*pr++);
+
+			std::cout << "dim[i] = " << dim[i] << ", min_pt[i] = " << min_pt[i]
+				<< ", sz_dim = " << sz_dim << std::endl;
+			if(sz_dim == 0 || (sz_dim != 1 && sz_dim != dim[i])) {
+				throw bs_exception("trimesh::impl", "Rgrid backend with wrong data passed");
+			}
+			deltas[i] = BS_KERNEL.create_object(v_float::bs_type());
+			deltas[i]->resize(sz_dim);
+			std::copy(pr, pr + sz_dim, deltas[i]->begin());
+			pr += sz_dim;
+			std::cout << "deltas[i] = ";
+			for(cvf_iterator pd = deltas[i]->begin(); pd != deltas[i]->end(); ++pd)
+				std::cout << *pd << ' ';
+			std::cout << std::endl;
+		}
+		// check if we need to reverse X-Y-Z -> Z-Y-X order
+		if(pr != rgrid_->end() && ulong(*pr) == 1) {
+			//std::swap(dim[1], dim[2]);
+			//std::swap(deltas[1], deltas[2]);
+			//std::swap(min_pt[1], min_pt[2]);
+			std::reverse(&dim[0], &dim[D]);
+			std::reverse(&deltas[0], &deltas[D]);
+			std::reverse(&min_pt[0], &min_pt[D]);
+			std::cout << "trimesh::impl: reverse flag set!" << std::endl;
+		}
+
+		// init handle
+		h_.init(dim, deltas, min_pt);
+
+		if(D < 3)
+			return 0;
+		else
+			return dim[2];
+	}
+};
+
+template< uint D >
+struct trimpl< rgrid_traits< D > > : public trimpl_rgrid< rgrid_traits< D > > {};
 
 // bufpool-related strategies can utilize the same code :)
 // can't stop pushing the template limits :)
