@@ -7,11 +7,6 @@
 				 and rsvd keyword content
 */
 
-#ifdef EPS
-#undef EPS
-#endif // EPS
-#define EPS 1.e-10
-
 namespace blue_sky
   {
   /*!
