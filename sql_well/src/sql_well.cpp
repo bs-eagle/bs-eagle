@@ -879,7 +879,7 @@ COMMIT;\
         finalize_sql ();
       const char *ttt;
       int rc = 0;
-      
+
       rc = sqlite3_prepare_v2 (db, sql.c_str (), sql.length () + 1, &stmp_sql, &ttt);
       if (rc)
         {
@@ -1903,8 +1903,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               std::list<double>::const_iterator di_prev = di;
               di_prev--;
               double dt = *di - *di_prev;
-              printf ("TSTEP %lf\n", dt);
-              fprintf (fp, "TSTEP\n%lf\n/\n\n", dt);
+              printf ("TSTEP %.10lf \t DATETIME %.10lf\n", dt, *di);
+              fprintf (fp, "TSTEP\n%.10lf\n/\n\n", dt);
             }
 
           // WELSPECS only on first date
@@ -2074,7 +2074,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               std::string s_status;
               std::string s_phase = "WATER";
               std::string s_params;
-              
+
               if (status == STATUS_OPEN)
                 s_status = "OPEN";
               else
@@ -2089,17 +2089,17 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   s_phase = "GAS";
                   rate = i_gr;
                 }
-              
+
               if (rate > 0)
-                { 
-                  s_params = (boost::format("%s %s") % V2S(rate) % V2S(i_bhp)).str();   
+                {
+                  s_params = (boost::format("%s %s") % V2S(rate) % V2S(i_bhp)).str();
                 }
               else
                 {
-                  s_params = (boost::format("* %s") % V2S(i_bhp)).str();   
+                  s_params = (boost::format("* %s") % V2S(i_bhp)).str();
                 }
 
-                
+
               fprintf (fp, "\'%s\' \'%s\' \'%s\' %s ", s.c_str (), s_phase.c_str(), s_status.c_str(), s_params.c_str());
               fprintf (fp, "/\n");
             }
@@ -2143,7 +2143,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                 s_status = "OPEN";
               else
                 s_status = "SHUT";
-            
+
               s_ctrl = "BHP";
               // TODO: add injection phase into DB
               s_phase = "WATER";
@@ -2193,7 +2193,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             fprintf (fp, "/\n\n");
           finalize_sql ();
 
-          
+
 
           // WCONHIST
           sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND p_bhp > 0 AND ctrl > 1 ORDER BY well_name ASC", *di);
@@ -2395,7 +2395,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               else if (lim_p_bhp > 0)
                 fprintf (fp, "\'%s\' BHP %s ", s.c_str (), V2S(lim_p_bhp));
 
-             
+
               fprintf (fp, "/\n");
             }
           if (weltarg_flag)
