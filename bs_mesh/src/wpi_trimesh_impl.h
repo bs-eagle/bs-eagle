@@ -14,7 +14,7 @@
 #include "i_cant_link_2_mesh.h"
 #include "rs_smesh_iface.h"
 #include "coord_zcorn_tools.h"
-#include <iostream>
+//#include <iostream>
 
 namespace blue_sky { namespace detail { namespace wpi {
 using namespace blue_sky::wpi;
@@ -60,10 +60,9 @@ protected:
 	ulong init(t_ulong nx, t_ulong ny, const sp_obj& backend) {
 		// backend can come from Python and be array with different traits
 		// so try to steal buffer instead of direct assignment
-		//sgrid_ = backend;
 		smart_ptr< bs_arrbase< t_float > > cont(backend, bs_dynamic_cast());
 		if(!cont)
-			throw bs_exception("trimesh::impl", "Incompatible backend passed");
+			throw bs_exception("trimesh::impl", "Incompatible carray (raw tops) backend passed");
 		tops_ = BS_KERNEL.create_object(v_float::bs_type());
 		tops_->init_inplace(cont);
 
@@ -110,9 +109,9 @@ protected:
 	}
 
 	ulong init(t_ulong nx, t_ulong ny, const sp_obj& backend) {
-		mesh_ = backend;
+		assign_sp(mesh_, backend, bs_dynamic_cast());
 		if(!mesh_)
-			throw bs_exception("trimesh::impl", "Incompatible backend passed");
+			throw bs_exception("trimesh::impl", "Incompatible online_tops (rs_smesh_iface) backend passed");
 		return ulong(mesh_->get_n_elements() / (nx * ny));
 	}
 };
@@ -163,7 +162,7 @@ protected:
 		//sgrid_ = backend;
 		smart_ptr< bs_arrbase< t_float > > cont(backend, bs_dynamic_cast());
 		if(!cont)
-			throw bs_exception("trimesh::impl", "Incompatible backend passed");
+			throw bs_exception("trimesh::impl", "Incompatible sgrid backend passed");
 		sgrid_ = BS_KERNEL.create_object(v_float::bs_type());
 		sgrid_->init_inplace(cont);
 
@@ -227,10 +226,9 @@ protected:
 	ulong init(t_long nx, t_long ny, const sp_obj& backend) {
 		// backend can come from Python and be array with different traits
 		// so try to steal buffer instead of direct assignment
-		//sgrid_ = backend;
 		smart_ptr< bs_arrbase< t_float > > cont(backend, bs_dynamic_cast());
 		if(!cont)
-			throw bs_exception("trimesh::impl", "Incompatible backend passed");
+			throw bs_exception("trimesh::impl", "Incompatible rgrid backend passed");
 		rgrid_ = BS_KERNEL.create_object(v_float::bs_type());
 		rgrid_->init_inplace(cont);
 
@@ -249,8 +247,8 @@ protected:
 			min_pt[i] = *pr++;
 			const ulong sz_dim = ulong(*pr++);
 
-			std::cout << "dim[i] = " << dim[i] << ", min_pt[i] = " << min_pt[i]
-				<< ", sz_dim = " << sz_dim << std::endl;
+			//std::cout << "dim[i] = " << dim[i] << ", min_pt[i] = " << min_pt[i]
+			//	<< ", sz_dim = " << sz_dim << std::endl;
 			if(sz_dim == 0 || (sz_dim != 1 && sz_dim != dim[i])) {
 				throw bs_exception("trimesh::impl", "Rgrid backend with wrong data passed");
 			}
@@ -258,20 +256,17 @@ protected:
 			deltas[i]->resize(sz_dim);
 			std::copy(pr, pr + sz_dim, deltas[i]->begin());
 			pr += sz_dim;
-			std::cout << "deltas[i] = ";
-			for(cvf_iterator pd = deltas[i]->begin(); pd != deltas[i]->end(); ++pd)
-				std::cout << *pd << ' ';
-			std::cout << std::endl;
+			//std::cout << "deltas[i] = ";
+			//for(cvf_iterator pd = deltas[i]->begin(); pd != deltas[i]->end(); ++pd)
+			//	std::cout << *pd << ' ';
+			//std::cout << std::endl;
 		}
 		// check if we need to reverse X-Y-Z -> Z-Y-X order
-		if(pr != rgrid_->end() && ulong(*pr) == 1) {
-			//std::swap(dim[1], dim[2]);
-			//std::swap(deltas[1], deltas[2]);
-			//std::swap(min_pt[1], min_pt[2]);
+		if(pr != rgrid_->end() && int(rgrid_->ss(rgrid_->size() - 1)) == 1) {
 			std::reverse(&dim[0], &dim[D]);
 			std::reverse(&deltas[0], &deltas[D]);
 			std::reverse(&min_pt[0], &min_pt[D]);
-			std::cout << "trimesh::impl: reverse flag set!" << std::endl;
+			//std::cout << "trimesh::impl: reverse flag set!" << std::endl;
 		}
 
 		// init handle
