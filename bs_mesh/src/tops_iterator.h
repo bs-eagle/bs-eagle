@@ -113,16 +113,20 @@ public:
 
 	// random-access operations
 	// Element access operator can destroy iterator position!
-	reference operator[](const difference_type n) {
-		switch_pos(pos_);
-		if(ulong(offs_ + n) < n_cell_pts)
-			return strat_t::ss(offs_ + n);
-			//return data_[offs_ + n];
-		else {
-			switch_pos(pos_ + n);
-			return strat_t::ss(offs_);
-			//return data_[offs_];
-		}
+	//reference operator[](const difference_type n) {
+	//	switch_pos(pos_);
+	//	if(ulong(offs_ + n) < n_cell_pts)
+	//		return strat_t::ss(offs_ + n);
+	//		//return data_[offs_ + n];
+	//	else {
+	//		switch_pos(pos_ + n);
+	//		return strat_t::ss(offs_);
+	//		//return data_[offs_];
+	//	}
+	//}
+
+	value_type operator[](const difference_type n) const {
+		return *(*this + n);
 	}
 
 	tops_iterator& operator+=(const difference_type n) {
