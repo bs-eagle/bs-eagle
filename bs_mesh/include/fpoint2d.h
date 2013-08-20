@@ -6,6 +6,7 @@
 	\author Iskhakov Ruslan
 	\date 2008-05-01 */
 #include <array>
+#include <math.h>
 
 namespace grd_ecl
   {
