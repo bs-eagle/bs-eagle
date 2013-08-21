@@ -138,6 +138,7 @@ typedef wpi::strategy_3d_ex< wpi::rgrid_traits >               rgrid_3d;
 
 // finds well-mesh intersection
 // returns mesh_points, well_points
+// pass NULL values_ pointer to return indexes instead of scalars
 template< class strat_t >
 bp::tuple make_projection_impl(t_ulong nx, t_ulong ny, t_ulong nz,
                           spv_int indices_, spv_int faces_,
@@ -153,10 +154,14 @@ bp::tuple make_projection_impl(t_ulong nx, t_ulong ny, t_ulong nz,
 
     trimesh triM(nx, ny, trim_backend);
     cell_vertex_iterator tops = triM.begin();
-    //sp_tops_adapter tops = create_tops_adapter_3d(nx, ny, tops_, strat_traits);
-    //v_float& tops = *tops_;
 
-    v_float& values = *values_;
+    bool return_val_idx = false;
+    t_float const* values = NULL;
+    if(values_)
+       values = &values_->ss(0);
+    else
+       return_val_idx = true;
+
     v_float& cross_x = *x_;
     v_float& cross_y = *y_;
     v_int& indices = *indices_;
@@ -174,6 +179,7 @@ bp::tuple make_projection_impl(t_ulong nx, t_ulong ny, t_ulong nz,
     n_z_points = z_end-z_start+2;
 
     list <t_float> points, wpoints, vals;
+    list< ulong > vals_idx;
 
     spv_float proj_mesh, well_points, scalars;
 
@@ -264,7 +270,10 @@ bp::tuple make_projection_impl(t_ulong nx, t_ulong ny, t_ulong nz,
               index = z + my.y * nz + my.x * nz * ny;
            //index = z + my.y*nz + my.x*nz*ny;
 
-           vals.push_back(values[index]);
+           if(return_val_idx)
+              vals_idx.push_back(index);
+           else
+              vals.push_back(values[index]);
 
            for (j=4;j<7;j++)
            {
@@ -362,7 +371,10 @@ bp::tuple make_projection_impl(t_ulong nx, t_ulong ny, t_ulong nz,
               index = z + my.y * nz + my.x * nz * ny;
            //index = z + my.y*nz + my.x*nz*ny;
            
-           vals.push_back(values[index]);
+           if(return_val_idx)
+              vals_idx.push_back(index);
+           else
+              vals.push_back(values[index]);
 
            j = corners[2];
            P[j].x = tops[8*3*index + 3*j];
@@ -497,15 +509,26 @@ bp::tuple make_projection_impl(t_ulong nx, t_ulong ny, t_ulong nz,
     n_points = points.size();
     proj_mesh->resize (n_points);
     well_points->resize (wpoints.size());
-    scalars->resize (vals.size());
 
     copy(points.begin(), points.end(), &(*proj_mesh)[0]);
     copy(wpoints.begin(), wpoints.end(), &(*well_points)[0]);
-    copy(vals.begin(), vals.end(), &(*scalars)[0]);
+
+    spv_ulong scalars_idx = BS_KERNEL.create_object(v_ulong::bs_type());
+    if(return_val_idx) {
+       scalars_idx->resize(vals_idx.size());
+       copy(vals_idx.begin(), vals_idx.end(), scalars_idx->begin());
+    }
+    else {
+      scalars->resize (vals.size());
+      copy(vals.begin(), vals.end(), &(*scalars)[0]);
+    }
 
     n_l_points = points.size()/n_z_points/2;
 
-    return bp::make_tuple(proj_mesh, well_points, scalars, n_z_points, n_l_points); 
+    if(return_val_idx)
+      return bp::make_tuple(proj_mesh, well_points, scalars_idx, n_z_points, n_l_points);
+    else
+      return bp::make_tuple(proj_mesh, well_points, scalars, n_z_points, n_l_points);
 
 }  // eof make_projection_impl()
 
@@ -517,37 +540,50 @@ bp::tuple make_projection(t_ulong nx, t_ulong ny, t_ulong nz,
                           spv_int indices_, spv_int faces_,
                           spv_int internal_,
                           spv_float x_, spv_float y_,
-                          sp_obj tops_, spv_float values_,
+                          spv_float tops_, spv_float values_,
+                          t_ulong z_start, t_ulong z_end)
+{
+   return make_projection_impl< carray_3d >(nx, ny, nz, indices_, faces_,
+      internal_, x_, y_, tops_, values_, z_start, z_end, false);
+}
+
+// XYZ tops direction on
+// return indexes instead of scalar values
+bp::tuple make_projection_xyz(t_ulong nx, t_ulong ny, t_ulong nz,
+                          spv_int indices_, spv_int faces_,
+                          spv_int internal_,
+                          spv_float x_, spv_float y_,
+                          sp_obj trim_backend,
                           t_ulong z_start, t_ulong z_end,
-                          const char* strat_traits = "carray",
-                          bool xyz_order = false)
+                          const char* strat_traits = "carray")
 {
    if(strcmp(strat_traits, "online_tops") == 0) {
       return make_projection_impl< onlinett_3d >(nx, ny, nz, indices_, faces_,
-         internal_, x_, y_, tops_, values_, z_start, z_end, xyz_order);
+         internal_, x_, y_, trim_backend, NULL, z_start, z_end, true);
    }
    else if(strcmp(strat_traits, "online_tops_bufpool") == 0) {
       return make_projection_impl< onlinett_bp_3d >(nx, ny, nz, indices_, faces_,
-         internal_, x_, y_, tops_, values_, z_start, z_end, xyz_order);
+         internal_, x_, y_, trim_backend, NULL, z_start, z_end, true);
    }
    else if(strcmp(strat_traits, "sgrid") == 0) {
       return make_projection_impl< sgrid_3d >(nx, ny, nz, indices_, faces_,
-         internal_, x_, y_, tops_, values_, z_start, z_end, xyz_order);
+         internal_, x_, y_, trim_backend, NULL, z_start, z_end, true);
    }
    else if(strcmp(strat_traits, "rgrid") == 0) {
       return make_projection_impl< rgrid_3d >(nx, ny, nz, indices_, faces_,
-         internal_, x_, y_, tops_, values_, z_start, z_end, xyz_order);
+         internal_, x_, y_, trim_backend, NULL, z_start, z_end, true);
    }
    else {
       return make_projection_impl< carray_3d >(nx, ny, nz, indices_, faces_,
-         internal_, x_, y_, tops_, values_, z_start, z_end, xyz_order);
+         internal_, x_, y_, trim_backend, NULL, z_start, z_end, true);
    }
 }
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(make_projection_overl, make_projection, 12, 14)
+BOOST_PYTHON_FUNCTION_OVERLOADS(make_projection_xyz_overl, make_projection_xyz, 11, 12)
 
 void py_export_well_edit() {
-    def("make_projection", &make_projection, make_projection_overl());
+    def("make_projection", &make_projection);
+    def("make_projection_xyz", &make_projection_xyz, make_projection_xyz_overl());
 }
 
 }} 	// eof blue_sky::python
