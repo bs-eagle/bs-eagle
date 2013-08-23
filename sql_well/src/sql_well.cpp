@@ -879,7 +879,7 @@ COMMIT;\
         finalize_sql ();
       const char *ttt;
       int rc = 0;
-
+      
       rc = sqlite3_prepare_v2 (db, sql.c_str (), sql.length () + 1, &stmp_sql, &ttt);
       if (rc)
         {
@@ -2046,7 +2046,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 
           // WCONINJH
           // Injector wells with rate control having historical bhp value
-          sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND ctrl < -1 AND i_bhp > 0 ORDER BY well_name ASC", *di);
+          sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND ctrl < -1 AND i_bhp >= 0 ORDER BY well_name ASC", *di);
           if (prepare_sql (s_buf))
             return -1;
           t_uint wconinjh_flag = 0;
@@ -2073,8 +2073,9 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               double rate = i_wr;
               std::string s_status;
               std::string s_phase = "WATER";
-              std::string s_params;
-
+              std::string s_rate;
+              std::string s_bhp;
+              
               if (status == STATUS_OPEN)
                 s_status = "OPEN";
               else
@@ -2089,18 +2090,27 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   s_phase = "GAS";
                   rate = i_gr;
                 }
-
+              
               if (rate > 0)
-                {
-                  s_params = (boost::format("%s %s") % V2S(rate) % V2S(i_bhp)).str();
+                { 
+                  s_rate = V2S(rate);   
                 }
               else
                 {
-                  s_params = (boost::format("* %s") % V2S(i_bhp)).str();
+                  s_rate = "*";   
                 }
 
+              if (i_bhp > 0)
+                { 
+                  s_bhp = V2S(i_bhp);   
+                }
+              else
+                {
+                  s_bhp = "*";   
+                }
 
-              fprintf (fp, "\'%s\' \'%s\' \'%s\' %s ", s.c_str (), s_phase.c_str(), s_status.c_str(), s_params.c_str());
+                
+              fprintf (fp, "\'%s\' \'%s\' \'%s\' %s %s ", s.c_str (), s_phase.c_str(), s_status.c_str(), s_rate.c_str(), s_bhp.c_str());
               fprintf (fp, "/\n");
             }
           if (wconinjh_flag)
@@ -2109,7 +2119,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 
 
           // WCONINJE
-          sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND (i_bhp <= 0 AND ctrl < -1 OR ctrl = -1) ORDER BY well_name ASC", *di);
+          sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND (i_bhp < 0 AND ctrl < -1 OR ctrl = -1) ORDER BY well_name ASC", *di);
           if (prepare_sql (s_buf))
             return -1;
           t_uint wconinje_flag = 0;
@@ -2143,7 +2153,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                 s_status = "OPEN";
               else
                 s_status = "SHUT";
-
+            
               s_ctrl = "BHP";
               // TODO: add injection phase into DB
               s_phase = "WATER";
@@ -2193,10 +2203,10 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
             fprintf (fp, "/\n\n");
           finalize_sql ();
 
-
+          
 
           // WCONHIST
-          sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND p_bhp > 0 AND ctrl > 1 ORDER BY well_name ASC", *di);
+          sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND p_bhp >= 0 AND ctrl > 1 ORDER BY well_name ASC", *di);
           if (prepare_sql (s_buf))
             return -1;
 
@@ -2244,7 +2254,16 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                 {
                   s_ctrl = "GRAT";
                 }
-              s_params = (boost::format("%s %s %s 3* %s") % V2S(p_or) % V2S(p_wr)% V2S(p_gr) % V2S(p_bhp)).str();
+             
+              if (p_bhp > 0)
+                { 
+                  s_params = (boost::format("%s %s %s 3* %s") % V2S(p_or) % V2S(p_wr)% V2S(p_gr) % V2S(p_bhp)).str();
+                }
+              else
+                {
+                  s_params = (boost::format("%s %s %s 4*") % V2S(p_or) % V2S(p_wr)% V2S(p_gr)).str();
+                }
+              
               fprintf (fp, "\'%s\' \'%s\' \'%s\' %s ", s.c_str (), s_status.c_str(), s_ctrl.c_str(), s_params.c_str());
               /*
               if (p_or < 0)
@@ -2278,7 +2297,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 
 
           // WCONPROD
-          sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND (p_bhp <= 0 AND ctrl > 1 OR ctrl = 1) ORDER BY well_name ASC", *di);
+          sprintf (s_buf, "SELECT * FROM well_hist WHERE d=%lf AND (p_bhp < 0 AND ctrl > 1 OR ctrl = 1) ORDER BY well_name ASC", *di);
           if (prepare_sql (s_buf))
             return -1;
 
@@ -2395,7 +2414,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               else if (lim_p_bhp > 0)
                 fprintf (fp, "\'%s\' BHP %s ", s.c_str (), V2S(lim_p_bhp));
 
-
+             
               fprintf (fp, "/\n");
             }
           if (weltarg_flag)
