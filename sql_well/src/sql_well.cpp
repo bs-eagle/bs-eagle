@@ -2019,7 +2019,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
 
               int horiz = 0;
               std::string sql = "SELECT name, horiz FROM wells WHERE name = ";
-              sql += fti->well_name.c_str ();
+              sql += std::string("'") + fti->well_name + std::string("'");
               if (prepare_sql (sql.c_str ()))
                 return -1;
               if (!step_sql ())
