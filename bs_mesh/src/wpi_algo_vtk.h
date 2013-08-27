@@ -191,9 +191,9 @@ struct algo_vtk : helpers< strat_t > {
 		enum { n_fv = cell_data::n_facet_vertex };
 		typedef typename cell_data::facet_vid_t facet_vid_t;
 
-		typedef bs_array< t_long, vector_traits > bs_lvector;
-		//smart_ptr< bs_lvector > idx_;
-		smart_ptr< bs_lvector > cell_idx_;
+		typedef bs_array< t_ulong, vector_traits > bs_ulvector;
+		//smart_ptr< bs_ulvector > idx_;
+		smart_ptr< bs_ulvector > cell_idx_;
 		trimesh& M_;
 		// cache beginning of mesh only to avoid multimple calls to M_.begin() in operator()
 		cell_vertex_iterator tops_;
@@ -205,7 +205,7 @@ struct algo_vtk : helpers< strat_t > {
 
 		// ctor
 		vtk_index_backend(trimesh& M)
-			: cell_idx_(BS_KERNEL.create_object(bs_lvector::bs_type())),
+			: cell_idx_(BS_KERNEL.create_object(bs_ulvector::bs_type())),
 			M_(M), tops_(M.begin())
 		{}
 
@@ -232,12 +232,12 @@ struct algo_vtk : helpers< strat_t > {
 		}
 
 		// return VTK primitives indices for vtkCellArray and cell indices in cell_ids
-		spv_long get_index(spv_long cell_ids) {
+		spv_ulong get_index(const spv_ulong& cell_ids) {
 			// export point ids for vtkQuads
-			spv_long res = BS_KERNEL.create_object(v_long::bs_type());
+			spv_ulong res = BS_KERNEL.create_object(v_ulong::bs_type());
 			// each facet reqire a prefix denoting number of facet vertices
 			res->resize(idx_.size() + cell_idx_->size());
-			v_long::iterator p_res = res->begin();
+			v_ulong::iterator p_res = res->begin();
 			typename index_storage::const_iterator p_idx = idx_.begin();
 			for(ulong i = 0; i < cell_idx_->size(); ++i) {
 				// prefix
@@ -259,8 +259,8 @@ struct algo_vtk : helpers< strat_t > {
 		enum { n_fv = cell_data::n_facet_vertex };
 		typedef typename cell_data::facet_vid_t facet_vid_t;
 
-		//typedef bs_array< t_long, vector_traits > bs_lvector;
-		//smart_ptr< bs_lvector > idx_;
+		//typedef bs_array< t_ulong, vector_traits > bs_ulvector;
+		//smart_ptr< bs_ulvector > idx_;
 
 		trimesh& M_;
 		cell_vertex_iterator tops_;
@@ -347,13 +347,13 @@ struct algo_vtk : helpers< strat_t > {
 			return vh_traits::export_vertex_storage(M_, vs_);
 		}
 
-		spv_long get_index(spv_long cell_ids) {
-			spv_long res = BS_KERNEL.create_object(v_long::bs_type());
+		spv_ulong get_index(const spv_ulong& cell_ids) {
+			spv_ulong res = BS_KERNEL.create_object(v_ulong::bs_type());
 			// copy collected unique edges as lines to resulting index
 			res->resize(es_.size() * 3);
 			cell_ids->resize(es_.size());
-			v_long::iterator pres = res->begin();
-			v_long::iterator pcell = cell_ids->begin();
+			v_ulong::iterator pres = res->begin();
+			v_ulong::iterator pcell = cell_ids->begin();
 			for(edge_citerator pe = es_.begin(), end = es_.end(); pe != end; ++pe, ++pcell) {
 				*pres++ = 2;
 				*pres++ = pe->beg_->offs; *pres++ = pe->end_->offs;
@@ -442,8 +442,8 @@ struct algo_vtk : helpers< strat_t > {
 	}
 
 	template< int prim_id >
-	static spv_long enum_border_vtk_simple(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
-		spv_int mask, spv_long cell_idx, spv_float points, Loki::Int2Type< prim_id > prim,
+	static spv_ulong enum_border_vtk_simple(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
+		spv_int mask, spv_ulong cell_idx, spv_float points, Loki::Int2Type< prim_id > prim,
 		int slice_dim = -1, ulong slice_idx = 0, const int facet_filter = -1)
 	{
 		typedef typename mesh_part::container_t parts_container;
@@ -472,8 +472,8 @@ struct algo_vtk : helpers< strat_t > {
 	}
 
 	template< int prim_id >
-	static spv_long enum_border_vtk(t_long nx, t_long ny, sp_obj trim_backend,
-		spv_int mask, spv_long cell_idx, spv_float points, Loki::Int2Type< prim_id > prim,
+	static spv_ulong enum_border_vtk(t_ulong nx, t_ulong ny, sp_obj trim_backend,
+		spv_int mask, spv_ulong cell_idx, spv_float points, Loki::Int2Type< prim_id > prim,
 		int slice_dim = -1, ulong slice_idx = 0, const ulong min_split_threshold = MIN_SPLIT_THRESHOLD,
 		const int facet_filter = -1)
 	{
@@ -572,8 +572,8 @@ struct algo_vtk : helpers< strat_t > {
 	}
 
 	// specialization for facets
-	static spv_long enum_border_facets_vtk(t_long nx, t_long ny, sp_obj trim_backend,
-		spv_int mask, spv_long cell_idx, spv_float points,
+	static spv_ulong enum_border_facets_vtk(t_ulong nx, t_ulong ny, sp_obj trim_backend,
+		spv_int mask, spv_ulong cell_idx, spv_float points,
 		int slice_dim = -1, ulong slice_idx = 0,  const ulong min_split_threshold = MIN_SPLIT_THRESHOLD,
 		const int facet_filter = -1)
 	{
@@ -583,8 +583,8 @@ struct algo_vtk : helpers< strat_t > {
 		);
 	}
 
-	static spv_long enum_border_facets_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
-		spv_int mask, spv_long cell_idx, spv_float points,
+	static spv_ulong enum_border_facets_vtk(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
+		spv_int mask, spv_ulong cell_idx, spv_float points,
 		int slice_dim = -1, ulong slice_idx = 0,  const ulong min_split_threshold = MIN_SPLIT_THRESHOLD,
 		const int facet_filter = -1)
 	{
@@ -596,8 +596,8 @@ struct algo_vtk : helpers< strat_t > {
 	}
 
 	// specialization for edges
-	static spv_long enum_border_edges_vtk(t_long nx, t_long ny, sp_obj trim_backend,
-		spv_int mask, spv_long cell_idx, spv_float points,
+	static spv_ulong enum_border_edges_vtk(t_ulong nx, t_ulong ny, sp_obj trim_backend,
+		spv_int mask, spv_ulong cell_idx, spv_float points,
 		int slice_dim = -1, ulong slice_idx = 0,  const ulong min_split_threshold = MIN_SPLIT_THRESHOLD,
 		const int facet_filter = -1)
 	{
@@ -607,8 +607,8 @@ struct algo_vtk : helpers< strat_t > {
 		);
 	}
 
-	static spv_long enum_border_edges_vtk(t_long nx, t_long ny, spv_float coord, spv_float zcorn,
-		spv_int mask, spv_long cell_idx, spv_float points,
+	static spv_ulong enum_border_edges_vtk(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
+		spv_int mask, spv_ulong cell_idx, spv_float points,
 		int slice_dim = -1, ulong slice_idx = 0,  const ulong min_split_threshold = MIN_SPLIT_THRESHOLD,
 		const int facet_filter = -1)
 	{

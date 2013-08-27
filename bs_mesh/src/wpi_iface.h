@@ -21,11 +21,11 @@ typedef pods< strategy_3d >::well_hit_cell well_hit_cell_3d;
 typedef pods< strategy_2d >::well_hit_cell well_hit_cell_2d;
 
 std::vector< well_hit_cell_3d > well_path_ident(
-	t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+	t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
 	spv_float well_info, bool include_well_nodes = true);
 
 std::vector< well_hit_cell_2d > well_path_ident_2d(
-	t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+	t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
 	spv_float well_info, bool include_well_nodes = true);
 
 }} /* blue_sky::wpi */

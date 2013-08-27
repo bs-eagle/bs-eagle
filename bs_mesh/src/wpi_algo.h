@@ -130,7 +130,7 @@ struct algo : public helpers< strat_t > {
 
 	template< bool pythonish >
 	static typename wpi_return< pythonish >::type well_path_ident_d(
-		t_long nx, t_long ny, sp_obj trim_backend,
+		ulong nx, ulong ny, sp_obj trim_backend,
 		spv_float well_info, bool include_well_nodes)
 	{
 		typedef typename wpi_return< pythonish >::type ret_t;
@@ -174,7 +174,7 @@ struct algo : public helpers< strat_t > {
 
 	template< bool pythonish >
 	static typename wpi_return< pythonish >::type well_path_ident_d(
-		t_long nx, t_long ny, spv_float coord, spv_float zcorn,
+		ulong nx, ulong ny, spv_float coord, spv_float zcorn,
 		spv_float well_info, bool include_well_nodes)
 	{
 		// calculate mesh nodes coordinates and build initial trimesh

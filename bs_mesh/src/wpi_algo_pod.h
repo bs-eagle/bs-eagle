@@ -186,22 +186,22 @@ struct pods : public helpers< strat_t > {
 			ca_assign(size_, ulong(0));
 		}
 		// ctor from given COORD & ZCORN
-		trimesh(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
+		trimesh(ulong nx, ulong ny, spv_float coord, spv_float zcorn) {
 			init(nx, ny, coord, zcorn);
 		}
 		// ctor from given backend
-		trimesh(t_long nx, t_long ny, sp_obj backend) {
+		trimesh(ulong nx, ulong ny, sp_obj backend) {
 			init(nx, ny, backend);
 		}
 
-		void init(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
+		void init(ulong nx, ulong ny, spv_float coord, spv_float zcorn) {
 			base_t::init(nx, ny, coord, zcorn);
 			// set size
 			const ulong size_3d[] = { ulong(nx), ulong(ny), zcorn->size() / (nx * ny * 8) };
 			std::copy(&size_3d[0], &size_3d[D], &size_[0]);
 		}
 
-		void init(t_long nx, t_long ny, sp_obj backend) {
+		void init(ulong nx, ulong ny, sp_obj backend) {
 			// set backend & size
 			const ulong size_3d[] = { ulong(nx), ulong(ny), base_t::init(nx, ny, backend) };
 			std::copy(&size_3d[0], &size_3d[D], &size_[0]);
@@ -236,7 +236,7 @@ struct pods : public helpers< strat_t > {
 		// float array or rs_smesh_iface object now
 		//sp_obj backend() const;
 
-		static sp_obj create_backend(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
+		static sp_obj create_backend(ulong nx, ulong ny, spv_float coord, spv_float zcorn) {
 			trimesh M(nx, ny, coord, zcorn);
 			return M.backend();
 		}
