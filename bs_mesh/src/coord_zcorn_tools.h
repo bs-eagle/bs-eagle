@@ -134,6 +134,20 @@ spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float coord, spv_float zcor
 // same as above using provided rs_smesh_iface object
 spv_float tops2struct_grid(smart_ptr< rs_smesh_iface > mesh);
 
+spv_float gen_sgrid(
+	t_ulong nx, t_ulong ny, t_ulong nz,
+	spv_float dx, spv_float dy, spv_float dz,
+	t_float x0 = 0, t_float y0 = 0, t_float z0 = 0,
+	bool zyx_order = false
+);
+
+spv_float gen_sgrid_2d(
+	t_ulong nx, t_ulong ny,
+	spv_float dx, spv_float dy,
+	t_float x0 = 0, t_float y0 = 0,
+	bool yx_order = false
+);
+
 }}  // eof namespace blue_sky::coord_zcorn_tools
 
 #endif /* end of include guard: COORD_ZCORN_TOOLS_1M4YIRKV */

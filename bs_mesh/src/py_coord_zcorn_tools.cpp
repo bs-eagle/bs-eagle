@@ -128,6 +128,8 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_deltas_s2_overl2, wave_mesh_deltas_s2_
 BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_overl, wave_mesh, 8, 11)
 BOOST_PYTHON_FUNCTION_OVERLOADS(wave_mesh_ij_overl, wave_mesh_ij, 9, 12)
 BOOST_PYTHON_FUNCTION_OVERLOADS(find_hit_idx_overl, find_hit_idx1, 3, 5)
+BOOST_PYTHON_FUNCTION_OVERLOADS(gen_sgrid_overl, czt::gen_sgrid, 6, 10)
+BOOST_PYTHON_FUNCTION_OVERLOADS(gen_sgrid_2d_overl, czt::gen_sgrid_2d, 4, 7)
 
 namespace blue_sky { namespace python {
 
@@ -149,6 +151,9 @@ void py_export_czt() {
 	def("tops2struct_grid", tops2sgrid1);
 	def("tops2struct_grid", tops2sgrid2);
 	def("tops2struct_grid", tops2sgrid3);
+
+	def("gen_sgrid", &czt::gen_sgrid, gen_sgrid_overl());
+	def("gen_sgrid_2d", &czt::gen_sgrid_2d, gen_sgrid_2d_overl());
 }
 
 }} 	// eof blue_sky::python

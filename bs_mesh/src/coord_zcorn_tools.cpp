@@ -257,24 +257,24 @@ struct dim_subscript {
 			ss_fcn_ = &dim_subscript::ss_array_dim;
 	}
 
-	fp_stor_t ss_const_dim(int_t idx) {
+	fp_stor_t ss_const_dim(const t_ulong idx) {
 		return static_cast< fp_stor_t >(fp_t(offset_ + dim_[0] * idx));
 	}
 
-	fp_stor_t ss_array_dim(int_t idx) {
+	fp_stor_t ss_array_dim(const t_ulong idx) {
 		if(idx > 0) sum_ += dim_[idx - 1];
 		return static_cast< fp_stor_t>(sum_);
 	}
 
 	void reset() { sum_ = offset_; }
 
-	fp_t operator[](int_t idx) {
+	fp_t operator[](t_ulong idx) {
 		return (this->*ss_fcn_)(idx);
 	}
 
 private:
 	const fp_storarr_t& dim_;
-	fp_stor_t (dim_subscript::*ss_fcn_)(int_t);
+	fp_stor_t (dim_subscript::*ss_fcn_)(const t_ulong);
 	const fp_t offset_;
 	fp_t sum_;
 };
@@ -521,7 +521,7 @@ spv_float tops2struct_grid_impl(const uint_t nx, const uint_t ny, const uint_t n
 	extract_plane ex(nx, ny);
 	for(t_ulong i = 0; i < nz; ++i)
 		ex.go(start, tgt);
-	// last plane is bootom of the hole cube
+	// last plane is bootom of the whole cube
 	start -= plane_sz - 4*3;
 	ex.go(start, tgt);
 
@@ -1570,6 +1570,114 @@ spi_arr_t find_hit_idx(
 	spi_arr_t hit_idx = BS_KERNEL.create_object(int_arr_t::bs_type());
 	find_hit_idx(nx, ny, *coord, *hit_idx, points_pos);
 	return hit_idx;
+}
+
+/*-----------------------------------------------------------------
+ * generate structured grid with given parameters
+ *----------------------------------------------------------------*/
+spv_float gen_sgrid(
+	t_ulong nx, t_ulong ny, t_ulong nz,
+	spv_float dx, spv_float dy, spv_float dz,
+	t_float x0, t_float y0, t_float z0,
+	bool zyx_order
+) {
+	enum { D = 3 };
+
+	dim_subscript ds[] = {
+		dim_subscript(*dx, x0),
+		dim_subscript(*dy, y0),
+		dim_subscript(*dz, z0)
+	};
+	spv_float deltas[] = { dx, dy, dz };
+	uint_t sz[] = { nx + 1, ny + 1, nz + 1 };
+	t_ulong sgrid_sz = 1;
+	for(uint_t i = 0; i < D; ++i) {
+		if(deltas[i]->size() > 1)
+			sz[i] = deltas[i]->size();
+		sgrid_sz *= sz[i];
+	}
+
+	// reorder if specified
+	t_uint order[] = { 0, 1, 2 };
+	if(zyx_order) {
+		std::swap(order[0], order[2]);
+		//std::reverse(&ds[0], &ds[3]);
+		//std::reverse(&sz[0], &sz[3]);
+	}
+
+	// generate mesh
+	spv_float sgrid = BS_KERNEL.create_object(v_float::bs_type());
+	if(!sgrid) return NULL;
+	sgrid->resize(sgrid_sz * D);
+	v_float::iterator psg = sgrid->begin();
+
+	t_float vertex[] = { 0, 0, 0 };
+	for(t_ulong i = 0; i < sz[order[2]]; ++i) {
+		vertex[order[2]] = ds[order[2]][i];
+		for(t_ulong j = 0; j < sz[order[1]]; ++j) {
+			vertex[order[1]] = ds[order[1]][j];
+			for(t_ulong k = 0; k < sz[order[0]]; ++k) {
+				vertex[order[0]] = ds[order[0]][k];
+				// in ZYX order we'll get [z, y, x] coords order in vertex
+				//if(zyx_order)
+				//	std::reverse(&vertex[0], &vertex[D]);
+				// store vertex value
+				psg = std::copy(&vertex[0], &vertex[D], psg);
+			}
+			ds[order[0]].reset();
+		}
+		ds[order[1]].reset();
+	}
+	return sgrid;
+}
+
+spv_float gen_sgrid_2d(
+	t_ulong nx, t_ulong ny,
+	spv_float dx, spv_float dy,
+	t_float x0, t_float y0,
+	bool yx_order
+) {
+	enum { D = 2 };
+
+	dim_subscript ds[] = {
+		dim_subscript(*dx, x0),
+		dim_subscript(*dy, y0)
+	};
+	spv_float deltas[] = { dx, dy };
+	uint_t sz[] = { nx + 1, ny + 1 };
+	t_ulong sgrid_sz = 1;
+	for(uint_t i = 0; i < D; ++i) {
+		if(deltas[i]->size() > 1)
+			sz[i] = deltas[i]->size() + 1;
+		sgrid_sz *= sz[i];
+	}
+
+	// reorder if specified
+	t_uint order[] = { 0, 1 };
+	if(yx_order) {
+		std::swap(order[0], order[1]);
+	}
+
+	// generate mesh
+	spv_float sgrid = BS_KERNEL.create_object(v_float::bs_type());
+	if(!sgrid) return NULL;
+	sgrid->resize(sgrid_sz * 3);
+	v_float::iterator psg = sgrid->begin();
+
+	t_float vertex[] = { 0, 0, 0 };
+	for(t_ulong j = 0; j < sz[order[1]]; ++j) {
+		vertex[order[1]] = ds[order[1]][j];
+		for(t_ulong k = 0; k < sz[order[0]]; ++k) {
+			vertex[order[0]] = ds[order[0]][k];
+			// in ZYX order we'll get [z, y, x] coords order in vertex
+			//if(zyx_order)
+			//	std::reverse(&vertex[0], &vertex[D]);
+			// store vertex value
+			psg = std::copy(&vertex[0], &vertex[3], psg);
+		}
+		ds[order[0]].reset();
+	}
+	return sgrid;
 }
 
 }}	// eof blue_sky::coord_zcorn_tools
