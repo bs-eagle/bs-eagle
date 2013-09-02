@@ -120,7 +120,7 @@ bp::tuple enum_border_facets_vtk_impl(t_ulong nx, t_ulong ny, sp_obj trim_backen
 {
 	typedef wpi::algo_vtk< vtk_strat_t > wpi_algo_vtk;
 
-	spv_ulong cell_idx = BS_KERNEL.create_object(v_long::bs_type());
+	spv_ulong cell_idx = BS_KERNEL.create_object(v_ulong::bs_type());
 	spv_float points = BS_KERNEL.create_object(v_float::bs_type());
 	//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_facets_vtk.prof");
 	spv_ulong res = wpi_algo_vtk::enum_border_facets_vtk(nx, ny, trim_backend, mask, cell_idx,
@@ -136,7 +136,7 @@ bp::tuple enum_border_edges_vtk_impl(t_ulong nx, t_ulong ny, sp_obj trim_backend
 {
 	typedef wpi::algo_vtk< vtk_strat_t > wpi_algo_vtk;
 
-	spv_ulong cell_idx = BS_KERNEL.create_object(v_long::bs_type());
+	spv_ulong cell_idx = BS_KERNEL.create_object(v_ulong::bs_type());
 	spv_float points = BS_KERNEL.create_object(v_float::bs_type());
 	//ProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk.prof");
 	//HeapProfilerStart("/home/uentity/my_projects/blue-sky.git/gui/enum_border_edges_vtk");
