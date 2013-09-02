@@ -182,9 +182,14 @@ void hdm_serialize_save(
 	const std::wstring& prj_name,
 	const std::wstring& deep_copy_suffix
 ){
-	std::string fname = wstr2str(prj_path) + PATHSEP + wstr2str(prj_name) + HDM_DUMP_EXT;
+  #ifdef UNIX
+    const char* enc_name = "ru_RU.UTF-8";
+  #else
+    const char* enc_name = "ru_RU.CP1251";
+  #endif
+	std::string fname = wstr2str(prj_path, enc_name) + PATHSEP + wstr2str(prj_name, enc_name) + HDM_DUMP_EXT;
 	std::ofstream f(fname.c_str());
-	hdm_serialize_save_impl(f, t, wstr2str (prj_path), wstr2str (prj_name), wstr2str (deep_copy_suffix));
+	hdm_serialize_save_impl(f, t, wstr2str (prj_path, enc_name), wstr2str (prj_name, enc_name), wstr2str (deep_copy_suffix));
 }
 
 std::string hdm_serialize_to_str(
@@ -204,8 +209,13 @@ smart_ptr< hdm > hdm_serialize_load(
 	const std::wstring& prj_path,
 	const std::wstring& prj_name
 ){
-	std::ifstream f((wstr2str (prj_path) + PATHSEP + wstr2str (prj_name) + HDM_DUMP_EXT).c_str());
-	return hdm_serialize_load_impl(f, wstr2str (prj_path), wstr2str (prj_name));
+  #ifdef UNIX
+    const char* enc_name = "ru_RU.UTF-8";
+  #else
+    const char* enc_name = "ru_RU.CP1251";
+  #endif
+	std::ifstream f((wstr2str (prj_path, enc_name) + PATHSEP + wstr2str (prj_name, enc_name) + HDM_DUMP_EXT).c_str());
+	return hdm_serialize_load_impl(f, wstr2str (prj_path, enc_name), wstr2str (prj_name, enc_name));
 }
 
 smart_ptr< hdm > hdm_serialize_from_str(
