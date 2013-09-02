@@ -2241,18 +2241,26 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               if (ctrl == CTRL_P_LRATE)
                 {
                   s_ctrl = "LRAT";
+                  if (status == STATUS_OPEN && (p_or + p_wr == 0))
+                    continue;
                 }
               else if (ctrl == CTRL_P_ORATE)
                 {
                   s_ctrl = "ORAT";
+                  if (status == STATUS_OPEN && (p_or == 0))
+                    continue;
                 }
               else if (ctrl == CTRL_P_WRATE)
                 {
                   s_ctrl = "WRAT";
+                  if (status == STATUS_OPEN && (p_wr == 0))
+                    continue;
                 }
               else if (ctrl == CTRL_P_GRATE)
                 {
                   s_ctrl = "GRAT";
+                  if (status == STATUS_OPEN && (p_gr == 0))
+                    continue;
                 }
              
               if (p_bhp > 0)
