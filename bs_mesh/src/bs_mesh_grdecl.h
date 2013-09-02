@@ -270,14 +270,6 @@ namespace blue_sky
 				hit_idx, cell_merge_thresh, band_thresh);
 	}
 
-	static std::pair< sp_fp_storage_array_t, sp_fp_storage_array_t >
-	refine_mesh(i_type_t& nx, i_type_t& ny, sp_fp_storage_array_t coord, sp_fp_storage_array_t zcorn, sp_fp_storage_array_t points,
-			sp_i_array_t hit_idx = NULL,
-			fp_type_t cell_merge_thresh = DEF_CELL_MERGE_THRESHOLD, fp_type_t band_thresh = DEF_BAND_THRESHOLD)
-	{
-		return wrapped_t::refine_mesh(nx, ny, coord, zcorn, points, hit_idx, cell_merge_thresh, band_thresh);
-	}
-
     ////////////////////
     // wrapped class
     ///////////////////
