@@ -7,20 +7,31 @@ tar_name = "bs_mesh"
 env = custom_env.Clone ()
 env.Append (CPPPATH = ["include", "src",
     includes["bs_bos_core_base"],
-    includes["bs_matrix"],
+    includes["common_types"],
+    includes["common_alg"],
     includes["bs_bos_core_data_storage"],
-	includes["bs_mtx"]
+    includes["bs_mtx"],
+    includes["sql_well"],
+    includes["bs_lsolvers"]
     ] + includes["kernel"])
 
-libs = ["blue_sky", "bs_bos_core_base", "bs_mtx", "bs_bos_core_data_storage"]
+libs = ["blue_sky", "bs_bos_core_base", "bs_mtx"]
 
 if (build_kind == "debug") :
-    env.AppendUnique (LIBS = list_suffix (libs, "_d"))
+    env.AppendUnique (
+        LIBS = list_suffix (libs, "_d"),
+        CPPDEFINES = ["CGAL_DISABLE_ROUNDING_MATH_CHECK"]
+    )
     lib_name += "_d"
 elif (build_kind == "release") :
     env.AppendUnique (LIBS = libs)
 
-bs_mesh = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
+env.AppendUnique(LIBS = ["CGAL", "gmp"])
+env.AppendUnique(CXXFLAGS = ["-frounding-math"])
+
+bs_mesh = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name),
+    source = files (["."]).sources)
+#   source = files (["."], ["well_path_ident_2d.cpp"]).sources)
 
 env.Alias (tar_name, bs_mesh)
 Export ("bs_mesh")

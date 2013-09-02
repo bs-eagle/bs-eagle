@@ -2,18 +2,19 @@
 #define ROCKTAB_TABLE_H
 
 #include "interpolation_macro.h"
+#include "conf.h"
+
+#include "bs_serialize_decl.h"
 
 namespace blue_sky
   {
   /**
    * @brief table class
    */
-  template <class strategy_t>
+  
   class BS_API_PLUGIN bs_table
     {
 
-      typedef typename strategy_t::fp_type_t   item_t;
-      typedef typename strategy_t::i_type_t  index_t;
       //-------------------------
       // METHODS
       //-------------------------
@@ -23,25 +24,25 @@ namespace blue_sky
       // Destructor
       ~bs_table ();
       // returns number of rows
-      index_t get_num_rows();
+      t_int get_num_rows();
       // returns number of columns
-      index_t get_num_cols();
+      t_int get_num_cols();
 
       // set number of rows in table
-      void set_num_rows (const index_t num_rows);
+      void set_num_rows (const t_int num_rows);
       // adds new column to the table
       void add_column (const std::string &_name);
       // erases all the elements of a list
       void clear();
 
       // returns name of the column with given index
-      const std::string &get_col_name (const index_t col_num);
+      const std::wstring &get_col_name (const t_int col_num);
 
       //returns name of current column
-      void set_col_name(const index_t col_num, const std::string &new_name);
+      void set_col_name(const t_int col_num, const std::wstring &new_name);
 
       //returns current data array from column
-      std::vector<item_t> &get_column(const index_t col_num);
+      std::vector<t_float> &get_column(const t_int col_num);
 
 
 
@@ -51,20 +52,20 @@ namespace blue_sky
     protected:
       struct column
         {
-          std::string name;               //!< column name
-          std::vector<item_t> data;       //!< data array stored in one column
+          std::wstring name;               //!< column name
+          std::vector<t_float> data;       //!< data array stored in one column
         };
 
       std::vector<column> columns;      //!< list of columns
-      index_t n_rows;                       //!< number of rows
+      t_int n_rows;                       //!< number of rows
+
+      friend class blue_sky::bs_serialize;
     };
 
-  template <class strategy_t>
-  class BS_API_PLUGIN rocktab_table  : public bs_table <strategy_t>
+  
+  class BS_API_PLUGIN rocktab_table  : public bs_table 
     {
     public:
-      typedef typename strategy_t::i_type_t  index_t;
-      typedef typename strategy_t::fp_type_t   item_t;
 
       //! ctor
       rocktab_table();
@@ -88,9 +89,9 @@ namespace blue_sky
                        T *dp_truns_m  //!< pressure derivation of transmissibility
                        )
       {
-        std::vector<item_t> &p = this->get_column (0);
-        std::vector<item_t> &phi = this->get_column (1);
-        std::vector<item_t> &truns = this->get_column (2);
+        std::vector<t_float> &p = this->get_column (0);
+        std::vector<t_float> &phi = this->get_column (1);
+        std::vector<t_float> &truns = this->get_column (2);
 
         if (this->n_rows < 1)
           return;
@@ -111,13 +112,13 @@ namespace blue_sky
           }
         else
           {
-            index_t iu, im, il;
-            item_t denom;
+            t_int iu, im, il;
+            t_double denom;
 
             BINARY_SEARCH (p, pressure, this->n_rows, iu, im, il);
             im = (il - 1);
             iu = il;
-            denom = (item_t) (1.0 / (p[iu] - p[im]));
+            denom = (t_double) (1.0 / (p[iu] - p[im]));
             *dp_phi_m = (phi[iu] - phi[im]) * denom;
             *dp_truns_m = (truns[iu] - truns[im]) * denom;
             *phi_m = phi[im] + *dp_phi_m * (pressure - p[im]);

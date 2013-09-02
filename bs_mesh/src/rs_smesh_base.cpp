@@ -8,61 +8,60 @@
 
 #include "rs_smesh_base.h"
 
-template <typename strategy_t>
-rs_smesh_base <strategy_t>::rs_smesh_base ()
+
+rs_smesh_base ::rs_smesh_base ()
 {
-  permx_array = 0;
-  permy_array = 0;
-  permz_array = 0;
-  multx_array = 0;
-  multy_array = 0;
-  multz_array = 0;
 }
 
 
-template <typename strategy_t>
+
 void
-rs_smesh_base <strategy_t>::init_props (const sp_idata_t &idata)
+rs_smesh_base ::init_props (const sp_hdm_t hdm)
 {
-  base_t::init_props (idata);
+  base_t::init_props (hdm);
+#ifndef PURE_MESH  
   
-  nx = idata->dimens.nx;
-  ny = idata->dimens.ny;
-  nz = idata->dimens.nz;
+  nx = hdm->get_prop ()->get_i(L"nx");
+  ny = hdm->get_prop ()->get_i(L"ny");
+  nz = hdm->get_prop ()->get_i(L"nz");
   
-  sp_fp_storage_array_t data_array;
+  permx_array = hdm->get_pool ()->get_fp_data("PERMX");
+  permy_array = hdm->get_pool ()->get_fp_data("PERMY");
+  permz_array = hdm->get_pool ()->get_fp_data("PERMZ");
+  multx_array = hdm->get_pool ()->get_fp_data("MULTX");
+  multy_array = hdm->get_pool ()->get_fp_data("MULTY");
+  multz_array = hdm->get_pool ()->get_fp_data("MULTZ");
+#else
+  nx = hdm->nx;
+  ny = hdm->ny;
+  nz = hdm->nz;
   
-  data_array = idata->get_fp_non_empty_array("PERMX");
-  if (data_array->size()) permx_array = &(*data_array)[0];
-  
-  data_array = idata->get_fp_non_empty_array("PERMY");
-  if (data_array->size()) permy_array = &(*data_array)[0];
-  
-  data_array = idata->get_fp_non_empty_array("PERMZ");
-  if (data_array->size()) permz_array = &(*data_array)[0];
-  
-  data_array = idata->get_fp_array("MULTX");
-  if (data_array && data_array->size()) multx_array = &(*data_array)[0];
-  
-  data_array = idata->get_fp_array("MULTY");
-  if (data_array && data_array->size()) multy_array = &(*data_array)[0];
-  
-  data_array = idata->get_fp_array("MULTZ");
-  if (data_array && data_array->size()) multz_array = &(*data_array)[0];
+  permx_array = hdm->permx_array;
+  permy_array = hdm->permy_array;
+  permz_array = hdm->permz_array;
+  multx_array = hdm->multx_array;
+  multy_array = hdm->multy_array;
+  multz_array = hdm->multz_array;
+#endif
 }
 
-template<class strategy_t>
-void rs_smesh_base<strategy_t>::inside_to_XYZ(const i_type_t index, i_type_t &i1,i_type_t &j1, i_type_t &k1) const
+
+void rs_smesh_base::inside_to_XYZ(const t_long index, t_long &i1,t_long &j1, t_long &k1) const
   {
-    i_type_t r_index = (*base_t::base_t::int_to_ext)[index];
+    
+#ifndef PURE_MESH
+    t_long r_index = (*base_t::base_t::int_to_ext)[index];
+#else
+    t_long r_index = base_t::base_t::int_to_ext[index];
+#endif
     k1 = r_index / (nx*ny);
     j1 = (r_index - k1*nx*ny) / nx;
     i1 = r_index - k1*nx*ny - j1*nx;
   }
 
 /*
-template<class strategy_t>
-int rs_smesh_base<strategy_t>::init_int_to_ext()
+
+int rs_smesh_base::init_int_to_ext()
 {
   
   if (base_t::base_t::ext_to_int.size() == 0)
@@ -74,25 +73,28 @@ int rs_smesh_base<strategy_t>::init_int_to_ext()
     {
       if (base_t::base_t::ext_to_int[i] != -1)
         {
-          base_t::base_t::int_to_ext [base_t::base_t::ext_to_int[i]] = (i_type_t)i;
+          base_t::base_t::int_to_ext [base_t::base_t::ext_to_int[i]] = (t_long)i;
         }
     }
   return 0;  
 }
 */
 
-template<class strategy_t>
-void rs_smesh_base<strategy_t>::check_data() const
+
+void rs_smesh_base::check_data() const
 {
   base_t::check_data ();
-  
+
+#ifndef PURE_MESH  
   if (nx <= 0)
     bs_throw_exception (boost::format ("nx = %d is out of range")% nx);
   if (ny <= 0)
     bs_throw_exception (boost::format ("ny = %d is out of range")% ny);
   if (nz <= 0)
     bs_throw_exception (boost::format ("nz = %d is out of range")% nz);
-    
+#endif
+
+  // FIXME: init_props will raise exceptions if no array in hdm
   if (!permx_array)
     bs_throw_exception ("PERMX array is not initialized");
   if (!permy_array)
@@ -101,10 +103,16 @@ void rs_smesh_base<strategy_t>::check_data() const
     bs_throw_exception ("PERMZ array is not initialized");
 }
 
-template<class strategy_t>
-int rs_smesh_base<strategy_t>::get_elems_n_in_layers(const direction d_dir, index_array_t &elem_in_layers) const
+
+int rs_smesh_base::get_elems_n_in_layers(const direction d_dir, stdv_int &elem_in_layers) const
 {
-  i_type_t i_index;
+  t_long i_index;
+#ifndef PURE_MESH
+  t_int const *actnum = base_t::actnum_array->data ();
+#else
+  t_int const *actnum = base_t::actnum_array;
+#endif
+
   if (d_dir == along_dim3)
     {
       elem_in_layers.resize(nz, 0);
@@ -113,7 +121,7 @@ int rs_smesh_base<strategy_t>::get_elems_n_in_layers(const direction d_dir, inde
         {
           for (int j = 0; j < nx*ny; ++j, ++i_index)
             {
-              if (base_t::actnum_array[i_index])
+              if (actnum[i_index])
                 ++elem_in_layers[i];
             }
         }
@@ -128,7 +136,7 @@ int rs_smesh_base<strategy_t>::get_elems_n_in_layers(const direction d_dir, inde
               i_index = nx*j+i*nx*nz;
               for (int k = 0; k < nx; ++k, ++i_index)
                 {
-                  if (base_t::actnum_array[i_index])
+                  if (actnum[i_index])
                     ++elem_in_layers[i];
                 }
             }
@@ -144,7 +152,7 @@ int rs_smesh_base<strategy_t>::get_elems_n_in_layers(const direction d_dir, inde
               i_index = ny*j+i*ny*nz;
               for (int k = 0; k < ny; ++k, ++i_index)
                 {
-                  if (base_t::actnum_array[i_index])
+                  if (actnum[i_index])
                     ++elem_in_layers[i];
                 }
             }
@@ -153,4 +161,4 @@ int rs_smesh_base<strategy_t>::get_elems_n_in_layers(const direction d_dir, inde
   return (int) elem_in_layers.size();
 }
 
-BS_INST_STRAT(rs_smesh_base);
+//BS_INST_STRAT(rs_smesh_base);

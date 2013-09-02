@@ -12,24 +12,21 @@ namespace blue_sky
   namespace scal
     {
 
-    template <typename strategy_t>
-    test_model<strategy_t>::test_model (bs_type_ctor_param param /* = NULL */)
+    test_model::test_model (bs_type_ctor_param /*param = NULL */)
         : n_phases (0)
         , cell_count (0)
     {
 
     }
 
-    template <typename strategy_t>
-    test_model<strategy_t>::test_model (const this_t& tm)
+    test_model::test_model (const this_t& tm)
     : bs_refcounter (tm), objbase (tm)
     {
       BS_ASSERT (false && "NOT IMPL YET");
     }
 
-    template <typename strategy_t>
     void
-    test_model<strategy_t>::init (int np, int cc)
+    test_model::init (int np, int cc)
     {
       n_phases = np;
       cell_count = cc;
@@ -43,63 +40,59 @@ namespace blue_sky
       sat.assign (cell_count * (n_phases - 1), 0);
     }
 
-    template <typename strategy_t>
-    typename test_model<strategy_t>::item_t *
-    test_model<strategy_t>::get_relative_perm (int cell_index)
+    test_model::item_t *
+    test_model::get_relative_perm (int cell_index)
     {
       BS_ASSERT (cell_index >= 0 && cell_index < cell_count);
 
       return &relative_perm[cell_index * n_phases];
     }
 
-    template <typename strategy_t>
-    typename test_model<strategy_t>::item_t *
-    test_model<strategy_t>::get_s_deriv_relativ_perm (int cell_index)
+    
+    test_model::item_t *
+    test_model::get_s_deriv_relativ_perm (int cell_index)
     {
       BS_ASSERT (cell_index >= 0 && cell_index < cell_count);
 
       return &s_deriv_relativ_perm[cell_index * 2 * (n_phases - 1)];
     }
 
-    template <typename strategy_t>
-    typename test_model<strategy_t>::item_t *
-    test_model<strategy_t>::get_cap_pressure (int cell_index)
+    test_model::item_t *
+    test_model::get_cap_pressure (int cell_index)
     {
       BS_ASSERT (cell_index >= 0 && cell_index < cell_count);
 
       return &cap_pressure[cell_index * (n_phases - 1)];
     }
 
-    template <typename strategy_t>
-    typename test_model<strategy_t>::item_t *
-    test_model<strategy_t>::get_s_deriv_cap_pressure (int cell_index)
+    test_model::item_t *
+    test_model::get_s_deriv_cap_pressure (int cell_index)
     {
       BS_ASSERT (cell_index >= 0 && cell_index < cell_count);
 
       return &s_deriv_cap_pressure[cell_index * (n_phases - 1)];
     }
 
-    template <typename strategy_t>
-    typename test_model<strategy_t>::item_t *
-    test_model<strategy_t>::get_sat (int cell_index)
+    test_model::item_t *
+    test_model::get_sat (int cell_index)
     {
       BS_ASSERT (cell_index >= 0 && cell_index < cell_count);
 
       return &sat [cell_index * (n_phases - 1)];
     }
 
-    template <typename strategy_t>
     int
-    test_model<strategy_t>::get_cell_count () const
+    test_model::get_cell_count () const
       {
         return cell_count;
       }
 
     //////////////////////////////////////////////////////////////////////////
-    BLUE_SKY_TYPE_STD_CREATE_T_DEF(test_model,(class));
-    BLUE_SKY_TYPE_STD_COPY_T_DEF(test_model,(class));
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (test_model<base_strategy_fi>), 1, (objbase), "test_model_fi", "test_model_fi", "test_model_fi", false);
-    BLUE_SKY_TYPE_IMPL_T_EXT(1, (test_model<base_strategy_di>), 1, (objbase), "test_model_di", "test_model_di", "test_model_di", false);
+
+  BLUE_SKY_TYPE_STD_CREATE (test_model);
+  BLUE_SKY_TYPE_STD_COPY (test_model);
+
+  BLUE_SKY_TYPE_IMPL(test_model,  objbase, "test_model", "test_model SCAL calculation class", "test_model SCAL calculation");
 
   } // namespace scal
 } // namespace blue_sky

@@ -15,8 +15,7 @@
 namespace blue_sky
   {
   // Special blue-sky objbase class implementations
-  template <class strategy_t/*, class mtrx_fp_type*/>
-  rock_grid<strategy_t /*,mtrx_fp_type*/>::rock_grid (bs_type_ctor_param /*param*/)
+  rock_grid::rock_grid (bs_type_ctor_param /*param*/)
       : bs_refcounter(), objbase()
   {
     n_elements = 0;
@@ -25,22 +24,20 @@ namespace blue_sky
     //n_boundary_planes = 0;
   }
 
-  template <class strategy_t/*, class mtrx_fp_type*/>
-  rock_grid<strategy_t /*,mtrx_fp_type*/>::rock_grid (const rock_grid& prop)
+  rock_grid::rock_grid (const rock_grid& prop)
       : bs_refcounter(), objbase(prop)
   {
     if (&prop != this)
       *this = prop;
   }
 
-  template <class strategy_t/*, class mtrx_fp_type*/>
-  rock_grid<strategy_t /*,mtrx_fp_type*/>::~rock_grid ()
+  rock_grid::~rock_grid ()
   {
   }
 
   // init rock_grid
-  template <class strategy_t>
-  void rock_grid<strategy_t>::init (const sp_idata &input_data, index_t n_els, index_t n_pvt_regs)
+  
+  void rock_grid::init (const sp_idata &input_data, t_long n_els, t_int n_pvt_regs)
   {
     n_elements = n_els;
     n_pvt_regions = n_pvt_regs;
@@ -51,10 +48,8 @@ namespace blue_sky
     comp_const.resize(n_pvt_regions);
     comp_ref_pressure.resize(n_pvt_regions);
 
-    if (input_data->contain("MULTPV"))
-      {
-        multpv.resize(n_elements);
-      }
+    BS_ASSERT (input_data->contains_fp_array ("MULTPV"));
+    multpv.resize(n_elements);
   }
 
   /*!
@@ -64,18 +59,18 @@ namespace blue_sky
   \param array  -- pointer to destination array
   \param carray -- pointer to source array
   */
-  template <class i_type_t, class sp_index_array_t, class array_t, class src_t>
+
   void
-  convert_permeability (i_type_t cells_count, const sp_index_array_t index_map, array_t &perm, const src_t &permx, const src_t &permy, const src_t &permz)
+  convert_permeability (t_long cells_count, const spv_long index_map, stdv_float &perm, spv_float permx, spv_float permy, spv_float permz)
   {
-    i_type_t *index_map_data = &(*index_map)[0];
-    typename src_t::pointed_t::value_type *permx_data = &(*permx)[0];
-    typename src_t::pointed_t::value_type *permy_data = &(*permy)[0];
-    typename src_t::pointed_t::value_type *permz_data = &(*permz)[0];
+    t_long *index_map_data = index_map->data ();
+    t_float *permx_data = permx->data ();
+    t_float *permy_data = permy->data ();
+    t_float *permz_data = permz->data ();
     
-    for (i_type_t i = 0; i < cells_count; ++i)
+    for (t_long i = 0; i < cells_count; ++i)
       {
-        i_type_t ind = index_map_data [i];
+        t_long ind = index_map_data [i];
 
         if (permx_data[ind] < 0)
           throw bs_exception ("convert_permeability", "the value of absolute permeability tensor element for node number [d] in X direction couldn't be less than 0");
@@ -93,9 +88,9 @@ namespace blue_sky
   }
 
   // init data
-  template <class strategy_t>
+  
   int
-  rock_grid<strategy_t>::init_data (index_t cells_count, const sp_index_array_t index_map, const sp_idata &input_data)
+  rock_grid::init_data (t_long cells_count, const spv_long index_map, const sp_idata &input_data)
   {
     if (input_data->get_rock()->size())
       {
@@ -115,25 +110,14 @@ namespace blue_sky
         bs_throw_exception ("p_ref of rock has not been specified");
       }
 
-    convert_arrays(cells_count, index_map, porosity_p_ref, input_data->get_fp_non_empty_array("PORO"));
+    convert_arrays(cells_count, index_map, porosity_p_ref, input_data->get_fp_array("PORO"));
+    convert_arrays (cells_count, index_map, net_to_gros, input_data->get_fp_array ("NTG"));
+    convert_arrays (cells_count, index_map, multpv, input_data->get_fp_array ("MULTPV"));
 
-    // initialize net to gross
-    if (!input_data->contain("NTG"))
-      {
-        net_to_gros.assign(cells_count, 1.0);
-      }
-    else
-      {
-        convert_arrays (cells_count, index_map, net_to_gros, input_data->get_fp_non_empty_array("NTG"));
-      }
-
-    convert_permeability (cells_count, index_map, permeability, input_data->get_fp_non_empty_array("PERMX"), 
-                         input_data->get_fp_non_empty_array("PERMY"), input_data->get_fp_non_empty_array("PERMZ"));
-
-    if (input_data->contain("MULTPV"))
-      {
-        convert_arrays (cells_count, index_map, multpv, input_data->get_fp_non_empty_array("MULTPV"));
-      }
+    convert_permeability (cells_count, index_map, permeability, 
+                          input_data->get_fp_array("PERMX"), 
+                          input_data->get_fp_array("PERMY"), 
+                          input_data->get_fp_array("PERMZ"));
 
     return 0;
   }
@@ -149,10 +133,11 @@ namespace blue_sky
   *
   * \return 0 if success
   */
-  template <class strategy_t>
+  
   int
-  rock_grid<strategy_t>::init_planes_trans (index_t cells_count, const sp_item_array_t mesh_volumes, const sp_fi_params &/*ts_params*/, physical_constants &/*internal_constants*/)
+  rock_grid::init_planes_trans (t_long cells_count, const spv_float mesh_volumes, const sp_fi_params &/*ts_params*/, physical_constants &/*internal_constants*/)
   {
+    // FIXME: net_to_gros don't used in this function
     if (net_to_gros.empty ())
       {
         bs_throw_exception ("net_to_gros is empty");
@@ -162,30 +147,26 @@ namespace blue_sky
         bs_throw_exception ("mesh_volumes is empty");
       }
 
+    // OPENMP
     volume.assign (mesh_volumes->begin (), mesh_volumes->end ());
-    if (!multpv.empty ())
+    if (multpv.size () == volume.size ())
       {
-        if (multpv.size () == volume.size ())
+        for (t_long i = 0; i < cells_count; ++i)
           {
-            for (index_t i = 0; i < cells_count; ++i)
-              {
-                volume[i] *= multpv[i];
-              }
+            volume[i] *= multpv[i];
           }
-        else
-          {
-            bs_throw_exception (boost::format ("Size of multpv not equal with size of volume (multpv: %ld, volume: %ld)") 
-                                % multpv.size () % volume.size ());
-          }
+      }
+    else
+      {
+        bs_throw_exception (boost::format ("Size of multpv not equal with size of volume (multpv: %ld, volume: %ld)") 
+                            % multpv.size () % volume.size ());
       }
 
     return 0;
   }
 
 
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF(rock_grid,(class))
-  BLUE_SKY_TYPE_STD_COPY_T_DEF(rock_grid,(class))
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (rock_grid<base_strategy_fif>), 1, (objbase), "rock_grid_fi", "rock_grid_fi_i class", "rock grid fi i", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (rock_grid<base_strategy_did>), 1, (objbase), "rock_grid_di", "rock_grid_di class", "rock grid di i", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT(1, (rock_grid<base_strategy_dif>), 1, (objbase), "rock_grid_mixi", "rock_grid_di class", "rock grid mixi i", false)
+  BLUE_SKY_TYPE_STD_CREATE(rock_grid)
+  BLUE_SKY_TYPE_STD_COPY(rock_grid)
+  BLUE_SKY_TYPE_IMPL(rock_grid, objbase, "rock_grid", "rock_grid class", "rock grid")
 }

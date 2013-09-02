@@ -8,21 +8,21 @@
 #define BS_SWITCH_MAIN_VARS_H_
 
 #include "pvt_oil.h"
+#include "scal_interpolate.h"
 
 namespace blue_sky
   {
 
   // TODO: pvt_oil::public
 
-  template <typename strategy_t>
   struct switch_main_vars
     {
       //typedef boost::array <double, PHASE_TOTAL>  sat_3p_t;
-      typedef typename strategy_t::item_t         item_t;
-      typedef typename strategy_t::index_t        index_t;
+      typedef t_double         item_t;
+      typedef t_long        index_t;
 
-      typedef pvt_oil <strategy_t>								pvt_oil_t;
-      typedef pvt_dead_oil <strategy_t>						pvt_dead_oil_t;
+      typedef pvt_oil 								pvt_oil_t;
+      typedef pvt_dead_oil 						pvt_dead_oil_t;
 
       typedef smart_ptr <pvt_oil_t, true>         sp_pvt_oil_t;
       typedef smart_ptr <pvt_dead_oil_t, true>    sp_pvt_dead_oil_t;
@@ -30,7 +30,7 @@ namespace blue_sky
       // TODO: in the future we can remove static modifier and made this class a stateful
       static
       void
-      do_switch (bool is_w, bool is_g, bool is_o,
+      do_switch (bool /*is_w*/, bool is_g, bool is_o,
                  index_t i_o, index_t i_g, index_t i_w,
                  const sp_pvt_oil_t &pvt, item_t p,
                  // results
@@ -67,7 +67,8 @@ namespace blue_sky
 private:
 
       static void
-      momg_case (index_t i_o, index_t i_g, index_t i_w, item_t *sat_3p, item_t &gas_oil_ratio, main_var_type &main_var, index_t &count, index_t cell_index)
+      momg_case (index_t i_o, index_t i_g, index_t i_w, item_t *sat_3p, item_t &gas_oil_ratio, 
+                 main_var_type &main_var, index_t &count, index_t /*cell_index*/)
       {
         sat_3p[i_g] = 0;
         sat_3p[i_w] = 1;
@@ -111,8 +112,8 @@ private:
       {
         BS_ASSERT (pvt);
 
-        const typename pvt_oil_t::vector_t &pressure_ = pvt->get_pressure ();
-        const typename pvt_oil_t::vector_t &gor_      = pvt->get_gor ();
+        const pvt_oil_t::vector_t &pressure_ = pvt->get_pressure ();
+        const pvt_oil_t::vector_t &gor_      = pvt->get_gor ();
 
         size_t il = 0, iu = 1;
         il = binary_search (p, pressure_, std::less <item_t> ());

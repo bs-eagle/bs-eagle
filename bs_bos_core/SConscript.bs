@@ -7,28 +7,34 @@ tar_name = "bs_bos_core"
 env = custom_env.Clone ()
 env.Append (CPPPATH = ["include",
     includes["bs_bos_core_base"],
-    includes["bs_matrix"],
-    includes["bs_base_linear_solvers"],
-    includes["bs_csr_ilu_prec"],
+    includes["common_types"],
+    includes["common_alg"],
+    includes["bs_mtx"],
+    includes["bs_lsolvers"],
+    #includes["bs_csr_ilu_prec"],
     includes["bs_bos_core_data_storage"],
-#    includes["bs_mesh_mpfa"],
+    #includes["bs_mesh_mpfa"],
     includes["bs_scal"],
     includes["bs_pvt"],
-	includes["kernel"],
-	includes["bs_mesh"]
+    includes["kernel"],
+    includes["bs_mesh"],
+    includes["bs_mesh_src"],
+    includes["sql_well"],
+ #   includes["sql_well_src"]
     ])
 
 libs = ["blue_sky", 
      "bs_bos_core_base", 
-     "bs_matrix", 
-     "bs_base_linear_solvers", 
-     "bs_csr_ilu_prec",
+     "bs_mtx",
+     "bs_lsolvers",
+     #"bs_csr_ilu_prec",
      "bs_bos_core_data_storage",
      "bs_scal",
-     "bs_pvt"
+     "bs_pvt",
+     "bs_mesh",
      ]
 
-boost_libs = ["boost_date_time-mt"]
+boost_libs = list_suffix(["boost_date_time", "boost_serialization"], env["boost_suffix"]);
 
 if ("cfl" in env and env["cfl"] == "1") :
 	env.AppendUnique (CPPDEFINES = ["BS_BOS_CORE_USE_CSR_ILU_CFL_PREC"])
@@ -38,15 +44,36 @@ if ("cfl" in env and env["cfl"] == "1") :
 #    libs = libs + ["bs_hdf5_storage"]
 
 if (build_kind == "debug") :
-    env.AppendUnique (LIBS = list_suffix (libs, "_d") + list_suffix (boost_libs, "-d"))
+    env.AppendUnique (
+        LIBS = list_suffix (libs, "_d") + list_suffix (boost_libs, "-d"),
+        CPPDEFINES = ["CGAL_DISABLE_ROUNDING_MATH_CHECK"]
+    )
     lib_name += "_d"
 elif (build_kind == "release") :
     env.AppendUnique (LIBS = libs + boost_libs)
 
-bs_bos_core = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
+# link with CGAL
+#env.AppendUnique (LIBS = ['CGAL', 'gmp'])
+env.AppendUnique(CXXFLAGS = ["-frounding-math"])
+
+excluded = [
+    "csr_ilu_cfl.cpp",
+    "py_csr_ilu_cfl_prec.cpp",
+    "well_results_storage.cpp",
+    "fip_results_storage.cpp",
+    ]
+
+bs_bos_core = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."], excluded).sources)
 
 env.Alias (tar_name, bs_bos_core)
 Export ("bs_bos_core")
+
+if env['deps'] != 'off' :
+    Depends(bs_bos_core, common_alg);
+    Depends(bs_bos_core, sql_well);
+    Depends(bs_bos_core, bs_hdf5_storage);
+    Depends(bs_bos_core, bs_swift);
+#   Depends(bs_bos_core, hdm_fluid);
 
 if (env["install"] == 1) :
     inst_tar = env.Install ("$plugins_prefix", bs_bos_core)

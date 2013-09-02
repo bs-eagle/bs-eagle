@@ -46,8 +46,8 @@
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="bs_mtx_stdafx.h"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderThrough=""
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="blue-sky_d.lib bs_bos_core_base_d.lib loki_D.lib ws2_32.lib"
+				AdditionalDependencies="loki_D.lib ws2_32.lib"
 				OutputFile="$(ProjectDir)/../../../exe/debug/plugins/$(ProjectName)_d.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/lib&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/debug/&quot;;&quot;$(ProjectDir)/../../../exe/debug/plugins&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
@@ -125,7 +125,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Zm1000"
 				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;&quot;$(NUMPY_PATH)/include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;NOMINMAX"
+				PreprocessorDefinitions="BOOST_ALL_DYN_LINK"
 				GeneratePreprocessedFile="0"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -145,7 +145,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="blue-sky.lib bs_bos_core_base.lib loki.lib ws2_32.lib"
+				AdditionalDependencies="loki.lib ws2_32.lib"
 				OutputFile="$(ProjectDir)/../../../exe/release/plugins/$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/lib&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/release/&quot;;&quot;$(ProjectDir)/../../../exe/release/plugins&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
@@ -312,15 +312,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\jac_matrix.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\jac_matrix.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\matrix_impl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\mbcsr_matrix.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\mbcsr_matrix.h"
 				>
 			</File>
 			<File
@@ -348,11 +348,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\py_naive_file_reader.cpp"
+				RelativePath=".\src\py_mbcsr_matrix.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\py_save_seq_vector.cpp"
+				RelativePath=".\src\py_mbcsr_matrix.h"
 				>
 			</File>
 		</Filter>
@@ -408,18 +408,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\naive_file_reader.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\py_naive_file_reader.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\py_save_seq_vector.h"
-				>
-			</File>
-			<File
 				RelativePath=".\include\read_b_matrix.h"
 				>
 			</File>
@@ -431,34 +419,6 @@
 		<File
 			RelativePath=".\src\main.cpp"
 			>
-		</File>
-		<File
-			RelativePath=".\src\stdafx.cpp"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="1"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="1"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release_WO_Python|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="1"
-				/>
-			</FileConfiguration>
 		</File>
 	</Files>
 	<Globals>

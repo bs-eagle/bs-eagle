@@ -10,86 +10,39 @@
 #define RESERVOIR_SIMULATOR_H
 
 #include "simulator_events.h"
-#include "data_manager.h"
+#include "hdm.h"
 #include "event_manager.h"
 #include "jacobian.h"
 
 namespace blue_sky
 {
-
-  template <typename strategy_t>
   class reservoir;
-
-  template <typename strategy_t>
   class calc_model;
-
-  template <typename strategy_t>
-  class reservoir;
-
-  template <typename strategy_t>
-  struct BS_API_PLUGIN trans_multipliers_calc;
-
-  template <typename strategy_t>
   struct main_loop_calc_base;
-
   class data_storage_interface;
-
-  template <typename strategy_t>
-  class keyword_manager;
 
   /**
    * \class reservoir_simulator
    * \brief main class of reservoir_simulator implementation,
    *        implements bs_node
    * */
-  template <class strategy_t>
   class BS_API_PLUGIN reservoir_simulator : public bs_node
     {
     public:
       // typedefs
-      typedef bs_node                               base_t;
-      typedef reservoir_simulator < strategy_t >    this_t;               //!< shortname for this type
-      typedef smart_ptr < this_t, true >            sp_this_t;            //!< smart pointer to this_t
+      typedef bs_node                                 base_t;
+      typedef smart_ptr <reservoir_simulator, true >  sp_this_t;
 
-      typedef data_manager < strategy_t >           dm_t;                 //!< data_manager type
-      typedef smart_ptr < dm_t, true >              sp_dm_t;              //!< smart_ptr to data_manager type
-
-      typedef rs_mesh_iface < strategy_t >          mesh_iface_t;         //!< rs_mesh_iface type
-      typedef smart_ptr < mesh_iface_t, true >      sp_mesh_iface_t;      //!< smart_ptr to rs_mesh_iface type
-
-      typedef linear_solver_base < strategy_t >     solver_t;             //!< linear_solver type
-      typedef smart_ptr < solver_t, true>           sp_solver_t;          //!< smart_ptr to solver_t type
-
-      typedef event_manager <strategy_t>            em_t;                 //!< event_manager type
-      typedef smart_ptr < em_t, true >              sp_em_t;              //!< smart_ptr to event_manager type
-      typedef typename em_t::sp_event_base_list     sp_event_base_list_t; //!< list of scheduled events
-
-      typedef calc_model < strategy_t >             calc_model_t;         //!< calc_model type
-      typedef smart_ptr < calc_model_t, true >      sp_calc_model_t;      //!< smart_ptr to calc_model type
-
-      typedef reservoir <strategy_t>                reservoir_t;          //!< reservoir type
-      typedef smart_ptr <reservoir_t, true>         sp_reservoir_t;       //!< smart_ptr to reservoir type
-
-      typedef data_storage_interface                facility_storage_t;   //!< facility_storage type
-      typedef smart_ptr <facility_storage_t, true>  sp_facility_storage_t;//!< smart_ptr to facility_storage type
-
-      typedef jacobian <strategy_t>                 jacobian_t;           //!< jacobian type
-      typedef smart_ptr <jacobian_t, true>          sp_jacobian_t;        //!< smart_ptr to jacobian type
-
-      typedef typename strategy_t::item_t           item_t;               //!< item type
-      typedef typename strategy_t::index_t          index_t;              //!< index type
-      typedef typename strategy_t::item_array_t     item_array_t;         //!< array of items type
-      typedef typename strategy_t::index_array_t    index_array_t;        //!< array of indexes type
-
-      //! transmissibility multipliers calculator type
-      typedef trans_multipliers_calc <strategy_t>   trans_multipliers_calc_t; 
-      typedef main_loop_calc_base <strategy_t>      main_loop_calc_t;     //!< base type of main_loop_calc type
-
-      typedef keyword_manager <strategy_t>          keyword_manager_t;    //!< keyword_manager type
-      typedef smart_ptr <keyword_manager_t, true >  sp_keyword_manager_t; //!< smart_ptr to keyword_manager type
-
-      typedef jacobian_matrix <strategy_t>          jmatrix_t;            //!< jacobian_matrix type
-      typedef smart_ptr <jmatrix_t, true>           sp_jmatrix_t;         //!< smart_ptr to jacobian_matrix type
+      typedef smart_ptr <hdm, true>                   sp_hdm_t;              //!< smart_ptr to hdm type
+      typedef smart_ptr <rs_mesh_iface, true >        sp_mesh_iface_t;      //!< smart_ptr to rs_mesh_iface type
+      typedef smart_ptr <lsolver_iface, true>         sp_solver_t;          //!< smart_ptr to solver_t type
+      typedef smart_ptr <event_manager, true >        sp_em_t;              //!< smart_ptr to event_manager type
+      typedef event_manager::event_list_t             event_list_t;         //!< list of scheduled events
+      typedef smart_ptr < calc_model, true >          sp_calc_model_t;      //!< smart_ptr to calc_model type
+      typedef smart_ptr <reservoir, true>             sp_reservoir_t;       //!< smart_ptr to reservoir type
+      typedef data_storage_interface                  facility_storage_t;   //!< facility_storage type
+      typedef smart_ptr <facility_storage_t, true>    sp_facility_storage_t;//!< smart_ptr to facility_storage type
+      typedef smart_ptr <jacobian, true>              sp_jacobian_t;        //!< smart_ptr to jacobian type
 
     public:
       /**
@@ -100,40 +53,46 @@ namespace blue_sky
       set_mesh (const sp_mesh_iface_t&);
 
       /**
-       * \brief  returns pointer to data_manager instance
+       * \brief  returns pointer to hdm instance
        * */
-      const sp_dm_t &
-      get_data_manager () const;
+      sp_hdm_t 
+      get_hdm () const;
 
       /**
        * \brief  returns pointer to event_manager instance
        * */
-      const sp_em_t &
+      sp_em_t 
       get_event_manager () const;
 
       /**
        * \brief  returns pointer to calc_model instance
        * */
-      const sp_calc_model_t &
+      sp_calc_model_t 
       get_calc_model () const;
 
       /**
        * \brief  returns pointer to mesh instance
        * */
-      const sp_mesh_iface_t &
+      sp_mesh_iface_t
       get_mesh () const;
 
       /**
        * \brief  returns pointer to jacobian instance
        * */
-      const sp_jacobian_t &
+      sp_jacobian_t 
       get_jacobian () const;
 
       /**
        * \brief  returns pointer to reservoir instance
        * */
-      const sp_reservoir_t &
+      sp_reservoir_t 
       get_reservoir () const;
+
+      /**
+       * \brief returns pointer to facility_storage
+       * */
+      smart_ptr <facility_storage_t> 
+      get_facility_storage () const;
 
       /**
        * \brief  inits reservoir simulator
@@ -154,7 +113,7 @@ namespace blue_sky
        *         and returns main_loop_calc
        * \return may throw exception
        * */
-      main_loop_calc_t *
+      main_loop_calc_base *
       get_main_loop ();
 
       /**
@@ -198,7 +157,7 @@ namespace blue_sky
        *         executed before start of the step
        * */
       void 
-      pre_large_step (const sp_event_base_list_t &event_list);
+      pre_large_step (const event_list_t &event_list);
 
       /**
        * \brief  returns name of model file
@@ -206,7 +165,20 @@ namespace blue_sky
       std::string
       model_filename () const;
 
-      BLUE_SKY_TYPE_DECL_T(reservoir_simulator)
+      BLUE_SKY_TYPE_DECL (reservoir_simulator)
+
+
+    protected:
+      sp_hdm_t                hdm_;               //!< pointer to hdm instance
+      sp_calc_model_t         cm;                 //!< pointer to calc_model instance
+      sp_reservoir_t          reservoir_;         //!< pointer to reservoir instance
+      sp_facility_storage_t   facility_storage_;  //!< pointer to facility_storage instance
+      sp_jacobian_t           jacobian_;          //!< pointer to jacobian instance
+      std::string             model_filename_;    //!< name of model file
+
+      smart_ptr <main_loop_calc_base, false> mloop;  //!< pointer to main_loop_calc instance
+
+    public:
 
       //! storage for event params
       typedef bs_array <std::string> signal_params_t;
@@ -227,18 +199,6 @@ namespace blue_sky
         ((post_read, (), 0))
         ((pre_read, (sp_this_t), 1))
       );
-
-      sp_dm_t                 dm;                 //!< pointer to data_manager instance
-      sp_em_t                 em;                 //!< pointer to event_manager instance
-      sp_calc_model_t         cm;                 //!< pointer to calc_model instance
-      sp_mesh_iface_t         mesh;               //!< pointer to mesh instance
-      sp_reservoir_t          reservoir_;         //!< pointer to reservoir instance
-      sp_facility_storage_t   facility_storage_;  //!< pointer to facility_storage instance
-      sp_jacobian_t           jacobian_;          //!< pointer to jacobian instance
-      sp_keyword_manager_t    keyword_manager_;   //!< pointer to keyword manager instance
-      std::string             model_filename_;    //!< name of model file
-
-      smart_ptr <main_loop_calc_t, false> mloop;  //!< pointer to main_loop_calc instance
     };
 
   /**

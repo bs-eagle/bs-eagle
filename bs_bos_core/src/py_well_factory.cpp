@@ -29,11 +29,11 @@ namespace python {
   void 
   py_export_well_factories ()
   {
-    strategy_exporter::export_base <well_factory, well_factory_exporter> ("well_factory");
-    strategy_exporter::export_base <well_controller_factory, well_controller_factory_exporter> ("well_controller_factory");
+    base_exporter <well_factory, well_factory_exporter>::export_class ("well_factory");
+    base_exporter <well_controller_factory, well_controller_factory_exporter>::export_class ("well_controller_factory");
 
-    strategy_exporter::export_class <py_well_factory, well_factory, well_factory_exporter> ("py_well_factory");
-    strategy_exporter::export_class <py_well_controller_factory, well_controller_factory, well_controller_factory_exporter> ("py_well_controller_factory");
+    class_exporter <py_well_factory, well_factory, well_factory_exporter>::export_class ("py_well_factory");
+    class_exporter <py_well_controller_factory, well_controller_factory, well_controller_factory_exporter>::export_class ("py_well_controller_factory");
   }
 
 } // namespace python

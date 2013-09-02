@@ -57,7 +57,7 @@ namespace blue_sky
         }
 
         //! Formated string
-        char str[255];
+        char str[1024];
       };
 
 

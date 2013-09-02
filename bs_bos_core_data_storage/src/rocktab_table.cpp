@@ -6,6 +6,7 @@
  */
 #include "bs_bos_core_data_storage_stdafx.h"
 #include "rocktab_table.h"
+#include "bs_misc.h"
 
 namespace blue_sky
   {
@@ -13,8 +14,8 @@ namespace blue_sky
   /**
    * @brief constructor
    */
-  template <class strategy_t>
-  bs_table<strategy_t>::bs_table()
+  
+  bs_table::bs_table()
   {
     n_rows = 0;
   }
@@ -22,8 +23,8 @@ namespace blue_sky
   /**
    * @brief destructor
    */
-  template <class strategy_t>
-  bs_table <strategy_t>::~bs_table()
+  
+  bs_table ::~bs_table()
   {
     clear();
   }
@@ -33,9 +34,9 @@ namespace blue_sky
    *
    * @return number of rows
    */
-  template <class strategy_t>
-  typename strategy_t::i_type_t
-  bs_table <strategy_t> ::get_num_rows ()
+  
+  t_int
+  bs_table  ::get_num_rows ()
   {
     return n_rows;
   }
@@ -45,9 +46,9 @@ namespace blue_sky
    *
    * @return number of columns
    */
-  template <class strategy_t>
-  typename strategy_t::i_type_t
-  bs_table<strategy_t>::get_num_cols ()
+  
+  t_int
+  bs_table::get_num_cols ()
   {
     return (int)columns.size ();
   }
@@ -57,11 +58,11 @@ namespace blue_sky
    *
    * @param num_rows -- new number of rows
    */
-  template <class strategy_t>
+  
   void
-  bs_table<strategy_t>::set_num_rows (const index_t num_rows)
+  bs_table::set_num_rows (const t_int num_rows)
   {
-    typename std::vector<column>::iterator itr, end_itr = columns.end ();
+    std::vector<column>::iterator itr, end_itr = columns.end ();
 
     for (itr = columns.begin (); itr != end_itr; ++itr)
       {
@@ -75,23 +76,23 @@ namespace blue_sky
    *
    * @param _name -- name of new column
    */
-  template <class strategy_t>
+  
   void
-  bs_table<strategy_t>::add_column(const std::string &_name)
+  bs_table::add_column(const std::string &_name)
   {
     column last_column;
 
     columns.push_back (last_column);
-    columns.back ().name = _name;
+    columns.back ().name = str2wstr(_name);
     columns.back ().data.resize (n_rows);
   }
 
   /**
    * @brief clear
    */
-  template <class strategy_t>
+  
   void
-  bs_table<strategy_t>::clear()
+  bs_table::clear()
   {
     columns.clear();
   }
@@ -103,9 +104,9 @@ namespace blue_sky
    *
    * @return column name
    */
-  template <class strategy_t>
-  const std::string &
-  bs_table <strategy_t>::get_col_name(const index_t col_num)
+  
+  const std::wstring &
+  bs_table ::get_col_name(const t_int col_num)
   {
     return columns[col_num].name;
   }
@@ -116,9 +117,9 @@ namespace blue_sky
    * @param col_num -- column index
    * @param new_name -- name
    */
-  template <class strategy_t>
+  
   void
-  bs_table <strategy_t>::set_col_name (const index_t col_num, const std::string &new_name)
+  bs_table ::set_col_name (const t_int col_num, const std::wstring &new_name)
   {
     columns[col_num].name = new_name;
   }
@@ -130,9 +131,9 @@ namespace blue_sky
    *
    * @return column data
    */
-  template <class strategy_t>
-  std::vector<typename strategy_t::fp_type_t> &
-  bs_table <strategy_t>::get_column (const index_t col_num)
+  
+  std::vector<t_float> &
+  bs_table ::get_column (const t_int col_num)
   {
     return columns[col_num].data;
   }
@@ -140,27 +141,27 @@ namespace blue_sky
   /**
    * @brief constructor
    */
-  template <class strategy_t>
-  rocktab_table <strategy_t>::rocktab_table ()
+  
+  rocktab_table ::rocktab_table ()
   {
     this->add_column ("pressure");
     this->add_column ("poro volume multiplier");
     this->add_column ("transmissibility multiplier");
   }
 
-  template <class strategy_t> 
-  rocktab_table <strategy_t> & 
-	  rocktab_table <strategy_t>::operator= (const rocktab_table <strategy_t> & rhs)
+   
+  rocktab_table  & 
+	  rocktab_table ::operator= (const rocktab_table  & rhs)
   {
 	  if (this == &rhs)
 		  return *this;
 
-	  bs_table <strategy_t>::operator=(rhs);
+	  bs_table ::operator=(rhs);
 	  return *this; 
   }
 
-  template <class strategy_t>
-  rocktab_table <strategy_t>::rocktab_table (const rocktab_table <strategy_t> & rhs)
+  
+  rocktab_table ::rocktab_table (const rocktab_table  & rhs)
   {
 	  *this = rhs;
   }
@@ -168,17 +169,9 @@ namespace blue_sky
   /**
    * @brief destructor
    */
-  template <class strategy_t>
-  rocktab_table <strategy_t>::~rocktab_table ()
+  
+  rocktab_table ::~rocktab_table ()
   {
   }
-
-  template class bs_table <base_strategy_did>;
-  template class bs_table <base_strategy_fif>;
-  template class bs_table <base_strategy_dif>;
-
-  template class rocktab_table <base_strategy_did>;
-  template class rocktab_table <base_strategy_fif>;
-  template class rocktab_table <base_strategy_dif>;
 
 } // namespace blue_sky

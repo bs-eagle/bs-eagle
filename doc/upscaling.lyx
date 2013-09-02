@@ -1,0 +1,459 @@
+#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
+\language russian
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\float_placement h
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Section
+Ремасштабирование методом Кинга
+\end_layout
+
+\begin_layout Standard
+Рассмотрим самый простой вариант апскейлинга по методу Кинга.
+ Пусть точная модель содержит 
+\begin_inset Formula $Nx\times Ny\times Nz$
+\end_inset
+
+ ячеек и задано количество слоев по вертикали 
+\begin_inset Formula $Nz_{upsc}$
+\end_inset
+
+ для укрупненной модели.
+ Ремасштабирование проводится итерационно, последовательным объединением
+ двух соседних слоев на каждом из 
+\begin_inset Formula $Nz-Nz_{upsc}$
+\end_inset
+
+ шагов.
+ Выбор слоев для объединения осуществляется на основе критерия Кинга cледующим
+ образом:
+\end_layout
+
+\begin_layout Itemize
+величину изменения скорости перемещения флюида (и, соответственно, потери
+ неоднородности) при объединении двух ячеек с индексами 
+\begin_inset Formula $(i,\, j,\, k)$
+\end_inset
+
+ и 
+\begin_inset Formula $(i,\, j,\, k+1)$
+\end_inset
+
+ определяют по формуле:
+\begin_inset Formula \[
+\delta W_{i,\, j,\, k}=\frac{V_{i,\, j,\, k}V_{i,\, j,\, k+1}}{V_{i,\, j,\, k}+V_{i,\, j,\, k+1}}(P_{i,\, j,\, k}-P_{i,\, j,\, k+1})^{2}\text{,}\]
+
+\end_inset
+
+где 
+\begin_inset Formula $P_{i,\, j,\, k}=(\frac{NTG\times k_{x}}{\phi})_{i,\, j,\, k}$
+\end_inset
+
+ --- показатель скорости перемещения флюида внутри ячейки, 
+\begin_inset Formula $NTG$
+\end_inset
+
+ --- песчанистость, 
+\begin_inset Formula $k_{x}$
+\end_inset
+
+ --- проницаемость в направлении 
+\begin_inset Formula $Ox$
+\end_inset
+
+, 
+\begin_inset Formula $\phi$
+\end_inset
+
+ --- пористость, 
+\begin_inset Formula $V$
+\end_inset
+
+ --- геометрический объем ячейки.
+ 
+\end_layout
+
+\begin_layout Itemize
+выбор слоев для объединения сводится к задаче нахождения такого номера слоя
+ 
+\begin_inset Formula $k$
+\end_inset
+
+, при котором значение величины 
+\begin_inset Formula $\sum_{i,\, j}\delta W_{i,\, j,\, k}$
+\end_inset
+
+ будет минимальным.
+ Производится объединение двух слоев в один и процедура нахождения новой
+ пары слоев для объединения проводится заново.
+\end_layout
+
+\begin_layout Standard
+При объединении двух слоев производится пересчет статических кубов по следующим
+ формулам:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $V_{new}=V_{1}+V_{2}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $NTG_{new}=\frac{NTG_{1}\times V_{1}+NTG_{2}\times V_{2}}{V_{1}+V_{2}}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\phi_{new}=\frac{\phi_{1}\times NTG_{1}\times V_{1}+\phi_{2}\times NTG_{2}\times V_{2}}{NTG_{1}\times V_{1}+NTG_{2}\times V_{2}}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $SWAT_{new}=\frac{SWAT_{1}\times\phi_{1}\times NTG_{1}\times V_{1}+SWAT_{2}\times\phi_{2}\times NTG_{2}\times V_{2}}{\phi_{1}\times NTG_{1}\times V_{1}+\phi_{2}\times NTG_{2}\times V_{2}}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Ремасштабирование проницаемостей
+\end_layout
+
+\begin_layout Standard
+Для определения нового значения проницаемости для укрупненной ячейки решается
+ уравнение Лапласа на мелкой сетке в области, соответствующей новой крупной
+ ячейке.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+\nabla(k\nabla p)=0\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Граничные условия задаются в зависимости от того, какая из главных компонент
+ тензора абсолютной проницаемости определяется.
+ 
+\end_layout
+
+\begin_layout Standard
+В следующем примере проводится ремасштабирование только вдоль оси 
+\begin_inset Formula $Oz$
+\end_inset
+
+ (см.
+ рис.
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:upsc_oz"
+
+\end_inset
+
+).
+ Рассмотрим процесс нахождения ремасштабированного значения 
+\begin_inset Formula $k_{z}$
+\end_inset
+
+ --- проницаемости в направлении оси 
+\begin_inset Formula $Oz$
+\end_inset
+
+.
+ На рисунке изображены объединяемые ячейки (с номерами от 
+\begin_inset Formula $1$
+\end_inset
+
+ до 
+\begin_inset Formula $n$
+\end_inset
+
+) и фиктивные ячейки (с номерами 
+\begin_inset Formula $0$
+\end_inset
+
+ и 
+\begin_inset Formula $n+1$
+\end_inset
+
+), в которых задаются граничные условия --- постоянное давление.
+ Свойства фиктивных ячеек полностью повторяют свойства граничащих с ними
+ объединяемых ячеек.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename upsc.JPG
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:upsc_oz"
+
+\end_inset
+
+Ремасштабирование вдоль оси 
+\begin_inset Formula $Oz$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Дискретная система уравнений для нахождения давления в объединяемых ячейках:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{eqnarray*}
+ & T_{1}^{-}p^{*}-(T_{1}^{-}+T_{1}^{+})p_{1}+T_{1}^{+}p_{2} & =0,\\
+ & ...\\
+ & T_{i}^{-}p_{i-1}-(T_{i}^{-}+T_{i}^{+})p_{i}+T_{i}^{+}p_{i+1} & =0,\\
+ & ...\\
+ & T_{n}^{-}p^{*}-(T_{n}^{-}+T_{n}^{+})p_{n}+T_{n}^{+}p_{*} & =0.\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Проводимость 
+\begin_inset Formula $T_{i}^{+}$
+\end_inset
+
+вычисляется между ячейками с номерами 
+\begin_inset Formula $i$
+\end_inset
+
+ и 
+\begin_inset Formula $i+1$
+\end_inset
+
+, соседними в положительном направлении оси 
+\begin_inset Formula $Oz$
+\end_inset
+
+, а 
+\begin_inset Formula $T_{i}^{-}=T_{i-1}^{+}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Ремасштабированное значение проницаемости находится из условия равенства
+ потоков 
+\begin_inset Formula $q=Q$
+\end_inset
+
+, 
+\end_layout
+
+\begin_layout Standard
+где 
+\begin_inset Formula $q$
+\end_inset
+
+ --- поток через верхнюю грань первой ячейки мелкой сетки, 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $Q$
+\end_inset
+
+ --- поток через ту же грань, но для укрупненной ячейки:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{eqnarray*}
+q & = & \frac{k_{z\:}^{1}dp\: A}{dl},\\
+Q & = & \frac{k_{z}^{*}\: dP\: A}{dL},\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $k_{z}^{1}$
+\end_inset
+
+--- проницаемость первой ячейки мелкой сетки,
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $k_{z}^{*}$
+\end_inset
+
+--- искомая проницаемость укрупненной ячейки, 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $A$
+\end_inset
+
+ --- площадь грани,
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $dp=p^{*}-p_{1}$
+\end_inset
+
+, 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $dP=\frac{p^{*}-p_{1}}{2}-\frac{p_{n}-p_{*}}{2}$
+\end_inset
+
+, 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $dl$
+\end_inset
+
+ --- расстояние между центрами нулевой и первой ячейки,
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $dL$
+\end_inset
+
+ --- суммарная длина вдоль оси 
+\begin_inset Formula $Oz$
+\end_inset
+
+ всех объединяемых ячеек от верхней грани первой ячейки до нижней грани
+ последней ячейки.
+\end_layout
+
+\begin_layout Standard
+Тогда искомая проницаемость вычисляется по формуле:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+k_{z}^{*}=\frac{dp}{dl}/\frac{dP}{dL}.\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Ремасштабированные значения проницаемостей вдоль осей 
+\begin_inset Formula $Ox$
+\end_inset
+
+ и 
+\begin_inset Formula $Oy$
+\end_inset
+
+ находятся как средневзвешенные по объему песчанника:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+k_{x}^{*}=\frac{\sum_{i}k_{x}^{i}\times NTG_{i}\times V_{i}}{\sum_{i}NTG_{i}*V_{i}},\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+k_{y}^{*}=\frac{\sum_{i}k_{y}^{i}\times NTG_{i}\times V_{i}}{\sum_{i}NTG_{i}\times V_{i}}.\]
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

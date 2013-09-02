@@ -18,31 +18,28 @@
 namespace blue_sky {
 namespace python {
 
-  template <typename jacobian_t>
   void
   export_jacobian (const char *name)
   {
     using namespace boost::python;
 
-    class_ <jacobian_t, boost::noncopyable> (name, no_init)
-      .def ("__cons__",         make_constructor (construct_python_object <jacobian_t>))
-      .def ("__init__",         make_function (init_python_object <jacobian_t>))
-      .add_property ("solver",  make_function (&jacobian_t::get_solver, return_value_policy <copy_const_reference> ()),  make_function (&jacobian_t::set_solver))
-      .add_property ("prec",    make_function (&jacobian_t::get_prec, return_value_policy <copy_const_reference> ()),    make_function (&jacobian_t::set_prec))
-      .add_property ("jmx",     make_function (&jacobian_t::get_jmatrix, return_value_policy <copy_const_reference> ()), make_function (&jacobian_t::set_jmatrix))
+    typedef BS_SP (mbcsr_matrix_iface) (jacobian::*get_matrix_t) () const;
+    get_matrix_t get_matrix = &jacobian::get_matrix;
+
+    class_ <jacobian, boost::noncopyable> (name, no_init)
+      .def ("__cons__",         make_constructor (construct_python_object <jacobian>))
+      .def ("__init__",         make_function (init_python_object <jacobian>))
+      .add_property ("solver",  make_function (&jacobian::get_solver, return_value_policy <copy_const_reference> ()),  make_function (&jacobian::set_solver))
+      .add_property ("prec",    make_function (&jacobian::get_prec, return_value_policy <copy_const_reference> ()),    make_function (&jacobian::set_prec))
+      .def ("matrix",           get_matrix)
       ;
   }
 
   void
   py_export_jacobian ()
   {
-    export_jacobian <jacobian <base_strategy_fi> >   ("jacobian_fi");
-    export_jacobian <jacobian <base_strategy_di> >   ("jacobian_di");
-    export_jacobian <jacobian <base_strategy_mixi> > ("jacobian_mixi");
-
-    boost::python::register_ptr_to_python <smart_ptr <jacobian <base_strategy_fi>, true> > ();
-    boost::python::register_ptr_to_python <smart_ptr <jacobian <base_strategy_di>, true> > ();
-    boost::python::register_ptr_to_python <smart_ptr <jacobian <base_strategy_mixi>, true> > ();
+    export_jacobian ("jacobian");
+    boost::python::register_ptr_to_python <smart_ptr <jacobian, true> > ();
   }
 
 

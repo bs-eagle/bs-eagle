@@ -1,6 +1,11 @@
 #include "bs_bos_core_data_storage_stdafx.h"
 #include "prvd_table.h"
 
+#ifdef EPS
+#undef EPS
+#endif // EPS
+#define EPS 1.e-10
+
 namespace blue_sky
   {
   val_vs_depth::val_vs_depth() {}

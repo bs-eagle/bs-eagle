@@ -21,15 +21,15 @@ namespace blue_sky
     namespace compute_factors
       {
 
-      template <typename strategy_t>
       void
-      peaceman_model<strategy_t>::compute (connection_t &con,
-                                           const physical_constants &internal_constants,
-                                           const sp_params_t &params,
-                                           const sp_mesh_iface_t &mesh,
-                                           const item_array_t &perm,
-                                           const item_array_t &ntg,
-                                           bool ro_calc_flag)
+      peaceman_model::compute (connection_t &con,
+                               const physical_constants &internal_constants,
+                               const sp_params_t &params,
+                               const sp_mesh_iface_t &mesh,
+                               const stdv_float &perm,
+                               const stdv_float &ntg,
+                               bool ro_calc_flag,
+                               item_t *completion_thickness)
       {
         BS_ASSERT (con.n_block_ >= 0) (con.n_block_);
 
@@ -43,6 +43,8 @@ namespace blue_sky
         d1 = d[dir_plane1];
         d2 = d[dir_plane2];
         d_ort = d[dir_orth];
+        if (completion_thickness)
+          d_ort = (*completion_thickness);
 
         item_t perm1 = (perm[3 * con.n_block () + dir_plane1]);
         item_t perm2 = (perm[3 * con.n_block () + dir_plane2]);
@@ -57,7 +59,7 @@ namespace blue_sky
             else
               {
                 BS_ASSERT (denomin > 1.0e-7) (denomin) (coef1) (coef2);
-                throw bs_exception ("well::connection::compute_factors_by_peaceman_model", "Connection factor is equal to zero");
+                bs_throw_exception (boost::format ("Connection factor == 0 for cell: %d") % con.n_block ());
               }
           }
 
@@ -73,7 +75,7 @@ namespace blue_sky
                 if (con.skin_ < ::log (con.diam_ / (2 * con.R0_)) - 2 * PI * dP)
                   {
                     BS_ASSERT (con.skin_ >= ::log (con.diam_ / (2 * con.R0_)) - 2 * PI * dP) (::log (con.diam_ / (2 * con.R0_)) - 2 * PI * dP) (dP);
-                    throw bs_exception ("well::connection::compute_factors_by_peaceman_model", "Wrong value of skin factor for connection");
+                    bs_throw_exception (boost::format ("Wrong value of skin factor for cell: %d") % con.n_block ());
                   }
 
                 con.skin_ += 2 * PI * dP;
@@ -81,7 +83,7 @@ namespace blue_sky
             else
               {
                 BS_ASSERT (false && "FI_PARAMS_B_USE_LOW_SKIN_TRANS_MULT");
-                throw bs_exception ("well::connection::compute_factors_by_peaceman_model", "Wrong value of skin factor for connection");
+                bs_throw_exception (boost::format ("Wrong value of skin factor for cell: %d") % con.n_block ());
               }
           }
 
@@ -117,17 +119,38 @@ namespace blue_sky
 
         if (con.fact_ < -MIN_ZERO_DIFF)
           {
-            bs_throw_exception (boost::format ("Negative value of connection factor %f for connection of well") % con.fact_);
+            bs_throw_exception (boost::format ("Negative value of connection factor %f for cell: %d") % con.fact_ % con.n_block ());
           }
       }
 
-      template <typename strategy_t>
-      typename strategy_t::item_t
-      peaceman_model<strategy_t>::compute_grp_pi_mult (connection_t &con)
+      t_double
+      peaceman_model::compute_grp_pi_mult (connection_t &con)
       {
         return (::log (4.0 * con.fracture_half_length_ / con.diam_) /*+  con.skin_ */) / (::log (4.0) /*+ con.skin_ */);
       }
 
+      //////////////////////////////////////////////////////////////////////////
+      void
+      completion_connection_factor::compute (connection_t &connection, 
+                                             const physical_constants &internal_constants, 
+                                             const sp_params_t &params, 
+                                             const sp_mesh_iface_t &mesh, 
+                                             const stdv_float &perm, 
+                                             const stdv_float &ntg)
+      {
+        item_t completion_fact_ = 0;
+        // loop through all directions 
+        for (t_uint dir = 0; dir < direction_total; ++dir)
+          {
+            connection.set_direction ((connection_direction_type) dir);
+            item_t completion_thickness = fabs (connection.completion_data.x2[dir] - connection.completion_data.x1[dir]);
+            peaceman_model::compute (connection, internal_constants, params, mesh, perm, ntg, /*ro_calc_flag*/ 1, &completion_thickness);
+            completion_fact_ += connection.get_fact ();
+          }
+        // set full completion connection factor
+        connection.set_factor (completion_fact_); 
+        connection.set_CFF_flag (true);
+      }
       //////////////////////////////////////////////////////////////////////////
       ///**
       // * \brief computes connection factor by baby and odeh model.
@@ -264,10 +287,6 @@ namespace blue_sky
       //    }
       //  return result;
       //}
-
-      template struct peaceman_model <base_strategy_fi>;
-      template struct peaceman_model <base_strategy_di>;
-      template struct peaceman_model <base_strategy_mixi>;
 
     } // namespace compute_factors
   } // namespace wells

@@ -41,8 +41,8 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Zm1000"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)/../bs_csr_ilu_prec\include&quot;;&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_matrix/include/&quot;;&quot;$(ProjectDir)/../bs_base_linear_solvers/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_data_storage/include/&quot;;&quot;$(ProjectDir)/../bs_mesh/include&quot;;&quot;$(ProjectDir)/../bs_scal/include/&quot;;&quot;$(ProjectDir)/../bs_pvt/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;$(NUMPY_PATH)/include"
-				PreprocessorDefinitions="_DEBUG;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;BS_BOS_CORE_DEBUG_MEMORY_;_HDF5_;_MPI_;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;_SCL_SECURE_NO_WARNINGS"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)/../bs_pvt/src/&quot;;&quot;$(ProjectDir)/../bs_csr_ilu_prec\include&quot;;&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_lsolvers/include/&quot;;&quot;$(ProjectDir)/../common_types/include/&quot;;&quot;$(ProjectDir)/../../hdf5-storage/src/&quot;;&quot;$(ProjectDir)/../bs_mtx/include/&quot;;&quot;$(ProjectDir)/../bs_base_linear_solvers/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_data_storage/include/&quot;;&quot;$(ProjectDir)/../sql_well/include&quot;;&quot;$(ProjectDir)/../bs_mesh/include&quot;;&quot;$(ProjectDir)/../bs_scal/include/&quot;;&quot;$(ProjectDir)/../bs_pvt/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;&quot;$(NUMPY_PATH)/include&quot;"
+				PreprocessorDefinitions="_DEBUG;_USRDLL;_HDF5_;WIN32;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;BS_BOS_CORE_DEBUG_MEMORY_;_MPI_;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;_SCL_SECURE_NO_WARNINGS;NOMINMAX"
 				GeneratePreprocessedFile="0"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="blue-sky_d.lib bs_bos_core_base_d.lib bs_matrix_d.lib bs_base_linear_solvers_d.lib bs_bos_core_data_storage_d.lib bs_scal_d.lib bs_pvt_d.lib loki_D.lib ws2_32.lib"
+				AdditionalDependencies="loki_D.lib ws2_32.lib"
 				OutputFile="$(ProjectDir)/../../../exe/debug/plugins/$(ProjectName)_d.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/lib&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/debug/&quot;;&quot;$(ProjectDir)/../../../exe/debug/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
@@ -131,8 +131,8 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="&quot;$(STLPORT_PATH_)/stlport&quot;;&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_matrix/include/&quot;;&quot;$(ProjectDir)/../bs_base_linear_solvers/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_data_storage/include/&quot;;&quot;$(ProjectDir)/../bs_mesh/include&quot;;&quot;$(ProjectDir)/../bs_scal/include/&quot;;&quot;$(ProjectDir)/../bs_csr_ilu_prec/include/&quot;;&quot;$(ProjectDir)/../bs_pvt/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;$(NUMPY_PATH)/include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;BS_BOS_CORE_DEBUG_MEMORY_;HDF5_;H5_USE_16_API_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)/../bs_csr_ilu_prec\include&quot;;&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_lsolvers/include/&quot;;&quot;$(ProjectDir)/../common_types/include/&quot;;&quot;$(ProjectDir)/../../hdf5-storage/src/&quot;;&quot;$(ProjectDir)/../bs_mtx/include/&quot;;&quot;$(ProjectDir)/../bs_base_linear_solvers/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_data_storage/include/&quot;;&quot;$(ProjectDir)/../bs_mesh/include&quot;;&quot;$(ProjectDir)/../bs_scal/src/&quot;;&quot;$(ProjectDir)/../bs_scal/include/&quot;;&quot;$(ProjectDir)/../bs_pvt/src/&quot;;&quot;$(ProjectDir)/../sql_well/include/&quot;;&quot;$(ProjectDir)/../bs_pvt/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;&quot;$(NUMPY_PATH)/include&quot;"
+				PreprocessorDefinitions="BOOST_ALL_DYN_LINK"
 				GeneratePreprocessedFile="0"
 				RuntimeLibrary="2"
 				EnableEnhancedInstructionSet="0"
@@ -153,12 +153,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="blue-sky.lib bs_bos_core_base.lib bs_matrix.lib bs_base_linear_solvers.lib bs_bos_core_data_storage.lib bs_mesh.lib bs_scal.lib bs_pvt.lib loki.lib ws2_32.lib"
+				AdditionalDependencies="blue-sky.lib bs_bos_core_base.lib bs_mtx.lib bs_bos_core_data_storage.lib bs_mesh.lib bs_scal.lib bs_pvt.lib loki.lib ws2_32.lib"
 				OutputFile="$(ProjectDir)/../../../exe/release/plugins/$(ProjectName).dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(STLPORT_PATH_)/lib&quot;;&quot;$(HDF5_PATH)/lib&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/release/&quot;;&quot;$(ProjectDir)/../../../exe/release/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/lib&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/release/&quot;;&quot;$(ProjectDir)/../../../exe/release/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
 				IgnoreDefaultLibraryNames="python25_d.lib"
 				GenerateDebugInformation="true"
+				AssemblyDebug="1"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -246,181 +247,6 @@
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug_HDF5|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zm1000"
-				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_matrix/include/&quot;;&quot;$(ProjectDir)/../bs_base_linear_solvers/include/&quot;;&quot;$(ProjectDir)/../bs_csr_ilu_prec/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_data_storage/include/&quot;;&quot;$(ProjectDir)/../bs_mesh/include&quot;;&quot;$(ProjectDir)/../bs_scal/include/&quot;;&quot;$(ProjectDir)/../bs_pvt/include/&quot;;&quot;$(ProjectDir)/../../bs-eagle-hdf5-storage/src&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;"
-				PreprocessorDefinitions="_DEBUG;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;BS_BOS_CORE_DEBUG_MEMORY_;_HDF5;H5_USE_16_API;_HDF5USEDLL_;_MPI_;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;_SCL_SECURE_NO_WARNINGS"
-				GeneratePreprocessedFile="0"
-				MinimalRebuild="true"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
-				UsePrecompiledHeader="2"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="4"
-				EnablePREfast="false"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="blue-sky_d.lib bs_bos_core_base_d.lib bs_matrix_d.lib bs_bos_core_data_storage_d.lib bs_scal_d.lib bs_pvt_d.lib loki_D.lib ws2_32.lib hdf5dll.lib bs_hdf5_storage_d.lib"
-				OutputFile="$(ProjectDir)/../../../exe/debug/plugins/$(ProjectName)_d.dll"
-				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/dll&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/debug/&quot;;&quot;$(ProjectDir)/../../../exe/debug/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
-				IgnoreDefaultLibraryNames="python25_d.lib"
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				TargetMachine="1"
-				Profile="false"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release_HDF5|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
-			CharacterSet="1"
-			WholeProgramOptimization="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zm1000"
-				Optimization="2"
-				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
-				OmitFramePointers="true"
-				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="&quot;$(STLPORT_PATH_)/stlport&quot;;&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_matrix/include/&quot;;&quot;$(ProjectDir)/../bs_base_linear_solvers/include/&quot;;&quot;$(ProjectDir)/../bs_csr_ilu_prec/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_data_storage/include/&quot;;&quot;$(ProjectDir)/../bs_mesh/include&quot;;&quot;$(ProjectDir)/../bs_scal/include/&quot;;&quot;$(ProjectDir)/../bs_pvt/include/&quot;;&quot;$(ProjectDir)/../../bs_hdf5_storage/src/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;BS_BOS_CORE_DEBUG_MEMORY_;_HDF5;H5_USE_16_API;_HDF5USEDLL_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT"
-				GeneratePreprocessedFile="0"
-				RuntimeLibrary="2"
-				EnableEnhancedInstructionSet="0"
-				FloatingPointExceptions="true"
-				UsePrecompiledHeader="2"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="blue-sky.lib bs_bos_core_base.lib bs_matrix.lib bs_base_linear_solvers.lib bs_bos_core_data_storage.lib bs_mesh.lib bs_scal.lib bs_pvt.lib loki.lib ws2_32.lib hdf5dll.lib bs_hdf5_storage.lib"
-				OutputFile="$(ProjectDir)/../../../exe/release/plugins/$(ProjectName).dll"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(STLPORT_PATH_)/lib&quot;;&quot;$(HDF5_PATH)/dll&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/release/&quot;;&quot;$(ProjectDir)/../../../exe/release/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
-				IgnoreDefaultLibraryNames="python25_d.lib"
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				TargetMachine="1"
-				Profile="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -589,6 +415,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\event_manager_keywords.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\src\py_event_base.cpp"
 					>
 				</File>
@@ -639,14 +469,6 @@
 							UsePrecompiledHeader="2"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_HDF5|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="2"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\include\calc_perf_bhp.h"
@@ -671,14 +493,6 @@
 							UsePrecompiledHeader="2"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_HDF5|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="2"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\include\calc_rho.h"
@@ -689,14 +503,6 @@
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="2"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_HDF5|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -719,14 +525,6 @@
 							UsePrecompiledHeader="2"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_HDF5|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="2"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\include\calc_well_pressure.h"
@@ -737,14 +535,6 @@
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="2"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_HDF5|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -767,14 +557,6 @@
 							UsePrecompiledHeader="2"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_HDF5|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="2"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\include\well_connection.h"
@@ -791,28 +573,12 @@
 							UsePrecompiledHeader="2"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_HDF5|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="2"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\src\wellbore_density_calc.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="2"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_HDF5|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -838,14 +604,6 @@
 								UsePrecompiledHeader="2"
 							/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug_HDF5|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="2"
-							/>
-						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\include\py_calc_well.h"
@@ -862,14 +620,6 @@
 								UsePrecompiledHeader="2"
 							/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug_HDF5|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="2"
-							/>
-						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\include\py_facility_manager.h"
@@ -880,14 +630,6 @@
 						>
 						<FileConfiguration
 							Name="Debug|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="2"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug_HDF5|Win32"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -1001,14 +743,6 @@
 									UsePrecompiledHeader="2"
 								/>
 							</FileConfiguration>
-							<FileConfiguration
-								Name="Debug_HDF5|Win32"
-								>
-								<Tool
-									Name="VCCLCompilerTool"
-									UsePrecompiledHeader="2"
-								/>
-							</FileConfiguration>
 						</File>
 						<File
 							RelativePath=".\include\py_data_storage_interface.h"
@@ -1028,14 +762,6 @@
 						>
 						<FileConfiguration
 							Name="Debug|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								UsePrecompiledHeader="2"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug_HDF5|Win32"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -1093,58 +819,6 @@
 		<Filter
 			Name="linear solvers"
 			>
-			<File
-				RelativePath=".\src\two_stage_preconditioner.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="2"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_HDF5|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="2"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\include\two_stage_preconditioner.h"
-				>
-			</File>
-			<Filter
-				Name="python wrappers"
-				>
-				<File
-					RelativePath=".\src\py_two_stage_preconditioner.cpp"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="2"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_HDF5|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="2"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\include\py_two_stage_preconditioner.h"
-					>
-				</File>
-			</Filter>
 			<Filter
 				Name="mpi"
 				>
@@ -1169,22 +843,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug_MPI|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_HDF5|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_HDF5|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -1228,22 +886,6 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug_HDF5|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_HDF5|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="Release_WO_Python|Win32"
 						ExcludedFromBuild="true"
 						>
@@ -1273,22 +915,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug_MPI|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_HDF5|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_HDF5|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -1332,22 +958,6 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug_HDF5|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_HDF5|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="Release_WO_Python|Win32"
 						ExcludedFromBuild="true"
 						>
@@ -1384,22 +994,6 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug_HDF5|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_HDF5|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="Release_WO_Python|Win32"
 						ExcludedFromBuild="true"
 						>
@@ -1429,22 +1023,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Debug_MPI|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_HDF5|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_HDF5|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -1512,18 +1090,6 @@
 			<Filter
 				Name="tables"
 				>
-				<File
-					RelativePath=".\src\py_table_2d_debug.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\py_table_2d_debug.h"
-					>
-				</File>
-				<File
-					RelativePath=".\include\table_2d.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="pp"
@@ -1574,26 +1140,6 @@
 			Name="simulator"
 			>
 			<File
-				RelativePath=".\src\calc_equil.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="2"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_HDF5|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="2"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\src\calc_model.cpp"
 				>
 				<FileConfiguration
@@ -1604,17 +1150,13 @@
 						UsePrecompiledHeader="2"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_HDF5|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="2"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\include\calc_model.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\calc_model_data.h"
 				>
 			</File>
 			<File
@@ -1632,25 +1174,9 @@
 						UsePrecompiledHeader="2"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_HDF5|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="2"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\include\calc_model_type_helper.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\fip_results_storage.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\include\fip_results_storage.h"
 				>
 			</File>
 			<File
@@ -1670,22 +1196,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="2"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_HDF5|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="2"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release_HDF5|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1713,14 +1223,6 @@
 				RelativePath=".\include\trans_multipliers.h"
 				>
 			</File>
-			<File
-				RelativePath=".\src\well_results_storage.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\include\well_results_storage.h"
-				>
-			</File>
 			<Filter
 				Name="python"
 				>
@@ -1735,14 +1237,6 @@
 							UsePrecompiledHeader="2"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_HDF5|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\include\py_calc_model.h"
@@ -1753,14 +1247,6 @@
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="2"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_HDF5|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1847,14 +1333,6 @@
 							UsePrecompiledHeader="2"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_HDF5|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="2"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\include\norm_calc.h"
@@ -1869,14 +1347,6 @@
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="2"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_HDF5|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1904,10 +1374,6 @@
 			<Filter
 				Name="hdf5"
 				>
-				<File
-					RelativePath=".\src\results_hdf5_writer.cpp"
-					>
-				</File>
 				<File
 					RelativePath=".\include\results_hdf5_writer.h"
 					>
@@ -1942,19 +1408,51 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="initialization"
+			>
+			<File
+				RelativePath=".\src\equil_model.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\equil_model.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\equil_model_depth.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\equil_model_depth.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\equil_model_iface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\explicit_model.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\explicit_model.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\py_equil_model.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\py_equil_model.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\src\main.cpp"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="2"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Debug_HDF5|Win32"
 				>
 				<Tool
 					Name="VCCLCompilerTool"
@@ -1975,22 +1473,6 @@
 			</FileConfiguration>
 			<FileConfiguration
 				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="1"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Debug_HDF5|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="1"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release_HDF5|Win32"
 				>
 				<Tool
 					Name="VCCLCompilerTool"

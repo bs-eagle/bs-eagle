@@ -12,6 +12,7 @@
 #define __BS_FIP_RESULTS_STORAGE_H
 
 #include "calc_model.h"
+#include "well_type_helper.h"
 
 namespace blue_sky
   {
@@ -76,33 +77,30 @@ namespace blue_sky
     };
 
 
-  template <typename strategy_t>
   struct save_fip_data
     {
-      typedef calc_model <strategy_t>                                                 calc_model_t;
-      typedef typename strategy_t::index_t                                            index_t;
+      typedef t_long                                  index_t;
 
-      typedef typename calc_model_t::data_array_t                                     data_array_t;
-      typedef typename calc_model_t::item_t                                           item_t;
-      typedef typename calc_model_t::helper_t::item_rr_block_t                        item_rr_block_t;
-      typedef typename calc_model_t::helper_t::item_rw_block_t                        item_rw_block_t;
-      typedef typename calc_model_t::helper_t::item_wr_block_t                        item_wr_block_t;
-      typedef typename calc_model_t::connection_t                                     connection_t;
-      typedef typename calc_model_t::well_t                                           well_t;
-      typedef typename calc_model_t::reservoir_t::facility_manager_t::well_iterator_t well_iterator_t;
-      typedef typename calc_model_t::strategy_type                                    strategy_type;
+      typedef calc_model::data_array_t                data_array_t;
+      typedef calc_model::item_t                      item_t;
+      typedef wells::type_helper::item_rr_block_t     item_rr_block_t;
+      typedef wells::type_helper::item_rw_block_t     item_rw_block_t;
+      typedef wells::type_helper::item_wr_block_t     item_wr_block_t;
+      typedef wells::connection                       connection_t;
+      typedef well                                    well_t;
+      typedef facility_manager::well_iterator_t       well_iterator_t;
 
-      typedef smart_ptr <calc_model_t, true>                                          sp_calc_model_t;
-      typedef typename calc_model_t::sp_well_t                                        sp_well_t;
-      typedef typename calc_model_t::sp_connection_t                                sp_connection_t;
-      typedef smart_ptr<fip_results_storage, true>     sp_fip_results_storage;
+      typedef smart_ptr <calc_model, true>            sp_calc_model_t;
+      typedef smart_ptr <well_t, true>                sp_well_t;
+      typedef smart_ptr <connection_t, true>          sp_connection_t;
+      typedef smart_ptr<fip_results_storage, true>    sp_fip_results_storage;
 
 //! copy current fip data to storage
       void
       copy_fip_data_to_storage (sp_calc_model_t &calc_model, item_t dt)
       {
-        const sp_fip_results_storage &f_res (calc_model->fip_res);
         /*
+        const sp_fip_results_storage &f_res (calc_model->fip_res);
         int i;
         fip_data *fd;
         int fip_region = rsv_status->fip_region;

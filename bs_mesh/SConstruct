@@ -1,0 +1,17 @@
+# Create static library pure_mesh
+
+import os
+Import ("*")
+
+lib_name = "pure_mesh"
+tar_name = "pure_mesh"
+
+env = Environment()
+env.Append (CPPDEFINES = ["PURE_MESH", "BS_EXPORTING", "BSPY_EXPORTING", "BS_EXPORTING_PLUGIN", 
+            "BSPY_EXPORTING_PLUGIN", "CGAL_NO_AUTOLINK_MPFR", "CGAL_NO_AUTOLINK_GMP"], 
+            CPPPATH = ["include", "../../../kernel/include", "../../../kernel"])
+
+env.Append(LIBS = ["CGAL", "gmp"], CXXFLAGS = ["-frounding-math", "-lm", "-std=gnu++0x"])
+
+pure_mesh = env.StaticLibrary (target = lib_name, source = ["src/mesh_base.cpp", "src/mesh_element3d.cpp", "src/mesh_grdecl.cpp", "src/rs_mesh_base.cpp", "src/rs_smesh_base.cpp"])
+

@@ -67,11 +67,11 @@ namespace blue_sky {
   /**
     * \brief interpolate
     *
-    * \param[in] x0 value for interpolate
+    * \param[in] s value for interpolate
     * \param[in] x vector of values X
     * \param[in] y vector of values Y
-    * \param[out] kr return value
-    * \param[out] d_kr
+    * \param[out] cap (capillary) return value
+    * \param[out] d_cap (d_cap/d_s) derivative
     * */
   template <typename item_t, typename data_vector_t, typename comparator_t>
   BS_FORCE_INLINE void
@@ -144,7 +144,7 @@ namespace blue_sky {
    * */
   template <typename item_t>
   BS_FORCE_INLINE item_t
-  scale_not_table (item_t a, item_t b, item_t c, item_t d, item_t s, bool is_table_value_calc = true)
+  scale_not_table (item_t a, item_t b, item_t c, item_t d, item_t s, bool /*is_table_value_calc = true*/)
   {
     BS_ASSERT (d != b) (d) (b);
     return a + (s - b) * (c - a) / (d - b);

@@ -8,7 +8,7 @@
  * */
 #include "stdafx.h"
 #include <boost/spirit.hpp>
-#include <boost/spirit/core.hpp>
+//#include <boost/spirit/core.hpp>
 
 #include "event_base.h"
 #include "str_functor.h"
@@ -82,8 +82,7 @@ namespace blue_sky {
   }
 
 
-  template <typename strategy_t>
-  event_base<strategy_t>::~event_base ()
+  event_base::~event_base ()
   {
 
   }
@@ -92,8 +91,7 @@ namespace blue_sky {
    * \brief  'default' ctor for event_base
    * \param  param Additional params for ctor
    * */
-  template <typename strategy_t>
-  event_base<strategy_t>::event_base(bs_type_ctor_param /*param*/)
+  event_base::event_base(bs_type_ctor_param /*param*/)
   {
     num   = 1;
     index = 1;
@@ -102,16 +100,14 @@ namespace blue_sky {
    * \brief  copy-ctor for event_base
    * \param  src Instance of event_base to be copied
    * */
-  template <typename strategy_t>
-  event_base<strategy_t>::event_base(const event_base& src)
+  event_base::event_base(const event_base& src)
   : bs_refcounter (src), objbase (src)
   {
     *this = src;
   }
 
-  template <typename strategy_t>
   void
-  event_base<strategy_t>::init (const std::string &event_name, const std::string & params)
+  event_base::init (const std::string &event_name, const std::string & params)
   {
 #ifdef _DEBUG
     debug_data_.params = params;
@@ -126,9 +122,8 @@ namespace blue_sky {
       }
   }
 
-  template <typename strategy_t>
   void
-  event_base <strategy_t>::add_next_line (const std::string &event_name, const std::string &params)
+  event_base::add_next_line (const std::string &event_name, const std::string &params)
   {
     const sp_named_pbase &next_line_params = add_next_line_params ();
     if (!next_line_params)
@@ -145,9 +140,8 @@ namespace blue_sky {
       }
   }
 
-  template <typename strategy_t>
   void
-  event_base<strategy_t>::save_value(const sp_named_pbase &params_, char const* first, char const* last) //< save a string value
+  event_base::save_value(const sp_named_pbase &params_, char const* first, char const* last) //< save a string value
   {
     std::string str (first, last);
 
@@ -158,9 +152,8 @@ namespace blue_sky {
   }
 
 
-  template <typename strategy_t>
   void
-  event_base<strategy_t>::save_def (const sp_named_pbase &params_, const char /*c*/) //< paste a default value
+  event_base::save_def (const sp_named_pbase &params_, const char /*c*/) //< paste a default value
   {
     if (index + num > (int)params_->size ())
       {
@@ -171,16 +164,14 @@ namespace blue_sky {
     index += num;
   }
 
-  template <typename strategy_t>
   void
-  event_base <strategy_t>::clear_num (const sp_named_pbase &, const char *, const char *)
+  event_base::clear_num (const sp_named_pbase &, const char *, const char *)
   {
     num = 1;
   }
 
-  template <typename strategy_t>
   void
-  event_base<strategy_t>::parse(const std::string &params_str, const sp_named_pbase &params)
+  event_base::parse(const std::string &params_str, const sp_named_pbase &params)
   {
     BS_ASSERT (params);
 
@@ -227,19 +218,16 @@ namespace blue_sky {
     save_def (params);
   }
 
-  template <typename strategy_t>
   void
-  event_base<strategy_t>::apply (const sp_top &/*top*/, const sp_mesh_iface_t &/*mesh*/, const sp_calc_model_t &/*calc_model*/, const smart_ptr <idata, true> &/*data*/) const
+  event_base::apply (const sp_top &/*top*/, const sp_mesh_iface_t &/*mesh*/, const sp_calc_model_t &/*calc_model*/, const smart_ptr <idata, true> &/*data*/) const
   {
     BS_ASSERT (false && "BASE METHOD CALL");
   }
 
   //bs stuff
-  BLUE_SKY_TYPE_STD_CREATE_T_DEF (event_base, (class))
-  BLUE_SKY_TYPE_STD_COPY_T_DEF (event_base, (class))
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (event_base<base_strategy_fi>), 1, (property_base), "BOS_Core event_base class (seq fi)", "BOS_Core event_base class", "BOS_Core event_base class", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (event_base<base_strategy_di>), 1, (property_base), "BOS_Core event_base class (seq di)", "BOS_Core event_base class", "BOS_Core event_base class", false)
-  BLUE_SKY_TYPE_IMPL_T_EXT (1, (event_base<base_strategy_mixi>), 1, (property_base), "BOS_Core event_base class (seq mixi)", "BOS_Core event_base class", "BOS_Core event_base class", false)
+  BLUE_SKY_TYPE_STD_CREATE (event_base)
+  BLUE_SKY_TYPE_STD_COPY (event_base)
+  BLUE_SKY_TYPE_IMPL (event_base, property_base, "BOS_Core event_base class", "BOS_Core event_base class", "BOS_Core event_base class")
 
 
   bool
@@ -247,12 +235,7 @@ namespace blue_sky {
   {
     bool res = true;
 
-    res &= BS_KERNEL.register_type (pd, event_base <base_strategy_fi>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, event_base <base_strategy_di>::bs_type ());
-    BS_ASSERT (res);
-    res &= BS_KERNEL.register_type (pd, event_base <base_strategy_mixi>::bs_type ());
-    BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, event_base::bs_type ()); BS_ASSERT (res);
 
     return true;
   }

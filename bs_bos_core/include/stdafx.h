@@ -13,6 +13,10 @@
 #ifndef BS_PRECOMPILED_HEADERS_H_
 #define BS_PRECOMPILED_HEADERS_H_
 
+#ifdef BSPY_EXPORTING_PLUGIN
+  #include <boost/python.hpp>
+#endif
+
 #ifndef UNIX
 #include <windows.h>
 #endif
@@ -74,10 +78,9 @@
   #include <omp.h>
 #endif // #ifdef _OPENMP
 
-#pragma intrinsic (memset, memcpy)
+//#pragma intrinsic (memset, memcpy)
 
 #include "bs_common.h"
-#include BS_FORCE_PLUGIN_IMPORT ()
 #include "smart_ptr.h"
 #include "bs_kernel.h"
 #include "bs_link.h"
@@ -85,7 +88,6 @@
 #include "bs_tree.h"
 #include "bs_exception.h"
 #include "bs_prop_base.h"
-#include BS_STOP_PLUGIN_IMPORT ()
 
 #ifdef BSPY_EXPORTING_PLUGIN
   #include <boost/python.hpp>
@@ -98,12 +100,10 @@
   #include <boost/python/wrapper.hpp>
   #include <boost/python/iterator.hpp>
 
-#include BS_FORCE_PLUGIN_IMPORT ()
   #include "bs_plugin_common.h"
   #include "py_bs_object_base.h"
   #include "py_bs_command.h"
   #include "py_bs_tree.h"
-#include BS_STOP_PLUGIN_IMPORT ()
 #endif
 
 #include BS_FORCE_PLUGIN_IMPORT ()
@@ -116,7 +116,7 @@
 
 #include "memory_macroses.h"
 #include "macroses.h"
-#include "lu_decomposition.h"
+//#include "lu_decomposition.h"
 #include "debug_macroses.h"
 #include "matrix_macroses.h"
 
@@ -136,11 +136,11 @@
 
 #include "bos_map.h"
 #include "constants.h"
-#include "main_def.h"
+//#include "main_def.h"
 #include "err_num_def.h"
 #include "vector_assign.h"
-#include "save_seq_vector.h"
-#include "jacobian_matrix.h"
+//#include "save_seq_vector.h"
+//#include "jacobian_matrix.h"
 
 #ifdef _HDF5
 //#include "bs_hdf5_storage.h"
@@ -149,28 +149,34 @@
 #include "property_base.h"
 #include "named_pbase_access.h"
 
-#include "linear_solvers.h"
+//#include "linear_solvers.h"
 #include "print_process_memory_info.h"
 #include "write_time_to_log.h"
 
-#include "bs_array_map.h"
+//#include "bs_array_map.h"
 #include "interpolation_macro.h"
 #include "rs_mesh_iface.h"
 #include "rs_smesh_iface.h"
-#include "localization.h"
+//#include "localization.h"
 #include "arrays.h"
 #include "arrays_tables.h"
 #include "convert_units.h"
+
+// sergey.miryanov - to compile pvt
+#include "table_iface.h"
 
 #include "pvt_water.h"
 #include "pvt_gas.h"
 #include "pvt_oil.h"
 
-#include "scal_3p.h"
-#include "scale_array_holder.h"
-#include "scal_region_info.h"
-#include "scal_region.h"
-#include "scal_2p_data_holder.h"
+// sergey.miryanov - to compile scal
+#include "vartype_table_iface.h"
+
+#include "scal_3p_iface.hpp"
+//#include "scale_array_holder.h"
+//#include "scal_region_info.h"
+//#include "scal_region.h"
+//#include "scal_2p_data_holder.h"
 #include "jfunction.h"
 
 #include "rock_grid.h"

@@ -15,23 +15,14 @@
 namespace blue_sky
   {
 
-  template <typename strategy_t>
   class well;
-
-  template <typename strategy_t>
   class reservoir;
-
-  template <typename strategy_t>
   class calc_model;
 
   namespace wells
     {
-    template <typename strategy_t>
     class connection;
-
-    template <typename strategy_t>
     class well_controller;
-
     class well_limit_operation;
   }
 
@@ -39,20 +30,19 @@ namespace blue_sky
    * \class well_event
    * \brief Base class for well events
    * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN well_event : public event_base<strategy_t>
+  class BS_API_PLUGIN well_event : public event_base
     {
     public:
 
-      typedef reservoir <strategy_t>                          reservoir_t;
+      typedef reservoir                           reservoir_t;
 
-      typedef well <strategy_t>                               well_t;
-      typedef wells::connection <strategy_t>                  connection_t;
-      typedef wells::well_controller <strategy_t>             well_controller_t;
+      typedef well                                well_t;
+      typedef wells::connection                   connection_t;
+      typedef wells::well_controller              well_controller_t;
       typedef wells::well_limit_operation                     well_limit_operation_t;
-      typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
-      typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>                         calc_model_t;
+      typedef rs_mesh_iface                       mesh_iface_t;
+      typedef rs_smesh_iface                      smesh_iface_t;
+      typedef calc_model                          calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -106,8 +96,10 @@ namespace blue_sky
        * \param  calc_model
        * */
       virtual void
-      apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
-      const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &data) const;
+      apply_internal (const BS_SP (reservoir) &reservoir, 
+                      const BS_SP (rs_mesh_iface) &msh,
+                      const BS_SP (calc_model) &calc_model, 
+                      const BS_SP (idata) &data) const;
 
     };
 
@@ -120,19 +112,18 @@ namespace blue_sky
    *          name and position of the well head, the BHP reference
    *          depth and the separator used.
    * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN WELSPECS_event: public well_event<strategy_t>
+  class BS_API_PLUGIN WELSPECS_event: public well_event
     {
     public:
-      typedef reservoir <strategy_t>                          reservoir_t;
+      typedef reservoir                           reservoir_t;
 
-      typedef well <strategy_t>                               well_t;
-      typedef wells::connection <strategy_t>                  connection_t;
-      typedef wells::well_controller <strategy_t>             well_controller_t;
+      typedef well                                well_t;
+      typedef wells::connection                   connection_t;
+      typedef wells::well_controller              well_controller_t;
       typedef wells::well_limit_operation                     well_limit_operation_t;
-      typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
-      typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>           calc_model_t;
+      typedef rs_mesh_iface                       mesh_iface_t;
+      typedef rs_smesh_iface                      smesh_iface_t;
+      typedef calc_model            calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -152,6 +143,16 @@ namespace blue_sky
         ((I,                "I - location of well head or heel", PT_INT))
         ((J,                "J - location of well head or heel", PT_INT))
         ((BHP_DEPTH,        "", PT_FLOAT))
+        ((PHASE,            "Prefered phase for well", PT_STR))
+        ((RADIUS,           "Drenage radius", PT_FLOAT))
+        ((P8,               "", PT_STR))
+        ((AUTO_SHUT,        "", PT_STR))
+        ((P10,              "", PT_STR))
+        ((P11,              "", PT_INT))
+        ((P12,              "", PT_STR))
+        ((P13,              "", PT_INT))
+        ((P14,              "", PT_STR))
+        ((P15,              "", PT_STR))
       );
 
       //NEXT_LINE_PARAMS (
@@ -183,19 +184,18 @@ namespace blue_sky
    *          entered after the WELLSPEC keyword defining
    *          the appropriate well.
    * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN WELLCON_event: public well_event<strategy_t>
+  class BS_API_PLUGIN WELLCON_event: public well_event
     {
     public:
-      typedef reservoir <strategy_t>                          reservoir_t;
+      typedef reservoir                           reservoir_t;
 
-      typedef well <strategy_t>                               well_t;
-      typedef wells::connection <strategy_t>                  connection_t;
-      typedef wells::well_controller <strategy_t>             well_controller_t;
+      typedef well                                well_t;
+      typedef wells::connection                   connection_t;
+      typedef wells::well_controller              well_controller_t;
       typedef wells::well_limit_operation                     well_limit_operation_t;
-      typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
-      typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>           calc_model_t;
+      typedef rs_mesh_iface                       mesh_iface_t;
+      typedef rs_smesh_iface                      smesh_iface_t;
+      typedef calc_model            calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -242,22 +242,21 @@ namespace blue_sky
    *          more well completions. This must be entered after
    *          the WELSPECS keyword defining the appropriate well.
    * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN COMPDAT_event: public well_event<strategy_t>
+  class BS_API_PLUGIN COMPDAT_event: public well_event
     {
     public:
-      typedef reservoir <strategy_t>                          reservoir_t;
+      typedef reservoir                           reservoir_t;
 
-      typedef typename strategy_t::index_t                    index_t;
-      typedef typename strategy_t::item_t                     item_t;
+      typedef t_long                    index_t;
+      typedef t_double                     item_t;
 
-      typedef well <strategy_t>                               well_t;
-      typedef wells::connection <strategy_t>                  connection_t;
-      typedef wells::well_controller <strategy_t>             well_controller_t;
+      typedef well                                well_t;
+      typedef wells::connection                   connection_t;
+      typedef wells::well_controller              well_controller_t;
       typedef wells::well_limit_operation                     well_limit_operation_t;
-      typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
-      typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>           calc_model_t;
+      typedef rs_mesh_iface                       mesh_iface_t;
+      typedef rs_smesh_iface                      smesh_iface_t;
+      typedef calc_model            calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -305,19 +304,18 @@ namespace blue_sky
    * \brief   WCONPROD keyword
    * \details Control data for production wells
    * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN WCONPROD_event: public well_event<strategy_t>
+  class BS_API_PLUGIN WCONPROD_event: public well_event
     {
     public:
-      typedef reservoir <strategy_t>                          reservoir_t;
+      typedef reservoir                           reservoir_t;
 
-      typedef well <strategy_t>                               well_t;
-      typedef wells::connection <strategy_t>                  connection_t;
-      typedef wells::well_controller <strategy_t>             well_controller_t;
+      typedef well                                well_t;
+      typedef wells::connection                   connection_t;
+      typedef wells::well_controller              well_controller_t;
       typedef wells::well_limit_operation                     well_limit_operation_t;
-      typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
-      typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>           calc_model_t;
+      typedef rs_mesh_iface                       mesh_iface_t;
+      typedef rs_smesh_iface                      smesh_iface_t;
+      typedef calc_model            calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -366,19 +364,18 @@ namespace blue_sky
    *          keyword for defining history matching injection wells
    *          is WCONINJH.
    * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN WCONHIST_event: public well_event<strategy_t>
+  class BS_API_PLUGIN WCONHIST_event: public well_event
     {
     public:
-      typedef reservoir <strategy_t>                            reservoir_t;
+      typedef reservoir                             reservoir_t;
 
-      typedef well <strategy_t>                               well_t;
-      typedef wells::connection <strategy_t>                  connection_t;
-      typedef wells::well_controller <strategy_t>             well_controller_t;
+      typedef well                                well_t;
+      typedef wells::connection                   connection_t;
+      typedef wells::well_controller              well_controller_t;
       typedef wells::well_limit_operation                     well_limit_operation_t;
-      typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
-      typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>                         calc_model_t;
+      typedef rs_mesh_iface                       mesh_iface_t;
+      typedef rs_smesh_iface                      smesh_iface_t;
+      typedef calc_model                          calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -426,19 +423,18 @@ namespace blue_sky
    *          This keyword can be used to set individual control
    *          targets and limits for injection wells
    * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN WCONINJE_event: public well_event<strategy_t>
+  class BS_API_PLUGIN WCONINJE_event: public well_event
     {
     public:
-      typedef reservoir <strategy_t>                            reservoir_t;
+      typedef reservoir                             reservoir_t;
 
-      typedef well <strategy_t>                               well_t;
-      typedef wells::connection <strategy_t>                  connection_t;
-      typedef wells::well_controller <strategy_t>             well_controller_t;
+      typedef well                                well_t;
+      typedef wells::connection                   connection_t;
+      typedef wells::well_controller              well_controller_t;
       typedef wells::well_limit_operation                     well_limit_operation_t;
-      typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
-      typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>                         calc_model_t;
+      typedef rs_mesh_iface                       mesh_iface_t;
+      typedef rs_smesh_iface                      smesh_iface_t;
+      typedef calc_model                          calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -483,19 +479,18 @@ namespace blue_sky
    * \brief   WECON keyword
    * \details Economic limit data for production wells
    * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN WECON_event: public well_event<strategy_t>
+  class BS_API_PLUGIN WECON_event: public well_event
     {
     public:
-      typedef reservoir <strategy_t>                          reservoir_t;
+      typedef reservoir                           reservoir_t;
 
-      typedef well <strategy_t>                               well_t;
-      typedef wells::connection <strategy_t>                  connection_t;
-      typedef wells::well_controller <strategy_t>             well_controller_t;
+      typedef well                                well_t;
+      typedef wells::connection                   connection_t;
+      typedef wells::well_controller              well_controller_t;
       typedef wells::well_limit_operation                     well_limit_operation_t;
-      typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
-      typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>                         calc_model_t;
+      typedef rs_mesh_iface                       mesh_iface_t;
+      typedef rs_smesh_iface                      smesh_iface_t;
+      typedef calc_model                          calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -534,19 +529,18 @@ namespace blue_sky
    * \brief   WECONINJ keyword
    * \details Economic limit data for injection wells
    * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN WECONINJ_event: public well_event<strategy_t>
+  class BS_API_PLUGIN WECONINJ_event: public well_event
     {
     public:
-      typedef reservoir <strategy_t>                          reservoir_t;
+      typedef reservoir                           reservoir_t;
 
-      typedef well <strategy_t>                               well_t;
-      typedef wells::connection <strategy_t>                  connection_t;
-      typedef wells::well_controller <strategy_t>             well_controller_t;
+      typedef well                                well_t;
+      typedef wells::connection                   connection_t;
+      typedef wells::well_controller              well_controller_t;
       typedef wells::well_limit_operation                     well_limit_operation_t;
-      typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
-      typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>                         calc_model_t;
+      typedef rs_mesh_iface                       mesh_iface_t;
+      typedef rs_smesh_iface                      smesh_iface_t;
+      typedef calc_model                          calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -583,19 +577,18 @@ namespace blue_sky
    * \brief   WEFAC keyword
    * \details Sets well efficiency factors (for downtime)
    * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN WEFAC_event: public well_event<strategy_t>
+  class BS_API_PLUGIN WEFAC_event: public well_event
     {
     public:
-      typedef reservoir <strategy_t>                          reservoir_t;
+      typedef reservoir                           reservoir_t;
 
-      typedef well <strategy_t>                               well_t;
-      typedef wells::connection <strategy_t>                  connection_t;
-      typedef wells::well_controller <strategy_t>             well_controller_t;
+      typedef well                                well_t;
+      typedef wells::connection                   connection_t;
+      typedef wells::well_controller              well_controller_t;
       typedef wells::well_limit_operation                     well_limit_operation_t;
-      typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
-      typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>                         calc_model_t;
+      typedef rs_mesh_iface                       mesh_iface_t;
+      typedef rs_smesh_iface                      smesh_iface_t;
+      typedef calc_model                          calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -642,19 +635,18 @@ namespace blue_sky
    *          VFP table number, and artificial lift quantity. The other
    *          quantities should not be modified with this keyword.
    * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN WELTARG_event: public well_event<strategy_t>
+  class BS_API_PLUGIN WELTARG_event: public well_event
     {
     public:
-      typedef reservoir <strategy_t>                          reservoir_t;
+      typedef reservoir                           reservoir_t;
 
-      typedef well <strategy_t>                               well_t;
-      typedef wells::connection <strategy_t>                  connection_t;
-      typedef wells::well_controller <strategy_t>             well_controller_t;
+      typedef well                                well_t;
+      typedef wells::connection                   connection_t;
+      typedef wells::well_controller              well_controller_t;
       typedef wells::well_limit_operation                     well_limit_operation_t;
-      typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
-      typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>                         calc_model_t;
+      typedef rs_mesh_iface                       mesh_iface_t;
+      typedef rs_smesh_iface                      smesh_iface_t;
+      typedef calc_model                          calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -701,19 +693,18 @@ namespace blue_sky
    *          A subset of connections can also be identified by their
    *          completion.
    * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN WPIMULT_event: public well_event<strategy_t>
+  class BS_API_PLUGIN WPIMULT_event: public well_event
     {
     public:
-      typedef reservoir <strategy_t>                          reservoir_t;
+      typedef reservoir                           reservoir_t;
 
-      typedef well <strategy_t>                               well_t;
-      typedef wells::connection <strategy_t>                  connection_t;
-      typedef wells::well_controller <strategy_t>             well_controller_t;
+      typedef well                                well_t;
+      typedef wells::connection                   connection_t;
+      typedef wells::well_controller              well_controller_t;
       typedef wells::well_limit_operation                     well_limit_operation_t;
-      typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
-      typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>                         calc_model_t;
+      typedef rs_mesh_iface                       mesh_iface_t;
+      typedef rs_smesh_iface                      smesh_iface_t;
+      typedef calc_model                          calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -755,19 +746,18 @@ namespace blue_sky
    * \brief   COMPENSATION keyword
    * \details Defines a compensation type and rate for well group
    * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN COMPENSATION_event: public well_event<strategy_t>
+  class BS_API_PLUGIN COMPENSATION_event: public well_event
     {
     public:
-      typedef reservoir <strategy_t>                          reservoir_t;
+      typedef reservoir                           reservoir_t;
 
-      typedef well <strategy_t>                               well_t;
-      typedef wells::connection <strategy_t>                  connection_t;
-      typedef wells::well_controller <strategy_t>             well_controller_t;
+      typedef well                                well_t;
+      typedef wells::connection                   connection_t;
+      typedef wells::well_controller              well_controller_t;
       typedef wells::well_limit_operation                     well_limit_operation_t;
-      typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
-      typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>                         calc_model_t;
+      typedef rs_mesh_iface                       mesh_iface_t;
+      typedef rs_smesh_iface                      smesh_iface_t;
+      typedef calc_model                          calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;
@@ -803,19 +793,18 @@ namespace blue_sky
    * \details Defines the fracture in cells
    * \todo    Obsolete
    * */
-  template <typename strategy_t>
-  class BS_API_PLUGIN PERMFRAC_event: public well_event<strategy_t>
+  class BS_API_PLUGIN PERMFRAC_event: public well_event
     {
     public:
-      typedef reservoir <strategy_t>                          reservoir_t;
+      typedef reservoir                           reservoir_t;
 
-      typedef well <strategy_t>                               well_t;
-      typedef wells::connection <strategy_t>                  connection_t;
-      typedef wells::well_controller <strategy_t>             well_controller_t;
+      typedef well                                well_t;
+      typedef wells::connection                   connection_t;
+      typedef wells::well_controller              well_controller_t;
       typedef wells::well_limit_operation                     well_limit_operation_t;
-      typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;
-      typedef rs_smesh_iface <strategy_t>                     smesh_iface_t;
-      typedef calc_model <strategy_t>                         calc_model_t;
+      typedef rs_mesh_iface                       mesh_iface_t;
+      typedef rs_smesh_iface                      smesh_iface_t;
+      typedef calc_model                          calc_model_t;
 
       typedef smart_ptr <well_t, true>                        sp_well_t;
       typedef smart_ptr <connection_t, true>                  sp_connection_t;

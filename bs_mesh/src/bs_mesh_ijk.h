@@ -14,8 +14,8 @@
 namespace blue_sky
   {
 
-  template<class strategy_t>
-  class BS_API_PLUGIN bs_mesh_ijk : virtual public rs_smesh_iface<strategy_t>
+  
+  class BS_API_PLUGIN bs_mesh_ijk : public rs_smesh_iface
     {
 
     ///////////////////////////////
@@ -26,18 +26,7 @@ namespace blue_sky
       ///////////////////////
       // BASE TYPES
       ///////////////////////
-      typedef rs_smesh_iface<strategy_t>                  base_t;
-
-      typedef typename base_t::i_type_t                   i_type_t;
-      typedef typename base_t::fp_type_t                  fp_type_t;
-
-      typedef typename base_t::sp_i_array_t               sp_i_array_t;
-      typedef typename base_t::sp_fp_array_t              sp_fp_array_t;
-
-      typedef typename base_t::sp_flux_conn_iface_t       sp_flux_conn_iface_t;
-      typedef typename base_t::sp_bcsr_t                  sp_bcsr_t;
-      typedef typename base_t::sp_idata_t                 sp_idata_t;
-      typedef typename base_t::point3d_t                  point3d_t;
+      typedef rs_smesh_iface                  base_t;
 
       ///////////////////////
       // OWN TYPES
@@ -57,8 +46,8 @@ namespace blue_sky
 
 
       //! init mesh properties
-      void init_props (const sp_idata_t &idata)
-        {wrapped.init_props (idata);};
+      void init_props (const sp_hdm_t hdm)
+        {wrapped.init_props (hdm);};
 
       //! initialize int_to_ext indexation
       int init_int_to_ext()
@@ -75,73 +64,77 @@ namespace blue_sky
 
 
       //! return number of active mesh elements
-      i_type_t get_n_active_elements () const
+      t_long get_n_active_elements () const
       {return wrapped.get_n_active_elements ();};
 
       //! return number of mesh elements
-      i_type_t get_n_elements () const
+      t_long get_n_elements () const
       {return wrapped.get_n_elements ();};
 
       //! return number of mesh elements connections
-      i_type_t get_n_connections () const
+      t_long get_n_connections () const
       {return wrapped.get_n_connections ();};
 
       //! return mesh dimensions range
-      void get_dimensions_range (fp_type_t &dim1_max, fp_type_t &dim1_min,
-                                         fp_type_t &dim2_max, fp_type_t &dim2_min,
-                                         fp_type_t &dim3_max, fp_type_t &dim3_min) const
+      void get_dimensions_range (t_float &dim1_max, t_float &dim1_min,
+                                         t_float &dim2_max, t_float &dim2_min,
+                                         t_float &dim3_max, t_float &dim3_min) const
       {return wrapped.get_min_max_xyz (dim1_max, dim1_min, dim2_max, dim2_min, dim3_max, dim3_min);};
 
       //! get mesh dimensions
-      typename base_t::index_point3d_t get_dimens ()
+      base_t::index_point3d_t get_dimens ()
       {return wrapped.get_dimens();};
 
       //! return element size in all 3 dimensions
-      void get_element_size (const i_type_t n_element, fp_type_t &d_dim1, fp_type_t &d_dim2, fp_type_t &d_dim3) const
+      void get_element_size (const t_long n_element, t_double &d_dim1, t_double &d_dim2, t_double &d_dim3) const
       {wrapped.get_block_dx_dy_dz(n_element, d_dim1, d_dim2, d_dim3);};
 
       //! return element size in 3rd dimension
-      fp_type_t get_element_dim3_size (const i_type_t n_element) const
+      t_double get_element_dim3_size (const t_long n_element) const
       {return wrapped.get_block_dz(n_element);};
+      
+      //! return element size in 3rd dimension
+      t_double get_element_dim3_size_ext (const t_long i, const t_long j, const t_long k) const
+        {return wrapped.get_block_dz_ext(i, j, k);};
 
       //! return center point of an element by I, J and K mesh coordinates
-      point3d_t get_element_center (const i_type_t i, const i_type_t j, const i_type_t k)const
+      point3d_t get_element_center (const t_long i, const t_long j, const t_long k)const
       {return wrapped.get_center(i, j, k);};
 
       //! return center point of an element by internal element number
-      point3d_t get_element_center (const i_type_t n_element)const
+      point3d_t get_element_center (const t_long n_element)const
       {return wrapped.get_center(n_element);};
 
       //! return depth of mesh element
-      fp_type_t get_element_depth(const i_type_t n_element) const
+      t_double get_element_depth(const t_long n_element) const
       {return wrapped.get_depth(n_element);};
 
       //! return top of mesh element
-      fp_type_t get_element_dtop(const i_type_t n_element) const
+      t_float get_element_dtop(const t_long n_element) const
       {return wrapped.get_dtop(n_element);};
 
       //! get element internal number by external
-      i_type_t convert_ext_to_int (const i_type_t n_element) const
+      t_long convert_ext_to_int (const t_long n_element) const
       {return wrapped.convert_ext_to_int(n_element);};
 
       //! get element external number by internal
-      i_type_t get_element_int_to_ext (const i_type_t n_element) const
+      t_long get_element_int_to_ext (const t_long n_element) const
       {return wrapped.get_element_int_to_ext(n_element);};
 
       //! return I, J and K structured mesh coordinates of an element by internal number
-      void get_element_int_to_ijk (const i_type_t n_element, i_type_t &i, i_type_t &j, i_type_t &k) const
+      void get_element_int_to_ijk (const t_long n_element, t_long &i, t_long &j, t_long &k) const
       {wrapped.inside_to_XYZ(n_element, i, j, k);};
 
       //! return internal number of an element by I, J and K structured mesh coordinates
-      i_type_t get_element_ijk_to_int (const i_type_t i, const i_type_t j, const i_type_t k) const
+      t_long get_element_ijk_to_int (const t_long i, const t_long j, const t_long k) const
       {return wrapped.XYZ_to_inside(i, j, k);};
 
       //! return coords of block vertexes by IJK indexes
-      grd_ecl::fpoint3d_vector calc_element (const i_type_t i, const i_type_t j, const i_type_t k) const
+      grd_ecl::fpoint3d_vector calc_element (const t_long i, const t_long j, const t_long k) const
         {return wrapped.calc_element (i, j, k);};
 
       //! return coords of block vertexes by n_block index
-      grd_ecl::fpoint3d_vector calc_element (const i_type_t index) const
+      grd_ecl::fpoint3d_vector calc_element (const t_long index) const
         {return wrapped.calc_element (index);};
 
       ///////////////////////
@@ -150,20 +143,25 @@ namespace blue_sky
 
 
       //! get const int_to_ext
-      const sp_i_array_t get_int_to_ext() const
+      const spv_long get_int_to_ext() const
       {return wrapped.get_int_to_ext ();};
 
       //! get const ext_to_int
-      const sp_i_array_t get_ext_to_int() const
+      const spv_long get_ext_to_int() const
       {return wrapped.get_ext_to_int ();};
 
       //! get mesh elements volumes
-      const sp_fp_array_t get_volumes () const
+      const spv_float get_volumes () const
       {return wrapped.get_volumes ();};
+      
+      //! get cell volumes
+      spv_float get_cell_volumes(const t_long Nx, const t_long Ny, const t_long Nz) const {
+          return 0;
+      }
 
 
       //! return depths of cell centers (length n_active_elements)
-      const sp_fp_array_t get_depths () const
+      const spv_float get_depths () const
       {return wrapped.get_depths();};
 
       //! set darcy constant for correct transmissibility calculation
@@ -179,17 +177,31 @@ namespace blue_sky
       {wrapped.check_data();};
 
       //! allocate jacobian
-      int build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, const sp_flux_conn_iface_t flux_conn, sp_i_array_t boundary_array)
+      int build_jacobian_and_flux_connections (const sp_bcsr_t jacobian, const sp_flux_conn_iface_t flux_conn, spv_long boundary_array)
       {return wrapped.build_jacobian_and_flux_connections (jacobian, flux_conn, boundary_array);};
 
+      //! find well`s trajectories and mesh cells intersection
+      int intersect_trajectories (sp_well_pool_t well_pool) {return wrapped.intersect_trajectories(well_pool);};
 
+	  spv_double
+	  get_element_sizes (const t_long n_element) const
+	  {
+		double dx, dy, dz;
+		get_element_size(n_element, dx, dy, dz);
+		spv_double sizes = BS_KERNEL.create_object(v_double::bs_type());
+		sizes->resize(3);
+		(*sizes)[0] = dx;
+		(*sizes)[1] = dy;
+		(*sizes)[2] = dz;
+		return sizes;
+	  }
     ////////////////////
     // wrapped class
     ///////////////////
 
     private:
 
-      mesh_ijk<strategy_t> wrapped;
+      mesh_ijk wrapped;
     };
 
 };//namespace blue_sky

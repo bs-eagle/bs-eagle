@@ -14,27 +14,16 @@ namespace blue_sky
   {
 
  //! keyword_register_iface - interface for register plugins keywords
-  template <class strategy_t>
-  class BS_API_PLUGIN mesh_grdecl_keywords: public smesh_keywords<strategy_t>
+  class BS_API_PLUGIN mesh_grdecl_keywords: public smesh_keywords
     {
       public:
-        typedef mesh_grdecl_keywords<strategy_t>       this_t;
-        typedef smesh_keywords<strategy_t>             base_t;
-        typedef typename base_t::sp_objbase            sp_objbase;
-        typedef typename base_t::keyword_handler       keyword_handler;
-        typedef typename base_t::handler_t             handler_t;
-        typedef typename base_t::i_type_t               i_type_t;
-        typedef typename base_t::fp_type_t                fp_type_t;
-        typedef typename base_t::idata_t               idata_t;
-        typedef typename base_t::sp_idata_t            sp_idata_t;
-        typedef typename base_t::sp_km_iface_t         sp_km_iface_t;
-        typedef typename base_t::keyword_params_t      keyword_params_t;
-        typedef typename base_t::fp_storage_type_t     fp_storage_type_t;
+        typedef mesh_grdecl_keywords       this_t;
+        typedef smesh_keywords             base_t;
         
-        typedef bs_mesh_grdecl <strategy_t>            bs_mesh_grdecl_t;
+        typedef bs_mesh_grdecl             bs_mesh_grdecl_t;
         typedef smart_ptr <bs_mesh_grdecl_t, true>		 sp_bs_mesh_grdecl_t;
         
-        typedef rs_mesh_iface <strategy_t>             rs_mesh_iface_t;
+        typedef rs_mesh_iface              rs_mesh_iface_t;
         typedef smart_ptr <rs_mesh_iface_t, true>			 sp_mesh_iface_t;
 
       public:
@@ -48,10 +37,10 @@ namespace blue_sky
         void register_keywords (sp_objbase &km, std::string provider) const;
         
         //! activate supported keywords
-        static void activate_keywords (sp_objbase &km);
+        static void activate_keywords (sp_km_iface_t keyword_manager);
         
         //! main handler instatiates class object
-        static void mesh_grdecl_handler (const std::string &keyword, keyword_params_t &params);
+        static void mesh_grdecl_reactor (const std::string &keyword, keyword_params_t &params);
     }; 
   };//namespace blue_sky
 #endif // MESH_GRDECL_KEYS_H

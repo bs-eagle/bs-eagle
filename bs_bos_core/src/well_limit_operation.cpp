@@ -34,7 +34,7 @@ namespace blue_sky
         }
     }
 
-    well_limit_operation::well_limit_operation (bs_type_ctor_param param /* = NULL */)
+    well_limit_operation::well_limit_operation (bs_type_ctor_param /*param = NULL */)
         : min_oil_rate_ (0)
         , max_water_cut_ (0)
         , min_water_cut_ (0)
@@ -66,7 +66,7 @@ namespace blue_sky
     }
 
     void
-    well_limit_operation::set_value (int value_type, item_t value)
+    well_limit_operation::set_value (int /*value_type*/, item_t /*value*/)
     {
       BS_ASSERT (false && "NOT IMPL YET");
     }
@@ -120,7 +120,7 @@ namespace blue_sky
 
     //////////////////////////////////////////////////////////////////////////
 
-    well_limit_operation_factory::well_limit_operation_factory (bs_type_ctor_param param /* = NULL */)
+    well_limit_operation_factory::well_limit_operation_factory (bs_type_ctor_param /*param = NULL */)
     {
 
     }
@@ -131,7 +131,7 @@ namespace blue_sky
     }
 
     well_limit_operation_factory::sp_well_limit_operation_t
-    well_limit_operation_factory::create_limit (limit_operation_type type) const
+    well_limit_operation_factory::create_limit (limit_operation_type /*type*/) const
       {
         BS_ASSERT (false && "BASE METHOD CALL");
         return BS_KERNEL.create_object (well_limit_operation::bs_type ());

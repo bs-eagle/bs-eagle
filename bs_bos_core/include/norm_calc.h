@@ -53,13 +53,10 @@ namespace blue_sky
   /*!
    * \brief class for storing different norms
    */
-  template <class strategy_t>
   class norms_storage
   {
   public:
-    typedef typename strategy_t::item_array_t         item_array_t;
-    typedef typename strategy_t::rhs_item_array_t     rhs_item_array_t;
-    typedef shared_vector <const char *>              name_array_t;
+    typedef std::vector <const char *>  name_array_t;
 
   public:
     //! default constructor
@@ -79,9 +76,9 @@ namespace blue_sky
     // --------------------------------------
   public:
     name_array_t  name;
-    item_array_t  val;
-    boost::array <int, norms::NORMS_COUNTER> idx;
-    boost::array <int, norms::NORMS_COUNTER> p_flag;
+    stdv_double   val;
+    boost::array <t_long, norms::NORMS_COUNTER> idx;
+    boost::array <t_long, norms::NORMS_COUNTER> p_flag;
   };
 
 } // ns bs

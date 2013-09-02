@@ -6,80 +6,129 @@
   */
   
 #include "bs_mesh_stdafx.h"
+
+#ifndef PURE_MESH
+  using namespace blue_sky;
+#endif
+
 #include "rs_mesh_base.h"
 
-using namespace blue_sky;
 
-template <typename strategy_t>
-rs_mesh_base <strategy_t>::rs_mesh_base ()
+rs_mesh_base ::rs_mesh_base ()
+#ifndef PURE_MESH
+: depths (give_kernel::Instance().create_object(v_float::bs_type ()))
+#endif
 {
-  depths = give_kernel::Instance().create_object(bs_array<fp_type_t>::bs_type());
-  actnum_array = 0; 
-  poro_array = 0;
-  ntg_array = 0;
-  multpv_array = 0;
-  darcy_constant = ph_const.darcy_constant;
 }
 
-template <typename strategy_t>
+
 void
-rs_mesh_base <strategy_t>::init_props (const sp_idata_t &idata)
+rs_mesh_base ::init_props (const sp_hdm_t hdm)
 {
-  //base_t::init_props (idata);
+#ifndef PURE_MESH  
+  well_pool = hdm->get_well_pool();
+  minpv = hdm->get_prop ()->get_f (L"minimal_pore_volume");
+  minsv = hdm->get_prop ()->get_f (L"minimal_splice_volume");
+  max_thickness = hdm->get_prop ()->get_f (L"maximum_splice_thickness");
+  darcy_constant = hdm->get_darcy_constant ();
   
-  minpv = idata->minimal_pore_volume;
-  minsv = idata->minimal_splice_volume;
-  max_thickness = idata->maximum_splice_thickness;
+  actnum_array = hdm->get_pool ()->get_i_data("ACTNUM");
+  poro_array = hdm->get_pool ()->get_fp_data("PORO");
+  ntg_array = hdm->get_pool ()->get_fp_data("NTG");
+  multpv_array = hdm->get_pool ()->get_fp_data("MULTPV");
   
-  sp_fp_storage_array_t data_array;
-  sp_i_array_t sp_actnum_array;
+  n_elements = static_cast <t_long> (actnum_array->size ());
+  n_active_elements =  std::accumulate (actnum_array->begin (), actnum_array->end (),0);
+#else
+  minpv = hdm->minpv;
+  minsv = hdm->minsv;
+  max_thickness = hdm->max_thickness;
+  darcy_constant = hdm->darcy_constant;
   
-  sp_actnum_array = idata->get_int_non_empty_array("ACTNUM");
-  if (sp_actnum_array->size()) actnum_array = &(*sp_actnum_array)[0];
+  actnum_array = hdm->actnum_array;
+  poro_array = hdm->poro_array;
+  ntg_array = hdm->ntg_array;
+  multpv_array = hdm->multpv_array;
   
-  base_t::n_elements = static_cast <i_type_t> (sp_actnum_array->size ());
-  base_t::n_active_elements =  std::accumulate(sp_actnum_array->begin(), sp_actnum_array->end(),0);
-  
-  data_array = idata->get_fp_non_empty_array("PORO");
-  if (data_array->size()) poro_array = &(*data_array)[0];
-  
-  data_array = idata->get_fp_array("NTG");
-  if (data_array && data_array->size()) ntg_array = &(*data_array)[0];
-  
-  data_array = idata->get_fp_array("MULTPV");
-  if (data_array && data_array->size()) multpv_array = &(*data_array)[0];
+  n_elements = hdm->n_elements;
+
+  n_active_elements = 0;
+  for (long i = 0; i < n_elements; ++i)
+    {
+      n_active_elements += actnum_array[i];
+    }
+  //n_active_elements =  std::accumulate (actnum_array->begin (), actnum_array->end (),0);
+#endif
+
 }
 
-
-template<class strategy_t>
-int rs_mesh_base<strategy_t>::init_int_to_ext()
+int rs_mesh_base::init_int_to_ext()
 {
-  i_type_t *ext_to_int_data, *int_to_ext_data; 
-  i_type_t n_ext = base_t::ext_to_int->size();
+#ifndef PURE_MESH
+  t_long n_ext = t_long(ext_to_int->size());
   if (n_ext == 0)
     return -1;
+
+  //int_to_ext->init (n_active_elements, 0);
+  int_to_ext->resize (n_active_elements);
+  
+  t_long *int_to_ext_data = int_to_ext->data ();
+  t_long *ext_to_int_data = ext_to_int->data ();
+  
+  stdv_long wrong;
+  stdv_long wrong_idx;
+
+#else
+  t_long n_ext = n_elements;
+  int r_code;
+  if (!ext_to_int)
+    return -1;
+  FI_LONG_ARRAY_ALLOCATOR (int_to_ext, n_active_elements, r_code);
+
+  spv_long int_to_ext_data = int_to_ext;
+  spv_long ext_to_int_data = ext_to_int;
+#endif
     
-  base_t::int_to_ext->resize (base_t::n_active_elements);
-  base_t::int_to_ext->assign(0);
   
-  int_to_ext_data = &(*base_t::int_to_ext)[0];
-  ext_to_int_data = &(*base_t::ext_to_int)[0];
-  
-  for (i_type_t i = 0; i < n_ext; i++)
+  for (t_long i = 0; i < n_ext; i++)
     {
       if (ext_to_int_data[i] != -1)
         {
-          int_to_ext_data[ext_to_int_data[i]] = i;
+#ifndef PURE_MESH          
+          if (ext_to_int_data[i] >= n_active_elements)
+            {
+              wrong.push_back (ext_to_int_data[i]);
+              wrong_idx.push_back (i);
+            }
+          else
+#endif
+            {
+              int_to_ext_data[ext_to_int_data[i]] = i;
+            }
         }
     }
+
+#ifndef PURE_MESH
+  if (wrong.size ())
+    {
+      for (size_t i = 0, cnt = wrong.size (); i < cnt; ++i)
+        {
+          BOSERR (section::mesh, level::error) 
+            << boost::format ("ext_to_int[%d] == %s >= %d") % wrong_idx[i] % wrong[i] % n_active_elements 
+            << bs_end;
+        }
+
+      bs_throw_exception ("ext_to_int out of n_active_elements");
+    }
+#endif
   return 0;  
 }
 
-template<class strategy_t>
-void rs_mesh_base<strategy_t>::check_data() const
+
+void rs_mesh_base::check_data() const
 {
   base_t::check_data ();
-  
+#ifndef PURE_MESH 
   if (minpv < 0)
     bs_throw_exception (boost::format ("minpv = %d is out of range")% minpv);
   if (minsv < 0)
@@ -87,13 +136,16 @@ void rs_mesh_base<strategy_t>::check_data() const
   if (max_thickness < 0)
     bs_throw_exception (boost::format ("max_thickness = %d is out of range")% max_thickness);
     
+  // FIXME: get_fp_data, get_i_data in init_props will raise exception if no such array
+  // maybe we can remove this checks, or don't raise exceptions in init_props
   if (!actnum_array)
     bs_throw_exception ("ACTNUM array is not initialized");
   if (!poro_array)
     bs_throw_exception ("PORO array is not initialized");
   if (!depths->size ())
     bs_throw_exception ("depths array is not initialized");
+#endif
 }
 
 
-BS_INST_STRAT(rs_mesh_base);
+//BS_INST_STRAT(rs_mesh_base);

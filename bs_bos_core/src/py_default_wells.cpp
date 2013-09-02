@@ -23,8 +23,8 @@ namespace python {
   void 
   py_export_default_wells ()
   {
-    strategy_exporter::export_class <default_well, well, well_exporter> ("default_well");
-    strategy_exporter::export_class <default_connection, blue_sky::wells::connection, connection_exporter> ("default_connection");
+    class_exporter <default_well, well, well_exporter>::export_class ("default_well");
+    class_exporter <default_connection, blue_sky::wells::connection, connection_exporter>::export_class ("default_connection");
   }
 
 } // namespace python

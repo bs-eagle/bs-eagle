@@ -1,0 +1,333 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release_WO_Python|Win32">
+      <Configuration>Release_WO_Python</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release_WO_Python|x64">
+      <Configuration>Release_WO_Python</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{CE770FDD-686B-48FB-9DFA-B660196BEF89}</ProjectGuid>
+    <RootNamespace>bs_mesh</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_WO_Python|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_WO_Python|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release_WO_Python|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release_WO_Python|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\exe\$(Configuration)\plugins\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\exe\$(Configuration)_$(Platform)\plugins\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">build\$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">build\$(Configuration)_$(Platform)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\exe\$(Configuration)\plugins\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\exe\$(Configuration)_$(Platform)\plugins\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">build\$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">build\$(Configuration)_$(Platform)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release_WO_Python|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release_WO_Python|x64'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release_WO_Python|Win32'">$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release_WO_Python|x64'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release_WO_Python|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release_WO_Python|x64'">false</LinkIncremental>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)_d</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectName)_d</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/Zm1000</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(LOKI_PATH)/include;$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include;$(ProjectDir)/../bs_scal/include/;$(ProjectDir)/../bs_bos_core/include/;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../sql_well/include/;$(ProjectDir)/../bs_mtx/include/;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../bs_lsolvers/include/;$(ProjectDir)/../common_alg/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(HDF5_PATH)/include;$(NUMPY_PATH)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_EXCEPTION_USE_BOOST_FORMAT;BS_MESH_WRITE_TRANSMISS_MATRIX;NOMINMAX;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP;%(PreprocessorDefinitions);BOOST_ALL_DYN_LINK;_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>bs_mesh_stdafx.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>4520</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>loki_D.lib;ws2_32.lib;libCGAL-vc100-mt-gd-4.0.lib;libgmp-10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>$(CGAL_DIR)\auxiliary\gmp\lib;$(CGAL_DIR)\lib;$(HDF5_PATH)/lib;$(PYTHON_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/debug/;$(ProjectDir)/../../../exe/debug/plugins/;$(MPICH_PATH)/SDK/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalOptions>/Zm1000 /bigobj</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(LOKI_PATH)/include;$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include;$(ProjectDir)/../bs_scal/include/;$(ProjectDir)/../bs_bos_core/include/;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../sql_well/include/;$(ProjectDir)/../bs_mtx/include/;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../bs_lsolvers/include/;$(ProjectDir)/../common_alg/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(NUMPY_PATH)/include;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_EXCEPTION_USE_BOOST_FORMAT;BS_MESH_WRITE_TRANSMISS_MATRIX;NOMINMAX;_SECURE_SCL=0;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP;%(PreprocessorDefinitions);BOOST_ALL_DYN_LINK;_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>bs_mesh_stdafx.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4520</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>libgmp-10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>$(CGAL_DIR)\lib64;$(HDF5_64_PATH)/lib;$(PYTHON64_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib64;$(ProjectDir)/../../../exe/debug/;$(ProjectDir)/../../../exe/debug/plugins/;$(MPICH_PATH)/SDK/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/Zm1000</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(CGAL_DIR)\include;$(CGAL_DIR)\auxiliary\gmp\include;$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include;$(ProjectDir)/../bs_bos_core/include;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../common_types/include;$(ProjectDir)/../bs_lsolvers/include;$(ProjectDir)/../common_alg/include;$(ProjectDir)/../sql_well/include;$(ProjectDir)/../bs_mtx/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(HDF5_PATH)/include;$(NUMPY_PATH)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BOOST_THREAD_USE_DLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>bs_mesh_stdafx.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DisableSpecificWarnings>4003;4520</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>loki.lib;ws2_32.lib;libCGAL_Core-vc100-mt-4.0.lib;libCGAL-vc100-mt-4.0.lib;libgmp-10.lib;libmpfr-4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>$(CGAL_DIR)\lib;$(HDF5_PATH)/lib;$(PYTHON_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/release/;$(ProjectDir)/../../../exe/release/plugins/;$(MPICH_PATH)/SDK/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>python25_d.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalOptions>/Zm1000 /bigobj</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(CGAL_DIR)\include64;$(CGAL_DIR)\auxiliary\gmp64\include;$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include;$(ProjectDir)/../bs_bos_core/include;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../common_types/include;$(ProjectDir)/../bs_lsolvers/include;$(ProjectDir)/../common_alg/include;$(ProjectDir)/../sql_well/include;$(ProjectDir)/../bs_mtx/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(NUMPY_PATH)/include;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BOOST_THREAD_USE_DLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>bs_mesh_stdafx.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DisableSpecificWarnings>4003;4520</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>loki.lib;ws2_32.lib;libCGAL_Core-vc100-mt-4.0.lib;libCGAL-vc100-mt-4.0.lib;libgmp-10.lib;libmpfr-4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>$(CGAL_DIR)\lib64;$(HDF5_PATH)/lib;$(PYTHON64_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib64;$(ProjectDir)/../../../exe/release_x64;$(ProjectDir)/../../../exe/release_x64/plugins/;$(MPICH_PATH)/SDK/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>python25_d.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_WO_Python|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/Zm1000 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include;$(ProjectDir)/../bs_bos_core/include;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../bs_matrix/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(HDF5_PATH)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BS_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>bs_mesh_stdafx.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>blue-sky.lib;bs_bos_core_base.lib;bs_matrix.lib;bs_bos_core_data_storage.lib;loki.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(ProjectDir)/../../../exe/release/plugins/$(ProjectName).dll</OutputFile>
+      <AdditionalLibraryDirectories>$(HDF5_PATH)/lib;$(PYTHON_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/release/;$(ProjectDir)/../../../exe/release/plugins/;$(MPICH_PATH)/SDK/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>python25_d.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_WO_Python|x64'">
+    <ClCompile>
+      <AdditionalOptions>/Zm1000 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include;$(ProjectDir)/../bs_bos_core/include;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../bs_matrix/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(HDF5_PATH)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BS_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>bs_mesh_stdafx.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>blue-sky.lib;bs_bos_core_base.lib;bs_matrix.lib;bs_bos_core_data_storage.lib;loki.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(ProjectDir)/../../../exe/release/plugins/$(ProjectName).dll</OutputFile>
+      <AdditionalLibraryDirectories>$(HDF5_PATH)/lib;$(PYTHON_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/release/;$(ProjectDir)/../../../exe/release/plugins/;$(MPICH_PATH)/SDK/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>python25_d.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\i_cant_link_2_mesh.cpp" />
+    <ClCompile Include="src\py_coord_zcorn_tools.cpp" />
+    <ClCompile Include="src\py_flux_connections.cpp" />
+    <ClCompile Include="src\py_mesh_grdecl.cpp" />
+    <ClCompile Include="src\py_rs_mesh.cpp" />
+    <ClCompile Include="src\mesh_base.cpp" />
+    <ClCompile Include="src\bs_flux_connections.cpp" />
+    <ClCompile Include="src\flux_connections.cpp" />
+    <ClCompile Include="src\mesh_element3d.cpp" />
+    <ClCompile Include="src\py_upsc.cpp" />
+    <ClCompile Include="src\rs_mesh_base.cpp" />
+    <ClCompile Include="src\rs_smesh_base.cpp" />
+    <ClCompile Include="src\bs_mesh_ijk.cpp" />
+    <ClCompile Include="src\mesh_ijk.cpp" />
+    <ClCompile Include="src\bs_mesh_grdecl.cpp" />
+    <ClCompile Include="src\mesh_grdecl.cpp" />
+    <ClCompile Include="src\mpi_mesh_grdecl.cpp" />
+    <ClCompile Include="src\mesh_grdecl_keywords.cpp" />
+    <ClCompile Include="src\mesh_ijk_keywords.cpp" />
+    <ClCompile Include="src\rs_smesh_keywords.cpp" />
+    <ClCompile Include="src\coord_zcorn_tools.cpp" />
+    <ClCompile Include="src\upsc.cpp" />
+    <ClCompile Include="src\well_edit_tools.cpp" />
+    <ClCompile Include="src\well_path_ident.cpp" />
+    <ClCompile Include="src\well_path_ident_2d.cpp" />
+    <ClCompile Include="src\bs_mesh.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_WO_Python|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_WO_Python|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\i_cant_link_2_mesh.h" />
+    <ClInclude Include="include\fpoint2d.h" />
+    <ClInclude Include="include\fpoint3d.h" />
+    <ClInclude Include="src\mesh_base.h" />
+    <ClInclude Include="src\bs_flux_connections.h" />
+    <ClInclude Include="src\flux_connections.h" />
+    <ClInclude Include="include\flux_connections_iface.h" />
+    <ClInclude Include="src\mesh_element3d.h" />
+    <ClInclude Include="src\rs_mesh_base.h" />
+    <ClInclude Include="include\rs_mesh_iface.h" />
+    <ClInclude Include="src\rs_smesh_base.h" />
+    <ClInclude Include="include\rs_smesh_iface.h" />
+    <ClInclude Include="src\bs_mesh_ijk.h" />
+    <ClInclude Include="src\mesh_ijk.h" />
+    <ClInclude Include="src\bs_mesh_grdecl.h" />
+    <ClInclude Include="src\mesh_grdecl.h" />
+    <ClInclude Include="src\mpi_mesh_grdecl.h" />
+    <ClInclude Include="src\mesh_grdecl_keywords.h" />
+    <ClInclude Include="src\mesh_ijk_keywords.h" />
+    <ClInclude Include="src\rs_smesh_keywords.h" />
+    <ClInclude Include="src\gauss_method.h" />
+    <ClInclude Include="src\bs_mesh_stdafx.h" />
+    <ClInclude Include="src\wpi_algo.h" />
+    <ClInclude Include="src\wpi_algo_meshp.h" />
+    <ClInclude Include="src\wpi_algo_pod.h" />
+    <ClInclude Include="src\wpi_algo_xaction.h" />
+    <ClInclude Include="src\wpi_common.h" />
+    <ClInclude Include="src\wpi_strategy_2d.h" />
+    <ClInclude Include="src\wpi_strategy_3d.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\kernel\blue-sky.vcxproj">
+      <Project>{7c235c2a-609a-49b4-a89b-ac23530f0f89}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\bs_bos_core_base\bs_bos_core_base.vcxproj">
+      <Project>{578a43d7-0338-4ed0-a455-666fda782085}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

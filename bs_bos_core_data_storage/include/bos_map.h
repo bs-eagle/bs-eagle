@@ -55,7 +55,7 @@ namespace blue_sky
        */
       bool add_item(const key_type& key, const value_type& value)
       {
-        return insert(data_pair(key, value)).second;
+        return this->insert(data_pair(key, value)).second;
       }
       /*!
       	\brief Remove item method.
@@ -63,7 +63,7 @@ namespace blue_sky
        */
       void rem_item(const key_type& key)
       {
-        erase(key);
+        this->erase(key);
       }
 
       /*!

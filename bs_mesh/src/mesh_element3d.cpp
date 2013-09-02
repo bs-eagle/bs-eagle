@@ -23,15 +23,15 @@ element_plane_orientation_t get_reverse_orientation (element_plane_orientation_t
       }
   }
 
-template<class strategy_t>
-mesh_element3d<strategy_t>::mesh_element3d()
+
+mesh_element3d::mesh_element3d()
 {
   n_corners = N_ELEMENT_CORNERS;
   n_plane_corners = N_PLANE_CORNERS;
 }
 
-template<class strategy_t>
-void mesh_element3d<strategy_t>::init(simple_corners_t new_corners)
+
+void mesh_element3d::init(simple_corners_t new_corners)
 {
     /* nodes layout
      *                             X
@@ -45,7 +45,7 @@ void mesh_element3d<strategy_t>::init(simple_corners_t new_corners)
      *              6 /-------/7
      */
 
-  i_type_t i;
+  t_int i;
   for (i = 0; i < n_corners; ++i)
     {
       corners[i].x = new_corners[i][0];
@@ -56,9 +56,11 @@ void mesh_element3d<strategy_t>::init(simple_corners_t new_corners)
 
 
 
-template<class strategy_t>
-inline void
-mesh_element3d<strategy_t>::get_plane (element_plane_orientation_t orientation, plane_t &plane) const
+
+// FIXME: in release symbol not found if inlined
+//inline 
+void
+mesh_element3d::get_plane (element_plane_orientation_t orientation, plane_t &plane) const
 {
   switch (orientation)
     {
@@ -105,12 +107,12 @@ mesh_element3d<strategy_t>::get_plane (element_plane_orientation_t orientation, 
     }
 }
 
-template<class strategy_t>
-typename mesh_element3d<strategy_t>::fpoint3d_t
-mesh_element3d<strategy_t>::get_center () const
+
+mesh_element3d::fpoint3d_t
+mesh_element3d::get_center () const
 {
   fpoint3d_t center;
-  i_type_t i;
+  t_int i;
   for (i = 0; i < n_corners; i++)
     {
       center += corners[i];
@@ -122,14 +124,16 @@ mesh_element3d<strategy_t>::get_center () const
 
 
 
-template<class strategy_t>
-typename mesh_element3d<strategy_t>::fp_type_t
-mesh_element3d<strategy_t>::calc_volume()
+
+t_double
+mesh_element3d::calc_volume()
 {
-    fpoint3d_t center = get_center ();
-    fp_type_t volume = 0.0;
+    t_double volume = 0.0;
 
     //share for 12 tetraidr (6 side -> 2 tetraidr for each)
+    /*
+    volume = 0;
+    fpoint3d_t center = get_center ();
     volume += calc_tetra_volume(corners[0],corners[1],corners[2], center);
     volume += calc_tetra_volume(corners[1],corners[2],corners[3], center);
 
@@ -147,64 +151,113 @@ mesh_element3d<strategy_t>::calc_volume()
 
     volume += calc_tetra_volume(corners[2],corners[3],corners[6], center);
     volume += calc_tetra_volume(corners[3],corners[6],corners[7], center);
+    */
+    
+    /*
+    share for 5 tetraidr
+    volume += calc_tetra_volume(corners[0],corners[4],corners[5], corners[6]);
+    volume += calc_tetra_volume(corners[0],corners[5],corners[1], corners[3]);
+    volume += calc_tetra_volume(corners[0],corners[3],corners[2], corners[6]);
+    volume += calc_tetra_volume(corners[5],corners[7],corners[6], corners[3]);
+    volume += calc_tetra_volume(corners[0],corners[3],corners[5], corners[6]);
+    */
 
-    return volume;
+    
+    /*
+    share for 6 tetraidr
+    volume += calc_tetra_volume(corners[0],corners[1],corners[3], corners[7]);
+    volume += calc_tetra_volume(corners[0],corners[1],corners[5], corners[7]);
+    volume += calc_tetra_volume(corners[0],corners[4],corners[5], corners[7]);
+    volume += calc_tetra_volume(corners[0],corners[2],corners[3], corners[7]);
+    volume += calc_tetra_volume(corners[0],corners[2],corners[6], corners[7]);
+    volume += calc_tetra_volume(corners[0],corners[4],corners[6], corners[7]);
+    */
+    fpoint3d_t centerx1, centerx2;
+    fpoint3d_t centery1, centery2;
+    fpoint3d_t centerz1, centerz2;
+    plane_t plane;
+    get_plane(x_axis_minus, plane);
+    centerx1 = plane[0] + plane[1] + plane[2] + plane[3];
+    //get_plane_center (plane, centerx1);
+
+    get_plane(x_axis_plus, plane);
+    //get_plane_center (plane, centerx2);
+    centerx2 = plane[0] + plane[1] + plane[2] + plane[3];
+
+    get_plane(y_axis_minus, plane);
+    //get_plane_center (plane, centery1);
+    centery1 = plane[0] + plane[1] + plane[2] + plane[3];
+
+    get_plane(y_axis_plus, plane);
+    //get_plane_center (plane, centery2);
+    centery2 = plane[0] + plane[1] + plane[2] + plane[3];
+
+    get_plane(z_axis_minus, plane);
+    //get_plane_center (plane, centerz1);
+    centerz1 = plane[0] + plane[1] + plane[2] + plane[3];
+
+    get_plane(z_axis_plus, plane);
+    //get_plane_center (plane, centerz2);
+    centerz2 = plane[0] + plane[1] + plane[2] + plane[3];
+
+    volume = fpoint3d_mixed_multiplicate (centerx1 - centerx2, centery1 - centery2,centerz1 - centerz2);
+    return fabs(volume * 0.015625); // 0.25*0.25*0.25
 }
 
-template<class strategy_t>
-typename mesh_element3d<strategy_t>::fp_type_t
-mesh_element3d<strategy_t>::get_dx ()
+
+t_double
+mesh_element3d::get_dx ()
 {
   plane_t plane1, plane2;
   
   get_plane(x_axis_minus, plane1);
   get_plane(x_axis_plus, plane2);
 
-  fp_type_t dx = 0.0;
+  t_double dx = 0.0;
 
-  for (i_type_t i = 0; i < n_plane_corners; ++i)
+  for (t_int i = 0; i < n_plane_corners; ++i)
     dx += plane1[i].x - plane2[i].x;
 
   return fabs (dx / n_plane_corners);
 }
 
-template<class strategy_t>
-typename mesh_element3d<strategy_t>::fp_type_t
-mesh_element3d<strategy_t>::get_dy ()
+
+t_double
+mesh_element3d::get_dy ()
 {
   plane_t plane1, plane2;
   
   get_plane(y_axis_minus, plane1);
   get_plane(y_axis_plus, plane2);
   
-  fp_type_t dy = 0.0;
+  t_double dy = 0.0;
 
-  for (i_type_t i = 0; i < n_plane_corners; ++i)
+  for (t_int i = 0; i < n_plane_corners; ++i)
     dy += plane1[i].y - plane2[i].y;
 
   return fabs (dy / n_plane_corners);
 }
 
-template<class strategy_t>
-typename mesh_element3d<strategy_t>::fp_type_t
-mesh_element3d<strategy_t>::get_dz ()
+
+t_double
+mesh_element3d::get_dz ()
 {
   plane_t plane1, plane2;
   
   get_plane(z_axis_minus, plane1);
   get_plane(z_axis_plus, plane2);
 
-  fp_type_t dz = 0.0;
+  t_double dz = 0.0;
 
-  for (i_type_t i = 0; i < n_plane_corners; ++i)
-    dz += plane1[i].x - plane2[i].x;
+  for (t_int i = 0; i < n_plane_corners; ++i)
+    dz += plane1[i].z - plane2[i].z;
 
   return fabs (dz / n_plane_corners);
 }
 
-template<class strategy_t>
-typename mesh_element3d<strategy_t>::point3d_t
-mesh_element3d<strategy_t>::get_dx_dy_dz ()
+
+mesh_element3d::point3d_t
+mesh_element3d::get_dx_dy_dz ()
 {
   plane_t plane1, plane2, plane3, plane4, plane5, plane6;
   
@@ -220,15 +273,19 @@ mesh_element3d<strategy_t>::get_dx_dy_dz ()
   element_size[1] = 0;
   element_size[2] = 0;
 
-  for (i_type_t i = 0; i < n_plane_corners; ++i)
+  for (t_int i = 0; i < n_plane_corners; ++i)
     {
       element_size[0] += plane1[i].x - plane2[i].x;
       element_size[1] += plane3[i].y - plane4[i].y;
-      element_size[2] += plane6[i].z - plane6[i].z;
+      element_size[2] += plane5[i].z - plane6[i].z;
     }
+
+  element_size[0] = fabs (element_size[0] / n_plane_corners);
+  element_size[1] = fabs (element_size[1] / n_plane_corners);
+  element_size[2] = fabs (element_size[2] / n_plane_corners);
 
   return element_size;
 }
 
 
-BS_INST_STRAT(mesh_element3d);
+//BS_INST_STRAT(mesh_element3d);

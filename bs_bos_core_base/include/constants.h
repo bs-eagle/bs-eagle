@@ -46,6 +46,12 @@ namespace blue_sky
     STONE2_MODEL
   };
 
+  enum SCALECRS_ENUM
+  {
+    SCALECRS_NO = 0,
+    SCALECRS_YES
+  };
+  
   enum PHASE_ENUM
   {
     PHASE_NULL		= 0,
@@ -217,7 +223,9 @@ namespace blue_sky
     EQUIL_RS_TYPE,
     EQUIL_RV_TYPE,
     EQUIL_NUM_SEC,
-    EQUIL_COMP_TYPE,
+    EQUIL_TOTAL_BLACK_OIL, 
+    
+    EQUIL_COMP_TYPE = EQUIL_TOTAL_BLACK_OIL,
     EQUIL_COMP_ARG,
     EQUIL_TOTAL
   };

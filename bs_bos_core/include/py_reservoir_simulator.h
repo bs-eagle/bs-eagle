@@ -11,14 +11,6 @@
 #define PY_RESERVOIR_SIMULATOR_H
 
 #ifdef BSPY_EXPORTING_PLUGIN
-#include "py_event_manager.h"
-#include "py_calc_model.h"
-
-#include BS_FORCE_PLUGIN_IMPORT ()
-#include "py_data_manager.h"
-#include "py_jacobian_matrix.h"
-#include "py_linear_solvers.h"
-#include BS_STOP_PLUGIN_IMPORT ()
 
 namespace blue_sky {
 namespace python {

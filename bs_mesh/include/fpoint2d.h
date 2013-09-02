@@ -5,18 +5,20 @@
 	\brief addition structure for mesh_grdecl - point2d
 	\author Iskhakov Ruslan
 	\date 2008-05-01 */
+#include <array>
+#include <math.h>
 
 namespace grd_ecl
   {
   struct fpoint2d
     {
-      float x,y;
+      t_double x,y;
 
       fpoint2d()
       {
         x=0.0f,y=0.0f;
       }
-      fpoint2d(float ax, float ay)
+      fpoint2d(t_double ax, t_double ay)
       {
         x = ax;
         y = ay;
@@ -27,22 +29,26 @@ namespace grd_ecl
         y += b.y;
         return *this;
       }
-      fpoint2d& operator /= (float b)
+      fpoint2d& operator /= (t_double b)
       {
         x /= b;
         y /= b;
         return *this;
       }
     };
-  
+#ifdef PURE_MESH  
+  typedef std::array <fpoint2d, 4>       quadrangle_t;
+  typedef std::array <fpoint2d, 3>       triangle_t;
+#else
   typedef boost::array <fpoint2d, 4>       quadrangle_t;
   typedef boost::array <fpoint2d, 3>       triangle_t;
+#endif
   
-  inline float get_sq_distance(const fpoint2d &a, const fpoint2d &b)
+  inline t_double get_sq_distance(const fpoint2d &a, const fpoint2d &b)
   {
     return (a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y);
   }
-  inline float get_len(const fpoint2d &a, const fpoint2d &b)
+  inline t_double get_len(const fpoint2d &a, const fpoint2d &b)
   {
     return sqrtf(get_sq_distance(a,b));
   }
@@ -55,7 +61,7 @@ namespace grd_ecl
   {
     return fpoint2d(a.x-b.x,a.y-b.y);
   }
-  inline fpoint2d operator / (const fpoint2d &a, float d)
+  inline fpoint2d operator / (const fpoint2d &a, t_double d)
   {
     return fpoint2d(a.x/d,a.y/d);
   }
@@ -76,8 +82,8 @@ namespace grd_ecl
     double Ua = ((p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x) ) / Z; //numerator1
     double Ub = ((p2.x - p1.x) * (p1.y - p3.y) - (p2.y - p1.y) * (p1.x - p3.x) ) / Z; //numerator2
 
-    resPoint.x = (float)(p1.x + (p2.x - p1.x) * Ua);
-    resPoint.y = (float)(p1.y + (p2.y - p1.y) * Ua);
+    resPoint.x = (t_double)(p1.x + (p2.x - p1.x) * Ua);
+    resPoint.y = (t_double)(p1.y + (p2.y - p1.y) * Ua);
 
     if ( (0 < Ua) && (Ua < 1)&&(0 < Ub) && (Ub < 1) )
       return 1;
@@ -85,14 +91,14 @@ namespace grd_ecl
     return 0;
   }
   
-  inline float formula_gerona2d(const fpoint2d &p1, const fpoint2d &p2, const fpoint2d &p3)
+  inline t_double formula_gerona2d(const fpoint2d &p1, const fpoint2d &p2, const fpoint2d &p3)
   {
-    float a = get_len(p2,p1);
-    float b = get_len(p1,p3);
-    float c = get_len(p3,p2);
+    t_double a = get_len(p2,p1);
+    t_double b = get_len(p1,p3);
+    t_double c = get_len(p3,p2);
 
-    float p = (a+b+c)/2;
-    float x = p*(p-a)*(p-b)*(p-c);
+    t_double p = (a+b+c)/2;
+    t_double x = p*(p-a)*(p-b)*(p-c);
     if (x < 1.0e-16)
       {
         return 0;
@@ -100,13 +106,18 @@ namespace grd_ecl
     return sqrtf(x);
   }
 
-  inline float get_triangle_crossing_area(const triangle_t &tri1, const  triangle_t &tri2, double eps, int are_opposed)
+  inline t_double get_triangle_crossing_area(const triangle_t &tri1, const  triangle_t &tri2, double eps, int are_opposed)
   {
-    boost::array <fpoint2d, 6> f;
+#ifdef PURE_MESH  
+  std::array <fpoint2d, 6> f;
+#else
+  boost::array <fpoint2d, 6> f;
+#endif
+    
     fpoint2d p, p1;
     int i, n = 0;
     int vertice_match1 = 0, vertice_match2 = 0;
-    float area = 0.0;
+    t_double area = 0.0;
     
     
     if (!are_opposed && (tri1[2].x == tri2[2].x) && (tri1[2].y == tri2[2].y))
@@ -183,7 +194,7 @@ namespace grd_ecl
     return area;
   }
 
-  inline float get_quadrangle_crossing_area(const quadrangle_t &polyg1, const quadrangle_t &polyg2, double eps)
+  inline t_double get_quadrangle_crossing_area(const quadrangle_t &polyg1, const quadrangle_t &polyg2, double eps)
   {
     // devide each quadrangle into 2 triangles and find 4 areas of triangles crossing
     // crossing area calculation is greatly simplified using MESH_GRDECL properties
@@ -210,7 +221,7 @@ namespace grd_ecl
     tri4[2] = polyg2[2];  // COORD1
 
     //find their area
-    float area = 0.0;
+    t_double area = 0.0;
     
     // tri1 and tri4, tri2 and tri3 are opposed (the have edge on different COORD)
     area += get_triangle_crossing_area(tri1, tri4, eps, true);

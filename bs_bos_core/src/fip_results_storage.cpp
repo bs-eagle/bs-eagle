@@ -5,13 +5,12 @@
  * @date 2009-02-05
  */
 #include "stdafx.h"
+#include "well_connection.h"
+#include "facility_manager.h"
 #include "fip_results_storage.h"
 
-// WTF??
-#include "well_results_storage.h"
 namespace blue_sky
   {
-
 
   /**
    * @brief constructor
@@ -42,8 +41,6 @@ namespace blue_sky
    */
   fip_results_storage::~fip_results_storage ()
   {}
-
-  class fip_results;
 
   BLUE_SKY_TYPE_STD_CREATE (fip_results_storage)
   BLUE_SKY_TYPE_STD_COPY   (fip_results_storage)

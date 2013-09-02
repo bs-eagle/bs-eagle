@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Zm1000"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_mesh/include/&quot;;&quot;$(ProjectDir)/../bs_matrix/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;&quot;$(NUMPY_PATH)/include&quot;"
+				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../bs_bos_core/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_pvt/include/&quot;;&quot;$(ProjectDir)/../bs_scal/include/&quot;;&quot;$(ProjectDir)/../sql_well/include/&quot;;&quot;$(ProjectDir)/../bs_mesh/include/&quot;;&quot;$(ProjectDir)/../common_types/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;&quot;$(NUMPY_PATH)/include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_EXCEPTION_USE_BOOST_FORMAT;_SCL_SECURE_NO_WARNINGS;NOMINMAX"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -63,7 +63,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="blue-sky_d.lib bs_bos_core_base_d.lib loki_D.lib ws2_32.lib"
+				AdditionalDependencies="loki_D.lib ws2_32.lib"
 				OutputFile="$(ProjectDir)/../../../exe/debug/plugins/$(ProjectName)_d.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/lib&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/debug/&quot;;&quot;$(ProjectDir)/../../../exe/debug/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
@@ -122,9 +122,9 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zm1000"
-				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_mesh/include/&quot;;&quot;$(ProjectDir)/../bs_matrix/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;&quot;$(NUMPY_PATH)/include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;NOMINMAX"
+				AdditionalOptions="/Zm1000 -D_SCL_SECURE_NO_WARNINGS"
+				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../bs_bos_core/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_pvt/include/&quot;;&quot;$(ProjectDir)/../sql_well/include/&quot;;&quot;$(ProjectDir)/../bs_scal/include/&quot;;&quot;$(ProjectDir)/../bs_mesh/include/&quot;;&quot;$(ProjectDir)/../common_types/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;&quot;$(NUMPY_PATH)/include&quot;"
+				PreprocessorDefinitions="BOOST_ALL_DYN_LINK"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="bs_bos_core_data_storage_stdafx.h"
@@ -143,7 +143,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="blue-sky.lib bs_bos_core_base.lib loki.lib ws2_32.lib"
+				AdditionalDependencies="loki.lib ws2_32.lib"
 				OutputFile="$(ProjectDir)/../../../exe/release/plugins/$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/lib&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/release/&quot;;&quot;$(ProjectDir)/../../../exe/release/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
@@ -266,34 +266,6 @@
 	</References>
 	<Files>
 		<Filter
-			Name="arithmetic"
-			>
-			<File
-				RelativePath=".\src\ar_args.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\include\ar_args.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\ar_operat.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\include\ar_operat.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\ar_stack.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\include\ar_stack.h"
-				>
-			</File>
-		</Filter>
-		<Filter
 			Name="data reader"
 			>
 			<File
@@ -409,31 +381,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\bs_array_map.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\include\bs_array_map.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\bs_array_map_strategies.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\data_class.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\include\data_class.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\data_manager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\include\data_manager.h"
 				>
 			</File>
 			<File
@@ -456,27 +408,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\src\py_bs_array_map.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\py_bs_array_map.h"
-					>
-				</File>
-				<File
 					RelativePath=".\src\py_data_class.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\include\py_data_class.h"
-					>
-				</File>
-				<File
-					RelativePath=".\src\py_data_manager.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\include\py_data_manager.h"
 					>
 				</File>
 			</Filter>
@@ -485,11 +421,27 @@
 			Name="keywords"
 			>
 			<File
+				RelativePath=".\src\equil_keywords.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\equil_keywords.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\explicit_keywords.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\explicit_keywords.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\keyword_manager.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\keyword_manager.h"
+				RelativePath=".\include\keyword_manager.h"
 				>
 			</File>
 			<File
@@ -509,12 +461,100 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="hdm"
+			>
+			<File
+				RelativePath=".\src\hdm.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\hdm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\hdm_iface.h"
+				>
+			</File>
+			<Filter
+				Name="python"
+				>
+				<File
+					RelativePath=".\src\py_hdm.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\include\py_hdm.h"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="well storage"
+			>
+			<File
+				RelativePath=".\src\well.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\well.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\well_branch.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\well_branch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\well_branch_iface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\well_iface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\well_storage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\well_storage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\well_storage_iface.h"
+				>
+			</File>
+			<Filter
+				Name="python"
+				>
+				<File
+					RelativePath=".\src\py_well.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\py_well.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\py_well_storage.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\include\py_well_storage.h"
+					>
+				</File>
+			</Filter>
+		</Filter>
 		<File
-			RelativePath=".\src\bs_bos_core_data_storage.cpp"
+			RelativePath=".\include\bs_bos_core_data_storage_stdafx.h"
 			>
 		</File>
 		<File
-			RelativePath=".\include\bs_bos_core_data_storage_stdafx.h"
+			RelativePath=".\src\main.cpp"
 			>
 		</File>
 		<File

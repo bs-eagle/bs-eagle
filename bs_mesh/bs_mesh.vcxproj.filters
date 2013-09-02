@@ -1,0 +1,190 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="python">
+      <UniqueIdentifier>{2125f99e-2fb4-4399-9052-85864e20a104}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mesh">
+      <UniqueIdentifier>{47f6caeb-31af-4b09-a5e6-6ccb3f0baec4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rs">
+      <UniqueIdentifier>{83a86dbb-aa00-4fd2-8052-7b268676b9ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rs\ijk">
+      <UniqueIdentifier>{240f6d2d-e827-4f3a-8dbe-eb719a83b6f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rs\grdecl">
+      <UniqueIdentifier>{f282fa23-a46a-45a5-832f-43624f6571fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rs\grdecl\mpi">
+      <UniqueIdentifier>{daf70c21-1f35-4f12-b1e1-e7bed5e8cc1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rs\keywords">
+      <UniqueIdentifier>{b971d074-0593-4863-ad07-32ceb2118a49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rs\grdecl_mpfa">
+      <UniqueIdentifier>{55c449b0-1fe2-4c6d-9546-23747028ac36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gen">
+      <UniqueIdentifier>{bfc78404-d270-44c4-b007-7ce673b6c7c4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\py_coord_zcorn_tools.cpp">
+      <Filter>python</Filter>
+    </ClCompile>
+    <ClCompile Include="src\py_flux_connections.cpp">
+      <Filter>python</Filter>
+    </ClCompile>
+    <ClCompile Include="src\py_mesh_grdecl.cpp">
+      <Filter>python</Filter>
+    </ClCompile>
+    <ClCompile Include="src\py_rs_mesh.cpp">
+      <Filter>python</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mesh_base.cpp">
+      <Filter>mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bs_flux_connections.cpp">
+      <Filter>rs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\flux_connections.cpp">
+      <Filter>rs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mesh_element3d.cpp">
+      <Filter>rs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rs_mesh_base.cpp">
+      <Filter>rs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rs_smesh_base.cpp">
+      <Filter>rs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bs_mesh_ijk.cpp">
+      <Filter>rs\ijk</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mesh_ijk.cpp">
+      <Filter>rs\ijk</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bs_mesh_grdecl.cpp">
+      <Filter>rs\grdecl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mesh_grdecl.cpp">
+      <Filter>rs\grdecl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mpi_mesh_grdecl.cpp">
+      <Filter>rs\grdecl\mpi</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mesh_grdecl_keywords.cpp">
+      <Filter>rs\keywords</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mesh_ijk_keywords.cpp">
+      <Filter>rs\keywords</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rs_smesh_keywords.cpp">
+      <Filter>rs\keywords</Filter>
+    </ClCompile>
+    <ClCompile Include="src\coord_zcorn_tools.cpp">
+      <Filter>gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\well_edit_tools.cpp">
+      <Filter>gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\well_path_ident.cpp">
+      <Filter>gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\well_path_ident_2d.cpp">
+      <Filter>gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bs_mesh.cpp" />
+    <ClCompile Include="src\stdafx.cpp" />
+    <ClCompile Include="src\i_cant_link_2_mesh.cpp" />
+    <ClCompile Include="src\py_upsc.cpp" />
+    <ClCompile Include="src\upsc.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\fpoint2d.h">
+      <Filter>mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fpoint3d.h">
+      <Filter>mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mesh_base.h">
+      <Filter>mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bs_flux_connections.h">
+      <Filter>rs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\flux_connections.h">
+      <Filter>rs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\flux_connections_iface.h">
+      <Filter>rs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mesh_element3d.h">
+      <Filter>rs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rs_mesh_base.h">
+      <Filter>rs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rs_mesh_iface.h">
+      <Filter>rs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rs_smesh_base.h">
+      <Filter>rs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rs_smesh_iface.h">
+      <Filter>rs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bs_mesh_ijk.h">
+      <Filter>rs\ijk</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mesh_ijk.h">
+      <Filter>rs\ijk</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bs_mesh_grdecl.h">
+      <Filter>rs\grdecl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mesh_grdecl.h">
+      <Filter>rs\grdecl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mpi_mesh_grdecl.h">
+      <Filter>rs\grdecl\mpi</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mesh_grdecl_keywords.h">
+      <Filter>rs\keywords</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mesh_ijk_keywords.h">
+      <Filter>rs\keywords</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rs_smesh_keywords.h">
+      <Filter>rs\keywords</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gauss_method.h">
+      <Filter>rs\grdecl_mpfa</Filter>
+    </ClInclude>
+    <ClInclude Include="src\bs_mesh_stdafx.h" />
+    <ClInclude Include="src\wpi_algo.h">
+      <Filter>gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wpi_algo_meshp.h">
+      <Filter>gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wpi_algo_pod.h">
+      <Filter>gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wpi_algo_xaction.h">
+      <Filter>gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wpi_common.h">
+      <Filter>gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wpi_strategy_2d.h">
+      <Filter>gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wpi_strategy_3d.h">
+      <Filter>gen</Filter>
+    </ClInclude>
+    <ClInclude Include="include\i_cant_link_2_mesh.h" />
+  </ItemGroup>
+</Project>

@@ -25,6 +25,11 @@
 #endif
 
 #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
+
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
+
 // Windows Header Files:
 #ifndef UNIX
 #include <Windows.h>
@@ -37,7 +42,6 @@
 #include <boost/array.hpp>
 
 #include "bs_common.h"
-#include BS_FORCE_PLUGIN_IMPORT ()
 #include "smart_ptr.h"
 #include "bs_kernel.h"
 #include "bs_link.h"
@@ -45,10 +49,8 @@
 #include "bs_tree.h"
 #include "bs_exception.h"
 #include "bs_assert.h"
-#include BS_STOP_PLUGIN_IMPORT ()
 
 #ifdef BSPY_EXPORTING_PLUGIN
-#include <boost/python.hpp>
 #include <boost/python/module.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -58,16 +60,15 @@
 #include <boost/python/wrapper.hpp>
 #include <boost/python/iterator.hpp>
 
-#include BS_FORCE_PLUGIN_IMPORT ()
 #include "bs_plugin_common.h"
 #include "py_bs_object_base.h"
 #include "py_bs_command.h"
 #include "py_bs_tree.h"
-#include BS_STOP_PLUGIN_IMPORT ()
 #endif
 
 #include "force_inline.h"
 #include "bos_report.h"
+
 
 #include "aligned_allocator.h"
 

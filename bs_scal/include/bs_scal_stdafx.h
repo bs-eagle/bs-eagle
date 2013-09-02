@@ -25,6 +25,10 @@
 #endif
 
 #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
+#ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python.hpp>
+#endif
+
 // Windows Header Files:
 #ifndef UNIX
 #include <Windows.h>
@@ -81,6 +85,7 @@
 #include "plane_orientation.h"
 #include "write_time_to_log.h"
 #include "locale_keeper.h"
+#include "conf.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #endif //#ifndef BS_SCAL_PRECOMPILED_HEADERS_H_

@@ -15,31 +15,39 @@ namespace blue_sky
   /**
    * \brief pvt_gas
    */
-  template <typename strategy_t>
-  class pvt_gas : public pvt_base <strategy_t>
+  class BS_API_PLUGIN pvt_gas : public pvt_base 
     {
     public:
 
-      typedef strategy_t                        pvt_strategy_t;
-      typedef pvt_base <strategy_t>             base_t;
-      typedef typename base_t::item_t           item_t;
-      typedef typename base_t::index_t          index_t;
-      typedef typename base_t::index_array_t    index_array_t;
-      typedef typename base_t::item_array_t     item_array_t;
-      typedef typename base_t::input_vector_t   input_vector_t;
-      typedef typename base_t::vector_t         vector_t;
+      typedef pvt_base                 base_t;
+      typedef base_t::vector_t         vector_t;
+
+      enum {
+         PVT_GAS_INPUT_PRESSURE = 0,
+         PVT_GAS_INPUT_FVF,
+         PVT_GAS_INPUT_VISC,
+         PVT_GAS_INPUT_TOTAL
+       };  
+
+      enum {
+         PVT_GAS_PRESSURE = 0,
+         PVT_GAS_INV_FVF,
+         PVT_GAS_INV_VISC,
+         PVT_GAS_INV_VISC_FVF,
+         PVT_GAS_TOTAL
+      };
 
       /**
        * \brief store values into data
        *
        * \param seq_vector
        */
-      virtual void insert_vector (const input_vector_t &vec);
+      virtual void insert_vector (const v_double &vec);
 
       /**
        * \brief generate interpolated data
        */
-      void build (item_t atm_p, item_t min_p, item_t max_p, index_t n_intervals);
+      void build (t_double atm_p, t_double min_p, t_double max_p, t_long n_intervals);
 
       /**
        * \brief calculate interpolated value
@@ -52,9 +60,9 @@ namespace blue_sky
        * \param[out] inv_visc_fvf
        * \param[out] d_inv_visc_fvf
        */
-      virtual void calc (const item_t p, item_t  *inv_fvf, item_t *d_inv_fvf,
-                         item_t *inv_visc, item_t *d_inv_visc,
-                         item_t *inv_visc_fvf, item_t *d_inv_visc_fvf) const;
+      virtual void calc (const t_double p, t_float  *inv_fvf, t_float *d_inv_fvf,
+                         t_float *inv_visc, t_float *d_inv_visc,
+                         t_float *inv_visc_fvf, t_float *d_inv_visc_fvf) const;
 
       virtual void
       print () const;
@@ -66,14 +74,14 @@ namespace blue_sky
 
     private:
 
-      vector_t main_pressure_;
-      vector_t main_fvf_;
-      vector_t main_visc_;
+      //vector_t main_pressure_;
+      //vector_t main_fvf_;
+      //vector_t main_visc_;
 
-      vector_t pressure_;
-      vector_t inv_fvf_;
-      vector_t inv_visc_;
-      vector_t inv_visc_fvf_;
+      //vector_t pressure_;
+      //vector_t inv_fvf_;
+      //vector_t inv_visc_;
+      //vector_t inv_visc_fvf_;
 
     public:
 

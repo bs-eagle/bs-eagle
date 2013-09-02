@@ -14,55 +14,31 @@
 #include "event_filter.h"
 #include "jacobian.h"
 
-#ifdef _HDF5
-#include "bs_hdf5_storage.h"
 #include "rs_smesh_iface.h"
-#endif
 
 #include <boost/shared_ptr.hpp>
 
 namespace blue_sky
   {
 
-  template <typename strategy_t>
   class calc_model;
-
-  template <typename strategy_t>
   class reservoir_simulator;
-
-  template <typename strategy_t>
   class facility_manager;
-
-  template <typename strategy_t>
   class well;
-
-  template <typename strategy_t>
   class well_factory;
-
   class data_storage_interface;
-
   class fi_params;
 
   namespace wells
-    {
-    template <typename strategy_t>
+  {
     class well_controller;
-
-    template <typename strategy_t>
     class well_rate_control;
-
-    template <typename strategy_t>
     class connection;
-
-    template <typename strategy_t>
     class well_controller_factory;
-
     class well_limit_operation_factory;
-
     class well_limit_operation;
   }
 
-  template <typename strategy_t>
   struct data_saver;
 
   /**
@@ -70,37 +46,35 @@ namespace blue_sky
    * \brief storage for and manager of facilities. also
    *        stores reservoir rates.
    * */
-  template <typename strategy_t>
   class BS_API_PLUGIN reservoir : public objbase
     {
     public:
 
-      typedef typename strategy_t::item_t                     item_t;                             //!< item value (floating point)
-      typedef typename strategy_t::index_t                    index_t;                            //!< index value (integral type)
-      typedef typename strategy_t::item_array_t               item_array_t;                       //!< type for array of item_t values
-      typedef typename strategy_t::rhs_item_array_t           rhs_item_array_t;                   //!< type for array of rhs_item_t values
-      typedef typename strategy_t::index_array_t              index_array_t;                      //!< type for array of index_t values
+      typedef t_double                                        item_t;                             //!< item value (floating point)
+      typedef t_long                                          index_t;                            //!< index value (integral type)
+      typedef spv_double                                      item_array_t;                       //!< type for array of item_t values
+      typedef spv_float                                       rhs_item_array_t;                   //!< type for array of rhs_item_t values
+      typedef spv_long                                        index_array_t;                      //!< type for array of index_t values
 
-      typedef facility_base <strategy_t>                      facility_t;                         //!< base type for facilities
-      typedef well <strategy_t>                               well_t;                             //!< base type for wells
-      typedef wells::well_controller <strategy_t>             well_controller_t;                  //!< well_controller type
+      typedef facility_base                                   facility_t;                         //!< base type for facilities
+      typedef well                                            well_t;                             //!< base type for wells
+      typedef wells::well_controller                          well_controller_t;                  //!< well_controller type
       typedef wells::well_limit_operation                     well_limit_operation_t;             //!< well_llimit_operation type
-      typedef wells::well_rate_control <strategy_t>           well_rate_control_t;                //!< well_rate_control type
-      typedef wells::connection <strategy_t>                  connection_t;                       //!< base type for well connections (perforations)
-      typedef facility_manager <strategy_t>                   facility_manager_t;                 //!< facility_manager type
-      typedef wells::well_controller_factory <strategy_t>     controller_factory_t;               //!< type for well_controller factory
+      typedef wells::well_rate_control                        well_rate_control_t;                //!< well_rate_control type
+      typedef wells::connection                               connection_t;                       //!< base type for well connections (perforations)
+      typedef facility_manager                                facility_manager_t;                 //!< facility_manager type
+      typedef wells::well_controller_factory                  controller_factory_t;               //!< type for well_controller factory
       typedef wells::well_limit_operation_factory             limit_operation_factory_t;          //!< type for well_limit_operation factory
-      typedef well_factory <strategy_t>                       well_factory_t;                     //!< type for well factory
-      typedef calc_model <strategy_t>                         calc_model_t;                       //!< calc_model type
-      typedef rs_mesh_iface <strategy_t>                      mesh_iface_t;                       //!< rs_mesh_iface type
-      typedef jacobian <strategy_t>                           jacobian_t;                         //!< jacobian type
-      typedef jacobian_matrix <strategy_t>                    jacobian_matrix_t;                  //!< jacobian_matrix type
+      typedef well_factory                                    well_factory_t;                     //!< type for well factory
+      typedef calc_model                                      calc_model_t;                       //!< calc_model type
+      typedef rs_mesh_iface                                   mesh_iface_t;                       //!< rs_mesh_iface type
+      typedef jacobian                                        jacobian_t;                         //!< jacobian type
 
-      typedef reservoir_simulator <strategy_t>                reservoir_simulator_t;              //!< reservoir_simulator type
-      typedef rate_data <strategy_t>                          rate_data_t;                        //!< type for rate data holder
-      typedef typename rate_data_t::rate_data_inner           rate_data_inner_t;                  //!< type for internal data of rate data holder
+      typedef reservoir_simulator                             reservoir_simulator_t;              //!< reservoir_simulator type
+      typedef rate_data                                       rate_data_t;                        //!< type for rate data holder
+      typedef rate_data_t::rate_data_inner                    rate_data_inner_t;                  //!< type for internal data of rate data holder
 
-      typedef data_saver <strategy_t>                         data_saver_t;
+      typedef data_saver                                      data_saver_t;
 
       typedef smart_ptr <reservoir_simulator_t, true>         sp_top_t;                           //!< smart_ptr to reservoir_simulator type
 
@@ -112,8 +86,6 @@ namespace blue_sky
       typedef smart_ptr <mesh_iface_t, true>                  sp_mesh_iface_t;                    //!< smart_ptr to rs_mesh_iface type
       typedef smart_ptr <calc_model_t, true>                  sp_calc_model_t;                    //!< smart_ptr to calc_model type
       typedef smart_ptr <jacobian_t, true>                    sp_jacobian_t;                      //!< smart_ptr to jacobian type
-      typedef smart_ptr <jacobian_matrix_t, true>             sp_jacobian_matrix_t;               //!< smart_ptr to jacobian_matrix type
-      typedef smart_ptr <jacobian_matrix_t, true>             sp_jmatrix_t;                       //!< smart_ptr to jacobian_matrix type
 
       typedef smart_ptr <facility_manager_t, true>            sp_facility_manager_t;              //!< smart_ptr to facility_manager type
       typedef smart_ptr <data_storage_interface, true>        sp_storage_t;                       //!< smart_ptr to data_storage_interface type
@@ -125,14 +97,10 @@ namespace blue_sky
       typedef smart_ptr <fi_params, true>                     sp_params_t;                        //!< smart_ptr to fi_params type
       typedef smart_ptr <event_filter, true>                  sp_event_filter_t;                  //!< smart_ptr to event_filter type
 
-#ifdef _HDF5
-      typedef smart_ptr <bs_hdf5_storage, true>               sp_bs_hdf5_storage;                 //!< smart_ptr to hdf5_storage type
-#endif
-
     public:
 
       //! blue-sky type declaration
-      BLUE_SKY_TYPE_DECL_T (reservoir <strategy_t>);
+      BLUE_SKY_TYPE_DECL (reservoir);
 
       /**
        * \brief  reservoir dtor
@@ -159,13 +127,11 @@ namespace blue_sky
       get_well (const std::string &well_name) const;
 
       /**
-       * \brief  creates well with name well_name in group group_name
-       * \param  group_name name of well group
-       * \param  well_name name of well
-       * \return well instance if created successfully otherwise null pointer
+       * \brief  add well to list
+       * \param  well well
        * */
-      sp_well_t                 
-      create_well (const std::string &group_name, const std::string &well_name);
+      void                 
+      add_well (BS_SP (well) well);
 
       /**
        * \brief  creates well_controller for given well
@@ -248,7 +214,7 @@ namespace blue_sky
        * \param  n_cells number of cells in mesh
        * */
       void                      
-      init_jacobian (const sp_jmatrix_t &jmx, index_t n_cells);
+      init_jacobian (const BS_SP (jacobian) &jacobian, index_t n_cells);
 
       /**
        * \brief  ends building of jacobian
@@ -258,7 +224,7 @@ namespace blue_sky
        * \return 
        * */
       void                      
-      end_jacobian (item_t dt, const sp_calc_model_t &calc_model, sp_jacobian_t &jacobian);
+      end_jacobian (BS_SP (jacobian) &jacobian, t_double dt, t_long block_size, t_long cells);
 
       /**
        * \brief  for each facility calls restore_solution
@@ -268,7 +234,7 @@ namespace blue_sky
        * \param  block_size size of one block in vectors
        * */
       void                      
-      restore_wells_solution (double dt, const item_array_t &p_sol, const item_array_t &s_sol, index_t block_size);
+      restore_wells_solution (double dt, const spv_double &p_sol, const spv_double &s_sol, index_t block_size);
 
       /**
        * \brief  for each facility calls process
@@ -280,7 +246,11 @@ namespace blue_sky
        * \return 
        * */
       void                      
-      calc_wells (int istart, double dt, const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, sp_jmatrix_t &jmatrix);
+      calc_wells (int istart, 
+        double dt, 
+        const BS_SP (calc_model) &calc_model, 
+        const BS_SP (rs_mesh_iface) &mesh, 
+        BS_SP (jacobian) &jacobian);
 
       /**
        * \brief  for each facility calls fill_rhs
@@ -355,38 +325,6 @@ namespace blue_sky
       void                      
       set_well_limit_operation_factory (const sp_well_limit_operation_factory_t &factory);
 
-#ifdef _HDF5
-      /**
-       * \todo describe
-       * */
-      void                      
-      open_hdf5_file (const std::string &filename) const;
-
-      /**
-       * \todo describe
-       * */
-      void                      
-      close_hdf5_file () const;
-
-      /**
-       * \todo describe
-       * */
-      void                      
-      write_step_to_hdf5 (const sp_calc_model_t &calc_model, const sp_mesh_iface_t &mesh, const sp_jmatrix_t &jmx, int, int, item_t time) const;
-
-      /**
-       * \todo describe
-       * */
-      void                      
-      write_mesh_to_hdf5 (const smart_ptr <rs_mesh_iface<strategy_t>, true> &mesh) const;
-
-      /**
-       * \todo describe
-       * */
-      const smart_ptr<bs_hdf5_storage, true> 
-      get_hdf5_file () const {return hdf5;}
-#endif
-
       /**
        * \brief  Writes data of current time-step to storage (HDF5 for example)
        * \param  calc_model
@@ -399,7 +337,7 @@ namespace blue_sky
       void
       write_step_to_storage (const sp_calc_model_t &calc_model, 
         const sp_mesh_iface_t &mesh, 
-        const sp_jmatrix_t &jmx, 
+        const BS_SP (jacobian) &jacobian, 
         size_t large_time_step_num, 
         size_t total_time_step_num, 
         double time);
@@ -461,11 +399,7 @@ namespace blue_sky
 
       sp_event_filter_t                   event_filter_;                      //!< events filter
 
-      index_array_t                       markers_;                           //!< markers, used to build jacobian
-
-#ifdef _HDF5
-      sp_bs_hdf5_storage                  hdf5;                               //!< pointer to hdf5_storage instance
-#endif
+      stdv_long                           markers_;                           //!< markers, used to build jacobian
 
       boost::shared_ptr <data_saver_t>    data_saver_;
     };

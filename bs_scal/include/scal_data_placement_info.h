@@ -20,8 +20,8 @@ namespace blue_sky
         separate_vectors,
         spkrp_sokrop_pcp,
         spof,
-        spfn_sof3,
-        sof3_spfn,
+        spfn_sofX,
+        sofX_spfn,
       };
 
       struct scal_placement_info
@@ -33,11 +33,11 @@ namespace blue_sky
           byte  krp_step;
           byte  krop_step;
           byte  pcp_step;
-          int   sp_offset;                                ///< offset of Sp from begin of memory region
-          int   so_offset;                                ///< offset of So from begin of memory region
-          int   krp_offset;                               ///< offset of Krp from begin of memory region
-          int   krop_offset;                              ///< offset of Krop from begin of memory region
-          int   pcp_offset;                               ///< offset of Pcp from begin of memory region
+          t_int   sp_offset;                                ///< offset of Sp from begin of memory region
+          t_int   so_offset;                                ///< offset of So from begin of memory region
+          t_int   krp_offset;                               ///< offset of Krp from begin of memory region
+          t_int   krop_offset;                              ///< offset of Krop from begin of memory region
+          t_int   pcp_offset;                               ///< offset of Pcp from begin of memory region
           scal_data_placement_type  type;
 
           scal_placement_info ()
@@ -68,13 +68,13 @@ namespace blue_sky
           byte sl_step;
           byte pcp_step;
 
-          int socr_offset;
-          int scr_offset;
-          int su_offset;
-          int sl_offset;
-          int pcp_offset;
+          t_int socr_offset;
+          t_int scr_offset;
+          t_int su_offset;
+          t_int sl_offset;
+          t_int pcp_offset;
 
-          int size;
+          t_int size;
 
           scale_array_placement_info ()
           {

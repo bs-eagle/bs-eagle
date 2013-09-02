@@ -22,7 +22,7 @@ namespace python {
   {
     using namespace boost::python;
 
-    class_ <data_dimens> ("dimens", init <long long, long long, long long> ())
+    class_ <data_dimens> ("dimens", init < t_long, t_long, t_long > ())
       .add_property ("nx", &data_dimens::nx)
       .add_property ("ny", &data_dimens::ny)
       .add_property ("nz", &data_dimens::nz)

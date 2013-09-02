@@ -7,7 +7,7 @@
 #include "bs_bos_core_data_storage_stdafx.h"
 
 #include "convert_units.h"
-#include "localization.h"
+//#include "localization.h"
 
 namespace blue_sky
   {
@@ -111,15 +111,15 @@ namespace blue_sky
     switch (units)
       {
       case UNITS_SI:
-        return GET_TEXT ("sm3");
+        return  ("sm3");
       case UNITS_METRIC:
-        return GET_TEXT ("sm3");
+        return  ("sm3");
       case UNITS_FIELD:
-        return GET_TEXT ("stb");
+        return  ("stb");
       case UNITS_LAB:
-        return GET_TEXT ("scc");
+        return  ("scc");
       case UNITS_INTERNAL:
-        return GET_TEXT ("scf");
+        return  ("scf");
       default:
         return 0;
       }
@@ -136,15 +136,15 @@ namespace blue_sky
     switch (units)
       {
       case UNITS_SI:
-        return GET_TEXT ("rm3");
+        return  ("rm3");
       case UNITS_METRIC:
-        return GET_TEXT ("rm3");
+        return  ("rm3");
       case UNITS_FIELD:
-        return GET_TEXT ("rtb");
+        return  ("rtb");
       case UNITS_LAB:
-        return GET_TEXT ("rcc");
+        return  ("rcc");
       case UNITS_INTERNAL:
-        return GET_TEXT ("rcf");
+        return  ("rcf");
       default:
         return 0;
       }
@@ -161,15 +161,15 @@ namespace blue_sky
     switch (units)
       {
       case UNITS_SI:
-        return GET_TEXT ("sm3");
+        return  ("sm3");
       case UNITS_METRIC:
-        return GET_TEXT ("sm3");
+        return  ("sm3");
       case UNITS_FIELD:
-        return GET_TEXT ("Mscf");
+        return  ("Mscf");
       case UNITS_LAB:
-        return GET_TEXT ("scc");
+        return  ("scc");
       case UNITS_INTERNAL:
-        return GET_TEXT ("scf");
+        return  ("scf");
       default:
         return 0;
       }
@@ -240,15 +240,15 @@ namespace blue_sky
     switch (units)
       {
       case UNITS_SI:
-        return GET_TEXT ("pa");
+        return  ("pa");
       case UNITS_METRIC:
-        return GET_TEXT ("atm");
+        return  ("atm");
       case UNITS_FIELD:
-        return GET_TEXT ("psi");
+        return  ("psi");
       case UNITS_LAB:
-        return GET_TEXT ("psi");
+        return  ("psi");
       case UNITS_INTERNAL:
-        return GET_TEXT ("psi");
+        return  ("psi");
       default:
         return 0;
       }
@@ -286,15 +286,15 @@ namespace blue_sky
     switch (units)
       {
       case UNITS_SI:
-        return GET_TEXT ("sm3/sm3");
+        return  ("sm3/sm3");
       case UNITS_METRIC:
-        return GET_TEXT ("sm3/sm3");
+        return  ("sm3/sm3");
       case UNITS_FIELD:
-        return GET_TEXT ("Mscf/stb");
+        return  ("Mscf/stb");
       case UNITS_LAB:
-        return GET_TEXT ("scc/scc");
+        return  ("scc/scc");
       case UNITS_INTERNAL:
-        return GET_TEXT ("scf/stb");
+        return  ("scf/stb");
       default:
         return 0;
       }
@@ -311,15 +311,15 @@ namespace blue_sky
     switch (units)
       {
       case UNITS_SI:
-        return GET_TEXT ("sm3/sm3");
+        return  ("sm3/sm3");
       case UNITS_METRIC:
-        return GET_TEXT ("sm3/sm3");
+        return  ("sm3/sm3");
       case UNITS_FIELD:
-        return GET_TEXT ("stb/Mscf");
+        return  ("stb/Mscf");
       case UNITS_LAB:
-        return GET_TEXT ("scc/scc");
+        return  ("scc/scc");
       case UNITS_INTERNAL:
-        return GET_TEXT ("stb/scf");
+        return  ("stb/scf");
       default:
         return 0;
       }
@@ -357,15 +357,15 @@ namespace blue_sky
     switch (units)
       {
       case UNITS_SI:
-        return GET_TEXT ("sm3/day");
+        return  ("sm3/day");
       case UNITS_METRIC:
-        return GET_TEXT ("sm3/day");
+        return  ("sm3/day");
       case UNITS_FIELD:
-        return GET_TEXT ("Mscf/day");
+        return  ("Mscf/day");
       case UNITS_LAB:
-        return GET_TEXT ("scc/hr");
+        return  ("scc/hr");
       case UNITS_INTERNAL:
-        return GET_TEXT ("scf/day");
+        return  ("scf/day");
       default:
         return 0;
       }
@@ -423,15 +423,15 @@ namespace blue_sky
     switch (units)
       {
       case UNITS_SI:
-        return GET_TEXT ("sm3/day");
+        return  ("sm3/day");
       case UNITS_METRIC:
-        return GET_TEXT ("sm3/day");
+        return  ("sm3/day");
       case UNITS_FIELD:
-        return GET_TEXT ("stb/day");
+        return  ("stb/day");
       case UNITS_LAB:
-        return GET_TEXT ("scc/hr");
+        return  ("scc/hr");
       case UNITS_INTERNAL:
-        return GET_TEXT ("scf/day");
+        return  ("scf/day");
       default:
         return 0;
       }
@@ -448,15 +448,15 @@ namespace blue_sky
     switch (units)
       {
       case UNITS_SI:
-        return GET_TEXT ("rm3/day");
+        return  ("rm3/day");
       case UNITS_METRIC:
-        return GET_TEXT ("rm3/day");
+        return  ("rm3/day");
       case UNITS_FIELD:
-        return GET_TEXT ("rtb/day");
+        return  ("rtb/day");
       case UNITS_LAB:
-        return GET_TEXT ("rcc/hr");
+        return  ("rcc/hr");
       case UNITS_INTERNAL:
-        return GET_TEXT ("rcf/day");
+        return  ("rcf/day");
       default:
         return 0;
       }
@@ -473,15 +473,15 @@ namespace blue_sky
     switch (units)
       {
       case UNITS_SI:
-        return GET_TEXT ("kg/m3");
+        return  ("kg/m3");
       case UNITS_METRIC:
-        return GET_TEXT ("kg/m3");
+        return  ("kg/m3");
       case UNITS_FIELD:
-        return GET_TEXT ("lbl/ft3");
+        return  ("lbl/ft3");
       case UNITS_LAB:
-        return GET_TEXT ("kg/m3");
+        return  ("kg/m3");
       case UNITS_INTERNAL:
-        return GET_TEXT ("rcf/day");
+        return  ("rcf/day");
       default:
         return 0;
       }

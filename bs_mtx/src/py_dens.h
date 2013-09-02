@@ -40,9 +40,9 @@ namespace blue_sky
     typedef matrix_iface <fp_vector_type, i_vector_type>        matrix_t;               
     typedef dens_matrix_iface <fp_vector_type, i_vector_type, fp_storage_vector_type>    dens_matrix_t;         
                                                                                         
-    typedef typename fp_vector_type::value_type                 fp_type_t;              
-    typedef typename fp_storage_vector_type::value_type         fp_storage_type_t;      
-    typedef typename i_vector_type::value_type                  i_type_t;               
+    typedef typename fp_vector_type::value_type                 t_double;              
+    typedef typename fp_storage_vector_type::value_type         t_float;      
+    typedef typename i_vector_type::value_type                  t_long;               
                                                                                         
                                                                                         
     //typedef dens_matrix_iface <fp_vector_type, i_vector_type, fp_storage_vector_type>         wrapped_t;              
@@ -54,23 +54,23 @@ namespace blue_sky
   public:
     WRAP_PURE_METHOD_R_CONST (matrix_vector_product, int, 2, (const fp_vector_type&, fp_vector_type&)); 
     WRAP_PURE_METHOD_R_CONST (matrix_vector_product_t, int, 2, (const fp_vector_type&, fp_vector_type&)); 
-    WRAP_PURE_METHOD_R_CONST (calc_lin_comb, int, 5, (fp_type_t, fp_type_t, const fp_vector_type&, const fp_vector_type&, fp_vector_type&)); 
-    WRAP_PURE_METHOD_R_CONST (get_allocated_memory_in_mbytes, fp_type_t, 0, (empty_arg__));       
+    WRAP_PURE_METHOD_R_CONST (calc_lin_comb, int, 5, (t_double, t_double, const fp_vector_type&, const fp_vector_type&, fp_vector_type&)); 
+    WRAP_PURE_METHOD_R_CONST (get_allocated_memory_in_mbytes, t_double, 0, (empty_arg__));       
                                                                                         
-    WRAP_PURE_METHOD_R_CONST (get_n_block_size, i_type_t, 0, (empty_arg__));            
+    WRAP_PURE_METHOD_R_CONST (get_n_block_size, t_long, 0, (empty_arg__));            
                                                                                         
-    WRAP_PURE_METHOD_R_CONST (get_n_rows, i_type_t, 0, (empty_arg__));                  
+    WRAP_PURE_METHOD_R_CONST (get_n_rows, t_long, 0, (empty_arg__));                  
                                                                                         
-    WRAP_PURE_METHOD_R_CONST (get_n_cols, i_type_t, 0, (empty_arg__));                  
+    WRAP_PURE_METHOD_R_CONST (get_n_cols, t_long, 0, (empty_arg__));                  
                                                                                         
     WRAP_PURE_METHOD_R_CONST (is_square, bool, 0, (empty_arg__));                       
     WRAP_PURE_METHOD_CONST   (init_vector, void, 1, (fp_vector_type &));                       
     WRAP_PURE_METHOD_R_CONST (py_str, std::string, 0, (empty_arg__));                   
     WRAP_PURE_METHOD_R       (init_by_matrix, int, 1, (const dens_matrix_t&));          
-    WRAP_PURE_METHOD_R       (init, int, 3, (const i_type_t, const i_type_t, const i_type_t));          
+    WRAP_PURE_METHOD_R       (init, int, 3, (const t_long, const t_long, const t_long));          
     WRAP_PURE_METHOD_R       (copy, int, 1, (const dens_matrix_t&));                    
-    WRAP_PURE_METHOD_R_CONST (get_calc_block_size, i_type_t, 0, (empty_arg__));             
-    WRAP_PURE_METHOD         (set_calc_block_size, void, 1, (const i_type_t));             
+    WRAP_PURE_METHOD_R_CONST (get_calc_block_size, t_long, 0, (empty_arg__));             
+    WRAP_PURE_METHOD         (set_calc_block_size, void, 1, (const t_long));             
     WRAP_PURE_METHOD_R       (get_values, fp_storage_vector_type&, 0, (empty_arg__));   
     WRAP_PURE_METHOD_R_CONST (get_values_const, const fp_storage_vector_type&, 0, (empty_arg__));          
     WRAP_PURE_METHOD_R_CONST (internal_check, int, 0, (empty_arg__));                   

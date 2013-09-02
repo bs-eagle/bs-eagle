@@ -74,8 +74,7 @@ namespace blue_sky
     BS_ASSERT (serializer_list_);
 
 #ifdef _DEBUG
-    register_serializer (BS_KERNEL.create_object (wells::well_serializer <base_strategy_fi>::bs_type ()));
-    register_serializer (BS_KERNEL.create_object (wells::well_serializer <base_strategy_di>::bs_type ()));
+    register_serializer (BS_KERNEL.create_object (wells::well_serializer::bs_type ()));
 #endif
   }
   data_storage_interface::data_storage_interface (const data_storage_interface& dsi)
@@ -90,7 +89,7 @@ namespace blue_sky
   void
   data_storage_interface::save (const sp_obj &obj) const
     {
-      BS_ASSERT (storage_);
+      // FIXME: Implement storage_
       if (!storage_)
         return ;
 

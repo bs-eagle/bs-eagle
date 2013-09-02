@@ -7,18 +7,21 @@ tar_name = "bs_pvt"
 env = custom_env.Clone ()
 env.AppendUnique (CPPPATH = ["include",
     includes["bs_bos_core_base"],
-    includes["bs_matrix"],
-    includes["bs_scal"]
+    includes["common_types"],
+    includes["common_alg"],
+    includes["bs_bos_core_data_storage"],
+    includes["bs_scal"],
     ] + includes["kernel"],
     CCFLAGS = ["-DBOOST_PYTHON_MAX_ARITY=25"])
 
-libs = ["blue_sky", "bs_bos_core_base", "bs_matrix"]
+libs = ["blue_sky", "bs_bos_core_base", "bs_bos_core_data_storage"]
+boost_libs = list_suffix(["boost_serialization"], env["boost_suffix"]);
 
 if (build_kind == "debug") :
-    env.AppendUnique (LIBS = list_suffix (libs, "_d"))
+    env.AppendUnique (LIBS = [list_suffix (libs, "_d"), list_suffix(boost_libs, "-d")])
     lib_name += "_d"
 elif (build_kind == "release") :
-    env.AppendUnique (LIBS = libs)
+    env.AppendUnique (LIBS = [libs, boost_libs])
 
 bs_pvt = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
 

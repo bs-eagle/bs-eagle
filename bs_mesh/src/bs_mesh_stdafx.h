@@ -3,6 +3,7 @@
  * \brief precompiled header
  * \author Sergey Miryanov
  * */
+#ifndef PURE_MESH
 #ifndef BS_MESH_PRECOMPILED_HEADERS_H_
 #define BS_MESH_PRECOMPILED_HEADERS_H_
 
@@ -91,16 +92,12 @@
 #include "strategies.h"
 
 #include "auto_value.h"
-#include "save_seq_vector.h"
 #include "bcsr_matrix_iface.h"
 
-#include "read_class.h"
-#include "data_class.h"
 #include "arrays.h"
 #include "keyword_manager_iface.h"
 #include "py_data_class.h"
-//#include "py_bcsr_matrix.h"
-//#include "py_jacobian_matrix.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #endif // #ifndef BS_MESH_PRECOMPILED_HEADERS_H_
+#endif

@@ -15,18 +15,29 @@ namespace blue_sky
   /**
    * \brief
    */
-  template <typename strategy_t>
-  class pvt_dead_oil : public pvt_base <strategy_t>
+  class BS_API_PLUGIN pvt_dead_oil : public pvt_base 
     {
     public:
 
-      typedef strategy_t                        pvt_strategy_t;
-      typedef pvt_base <strategy_t>             base_t;
-      typedef typename base_t::item_t           item_t;
-      typedef typename strategy_t::index_t      index_t;
-      typedef typename base_t::input_vector_t   input_vector_t;
-      typedef typename base_t::vector_t         vector_t;
-
+      typedef pvt_base                          base_t;
+      typedef base_t::vector_t                  vector_t;
+      
+      enum {
+         PVT_OIL_INPUT_GPR = 0,
+         PVT_OIL_INPUT_PRESSURE,
+         PVT_OIL_INPUT_FVF,
+         PVT_OIL_INPUT_VISC,
+         PVT_OIL_INPUT_TOTAL
+       };  
+           
+      enum {
+         PVT_OIL_PRESSURE = 0,
+         PVT_OIL_INV_FVF,
+         PVT_OIL_INV_VISC,
+         PVT_OIL_INV_VISC_FVF,
+         PVT_OIL_GOR,
+         PVT_OIL_TOTAL
+      };
       /**
        * \brief parse line of chars and store values into data
        *
@@ -40,7 +51,7 @@ namespace blue_sky
        *
        * \param seq_vector
        */
-      virtual void insert_vector (const input_vector_t &vec);
+      virtual void insert_vector (const v_double &vec);
 
       /**
        * \brief generate interpolated data
@@ -50,7 +61,7 @@ namespace blue_sky
        * \param max_p maximal value of pressure
        * \param n_intervals number of intervals
        */
-      virtual void build (item_t atm_p, item_t min_p, item_t max_p, int n_intervals);
+      virtual void build (t_double atm_p, t_double min_p, t_double max_p, t_long n_intervals);
 
       /**
        * \brief calculate interpolated value
@@ -60,29 +71,29 @@ namespace blue_sky
        * \param gor
        */
       virtual bool 
-      calc (const bool is_g, const int main_var, const item_t p, const item_t gor,
-            item_t *inv_fvf, item_t *d_inv_fvf, item_t *gor_d_inv_fvf,
-            item_t *inv_visc, item_t *d_inv_visc, item_t *gor_d_inv_visc,
-            item_t *inv_visc_fvf, item_t *d_inv_visc_fvf, item_t *gor_d_inv_visc_fvf,
-            item_t *gas_oil_ratio, item_t *d_gas_oil_ratio,
-            const item_t drsdt = -1.0, const item_t dt = 0,
-            const item_t old_gas_oil_ratio = 0) const;
+      calc (const bool is_g, const int main_var, const t_double p, const t_double gor,
+            t_float *inv_fvf, t_float *d_inv_fvf, t_float *gor_d_inv_fvf,
+            t_float *inv_visc, t_float *d_inv_visc, t_float *gor_d_inv_visc,
+            t_float *inv_visc_fvf, t_float *d_inv_visc_fvf, t_float *gor_d_inv_visc_fvf,
+            t_float *gas_oil_ratio, t_float *d_gas_oil_ratio,
+            const t_double drsdt = -1.0, const t_double dt = 0,
+            const t_double old_gas_oil_ratio = 0) const;
 
       virtual
-      item_t get_gor_for_pressure (item_t pressure_data) const;
+      t_double get_gor_for_pressure (t_double pressure_data) const;
 
       virtual
-      item_t interpolate_and_fix (item_t cell_pbub) const;
+      t_double interpolate_and_fix (t_double cell_pbub) const;
 
       const vector_t &
-      get_pressure () const
+      get_pressure () const 
       {
-        return pressure_;
+        return pvt_props_table->get_col_vector (PVT_OIL_PRESSURE);
       }
       const vector_t &
-      get_gor () const
+      get_gor () const 
       {
-        return gor_;
+        return pvt_props_table->get_col_vector (PVT_OIL_GOR);
       }
 
       virtual void
@@ -105,33 +116,33 @@ namespace blue_sky
        * \param n_intervals number of intervals
        * \param is_pvto is called for pvt_oil object or for pvt_dead_oil
        */
-      int build_internal (item_t atm_p, item_t min_p, item_t max_p, int n_intervals, bool is_pvto);
+      int build_internal (t_double atm_p, t_double min_p, t_double max_p, t_long n_intervals, bool is_pvto);
 
       /**
        * \brief calc saturated oil
        */
       bool
-      calc_saturated_oil (const bool is_g, const int main_var, const item_t p, const item_t gor,
-                          item_t *inv_fvf, item_t *d_inv_fvf, item_t *gor_d_inv_fvf,
-                          item_t *inv_visc, item_t *d_inv_visc, item_t *gor_d_inv_visc,
-                          item_t *inv_visc_fvf, item_t *d_inv_visc_fvf, item_t *gor_d_inv_visc_fvf,
-                          item_t *gas_oil_ratio, item_t *d_gas_oil_ratio,
-                          const item_t drsdt = -1.0, const item_t dt = 0,
-                          const item_t old_gas_oil_ratio = 0) const;
+      calc_saturated_oil (const bool is_g, const int main_var, const t_double p, const t_double gor,
+                          t_float *inv_fvf, t_float *d_inv_fvf, t_float *gor_d_inv_fvf,
+                          t_float *inv_visc, t_float *d_inv_visc, t_float *gor_d_inv_visc,
+                          t_float *inv_visc_fvf, t_float *d_inv_visc_fvf, t_float *gor_d_inv_visc_fvf,
+                          t_float *gas_oil_ratio, t_float *d_gas_oil_ratio,
+                          const t_double drsdt = -1.0, const t_double dt = 0,
+                          const t_double old_gas_oil_ratio = 0) const;
 
     protected:
 
 
-      vector_t  main_gpr_;
-      vector_t  main_pressure_;
-      vector_t  main_fvf_;
-      vector_t  main_visc_;
+//      vector_t  main_gpr_;
+//      vector_t  main_pressure_;
+//      vector_t  main_fvf_;
+//      vector_t  main_visc_;
 
-      vector_t  pressure_;
-      vector_t  inv_fvf_;
-      vector_t  inv_visc_;
-      vector_t  inv_visc_fvf_;
-      vector_t  gor_;
+//      vector_t  pressure_;
+//      vector_t  inv_fvf_;
+//      vector_t  inv_visc_;
+//      vector_t  inv_visc_fvf_;
+//      vector_t  gor_;
 
     public:
 

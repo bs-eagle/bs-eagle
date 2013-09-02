@@ -8,6 +8,7 @@
 #define BS_JFUNCTION_H_
 
 #include "plane_orientation.h"
+#include "bs_serialize_decl.h"
 
 namespace blue_sky
   {
@@ -20,7 +21,6 @@ namespace blue_sky
     JFUNC_PERM_Z,
   };
 
-  template <typename strategy_t>
   class BS_API_PLUGIN jfunction : public objbase
     {
     public:
@@ -31,8 +31,8 @@ namespace blue_sky
       //  init (perm_type);
       //}
 
-      typedef typename strategy_t::item_t item_t;
-      typedef jfunction <strategy_t>      this_t;
+      typedef t_float                     item_t;
+      typedef jfunction                   this_t;
 
       void init (JFUNC_PERM_TYPE_ENUM perm_type_)
       {
@@ -65,13 +65,21 @@ namespace blue_sky
         is_valid = b;
       }
 
+	  void
+	  init_ab (item_t _st_phase, item_t _alpha, item_t _beta)
+	  {
+		  st_phase = _st_phase;
+		  alpha = _alpha;
+		  beta = _beta;
+	  }
+
       item_t get_perm (const item_t *perm_array) const
         {
           BS_ASSERT (is_valid);
           return (perm_array[plane_a] + perm_array[plane_b]) * 0.5;
         }
 
-      BLUE_SKY_TYPE_DECL_T (jfunction);
+      BLUE_SKY_TYPE_DECL (jfunction);
 
 public:
 
@@ -87,6 +95,7 @@ private:
 
       JFUNC_PERM_TYPE_ENUM  perm_type;
 
+      friend class blue_sky::bs_serialize;
     };
 
 

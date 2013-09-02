@@ -16,9 +16,9 @@ namespace blue_sky {
    * \param  base_norm Norm storage
    * \return Calculated multiplier
    * */
-  template <typename strategy_t, bool is_w, bool is_g, bool is_o>
-  BS_FORCE_INLINE typename strategy_t::item_t
-  fi_operator_impl <strategy_t, is_w, is_g, is_o>::calc_solution_mult_cell (const norms_storage_t &old_norm)
+  template <bool is_w, bool is_g, bool is_o>
+  BS_FORCE_INLINE typename fi_operator_impl <is_w, is_g, is_o>::item_t
+  fi_operator_impl <is_w, is_g, is_o>::calc_solution_mult_cell (const norms_storage_t &old_norm)
   {
     item_t d = 0.0;
     item_t mult = 0.0;

@@ -10,6 +10,7 @@
 
 #include "py_scal_wrapper.h"
 #include "scal_save_data.h"
+#include "bs_serialize.h"
 
 #include "export_python_wrapper.h"
 
@@ -30,6 +31,8 @@ namespace blue_sky
       .add_property ("alpha",     &T::alpha)
       .add_property ("beta",      &T::beta)
       .add_property ("valid",     &T::valid)
+	  .def ("init", &T::init)
+	  .def ("init_ab", &T::init_ab)
     PY_EXPORTER_END;
 
     PY_EXPORTER (scal_3p_exporter, default_exporter)
@@ -39,6 +42,16 @@ namespace blue_sky
       .add_property ("gas_data",         &T::get_gas_data)
       .add_property ("water_jfunction",  &T::get_water_jfunction, &T::set_water_jfunction)
       .add_property ("gas_jfunction",    &T::get_gas_jfunction, &T::set_gas_jfunction)
+    .def ("init_tables", &T:: init_scal_input_table_arrays)
+	  .def ("init_scal_calc_data", &T::init_scal_calc_data)
+	  .def ("get_tables_list", &T::get_tables_list)
+	  .def ("get_n_scal_regions", &T::get_n_scal_regions)
+	  .def ("get_table", &T::get_table)
+	  .def ("get_tables_fluid_all_regions", &T::get_tables_fluid_all_regions)
+    PY_EXPORTER_END;
+    
+    PY_EXPORTER (scal_dummy_exporter, default_exporter)
+      .def ("get_table", &T::py_get_table)
     PY_EXPORTER_END;
 
     void py_export_scal ()
@@ -64,10 +77,16 @@ namespace blue_sky
         .value ("z", JFUNC_PERM_Z)
         ;
 
-      strategy_exporter::export_base <jfunction, jfunction_exporter> ("jfunction");
-      strategy_exporter::export_base <scale_array_holder, scale_array_holder_exporter> ("scale_arrays");
-      strategy_exporter::export_base <scal_2p_data_holder, scal_data_holder_exporter> ("scal_data");
-      strategy_exporter::export_base <scal_3p, scal_3p_exporter> ("scal_3p");
+ 
+      base_exporter<jfunction, jfunction_exporter>::export_class ("jfunction");
+      base_exporter<scale_array_holder, scale_array_holder_exporter>::export_class ("scale_arrays");
+      base_exporter<scal_2p_data_holder, scal_data_holder_exporter>::export_class ("scal_data");
+      base_exporter<scal_3p_iface, default_exporter>::export_class ("scal_3p_iface");
+      class_exporter<scal_3p, scal_3p_iface, scal_3p_exporter>::export_class ("scal_3p");
+
+      // register pvt to/from str serialization
+      def("serialize_to_str", &blue_sky::serialize_to_str< scal_3p_iface >);
+      def("serialize_from_str", &blue_sky::serialize_from_str< scal_3p_iface >);
     }
   }
 }

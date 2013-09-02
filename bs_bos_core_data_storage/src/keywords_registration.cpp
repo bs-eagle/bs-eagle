@@ -20,7 +20,7 @@ namespace blue_sky
     register_keywyfgord(#KWRD, keyword_handler (&this_t::HNDL));
 
 #define REG_KEYWORD(KWRD) \
-    register_keyword(#KWRD, keyword_handler (&this_t::KWRD##_handler));
+    register_keyword(#KWRD, keyword_handler (&this_t::KWRD##_handler, 0));
 
 #define REG_ARRAY_KEYWORD(KWRD,T) \
     register_keyword(#KWRD, keyword_handler (&this_t::T##_array_handler, KWRD));
@@ -33,8 +33,8 @@ namespace blue_sky
 
 
 
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::register_keywords()//const sp_event_manager_t &em)
+  
+  void keyword_manager::register_keywords()//const sp_event_manager_t &em)
   {
     //Keywords
     REG_KEYWORD(TITLE);
@@ -50,30 +50,22 @@ namespace blue_sky
     REG_KEYWORD(STONE1);
     REG_KEYWORD(STONE2);
     REG_KEYWORD(RELATIVE_PERM_DEFAULT);
+    REG_KEYWORD(SCALECRS);
     REG_KEYWORD(UNITS);
-    //REG_KEYWORD(DIMENS);
     REG_KEYWORD(ROCKCOMP);
     REG_KEYWORD(REGDIMS);
     REG_KEYWORD(REGNUM);
     REG_KEYWORD(EQLDIMS);
     REG_KEYWORD(TABDIMS);
-    //REG_KEYWORD(COORD);
-    //REG_KEYWORD(ZCORN);
-    REG_KEYWORD(MINPV);
-    REG_KEYWORD(MINSV);
-    REG_KEYWORD(DENSITY);
+    //REG_KEYWORD(DENSITY);
     REG_KEYWORD(ROCKTAB);
-    REG_KEYWORD(PVTO);
-    REG_KEYWORD(PVDO);
-    REG_KEYWORD(PVTW);
-    REG_KEYWORD(PVDG);
-    REG_KEYWORD(ROCK);
+    REG_KEYWORD(START);
+    //REG_KEYWORD(PVTO);
+    //REG_KEYWORD(PVDO);
+    //REG_KEYWORD(PVTW);
+    //REG_KEYWORD(PVDG);
+    //REG_KEYWORD(ROCK);
 /*
-    REG_KEYWORD(SWOF);
-    REG_KEYWORD(SGOF);
-    REG_KEYWORD(SWFN);
-    REG_KEYWORD(SGFN);
-    REG_KEYWORD(SOF2);
     REG_KEYWORD(EQUIL);
     REG_KEYWORD(PRVD);
     REG_KEYWORD(RSVD);
@@ -86,55 +78,29 @@ namespace blue_sky
 */    
     REG_KEYWORD(WELLDIMS);
 
+
+    // FIXME: npy_intp
+    // FIXME: move registration to data_class
+    npy_intp dimens[] = {1, 0, 1, 0, 1, 0};
+    register_i_pool_keyword ("MPFANUM", dimens, 1, 0);
+    register_i_pool_keyword ("EQLNUM", dimens, 1, 0);
+    register_i_pool_keyword ("SATNUM", dimens, 1, 0);
+    register_i_pool_keyword ("PVTNUM", dimens, 1, 0);
+    register_i_pool_keyword ("FIPNUM", dimens, 1, 0);
+    register_i_pool_keyword ("BNDNUM", dimens, 2, 0);
+    register_i_pool_keyword ("EOSNUM", dimens, 1, 0);
+    register_i_pool_keyword ("ROCKNUM", dimens, 1, 0);
+
     //Pool array
-    //int
-    REG_INT_ARRAY_KEYWORD(MPFANUM);
-    REG_INT_ARRAY_KEYWORD(EQLNUM);
-    REG_INT_ARRAY_KEYWORD(SATNUM);
-    REG_INT_ARRAY_KEYWORD(PVTNUM);
-    //REG_INT_ARRAY_KEYWORD(ACTNUM);
-    REG_INT_ARRAY_KEYWORD(FIPNUM);
-    REG_INT_ARRAY_KEYWORD(BNDNUM);
-    REG_INT_ARRAY_KEYWORD(EOSNUM);
-    REG_INT_ARRAY_KEYWORD(ROCKNUM);
+    /*
     //double
-    //REG_FLOAT_ARRAY_KEYWORD(PERMXY);
-    //REG_FLOAT_ARRAY_KEYWORD(PERMYZ);
-    //REG_FLOAT_ARRAY_KEYWORD(PERMZX);
-    //REG_FLOAT_ARRAY_KEYWORD(PERMX);
-    //REG_FLOAT_ARRAY_KEYWORD(PERMY);
-    //REG_FLOAT_ARRAY_KEYWORD(PERMZ);
-    //REG_FLOAT_ARRAY_KEYWORD(PORO);
-    //REG_FLOAT_ARRAY_KEYWORD(NTG);
-    REG_FLOAT_ARRAY_KEYWORD(SGL);
-    REG_FLOAT_ARRAY_KEYWORD(SGU);
-    REG_FLOAT_ARRAY_KEYWORD(SOGCR);
-    REG_FLOAT_ARRAY_KEYWORD(SGCR);
-    REG_FLOAT_ARRAY_KEYWORD(SWL);
-    REG_FLOAT_ARRAY_KEYWORD(SWU);
-    REG_FLOAT_ARRAY_KEYWORD(SOWCR);
-    REG_FLOAT_ARRAY_KEYWORD(SWCR);
-    REG_FLOAT_ARRAY_KEYWORD(PBUB);
-    REG_FLOAT_ARRAY_KEYWORD(RS);
-    REG_FLOAT_ARRAY_KEYWORD(PCW);
     REG_FLOAT_ARRAY_KEYWORD(SWATINIT);
-    REG_FLOAT_ARRAY_KEYWORD(SOIL);
-    REG_FLOAT_ARRAY_KEYWORD(SWAT);
-    REG_FLOAT_ARRAY_KEYWORD(PRESSURE);
-    //REG_FLOAT_ARRAY_KEYWORD(DX);
-    //REG_FLOAT_ARRAY_KEYWORD(DY);
-    //REG_FLOAT_ARRAY_KEYWORD(DZ);
-    //REG_FLOAT_ARRAY_KEYWORD(MULTX);
-    //REG_FLOAT_ARRAY_KEYWORD(MULTY);
-    //REG_FLOAT_ARRAY_KEYWORD(MULTZ);
-    //REG_FLOAT_ARRAY_KEYWORD(TOPS);
-    //REG_FLOAT_ARRAY_KEYWORD(MULTPV);
-    REG_FLOAT_ARRAY_KEYWORD(SGAS);
+    */
 
     //BS_ASSERT (em);
 
     /*
-    const type_descriptor &event_td = event_base <strategy_t>::bs_type ();
+    const type_descriptor &event_td = event_base ::bs_type ();
     const std::vector <type_tuple> &types = BS_KERNEL.registered_types ();
     for (size_t i = 0, cnt = types.size (); i < cnt; ++i)
       {
@@ -154,12 +120,12 @@ namespace blue_sky
     */
   }
   
-  template <class strategy_t>
-  void keyword_manager<strategy_t>::register_plugin_keywords()
+  
+  void keyword_manager::register_plugin_keywords()
   {
     const std::vector <type_tuple> &types = BS_KERNEL.registered_types ();
     sp_keyword_info_base_t keywords;
-    const type_descriptor &keyword_info_td = keyword_info_base <strategy_t>::bs_type ();
+    const type_descriptor &keyword_info_td = keyword_info_base ::bs_type ();
     sp_objbase keyword_manager (this);
     
     for (size_t i = 0, cnt = types.size (); i < cnt; ++i)
@@ -183,6 +149,7 @@ namespace blue_sky
   }
 
   //!TODO: kill next string after debug
+  /*
   template void keyword_manager <base_strategy_did>::register_keywords();//const sp_event_manager_t &em);
   template void keyword_manager <base_strategy_fif>::register_keywords();//const sp_event_manager_t &em);
   template void keyword_manager <base_strategy_dif>::register_keywords();//const sp_event_manager_t &em);
@@ -196,4 +163,5 @@ namespace blue_sky
   template void keyword_manager <base_strategy_dld>::register_plugin_keywords();
   template void keyword_manager <base_strategy_flf>::register_plugin_keywords();
   template void keyword_manager <base_strategy_dlf>::register_plugin_keywords();
+  */
 }//ns_bs

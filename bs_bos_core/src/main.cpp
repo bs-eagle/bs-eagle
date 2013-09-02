@@ -17,13 +17,8 @@
 //#include "py_mpi_vector.h"
 //#include "py_mpi_csr_matrix.h"
 
-#include "two_stage_preconditioner.h"
-#include "py_two_stage_preconditioner.h"
-
 #include "event_manager.h"
 #include "py_event_manager.h"
-#include "keyword_manager.h"
-#include "py_keyword_manager.h"
 
 #include "reservoir_simulator.h"
 #include "py_reservoir_simulator.h"
@@ -57,8 +52,18 @@
 
 #include "prepare_fpu.h"
 
-#include "csr_ilu_cfl.h"
-#include "py_csr_ilu_cfl_prec.h"
+#include "explicit_model.hpp"
+#include "equil_model.hpp"
+#include "event_manager_keywords.hpp"
+#include "equil_model_depth.h"
+
+#include "py_equil_model.h"
+//#include "well_results_storage.h"
+//#include "fip_results_storage.h"
+
+// FIXME:
+//#include "csr_ilu_cfl.h"
+//#include "py_csr_ilu_cfl_prec.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -298,39 +303,26 @@ namespace blue_sky
 //    register_ptr_to_python<smart_ptr <test_i, false> >();
 //  }
 
-
-  BLUE_SKY_REGISTER_PLUGIN_FUN
+  namespace {
+  bool
+  register_types (const plugin_descriptor &pd)
   {
-
-    //bool res = true;
-    const plugin_descriptor & pd = *bs_init.pd_;
-
     bool res = true;
 
     //////////////////////////////Events/////////////////////////////////////////////
     res &= event_base_register_types (pd);
-    res &= event_manager_register_types (pd);
-
-    res &= blue_sky::well_events_register_type (pd);
-    BS_ASSERT (res);
-    //////////////////////////////Keywords/////////////////////////////////////////////
-    res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, keyword_manager<base_strategy_di>::bs_type());
-    BS_ASSERT (res);
-    res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, keyword_manager<base_strategy_fi>::bs_type());
-    BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, event_manager::bs_type ()); BS_ASSERT (res);
 
     //////////////////////////////Linear Solver///////////////////////////////
-    res &= blue_sky::two_stage_prec_register_type (pd);
-    BS_ASSERT (res);
-
-#ifdef BS_BOS_CORE_USE_CSR_ILU_CFL_PREC
-    res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, csr_ilu_cfl_prec<base_strategy_fi>::bs_type());
-    BS_ASSERT (res);
-    res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, csr_ilu_cfl_prec<base_strategy_di>::bs_type());
-    BS_ASSERT (res);
-    res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, csr_ilu_cfl_prec<base_strategy_mixi>::bs_type());
-    BS_ASSERT (res);
-#endif
+// FIXME:
+//#ifdef BS_BOS_CORE_USE_CSR_ILU_CFL_PREC
+//    res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, csr_ilu_cfl_prec<base_strategy_fi>::bs_type());
+//    BS_ASSERT (res);
+//    res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, csr_ilu_cfl_prec<base_strategy_di>::bs_type());
+//    BS_ASSERT (res);
+//    res &= blue_sky::give_kernel::Instance().register_type(*bs_init.pd_, csr_ilu_cfl_prec<base_strategy_mixi>::bs_type());
+//    BS_ASSERT (res);
+//#endif
 
 
 //#ifdef _MPI
@@ -339,6 +331,9 @@ namespace blue_sky
 //    res &= blue_sky::mpi_csr_comm_register_type (pd);
 //    BS_ASSERT (res);
 //#endif
+
+    //res &= BS_KERNEL.register_type (pd, well_results_storage::bs_type ()); BS_ASSERT (res);
+    //res &= BS_KERNEL.register_type (pd, fip_results_storage::bs_type ()); BS_ASSERT (res);
 
     res &= calc_rho_register_types (pd);            BS_ASSERT (res);
     res &= calc_well_pressure_register_types (pd);  BS_ASSERT (res);
@@ -369,7 +364,26 @@ namespace blue_sky
     res &= reservoir_simulator_register_types (pd);
     BS_ASSERT (res);
 
+    res &= BS_KERNEL.register_type (pd, explicit_model::bs_type ()); BS_ASSERT (res);
+    res &= BS_KERNEL.register_type (pd, equil_model::bs_type ()); BS_ASSERT (res);
+
+    res &= BS_KERNEL.register_type (pd, event_manager_keywords::bs_type ()); BS_ASSERT (res);
+    
+    res &= BS_KERNEL.register_type (pd, equil_model_depth::bs_type ()); BS_ASSERT (res);
+
+    // force serialization typeinfo registering
+    //serialize_register_eti< equil_model_depth >();
+
     return res;
+  }
+  }
+
+  BLUE_SKY_REGISTER_PLUGIN_FUN
+  {
+
+    //bool res = true;
+    return register_types (*bs_init.pd_);
+
   }
 }//bs
 //
@@ -429,52 +443,69 @@ namespace blue_sky
 //}
 
 #ifdef BSPY_EXPORTING_PLUGIN
+namespace {
+  void 
+  init_py_subsystem ()
+  {
+    using namespace boost::python;
+
+  //#ifdef _MPI
+  //  python::py_export_mpi_vector ();
+  //  python::py_export_mpi_csr_matrix ();
+  //#endif
+
+	python::py_export_equil_model();
+
+	py_export_fi_params ();
+
+    py_export_events ();
+    py_export_event_manager();
+
+    python::py_export_reservoir_simulator ();
+    python::py_export_calc_model ();
+    // we should export enum only for one instance of reservoir simulator
+    //reservoir_simulator<base_strategy_di>::py_export_signals_enum (); //!TODO:
+
+    python::py_export_calc_well ();
+
+    python::py_export_data_storage_interface ();
+
+    python::py_export_jacobian ();
+
+    python::py_export_facility_manager ();
+    python::py_export_reservoir ();
+
+    python::py_export_well_factories ();
+
+  // FIXME:
+  //#ifdef BS_BOS_CORE_USE_CSR_ILU_CFL_PREC
+  //  python::py_export_csr_ilu_cfl_prec ();
+  //#endif
+
+    python::py_export_default_wells ();
+
+    def ("enable_fpu_exceptions", blue_sky::tools::prepare_fpu::enable_exceptions);
+
+    //def ("convert_double_to_float", py_convert_double_to_float <python::py_bcsr_matrix <base_strategy_di::item_array_t, base_strategy_di::index_array_t>, python::py_bcsr_matrix <base_strategy_fi::item_array_t, base_strategy_fi::index_array_t> >);
+
+    //py_export_test_x ();
+  }
+}
 BLUE_SKY_INIT_PY_FUN
 {
-  using namespace boost::python;
-
-  py_export_fi_params ();
-
-//#ifdef _MPI
-//  python::py_export_mpi_vector ();
-//  python::py_export_mpi_csr_matrix ();
-//#endif
-
-
-  py_export_two_stage_prec ();
-
-  py_export_events ();
-  py_export_event_manager();
-
-  python::py_export_reservoir_simulator ();
-  python::py_export_calc_model ();
-  // we should export enum only for one instance of reservoir simulator
-  //reservoir_simulator<base_strategy_di>::py_export_signals_enum (); //!TODO:
-
-  python::py_export_calc_well ();
-
-  python::py_export_data_storage_interface ();
-
-  python::py_export_jacobian ();
-
-  python::py_export_facility_manager ();
-  python::py_export_reservoir ();
-
-  python::py_export_well_factories ();
-
-#ifdef BS_BOS_CORE_USE_CSR_ILU_CFL_PREC
-  python::py_export_csr_ilu_cfl_prec ();
-#endif
-
-  python::py_export_default_wells ();
-
-  def ("enable_fpu_exceptions", blue_sky::tools::prepare_fpu::enable_exceptions);
-
-  python::export_keyword_manager ();
-
-
-  //def ("convert_double_to_float", py_convert_double_to_float <python::py_bcsr_matrix <base_strategy_di::item_array_t, base_strategy_di::index_array_t>, python::py_bcsr_matrix <base_strategy_fi::item_array_t, base_strategy_fi::index_array_t> >);
-
-  //py_export_test_x ();
+  init_py_subsystem ();
 }
+#ifdef _DEBUG
+BOOST_PYTHON_MODULE (bs_bos_core_d)
+#else
+BOOST_PYTHON_MODULE (bs_bos_core)
+#endif
+{
+  init_py_subsystem ();
+  std::cout << &BS_KERNEL << std::endl;
+  bool res = blue_sky::register_types (*blue_sky::bs_get_plugin_descriptor ());
+  if (!res)
+    throw "Can't register bs_bos_core types";
+}
+
 #endif //BSPY_EXPORT_PLUGIN

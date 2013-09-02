@@ -22,44 +22,48 @@ namespace blue_sky
 
 
 #define DECL_GET_WELL_EVENT_NAMES(event_name)                           \
-  template <typename strategy_t>                                        \
   BS_API_PLUGIN std::string                                             \
-  event_name <strategy_t>::get_well_name () const                       \
+  event_name::get_well_name () const                       \
   {                                                                     \
   return main_params_->get_WELL_NAME ("WELL_NAME NOT SET");             \
   }                                                                     \
-  template <typename strategy_t>                                        \
   BS_API_PLUGIN std::string                                             \
-  event_name <strategy_t>::get_event_name () const                      \
+  event_name::get_event_name () const                      \
   {                                                                     \
     return BOOST_PP_STRINGIZE (event_name);                             \
   }
 
 #define DECL_GET_WELL_EVENT_NAME(event_name)                            \
-  template <typename strategy_t>                                        \
   BS_API_PLUGIN std::string                                             \
-  event_name <strategy_t>::get_event_name () const                      \
+  event_name::get_event_name () const                      \
   {                                                                     \
     return BOOST_PP_STRINGIZE (event_name);                             \
   }
   //////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
   void
-  WELSPECS_event<strategy_t>::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
-                              const sp_calc_model_t &/*calc_model*/, const smart_ptr <idata, true> &/*data*/) const
+  WELSPECS_event::apply_internal (const BS_SP (reservoir) &r, 
+                                  const BS_SP (rs_mesh_iface) &/*msh*/,
+                                  const BS_SP (calc_model) &/*calc_model*/, 
+                                  const BS_SP (idata) &/*data*/) const
   {
-    const sp_top &locked (top);
+    const sp_top &reservoir (r);
     // TODO: FIELD
     std::string group_name  = main_params_->get_WELL_GROUP_NAME ("");
     std::string name        = main_params_->get_WELL_NAME ("");
 
     BS_ASSERT (name.size ());
 
-    sp_well_t well = locked->get_well (group_name, name);
+    sp_well_t well = reservoir->get_well (group_name, name);
     if (!well)
       {
-        well = locked->create_well (group_name, name);
-        BS_ERROR (well, "apply_internal");// (group_name) (name);
+        well = BS_KERNEL.create_object ("default_well");
+        if (!well)
+          {
+            bs_throw_exception ("Can't create default_well");
+          }
+
+        well->set_name (name);
+        reservoir->add_well (well);
       }
 
     const sp_well_t &locked_well (well);
@@ -67,25 +71,24 @@ namespace blue_sky
     BS_ASSERT (main_params_->get_I (0) && main_params_->get_J (0)) (main_params_->get_I (0)) (main_params_->get_J (0));
 
     locked_well->set_coord (main_params_->get_I (), main_params_->get_J ());
-    locked_well->set_bhp_depth (main_params_->get_BHP_DEPTH ());
+    locked_well->set_bhp_depth (main_params_->get_BHP_DEPTH (-1));
   }
 
   //////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
   void
-  WELLCON_event<strategy_t>::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
+  WELLCON_event::apply_internal (const sp_top & /*top*/, const sp_mesh_iface_t &/*msh*/,
                              const sp_calc_model_t &/*calc_model*/, const smart_ptr <idata, true> &/*data*/) const
   {
-    const sp_top &locked (top);
-    sp_well_t well = locked->get_well (main_params_->get_WELL_GROUP_NAME (""), main_params_->get_WELL_NAME (""));
-    if (!well)
-      {
-        well = locked->create_well (main_params_->get_WELL_GROUP_NAME (""), main_params_->get_WELL_NAME (""));
-        if (!well)
-          {
-            bs_throw_exception (boost::format ("Can't create well (name: %s, group: %s)") % main_params_->get_WELL_NAME ("") % main_params_->get_WELL_GROUP_NAME (""));
-          }
-      }
+    //const sp_top &locked (top);
+    //sp_well_t well = locked->get_well (main_params_->get_WELL_GROUP_NAME (""), main_params_->get_WELL_NAME (""));
+    //if (!well)
+    //  {
+    //    well = locked->create_well (main_params_->get_WELL_GROUP_NAME (""), main_params_->get_WELL_NAME (""));
+    //    if (!well)
+    //      {
+    //        bs_throw_exception (boost::format ("Can't create well (name: %s, group: %s)") % main_params_->get_WELL_NAME ("") % main_params_->get_WELL_GROUP_NAME (""));
+    //      }
+    //  }
 
     bs_throw_exception ("NOT IMPL YET");
 
@@ -100,10 +103,9 @@ namespace blue_sky
   }
 
   //////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
   void
-  COMPDAT_event<strategy_t>::apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
-                             const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &/*data*/) const
+  COMPDAT_event::apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
+                             const sp_calc_model_t & /*calc_model*/, const smart_ptr <idata, true> &/*data*/) const
   {
     const sp_top &locked (top);
     const sp_smesh_iface_t struct_msh (msh, bs_dynamic_cast());
@@ -181,9 +183,8 @@ namespace blue_sky
   }
 
   //////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
   void
-  WCONPROD_event<strategy_t>::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
+  WCONPROD_event::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
                               const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &/*data*/) const
   {
     const sp_top &locked (top);
@@ -222,9 +223,8 @@ namespace blue_sky
   }
 
   //////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
   void
-  WCONHIST_event<strategy_t>::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
+  WCONHIST_event::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
                               const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &/*data*/) const
   {
     const sp_top &locked (top);
@@ -264,9 +264,8 @@ namespace blue_sky
   }
 
   //////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
   void
-  WCONINJE_event<strategy_t>::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
+  WCONINJE_event::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
                               const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &/*data*/) const
   {
     using namespace wells;
@@ -303,9 +302,8 @@ namespace blue_sky
   }
 
   //////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
   void
-  WECON_event<strategy_t>::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
+  WECON_event::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
                            const sp_calc_model_t &/*calc_model*/, const smart_ptr <idata, true> &/*data*/) const
   {
     const sp_top &locked (top);
@@ -323,9 +321,8 @@ namespace blue_sky
   }
 
   //////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
   void
-  WECONINJ_event<strategy_t>::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
+  WECONINJ_event::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
                               const sp_calc_model_t &/*calc_model*/, const smart_ptr <idata, true> &/*data*/) const
   {
     const sp_top &locked (top);
@@ -342,9 +339,8 @@ namespace blue_sky
   }
 
   //////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
   void
-  WEFAC_event<strategy_t>::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
+  WEFAC_event::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
                            const sp_calc_model_t &/*calc_model*/, const smart_ptr <idata, true> &/*data*/) const
   {
     const sp_top &locked (top);
@@ -358,9 +354,8 @@ namespace blue_sky
   }
 
   //////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
   void
-  WELTARG_event<strategy_t>::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
+  WELTARG_event::apply_internal (const sp_top &top, const sp_mesh_iface_t &/*msh*/,
                              const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &/*data*/) const
   {
     const sp_top &locked (top);
@@ -376,7 +371,7 @@ namespace blue_sky
     rate_value_type type = wells::rate_value_cast (main_params_->get_WELL_CONTROL (""));
     if (type == bhp_value)
       {
-        typename strategy_t::item_t bhp = locked_controller->is_production ()
+        t_double bhp = locked_controller->is_production ()
           ? main_params_->get_VALUE (calc_model->internal_constants.default_production_bhp_limit)
           : main_params_->get_VALUE (calc_model->internal_constants.default_injection_bhp_limit)
           ;
@@ -393,9 +388,8 @@ namespace blue_sky
   }
 
   //////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
   void
-  WPIMULT_event<strategy_t>::apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
+  WPIMULT_event::apply_internal (const sp_top &top, const sp_mesh_iface_t &msh,
                              const sp_calc_model_t &/*calc_model*/, const smart_ptr <idata, true> &/*data*/) const
   {
     const sp_top &locked (top);
@@ -406,7 +400,7 @@ namespace blue_sky
     if (!well)
       return ;
 
-    typedef typename strategy_t::index_t index_t;
+    typedef t_long index_t;
 
     double perm_mult = main_params_->get_PERM_FACTOR (0);
     index_t i_cell   = main_params_->get_I (0);
@@ -426,7 +420,7 @@ namespace blue_sky
 
     if (/*(!z1_cell && !z2_cell) || */!i_cell || !j_cell || !k_cell)
       {
-        typename well_t::connection_iterator_t it = well->connections_begin (),
+        well_t::connection_iterator_t it = well->connections_begin (),
                  e = well->connections_end ();
         for (; it != e; ++it)
           {
@@ -437,7 +431,7 @@ namespace blue_sky
     else if (i_cell && j_cell && k_cell)
       {
         index_t n_block = struct_msh->get_element_ijk_to_int (i_cell - 1, j_cell - 1, k_cell - 1);
-        const typename well_t::sp_connection_t &c = well->get_connection_map (n_block);
+        const well_t::sp_connection_t &c = well->get_connection_map (n_block);
         if (c)
           {
             c->mul_perm_mult (perm_mult);
@@ -471,31 +465,12 @@ namespace blue_sky
   }
 
   //////////////////////////////////////////////////////////////////////////
-  template <typename strategy_t>
   void
-  COMPENSATION_event<strategy_t>::apply_internal (const sp_top &/*top*/, const sp_mesh_iface_t &/*msh*/,
+  COMPENSATION_event::apply_internal (const sp_top &/*top*/, const sp_mesh_iface_t &/*msh*/,
                                   const sp_calc_model_t &/*calc_model*/, const smart_ptr <idata, true> &/*data*/) const
   {
     bs_throw_exception ("NOT IMPL YET");
   }
-#define SPEC_APPLY(name)																																																		          \
-	template void name<base_strategy_fi>::apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &data) const;\
-	template void name<base_strategy_di>::apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &data) const;\
-	template void name<base_strategy_mixi>::apply_internal (const sp_top &top, const sp_mesh_iface_t &msh, const sp_calc_model_t &calc_model, const smart_ptr <idata, true> &data) const;
-
-  SPEC_APPLY (WELSPECS_event);
-  SPEC_APPLY (WELLCON_event);
-  SPEC_APPLY (COMPDAT_event);
-  SPEC_APPLY (WCONPROD_event);
-  SPEC_APPLY (WCONHIST_event);
-  SPEC_APPLY (WCONINJE_event);
-  SPEC_APPLY (WECON_event);
-  SPEC_APPLY (WECONINJ_event);
-  SPEC_APPLY (WEFAC_event);
-  SPEC_APPLY (WELTARG_event);
-  SPEC_APPLY (WPIMULT_event);
-  SPEC_APPLY (COMPENSATION_event);
-//SPEC_APPLY (PERMFRAC_event);
 
   DECL_GET_WELL_EVENT_NAMES (WELSPECS_event);
   DECL_GET_WELL_EVENT_NAMES (WELLCON_event);
@@ -511,46 +486,6 @@ namespace blue_sky
 
   DECL_GET_WELL_EVENT_NAME (COMPENSATION_event);
   DECL_GET_WELL_EVENT_NAME (PERMFRAC_event);
-
-  template class WELSPECS_event <base_strategy_fi>;
-  template class WELSPECS_event <base_strategy_di>;
-  template class WELSPECS_event <base_strategy_mixi>;
-  template class WELLCON_event <base_strategy_fi>;
-  template class WELLCON_event <base_strategy_di>;
-  template class WELLCON_event <base_strategy_mixi>;
-  template class COMPDAT_event <base_strategy_fi>;
-  template class COMPDAT_event <base_strategy_di>;
-  template class COMPDAT_event <base_strategy_mixi>;
-  template class WCONPROD_event <base_strategy_fi>;
-  template class WCONPROD_event <base_strategy_di>;
-  template class WCONPROD_event <base_strategy_mixi>;
-  template class WCONHIST_event <base_strategy_fi>;
-  template class WCONHIST_event <base_strategy_di>;
-  template class WCONHIST_event <base_strategy_mixi>;
-  template class WCONINJE_event <base_strategy_fi>;
-  template class WCONINJE_event <base_strategy_di>;
-  template class WCONINJE_event <base_strategy_mixi>;
-  template class WECON_event <base_strategy_fi>;
-  template class WECON_event <base_strategy_di>;
-  template class WECON_event <base_strategy_mixi>;
-  template class WECONINJ_event <base_strategy_fi>;
-  template class WECONINJ_event <base_strategy_di>;
-  template class WECONINJ_event <base_strategy_mixi>;
-  template class WEFAC_event <base_strategy_fi>;
-  template class WEFAC_event <base_strategy_di>;
-  template class WEFAC_event <base_strategy_mixi>;
-  template class WELTARG_event <base_strategy_fi>;
-  template class WELTARG_event <base_strategy_di>;
-  template class WELTARG_event <base_strategy_mixi>;
-  template class WPIMULT_event <base_strategy_fi>;
-  template class WPIMULT_event <base_strategy_di>;
-  template class WPIMULT_event <base_strategy_mixi>;
-  template class COMPENSATION_event <base_strategy_fi>;
-  template class COMPENSATION_event <base_strategy_di>;
-  template class COMPENSATION_event <base_strategy_mixi>;
-  template class PERMFRAC_event <base_strategy_fi>;
-  template class PERMFRAC_event <base_strategy_di>;
-  template class PERMFRAC_event <base_strategy_mixi>;
 
 } // namespace blue_sky
 

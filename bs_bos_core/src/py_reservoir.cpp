@@ -31,7 +31,7 @@ namespace python {
 
   void py_export_reservoir()
   {
-    strategy_exporter::export_base <reservoir, reservoir_exporter> ("reservoir");
+    base_exporter <reservoir, reservoir_exporter>::export_class ("reservoir");
   }
 
 } // namespace python

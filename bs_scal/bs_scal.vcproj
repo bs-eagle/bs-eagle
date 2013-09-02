@@ -41,8 +41,8 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Zm1000"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_matrix/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;$(NUMPY_PATH)/include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_EXCEPTION_USE_BOOST_FORMAT"
+				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_data_storage/include/&quot;;&quot;$(ProjectDir)/../bs_matrix/include/&quot;;&quot;$(ProjectDir)/../common_types/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;&quot;$(NUMPY_PATH)/include&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_EXCEPTION_USE_BOOST_FORMAT;NOMINMAX"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -63,7 +63,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="blue-sky_d.lib bs_bos_core_base_d.lib bs_matrix_d.lib loki_D.lib ws2_32.lib"
+				AdditionalDependencies="bs_bos_core_base_d.lib loki_D.lib ws2_32.lib"
 				OutputFile="$(ProjectDir)/../../../exe/debug/plugins/$(ProjectName)_d.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/lib&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/debug/&quot;;&quot;$(ProjectDir)/../../../exe/debug/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
@@ -122,8 +122,9 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_matrix/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core/include&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;&quot;$(NUMPY_PATH)/include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT"
+				AdditionalOptions="/Zm1000"
+				AdditionalIncludeDirectories="&quot;${ProjectDir)/../bs_pvt/include&quot;;&quot;$(LOKI_PATH)/include&quot;;&quot;$(BOOST_PATH)&quot;;&quot;$(ProjectDir)/../../../kernel/include&quot;;&quot;$(ProjectDir)/../../../kernel/include/python&quot;;&quot;$(ProjectDir)/include&quot;;&quot;$(ProjectDir)/../bs_bos_core_base/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core_data_storage/include/&quot;;&quot;$(ProjectDir)/../bs_matrix/include/&quot;;&quot;$(ProjectDir)/../common_types/include/&quot;;&quot;$(ProjectDir)/../bs_bos_core/include/&quot;;&quot;$(PYTHON_PATH)/include&quot;;&quot;$(MPICH_PATH)/SDK/include&quot;;&quot;$(HDF5_PATH)/include&quot;;&quot;$(NUMPY_PATH)/include&quot;"
+				PreprocessorDefinitions="BOOST_ALL_DYN_LINK"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="bs_scal_stdafx.h"
@@ -142,7 +143,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="blue-sky.lib bs_bos_core_base.lib bs_matrix.lib loki.lib ws2_32.lib"
+				AdditionalDependencies="loki.lib ws2_32.lib"
 				OutputFile="$(ProjectDir)/../../../exe/release/plugins/$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(HDF5_PATH)/lib&quot;;&quot;$(PYTHON_PATH)/libs&quot;;&quot;$(LOKI_PATH)/lib&quot;;&quot;$(BOOST_PATH)/lib&quot;;&quot;$(ProjectDir)/../../../exe/release/&quot;;&quot;$(ProjectDir)/../../../exe/release/plugins/&quot;;&quot;$(MPICH_PATH)/SDK/lib&quot;"
@@ -271,11 +272,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\scal_2p_dummy.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\scal_3p.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\include\scal_3p.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\scal_3p_iface.hpp"
 				>
 			</File>
 			<File
@@ -292,6 +301,10 @@
 			</File>
 			<File
 				RelativePath=".\include\scal_data_vector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\scal_dummy.cpp"
 				>
 			</File>
 			<File
@@ -351,12 +364,28 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="keywords"
+			>
+			<File
+				RelativePath=".\src\scal_keywords.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\scal_keywords.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\src\bs_scal.cpp"
 			>
 		</File>
 		<File
 			RelativePath=".\include\bs_scal_stdafx.h"
+			>
+		</File>
+		<File
+			RelativePath=".\include\scal_dummy_iface.h"
 			>
 		</File>
 		<File
