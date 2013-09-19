@@ -36,7 +36,7 @@ namespace grd_ecl
         return *this;
       }
     };
-#ifdef PURE_MESH  
+#ifdef PURE_MESH
   typedef std::array <fpoint2d, 4>       quadrangle_t;
   typedef std::array <fpoint2d, 3>       triangle_t;
 #else

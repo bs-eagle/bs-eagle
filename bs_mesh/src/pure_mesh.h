@@ -18,7 +18,9 @@
 #define bs_throw_exception printf
 #define write_time_to_log printf
 #define init_time
-#define CH_PTR
+#ifndef CH_PTR
+#   define CH_PTR
+#endif // CH_PTR
 #define BS_SP(T) T
 
 
