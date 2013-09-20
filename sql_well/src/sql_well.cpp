@@ -2015,7 +2015,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               if (fti->frac_perm > 0)
                 sprintf (perm_str, "%lf", fti->frac_perm);
               else
-                sprintf (perm_str, " *   * ");
+                sprintf (perm_str, " * ");
 
               int horiz = 0;
               std::string sql = "SELECT name, horiz FROM wells WHERE name = ";
