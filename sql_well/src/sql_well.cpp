@@ -2015,7 +2015,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               if (fti->frac_perm > 0)
                 sprintf (perm_str, "%lf", fti->frac_perm);
               else
-                sprintf (perm_str, " *   * ");
+                sprintf (perm_str, " * ");
 
               int horiz = 0;
               std::string sql = "SELECT name, horiz FROM wells WHERE name = ";
@@ -2087,6 +2087,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   case STATUS_CLOSE:
                     s_status = "CLOSE";
                     break;
+                  default:
+                    s_status = "SHUT";
                 }
 
               if (ctrl == CTRL_I_ORATE)
@@ -2169,6 +2171,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   case STATUS_CLOSE:
                     s_status = "CLOSE";
                     break;
+                  default:
+                    s_status = "SHUT";
                 }
             
               s_ctrl = "BHP";
@@ -2262,6 +2266,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   case STATUS_CLOSE:
                     s_status = "CLOSE";
                     break;
+                  default:
+                    s_status = "SHUT";
                 }
               if (ctrl == CTRL_P_LRATE)
                 {
@@ -2370,6 +2376,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
                   case STATUS_CLOSE:
                     s_status = "CLOSE";
                     break;
+                  default:
+                    s_status = "SHUT";
                 }
               if (ctrl == CTRL_P_LRATE)
                 {
