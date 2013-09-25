@@ -99,11 +99,12 @@ namespace blue_sky
       //virtual int add_branch_prop (const std::string &wname, const std::string &branch,
       //                             sp_table_t tbl);
       virtual int add_branch_gis (const std::string &wname, const std::string &branch,
-                                  sp_gis_t g);
+                                  sp_gis_t g, const std::string& wlog_name = "");
       virtual int add_branch_traj (const std::string &wname, const std::string &branch,
                                    sp_traj_t t);
       //virtual sp_table_t get_branch_prop (const std::string &wname, const std::string &branch) const;
-      virtual sp_gis_t get_branch_gis (const std::string &wname, const std::string &branch) const;
+      virtual sp_gis_t get_branch_gis (const std::string &wname, const std::string &branch,
+                                   const std::string& wlog_name = "");
       virtual sp_traj_t get_branch_traj (const std::string &wname, const std::string &branch) const;
       //virtual void remove_branch (const std::string &wname, const std::string &branch);
 

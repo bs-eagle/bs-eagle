@@ -70,7 +70,27 @@ struct val2str {
   }
 };
 
+// create well_log table for storing multiple well logs with possibly different depths
+// i.e. we can store mmultiple gis objects for single well
+bool create_wlogs_table(sql_well& sqw) {
+  std::string q = "CREATE TABLE IF NOT EXISTS \
+    well_logs(\
+    well_name TEXT NOT NULL REFERENCES branches(well_name) ON UPDATE CASCADE ON DELETE CASCADE,\
+    branch_name TEXT NOT NULL REFERENCES branches(branch_name) ON UPDATE CASCADE ON DELETE CASCADE,\
+    wlog_name TEXT NOT NULL,\
+    wlog_data BLOB,\
+    PRIMARY KEY(well_name, branch_name, wlog_name));\
+    CREATE INDEX iwlname ON well_logs (wlog_name ASC);\
+    CREATE UNIQUE INDEX iwlpkey ON well_logs (well_name, branch_name, wlog_name ASC);\
+    ";
+  if(sqw.prepare_sql(q) < 0)
+    return false;
+  sqw.step_sql();
+  sqw.finalize_sql();
+  return true;
 }
+
+} // eof hidden namespace
 
   int clear_table (void *pData, int nColumns,
                    char **values, char ** /*columns*/)
@@ -657,88 +677,166 @@ COMMIT;\
     }
   int
   sql_well::add_branch_gis (const std::string &wname, const std::string &branch,
-                            sp_gis_t g)
+                            sp_gis_t g, const std::string& wlog_name)
     {
-      if (!db)
-        return -1;
-      if (stmp_sql)
-        finalize_sql ();
+      std::string q;
 
-      int rc = 0;
-      //char *zErrMsg = 0;
-      const char *ttt;
-      sqlite3_stmt *stmp;
-      char buf[4096];
-      sprintf (buf, "UPDATE branches SET well_log = @q WHERE well_name = '%s' AND branch_name = '%s'",
-               wname.c_str (), branch.c_str ());
-      rc = sqlite3_prepare_v2 (db, buf, strlen (buf), &stmp, &ttt);
-      if (rc)
-        {
-          fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
+      if(wlog_name.size() == 0) {
+        // old-fashioned query writes directly to branches table
+        q = "UPDATE branches SET well_log = @q WHERE well_name = '";
+        q += wname + "' AND branch_name = '" + branch + "'";
+      }
+      else {
+        // new implementation writes to separate well_logs table
+        // create table
+        if(!create_wlogs_table(*this))
           return -1;
-        }
+        // format query
+        q = "INSERT OR REPLACE INTO well_logs (well_name, branch_name, wlog_name, wlog_data) \
+             VALUES ('";
+        q += wname + "', '" + branch + "', '" + wlog_name + ", @q)";
+      }
+
+      // exec query
+      if(prepare_sql(q) < 0)
+        return -1;
 
       std::string s = g->to_str();
       std::vector<char> ch (s.begin (), s.end ());
-      //printf ("GIS\n%s\n", s.c_str ());
-      //printf ("GIS INT %d %d\n", (int)strlen (s.c_str ()), (int)s.length ());
-      rc = sqlite3_bind_blob (stmp, 1, &ch[0], ch.size (), SQLITE_STATIC);
-      if (rc)
+      if (sqlite3_bind_blob (stmp_sql, 1, &ch[0], ch.size (), SQLITE_STATIC))
         {
           fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
           return -3;
         }
-      sqlite3_step (stmp); // UPDATE
-      sqlite3_finalize (stmp);
-
+      step_sql();
+      finalize_sql();
       return 0;
+
+      //if (!db)
+      //  return -1;
+      //if (stmp_sql)
+      //  finalize_sql ();
+
+      //int rc = 0;
+      ////char *zErrMsg = 0;
+      //const char *ttt;
+      //sqlite3_stmt *stmp;
+      //char buf[4096];
+      //sprintf (buf, "UPDATE branches SET well_log = @q WHERE well_name = '%s' AND branch_name = '%s'",
+      //         wname.c_str (), branch.c_str ());
+      //rc = sqlite3_prepare_v2 (db, buf, strlen (buf), &stmp, &ttt);
+      //if (rc)
+      //  {
+      //    fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
+      //    return -1;
+      //  }
+
+      //std::string s = g->to_str();
+      //std::vector<char> ch (s.begin (), s.end ());
+      ////printf ("GIS\n%s\n", s.c_str ());
+      ////printf ("GIS INT %d %d\n", (int)strlen (s.c_str ()), (int)s.length ());
+      //rc = sqlite3_bind_blob (stmp, 1, &ch[0], ch.size (), SQLITE_STATIC);
+      //if (rc)
+      //  {
+      //    fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
+      //    return -3;
+      //  }
+      //sqlite3_step (stmp); // UPDATE
+      //sqlite3_finalize (stmp);
+
+      //return 0;
     }
 
   sql_well::sp_gis_t
-  sql_well::get_branch_gis (const std::string &wname, const std::string &branch) const
+  sql_well::get_branch_gis (const std::string &wname, const std::string &branch,
+      const std::string& wlog_name)
     {
-      sp_gis_t sp_gis = BS_KERNEL.create_object ("gis");
       if (!db)
-        return sp_gis_t ();
-      if (stmp_sql)
-        return sp_gis_t ();
+        return sp_gis_t();
 
-      int rc = 0;
-      //char *zErrMsg = 0;
-      const char *ttt;
-      sqlite3_stmt *stmp;
-      char buf[4096];
-      sprintf (buf, "SELECT well_log FROM branches WHERE well_name = '%s' AND branch_name = '%s'",
-               wname.c_str (), branch.c_str ());
-      rc = sqlite3_prepare_v2 (db, buf, strlen (buf) + 1, &stmp, &ttt);
-      if (rc)
-        {
-          fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
-          sqlite3_finalize (stmp);
-          return sp_gis_t ();
-        }
-      if (sqlite3_step (stmp) == SQLITE_ROW) // UPDATE
-        {
-          int n = sqlite3_column_bytes (stmp, 0);
-          if (n < 1)
-            {
-              sqlite3_finalize (stmp);
-              return sp_gis_t ();
-            }
-          const char *b = (const char *)sqlite3_column_blob (stmp, 0);
-          //std::string s = (const char *)sqlite3_column_text (stmp, 0);
-          std::string s;
-          s.assign (b, n);
-          printf ("READ GIS %d\n", (int)s.length ());
-          sp_gis->from_str(s);
+      std::string q;
+      if(wlog_name.size() == 0) {
+        // old-fashioned query writes directly to branches table
+        q = "SELECT well_log FROM branches WHERE well_name = '";
+      }
+      else {
+        // new implementation writes to separate well_logs table
+        // format query
+        q = "SELECT wlog_data FROM well_logs WHERE well_name = '";
+      }
+      // add key info
+      q += wname + "' AND branch_name = '" + branch + "'";
+      if(wlog_name.size() > 0) {
+        q += " AND wlog_name = '" + wlog_name + "'";
+      }
 
+      // exec sql
+      if(prepare_sql(q) < 0 || step_sql() != 0) {
+        finalize_sql();
+        return NULL;
+      }
+
+      // extract blob
+      int n = sqlite3_column_bytes (stmp_sql, 0);
+      if (n < 1)
+        {
+          finalize_sql();
+          return NULL;
         }
-	  else
-	    {
-		  return sp_gis_t ();
-	    }
-      sqlite3_finalize (stmp);
+      const char *b = (const char *)sqlite3_column_blob (stmp_sql, 0);
+      std::string s;
+      s.assign (b, n);
+      printf ("READ GIS %d\n", (int)s.length ());
+
+      sp_gis_t sp_gis = BS_KERNEL.create_object ("gis");
+      sp_gis->from_str(s);
+
+      // return
+      finalize_sql();
       return sp_gis;
+
+      //sp_gis_t sp_gis = BS_KERNEL.create_object ("gis");
+      //if (!db)
+      //  return sp_gis_t ();
+      //if (stmp_sql)
+      //  return sp_gis_t ();
+
+      //int rc = 0;
+      ////char *zErrMsg = 0;
+      //const char *ttt;
+      //sqlite3_stmt *stmp;
+      //char buf[4096];
+      //sprintf (buf, "SELECT well_log FROM branches WHERE well_name = '%s' AND branch_name = '%s'",
+      //         wname.c_str (), branch.c_str ());
+      //rc = sqlite3_prepare_v2 (db, buf, strlen (buf) + 1, &stmp, &ttt);
+      //if (rc)
+      //  {
+      //    fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
+      //    sqlite3_finalize (stmp);
+      //    return sp_gis_t ();
+      //  }
+      //if (sqlite3_step (stmp) == SQLITE_ROW) // UPDATE
+      //  {
+      //    int n = sqlite3_column_bytes (stmp, 0);
+      //    if (n < 1)
+      //      {
+      //        sqlite3_finalize (stmp);
+      //        return sp_gis_t ();
+      //      }
+      //    const char *b = (const char *)sqlite3_column_blob (stmp, 0);
+      //    //std::string s = (const char *)sqlite3_column_text (stmp, 0);
+      //    std::string s;
+      //    s.assign (b, n);
+      //    printf ("READ GIS %d\n", (int)s.length ());
+      //    sp_gis->from_str(s);
+
+      //  }
+	  //else
+	  //  {
+	  //    return sp_gis_t ();
+	  //  }
+      //sqlite3_finalize (stmp);
+      //return sp_gis;
     }
 
    int
@@ -885,6 +983,7 @@ COMMIT;\
         {
           fprintf (stderr, "Can't make select: %s (%d)\n", sqlite3_errmsg (db), rc);
           fprintf (stderr, "Query: %s\n", sql.c_str());
+          finalize_sql ();
           return -1;
         }
       return 0;
