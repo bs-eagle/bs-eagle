@@ -75,19 +75,27 @@ struct val2str {
 bool create_wlogs_table(sql_well& sqw) {
   std::string q = "CREATE TABLE IF NOT EXISTS \
     well_logs(\
-    well_name TEXT NOT NULL REFERENCES branches(well_name) ON UPDATE CASCADE ON DELETE CASCADE,\
-    branch_name TEXT NOT NULL REFERENCES branches(branch_name) ON UPDATE CASCADE ON DELETE CASCADE,\
+    well_name TEXT NOT NULL,\
+    branch_name TEXT NOT NULL,\
     wlog_name TEXT NOT NULL,\
     wlog_data BLOB,\
     PRIMARY KEY(well_name, branch_name, wlog_name));\
-    CREATE INDEX iwlname ON well_logs (wlog_name ASC);\
-    CREATE UNIQUE INDEX iwlpkey ON well_logs (well_name, branch_name, wlog_name ASC);\
+    CREATE INDEX IF NOT EXISTS iwlname ON well_logs (wlog_name ASC);\
+    CREATE UNIQUE INDEX IF NOT EXISTS iwlpkey ON well_logs (well_name, branch_name, wlog_name ASC);\
     ";
-  if(sqw.prepare_sql(q) < 0)
-    return false;
-  sqw.step_sql();
-  sqw.finalize_sql();
-  return true;
+
+  //std::string q = "CREATE TABLE IF NOT EXISTS \
+  //  well_logs(\
+  //  well_name TEXT NOT NULL REFERENCES branches(well_name) ON UPDATE CASCADE ON DELETE CASCADE,\
+  //  branch_name TEXT NOT NULL REFERENCES branches(branch_name) ON UPDATE CASCADE ON DELETE CASCADE,\
+  //  wlog_name TEXT NOT NULL,\
+  //  wlog_data BLOB,\
+  //  PRIMARY KEY(well_name, branch_name, wlog_name));\
+  //  CREATE INDEX IF NOT EXISTS iwlname ON well_logs (wlog_name ASC);\
+  //  CREATE UNIQUE INDEX IF NOT EXISTS iwlpkey ON well_logs (well_name, branch_name, wlog_name ASC);\
+  //  ";
+
+  return (sqw.exec_sql(q) == 0);
 }
 
 } // eof hidden namespace
@@ -694,7 +702,7 @@ COMMIT;\
         // format query
         q = "INSERT OR REPLACE INTO well_logs (well_name, branch_name, wlog_name, wlog_data) \
              VALUES ('";
-        q += wname + "', '" + branch + "', '" + wlog_name + ", @q)";
+        q += wname + "', '" + branch + "', '" + wlog_name + "', @q)";
       }
 
       // exec query
