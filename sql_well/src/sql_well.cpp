@@ -98,6 +98,18 @@ bool create_wlogs_table(sql_well& sqw) {
   return (sqw.exec_sql(q) == 0);
 }
 
+bool wlogs_table_exists(sql_well& sqw) {
+  std::string q = "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='well_logs'";
+  sqw.prepare_sql(q);
+
+  bool res = false;
+  if(sqw.step_sql() == 0) {
+    res = bool(sqw.get_sql_int(0));
+  }
+  sqw.finalize_sql();
+  return res;
+}
+
 } // eof hidden namespace
 
   int clear_table (void *pData, int nColumns,
@@ -759,7 +771,7 @@ COMMIT;\
       const std::string &wname, const std::string &branch
   ) {
       std::vector< std::string > res;
-      if (!db)
+      if (!db || !wlogs_table_exists(*this))
         return res;
 
       std::string q = "SELECT wlog_name FROM well_logs WHERE well_name = '" + wname +
