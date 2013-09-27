@@ -152,6 +152,11 @@ namespace blue_sky
        * @return 0 if success
        */
       virtual int save_to_bos_ascii_file (const std::wstring &fname, sp_pool_t pool, sp_prop_t prop);
+
+      // return list of cutom well logs added via add_branch_gis() with nonempty
+      // wlog_name parameter
+      std::vector< std::string > get_wlog_names(const std::string &wname, const std::string &branch);
+
     public:
 #ifdef BSPY_EXPORTING_PLUGIN
 #if 0

@@ -755,6 +755,30 @@ COMMIT;\
       //return 0;
     }
 
+  std::vector< std::string > sql_well::get_wlog_names(
+      const std::string &wname, const std::string &branch
+  ) {
+      std::vector< std::string > res;
+      if (!db)
+        return res;
+
+      std::string q = "SELECT wlog_name FROM well_logs WHERE well_name = '" + wname +
+        "' AND branch_name = '" + branch + "'";
+
+      // exec sql
+      if(prepare_sql(q) < 0) {
+        finalize_sql();
+        return res;
+      }
+
+      while(step_sql() == 0) {
+        res.push_back(get_sql_str(0));
+      }
+
+      finalize_sql();
+      return res;
+  }
+
   sql_well::sp_gis_t
   sql_well::get_branch_gis (const std::string &wname, const std::string &branch,
       const std::string& wlog_name)

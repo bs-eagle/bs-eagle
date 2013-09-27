@@ -161,6 +161,9 @@ class well_pool_iface : public objbase
        * @return 0 if success
        */
       virtual int save_to_bos_ascii_file (const std::wstring &fname, sp_pool_t pool, sp_prop_t prop) = 0;
+
+      virtual std::vector< std::string > get_wlog_names(const std::string &wname, const std::string &branch) = 0;
+
 #ifdef BSPY_EXPORTING_PLUGIN
       //virtual boost::python::list d2date (double d) const = 0;
       //virtual double date2d (int year, int month, int day, int hour, int minute, int second) const = 0;
