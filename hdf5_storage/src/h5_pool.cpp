@@ -195,7 +195,10 @@ namespace blue_sky
       FILE* f;
       if((f = fopen(fname_.c_str(), "r")) != 0) {
         fclose(f);
-        remove(fname_.c_str());
+        if(remove(fname_.c_str())) {
+          // try to rename file if removing failed
+          rename(fname_.c_str(), (fname_ + ".off").c_str());
+        }
       }
 
       file_id = H5Fcreate (fname_.c_str (), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
