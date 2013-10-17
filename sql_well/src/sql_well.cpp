@@ -715,7 +715,7 @@ COMMIT;\
         q = "INSERT OR REPLACE INTO well_logs (well_name, branch_name, wlog_name, wlog_data) \
              VALUES ('";
         q += wname + "', '" + branch + "', '" + wlog_name + "', @q)";
-      }
+        }
 
       // exec query
       if(prepare_sql(q) < 0)
@@ -796,13 +796,13 @@ COMMIT;\
       const std::string& wlog_name)
     {
       if (!db)
-        return sp_gis_t();
+        return sp_gis_t ();
 
       std::string q;
       if(wlog_name.size() == 0) {
         // old-fashioned query writes directly to branches table
         q = "SELECT well_log FROM branches WHERE well_name = '";
-      }
+        }
       else {
         // new implementation writes to separate well_logs table
         // format query
@@ -822,18 +822,18 @@ COMMIT;\
 
       // extract blob
       int n = sqlite3_column_bytes (stmp_sql, 0);
-      if (n < 1)
-        {
+          if (n < 1)
+            {
           finalize_sql();
           return NULL;
-        }
+            }
       const char *b = (const char *)sqlite3_column_blob (stmp_sql, 0);
-      std::string s;
-      s.assign (b, n);
-      printf ("READ GIS %d\n", (int)s.length ());
+          std::string s;
+          s.assign (b, n);
+          printf ("READ GIS %d\n", (int)s.length ());
 
       sp_gis_t sp_gis = BS_KERNEL.create_object ("gis");
-      sp_gis->from_str(s);
+          sp_gis->from_str(s);
 
       // return
       finalize_sql();
