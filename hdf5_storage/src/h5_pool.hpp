@@ -17,7 +17,7 @@
 #include <hdf5.h>
 
 #include "bs_serialize_decl.h"
-const int BUF_SIZE = 1024; //!< size of buffer for script
+const int BUF_SIZE = 100000; //!< size of buffer for script
 
 namespace blue_sky
 {
