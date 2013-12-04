@@ -127,20 +127,20 @@ BS_API_PLUGIN coord_zcorn_pair refine_wave_mesh_deltas(
 	spfp_storarr_t points_pos, spfp_storarr_t points_param);
 
 // convert array of cell's tops coord to structured grid representation
-spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float tops);
+BS_API_PLUGIN spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float tops);
 // memory-efficient implementation directly from COORD and ZCORN using tops_iterator
-spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float coord, spv_float zcorn);
+BS_API_PLUGIN spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float coord, spv_float zcorn);
 // same as above using provided rs_smesh_iface object
-spv_float tops2struct_grid(smart_ptr< rs_smesh_iface > mesh);
+BS_API_PLUGIN spv_float tops2struct_grid(smart_ptr< rs_smesh_iface > mesh);
 
-spv_float gen_sgrid(
+BS_API_PLUGIN spv_float gen_sgrid(
 	t_ulong nx, t_ulong ny, t_ulong nz,
 	spv_float dx, spv_float dy, spv_float dz,
 	t_float x0 = 0, t_float y0 = 0, t_float z0 = 0,
 	bool zyx_order = false
 );
 
-spv_float gen_sgrid_2d(
+BS_API_PLUGIN spv_float gen_sgrid_2d(
 	t_ulong nx, t_ulong ny,
 	spv_float dx, spv_float dy,
 	t_float x0 = 0, t_float y0 = 0,

@@ -34,6 +34,7 @@ BLUE_SKY_REGISTER_PLUGIN_FUN {
 namespace python {
 
 void py_export_wpi();
+void py_export_wpi_vtk();
 
 }
 
@@ -44,6 +45,7 @@ namespace {
 
 void init_py_subsystem() {
 	python::py_export_wpi();
+	python::py_export_wpi_vtk();
 }
 
 } /* eof hidden namespace */
