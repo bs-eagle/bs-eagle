@@ -34,6 +34,14 @@ typedef std::pair< spfp_storarr_t, spfp_storarr_t > coord_zcorn_pair;
  *----------------------------------------------------------------*/
 BS_API_PLUGIN spfp_storarr_t gen_coord(int_t nx, int_t ny, spfp_storarr_t dx, spfp_storarr_t dy, fp_t x0, fp_t y0);
 
+BS_API_PLUGIN coord_zcorn_pair gen_coord_zcorn(
+	int_t nx, int_t ny, int_t nz,
+	spv_float dx, spv_float dy, spv_float dz,
+	fp_stor_t x0, fp_stor_t y0, fp_stor_t z0
+);
+
+BS_API_PLUGIN spfp_storarr_t gen_coord2(spfp_storarr_t x, spfp_storarr_t y);
+
 BS_API_PLUGIN coord_zcorn_pair refine_mesh_deltas(int_t& nx, int_t& ny, spfp_storarr_t coord,
 	spfp_storarr_t points, fp_t cell_merge_thresh, fp_t band_thresh,
 	spi_arr_t hit_idx = NULL);
