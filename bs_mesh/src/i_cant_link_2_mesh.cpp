@@ -10,7 +10,7 @@
 
 #include "i_cant_link_2_mesh.h"
 #include "bs_mesh_grdecl.h"
-#include "well_path_ident.h"
+//#include "well_path_ident.h"
 
 namespace blue_sky {
 
@@ -37,23 +37,23 @@ public:
 		return calc_cells_vertices_xyz_impl(nx, ny, coord, zcorn);
 	}
 
-	// 3D
-	spv_ulong where_is_points(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
-		return blue_sky::where_is_points(nx, ny, coord, zcorn, points);
-	}
-	// 2D
-	spv_ulong where_is_points_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
-		return blue_sky::where_is_points_2d(nx, ny, coord, zcorn, points);
-	}
+	//// 3D
+	//spv_ulong where_is_points(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
+	//	return blue_sky::where_is_points(nx, ny, coord, zcorn, points);
+	//}
+	//// 2D
+	//spv_ulong where_is_points_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
+	//	return blue_sky::where_is_points_2d(nx, ny, coord, zcorn, points);
+	//}
 
-	// 3D
-	t_ulong where_is_point(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) {
-		return blue_sky::where_is_point(nx, ny, coord, zcorn, point);
-	}
-	// 2D
-	t_ulong where_is_point_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) {
-		return blue_sky::where_is_point_2d(nx, ny, coord, zcorn, point);
-	}
+	//// 3D
+	//t_ulong where_is_point(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) {
+	//	return blue_sky::where_is_point(nx, ny, coord, zcorn, point);
+	//}
+	//// 2D
+	//t_ulong where_is_point_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) {
+	//	return blue_sky::where_is_point_2d(nx, ny, coord, zcorn, point);
+	//}
 
 	sp_smesh make_mesh_grdecl(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
 		typedef smart_ptr< bs_mesh_grdecl, true > sp_grd_mesh;
