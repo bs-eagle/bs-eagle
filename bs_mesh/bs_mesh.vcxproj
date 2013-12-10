@@ -249,7 +249,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\i_cant_link_2_mesh.cpp" />
-    <ClCompile Include="src\py_coord_zcorn_tools.cpp" />
     <ClCompile Include="src\py_flux_connections.cpp" />
     <ClCompile Include="src\py_mesh_grdecl.cpp" />
     <ClCompile Include="src\py_rs_mesh.cpp" />
@@ -268,11 +267,8 @@
     <ClCompile Include="src\mesh_grdecl_keywords.cpp" />
     <ClCompile Include="src\mesh_ijk_keywords.cpp" />
     <ClCompile Include="src\rs_smesh_keywords.cpp" />
-    <ClCompile Include="src\coord_zcorn_tools.cpp" />
     <ClCompile Include="src\upsc.cpp" />
     <ClCompile Include="src\well_edit_tools.cpp" />
-    <ClCompile Include="src\well_path_ident.cpp" />
-    <ClCompile Include="src\well_path_ident_2d.cpp" />
     <ClCompile Include="src\bs_mesh.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -309,13 +305,6 @@
     <ClInclude Include="src\rs_smesh_keywords.h" />
     <ClInclude Include="src\gauss_method.h" />
     <ClInclude Include="src\bs_mesh_stdafx.h" />
-    <ClInclude Include="src\wpi_algo.h" />
-    <ClInclude Include="src\wpi_algo_meshp.h" />
-    <ClInclude Include="src\wpi_algo_pod.h" />
-    <ClInclude Include="src\wpi_algo_xaction.h" />
-    <ClInclude Include="src\wpi_common.h" />
-    <ClInclude Include="src\wpi_strategy_2d.h" />
-    <ClInclude Include="src\wpi_strategy_3d.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\kernel\blue-sky.vcxproj">
