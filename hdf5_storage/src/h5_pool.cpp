@@ -12,6 +12,7 @@
 #include <hdf5.h>
 #include <stdio.h>
 #include <iomanip>
+#include <cstdio>
 
 #include "h5_pool.hpp"
 #include "h5_helper.h"
@@ -189,6 +190,16 @@ namespace blue_sky
         {
           close_file ();
         }
+
+      // check if file already exists, if so -- delete it
+      FILE* f;
+      if((f = fopen(fname_.c_str(), "r")) != 0) {
+        fclose(f);
+        if(remove(fname_.c_str())) {
+          // try to rename file if removing failed
+          rename(fname_.c_str(), (fname_ + ".off").c_str());
+        }
+      }
 
       file_id = H5Fcreate (fname_.c_str (), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
       if (file_id < 0)

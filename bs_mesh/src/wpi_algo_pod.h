@@ -155,14 +155,13 @@ struct pods : public helpers< strat_t > {
 		void bound(vertex_pos& b) const {
 			pred< t_float > p = pred< t_float >();
 			const cell_pos& cV = cpos();
-			t_float c;
+
 			for(uint i = 0; i < D; ++i) {
-				c = cV[0][i];
+				b[i] = cV[0][i];
 				for(uint j = 1; j < N; ++j) {
-					if(p(cV[j][i], c))
-						c = cV[j][i];
+					if(p(cV[j][i], b[i]))
+						b[i] = cV[j][i];
 				}
-				b[i] = c;
 			}
 		}
 	};

@@ -188,8 +188,9 @@ struct strategy_2d_ex {
 					res.push_back(std::make_pair(*xpoint, i));
 				else if(const Segment* xseg = CGAL::object_cast< Segment >(&xres)) {
 					// in rare 1% of segment lying on the facet, add begin and end of segment
+					// update: add only first point, two points confuse different algorithms
 					res.push_back(std::make_pair(xseg->source(), i));
-					res.push_back(std::make_pair(xseg->target(), i));
+					//res.push_back(std::make_pair(xseg->target(), i));
 				}
 			}
 			catch(std::exception& e) {

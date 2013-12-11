@@ -42,6 +42,8 @@ namespace blue_sky
         args ("well_name", "branch_name", "gis"), "Add gis to the well branch")
     .def ("get_branch_gis",                     &T::get_branch_gis,
         args ("well_name", "branch_name"),  "Get gis of well branch")
+    .def ("get_wlog_names",                     &T::get_wlog_names,
+        args ("well_name", "branch_name"), "Get list of custom well logs")
     .def ("add_branch_traj",                     &T::add_branch_traj,
         args ("well_name", "branch_name", "traj"), "Add traj to the well branch")
     .def ("update_branch_traj",                     &T::add_branch_traj,

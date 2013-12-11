@@ -99,11 +99,12 @@ namespace blue_sky
       //virtual int add_branch_prop (const std::string &wname, const std::string &branch,
       //                             sp_table_t tbl);
       virtual int add_branch_gis (const std::string &wname, const std::string &branch,
-                                  sp_gis_t g);
+                                  sp_gis_t g, const std::string& wlog_name = "");
       virtual int add_branch_traj (const std::string &wname, const std::string &branch,
                                    sp_traj_t t);
       //virtual sp_table_t get_branch_prop (const std::string &wname, const std::string &branch) const;
-      virtual sp_gis_t get_branch_gis (const std::string &wname, const std::string &branch) const;
+      virtual sp_gis_t get_branch_gis (const std::string &wname, const std::string &branch,
+                                   const std::string& wlog_name = "");
       virtual sp_traj_t get_branch_traj (const std::string &wname, const std::string &branch) const;
       //virtual void remove_branch (const std::string &wname, const std::string &branch);
 
@@ -151,6 +152,11 @@ namespace blue_sky
        * @return 0 if success
        */
       virtual int save_to_bos_ascii_file (const std::wstring &fname, sp_pool_t pool, sp_prop_t prop);
+
+      // return list of cutom well logs added via add_branch_gis() with nonempty
+      // wlog_name parameter
+      std::vector< std::string > get_wlog_names(const std::string &wname, const std::string &branch);
+
     public:
 #ifdef BSPY_EXPORTING_PLUGIN
 #if 0

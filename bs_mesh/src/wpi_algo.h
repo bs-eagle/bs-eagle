@@ -89,14 +89,8 @@ struct algo : public helpers< strat_t > {
 		//well_data wd;
 		for(ulong i = 1; i < well_node_num - 1; ++i) {
 			pw += 4;
-			//if(i)
-			//	wd = well_data(pw, &W[i - 1]);
-			//else
-			//	wd = well_data(pw);
-	
 			// insert well segment
 			W[i] = well_data(pw, &W[i - 1]);
-			//pw += 4;
 		}
 
 		return well_node_num;
@@ -109,7 +103,7 @@ struct algo : public helpers< strat_t > {
 	struct wpi_return {
 		typedef spv_float type;
 
-		static type make(xbase& A) {
+		static type make(const xbase& A) {
 			return A.export_1d();
 		}
 	};
@@ -118,11 +112,12 @@ struct algo : public helpers< strat_t > {
 	struct wpi_return< false, unused > {
 		typedef std::vector< well_hit_cell > type;
 
-		static type make(xbase& A) {
+		static type make(const xbase& A) {
 			type res(A.path().size());
-			ulong i = 0;
-			for(typename intersect_path::const_iterator px = A.path().begin(), end = A.path().end(); px != end; ++px)
-				res[i++] = *px;
+			std::copy(A.path().begin(), A.path().end(), res.begin());
+			//ulong i = 0;
+			//for(typename intersect_path::const_iterator px = A.path().begin(), end = A.path().end(); px != end; ++px)
+			//	res[i++] = *px;
 
 			return res;
 		}
@@ -131,56 +126,49 @@ struct algo : public helpers< strat_t > {
 	template< bool pythonish >
 	static typename wpi_return< pythonish >::type well_path_ident_d(
 		ulong nx, ulong ny, sp_obj trim_backend,
-		spv_float well_info, bool include_well_nodes)
+		spv_float well_info, bool include_well_nodes, spv_ulong H = NULL)
 	{
 		typedef typename wpi_return< pythonish >::type ret_t;
 
 		// 1) calculate mesh nodes coordinates and build initial trimesh
 		trimesh M(nx, ny, trim_backend);
-		//vertex_pos_i mesh_size;
-		//spv_float tops = coord_zcorn2trimesh(nx, ny, coord, zcorn, M, mesh_size);
-		// DEBUG
-		//std::cout << "trimesh built" << std::endl;
 
 		// 2) create well path description
 		well_path W;
 		if(!fill_well_path(well_info, W)) return ret_t();
-		// DEBUG
-		//std::cout << "well_path created" << std::endl;
 
 		// 3) construct main object
 		xbuilder A(M, W);
-		// DEBUG
-		//std::cout << "hit_idx found" << std::endl;
 
 		// 4) narrow search space via branch & bound algo
-		hit_idx_t& hit_idx = A.build();
-		// DEBUG
-		//std::cout << "build() done" << std::endl;
+		const hit_idx_t& hit_idx = A.build();
 
 		// 5) remove duplicates in X,Y,Z directions
 		//A.remove_dups2();
-		// DEBUG
-		//std::cout << "remove_dups2 done" << std::endl;
 
 		// 6) finalize intersection
 		if(include_well_nodes)
 			A.append_wp_nodes(hit_idx);
-		// DEBUG
-		//std::cout << "well nodes inserted" << std::endl;
 
+		// return well nodes hit indexes
+		if(H) {
+			H->resize(hit_idx.size());
+			if(H->size() == hit_idx.size())
+				std::copy(hit_idx.begin(), hit_idx.end(), H->begin());
+		}
+		// return intersections
 		return wpi_return< pythonish >::make(A);
 	}
 
 	template< bool pythonish >
 	static typename wpi_return< pythonish >::type well_path_ident_d(
 		ulong nx, ulong ny, spv_float coord, spv_float zcorn,
-		spv_float well_info, bool include_well_nodes)
+		spv_float well_info, bool include_well_nodes, spv_ulong H = NULL)
 	{
 		// calculate mesh nodes coordinates and build initial trimesh
 		return well_path_ident_d< pythonish >(
 			nx, ny, trimesh::create_backend(nx, ny, coord, zcorn),
-			well_info, include_well_nodes
+			well_info, include_well_nodes, H
 		);
 	}
 

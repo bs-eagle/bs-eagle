@@ -105,11 +105,13 @@ class well_pool_iface : public objbase
       //virtual int add_branch_prop (const std::string &wname, const std::string &branch,
       //                             sp_table_t tbl) = 0;
       virtual int add_branch_gis (const std::string &wname, const std::string &branch,
-                                  sp_gis_t g) = 0;
+                                  sp_gis_t g, const std::string& wlog_name = "") = 0;
       virtual int add_branch_traj (const std::string &wname, const std::string &branch,
                                    sp_traj_t t) = 0;
       //virtual sp_table_t get_branch_prop (const std::string &wname, const std::string &branch) const = 0;
-      virtual sp_gis_t get_branch_gis (const std::string &wname, const std::string &branch) const = 0;
+      virtual sp_gis_t get_branch_gis (const std::string &wname, const std::string &branch,
+                                   const std::string& wlog_name = "") = 0;
+
       virtual sp_traj_t get_branch_traj (const std::string &wname, const std::string &branch) const = 0;
       //virtual void remove_branch (const std::string &wname, const std::string &branch) = 0;
 
@@ -159,6 +161,9 @@ class well_pool_iface : public objbase
        * @return 0 if success
        */
       virtual int save_to_bos_ascii_file (const std::wstring &fname, sp_pool_t pool, sp_prop_t prop) = 0;
+
+      virtual std::vector< std::string > get_wlog_names(const std::string &wname, const std::string &branch) = 0;
+
 #ifdef BSPY_EXPORTING_PLUGIN
       //virtual boost::python::list d2date (double d) const = 0;
       //virtual double date2d (int year, int month, int day, int hour, int minute, int second) const = 0;

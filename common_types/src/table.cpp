@@ -193,14 +193,16 @@ namespace blue_sky
   void 
   table::set_col_values (const t_long col, spv_double val)
     {
-      if (col < 0 || col >= get_n_cols ()
-          || get_n_rows () != (t_long)val->size ())
+      if (col < 0 || col >= get_n_cols ())
         {
           // TODO: print error message
-          throw "Invalid parameters in set_col_values"; 
+          throw bs_exception("common_types::table", "Invalid parameters in set_col_values");
         }
-	  if(get_n_rows() > 0)
-		memcpy (&(values[col])[0], &(*val)[0], sizeof (t_double) * get_n_rows ()); 
+      if(get_n_rows() > 0) {
+        ulong sz = std::min(val->size(), ulong(get_n_rows()));
+        std::copy(val->begin(), val->begin() + sz, values[col].begin());
+        //memcpy (&(values[col])[0], &(*val)[0], sizeof (t_double) * get_n_rows ()); 
+      }
     }
   
   spv_double 
@@ -209,14 +211,15 @@ namespace blue_sky
       if (col < 0 || col >= get_n_cols ())
         {
           // TODO: print error message
-          throw "Invalid parameters in get_col_values"; 
+          throw bs_exception("common_types::table", "Invalid parameters in get_col_values");
         }
       spv_double a = BS_KERNEL.create_object (v_double::bs_type ());
 
-	  if(get_n_rows() > 0) {
-		a->resize (get_n_rows ());
-		memcpy (&(*a)[0], &(values[col])[0], sizeof (t_double) * get_n_rows ()); 
-	  }
+      if(get_n_rows() > 0) {
+          a->resize (get_n_rows ());
+          std::copy(values[col].begin(), values[col].end(), a->begin());
+          //memcpy (&(*a)[0], &(values[col])[0], sizeof (t_double) * get_n_rows ()); 
+      }
       return a;
     }
 

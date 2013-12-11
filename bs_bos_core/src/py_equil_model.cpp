@@ -2,6 +2,7 @@
 #include "py_equil_model.h"
 #include "equil_model_iface.h"
 #include "equil_model_depth.h"
+#include "bs_serialize.h"
 
 #ifdef BSPY_EXPORTING_PLUGIN
 #include "export_python_wrapper.h"
@@ -29,6 +30,9 @@ namespace blue_sky
 			base_exporter <equil_model_iface, equil_model_depth_exporter>::export_class ("equil_model_iface");
       class_exporter <equil_model_depth, equil_model_iface, equil_model_depth_exporter>::export_class ("equil_model_depth");
       
+      // register equil to/from str serialization
+      def("serialize_to_str", &blue_sky::serialize_to_str< equil_model_iface >);
+      def("serialize_from_str", &blue_sky::serialize_from_str< equil_model_iface >);
 		}
 	}
 }
