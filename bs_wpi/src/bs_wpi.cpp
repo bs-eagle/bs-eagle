@@ -23,8 +23,15 @@ bool register_types(const plugin_descriptor& pd) {
 
 } /* eof hidden namespace */
 
+// forward declaration of additional types registering functions
+bool register_czt_iface(const plugin_descriptor&);
+bool register_wpi_iface(const plugin_descriptor&);
+
 BLUE_SKY_REGISTER_PLUGIN_FUN {
-	return register_types(*bs_init.pd_);
+	bool res = register_types(*bs_init.pd_);
+	res &= register_czt_iface(*bs_init.pd_);
+	res &= register_wpi_iface(*bs_init.pd_);
+	return res;
 }
 
 #ifdef BSPY_EXPORTING_PLUGIN
@@ -64,7 +71,7 @@ BOOST_PYTHON_MODULE (bs_wpi)
 {
 	init_py_subsystem ();
 	std::cout << &BS_KERNEL << std::endl;
-	bool res = blue_sky::register_types (*bs_get_plugin_descriptor());
+	bool res = blue_sky::register_types(*bs_get_plugin_descriptor());
 	if (!res)
 		throw "Can't register bs_wpi types";
 }

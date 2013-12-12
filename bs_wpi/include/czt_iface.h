@@ -173,6 +173,7 @@ public:
 
 	BLUE_SKY_TYPE_DECL(czt_iface)
 };
+typedef smart_ptr< czt_iface > sp_iczt;
 
 } /* namespace blue_sky */
 

@@ -37,10 +37,11 @@ std::vector< well_hit_cell_2d > well_path_ident_2d(t_ulong nx, t_ulong ny, spv_f
 
 } /* wpi */
 
+namespace {
 /*-----------------------------------------------------------------
  * Forward interface calls to corresponding functions
  *----------------------------------------------------------------*/
-class BS_API_PLUGIN wpi_object : public wpi_iface {
+class wpi_object : public wpi_iface {
 public:
 	/*-----------------------------------------------------------------
 	 * Generic well path ident functions
@@ -185,6 +186,7 @@ public:
 		);
 	}
 };
+} // eof hidden namespace
 
 /*-----------------------------------------------------------------
  * BS-related implementation stuff
@@ -207,8 +209,8 @@ blue_sky::objbase* wpi_iface::bs_create_copy(bs_type_cpy_ctor_param) {
 }
 
 bool register_wpi_iface(const plugin_descriptor& pd) {
-	return BS_KERNEL.register_type(pd, wpi_object::bs_type());
+	return BS_KERNEL.register_type(pd, wpi_iface::bs_type());
 }
 
-
 } /* namespace blue_sky */
+
