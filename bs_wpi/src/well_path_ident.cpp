@@ -10,7 +10,6 @@
 #include "bs_common.h"
 #include "well_path_ident.h"
 #include "wpi_strategies.h"
-#include "wpi_iface.h"
 #include "wpi_trimesh_impl.h"
 #include "wpi_algo.h"
 
@@ -291,31 +290,6 @@ t_ulong where_is_point_2d(t_ulong nx, t_ulong ny, spv_float coord, spv_float zco
 		return where_is_point_impl< carray_2d >(nx, ny, coord, zcorn, point);
 	}
 }
-
-/*-----------------------------------------------------------------
- * C++ iface
- *----------------------------------------------------------------*/
-namespace wpi {
-
-std::vector< well_hit_cell_3d > well_path_ident(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
-	spv_float well_info, bool include_well_nodes)
-{
-	//return well_path_ident_(nx, ny, coord, zcorn, well_info, include_well_nodes);
-	return algo< strategy_3d >::well_path_ident_d< false >(
-		nx, ny, coord, zcorn, well_info, include_well_nodes
-	);
-}
-
-std::vector< well_hit_cell_2d > well_path_ident_2d(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
-	spv_float well_info, bool include_well_nodes)
-{
-	//return well_path_ident_(nx, ny, coord, zcorn, well_info, include_well_nodes);
-	return algo< strategy_2d >::well_path_ident_d< false >(
-		nx, ny, coord, zcorn, well_info, include_well_nodes
-	);
-}
-
-} /* wpi */
 
 #ifdef BSPY_EXPORTING_PLUGIN
 // wrappers for well_path_ident family that return hit_idx
