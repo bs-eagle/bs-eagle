@@ -5,7 +5,7 @@
 
 #include "bs_mesh_stdafx.h"
 #include "mesh_grdecl.h"
-#include "coord_zcorn_tools.h"
+#include "czt_iface.h"
 
 #include <iterator>
 #ifdef WIN32
@@ -4195,12 +4195,14 @@ namespace czt = blue_sky::coord_zcorn_tools;
 
 std::pair< spv_float, spv_float >
 mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz, t_float x0, t_float y0, t_float z0) {
-	return czt::gen_coord_zcorn(nx, ny, nz, dx, dy, dz, x0, y0, z0);
+	sp_iczt t = BS_KERNEL.create_object("czt_iface");
+	return t->gen_coord_zcorn(nx, ny, nz, dx, dy, dz, x0, y0, z0);
 }
 
 spv_float
 mesh_grdecl::gen_coord2 (spv_float x, spv_float y) {
-	return czt::gen_coord2(x, y);
+	sp_iczt t = BS_KERNEL.create_object("czt_iface");
+	return t->gen_coord2(x, y);
 }
 
 /*-----------------------------------------------------------------
@@ -4210,14 +4212,16 @@ std::pair< spv_float, spv_float >
 mesh_grdecl::refine_mesh_deltas(t_long& nx, t_long& ny, spv_float coord,
 		spv_float points, spv_long hit_idx, t_double cell_merge_thresh, t_double band_thresh)
 {
-	return czt::refine_mesh_deltas(nx, ny, coord, points, cell_merge_thresh, band_thresh, hit_idx);
+	static sp_iczt t = BS_KERNEL.create_object("czt_iface");
+	return t->refine_mesh_deltas(nx, ny, coord, points, cell_merge_thresh, band_thresh, hit_idx);
 }
 
 std::pair< spv_float, spv_float >
 mesh_grdecl::refine_mesh(t_long& nx, t_long& ny, spv_float coord, spv_float zcorn,
 		spv_float points, spv_long hit_idx, t_double cell_merge_thresh, t_double band_thresh)
 {
-	return czt::refine_mesh(nx, ny, coord, zcorn, points, cell_merge_thresh, band_thresh, hit_idx);
+	static sp_iczt t = BS_KERNEL.create_object("czt_iface");
+	return t->refine_mesh(nx, ny, coord, zcorn, points, cell_merge_thresh, band_thresh, hit_idx);
 }
 
 /*-----------------------------------------------------------------
@@ -4228,7 +4232,8 @@ mesh_grdecl::refine_mesh_deltas(t_long& nx, t_long& ny, spv_float coord,
 		spv_long points_pos, spv_float points_param, spv_long hit_idx,
 		t_double cell_merge_thresh, t_double band_thresh)
 {
-	return czt::refine_mesh_deltas(nx, ny, coord, points_pos, points_param,
+	static sp_iczt t = BS_KERNEL.create_object("czt_iface");
+	return t->refine_mesh_deltas(nx, ny, coord, points_pos, points_param,
 			cell_merge_thresh, band_thresh, hit_idx);
 }
 
@@ -4237,7 +4242,8 @@ mesh_grdecl::refine_mesh(t_long& nx, t_long& ny, spv_float coord, spv_float zcor
 		spv_long points_pos, spv_float points_param, spv_long hit_idx,
 		t_double cell_merge_thresh, t_double band_thresh)
 {
-	return czt::refine_mesh(nx, ny, coord, zcorn, points_pos, points_param,
+	static sp_iczt t = BS_KERNEL.create_object("czt_iface");
+	return t->refine_mesh(nx, ny, coord, zcorn, points_pos, points_param,
 			cell_merge_thresh, band_thresh, hit_idx);
 }
 
