@@ -255,14 +255,6 @@ public:
 /*-----------------------------------------------------------------
  * BS-related implementation stuff
  *----------------------------------------------------------------*/
-// std and copy ctors
-czt_iface::czt_iface(bs_type_ctor_param)
-{}
-
-czt_iface::czt_iface(const czt_iface& rhs)
-	: bs_refcounter(), objbase(rhs)
-{}
-
 BLUE_SKY_TYPE_IMPL(czt_iface, objbase, "czt_iface", "Interface to CZT functions", "")
 // creation and copy functions creates underlying czt_object
 blue_sky::objbase* czt_iface::bs_create_instance(bs_type_ctor_param) {

@@ -171,7 +171,7 @@ public:
 		bool yx_order = false
 	) = 0;
 
-	BLUE_SKY_TYPE_DECL(czt_iface)
+	BLUE_SKY_TYPE_DECL_IFACE(czt_iface)
 };
 typedef smart_ptr< czt_iface > sp_iczt;
 

@@ -104,7 +104,7 @@ public:
 		const char* strat_traits = "sgrid"
 	) = 0;
 
-	BLUE_SKY_TYPE_DECL(wpi_iface)
+	BLUE_SKY_TYPE_DECL_IFACE(wpi_iface)
 };
 typedef smart_ptr< wpi_iface > sp_iwpi;
 

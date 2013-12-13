@@ -191,14 +191,6 @@ public:
 /*-----------------------------------------------------------------
  * BS-related implementation stuff
  *----------------------------------------------------------------*/
-// std and copy ctors
-wpi_iface::wpi_iface(bs_type_ctor_param)
-{}
-
-wpi_iface::wpi_iface(const wpi_iface& rhs)
-	: bs_refcounter(), objbase(rhs)
-{}
-
 BLUE_SKY_TYPE_IMPL(wpi_iface, objbase, "wpi_iface", "Interface to WPI functions", "")
 // creation and copy functions creates underlying wpi_object
 blue_sky::objbase* wpi_iface::bs_create_instance(bs_type_ctor_param) {
