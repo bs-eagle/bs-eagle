@@ -30,9 +30,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\py_coord_zcorn_tools.cpp">
-      <Filter>python</Filter>
-    </ClCompile>
     <ClCompile Include="src\py_flux_connections.cpp">
       <Filter>python</Filter>
     </ClCompile>
@@ -84,16 +81,7 @@
     <ClCompile Include="src\rs_smesh_keywords.cpp">
       <Filter>rs\keywords</Filter>
     </ClCompile>
-    <ClCompile Include="src\coord_zcorn_tools.cpp">
-      <Filter>gen</Filter>
-    </ClCompile>
     <ClCompile Include="src\well_edit_tools.cpp">
-      <Filter>gen</Filter>
-    </ClCompile>
-    <ClCompile Include="src\well_path_ident.cpp">
-      <Filter>gen</Filter>
-    </ClCompile>
-    <ClCompile Include="src\well_path_ident_2d.cpp">
       <Filter>gen</Filter>
     </ClCompile>
     <ClCompile Include="src\bs_mesh.cpp" />
@@ -164,27 +152,6 @@
       <Filter>rs\grdecl_mpfa</Filter>
     </ClInclude>
     <ClInclude Include="src\bs_mesh_stdafx.h" />
-    <ClInclude Include="src\wpi_algo.h">
-      <Filter>gen</Filter>
-    </ClInclude>
-    <ClInclude Include="src\wpi_algo_meshp.h">
-      <Filter>gen</Filter>
-    </ClInclude>
-    <ClInclude Include="src\wpi_algo_pod.h">
-      <Filter>gen</Filter>
-    </ClInclude>
-    <ClInclude Include="src\wpi_algo_xaction.h">
-      <Filter>gen</Filter>
-    </ClInclude>
-    <ClInclude Include="src\wpi_common.h">
-      <Filter>gen</Filter>
-    </ClInclude>
-    <ClInclude Include="src\wpi_strategy_2d.h">
-      <Filter>gen</Filter>
-    </ClInclude>
-    <ClInclude Include="src\wpi_strategy_3d.h">
-      <Filter>gen</Filter>
-    </ClInclude>
     <ClInclude Include="include\i_cant_link_2_mesh.h" />
   </ItemGroup>
 </Project>

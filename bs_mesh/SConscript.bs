@@ -12,10 +12,11 @@ env.Append (CPPPATH = ["include", "src",
     includes["bs_bos_core_data_storage"],
     includes["bs_mtx"],
     includes["sql_well"],
-    includes["bs_lsolvers"]
+    includes["bs_lsolvers"],
+    includes["bs_wpi"],
     ] + includes["kernel"])
 
-libs = ["blue_sky", "bs_bos_core_base", "bs_mtx"]
+libs = ["blue_sky", "bs_bos_core_base", "bs_mtx", "bs_wpi"]
 
 if (build_kind == "debug") :
     env.AppendUnique (

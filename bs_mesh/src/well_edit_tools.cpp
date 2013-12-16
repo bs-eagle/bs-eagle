@@ -6,6 +6,7 @@
 
 #include "conf.h"
 #include "wpi_iface.h"
+#include "wpi_strategies.h"
 #include "wpi_trimesh_impl.h"
 #include "wpi_algo.h"
 #include "wpi_algo_vtk.h"
@@ -123,18 +124,6 @@ t_float find_point_z(point3d N1, point3d N2, point3d N3, point2d M)
 }
 
 using namespace blue_sky;
-
-typedef wpi::strategy_3d_ex< wpi::carray_traits >              carray_3d;
-typedef wpi::strategy_3d_ex< wpi::online_tops_traits >         onlinett_3d;
-typedef wpi::strategy_3d_ex< wpi::online_tops_traits_bufpool > onlinett_bp_3d;
-typedef wpi::strategy_3d_ex< wpi::sgrid_traits >               sgrid_3d;
-typedef wpi::strategy_3d_ex< wpi::rgrid_traits >               rgrid_3d;
-
-//typedef wpi::strategy_2d_ex< wpi::carray_traits >              carray_2d;
-//typedef wpi::strategy_2d_ex< wpi::online_tops_traits >         onlinett_2d;
-//typedef wpi::strategy_2d_ex< wpi::online_tops_traits_bufpool > onlinett_bp_2d;
-//typedef wpi::strategy_2d_ex< wpi::sgrid_traits >               sgrid_2d;
-//typedef wpi::strategy_2d_ex< wpi::rgrid_traits >               rgrid_2d;
 
 // finds well-mesh intersection
 // returns mesh_points, well_points
@@ -543,7 +532,7 @@ bp::tuple make_projection(t_ulong nx, t_ulong ny, t_ulong nz,
                           spv_float tops_, spv_float values_,
                           t_ulong z_start, t_ulong z_end)
 {
-   return make_projection_impl< carray_3d >(nx, ny, nz, indices_, faces_,
+   return make_projection_impl< wpi::carray_3d >(nx, ny, nz, indices_, faces_,
       internal_, x_, y_, tops_, values_, z_start, z_end, false);
 }
 
@@ -558,23 +547,23 @@ bp::tuple make_projection_xyz(t_ulong nx, t_ulong ny, t_ulong nz,
                           const char* strat_traits = "carray")
 {
    if(strcmp(strat_traits, "online_tops") == 0) {
-      return make_projection_impl< onlinett_3d >(nx, ny, nz, indices_, faces_,
+      return make_projection_impl< wpi::onlinett_3d >(nx, ny, nz, indices_, faces_,
          internal_, x_, y_, trim_backend, NULL, z_start, z_end, true);
    }
    else if(strcmp(strat_traits, "online_tops_bufpool") == 0) {
-      return make_projection_impl< onlinett_bp_3d >(nx, ny, nz, indices_, faces_,
+      return make_projection_impl< wpi::onlinett_bp_3d >(nx, ny, nz, indices_, faces_,
          internal_, x_, y_, trim_backend, NULL, z_start, z_end, true);
    }
    else if(strcmp(strat_traits, "sgrid") == 0) {
-      return make_projection_impl< sgrid_3d >(nx, ny, nz, indices_, faces_,
+      return make_projection_impl< wpi::sgrid_3d >(nx, ny, nz, indices_, faces_,
          internal_, x_, y_, trim_backend, NULL, z_start, z_end, true);
    }
    else if(strcmp(strat_traits, "rgrid") == 0) {
-      return make_projection_impl< rgrid_3d >(nx, ny, nz, indices_, faces_,
+      return make_projection_impl< wpi::rgrid_3d >(nx, ny, nz, indices_, faces_,
          internal_, x_, y_, trim_backend, NULL, z_start, z_end, true);
    }
    else {
-      return make_projection_impl< carray_3d >(nx, ny, nz, indices_, faces_,
+      return make_projection_impl< wpi::carray_3d >(nx, ny, nz, indices_, faces_,
          internal_, x_, y_, trim_backend, NULL, z_start, z_end, true);
    }
 }

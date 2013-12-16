@@ -29,6 +29,7 @@ if build_kind == 'init':
     includes["bs_hdf5_storage"]             = Dir("hdf5_storage/src")
     includes["bs_pvt_src"]                  = Dir("bs_pvt/src")
     includes["bs_scal_src"]                 = Dir("bs_scal/src")
+    includes["bs_wpi"]                      = Dir("bs_wpi/include")
     #includes["common_types_src"]            = Dir("common_types/src")
     Export ("includes")
 
@@ -48,3 +49,5 @@ else :
     SConscript ("bs_pvt/SConscript.bs")
     SConscript ("hdf5_storage/SConscript.bs")
     SConscript ("bs_bos_core/SConscript.bs")
+    SConscript ("bs_wpi/SConscript.bs")
+
