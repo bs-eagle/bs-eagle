@@ -115,7 +115,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(CGAL_DIR)\include;$(CGAL_DIR)\auxiliary\gmp\include;$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(ProjectDir)/../bs_mesh/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(NUMPY_PATH)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BOOST_THREAD_USE_DLL;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BOOST_THREAD_USE_DLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -147,6 +147,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\coord_zcorn_tools.h" />
+    <ClInclude Include="include\czt_iface.h" />
     <ClInclude Include="include\tops_iterator.h" />
     <ClInclude Include="include\tops_iterator_traits.h" />
     <ClInclude Include="include\well_path_ident.h" />
@@ -172,9 +173,11 @@
   <ItemGroup>
     <ClCompile Include="src\bs_wpi.cpp" />
     <ClCompile Include="src\coord_zcorn_tools.cpp" />
+    <ClCompile Include="src\czt_iface.cpp" />
     <ClCompile Include="src\py_coord_zcorn_tools.cpp" />
     <ClCompile Include="src\well_path_ident.cpp" />
     <ClCompile Include="src\well_path_ident_vtk.cpp" />
+    <ClCompile Include="src\wpi_iface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\kernel\blue-sky.vcxproj">
