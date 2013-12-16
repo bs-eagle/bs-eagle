@@ -43,6 +43,8 @@ namespace {
  *----------------------------------------------------------------*/
 class wpi_object : public wpi_iface {
 public:
+	wpi_object(bs_type_ctor_param = NULL) {}
+
 	/*-----------------------------------------------------------------
 	 * Generic well path ident functions
 	 *----------------------------------------------------------------*/
@@ -185,20 +187,18 @@ public:
 			nx, ny, coord, zcorn, strat_traits
 		);
 	}
+
+	BS_RESOLVE_TYPE_IMPL_MEM
 };
+
 } // eof hidden namespace
 
 /*-----------------------------------------------------------------
  * BS-related implementation stuff
  *----------------------------------------------------------------*/
 BLUE_SKY_TYPE_IMPL(wpi_iface, objbase, "wpi_iface", "Interface to WPI functions", "")
-// creation and copy functions creates underlying wpi_object
-blue_sky::objbase* wpi_iface::bs_create_instance(bs_type_ctor_param) {
-	return new wpi_object;
-}
-blue_sky::objbase* wpi_iface::bs_create_copy(bs_type_cpy_ctor_param) {
-	return new wpi_object;
-}
+BLUE_SKY_TYPE_STD_CREATE_IFACE(wpi_iface, wpi_object)
+BLUE_SKY_TYPE_STD_COPY_IFACE(wpi_iface, wpi_object)
 
 bool register_wpi_iface(const plugin_descriptor& pd) {
 	return BS_KERNEL.register_type(pd, wpi_iface::bs_type());

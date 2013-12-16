@@ -15,6 +15,9 @@ namespace {
 
 class czt_object : public czt_iface {
 public:
+	// empty ctor
+	czt_object(bs_type_ctor_param = NULL) {}
+
 	/*-----------------------------------------------------------------
 	* Main processing functions
 	*----------------------------------------------------------------*/
@@ -248,6 +251,8 @@ public:
 			nx, ny, dx, dy, x0, y0, yx_order
 		);
 	}
+
+	BS_RESOLVE_TYPE_IMPL_MEM
 };
 
 } // eof hidden namespace
@@ -256,13 +261,8 @@ public:
  * BS-related implementation stuff
  *----------------------------------------------------------------*/
 BLUE_SKY_TYPE_IMPL(czt_iface, objbase, "czt_iface", "Interface to CZT functions", "")
-// creation and copy functions creates underlying czt_object
-blue_sky::objbase* czt_iface::bs_create_instance(bs_type_ctor_param) {
-	return new czt_object;
-}
-blue_sky::objbase* czt_iface::bs_create_copy(bs_type_cpy_ctor_param) {
-	return new czt_object;
-}
+BLUE_SKY_TYPE_STD_CREATE_IFACE(czt_iface, czt_object)
+BLUE_SKY_TYPE_STD_COPY_IFACE(czt_iface, czt_object)
 
 bool register_czt_iface(const plugin_descriptor& pd) {
 	return BS_KERNEL.register_type(pd, czt_iface::bs_type());
