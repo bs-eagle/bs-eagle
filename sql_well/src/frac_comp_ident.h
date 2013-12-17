@@ -12,7 +12,7 @@
 #include "conf.h"
 #include "well_pool_iface.h"
 #include "wpi_algo.h"
-#include "wpi_strategy_3d.h"
+#include "wpi_strategies.h"
 
 namespace blue_sky { namespace fci {
 

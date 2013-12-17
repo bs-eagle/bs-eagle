@@ -27,7 +27,7 @@ namespace blue_sky
                                       const stdv_float &perm,
                                       const stdv_float &ntg,
                                       sp_well_t &well,
-                                      std::vector <wpi::well_hit_cell_3d> &well_path_segs,
+                                      std::vector <well_hit_cell_3d> &well_path_segs,
                                       t_uint /*con_branch*/,
                                       t_float con_md,
                                       t_float con_len)

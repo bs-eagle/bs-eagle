@@ -27,6 +27,10 @@ typedef strategy_2d_ex< online_tops_traits_bufpool > onlinett_bp_2d;
 typedef strategy_2d_ex< sgrid_traits >               sgrid_2d;
 typedef strategy_2d_ex< rgrid_traits >               rgrid_2d;
 
+// shortcoming typedef
+typedef strategy_2d_ex< online_tops_traits > strategy_2d;
+typedef strategy_3d_ex< online_tops_traits > strategy_3d;
+
 }} /* namespace blue_sky::wpi */
 
 #endif /* end of include guard: WPI_STRATEGIES_3MKRZELP */

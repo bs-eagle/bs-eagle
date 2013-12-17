@@ -10,7 +10,6 @@
 #define WPI_STRATEGY_2D_C5EHIKCY
 
 #include "wpi_common.h"
-#include "bos_report.h"
 #include <CGAL/Bbox_2.h>
 #include <CGAL/Polygon_2.h>
 
@@ -246,10 +245,6 @@ struct strategy_2d_ex {
 		return t[dim*2 + bnd_id];
 	}
 };
-
-// shortcoming typedef
-typedef strategy_2d_ex< online_tops_traits > strategy_2d;
-//typedef strategy_2d_ex< carray_traits > strategy_2d;
 
 }} // eof blue_sky::wpi
 

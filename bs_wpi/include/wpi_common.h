@@ -17,6 +17,7 @@
 #include <boost/integer/static_min_max.hpp>
 
 #include "conf.h"
+#include "bos_report.h"
 
 namespace blue_sky { namespace wpi {
 

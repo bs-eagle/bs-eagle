@@ -10,7 +10,6 @@
 #define WPI_STRATEGY_3D_SJLKT8NL
 
 #include "wpi_common.h"
-#include "bos_report.h"
 #include <CGAL/Bbox_3.h>
 
 namespace blue_sky { namespace wpi {
@@ -390,10 +389,6 @@ struct strategy_3d_ex {
 		return t[dim*2 + bnd_id];
 	}
 };
-
-// shortcoming typedef
-typedef strategy_3d_ex< online_tops_traits > strategy_3d;
-//typedef strategy_3d_ex< carray_traits > strategy_3d;
 
 }} // eof blue_sky::wpi
 

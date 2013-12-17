@@ -12,30 +12,6 @@
 #include "wpi_algo.h"
 
 namespace blue_sky {
-/*-----------------------------------------------------------------
- * C++ iface
- *----------------------------------------------------------------*/
-namespace wpi {
-
-std::vector< well_hit_cell_3d > well_path_ident(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
-	spv_float well_info, bool include_well_nodes)
-{
-	//return well_path_ident_(nx, ny, coord, zcorn, well_info, include_well_nodes);
-	return algo< strategy_3d >::well_path_ident_d< false >(
-		nx, ny, coord, zcorn, well_info, include_well_nodes
-	);
-}
-
-std::vector< well_hit_cell_2d > well_path_ident_2d(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
-	spv_float well_info, bool include_well_nodes)
-{
-	//return well_path_ident_(nx, ny, coord, zcorn, well_info, include_well_nodes);
-	return algo< strategy_2d >::well_path_ident_d< false >(
-		nx, ny, coord, zcorn, well_info, include_well_nodes
-	);
-}
-
-} /* wpi */
 
 namespace {
 /*-----------------------------------------------------------------
