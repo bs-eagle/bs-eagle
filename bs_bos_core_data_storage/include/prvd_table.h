@@ -1,6 +1,8 @@
 #ifndef PRVD_TABLE_H
 #define PRVD_TABLE_H
 
+#include "table_iface.h"
+
 /*!
   \file prvd_table.h
   \brief declaration of table class for storing prvd
@@ -33,6 +35,9 @@ namespace blue_sky
       d_vec &tdepth();
       //! -//- values array
       d_vec &tvalues();
+
+      BS_SP( table_iface)
+        get_table_data () const;
 
       //! calculate pressure using linear interpolation
       /*inline*/ double interpolate_linear (double) const;

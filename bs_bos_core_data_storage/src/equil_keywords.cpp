@@ -93,7 +93,7 @@ namespace blue_sky
           dbuf[EQUIL_GOC_PRESS] = 0.0;  // Pgoc
           dbuf[EQUIL_RS_TYPE]   = 0;    // RS type initialization
           dbuf[EQUIL_RV_TYPE]   = 0;    // RV type initialization
-          dbuf[EQUIL_NUM_SEC]   = 100;  // number of points
+          dbuf[EQUIL_NUM_SEC]   = -5;  // number of points
           dbuf[EQUIL_COMP_TYPE] = 0;    // composition type initialization
           dbuf[EQUIL_COMP_ARG]  = 0;    // composition argument initialization
 
@@ -105,7 +105,9 @@ namespace blue_sky
               || reader->scanf_fp (end_ptr, &end_ptr, &dbuf[EQUIL_WOC_PRESS], 0, 0)
               || reader->scanf_fp (end_ptr, &end_ptr, &dbuf[EQUIL_GOC_DEPTH], 0, 0)
               || reader->scanf_fp (end_ptr, &end_ptr, &dbuf[EQUIL_GOC_PRESS], 0, 0)
-              || reader->scanf_fp (end_ptr, &end_ptr, &dbuf[EQUIL_RS_TYPE],   0, 0))
+              || reader->scanf_fp (end_ptr, &end_ptr, &dbuf[EQUIL_RS_TYPE],   0, 0)
+              || reader->scanf_fp (end_ptr, &end_ptr, &dbuf[EQUIL_RV_TYPE],   0, 0)
+              || reader->scanf_fp (end_ptr, &end_ptr, &dbuf[EQUIL_NUM_SEC],   0, 0))
             {
               bs_throw_exception (boost::format ("Error in %s: Cannot read values")
                 % reader->get_prefix ().c_str ());

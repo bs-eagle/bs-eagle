@@ -117,4 +117,18 @@ namespace blue_sky
         }
       return -1;
     }
+
+  BS_SP( table_iface)
+  val_vs_depth::get_table_data () const
+  {
+    BS_SP( table_iface) table;
+    table = BS_KERNEL.create_object ("table");
+    table->init (depth.size(), 2);
+    for (unsigned i = 0; i < depth.size(); ++i)
+      {
+        table->set_value(i, 0, depth[i]);
+        table->set_value(i, 1, values[i]);
+      }
+    return table;
+  }
 }

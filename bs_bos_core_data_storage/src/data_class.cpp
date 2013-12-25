@@ -154,6 +154,27 @@ namespace blue_sky
     return pbvd;
   }
 
+  std::list <BS_SP( table_iface)>
+  idata::get_rsvd_data () const
+  {
+    std::list<BS_SP( table_iface)> tables;
+    
+    for (t_long i = 0; i < rsvd.size(); ++i)
+      tables.push_back (rsvd [i].get_table_data());
+    return tables;
+  }
+
+  std::list <BS_SP( table_iface)>
+  idata::get_pbvd_data () const
+  {
+    std::list<BS_SP( table_iface)> tables;
+    
+    for (t_long i = 0; i < pbvd.size(); ++i)
+      tables.push_back (pbvd [i].get_table_data());
+    return tables;
+  }
+
+
   //idata::vsp_pvt &idata::get_pvt()
   //{
   //  return pvt;

@@ -32,6 +32,7 @@ namespace python {
     .def("get_comp_ref_pressure", &T::get_comp_ref_pressure)
     .def("set_comp_const", &T::set_comp_const)
     .def("get_comp_const", &T::get_comp_const)
+    .def("get_data", &T::get_data)
     .def_readwrite("scal", &T::scal_3p_)
     .def_readwrite("pvt", &T::pvt_3p_)
     .def_readwrite("init_model", &T::init_model_)

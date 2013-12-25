@@ -183,6 +183,12 @@ enum   //! indexes for dimension parameters
       bool
       is_set (std::string const &name);
 
+      std::list <BS_SP( table_iface)>
+      get_rsvd_data () const;
+
+      std::list <BS_SP( table_iface)>
+      get_pbvd_data () const;
+
     public:
       sp_prop_t props;
 

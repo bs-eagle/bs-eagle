@@ -24,6 +24,8 @@ namespace python {
     .def("set_fp_array", &T::set_fp_array)
     .def("get_i_array", &T::get_i_array)
     .def("get_fp_array", &T::get_fp_array)
+    .def("get_rsvd_data", &T::get_rsvd_data)
+    .def("get_pbvd_data", &T::get_pbvd_data)
   PY_EXPORTER_END;
 
   void py_export_idata()
