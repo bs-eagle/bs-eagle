@@ -2623,8 +2623,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           for (; !step_sql ();)
             {
               double wefac = get_sql_real (1);
-              if (wefac == 1.0)
-                continue;
+              //if (wefac == 1.0)
+              //  continue;
 
               std::string s = get_sql_str (0);
               // skip out-of-mesh wells
