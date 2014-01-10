@@ -38,10 +38,11 @@ namespace blue_sky {
 // invoke with empty strings to clear kernel table
 // returns prev content of kernel table
 // pass 3 empty strs to clear kernel table
+template< class str_t = std::string >
 std::vector< std::string > hdm_serialize_set_project_prop(
-	const std::string& prj_path = "",
-	const std::string& prj_name = "",
-	const std::string& deep_copy_suffix = ""
+	const str_t& prj_path = str_t(),
+	const str_t& prj_name = str_t(),
+	const str_t& deep_copy_suffix = str_t()
 ) {
 	// save project path for serialization code
 	kernel::idx_dt_ptr p_dt = BS_KERNEL.pert_idx_dt(hdm::bs_type());
@@ -69,13 +70,20 @@ std::vector< std::string > hdm_serialize_set_project_prop(
 }
 
 // wstring version
-std::vector< std::string > hdm_serialize_set_project_prop_w(
-	const std::wstring& prj_path = L"",
-	const std::wstring& prj_name = L"",
-	const std::wstring& deep_copy_suffix = L""
+template< >
+std::vector< std::string > hdm_serialize_set_project_prop< std::wstring >(
+	const std::wstring& prj_path,
+	const std::wstring& prj_name,
+	const std::wstring& deep_copy_suffix
 ) {
+#ifdef UNIX
+	const char* enc_name = "ru_RU.UTF-8";
+#else
+	const char* enc_name = "ru_RU.CP1251";
+#endif
 	return hdm_serialize_set_project_prop(
-		wstr2str(prj_path), wstr2str(prj_name), wstr2str(deep_copy_suffix)
+		wstr2str(prj_path, enc_name), wstr2str(prj_name, enc_name),
+		wstr2str(deep_copy_suffix, enc_name)
 	);
 }
 
@@ -89,13 +97,13 @@ void hdm_serialize_restore_project_prop(const std::vector< std::string >& prev_t
 // hidden implementation details
 namespace  {
 
-template< class dst_stream >
+template< class dst_stream, class str_t = std::string >
 dst_stream& hdm_serialize_save_impl(
 	dst_stream& f,
 	smart_ptr< hdm > t,
-	const std::string& prj_path,
-	const std::string& prj_name,
-	const std::string& deep_copy_suffix
+	const str_t& prj_path,
+	const str_t& prj_name,
+	const str_t& deep_copy_suffix
 ){
 	// setup paths
 	std::vector< std::string > prev_tbl = hdm_serialize_set_project_prop(
@@ -125,11 +133,11 @@ dst_stream& hdm_serialize_save_impl(
 	return f;
 }
 
-template< class src_stream >
+template< class src_stream, class str_t = std::string >
 smart_ptr< hdm > hdm_serialize_load_impl(
 	src_stream& f,
-	const std::string& prj_path,
-	const std::string& prj_name
+	const str_t& prj_path,
+	const str_t& prj_name
 ){
 	// setup paths
 	std::vector< std::string > prev_tbl = hdm_serialize_set_project_prop(
@@ -182,14 +190,17 @@ void hdm_serialize_save(
 	const std::wstring& prj_name,
 	const std::wstring& deep_copy_suffix
 ){
-  #ifdef UNIX
-    const char* enc_name = "ru_RU.UTF-8";
-  #else
-    const char* enc_name = "ru_RU.CP1251";
-  #endif
-	std::string fname = wstr2str(prj_path, enc_name) + PATHSEP + wstr2str(prj_name, enc_name) + HDM_DUMP_EXT;
-	std::ofstream f(fname.c_str());
-	hdm_serialize_save_impl(f, t, wstr2str (prj_path, enc_name), wstr2str (prj_name, enc_name), wstr2str (deep_copy_suffix));
+#ifdef UNIX
+	const char* enc_name = "ru_RU.UTF-8";
+#else
+	const char* enc_name = "ru_RU.CP1251";
+#endif
+	std::ofstream f(
+		(wstr2str(prj_path, enc_name) + PATHSEP +
+		wstr2str(prj_name, enc_name) + HDM_DUMP_EXT).c_str()
+	);
+
+	hdm_serialize_save_impl(f, t, prj_path, prj_name, deep_copy_suffix);
 }
 
 std::string hdm_serialize_to_str(
@@ -199,7 +210,7 @@ std::string hdm_serialize_to_str(
 	const std::wstring& deep_copy_suffix
 ){
 	std::ostringstream f;
-	return hdm_serialize_save_impl(f, t, wstr2str (prj_path), wstr2str (prj_name), wstr2str (deep_copy_suffix)).str();
+	return hdm_serialize_save_impl(f, t, prj_path, prj_name, deep_copy_suffix).str();
 }
 
 /*-----------------------------------------------------------------
@@ -209,13 +220,16 @@ smart_ptr< hdm > hdm_serialize_load(
 	const std::wstring& prj_path,
 	const std::wstring& prj_name
 ){
-  #ifdef UNIX
-    const char* enc_name = "ru_RU.UTF-8";
-  #else
-    const char* enc_name = "ru_RU.CP1251";
-  #endif
-	std::ifstream f((wstr2str (prj_path, enc_name) + PATHSEP + wstr2str (prj_name, enc_name) + HDM_DUMP_EXT).c_str());
-	return hdm_serialize_load_impl(f, wstr2str (prj_path, enc_name), wstr2str (prj_name, enc_name));
+#ifdef UNIX
+	const char* enc_name = "ru_RU.UTF-8";
+#else
+	const char* enc_name = "ru_RU.CP1251";
+#endif
+	std::ifstream f(
+		(wstr2str(prj_path, enc_name) + PATHSEP +
+		wstr2str(prj_name, enc_name) + HDM_DUMP_EXT).c_str()
+	);
+	return hdm_serialize_load_impl(f, prj_path, prj_name);
 }
 
 smart_ptr< hdm > hdm_serialize_from_str(
@@ -224,7 +238,7 @@ smart_ptr< hdm > hdm_serialize_from_str(
 	const std::wstring& prj_name
 ){
 	std::istringstream f(hdm_dump);
-	return hdm_serialize_load_impl(f, wstr2str (prj_path), wstr2str (prj_name));
+	return hdm_serialize_load_impl(f, prj_path, prj_name);
 }
 
 /*-----------------------------------------------------------------
@@ -235,7 +249,9 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(hdm_serialize_save_overl, hdm_serialize_save, 3,
 BOOST_PYTHON_FUNCTION_OVERLOADS(hdm_serialize_to_str_overl, hdm_serialize_to_str, 3, 4)
 //BOOST_PYTHON_FUNCTION_OVERLOADS(hdm_serialize_from_str_overl, hdm_serialize_from_str, 3, 4)
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(hdm_serialize_setpprop_overl, hdm_serialize_set_project_prop_w, 0, 3)
+BOOST_PYTHON_FUNCTION_OVERLOADS(hdm_serialize_setpprop_overl,
+	hdm_serialize_set_project_prop< std::wstring >, 0, 3
+)
 
 namespace python {
 
@@ -249,7 +265,7 @@ BS_API_PLUGIN void py_export_hdm_serialize() {
 	// export only wide-string version
 	//bp::def("hdm_serialize_set_project_prop", &hdm_serialize_set_project_prop);
 	bp::def(
-		"hdm_serialize_set_project_prop", &blue_sky::hdm_serialize_set_project_prop_w,
+		"hdm_serialize_set_project_prop", &blue_sky::hdm_serialize_set_project_prop< std::wstring >,
 		hdm_serialize_setpprop_overl()
 	);
 	bp::def(
