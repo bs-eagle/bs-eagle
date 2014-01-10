@@ -38,11 +38,10 @@ namespace blue_sky {
 // invoke with empty strings to clear kernel table
 // returns prev content of kernel table
 // pass 3 empty strs to clear kernel table
-template< class str_t >
 std::vector< std::string > hdm_serialize_set_project_prop(
-	const str_t& prj_path = str_t(),
-	const str_t& prj_name = str_t(),
-	const str_t& deep_copy_suffix = str_t()
+	const std::string& prj_path = "",
+	const std::string& prj_name = "",
+	const std::string& deep_copy_suffix = ""
 ) {
 	// save project path for serialization code
 	kernel::idx_dt_ptr p_dt = BS_KERNEL.pert_idx_dt(hdm::bs_type());
@@ -70,11 +69,10 @@ std::vector< std::string > hdm_serialize_set_project_prop(
 }
 
 // wstring version
-template< >
-std::vector< std::string > hdm_serialize_set_project_prop< std::wstring >(
-	const std::wstring& prj_path,
-	const std::wstring& prj_name,
-	const std::wstring& deep_copy_suffix
+std::vector< std::string > hdm_serialize_set_project_prop(
+	const std::wstring& prj_path = L"",
+	const std::wstring& prj_name = L"",
+	const std::wstring& deep_copy_suffix = L""
 ) {
 #ifdef UNIX
 	const char* enc_name = "ru_RU.UTF-8";
@@ -85,6 +83,15 @@ std::vector< std::string > hdm_serialize_set_project_prop< std::wstring >(
 		wstr2str(prj_path, enc_name), wstr2str(prj_name, enc_name),
 		wstr2str(deep_copy_suffix, enc_name)
 	);
+}
+
+// just to resolve ambiguity during Python export
+std::vector< std::string > hdm_serialize_set_project_prop_w(
+	const std::wstring& prj_path = L"",
+	const std::wstring& prj_name = L"",
+	const std::wstring& deep_copy_suffix = L""
+) {
+	return hdm_serialize_set_project_prop(prj_path, prj_name, deep_copy_suffix);
 }
 
 void hdm_serialize_restore_project_prop(const std::vector< std::string >& prev_tbl) {
@@ -250,7 +257,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(hdm_serialize_to_str_overl, hdm_serialize_to_str
 //BOOST_PYTHON_FUNCTION_OVERLOADS(hdm_serialize_from_str_overl, hdm_serialize_from_str, 3, 4)
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(hdm_serialize_setpprop_overl,
-	hdm_serialize_set_project_prop< std::wstring >, 0, 3
+	hdm_serialize_set_project_prop_w, 0, 3
 )
 
 namespace python {
@@ -263,9 +270,8 @@ BS_API_PLUGIN void py_export_hdm_serialize() {
 	bp::def("serialize_from_str", &blue_sky::hdm_serialize_from_str);
 
 	// export only wide-string version
-	//bp::def("hdm_serialize_set_project_prop", &hdm_serialize_set_project_prop);
 	bp::def(
-		"hdm_serialize_set_project_prop", &blue_sky::hdm_serialize_set_project_prop< std::wstring >,
+		"hdm_serialize_set_project_prop", &hdm_serialize_set_project_prop_w,
 		hdm_serialize_setpprop_overl()
 	);
 	bp::def(
