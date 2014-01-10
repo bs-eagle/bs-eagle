@@ -38,7 +38,7 @@ namespace blue_sky {
 // invoke with empty strings to clear kernel table
 // returns prev content of kernel table
 // pass 3 empty strs to clear kernel table
-template< class str_t = std::string >
+template< class str_t >
 std::vector< std::string > hdm_serialize_set_project_prop(
 	const str_t& prj_path = str_t(),
 	const str_t& prj_name = str_t(),
@@ -97,7 +97,7 @@ void hdm_serialize_restore_project_prop(const std::vector< std::string >& prev_t
 // hidden implementation details
 namespace  {
 
-template< class dst_stream, class str_t = std::string >
+template< class dst_stream, class str_t >
 dst_stream& hdm_serialize_save_impl(
 	dst_stream& f,
 	smart_ptr< hdm > t,
@@ -133,7 +133,7 @@ dst_stream& hdm_serialize_save_impl(
 	return f;
 }
 
-template< class src_stream, class str_t = std::string >
+template< class src_stream, class str_t >
 smart_ptr< hdm > hdm_serialize_load_impl(
 	src_stream& f,
 	const str_t& prj_path,
