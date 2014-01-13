@@ -2396,6 +2396,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               double p_wr = get_sql_real (3);
               double p_gr = get_sql_real (4);
               double p_bhp = get_sql_real (6);
+              double p_lr = get_sql_real (5);
               std::string s_status;
               std::string s_ctrl;
               std::string s_params;
@@ -2416,6 +2417,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               if (ctrl == CTRL_P_LRATE)
                 {
                   s_ctrl = "LRAT";
+                  if (p_or + p_wr == 0)
+                    p_or = p_lr;
                   if (status == STATUS_OPEN && (p_or + p_wr == 0))
                     continue;
                 }
