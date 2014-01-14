@@ -42,14 +42,14 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 	std::string db_fname, prj_path, prj_name, db_basename;
 	// check if hdm serializer saved filename for us
 	kernel::idx_dt_ptr kdt = BS_KERNEL.pert_idx_dt(BS_KERNEL.find_type("hdm").td_);
-	if(kdt && kdt->size< std::string >()) {
+	if(kdt && kdt->size< std::string >() > 1) {
 		prj_path = kdt->ss< std::string >(0);
 		prj_name = kdt->ss< std::string >(1);
 		db_basename = prj_name;
 		// if we should make a deep copy of well pool - add given suffix to filename
 		if(kdt->size< std::string >() > 2)
 			db_basename += std::string("_") + kdt->ss< std::string >(2);
-		db_basename += "_well_pool.db";
+		db_basename += ".db";
 		db_fname = prj_path + PATHSEP + db_basename;
 	}
 	else {
@@ -60,8 +60,9 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 	// generate uuid that is part of filename
 	if(db_basename.empty()) {
 		bu::uuid db_uuid = bu::random_generator()();
-		db_basename = bu::to_string(db_uuid) + "_well_pool.db";
-		db_fname = std::string("file:") + db_basename;
+		db_basename = bu::to_string(db_uuid) + ".db";
+		db_fname = db_basename;
+		//db_fname = std::string("file:") + db_basename;
 	}
 
 	// flag indicating whether we should backup db
@@ -113,7 +114,7 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 	sqlite3_close(save_db);
 	// SQLITE_BUSY returned if we're trying to backup into source db
 	if(opres != SQLITE_DONE && opres != SQLITE_BUSY) {
-		// if error happens - kill db file
+		// if error happens - kill saved db file
 		::remove(db_fname.c_str());
 	}
 
