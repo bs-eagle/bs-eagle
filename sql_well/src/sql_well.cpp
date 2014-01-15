@@ -207,7 +207,12 @@ bool wlogs_table_exists(sql_well& sqw) {
 
       if (db)
         close_db ();
-      std::string file = wstr2str (file_);
+#ifdef UNIX
+    const char* enc_name = "ru_RU.UTF-8";
+#else
+    const char* enc_name = "ru_RU.CP1251";
+#endif
+      const std::string file = wstr2str (file_, enc_name);
       printf ("SQL open_db %s\n", file.c_str ());
       if (!strcmp(file.c_str(),":memory:") || !boost::filesystem::exists (file))
         {

@@ -9,6 +9,7 @@
 #include "bs_bos_core_data_storage_stdafx.h"
 
 #include "bs_serialize.h"
+#include "bs_misc.h"
 #include "sql_well.h"
 
 #include <boost/serialization/string.hpp>
@@ -18,14 +19,17 @@
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/python.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #include <stdio.h>
 
 // path separator
 #ifdef UNIX
 #define PATHSEP '/'
+#define PATHSEP_W L'/'
 #else
 #define PATHSEP '\\'
+#define PATHSEP_W L'\\'
 #endif
 
 using namespace blue_sky;
@@ -39,13 +43,12 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 	// check db has an associated filename
 	// strangely there is no such API function though it is documented
 	//std::string db_fname(sqlite3_db_filename(t.db, "main"));
-	std::string db_fname, prj_path, prj_name, db_basename;
+	std::string db_fname, prj_path, db_basename;
 	// check if hdm serializer saved filename for us
 	kernel::idx_dt_ptr kdt = BS_KERNEL.pert_idx_dt(BS_KERNEL.find_type("hdm").td_);
 	if(kdt && kdt->size< std::string >() > 1) {
 		prj_path = kdt->ss< std::string >(0);
-		prj_name = kdt->ss< std::string >(1);
-		db_basename = prj_name;
+		db_basename = kdt->ss< std::string >(1);
 		// if we should make a deep copy of well pool - add given suffix to filename
 		if(kdt->size< std::string >() > 2)
 			db_basename += std::string("_") + kdt->ss< std::string >(2);
@@ -190,25 +193,54 @@ BLUE_SKY_TYPE_SERIALIZE_IMPL(blue_sky::sql_well)
 namespace blue_sky { namespace python {
 
 // helper function to write well_pool to given fname
-std::string serialize_to_str_fname(
-	smart_ptr< well_pool_iface > wp,
-		const std::string& prj_path,
-		const std::string& prj_name
+std::string serialize_to_fname(
+		smart_ptr< well_pool_iface > wp,
+		const std::wstring& prj_path,
+		const std::wstring& prj_name,
+		bool switch_conn = false
 	) {
 	// save project path for serialization code
 	kernel::idx_dt_ptr p_dt = BS_KERNEL.pert_idx_dt(BS_KERNEL.find_type("hdm").td_);
-	//std::string well_pool_filename = prj_name + "_well_pool.db";
-	p_dt->insert< std::string >(prj_path);
-	// and project name
-	p_dt->insert< std::string >(prj_name);
+	// save existing contents of kernel table
+	ulong sz = p_dt->size< std::string >();
+	std::vector< std::string > prev_tbl(sz);
+	for(ulong i = 0; i < sz; ++i)
+		prev_tbl[i] = p_dt->ss< std::string >(i);
+
+	// clear kernel table to not confuse with further saves
+	p_dt->clear< std::string >();
+
+	// decode widestring paths
+#ifdef UNIX
+	const char* enc_name = "ru_RU.UTF-8";
+#else
+	const char* enc_name = "ru_RU.CP1251";
+#endif
+	const std::string prj_path_ = wstr2str(prj_path, enc_name);
+	const std::string prj_name_ = wstr2str(prj_name, enc_name);
+	const std::string db_fname_ = prj_path_ + PATHSEP + prj_name_ + ".db";
+	const std::wstring db_fname = prj_path + PATHSEP_W + prj_name + L".db";
+
+	// insert given data
+	p_dt->insert< std::string >(prj_path_);
+	p_dt->insert< std::string >(prj_name_);
 
 	// invoke serializetion
 	std::string res = serialize_to_str< well_pool_iface >(wp);
-	// clear table
+	// switch to newly created DB if requested
+	if(switch_conn && boost::filesystem::exists(db_fname_)) {
+		wp->open_db(db_fname);
+	}
+
+	// restore table
 	p_dt->clear< std::string >();
+	for(ulong i = 0; i < prev_tbl.size(); ++i)
+		p_dt->insert< std::string >(prev_tbl[i]);
 
 	return res;
 }
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(serialize_to_fname_ol, serialize_to_fname, 3, 4)
 
 BS_API_PLUGIN void py_export_sql_well_serialize() {
 	using namespace boost::python;
@@ -224,7 +256,7 @@ BS_API_PLUGIN void py_export_sql_well_serialize() {
 	def("serialize_to_str", s2s_sqw);
 	def("serialize_from_str", sfs_wpi);
 	def("serialize_from_str", sfs_sqw);
-	def("serialize_to_str_fname", &serialize_to_str_fname);
+	def("serialize_to_fname", &serialize_to_fname, serialize_to_fname_ol());
 }
 
 }} /* blue_sky::python */
