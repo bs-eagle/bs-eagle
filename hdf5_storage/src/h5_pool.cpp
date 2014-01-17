@@ -253,14 +253,29 @@ namespace blue_sky
         }
       if (file_id >= 0)
         {
-          std::cout<<"at H5Fclose: there are objs_all  still opened: "<<H5Fget_obj_count(file_id, H5F_OBJ_ALL)<<"\n";
-          std::cout<<"at H5Fclose: there are files     still opened: "<<H5Fget_obj_count(file_id, H5F_OBJ_FILE)<<"\n";
+          // close all open groups, datasets and datatypes
+          ulong obj_cnt = H5Fget_obj_count(file_id, H5F_OBJ_GROUP | H5F_OBJ_DATASET | H5F_OBJ_DATATYPE);
+          std::vector< hid_t > obj_list(obj_cnt);
+          H5Fget_obj_ids(file_id, H5F_OBJ_GROUP | H5F_OBJ_DATASET | H5F_OBJ_DATATYPE, obj_cnt, &obj_list[0]);
+          for(ulong i = 0; i < obj_cnt; ++i) {
+            H5Oclose(obj_list[i]);
+          }
           std::cout<<"at H5Fclose: there are groups    still opened: "<<H5Fget_obj_count(file_id, H5F_OBJ_GROUP)<<"\n";
           std::cout<<"at H5Fclose: there are datatypes still opened: "<<H5Fget_obj_count(file_id, H5F_OBJ_DATATYPE)<<"\n";
-          std::cout<<"at H5Fclose: there are attrs     still opened: "<<H5Fget_obj_count(file_id, H5F_OBJ_ATTR)<<"\n";
           std::cout<<"at H5Fclose: there are datasets  still opened: "<<H5Fget_obj_count(file_id, H5F_OBJ_DATASET)<<"\n";
 
+          // close all open attributes
+          obj_cnt = H5Fget_obj_count(file_id, H5F_OBJ_ATTR);
+          if(obj_list.size() < obj_cnt) obj_list.resize(obj_cnt);
+          H5Fget_obj_ids(file_id, H5F_OBJ_DATATYPE, obj_cnt, &obj_list[0]);
+          for(ulong i = 0; i < obj_cnt; ++i) {
+            H5Aclose(obj_list[i]);
+          }
+          std::cout<<"at H5Fclose: there are attrs     still opened: "<<H5Fget_obj_count(file_id, H5F_OBJ_ATTR)<<"\n";
+
+          std::cout<<"at H5Fclose: there are objs_all  still opened: "<<H5Fget_obj_count(file_id, H5F_OBJ_ALL)<<"\n";
           H5Fclose (file_id);
+          std::cout<<"at H5Fclose: there are files     still opened: "<<H5Fget_obj_count(file_id, H5F_OBJ_FILE)<<"\n";
         }
       init_all ();
     }
