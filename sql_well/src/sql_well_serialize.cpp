@@ -152,16 +152,17 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, blue_sky::sql_well)
 		if(opres == SQLITE_OK) {
 			// save handle to open db
 			t.db = bu_db;
+			t.file_name = db_relname;
 			return;
 		}
-		else
-			sqlite3_close(bu_db);
+		sqlite3_close(bu_db);
 	}
 
 	opres = sqlite3_open(db_fname.c_str(), &bu_db);
 	if(opres == SQLITE_OK) {
 		// just save handle to db into sql_well and we're done
 		t.db = bu_db;
+		t.file_name = db_fname;
 		return;
 	}
 	// finally try to open db from stored path t.file_name
@@ -169,8 +170,12 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, blue_sky::sql_well)
 	opres = sqlite3_open(t.file_name.c_str(), &bu_db);
 	if(opres == SQLITE_OK)
 		t.db = bu_db;
-	else
+	else {
+		// failed to open DB
 		sqlite3_close(bu_db);
+		t.db = 0;
+		t.file_name.clear();
+	}
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 // generate serialize() function that uses save & load
