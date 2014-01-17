@@ -197,6 +197,8 @@ bool wlogs_table_exists(sql_well& sqw) {
     }
   sql_well::~sql_well ()
     {
+      if (db)
+        close_db ();
     }
 
   int
@@ -209,7 +211,7 @@ bool wlogs_table_exists(sql_well& sqw) {
         close_db ();
       const std::string file = wstr2str (file_);
       printf ("SQL open_db %s\n", file.c_str ());
-      if (!strcmp(file.c_str(),":memory:") || !boost::filesystem::exists (file))
+      if (file == ":memory:" || !boost::filesystem::exists (file))
         {
           rc = sqlite3_open (file.c_str (), &db);
           if (rc)
@@ -242,40 +244,6 @@ bool wlogs_table_exists(sql_well& sqw) {
         }
 
       file_name = file;
-
-#if 0
-      char buf[2048];
-      rc = sqlite3_open (":memory:", &db);
-      if (rc)
-        {
-          fprintf (stderr, "Can't open database: %s\n", sqlite3_errmsg (db));
-          sqlite3_close (db);
-          db = 0;
-          return -1;
-        }
-      file_name = file;
-      // load from file to memory
-      rc = create_db (db);
-      if (rc)
-        return rc;
-      sprintf (buf, "ATTACH DATABASE '%s' as backup; BEGIN", file.c_str ());
-      rc = sqlite3_exec (db, buf, NULL, NULL, &zErrMsg);
-      if (rc != SQLITE_OK)
-        {
-          fprintf (stderr, "SQL error: %s\n", zErrMsg);
-          sqlite3_free (zErrMsg);
-        }
-
-      rc = sqlite3_exec(db, "SELECT name FROM backup.sqlite_master WHERE type='table'",
-                        &backup_to_main, db, &zErrMsg);
-      if (rc != SQLITE_OK)
-        {
-          fprintf (stderr, "SQL error: %s\n", zErrMsg);
-          sqlite3_free (zErrMsg);
-        }
-      sqlite3_exec(db, "COMMIT; DETACH DATABASE backup", NULL, NULL, NULL);
-#else //0
-#endif //0
       return 0;
     }
 
