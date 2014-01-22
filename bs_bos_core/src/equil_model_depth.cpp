@@ -803,6 +803,23 @@ namespace blue_sky
     return tables;
   }
 
+  BS_SP(table_iface)
+  equil_model_depth::get_rsvd_region_data(const t_long region) const
+  {
+    BS_ASSERT(region >= 0 && region < n_equil_regions);
+    return rsvd_data[region];
+  }
+
+  std::list<BS_SP(table_iface)>
+  equil_model_depth::get_rsvd_data() const
+  {
+    std::list<BS_SP(table_iface)> tables;
+
+    for (t_long i = 0; i < n_equil_regions; ++i)
+      tables.push_back(get_rsvd_region_data(i));
+    return tables;
+  }
+
 
   BLUE_SKY_TYPE_STD_CREATE (equil_model_depth);
   BLUE_SKY_TYPE_STD_COPY (equil_model_depth);
