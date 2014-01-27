@@ -273,7 +273,7 @@ namespace blue_sky
   {
     smart_ptr <hdm_iface, true> hdm = this;
     keyword_params kp;
-    std::string model_name = wstr2str (model_name_, "ru_RU.CP1251");
+    std::string model_name = wstr2str_n (model_name_);
     kp.hdm = this;
     if (model_name == std::string(":memory:")) {
         this->well_pool_->open_db (model_name_); //"mem_well_pool.db");
