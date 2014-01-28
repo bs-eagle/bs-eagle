@@ -67,7 +67,7 @@ namespace blue_sky
 
     sp_dens_matrix_t lu;
 
-    if (dynamic_cast<dens_matrix_iface_t *> (matrix.lock ()))
+    if (dynamic_cast<dens_matrix_iface_t *> (matrix.get ()))
       {
         lu = matrix;
         BS_ASSERT (lu);
@@ -117,7 +117,7 @@ namespace blue_sky
     t_long nb;
 
     sp_dens_matrix_t lu;
-    if (dynamic_cast<dens_matrix_iface_t *> (matrix.lock ()))
+    if (dynamic_cast<dens_matrix_iface_t *> (matrix.get ()))
       {
         lu = matrix;
         BS_ASSERT (lu);

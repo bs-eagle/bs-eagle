@@ -179,7 +179,7 @@ namespace blue_sky
       //t_double *sol = &(*sp_sol)[0];
 
       sp_bcsr_t bcsr;
-      if (!dynamic_cast<bcsr_t *> (matrix.lock ()))
+      if (!dynamic_cast<bcsr_t *> (matrix.get ()))
         {
           bcsr = matrix;
           BS_ASSERT (bcsr);

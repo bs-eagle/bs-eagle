@@ -85,7 +85,7 @@ namespace blue_sky
 
     sp_bcsr_matrix_t ilu;
 
-    if (dynamic_cast<bcsr_matrix_iface_t*> (matrix.lock ()))
+    if (dynamic_cast<bcsr_matrix_iface_t*> (matrix.get ()))
       {
         ilu = matrix;
         BS_ASSERT (ilu);
@@ -206,7 +206,7 @@ namespace blue_sky
 
     sp_bcsr_matrix_t ilu;
 
-    if (dynamic_cast<bcsr_matrix_iface_t *> (matrix.lock ()))
+    if (dynamic_cast<bcsr_matrix_iface_t *> (matrix.get ()))
       {
         ilu = matrix;
         BS_ASSERT (ilu);
