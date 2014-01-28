@@ -38,7 +38,8 @@ namespace boser = boost::serialization;
 
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 	// save file_name
-	ar << t.file_name;
+	// NOTE: ensure that all filenames are saved in UTF-8 encoding
+	ar << (const std::string&)str2ustr(t.file_name);
 
 	// check db has an associated filename
 	// strangely there is no such API function though it is documented
@@ -95,8 +96,8 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 		return;
 
 	// save basename first
-	ar << db_basename;
-	ar << db_fname;
+	ar << (const std::string&)str2ustr(db_basename);
+	ar << (const std::string&)str2ustr(db_fname);
 
 	// open db for backup
 	sqlite3* save_db = NULL;
@@ -128,6 +129,8 @@ BLUE_SKY_CLASS_SRZ_FCN_END
 
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, blue_sky::sql_well)
 	// load filename
+	// NOTE: Sqlite supports UTF-8 encoded filenames, so no conversion is needed
+	// for 
 	ar >> t.file_name;
 	// and flag if we should restore db
 	bool do_load_db;
@@ -200,8 +203,8 @@ namespace blue_sky { namespace python {
 // helper function to write well_pool to given fname
 std::string serialize_to_fname(
 		smart_ptr< well_pool_iface > wp,
-		const std::wstring& prj_path,
-		const std::wstring& prj_name,
+		const std::string& prj_path,
+		const std::string& prj_name,
 		bool switch_conn = false
 	) {
 	// save project path for serialization code
@@ -216,14 +219,14 @@ std::string serialize_to_fname(
 	p_dt->clear< std::string >();
 
 	// decode widestring paths
-	const std::string prj_path_ = wstr2str(prj_path);
-	const std::string prj_name_ = wstr2str(prj_name);
-	//const std::string db_fname_ = prj_path_ + PATHSEP + prj_name_ + ".db";
-	const std::wstring db_fname = prj_path + PATHSEP_W + prj_name + L".db";
+	//const std::string prj_path_ = wstr2str(prj_path);
+	//const std::string prj_name_ = wstr2str(prj_name);
+	const std::string db_fname = prj_path + PATHSEP + prj_name + ".db";
+	//const std::wstring db_fname = prj_path + PATHSEP_W + prj_name + L".db";
 
 	// insert given data
-	p_dt->insert< std::string >(prj_path_);
-	p_dt->insert< std::string >(prj_name_);
+	p_dt->insert< std::string >(prj_path);
+	p_dt->insert< std::string >(prj_name);
 
 	// invoke serializetion
 	std::string res = serialize_to_str< well_pool_iface >(wp);

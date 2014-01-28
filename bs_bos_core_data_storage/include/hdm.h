@@ -43,7 +43,7 @@ namespace blue_sky {
       void init_equil (t_int n_equil_regions);
       
       // initialize data manager
-      void init(const std::wstring &model_name);
+      void init(const std::string &model_name);
 
       // initialize process params
       void init_proc_params();

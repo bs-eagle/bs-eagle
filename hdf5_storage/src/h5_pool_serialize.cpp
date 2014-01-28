@@ -178,8 +178,9 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, h5_pool)
 	}
 
 	// save full filename & basename
-	ar << h5_fname;
-	ar << h5_basename;
+	// NOTE: use UTF-8 encoding for filenames
+	ar << (const std::string&)str2ustr(h5_fname);
+	ar << (const std::string&)str2ustr(h5_basename);
 
 	// we should only dump group names
 	typedef h5_pool::map_hid_t::const_iterator g_iterator;
@@ -288,10 +289,13 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, h5_pool)
 	bool do_open;
 	ar >> do_open;
 	ar >> t.fname;
+	// NOTE: expect filenames in unicode, convert to native locale
+	t.fname = ustr2str(t.fname);
 
 	// load base name
 	std::string h5_basename;
 	ar >> h5_basename;
+	h5_basename = ustr2str(h5_basename);
 
 	// open file
 	if(do_open) {

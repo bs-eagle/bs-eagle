@@ -210,25 +210,25 @@ void read_grdecl(const std::string& fname, const std::string dir, ulong nx, ulon
 }
 
 // wrapper for wide strings
-void read_grdecl_w(const std::wstring& fname, const std::wstring dir, ulong nx, ulong ny, ulong nz,
-	smart_ptr< h5_pool_iface > pool) {
-
-	// decode wide strings and call 
-	read_grdecl(
-#ifdef UNIX
-		wstr2str(fname)
-#else
-		wstr2str(fname, "ru_RU.CP1251")
-#endif
-		,
-#ifdef UNIX
-		wstr2str(dir)
-#else
-		wstr2str(dir, "ru_RU.CP1251")
-#endif
-		, nx, ny, nz, pool
-	);
-}
+//void read_grdecl_w(const std::wstring& fname, const std::wstring dir, ulong nx, ulong ny, ulong nz,
+//	smart_ptr< h5_pool_iface > pool) {
+//
+//	// decode wide strings and call 
+//	read_grdecl(
+//#ifdef UNIX
+//		wstr2str(fname)
+//#else
+//		wstr2str(fname, "ru_RU.CP1251")
+//#endif
+//		,
+//#ifdef UNIX
+//		wstr2str(dir)
+//#else
+//		wstr2str(dir, "ru_RU.CP1251")
+//#endif
+//		, nx, ny, nz, pool
+//	);
+//}
 
 } /* blue_sky */
 

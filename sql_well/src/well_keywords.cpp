@@ -65,10 +65,10 @@ namespace blue_sky
             break;
           }
       }
-    std::wstring csv_schedule = params.hdm->get_prop()->get_s (L"model_path") + params.hdm->get_prop()->get_s (str2wstr (std::string(prop_name_last)));
+    std::wstring csv_schedule = params.hdm->get_prop()->get_s (L"model_path") + params.hdm->get_prop()->get_s (str2wstr (std::string(prop_name_last), "utf-8"));
     t_double starting_date = params.hdm->get_prop()->get_f (L"starting_date");
     //TODO: and reading error check
-    params.hdm->get_well_pool()->read_from_ascii_file(wstr2str (csv_schedule), starting_date);
+    params.hdm->get_well_pool()->read_from_ascii_file(wstr2str (csv_schedule, "utf-8"), starting_date);
 
   }
 
