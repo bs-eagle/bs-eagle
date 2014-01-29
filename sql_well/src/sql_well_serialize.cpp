@@ -69,6 +69,11 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 		//db_fname = std::string("file:") + db_basename;
 	}
 
+	// assume, that paths in kernel table are in native system encoding
+	// convert 'em to utf-8 before usage
+	db_basename = str2ustr(db_basename);
+	db_fname = str2ustr(db_fname);
+
 	// flag indicating whether we should backup db
 	bool do_write_db = true;
 	// check if database is open
@@ -96,8 +101,8 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 		return;
 
 	// save basename first
-	ar << (const std::string&)str2ustr(db_basename);
-	ar << (const std::string&)str2ustr(db_fname);
+	ar << db_basename;
+	ar << db_fname;
 
 	// open db for backup
 	sqlite3* save_db = NULL;
@@ -119,7 +124,7 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 	// SQLITE_BUSY returned if we're trying to backup into source db
 	if(opres != SQLITE_DONE && opres != SQLITE_BUSY) {
 		// if error happens - kill saved db file
-		::remove(db_fname.c_str());
+		::remove(ustr2str(db_fname).c_str());
 	}
 
 	// save flag that db backup was successful and filename of backup db
@@ -129,9 +134,10 @@ BLUE_SKY_CLASS_SRZ_FCN_END
 
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, blue_sky::sql_well)
 	// load filename
-	// NOTE: Sqlite supports UTF-8 encoded filenames, so no conversion is needed
-	// for 
+	// NOTE: Sqlite supports UTF-8 encoded filenames, so don't convert anything
+	// assume that all file names are saved in UTF-8
 	ar >> t.file_name;
+
 	// and flag if we should restore db
 	bool do_load_db;
 	ar >> do_load_db;
@@ -148,9 +154,10 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, blue_sky::sql_well)
 	// check if hdm serializer saved project path for us
 	kernel::idx_dt_ptr kdt = BS_KERNEL.pert_idx_dt(BS_KERNEL.find_type("hdm").td_);
 	if(kdt && kdt->size< std::string >()) {
-		std::string prj_path = kdt->ss< std::string >(0);
+		std::string prj_path = str2ustr(kdt->ss< std::string >(0));
 		// try to open db relative to project path
-		std::string db_relname = prj_path + PATHSEP + db_basename;
+		// NOTE: assume that kernel paths are in native system encoding
+		std::string db_relname = str2ustr(prj_path + PATHSEP) + db_basename;
 		opres = sqlite3_open(db_relname.c_str(), &bu_db);
 		if(opres == SQLITE_OK) {
 			// save handle to open db
