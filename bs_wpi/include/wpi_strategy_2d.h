@@ -9,7 +9,7 @@
 #ifndef WPI_STRATEGY_2D_C5EHIKCY
 #define WPI_STRATEGY_2D_C5EHIKCY
 
-#include "wpi_common.h"
+#include "strategy_2d_common.h"
 #include <CGAL/Bbox_2.h>
 #include <CGAL/Polygon_2.h>
 
@@ -18,7 +18,7 @@
 namespace blue_sky { namespace wpi {
 
 template< template< uint > class strat_traits >
-struct strategy_2d_ex {
+struct strategy_2d_ex : public strategy_2d_common< strat_traits > {
 	// main typedefs
 	typedef Kernel::Point_2                                     Point;
 	typedef Kernel::Segment_2                                   Segment;
@@ -28,32 +28,20 @@ struct strategy_2d_ex {
 	// 2D specific typedefs
 	typedef CGAL::Polygon_2< Kernel >                           Polygon_2;
 
-	// dimens num, inner point id
-	enum { D = 2, inner_point_id = 4 };
+	// import common typedefs
+	typedef strategy_2d_common< strat_traits >          strat_common;
+	typedef typename strat_common::vertex_pos           vertex_pos;
+	typedef typename strat_common::vertex_pos_i         vertex_pos_i;
+	typedef typename strat_common::traits_t             traits_t;
+	typedef typename strat_common::cell_vertex_iterator cell_vertex_iterator;
+	typedef typename strat_common::well_traj_iterator   well_traj_iterator;
 
-	typedef t_float vertex_pos[D];
-	typedef ulong   vertex_pos_i[D];
-
-	// iterator over source arrays come from traits
-	typedef strat_traits< D > traits_t;
-	typedef typename traits_t::cell_vertex_iterator cell_vertex_iterator;
-	typedef typename traits_t::well_traj_iterator   well_traj_iterator;
+	using strat_common::D;
 
 	// misc helper functions
 	static const char* name() {
 		static std::string name_ = std::string("2D:") + traits_t::name();
 		return name_.c_str();
-	}
-
-	// X-Y-Z order!
-	static void decode_cell_id(ulong id, vertex_pos_i& res, const vertex_pos_i& m_size) {
-		//vertex_pos_i res;
-		res[1] = id / m_size[0];
-		res[0] = id - m_size[0]*res[1];
-	}
-
-	static ulong encode_cell_id(const vertex_pos_i& p, const vertex_pos_i& m_size) {
-		return p[0] + m_size[0] * p[1];
 	}
 
 	static Bbox vertex_pos2bbox(const vertex_pos& lo, const vertex_pos& hi) {
@@ -137,37 +125,6 @@ struct strategy_2d_ex {
 		}
 	};
 
-	// well_data contains specifid MD member for
-	// segment distances in 2D
-
-	template< class base_t >
-	struct well_data : public base_t {
-		double md_;
-
-		//empty ctor for map
-		well_data() : md_(0) {}
-		//std ctor
-		well_data(const well_traj_iterator& segment, const well_data* prev = NULL)
-			: base_t(segment), md_(0)
-		{
-			if(prev)
-				md_ = prev->md_ + prev->len();
-		}
-
-		// MD access
-		using base_t::W;
-		using base_t::len;
-
-		t_float md() const {
-			return md_;
-			//return W[3];
-		}
-
-		t_float md_finish() const {
-			return md() + len();
-		}
-	};
-
 	typedef std::list< std::pair< Point, uint > > xpoints_list;
 
 	// action taken on well & mesh boxes intersection
@@ -229,20 +186,6 @@ struct strategy_2d_ex {
 			Point(b.max(0), b.max(1)),
 			s.min(), s.max()
 		);
-	}
-
-	// look into wpi_strategy_3d.h for description of this function
-	typedef int bbox_bnd_offs[2][D];
-	static const bbox_bnd_offs& bbox_boundary_offs(const uint dim, const uint bnd_id) {
-		static const bbox_bnd_offs t[4] = {
-			// X
-			{ {0, 1}, {0,  0} },
-			{ {0, 0}, {0, -1} },
-			// Y
-			{ {0, 0}, {-1, 0} },
-			{ {1, 0}, { 0, 0} },
-		};
-		return t[dim*2 + bnd_id];
 	}
 };
 
