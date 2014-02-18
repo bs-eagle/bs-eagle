@@ -65,18 +65,30 @@ public:
 		// default value
 		typedef ulong fish_t;
 		typedef cell_data data_t;
+
+		static bool less(const fish_t& lhs, const fish_t& rhs) {
+			return lhs < rhs;
+		}
 	};
 	// overload for well path
 	template< class unused >
 	struct fish2box< Loki::Int2Type< 1 >, unused > {
 		typedef ulong fish_t;
 		typedef well_data data_t;
+
+		static bool less(const fish_t& lhs, const fish_t& rhs) {
+			return lhs < rhs;
+		}
 	};
 	// overload for mesh_part
 	template< class unused >
 	struct fish2box< Loki::Int2Type< 2 >, unused > {
 		typedef const mesh_part* fish_t;
 		typedef mesh_part data_t;
+
+		static bool less(const fish_t& lhs, const fish_t& rhs) {
+			return *lhs < *rhs;
+		}
 	};
 
 	// structure to help identify given boxes
@@ -105,6 +117,11 @@ public:
 
 		fish_t data() const {
 			return f_;
+		}
+
+		// for storing into ordered containers
+		bool operator<(const box_handle_impl& rhs) const {
+			return fish2box_t::less(f_, rhs.f_);
 		}
 
 	private:
@@ -145,7 +162,7 @@ public:
 			// if mesh_part contains > 1 cells then just push it for further splitting
 			// otherwise check for real intersections
 			if(pm->size() == 1) {
-				ulong cell_id = pm->ss_id(0);
+				const ulong cell_id = pm->ss_id(0);
 				cell_data cell = A_.m_[cell_id];
 				// check if segment start & finish are inside the cell
 				if(hit_[wseg_id] >= m_size_) {
@@ -153,7 +170,7 @@ public:
 					if(
 						mesh_tools_t::point_inside_bbox(cell.bbox(), start) &&
 						cell.contains(start)
-						)
+					)
 						hit_[wseg_id] = cell_id;
 				}
 				// check segment end for last segment
@@ -162,7 +179,7 @@ public:
 					if(
 						mesh_tools_t::point_inside_bbox(cell.bbox(), finish) &&
 						cell.contains(finish)
-						)
+					)
 						hit_[wseg_id + 1] = cell_id;
 				}
 

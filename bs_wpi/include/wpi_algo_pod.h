@@ -304,6 +304,10 @@ struct pods : public helpers< strat_t > {
 	typedef typename well_path::iterator wp_iterator;
 	typedef typename well_path::const_iterator cwp_iterator;
 
+	typedef std::vector< well_path > well_paths;
+	typedef typename well_paths::iterator wps_iterator;
+	typedef typename well_paths::const_iterator cwps_iterator;
+
 	/*-----------------------------------------------------------------
 	* intersections description
 	*----------------------------------------------------------------*/

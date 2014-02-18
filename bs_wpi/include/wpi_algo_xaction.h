@@ -38,6 +38,7 @@ public:
 
 	// import global consts
 	enum { D = strat_t::D, inner_point_id = strat_t::inner_point_id };
+	typedef int dirvec_t[D];
 
 	// import pods
 	typedef pods< strat_t > pods_t;
@@ -54,6 +55,7 @@ public:
 
 	typedef typename pods_t::well_hit_cell well_hit_cell;
 	typedef typename pods_t::intersect_path intersect_path;
+	typedef typename intersect_path::iterator x_iterator;
 
 	// import helper functions
 	typedef helpers< strat_t > base_t;
@@ -64,10 +66,6 @@ public:
 	typedef typename mesh_tools_t::mesh_part mesh_part;
 
 	typedef std::vector< ulong > hit_idx_t;
-
-	typedef typename intersect_path::iterator x_iterator;
-
-	typedef int dirvec_t[D];
 
 	//template< int N >
 	struct spatial_sort {
