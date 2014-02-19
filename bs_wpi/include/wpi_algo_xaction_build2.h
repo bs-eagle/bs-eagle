@@ -94,8 +94,13 @@ public:
 	// structure to help identify given boxes
 	class box_handle {
 	public:
-		virtual int type() const = 0;
 		virtual ~box_handle() {};
+		virtual int type() const = 0;
+		virtual bool less(const box_handle& rhs) const = 0;
+		// for storing into ordered containers
+		bool operator<(const box_handle& rhs) const {
+			return less(rhs);
+		}
 	};
 	// pointer is really stored as box handle
 	typedef st_smart_ptr< box_handle > sp_bhandle;
@@ -120,8 +125,9 @@ public:
 		}
 
 		// for storing into ordered containers
-		bool operator<(const box_handle_impl& rhs) const {
-			return fish2box_t::less(f_, rhs.f_);
+		bool less(const box_handle& rhs) const {
+			if(rhs.type() != id) return false;
+			return fish2box_t::less(f_, static_cast< const box_handle_impl& >(rhs).f_);
 		}
 
 	private:
@@ -143,7 +149,7 @@ public:
 		typedef std::vector< Segment > Segments;
 		//typedef xbbox< D > xbbox_t;
 
-		leafs_builder(intersect_builder2& A, const Segments& s, std::vector< ulong >& hit, parts_container& leafs)
+		leafs_builder(base_t& A, const Segments& s, std::vector< ulong >& hit, parts_container& leafs)
 			: A_(A), s_(s), hit_(hit), leafs_(leafs), m_size_(A.m_.size_flat())
 		{}
 
@@ -192,7 +198,7 @@ public:
 				leafs_.insert(*pm);
 		}
 
-		intersect_builder2& A_;
+		base_t& A_;
 		const Segments& s_;
 		std::vector< ulong >& hit_;
 		parts_container& leafs_;

@@ -68,6 +68,7 @@ struct algo : public helpers< strat_t > {
 
 	typedef typename pods_t::well_hit_cell well_hit_cell;
 	typedef typename pods_t::intersect_path intersect_path;
+	typedef typename pods_t::intersect_paths intersect_paths;
 
 	// import mesh_part
 	typedef mesh_tools< strat_t > mesh_tools_t;
@@ -145,9 +146,9 @@ struct algo : public helpers< strat_t > {
 
 		template< class intersector_t >
 		static type make(const intersector_t& A) {
-			type res(A.path().size());
-			for(ulong i = 0; i < A.size(); ++i)
-				res[i] = wpi_ret::make(A.path()[i]);
+			type res(A.xbricks().size());
+			for(ulong i = 0; i < A.xbricks().size(); ++i)
+				res[i] = wpi_ret::make(A.xbricks()[i]);
 
 			return res;
 		}
@@ -220,7 +221,7 @@ struct algo : public helpers< strat_t > {
 		trimesh M(nx, ny, trim_backend);
 
 		// 2) create well path description
-		well_paths W;
+		well_paths W(well_info.size());
 		for(ulong i = 0; i < well_info.size(); ++i) {
 			if(!fill_well_path(well_info[i], W[i]))
 				return ret_t();

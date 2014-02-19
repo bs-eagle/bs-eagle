@@ -344,6 +344,7 @@ struct pods : public helpers< strat_t > {
 
 	// storage of intersection points
 	typedef std::multiset< well_hit_cell > intersect_path;
+	typedef std::vector< intersect_path >  intersect_paths;
 
 	//typedef boost::fast_pool_allocator<
 	//	well_hit_cell,

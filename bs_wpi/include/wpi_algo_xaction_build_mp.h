@@ -14,26 +14,28 @@
 namespace blue_sky { namespace wpi {
 
 template< class strat_t >
-class intersect_builder_mp : public pods< strat_t > {
+class intersect_builder_mp : public helpers< strat_t > {
 public:
-	typedef pods< strat_t > base_t;
+	typedef pods< strat_t > pods_t;
 	typedef intersect_builder2< strat_t > xbuild1;
 
-	// inherit types
-	typedef typename base_t::cell_data    cell_data;
-	typedef typename base_t::well_data    well_data;
-	typedef typename base_t::trimesh      trimesh;
-	typedef typename base_t::well_path    well_path;
-	typedef typename base_t::well_paths   well_paths;
-	typedef typename xbuild1::mesh_part   mesh_part;
+	// import types
+	typedef typename pods_t::cell_data       cell_data;
+	typedef typename pods_t::well_data       well_data;
+	typedef typename pods_t::trimesh         trimesh;
+	typedef typename pods_t::well_path       well_path;
+	typedef typename pods_t::well_paths      well_paths;
+	typedef typename pods_t::intersect_path  intersect_path;
+	typedef typename pods_t::intersect_paths intersect_paths;
 
 	typedef typename strat_t::vertex_pos_i vertex_pos_i;
 	typedef typename strat_t::Point        Point;
 	typedef typename strat_t::Segment      Segment;
 
-	typedef typename xbuild1::mesh_tools_t mesh_tools_t;
-	typedef typename mesh_part::container_t parts_container;
-	typedef typename parts_container::iterator part_iterator;
+	typedef typename xbuild1::mesh_part              mesh_part;
+	typedef typename xbuild1::mesh_tools_t           mesh_tools_t;
+	typedef typename mesh_part::container_t          parts_container;
+	typedef typename parts_container::iterator       part_iterator;
 	typedef typename parts_container::const_iterator part_citerator;
 
 	enum { D = strat_t::D };
@@ -41,14 +43,11 @@ public:
 	// intersection builder for single well_path
 	// import some usefull stuff from it
 	typedef typename xbuild1::template xbbox< D > xbbox_t;
-	typedef typename xbuild1::cell_box_handle cell_box_handle;
-	typedef typename xbuild1::well_box_handle well_box_handle;
-	typedef typename xbuild1::mesh_box_handle mesh_box_handle;
-	typedef typename xbuild1::Box Box;
-	typedef typename xbuild1::leafs_builder leafs_builder;
-
-	typedef typename xbuild1::intersect_path intersect_path;
-	typedef std::vector< intersect_path >    intersect_paths;
+	typedef typename xbuild1::cell_box_handle     cell_box_handle;
+	typedef typename xbuild1::well_box_handle     well_box_handle;
+	typedef typename xbuild1::mesh_box_handle     mesh_box_handle;
+	typedef typename xbuild1::Box                 Box;
+	typedef typename xbuild1::leafs_builder       leafs_builder;
 
 	typedef typename xbuild1::hit_idx_t       hit_idx_t;
 	typedef typename std::vector< hit_idx_t > hit_idxs_t;
@@ -61,8 +60,8 @@ public:
 			return *lhs.handle() < *rhs.handle();
 		}
 	};
-	typedef std::set< Box, Box_compare > Boxes;
-	typedef typename Boxes::iterator Boxes_iterator;
+	typedef std::set< Box, Box_compare >   Boxes;
+	typedef typename Boxes::iterator       Boxes_iterator;
 	typedef typename Boxes::const_iterator Boxes_citerator;
 
 	// ctor
@@ -97,7 +96,10 @@ public:
 		// cache well segments
 		// and make boxes for them
 		for(ulong i = 0; i < wps_.size(); ++i) {
-			for(ulong j = 0; j < wps_[i].size(); ++i) {
+			wseg[i].resize(wps_[i].size());
+			well_boxes[i].resize(wps_[i].size());
+			well_boxes_p[i].resize(wps_[i].size());
+			for(ulong j = 0; j < wps_[i].size(); ++j) {
 				wseg[i][j] = wps_[i][j].segment();
 				// NOTE: use value of j as local well_box identificator
 				well_boxes[i][j] = Box(wps_[i][j].bbox(), new(wbh_pool.malloc()) well_box_handle(j));
@@ -105,9 +107,11 @@ public:
 				well_boxes_p[i][j] = &well_boxes[i][j];
 			}
 
-			xbricks_[i] = xbuild_base(m_, wps_[i]);
+			xbricks_.push_back(xbuild_base(m_, wps_[i]));
 			// init hit index with invalid value
-			std::fill(xbricks_[i].hit_idx().begin(), xbricks_[i].hit_idx().end(), m_.size_flat());
+			hit_idx_t& H = xbricks_[i].hit_idx();
+			H.resize(wps_[i].size() + 1);
+			std::fill(H.begin(), H.end(), m_.size_flat());
 		}
 
 		// result - hit index
@@ -159,7 +163,7 @@ public:
 					Boxes_citerator p_box = mp_boxes.begin(), e = mp_boxes.end();
 					p_box != e; ++p_box, ++j
 				) {
-					mp_boxes_p[j] = &*p_box;
+					mp_boxes_p[j] = const_cast< Box* >(&*p_box);
 				}
 
 				// IMPORTANT: clear new_parts before processing next leafs_builder
@@ -175,7 +179,9 @@ public:
 				for(part_citerator pk = new_parts.begin(), e = new_parts.end(); pk != e; ++pk) {
 					// erase kid from boxes storage
 					// use specifix Box ctor, provide only handle for searching
-					const Boxes_citerator pb = mp_boxes.find(Box(false, &*pk));
+					const Boxes_citerator pb = mp_boxes.find(
+						Box(false, new(mbh_pool.malloc()) mesh_box_handle(&*pk))
+					);
 					if(pb != mp_boxes.end())
 						mp_boxes.erase(pb);
 
@@ -186,13 +192,13 @@ public:
 		}
 
 		// collect all hit_idx from xbricks
-		hit_idxs_t res(xbricks_.size());
+		hit_idx_.resize(xbricks_.size());
 		for(ulong i = 0; i < xbricks_.size(); ++i) {
-			res[i] = xbricks_[i].hit_idx();
+			hit_idx_[i] = xbricks_[i].hit_idx();
 			if(append_wp_nodes)
-				xbricks_[i].append_wp_nodes(res[i]);
+				xbricks_[i].append_wp_nodes(hit_idx_[i]);
 		}
-		return res;
+		return hit_idx_;
 	}
 
 	// export resulting intersections as vector of 1D arrays
@@ -204,8 +210,17 @@ public:
 		return res;
 	}
 
-	const std::vector< xbuild_base >& path() const {
+	// return vector intersection builders for each well
+	const std::vector< xbuild_base >& xbricks() const {
 		return xbricks_;
+	}
+
+	const intersect_paths path() const {
+		intersect_paths res(xbricks_.size());
+		for(ulong i = 0; i < xbricks_.size(); ++i) {
+			res[i] = xbricks_.path();
+		}
+		return res;
 	}
 
 	// mesh
@@ -216,7 +231,7 @@ public:
 	// for each well
 	std::vector< xbuild_base > xbricks_;
 	// cell IDs of where each well node is located
-	//hit_idxs_t hit_idx_;
+	hit_idxs_t hit_idx_;
 };
 
 }} /* blue_sky::wpi */

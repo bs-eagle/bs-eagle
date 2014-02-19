@@ -326,7 +326,7 @@ public:
 		return x_;
 	}
 
-protected:
+//protected:
 	x_iterator insert_wp_node(ulong cell_id, ulong wseg_id, x_iterator px, bool end_point = false) {
 		// initialization
 		const well_data& wseg = wp_[wseg_id];
