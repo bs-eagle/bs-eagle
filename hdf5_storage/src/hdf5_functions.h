@@ -110,7 +110,7 @@ namespace blue_sky
   template<typename T> int
   write_data_to_hdf5(const hid_t &location, const std::string &name, const T *data, int length)
   {
-    hsize_t dims[] = {length};
+    hsize_t dims[] = {hsize_t(length)};
     return write_data_to_hdf5(location, name, data, 1, dims);
   }
 
