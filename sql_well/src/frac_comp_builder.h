@@ -19,17 +19,19 @@ namespace blue_sky { namespace fci {
 template< class cd_traits >
 class frac_comp_builder {
 public:
-	typedef strategy_3d strat_t;
-	typedef wpi_algo::trimesh trimesh;
-	typedef wpi_algo::well_path well_path;
-	typedef wpi_algo::well_hit_cell whc;
-	typedef wpi_algo::intersect_path xpath;
-	typedef wpi_algo::hit_idx_t hit_idx_t;
-	typedef wpi_algo::xbuilder xbuilder;
-	//typedef intersect_builder2< strategy_3d > xbuilder;
+	typedef strategy_3d               strat_t;
+	typedef wpi_algo::trimesh         trimesh;
+	typedef wpi_algo::well_path       well_path;
+	typedef wpi_algo::well_paths      well_paths;
+	typedef wpi_algo::well_hit_cell   whc;
+	typedef wpi_algo::intersect_path  xpath;
+	typedef wpi_algo::intersect_paths xpaths;
+	typedef wpi_algo::hit_idx_t       hit_idx_t;
+	typedef wpi_algo::xbuilder        xbuilder;
+	typedef wpi_algo::xbuilder_mp     xbuilder_mp;
 
-	typedef strat_t::vertex_pos_i vertex_pos_i;
-	typedef strat_t::vertex_pos vertex_pos;
+	typedef strat_t::vertex_pos_i            vertex_pos_i;
+	typedef strat_t::vertex_pos              vertex_pos;
 	typedef mesh_tools< strat_t >::mesh_part mesh_part;
 
 	typedef sql_well::sp_traj_t sp_traj_t;
@@ -42,8 +44,8 @@ public:
 	typedef smart_ptr< well_pool_iface, true > sp_srcwell;
 
 	typedef std::map< std::string, xpath > xp_cache_t;
-	typedef st_smart_ptr< xp_cache_t > spxp_cache_t;
-	typedef typename xp_cache_t::iterator xpc_iterator;
+	typedef st_smart_ptr< xp_cache_t >     spxp_cache_t;
+	typedef typename xp_cache_t::iterator  xpc_iterator;
 
 	frac_comp_builder() {}
 
@@ -71,7 +73,7 @@ public:
 		sw_ = BS_KERNEL.create_object_copy(src_well);
 	}
 
-	void init_cache(const spxp_cache_t& xp_cache = NULL, const ulong cache_limit = 10) {
+	void init_cache(const spxp_cache_t& xp_cache = NULL, const ulong cache_limit = 0) {
 		if(xp_cache)
 			xp_cache_ = xp_cache;
 		else
@@ -79,10 +81,80 @@ public:
 		cache_limit_ = cache_limit;
 	}
 
+	// access to stored cache
+	spxp_cache_t cache() const {
+		return xp_cache_;
+	}
+
+	bool build_cache() {
+		// 1 fill storage with all unique well+branch
+		if(!sw_) return false;
+		wb_storage wb;
+		// select all wells+branch in completions and fractures tables
+		std::string q =
+			"SELECT DISTINCT well_name, branch_name FROM branches";
+			//"SELECT well_name, branch_name FROM completions UNION SELECT well_name, branch_name FROM fractures";
+		//std::string q = (cd_traits::select_unique_well_branch() % date).str();
+		sw_->prepare_sql(q);
+		while(sw_->step_sql() == 0) {
+			wb.insert(make_pair(sw_->get_sql_str(0), sw_->get_sql_str(1)));
+		}
+		sw_->finalize_sql();
+
+		// column id's for X, Y, Z and MD
+		const t_long col_ids[4] = {1, 2, 3, 0};
+
+		// 2. fill well_paths vector
+		well_paths W(wb.size());
+		// well_paths reference source traj data, so keep it while algo works
+		std::vector< spv_float > trajes(wb.size());
+		ulong i = 0;
+		// for each well+branch combo build well_infos
+		for(wb_storage::iterator pwb = wb.begin(), wb_end = wb.end(); pwb != wb_end; ++pwb, ++i) {
+			// from 'branches' select well+branch_i trajectory (sql_well::get_branch_traj)
+			sp_traj_t traj = sw_->get_branch_traj(pwb->first, pwb->second);
+			if(!traj) return false;
+			sp_table_t traj_t = traj->get_table();
+			if(!traj_t) return false;
+
+			// fill vector with traj data
+			spv_float traj_v = BS_KERNEL.create_object(v_float::bs_type());
+			traj_v->resize(traj_t->get_n_rows() * 4);
+			v_float::iterator ptv = traj_v->begin();
+			for(ulong i = 0, trows = traj_t->get_n_rows(); i < trows; ++i) {
+				for(ulong j = 0; j < 4; ++j)
+					*ptv++ = traj_t->get_value(i, col_ids[j]);
+			}
+			// prevent deleting source traj data
+			trajes[i] = traj_v;
+
+			// convert traj_v to i-th well_path
+			if(!wpi_algo::fill_well_path(traj_v, W[i])) return false;
+		}
+
+		// 3 find intersections of all branches with mesh (well_paths_ident)
+		xbuilder_mp A(m_, W);
+		A.build(true);
+
+		// 4. store results in cache
+		// cache limit is ignored
+		xp_cache_->clear();
+		i = 0;
+		for(
+			wb_storage::iterator pwb = wb.begin(), wb_end = wb.end();
+			pwb != wb_end, i < A.xbricks().size(); ++pwb, ++i
+		) {
+			(*xp_cache_)[pwb->first + pwb->second] = A.xbricks()[i].path();
+		}
+
+		return true;
+	}
+
 	void build(double date) {
 		//s_.clear();
 
 		// 1 fill storage with all unique well+branch
+		if(!sw_) return;
 		wb_storage wb;
 		std::string q = (cd_traits::select_unique_well_branch() % date).str();
 		sw_->prepare_sql(q);
@@ -117,7 +189,7 @@ public:
 				if(!traj_t) return;
 
 				// find column id's for X, Y, Z and MD
-				t_long col_ids[4] = {1, 2, 3, 0};
+				const t_long col_ids[4] = {1, 2, 3, 0};
 				//for(t_long i = 0; i < traj_t->get_n_cols(); ++i) {
 				//	std::string cur_col = traj_t->get_col_name(i);
 				//	if(cur_col == "X")
@@ -145,7 +217,7 @@ public:
 
 				// 3.2 find intersections of given branch with mesh (well_path_ident)
 				sp_A = new xbuilder(m_, W);
-				hit_idx_t& hi = sp_A->build();
+				const hit_idx_t& hi = sp_A->build();
 				//sp_A->remove_dups2();
 				sp_A->append_wp_nodes(hi);
 				xp = &sp_A->path();
@@ -155,7 +227,7 @@ public:
 					(*xp_cache_)[pwb->first + pwb->second] = *xp;
 			}
 
-			if (xp->empty ()) // no intersections
+			if (xp->empty()) // no intersections
 				continue;
 
 			// 3.3 select all completions that belong to well+branch_i

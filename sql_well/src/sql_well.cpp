@@ -1966,7 +1966,9 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           fci::compl_n_frac_builder cfb;
           cfb.init(nx, ny, trim_backend);
           cfb.init(sp_wp);
-          if(cfb_storage.size() != 0)
+          if(cfb_storage.size() == 0)
+            cfb.build_cache();
+          else
             cfb.share_cache_with(cfb_storage.front());
 
           // find completions & save

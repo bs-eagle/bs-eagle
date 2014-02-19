@@ -220,6 +220,9 @@ public:
 	// fractures build
 	const frac_storage& frac_build(double date);
 
+	// precalc all possible mesh-well intersections at once
+	bool build_cache();
+
 	// clear storage
 	void clear();
 
