@@ -25,8 +25,6 @@ namespace blue_sky { namespace fci {
 // impl details
 using namespace std;
 
-typedef wpi::algo< wpi::strategy_3d > wpi_algo;
-
 // hidden details
 namespace {
 

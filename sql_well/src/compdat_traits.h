@@ -14,7 +14,6 @@
 namespace blue_sky { namespace fci {
 
 struct compl_traits {
-	typedef strategy_3d strat_t;
 	typedef strat_t::vertex_pos_i vertex_pos_i;
 	typedef strat_t::vertex_pos vertex_pos;
 	typedef wpi_algo::intersect_path xpath;

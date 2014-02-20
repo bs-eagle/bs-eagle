@@ -19,7 +19,6 @@ namespace blue_sky { namespace fci {
 template< class cd_traits >
 class frac_comp_builder {
 public:
-	typedef strategy_3d               strat_t;
 	typedef wpi_algo::trimesh         trimesh;
 	typedef wpi_algo::well_path       well_path;
 	typedef wpi_algo::well_paths      well_paths;
