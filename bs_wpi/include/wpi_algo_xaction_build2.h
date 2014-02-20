@@ -145,6 +145,10 @@ public:
 	/*-----------------------------------------------------------------
 	 * action taken when boxes intersection detected
 	 *----------------------------------------------------------------*/
+	// if size of mesh_part <= rawscan threshold, then every cell in that mesh part
+	// will be checked for intersections with given well path segment
+	// instead of marking for further split
+	template< ulong rawscan_thresh = 500 >
 	struct leafs_builder {
 		typedef std::vector< Segment > Segments;
 		//typedef xbbox< D > xbbox_t;
@@ -165,10 +169,15 @@ public:
 			//const mesh_part* pm = static_cast< mesh_box_handle* >(mb->handle().get())->data();
 			//ulong wseg_id = static_cast< well_box_handle* >(wb->handle().get())->data();
 
-			// if mesh_part contains > 1 cells then just push it for further splitting
-			// otherwise check for real intersections
-			if(pm->size() == 1) {
-				const ulong cell_id = pm->ss_id(0);
+			// if mesh_part contains > rawscan_thresh cells then just push it for further splitting
+			if(pm->size() > rawscan_thresh) {
+				leafs_.insert(*pm);
+				return;
+			}
+
+			// otherwise check for real intersections in every cell of mesh part
+			for(ulong i = 0, sz = pm->size(); i < sz; ++i) {
+				const ulong cell_id = pm->ss_id(i);
 				cell_data cell = A_.m_[cell_id];
 				// check if segment start & finish are inside the cell
 				if(hit_[wseg_id] >= m_size_) {
@@ -190,12 +199,13 @@ public:
 				}
 
 				// check for intersections with segment
+				// update: assume that in 95% of cases cells are rectangular,
+				// and intersection most probably exists
 				//if(!s_[wseg_id].is_degenerate() && strat_t::bbox_segment_x(cell.bbox(), s_[wseg_id]))
 				if(!s_[wseg_id].is_degenerate() && CGAL::do_intersect(xbbox_t::get(cell), s_[wseg_id]))
+				//if(!s_[wseg_id].is_degenerate())
 					A_.check_intersection(cell_id, wseg_id, s_[wseg_id]);
 			}
-			else
-				leafs_.insert(*pm);
 		}
 
 		base_t& A_;
@@ -242,7 +252,7 @@ public:
 		std::fill(hit_idx_.begin(), hit_idx_.end(), m_.size_flat());
 
 		// actual intersector object
-		leafs_builder B(*this, wseg, hit_idx_, parts);
+		leafs_builder<> B(*this, wseg, hit_idx_, parts);
 		// pool for allocating mesh box handles
 		// they all will be detroyed automatically on exit
 		boost::object_pool< mesh_box_handle > mbh_pool;
