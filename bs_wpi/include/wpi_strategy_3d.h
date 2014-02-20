@@ -206,7 +206,7 @@ struct strategy_3d_ex : public strategy_3d_common< strat_traits > {
 
 			// check each tetrahedron
 			for(uint i = 0; i < split.size(); ++i) {
-				if(!split[i].has_on_unbounded_side(p))
+				if(!split[i].is_degenerate() && !split[i].has_on_unbounded_side(p))
 					return true;
 			}
 			return false;
