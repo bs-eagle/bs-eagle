@@ -47,7 +47,7 @@ public:
 	typedef typename xbuild1::well_box_handle     well_box_handle;
 	typedef typename xbuild1::mesh_box_handle     mesh_box_handle;
 	typedef typename xbuild1::Box                 Box;
-	typedef typename xbuild1::template leafs_builder<> leafs_builder;
+	typedef typename xbuild1::leafs_builder       leafs_builder;
 
 	typedef typename xbuild1::hit_idx_t       hit_idx_t;
 	typedef typename std::vector< hit_idx_t > hit_idxs_t;

@@ -145,17 +145,19 @@ public:
 	/*-----------------------------------------------------------------
 	 * action taken when boxes intersection detected
 	 *----------------------------------------------------------------*/
-	// if size of mesh_part <= rawscan threshold, then every cell in that mesh part
-	// will be checked for intersections with given well path segment
-	// instead of marking for further split
-	template< ulong rawscan_thresh = 500 >
 	struct leafs_builder {
 		typedef std::vector< Segment > Segments;
-		//typedef xbbox< D > xbbox_t;
 
-		leafs_builder(base_t& A, const Segments& s, std::vector< ulong >& hit, parts_container& leafs)
+		leafs_builder(base_t& A, const Segments& s, std::vector< ulong >& hit,
+			parts_container& leafs, const ulong min_split_threshold = 0
+		)
 			: A_(A), s_(s), hit_(hit), leafs_(leafs), m_size_(A.m_.size_flat())
-		{}
+		{
+			if(min_split_threshold == 0)
+				min_spl_thresh_ = 10 * (1 << D);
+			else
+				min_spl_thresh_ = min_split_threshold;
+		}
 
 		//leafs_builder(const leafs_builder& rhs)
 		//	: A_(rhs.A_), s_(rhs.s_), hit_(rhs.hit_), leafs_(rhs.leafs_)
@@ -169,8 +171,10 @@ public:
 			//const mesh_part* pm = static_cast< mesh_box_handle* >(mb->handle().get())->data();
 			//ulong wseg_id = static_cast< well_box_handle* >(wb->handle().get())->data();
 
-			// if mesh_part contains > rawscan_thresh cells then just push it for further splitting
-			if(pm->size() > rawscan_thresh) {
+			// if size of mesh_part <= min split threshold, then every cell in that mesh part
+			// will be checked for intersections with given well path segment
+			// instead of marking for further split
+			if(pm->size() > min_spl_thresh_) {
 				leafs_.insert(*pm);
 				return;
 			}
@@ -213,6 +217,10 @@ public:
 		std::vector< ulong >& hit_;
 		parts_container& leafs_;
 		const ulong m_size_;
+		// store mesh parts for detailed check here
+		std::set< mesh_part* > parts2check_;
+		// splitting threshold
+		ulong min_spl_thresh_;
 	};
 
 	/*-----------------------------------------------------------------
@@ -252,7 +260,7 @@ public:
 		std::fill(hit_idx_.begin(), hit_idx_.end(), m_.size_flat());
 
 		// actual intersector object
-		leafs_builder<> B(*this, wseg, hit_idx_, parts);
+		leafs_builder B(*this, wseg, hit_idx_, parts);
 		// pool for allocating mesh box handles
 		// they all will be detroyed automatically on exit
 		boost::object_pool< mesh_box_handle > mbh_pool;
