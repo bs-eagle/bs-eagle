@@ -20,7 +20,10 @@ namespace blue_sky { namespace fci {
 using namespace std;
 using namespace wpi;
 
-typedef strategy_3d strat_t;
+typedef onlinett_3d strat_t;
+// faster but consumes more memory
+//typedef carray_3d strat_t;
+
 typedef algo< strat_t > wpi_algo;
 typedef wpi_algo::intersect_path xpath;
 typedef std::vector <xpath>  xpath_storage;

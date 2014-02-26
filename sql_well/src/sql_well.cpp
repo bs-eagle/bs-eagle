@@ -21,11 +21,14 @@
 #include <boost/mpl/bool.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
+// DEBUG
+//#include <boost/timer/timer.hpp>
+//#include <google/profiler.h>
 
 #include "bs_kernel.h"
 #include "sql_well.h"
 #include "frac_comp_ident.h"
-#include "i_cant_link_2_mesh.h"
+#include "wpi_iface.h"
 
 using namespace boost;
 
@@ -1919,8 +1922,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
       char s_buf[2048];
 
       // interface to mesh
-      sp_himesh himesh = BS_KERNEL.create_object("handy_mesh_iface");
-      BS_ASSERT(himesh);
+      sp_iwpi iwpi = BS_KERNEL.create_object("wpi_iface");
+      BS_ASSERT(iwpi);
 
       //const double eps = 1e-10;
       sp_dt_t dt_t = BS_KERNEL.create_object ("dt_tools");
@@ -1941,8 +1944,10 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
       BS_SP (well_pool_iface) sp_wp = this;
 
       // precalc trimesh backend to share among all compl & frac builders
-      sp_obj trim_backend = fci::wpi_algo::trimesh::create_backend(nx, ny,
-          pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"));
+      sp_obj trim_backend = iwpi->make_trimesh_backend(nx, ny,
+        pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"),
+        fci::strat_t::traits_t::name()
+      );
 
       // here we wil store builders on every date
       typedef std::list< fci::compl_n_frac_builder > cfb_storage_t;
@@ -1966,8 +1971,12 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           fci::compl_n_frac_builder cfb;
           cfb.init(nx, ny, trim_backend);
           cfb.init(sp_wp);
-          if(cfb_storage.size() == 0)
+          if(cfb_storage.size() == 0) {
+            //boost::timer::auto_cpu_timer t;
+            //ProfilerStart("/home/uentity/my_projects/blue-sky.git/plugins/bs-eagle/examples/build_cache.prof");
             cfb.build_cache();
+            //ProfilerStop();
+          }
           else
             cfb.share_cache_with(cfb_storage.front());
 

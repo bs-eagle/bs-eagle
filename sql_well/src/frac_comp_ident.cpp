@@ -7,10 +7,6 @@
 ///            the BSD License. See LICENSE for more details.
 
 #include "frac_comp_ident.h"
-#include "bcsr_matrix_iface.h"
-#include "wpi_algo.h"
-#include "wpi_strategy_3d.h"
-#include "export_python_wrapper.h"
 #include "py_list_converter.h"
 #include "sql_well.h"
 
