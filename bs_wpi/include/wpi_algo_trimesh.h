@@ -85,7 +85,11 @@ struct trimpl< online_tops_traits > {
 		return iterator_t(mesh_, mesh_->get_n_elements());
 	}
 	rs_smesh_iface* data() const {
+#ifdef BS_DISABLE_MT_LOCKS
+		return mesh_.get();
+#else
 		return mesh_.lock();
+#endif
 	}
 	sp_obj backend() const {
 		return mesh_;

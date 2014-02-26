@@ -557,7 +557,7 @@ spv_float tops2struct_grid(smart_ptr< rs_smesh_iface > mesh) {
 	rs_smesh_iface::index_point3d_t dims = mesh->get_dimens();
 	// go
 	return tops2struct_grid_impl(
-		uint_t(dims[0]), uint_t(dims[1]), uint_t(dims[2]), iterator_t(mesh.lock())
+		uint_t(dims[0]), uint_t(dims[1]), uint_t(dims[2]), iterator_t(mesh.get())
 	);
 }
 
