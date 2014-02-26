@@ -59,9 +59,9 @@ struct strategy_3d_ex : public strategy_3d_common< strat_traits > {
 		typedef std::vector< Tetrahedron > Tetrahedrons;
 
 		// cell facets cover with triangles
-		Triangles cover;
+		//Triangles cover;
 		// cell split into tetrahedrons
-		Tetrahedrons split;
+		//Tetrahedrons split;
 
 		// empty ctor for map
 		cell_data() {}
@@ -92,120 +92,34 @@ struct strategy_3d_ex : public strategy_3d_common< strat_traits > {
 		*  inside cell - 6
 		*/
 
-		// implement cell cover with triangles
-		// to find exact intersection points
-		void cell_tri_cover() {
-			if(cover.size() > 0) return;
-			cover.resize(12);
-			const cell_pos& p = cpos();
-
-			// facet 0-1-2-3
-			// 3angle 0-1-3
-			cover[0] = Triangle(
-				vertex_pos2point(p[0]),
-				vertex_pos2point(p[1]),
-				vertex_pos2point(p[3])
-			);
-			// 3angle 0-2-3
-			cover[1] = Triangle(
-				vertex_pos2point(p[0]),
-				vertex_pos2point(p[2]),
-				vertex_pos2point(p[3])
-			);
-			// facet 0-1-4-5
-			// 3angle 0-1-5
-			cover[2] = Triangle(
-				vertex_pos2point(p[0]),
-				vertex_pos2point(p[1]),
-				vertex_pos2point(p[5])
-			);
-			// 3angle 0-4-5
-			cover[3] = Triangle(
-				vertex_pos2point(p[0]),
-				vertex_pos2point(p[4]),
-				vertex_pos2point(p[5])
-			);
-			// facet 4-5-6-7
-			// 3angle 4-5-7
-			cover[4] = Triangle(
-				vertex_pos2point(p[4]),
-				vertex_pos2point(p[5]),
-				vertex_pos2point(p[7])
-			);
-			// 3angle 4-6-7
-			cover[5] = Triangle(
-				vertex_pos2point(p[4]),
-				vertex_pos2point(p[6]),
-				vertex_pos2point(p[7])
-			);
-			// facet 2-3-6-7
-			// 3angle 2-3-7
-			cover[6] = Triangle(
-				vertex_pos2point(p[2]),
-				vertex_pos2point(p[3]),
-				vertex_pos2point(p[7])
-			);
-			// 3angle 2-6-7
-			cover[7] = Triangle(
-				vertex_pos2point(p[2]),
-				vertex_pos2point(p[6]),
-				vertex_pos2point(p[7])
-			);
-			// facet 0-2-4-6
-			// 3angle 0-2-6
-			cover[8] = Triangle(
-				vertex_pos2point(p[0]),
-				vertex_pos2point(p[2]),
-				vertex_pos2point(p[6])
-			);
-			// 3angle 0-4-6
-			cover[9] = Triangle(
-				vertex_pos2point(p[0]),
-				vertex_pos2point(p[4]),
-				vertex_pos2point(p[6])
-			);
-			// facet 1-3-5-7
-			// 3angle 1-3-7
-			cover[10] = Triangle(
-				vertex_pos2point(p[1]),
-				vertex_pos2point(p[3]),
-				vertex_pos2point(p[7])
-			);
-			// 3angle 1-5-7
-			cover[11] = Triangle(
-				vertex_pos2point(p[1]),
-				vertex_pos2point(p[5]),
-				vertex_pos2point(p[7])
-			);
-		}
-
 		// implement testing whether point is inside cell
-		bool contains(const Point& p) {
+		bool contains(const Point& p) const {
 			// split cell into 5 tetrahedrons
 			// and check whether point belongs to any of 'em
-			if(!split.size()) {
-				split.resize(5);
+			//if(!split.size()) {
+			//	split.resize(5);
+			const Tetrahedron split[] = {
 				// cell A B C D A' B' C' D'
 				// ord  0 1 3 2 4  5  7  6
 				// A A' B' D'
 				// 0 4  5  6
-				split[0] = Tetrahedron(ss(0), ss(4), ss(5), ss(6));
+				Tetrahedron(ss(0), ss(4), ss(5), ss(6)),
 				// A B' B C
 				// 0 5  1 3
-				split[1] = Tetrahedron(ss(0), ss(5), ss(1), ss(3));
+				Tetrahedron(ss(0), ss(5), ss(1), ss(3)),
 				// A C D D'
 				// 0 3 2 6
-				split[2] = Tetrahedron(ss(0), ss(3), ss(2), ss(6));
+				Tetrahedron(ss(0), ss(3), ss(2), ss(6)),
 				// B' C' D' C
 				// 5  7  6  3
-				split[3] = Tetrahedron(ss(5), ss(7), ss(6), ss(3));
+				Tetrahedron(ss(5), ss(7), ss(6), ss(3)),
 				// A C B' D'
 				// 0 3 5  6
-				split[4] = Tetrahedron(ss(0), ss(3), ss(5), ss(6));
-			}
+				Tetrahedron(ss(0), ss(3), ss(5), ss(6))
+			};
 
 			// check each tetrahedron
-			for(uint i = 0; i < split.size(); ++i) {
+			for(uint i = 0; i < 5; ++i) {
 				if(!split[i].is_degenerate() && !split[i].has_on_unbounded_side(p))
 					return true;
 			}
@@ -217,21 +131,54 @@ struct strategy_3d_ex : public strategy_3d_common< strat_traits > {
 
 	// action taken on well & mesh boxes intersection
 	template< class cell_data_t >
-	static xpoints_list precise_intersection(cell_data_t& c, const Segment& well_seg) {
+	static xpoints_list precise_intersection(const cell_data_t& c, const Segment& well_seg) {
 		// cover cell with triangles
-		if(!c.cover.size())
-			c.cell_tri_cover();
+		// to find exact intersection points
+		const Triangle cover[] = {
+			// facet 0-1-2-3
+			// 3angle 0-1-3
+			Triangle(c.ss(0), c.ss(1), c.ss(3)),
+			// 3angle 0-2-3
+			Triangle(c.ss(0), c.ss(2), c.ss(3)),
+			// facet 0-1-4-5
+			// 3angle 0-1-5
+			Triangle(c.ss(0), c.ss(1), c.ss(5)),
+			// 3angle 0-4-5
+			Triangle(c.ss(0), c.ss(4), c.ss(5)),
+			// facet 4-5-6-7
+			// 3angle 4-5-7
+			Triangle(c.ss(4), c.ss(5), c.ss(7)),
+			// 3angle 4-6-7
+			Triangle(c.ss(4), c.ss(6), c.ss(7)),
+			// facet 2-3-6-7
+			// 3angle 2-3-7
+			Triangle(c.ss(2), c.ss(3), c.ss(7)),
+			// 3angle 2-6-7
+			Triangle(c.ss(2), c.ss(6), c.ss(7)),
+			// facet 0-2-4-6
+			// 3angle 0-2-6
+			Triangle(c.ss(0), c.ss(2), c.ss(6)),
+			// 3angle 0-4-6
+			Triangle(c.ss(0), c.ss(4), c.ss(6)),
+			// facet 1-3-5-7
+			// 3angle 1-3-7
+			Triangle(c.ss(1), c.ss(3), c.ss(7)),
+			// 3angle 1-5-7
+			Triangle(c.ss(1), c.ss(5), c.ss(7))
+		};
 
 		xpoints_list res;
 		// check that each triangle really intersects with given well segment
-		//Segment s = w.segment();
-		uint tri_count = 0;
-		for(tri_iterator tri = c.cover.begin(), end = c.cover.end(); tri != end; ++tri, ++tri_count) {
+		for(uint tri_count = 0; tri_count < 12; ++tri_count) {
 			try {
-				// test intersection
+				// sanity
+				// disabled: is_degenerate() checking is very expensive
+				// so use try-catch approach to just skip invalid elements
+				//if(tri->is_degenerate()) continue;
 				//if(!CGAL::do_intersect(well_seg, *tri)) continue;
+
 				// really do intersection
-				Object xres = CGAL::intersection(well_seg, *tri);
+				Object xres = CGAL::intersection(well_seg, cover[tri_count]);
 				// in 99% of cases we should get a point of intersection
 				if(const Point* xpoint = CGAL::object_cast< Point >(&xres))
 					res.push_back(std::make_pair(*xpoint, tri_count >> 1));

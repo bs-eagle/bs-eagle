@@ -111,7 +111,7 @@ struct strategy_2d_ex : public strategy_2d_common< strat_traits > {
 			return facet_vid(facet_id(dim, facet, res));
 		}
 
-		Polygon_2 polygon() {
+		Polygon_2 polygon() const {
 			// 2D upper plane of cell
 			Point points[] = {
 				Point(V[0], V[1]),  Point(V[3], V[4]),
@@ -120,7 +120,7 @@ struct strategy_2d_ex : public strategy_2d_common< strat_traits > {
 			return Polygon_2(points, points + 4);
 		}
 
-		bool contains(const Point& p) {
+		bool contains(const Point& p) const {
 			return !(polygon().has_on_unbounded_side(p));
 		}
 	};
@@ -129,7 +129,7 @@ struct strategy_2d_ex : public strategy_2d_common< strat_traits > {
 
 	// action taken on well & mesh boxes intersection
 	template< class cell_data_t >
-	static xpoints_list precise_intersection(cell_data_t& c, const Segment& well_seg) {
+	static xpoints_list precise_intersection(const cell_data_t& c, const Segment& well_seg) {
 		// obtain well segment
 		//const Segment& s = w.segment();
 		// and cell polygon
