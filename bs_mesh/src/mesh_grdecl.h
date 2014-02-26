@@ -155,6 +155,10 @@ class BS_API_PLUGIN mesh_grdecl : public  rs_smesh_base
     spv_float get_cell_volumes (const t_long Nx, const t_long Ny, const t_long Nz) const;
 
     //! get vertex of cube [i,j,k]
+    corners_t
+    calc_corners (const t_long i, const t_long j, const t_long k) const;
+
+    //! get vertex of cube [i,j,k]
     void calc_element (const t_long i, const t_long j, const t_long k, element_t &element) const;
 
     //! get vertex of cube [index]

@@ -469,6 +469,13 @@ mesh_grdecl::calc_element (const t_long index) const
 void
 mesh_grdecl::calc_element (const t_long i, const t_long j, const t_long k, element_t &element) const
   {
+    corners_t corners = calc_corners(i, j, k);
+    element.init (corners);
+  }
+  
+mesh_grdecl::corners_t
+mesh_grdecl::calc_corners (const t_long i, const t_long j, const t_long k) const
+  {
     corners_t corners;
 
 #ifdef _DEBUG
@@ -502,10 +509,8 @@ mesh_grdecl::calc_element (const t_long i, const t_long j, const t_long k, eleme
     calc_corner_point (zcorn_array[index2 + 1], &coord_array[(iCOORD + 1) * 6], corners[5]);
     calc_corner_point (zcorn_array[index2 + 2 * nx], &coord_array[(iCOORD + (nx + 1)) * 6], corners[6]);
     calc_corner_point (zcorn_array[index2 + 2 * nx + 1], &coord_array[(iCOORD + (nx + 1) + 1) * 6], corners[7]);
-    
-    element.init (corners);
+    return corners;
   }
-  
 
 bool mesh_grdecl::is_small(const t_long i, const t_long j, const t_long k, t_double eps)  const
   {
