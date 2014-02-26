@@ -143,10 +143,10 @@ struct pods : public helpers< strat_t > {
 			return vertex_pos2rect(p1, p2);
 		}
 
-		Point ss(uint vert_idx) const {
+		Point ss(const uint vert_idx) const {
 			return vertex_pos2point(cpos()[vert_idx]);
 		}
-		Point operator[](uint vert_idx) const {
+		Point operator[](const uint vert_idx) const {
 			return ss(vert_idx);
 		}
 
@@ -304,6 +304,10 @@ struct pods : public helpers< strat_t > {
 	typedef typename well_path::iterator wp_iterator;
 	typedef typename well_path::const_iterator cwp_iterator;
 
+	typedef std::vector< well_path > well_paths;
+	typedef typename well_paths::iterator wps_iterator;
+	typedef typename well_paths::const_iterator cwps_iterator;
+
 	/*-----------------------------------------------------------------
 	* intersections description
 	*----------------------------------------------------------------*/
@@ -340,6 +344,7 @@ struct pods : public helpers< strat_t > {
 
 	// storage of intersection points
 	typedef std::multiset< well_hit_cell > intersect_path;
+	typedef std::vector< intersect_path >  intersect_paths;
 
 	//typedef boost::fast_pool_allocator<
 	//	well_hit_cell,

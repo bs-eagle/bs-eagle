@@ -7,10 +7,6 @@
 ///            the BSD License. See LICENSE for more details.
 
 #include "frac_comp_ident.h"
-#include "bcsr_matrix_iface.h"
-#include "wpi_algo.h"
-#include "wpi_strategy_3d.h"
-#include "export_python_wrapper.h"
 #include "py_list_converter.h"
 #include "sql_well.h"
 
@@ -24,8 +20,6 @@
 namespace blue_sky { namespace fci {
 // impl details
 using namespace std;
-
-typedef wpi::algo< wpi::strategy_3d > wpi_algo;
 
 // hidden details
 namespace {
@@ -84,8 +78,8 @@ compdat::compdat(const string& well_name_, const string& branch_name_, const pos
 	cell_pos[3] = cell_pos[2];
 	cell_id_ = wpi_algo::encode_cell_id(cell_pos_, mesh_size);
 
-  x1[0] = x1[1] = x1[2] = 0;
-  x2[0] = x2[1] = x2[2] = 0;
+	x1[0] = x1[1] = x1[2] = 0;
+	x2[0] = x2[1] = x2[2] = 0;
 }
 
 compdat::compdat(const string& well_name_, const string& branch_name_, ulong cell_id, const pos_i& mesh_size)
@@ -97,8 +91,8 @@ compdat::compdat(const string& well_name_, const string& branch_name_, ulong cel
 compdat::compdat(ulong cell_id)
 	: dir(' '), kh_mult(0), md(0), len(0), skin (0), diam (0.146), kh (0), status (0), cell_id_(cell_id)
 {
-  x1[0] = x1[1] = x1[2] = 0;
-  x2[0] = x2[1] = x2[2] = 0;
+	x1[0] = x1[1] = x1[2] = 0;
+	x2[0] = x2[1] = x2[2] = 0;
 }
 
 void compdat::init(ulong cell_id, const pos_i& mesh_size) {
@@ -109,8 +103,8 @@ void compdat::init(ulong cell_id, const pos_i& mesh_size) {
 	cell_pos[3] = cell_pos[2];
 	// store cell_id
 	cell_id_ = cell_id;
-  x1[0] = x1[1] = x1[2] = 0;
-  x2[0] = x2[1] = x2[2] = 0;
+	x1[0] = x1[1] = x1[2] = 0;
+	x2[0] = x2[1] = x2[2] = 0;
 }
 
 /*-----------------------------------------------------------------
@@ -282,6 +276,13 @@ public:
 		fb_.init_cache(xp_cache_, cache_limit);
 	}
 
+	bool build_cache() {
+		if(!cb_.cache() || !fb_.cache())
+			init_cache();
+		// cache is shared, so invoke build() single time
+		return cb_.build_cache();
+	}
+
 	const cd_storage& compl_build(double date) {
 		cb_.build(date);
 		return cb_.s_;
@@ -337,6 +338,10 @@ const cd_storage& compl_n_frac_builder::compl_build(double date) {
 
 const frac_storage& compl_n_frac_builder::frac_build(double date) {
 	return pimpl_->frac_build(date);
+}
+
+bool compl_n_frac_builder::build_cache() {
+	return pimpl_->build_cache();
 }
 
 const cd_storage& compl_n_frac_builder::storage_compdat ()  const {

@@ -77,7 +77,7 @@ class well_pool_iface : public objbase
        *
        * @return 0 if success
        */
-      virtual int open_db (const std::wstring &file) = 0;
+      virtual int open_db (const std::string &file) = 0;
 
       /**
        * @brief close database connection
@@ -124,10 +124,10 @@ class well_pool_iface : public objbase
       virtual bool get_sql_bool (t_int col) = 0;
       virtual std::string get_sql_str (t_int col) = 0;
 	  virtual bool get_sql_exist (t_int col) = 0;
-      virtual int merge_with_db (const std::wstring &dbname) = 0;
+      virtual int merge_with_db (const std::string &dbname) = 0;
       virtual int exec_sql (const std::string &sql) = 0;
       virtual int exec_sql_and_return_rowid (const std::string &sql) = 0;
-      virtual void backup_to_file (const std::wstring &filename) = 0;
+      virtual void backup_to_file (const std::string &filename) = 0;
       virtual int insert_or_update (const std::string &select_sql,
                                     const std::string &insert_sql,
                                     const std::string &update_sql) = 0;
@@ -160,7 +160,7 @@ class well_pool_iface : public objbase
        *
        * @return 0 if success
        */
-      virtual int save_to_bos_ascii_file (const std::wstring &fname, sp_pool_t pool, sp_prop_t prop) = 0;
+      virtual int save_to_bos_ascii_file (const std::string &fname, sp_pool_t pool, sp_prop_t prop) = 0;
 
       virtual std::vector< std::string > get_wlog_names(const std::string &wname, const std::string &branch) = 0;
 

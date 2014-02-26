@@ -8,7 +8,6 @@
 #ifndef COORD_ZCORN_TOOLS_1M4YIRKV
 #define COORD_ZCORN_TOOLS_1M4YIRKV
 
-#include "bs_mesh_stdafx.h"
 #include "rs_smesh_iface.h"
 #include <iterator>
 #include <cmath>
@@ -34,6 +33,14 @@ typedef std::pair< spfp_storarr_t, spfp_storarr_t > coord_zcorn_pair;
  * Main processing functions
  *----------------------------------------------------------------*/
 BS_API_PLUGIN spfp_storarr_t gen_coord(int_t nx, int_t ny, spfp_storarr_t dx, spfp_storarr_t dy, fp_t x0, fp_t y0);
+
+BS_API_PLUGIN coord_zcorn_pair gen_coord_zcorn(
+	int_t nx, int_t ny, int_t nz,
+	spv_float dx, spv_float dy, spv_float dz,
+	fp_stor_t x0, fp_stor_t y0, fp_stor_t z0
+);
+
+BS_API_PLUGIN spfp_storarr_t gen_coord2(spfp_storarr_t x, spfp_storarr_t y);
 
 BS_API_PLUGIN coord_zcorn_pair refine_mesh_deltas(int_t& nx, int_t& ny, spfp_storarr_t coord,
 	spfp_storarr_t points, fp_t cell_merge_thresh, fp_t band_thresh,
@@ -128,20 +135,20 @@ BS_API_PLUGIN coord_zcorn_pair refine_wave_mesh_deltas(
 	spfp_storarr_t points_pos, spfp_storarr_t points_param);
 
 // convert array of cell's tops coord to structured grid representation
-spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float tops);
+BS_API_PLUGIN spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float tops);
 // memory-efficient implementation directly from COORD and ZCORN using tops_iterator
-spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float coord, spv_float zcorn);
+BS_API_PLUGIN spv_float tops2struct_grid(uint_t nx, uint_t ny, spv_float coord, spv_float zcorn);
 // same as above using provided rs_smesh_iface object
-spv_float tops2struct_grid(smart_ptr< rs_smesh_iface > mesh);
+BS_API_PLUGIN spv_float tops2struct_grid(smart_ptr< rs_smesh_iface > mesh);
 
-spv_float gen_sgrid(
+BS_API_PLUGIN spv_float gen_sgrid(
 	t_ulong nx, t_ulong ny, t_ulong nz,
 	spv_float dx, spv_float dy, spv_float dz,
 	t_float x0 = 0, t_float y0 = 0, t_float z0 = 0,
 	bool zyx_order = false
 );
 
-spv_float gen_sgrid_2d(
+BS_API_PLUGIN spv_float gen_sgrid_2d(
 	t_ulong nx, t_ulong ny,
 	spv_float dx, spv_float dy,
 	t_float x0 = 0, t_float y0 = 0,

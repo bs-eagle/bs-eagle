@@ -4,7 +4,6 @@
 /// @date 10.05.2011
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
-#include "bs_mesh_stdafx.h"
 #include "coord_zcorn_tools.h"
 #include "export_python_wrapper.h"
 #include "py_pair_converter.h"
@@ -134,6 +133,10 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(gen_sgrid_2d_overl, czt::gen_sgrid_2d, 4, 7)
 namespace blue_sky { namespace python {
 
 void py_export_czt() {
+	def("gen_coord", &czt::gen_coord);
+	def("gen_coord2", &czt::gen_coord2);
+	def("gen_coord_zcorn", &czt::gen_coord_zcorn);
+
 	def("wave_mesh_deltas_s1", &czt::wave_mesh_deltas_s1);
 	def("wave_mesh_deltas_s2", &wave_mesh_deltas_s2_o1, wave_mesh_deltas_s2_overl1());
 	def("wave_mesh_deltas_s2", &wave_mesh_deltas_s2_o2, wave_mesh_deltas_s2_overl2());

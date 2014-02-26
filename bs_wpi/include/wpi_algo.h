@@ -21,6 +21,7 @@
 #include "wpi_algo_xaction_build.h"
 #include "wpi_algo_xaction_build2.h"
 #include "wpi_algo_xaction_build3.h"
+#include "wpi_algo_xaction_build_mp.h"
 //#include "wpi_algo_vtk.h"
 
 #include "conf.h"
@@ -61,11 +62,13 @@ struct algo : public helpers< strat_t > {
 
 	typedef typename pods_t::well_data well_data;
 	typedef typename pods_t::well_path well_path;
+	typedef typename pods_t::well_paths well_paths;
 	typedef typename pods_t::wp_iterator wp_iterator;
 	typedef typename pods_t::cwp_iterator cwp_iterator;
 
 	typedef typename pods_t::well_hit_cell well_hit_cell;
 	typedef typename pods_t::intersect_path intersect_path;
+	typedef typename pods_t::intersect_paths intersect_paths;
 
 	// import mesh_part
 	typedef mesh_tools< strat_t > mesh_tools_t;
@@ -75,6 +78,9 @@ struct algo : public helpers< strat_t > {
 	typedef intersect_base< strat_t > xbase;
 	typedef typename xbase::hit_idx_t hit_idx_t;
 	typedef intersect_builder2< strat_t > xbuilder;
+	// multiple wells
+	typedef intersect_builder_mp< strat_t > xbuilder_mp;
+	typedef typename xbuilder_mp::hit_idxs_t hit_idxs_t;
 
 	static ulong fill_well_path(spv_float well_info, well_path& W) {
 		ulong well_node_num = well_info->size() >> 2;
@@ -97,13 +103,14 @@ struct algo : public helpers< strat_t > {
 	}
 
 	/*-----------------------------------------------------------------
-	* implementation of main routine
-	*----------------------------------------------------------------*/
+	 * path identification result constructor
+	 *----------------------------------------------------------------*/
 	template< bool pythonish, class = void >
 	struct wpi_return {
 		typedef spv_float type;
 
-		static type make(const xbase& A) {
+		template< class intersector_t >
+		static type make(const intersector_t& A) {
 			return A.export_1d();
 		}
 	};
@@ -112,17 +119,44 @@ struct algo : public helpers< strat_t > {
 	struct wpi_return< false, unused > {
 		typedef std::vector< well_hit_cell > type;
 
-		static type make(const xbase& A) {
+		template< class intersector_t >
+		static type make(const intersector_t& A) {
 			type res(A.path().size());
 			std::copy(A.path().begin(), A.path().end(), res.begin());
-			//ulong i = 0;
-			//for(typename intersect_path::const_iterator px = A.path().begin(), end = A.path().end(); px != end; ++px)
-			//	res[i++] = *px;
 
 			return res;
 		}
 	};
 
+	// the same for multiple wells
+	template< bool pythonish, class = void >
+	struct wpi_return_mp {
+		typedef std::vector< spv_float > type;
+
+		template< class intersector_t >
+		static type make(const intersector_t& A) {
+			return A.export_1d();
+		}
+	};
+
+	template< class unused >
+	struct wpi_return_mp< false, unused > {
+		typedef wpi_return< false > wpi_ret;
+		typedef std::vector< std::vector< well_hit_cell > > type;
+
+		template< class intersector_t >
+		static type make(const intersector_t& A) {
+			type res(A.xbricks().size());
+			for(ulong i = 0; i < A.xbricks().size(); ++i)
+				res[i] = wpi_ret::make(A.xbricks()[i]);
+
+			return res;
+		}
+	};
+
+	/*-----------------------------------------------------------------
+	* implementation of main routine
+	*----------------------------------------------------------------*/
 	template< bool pythonish >
 	static typename wpi_return< pythonish >::type well_path_ident_d(
 		ulong nx, ulong ny, sp_obj trim_backend,
@@ -167,6 +201,55 @@ struct algo : public helpers< strat_t > {
 	{
 		// calculate mesh nodes coordinates and build initial trimesh
 		return well_path_ident_d< pythonish >(
+			nx, ny, trimesh::create_backend(nx, ny, coord, zcorn),
+			well_info, include_well_nodes, H
+		);
+	}
+
+	/*-----------------------------------------------------------------
+	 * well path identification for multiple wells
+	 *----------------------------------------------------------------*/
+	template< bool pythonish >
+	static typename wpi_return_mp< pythonish >::type well_paths_ident_d(
+		ulong nx, ulong ny, sp_obj trim_backend,
+		std::vector< spv_float > well_info, bool include_well_nodes,
+		std::vector< spv_ulong > H = std::vector< spv_ulong >()
+	) {
+		typedef typename wpi_return< pythonish >::type ret_t;
+
+		// 1) calculate mesh nodes coordinates and build initial trimesh
+		trimesh M(nx, ny, trim_backend);
+
+		// 2) create well path description
+		well_paths W(well_info.size());
+		for(ulong i = 0; i < well_info.size(); ++i) {
+			if(!fill_well_path(well_info[i], W[i]))
+				return ret_t();
+		}
+
+		// 3) construct main object
+		xbuilder_mp A(M, W);
+
+		// 4) narrow search space via branch & bound algo
+		const hit_idxs_t& hit_idxs = A.build(include_well_nodes);
+
+		// return well nodes hit indexes
+		for(ulong i = 0; i < std::min(H.size(), hit_idxs.size()); ++i) {
+			H[i]->resize(hit_idxs[i].size());
+			if(H[i]->size() == hit_idxs[i].size())
+				std::copy(hit_idxs[i].begin(), hit_idxs[i].end(), H[i]->begin());
+		}
+		// return intersections
+		return wpi_return< pythonish >::make(A);
+	}
+
+	template< bool pythonish >
+	static typename wpi_return_mp< pythonish >::type well_paths_ident_d(
+		ulong nx, ulong ny, spv_float coord, spv_float zcorn,
+		spv_float well_info, bool include_well_nodes, spv_ulong H = NULL)
+	{
+		// calculate mesh nodes coordinates and build initial trimesh
+		return well_paths_ident_d< pythonish >(
 			nx, ny, trimesh::create_backend(nx, ny, coord, zcorn),
 			well_info, include_well_nodes, H
 		);

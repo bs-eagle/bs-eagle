@@ -1,8 +1,9 @@
 #ifndef WELL_PROCESS_COMPLETIONS_H
 #define WELL_PROCESS_COMPLETIONS_H
 
-#include "wpi_iface.h"
-#include "rs_mesh_iface.h"
+//#include "wpi_iface.h"
+#include "wpi_algo_pod.h"
+#include "wpi_strategies.h"
 #include "well_completion_coords.h"
 
 namespace blue_sky
@@ -28,7 +29,8 @@ namespace blue_sky
         typedef smart_ptr <mesh_iface_t, true>  sp_mesh_iface_t;
         typedef smart_ptr <connection_t, true>  sp_connection_t;
         typedef smart_ptr <well_t, true>        sp_well_t;                          //!< smart_ptr to well type
-        typedef wpi::well_hit_cell_3d           well_hit_cell_3d; 
+        typedef wpi::pods< wpi::strategy_3d >::well_hit_cell well_hit_cell_3d;
+        //typedef wpi::well_hit_cell_3d           well_hit_cell_3d; 
         typedef completion_coords               completion_coords_t;
         
         static void
@@ -38,7 +40,7 @@ namespace blue_sky
                             const stdv_float &perm, 
                             const stdv_float &ntg,
                             sp_well_t &well, 
-                            std::vector <wpi::well_hit_cell_3d> &well_path_segs,
+                            std::vector <well_hit_cell_3d> &well_path_segs,
                             t_uint con_branch, 
                             t_float con_md, 
                             t_float con_len);

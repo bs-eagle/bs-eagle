@@ -150,9 +150,7 @@ namespace blue_sky
 
       //! return coords of block vertexes by IJK indexes
       grd_ecl::fpoint3d_vector calc_element (const t_long i, const t_long j, const t_long k) const
-        {  mesh_grdecl::element_t element;
-          wrapped.calc_element (i, j, k, element);
-          return element.get_corners ();};
+        { return wrapped.calc_corners(i, j, k); }
 
       //! return coords of block vertexes by n_block index
       grd_ecl::fpoint3d_vector calc_element (const t_long index) const

@@ -90,9 +90,11 @@ public:
 					//if(!seg.is_degenerate() && strat_t::bbox_segment_x(pk->bbox(), seg)) {
 					if(!seg.is_degenerate() && CGAL::do_intersect(seg, xbbox_t::get(*pk))) {
 						// mesh parts of only 1 cell goes to result
-						if(pk->size() == 1)
+						if(pk->size() == 1) {
 							// find intersection points if any
-							check_intersection(pk->ss_id(0), wseg_id, seg);
+							const ulong cell_id = pk->ss_id(0);
+							check_intersection(cell_id, wseg_id, m_[cell_id], seg);
+						}
 						else
 							div_space.insert(std::make_pair(wseg_id, *pk));
 					}

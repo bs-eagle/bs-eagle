@@ -35,6 +35,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common_alg", "common_alg\co
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_lsolvers", "bs_lsolvers\bs_lsolvers.vcxproj", "{56C5E340-52C1-4084-9000-6DA8C612C8A0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bs_wpi", "bs_wpi\bs_wpi.vcxproj", "{DA2E1B73-8D3D-4A2E-98A0-E54048491F9E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_MPI|Win32 = Debug_MPI|Win32
@@ -329,6 +331,23 @@ Global
 		{56C5E340-52C1-4084-9000-6DA8C612C8A0}.Release|Win32.Build.0 = Release|Win32
 		{56C5E340-52C1-4084-9000-6DA8C612C8A0}.Release|x64.ActiveCfg = Release|x64
 		{56C5E340-52C1-4084-9000-6DA8C612C8A0}.Release|x64.Build.0 = Release|x64
+		{DA2E1B73-8D3D-4A2E-98A0-E54048491F9E}.Debug_MPI|Win32.ActiveCfg = Debug|Win32
+		{DA2E1B73-8D3D-4A2E-98A0-E54048491F9E}.Debug_MPI|Win32.Build.0 = Debug|Win32
+		{DA2E1B73-8D3D-4A2E-98A0-E54048491F9E}.Debug_MPI|x64.ActiveCfg = Debug|Win32
+		{DA2E1B73-8D3D-4A2E-98A0-E54048491F9E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DA2E1B73-8D3D-4A2E-98A0-E54048491F9E}.Debug|Win32.Build.0 = Debug|Win32
+		{DA2E1B73-8D3D-4A2E-98A0-E54048491F9E}.Debug|x64.ActiveCfg = Debug|x64
+		{DA2E1B73-8D3D-4A2E-98A0-E54048491F9E}.Debug|x64.Build.0 = Debug|x64
+		{DA2E1B73-8D3D-4A2E-98A0-E54048491F9E}.release_with_debug|Win32.ActiveCfg = Release|Win32
+		{DA2E1B73-8D3D-4A2E-98A0-E54048491F9E}.release_with_debug|Win32.Build.0 = Release|Win32
+		{DA2E1B73-8D3D-4A2E-98A0-E54048491F9E}.release_with_debug|x64.ActiveCfg = Release|Win32
+		{DA2E1B73-8D3D-4A2E-98A0-E54048491F9E}.Release_WO_Python|Win32.ActiveCfg = Release|Win32
+		{DA2E1B73-8D3D-4A2E-98A0-E54048491F9E}.Release_WO_Python|Win32.Build.0 = Release|Win32
+		{DA2E1B73-8D3D-4A2E-98A0-E54048491F9E}.Release_WO_Python|x64.ActiveCfg = Release|Win32
+		{DA2E1B73-8D3D-4A2E-98A0-E54048491F9E}.Release|Win32.ActiveCfg = Release|Win32
+		{DA2E1B73-8D3D-4A2E-98A0-E54048491F9E}.Release|Win32.Build.0 = Release|Win32
+		{DA2E1B73-8D3D-4A2E-98A0-E54048491F9E}.Release|x64.ActiveCfg = Release|x64
+		{DA2E1B73-8D3D-4A2E-98A0-E54048491F9E}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -65,25 +65,42 @@ public:
 		// default value
 		typedef ulong fish_t;
 		typedef cell_data data_t;
+
+		static bool less(const fish_t& lhs, const fish_t& rhs) {
+			return lhs < rhs;
+		}
 	};
 	// overload for well path
 	template< class unused >
 	struct fish2box< Loki::Int2Type< 1 >, unused > {
 		typedef ulong fish_t;
 		typedef well_data data_t;
+
+		static bool less(const fish_t& lhs, const fish_t& rhs) {
+			return lhs < rhs;
+		}
 	};
 	// overload for mesh_part
 	template< class unused >
 	struct fish2box< Loki::Int2Type< 2 >, unused > {
 		typedef const mesh_part* fish_t;
 		typedef mesh_part data_t;
+
+		static bool less(const fish_t& lhs, const fish_t& rhs) {
+			return *lhs < *rhs;
+		}
 	};
 
 	// structure to help identify given boxes
 	class box_handle {
 	public:
-		virtual int type() const = 0;
 		virtual ~box_handle() {};
+		virtual int type() const = 0;
+		virtual bool less(const box_handle& rhs) const = 0;
+		// for storing into ordered containers
+		bool operator<(const box_handle& rhs) const {
+			return less(rhs);
+		}
 	};
 	// pointer is really stored as box handle
 	typedef st_smart_ptr< box_handle > sp_bhandle;
@@ -107,6 +124,12 @@ public:
 			return f_;
 		}
 
+		// for storing into ordered containers
+		bool less(const box_handle& rhs) const {
+			if(rhs.type() != id) return false;
+			return fish2box_t::less(f_, static_cast< const box_handle_impl& >(rhs).f_);
+		}
+
 	private:
 		fish_t f_;
 	};
@@ -124,11 +147,17 @@ public:
 	 *----------------------------------------------------------------*/
 	struct leafs_builder {
 		typedef std::vector< Segment > Segments;
-		//typedef xbbox< D > xbbox_t;
 
-		leafs_builder(intersect_builder2& A, const Segments& s, std::vector< ulong >& hit, parts_container& leafs)
+		leafs_builder(base_t& A, const Segments& s, std::vector< ulong >& hit,
+			parts_container& leafs, const ulong min_split_threshold = 0
+		)
 			: A_(A), s_(s), hit_(hit), leafs_(leafs), m_size_(A.m_.size_flat())
-		{}
+		{
+			if(min_split_threshold == 0)
+				min_spl_thresh_ = 100 * (1 << D);
+			else
+				min_spl_thresh_ = min_split_threshold;
+		}
 
 		//leafs_builder(const leafs_builder& rhs)
 		//	: A_(rhs.A_), s_(rhs.s_), hit_(rhs.hit_), leafs_(rhs.leafs_)
@@ -142,18 +171,25 @@ public:
 			//const mesh_part* pm = static_cast< mesh_box_handle* >(mb->handle().get())->data();
 			//ulong wseg_id = static_cast< well_box_handle* >(wb->handle().get())->data();
 
-			// if mesh_part contains > 1 cells then just push it for further splitting
-			// otherwise check for real intersections
-			if(pm->size() == 1) {
-				ulong cell_id = pm->ss_id(0);
-				cell_data cell = A_.m_[cell_id];
+			// if size of mesh_part <= min split threshold, then every cell in that mesh part
+			// will be checked for intersections with given well path segment
+			// instead of marking for further split
+			if(pm->size() > min_spl_thresh_) {
+				leafs_.insert(*pm);
+				return;
+			}
+
+			// otherwise check for real intersections in every cell of mesh part
+			for(ulong i = 0, sz = pm->size(); i < sz; ++i) {
+				const ulong cell_id = pm->ss_id(i);
+				const cell_data& cell = A_.m_[cell_id];
 				// check if segment start & finish are inside the cell
 				if(hit_[wseg_id] >= m_size_) {
 					const Point& start = A_.wp_[wseg_id].start();
 					if(
 						mesh_tools_t::point_inside_bbox(cell.bbox(), start) &&
 						cell.contains(start)
-						)
+					)
 						hit_[wseg_id] = cell_id;
 				}
 				// check segment end for last segment
@@ -162,24 +198,29 @@ public:
 					if(
 						mesh_tools_t::point_inside_bbox(cell.bbox(), finish) &&
 						cell.contains(finish)
-						)
+					)
 						hit_[wseg_id + 1] = cell_id;
 				}
 
 				// check for intersections with segment
+				// update: assume that in 95% of cases cells are rectangular,
+				// and intersection most probably exists
 				//if(!s_[wseg_id].is_degenerate() && strat_t::bbox_segment_x(cell.bbox(), s_[wseg_id]))
 				if(!s_[wseg_id].is_degenerate() && CGAL::do_intersect(xbbox_t::get(cell), s_[wseg_id]))
-					A_.check_intersection(cell_id, wseg_id, s_[wseg_id]);
+				//if(!s_[wseg_id].is_degenerate())
+					A_.check_intersection(cell_id, wseg_id, cell, s_[wseg_id]);
 			}
-			else
-				leafs_.insert(*pm);
 		}
 
-		intersect_builder2& A_;
+		base_t& A_;
 		const Segments& s_;
 		std::vector< ulong >& hit_;
 		parts_container& leafs_;
 		const ulong m_size_;
+		// store mesh parts for detailed check here
+		std::set< mesh_part* > parts2check_;
+		// splitting threshold
+		ulong min_spl_thresh_;
 	};
 
 	/*-----------------------------------------------------------------

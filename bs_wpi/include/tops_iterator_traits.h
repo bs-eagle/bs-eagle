@@ -185,7 +185,7 @@ struct mesh_ti_sc_traits : public buf_traits {
 			const ulong z = cell_id / plane_sz;
 			const ulong y = (cell_id - z * plane_sz) / dims[0];
 
-			const grd_ecl::fpoint3d_vector corners = mesh_->calc_element(
+			const grd_ecl::fpoint3d_vector& corners = mesh_->calc_element(
 				cell_id - z * plane_sz - y * dims[0], y, z
 			);
 			// copy corners to plain data array

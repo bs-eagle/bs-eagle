@@ -4,9 +4,8 @@
 /// @date 2011-05-06
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
-#include "bs_mesh_stdafx.h"
 #include "coord_zcorn_tools.h"
-#include "mesh_grdecl.h"
+//#include "mesh_grdecl.h"
 #include "tops_iterator.h"
 #include "i_cant_link_2_mesh.h"
 
@@ -558,7 +557,7 @@ spv_float tops2struct_grid(smart_ptr< rs_smesh_iface > mesh) {
 	rs_smesh_iface::index_point3d_t dims = mesh->get_dimens();
 	// go
 	return tops2struct_grid_impl(
-		uint_t(dims[0]), uint_t(dims[1]), uint_t(dims[2]), iterator_t(mesh.lock())
+		uint_t(dims[0]), uint_t(dims[1]), uint_t(dims[2]), iterator_t(mesh.get())
 	);
 }
 
@@ -1681,58 +1680,4 @@ spv_float gen_sgrid_2d(
 }
 
 }}	// eof blue_sky::coord_zcorn_tools
-
-/*-----------------------------------------------------------------
- * implementation of bs_mesh::gen_coord_zcorn & refine_mesh
- *----------------------------------------------------------------*/
-using namespace blue_sky;
-namespace czt = blue_sky::coord_zcorn_tools;
-
-std::pair< spv_float, spv_float >
-mesh_grdecl::gen_coord_zcorn(t_long nx, t_long ny, t_long nz, spv_float dx, spv_float dy, spv_float dz, t_float x0, t_float y0, t_float z0) {
-	return czt::gen_coord_zcorn(nx, ny, nz, dx, dy, dz, x0, y0, z0);
-}
-
-spv_float
-mesh_grdecl::gen_coord2 (spv_float x, spv_float y) {
-	return czt::gen_coord2(x, y);
-}
-
-/*-----------------------------------------------------------------
- * points given in abs coordinates merged with params
- *----------------------------------------------------------------*/
-std::pair< spv_float, spv_float >
-mesh_grdecl::refine_mesh_deltas(t_long& nx, t_long& ny, spv_float coord,
-		spv_float points, spv_long hit_idx, t_double cell_merge_thresh, t_double band_thresh)
-{
-	return czt::refine_mesh_deltas(nx, ny, coord, points, cell_merge_thresh, band_thresh, hit_idx);
-}
-
-std::pair< spv_float, spv_float >
-mesh_grdecl::refine_mesh(t_long& nx, t_long& ny, spv_float coord, spv_float zcorn,
-		spv_float points, spv_long hit_idx, t_double cell_merge_thresh, t_double band_thresh)
-{
-	return czt::refine_mesh(nx, ny, coord, zcorn, points, cell_merge_thresh, band_thresh, hit_idx);
-}
-
-/*-----------------------------------------------------------------
- * points given in (i,j) format
- *----------------------------------------------------------------*/
-std::pair< spv_float, spv_float >
-mesh_grdecl::refine_mesh_deltas(t_long& nx, t_long& ny, spv_float coord,
-		spv_long points_pos, spv_float points_param, spv_long hit_idx,
-		t_double cell_merge_thresh, t_double band_thresh)
-{
-	return czt::refine_mesh_deltas(nx, ny, coord, points_pos, points_param,
-			cell_merge_thresh, band_thresh, hit_idx);
-}
-
-std::pair< spv_float, spv_float >
-mesh_grdecl::refine_mesh(t_long& nx, t_long& ny, spv_float coord, spv_float zcorn,
-		spv_long points_pos, spv_float points_param, spv_long hit_idx,
-		t_double cell_merge_thresh, t_double band_thresh)
-{
-	return czt::refine_mesh(nx, ny, coord, zcorn, points_pos, points_param,
-			cell_merge_thresh, band_thresh, hit_idx);
-}
 

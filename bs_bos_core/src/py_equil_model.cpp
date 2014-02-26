@@ -21,6 +21,10 @@ namespace blue_sky
 			.def("get_saturation", &T::get_saturation)
 			.def("get_equil_region_data", &T::get_equil_region_data)
 			.def("get_equil_data", &T::get_equil_data)
+            .def("get_pbvd_region_data", &T::get_pbvd_region_data)
+            .def("get_pbvd_data", &T::get_pbvd_data)
+            .def("get_rsvd_region_data", &T::get_rsvd_region_data)
+            .def("get_rsvd_data", &T::get_rsvd_data)
 			.def("get_n_equil_regions", &T::get_n_equil_regions)
 		PY_EXPORTER_END;
 
@@ -29,7 +33,7 @@ namespace blue_sky
 		{
 			base_exporter <equil_model_iface, equil_model_depth_exporter>::export_class ("equil_model_iface");
       class_exporter <equil_model_depth, equil_model_iface, equil_model_depth_exporter>::export_class ("equil_model_depth");
-      
+
       // register equil to/from str serialization
       def("serialize_to_str", &blue_sky::serialize_to_str< equil_model_iface >);
       def("serialize_from_str", &blue_sky::serialize_from_str< equil_model_iface >);

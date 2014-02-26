@@ -102,21 +102,19 @@ namespace blue_sky
       BLUE_SKY_TYPE_STD_CREATE_T_MEM(bos_val_table)
       BLUE_SKY_TYPE_STD_COPY_T_MEM(bos_val_table)
 
-      BLUE_SKY_TYPE_DECL_T_MEM(bos_val_table, objbase, "bos_val_table",
+      BLUE_SKY_TYPE_DECL_T_MEM_IFACE(bos_val_table, objbase, "bos_val_table",
                                "Array of values of the item_t type indexed by index_t key", "")
+
+    protected:
+      // default ctor
+      bos_val_table(bs_type_ctor_param param = NULL)
+        : bs_refcounter(), container(), objbase()
+      {}
+      // copy ctor
+      bos_val_table(const bos_val_table& rhs)
+        : bs_refcounter(), container(rhs), objbase(rhs)
+      {}
     };
-
-  //default ctor implementation
-  template< class index_t, class item_t >
-  bos_val_table< index_t, item_t >::bos_val_table(bs_type_ctor_param param)
-      : objbase(param)
-  {}
-
-  //copy ctor implementation
-  template< class index_t, class item_t >
-  bos_val_table< index_t, item_t >::bos_val_table(const bos_val_table< index_t, item_t >& src) : bs_refcounter (src),
-      container(src), objbase(src)
-  {}
 }
 
 #endif // BOS_VAL_TABLE_H

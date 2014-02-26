@@ -38,6 +38,7 @@ public:
 
 	// import global consts
 	enum { D = strat_t::D, inner_point_id = strat_t::inner_point_id };
+	typedef int dirvec_t[D];
 
 	// import pods
 	typedef pods< strat_t > pods_t;
@@ -54,6 +55,7 @@ public:
 
 	typedef typename pods_t::well_hit_cell well_hit_cell;
 	typedef typename pods_t::intersect_path intersect_path;
+	typedef typename intersect_path::iterator x_iterator;
 
 	// import helper functions
 	typedef helpers< strat_t > base_t;
@@ -64,10 +66,6 @@ public:
 	typedef typename mesh_tools_t::mesh_part mesh_part;
 
 	typedef std::vector< ulong > hit_idx_t;
-
-	typedef typename intersect_path::iterator x_iterator;
-
-	typedef int dirvec_t[D];
 
 	//template< int N >
 	struct spatial_sort {
@@ -328,7 +326,7 @@ public:
 		return x_;
 	}
 
-protected:
+//protected:
 	x_iterator insert_wp_node(ulong cell_id, ulong wseg_id, x_iterator px, bool end_point = false) {
 		// initialization
 		const well_data& wseg = wp_[wseg_id];
@@ -372,11 +370,11 @@ protected:
 		return px;
 	}
 
-	void check_intersection(ulong cell_id, ulong wseg_id, const Segment& well_seg) {
+	void check_intersection(ulong cell_id, ulong wseg_id, const cell_data& c, const Segment& well_seg) {
 		typedef typename strat_t::xpoints_list xpoints_list;
 
 		// find intersection points coord if any
-		cell_data c = m_[cell_id];
+		//cell_data c = m_[cell_id];
 		const xpoints_list& res = strat_t::precise_intersection(c, well_seg);
 		// cache modified cell in order to omit polygon or triangulation recalc, used by
 		// precise_intersection

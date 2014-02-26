@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import bs
 import numpy as np
-import bs.bs_mesh as bm
+import bs.wpi as bm
 
 # generate initial mesh
 cell_x = 25; cell_y = 25; cell_z = 1;
@@ -11,7 +11,7 @@ dz = np.array([cell_z], dtype='d') # Lz
 Nx = 50
 Ny = 50
 Nz = 10
-[c, z] = bm.mesh_grdecl.gen_coord_zcorn(Nx, Ny, Nz, dx, dy, dz)
+[c, z] = bm.gen_coord_zcorn(Nx, Ny, Nz, dx, dy, dz)
 print 'Source mesh generated!'
 
 # generate vertical mesh trajectory

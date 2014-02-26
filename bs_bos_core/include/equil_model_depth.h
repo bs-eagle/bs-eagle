@@ -29,9 +29,9 @@ namespace blue_sky
 						 const phase_d_t &phase_d, const sat_d_t &sat_d,
 						 t_long n_phases, t_long phases, t_long sat_counter,
 						 t_long n_depth,
-                         const t_long n_eql,               //!< number of equil regions      
-                         const stdv_long &sat_regions,      //!< (n_eql) scal region number for current equil region 
-                         const stdv_long &pvt_regions,      //!< (n_eql) pvt region number for current equil region 
+                         const t_long n_eql,               //!< number of equil regions
+                         const stdv_long &sat_regions,      //!< (n_eql) scal region number for current equil region
+                         const stdv_long &pvt_regions,      //!< (n_eql) pvt region number for current equil region
                          BS_SP (pvt_3p_iface) pvt_prop,    //!< PVT properties
                          BS_SP (scal_3p_iface) scal_prop,  //!< SCAL properties
                          BS_SP (table_iface) equil,        //!< main equil data (from EQUIL keyword)
@@ -51,10 +51,10 @@ namespace blue_sky
 	  typedef std::vector <spv_double>           stdv_spv_double;
 	  typedef BS_SP (table_iface)                sp_table_t;
 	  typedef std::vector <BS_SP (table_iface)>  sp_table_array_t;
-	
+
 		void
 		py_calc_equil(bool is_o, bool is_g, bool is_w,
-		              BS_SP(scal_3p_iface) scal_props, 
+		              BS_SP(scal_3p_iface) scal_props,
 					  BS_SP(pvt_3p_iface) pvt_props,
 					  BS_SP (table_iface) equil,
 					  const stdv_float &min_depth,
@@ -68,25 +68,39 @@ namespace blue_sky
 
 		spv_double get_pressure ();
 		spv_double get_saturation ();
-    
+
     virtual void init_equil_model (const t_long n_equil_regions_,
                                    t_int n_phases);
 
     virtual BS_SP (table_iface)
     get_equil_region_data (const t_long region) const;
-    
+
     virtual std::list <BS_SP( table_iface)>
     get_equil_data () const;
-    
+
+    virtual BS_SP (table_iface)
+    get_pbvd_region_data (const t_long region) const;
+
+    virtual std::list <BS_SP( table_iface)>
+    get_pbvd_data () const;
+
+    virtual BS_SP (table_iface)
+    get_rsvd_region_data (const t_long region) const;
+
+    virtual std::list <BS_SP( table_iface)>
+    get_rsvd_data () const;
+
     virtual t_long
-    get_n_equil_regions () const 
-      { return n_equil_regions;  }                           
-                            
+    get_n_equil_regions () const
+      { return n_equil_regions;  }
+
 	private:
-	  t_long                          n_equil_regions;   //!< number of equil regions 
-	  sp_table_array_t                equil_data;        //!< equil data 
-		spv_double                      pressure;
-		spv_double                      saturation;
+	  t_long                          n_equil_regions;   //!< number of equil regions
+	  sp_table_array_t                equil_data;        //!< equil data
+	  sp_table_array_t                pbvd_data;        //!< pbvd data
+	  sp_table_array_t                rsvd_data;        //!< rsvd data
+	  spv_double                      pressure;
+	  spv_double                      saturation;
 	public:
 		BLUE_SKY_TYPE_DECL (equil_model_depth);
 

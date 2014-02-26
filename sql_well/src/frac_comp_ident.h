@@ -12,7 +12,7 @@
 #include "conf.h"
 #include "well_pool_iface.h"
 #include "wpi_algo.h"
-#include "wpi_strategy_3d.h"
+#include "wpi_strategies.h"
 
 namespace blue_sky { namespace fci {
 
@@ -20,7 +20,10 @@ namespace blue_sky { namespace fci {
 using namespace std;
 using namespace wpi;
 
-typedef strategy_3d strat_t;
+typedef onlinett_3d strat_t;
+// faster but consumes more memory
+//typedef carray_3d strat_t;
+
 typedef algo< strat_t > wpi_algo;
 typedef wpi_algo::intersect_path xpath;
 typedef std::vector <xpath>  xpath_storage;
@@ -219,6 +222,9 @@ public:
 
 	// fractures build
 	const frac_storage& frac_build(double date);
+
+	// precalc all possible mesh-well intersections at once
+	bool build_cache();
 
 	// clear storage
 	void clear();

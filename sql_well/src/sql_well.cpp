@@ -21,11 +21,14 @@
 #include <boost/mpl/bool.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
+// DEBUG
+//#include <boost/timer/timer.hpp>
+//#include <google/profiler.h>
 
 #include "bs_kernel.h"
 #include "sql_well.h"
 #include "frac_comp_ident.h"
-#include "i_cant_link_2_mesh.h"
+#include "wpi_iface.h"
 
 using namespace boost;
 
@@ -197,19 +200,21 @@ bool wlogs_table_exists(sql_well& sqw) {
     }
   sql_well::~sql_well ()
     {
+      if (db)
+        close_db ();
     }
 
   int
-  sql_well::open_db (const std::wstring &file_)
+  sql_well::open_db (const std::string &file)
     {
       int rc = 0;
       char *zErrMsg = 0;
 
       if (db)
         close_db ();
-      std::string file = wstr2str (file_);
+      //const std::string file = wstr2str (file_);
       printf ("SQL open_db %s\n", file.c_str ());
-      if (!strcmp(file.c_str(),":memory:") || !boost::filesystem::exists (file))
+      if (file == ":memory:" || !boost::filesystem::exists (file))
         {
           rc = sqlite3_open (file.c_str (), &db);
           if (rc)
@@ -242,50 +247,16 @@ bool wlogs_table_exists(sql_well& sqw) {
         }
 
       file_name = file;
-
-#if 0
-      char buf[2048];
-      rc = sqlite3_open (":memory:", &db);
-      if (rc)
-        {
-          fprintf (stderr, "Can't open database: %s\n", sqlite3_errmsg (db));
-          sqlite3_close (db);
-          db = 0;
-          return -1;
-        }
-      file_name = file;
-      // load from file to memory
-      rc = create_db (db);
-      if (rc)
-        return rc;
-      sprintf (buf, "ATTACH DATABASE '%s' as backup; BEGIN", file.c_str ());
-      rc = sqlite3_exec (db, buf, NULL, NULL, &zErrMsg);
-      if (rc != SQLITE_OK)
-        {
-          fprintf (stderr, "SQL error: %s\n", zErrMsg);
-          sqlite3_free (zErrMsg);
-        }
-
-      rc = sqlite3_exec(db, "SELECT name FROM backup.sqlite_master WHERE type='table'",
-                        &backup_to_main, db, &zErrMsg);
-      if (rc != SQLITE_OK)
-        {
-          fprintf (stderr, "SQL error: %s\n", zErrMsg);
-          sqlite3_free (zErrMsg);
-        }
-      sqlite3_exec(db, "COMMIT; DETACH DATABASE backup", NULL, NULL, NULL);
-#else //0
-#endif //0
       return 0;
     }
 
   void
-  sql_well::backup_to_file (const std::wstring &filename)
+  sql_well::backup_to_file (const std::string &filename)
     {
       if (!db)
         return;
       sqlite3 *ddb = 0;
-      int rc = sqlite3_open (wstr2str (filename).c_str (), &ddb);
+      int rc = sqlite3_open (filename.c_str(), &ddb);
       if (rc)
         {
           fprintf (stderr, "Can't open database: %s\n", sqlite3_errmsg (ddb));
@@ -312,13 +283,13 @@ bool wlogs_table_exists(sql_well& sqw) {
 
 
   int
-  sql_well::merge_with_db(const std::wstring& dbname_)
+  sql_well::merge_with_db(const std::string& dbname)
     {
       if (!db)
         return 0;
       if (stmp_sql)
         finalize_sql ();
-      std::string dbname = wstr2str (dbname_);
+      //std::string dbname = wstr2str (dbname_);
 
       int rc = 0;
       char *zErrMsg = 0;
@@ -1945,19 +1916,14 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
     }
 
   int
-  sql_well::save_to_bos_ascii_file (const std::wstring &fname_, sp_pool_t pool, sp_prop_t prop)
+  sql_well::save_to_bos_ascii_file (const std::string &fname, sp_pool_t pool, sp_prop_t prop)
     {
-#ifdef UNIX
-      std::string fname = wstr2str (fname_);
-#else
-      std::string fname = wstr2str (fname_, "ru_RU.CP1251");
-#endif
       FILE *fp = fopen (fname.c_str (), "w");
       char s_buf[2048];
 
       // interface to mesh
-      sp_himesh himesh = BS_KERNEL.create_object("handy_mesh_iface");
-      BS_ASSERT(himesh);
+      sp_iwpi iwpi = BS_KERNEL.create_object("wpi_iface");
+      BS_ASSERT(iwpi);
 
       //const double eps = 1e-10;
       sp_dt_t dt_t = BS_KERNEL.create_object ("dt_tools");
@@ -1978,8 +1944,10 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
       BS_SP (well_pool_iface) sp_wp = this;
 
       // precalc trimesh backend to share among all compl & frac builders
-      sp_obj trim_backend = fci::wpi_algo::trimesh::create_backend(nx, ny,
-          pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"));
+      sp_obj trim_backend = iwpi->make_trimesh_backend(nx, ny,
+        pool->get_fp_data("COORD"), pool->get_fp_data("ZCORN"),
+        fci::strat_t::traits_t::name()
+      );
 
       // here we wil store builders on every date
       typedef std::list< fci::compl_n_frac_builder > cfb_storage_t;
@@ -2003,7 +1971,13 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           fci::compl_n_frac_builder cfb;
           cfb.init(nx, ny, trim_backend);
           cfb.init(sp_wp);
-          if(cfb_storage.size() != 0)
+          if(cfb_storage.size() == 0) {
+            //boost::timer::auto_cpu_timer t;
+            //ProfilerStart("/home/uentity/my_projects/blue-sky.git/plugins/bs-eagle/examples/build_cache.prof");
+            cfb.build_cache();
+            //ProfilerStop();
+          }
+          else
             cfb.share_cache_with(cfb_storage.front());
 
           // find completions & save
@@ -2396,6 +2370,7 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               double p_wr = get_sql_real (3);
               double p_gr = get_sql_real (4);
               double p_bhp = get_sql_real (6);
+              double p_lr = get_sql_real (5);
               std::string s_status;
               std::string s_ctrl;
               std::string s_params;
@@ -2416,6 +2391,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
               if (ctrl == CTRL_P_LRATE)
                 {
                   s_ctrl = "LRAT";
+                  if (p_or + p_wr == 0)
+                    p_or = p_lr;
                   if (status == STATUS_OPEN && (p_or + p_wr == 0))
                     continue;
                 }
@@ -2623,8 +2600,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           for (; !step_sql ();)
             {
               double wefac = get_sql_real (1);
-              if (wefac == 1.0)
-                continue;
+              //if (wefac == 1.0)
+              //  continue;
 
               std::string s = get_sql_str (0);
               // skip out-of-mesh wells
