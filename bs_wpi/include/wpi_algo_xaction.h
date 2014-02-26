@@ -370,11 +370,11 @@ public:
 		return px;
 	}
 
-	void check_intersection(ulong cell_id, ulong wseg_id, const Segment& well_seg) {
+	void check_intersection(ulong cell_id, ulong wseg_id, const cell_data& c, const Segment& well_seg) {
 		typedef typename strat_t::xpoints_list xpoints_list;
 
 		// find intersection points coord if any
-		cell_data c = m_[cell_id];
+		//cell_data c = m_[cell_id];
 		const xpoints_list& res = strat_t::precise_intersection(c, well_seg);
 		// cache modified cell in order to omit polygon or triangulation recalc, used by
 		// precise_intersection

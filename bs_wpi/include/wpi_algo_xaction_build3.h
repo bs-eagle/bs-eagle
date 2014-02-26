@@ -155,8 +155,10 @@ public:
 					// check for intersection points
 					for(std::list< ulong >::iterator ps = catched_seg.begin(),
 						cs_end = catched_seg.end(); ps != cs_end; ++ps
-						)
-						check_intersection(l->ss_id(0), *ps, wseg[*ps]);
+					) {
+						const ulong cell_id = l->ss_id(0);
+						check_intersection(cell_id, *ps, m_[cell_id], wseg[*ps]);
+					}
 
 					leafs.erase(l++);
 				}

@@ -154,7 +154,7 @@ public:
 			: A_(A), s_(s), hit_(hit), leafs_(leafs), m_size_(A.m_.size_flat())
 		{
 			if(min_split_threshold == 0)
-				min_spl_thresh_ = 10 * (1 << D);
+				min_spl_thresh_ = 100 * (1 << D);
 			else
 				min_spl_thresh_ = min_split_threshold;
 		}
@@ -182,7 +182,7 @@ public:
 			// otherwise check for real intersections in every cell of mesh part
 			for(ulong i = 0, sz = pm->size(); i < sz; ++i) {
 				const ulong cell_id = pm->ss_id(i);
-				cell_data cell = A_.m_[cell_id];
+				const cell_data& cell = A_.m_[cell_id];
 				// check if segment start & finish are inside the cell
 				if(hit_[wseg_id] >= m_size_) {
 					const Point& start = A_.wp_[wseg_id].start();
@@ -208,7 +208,7 @@ public:
 				//if(!s_[wseg_id].is_degenerate() && strat_t::bbox_segment_x(cell.bbox(), s_[wseg_id]))
 				if(!s_[wseg_id].is_degenerate() && CGAL::do_intersect(xbbox_t::get(cell), s_[wseg_id]))
 				//if(!s_[wseg_id].is_degenerate())
-					A_.check_intersection(cell_id, wseg_id, s_[wseg_id]);
+					A_.check_intersection(cell_id, wseg_id, cell, s_[wseg_id]);
 			}
 		}
 

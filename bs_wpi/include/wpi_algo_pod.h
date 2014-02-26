@@ -143,10 +143,10 @@ struct pods : public helpers< strat_t > {
 			return vertex_pos2rect(p1, p2);
 		}
 
-		Point ss(uint vert_idx) const {
+		Point ss(const uint vert_idx) const {
 			return vertex_pos2point(cpos()[vert_idx]);
 		}
-		Point operator[](uint vert_idx) const {
+		Point operator[](const uint vert_idx) const {
 			return ss(vert_idx);
 		}
 
