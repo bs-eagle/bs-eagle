@@ -69,7 +69,8 @@ public:
 	}
 
 	void init(smart_ptr< well_pool_iface, true > src_well) {
-		sw_ = BS_KERNEL.create_object_copy(src_well);
+		sw_ = src_well;
+		//sw_ = BS_KERNEL.create_object_copy(src_well);
 	}
 
 	void init_cache(const spxp_cache_t& xp_cache = NULL, const ulong cache_limit = 0) {
