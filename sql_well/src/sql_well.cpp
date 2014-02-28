@@ -328,7 +328,8 @@ CREATE TABLE wells(name TEXT UNIQUE PRIMARY KEY, \
 				    x REAL DEFAULT -1, \
 				    y REAL DEFAULT -1, \
 				    horiz INTEGER DEFAULT 0, \
-				    KB REAL DEFAULT -1);\
+				    KB REAL DEFAULT -1, \
+				    src INT DEFAULT 0);\
 CREATE TABLE groups(name TEXT UNIQUE PRIMARY KEY);\
 CREATE TABLE wells_in_group(gr_name TEXT NOT NULL REFERENCES groups(name) ON UPDATE CASCADE ON DELETE CASCADE,\
 						    well_name TEXT NOT NULL REFERENCES wells(name) ON UPDATE CASCADE ON DELETE CASCADE);\
