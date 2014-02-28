@@ -184,6 +184,7 @@
     <ClCompile Include="src\py_dt_tools.cpp" />
     <ClCompile Include="src\table_upper.cpp" />
     <ClCompile Include="src\timer.cpp" />
+    <ClCompile Include="src\wlog_tools.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ascii_reader.h" />

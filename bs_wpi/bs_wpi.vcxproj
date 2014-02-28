@@ -149,6 +149,8 @@
   <ItemGroup>
     <ClInclude Include="include\coord_zcorn_tools.h" />
     <ClInclude Include="include\czt_iface.h" />
+    <ClInclude Include="include\strategy_2d_common.h" />
+    <ClInclude Include="include\strategy_3d_common.h" />
     <ClInclude Include="include\tops_iterator.h" />
     <ClInclude Include="include\tops_iterator_traits.h" />
     <ClInclude Include="include\well_path_ident.h" />
@@ -163,11 +165,13 @@
     <ClInclude Include="include\wpi_algo_xaction_build.h" />
     <ClInclude Include="include\wpi_algo_xaction_build2.h" />
     <ClInclude Include="include\wpi_algo_xaction_build3.h" />
+    <ClInclude Include="include\wpi_algo_xaction_build_mp.h" />
     <ClInclude Include="include\wpi_common.h" />
     <ClInclude Include="include\wpi_iface.h" />
     <ClInclude Include="include\wpi_strategies.h" />
     <ClInclude Include="include\wpi_strategy_2d.h" />
     <ClInclude Include="include\wpi_strategy_3d.h" />
+    <ClInclude Include="include\wpi_strategy_3d_bg.h" />
     <ClInclude Include="include\wpi_strategy_traits.h" />
     <ClInclude Include="include\wpi_trimesh_impl.h" />
   </ItemGroup>
