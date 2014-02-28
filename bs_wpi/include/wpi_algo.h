@@ -143,12 +143,15 @@ struct algo : public helpers< strat_t > {
 	struct wpi_return_mp< false, unused > {
 		typedef wpi_return< false > wpi_ret;
 		typedef std::vector< std::vector< well_hit_cell > > type;
+		typedef intersect_base< strat_t > xbuild_base;
+		typedef typename std::list< xbuild_base >::const_iterator cxbricks_iterator;
 
 		template< class intersector_t >
 		static type make(const intersector_t& A) {
 			type res(A.xbricks().size());
-			for(ulong i = 0; i < A.xbricks().size(); ++i)
-				res[i] = wpi_ret::make(A.xbricks()[i]);
+			cxbricks_iterator pb = A.xbricks().begin();
+			for(ulong i = 0; i < A.xbricks().size(); ++i, ++pb)
+				res[i] = wpi_ret::make(*pb);
 
 			return res;
 		}

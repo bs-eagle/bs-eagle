@@ -74,6 +74,8 @@ public:
 	hit_idxs_t& build(bool append_wp_nodes = true) {
 		typedef std::vector< Segment > Segments;
 		typedef std::vector< Segments > Segments_mp;
+		typedef typename std::list< xbuild_base >::const_iterator cxbricks_iterator;
+		typedef typename std::list< xbuild_base >::iterator xbricks_iterator;
 
 		Segments_mp wseg(wps_.size());
 		std::vector< std::vector< Box > > well_boxes(wps_.size());
@@ -81,7 +83,7 @@ public:
 
 		// make separate base intersector for each well_path
 		xbricks_.clear();
-		xbricks_.reserve(wps_.size());
+		//xbricks_.reserve(wps_.size());
 
 		// list of mesh parts
 		// new parts is temp storage for intersected parts with given leafs_builder
@@ -154,7 +156,8 @@ public:
 			parts.clear();
 
 			// do intersect boxes for each well_path
-			for(ulong i = 0; i < wps_.size(); ++i) {
+			xbricks_iterator pb = xbricks_.begin();
+			for(ulong i = 0; i < wps_.size(); ++i, ++pb) {
 				// make mesh box pointers
 				std::vector< Box* > mp_boxes_p(mp_boxes.size());
 				ulong j = 0;
@@ -171,7 +174,7 @@ public:
 				CGAL::box_intersection_d(
 					mp_boxes_p.begin(),   mp_boxes_p.end(),
 					well_boxes_p[i].begin(), well_boxes_p[i].end(),
-					leafs_builder(xbricks_[i], wseg[i], xbricks_[i].hit_idx(), new_parts)
+					leafs_builder(*pb, wseg[i], pb->hit_idx(), new_parts)
 				);
 
 				// parts marked for further split can be excluded from mp_boxes
@@ -192,32 +195,38 @@ public:
 
 		// collect all hit_idx from xbricks
 		hit_idx_.resize(xbricks_.size());
-		for(ulong i = 0; i < xbricks_.size(); ++i) {
-			hit_idx_[i] = xbricks_[i].hit_idx();
+		xbricks_iterator pb = xbricks_.begin();
+		for(ulong i = 0; i < xbricks_.size(); ++i, ++pb) {
 			if(append_wp_nodes)
-				xbricks_[i].append_wp_nodes(hit_idx_[i]);
+				pb->append_wp_nodes(pb->hit_idx());
+			hit_idx_[i] = pb->hit_idx();
 		}
 		return hit_idx_;
 	}
 
 	// export resulting intersections as vector of 1D arrays
 	std::vector< spv_float > export_1d() const {
+		typedef typename std::list< xbuild_base >::const_iterator cxbricks_iterator;
 		std::vector< spv_float > res;
 		res.reserve(xbricks_.size());
-		for(ulong i = 0; i < xbricks_.size(); ++i)
-			res.push_back(xbricks_[i].export_1d());
+		cxbricks_iterator pb = xbricks_.begin();
+		for(ulong i = 0; i < xbricks_.size(); ++i, ++pb) {
+			res.push_back(pb->export_1d());
+		}
 		return res;
 	}
 
 	// return vector intersection builders for each well
-	const std::vector< xbuild_base >& xbricks() const {
+	const std::list< xbuild_base >& xbricks() const {
 		return xbricks_;
 	}
 
 	const intersect_paths path() const {
+		typedef typename std::list< xbuild_base >::const_iterator cxbricks_iterator;
 		intersect_paths res(xbricks_.size());
-		for(ulong i = 0; i < xbricks_.size(); ++i) {
-			res[i] = xbricks_.path();
+		cxbricks_iterator pb = xbricks_.begin();
+		for(ulong i = 0; i < xbricks_.size(); ++i, ++pb) {
+			res[i] = pb->path();
 		}
 		return res;
 	}
@@ -228,7 +237,7 @@ public:
 	well_paths& wps_;
 	// base intersection builders that store resulting intersections
 	// for each well
-	std::vector< xbuild_base > xbricks_;
+	std::list< xbuild_base > xbricks_;
 	// cell IDs of where each well node is located
 	hit_idxs_t hit_idx_;
 };
