@@ -108,9 +108,9 @@ public:
 		well_paths W(wb.size());
 		// well_paths reference source traj data, so keep it while algo works
 		std::vector< spv_float > trajes(wb.size());
-		ulong i = 0;
+		ulong k = 0;
 		// for each well+branch combo build well_infos
-		for(wb_storage::iterator pwb = wb.begin(), wb_end = wb.end(); pwb != wb_end; ++pwb, ++i) {
+		for(wb_storage::iterator pwb = wb.begin(), wb_end = wb.end(); pwb != wb_end; ++pwb, ++k) {
 			// from 'branches' select well+branch_i trajectory (sql_well::get_branch_traj)
 			sp_traj_t traj = sw_->get_branch_traj(pwb->first, pwb->second);
 			if(!traj) return false;
@@ -126,10 +126,10 @@ public:
 					*ptv++ = traj_t->get_value(i, col_ids[j]);
 			}
 			// prevent deleting source traj data
-			trajes[i] = traj_v;
+			trajes[k] = traj_v;
 
-			// convert traj_v to i-th well_path
-			if(!wpi_algo::fill_well_path(traj_v, W[i])) return false;
+			// convert traj_v to k-th well_path
+			if(!wpi_algo::fill_well_path(traj_v, W[k])) return false;
 		}
 
 		// 3 find intersections of all branches with mesh (well_paths_ident)
@@ -139,12 +139,12 @@ public:
 		// 4. store results in cache
 		// cache limit is ignored
 		xp_cache_->clear();
-		i = 0;
+		k = 0;
 		for(
 			wb_storage::iterator pwb = wb.begin(), wb_end = wb.end();
-			pwb != wb_end, i < A.xbricks().size(); ++pwb, ++i
+			pwb != wb_end, k < A.xbricks().size(); ++pwb, ++k
 		) {
-			(*xp_cache_)[pwb->first + pwb->second] = A.xbricks()[i].path();
+			(*xp_cache_)[pwb->first + pwb->second] = A.xbricks()[k].path();
 		}
 
 		return true;
