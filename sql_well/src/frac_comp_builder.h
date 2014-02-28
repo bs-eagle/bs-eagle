@@ -46,6 +46,9 @@ public:
 	typedef st_smart_ptr< xp_cache_t >     spxp_cache_t;
 	typedef typename xp_cache_t::iterator  xpc_iterator;
 
+	typedef intersect_base< strat_t > xbuild_base;
+	typedef typename std::list< xbuild_base >::const_iterator cxbricks_iterator;
+
 	frac_comp_builder() {}
 
 	frac_comp_builder(t_ulong nx, t_ulong ny, const spv_float& coord, const spv_float& zcorn) {
@@ -139,12 +142,12 @@ public:
 		// 4. store results in cache
 		// cache limit is ignored
 		xp_cache_->clear();
-		k = 0;
+		cxbricks_iterator pb = A.xbricks().begin();
 		for(
 			wb_storage::iterator pwb = wb.begin(), wb_end = wb.end();
-			pwb != wb_end, k < A.xbricks().size(); ++pwb, ++k
+			pwb != wb_end; ++pwb, ++pb
 		) {
-			(*xp_cache_)[pwb->first + pwb->second] = A.xbricks()[k].path();
+			(*xp_cache_)[pwb->first + pwb->second] = pb->path();
 		}
 
 		return true;

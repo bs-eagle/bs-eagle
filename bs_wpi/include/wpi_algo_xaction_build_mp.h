@@ -111,7 +111,7 @@ public:
 
 			xbricks_.push_back(xbuild_base(m_, wps_[i]));
 			// init hit index with invalid value
-			hit_idx_t& H = xbricks_[i].hit_idx();
+			hit_idx_t& H = xbricks_.back().hit_idx();
 			H.resize(wps_[i].size() + 1);
 			std::fill(H.begin(), H.end(), m_.size_flat());
 		}
