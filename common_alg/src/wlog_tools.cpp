@@ -44,28 +44,38 @@ void projection_impl(
 	//vf_iterator  p_res  = res->begin();
 	// position dest grid to next boundary
 	++p_grid;
+	// zero-fill resulting array
+	// TODO: do something for out-of-bounds values, instead of simple 0
+	std::fill(p_res, p_res + (p_grid_end - p_grid), 0.0);
 
 	// main cycle
 	t_float win_sum = 0;
 	ulong win_sz = 0;
-	for(; p_dept != p_dept_end && p_grid != p_grid_end; ++p_data, ++p_dept) {
+	while(p_grid != p_grid_end) {
 		// if we reached window boundary
-		if(*p_dept > *p_grid) {
+		if(*p_dept >= *p_grid) {
 			if(win_sz)
 				*p_res = win_sum / win_sz;
 			else
 				*p_res = *p_data;
+			// next step on dest grid and resulting array
 			++p_res;
 			++p_grid;
 			win_sum = 0;
 			win_sz = 0;
 		}
+		else {
+			++p_data; ++p_dept;
+			if(p_dept == p_dept_end) {
+				// here we always have win_sz >= 1
+				*p_res = win_sum / win_sz;
+				break;
+			}
+		}
 		// we're inside window
 		win_sum += *p_data;
 		++win_sz;
 	}
-
-	//return res;
 }
 
 } // eof hidden namespace
