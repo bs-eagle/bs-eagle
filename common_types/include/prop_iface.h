@@ -24,6 +24,7 @@ namespace blue_sky
   class prop_iface : public objbase
     {
     public:
+      typedef std::list<std::wstring>                  list_t;
 
       virtual ~prop_iface ()
         {}
@@ -110,6 +111,21 @@ namespace blue_sky
        * @param s -- <INPUT> string
        */
       virtual void from_str (const std::string &s) = 0;
+
+      virtual list_t get_names_i () const = 0;
+      virtual list_t get_names_f () const = 0;
+      virtual list_t get_names_b () const = 0;
+      virtual list_t get_names_s () const = 0;
+
+      virtual t_double get_def_val_f (const std::wstring &name) const = 0;
+      virtual t_long get_def_val_i (const std::wstring &name) const = 0;
+      virtual bool get_def_val_b (const std::wstring &name) const = 0;
+      virtual std::wstring get_def_val_s (const std::wstring &name) const = 0;
+
+      virtual std::wstring get_description_f (const std::wstring &name) const = 0;
+      virtual std::wstring get_description_i (const std::wstring &name) const = 0;
+      virtual std::wstring get_description_b (const std::wstring &name) const = 0;
+      virtual std::wstring get_description_s (const std::wstring &name) const = 0;
 
 #ifdef BSPY_EXPORTING_PLUGIN
       virtual std::wstring py_str () const = 0;
