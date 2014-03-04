@@ -20,13 +20,15 @@
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #include "table_iface.h"
+#include "prop_iface.h"
 
 namespace blue_sky
 {
 class traj_iface : public objbase
   {
     public:
-      typedef BS_SP (table_iface)                     sp_table_t;
+      typedef BS_SP (table_iface)                   sp_table_t;
+      typedef BS_SP (prop_iface)                    sp_prop_t;
 
     public:
       /** 
@@ -38,6 +40,11 @@ class traj_iface : public objbase
        * @brief return SP to the table
        */
       virtual sp_table_t get_table () = 0;
+
+      /** 
+       * @brief return SP to the property
+       */
+      virtual sp_prop_t get_prop () = 0;
 
       /** 
        * @brief read data from LAS file

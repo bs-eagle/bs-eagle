@@ -151,7 +151,7 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, traj)
 		static_cast< traj_iface* >(NULL)
 	);
 
-	ar & t.sp_table;
+	ar & t.sp_table & t.sp_prop;
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 // instantiate code using _BYNAME macro

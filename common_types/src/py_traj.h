@@ -30,6 +30,8 @@ namespace blue_sky
   PY_EXPORTER (py_traj_exporter, default_exporter)
     .def ("get_table",                       &T::get_table, 
         args (""), "Return table with depth and DEV curves")
+    .def ("get_prop",                         &T::get_prop, 
+        args (""), "Return trajectory properties")
     .def ("read_from_dev_file",               &T::read_from_dev_file, 
         args ("fname"), "Read wellbore trajectory from DEV file format")
     .def ("to_str",                               &T::to_str, 

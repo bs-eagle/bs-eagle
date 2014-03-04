@@ -20,13 +20,14 @@
 
 namespace blue_sky
 {
-  
+
   class BS_API_PLUGIN traj : public traj_iface
     {
-    
-    public: 
 
-      typedef BS_SP (table_iface)                     sp_table_t;
+    public:
+
+      typedef BS_SP (table_iface)                   sp_table_t;
+      typedef BS_SP (prop_iface)                    sp_prop_t;
 
       // ------------------------------------
       // METHODS
@@ -44,6 +45,14 @@ namespace blue_sky
       virtual sp_table_t get_table ()
         {
           return sp_table;
+        }
+
+      /** 
+       * @brief return SP to the property 
+       */
+      virtual sp_prop_t get_prop ()
+        {
+          return sp_prop;
         }
 
       /** 
@@ -77,17 +86,16 @@ namespace blue_sky
       virtual std::string py_str () const;
 
 #endif //BSPY_EXPORTING_PLUGIN
-      
-    protected:
 
+    protected:
       // ------------------------------
       // VARIABLES
       // ------------------------------
-    protected:
       sp_table_t sp_table;      //!< table pointer
+      sp_prop_t  sp_prop;    //!< properties pointer
 
       BLUE_SKY_TYPE_DECL (traj);
-	  friend class bs_serialize;
+      friend class bs_serialize;
     };
 
 }; //end of blue_sky namespace
