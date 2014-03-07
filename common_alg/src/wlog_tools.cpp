@@ -11,6 +11,9 @@
 
 #include "bs_kernel.h"
 #include "conf.h"
+#include <limits>
+// DEBUG
+//#include <iostream>
 
 namespace blue_sky {
 
@@ -35,18 +38,24 @@ void projection_impl(
 	//res->resize(p_grid_end - p_grid - 1);
 
 	// setup iterators
-	const cvf_iterator p_dept_end = wlog_dept->begin() + wlog_sz;
+	const cvf_iterator p_dept_begin = wlog_dept->begin();
+	const cvf_iterator p_dept_end = p_dept_begin + wlog_sz;
 	// find starting point on well log
 	cvf_iterator p_dept = std::lower_bound(
 		wlog_dept->begin(), wlog_dept->begin() + wlog_sz, *p_grid
 	);
 	cvf_iterator p_data = wlog_data->begin() + (p_dept - wlog_dept->begin());
-	//vf_iterator  p_res  = res->begin();
+
+	// DEBUG
+	//std::cout << "++wlog_mean_projection:" << std::endl;
+	//std::cout << "log_dept = [" << *p_dept << ", " << *(p_dept_end - 1) << "]" << std::endl;
+	//std::cout << "grid = [" << *p_grid << ", " << *(p_grid_end - 1) << "]" << std::endl;
 	// position dest grid to next boundary
 	++p_grid;
 	// zero-fill resulting array
 	// TODO: do something for out-of-bounds values, instead of simple 0
-	std::fill(p_res, p_res + (p_grid_end - p_grid), 0.0);
+	//std::fill(p_res, p_res + (p_grid_end - p_grid), 0.0);
+	std::fill(p_res, p_res + (p_grid_end - p_grid), std::numeric_limits< double >::quiet_NaN());
 
 	// main cycle
 	t_float win_sum = 0;
@@ -56,8 +65,8 @@ void projection_impl(
 		if(*p_dept >= *p_grid) {
 			if(win_sz)
 				*p_res = win_sum / win_sz;
-			else
-				*p_res = *p_data;
+			else if(p_dept != p_dept_begin)
+				*p_res = *(p_data - 1);
 			// next step on dest grid and resulting array
 			++p_res;
 			++p_grid;
@@ -65,6 +74,10 @@ void projection_impl(
 			win_sz = 0;
 		}
 		else {
+			// we're inside window
+			win_sum += *p_data;
+			++win_sz;
+			// next step in well log
 			++p_data; ++p_dept;
 			if(p_dept == p_dept_end) {
 				// here we always have win_sz >= 1
@@ -72,9 +85,6 @@ void projection_impl(
 				break;
 			}
 		}
-		// we're inside window
-		win_sum += *p_data;
-		++win_sz;
 	}
 }
 

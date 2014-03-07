@@ -219,7 +219,7 @@ namespace blue_sky
       namespace qi = boost::spirit::qi;
       using boost::spirit::ascii::space;
 
-      std::cout << "SEC ASCII:" << s << std::endl;
+      //std::cout << "SEC ASCII:" << s << std::endl;
       for (;!file.eof ();)
         {
           std::string::iterator begin = s.begin();
