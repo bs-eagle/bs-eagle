@@ -144,8 +144,8 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, blue_sky::sql_well)
 	if(!do_load_db) return;
 
 	// backup db handle
-	sqlite3* bu_db;
-	int opres;
+	//sqlite3* bu_db;
+	//int opres;
 
 	// load backup db fname
 	std::string db_basename, db_fname;
@@ -158,31 +158,39 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, blue_sky::sql_well)
 		// try to open db relative to project path
 		// NOTE: assume that kernel paths are in native system encoding
 		std::string db_relname = str2ustr(prj_path + PATHSEP) + db_basename;
-		opres = sqlite3_open(db_relname.c_str(), &bu_db);
-		if(opres == SQLITE_OK) {
-			// save handle to open db
-			t.db = bu_db;
-			t.file_name = db_relname;
+		if(t.open_db(db_relname) == 0)
 			return;
-		}
-		sqlite3_close(bu_db);
+		//opres = sqlite3_open(db_relname.c_str(), &bu_db);
+		//if(opres == SQLITE_OK) {
+		//	// save handle to open db
+		//	t.db = bu_db;
+		//	t.file_name = db_relname;
+		//	return;
+		//}
+		//sqlite3_close(bu_db);
 	}
 
-	opres = sqlite3_open(db_fname.c_str(), &bu_db);
-	if(opres == SQLITE_OK) {
-		// just save handle to db into sql_well and we're done
-		t.db = bu_db;
-		t.file_name = db_fname;
+	if(t.open_db(db_fname) == 0)
+		return;
+	//opres = sqlite3_open(db_fname.c_str(), &bu_db);
+	//if(opres == SQLITE_OK) {
+	//	// just save handle to db into sql_well and we're done
+	//	t.db = bu_db;
+	//	t.file_name = db_fname;
+	//	return;
+	//}
+	//sqlite3_close(bu_db);
+
+	// finally try to open db from stored path t.file_name
+	//opres = sqlite3_open(t.file_name.c_str(), &bu_db);
+	//if(opres == SQLITE_OK)
+	//	t.db = bu_db;
+	if(t.open_db(t.file_name)) {
 		return;
 	}
-	// finally try to open db from stored path t.file_name
-	sqlite3_close(bu_db);
-	opres = sqlite3_open(t.file_name.c_str(), &bu_db);
-	if(opres == SQLITE_OK)
-		t.db = bu_db;
 	else {
 		// failed to open DB
-		sqlite3_close(bu_db);
+		//sqlite3_close(bu_db);
 		t.db = 0;
 		t.file_name.clear();
 	}
