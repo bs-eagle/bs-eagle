@@ -149,10 +149,10 @@ bool create_wlogs_table(sql_well& sqw) {
     q = "ALTER TABLE wells ADD COLUMN KB REAL DEFAULT -1";
     sqw.exec_sql(q);
   }
-  if(wells_cols.find("uid") == wells_cols.end()) {
-    q = "ALTER TABLE wells ADD COLUMN uid TEXT DEFAULT ''";
-    sqw.exec_sql(q);
-  }
+  //if(wells_cols.find("uid") == wells_cols.end()) {
+  //  q = "ALTER TABLE wells ADD COLUMN uid TEXT DEFAULT ''";
+  //  sqw.exec_sql(q);
+  //}
 
   // fix branches table
   //const std::set< std::string >& br_cols = table_columns(sqw, "branches");
@@ -378,7 +378,6 @@ bool create_wlogs_table(sql_well& sqw) {
 PRAGMA foreign_keys=ON;\
 BEGIN;\
 CREATE TABLE wells(name TEXT UNIQUE PRIMARY KEY, \
-				    uid TEXT DEFAULT '', \
 				    x REAL DEFAULT -1, \
 				    y REAL DEFAULT -1, \
 				    horiz INTEGER DEFAULT 0, \
