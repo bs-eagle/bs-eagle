@@ -145,13 +145,18 @@ BLUE_SKY_TYPE_SERIALIZE_IMPL(gis)
 /*-----------------------------------------------------------------
  * serialize traj_iface
  *----------------------------------------------------------------*/
+BOOST_CLASS_VERSION(traj, 1)
+
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, traj)
 	boser::bs_void_cast_register(
 		static_cast< traj* >(NULL),
 		static_cast< traj_iface* >(NULL)
 	);
 
-	ar & t.sp_table & t.sp_prop;
+	ar & t.sp_table;
+	if(version > 0) {
+		ar & t.sp_prop;
+	}
 BLUE_SKY_CLASS_SRZ_FCN_END
 
 // instantiate code using _BYNAME macro
