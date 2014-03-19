@@ -108,8 +108,6 @@ namespace blue_sky
       virtual sp_traj_t get_branch_traj (const std::string &wname, const std::string &branch);
       //virtual void remove_branch (const std::string &wname, const std::string &branch);
 
-      virtual int update_branch_traj (const std::string &wname, const std::string &branch, sp_traj_t t);
-
       virtual void backup_to_file (const std::string &filename);
 
       virtual int prepare_sql (const std::string &sql);

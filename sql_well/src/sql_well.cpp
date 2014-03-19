@@ -995,48 +995,6 @@ COMMIT;\
    }
 
   int
-   sql_well::update_branch_traj (const std::string &wname, const std::string &branch,
-                                 sp_traj_t t)
-     {
-      if (!db)
-        return -1;
-      if (stmp_sql)
-        finalize_sql ();
-
-      int rc = 0;
-      //char *zErrMsg = 0;
-      const char *ttt;
-      sqlite3_stmt *stmp;
-      char buf[4096];
-      sprintf (buf, "SELECT traj FROM branches WHERE well_name = '%s' AND branch_name = '%s'",
-               wname.c_str (), branch.c_str ());
-      rc = sqlite3_prepare_v2 (db, buf, strlen (buf) + 1, &stmp, &ttt);
-      if (rc)
-        {
-          fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
-          if(stmp) sqlite3_finalize (stmp);
-          return -1;
-        }
-
-      std::string s = t->to_str();
-      std::vector<char> ch (s.begin (), s.end ());
-      rc = sqlite3_bind_blob (stmp, 1, &ch[0], ch.size (), SQLITE_STATIC);
-      //printf ("TRAJ\n%s\n", s.c_str ());
-      //printf ("TRAJ INT %d %d\n", (int)strlen (s.c_str ()), (int)s.length ());
-      if (rc)
-        {
-          fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
-          if(stmp) sqlite3_finalize (stmp);
-          return -3;
-        }
-
-      sqlite3_step (stmp); // UPDATE
-      sqlite3_finalize (stmp);
-
-      return 0;
-     }
-
-  int
   sql_well::prepare_sql (const std::string &sql)
     {
       if (!db)
