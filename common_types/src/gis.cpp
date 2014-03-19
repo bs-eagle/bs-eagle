@@ -42,7 +42,7 @@ namespace blue_sky
       sp_table = BS_KERNEL.create_object ("table");
       if (!sp_prop || !sp_table)
         {
-          bs_throw_exception ("Type (prop) not registered");
+          bs_throw_exception ("Type (gis) isn't created");
         }
     }
   gis::gis (const gis& rhs) 
