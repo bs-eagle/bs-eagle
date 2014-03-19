@@ -22,10 +22,14 @@
 #include "export_python_wrapper.h"
 
 #ifdef BSPY_EXPORTING_PLUGIN
+
 namespace blue_sky
   {
   namespace python
     {
+
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(add_branch_gis_ol, add_branch_gis, 3, 4)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(get_branch_gis_ol, get_branch_gis, 2, 4)
 
   PY_EXPORTER (py_sql_well_exporter, default_exporter)
     .def ("open_db",                            &T::open_db,
@@ -38,10 +42,10 @@ namespace blue_sky
         args (""), "Create data base structure")
     .def ("add_well",                           &T::add_well,
         args ("well_name"), "Add new well to the storage")
-    .def ("add_branch_gis",                     &T::add_branch_gis,
-        args ("well_name", "branch_name", "gis"), "Add gis to the well branch")
-    .def ("get_branch_gis",                     &T::get_branch_gis,
-        args ("well_name", "branch_name"),  "Get gis of well branch")
+    .def ("add_branch_gis",                     &T::add_branch_gis, add_branch_gis_ol())
+//        args ("well_name", "branch_name", "gis"), "Add gis to the well branch")
+    .def ("get_branch_gis",                     &T::get_branch_gis, get_branch_gis_ol())
+//        args ("well_name", "branch_name"),  "Get gis of well branch")
     .def ("get_wlog_names",                     &T::get_wlog_names,
         args ("well_name", "branch_name"), "Get list of custom well logs")
     .def ("add_branch_traj",                     &T::add_branch_traj,
