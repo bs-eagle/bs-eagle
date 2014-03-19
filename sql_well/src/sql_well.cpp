@@ -802,14 +802,15 @@ COMMIT;\
     }
 
   std::vector< std::string > sql_well::get_wlog_names(
-      const std::string &wname, const std::string &branch
+      const std::string &wname, const std::string &branch, uint wlog_type
   ) {
       std::vector< std::string > res;
       if (!db || !wlogs_table_exists(*this))
         return res;
 
       std::string q = "SELECT wlog_name FROM well_logs WHERE well_name = '" + wname +
-        "' AND branch_name = '" + branch + "'";
+        "' AND branch_name = '" + branch + "' AND wlog_type = " +
+        boost::lexical_cast< std::string >(wlog_type);
 
       // exec sql
       if(prepare_sql(q) < 0) {

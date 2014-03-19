@@ -88,7 +88,7 @@ namespace blue_sky
        * @return 0 if OK
        */
       virtual int add_well (const std::string &well_name);
-      virtual list_t get_well_names () const;
+      virtual list_t get_well_names() const;
       //virtual int set_well_param (const std::string &wname, double date, const std::string param, double value);
       //virtual double get_well_param (const std::string &wname, double date, const std::string param);
 
@@ -155,7 +155,9 @@ namespace blue_sky
 
       // return list of cutom well logs added via add_branch_gis() with nonempty
       // wlog_name parameter
-      std::vector< std::string > get_wlog_names(const std::string &wname, const std::string &branch);
+      std::vector< std::string > get_wlog_names(
+          const std::string &wname, const std::string &branch, uint wlog_type = 0
+      );
 
     public:
 #ifdef BSPY_EXPORTING_PLUGIN

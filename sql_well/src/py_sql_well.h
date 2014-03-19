@@ -30,6 +30,7 @@ namespace blue_sky
 
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(add_branch_gis_ol, add_branch_gis, 3, 4)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(get_branch_gis_ol, get_branch_gis, 2, 4)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(get_wlog_names_ol, get_wlog_names, 2, 3)
 
   PY_EXPORTER (py_sql_well_exporter, default_exporter)
     .def ("open_db",                            &T::open_db,
@@ -46,8 +47,8 @@ namespace blue_sky
 //        args ("well_name", "branch_name", "gis"), "Add gis to the well branch")
     .def ("get_branch_gis",                     &T::get_branch_gis, get_branch_gis_ol())
 //        args ("well_name", "branch_name"),  "Get gis of well branch")
-    .def ("get_wlog_names",                     &T::get_wlog_names,
-        args ("well_name", "branch_name"), "Get list of custom well logs")
+    .def ("get_wlog_names",                     &T::get_wlog_names, get_wlog_names_ol())
+//        args ("well_name", "branch_name"), "Get list of custom well logs")
     .def ("add_branch_traj",                     &T::add_branch_traj,
         args ("well_name", "branch_name", "traj"), "Add traj to the well branch")
     .def ("update_branch_traj",                     &T::add_branch_traj,
