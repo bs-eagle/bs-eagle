@@ -447,7 +447,6 @@ CREATE TABLE branches(well_name TEXT NOT NULL REFERENCES wells(name) ON UPDATE C
                        parent TEXT DEFAULT '',\
 					   traj BLOB, \
 					   well_log BLOB, \
-                       traj_prop BLOB, \
 					   PRIMARY KEY (well_name, branch_name));\
 CREATE INDEX i9 ON branches (well_name ASC);\
 CREATE UNIQUE INDEX i10 ON branches (well_name, branch_name ASC);\
