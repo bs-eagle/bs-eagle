@@ -28,7 +28,7 @@ namespace blue_sky
   namespace python
     {
 
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(add_branch_gis_ol, add_branch_gis, 3, 4)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(add_branch_gis_ol, add_branch_gis, 3, 5)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(get_branch_gis_ol, get_branch_gis, 2, 4)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(get_wlog_names_ol, get_wlog_names, 2, 3)
 
