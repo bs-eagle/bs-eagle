@@ -875,7 +875,7 @@ COMMIT;\
         }
         else {
           finalize_sql();
-          return sp_gis_t;
+          return sp_gis_t();
         }
       }
 
