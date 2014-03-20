@@ -879,6 +879,56 @@ COMMIT;\
       return sp_gis;
     }
 
+   bool sql_well::rename_well_log(
+       const std::string &wname, const std::string &branch,
+       const std::string& old_name, const std::string& new_name
+   ) {
+      if (!db)
+        return -1;
+      if (stmp_sql)
+        finalize_sql ();
+
+      const std::string q = "UPDATE well_logs SET wlog_name = '" + new_name +
+      "' WHERE well_name = '" + wname + "' AND branch_name = '" + branch +
+      "' AND wlog_name = '" + old_name + "'";
+
+      bool res = (exec_sql(q) == 0);
+
+      // try to rename also in old-fashioned logs table inside branches
+      sp_gis_t g = get_branch_gis(wname, branch);
+      if(!g) return res;
+
+      sp_table_t wlog_data = g->get_table();
+      const std::wstring wold_name = str2wstr(old_name, "utf-8");
+      const ulong n_wlogs(wlog_data->get_n_cols());
+      for(ulong i = 0; i < n_wlogs; ++i) {
+        if(wlog_data->get_col_name(i) != wold_name) continue;
+        // we found a matching column
+        // rename it
+        wlog_data->set_col_name(i, str2wstr(new_name, "utf-8"));
+        // and write result to DB
+        add_branch_gis(wname, branch, g);
+        return true;
+      }
+
+      return res;
+   }
+
+   bool sql_well::delete_well_log(
+       const std::string &wname, const std::string &branch, const std::string& wlog_name
+   ) {
+      if (!db)
+        return -1;
+      if (stmp_sql)
+        finalize_sql ();
+
+      const std::string q = "DELETE FROM well_logs WHERE well_name = '" +
+        wname + "' AND branch_name = '" + branch +
+        "' AND wlog_name = '" + wlog_name + "'";
+
+      return (exec_sql(q) == 0);
+   }
+
    int
    sql_well::add_branch_traj (const std::string &wname, const std::string &branch,
                               sp_traj_t t)

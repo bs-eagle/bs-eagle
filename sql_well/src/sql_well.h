@@ -157,47 +157,19 @@ namespace blue_sky
           const std::string &wname, const std::string &branch, uint wlog_type = 0
       );
 
+      // rename existing well log
+      bool rename_well_log(
+          const std::string &wname, const std::string &branch,
+          const std::string& old_name, const std::string& new_name
+      );
+
+      // delete existing well log
+      bool delete_well_log(
+          const std::string &wname, const std::string &branch, const std::string& wlog_name
+      );
+
     public:
 #ifdef BSPY_EXPORTING_PLUGIN
-#if 0
-      virtual boost::python::list d2date (double d) const
-        {
-          boost::python::list l;
-          int day, month, year, hour, minute, second;
-          double dd;
-          dd = get_date_day_month_year (d, day, month, year);
-          d2hms (dd, hour, minute, second);
-          l.append (year);
-          l.append (month);
-          l.append (day);
-          l.append (hour);
-          l.append (minute);
-          l.append (second);
-          return l;
-        }
-      virtual double date2d (int year, int month, int day, int hour, int minute, int second) const
-        {
-          double tm;
-          tm = ((double)hour + ((double)minute + (date_sim)second / 60.0) / 60.0) / 24.0;
-          return ymd2d (year, month, day) + tm;
-        }
-      virtual std::string d2str (double d) const
-        {
-          char b[1024];
-          int day, month, year;
-          get_date_day_month_year (d, day, month, year);
-          sprintf (b, "%02d.%02d.%04d", day, month, year);
-          return std::string (b);
-        }
-      virtual std::string t2str (double d) const
-        {
-          char b[1024];
-          int hour, minute, second;
-          d2hms (d, hour, minute, second);
-          sprintf (b, "Time: %02d:%02d:%02d", hour, minute, second);
-          return std::string (b);
-        }
-#endif //0
       /**
        * @brief python print wrapper
        *
