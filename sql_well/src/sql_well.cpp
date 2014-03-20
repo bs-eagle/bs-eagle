@@ -741,17 +741,6 @@ COMMIT;\
               sqw.finalize_sql();
               return -3;
             }
-          // bind well log properties
-          //std::string prop_data;
-          //sp_prop_t prop = g->get_prop();
-          //if(prop)
-          //  prop_data = prop->to_str();
-          //if (sqlite3_bind_blob(sqw.stmp_sql, 2, &prop_data.c_str()[0], prop_data.size (), SQLITE_STATIC))
-          //  {
-          //    fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (sqw.db));
-          //    sqw.finalize_sql();
-          //    return -3;
-          //  }
 
           // exec query
           sqw.step_sql();
@@ -766,10 +755,6 @@ COMMIT;\
         finalize_sql ();
 
       std::string q;
-
-      // create separate well_logs table
-      //if(!create_wlogs_table(*this))
-      //  return -1;
 
       if(wlog_name.size() == 0) {
         // TODO: deprecate and disable writing to branches table at all
@@ -853,7 +838,7 @@ COMMIT;\
       const std::string select_filter = " WHERE well_name = '" + wname +
         "' AND branch_name = '" + branch + "'";
       // what blobs can we extract from result?
-      uint blobs_mask = 0;
+      bool has_data = 0;
 
       // 1) check well_logs table
       // format query
@@ -862,7 +847,7 @@ COMMIT;\
         boost::lexical_cast< std::string >(wlog_type);
       // exec sql
       if(prepare_sql(q) == 0 && step_sql() == 0) {
-        blobs_mask = 1;
+        has_data = true;
       }
       else {
         // 2. make old-fashioned query to branches table
@@ -871,36 +856,24 @@ COMMIT;\
         q = "SELECT well_log FROM branches" + select_filter;
         // exec sql
         if(prepare_sql(q) == 0 && step_sql() == 0) {
-          blobs_mask = 1;
+          has_data = 0;
         }
       }
 
-      if(blobs_mask) {
+      // 3. read traj BLOB
+      if(has_data) {
         // leave this for debugging purposes
         std::cout << "READ WELL LOG: " << wname;
-      }
-      // extract well log data
-      if(blobs_mask & 1) {
+
+        // extract well log data
         q = extract_str_blob::go(*this, 0);
         if(!q.empty()) {
           // we have some to read
           sp_gis = BS_KERNEL.create_object ("gis");
           sp_gis->from_str(q);
         }
-        std::cout << ", DATA = " << q.size();
+        std::cout << ", DATA = " << q.size() << std::endl;
       }
-
-      // disabled: properties are stored in single blob with well log data
-      //// extract well log properties
-      //if(blobs_mask & 2) {
-      //  q = extract_str_blob::go(*this, 1);
-      //  if(!q.empty())
-      //    sp_gis->get_prop()->from_str(q);
-      //  std::cout <<  ", PROP = " << q.size();
-      //}
-
-      if(blobs_mask)
-        std::cout << std::endl;
       finalize_sql();
 
       return sp_gis;
@@ -930,19 +903,6 @@ COMMIT;\
           finalize_sql();
           return -3;
         }
-
-      // NOTE: disabled because properties are stored with traj data in single BLOB
-      // bind traj properties
-      //std::string prop_data;
-      //sp_prop_t prop = t->get_prop();
-      //if(prop)
-      //  prop_data = prop->to_str();
-      //if (sqlite3_bind_blob (stmp_sql, 2, &prop_data.c_str()[0], prop_data.size (), SQLITE_STATIC))
-      //  {
-      //    fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
-      //    finalize_sql();
-      //    return -3;
-      //  }
 
       // exec query
       step_sql();
@@ -986,13 +946,6 @@ COMMIT;\
           sp_traj->from_str(q);
         }
         std::cout << ", DATA = " << q.size() << std::endl;
-
-        // NOTE: disabled because props are restored with traj data
-        //// extract trajectory properties
-        //q = extract_str_blob::go(*this, 1);
-        //if(!q.empty())
-        //  sp_traj->get_prop()->from_str(q);
-        //std::cout << ", PROP = " << q.size() << std::endl;
       }
       finalize_sql();
 
