@@ -840,8 +840,11 @@ COMMIT;\
         }
       };
 
+      // result
+      sp_gis_t sp_gis;
+
       if (!db)
-        return sp_gis_t ();
+        return sp_gis;
       finalize_sql();
 
       if(wlog_name.size() == 0)
@@ -849,8 +852,6 @@ COMMIT;\
       std::string q;
       const std::string select_filter = " WHERE well_name = '" + wname +
         "' AND branch_name = '" + branch + "'";
-      // result
-      sp_gis_t sp_gis = BS_KERNEL.create_object ("gis");
       // what blobs can we extract from result?
       uint blobs_mask = 0;
 
@@ -872,20 +873,20 @@ COMMIT;\
         if(prepare_sql(q) == 0 && step_sql() == 0) {
           blobs_mask = 1;
         }
-        else {
-          finalize_sql();
-          return sp_gis_t();
-        }
       }
 
-      // leave this for debugging purposes
-      if(blobs_mask)
+      if(blobs_mask) {
+        // leave this for debugging purposes
         std::cout << "READ WELL LOG: " << wname;
+      }
       // extract well log data
       if(blobs_mask & 1) {
         q = extract_str_blob::go(*this, 0);
-        if(!q.empty())
+        if(!q.empty()) {
+          // we have some to read
+          sp_gis = BS_KERNEL.create_object ("gis");
           sp_gis->from_str(q);
+        }
         std::cout << ", DATA = " << q.size();
       }
 
@@ -965,9 +966,9 @@ COMMIT;\
         }
       };
 
-      sp_traj_t sp_traj = BS_KERNEL.create_object ("traj");
+      sp_traj_t sp_traj;
       if (!db)
-        return sp_traj_t ();
+        return sp_traj;
       finalize_sql();
 
       // format sql
@@ -980,8 +981,10 @@ COMMIT;\
         std::cout << "READ WELL TRAJ: " << wname;
         // extract trajectory
         q = extract_str_blob::go(*this, 0);
-        if(!q.empty())
+        if(!q.empty()) {
+          sp_traj = BS_KERNEL.create_object ("traj");
           sp_traj->from_str(q);
+        }
         std::cout << ", DATA = " << q.size() << std::endl;
 
         // NOTE: disabled because props are restored with traj data
