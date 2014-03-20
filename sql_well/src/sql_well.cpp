@@ -22,8 +22,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 // DEBUG
-#include <boost/timer/timer.hpp>
-#include <google/profiler.h>
+//#include <boost/timer/timer.hpp>
+//#include <google/profiler.h>
 
 #include "bs_kernel.h"
 #include "bs_misc.h"
