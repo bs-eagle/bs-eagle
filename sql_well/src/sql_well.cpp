@@ -22,8 +22,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 // DEBUG
-//#include <boost/timer/timer.hpp>
-//#include <google/profiler.h>
+#include <boost/timer/timer.hpp>
+#include <google/profiler.h>
 
 #include "bs_kernel.h"
 #include "bs_misc.h"
@@ -873,8 +873,10 @@ COMMIT;\
         if(prepare_sql(q) == 0 && step_sql() == 0) {
           blobs_mask = 1;
         }
-        else
-          return NULL;
+        else {
+          finalize_sql();
+          return sp_gis_t;
+        }
       }
 
       // leave this for debugging purposes
