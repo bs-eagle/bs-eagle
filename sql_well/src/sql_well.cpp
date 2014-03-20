@@ -873,6 +873,8 @@ COMMIT;\
         if(prepare_sql(q) == 0 && step_sql() == 0) {
           blobs_mask = 1;
         }
+        else
+          return NULL;
       }
 
       // leave this for debugging purposes
