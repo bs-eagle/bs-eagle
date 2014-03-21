@@ -71,7 +71,7 @@ public:
 
 	// branch & bound algorithm for finding cells that really intersect with well
 	// works using boxes intersection
-	hit_idxs_t& build(bool append_wp_nodes = true) {
+	hit_idxs_t& build(bool append_wp_nodes = true, const ulong min_split_threshold = 0) {
 		typedef std::vector< Segment > Segments;
 		typedef std::vector< Segments > Segments_mp;
 		typedef typename std::list< xbuild_base >::const_iterator cxbricks_iterator;
@@ -174,7 +174,7 @@ public:
 				CGAL::box_intersection_d(
 					mp_boxes_p.begin(),   mp_boxes_p.end(),
 					well_boxes_p[i].begin(), well_boxes_p[i].end(),
-					leafs_builder(*pb, wseg[i], pb->hit_idx(), new_parts)
+					leafs_builder(*pb, wseg[i], pb->hit_idx(), new_parts, min_split_threshold)
 				);
 
 				// parts marked for further split can be excluded from mp_boxes

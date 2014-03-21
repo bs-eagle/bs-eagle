@@ -163,8 +163,9 @@ struct algo : public helpers< strat_t > {
 	template< bool pythonish >
 	static typename wpi_return< pythonish >::type well_path_ident_d(
 		ulong nx, ulong ny, sp_obj trim_backend,
-		spv_float well_info, bool include_well_nodes, spv_ulong H = NULL)
-	{
+		spv_float well_info, bool include_well_nodes,
+		const ulong min_split_threshold = 0, spv_ulong H = NULL
+	) {
 		typedef typename wpi_return< pythonish >::type ret_t;
 
 		// 1) calculate mesh nodes coordinates and build initial trimesh
@@ -178,7 +179,7 @@ struct algo : public helpers< strat_t > {
 		xbuilder A(M, W);
 
 		// 4) narrow search space via branch & bound algo
-		const hit_idx_t& hit_idx = A.build();
+		const hit_idx_t& hit_idx = A.build(min_split_threshold);
 
 		// 5) remove duplicates in X,Y,Z directions
 		//A.remove_dups2();
@@ -200,12 +201,13 @@ struct algo : public helpers< strat_t > {
 	template< bool pythonish >
 	static typename wpi_return< pythonish >::type well_path_ident_d(
 		ulong nx, ulong ny, spv_float coord, spv_float zcorn,
-		spv_float well_info, bool include_well_nodes, spv_ulong H = NULL)
-	{
+		spv_float well_info, bool include_well_nodes,
+		const ulong min_split_threshold = 0, spv_ulong H = NULL
+	) {
 		// calculate mesh nodes coordinates and build initial trimesh
 		return well_path_ident_d< pythonish >(
 			nx, ny, trimesh::create_backend(nx, ny, coord, zcorn),
-			well_info, include_well_nodes, H
+			well_info, include_well_nodes, min_split_threshold, H
 		);
 	}
 
@@ -216,7 +218,7 @@ struct algo : public helpers< strat_t > {
 	static typename wpi_return_mp< pythonish >::type well_paths_ident_d(
 		ulong nx, ulong ny, sp_obj trim_backend,
 		std::vector< spv_float > well_info, bool include_well_nodes,
-		std::vector< spv_ulong > H = std::vector< spv_ulong >()
+		const ulong min_split_threshold = 0, std::vector< spv_ulong > H = std::vector< spv_ulong >()
 	) {
 		typedef typename wpi_return< pythonish >::type ret_t;
 
@@ -234,7 +236,7 @@ struct algo : public helpers< strat_t > {
 		xbuilder_mp A(M, W);
 
 		// 4) narrow search space via branch & bound algo
-		const hit_idxs_t& hit_idxs = A.build(include_well_nodes);
+		const hit_idxs_t& hit_idxs = A.build(include_well_nodes, min_split_threshold);
 
 		// return well nodes hit indexes
 		for(ulong i = 0; i < std::min(H.size(), hit_idxs.size()); ++i) {
@@ -249,12 +251,13 @@ struct algo : public helpers< strat_t > {
 	template< bool pythonish >
 	static typename wpi_return_mp< pythonish >::type well_paths_ident_d(
 		ulong nx, ulong ny, spv_float coord, spv_float zcorn,
-		spv_float well_info, bool include_well_nodes, spv_ulong H = NULL)
-	{
+		std::vector< spv_float > well_info, bool include_well_nodes,
+		const ulong min_split_threshold = 0, std::vector< spv_ulong > H = std::vector< spv_ulong >()
+	) {
 		// calculate mesh nodes coordinates and build initial trimesh
 		return well_paths_ident_d< pythonish >(
 			nx, ny, trimesh::create_backend(nx, ny, coord, zcorn),
-			well_info, include_well_nodes, H
+			well_info, include_well_nodes, min_split_threshold, H
 		);
 	}
 

@@ -233,7 +233,7 @@ public:
 
 	// branch & bound algorithm for finding cells that really intersect with well
 	// works using boxes intersection
-	hit_idx_t& build() {
+	hit_idx_t& build(const ulong min_split_threshold = 0) {
 		typedef std::vector< Segment > Segments;
 
 		Segments wseg(wp_.size());
@@ -260,7 +260,7 @@ public:
 		std::fill(hit_idx_.begin(), hit_idx_.end(), m_.size_flat());
 
 		// actual intersector object
-		leafs_builder B(*this, wseg, hit_idx_, parts);
+		leafs_builder B(*this, wseg, hit_idx_, parts, min_split_threshold);
 		// pool for allocating mesh box handles
 		// they all will be detroyed automatically on exit
 		boost::object_pool< mesh_box_handle > mbh_pool;
