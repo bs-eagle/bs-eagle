@@ -9,13 +9,15 @@ dx = np.array([cell_x], dtype='d') # Lx
 dy = np.array([cell_y], dtype='d') # Ly
 dz = np.array([cell_z], dtype='d') # Lz
 Nx = 500
-Ny = 500
-Nz = 100
-[c, z] = bm.gen_coord_zcorn(Nx, Ny, Nz, dx, dy, dz)
+Ny = 50
+Nz = 10
+[c, z] = bm.gen_coord_zcorn(Nx, Ny, Nz, dx, dy, dz, 0, 0, 0)
 print 'Source mesh generated!'
 
 # generate randomly mesh trajectory
 well_nodes_num = 5000;
+# seed generator to obtain comparable results between starts
+np.random.seed(42);
 wx = np.random.rand(well_nodes_num) * cell_x * Nx;
 wy = np.random.rand(well_nodes_num) * cell_y * Ny;
 wz = np.random.rand(well_nodes_num) * cell_z * Nz;
@@ -35,7 +37,7 @@ print W
 # calc mesh and well intersection
 from time import clock
 start = clock()
-X = bm.well_path_ident(Nx, Ny, c, z, W.reshape([1, -1]), True)
+X = bm.well_path_ident(Nx, Ny, c, z, W.reshape([1, -1]), True, "sgrid")
 elapsed = (clock() - start)
 print '==============================================='
 print 'Well_path_ident time %.3f seconds' % elapsed
