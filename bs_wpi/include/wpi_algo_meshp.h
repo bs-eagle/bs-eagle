@@ -151,14 +151,10 @@ struct mesh_tools : public helpers< strat_t > {
 		//}
 
 		Iso_bbox iso_bbox() const {
-			//vertex_pos lo_pos, hi_pos;
-			//bounds(lo_pos, hi_pos);
 			return vertex_pos2rect(lo_bbox_, hi_bbox_);
 		}
 
 		Bbox bbox() const {
-			//vertex_pos lo_pos, hi_pos;
-			//bounds(lo_pos, hi_pos);
 			return vertex_pos2bbox(lo_bbox_, hi_bbox_);
 		}
 
@@ -458,34 +454,6 @@ struct mesh_tools : public helpers< strat_t > {
 						lo_bbox[i] = lo_cell[i];
 					if(hi_cell[i] > hi_bbox[i])
 						hi_bbox[i] = hi_cell[i];
-				}
-			}
-		}
-
-		void bounds(vertex_pos& lo_pos, vertex_pos& hi_pos) const {
-			vertex_pos lo_lo_pos, lo_hi_pos;
-			vertex_pos hi_lo_pos, hi_hi_pos;
-			ss(lo).lo (lo_lo_pos);
-			ss(lo).hi (lo_hi_pos);
-
-			// last = hi - 1
-			vertex_pos_i last;
-			ca_assign(last, hi);
-			std::transform(&last[0], &last[D], &last[0], std::bind2nd(std::minus< ulong >(), 1));
-			ss(last).lo (hi_lo_pos);
-			ss(last).hi (hi_hi_pos);
-
-			// ensure that lo[i] < hi[i]
-			for(uint i = 0; i < D; ++i) {
-				if (lo_lo_pos[i] < hi_lo_pos[i]) {
-					// global coordinates increasing along cells - normal order
-					lo_pos[i] = lo_lo_pos[i]; // std::min (lo_lo_pos[i], lo_hi_pos[i]);
-					hi_pos[i] = hi_hi_pos[i]; // std::max (hi_lo_pos[i], hi_hi_pos[i]);
-				}
-				else {
-					// lo_lo_pos[i] > hi_lo_pos[i] // global coordinates decreasing along cells - reverse order 
-					lo_pos[i] = hi_lo_pos[i]; // std::min (hi_lo_pos[i], hi_hi_pos[i]);
-					hi_pos[i] = lo_hi_pos[i]; // std::max (lo_lo_pos[i], lo_hi_pos[i]);
 				}
 			}
 		}
