@@ -31,6 +31,7 @@ namespace blue_sky
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(add_branch_gis_ol, add_branch_gis, 3, 5)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(get_branch_gis_ol, get_branch_gis, 2, 4)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(get_wlog_names_ol, get_wlog_names, 2, 3)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(delete_well_log_ol, delete_well_log, 2, 3)
 
   PY_EXPORTER (py_sql_well_exporter, default_exporter)
     .def ("open_db",                            &T::open_db,
@@ -89,15 +90,9 @@ namespace blue_sky
         args ("select", "insert", "update"), "Insert or update data")
     .def ("backup_to_file",                     &T::backup_to_file,
         args ("filename"), "Backup memory DB to disk")
-    //.def ("d2date",                               &T::d2date,
-    //  args ("d"), "convert d to list (year, month, day, hour, minute, second)")
-    //.def ("date2d",                               &T::date2d,
-    //  args ("year", "month", "day", "hour", "minute", "second"), "date and time to double")
-    //.def ("d2str",                                &T::d2str,
-    //  args ("d"), "convert date from double to str")
-    //.def ("t2str",                                &T::t2str,
-    //  args ("d"), "convert time from double to str")
     .def ("__str__",                            &T::py_str)
+    .def("rename_well_log", &T::rename_well_log)
+    .def("delete_well_log", &T::delete_well_log, delete_well_log_ol())
   PY_EXPORTER_END;
 
   //! export matrices to python

@@ -166,6 +166,16 @@ class well_pool_iface : public objbase
           const std::string &wname, const std::string &branch, uint wlog_type = 0
       ) = 0;
 
+      // rename existing well log
+      virtual bool rename_well_log(
+          const std::string &wname, const std::string &branch,
+          const std::string& old_name, const std::string& new_name
+      ) = 0;
+
+      // delete existing well log
+      virtual bool delete_well_log(
+          const std::string &wname, const std::string &branch, std::string wlog_name = ""
+      ) = 0;
 
 #ifdef BSPY_EXPORTING_PLUGIN
       //virtual boost::python::list d2date (double d) const = 0;

@@ -165,7 +165,7 @@ namespace blue_sky
 
       // delete existing well log
       bool delete_well_log(
-          const std::string &wname, const std::string &branch, const std::string& wlog_name
+          const std::string &wname, const std::string &branch, std::string wlog_name = ""
       );
 
     public:

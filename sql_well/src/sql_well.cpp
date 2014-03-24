@@ -918,18 +918,29 @@ COMMIT;\
    }
 
    bool sql_well::delete_well_log(
-       const std::string &wname, const std::string &branch, const std::string& wlog_name
+       const std::string &wname, const std::string &branch, std::string wlog_name
    ) {
       if (!db)
         return -1;
       if (stmp_sql)
         finalize_sql ();
 
-      const std::string q = "DELETE FROM well_logs WHERE well_name = '" +
-        wname + "' AND branch_name = '" + branch +
-        "' AND wlog_name = '" + wlog_name + "'";
+      std::string q;
+      const std::string select_filter = " WHERE well_name = '" + wname +
+        "' AND branch_name = '" + branch + "'";
+      bool res = false;
 
-      return (exec_sql(q) == 0);
+      if(wlog_name.size() == 0) {
+        q = "UPDATE branches SET well_log = NULL" + select_filter;
+        res = (exec_sql(q) == 0);
+        // use specific identifier to delete from well_logs table
+        wlog_name = old_wlog_name;
+      }
+
+      q = "DELETE FROM well_logs" + select_filter +
+        " AND wlog_name = '" + wlog_name + "'";
+
+      return  res | (exec_sql(q) == 0);
    }
 
    int
