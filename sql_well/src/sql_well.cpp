@@ -166,6 +166,8 @@ bool create_wlogs_table(sql_well& sqw) {
   return true;
 }
 
+static const char* old_wlog_name = "__old__well__log__";
+
 } // eof hidden namespace
 
   int clear_table (void *pData, int nColumns,
@@ -766,8 +768,8 @@ COMMIT;\
         // exec query
         dump_wlog_data::go(*this, g);
 
-        // if we get no wlog name, let it be equal to well name
-        wlog_name = wname;
+        // if we get no wlog name, let it be equal to specific value
+        wlog_name = old_wlog_name;
       }
 
       // new implementation writes to separate well logs table
@@ -833,7 +835,8 @@ COMMIT;\
       finalize_sql();
 
       if(wlog_name.size() == 0)
-        wlog_name = wname;
+        wlog_name = old_wlog_name;
+
       std::string q;
       const std::string select_filter = " WHERE well_name = '" + wname +
         "' AND branch_name = '" + branch + "'";
