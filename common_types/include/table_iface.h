@@ -219,6 +219,9 @@ class table_iface : public objbase
        * @return numpy array
        */
       virtual spv_double get_col_values (const t_long col) const = 0;
+
+      virtual void remove_col(const t_long col) = 0;
+      virtual void remove_col(const std::wstring& col_name) = 0;
 };
 
 }  // end of bluesky name space

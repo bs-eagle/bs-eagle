@@ -223,6 +223,26 @@ namespace blue_sky
       return a;
     }
 
+  void table::remove_col(const t_long col) {
+      if (col < 0 || col >= get_n_cols ())
+        {
+          // TODO: print error message
+          throw bs_exception("common_types::table", "remove_col: wrong column number");
+        }
+
+      values.erase(values.begin() + col);
+      col_names.erase(col_names.begin() + col);
+  }
+
+  void table::remove_col(const std::wstring& col_name) {
+    for(t_long i = 0; i < col_names.size(); ++i) {
+      if(col_names[i] == col_name) {
+        remove_col(i);
+        break;
+      }
+    }
+  }
+
 #ifdef BSPY_EXPORTING_PLUGIN
   std::string 
   table::py_str () const

@@ -23,6 +23,9 @@ namespace python {
   void   (table_iface::*add_col_vector2)(t_long, std::wstring const&, spv_double) =
     &table_iface::add_col_vector;
 
+  void (table_iface::*remove_col1)(const t_long) = &table_iface::remove_col;
+  void (table_iface::*remove_col2)(const std::wstring&) = &table_iface::remove_col;
+
   PY_EXPORTER (py_table_exporter, default_exporter)
     .def ("init",                               &T::init, 
         args ("n_rows", "n_cols"), "Initialize table n_rows * n_cols")
@@ -67,7 +70,9 @@ namespace python {
     .def("convert_to_array", &T::convert_to_array)
     .def("convert_to_array_f", &T::convert_to_array_f)
     .def("convert_from_array", &T::convert_from_array)
-  PY_EXPORTER_END;                               
+    .def("remove_col", remove_col1)
+    .def("remove_col", remove_col2)
+  PY_EXPORTER_END;
 
   //////////////////////////////////////////////////////////////////////////
   //! export matrices to python
