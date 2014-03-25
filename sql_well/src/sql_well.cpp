@@ -132,8 +132,9 @@ std::string to_lower(const std::string& s) {
 
   int
   sql_well::add_branch_gis (const std::string &wname, const std::string &branch,
-                            sp_gis_t g, std::string wlog_name, uint wlog_type)
-    {
+                            sp_gis_t g, std::string wlog_name, uint wlog_type,
+                            bool replace_existing
+  ) {
       // helper
       // bind well log data blob and execute PREPARED sql statement
       struct dump_wlog_data {
@@ -219,7 +220,12 @@ std::string to_lower(const std::string& s) {
 
       // new implementation writes to separate well logs table
       // format query
-      q = "INSERT OR REPLACE INTO well_logs (well_name, branch_name, wlog_name, wlog_type, wlog_data) \
+      q = "INSERT OR ";
+      if(replace_existing)
+        q += "REPLACE";
+      else
+        q += "IGNORE";
+      q += " INTO well_logs (well_name, branch_name, wlog_name, wlog_type, wlog_data) \
             VALUES ('";
       q += wname + "', '" + branch + "', '" + wlog_name + "', " + boost::lexical_cast< std::string >(wlog_type) + ", ?1)";
 

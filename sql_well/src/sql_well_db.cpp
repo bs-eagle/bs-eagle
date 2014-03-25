@@ -113,6 +113,21 @@ bool create_wlogs_table(sql_well& sqw) {
   //  sqw.exec_sql(q);
   //}
 
+  // convert well logs from old format to new
+  q = "SELECT well_name, branch_name FROM branches";
+  if(sqw.prepare_sql(q) < 0)
+    return true;
+
+  while(sqw.step_sql() == 0) {
+    const std::string wname = sqw.get_sql_str(0);
+    const std::string branch_name = sqw.get_sql_str(1);
+    sql_well::sp_gis_t old_g = sqw.get_branch_gis(wname, branch_name);
+    if(old_g)
+      // don't overwrite existing logs
+      sqw.add_branch_gis(wname, branch_name, old_g, "", 0, false);
+  }
+  sqw.finalize_sql();
+
   return true;
 }
 

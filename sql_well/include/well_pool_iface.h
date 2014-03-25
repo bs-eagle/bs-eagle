@@ -105,7 +105,8 @@ class well_pool_iface : public objbase
       //virtual int add_branch_prop (const std::string &wname, const std::string &branch,
       //                             sp_table_t tbl) = 0;
       virtual int add_branch_gis (const std::string &wname, const std::string &branch,
-                                  sp_gis_t g, std::string wlog_name = "", uint wlog_type = 0) = 0;
+                                  sp_gis_t g, std::string wlog_name = "", uint wlog_type = 0,
+                                  bool replace_existing = true) = 0;
       virtual int add_branch_traj (const std::string &wname, const std::string &branch,
                                    sp_traj_t t) = 0;
       //virtual sp_table_t get_branch_prop (const std::string &wname, const std::string &branch) const = 0;
