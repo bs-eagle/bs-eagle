@@ -175,6 +175,8 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\py_sql_well.cpp" />
     <ClCompile Include="src\sql_well.cpp" />
+    <ClCompile Include="src\sql_well_db.cpp" />
+    <ClCompile Include="src\sql_well_hdm.cpp" />
     <ClCompile Include="src\sql_well_serialize.cpp" />
     <ClCompile Include="src\timer.cpp" />
     <ClCompile Include="src\well_keywords.cpp" />
