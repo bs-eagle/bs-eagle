@@ -939,8 +939,27 @@ COMMIT;\
 
       q = "DELETE FROM well_logs" + select_filter +
         " AND wlog_name = '" + wlog_name + "'";
+      res |= (exec_sql(q) == 0);
 
-      return  res | (exec_sql(q) == 0);
+      // try to delete also from old-fashioned logs table inside branches
+      sp_gis_t g = get_branch_gis(wname, branch);
+      if(!g) return res;
+
+      sp_table_t wlog_data = g->get_table();
+      // delete corresponding column
+      const std::wstring w_name = str2wstr(wlog_name, "utf-8");
+      const ulong n_wlogs(wlog_data->get_n_cols());
+      for(ulong i = 0; i < n_wlogs; ++i) {
+        if(wlog_data->get_col_name(i) != w_name) continue;
+        // we found a matching column
+        // delete it
+        wlog_data->remove_col(i);
+        // and write result to DB
+        add_branch_gis(wname, branch, g);
+        return true;
+      }
+
+      return res;
    }
 
    int
@@ -1992,18 +2011,23 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
       if (prepare_sql (sql.c_str ()))
         return -1;
 
-      // fill dates array & calc COMPDATs on every date
+      // fill dates array
       std::list<double> dates;
       for (; !step_sql ();)
         {
           double d = get_sql_real (0);
           dates.push_back (d);
+          std::cout << "date " << d << std::endl;
+        }
+      finalize_sql ();
 
-          // prepare builder
+      // calc COMPDATs on every date
+      std::list<double>::const_iterator di = dates.begin();
+      for(ulong i = 0; i < dates.size(); ++i, ++di) {
           fci::compl_n_frac_builder cfb;
           cfb.init(nx, ny, trim_backend);
           cfb.init(sp_wp);
-          if(cfb_storage.size() == 0) {
+          if(i == 0) {
             //boost::timer::auto_cpu_timer t;
             //ProfilerStart("/home/uentity/my_projects/blue-sky.git/plugins/bs-eagle/examples/build_cache.prof");
             cfb.build_cache();
@@ -2012,11 +2036,10 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
           else
             cfb.share_cache_with(cfb_storage.front());
 
-          // find completions & save
-          cfb.compl_build(d);
+          // find completions & fractures
+          cfb.compl_build(*di);
           cfb_storage.push_back(cfb);
-        }
-      finalize_sql ();
+      }
 
       // wells in mesh come here
       std::set< std::string > good_wells;
@@ -2039,7 +2062,8 @@ VALUES ('%s', %lf, %lf, %lf, %lf, %lf, %lf, %lf, %d, %d, %lf, %lf, %lf, %lf, %lf
        * Main cycle - iterate over all dates
        *----------------------------------------------------------------*/
       cfb_iterator p_cfb = cfb_storage.begin();
-      for (std::list<double>::const_iterator di = dates.begin(), de = dates.end(); di != de; ++di, ++p_cfb)
+      di = dates.begin();
+      for (std::list<double>::const_iterator de = dates.end(); di != de; ++di, ++p_cfb)
         {
           char d_buf[1024];
           if (*di - int(*di) == 0) // if *di is integer
