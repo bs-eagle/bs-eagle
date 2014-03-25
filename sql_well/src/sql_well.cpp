@@ -19,6 +19,7 @@ using namespace boost::python;
 
 #include <iostream>
 #include <stdio.h>
+#include <ctype.h>
 #include <boost/lexical_cast.hpp>
 //#include <boost/format.hpp>
 
@@ -32,8 +33,28 @@ namespace blue_sky {
 
 // hidden details
 namespace {
+static const char* spaces = " \n\r\t";
 
-static const char* old_wlog_name = "__old__well__log__";
+std::string trim(const std::string& ss) {
+	std::string s = ss;
+	while(s.size() > 0 && strchr(spaces, s[0]) != NULL)
+		s.erase(s.begin());
+	while(s.size() > 0 && strchr(spaces, s[s.size() - 1]) != NULL)
+		s.erase(s.size() - 1);
+	return s;
+}
+
+std::string to_upper(const std::string& s) {
+	std::string us(s.size(), ' ');
+	std::transform(s.begin(), s.end(), us.begin(), ::toupper);
+	return us;
+}
+
+std::string to_lower(const std::string& s) {
+	std::string us(s.size(), ' ');
+	std::transform(s.begin(), s.end(), us.begin(), ::tolower);
+	return us;
+}
 
 } // eof hidden namespace
 
@@ -139,6 +160,7 @@ static const char* old_wlog_name = "__old__well__log__";
         finalize_sql ();
 
       std::string q;
+      int res;
 
       if(wlog_name.size() == 0) {
         // TODO: deprecate and disable writing to branches table at all
@@ -148,14 +170,54 @@ static const char* old_wlog_name = "__old__well__log__";
         if(prepare_sql(q) < 0)
           return -1;
         // exec query
-        dump_wlog_data::go(*this, g);
+        res = dump_wlog_data::go(*this, g);
 
-        // if we get no wlog name, let it be equal to specific value
-        wlog_name = old_wlog_name;
+        // for tables in old format - split it into sequence of DEPT-LOG data tables
+        sp_table_t log_data = g->get_table();
+        const std::vector< std::wstring > log_names = log_data->get_col_names();
+        // process only tables with >= 2 columns
+        if(log_names.size() < 2)
+          return res;
+
+        // search DEPTH values
+        // take first column by default
+        ulong dept_idx = 0;
+        for(ulong i = 0; i < log_names.size(); ++i) {
+          const std::string cur_col = trim(to_lower(wstr2str(log_names[i], "utf-8")));
+          if(cur_col == "dept" || cur_col == "depth") {
+            dept_idx = i;
+            break;
+          }
+        }
+        // extract depth vector
+        spv_double dept_data = BS_KERNEL.create_object(v_double::bs_type());
+        dept_data->init(log_data->get_col_vector(dept_idx));
+
+        // prepare string representation of properties from parent gis
+        // TODO: find better way to copy props from one object to another
+        const std::string log_props = g->get_prop()->to_str();
+
+        // loop over all well log columns
+        spv_double cur_log = BS_KERNEL.create_object(v_double::bs_type());
+        for(ulong i = 0; i < log_names.size(); ++i) {
+          // skip depth
+          if(i == dept_idx) continue;
+          // create and fill new gis object
+          sp_gis_t cur_gis = BS_KERNEL.create_object("gis");
+          cur_gis->get_prop()->from_str(log_props);
+          sp_table_t cur_data = cur_gis->get_table();
+          cur_data->init(0, 2);
+          cur_data->add_col_vector(0, L"DEPTH", dept_data);
+          cur_log->init(log_data->get_col_vector(i));
+          cur_data->add_col_vector(1, log_names[i], cur_log);
+
+          // write it to DB
+          add_branch_gis(wname, branch, cur_gis, wstr2str(log_names[i], "utf-8"), wlog_type);
+        }
+        return 0;
       }
 
       // new implementation writes to separate well logs table
-      // always insert coorresponding entry in this table
       // format query
       q = "INSERT OR REPLACE INTO well_logs (well_name, branch_name, wlog_name, wlog_type, wlog_data) \
             VALUES ('";
@@ -216,32 +278,30 @@ static const char* old_wlog_name = "__old__well__log__";
         return sp_gis;
       finalize_sql();
 
-      if(wlog_name.size() == 0)
-        wlog_name = old_wlog_name;
-
       std::string q;
       const std::string select_filter = " WHERE well_name = '" + wname +
         "' AND branch_name = '" + branch + "'";
       // what blobs can we extract from result?
-      bool has_data = 0;
+      bool has_data = false;
 
-      // 1) check well_logs table
-      // format query
-      q = "SELECT wlog_data FROM well_logs" + select_filter +
-        " AND wlog_name = '" + wlog_name + "' AND wlog_type = " +
-        boost::lexical_cast< std::string >(wlog_type);
-      // exec sql
-      if(prepare_sql(q) == 0 && step_sql() == 0) {
-        has_data = true;
+      if(wlog_name.size()) {
+        // check well_logs table
+        // format query
+        q = "SELECT wlog_data FROM well_logs" + select_filter +
+          " AND wlog_name = '" + wlog_name + "' AND wlog_type = " +
+          boost::lexical_cast< std::string >(wlog_type);
+        // exec sql
+        if(prepare_sql(q) == 0 && step_sql() == 0) {
+          has_data = true;
+        }
       }
       else {
-        // 2. make old-fashioned query to branches table
-        finalize_sql();
+        // make old-fashioned query to branches table
         // format query
         q = "SELECT well_log FROM branches" + select_filter;
         // exec sql
         if(prepare_sql(q) == 0 && step_sql() == 0) {
-          has_data = 0;
+          has_data = true;
         }
       }
 
@@ -313,15 +373,16 @@ static const char* old_wlog_name = "__old__well__log__";
       bool res = false;
 
       if(wlog_name.size() == 0) {
+        // old-fashioned query
         q = "UPDATE branches SET well_log = NULL" + select_filter;
         res = (exec_sql(q) == 0);
-        // use specific identifier to delete from well_logs table
-        wlog_name = old_wlog_name;
       }
-
-      q = "DELETE FROM well_logs" + select_filter +
-        " AND wlog_name = '" + wlog_name + "'";
-      res |= (exec_sql(q) == 0);
+      else {
+        // delete from well_logs table
+        q = "DELETE FROM well_logs" + select_filter +
+          " AND wlog_name = '" + wlog_name + "'";
+        res = (exec_sql(q) == 0);
+      }
 
       // try to delete also from old-fashioned logs table inside branches
       sp_gis_t g = get_branch_gis(wname, branch);
