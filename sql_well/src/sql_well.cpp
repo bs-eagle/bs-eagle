@@ -188,7 +188,7 @@ std::string to_lower(const std::string& s) {
         ulong dept_idx = 0;
         for(ulong i = 0; i < log_names.size(); ++i) {
           const std::string cur_col = trim(to_lower(wstr2str(log_names[i], "utf-8")));
-          if(cur_col == "dept" || cur_col == "depth") {
+          if(cur_col.find("dept", 0, 4) != std::string::npos) {
             dept_idx = i;
             break;
           }
@@ -211,7 +211,7 @@ std::string to_lower(const std::string& s) {
           cur_gis->get_prop()->from_str(log_props);
           sp_table_t cur_data = cur_gis->get_table();
           cur_data->init(0, 2);
-          cur_data->add_col_vector(0, L"DEPTH", dept_data);
+          cur_data->add_col_vector(0, log_names[dept_idx], dept_data);
           cur_log->init(log_data->get_col_vector(i));
           cur_data->add_col_vector(1, log_names[i], cur_log);
 
