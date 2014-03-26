@@ -19,6 +19,8 @@ using namespace boost::python;
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/fstream.hpp"
 
+#define DB_FORMAT_PROP L"DB_format"
+
 namespace blue_sky {
 
 // hidden details
@@ -132,9 +134,19 @@ bool update_db_scheme(sql_well& sqw) {
     sql_well::sp_gis_t old_g = sqw.get_branch_gis(
       well_branches[i].first, well_branches[i].second
     );
-    if(old_g)
-      // don't overwrite existing logs
-      sqw.add_branch_gis(well_branches[i].first, well_branches[i].second, old_g, "", 0, false);
+    if(old_g) {
+      // check DB format property
+      sql_well::sp_prop_t log_prop = old_g->get_prop();
+      const std::vector< std::wstring > names = log_prop->get_names_i();
+      // only convert logs in old format 
+      if(
+        std::find(names.begin(), names.end(), DB_FORMAT_PROP) == names.end() ||
+        log_prop->get_i(DB_FORMAT_PROP) == 0
+      ) {
+        // don't overwrite existing logs
+        sqw.add_branch_gis(well_branches[i].first, well_branches[i].second, old_g, "", 0, false);
+      }
+    }
   }
 
   return true;

@@ -10,12 +10,9 @@
 //
 // d REAL NOT NULL,
 
-#ifdef BSPY_EXPORTING_PLUGIN
-
-#include <boost/python.hpp>
-using namespace boost::python;
-
-#endif //BSPY_EXPORTING_PLUGIN
+#include "bs_kernel.h"
+#include "bs_misc.h"
+#include "sql_well.h"
 
 #include <iostream>
 #include <stdio.h>
@@ -23,9 +20,14 @@ using namespace boost::python;
 #include <boost/lexical_cast.hpp>
 //#include <boost/format.hpp>
 
-#include "bs_kernel.h"
-#include "bs_misc.h"
-#include "sql_well.h"
+#ifdef BSPY_EXPORTING_PLUGIN
+
+#include <boost/python.hpp>
+using namespace boost::python;
+
+#endif //BSPY_EXPORTING_PLUGIN
+
+#define DB_FORMAT_PROP L"DB_format"
 
 using namespace boost;
 
@@ -164,30 +166,29 @@ std::string to_lower(const std::string& s) {
       int res;
 
       if(wlog_name.size() == 0) {
-        // TODO: deprecate and disable writing to branches table at all
-        q = "UPDATE ";
-        if(!replace_existing)
-          q += "OR IGNORE ";
-        q += "branches SET well_log = ?1 WHERE well_name = '";
-        q += wname + "' AND branch_name = '" + branch + "'";
+        // 0. Check wlog property indicating if it has been converted to new format before
+        sp_prop_t log_prop = g->get_prop();
+        std::vector< std::wstring > names = log_prop->get_names_i();
+        // ensure DB format prop exists
+        if(std::find(names.begin(), names.end(), DB_FORMAT_PROP) == names.end()) {
+          log_prop->add_property_i(0, DB_FORMAT_PROP, L"");
+        }
+        // mark that we store logs in new format
+        log_prop->set_i(DB_FORMAT_PROP, 1);
 
-        if(prepare_sql(q) < 0)
-          return -1;
-        // exec query
-        res = dump_wlog_data::go(*this, g);
-
-        // for tables in old format - split it into sequence of DEPT-LOG data tables
+        // 1. convert old representation to new
+        // split logs table into sequence of DEPT-LOG data tables
         sp_table_t log_data = g->get_table();
-        const std::vector< std::wstring > log_names = log_data->get_col_names();
+        names = log_data->get_col_names();
         // process only tables with >= 2 columns
-        if(log_names.size() < 2)
+        if(names.size() < 2)
           return res;
 
         // search DEPTH values
         // take first column by default
         ulong dept_idx = 0;
-        for(ulong i = 0; i < log_names.size(); ++i) {
-          const std::string cur_col = trim(to_lower(wstr2str(log_names[i], "utf-8")));
+        for(ulong i = 0; i < names.size(); ++i) {
+          const std::string cur_col = trim(to_lower(wstr2str(names[i], "utf-8")));
           if(cur_col.find("dept", 0, 4) != std::string::npos) {
             dept_idx = i;
             break;
@@ -199,28 +200,40 @@ std::string to_lower(const std::string& s) {
 
         // prepare string representation of properties from parent gis
         // TODO: find better way to copy props from one object to another
-        const std::string log_props = g->get_prop()->to_str();
+        const std::string log_prop_dump = g->get_prop()->to_str();
 
         // loop over all well log columns
         spv_double cur_log = BS_KERNEL.create_object(v_double::bs_type());
         sp_gis_t cur_gis = BS_KERNEL.create_object("gis");
-        for(ulong i = 0; i < log_names.size(); ++i) {
+        for(ulong i = 0; i < names.size(); ++i) {
           // skip depth
           if(i == dept_idx) continue;
           // create and fill new gis object
-          cur_gis->get_prop()->from_str(log_props);
+          cur_gis->get_prop()->from_str(log_prop_dump);
           sp_table_t cur_data = cur_gis->get_table();
           cur_data->init(0, 2);
-          cur_data->add_col_vector(0, log_names[dept_idx], dept_data);
+          cur_data->add_col_vector(0, names[dept_idx], dept_data);
           cur_log->init(log_data->get_col_vector(i));
-          cur_data->add_col_vector(1, log_names[i], cur_log);
+          cur_data->add_col_vector(1, names[i], cur_log);
 
           // write it to DB
           add_branch_gis(
-            wname, branch, cur_gis, wstr2str(log_names[i], "utf-8"), wlog_type, replace_existing
+            wname, branch, cur_gis, wstr2str(names[i], "utf-8"), wlog_type, replace_existing
           );
         }
-        return 0;
+
+        // 2. Write gis in old format if no wlog_name specified
+        // TODO: deprecate and disable writing to branches table at all
+        q = "UPDATE ";
+        //if(!replace_existing)
+        //  q += "OR IGNORE ";
+        q += "branches SET well_log = ?1 WHERE well_name = '";
+        q += wname + "' AND branch_name = '" + branch + "'";
+
+        if(prepare_sql(q) < 0)
+          return -1;
+        // exec query
+        return dump_wlog_data::go(*this, g);
       }
 
       // new implementation writes to separate well logs table
