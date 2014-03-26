@@ -36,24 +36,24 @@ namespace {
 static const char* spaces = " \n\r\t";
 
 std::string trim(const std::string& ss) {
-	std::string s = ss;
-	while(s.size() > 0 && strchr(spaces, s[0]) != NULL)
-		s.erase(s.begin());
-	while(s.size() > 0 && strchr(spaces, s[s.size() - 1]) != NULL)
-		s.erase(s.size() - 1);
-	return s;
+  std::string s = ss;
+  while(s.size() > 0 && strchr(spaces, s[0]) != NULL)
+   s.erase(s.begin());
+  while(s.size() > 0 && strchr(spaces, s[s.size() - 1]) != NULL)
+   s.erase(s.size() - 1);
+  return s;
 }
 
 std::string to_upper(const std::string& s) {
-	std::string us(s.size(), ' ');
-	std::transform(s.begin(), s.end(), us.begin(), ::toupper);
-	return us;
+  std::string us(s.size(), ' ');
+  std::transform(s.begin(), s.end(), us.begin(), ::toupper);
+  return us;
 }
 
 std::string to_lower(const std::string& s) {
-	std::string us(s.size(), ' ');
-	std::transform(s.begin(), s.end(), us.begin(), ::tolower);
-	return us;
+  std::string us(s.size(), ' ');
+  std::transform(s.begin(), s.end(), us.begin(), ::tolower);
+  return us;
 }
 
 } // eof hidden namespace

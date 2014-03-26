@@ -53,12 +53,12 @@ std::set< std::string > table_columns(sql_well& sqw, const std::string& tbl_name
 
 // create well_log table for storing multiple well logs with possibly different depths
 // i.e. we can store mmultiple gis objects for single well
-bool create_wlogs_table(sql_well& sqw) {
+bool update_db_scheme(sql_well& sqw) {
   std::string q;
   bool res = true;
-  //std::cout << "*** create_wlogs_table: " << sqw.file_name << std::endl;
+  //std::cout << "*** update_db_scheme: " << sqw.file_name << std::endl;
   if(!wlogs_table_exists(sqw)) {
-    //std::cout << "create_wlogs_table: no well_logs table in " << sqw.file_name << std::endl;
+    //std::cout << "update_db_scheme: no well_logs table in " << sqw.file_name << std::endl;
     // create table from scratch
     q = "CREATE TABLE IF NOT EXISTS \
       well_logs(\
@@ -72,7 +72,7 @@ bool create_wlogs_table(sql_well& sqw) {
       CREATE UNIQUE INDEX IF NOT EXISTS iwlpkey ON well_logs (well_name, branch_name, wlog_name ASC);\
       ";
     res &= (sqw.exec_sql(q) != 0);
-    //std::cout << "create_wlogs_table: well_logs table created = " << res << std::endl;
+    //std::cout << "update_db_scheme: well_logs table created = " << res << std::endl;
   }
   else {
     const std::set< std::string >& col_names = table_columns(sqw, "well_logs");
@@ -185,7 +185,7 @@ bool create_wlogs_table(sql_well& sqw) {
         }
 
       file_name = file;
-      return create_wlogs_table(*this) ? 0 : -1;
+      return update_db_scheme(*this) ? 0 : -1;
     }
 
   void
@@ -468,7 +468,7 @@ COMMIT;\
   sql_well::create_db_struct ()
     {
       if(create_db (db)) {
-        return create_wlogs_table(*this) ? 0 : -1;
+        return update_db_scheme(*this) ? 0 : -1;
       }
       return -1;
     }
