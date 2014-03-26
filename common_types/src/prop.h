@@ -22,7 +22,7 @@ namespace blue_sky
       // METHODS
       // ------------------------------------
     public:
-      typedef std::list<std::wstring>                  list_t;
+      typedef prop_iface::list_t list_t;
 
       // destructor
       virtual ~prop ()

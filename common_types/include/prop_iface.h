@@ -24,7 +24,7 @@ namespace blue_sky
   class prop_iface : public objbase
     {
     public:
-      typedef std::list<std::wstring>                  list_t;
+      typedef std::vector<std::wstring> list_t;
 
       virtual ~prop_iface ()
         {}
