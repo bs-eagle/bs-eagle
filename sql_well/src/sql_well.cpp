@@ -165,7 +165,10 @@ std::string to_lower(const std::string& s) {
 
       if(wlog_name.size() == 0) {
         // TODO: deprecate and disable writing to branches table at all
-        q = "UPDATE branches SET well_log = ?1 WHERE well_name = '";
+        q = "UPDATE ";
+        if(!replace_existing)
+          q += "OR IGNORE ";
+        q += "branches SET well_log = ?1 WHERE well_name = '";
         q += wname + "' AND branch_name = '" + branch + "'";
 
         if(prepare_sql(q) < 0)
@@ -200,11 +203,11 @@ std::string to_lower(const std::string& s) {
 
         // loop over all well log columns
         spv_double cur_log = BS_KERNEL.create_object(v_double::bs_type());
+        sp_gis_t cur_gis = BS_KERNEL.create_object("gis");
         for(ulong i = 0; i < log_names.size(); ++i) {
           // skip depth
           if(i == dept_idx) continue;
           // create and fill new gis object
-          sp_gis_t cur_gis = BS_KERNEL.create_object("gis");
           cur_gis->get_prop()->from_str(log_props);
           sp_table_t cur_data = cur_gis->get_table();
           cur_data->init(0, 2);
@@ -213,7 +216,9 @@ std::string to_lower(const std::string& s) {
           cur_data->add_col_vector(1, log_names[i], cur_log);
 
           // write it to DB
-          add_branch_gis(wname, branch, cur_gis, wstr2str(log_names[i], "utf-8"), wlog_type);
+          add_branch_gis(
+            wname, branch, cur_gis, wstr2str(log_names[i], "utf-8"), wlog_type, replace_existing
+          );
         }
         return 0;
       }
@@ -225,9 +230,9 @@ std::string to_lower(const std::string& s) {
         q += "REPLACE";
       else
         q += "IGNORE";
-      q += " INTO well_logs (well_name, branch_name, wlog_name, wlog_type, wlog_data) \
-            VALUES ('";
-      q += wname + "', '" + branch + "', '" + wlog_name + "', " + boost::lexical_cast< std::string >(wlog_type) + ", ?1)";
+      q += " INTO well_logs (well_name, branch_name, wlog_name, wlog_type, wlog_data) VALUES ('";
+      q += wname + "', '" + branch + "', '" + wlog_name + "', " +
+        boost::lexical_cast< std::string >(wlog_type) + ", ?1)";
 
       // prepare query
       if(prepare_sql(q) < 0)

@@ -118,15 +118,24 @@ bool create_wlogs_table(sql_well& sqw) {
   if(sqw.prepare_sql(q) < 0)
     return true;
 
+  // collect all well-branch pairs
+  std::vector< std::pair< std::string, std::string > > well_branches;
   while(sqw.step_sql() == 0) {
-    const std::string wname = sqw.get_sql_str(0);
-    const std::string branch_name = sqw.get_sql_str(1);
-    sql_well::sp_gis_t old_g = sqw.get_branch_gis(wname, branch_name);
-    if(old_g)
-      // don't overwrite existing logs
-      sqw.add_branch_gis(wname, branch_name, old_g, "", 0, false);
+    well_branches.push_back(std::make_pair(sqw.get_sql_str(0), sqw.get_sql_str(1)));
   }
   sqw.finalize_sql();
+
+  // update wlogs DB for all collected pairs
+  for(ulong i = 0; i < well_branches.size(); ++i) {
+    //const std::string wname = sqw.get_sql_str(0);
+    //const std::string branch_name = sqw.get_sql_str(1);
+    sql_well::sp_gis_t old_g = sqw.get_branch_gis(
+      well_branches[i].first, well_branches[i].second
+    );
+    if(old_g)
+      // don't overwrite existing logs
+      sqw.add_branch_gis(well_branches[i].first, well_branches[i].second, old_g, "", 0, false);
+  }
 
   return true;
 }
