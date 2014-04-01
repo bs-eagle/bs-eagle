@@ -75,8 +75,11 @@ void projection_impl(
 		}
 		else {
 			// we're inside window
-			win_sum += *p_data;
-			++win_sz;
+			// check for NaN
+			if(!(*p_data != *p_data)) {
+				win_sum += *p_data;
+				++win_sz;
+			}
 			// next step in well log
 			++p_data; ++p_dept;
 			if(p_dept == p_dept_end) {
