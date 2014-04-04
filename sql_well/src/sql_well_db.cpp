@@ -14,6 +14,8 @@ using namespace boost::python;
 #endif //BSPY_EXPORTING_PLUGIN
 
 #include "sql_well.h"
+#include "bs_misc.h"
+
 #include <stdio.h>
 #include <fstream>
 #include "boost/filesystem/operations.hpp"
@@ -155,21 +157,23 @@ bool update_db_scheme(sql_well& sqw) {
 } // eof hidden namespace
 
   int
-  sql_well::open_db (const std::string &file)
+  sql_well::open_db (const std::string &file_)
     {
       int rc = 0;
       char *zErrMsg = 0;
 
       if (db)
         close_db ();
-      //const std::string file = wstr2str (file_);
-      printf ("SQL open_db %s\n", file.c_str ());
-      if (file == ":memory:" || !boost::filesystem::exists (file))
+	  // expect that file_ comes in native locale
+	  // convert it to UTF-8
+      const std::string file = str2ustr(file_);
+      printf ("SQL open_db %s\n", file_.c_str ());
+      if (file == ":memory:" || !boost::filesystem::exists (file_))
         {
           rc = sqlite3_open (file.c_str (), &db);
           if (rc)
             {
-              fprintf (stderr, "Can't open database: %s (%s)\n", sqlite3_errmsg (db), file.c_str());
+              fprintf (stderr, "Can't open database: %s (%s)\n", sqlite3_errmsg (db), file_.c_str());
               sqlite3_close (db);
               db = 0;
               return -1;
@@ -189,7 +193,7 @@ bool update_db_scheme(sql_well& sqw) {
           rc = sqlite3_open (file.c_str (), &db);
           if (rc != SQLITE_OK)
             {
-              fprintf (stderr, "Can't open database: %s (%s) - 2\n", sqlite3_errmsg (db), file.c_str());
+              fprintf (stderr, "Can't open database: %s (%s) - 2\n", sqlite3_errmsg (db), file_.c_str());
               sqlite3_close (db);
               db = 0;
               return -1;

@@ -39,7 +39,8 @@ namespace boser = boost::serialization;
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 	// save file_name
 	// NOTE: ensure that all filenames are saved in UTF-8 encoding
-	ar << (const std::string&)str2ustr(t.file_name);
+	// assume that t.file_name is always in UTF-8, so don't convert
+	ar << (const std::string&)t.file_name;
 
 	// check db has an associated filename
 	// strangely there is no such API function though it is documented
@@ -143,48 +144,29 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(load, blue_sky::sql_well)
 	ar >> do_load_db;
 	if(!do_load_db) return;
 
-	// backup db handle
-	//sqlite3* bu_db;
-	//int opres;
-
 	// load backup db fname
 	std::string db_basename, db_fname;
+	// open_db() requires _native_ system encoding, so make proper conversions
 	ar >> db_basename >> db_fname;
+	db_basename = ustr2str(db_basename);
+	db_fname = ustr2str(db_fname);
 
 	// check if hdm serializer saved project path for us
 	kernel::idx_dt_ptr kdt = BS_KERNEL.pert_idx_dt(BS_KERNEL.find_type("hdm").td_);
 	if(kdt && kdt->size< std::string >()) {
-		std::string prj_path = str2ustr(kdt->ss< std::string >(0));
-		// try to open db relative to project path
 		// NOTE: assume that kernel paths are in native system encoding
-		std::string db_relname = str2ustr(prj_path + PATHSEP) + db_basename;
+		std::string prj_path = kdt->ss< std::string >(0);
+		// try to open db relative to project path
+		// relname in native encoding
+		std::string db_relname = prj_path + PATHSEP + db_basename;
 		if(t.open_db(db_relname) == 0)
 			return;
-		//opres = sqlite3_open(db_relname.c_str(), &bu_db);
-		//if(opres == SQLITE_OK) {
-		//	// save handle to open db
-		//	t.db = bu_db;
-		//	t.file_name = db_relname;
-		//	return;
-		//}
-		//sqlite3_close(bu_db);
 	}
 
 	if(t.open_db(db_fname) == 0)
 		return;
-	//opres = sqlite3_open(db_fname.c_str(), &bu_db);
-	//if(opres == SQLITE_OK) {
-	//	// just save handle to db into sql_well and we're done
-	//	t.db = bu_db;
-	//	t.file_name = db_fname;
-	//	return;
-	//}
-	//sqlite3_close(bu_db);
 
 	// finally try to open db from stored path t.file_name
-	//opres = sqlite3_open(t.file_name.c_str(), &bu_db);
-	//if(opres == SQLITE_OK)
-	//	t.db = bu_db;
 	if(t.open_db(t.file_name)) {
 		return;
 	}
