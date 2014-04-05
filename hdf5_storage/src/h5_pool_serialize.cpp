@@ -173,7 +173,7 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, h5_pool)
 		// randomly generate h5 filename
 		// bu::uuid cpy_uuid = bu::random_generator()();
 		// filename = project path + basename
-		h5_basename = kdt->ss< std::string >(1) + '_' + kdt->ss< std::string >(2) + ".h5";
+		h5_basename = kdt->ss< std::string >(1) + kdt->ss< std::string >(2) + ".h5";
 		h5_fname = kdt->ss< std::string >(0) + PATHSEP + h5_basename;
 	}
 
