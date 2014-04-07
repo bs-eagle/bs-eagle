@@ -251,6 +251,7 @@ bool update_db_scheme(sql_well& sqw) {
       std::string sql = "attach '" + dbname + "' as tomerge;    insert or ignore into groups select * from tomerge.groups; \
                                                                 insert or ignore into dates select * from tomerge.dates; \
                                                                 insert or ignore into wells select * from tomerge.wells; \
+                                                                insert or ignore into well_logs select * from tomerge.well_logs; \
                                                                 insert or replace into branches select * from tomerge.branches; \
                                                                 insert or ignore into completions select * from tomerge.completions; \
                                                                 insert or ignore into fractures select * from tomerge.fractures; \
