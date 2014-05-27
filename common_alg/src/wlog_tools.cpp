@@ -25,26 +25,29 @@ typedef v_float::const_iterator cvf_iterator;
 typedef v_float::reverse_iterator vf_riterator;
 typedef v_float::const_reverse_iterator cvf_riterator;
 
-template< class dept_iterator, class res_iterator >
+// depth and share same iterator type
+template< class data_iterator, class grid_iterator, class res_iterator >
 void projection_impl(
-	const spv_float& wlog_data, const spv_float& wlog_dept,
-	dept_iterator& p_grid, const dept_iterator& p_grid_end,
+	//const spv_float& wlog_data, const spv_float& wlog_dept,
+	const data_iterator& p_data_begin, const data_iterator& p_data_end,
+	const data_iterator& p_dept_begin, const data_iterator& p_dept_end,
+	grid_iterator& p_grid, const grid_iterator& p_grid_end,
 	res_iterator& p_res
 ) {
-	const ulong wlog_sz = std::min(wlog_data->size(), wlog_dept->size());
-	//spv_float res = BS_KERNEL.create_object(v_float::bs_type());
+	// setup iterators
+	//const cvf_iterator p_dept_begin = wlog_dept->begin();
+	//const cvf_iterator p_dept_end = p_dept_begin + wlog_sz;
+
+	const ulong wlog_sz = std::min< ulong >(p_data_end - p_data_begin, p_dept_end - p_dept_begin);
+	//const ulong wlog_sz = std::min(wlog_data->size(), wlog_dept->size());
 	if(wlog_sz == 0)
 		return;
-	//res->resize(p_grid_end - p_grid - 1);
 
-	// setup iterators
-	const cvf_iterator p_dept_begin = wlog_dept->begin();
-	const cvf_iterator p_dept_end = p_dept_begin + wlog_sz;
 	// find starting point on well log
-	cvf_iterator p_dept = std::lower_bound(
-		wlog_dept->begin(), wlog_dept->begin() + wlog_sz, *p_grid
+	data_iterator p_dept = std::lower_bound(
+		p_dept_begin, p_dept_end, *p_grid
 	);
-	cvf_iterator p_data = wlog_data->begin() + (p_dept - wlog_dept->begin());
+	data_iterator p_data = p_data_begin + (p_dept - p_dept_begin);
 
 	// DEBUG
 	//std::cout << "++wlog_mean_projection:" << std::endl;
@@ -52,26 +55,30 @@ void projection_impl(
 	//std::cout << "grid = [" << *p_grid << ", " << *(p_grid_end - 1) << "]" << std::endl;
 	// position dest grid to next boundary
 	++p_grid;
-	// zero-fill resulting array
-	// TODO: do something for out-of-bounds values, instead of simple 0
-	//std::fill(p_res, p_res + (p_grid_end - p_grid), 0.0);
+	// fill resulting array with NaN
 	std::fill(p_res, p_res + (p_grid_end - p_grid), std::numeric_limits< double >::quiet_NaN());
 
 	// main cycle
 	t_float win_sum = 0;
-	ulong win_sz = 0;
+	// win_sz counts only valid numbers that fits in window
+	// raw_sz counts all values in window, including NaNs
+	ulong win_sz = 0, raw_sz = 0;
 	while(p_grid != p_grid_end) {
 		// if we reached window boundary
-		if(*p_dept >= *p_grid) {
+		if(*p_dept > *p_grid) {
 			if(win_sz)
 				*p_res = win_sum / win_sz;
-			else if(p_dept != p_dept_begin)
+			else if(!raw_sz && (p_dept != p_dept_begin)) {
+				// assign prev log value only if we had no NaNs in window
 				*p_res = *(p_data - 1);
+			}
+
 			// next step on dest grid and resulting array
 			++p_res;
 			++p_grid;
 			win_sum = 0;
 			win_sz = 0;
+			raw_sz = 0;
 		}
 		else {
 			// we're inside window
@@ -80,11 +87,13 @@ void projection_impl(
 				win_sum += *p_data;
 				++win_sz;
 			}
+			// count all values in raw_sz
+			++raw_sz;
 			// next step in well log
 			++p_data; ++p_dept;
 			if(p_dept == p_dept_end) {
-				// here we always have win_sz >= 1
-				*p_res = win_sum / win_sz;
+				if(win_sz)
+					*p_res = win_sum / win_sz;
 				break;
 			}
 		}
@@ -98,23 +107,55 @@ BS_API spv_float wlog_mean_projection(
 ) {
 	// sanity
 	spv_float res = BS_KERNEL.create_object(v_float::bs_type());
-	if(dest_grid->size() < 2 || !res)
+	if(!wlog_data->size() || !wlog_dept->size() || dest_grid->size() < 2 || !res)
 		return res;
 	res->resize(dest_grid->size() - 1);
 
+	// check grid ordering
 	if(dest_grid->ss(0) < dest_grid->ss(dest_grid->size() - 1)) {
 		// normal ordering
 		cvf_iterator p_grid = dest_grid->begin();
 		const cvf_iterator p_grid_end = dest_grid->end();
 		vf_iterator p_res = res->begin();
-		projection_impl(wlog_data, wlog_dept, p_grid, p_grid_end, p_res);
+
+		// check depth ordering
+		if(wlog_dept->ss(0) < wlog_dept->ss(wlog_dept->size() - 1)) {
+			projection_impl(
+				wlog_data->begin(), wlog_data->end(),
+				wlog_dept->begin(), wlog_dept->end(),
+				p_grid, p_grid_end, p_res
+			);
+		}
+		else {
+			projection_impl(
+				wlog_data->rbegin(), wlog_data->rend(),
+				wlog_dept->rbegin(), wlog_dept->rend(),
+				p_grid, p_grid_end, p_res
+			);
+		}
 	}
 	else {
 		// reversed grid ordering
 		cvf_riterator p_grid = dest_grid->rbegin();
 		const cvf_riterator p_grid_end = dest_grid->rend();
 		vf_riterator p_res = res->rbegin();
-		projection_impl(wlog_data, wlog_dept, p_grid, p_grid_end, p_res);
+
+		// check depth ordering
+		if(wlog_dept->ss(0) < wlog_dept->ss(wlog_dept->size() - 1)) {
+			projection_impl(
+				wlog_data->begin(), wlog_data->end(),
+				wlog_dept->begin(), wlog_dept->end(),
+				p_grid, p_grid_end, p_res
+			);
+		}
+		else {
+			projection_impl(
+				wlog_data->rbegin(), wlog_data->rend(),
+				wlog_dept->rbegin(), wlog_dept->rend(),
+				p_grid, p_grid_end, p_res
+			);
+		}
+		//projection_impl(wlog_data, wlog_dept, p_grid, p_grid_end, p_res);
 	}
 	return res;
 }
