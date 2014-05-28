@@ -75,8 +75,8 @@ struct algo_vtk : helpers< strat_t > {
 	};
 
 	// vertex handle for structured grids
-	// in sgrid we now vertex offset beforehand (via backend_index())
-	// and this offset allow to make unique check (fast)
+	// in sgrid we know vertex offset beforehand (via backend_index())
+	// and this offset allows to make unique check (fast)
 	// also latter stage of filling offsets isn't needed
 	struct vertex_handle_sgrid {
 		// we don't need to store anything besides cell index in sgrid
@@ -442,7 +442,7 @@ struct algo_vtk : helpers< strat_t > {
 	}
 
 	template< int prim_id >
-	static spv_ulong enum_border_vtk_simple(t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
+	static spv_ulong enum_border_vtk_simple(t_ulong nx, t_ulong ny, sp_obj trim_backend,
 		spv_int mask, spv_ulong cell_idx, spv_float points, Loki::Int2Type< prim_id > prim,
 		int slice_dim = -1, ulong slice_idx = 0, const int facet_filter = -1)
 	{
@@ -450,7 +450,7 @@ struct algo_vtk : helpers< strat_t > {
 		typedef typename mesh_part::container_t::iterator part_iterator;
 
 		// 1) build trimesh from given tops
-		trimesh M(nx, ny, coord, zcorn);
+		trimesh M(nx, ny, trim_backend);
 		// make mesh_part containing full mesh, skip bbox calculation
 		mesh_part MP(M, true);
 		// cut the slice from whole mesh
@@ -459,12 +459,27 @@ struct algo_vtk : helpers< strat_t > {
 		// backend for storing index
 		vtk_index_backend< prim_id > vib(M);
 
-		// store pointer direcctly to mask array for speedup
-		const t_int* cmask = &mask->ss(0);
-		const ulong mask_sz = mask->size();
+		if(mask && mask->size() > 0) {
+			// store pointer direcctly to mask array for speedup
+			const t_int* cmask = &mask->ss(0);
+			const ulong mask_sz = mask->size();
 
-		// just process whole mesh part
-		process_mesh_part(vib, MP, MP, cmask, mask_sz, facet_filter);
+			// just process whole mesh part
+			process_mesh_part(vib, MP, MP, cmask, mask_sz, facet_filter);
+		}
+		else {
+			// we have no mask, so process only mesh boundary
+			if(MP.is_pure_boundary())
+				process_mesh_part(vib, MP, MP, NULL, 0, facet_filter);
+			else {
+				typedef std::list< mesh_part > bnd_t;
+				// process only mesh boundary
+				const bnd_t bnd = MP.boundary();
+				for(typename bnd_t::const_iterator pb = bnd.begin(), end = bnd.end(); pb != end; ++pb) {
+					process_mesh_part(vib, *pb, MP, NULL, 0, facet_filter);
+				}
+			}
+		}
 
 		// share the same buffer for points
 		points->init_inplace(vib.get_points());
@@ -479,6 +494,13 @@ struct algo_vtk : helpers< strat_t > {
 	{
 		typedef typename mesh_part::container_t parts_container;
 		typedef typename mesh_part::container_t::iterator part_iterator;
+
+		// fall back to simple algo if we have no mask array
+		if(!mask || mask->size() == 0)
+			return enum_border_vtk_simple< prim_id >(
+				nx, ny, trim_backend, mask, cell_idx, points, prim,
+				slice_dim, slice_idx, facet_filter
+			);
 
 		// 1) build trimesh from given tops
 		//trimesh M(nx, ny, coord, zcorn);

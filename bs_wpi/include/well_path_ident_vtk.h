@@ -25,7 +25,7 @@ namespace blue_sky {
 
 BS_API_PLUGIN spv_ulong enum_border_facets_vtk(
 	ulong nx, ulong ny, sp_obj trim_backend,
-	spv_int mask, spv_ulong cell_idx, spv_float points,
+	spv_ulong cell_idx, spv_float points, spv_int mask = NULL,
 	const char* strat_traits = "online_tops",
 	int slice_dim = -1, ulong slice_idx = 0,
 	const ulong min_split_threshold = 10000, int facet_filter = -1
@@ -33,7 +33,7 @@ BS_API_PLUGIN spv_ulong enum_border_facets_vtk(
 
 BS_API_PLUGIN spv_ulong enum_border_facets_vtk(
 	ulong nx, ulong ny, spv_float coord, spv_float zcorn,
-	spv_int mask, spv_ulong cell_idx, spv_float points,
+	spv_ulong cell_idx, spv_float points, spv_int mask = NULL,
 	const char* strat_traits = "online_tops",
 	int slice_dim = -1, ulong slice_idx = 0,
 	const ulong min_split_threshold = 10000, int facet_filter = -1
@@ -41,16 +41,16 @@ BS_API_PLUGIN spv_ulong enum_border_facets_vtk(
 
 BS_API_PLUGIN spv_ulong enum_border_edges_vtk(
 	ulong nx, ulong ny, sp_obj trim_backend,
-	spv_int mask, spv_ulong cell_idx, spv_float points,
-	const char* strat_traits,
+	spv_ulong cell_idx, spv_float points, spv_int mask = NULL,
+	const char* strat_traits = "online_tops",
 	int slice_dim = -1, ulong slice_idx = 0,
 	const ulong min_split_threshold = 10000, int facet_filter = -1
 );
 
 BS_API_PLUGIN spv_ulong enum_border_edges_vtk(
 	ulong nx, ulong ny, spv_float coord, spv_float zcorn,
-	spv_int mask, spv_ulong cell_idx, spv_float points,
-	const char* strat_traits,
+	spv_ulong cell_idx, spv_float points, spv_int mask = NULL,
+	const char* strat_traits = "online_tops",
 	int slice_dim = -1, ulong slice_idx = 0,
 	const ulong min_split_threshold = 10000, int facet_filter = -1
 );

@@ -69,7 +69,7 @@ namespace bp = boost::python;
 
 template< int prim_id >
 bp::tuple py_enum_border_vtk_impl(t_ulong nx, t_ulong ny, sp_obj trim_backend,
-	spv_int mask, const char* strat_traits = "online_tops",
+	spv_int mask = NULL, const char* strat_traits = "online_tops",
 	int slice_dim = -1, ulong slice_idx = 0,
 	const ulong min_split_threshold = MIN_SPLIT_THRESHOLD, const int facet_filter = -1)
 {
@@ -116,8 +116,8 @@ sp_obj make_trimesh_backend(t_ulong nx, t_ulong ny, spv_float coord, spv_float z
 }
 
 spv_ulong enum_border_facets_vtk(
-	t_ulong nx, t_ulong ny, sp_obj trim_backend, spv_int mask,
-	spv_ulong cell_idx, spv_float points, const char* strat_traits,
+	t_ulong nx, t_ulong ny, sp_obj trim_backend,
+	spv_ulong cell_idx, spv_float points, spv_int mask, const char* strat_traits,
 	int slice_dim, ulong slice_idx,
 	const ulong min_split_threshold, const int facet_filter)
 {
@@ -128,8 +128,8 @@ spv_ulong enum_border_facets_vtk(
 }
 
 spv_ulong enum_border_facets_vtk(
-	t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn, spv_int mask,
-	spv_ulong cell_idx, spv_float points, const char* strat_traits,
+	t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
+	spv_ulong cell_idx, spv_float points, spv_int mask, const char* strat_traits,
 	int slice_dim, ulong slice_idx,
 	const ulong min_split_threshold, const int facet_filter)
 {
@@ -141,8 +141,8 @@ spv_ulong enum_border_facets_vtk(
 }
 
 spv_ulong enum_border_edges_vtk(
-	t_ulong nx, t_ulong ny, sp_obj trim_backend, spv_int mask,
-	spv_ulong cell_idx, spv_float points, const char* strat_traits,
+	t_ulong nx, t_ulong ny, sp_obj trim_backend,
+	spv_ulong cell_idx, spv_float points, spv_int mask, const char* strat_traits,
 	int slice_dim, ulong slice_idx,
 	const ulong min_split_threshold, const int facet_filter)
 {
@@ -153,8 +153,8 @@ spv_ulong enum_border_edges_vtk(
 }
 
 spv_ulong enum_border_edges_vtk(
-	t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn, spv_int mask,
-	spv_ulong cell_idx, spv_float points, const char* strat_traits,
+	t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
+	spv_ulong cell_idx, spv_float points, spv_int mask, const char* strat_traits,
 	int slice_dim, ulong slice_idx,
 	const ulong min_split_threshold, const int facet_filter)
 {
@@ -170,8 +170,8 @@ spv_ulong enum_border_edges_vtk(
  * Python bindings
  *----------------------------------------------------------------*/
 BOOST_PYTHON_FUNCTION_OVERLOADS(make_trimbe_overl, make_trimesh_backend, 4, 5)
-BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_facets_overl, py_enum_border_vtk_impl< 0 >, 4, 9)
-BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_edges_overl, py_enum_border_vtk_impl< 1 >, 4, 9)
+BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_facets_overl, py_enum_border_vtk_impl< 0 >, 3, 9)
+BOOST_PYTHON_FUNCTION_OVERLOADS(enumb_edges_overl, py_enum_border_vtk_impl< 1 >, 3, 9)
 
 namespace python {
 
