@@ -10,19 +10,21 @@
 #define H5_POOL_G42LCHNB
 
 #include <map>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
+//#include <boost/archive/text_iarchive.hpp>
+//#include <boost/archive/text_oarchive.hpp>
 #include <string>
 #include "pool_iface.h"
 #include <hdf5.h>
 
 #include "bs_serialize_decl.h"
+#include "date_helper.h"
+
 const int BUF_SIZE = 100000; //!< size of buffer for script
 
 namespace blue_sky
 {
-  typedef boost::archive::text_iarchive           tia_t;
-  typedef boost::archive::text_oarchive           toa_t;
+  //typedef boost::archive::text_iarchive           tia_t;
+  //typedef boost::archive::text_oarchive           toa_t;
 
   struct h5_pair
     {
@@ -79,9 +81,9 @@ namespace blue_sky
 
       typedef h5_pool_iface                                     base_t;
       typedef h5_pool                                           this_t;
-      typedef std::map<std::string, h5_pair>                    map_t;
-      typedef std::pair<std::string, h5_pair>                   pair_t;
-      typedef std::map<std::string, hid_t>                      map_hid_t;
+      typedef std::map< std::string, h5_pair >                    map_t;
+      typedef std::pair< std::string, h5_pair >                   pair_t;
+      typedef std::map< std::string, hid_t, str_dt_compare >     map_hid_t;
 
     public:
 
