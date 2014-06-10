@@ -101,14 +101,14 @@ struct strategy_2d_ex : public strategy_2d_common< strat_traits > {
 			return ulong(-1);
 		}
 		// obtain IDs of given facet vertices
-		static facet_vid_t& facet_vid(ulong facet) {
+		static const facet_vid_t& facet_vid(ulong facet) {
 			static const facet_vid_t t[4] = {
 				{0, 1}, {1, 3}, {3, 2}, {2, 0}
 			};
 			return t[facet];
 		}
 		static void facet_vid(ulong dim, ulong facet, facet_vid_t& res) {
-			return facet_vid(facet_id(dim, facet, res));
+			ca_assign(res, facet_vid(facet_id(dim, facet)));
 		}
 
 		Polygon_2 polygon() const {
