@@ -55,8 +55,7 @@ void projection_impl(
 	//std::cout << "grid = [" << *p_grid << ", " << *(p_grid_end - 1) << "]" << std::endl;
 	// position dest grid to next boundary
 	++p_grid;
-	// fill resulting array with NaN
-	std::fill(p_res, p_res + (p_grid_end - p_grid), std::numeric_limits< double >::quiet_NaN());
+	const res_iterator p_res_end = p_res + (p_grid_end - p_grid - 1);
 
 	// main cycle
 	t_float win_sum = 0;
@@ -74,7 +73,8 @@ void projection_impl(
 			}
 
 			// next step on dest grid and resulting array
-			++p_res;
+			if(++p_res == p_res_end)
+				break;
 			++p_grid;
 			win_sum = 0;
 			win_sz = 0;
@@ -110,6 +110,8 @@ BS_API spv_float wlog_mean_projection(
 	if(!wlog_data->size() || !wlog_dept->size() || dest_grid->size() < 2 || !res)
 		return res;
 	res->resize(dest_grid->size() - 1);
+	// fill resulting array with NaN
+	std::fill(res->begin(), res->end(), std::numeric_limits< double >::quiet_NaN());
 
 	// check grid ordering
 	if(dest_grid->ss(0) < dest_grid->ss(dest_grid->size() - 1)) {
