@@ -47,6 +47,10 @@ void projection_impl(
 	data_iterator p_dept = std::lower_bound(
 		p_dept_begin, p_dept_end, *p_grid
 	);
+	if(p_dept == p_dept_end)
+		// grid is fully outside of well log depths
+		return;
+
 	data_iterator p_data = p_data_begin + (p_dept - p_dept_begin);
 
 	// DEBUG
