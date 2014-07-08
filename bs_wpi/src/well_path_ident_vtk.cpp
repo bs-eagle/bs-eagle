@@ -54,8 +54,38 @@ spv_ulong enum_border_vtk_impl(
 			slice_dim, slice_idx, min_split_threshold, facet_filter
 		);
 	}
+	if(strcmp(strat_traits, "online_tops_2d") == 0) {
+		return wpi::algo_vtk< wpi::onlinett_2d >::enum_border_vtk(
+			nx, ny, trim_backend, mask, cell_idx, points, Loki::Int2Type< prim_id >(),
+			slice_dim, slice_idx, min_split_threshold, facet_filter
+		);
+	}
+	else if(strcmp(strat_traits, "online_tops_bufpool_2d") == 0) {
+		return wpi::algo_vtk< wpi::onlinett_bp_2d >::enum_border_vtk(
+			nx, ny, trim_backend, mask, cell_idx, points, Loki::Int2Type< prim_id >(),
+			slice_dim, slice_idx, min_split_threshold, facet_filter
+		);
+	}
+	else if(strcmp(strat_traits, "sgrid_2d") == 0) {
+		return wpi::algo_vtk< wpi::sgrid_2d >::enum_border_vtk(
+			nx, ny, trim_backend, mask, cell_idx, points, Loki::Int2Type< prim_id >(),
+			slice_dim, slice_idx, min_split_threshold, facet_filter
+		);
+	}
+	else if(strcmp(strat_traits, "rgrid_2d") == 0) {
+		return wpi::algo_vtk< wpi::rgrid_2d >::enum_border_vtk(
+			nx, ny, trim_backend, mask, cell_idx, points, Loki::Int2Type< prim_id >(),
+			slice_dim, slice_idx, min_split_threshold, facet_filter
+		);
+	}
+	else if(strcmp(strat_traits, "carray_2d") == 0) {
+		return wpi::algo_vtk< wpi::carray_2d >::enum_border_vtk(
+			nx, ny, trim_backend, mask, cell_idx, points, Loki::Int2Type< prim_id >(),
+			slice_dim, slice_idx, min_split_threshold, facet_filter
+		);
+	}
 	else {
-		// fallback to carray traits
+		// fallback to carray 3D traits
 		return wpi::algo_vtk< wpi::carray_3d >::enum_border_vtk(
 			nx, ny, trim_backend, mask, cell_idx, points, Loki::Int2Type< prim_id >(),
 			slice_dim, slice_idx, min_split_threshold, facet_filter
@@ -108,7 +138,28 @@ sp_obj make_trimesh_backend(t_ulong nx, t_ulong ny, spv_float coord, spv_float z
 			nx, ny, coord, zcorn
 		);
 	}
+	if(strcmp(strat_traits, "online_tops_2d") == 0) {
+		return wpi::pods< wpi::onlinett_2d >::trimesh::create_backend(
+			nx, ny, coord, zcorn
+		);
+	}
+	else if(strcmp(strat_traits, "online_tops_bufpool_2d") == 0) {
+		return wpi::pods< wpi::onlinett_bp_2d >::trimesh::create_backend(
+			nx, ny, coord, zcorn
+		);
+	}
+	else if(strcmp(strat_traits, "sgrid_2d") == 0 || strcmp(strat_traits, "rgrid_2d") == 0) {
+		return wpi::pods< wpi::sgrid_2d >::trimesh::create_backend(
+			nx, ny, coord, zcorn
+		);
+	}
+	else if(strcmp(strat_traits, "carray_2d") == 0) {
+		return wpi::pods< wpi::carray_2d >::trimesh::create_backend(
+			nx, ny, coord, zcorn
+		);
+	}
 	else {
+		// fall back to carray 3d traits
 		return wpi::pods< wpi::carray_3d >::trimesh::create_backend(
 			nx, ny, coord, zcorn
 		);

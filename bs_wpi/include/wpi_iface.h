@@ -23,23 +23,23 @@ public:
 	virtual spv_float well_path_ident(
 		t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
 		spv_float well_info, bool include_well_nodes = true, const char* strat_traits = "sgrid",
-		spv_ulong hit_idx = NULL
+		const ulong min_split_threshold = 0, spv_ulong hit_idx = NULL
 	) = 0;
 	virtual spv_float well_path_ident(
 		t_ulong nx, t_ulong ny, sp_obj trimesh_backend,
 		spv_float well_info, bool include_well_nodes = true, const char* strat_traits = "sgrid",
-		spv_ulong hit_idx = NULL
+		const ulong min_split_threshold = 0, spv_ulong hit_idx = NULL
 	) = 0;
 
 	virtual spv_float well_path_ident_2d(
 		t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
 		spv_float well_info, bool include_well_nodes = true, const char* strat_traits = "online_tops",
-		spv_ulong hit_idx = NULL
+		const ulong min_split_threshold = 0, spv_ulong hit_idx = NULL
 	) = 0;
 	virtual spv_float well_path_ident_2d(
 		t_ulong nx, t_ulong ny, sp_obj trimesh_backend,
 		spv_float well_info, bool include_well_nodes = true, const char* strat_traits = "online_tops",
-		spv_ulong hit_idx = NULL
+		const ulong min_split_threshold = 0, spv_ulong hit_idx = NULL
 	) = 0;
 
 	virtual spv_ulong where_is_points(

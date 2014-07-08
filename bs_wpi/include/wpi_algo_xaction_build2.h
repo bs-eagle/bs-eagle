@@ -148,10 +148,10 @@ public:
 	struct leafs_builder {
 		typedef std::vector< Segment > Segments;
 
-		leafs_builder(base_t& A, const Segments& s, std::vector< ulong >& hit,
+		leafs_builder(base_t& A, std::vector< ulong >& hit,
 			parts_container& leafs, const ulong min_split_threshold = 0
 		)
-			: A_(A), s_(s), hit_(hit), leafs_(leafs), m_size_(A.m_.size_flat())
+			: A_(A), hit_(hit), leafs_(leafs), m_size_(A.m_.size_flat())
 		{
 			if(min_split_threshold == 0)
 				min_spl_thresh_ = 100 * (1 << D);
@@ -159,17 +159,27 @@ public:
 				min_spl_thresh_ = min_split_threshold;
 		}
 
-		//leafs_builder(const leafs_builder& rhs)
-		//	: A_(rhs.A_), s_(rhs.s_), hit_(rhs.hit_), leafs_(rhs.leafs_)
-		//{}
+		template< class box_t >
+		void operator()(const box_t& mb, const box_t& wb) {
+			// helpers to extract fish from Box, whether Box is given by pointer,
+			// or by reference
+			struct catch_handle {
+				static box_handle* go(const Box* b) {
+					return b->handle();
+				}
+				static box_handle* go(const Box& b) {
+					return b.handle();
+				}
+			};
 
-		void operator()(const Box* mb, const Box* wb) {
 			// Box handles are raw pointers
-			const mesh_part* pm = static_cast< mesh_box_handle* >(mb->handle())->data();
-			ulong wseg_id = static_cast< well_box_handle* >(wb->handle())->data();
-			// Box handlex are st_smart_ptrs
-			//const mesh_part* pm = static_cast< mesh_box_handle* >(mb->handle().get())->data();
-			//ulong wseg_id = static_cast< well_box_handle* >(wb->handle().get())->data();
+			//const mesh_part* pm = static_cast< mesh_box_handle* >(mb->handle())->data();
+			//const ulong wseg_id = static_cast< well_box_handle* >(wb->handle())->data();
+			// obtain Box handlex using adapter
+			const mesh_part* pm = static_cast< mesh_box_handle* >(
+				catch_handle::go(mb))->data();
+			const ulong wseg_id = static_cast< well_box_handle* >(
+				catch_handle::go(wb))->data();
 
 			// if size of mesh_part <= min split threshold, then every cell in that mesh part
 			// will be checked for intersections with given well path segment
@@ -203,17 +213,17 @@ public:
 				}
 
 				// check for intersections with segment
-				// update: assume that in 95% of cases cells are rectangular,
-				// and intersection most probably exists
+				const Segment well_s = A_.wp_[wseg_id].segment();
 				//if(!s_[wseg_id].is_degenerate() && strat_t::bbox_segment_x(cell.bbox(), s_[wseg_id]))
-				if(!s_[wseg_id].is_degenerate() && CGAL::do_intersect(xbbox_t::get(cell), s_[wseg_id]))
 				//if(!s_[wseg_id].is_degenerate())
-					A_.check_intersection(cell_id, wseg_id, cell, s_[wseg_id]);
+				//if(!s_[wseg_id].is_degenerate() && CGAL::do_intersect(xbbox_t::get(cell), s_[wseg_id]))
+				//if(CGAL::do_intersect(xbbox_t::get(cell), s_[wseg_id]))
+				if(!well_s.is_degenerate() && CGAL::do_intersect(xbbox_t::get(cell), well_s))
+					A_.check_intersection(cell_id, wseg_id, cell, well_s);
 			}
 		}
 
 		base_t& A_;
-		const Segments& s_;
 		std::vector< ulong >& hit_;
 		parts_container& leafs_;
 		const ulong m_size_;
@@ -233,21 +243,19 @@ public:
 
 	// branch & bound algorithm for finding cells that really intersect with well
 	// works using boxes intersection
-	hit_idx_t& build() {
+	hit_idx_t& build(const ulong min_split_threshold = 0) {
 		typedef std::vector< Segment > Segments;
 
-		Segments wseg(wp_.size());
 		std::vector< Box > well_boxes(wp_.size());
 		std::vector< Box* > well_boxes_p(wp_.size());
+
 		// pool for allocating well box handles
 		// they all will be detroyed automatically on exit
 		boost::object_pool< well_box_handle > wbh_pool;
-		// cache well segments
+		// update: DO NOT cache well segments
 		// and make boxes for them
 		for(ulong i = 0; i < wp_.size(); ++i) {
-			wseg[i] = wp_[i].segment();
 			well_boxes[i] = Box(wp_[i].bbox(), new(wbh_pool.malloc()) well_box_handle(i));
-			//well_boxes[i] = Box(wp_[i].bbox(), new well_box_handle(i));
 			well_boxes_p[i] = &well_boxes[i];
 		}
 
@@ -260,7 +268,7 @@ public:
 		std::fill(hit_idx_.begin(), hit_idx_.end(), m_.size_flat());
 
 		// actual intersector object
-		leafs_builder B(*this, wseg, hit_idx_, parts);
+		leafs_builder B(*this, hit_idx_, parts, min_split_threshold);
 		// pool for allocating mesh box handles
 		// they all will be detroyed automatically on exit
 		boost::object_pool< mesh_box_handle > mbh_pool;
@@ -299,7 +307,7 @@ public:
 			parts.clear();
 			// do intersect boxes
 			CGAL::box_intersection_d(
-				mp_boxes_p.begin(),   mp_boxes_p.end(),
+				mp_boxes_p.begin(), mp_boxes_p.end(),
 				well_boxes_p.begin(), well_boxes_p.end(),
 				B
 			);

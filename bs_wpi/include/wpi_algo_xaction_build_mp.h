@@ -71,13 +71,12 @@ public:
 
 	// branch & bound algorithm for finding cells that really intersect with well
 	// works using boxes intersection
-	hit_idxs_t& build(bool append_wp_nodes = true) {
+	hit_idxs_t& build(bool append_wp_nodes = true, const ulong min_split_threshold = 0) {
 		typedef std::vector< Segment > Segments;
 		typedef std::vector< Segments > Segments_mp;
 		typedef typename std::list< xbuild_base >::const_iterator cxbricks_iterator;
 		typedef typename std::list< xbuild_base >::iterator xbricks_iterator;
 
-		Segments_mp wseg(wps_.size());
 		std::vector< std::vector< Box > > well_boxes(wps_.size());
 		std::vector< std::vector< Box* > > well_boxes_p(wps_.size());
 
@@ -98,14 +97,11 @@ public:
 		// cache well segments
 		// and make boxes for them
 		for(ulong i = 0; i < wps_.size(); ++i) {
-			wseg[i].resize(wps_[i].size());
 			well_boxes[i].resize(wps_[i].size());
 			well_boxes_p[i].resize(wps_[i].size());
 			for(ulong j = 0; j < wps_[i].size(); ++j) {
-				wseg[i][j] = wps_[i][j].segment();
 				// NOTE: use value of j as local well_box identificator
 				well_boxes[i][j] = Box(wps_[i][j].bbox(), new(wbh_pool.malloc()) well_box_handle(j));
-				//well_boxes[i] = Box(wp_[i].bbox(), new well_box_handle(i));
 				well_boxes_p[i][j] = &well_boxes[i][j];
 			}
 
@@ -174,7 +170,7 @@ public:
 				CGAL::box_intersection_d(
 					mp_boxes_p.begin(),   mp_boxes_p.end(),
 					well_boxes_p[i].begin(), well_boxes_p[i].end(),
-					leafs_builder(*pb, wseg[i], pb->hit_idx(), new_parts)
+					leafs_builder(*pb, pb->hit_idx(), new_parts, min_split_threshold)
 				);
 
 				// parts marked for further split can be excluded from mp_boxes

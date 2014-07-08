@@ -151,14 +151,10 @@ struct mesh_tools : public helpers< strat_t > {
 		//}
 
 		Iso_bbox iso_bbox() const {
-			//vertex_pos lo_pos, hi_pos;
-			//bounds(lo_pos, hi_pos);
 			return vertex_pos2rect(lo_bbox_, hi_bbox_);
 		}
 
 		Bbox bbox() const {
-			//vertex_pos lo_pos, hi_pos;
-			//bounds(lo_pos, hi_pos);
 			return vertex_pos2bbox(lo_bbox_, hi_bbox_);
 		}
 
@@ -215,34 +211,19 @@ struct mesh_tools : public helpers< strat_t > {
 				);
 			else
 				return (r < 0);
-
-			// if same objects
-			//if(&lo[0] == &rhs.lo[0] || &hi[0] == &rhs.hi[0])
-			//	return false;
-			//for(uint i = 0; i < D; ++i) {
-			//	if(lo[i] < rhs.lo[i])
-			//		return true;
-			//	else if(lo[i] > rhs.lo[i])
-			//		return false;
-			//	else if(hi[i] < rhs.hi[i])
-			//		return true;
-			//	else if(hi[i] > rhs.hi[i])
-			//		return false;
-			//}
-			//return false;
 		}
 
 		// assignment operator for containers
 		// assign only mesh_parts that belong to the same mesh!
-		mesh_part& operator=(const mesh_part& rhs) {
-			ca_assign(lo, rhs.lo);
-			ca_assign(hi, rhs.hi);
-			ca_assign(mp_size_, rhs.mp_size_);
-			ca_assign(lo_bbox_, rhs.lo_bbox_);
-			ca_assign(hi_bbox_, rhs.hi_bbox_);
-			sz_flat_ = rhs.sz_flat_;
-			return *this;
-		}
+		//mesh_part& operator=(const mesh_part& rhs) {
+		//	ca_assign(lo, rhs.lo);
+		//	ca_assign(hi, rhs.hi);
+		//	ca_assign(mp_size_, rhs.mp_size_);
+		//	ca_assign(lo_bbox_, rhs.lo_bbox_);
+		//	ca_assign(hi_bbox_, rhs.hi_bbox_);
+		//	sz_flat_ = rhs.sz_flat_;
+		//	return *this;
+		//}
 
 		// calc size of cell in x-y-z directions
 		void cell_size(ulong offset, vertex_pos& res) const {
@@ -458,34 +439,6 @@ struct mesh_tools : public helpers< strat_t > {
 						lo_bbox[i] = lo_cell[i];
 					if(hi_cell[i] > hi_bbox[i])
 						hi_bbox[i] = hi_cell[i];
-				}
-			}
-		}
-
-		void bounds(vertex_pos& lo_pos, vertex_pos& hi_pos) const {
-			vertex_pos lo_lo_pos, lo_hi_pos;
-			vertex_pos hi_lo_pos, hi_hi_pos;
-			ss(lo).lo (lo_lo_pos);
-			ss(lo).hi (lo_hi_pos);
-
-			// last = hi - 1
-			vertex_pos_i last;
-			ca_assign(last, hi);
-			std::transform(&last[0], &last[D], &last[0], std::bind2nd(std::minus< ulong >(), 1));
-			ss(last).lo (hi_lo_pos);
-			ss(last).hi (hi_hi_pos);
-
-			// ensure that lo[i] < hi[i]
-			for(uint i = 0; i < D; ++i) {
-				if (lo_lo_pos[i] < hi_lo_pos[i]) {
-					// global coordinates increasing along cells - normal order
-					lo_pos[i] = lo_lo_pos[i]; // std::min (lo_lo_pos[i], lo_hi_pos[i]);
-					hi_pos[i] = hi_hi_pos[i]; // std::max (hi_lo_pos[i], hi_hi_pos[i]);
-				}
-				else {
-					// lo_lo_pos[i] > hi_lo_pos[i] // global coordinates decreasing along cells - reverse order 
-					lo_pos[i] = hi_lo_pos[i]; // std::min (hi_lo_pos[i], hi_hi_pos[i]);
-					hi_pos[i] = lo_hi_pos[i]; // std::max (lo_lo_pos[i], lo_hi_pos[i]);
 				}
 			}
 		}

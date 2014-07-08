@@ -145,7 +145,7 @@ struct strategy_3d_common {
 			return t[facet];
 		}
 		static void facet_vid(ulong dim, ulong facet, facet_vid_t& res) {
-			return facet_vid(facet_id(dim, facet, res));
+			ca_assign(res, facet_vid(facet_id(dim, facet)));
 		}
 	};
 
