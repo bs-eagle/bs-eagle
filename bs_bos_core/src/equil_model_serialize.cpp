@@ -28,6 +28,8 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, equil_model_depth)
 	// serialize data
 	ar & t.n_equil_regions;
 	ar & t.equil_data;
+	ar & t.pbvd_data;
+	ar & t.rsvd_data;
 	ar & t.pressure;
 	ar & t.saturation;
 BLUE_SKY_CLASS_SRZ_FCN_END
