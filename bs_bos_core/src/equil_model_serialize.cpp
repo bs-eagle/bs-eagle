@@ -19,6 +19,9 @@ namespace boser = boost::serialization;
 /*-----------------------------------------------------------------
  * serialize equil_model_depth
  *----------------------------------------------------------------*/
+
+BOOST_CLASS_VERSION(equil_model_depth, 1)
+
 BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, equil_model_depth)
 	// register conversion to base iface
 	boser::bs_void_cast_register(
@@ -28,8 +31,10 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(serialize, equil_model_depth)
 	// serialize data
 	ar & t.n_equil_regions;
 	ar & t.equil_data;
-	ar & t.pbvd_data;
-	ar & t.rsvd_data;
+	if(version > 0) {
+        ar & t.pbvd_data;
+        ar & t.rsvd_data;
+    }
 	ar & t.pressure;
 	ar & t.saturation;
 BLUE_SKY_CLASS_SRZ_FCN_END
