@@ -71,7 +71,9 @@ public:
 
 	// branch & bound algorithm for finding cells that really intersect with well
 	// works using boxes intersection
-	hit_idxs_t& build(bool append_wp_nodes = true, const ulong min_split_threshold = 0) {
+	// if append_wp_nodes == 1 - add all nodes of well trajectory to resulting intersections list
+	// if append_wp_nodes == 2 - add only start & and well trajectory points
+	hit_idxs_t& build(int append_wp_nodes = 1, const ulong min_split_threshold = 0) {
 		typedef std::vector< Segment > Segments;
 		typedef std::vector< Segments > Segments_mp;
 		typedef typename std::list< xbuild_base >::const_iterator cxbricks_iterator;
@@ -193,8 +195,8 @@ public:
 		hit_idx_.resize(xbricks_.size());
 		xbricks_iterator pb = xbricks_.begin();
 		for(ulong i = 0; i < xbricks_.size(); ++i, ++pb) {
-			if(append_wp_nodes)
-				pb->append_wp_nodes(pb->hit_idx());
+			if(append_wp_nodes > 0)
+				pb->append_wp_nodes(pb->hit_idx(), append_wp_nodes == 2);
 			hit_idx_[i] = pb->hit_idx();
 		}
 		return hit_idx_;

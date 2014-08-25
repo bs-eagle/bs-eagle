@@ -195,7 +195,7 @@ public:
 	}
 
 	// run it after all dups killed
-	void append_wp_nodes(const hit_idx_t& hit_idx) {
+	void append_wp_nodes(const hit_idx_t& hit_idx, bool startend_only = false) {
 		if(!wp_.size()) return;
 
 		// walk through the intersection path and add node points
@@ -206,7 +206,10 @@ public:
 		//wp_iterator pw = wp_.begin();
 		//ulong node_idx = 0;
 		ulong mesh_sz = m_.size_flat();
-		for(ulong i = 0; i < wp_.size(); ++i) {
+		ulong wp_size = wp_.size();
+		if(startend_only)
+			wp_size = 1;
+		for(ulong i = 0; i < wp_size; ++i) {
 			//const well_data& wseg = pw->second;
 			// upper_bound
 			while(px != x_.end() && px->md < wp_[i].md())
