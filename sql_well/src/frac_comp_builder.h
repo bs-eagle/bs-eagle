@@ -137,8 +137,7 @@ public:
 
 		// 3 find intersections of all branches with mesh (well_paths_ident)
 		xbuilder_mp A(m_, W);
-		// add only start & end well trajectory points
-		A.build(2);
+		A.build(1);
 
 		// 4. store results in cache
 		// cache limit is ignored
@@ -223,8 +222,7 @@ public:
 				sp_A = new xbuilder(m_, W);
 				const hit_idx_t& hi = sp_A->build();
 				//sp_A->remove_dups2();
-				// append only start & end well traj points
-				sp_A->append_wp_nodes(hi, true);
+				sp_A->append_wp_nodes(hi);
 				xp = &sp_A->path();
 
 				// if cache enabled - then store new xpath in cache
