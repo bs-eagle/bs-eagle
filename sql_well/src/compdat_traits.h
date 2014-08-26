@@ -68,7 +68,8 @@ struct compl_traits {
 		// directions
 		const char dirs[] = {'X', 'Y', 'Z'};
 		// cumulative kh_mults per direction for singe cell
-		t_double cum_kh_mult[] = {0, 0, 0};
+		std::map< ulong, t_double[strat_t::D] > cum_kh_mult;
+		//t_double cum_kh_mult[] = {0, 0, 0};
 
 		// 3.4.2 consider all intersections between begin_j and end_j
 		for(; px != xend; ++px) {
@@ -172,15 +173,16 @@ struct compl_traits {
 				// if compdat for this cell is already added
 				// then just update kh_mult
 				// otherwise add new COMPDAT record
-				cd_storage::iterator pcd = fcb.s_.find(compdat(px->cell));
+				cd_storage::iterator pcd = fcb.s_.find(compdat(well_name, px->cell));
 				if(pcd != fcb.s_.end()) {
 					compdat& cur_cd = const_cast< compdat& >(*pcd);
-					cum_kh_mult[dir_idx] = std::min(cum_kh_mult[dir_idx] + cf.kh_mult, 1.);
+					t_double* p_ckm = &cum_kh_mult[px->cell][0];
+					p_ckm[dir_idx] = std::min(p_ckm[dir_idx] + cf.kh_mult, 1.);
 					// select direction with greatest kh_mult
 					cur_cd.kh_mult = 0;
 					for(uint i = 0; i < strat_t::D; ++i) {
-						if(cum_kh_mult[i] > cur_cd.kh_mult) {
-							cur_cd.kh_mult = cum_kh_mult[i];
+						if(p_ckm[i] > cur_cd.kh_mult) {
+							cur_cd.kh_mult = p_ckm[i];
 							cur_cd.dir = dirs[i];
 						}
 					}
@@ -188,8 +190,9 @@ struct compl_traits {
 				else {
 					fcb.s_.insert(cf);
 					// reset kh_mult
-					std::fill_n(&cum_kh_mult[0], strat_t::D, 0.);
-					cum_kh_mult[dir_idx] = cf.kh_mult;
+					t_double* p_ckm = &cum_kh_mult[px->cell][0];
+					std::fill_n(p_ckm, strat_t::D, 0.);
+					p_ckm[dir_idx] = cf.kh_mult;
 				}
 			}
 		} // 3.4.4 end of intersections loop

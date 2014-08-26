@@ -188,7 +188,7 @@ struct fract_traits  {
 		// then just update kh_mult
 		// otherwise add new COMPDAT record
 		// TODO: handle case of different directions inside one cell
-		frac_storage::iterator pcd = fcb.s_.find(fracture(px->cell));
+		frac_storage::iterator pcd = fcb.s_.find(fracture(well_name, px->cell));
 		if(pcd != fcb.s_.end()) {
 			//fracture& cur_cd = const_cast< fracture& >(*pcd);
 			// TODO: cur_cd.kh_mult = std::min(cur_cd.kh_mult + cf.kh_mult, 1.);

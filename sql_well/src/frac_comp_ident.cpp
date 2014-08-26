@@ -88,8 +88,8 @@ compdat::compdat(const string& well_name_, const string& branch_name_, ulong cel
 	init(cell_id, mesh_size);
 }
 
-compdat::compdat(ulong cell_id)
-	: dir(' '), kh_mult(0), md(0), len(0), skin (0), diam (0.146), kh (0), status (0), cell_id_(cell_id)
+compdat::compdat(const string& well_name_, ulong cell_id)
+	: well_name(well_name_), dir(' '), kh_mult(0), md(0), len(0), skin (0), diam (0.146), kh (0), status (0), cell_id_(cell_id)
 {
 	x1[0] = x1[1] = x1[2] = 0;
 	x2[0] = x2[1] = x2[2] = 0;
@@ -127,8 +127,8 @@ fracture::fracture(const string& well_name_, const string& branch_name_, ulong c
 	init(cell_id, mesh_size);
 }
 
-fracture::fracture(ulong cell_id)
-	: frac_status(0), frac_half_length_1 (0), frac_half_length_2 (0),
+fracture::fracture(const string& well_name_, ulong cell_id)
+	: well_name(well_name_), frac_status(0), frac_half_length_1 (0), frac_half_length_2 (0),
 	  frac_angle (0), frac_half_thin (0), frac_perm (0), frac_main_k (-1), cell_id_(cell_id)
 {
 }

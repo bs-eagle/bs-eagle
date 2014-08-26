@@ -59,7 +59,7 @@ struct BS_API_PLUGIN compdat {
 	compdat(const std::string& well_name_, const std::string& branch_name_,
 		ulong cell_id, const pos_i& mesh_size);
 	// for searching only
-	compdat(ulong cell_id);
+	compdat(const std::string& well_name_, ulong cell_id);
 
 	// decode cell id
 	void init(ulong cell_id, const pos_i& mesh_size);
@@ -73,13 +73,13 @@ struct BS_API_PLUGIN compdat {
 	}
 
 	static storage_t::const_iterator find_first_cd(const storage_t& cds, const std::string& well_name) {
-		compdat t(0);
-		t.well_name = well_name;
-		const storage_t::const_iterator p_cd = cds.lower_bound(t);
-		if(p_cd != cds.end() && p_cd->well_name == well_name)
-			return p_cd;
-		else
-			return cds.end();
+		return cds.lower_bound(compdat(well_name, 0));
+		//compdat t(well_name, 0);
+		//const storage_t::const_iterator p_cd = cds.lower_bound(t);
+		//if(p_cd != cds.end() && p_cd->well_name == well_name)
+		//	return p_cd;
+		//else
+		//	return cds.end();
 	}
 
 private:
@@ -118,7 +118,7 @@ struct BS_API_PLUGIN fracture {
 	fracture(const std::string& well_name_, const std::string& branch_name_,
 		ulong cell_id, const pos_i& mesh_size);
 	// for searching only
-	fracture(ulong cell_id);
+	fracture(const std::string& well_name_, ulong cell_id);
 
 	// decode cell id
 	void init(ulong cell_id, const pos_i& mesh_size);
