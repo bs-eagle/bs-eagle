@@ -66,9 +66,7 @@ struct BS_API_PLUGIN compdat {
 
 	bool operator<(const compdat& rhs) const {
 		if(well_name == rhs.well_name) {
-			if(md == rhs.md)
-				return cell_id_ < rhs.cell_id_;
-			return md < rhs.md;
+			return cell_id_ < rhs.cell_id_;
 		}
 		else
 			return well_name < rhs.well_name;
@@ -126,7 +124,11 @@ struct BS_API_PLUGIN fracture {
 	void init(ulong cell_id, const pos_i& mesh_size);
 
 	bool operator<(const fracture& rhs) const {
-		return cell_id_ < rhs.cell_id_;
+		if(well_name == rhs.well_name) {
+			return cell_id_ < rhs.cell_id_;
+		}
+		else
+			return well_name < rhs.well_name;
 	}
 
 private:
