@@ -445,34 +445,8 @@ COMMIT;\
           if (stmp_sql)
             finalize_sql ();
 
-#if 0
-          int rc = 0;
-          char *zErrMsg = 0;
-          char buf[2048];
-          sprintf (buf, "ATTACH DATABASE '%s' as backup; BEGIN", file_name.c_str ());
-          rc = sqlite3_exec (db, buf, NULL, NULL, &zErrMsg);
-          if (rc != SQLITE_OK)
-            {
-              fprintf (stderr, "SQL error: %s\n", zErrMsg);
-              sqlite3_free (zErrMsg);
-            }
-          rc = sqlite3_exec (db, "SELECT name FROM backup.sqlite_master WHERE type='table'",
-                            &clear_table, db, &zErrMsg);
-          if (rc != SQLITE_OK)
-            {
-              fprintf (stderr, "SQL error: %s\n", zErrMsg);
-              sqlite3_free (zErrMsg);
-            }
-
-          rc = sqlite3_exec (db, "SELECT name FROM main.sqlite_master WHERE type='table'",
-                             &main_to_backup, db, &zErrMsg);
-          if (rc != SQLITE_OK)
-            {
-              fprintf (stderr, "SQL error: %s\n", zErrMsg);
-              sqlite3_free (zErrMsg);
-            }
-          sqlite3_exec(db, "COMMIT; DETACH DATABASE backup", NULL, NULL, NULL);
-#endif //0
+          // physically remove deleted datafrom DB
+          exec_sql("VACUUM");
           sqlite3_close (db);
         }
 
