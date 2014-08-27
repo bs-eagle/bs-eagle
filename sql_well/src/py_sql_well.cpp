@@ -45,6 +45,7 @@ namespace python {
     export_class(class_t& class__) {
       py_sql_well_exporter< T >::export_class(class__)
         .add_property("file_name", &sqw_get_file_name, &sqw_set_file_name)
+        .def("delete_well", &T::delete_well)
         //.def ("add_branch_gis", &sqw_add_branch_gis_old,
         //    args ("well_name", "branch_name", "gis"), "Add gis to the well branch")
         //.def ("get_branch_gis", &sqw_get_branch_gis_old,

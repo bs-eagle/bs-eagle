@@ -101,9 +101,26 @@ std::string to_lower(const std::string& s) {
         {
           fprintf (stderr, "SQL error (add_well): %s\n", zErrMsg);
           sqlite3_free (zErrMsg);
+          return -1;
         }
       return 0;
     }
+
+  int sql_well::delete_well(const std::string& well_name) {
+    // remove well logs
+    // assume that all DBs are in new format and contain well_logs table
+    exec_sql("DELETE FROM well_logs WHERE well_name = '" + well_name + "'");
+    // delete from other HDM-related tables
+    exec_sql("DELETE FROM completions WHERE well_name = '" + well_name + "'");
+    exec_sql("DELETE FROM fractures WHERE well_name = '" + well_name + "'");
+    exec_sql("DELETE FROM well_hist WHERE well_name = '" + well_name + "'");
+    exec_sql("DELETE FROM well_res WHERE well_name = '" + well_name + "'");
+    exec_sql("DELETE FROM wells_in_group WHERE well_name = '" + well_name + "'");
+    // remove vranches
+    exec_sql("DELETE FROM branches WHERE well_name = '" + well_name + "'");
+    // remove well
+    return exec_sql("DELETE FROM wells WHERE name = '" + well_name + "'");
+  }
 
   sql_well::list_t
   sql_well::get_well_names () const

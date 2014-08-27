@@ -33,7 +33,7 @@ namespace blue_sky
       typedef BS_SP (table_iface)                       sp_table_t;
       typedef BS_SP (gis_iface)                         sp_gis_t;
       typedef BS_SP (traj_iface)                        sp_traj_t;
-      typedef BS_SP (h5_pool_iface)           			sp_pool_t;
+      typedef BS_SP (h5_pool_iface)                     sp_pool_t;
       typedef BS_SP (bos_reader_iface)                  sp_reader_t;
       typedef BS_SP (dt_tools_iface)                    sp_dt_t;
 
@@ -88,6 +88,8 @@ namespace blue_sky
        * @return 0 if OK
        */
       virtual int add_well (const std::string &well_name);
+      int delete_well(const std::string& well_name);
+
       virtual list_t get_well_names() const;
       //virtual int set_well_param (const std::string &wname, double date, const std::string param, double value);
       //virtual double get_well_param (const std::string &wname, double date, const std::string param);
@@ -118,7 +120,7 @@ namespace blue_sky
       virtual t_double get_sql_real (t_int col);
       virtual bool get_sql_bool (t_int col);
       virtual std::string get_sql_str (t_int col);
-	  virtual bool get_sql_exist (t_int col);
+      virtual bool get_sql_exist (t_int col);
       virtual int exec_sql (const std::string &sql);
       virtual int exec_sql_and_return_rowid (const std::string &sql);
       virtual int merge_with_db (const std::string &dbname);
