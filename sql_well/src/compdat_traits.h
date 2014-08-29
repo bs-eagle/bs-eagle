@@ -192,7 +192,9 @@ struct compl_traits {
 					fcb.s_.insert(cf);
 					// reset kh_mult
 					t_double* p_ckm = &cum_kh_mult[px->cell][0];
-					std::fill_n(p_ckm, strat_t::D, 0.);
+					std::fill(p_ckm, p_ckm + strat_t::D, 0.);
+					// crappy VS can't compile the following line. Crazy fuck!
+					//std::fill_n(p_ckm, strat_t::D, 0.);
 					p_ckm[dir_idx] = cf.kh_mult;
 				}
 			}
