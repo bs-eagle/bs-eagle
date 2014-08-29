@@ -10,6 +10,7 @@
 #define COMPDAT_TRAITS_RXNBKXX0
 
 #include "frac_comp_builder.h"
+#include <boost/array.hpp>
 
 namespace blue_sky { namespace fci {
 
@@ -68,7 +69,7 @@ struct compl_traits {
 		// directions
 		const char dirs[] = {'X', 'Y', 'Z'};
 		// cumulative kh_mults per direction for singe cell
-		std::map< ulong, t_double[strat_t::D] > cum_kh_mult;
+		std::map< ulong, boost::array< t_double, strat_t::D > > cum_kh_mult;
 		//t_double cum_kh_mult[] = {0, 0, 0};
 
 		// 3.4.2 consider all intersections between begin_j and end_j
