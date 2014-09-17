@@ -106,6 +106,11 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, blue_sky::sql_well)
 	ar << db_basename;
 	ar << db_fname;
 
+	// clear source DB from deleted records before backup
+	sql_well& tt = const_cast< sql_well& >(t);
+	tt.finalize_sql();
+	tt.exec_sql("VACUUM");
+
 	// open db for backup
 	sqlite3* save_db = NULL;
 	sqlite3_backup* save_bu = NULL;
