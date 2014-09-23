@@ -11,17 +11,13 @@
 #include "bs_object_base.h"
 #include "conf.h"
 
-#include BS_FORCE_PLUGIN_IMPORT ()
-#include BS_STOP_PLUGIN_IMPORT ()
-
-
 namespace blue_sky
 {
 
   /**
   * \brief properties
   */
-  class prop_iface : public objbase
+  class BS_API_PLUGIN prop_iface : public objbase
     {
     public:
       typedef std::vector<std::wstring> list_t;

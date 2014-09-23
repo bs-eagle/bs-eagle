@@ -235,7 +235,7 @@ namespace blue_sky
   }
 
   void table::remove_col(const std::wstring& col_name) {
-    for(t_long i = 0; i < col_names.size(); ++i) {
+    for(t_ulong i = 0; i < col_names.size(); ++i) {
       if(col_names[i] == col_name) {
         remove_col(i);
         break;

@@ -12,15 +12,11 @@
 #include <sstream>
 
 #include "bs_object_base.h"
-
-#include BS_FORCE_PLUGIN_IMPORT ()
 #include "conf.h"
-#include BS_STOP_PLUGIN_IMPORT ()
-
 
 namespace blue_sky
 {
-class table_iface : public objbase
+class BS_API_PLUGIN table_iface : public objbase
   {
     public:
       typedef std::vector <t_double>                  vector_t;
