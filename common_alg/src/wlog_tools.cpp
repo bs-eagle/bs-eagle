@@ -106,7 +106,7 @@ void projection_impl(
 
 } // eof hidden namespace
 
-BS_API spv_float wlog_mean_projection(
+BS_API_PLUGIN spv_float wlog_mean_projection(
 	spv_float wlog_data, spv_float wlog_dept, spv_float dest_grid
 ) {
 	// sanity
