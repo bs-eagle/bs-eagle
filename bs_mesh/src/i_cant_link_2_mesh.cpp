@@ -6,8 +6,6 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
-#include "bs_mesh_stdafx.h"
-
 #include "i_cant_link_2_mesh.h"
 #include "bs_mesh_grdecl.h"
 //#include "well_path_ident.h"

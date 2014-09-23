@@ -4,7 +4,6 @@
   \author Mark Khait
   \date 2009-07-17
  */
-#include "bs_mesh_stdafx.h"
 #include "mesh_base.h"
 
 

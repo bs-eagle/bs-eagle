@@ -9,16 +9,15 @@
 
 #ifndef PURE_MESH
   #include "conf.h"
+  #include BS_FORCE_PLUGIN_IMPORT()
   #include "hdm_iface.h"
+  #include "bcsr_matrix_iface.h"
+  #include BS_STOP_PLUGIN_IMPORT()
 
   using namespace blue_sky;
 #else
   #include "pure_mesh.h"
 #endif
-
-
-
-
 
   
   class BS_API_PLUGIN mesh_base

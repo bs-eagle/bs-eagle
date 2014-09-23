@@ -5,8 +5,10 @@
   \date 2009-08-07
 */
 
-#include "bs_mesh_stdafx.h" 
 #include "rs_smesh_keywords.h"
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "bos_report.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
 namespace blue_sky
   {
@@ -59,7 +61,6 @@ namespace blue_sky
       //keyword_manager->register_keyword ("DIMENS", keyword_handler (&this_t::DIMENS_reactor));
       std::vector<std::string> names(6);
       npy_intp array_dimens[6] = {1,0,1,0,1,0};
-      t_float def_value_zero = 0.0;
       t_float def_value_one = 1.0;
       
       names[0] = "nx";

@@ -5,7 +5,6 @@
 	\date 2009-09-23
  */
 
-#include "bs_mesh_stdafx.h"
 #include "mesh_element3d.h"
 
 

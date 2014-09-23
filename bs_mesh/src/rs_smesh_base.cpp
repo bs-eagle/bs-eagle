@@ -4,8 +4,6 @@
 	\author Iskhakov Ruslan
 	\date 2008-05-20
  */
-#include "bs_mesh_stdafx.h"
-
 #include "rs_smesh_base.h"
 
 

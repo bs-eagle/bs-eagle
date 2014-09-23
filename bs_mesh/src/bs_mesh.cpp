@@ -1,8 +1,6 @@
 // bs_mesh.cpp : Defines the entry point for the DLL application.
 //
 
-#include "bs_mesh_stdafx.h"
-
 #include "bs_mesh_ijk.h"
 #include "bs_mesh_grdecl.h"
 #include "bs_flux_connections.h"

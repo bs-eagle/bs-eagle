@@ -8,6 +8,7 @@
  */
 
 #ifndef PURE_MESH
+  #include "bs_common.h"
   using namespace blue_sky;
 #else
   #include "pure_mesh.h"

@@ -1,5 +1,3 @@
-#include "bs_mesh_stdafx.h"
-
 #include "py_rs_mesh.h"
 #include "bs_mesh_grdecl.h"
 

@@ -5,6 +5,7 @@
 	\brief addition structure for mesh_grdecl - point2d
 	\author Iskhakov Ruslan
 	\date 2008-05-01 */
+#include "conf.h"
 #include <array>
 #include <math.h>
 

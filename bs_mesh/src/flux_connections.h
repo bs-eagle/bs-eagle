@@ -5,7 +5,9 @@
 	\author Iskhakov Ruslan
 	\date 2008-05-20
  * */
- 
+
+#include "bs_common.h"
+#include "bcsr_matrix_iface.h"
 using namespace blue_sky;
  
 

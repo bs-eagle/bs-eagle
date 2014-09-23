@@ -1,9 +1,3 @@
-#include "bs_mesh_stdafx.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-
 #include "conf.h"
 #include "wpi_iface.h"
 #include "wpi_strategies.h"
@@ -12,6 +6,10 @@
 #include "wpi_algo_vtk.h"
 
 #include "export_python_wrapper.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
 
 namespace bp = boost::python;
 

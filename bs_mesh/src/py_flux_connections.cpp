@@ -1,8 +1,8 @@
-#include "bs_mesh_stdafx.h"
-
+#include "bs_kernel.h"
 #include "flux_connections_iface.h"
 #include "bs_flux_connections.h"
 #include "export_python_wrapper.h"
+#include "py_bs_object_base.h"
 
 #ifdef BSPY_EXPORTING_PLUGIN
 using namespace boost::python;
