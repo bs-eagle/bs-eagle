@@ -4,7 +4,6 @@
 * @author Mark Khait
 * @date 2009-08-03
 * */
-#include "bs_bos_core_base_stdafx.h"
 #include "keyword_info_base.h"
 #include "strategies.h"
 

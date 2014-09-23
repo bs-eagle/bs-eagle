@@ -4,7 +4,6 @@
  * @author Borschuk Oleg
  * @date 2008-03-29
  */
-#include "bs_bos_core_base_stdafx.h"
 #include "property_base.h"
 
 namespace blue_sky

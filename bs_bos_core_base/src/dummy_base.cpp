@@ -4,8 +4,8 @@
  * \author Sergey Miryanov
  * \date 30.03.2009
  * */
-#include "bs_bos_core_base_stdafx.h"
 #include "dummy_base.h"
+#include "bs_kernel.h"
 
 namespace blue_sky {
 

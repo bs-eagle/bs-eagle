@@ -7,11 +7,8 @@
  *              the BSD License. See LICENSE for more details.
  * */
 
-
-#include "bs_bos_core_base_stdafx.h"
-#include "data_dimens.h"
-
 #ifdef BSPY_EXPORTING_PLUGIN
+#include "data_dimens.h"
 #include <boost/python.hpp>
 
 namespace blue_sky {

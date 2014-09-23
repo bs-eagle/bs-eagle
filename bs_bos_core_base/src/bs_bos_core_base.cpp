@@ -4,7 +4,6 @@
  * \author Sergey Miryanov
  * \date 24.03.2009
  * */
-#include "bs_bos_core_base_stdafx.h"
 
 #include "py_bs_assert.h"
 #include "named_pbase_access.h"

@@ -1,11 +1,10 @@
 #ifndef BOS_REPORT_H
 #define BOS_REPORT_H
 
-#include BS_FORCE_PLUGIN_IMPORT ()
 #include "bs_report.h"
-#include BS_STOP_PLUGIN_IMPORT ()
+#include "bs_kernel.h"
 
-#ifdef BSPY_EXPORTING
+#ifdef BSPY_EXPORTING_PLUGIN
 #include <boost/python/enum.hpp>
 #include <boost/preprocessor/seq/for_each.hpp>
 #endif
