@@ -1,5 +1,3 @@
-#include "bs_bos_core_data_storage_stdafx.h"
-
 #include "rock_grid.h"
 #include "arrays.h"
 #include "data_class.h"

@@ -6,8 +6,6 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
-#include "bs_bos_core_data_storage_stdafx.h"
-
 #include "auto_value.h"
 #include "idata_serialize.h"
 //#include "h5_pool_serialize.h"

@@ -4,7 +4,6 @@
  * \author Sergey Miryanov
  * \date 21.08.2009
  * */
-#include "bs_bos_core_data_storage_stdafx.h"
 #include "arrays_tables.h"
 
 int i_pool_default_values[ARR_TOTAL_INT]=

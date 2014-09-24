@@ -9,7 +9,10 @@
 #ifndef KEYWORD_MANAGER_H_
 #define KEYWORD_MANAGER_H_
 
-//#include "main_def.h"
+#include "bs_common.h"
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "bos_report.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
 #include "keyword_manager_iface.h"
 #include "date_sim.h"

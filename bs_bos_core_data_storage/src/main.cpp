@@ -1,8 +1,6 @@
 // bs_bos_core_data_storage.cpp : Defines the entry point for the DLL application.
 //
 
-#include "bs_bos_core_data_storage_stdafx.h"
-
 #include "hdm.h"
 #include "well.h"
 #include "data_class.h"

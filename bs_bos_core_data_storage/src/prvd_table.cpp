@@ -1,4 +1,8 @@
-#include "bs_bos_core_data_storage_stdafx.h"
+#include "bs_common.h"
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "bos_report.h"
+#include BS_STOP_PLUGIN_IMPORT()
+
 #include "prvd_table.h"
 
 #ifdef EPS

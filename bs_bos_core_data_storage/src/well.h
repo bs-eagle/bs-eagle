@@ -6,13 +6,12 @@
  * \author Mark Khait
  * \date 29.07.2011
  * */
+#include "well_iface.h"
+#include "well_branch_iface.h"
+
 #include <map>
 #include <string>
 
-#include "well_iface.h"
-#include "well_branch_iface.h"
- 
- 
 namespace blue_sky {
 
   class gis;

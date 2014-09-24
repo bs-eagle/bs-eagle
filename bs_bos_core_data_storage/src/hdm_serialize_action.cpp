@@ -6,10 +6,9 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
-#include "bs_bos_core_data_storage_stdafx.h"
-
 #include "hdm_serialize.h"
 #include "bs_misc.h"
+#include "bs_prop_base.h"
 #include <fstream>
 #include <sstream>
 

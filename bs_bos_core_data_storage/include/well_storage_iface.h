@@ -6,14 +6,13 @@
  * \author Mark Khait
  * \date 12.07.2011
  * */
+#include "conf.h"
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/identity.hpp>
 #include <boost/multi_index/member.hpp>
 #include "boost/date_time/posix_time/posix_time.hpp"
-    
-#include "conf.h"
 
 using namespace boost;
 using namespace boost::multi_index;    

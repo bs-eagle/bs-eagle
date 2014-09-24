@@ -1,5 +1,6 @@
 #ifndef _ARRAYS_TABLES_H
 #define _ARRAYS_TABLES_H
+#include "bs_common.h"
 #include "arrays.h"
 
 extern BS_API_PLUGIN int i_pool_default_values[ARR_TOTAL_INT];

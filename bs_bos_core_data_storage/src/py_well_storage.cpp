@@ -1,5 +1,3 @@
-#include "bs_bos_core_data_storage_stdafx.h"
-
 #include "py_well_storage.h"
 #include "well_storage.h"
 

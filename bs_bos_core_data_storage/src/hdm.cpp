@@ -1,5 +1,3 @@
-#include "bs_bos_core_data_storage_stdafx.h"
-
 #include "bs_misc.h"
 #include "hdm.h"
 //#include "main_def.h"
@@ -7,6 +5,7 @@
 //#include "localization.h"
 #include "arrays_tables.h"
 #include "data_class.h"
+#include "err_num_def.h"
 
 #include "write_time_to_log.h"
 #include <stdio.h>

@@ -6,8 +6,6 @@
  * @date 2011-07-29
  */
  
- #include "bs_bos_core_data_storage_stdafx.h"
-
 #include "py_well.h"
 #include "well.h"
 

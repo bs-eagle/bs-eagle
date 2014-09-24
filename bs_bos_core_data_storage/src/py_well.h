@@ -6,20 +6,18 @@
  * @date 2011-07-29
  */
 #ifndef PY_WELL_O4VRW03K
-
 #define PY_WELL_O4VRW03K
 
-
-#include <string>
 #include "well_iface.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "dummy_base.h"
 #include "construct_python_object.h"
 #include "make_me_happy.h"
+#include "export_python_wrapper.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
-#include "export_python_wrapper.h"
+#include <string>
 
 #ifdef BSPY_EXPORTING_PLUGIN
 namespace blue_sky

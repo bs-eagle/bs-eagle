@@ -4,12 +4,7 @@
 * @author Morozov Andrey
 * @date 2008-07-02
 */
-#include "bs_bos_core_data_storage_stdafx.h"
 
-/*
-#include "event_base.h"
-#include "event_manager.h"
-*/
 #include "keyword_manager.h"
 #include "keyword_info_base.h"
 

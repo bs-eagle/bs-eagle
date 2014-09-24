@@ -5,11 +5,11 @@
   \brief initial data holder
 	\author Nikonov Maxim
 */
-#include BS_FORCE_PLUGIN_IMPORT ()
+#include "bs_common.h"
 
+#include BS_FORCE_PLUGIN_IMPORT ()
 #include "pool_iface.h"
 #include "prop_iface.h"
-
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #include "rocktab_table.h"

@@ -5,6 +5,8 @@
 #ifndef CONVERT_UNITS_H_
 #define CONVERT_UNITS_H_
 
+#include "bs_common.h"
+
 namespace blue_sky
   {
 

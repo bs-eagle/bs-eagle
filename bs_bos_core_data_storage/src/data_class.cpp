@@ -3,8 +3,6 @@
 	\brief implimenataion of idata class methods
 	\author Nikonov Maxim
 */
-#include "bs_bos_core_data_storage_stdafx.h"
-
 #include "data_class.h"
 #include "arrays.h"
 #include "arrays_tables.h"
