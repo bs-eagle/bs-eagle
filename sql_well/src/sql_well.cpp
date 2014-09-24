@@ -129,7 +129,7 @@ std::string to_lower(const std::string& s) {
       if (!db)
         return lst;
 
-      int rc = 0;
+      ulong rc = 0;
       //char *zErrMsg = 0;
       const char *ttt;
       sqlite3_stmt *stmp;
@@ -160,7 +160,7 @@ std::string to_lower(const std::string& s) {
         static int go(sql_well& sqw, const sp_gis_t& g) {
           // bind well log data
           const std::string log_data = g->to_str();
-          if (sqlite3_bind_blob(sqw.stmp_sql, 1, &log_data.c_str()[0], log_data.size (), SQLITE_STATIC))
+          if (sqlite3_bind_blob(sqw.stmp_sql, 1, &log_data.c_str()[0], int(log_data.size()), SQLITE_STATIC))
             {
               fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (sqw.db));
               sqw.finalize_sql();
@@ -180,8 +180,6 @@ std::string to_lower(const std::string& s) {
         finalize_sql ();
 
       std::string q;
-      int res;
-
       if(wlog_name.size() == 0) {
         // 0. Check wlog property indicating if it has been converted to new format before
         sp_prop_t log_prop = g->get_prop();
@@ -199,7 +197,7 @@ std::string to_lower(const std::string& s) {
         names = log_data->get_col_names();
         // process only tables with >= 2 columns
         if(names.size() < 2)
-          return res;
+          return -1;
 
         // search DEPTH values
         // take first column by default
@@ -370,7 +368,7 @@ std::string to_lower(const std::string& s) {
        const std::string& old_name, const std::string& new_name
    ) {
       if (!db)
-        return -1;
+        return false;
       if (stmp_sql)
         finalize_sql ();
 
@@ -404,7 +402,7 @@ std::string to_lower(const std::string& s) {
        const std::string &wname, const std::string &branch, std::string wlog_name
    ) {
       if (!db)
-        return -1;
+        return false;
       if (stmp_sql)
         finalize_sql ();
 
@@ -464,7 +462,7 @@ std::string to_lower(const std::string& s) {
 
       // bind well log data
       const std::string traj_data = t->to_str();
-      if (sqlite3_bind_blob (stmp_sql, 1, &traj_data.c_str()[0], traj_data.size (), SQLITE_STATIC))
+      if (sqlite3_bind_blob (stmp_sql, 1, &traj_data.c_str()[0], int(traj_data.size()), SQLITE_STATIC))
         {
           fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (db));
           finalize_sql();

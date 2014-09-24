@@ -31,7 +31,7 @@
 
 namespace blue_sky
 {
-class well_pool_iface : public objbase
+class BS_API_PLUGIN well_pool_iface : public objbase
   {
     public:
       typedef std::list<std::string>                    list_t;

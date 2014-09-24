@@ -513,7 +513,7 @@ COMMIT;\
 
       if (stmp_sql)
         finalize_sql ();
-      int rc = 0;
+      ulong rc = 0;
       char *zErrMsg = 0;
       const char *ttt;
       sqlite3_stmt *stmp;
@@ -559,7 +559,7 @@ COMMIT;\
       if (stmp_sql)
         finalize_sql ();
       const char *ttt;
-      int rc = 0;
+      ulong rc = 0;
       
       rc = sqlite3_prepare_v2 (db, sql.c_str (), sql.length () + 1, &stmp_sql, &ttt);
       if (rc)
