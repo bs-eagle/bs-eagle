@@ -224,8 +224,8 @@ BLUE_SKY_CLASS_SRZ_FCN_BEGIN(save, h5_pool)
 				}
 				catch(bs_exception& e) {
 					BSERR
-						<< "h5 pool serialize: WARNING! can't create group for storing data types"
-						<< bs_end;
+						<< "h5 pool serialize: WARNING! can't create group for storing data types: "
+						<< e.what() << bs_end;
 				}
 				catch(...) {
 					throw;

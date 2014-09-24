@@ -640,7 +640,7 @@ namespace blue_sky
   h5_pool::get_script ()
   {
 	const hsize_t rank = 1;
-	hid_t dset, dspace;
+	hid_t dset;
 
 	// Create the datatype
 	hid_t dtype = H5Tcopy (H5T_C_S1);
@@ -873,7 +873,7 @@ namespace blue_sky
               get_hdf5_type <hdf5_type_helper <t_int>::type> (),
               data->data (),
               data->size (),
-              data->ndim (),
+              int(data->ndim ()),
               data->dims (),
               &def_value, true);
     return 0;
@@ -886,7 +886,7 @@ namespace blue_sky
               get_hdf5_type <hdf5_type_helper <t_int>::type> (),
               data->data (),
               data->size (),
-              data->ndim (),
+              int(data->ndim ()),
               data->dims (),
               &def_value, false);
     return 0;
@@ -899,7 +899,7 @@ namespace blue_sky
               get_hdf5_type <hdf5_type_helper <t_float>::type> (),
               data->data (),
               data->size (),
-              data->ndim (),
+              int(data->ndim ()),
               data->dims (),
               &def_value, true);
     return 0;
@@ -912,7 +912,7 @@ namespace blue_sky
               get_hdf5_type <hdf5_type_helper <t_float>::type> (),
               data->data (),
               data->size (),
-              data->ndim (),
+              int(data->ndim ()),
               data->dims (),
               &def_value, false);
     return 0;
