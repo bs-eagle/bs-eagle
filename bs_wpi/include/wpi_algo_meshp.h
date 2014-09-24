@@ -303,8 +303,8 @@ struct mesh_tools : public helpers< strat_t > {
 				// correct dims of 1st boundary using strategy-specific offsets
 				// to make them finally non-intersecting
 				const bbox_bnd_offs& offs0 = strat_t::bbox_boundary_offs(i, 0);
-				std::transform(&bnd_lo[0], &bnd_lo[D], &offs0[0][0], &bnd_lo[0], std::plus< long >());
-				std::transform(&bnd_hi[0], &bnd_hi[D], &offs0[1][0], &bnd_hi[0], std::plus< long >());
+				std::transform(&bnd_lo[0], &bnd_lo[D], &offs0[0][0], &bnd_lo[0], std::plus< long long >());
+				std::transform(&bnd_hi[0], &bnd_hi[D], &offs0[1][0], &bnd_hi[0], std::plus< long long >());
 				// save resulting boundary
 				res.push_back(mesh_part(m_, bnd_lo, bnd_hi));
 
@@ -317,8 +317,8 @@ struct mesh_tools : public helpers< strat_t > {
 				// correct dims of 1st boundary using strategy-specific offsets
 				// to make them finally non-intersecting
 				const bbox_bnd_offs& offs1 = strat_t::bbox_boundary_offs(i, 1);
-				std::transform(&bnd_lo[0], &bnd_lo[D], &offs1[0][0], &bnd_lo[0], std::plus< long >());
-				std::transform(&bnd_hi[0], &bnd_hi[D], &offs1[1][0], &bnd_hi[0], std::plus< long >());
+				std::transform(&bnd_lo[0], &bnd_lo[D], &offs1[0][0], &bnd_lo[0], std::plus< long long >());
+				std::transform(&bnd_hi[0], &bnd_hi[D], &offs1[1][0], &bnd_hi[0], std::plus< long long >());
 				// save resulting boundary
 				res.push_back(mesh_part(m_, bnd_lo, bnd_hi));
 			}
