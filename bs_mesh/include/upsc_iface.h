@@ -15,17 +15,12 @@
 #include "bs_object_base.h"
 #include "conf.h"
 
-#include "bs_mesh_stdafx.h"
 #include "bs_mesh_grdecl.h"
-
-#include BS_FORCE_PLUGIN_IMPORT ()
-#include BS_STOP_PLUGIN_IMPORT ()
-
 #include "prop_iface.h"
 
 namespace blue_sky
 {
-class upsc_iface : public objbase
+class BS_API_PLUGIN upsc_iface : public objbase
   {
     public:
       typedef BS_SP (prop_iface)                      sp_prop_t;
