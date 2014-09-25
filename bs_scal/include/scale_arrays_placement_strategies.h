@@ -8,6 +8,7 @@
 #define BS_SCALE_ARRAYS_PLACEMENT_STRATEGIES_H_
 
 #include "scal_data_placement_info.h"
+#include "shared_vector.h"
 
 namespace blue_sky
   {

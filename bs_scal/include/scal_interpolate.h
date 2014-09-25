@@ -7,7 +7,11 @@
 #ifndef BS_SCAL_SCAL_INTERPOLATE_H_
 #define BS_SCAL_SCAL_INTERPOLATE_H_
 
+#include "bs_common.h"
 #include "interpolation_macro.h"
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "force_inline.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
 namespace blue_sky {
 

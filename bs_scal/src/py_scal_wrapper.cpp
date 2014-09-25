@@ -6,8 +6,6 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
-#include "bs_scal_stdafx.h"
-
 #include "py_scal_wrapper.h"
 #include "scal_save_data.h"
 #include "bs_serialize.h"

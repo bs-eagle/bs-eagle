@@ -6,8 +6,6 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
-#include "bs_scal_stdafx.h"
-
 #include "scal_3p.h"
 #include "scale_array_holder.h"
 #include "scal_region_info.h"

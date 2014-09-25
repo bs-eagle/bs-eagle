@@ -7,6 +7,8 @@
 #ifndef BS_JFUNCTION_H_
 #define BS_JFUNCTION_H_
 
+#include "bs_common.h"
+#include "conf.h"
 #include "plane_orientation.h"
 #include "bs_serialize_decl.h"
 

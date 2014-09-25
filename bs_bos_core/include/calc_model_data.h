@@ -9,6 +9,8 @@
 #ifndef BS_BOS_CORE_CALC_MODEL_DATA_H_
 #define BS_BOS_CORE_CALC_MODEL_DATA_H_
 
+#include "bs_common.h"
+#include "conf.h"
 #include "constants.h"
 
 namespace blue_sky {
