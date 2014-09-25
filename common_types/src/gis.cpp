@@ -174,7 +174,7 @@ namespace blue_sky
       std::string data;
 
       std::cout << "SEC PAR:" << s << std::endl;
-      if (s[0]='-')
+      if (s[0] == '-')
         {
           return 0;
         }
