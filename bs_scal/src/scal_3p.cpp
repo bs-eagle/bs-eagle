@@ -24,8 +24,8 @@
 
 namespace blue_sky
   {
-    BLUE_SKY_TYPE_IMPL_T_EXT_MEM(bs_array, 2, (calc_model_data, bs_array_shared));
-    BLUE_SKY_TYPE_IMPL_T_EXT_MEM(bs_array, 2, (calc_model_data, vector_traits));
+    //BLUE_SKY_TYPE_IMPL_T_EXT_MEM(bs_array, 2, (calc_model_data, bs_array_shared));
+    //BLUE_SKY_TYPE_IMPL_T_EXT_MEM(bs_array, 2, (calc_model_data, vector_traits));
 
   //////////////////////////////////////////////////////////////////////////
 
