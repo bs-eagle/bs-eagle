@@ -1,15 +1,14 @@
-#include "bs_pvt_stdafx.h"
-
-//#include BS_FORCE_PLUGIN_IMPORT ()
 #include "pvt_3p.h"
 #include "pvt_base.h"
 #include "pvt_dead_oil.h"
 #include "pvt_oil.h"
 #include "pvt_gas.h"
 #include "pvt_water.h"
-#include "data_class.h"
 #include "pvt_3p_iface.h"
-//#include BS_STOP_PLUGIN_IMPORT ()
+#include BS_FORCE_PLUGIN_IMPORT ()
+#include "data_class.h"
+#include "constants.h"
+#include BS_STOP_PLUGIN_IMPORT ()
 
     
 namespace blue_sky

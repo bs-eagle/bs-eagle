@@ -6,8 +6,6 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
-#include "bs_pvt_stdafx.h"
-
 #include "bs_serialize.h"
 #include "pvt_3p.h"
 

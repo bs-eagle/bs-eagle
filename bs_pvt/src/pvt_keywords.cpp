@@ -6,8 +6,12 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
+#include "bs_common.h"
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "bos_report.h"
+#include "constants.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
-#include "bs_pvt_stdafx.h"
 #include "pvt_keywords.hpp"
 #include "keyword_manager_iface.h"
 #include "data_class.h"

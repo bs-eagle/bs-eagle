@@ -1,8 +1,6 @@
 // bs_pvt.cpp : Defines the entry point for the DLL application.
 //
 
-#include "bs_pvt_stdafx.h"
-
 #include "pvt_base.h"
 #include "pvt_3p_iface.h"
 #include "pvt_3p.h"

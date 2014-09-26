@@ -1,6 +1,13 @@
 #ifndef __PVT_3P_IFACE_H
 #define __PVT_3P_IFACE_H
 
+#include "bs_common.h"
+#include "bs_object_base.h"
+#include "conf.h"
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "table_iface.h"
+#include BS_STOP_PLUGIN_IMPORT()
+#include <list>
 
 namespace blue_sky
   {

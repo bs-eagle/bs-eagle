@@ -5,9 +5,7 @@
  * \date 10.05.2010
  * */
 
-#include "bs_pvt_stdafx.h"
 #include "pvt_dummy.h"
-
 
 namespace blue_sky {
 

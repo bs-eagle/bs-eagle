@@ -4,7 +4,6 @@
  * \author Miryanov Sergey
  * \date 08.05.2008
  */
-#include "bs_pvt_stdafx.h"
 
 #include "pvt_base.h"
 #include "pvt_dead_oil.h"
