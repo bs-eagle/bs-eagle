@@ -13,7 +13,7 @@ namespace blue_sky
   /**
    * @brief interface class for density matrix
    */
-  class dens_matrix_iface: public matrix_iface
+  class BS_API_PLUGIN dens_matrix_iface: public matrix_iface
     {
 
     public:

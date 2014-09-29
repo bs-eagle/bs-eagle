@@ -14,7 +14,7 @@ namespace blue_sky
   /** 
    * @brief interface class for block CSR matrix storage and manipulation
    */
-  class bcsr_matrix_iface: public matrix_iface
+  class BS_API_PLUGIN bcsr_matrix_iface: public matrix_iface
     {
 
     public:
