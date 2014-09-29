@@ -37,7 +37,7 @@ namespace blue_sky
    *                    3) call setup () -- for prepare solver and preconditioner
    *                    4) call solve () -- for solving linear system (for sequence of linear systems A(x_i) = b_i, 1--3 should be call only once)  
    */
-  class lsolver_iface: public bs_node
+  class BS_API_PLUGIN lsolver_iface: public bs_node
     {
     public:
       //! matrix interface type

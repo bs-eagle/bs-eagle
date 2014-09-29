@@ -24,7 +24,7 @@ namespace blue_sky
    * @brief interface class for matrix storage and manipulation
    */
   
-  class two_stage_prec_iface: public lsolver_iface
+  class BS_API_PLUGIN two_stage_prec_iface: public lsolver_iface
     {
     public:
       //! matrix interface type

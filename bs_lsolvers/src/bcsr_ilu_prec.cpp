@@ -5,14 +5,14 @@
  * \date 2006-11-07
  */
 
-//#include "bs_csr_ilu_prec_stdafx.h"
+#include "bs_common.h"
 #include "bcsr_ilu_prec.h"
 
-#include BS_FORCE_PLUGIN_IMPORT ()
+#include BS_FORCE_PLUGIN_IMPORT()
 #include "strategies.h"
 #include "matrix_iface.h"
 #include "matrix_macroses.h"
-#include BS_STOP_PLUGIN_IMPORT ()
+#include BS_STOP_PLUGIN_IMPORT()
 
 namespace blue_sky
   {

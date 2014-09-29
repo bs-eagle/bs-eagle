@@ -25,7 +25,7 @@ namespace blue_sky
    * @brief interface class for matrix storage and manipulation
    */
   
-  class amg_smoother_iface: public lsolver_iface
+  class BS_API_PLUGIN amg_smoother_iface: public lsolver_iface
     {
     public:
       //! matrix interface type
