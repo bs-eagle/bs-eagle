@@ -4,8 +4,6 @@
  * @date 2009-12-09
  */
 
-#include "bs_lsolvers_stdafx.h"
-
 #include "blu_solver.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()

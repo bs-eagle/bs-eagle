@@ -7,8 +7,6 @@
 #ifndef __LSOLVER_IFACE_H
 #define __LSOLVER_IFACE_H
 
-#include <string>
-
 #include "bs_assert.h"
 #include "bs_tree.h"
 #include "bs_array.h"
@@ -19,7 +17,7 @@
 #include "matrix_iface.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
-
+#include <string>
 
 namespace blue_sky
 {

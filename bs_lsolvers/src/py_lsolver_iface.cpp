@@ -4,7 +4,6 @@
 * \author Miryanov Sergey
 * \date 2008-04-04
 */
-#include "bs_lsolvers_stdafx.h"
 #include "py_lsolver_iface.h"
 #include "matrix_iface.h"
 #include "bicgstab_solver.h"

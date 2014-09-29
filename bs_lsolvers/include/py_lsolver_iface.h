@@ -6,7 +6,6 @@
  * @author
  * @date 2009-11-25
  */
-#include <string>
 #include "lsolver_iface.h"
 #include "amg_smoother_iface.h"
 
@@ -17,6 +16,7 @@
 #include BS_STOP_PLUGIN_IMPORT ()
 
 #include "export_python_wrapper.h"
+#include <string>
 
 #ifdef BSPY_EXPORTING_PLUGIN
 namespace blue_sky
