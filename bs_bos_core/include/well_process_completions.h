@@ -5,6 +5,10 @@
 #include "wpi_algo_pod.h"
 #include "wpi_strategies.h"
 #include "well_completion_coords.h"
+#include "fi_params.h"
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "convert_units.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
 namespace blue_sky
 {

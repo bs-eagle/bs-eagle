@@ -11,6 +11,7 @@
 #define BS_PY_DATA_STORAGE_INTERFACE_H_
 
 #include "data_storage_interface.h"
+#include "py_bs_object_base.h"
 
 #ifdef BSPY_EXPORTING_PLUGIN
 namespace blue_sky
@@ -54,7 +55,7 @@ namespace blue_sky
 
         }
 
-        void save (const sp_storage_t &storage, const sp_obj &obj);
+        void save (const sp_storage_t &storage, const sp_obj &obj) const;
         void save_impl (py_data_storage storage, py_objbase obj);
 
       private:

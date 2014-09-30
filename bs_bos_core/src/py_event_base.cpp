@@ -9,25 +9,12 @@
  *       \todo  A bit outdate
  * */
 
-#include "stdafx.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "calc_model.h"
 #include "reservoir.h"
 
 #include "py_event_base.h"
-
-//#include "py_reservoir.h"
-//#include "py_calc_model.h"
-
-//#include "facility_manager.h"
-//#include "calc_model_types.h"
-//#include "well_connection.h"
-
-//#include BS_FORCE_PLUGIN_IMPORT ()
-//#include "py_rs_mesh.h"
-//#include BS_STOP_PLUGIN_IMPORT ()
-
-#ifdef BSPY_EXPORTING_PLUGIN
 
 using namespace boost::python;
 

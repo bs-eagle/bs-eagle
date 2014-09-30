@@ -6,7 +6,6 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
-#include "stdafx.h"
 
 #include "event_base.h"
 #include "event_manager.h"
@@ -18,6 +17,9 @@
 #include "main_loop_calc.h"
 #include "facility_manager.h"
 #include "keyword_manager.h"
+#include "write_time_to_log.h"
+#include "constants.h"
+#include "err_num_def.h"
 
 namespace blue_sky
 {

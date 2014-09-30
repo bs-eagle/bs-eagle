@@ -7,7 +7,6 @@
  *              the BSD License. See LICENSE for more details.
  * */
 
-#include "stdafx.h"
 #include "event_manager_keywords.hpp"
 #include "bos_reader_iface.h"
 #include "event_manager_iface.hpp"

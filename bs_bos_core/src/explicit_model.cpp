@@ -7,7 +7,6 @@
  *              the BSD License. See LICENSE for more details.
  * */
 
-#include "stdafx.h"
 #include "explicit_model.hpp"
 #include "data_class.h"
 #include "rs_mesh_iface.h"

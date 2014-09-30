@@ -9,6 +9,7 @@
 #ifndef BS_BOS_CORE_WELL_REPORTER_H_
 #define BS_BOS_CORE_WELL_REPORTER_H_
 
+#include "bs_common.h"
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "data_class.h"
 #include BS_STOP_PLUGIN_IMPORT ()

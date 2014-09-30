@@ -13,7 +13,6 @@
  * \author Sergey Miryanov
  * \date 10.09.2009
  * */
-#include "stdafx.h"
 #include "prepare_fpu.h"
 
 #ifndef UNIX

@@ -7,17 +7,17 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
-#include "stdafx.h"
 
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "event_manager.h"
 #include "py_event_manager.h"
+#include "py_bs_iterator.h"
 
 #include "reservoir.h"
 #include "facility_manager.h"
 #include "well_connection.h"
 #include "calc_model.h"
 
-#ifdef BSPY_EXPORTING_PLUGIN
 #include "export_python_wrapper.h"
 
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>

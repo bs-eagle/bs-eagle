@@ -6,8 +6,10 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
-#include "stdafx.h"
 #include "jacobian.h"
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "matrix_macroses.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
 namespace blue_sky
   {

@@ -7,7 +7,6 @@
  *              the BSD License. See LICENSE for more details.
  *       \todo  A bit outdate
  * */
-#include "stdafx.h"
 #include "py_calc_well.h"
 #include "reservoir.h"
 #include "facility_manager.h"

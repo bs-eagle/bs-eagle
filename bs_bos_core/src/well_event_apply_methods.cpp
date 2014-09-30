@@ -4,7 +4,6 @@
  * \author Sergey Miryanov
  * \date 11.07.2008
  * */
-#include "stdafx.h"
 
 #include "reservoir.h"
 #include "reservoir_simulator.h"

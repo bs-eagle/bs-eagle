@@ -10,6 +10,8 @@
 #ifndef BS_BOS_CORE_MATRIX_VECTOR_OP_H_
 #define BS_BOS_CORE_MATRIX_VECTOR_OP_H_
 
+#include "force_inline.h"
+
 namespace blue_sky {
 
   /**

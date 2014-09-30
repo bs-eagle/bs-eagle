@@ -9,7 +9,7 @@
 #ifndef BS_WELLS_COMPUTE_CONNECTION_FACTORS_H_
 #define BS_WELLS_COMPUTE_CONNECTION_FACTORS_H_
 
-//#include "calc_well.h"
+#include "rs_mesh_iface.h"
 
 namespace blue_sky
   {

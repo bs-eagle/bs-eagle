@@ -8,7 +8,6 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
-#include "stdafx.h"
 #include "csr_ilu_cfl.h"
 
 namespace blue_sky

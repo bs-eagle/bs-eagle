@@ -7,7 +7,7 @@
  *              the BSD License. See LICENSE for more details.
  * */
 
-#include "stdafx.h"
+#include "bos_report.h"
 #include "equil_model_iface.h"
 #include "equil_model_depth.h"
 #include "rs_mesh_iface.h"

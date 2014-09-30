@@ -9,6 +9,10 @@
 #ifndef NORM_CALC_H
 #define NORM_CALC_H
 
+#include <vector>
+#include <boost/array.hpp>
+#include "conf.h"
+
 namespace blue_sky
   {
   namespace norms

@@ -6,8 +6,8 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
-#include "stdafx.h"
 #include "default_connection.h"
+#include "vector_assign.h"
 
 namespace blue_sky {
 namespace wells {

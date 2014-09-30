@@ -6,12 +6,15 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
-#include "stdafx.h"
 
 #include "calc_model.h"
 #include "fi_params.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
+#include "force_inline.h"
+#include "write_time_to_log.h"
+#include "vector_assign.h"
+#include "memory_macroses.h"
 #include "hdm_iface.h"
 #include "scal_3p_iface.hpp"
 //#include "scale_array_holder.h"

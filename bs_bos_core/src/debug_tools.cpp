@@ -7,7 +7,6 @@
  *              the BSD License. See LICENSE for more details.
  *       \todo  Obsolete, should be removed
  * */
-#include "stdafx.h"
 
 #ifdef _MPI
 #include <mpi.h>

@@ -6,7 +6,6 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
-#include "stdafx.h"
 
 #include "calc_perf_bhp.h"
 #include "calc_model.h"

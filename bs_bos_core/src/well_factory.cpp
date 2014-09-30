@@ -4,7 +4,6 @@
  * \author Sergey Miryanov
  * \date 17.07.2008
  * */
-#include "stdafx.h"
 
 #include "calc_well.h"
 #include "well_connection.h"

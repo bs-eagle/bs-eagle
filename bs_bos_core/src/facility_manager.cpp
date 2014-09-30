@@ -6,7 +6,6 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
-#include "stdafx.h"
 
 #include "facility_manager.h"
 #include "data_storage_interface.h"

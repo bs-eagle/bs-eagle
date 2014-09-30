@@ -10,6 +10,8 @@
 #ifndef BS_WELL_LIMIT_OPERATION_H_
 #define BS_WELL_LIMIT_OPERATION_H_
 
+#include "bs_object_base.h"
+
 namespace blue_sky
   {
   namespace wells

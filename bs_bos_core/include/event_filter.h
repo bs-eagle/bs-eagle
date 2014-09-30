@@ -9,6 +9,9 @@
 #ifndef BS_EVENT_FILTER_H_
 #define BS_EVENT_FILTER_H_
 
+#include "bs_object_base.h"
+#include "auto_value.h"
+
 namespace blue_sky
   {
 

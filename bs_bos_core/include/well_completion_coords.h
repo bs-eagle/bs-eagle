@@ -10,6 +10,9 @@
 #define WELL_COMPLETION_COORDS_2B3UD1U7
 
 #include "rs_smesh_iface.h"
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "auto_value.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
 namespace blue_sky
 {

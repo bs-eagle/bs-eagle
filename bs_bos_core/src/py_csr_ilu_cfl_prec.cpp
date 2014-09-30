@@ -4,7 +4,6 @@
  * \author Salimgareeva Elmira
  * \date 28.09.2009
  */
-#include "stdafx.h"
 #include "py_csr_ilu_cfl_prec.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
