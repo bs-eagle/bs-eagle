@@ -7,7 +7,6 @@
  *              the BSD License. See LICENSE for more details.
  * */
 
-#include "bs_scal_stdafx.h"
 #include "scal_keywords.hpp"
 #include "keyword_manager_iface.h"
 #include "data_class.h"

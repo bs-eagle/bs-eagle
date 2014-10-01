@@ -7,6 +7,9 @@
 #ifndef BS_SCAL_TEST_MODEL_H_
 #define BS_SCAL_TEST_MODEL_H_
 
+#include "bs_object_base.h"
+#include "conf.h"
+
 namespace blue_sky
   {
   namespace scal
