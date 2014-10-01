@@ -8,9 +8,11 @@
  * */
 
 #include "explicit_model.hpp"
+#include "calc_model.h"
+#include BS_FORCE_PLUGIN_IMPORT()
 #include "data_class.h"
 #include "rs_mesh_iface.h"
-#include "calc_model.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
 namespace blue_sky 
 {

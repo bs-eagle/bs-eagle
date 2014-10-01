@@ -7,15 +7,16 @@
  *              the BSD License. See LICENSE for more details.
  * */
 #include "data_saver.h"
-
+#include "well_connection.h"
 #ifdef _HDF5
 #include "data_saver_hdf5.h"
 #else
 #include "data_saver_dummy.h"
 #endif
 
+#include BS_FORCE_PLUGIN_IMPORT()
 #include "rs_smesh_iface.h"
-#include "well_connection.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
 namespace blue_sky {
 
