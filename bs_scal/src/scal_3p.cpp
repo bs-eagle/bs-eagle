@@ -4,7 +4,6 @@
  * \author Sergey Miryanov
  * \date 19.05.2008
  * */
-#include "bs_scal_stdafx.h"
 
 #include "scal_3p.h"
 #include "scal_3p_impl.h"
