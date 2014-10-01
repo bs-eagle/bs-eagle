@@ -198,17 +198,19 @@
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>$(ProjectDir)/../bs_csr_ilu_prec\include;$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include/;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../bs_lsolvers/include/;$(ProjectDir)/../common_alg/include/;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../../hdf5-storage/src/;$(ProjectDir)/../bs_mtx/include/;$(ProjectDir)/../bs_base_linear_solvers/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(ProjectDir)/../bs_wpi/include/;$(ProjectDir)/../bs_mesh/include;$(ProjectDir)/../bs_scal/src/;$(ProjectDir)/../bs_scal/include/;$(ProjectDir)/../bs_pvt/src/;$(ProjectDir)/../sql_well/include/;$(ProjectDir)/../bs_pvt/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(HDF5_PATH)/include;$(NUMPY_PATH)/include;$(CGAL_DIR)/include;$(CGAL_DIR)/auxiliary/gmp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;BS_BOS_CORE_DEBUG_MEMORY_;_HDF5_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FloatingPointExceptions>true</FloatingPointExceptions>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4003;4520</DisableSpecificWarnings>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>
@@ -236,13 +238,13 @@
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>$(ProjectDir)/../bs_csr_ilu_prec\include;$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include/;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../bs_lsolvers/include/;$(ProjectDir)/../common_alg/include/;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../../hdf5-storage/src/;$(ProjectDir)/../bs_mtx/include/;$(ProjectDir)/../bs_base_linear_solvers/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(ProjectDir)/../bs_wpi/include/;$(ProjectDir)/../bs_mesh/include;$(ProjectDir)/../bs_scal/src/;$(ProjectDir)/../bs_scal/include/;$(ProjectDir)/../bs_pvt/src/;$(ProjectDir)/../sql_well/include/;$(ProjectDir)/../bs_pvt/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(NUMPY_PATH)/include;$(CGAL_DIR)/include;$(CGAL_DIR)/auxiliary/gmp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;BS_BOS_CORE_DEBUG_MEMORY_;_HDF5_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FloatingPointExceptions>true</FloatingPointExceptions>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -387,6 +389,7 @@
     <ClCompile Include="src\event_manager_keywords.cpp" />
     <ClCompile Include="src\py_event_base.cpp" />
     <ClCompile Include="src\py_event_manager.cpp" />
+    <ClCompile Include="src\reservoir_simulator.cpp" />
     <ClCompile Include="src\well_event_apply_methods.cpp" />
     <ClCompile Include="src\well_events.cpp" />
     <ClCompile Include="src\calc_perf_bhp.cpp">
@@ -493,14 +496,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\reservoir_simulator.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_WO_Python|Win32'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_WO_Python|x64'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="src\py_calc_model.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
@@ -527,14 +522,6 @@
     <ClCompile Include="src\main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_WO_Python|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_WO_Python|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -649,7 +636,6 @@
     <ClInclude Include="include\equil_model_depth.h" />
     <ClInclude Include="src\explicit_model.hpp" />
     <ClInclude Include="include\py_equil_model.h" />
-    <ClInclude Include="include\stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\bspy_test\unit_test\bos\ARITHMETIC\arithmetic_test.py" />
