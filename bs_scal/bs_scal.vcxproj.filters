@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="scal">
+      <UniqueIdentifier>{0153da0a-5ab9-46ec-b9e5-f920b35b3496}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="python">
+      <UniqueIdentifier>{f330c9d4-eeef-4a6c-b05d-14773f573664}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="jfunction">
+      <UniqueIdentifier>{544bae4d-11d8-4f00-85e1-eb5ba0dc0451}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="keywords">
+      <UniqueIdentifier>{23d8c489-65a6-45d1-b19f-da4e482c4441}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\scal_2p_data_holder.h">
+      <Filter>scal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scal_3p.h">
+      <Filter>scal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scal_3p_iface.hpp">
+      <Filter>scal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scal_data_placement_info.h">
+      <Filter>scal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scal_data_placement_strategies.h">
+      <Filter>scal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scal_data_source.h">
+      <Filter>scal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scal_data_vector.h">
+      <Filter>scal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scal_interpolate.h">
+      <Filter>scal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scal_region.h">
+      <Filter>scal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scal_region_info.h">
+      <Filter>scal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scal_save_data.h">
+      <Filter>scal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scal_test_model.h">
+      <Filter>scal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scale_array_holder.h">
+      <Filter>scal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scale_arrays_placement_strategies.h">
+      <Filter>scal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\py_scal_wrapper.h">
+      <Filter>python</Filter>
+    </ClInclude>
+    <ClInclude Include="include\jfunction.h">
+      <Filter>jfunction</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scal_keywords.h">
+      <Filter>keywords</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scal_dummy_iface.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\scal_3p.cpp">
+      <Filter>scal</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scal_test_model.cpp">
+      <Filter>scal</Filter>
+    </ClCompile>
+    <ClCompile Include="src\py_scal_wrapper.cpp">
+      <Filter>python</Filter>
+    </ClCompile>
+    <ClCompile Include="src\jfunction.cpp">
+      <Filter>jfunction</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scal_keywords.cpp">
+      <Filter>keywords</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bs_scal.cpp" />
+    <ClCompile Include="src\scal_3p_serialize.cpp">
+      <Filter>scal</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scal_2p_data_holder.cpp">
+      <Filter>scal</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

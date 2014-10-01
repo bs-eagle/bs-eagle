@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="data reader">
+      <UniqueIdentifier>{248b630a-c213-41df-8d4c-6ed358a98953}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data reader\python">
+      <UniqueIdentifier>{131ca731-e390-4f34-a1ca-c342505e49aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rock">
+      <UniqueIdentifier>{4f0dbed4-493f-4ef6-baff-8edc37c5f261}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data storage">
+      <UniqueIdentifier>{7fb40e68-e1d8-4505-9fd6-63841547ad44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data storage\python">
+      <UniqueIdentifier>{44232153-53d4-431b-b464-fc290400ed6b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="keywords">
+      <UniqueIdentifier>{9e56ca7b-ce45-4b24-ab43-324179d3c945}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hdm">
+      <UniqueIdentifier>{ff030078-c312-47c8-9c93-d3f5f914f54c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hdm\python">
+      <UniqueIdentifier>{36fdf27c-1bc8-43a1-bc15-bfa641e2fa1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="well storage">
+      <UniqueIdentifier>{8d1707bc-b6bb-4676-b31a-a133fd026e57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="well storage\python">
+      <UniqueIdentifier>{83963642-a65a-43f0-8d6f-c7c3cea18d16}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\convert_str_to_array.h">
+      <Filter>data reader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\convert_units.h">
+      <Filter>data reader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\str_tools.h">
+      <Filter>data reader</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rock_grid.h">
+      <Filter>rock</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rocktab_table.h">
+      <Filter>rock</Filter>
+    </ClInclude>
+    <ClInclude Include="include\arrays.h">
+      <Filter>data storage</Filter>
+    </ClInclude>
+    <ClInclude Include="include\arrays_tables.h">
+      <Filter>data storage</Filter>
+    </ClInclude>
+    <ClInclude Include="include\bos_map.h">
+      <Filter>data storage</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data_class.h">
+      <Filter>data storage</Filter>
+    </ClInclude>
+    <ClInclude Include="include\prvd_table.h">
+      <Filter>data storage</Filter>
+    </ClInclude>
+    <ClInclude Include="include\numpy_tools.h">
+      <Filter>data storage\python</Filter>
+    </ClInclude>
+    <ClInclude Include="include\py_data_class.h">
+      <Filter>data storage\python</Filter>
+    </ClInclude>
+    <ClInclude Include="src\equil_keywords.hpp">
+      <Filter>keywords</Filter>
+    </ClInclude>
+    <ClInclude Include="src\explicit_keywords.hpp">
+      <Filter>keywords</Filter>
+    </ClInclude>
+    <ClInclude Include="include\keyword_manager.h">
+      <Filter>keywords</Filter>
+    </ClInclude>
+    <ClInclude Include="src\py_keyword_manager.h">
+      <Filter>keywords</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hdm.h">
+      <Filter>hdm</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hdm_iface.h">
+      <Filter>hdm</Filter>
+    </ClInclude>
+    <ClInclude Include="include\py_hdm.h">
+      <Filter>hdm\python</Filter>
+    </ClInclude>
+    <ClInclude Include="src\well.h">
+      <Filter>well storage</Filter>
+    </ClInclude>
+    <ClInclude Include="src\py_well.h">
+      <Filter>well storage\python</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rocktab_table_serialize.h">
+      <Filter>data reader</Filter>
+    </ClInclude>
+    <ClInclude Include="src\convert_units_serialize.h">
+      <Filter>data reader</Filter>
+    </ClInclude>
+    <ClInclude Include="src\hdm_serialize.h">
+      <Filter>data reader</Filter>
+    </ClInclude>
+    <ClInclude Include="src\idata_serialize.h">
+      <Filter>data reader</Filter>
+    </ClInclude>
+    <ClInclude Include="src\locale_keeper_serialize.h">
+      <Filter>data reader</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\convert_units.cpp">
+      <Filter>data reader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rock_grid.cpp">
+      <Filter>rock</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rocktab_table.cpp">
+      <Filter>rock</Filter>
+    </ClCompile>
+    <ClCompile Include="src\arrays_tables.cpp">
+      <Filter>data storage</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data_class.cpp">
+      <Filter>data storage</Filter>
+    </ClCompile>
+    <ClCompile Include="src\prvd_table.cpp">
+      <Filter>data storage</Filter>
+    </ClCompile>
+    <ClCompile Include="src\py_data_class.cpp">
+      <Filter>data storage\python</Filter>
+    </ClCompile>
+    <ClCompile Include="src\equil_keywords.cpp">
+      <Filter>keywords</Filter>
+    </ClCompile>
+    <ClCompile Include="src\explicit_keywords.cpp">
+      <Filter>keywords</Filter>
+    </ClCompile>
+    <ClCompile Include="src\keyword_manager.cpp">
+      <Filter>keywords</Filter>
+    </ClCompile>
+    <ClCompile Include="src\keywords_handlers.cpp">
+      <Filter>keywords</Filter>
+    </ClCompile>
+    <ClCompile Include="src\keywords_registration.cpp">
+      <Filter>keywords</Filter>
+    </ClCompile>
+    <ClCompile Include="src\py_keyword_manager.cpp">
+      <Filter>keywords</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hdm.cpp">
+      <Filter>hdm</Filter>
+    </ClCompile>
+    <ClCompile Include="src\py_hdm.cpp">
+      <Filter>hdm\python</Filter>
+    </ClCompile>
+    <ClCompile Include="src\well.cpp">
+      <Filter>well storage</Filter>
+    </ClCompile>
+    <ClCompile Include="src\py_well.cpp">
+      <Filter>well storage\python</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\convert_units_serialize.cpp">
+      <Filter>data reader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hdm_serialize.cpp">
+      <Filter>data reader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hdm_serialize_action.cpp">
+      <Filter>data reader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\idata_serialize.cpp">
+      <Filter>data reader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\locale_keeper_serialize.cpp">
+      <Filter>data reader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rocktab_table_serialize.cpp">
+      <Filter>data reader</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
