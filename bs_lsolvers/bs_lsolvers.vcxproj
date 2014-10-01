@@ -273,7 +273,6 @@
     <ClCompile Include="src\gs_solver.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\py_lsolver_iface.cpp" />
-    <ClCompile Include="src\stdafx.cpp" />
     <ClCompile Include="src\tfqmr_solver.cpp" />
     <ClCompile Include="src\two_stage_prec.cpp" />
   </ItemGroup>
