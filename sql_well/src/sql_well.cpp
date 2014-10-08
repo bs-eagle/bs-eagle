@@ -119,7 +119,10 @@ std::string to_lower(const std::string& s) {
     // remove vranches
     exec_sql("DELETE FROM branches WHERE well_name = '" + well_name + "'");
     // remove well
-    return exec_sql("DELETE FROM wells WHERE name = '" + well_name + "'");
+    int res = exec_sql("DELETE FROM wells WHERE name = '" + well_name + "'");
+    // clean deleted entries from DB
+    exec_sql("VACUUM");
+    return res;
   }
 
   sql_well::list_t
@@ -438,9 +441,11 @@ std::string to_lower(const std::string& s) {
         wlog_data->remove_col(i);
         // and write result to DB
         add_branch_gis(wname, branch, g);
-        return true;
+        break;
       }
 
+      // clean deleted entries from DB
+      exec_sql("VACUUM");
       return res;
    }
 

@@ -446,7 +446,7 @@ COMMIT;\
             finalize_sql ();
 
           // physically remove deleted datafrom DB
-          exec_sql("VACUUM");
+          //exec_sql("VACUUM");
           sqlite3_close (db);
         }
 
@@ -564,7 +564,7 @@ COMMIT;\
       rc = sqlite3_prepare_v2 (db, sql.c_str (), sql.length () + 1, &stmp_sql, &ttt);
       if (rc)
         {
-          fprintf (stderr, "Can't make select: %s (%d)\n", sqlite3_errmsg (db), rc);
+          fprintf (stderr, "Can't make select: %s (%lu)\n", sqlite3_errmsg (db), rc);
           fprintf (stderr, "Query: %s\n", sql.c_str());
           finalize_sql ();
           return -1;
