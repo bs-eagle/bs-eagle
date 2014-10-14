@@ -40,7 +40,7 @@ namespace blue_sky
     {
       sp_table = BS_KERNEL.create_object ("table");
       sp_prop = BS_KERNEL.create_object ("prop");
-      if (!sp_table || !sp_table)
+      if (!sp_table || !sp_prop)
         {
           bs_throw_exception ("Type (traj) isn't created");
         }
