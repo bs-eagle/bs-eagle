@@ -6,10 +6,14 @@
  *  \copyright  This source code is released under the terms of
  *              the BSD License. See LICENSE for more details.
  * */
-#include "bs_bos_core_data_storage_stdafx.h"
+#include "bs_common.h"
 #ifdef BSPY_EXPORTING_PLUGIN
 #include <boost/python.hpp>
 #endif
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "bos_report.h"
+#include BS_STOP_PLUGIN_IMPORT()
+
 #include "equil_keywords.hpp"
 #include "keyword_manager_iface.h"
 #include "init_model_iface.hpp"

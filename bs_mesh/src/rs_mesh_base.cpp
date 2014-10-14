@@ -5,10 +5,13 @@
   \date 2009-07-20
   */
   
-#include "bs_mesh_stdafx.h"
-
 #ifndef PURE_MESH
+  #include "bs_common.h"
+  #include "bs_report.h"
   using namespace blue_sky;
+  #include BS_FORCE_PLUGIN_IMPORT()
+  #include "bos_report.h"
+  #include BS_STOP_PLUGIN_IMPORT()
 #endif
 
 #include "rs_mesh_base.h"

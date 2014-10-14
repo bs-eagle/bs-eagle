@@ -8,8 +8,6 @@
  *              the BSD License. See LICENSE for more details.
  * */
 
-#include "stdafx.h"
-
 #include "py_jacobian.h"
 #include "jacobian.h"
 

@@ -6,11 +6,10 @@
  *  \copyright  This source code is released under the terms of
  *              the BSD License. See LICENSE for more details.
  * */
-#include "bs_pvt_stdafx.h"
 
-#include "py_pvt.h"
 
 #ifdef BSPY_EXPORTING_PLUGIN
+#include "py_pvt.h"
 
 #include "pvt_base.h"
 #include "pvt_dead_oil.h"

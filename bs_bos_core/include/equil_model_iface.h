@@ -1,6 +1,11 @@
 #ifndef __EQUIL_MODEL_IFACE_H
 #define __EQUIL_MODEL_IFACE_H
 
+#include "bs_object_base.h"
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "table_iface.h"
+#include "jfunction.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
 namespace blue_sky
 {

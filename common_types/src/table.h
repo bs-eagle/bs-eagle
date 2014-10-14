@@ -302,6 +302,8 @@ namespace blue_sky
        */
       virtual spv_double get_col_values (const t_long col) const;
       
+      void remove_col(const t_long col);
+      void remove_col(const std::wstring& col_name);
       // ------------------------------
       // VARIABLES
       // ------------------------------

@@ -4,7 +4,6 @@
  * \author Sergey Miryanov
  * \date 23.05.2008
  * */
-#include "bs_scal_stdafx.h"
 #include "scal_test_model.h"
 
 namespace blue_sky

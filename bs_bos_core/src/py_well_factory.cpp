@@ -9,11 +9,10 @@
  *              the BSD License. See LICENSE for more details.
  * */
 
-#include "stdafx.h"
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "py_well_factory.h"
 #include "well_connection.h"
 
-#ifdef BSPY_EXPORTING_PLUGIN
 namespace blue_sky {
 namespace python {
 

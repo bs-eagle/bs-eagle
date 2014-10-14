@@ -6,8 +6,6 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
-#include "bs_scal_stdafx.h"
-
 #include "conf.h"
 #include "scal_3p.h"
 #include "py_scal_wrapper.h"

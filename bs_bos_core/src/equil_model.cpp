@@ -7,11 +7,13 @@
  *              the BSD License. See LICENSE for more details.
  * */
 
-#include "stdafx.h"
 #include "equil_model.hpp"
 #include "data_class.h"
 #include "rs_mesh_iface.h"
 #include "calc_model.h"
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "jfunction.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
 namespace blue_sky 
 {

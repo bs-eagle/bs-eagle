@@ -182,7 +182,8 @@ namespace blue_sky {
             item_t t_krpr;
             if (is_crs)
               {
-                t_sr_phase = t_sr_phase;
+                (void)t_sr_phase;
+                //t_sr_phase = t_sr_phase;
               }
             else
               {
@@ -241,7 +242,8 @@ namespace blue_sky {
             item_t t_krorp;
             if (is_crs)
               {
-                t_sr_oil = t_sr_oil;
+                (void)t_sr_oil;
+                //t_sr_oil = t_sr_oil;
               }
             else
               {

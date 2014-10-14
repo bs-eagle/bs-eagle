@@ -17,7 +17,7 @@ namespace blue_sky
    * <double, int>
    * <double, long>
    */
-  class bdiag_matrix_iface: public matrix_iface
+  class BS_API_PLUGIN bdiag_matrix_iface: public matrix_iface
     {
 
     public:

@@ -9,11 +9,7 @@
 #include <string>
 
 #include "bs_object_base.h"
-
-#include BS_FORCE_PLUGIN_IMPORT ()
 #include "conf.h"
-#include BS_STOP_PLUGIN_IMPORT ()
-
 
 namespace blue_sky
 {
@@ -22,7 +18,7 @@ namespace blue_sky
   * \brief properties
   */
   template <class var_type_t>
-  class vartype_table_iface : public objbase
+  class BS_API_PLUGIN vartype_table_iface : public objbase
     {
       public:
         typedef std::vector <var_type_t>                       vector_t;

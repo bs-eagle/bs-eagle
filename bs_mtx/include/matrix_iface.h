@@ -19,7 +19,7 @@ namespace blue_sky
   /** 
    * @brief interface class for matrix storage and manipulation
    */
-  class matrix_iface: public bs_node
+  class BS_API_PLUGIN matrix_iface: public bs_node
     {
     public:
 

@@ -13,11 +13,11 @@
 #endif
 #define BS_ARRAY_DEFAULT_TRAITS bs_nparray
 
-#include <cstddef>
 #include "bs_nparray.h"
 #include "bs_npvec.h"
 #include "bs_npvec_shared.h"
 #include "bs_array.h"
+#include <cstddef>
 
 //! using this type for small data
 typedef int             t_int;

@@ -13,7 +13,6 @@
  * @author Sayfullin Ilshat
  * @date 2009-01-28
  */
-#include "stdafx.h"
 #include "well_connection.h"
 #include "calc_well.h"
 #include "well_results_storage.h"

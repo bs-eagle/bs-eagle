@@ -27,40 +27,44 @@ public:
 	spv_float well_path_ident(
 		t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
 		spv_float well_info, bool include_well_nodes, const char* strat_traits,
-		spv_ulong hit_idx
+		const ulong min_split_threshold, spv_ulong hit_idx
 	) {
 		return blue_sky::well_path_ident(
-			nx, ny, coord, zcorn, well_info, include_well_nodes, strat_traits, hit_idx
+			nx, ny, coord, zcorn, well_info, include_well_nodes, strat_traits,
+			min_split_threshold, hit_idx
 		);
 	}
 
 	spv_float well_path_ident(
 		t_ulong nx, t_ulong ny, sp_obj trimesh_backend,
 		spv_float well_info, bool include_well_nodes, const char* strat_traits,
-		spv_ulong hit_idx
+		const ulong min_split_threshold, spv_ulong hit_idx
 	) {
 		return blue_sky::well_path_ident(
-			nx, ny, trimesh_backend, well_info, include_well_nodes, strat_traits, hit_idx
+			nx, ny, trimesh_backend, well_info, include_well_nodes, strat_traits,
+			min_split_threshold, hit_idx
 		);
 	}
 
 	spv_float well_path_ident_2d(
 		t_ulong nx, t_ulong ny, spv_float coord, spv_float zcorn,
 		spv_float well_info, bool include_well_nodes, const char* strat_traits,
-		spv_ulong hit_idx
+		const ulong min_split_threshold, spv_ulong hit_idx
 	) {
 		return blue_sky::well_path_ident_2d(
-			nx, ny, coord, zcorn, well_info, include_well_nodes, strat_traits, hit_idx
+			nx, ny, coord, zcorn, well_info, include_well_nodes, strat_traits,
+			min_split_threshold, hit_idx
 		);
 	}
 
 	spv_float well_path_ident_2d(
 		t_ulong nx, t_ulong ny, sp_obj trimesh_backend,
 		spv_float well_info, bool include_well_nodes, const char* strat_traits,
-		spv_ulong hit_idx
+		const ulong min_split_threshold, spv_ulong hit_idx
 	) {
 		return blue_sky::well_path_ident_2d(
-			nx, ny, trimesh_backend, well_info, include_well_nodes, strat_traits, hit_idx
+			nx, ny, trimesh_backend, well_info, include_well_nodes, strat_traits,
+			min_split_threshold, hit_idx
 		);
 	}
 
@@ -105,52 +109,52 @@ public:
 	 *----------------------------------------------------------------*/
 	virtual spv_ulong enum_border_facets_vtk(
 		ulong nx, ulong ny, sp_obj trim_backend,
-		spv_int mask, spv_ulong cell_idx, spv_float points,
+		spv_ulong cell_idx, spv_float points, spv_int mask,
 		const char* strat_traits,
 		int slice_dim, ulong slice_idx,
 		const ulong min_split_threshold, int facet_filter
 	) {
 		return blue_sky::enum_border_facets_vtk(
-			nx, ny, trim_backend, mask, cell_idx, points, strat_traits,
+			nx, ny, trim_backend, cell_idx, points, mask, strat_traits,
 			slice_dim, slice_idx, min_split_threshold, facet_filter
 		);
 	}
 
 	virtual spv_ulong enum_border_facets_vtk(
 		ulong nx, ulong ny, spv_float coord, spv_float zcorn,
-		spv_int mask, spv_ulong cell_idx, spv_float points,
+		spv_ulong cell_idx, spv_float points, spv_int mask,
 		const char* strat_traits,
 		int slice_dim, ulong slice_idx,
 		const ulong min_split_threshold, int facet_filter
 	) {
 		return blue_sky::enum_border_facets_vtk(
-			nx, ny, coord, zcorn, mask, cell_idx, points, strat_traits,
+			nx, ny, coord, zcorn, cell_idx, points, mask, strat_traits,
 			slice_dim, slice_idx, min_split_threshold, facet_filter
 		);
 	}
 
 	virtual spv_ulong enum_border_edges_vtk(
 		ulong nx, ulong ny, sp_obj trim_backend,
-		spv_int mask, spv_ulong cell_idx, spv_float points,
+		spv_ulong cell_idx, spv_float points, spv_int mask,
 		const char* strat_traits,
 		int slice_dim, ulong slice_idx,
 		const ulong min_split_threshold, int facet_filter
 	) {
 		return blue_sky::enum_border_edges_vtk(
-			nx, ny, trim_backend, mask, cell_idx, points, strat_traits,
+			nx, ny, trim_backend, cell_idx, points, mask, strat_traits,
 			slice_dim, slice_idx, min_split_threshold, facet_filter
 		);
 	}
 
 	virtual spv_ulong enum_border_edges_vtk(
 		ulong nx, ulong ny, spv_float coord, spv_float zcorn,
-		spv_int mask, spv_ulong cell_idx, spv_float points,
+		spv_ulong cell_idx, spv_float points, spv_int mask,
 		const char* strat_traits,
 		int slice_dim, ulong slice_idx,
 		const ulong min_split_threshold, int facet_filter
 	) {
 		return blue_sky::enum_border_edges_vtk(
-			nx, ny, coord, zcorn, mask, cell_idx, points, strat_traits,
+			nx, ny, coord, zcorn, cell_idx, points, mask, strat_traits,
 			slice_dim, slice_idx, min_split_threshold, facet_filter
 		);
 	}

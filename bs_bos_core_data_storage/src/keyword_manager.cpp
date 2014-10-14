@@ -6,7 +6,6 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
-#include "bs_bos_core_data_storage_stdafx.h"
 #include "keyword_manager.h"
 #include "bos_reader_iface.h"
 #include "data_class.h"

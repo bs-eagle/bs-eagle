@@ -1,5 +1,3 @@
-#include "stdafx.h"
-
 //#ifdef _MPI
 //#include "mpi_csr_comm.h"
 //#include "mpi_csr_matrix.h"

@@ -1,5 +1,3 @@
-#include "bs_mesh_stdafx.h"
-
 #include "rs_mesh_iface.h"
 #include "flux_connections_iface.h"
 #include "py_rs_mesh.h"

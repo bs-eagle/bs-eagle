@@ -10,6 +10,11 @@
 #ifndef BS_DATA_STORAGE_INTERFACE_H_
 #define BS_DATA_STORAGE_INTERFACE_H_
 
+#include "bs_object_base.h"
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "bos_map.h"
+#include BS_STOP_PLUGIN_IMPORT()
+
 namespace blue_sky
   {
 

@@ -10,6 +10,7 @@
 #ifndef BS_WELL_TYPE_HELPER_H_
 #define BS_WELL_TYPE_HELPER_H_
 
+#include "conf.h"
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "constants.h"
 #include BS_STOP_PLUGIN_IMPORT ()

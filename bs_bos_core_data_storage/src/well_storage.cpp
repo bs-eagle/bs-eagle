@@ -1,5 +1,3 @@
-#include "bs_bos_core_data_storage_stdafx.h"
-
 #include "well_storage.h"
 //#include "main_def.h"
 

@@ -4,9 +4,8 @@
 
   Class #convert_units methods.
 */
-#include "bs_bos_core_data_storage_stdafx.h"
-
 #include "convert_units.h"
+#include "err_num_def.h"
 //#include "localization.h"
 
 namespace blue_sky

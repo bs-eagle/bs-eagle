@@ -7,6 +7,8 @@
 #ifndef BS_PVT_INTRPOLATOR_H_
 #define BS_PVT_INTRPOLATOR_H_
 
+#include "force_inline.h"
+
 namespace blue_sky
   {
   namespace pvt

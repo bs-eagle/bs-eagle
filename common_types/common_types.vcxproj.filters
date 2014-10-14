@@ -122,5 +122,11 @@
     <ClInclude Include="src\common_types_serialize.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\frac_iface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\perf_iface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

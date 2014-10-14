@@ -8,14 +8,12 @@
  *              the BSD License. See LICENSE for more details.
  * */
 
-#include "stdafx.h"
-
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "py_facility_manager.h"
 #include "reservoir.h"
 #include "facility_manager.h"
-
-#ifdef BSPY_EXPORTING_PLUGIN
 #include "export_python_wrapper.h"
+#include "py_bs_iterator.h"
 
 using namespace boost::python;
 

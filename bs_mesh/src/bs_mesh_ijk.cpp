@@ -5,7 +5,6 @@
   \date 2009-07-21
  */
  
-#include "bs_mesh_stdafx.h"
 #include "bs_mesh_ijk.h"
 #include "bs_flux_connections.h"
 

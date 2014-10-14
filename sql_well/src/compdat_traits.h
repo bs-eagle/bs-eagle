@@ -10,6 +10,7 @@
 #define COMPDAT_TRAITS_RXNBKXX0
 
 #include "frac_comp_builder.h"
+#include <boost/array.hpp>
 
 namespace blue_sky { namespace fci {
 
@@ -64,8 +65,12 @@ struct compl_traits {
 		//x_iterator pnext_x = px;
 		if(px != xp.begin())
 			--px;
-		//else
-		//	++pnext_x;
+
+		// directions
+		const char dirs[] = {'X', 'Y', 'Z'};
+		// cumulative kh_mults per direction for singe cell
+		std::map< ulong, boost::array< t_double, strat_t::D > > cum_kh_mult;
+		//t_double cum_kh_mult[] = {0, 0, 0};
 
 		// 3.4.2 consider all intersections between begin_j and end_j
 		for(; px != xend; ++px) {
@@ -80,7 +85,6 @@ struct compl_traits {
 			// 3.4.3.1 calc delta between consequent xpoint_k and xpoint_(k - 1)
 			// position to previous point
 			double delta_l = 0;
-			//if(px != xp.end()) {
 			// completion fully inside well segment
 			if (md >= px->md && (md + len) <= pnext_x->md) {
 				delta_l = len;
@@ -145,16 +149,19 @@ struct compl_traits {
 				fullmesh.cell_size(px->cell, cell_sz);
 
 				// select direction, calc kh increase
-				const char dirs[] = {'X', 'Y', 'Z'};
 				double max_step = 0;
+				uint dir_idx = 0;
 				for(uint i = 0; i < strat_t::D; ++i) {
-					double dir_step = std::fabs(cf.x2[i] - cf.x1[i]);
+					const double dir_step = std::fabs(cf.x2[i] - cf.x1[i]);
 					if (max_step < dir_step) {
 						max_step = dir_step;
-						cf.dir = dirs[i];
-						cf.kh_mult = delta_l / cell_sz[i];
+						dir_idx = i;
 					}
 				}
+				cf.dir = dirs[dir_idx];
+				cf.kh_mult = 0;
+				if(cell_sz[dir_idx] > 1e-12)
+					cf.kh_mult = delta_l / cell_sz[dir_idx];
 				cf.kh_mult = std::min(cf.kh_mult, 1.);
 
 				// set data
@@ -164,18 +171,32 @@ struct compl_traits {
 				cf.skin      = skin;
 				cf.kh_mult  *= kh_mult;
 
-
 				// if compdat for this cell is already added
 				// then just update kh_mult
 				// otherwise add new COMPDAT record
-				// TODO: handle case of different directions inside one cell
-				cd_storage::iterator pcd = fcb.s_.find(compdat(px->cell));
+				cd_storage::iterator pcd = fcb.s_.find(compdat(well_name, px->cell));
 				if(pcd != fcb.s_.end()) {
 					compdat& cur_cd = const_cast< compdat& >(*pcd);
-					cur_cd.kh_mult = std::min(cur_cd.kh_mult + cf.kh_mult, 1.);
+					t_double* p_ckm = &cum_kh_mult[px->cell][0];
+					p_ckm[dir_idx] = std::min(p_ckm[dir_idx] + cf.kh_mult, 1.);
+					// select direction with greatest kh_mult
+					cur_cd.kh_mult = 0;
+					for(uint i = 0; i < strat_t::D; ++i) {
+						if(p_ckm[i] > cur_cd.kh_mult) {
+							cur_cd.kh_mult = p_ckm[i];
+							cur_cd.dir = dirs[i];
+						}
+					}
 				}
-				else
+				else {
 					fcb.s_.insert(cf);
+					// reset kh_mult
+					t_double* p_ckm = &cum_kh_mult[px->cell][0];
+					std::fill(p_ckm, p_ckm + strat_t::D, 0.);
+					// crappy VS can't compile the following line. Crazy fuck!
+					//std::fill_n(p_ckm, strat_t::D, 0.);
+					p_ckm[dir_idx] = cf.kh_mult;
+				}
 			}
 		} // 3.4.4 end of intersections loop
 	}

@@ -539,9 +539,9 @@ namespace blue_sky {
         {
           // TODO:
           kro         = krow;
-          d_krow      = d_krow;
+          //d_krow      = d_krow;
           d_kroo      = d_krow;
-          d_krog      = d_krog;
+          //d_krog      = d_krog;
         }
     }
 

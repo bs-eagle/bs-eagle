@@ -9,7 +9,11 @@
 #ifndef FI_PARAMS_H
 #define FI_PARAMS_H
 
+#include "bs_common.h"
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "bos_reader_iface.h"
 #include "named_pbase_access.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
 namespace blue_sky
   {

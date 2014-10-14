@@ -6,9 +6,13 @@
  *  \copyright  This source code is released under the terms of
  *              the BSD License. See LICENSE for more details.
  * */
-#include "stdafx.h"
 #include <boost/spirit.hpp>
 //#include <boost/spirit/core.hpp>
+
+#include "bs_common.h"
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "bos_report.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
 #include "event_base.h"
 #include "str_functor.h"

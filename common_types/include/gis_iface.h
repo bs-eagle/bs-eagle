@@ -13,16 +13,12 @@
 
 #include "bs_object_base.h"
 #include "conf.h"
-
-#include BS_FORCE_PLUGIN_IMPORT ()
-#include BS_STOP_PLUGIN_IMPORT ()
-
 #include "table_iface.h"
 #include "prop_iface.h"
 
 namespace blue_sky
 {
-class gis_iface : public objbase
+class BS_API_PLUGIN gis_iface : public objbase
   {
     public:
       typedef BS_SP (table_iface)                   sp_table_t;

@@ -6,8 +6,6 @@
 #ifndef TWO_STAGE_PREC_IFACE_H__
 #define TWO_STAGE_PREC_IFACE_H__
 
-#include <string>
-
 #include "bs_assert.h"
 #include "bs_tree.h"
 
@@ -18,6 +16,7 @@
 #include "matrix_iface.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
+#include <string>
 
 namespace blue_sky
 {
@@ -25,7 +24,7 @@ namespace blue_sky
    * @brief interface class for matrix storage and manipulation
    */
   
-  class two_stage_prec_iface: public lsolver_iface
+  class BS_API_PLUGIN two_stage_prec_iface: public lsolver_iface
     {
     public:
       //! matrix interface type

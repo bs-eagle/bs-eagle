@@ -1,5 +1,3 @@
-#include "bs_mesh_stdafx.h"
-
 #include "mesh_ijk.h"
 //#include "mesh_grdecl.h"
 #include <stack>

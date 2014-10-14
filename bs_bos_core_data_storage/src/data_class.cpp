@@ -3,8 +3,6 @@
 	\brief implimenataion of idata class methods
 	\author Nikonov Maxim
 */
-#include "bs_bos_core_data_storage_stdafx.h"
-
 #include "data_class.h"
 #include "arrays.h"
 #include "arrays_tables.h"
@@ -159,7 +157,7 @@ namespace blue_sky
   {
     std::list<BS_SP( table_iface)> tables;
     
-    for (t_long i = 0; i < rsvd.size(); ++i)
+    for (t_ulong i = 0; i < rsvd.size(); ++i)
       tables.push_back (rsvd [i].get_table_data());
     return tables;
   }
@@ -169,7 +167,7 @@ namespace blue_sky
   {
     std::list<BS_SP( table_iface)> tables;
     
-    for (t_long i = 0; i < pbvd.size(); ++i)
+    for (t_ulong i = 0; i < pbvd.size(); ++i)
       tables.push_back (pbvd [i].get_table_data());
     return tables;
   }

@@ -16,7 +16,7 @@ namespace blue_sky
 
   class bos_reader_iface;
 
-  class /*BS_API_PLUGIN*/ rs_mesh_iface : public bs_node
+  class BS_API_PLUGIN rs_mesh_iface : public bs_node
     {
 //+++++++++++++++++++++++++++++++++++++++++++
 //  INTERNAL TYPE DECLARATION

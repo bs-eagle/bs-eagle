@@ -1,5 +1,3 @@
-#include "bs_bos_core_data_storage_stdafx.h"
-
 #include "py_hdm.h"
 #include "hdm.h"
 #include "py_data_class.h"

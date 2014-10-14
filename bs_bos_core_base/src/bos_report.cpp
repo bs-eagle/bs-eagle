@@ -1,5 +1,3 @@
-#include "bs_bos_core_base_stdafx.h"
-
 #include "bos_report.h"
 #include "bs_assert.h"
 #include "bs_log_scribers.h"

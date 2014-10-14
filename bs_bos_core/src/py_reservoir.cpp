@@ -8,14 +8,11 @@
  *              the BSD License. See LICENSE for more details.
  * */
 
-#include "stdafx.h"
-
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "py_reservoir.h"
 #include "reservoir.h"
 #include "well_connection.h"
 #include "py_facility_manager.h"
-
-#ifdef BSPY_EXPORTING_PLUGIN
 using namespace boost::python;
 
 namespace blue_sky {

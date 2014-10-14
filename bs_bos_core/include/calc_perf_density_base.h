@@ -9,6 +9,8 @@
 #ifndef BS_CALC_PERF_DENSITY_BASE_H_
 #define BS_CALC_PERF_DENSITY_BASE_H_
 
+#include "bs_object_base.h"
+#include "conf.h"
 
 namespace blue_sky
   {

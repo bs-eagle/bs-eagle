@@ -156,12 +156,13 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(ProjectDir)/../common_types/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(HDF5_PATH)/include;$(ProjectDir)/include;$(NUMPY_PATH)/include;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../bs_mtx/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_BOS_CORE_COLLECT_BACKTRACE_;BS_EXCEPTION_USE_BOOST_FORMAT;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS; _SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_DISABLE_MT_LOCKS;BS_BOS_CORE_COLLECT_BACKTRACE_;BS_EXCEPTION_USE_BOOST_FORMAT;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>bs_lsolvers_stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -170,7 +171,7 @@
       <DisableSpecificWarnings>4003;4520</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>loki.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>$(HDF5_PATH)/lib;$(PYTHON_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/release/;$(MPICH_PATH)/SDK/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>python25_d.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -184,21 +185,23 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(ProjectDir)/../common_types/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(ProjectDir)/include;$(NUMPY_PATH)/include;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../bs_mtx/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_BOS_CORE_COLLECT_BACKTRACE_;BS_EXCEPTION_USE_BOOST_FORMAT;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS; _SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_DISABLE_MT_LOCKS;BS_BOS_CORE_COLLECT_BACKTRACE_;BS_EXCEPTION_USE_BOOST_FORMAT;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>bs_lsolvers_stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/bigobj</AdditionalOptions>
-      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
       <DisableSpecificWarnings>4003;4520</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>loki.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>$(HDF5_PATH)/lib;$(PYTHON64_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib64;$(ProjectDir)/../../../exe/release_x64;$(MPICH_PATH)/SDK/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>python25_d.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -262,10 +265,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\bcsr_ilu_prec.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="src\bcsr_ilu_prec.cpp" />
     <ClCompile Include="src\bicgstab_solver.cpp" />
     <ClCompile Include="src\blu_solver.cpp" />
     <ClCompile Include="src\cgs_solver.cpp" />
@@ -273,16 +273,16 @@
     <ClCompile Include="src\gs_solver.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\py_lsolver_iface.cpp" />
-    <ClCompile Include="src\stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="src\tfqmr_solver.cpp" />
     <ClCompile Include="src\two_stage_prec.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\amg_smoother_iface.h" />
     <ClInclude Include="include\bs_lsolvers_stdafx.h" />
+    <ClInclude Include="include\lsolver_iface.h" />
+    <ClInclude Include="include\mv_functions.h" />
+    <ClInclude Include="include\py_lsolver_iface.h" />
+    <ClInclude Include="include\two_stage_prec_iface.h" />
     <ClInclude Include="src\bcsr_ilu_prec.h" />
     <ClInclude Include="src\bicgstab_solver.h" />
     <ClInclude Include="src\blu_solver.h" />

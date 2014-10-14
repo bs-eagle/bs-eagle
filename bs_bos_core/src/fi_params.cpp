@@ -6,11 +6,13 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
-#include "stdafx.h"
 #include "fi_params.h"
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "bos_reader_iface.h"
+#include "convert_units.h"
+#include "constants.h"
+#include "err_num_def.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 namespace blue_sky

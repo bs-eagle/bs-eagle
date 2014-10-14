@@ -7,14 +7,13 @@
  *              the BSD License. See LICENSE for more details.
  * */
 
-#include "stdafx.h"
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "py_default_wells.h"
 #include "export_python_wrapper.h"
 #include "default_well.h"
 #include "default_connection.h"
 #include "py_calc_well.h"
 
-#ifdef BSPY_EXPORTING_PLUGIN
 using namespace blue_sky::wells;
 
 namespace blue_sky {

@@ -14,7 +14,7 @@ if (build_kind == "debug") :
 elif (build_kind == "release") :
     env.AppendUnique (LIBS = ["blue_sky"])
 
-bs_bos_core_base = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."], ["property_base_new.cpp", "stdafx.cpp"]).sources)
+bs_bos_core_base = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."], ["property_base_new.cpp"]).sources)
 
 env.Alias (tar_name, bs_bos_core_base)
 Export ("bs_bos_core_base")

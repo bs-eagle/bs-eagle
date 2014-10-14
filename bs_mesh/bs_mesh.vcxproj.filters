@@ -85,7 +85,6 @@
       <Filter>gen</Filter>
     </ClCompile>
     <ClCompile Include="src\bs_mesh.cpp" />
-    <ClCompile Include="src\stdafx.cpp" />
     <ClCompile Include="src\i_cant_link_2_mesh.cpp" />
     <ClCompile Include="src\py_upsc.cpp" />
     <ClCompile Include="src\upsc.cpp" />
@@ -151,7 +150,6 @@
     <ClInclude Include="src\gauss_method.h">
       <Filter>rs\grdecl_mpfa</Filter>
     </ClInclude>
-    <ClInclude Include="src\bs_mesh_stdafx.h" />
     <ClInclude Include="include\i_cant_link_2_mesh.h" />
   </ItemGroup>
 </Project>

@@ -6,10 +6,9 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
-#include "bs_bos_core_data_storage_stdafx.h"
-
 #include "hdm_serialize.h"
 #include "bs_misc.h"
+#include "bs_prop_base.h"
 #include <fstream>
 #include <sstream>
 
@@ -41,7 +40,8 @@ namespace blue_sky {
 std::vector< std::string > hdm_serialize_set_project_prop(
 	const std::string& prj_path = "",
 	const std::string& prj_name = "",
-	const std::string& deep_copy_suffix = ""
+	const std::string& deep_copy_suffix = "",
+	bool force = false
 ) {
 	// save project path for serialization code
 	kernel::idx_dt_ptr p_dt = BS_KERNEL.pert_idx_dt(hdm::bs_type());
@@ -55,13 +55,13 @@ std::vector< std::string > hdm_serialize_set_project_prop(
 	p_dt->clear< std::string >();
 
 	// remember project path
-	if(prj_path.size() > 0 || prj_name.size() > 0)
+	if(force || prj_path.size() > 0 || prj_name.size() > 0)
 		p_dt->insert< std::string >(prj_path);
 	// and project name
-	if(prj_name.size() > 0 || deep_copy_suffix.size() > 0)
+	if(force || prj_name.size() > 0 || deep_copy_suffix.size() > 0)
 		p_dt->insert< std::string >(prj_name);
 	// and deep copy suffix
-	if(deep_copy_suffix.size() > 0) {
+	if(force || deep_copy_suffix.size() > 0) {
 		p_dt->insert< std::string >(deep_copy_suffix);
 	}
 
@@ -233,7 +233,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(hdm_serialize_to_str_overl, hdm_serialize_to_str
 //BOOST_PYTHON_FUNCTION_OVERLOADS(hdm_serialize_from_str_overl, hdm_serialize_from_str, 3, 4)
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(hdm_serialize_setpprop_overl,
-	hdm_serialize_set_project_prop, 0, 3
+	hdm_serialize_set_project_prop, 0, 4
 )
 
 namespace python {

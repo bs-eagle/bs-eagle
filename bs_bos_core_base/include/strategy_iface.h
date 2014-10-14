@@ -8,7 +8,7 @@ namespace blue_sky
   /**
   * \brief strategy interface
   */
-  class strategy_iface
+  class BS_API_PLUGIN strategy_iface
     {
     public:
       virtual ~strategy_iface ()

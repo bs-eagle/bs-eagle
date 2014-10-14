@@ -1,10 +1,9 @@
-#include "stdafx.h"
+#ifdef BSPY_EXPORTING_PLUGIN
 #include "py_equil_model.h"
 #include "equil_model_iface.h"
 #include "equil_model_depth.h"
 #include "bs_serialize.h"
 
-#ifdef BSPY_EXPORTING_PLUGIN
 #include "export_python_wrapper.h"
 #include <boost/python/call_method.hpp>
 #include "py_list_converter.h"

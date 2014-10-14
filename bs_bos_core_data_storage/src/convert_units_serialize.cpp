@@ -6,8 +6,6 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
-#include "bs_bos_core_data_storage_stdafx.h"
-
 #include "convert_units_serialize.h"
 
 using namespace blue_sky;

@@ -6,19 +6,15 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
-#include "bs_mesh_stdafx.h"
-
 #include "i_cant_link_2_mesh.h"
 #include "bs_mesh_grdecl.h"
-//#include "well_path_ident.h"
 
 namespace blue_sky {
 
 namespace {
+typedef handy_mesh_iface::sp_smesh sp_smesh;
 
-#ifdef BSPY_EXPORTING_PLUGIN
-
-// separate function for Python export
+// implementation
 spv_float calc_cells_vertices_xyz_impl(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
 	typedef smart_ptr< bs_mesh_grdecl, true > sp_grd_mesh;
 	// build mesh_grdecl around given mesh
@@ -29,39 +25,23 @@ spv_float calc_cells_vertices_xyz_impl(t_long nx, t_long ny, spv_float coord, sp
 	return grd_src->calc_cells_vertices_xyz();
 }
 
-#endif
+sp_smesh make_mesh_grdecl_impl(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
+	typedef smart_ptr< bs_mesh_grdecl, true > sp_grd_mesh;
+	// build mesh_grdecl around given mesh
+	sp_grd_mesh grd_src = BS_KERNEL.create_object(bs_mesh_grdecl::bs_type());
+	if(!grd_src) return NULL;
+	grd_src->init_props(nx, ny, coord, zcorn);
+	return grd_src;
+}
 
-class BS_API_PLUGIN handy_object : public handy_mesh_iface {
+class handy_object : public handy_mesh_iface {
 public:
 	spv_float calc_cells_vertices_xyz(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
 		return calc_cells_vertices_xyz_impl(nx, ny, coord, zcorn);
 	}
 
-	//// 3D
-	//spv_ulong where_is_points(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
-	//	return blue_sky::where_is_points(nx, ny, coord, zcorn, points);
-	//}
-	//// 2D
-	//spv_ulong where_is_points_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float points) {
-	//	return blue_sky::where_is_points_2d(nx, ny, coord, zcorn, points);
-	//}
-
-	//// 3D
-	//t_ulong where_is_point(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) {
-	//	return blue_sky::where_is_point(nx, ny, coord, zcorn, point);
-	//}
-	//// 2D
-	//t_ulong where_is_point_2d(t_long nx, t_long ny, spv_float coord, spv_float zcorn, spv_float point) {
-	//	return blue_sky::where_is_point_2d(nx, ny, coord, zcorn, point);
-	//}
-
 	sp_smesh make_mesh_grdecl(t_long nx, t_long ny, spv_float coord, spv_float zcorn) {
-		typedef smart_ptr< bs_mesh_grdecl, true > sp_grd_mesh;
-		// build mesh_grdecl around given mesh
-		sp_grd_mesh grd_src = BS_KERNEL.create_object(bs_mesh_grdecl::bs_type());
-		if(!grd_src) return NULL;
-		grd_src->init_props(nx, ny, coord, zcorn);
-		return grd_src;
+		return make_mesh_grdecl_impl(nx, ny, coord, zcorn);
 	}
 
 	BLUE_SKY_TYPE_DECL(handy_object)
@@ -92,6 +72,7 @@ namespace python {
 		using namespace boost::python;
 
 		def("calc_cells_vertices_xyz", &calc_cells_vertices_xyz_impl);
+		def("make_mesh_grdecl", &make_mesh_grdecl_impl);
 	}
 } /* python */
 

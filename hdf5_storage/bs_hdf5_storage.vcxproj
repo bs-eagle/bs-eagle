@@ -126,7 +126,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(NUMPY_PATH)/include;$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../bs_bos_core_base/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(HDF5_PATH)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_HDF5_STORAGE_EXPORTS;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5;H5_USE_16_API;_HDF5USEDLL_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_EXCEPTION_USE_BOOST_FORMAT;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS; _SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_HDF5_STORAGE_EXPORTS;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5;H5_USE_16_API;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -137,7 +137,7 @@
       <DisableSpecificWarnings>4003;4520</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>loki.lib;ws2_32.lib;hdf5dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>hdf5dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>$(HDF5_PATH)/dll;$(PYTHON_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/release/;$(ProjectDir)/../../../exe/release/plugins/;$(MPICH_PATH)/SDK/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>python25_d.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -151,7 +151,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(NUMPY_PATH)/include;$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include;$(ProjectDir)/../common_types/include/;$(ProjectDir)/../bs_bos_core_base/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(HDF5_64_PATH)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_HDF5_STORAGE_EXPORTS;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5;H5_USE_16_API;_HDF5USEDLL_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BOOST_DEBUG_PYTHON_;BOOST_ALL_NO_LIB_;BS_EXCEPTION_USE_BOOST_FORMAT;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS; _SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_HDF5_STORAGE_EXPORTS;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5;H5_USE_16_API;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -162,7 +162,7 @@
       <DisableSpecificWarnings>4003;4520</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>loki.lib;ws2_32.lib;hdf5dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>hdf5dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>$(HDF5_64_PATH)/dll;$(PYTHON64_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib64;$(ProjectDir)/../../../exe/release_x64;$(ProjectDir)/../../../exe/release_x64/plugins/;$(MPICH_PATH)/SDK/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>python25_d.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>

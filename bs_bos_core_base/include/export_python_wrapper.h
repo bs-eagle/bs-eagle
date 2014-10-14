@@ -45,8 +45,9 @@ namespace python {
     {
       using namespace boost::python;
       class__
-        .def ("__cons__", make_constructor (construct_python_object <T>))
-        .def ("__init__", make_function (init_python_object  <T>))
+        .def ("__init__", make_constructor (&construct_python_object <T>))
+        //.def ("__cons__", make_constructor (construct_python_object <T>))
+        //.def ("__init__", make_function (init_python_object  <T>))
         ;
 
       return class__;

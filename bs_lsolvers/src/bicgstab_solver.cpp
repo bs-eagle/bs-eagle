@@ -5,8 +5,6 @@
  * \date 11.02.2009
  * */
 
-#include "bs_lsolvers_stdafx.h"
-
 #include "bicgstab_solver.h"
 #include "mv_functions.h"
 

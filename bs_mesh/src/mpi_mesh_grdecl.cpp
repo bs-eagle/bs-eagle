@@ -3,7 +3,6 @@
  	\brief This file implement class for decompose main mesh among processes
 	\author Iskhakov Ruslan
 	\date 2008-10-14*/
-#include "bs_mesh_stdafx.h"
 
 #include "mpi_mesh_grdecl.h"
 #ifdef _MPI_MY

@@ -1,7 +1,6 @@
 /**
  *
  * */
-#include "stdafx.h"
 #include "calc_model.h"
 
 namespace blue_sky

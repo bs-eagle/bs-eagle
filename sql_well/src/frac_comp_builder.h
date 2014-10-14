@@ -46,6 +46,9 @@ public:
 	typedef st_smart_ptr< xp_cache_t >     spxp_cache_t;
 	typedef typename xp_cache_t::iterator  xpc_iterator;
 
+	typedef intersect_base< strat_t > xbuild_base;
+	typedef typename std::list< xbuild_base >::const_iterator cxbricks_iterator;
+
 	frac_comp_builder() {}
 
 	frac_comp_builder(t_ulong nx, t_ulong ny, const spv_float& coord, const spv_float& zcorn) {
@@ -69,7 +72,8 @@ public:
 	}
 
 	void init(smart_ptr< well_pool_iface, true > src_well) {
-		sw_ = BS_KERNEL.create_object_copy(src_well);
+		sw_ = src_well;
+		//sw_ = BS_KERNEL.create_object_copy(src_well);
 	}
 
 	void init_cache(const spxp_cache_t& xp_cache = NULL, const ulong cache_limit = 0) {
@@ -107,9 +111,9 @@ public:
 		well_paths W(wb.size());
 		// well_paths reference source traj data, so keep it while algo works
 		std::vector< spv_float > trajes(wb.size());
-		ulong i = 0;
+		ulong k = 0;
 		// for each well+branch combo build well_infos
-		for(wb_storage::iterator pwb = wb.begin(), wb_end = wb.end(); pwb != wb_end; ++pwb, ++i) {
+		for(wb_storage::iterator pwb = wb.begin(), wb_end = wb.end(); pwb != wb_end; ++pwb, ++k) {
 			// from 'branches' select well+branch_i trajectory (sql_well::get_branch_traj)
 			sp_traj_t traj = sw_->get_branch_traj(pwb->first, pwb->second);
 			if(!traj) return false;
@@ -125,25 +129,25 @@ public:
 					*ptv++ = traj_t->get_value(i, col_ids[j]);
 			}
 			// prevent deleting source traj data
-			trajes[i] = traj_v;
+			trajes[k] = traj_v;
 
-			// convert traj_v to i-th well_path
-			if(!wpi_algo::fill_well_path(traj_v, W[i])) return false;
+			// convert traj_v to k-th well_path
+			if(!wpi_algo::fill_well_path(traj_v, W[k])) return false;
 		}
 
 		// 3 find intersections of all branches with mesh (well_paths_ident)
 		xbuilder_mp A(m_, W);
-		A.build(true);
+		A.build(1);
 
 		// 4. store results in cache
 		// cache limit is ignored
 		xp_cache_->clear();
-		i = 0;
+		cxbricks_iterator pb = A.xbricks().begin();
 		for(
 			wb_storage::iterator pwb = wb.begin(), wb_end = wb.end();
-			pwb != wb_end, i < A.xbricks().size(); ++pwb, ++i
+			pwb != wb_end; ++pwb, ++pb
 		) {
-			(*xp_cache_)[pwb->first + pwb->second] = A.xbricks()[i].path();
+			(*xp_cache_)[pwb->first + pwb->second] = pb->path();
 		}
 
 		return true;

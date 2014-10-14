@@ -116,15 +116,17 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(CGAL_DIR)\include;$(CGAL_DIR)\auxiliary\gmp\include;$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(ProjectDir)/../bs_mesh/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(NUMPY_PATH)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BOOST_THREAD_USE_DLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4003;4520;4355</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(CGAL_DIR)\lib;$(HDF5_PATH)/lib;$(PYTHON_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/release/;$(ProjectDir)/../../../exe/release/plugins/;$(MPICH_PATH)/SDK/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>loki.lib;ws2_32.lib;libCGAL_Core-vc100-mt-4.0.lib;libCGAL-vc100-mt-4.0.lib;libgmp-10.lib;libmpfr-4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libCGAL_Core-vc100-mt-4.0.lib;libCGAL-vc100-mt-4.0.lib;libgmp-10.lib;libmpfr-4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>python25_d.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalOptions>/FORCE:MULTIPLE /ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -135,20 +137,24 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(CGAL_DIR)\include;$(CGAL_DIR)\auxiliary\gmp\include;$(LOKI_PATH)/include;$(BOOST_PATH);$(ProjectDir)/../../../kernel/include;$(ProjectDir)/../../../kernel/include/python;$(ProjectDir)/include;$(ProjectDir)/../bs_bos_core_base/include/;$(ProjectDir)/../bs_bos_core_data_storage/include/;$(ProjectDir)/../bs_mesh/include/;$(PYTHON_PATH)/include;$(MPICH_PATH)/SDK/include;$(NUMPY_PATH)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BOOST_THREAD_USE_DLL;BS_EXPORTING;BSPY_EXPORTING;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_BOS_CORE_DEBUG_MEMORY_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_ALL_DYN_LINK;BS_EXPORTING_PLUGIN;BSPY_EXPORTING_PLUGIN;_HDF5_;_MPI_;BS_DISABLE_MT_LOCKS;BS_EXCEPTION_USE_BOOST_FORMAT;CGAL_NO_AUTOLINK_MPFR;CGAL_NO_AUTOLINK_GMP;NOMINMAX;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4003;4520;4355</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(CGAL_DIR)\lib64;$(HDF5_PATH)/lib;$(PYTHON64_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib64;$(ProjectDir)/../../../exe/release_x64;$(ProjectDir)/../../../exe/release_x64/plugins/;$(MPICH_PATH)/SDK/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>loki.lib;ws2_32.lib;libCGAL_Core-vc100-mt-4.0.lib;libCGAL-vc100-mt-4.0.lib;libgmp-10.lib;libmpfr-4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libCGAL_Core-vc100-mt-4.0.lib;libCGAL-vc100-mt-4.0.lib;libgmp-10.lib;libmpfr-4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>python25_d.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalOptions>/FORCE:MULTIPLE /ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\coord_zcorn_tools.h" />
     <ClInclude Include="include\czt_iface.h" />
+    <ClInclude Include="include\strategy_2d_common.h" />
+    <ClInclude Include="include\strategy_3d_common.h" />
     <ClInclude Include="include\tops_iterator.h" />
     <ClInclude Include="include\tops_iterator_traits.h" />
     <ClInclude Include="include\well_path_ident.h" />
@@ -163,11 +169,13 @@
     <ClInclude Include="include\wpi_algo_xaction_build.h" />
     <ClInclude Include="include\wpi_algo_xaction_build2.h" />
     <ClInclude Include="include\wpi_algo_xaction_build3.h" />
+    <ClInclude Include="include\wpi_algo_xaction_build_mp.h" />
     <ClInclude Include="include\wpi_common.h" />
     <ClInclude Include="include\wpi_iface.h" />
     <ClInclude Include="include\wpi_strategies.h" />
     <ClInclude Include="include\wpi_strategy_2d.h" />
     <ClInclude Include="include\wpi_strategy_3d.h" />
+    <ClInclude Include="include\wpi_strategy_3d_bg.h" />
     <ClInclude Include="include\wpi_strategy_traits.h" />
     <ClInclude Include="include\wpi_trimesh_impl.h" />
   </ItemGroup>

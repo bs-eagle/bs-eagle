@@ -6,16 +6,17 @@
  * \author Mark Khait
  * \date 29.07.2011
  * */
-#include <string> 
 #include "bs_object_base.h"
 #include "conf.h"
 #include "well_branch_iface.h" 
 #include "prop_iface.h"
+
+#include <string>
  
 namespace blue_sky {
 
   
-  class well_obj_iface: public objbase
+  class BS_API_PLUGIN well_obj_iface: public objbase
     {
     public:
       typedef BS_SP (well_branch_iface)                 sp_branch_t;

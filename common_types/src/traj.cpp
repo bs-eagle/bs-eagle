@@ -39,9 +39,10 @@ namespace blue_sky
   traj::traj (bs_type_ctor_param) 
     {
       sp_table = BS_KERNEL.create_object ("table");
-      if (!sp_table)
+      sp_prop = BS_KERNEL.create_object ("prop");
+      if (!sp_table || !sp_table)
         {
-          bs_throw_exception ("Type (table) not registered");
+          bs_throw_exception ("Type (traj) isn't created");
         }
       
     }
@@ -157,6 +158,7 @@ namespace blue_sky
     {
       smart_ptr< traj > pv = serialize_from_str_indirect< traj, traj_iface >(s);
       sp_table = pv->sp_table;
+      sp_prop = pv->sp_prop;
     }
 #ifdef BSPY_EXPORTING_PLUGIN
   std::string 

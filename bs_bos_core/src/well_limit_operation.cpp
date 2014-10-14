@@ -4,9 +4,9 @@
  * \author Sergey Miryanov
  * \date 16.07.2008
  * */
-#include "stdafx.h"
 
 #include "well_limit_operation.h"
+#include "bs_kernel.h"
 
 namespace blue_sky
   {

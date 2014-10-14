@@ -9,7 +9,10 @@
 #ifndef CALC_MODEL_H
 #define CALC_MODEL_H
 
+#include "bs_common.h"
 #include BS_FORCE_PLUGIN_IMPORT ()
+#include "bos_report.h"
+#include "auto_value.h"
 #include "convert_units.h"
 #include "constants.h"
 #include "prvd_table.h"

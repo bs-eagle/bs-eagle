@@ -7,7 +7,10 @@
 #ifndef BS_PVT_BASE_H_
 #define BS_PVT_BASE_H_
 
+#include "bs_common.h"
+#include "conf.h"
 #include "bs_serialize_decl.h"
+#include "table_iface.h"
 
 namespace blue_sky
   {

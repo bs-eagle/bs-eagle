@@ -7,7 +7,6 @@
  *              the BSD License. See LICENSE for more details.
  *       \todo  Obsolete
  * */
-#include "stdafx.h"
 
 #include "calc_well.h"
 #include "well_serializer.h"

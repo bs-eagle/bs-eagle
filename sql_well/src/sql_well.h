@@ -33,7 +33,7 @@ namespace blue_sky
       typedef BS_SP (table_iface)                       sp_table_t;
       typedef BS_SP (gis_iface)                         sp_gis_t;
       typedef BS_SP (traj_iface)                        sp_traj_t;
-      typedef BS_SP (h5_pool_iface)           			sp_pool_t;
+      typedef BS_SP (h5_pool_iface)                     sp_pool_t;
       typedef BS_SP (bos_reader_iface)                  sp_reader_t;
       typedef BS_SP (dt_tools_iface)                    sp_dt_t;
 
@@ -88,7 +88,9 @@ namespace blue_sky
        * @return 0 if OK
        */
       virtual int add_well (const std::string &well_name);
-      virtual list_t get_well_names () const;
+      int delete_well(const std::string& well_name);
+
+      virtual list_t get_well_names() const;
       //virtual int set_well_param (const std::string &wname, double date, const std::string param, double value);
       //virtual double get_well_param (const std::string &wname, double date, const std::string param);
 
@@ -99,16 +101,15 @@ namespace blue_sky
       //virtual int add_branch_prop (const std::string &wname, const std::string &branch,
       //                             sp_table_t tbl);
       virtual int add_branch_gis (const std::string &wname, const std::string &branch,
-                                  sp_gis_t g, const std::string& wlog_name = "");
+                                  sp_gis_t g, std::string wlog_name = "", uint wlog_type = 0,
+                                  bool replace_existing = true);
       virtual int add_branch_traj (const std::string &wname, const std::string &branch,
                                    sp_traj_t t);
       //virtual sp_table_t get_branch_prop (const std::string &wname, const std::string &branch) const;
       virtual sp_gis_t get_branch_gis (const std::string &wname, const std::string &branch,
-                                   const std::string& wlog_name = "");
-      virtual sp_traj_t get_branch_traj (const std::string &wname, const std::string &branch) const;
+                                   std::string wlog_name = "", uint wlog_type = 0);
+      virtual sp_traj_t get_branch_traj (const std::string &wname, const std::string &branch);
       //virtual void remove_branch (const std::string &wname, const std::string &branch);
-
-      virtual int update_branch_traj (const std::string &wname, const std::string &branch, sp_traj_t t);
 
       virtual void backup_to_file (const std::string &filename);
 
@@ -119,7 +120,7 @@ namespace blue_sky
       virtual t_double get_sql_real (t_int col);
       virtual bool get_sql_bool (t_int col);
       virtual std::string get_sql_str (t_int col);
-	  virtual bool get_sql_exist (t_int col);
+      virtual bool get_sql_exist (t_int col);
       virtual int exec_sql (const std::string &sql);
       virtual int exec_sql_and_return_rowid (const std::string &sql);
       virtual int merge_with_db (const std::string &dbname);
@@ -155,49 +156,23 @@ namespace blue_sky
 
       // return list of cutom well logs added via add_branch_gis() with nonempty
       // wlog_name parameter
-      std::vector< std::string > get_wlog_names(const std::string &wname, const std::string &branch);
+      std::vector< std::string > get_wlog_names(
+          const std::string &wname, const std::string &branch, uint wlog_type = 0
+      );
+
+      // rename existing well log
+      bool rename_well_log(
+          const std::string &wname, const std::string &branch,
+          const std::string& old_name, const std::string& new_name
+      );
+
+      // delete existing well log
+      bool delete_well_log(
+          const std::string &wname, const std::string &branch, std::string wlog_name = ""
+      );
 
     public:
 #ifdef BSPY_EXPORTING_PLUGIN
-#if 0
-      virtual boost::python::list d2date (double d) const
-        {
-          boost::python::list l;
-          int day, month, year, hour, minute, second;
-          double dd;
-          dd = get_date_day_month_year (d, day, month, year);
-          d2hms (dd, hour, minute, second);
-          l.append (year);
-          l.append (month);
-          l.append (day);
-          l.append (hour);
-          l.append (minute);
-          l.append (second);
-          return l;
-        }
-      virtual double date2d (int year, int month, int day, int hour, int minute, int second) const
-        {
-          double tm;
-          tm = ((double)hour + ((double)minute + (date_sim)second / 60.0) / 60.0) / 24.0;
-          return ymd2d (year, month, day) + tm;
-        }
-      virtual std::string d2str (double d) const
-        {
-          char b[1024];
-          int day, month, year;
-          get_date_day_month_year (d, day, month, year);
-          sprintf (b, "%02d.%02d.%04d", day, month, year);
-          return std::string (b);
-        }
-      virtual std::string t2str (double d) const
-        {
-          char b[1024];
-          int hour, minute, second;
-          d2hms (d, hour, minute, second);
-          sprintf (b, "Time: %02d:%02d:%02d", hour, minute, second);
-          return std::string (b);
-        }
-#endif //0
       /**
        * @brief python print wrapper
        *

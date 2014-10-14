@@ -4,7 +4,10 @@
  * \author Miryanov Sergey
  * \date 07.05.2008
  */
-#include "bs_pvt_stdafx.h"
+#include "bs_common.h"
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "bos_report.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
 #include "pvt_gas.h"
 #include "pvt_interpolator.h"

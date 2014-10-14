@@ -5,7 +5,6 @@
   \date 2009-08-07
 */
 
-#include "bs_mesh_stdafx.h"
 #include "mesh_grdecl_keywords.h"
 #include "bs_mesh_grdecl.h"
 

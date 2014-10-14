@@ -3,8 +3,8 @@
  * \brief implementation of tow stage preconditioner
  * \date 2006-08-04
  */
-#include "bs_lsolvers_stdafx.h"
 
+#include "bs_common.h"
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "matrix_iface.h"
 #include BS_STOP_PLUGIN_IMPORT ()

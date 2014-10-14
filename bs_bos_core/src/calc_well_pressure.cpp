@@ -6,7 +6,6 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
-#include "stdafx.h"
 #include "calc_well_pressure.h"
 #include "calc_model.h"
 #include "calc_well.h"

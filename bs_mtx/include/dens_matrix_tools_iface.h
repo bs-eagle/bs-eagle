@@ -19,7 +19,7 @@ namespace blue_sky
   /** 
    * @brief interface class for block CSR matrix storage and manipulation
    */
-  class dens_matrix_tools_iface: public bs_node
+  class BS_API_PLUGIN dens_matrix_tools_iface: public bs_node
     {
     public:
       typedef dens_matrix_iface                                 dens_t;

@@ -1,7 +1,6 @@
 // bs_scal.cpp : Defines the entry point for the DLL application.
 //
 
-#include "bs_scal_stdafx.h"
 #include "scal_3p.h"
 #include "py_scal_wrapper.h"
 #include "scal_keywords.hpp"

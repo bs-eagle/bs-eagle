@@ -4,7 +4,6 @@
  * @author
  * @date 2007-09-28
  */
-#include "bs_bos_core_data_storage_stdafx.h"
 #include "rocktab_table.h"
 #include "bs_misc.h"
 

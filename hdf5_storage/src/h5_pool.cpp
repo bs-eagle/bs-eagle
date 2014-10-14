@@ -21,7 +21,7 @@
 #include "hdf5_type_to_hid.hpp"
 #include "hdf5_hid_holder.hpp"
 #include "hdf5_functions.h"
-#include "date_helper.h"
+//#include "date_helper.h"
 #include "bos_report.h"
 
 using namespace std;
@@ -368,7 +368,7 @@ namespace blue_sky
         return get_fp_data_group (name, group_name);
       }
     map_hid_t::iterator b = group_id.begin();
-	map_hid_t::reverse_iterator rev_end (++b), rev_i (group_id.end());
+	map_hid_t::reverse_iterator rev_end (b), rev_i (group_id.end());
 	for (;rev_i != rev_end; ++rev_i)
 	  {
 		group_name = rev_i->first;
@@ -408,7 +408,7 @@ namespace blue_sky
         return get_i_data_group (name, group_name);
       }
     map_hid_t::iterator b = group_id.begin();
-	map_hid_t::reverse_iterator rev_end (++b), rev_i (group_id.end());
+	map_hid_t::reverse_iterator rev_end (b), rev_i (group_id.end());
 	for (;rev_i != rev_end; ++rev_i)
 	  {
 		group_name = rev_i->first;
@@ -640,7 +640,7 @@ namespace blue_sky
   h5_pool::get_script ()
   {
 	const hsize_t rank = 1;
-	hid_t dset, dspace;
+	hid_t dset;
 
 	// Create the datatype
 	hid_t dtype = H5Tcopy (H5T_C_S1);
@@ -873,7 +873,7 @@ namespace blue_sky
               get_hdf5_type <hdf5_type_helper <t_int>::type> (),
               data->data (),
               data->size (),
-              data->ndim (),
+              int(data->ndim ()),
               data->dims (),
               &def_value, true);
     return 0;
@@ -886,7 +886,7 @@ namespace blue_sky
               get_hdf5_type <hdf5_type_helper <t_int>::type> (),
               data->data (),
               data->size (),
-              data->ndim (),
+              int(data->ndim ()),
               data->dims (),
               &def_value, false);
     return 0;
@@ -899,7 +899,7 @@ namespace blue_sky
               get_hdf5_type <hdf5_type_helper <t_float>::type> (),
               data->data (),
               data->size (),
-              data->ndim (),
+              int(data->ndim ()),
               data->dims (),
               &def_value, true);
     return 0;
@@ -912,7 +912,7 @@ namespace blue_sky
               get_hdf5_type <hdf5_type_helper <t_float>::type> (),
               data->data (),
               data->size (),
-              data->ndim (),
+              int(data->ndim ()),
               data->dims (),
               &def_value, false);
     return 0;

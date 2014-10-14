@@ -14,6 +14,9 @@
 #include "mbcsr_matrix_iface.h"
 #include "bdiag_matrix_iface.h"
 #include "lsolver_iface.h"
+#include "constants.h"
+#include "flux_connections_iface.h"
+#include "auto_value.h"
 #include BS_STOP_PLUGIN_IMPORT ()
 
 namespace blue_sky

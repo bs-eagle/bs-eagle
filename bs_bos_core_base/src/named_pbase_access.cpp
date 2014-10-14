@@ -2,7 +2,6 @@
 		\brief named_pbase class methods implementations
 		\author Nikonov Max
 */
-#include "bs_bos_core_base_stdafx.h"
 
 #include "named_pbase_access.h"
 #include "bs_kernel.h"

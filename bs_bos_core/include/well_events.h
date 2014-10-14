@@ -11,6 +11,9 @@
 
 #include "event_base.h"
 #include "well_event_params_decl.h"
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "rs_smesh_iface.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
 namespace blue_sky
   {

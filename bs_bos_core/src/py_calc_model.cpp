@@ -6,9 +6,10 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
-#include "stdafx.h"
 
 #ifdef BSPY_EXPORTING_PLUGIN
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include "py_bs_iterator.h"
 #include "boost_array_adapter.h"
 #include "calc_model.h"
 #include "py_calc_model.h"

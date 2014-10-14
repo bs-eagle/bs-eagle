@@ -4,11 +4,13 @@
 #define BS_EAGLE_DATA_SAVER_H_
 
 #include "calc_model.h"
-#include "rs_mesh_iface.h"
-
 #include "calc_well.h"
 #include "facility_manager.h"
 #include "jacobian.h"
+
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "rs_mesh_iface.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 

@@ -22,7 +22,7 @@ namespace blue_sky
       // METHODS
       // ------------------------------------
     public:
-      typedef std::list<std::wstring>                  list_t;
+      typedef prop_iface::list_t list_t;
 
       // destructor
       virtual ~prop ()
@@ -183,23 +183,6 @@ namespace blue_sky
        */
       virtual void from_str (const std::string &s);
 
-#ifdef BSPY_EXPORTING_PLUGIN
-      virtual std::wstring py_str () const
-        {
-          //std::wstringstream s;
-          
-          //s << "FP properties:\n";
-          //s << str2wstr (fp_impl.py_str ());
-          //s << "INT properties:\n";
-          //s << str2wstr (i_impl.py_str ());
-          //s << "STRING properties:\n";
-          //s << str2wstr (s_impl.py_str ());
-          //s << "BOOL properties:\n";
-          //s << str2wstr (b_impl.py_str ());
-          //return s.str ();
-          return L"";
-        }
-
       list_t get_names_i () const
         {return i_impl.get_names ();}
       list_t get_names_f () const
@@ -227,7 +210,11 @@ namespace blue_sky
       std::wstring get_description_s (const std::wstring &name) const
         {return s_impl.get_description (name);}
 
-
+#ifdef BSPY_EXPORTING_PLUGIN
+      virtual std::wstring py_str () const
+        {
+          return L"";
+        }
 #endif //BSPY_EXPORTING_PLUGIN
       // ------------------------------
       // VARIABLES

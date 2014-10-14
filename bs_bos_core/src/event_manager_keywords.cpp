@@ -7,11 +7,13 @@
  *              the BSD License. See LICENSE for more details.
  * */
 
-#include "stdafx.h"
-#include "event_manager_keywords.hpp"
+#include "bs_common.h"
+#include BS_FORCE_PLUGIN_IMPORT()
 #include "bos_reader_iface.h"
 #include "event_manager_iface.hpp"
 #include "event_manager.h"
+#include BS_STOP_PLUGIN_IMPORT()
+#include "event_manager_keywords.hpp"
 
 namespace blue_sky 
 {

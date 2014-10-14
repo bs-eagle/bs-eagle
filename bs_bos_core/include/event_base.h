@@ -12,6 +12,11 @@
 // WTF??
 #include "data_storage_interface.h"
 
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "named_pbase_access.h"
+#include "rs_mesh_iface.h"
+#include BS_STOP_PLUGIN_IMPORT()
+
 namespace blue_sky
   {
 

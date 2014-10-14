@@ -4,7 +4,6 @@
  * @author Sayfullin Ilshat
  * @date 2009-02-05
  */
-#include "stdafx.h"
 #include "well_connection.h"
 #include "facility_manager.h"
 #include "fip_results_storage.h"

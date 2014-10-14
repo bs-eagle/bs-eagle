@@ -7,10 +7,10 @@
  *              the BSD License. See LICENSE for more details.
  *       \todo  A bit outdate
  * */
-#include "stdafx.h"
-#include "py_data_storage_interface.h"
-
 #ifdef BSPY_EXPORTING_PLUGIN
+#include "py_data_storage_interface.h"
+#include <boost/python.hpp>
+
 namespace blue_sky
   {
   namespace python
@@ -87,7 +87,7 @@ private:
     }
 
     void
-    py_data_serializer::save (const sp_storage_t &/*storage*/, const sp_obj &/*obj*/)
+    py_data_serializer::save (const sp_storage_t &/*storage*/, const sp_obj &/*obj*/) const
     {
       //Sergey Miryanov:
       //  today (23.07.2008) we haven't any way to convert sp_obj

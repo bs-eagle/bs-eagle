@@ -54,9 +54,11 @@ namespace blue_sky {
   }
 
   // forward declaration to export to python
-  // wide version
   void read_grdecl(const std::string& fname, const std::string dir, ulong nx, ulong ny, ulong nz,
     smart_ptr< h5_pool_iface > pool);
+
+  spv_float wlog_mean_projection(spv_float wlog_data, spv_float wlog_dept, spv_float dest_grid);
+
 }
 
 #ifdef BSPY_EXPORTING_PLUGIN
@@ -70,6 +72,7 @@ namespace {
     python::py_export_dt_tools ();
 
     def("read_grdecl", &blue_sky::read_grdecl);
+    def("wlog_mean_projection", &blue_sky::wlog_mean_projection);
     //python::py_export_table ();
     //python::py_export_gis ();
     //python::py_export_frac ();

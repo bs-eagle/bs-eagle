@@ -9,6 +9,10 @@
 #ifndef BS_CALC_PERF_BHP_BASE_H_
 #define BS_CALC_PERF_BHP_BASE_H_
 
+#include "bs_object_base.h"
+#include "conf.h"
+#include "rs_mesh_iface.h"
+
 namespace blue_sky
   {
 

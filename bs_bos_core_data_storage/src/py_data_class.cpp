@@ -1,5 +1,3 @@
-#include "bs_bos_core_data_storage_stdafx.h"
-
 #include "py_data_class.h"
 #include "numpy_tools.h"
 #include "py_object_handler.h"

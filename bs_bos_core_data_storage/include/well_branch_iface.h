@@ -8,7 +8,6 @@
  * */
  
 #include "bs_object_base.h"
-#include "conf.h"
 
 #include "conf.h"
 #include "prop_iface.h"
@@ -22,7 +21,7 @@ namespace blue_sky {
   class perforation;
   class fracture;
   
-  class well_branch_iface: public objbase
+  class BS_API_PLUGIN well_branch_iface: public objbase
     {
      public:
      

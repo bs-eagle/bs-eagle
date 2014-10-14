@@ -13,7 +13,7 @@
 namespace blue_sky {
 
 
-class pvt_dummy_iface : public objbase
+class BS_API_PLUGIN pvt_dummy_iface : public objbase
   {
     public:
 

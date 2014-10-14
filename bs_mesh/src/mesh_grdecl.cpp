@@ -3,9 +3,13 @@
 \author Iskhakov Ruslan
 \date 2008-05-20 */
 
-#include "bs_mesh_stdafx.h"
+#include "bs_report.h"
 #include "mesh_grdecl.h"
+
+#include BS_FORCE_PLUGIN_IMPORT()
 #include "czt_iface.h"
+#include "write_time_to_log.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
 #include <iterator>
 #ifdef WIN32
@@ -18,7 +22,7 @@ using namespace grd_ecl;
 #include <set>
 #endif
 
-const char filename_hdf5[] = "grid_swap.h5";
+//const char filename_hdf5[] = "grid_swap.h5";
 
 #ifdef BS_MESH_WRITE_TRANSMISS_MATRIX
   FILE*  fp;
@@ -1226,7 +1230,7 @@ mesh_grdecl::calc_tran(const t_long ext_index1, const t_long ext_index2, const p
 t_double 
 mesh_grdecl::calc_tran_boundary (const t_long ext_index1, const plane_t &plane1, const fpoint3d_t &center1, direction d_dir) const
 {
-  t_double tran;
+  t_double tran = 0;
   fpoint3d_t D1, A, plane_contact_center;
   
   get_plane_center(plane1, plane_contact_center);
@@ -2445,7 +2449,7 @@ double mesh_grdecl::mod(double *gogo,double ncub[],double d[],double *curve,doub
 	long key_27=0;//счётчик точек пересечения для алгоритма по прохождению 27 кубов
 	double i,j,k;//позже их надо куда нить в структура засунуть
 	ara->lwt=0;//флаг пересечения с отрезком
-	double counter1,counter2,counter3;
+	//double counter1,counter2,counter3;
 //начиная с номера flag массив points является доступным для заполнения
 	if((gogo[0]==(table->get_n_rows()-1))||(gogo[1]>=nx)||(gogo[2]>=ny)||(gogo[3]>=nz))//если достигли конца ломанной то завершаем выполнение
 	{
@@ -3702,10 +3706,10 @@ int mesh_grdecl::intersect_trajectories (sp_well_pool_t well_pool)
     for (t_long j = 0; j < ny; ++j)
       for (t_long k = 0; k < nz; ++k)
         {
-          t_long index = k + j * nz + i * ny * nz;
+          //t_long index = k + j * nz + i * ny * nz;
           calc_element (i, j, k, element);
 
-          mesh_element3d::corners_t corns = element.get_corners();
+          //mesh_element3d::corners_t corns = element.get_corners();
         }
 
   well_pool->prepare_sql("SELECT DISTINCT well_name, branch_name FROM branches");
@@ -3737,8 +3741,8 @@ int mesh_grdecl::intersect_trajectories (sp_well_pool_t well_pool)
 			    v_md[i] = table->get_value(i, 0);
 				}
 
-	    long int i,k=0;
-	    double *gogo,man,*points,*finish,*mdpoints;
+	    //long int i,k=0;
+	    double *gogo,*points,*mdpoints;
 
 	    double z=10;
 	    long cubFlag,flag;
@@ -3746,7 +3750,7 @@ int mesh_grdecl::intersect_trajectories (sp_well_pool_t well_pool)
 	    double d[3];
 	    double *curve,*md,*test,points69,*Ncubs;
 	    curve=NULL;
-	    struct tri pon;
+	    //struct tri pon;
 	    md=new double[table->get_n_rows()];
 	    points=new double[(table->get_n_rows())*100*3];//Здесь сохраняются точки пересечения отрезков с нашими кубами
 	    Ncubs=new double[(table->get_n_rows())*100*3];

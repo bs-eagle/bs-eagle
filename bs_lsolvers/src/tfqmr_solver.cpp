@@ -5,11 +5,8 @@
  * \date 11.02.2009
  * */
 
-#include "bs_lsolvers_stdafx.h"
-
 #include "tfqmr_solver.h"
 #include "mv_functions.h"
-
 
 #include BS_FORCE_PLUGIN_IMPORT ()
 #include "bos_report.h"

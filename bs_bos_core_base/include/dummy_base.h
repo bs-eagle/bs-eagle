@@ -7,10 +7,8 @@
 #ifndef BS_DUMMY_BASE_H_
 #define BS_DUMMY_BASE_H_
 
-#include BS_FORCE_PLUGIN_IMPORT ()
 #include "bs_object_base.h"
 #include "bs_link.h"
-#include BS_STOP_PLUGIN_IMPORT ()
 
 namespace blue_sky
   {

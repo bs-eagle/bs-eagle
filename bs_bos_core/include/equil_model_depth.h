@@ -2,6 +2,9 @@
 #define EQUIL_MODEL_DEPTH_H
 
 #include "equil_model_iface.h"
+#include "bs_serialize_decl.h"
+
+#include BS_FORCE_PLUGIN_IMPORT()
 #include "data_class.h"
 #include "pvt_3p_iface.h"
 #include "scal_3p_iface.hpp"
@@ -15,8 +18,7 @@
 //--------------------
 #include "scal_dummy_iface.h"
 #include "pvt_dummy_iface.h"
-
-#include "bs_serialize_decl.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
 namespace blue_sky
 {

@@ -5,7 +5,6 @@
  * @version 1.0
  * @date 2011-04-22
 */
-#include "bs_bos_core_base_stdafx.h"
 #include "conf.h"
 
 

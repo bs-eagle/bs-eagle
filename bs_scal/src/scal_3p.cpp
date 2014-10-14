@@ -4,7 +4,6 @@
  * \author Sergey Miryanov
  * \date 19.05.2008
  * */
-#include "bs_scal_stdafx.h"
 
 #include "scal_3p.h"
 #include "scal_3p_impl.h"
@@ -24,8 +23,8 @@
 
 namespace blue_sky
   {
-    BS_TYPE_IMPL_T_EXT_MEM(bs_array, 2, (calc_model_data, bs_array_shared));
-    BS_TYPE_IMPL_T_EXT_MEM(bs_array, 2, (calc_model_data, vector_traits));
+    //BLUE_SKY_TYPE_IMPL_T_EXT_MEM(bs_array, 2, (calc_model_data, bs_array_shared));
+	//BLUE_SKY_TYPE_IMPL_T_EXT_MEM(bs_array, 2, (calc_model_data, vector_traits));
 
   //////////////////////////////////////////////////////////////////////////
 

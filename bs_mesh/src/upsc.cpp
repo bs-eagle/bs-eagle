@@ -6,7 +6,6 @@
  * @date 2012-20-02
  */
 
-#include "bs_mesh_stdafx.h"
 #include <iomanip>
 #include <iostream>
 

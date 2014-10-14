@@ -9,9 +9,8 @@
 #ifndef BS_CALC_WELL_PRESSURE_H_
 #define BS_CALC_WELL_PRESSURE_H_
 
-//// WTF??
-//#include "well_results_storage.h"
-//#include "fip_results_storage.h"
+#include "bs_object_base.h"
+#include "conf.h"
 
 namespace blue_sky
   {

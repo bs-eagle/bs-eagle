@@ -7,11 +7,9 @@
  * \date 28.07.2011
  * */
 
-#include "well_branch_iface.h" 
+#include "well_branch_iface.h"
 #include "conf.h"
 
- 
- 
 namespace blue_sky {
 
   class gis;

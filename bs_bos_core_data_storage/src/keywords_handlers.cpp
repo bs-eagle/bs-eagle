@@ -4,13 +4,9 @@
 * @author Morozov Andrey
 * @date 2008-07-02
 */
-#include "bs_bos_core_data_storage_stdafx.h"
 
-//#include "event_base.h"
-//#include "event_manager.h"
-//#include "fi_params.h"
+#include "bs_common.h"
 #include "keyword_manager.h"
-//#include "localization.h"
 #include "constants.h"
 #include "data_class.h"
 #include "bos_reader_iface.h"

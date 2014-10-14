@@ -4,7 +4,6 @@
 * \author Khait Mark
 * \date 2006-07-21
 */
-#include "bs_bos_core_base_stdafx.h"
 
 double fi_operator_block_connections_timer = 0;
 double fi_operator_cells_timer = 0;

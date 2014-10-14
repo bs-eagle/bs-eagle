@@ -42,7 +42,7 @@ namespace blue_sky
       sp_table = BS_KERNEL.create_object ("table");
       if (!sp_prop || !sp_table)
         {
-          bs_throw_exception ("Type (prop) not registered");
+          bs_throw_exception ("Type (gis) isn't created");
         }
     }
   gis::gis (const gis& rhs) 
@@ -174,7 +174,7 @@ namespace blue_sky
       std::string data;
 
       std::cout << "SEC PAR:" << s << std::endl;
-      if (s[0]='-')
+      if (s[0] == '-')
         {
           return 0;
         }
@@ -219,7 +219,7 @@ namespace blue_sky
       namespace qi = boost::spirit::qi;
       using boost::spirit::ascii::space;
 
-      std::cout << "SEC ASCII:" << s << std::endl;
+      //std::cout << "SEC ASCII:" << s << std::endl;
       for (;!file.eof ();)
         {
           std::string::iterator begin = s.begin();

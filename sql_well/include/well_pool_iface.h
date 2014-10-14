@@ -31,7 +31,7 @@
 
 namespace blue_sky
 {
-class well_pool_iface : public objbase
+class BS_API_PLUGIN well_pool_iface : public objbase
   {
     public:
       typedef std::list<std::string>                    list_t;
@@ -105,14 +105,15 @@ class well_pool_iface : public objbase
       //virtual int add_branch_prop (const std::string &wname, const std::string &branch,
       //                             sp_table_t tbl) = 0;
       virtual int add_branch_gis (const std::string &wname, const std::string &branch,
-                                  sp_gis_t g, const std::string& wlog_name = "") = 0;
+                                  sp_gis_t g, std::string wlog_name = "", uint wlog_type = 0,
+                                  bool replace_existing = true) = 0;
       virtual int add_branch_traj (const std::string &wname, const std::string &branch,
                                    sp_traj_t t) = 0;
       //virtual sp_table_t get_branch_prop (const std::string &wname, const std::string &branch) const = 0;
       virtual sp_gis_t get_branch_gis (const std::string &wname, const std::string &branch,
-                                   const std::string& wlog_name = "") = 0;
+                                   std::string wlog_name = "", uint wlog_type = 0) = 0;
 
-      virtual sp_traj_t get_branch_traj (const std::string &wname, const std::string &branch) const = 0;
+      virtual sp_traj_t get_branch_traj (const std::string &wname, const std::string &branch) = 0;
       //virtual void remove_branch (const std::string &wname, const std::string &branch) = 0;
 
 
@@ -162,7 +163,20 @@ class well_pool_iface : public objbase
        */
       virtual int save_to_bos_ascii_file (const std::string &fname, sp_pool_t pool, sp_prop_t prop) = 0;
 
-      virtual std::vector< std::string > get_wlog_names(const std::string &wname, const std::string &branch) = 0;
+      virtual std::vector< std::string > get_wlog_names(
+          const std::string &wname, const std::string &branch, uint wlog_type = 0
+      ) = 0;
+
+      // rename existing well log
+      virtual bool rename_well_log(
+          const std::string &wname, const std::string &branch,
+          const std::string& old_name, const std::string& new_name
+      ) = 0;
+
+      // delete existing well log
+      virtual bool delete_well_log(
+          const std::string &wname, const std::string &branch, std::string wlog_name = ""
+      ) = 0;
 
 #ifdef BSPY_EXPORTING_PLUGIN
       //virtual boost::python::list d2date (double d) const = 0;

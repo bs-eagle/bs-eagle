@@ -6,18 +6,25 @@
  *  \copyright  This source code is released under the terms of 
  *              the BSD License. See LICENSE for more details.
  * */
-#include "stdafx.h"
+
+#include "bs_common.h"
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "arrays_tables.h"
+#include "data_storage_interface.h"
+#include "keyword_manager.h"
+#include "write_time_to_log.h"
+#include "constants.h"
+#include "err_num_def.h"
+#include BS_STOP_PLUGIN_IMPORT()
 
 #include "event_base.h"
 #include "event_manager.h"
 #include "reservoir_simulator.h"
 #include "reservoir.h"
-#include "data_storage_interface.h"
 #include "jacobian.h"
 #include "trans_multipliers.h"
 #include "main_loop_calc.h"
 #include "facility_manager.h"
-#include "keyword_manager.h"
 
 namespace blue_sky
 {
