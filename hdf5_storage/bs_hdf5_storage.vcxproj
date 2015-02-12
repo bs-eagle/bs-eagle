@@ -91,7 +91,7 @@
       <DisableSpecificWarnings>4520</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>blue-sky_d.lib;loki_D.lib;ws2_32.lib;hdf5.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>blue-sky_d.lib;hdf5_bs.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>$(HDF5_PATH)/dll;$(PYTHON_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/debug/;$(ProjectDir)/../../../exe/debug/plugins/;$(MPICH_PATH)/SDK/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>python25_d.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -115,7 +115,7 @@
       <DisableSpecificWarnings>4520</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>blue-sky_d.lib;loki_D.lib;ws2_32.lib;hdf5.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>blue-sky_d.lib;hdf5_bs.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>$(HDF5_64_PATH)/dll;$(PYTHON64_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib64;$(TargetDir)/../;$(TargetDir);$(MPICH_PATH)/SDK/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>python25_d.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -137,7 +137,7 @@
       <DisableSpecificWarnings>4003;4520</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>hdf5.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>hdf5_bs.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>$(HDF5_PATH)/dll;$(PYTHON_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib;$(ProjectDir)/../../../exe/release/;$(ProjectDir)/../../../exe/release/plugins/;$(MPICH_PATH)/SDK/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>python25.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -162,7 +162,7 @@
       <DisableSpecificWarnings>4003;4520</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>hdf5.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>hdf5_bs.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>$(HDF5_64_PATH)/dll;$(PYTHON64_PATH)/libs;$(LOKI_PATH)/lib;$(BOOST_PATH)/lib64;$(ProjectDir)/../../../exe/release_x64;$(ProjectDir)/../../../exe/release_x64/plugins/;$(MPICH_PATH)/SDK/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>python25.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
