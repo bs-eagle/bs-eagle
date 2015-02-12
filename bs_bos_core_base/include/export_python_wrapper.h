@@ -136,6 +136,7 @@ namespace python {
         using namespace boost::python;
         register_ptr_to_python <smart_ptr <class_t_, true> > ();
         implicitly_convertible <smart_ptr <class_t_, true>, smart_ptr <base_t_, true> > ();
+        implicitly_convertible <smart_ptr <objbase, true>, smart_ptr <class_t_, true> > ();
       }
     };
   }
