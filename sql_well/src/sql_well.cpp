@@ -177,7 +177,7 @@ std::string to_lower(const std::string& s) {
         }
       };
 
-      if (!db)
+      if (!db || !g)
         return -1;
       if (stmp_sql)
         finalize_sql ();
@@ -453,7 +453,7 @@ std::string to_lower(const std::string& s) {
    sql_well::add_branch_traj (const std::string &wname, const std::string &branch,
                               sp_traj_t t)
      {
-      if (!db)
+      if (!db || !t)
         return -1;
       if (stmp_sql)
         finalize_sql ();
