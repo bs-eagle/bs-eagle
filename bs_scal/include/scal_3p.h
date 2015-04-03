@@ -16,11 +16,11 @@
 namespace blue_sky
 {
 
-  class BS_API_PLUGIN scal_region;
+  class scal_region;
 
-  class BS_API_PLUGIN scale_array_holder;
+  class scale_array_holder;
 
-  class BS_API_PLUGIN scal_2p_data_holder;
+  class scal_2p_data_holder;
   
   //class BS_API_PLUGIN jfunction;
 

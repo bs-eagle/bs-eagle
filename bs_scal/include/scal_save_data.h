@@ -9,6 +9,14 @@
 
 #ifdef _DEBUG
 
+#include "bs_common.h"
+#include BS_FORCE_PLUGIN_IMPORT()
+#include "bos_report.h"
+#include "locale_keeper.h"
+#include BS_STOP_PLUGIN_IMPORT()
+
+#include "scal_2p_data_holder.h"
+
 namespace blue_sky
   {
   namespace scal
