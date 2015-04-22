@@ -589,14 +589,77 @@ sql_well::sp_traj_t sql_well::get_branch_traj(
 	return sp_traj;
 }
 
+bool sql_well::delete_branch(
+	const std::string &wname, const std::string &branch
+) {
+	if (!db)
+		return false;
+	if (stmp_sql)
+		finalize_sql ();
+
+	std::string q;
+	const std::string select_filter = " WHERE well_name = '" + wname +
+		"' AND branch_name = '" + branch + "'";
+	bool res = false;
+
+	// remove branch-related data in misc tables
+	// well logs
+	q = "DELETE FROM well_logs" + select_filter;
+	exec_sql(q);
+	// TODO: get rid of following tables completely
+	// completions
+	q = "DELETE FROM completions" + select_filter;
+	exec_sql(q);
+	// fractures
+	q = "DELETE FROM fractures" + select_filter;
+	exec_sql(q);
+
+	// and finally delete branch
+	q = "DELETE FROM branches" + select_filter;
+	res = (exec_sql(q) == 0);
+
+	// clean deleted entries from DB
+	exec_sql("VACUUM");
+	return res;
+}
+
+bool sql_well::rename_branch(
+	const std::string& wname, const std::string& old_branch, const std::string& new_branch
+) {
+	if (!db)
+		return false;
+	if (stmp_sql)
+		finalize_sql ();
+
+	std::string q;
+	const std::string update_filter = " SET branch_name = '" + new_branch +
+		"' WHERE well_name = '" + wname + "' AND branch_name = '" + old_branch + "'";
+
+	// rename branch in misc tables
+	// well logs
+	q = "UPDATE well_logs" + update_filter;
+	exec_sql(q);
+	// TODO: get rid of following tables completely
+	// completions
+	q = "UPDATE completions" + update_filter;
+	exec_sql(q);
+	// fractures
+	q = "UPDATE fractures" + update_filter;
+	exec_sql(q);
+
+	// and finally delete branch
+	q = "UPDATE branches" + update_filter;
+	return (exec_sql(q) == 0);
+}
+
 #ifdef BSPY_EXPORTING_PLUGIN
-  std::string
-  sql_well::py_str () const
-    {
-      std::stringstream s;
-      s << file_name << "\n";
-      return s.str ();
-    }
+
+std::string sql_well::py_str() const {
+	std::stringstream s;
+	s << file_name << "\n";
+	return s.str ();
+}
+
 #endif //BSPY_EXPORTING_PLUGIN
 
 /////////////////////////////////BS Register

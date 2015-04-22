@@ -97,8 +97,6 @@ public:
 	virtual list_t get_branches_names (const std::string &well_name) const;
 	virtual int add_branch(const std::string &wname, const std::string &branch,
 		const std::string &parent = "", t_double md = -1);
-	//virtual int add_branch_prop (const std::string &wname, const std::string &branch,
-	//	sp_table_t tbl);
 
 	virtual int add_branch_gis (const std::string &wname, const std::string &branch,
 		sp_gis_t g, std::string wlog_name = "", uint wlog_type = 0,
@@ -162,13 +160,24 @@ public:
 
 	// rename existing well log
 	bool rename_well_log(
-		const std::string &wname, const std::string &branch,
+		const std::string& wname, const std::string& branch,
 		const std::string& old_name, const std::string& new_name
 	);
 
 	// delete existing well log
 	bool delete_well_log(
-		const std::string &wname, const std::string &branch, std::string wlog_name = ""
+		const std::string& wname, const std::string& branch, std::string wlog_name = ""
+	);
+
+	// rename existing branch
+	bool rename_branch(
+		const std::string& wname, const std::string& old_branch, const std::string& new_branch
+	);
+
+	// delete existing branch
+	// will also delete corresponding well logs!
+	bool delete_branch(
+		const std::string &wname, const std::string &branch
 	);
 
 public:

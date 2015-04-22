@@ -91,6 +91,8 @@ PY_EXPORTER (py_sql_well_exporter, default_exporter)
 	.def ("get_branches_names",                 &T::get_branches_names,
 		args (""), "Return names of branches for given well")
 	.def("add_branch", &T::add_branch, add_branch_ol())
+	.def("rename_branch", &T::rename_branch)
+	.def("delete_branch", &T::delete_branch)
 PY_EXPORTER_END;
 
 //! export matrices to python

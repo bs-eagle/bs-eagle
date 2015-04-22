@@ -97,23 +97,26 @@ public:
 	//virtual double get_well_param (const std::string &wname, double date, const std::string param) = 0;
 
 	// branches
-	virtual list_t get_branches_names (const std::string &well_name) const = 0;
-	virtual int add_branch(const std::string &wname, const std::string &branch,
-		const std::string &parent = "", t_double md = -1) = 0;
-	//virtual int add_branch_prop (const std::string &wname, const std::string &branch,
-	//                             sp_table_t tbl) = 0;
-	virtual int add_branch_gis (const std::string &wname, const std::string &branch,
+	virtual list_t get_branches_names(const std::string &well_name) const = 0;
+	virtual int add_branch(
+		const std::string &wname, const std::string &branch,
+		const std::string &parent = "", t_double md = -1
+	) = 0;
+
+	virtual int add_branch_gis(
+		const std::string &wname, const std::string &branch,
 		sp_gis_t g, std::string wlog_name = "", uint wlog_type = 0,
-		bool replace_existing = true) = 0;
-	virtual int add_branch_traj (const std::string &wname, const std::string &branch,
-		sp_traj_t t) = 0;
-	//virtual sp_table_t get_branch_prop (const std::string &wname, const std::string &branch) const = 0;
-	virtual sp_gis_t get_branch_gis (const std::string &wname, const std::string &branch,
-		std::string wlog_name = "", uint wlog_type = 0) = 0;
+		bool replace_existing = true
+	) = 0;
+	virtual int add_branch_traj(
+		const std::string &wname, const std::string &branch, sp_traj_t t
+	) = 0;
+	virtual sp_gis_t get_branch_gis(
+		const std::string &wname, const std::string &branch,
+		std::string wlog_name = "", uint wlog_type = 0
+	) = 0;
 
-	virtual sp_traj_t get_branch_traj (const std::string &wname, const std::string &branch) = 0;
-	//virtual void remove_branch (const std::string &wname, const std::string &branch) = 0;
-
+	virtual sp_traj_t get_branch_traj(const std::string &wname, const std::string &branch) = 0;
 
 	virtual int prepare_sql (const std::string &sql) = 0;
 	virtual int step_sql () = 0;
@@ -178,12 +181,18 @@ public:
 		const std::string &wname, const std::string &branch, std::string wlog_name = ""
 	) = 0;
 
-#ifdef BSPY_EXPORTING_PLUGIN
-	//virtual boost::python::list d2date (double d) const = 0;
-	//virtual double date2d (int year, int month, int day, int hour, int minute, int second) const = 0;
-	//virtual std::string d2str (double d) const = 0;
-	//virtual std::string t2str (double d) const = 0;
+	// rename existing branch
+	virtual bool rename_branch(
+		const std::string& wname, const std::string& old_branch, const std::string& new_branch
+	) = 0;
 
+	// delete existing branch
+	// will also delete corresponding well logs!
+	virtual bool delete_branch(
+		const std::string &wname, const std::string &branch
+	) = 0;
+
+#ifdef BSPY_EXPORTING_PLUGIN
 	/**
 	 * @brief python print wrapper
 	 *
