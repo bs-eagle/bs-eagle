@@ -200,8 +200,16 @@ sql_well::list_t sql_well::get_branches_names(const std::string& well_name) cons
 	return lst;
 }
 
-int
-sql_well::add_branch_gis (const std::string &wname, const std::string &branch,
+int sql_well::add_branch(
+	const std::string &wname, const std::string &branch, const std::string &parent, t_double md
+) {
+	std::string sql = "INSERT OR REPLACE INTO branches (well_name, branch_name, md, parent)";
+	sql += " VALUES ('" + wname + "', '" + branch + "', '" + parent + "', " +
+		boost::lexical_cast< std::string >(md) + ")";
+	return exec_sql(sql);
+}
+
+int sql_well::add_branch_gis (const std::string &wname, const std::string &branch,
 	sp_gis_t g, std::string wlog_name, uint wlog_type,
 	bool replace_existing
 ) {
@@ -283,8 +291,8 @@ sql_well::add_branch_gis (const std::string &wname, const std::string &branch,
 
 			// write it to DB
 			add_branch_gis(
-					wname, branch, cur_gis, wstr2str(names[i], "utf-8"), wlog_type, replace_existing
-					);
+				wname, branch, cur_gis, wstr2str(names[i], "utf-8"), wlog_type, replace_existing
+			);
 		}
 
 		// 2. Write gis in old format if no wlog_name specified

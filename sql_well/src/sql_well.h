@@ -95,18 +95,19 @@ public:
 
 	// branches
 	virtual list_t get_branches_names (const std::string &well_name) const;
-	//virtual int add_branch (const std::string &wname, const std::string &branch,
-	//                        t_double md, const std::string &parent);
+	virtual int add_branch(const std::string &wname, const std::string &branch,
+		const std::string &parent = "", t_double md = -1);
 	//virtual int add_branch_prop (const std::string &wname, const std::string &branch,
-	//                             sp_table_t tbl);
+	//	sp_table_t tbl);
+
 	virtual int add_branch_gis (const std::string &wname, const std::string &branch,
-			sp_gis_t g, std::string wlog_name = "", uint wlog_type = 0,
-			bool replace_existing = true);
+		sp_gis_t g, std::string wlog_name = "", uint wlog_type = 0,
+		bool replace_existing = true);
 	virtual int add_branch_traj (const std::string &wname, const std::string &branch,
-			sp_traj_t t);
+		sp_traj_t t);
 	//virtual sp_table_t get_branch_prop (const std::string &wname, const std::string &branch) const;
 	virtual sp_gis_t get_branch_gis (const std::string &wname, const std::string &branch,
-			std::string wlog_name = "", uint wlog_type = 0);
+		std::string wlog_name = "", uint wlog_type = 0);
 	virtual sp_traj_t get_branch_traj (const std::string &wname, const std::string &branch);
 	//virtual void remove_branch (const std::string &wname, const std::string &branch);
 

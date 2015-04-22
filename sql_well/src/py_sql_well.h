@@ -29,6 +29,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(add_branch_gis_ol, add_branch_gis, 3, 5)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(get_branch_gis_ol, get_branch_gis, 2, 4)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(get_wlog_names_ol, get_wlog_names, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(delete_well_log_ol, delete_well_log, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(add_branch_ol, add_branch, 2, 4)
 
 PY_EXPORTER (py_sql_well_exporter, default_exporter)
 	.def ("open_db",                            &T::open_db,
@@ -89,6 +90,7 @@ PY_EXPORTER (py_sql_well_exporter, default_exporter)
 	.def("delete_well_log", &T::delete_well_log, delete_well_log_ol())
 	.def ("get_branches_names",                 &T::get_branches_names,
 		args (""), "Return names of branches for given well")
+	.def("add_branch", &T::add_branch, add_branch_ol())
 PY_EXPORTER_END;
 
 //! export matrices to python
