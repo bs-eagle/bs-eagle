@@ -203,7 +203,7 @@ sql_well::list_t sql_well::get_branches_names(const std::string& well_name) cons
 int sql_well::add_branch(
 	const std::string &wname, const std::string &branch, const std::string &parent, t_double md
 ) {
-	std::string sql = "INSERT OR REPLACE INTO branches (well_name, branch_name, md, parent)";
+	std::string sql = "INSERT OR REPLACE INTO branches (well_name, branch_name, parent, md)";
 	sql += " VALUES ('" + wname + "', '" + branch + "', '" + parent + "', " +
 		boost::lexical_cast< std::string >(md) + ")";
 	return exec_sql(sql);
@@ -531,22 +531,60 @@ sql_well::sp_traj_t sql_well::get_branch_traj(
 	finalize_sql();
 
 	// format sql
-	std::string q = "SELECT traj FROM branches WHERE well_name = '" + wname +
+	std::string q = "SELECT traj, parent, md FROM branches WHERE well_name = '" + wname +
 		"' AND branch_name = '" + branch + "'";
 
 	// exec sql
 	if(prepare_sql(q) == 0 && step_sql() == 0) {
 		// leave this for debugging purposes
-		std::cout << "READ WELL TRAJ: " << wname;
-		// extract trajectory
+		std::cout << "READ WELL TRAJ: (" << wname << ", " << branch << ')';
+		// extract trajectory, parent, md
 		q = extract_blob< std::string >::go(*this, 0);
+		std::string parent = get_sql_str(1);
+		t_double md = get_sql_real(2);
+		finalize_sql();
+
 		if(!q.empty()) {
 			sp_traj = BS_KERNEL.create_object ("traj");
 			sp_traj->from_str(q);
+			std::cout << ", ";
 		}
-		std::cout << ", DATA = " << q.size() << std::endl;
+		// check if branch contains reference to parent
+		else if(!parent.empty()) {
+			std::cout << " -> PARENT: ";
+			sp_traj = get_branch_traj(wname, parent);
+			if(md <= 0)
+				return sp_traj;
+
+			// if positive MD is set, return parent trajectory after given MD
+			// obtain parent traj data
+			sp_table_t ptraj = sp_traj->get_table();
+			// check if MD column exists
+			std::vector< std::wstring > col_names = ptraj->get_col_names();
+			int md_col = -1;
+			for(ulong i = 0; i < col_names.size(); ++i) {
+				if(col_names[i] == L"MD" || col_names[i] == L"md") {
+					md_col = int(i);
+					break;
+				}
+			}
+			// cut trajectory below md
+			// DEBUG
+			//std::cout << "MD col = " << md_col << std::endl;
+			if(md_col >= 0) {
+				const t_double* p_md = ptraj->get_col_ptr(md_col);
+				for(ulong i = ptraj->get_n_rows() - 1; i < ptraj->get_n_rows(); --i) {
+					if(p_md[i] < md) {
+						//std::cout << "cut row " << i << ", MD = " << p_md[i] << std::endl;
+						ptraj->remove_row(i);
+					}
+				}
+			}
+		}
+		std::cout << "DATA = " << sp_traj->get_table()->get_n_rows() << std::endl;
 	}
-	finalize_sql();
+	else
+		finalize_sql();
 
 	return sp_traj;
 }
