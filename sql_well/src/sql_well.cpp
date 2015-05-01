@@ -402,10 +402,25 @@ sql_well::sp_gis_t sql_well::get_branch_gis(
 			sp_gis = BS_KERNEL.create_object ("gis");
 			sp_gis->from_str(q);
 		}
-		std::cout << ", DATA = " << q.size() << std::endl;
+		std::cout << " DATA = ";
+		if(sp_gis)
+			std::cout << sp_gis->get_table()->get_n_rows();
+		else
+			std::cout << 0;
+		std::cout << std::endl;
 	}
 	finalize_sql();
 
+	// add branch property to gis
+	if(sp_gis) {
+		sp_prop_t p = sp_gis->get_prop();
+		p->add_property_s(L"", L"_well", L"Well name of well log in DB");
+		p->set_s(L"_well", str2wstr(wname, "utf-8"));
+		p->add_property_s(L"main", L"_branch", L"Branch name of well log in DB");
+		p->set_s(L"_branch", str2wstr(branch, "utf-8"));
+		p->add_property_i(0, L"_type", L"Well log type");
+		p->set_i(L"_type", wlog_type);
+	}
 	return sp_gis;
 }
 
@@ -537,7 +552,7 @@ sql_well::sp_traj_t sql_well::get_branch_traj(
 	// exec sql
 	if(prepare_sql(q) == 0 && step_sql() == 0) {
 		// leave this for debugging purposes
-		std::cout << "READ WELL TRAJ: (" << wname << ", " << branch << ')';
+		std::cout << "READ WELL TRAJ: (" << wname << ", " << branch << ") ";
 		// extract trajectory, parent, md
 		q = extract_blob< std::string >::go(*this, 0);
 		std::string parent = get_sql_str(1);
@@ -547,11 +562,11 @@ sql_well::sp_traj_t sql_well::get_branch_traj(
 		if(!q.empty()) {
 			sp_traj = BS_KERNEL.create_object ("traj");
 			sp_traj->from_str(q);
-			std::cout << ", ";
+			//std::cout << ", ";
 		}
 		// check if branch contains reference to parent
 		else if(!parent.empty()) {
-			std::cout << " -> PARENT: ";
+			std::cout << "-> PARENT: ";
 			sp_traj = get_branch_traj(wname, parent);
 			if(md <= 0)
 				return sp_traj;
@@ -581,7 +596,12 @@ sql_well::sp_traj_t sql_well::get_branch_traj(
 				}
 			}
 		}
-		std::cout << "DATA = " << sp_traj->get_table()->get_n_rows() << std::endl;
+		std::cout << "DATA = ";
+		if(sp_traj)
+			std::cout << sp_traj->get_table()->get_n_rows();
+		else
+			std::cout << 0;
+		std::cout << std::endl;
 	}
 	else
 		finalize_sql();
