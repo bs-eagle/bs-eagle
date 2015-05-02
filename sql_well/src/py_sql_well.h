@@ -30,10 +30,11 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(get_branch_gis_ol, get_branch_gis, 2, 4)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(get_wlog_names_ol, get_wlog_names, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(delete_well_log_ol, delete_well_log, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(add_branch_ol, add_branch, 2, 4)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(open_db_ol, open_db, 1, 2)
 
 PY_EXPORTER (py_sql_well_exporter, default_exporter)
-	.def ("open_db",                            &T::open_db,
-		args ("file_name"), "Open database")
+	.def ("open_db",                            &T::open_db, open_db_ol())
+	//	args ("file_name"), "Open database")
 	.def ("close_db",                           &T::close_db,
 		args (""), "Close database")
 	.def ("fill_db",                           &T::fill_db,

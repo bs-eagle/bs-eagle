@@ -75,7 +75,7 @@ public:
 	 *
 	 * @return 0 if success
 	 */
-	virtual int open_db (const std::string &file) = 0;
+	virtual int open_db (const std::string &file, bool skip_postproc = false) = 0;
 
 	/**
 	 * @brief close database connection
