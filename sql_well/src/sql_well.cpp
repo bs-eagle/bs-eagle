@@ -220,7 +220,7 @@ int sql_well::add_branch_gis (const std::string &wname, const std::string &branc
 			// bind well log data
 			const std::string log_data = g->to_str();
 			if (sqlite3_bind_blob(sqw.stmp_sql, 1, &log_data.c_str()[0], int(log_data.size()), SQLITE_STATIC)) {
-				fprintf (stderr, "Can't make select: %s\n", sqlite3_errmsg (sqw.db));
+				fprintf (stderr, "Can't write wlog blob: %s\n", sqlite3_errmsg (sqw.db));
 				sqw.finalize_sql();
 				return -3;
 			}
@@ -236,6 +236,15 @@ int sql_well::add_branch_gis (const std::string &wname, const std::string &branc
 		return -1;
 	if (stmp_sql)
 		finalize_sql ();
+
+	// add some properties to gis
+	sp_prop_t p = g->get_prop();
+	p->add_property_s(L"", L"_well", L"Well name of well log in DB");
+	p->set_s(L"_well", str2wstr(wname, "utf-8"));
+	p->add_property_s(L"main", L"_branch", L"Branch name of well log in DB");
+	p->set_s(L"_branch", str2wstr(branch, "utf-8"));
+	p->add_property_i(0, L"_type", L"Well log type");
+	p->set_i(L"_type", wlog_type);
 
 	std::string q;
 	if(wlog_name.size() == 0) {
@@ -411,7 +420,7 @@ sql_well::sp_gis_t sql_well::get_branch_gis(
 	}
 	finalize_sql();
 
-	// add branch property to gis
+	// add some properties to gis
 	if(sp_gis) {
 		sp_prop_t p = sp_gis->get_prop();
 		p->add_property_s(L"", L"_well", L"Well name of well log in DB");
