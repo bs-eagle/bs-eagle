@@ -59,10 +59,14 @@ namespace blue_sky {
 
   spv_float wlog_mean_projection(spv_float wlog_data, spv_float wlog_dept, spv_float dest_grid);
 
+  void read_surface(const std::string& fname, ulong nx, ulong ny,
+    smart_ptr< h5_pool_iface > pool, const std::string& surf_name = "");
 }
 
 #ifdef BSPY_EXPORTING_PLUGIN
 namespace {
+
+  BOOST_PYTHON_FUNCTION_OVERLOADS(read_surface_overl, blue_sky::read_surface, 4, 5);
   void
   init_py_subsystem ()
   {
@@ -73,6 +77,7 @@ namespace {
 
     def("read_grdecl", &blue_sky::read_grdecl);
     def("wlog_mean_projection", &blue_sky::wlog_mean_projection);
+    def("read_surface", &blue_sky::read_surface, read_surface_overl());
     //python::py_export_table ();
     //python::py_export_gis ();
     //python::py_export_frac ();
