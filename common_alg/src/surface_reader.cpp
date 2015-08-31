@@ -109,7 +109,6 @@ void read_surface(const std::string& fname, ulong nx, ulong ny,
 	}
 
 	// write array to pool
-	npy_intp h5p_dims[] = { 0, npy_intp(dims[0]), 0, npy_intp(dims[1]), 0, 1 };
 	std::string surf_name_ = surf_name;
 	if(!surf_name.size()) {
 		surf_name_ = fname.substr(0, fname.rfind('.'));
@@ -117,7 +116,11 @@ void read_surface(const std::string& fname, ulong nx, ulong ny,
 		if(slashpos != std::string::npos)
 			surf_name_ = surf_name_.substr(slashpos + 1);
 	}
-	pool->declare_fp_data(surf_name_, 0, 3, &h5p_dims[0], 1);
+
+	//npy_intp h5p_dims[] = { 0, npy_intp(dims[0]), 0, npy_intp(dims[1]), 0, 1 };
+	npy_intp h5p_dims[] = { npy_intp(dims[0]), npy_intp(dims[1]) };
+	//pool->declare_fp_data(surf_name_, 0, 3, &h5p_dims[0], 1);
+	pool->declare_fp_data(surf_name_, 0, 2, &h5p_dims[0], 0);
 	pool->set_fp_data(surf_name_, databuf);
 }
 
