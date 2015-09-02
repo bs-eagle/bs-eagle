@@ -79,7 +79,7 @@ void read_surface(const std::string& fname, ulong nx, ulong ny,
 					// update data buffer size
 					databuf->resize(dims[0] * dims[1] * 3);
 					std::fill(databuf->begin(), databuf->end(), 0.);
-			}
+				}
 			}
 			continue;
 		}
@@ -118,9 +118,9 @@ void read_surface(const std::string& fname, ulong nx, ulong ny,
 	}
 
 	//npy_intp h5p_dims[] = { 0, npy_intp(dims[0]), 0, npy_intp(dims[1]), 0, 1 };
-	npy_intp h5p_dims[] = { npy_intp(dims[0]), npy_intp(dims[1]) };
+	npy_intp h5p_dims[] = { npy_intp(dims[0]), npy_intp(dims[1]), 3 };
 	//pool->declare_fp_data(surf_name_, 0, 3, &h5p_dims[0], 1);
-	pool->declare_fp_data(surf_name_, 0, 2, &h5p_dims[0], 0);
+	pool->declare_fp_data(surf_name_, 0, 3, &h5p_dims[0], 0);
 	pool->set_fp_data(surf_name_, databuf);
 }
 
