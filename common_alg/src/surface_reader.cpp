@@ -17,6 +17,17 @@
 namespace blue_sky {
 typedef smart_ptr< h5_pool_iface > sp_h5_pool;
 
+// function that actually reads surface data in some format
+// params are: file, dims, target data buffer)
+typedef ulong (*read_surface_fmt)(std::ifstream&, ulong*, spv_float&);
+
+// forward declaration of functions that read different surface 
+ulong read_earth_vision_grid(std::ifstream& f, ulong* dims, spv_float& databuf);
+ulong read_cps3_grid(std::ifstream& f, ulong* dims, spv_float& databuf);
+ulong read_zmap_grid(std::ifstream& f, ulong* dims, spv_float& databuf) {
+	return 0;
+}
+
 // hidden details
 namespace {
 
@@ -53,12 +64,12 @@ void read_surface(const std::string& fname, ulong nx, ulong ny,
 
 	std::string linebuf;
 	std::istringstream line_s;
-	std::size_t pos;
-	t_float point[3];
-	ulong row, col;
+	//std::size_t pos;
+	//t_float point[3];
+	//ulong row, col;
 
 	// setup buffer with dimensions passed
-	ulong dims[3] = {nx, ny, 1};
+	ulong dims[3] = {nx, ny};
 	spv_float databuf = BS_KERNEL.create_object(v_float::bs_type());
 	databuf->resize(dims[0] * dims[1] * 3);
 	std::fill(databuf->begin(), databuf->end(), 0.);
@@ -70,30 +81,32 @@ void read_surface(const std::string& fname, ulong nx, ulong ny,
 
 		// parse some info from comments
 		if(linebuf[0] == '#') {
-			pos = linebuf.find("Grid_size:");
-			if(pos != std::string::npos) {
-				line_s.str(linebuf.substr(pos + 11));
-				// format is "252 x 151", so read intermediate 'x' char
-				if(line_s >> nx >> linebuf[0] >> ny) {
-					dims[0] = nx; dims[1] = ny;
-					// update data buffer size
-					databuf->resize(dims[0] * dims[1] * 3);
-					std::fill(databuf->begin(), databuf->end(), 0.);
-				}
+			if(linebuf.find("Information from grid:") != std::string::npos) {
+				// EarthVision grid format
+				n_points = read_earth_vision_grid(f, dims, databuf);
+				break;
 			}
 			continue;
 		}
+		// skip ! comments
+		if(linebuf[0] == '!') continue;
 
-		// if we are here, then start array reading
-		line_s.str(linebuf);
-		if(line_s >> point[0] >> point[1] >> point[2] >> col >> row) {
-			const ulong offs = ((row - 1)*ny + col - 1) * 3;
-			if(offs > databuf->size() - 3)
-				continue;
-			std::copy(&point[0], &point[0] + 3, databuf->begin() + offs);
-			// count points actually read from file
-			++n_points;
+		if(linebuf.substr(0, 6) == "FSASCI") {
+			// CPS-3 grid format
+			n_points = read_cps3_grid(f, dims, databuf);
+			break;
 		}
+
+		if(linebuf[0] == '@') {
+			if(linebuf.find("grid") != std::string::npos) {
+				// Zmap+grid format
+				n_points = read_zmap_grid(f, dims, databuf);
+				break;
+			}
+		}
+
+		// try to read as Irap classic grid
+		// TODO: impleent Irap reading
 	}
 
 	// restore locale
