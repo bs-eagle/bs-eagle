@@ -7,6 +7,8 @@
 #ifndef BS_SCAL_SCAL_2P_DATA_HOLDER_H_
 #define BS_SCAL_SCAL_2P_DATA_HOLDER_H_
 
+#include "scal_3p_iface.hpp"
+#include "scal_region.h"
 #include "scal_data_placement_info.h"
 #include "table_iface.h"
 

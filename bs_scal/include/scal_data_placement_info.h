@@ -7,6 +7,8 @@
 #ifndef BS_SCAL_DATA_PLACEMENT_INFO_H_
 #define BS_SCAL_DATA_PLACEMENT_INFO_H_
 
+#include "conf.h"
+
 namespace blue_sky
   {
   namespace scal

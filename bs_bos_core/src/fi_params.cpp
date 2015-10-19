@@ -452,7 +452,7 @@ namespace blue_sky
                     << " from " << strt << " value should be \'ON\' or \'OFF\' or \'YES\' or \'NO\'";
                     BS_ASSERT(false) (out_s.str());
                     throw bs_exception("fi_params class",out_s.str().c_str());
-                    BOSERR (section::read_data, level::error) << out_s << bs_end;
+                    BOSERR (section::read_data, level::error) << out_s.str() << bs_end;
                   }
                 flag = 0;
               }

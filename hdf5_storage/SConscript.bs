@@ -20,7 +20,7 @@ libs = ["blue_sky",
      "bs_mtx"
      ]
 
-boost_libs = ["boost_date_time-mt"]
+boost_libs = list_suffix(["boost_date_time"], env["boost_suffix"])
 
 if (build_kind == "debug") :
     env.AppendUnique (LIBS = list_suffix (libs, "_d") + list_suffix (boost_libs, "-d"))

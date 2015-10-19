@@ -157,7 +157,7 @@ bool update_db_scheme(sql_well& sqw) {
 } // eof hidden namespace
 
   int
-  sql_well::open_db (const std::string &file_)
+  sql_well::open_db (const std::string &file_, bool skip_postproc)
     {
       int rc = 0;
       char *zErrMsg = 0;
@@ -201,7 +201,10 @@ bool update_db_scheme(sql_well& sqw) {
         }
 
       file_name = file;
-      return update_db_scheme(*this) ? 0 : -1;
+      if(skip_postproc)
+        return 0;
+      else
+        return update_db_scheme(*this) ? 0 : -1;
     }
 
   void

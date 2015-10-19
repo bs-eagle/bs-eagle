@@ -6,6 +6,9 @@
 /// @copyright This source code is released under the terms of
 ///            the BSD License. See LICENSE for more details.
 
+#include "bos_report.h"
+#include "scal_2p_data_holder.h"
+
 #include "scal_3p.h"
 #include "scale_array_holder.h"
 #include "scal_region_info.h"
@@ -15,8 +18,6 @@
 #include "scal_data_vector.h"
 #include "scale_arrays_placement_strategies.h"
 #include "scal_data_placement_strategies.h"
-
-#include "scal_2p_data_holder.h"
 
 namespace blue_sky {
   //////////////////////////////////////////////////////////////////////////
