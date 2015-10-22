@@ -527,33 +527,41 @@ bp::tuple make_projection(t_ulong nx, t_ulong ny, t_ulong nz,
                           spv_int indices_, spv_int faces_,
                           spv_int internal_,
                           spv_float x_, spv_float y_,
+                          spv_float tops_, spv_float values_,
+                          t_ulong z_start, t_ulong z_end)
+{
+   return make_projection_impl< wpi::carray_3d >(nx, ny, nz, indices_, faces_,
+      internal_, x_, y_, tops_, values_, z_start, z_end, false);
+}
+
+bp::tuple make_projection1(t_ulong nx, t_ulong ny, t_ulong nz,
+                          spv_int indices_, spv_int faces_,
+                          spv_int internal_,
+                          spv_float x_, spv_float y_,
                           sp_obj trim_backend, spv_float values_,
                           t_ulong z_start, t_ulong z_end,
                           const char* strat_traits = "carray")
 {
    if(strcmp(strat_traits, "online_tops") == 0) {
       return make_projection_impl< wpi::onlinett_3d >(nx, ny, nz, indices_, faces_,
-         internal_, x_, y_, trim_backend, values_, z_start, z_end, false);
+         internal_, x_, y_, trim_backend, values_, z_start, z_end, true);
    }
    else if(strcmp(strat_traits, "online_tops_bufpool") == 0) {
       return make_projection_impl< wpi::onlinett_bp_3d >(nx, ny, nz, indices_, faces_,
-         internal_, x_, y_, trim_backend, values_, z_start, z_end, false);
+         internal_, x_, y_, trim_backend, values_, z_start, z_end, true);
    }
    else if(strcmp(strat_traits, "sgrid") == 0) {
       return make_projection_impl< wpi::sgrid_3d >(nx, ny, nz, indices_, faces_,
-         internal_, x_, y_, trim_backend, values_, z_start, z_end, false);
+         internal_, x_, y_, trim_backend, values_, z_start, z_end, true);
    }
    else if(strcmp(strat_traits, "rgrid") == 0) {
       return make_projection_impl< wpi::rgrid_3d >(nx, ny, nz, indices_, faces_,
-         internal_, x_, y_, trim_backend, values_, z_start, z_end, false);
+         internal_, x_, y_, trim_backend, values_, z_start, z_end, true);
    }
    else {
       return make_projection_impl< wpi::carray_3d >(nx, ny, nz, indices_, faces_,
-         internal_, x_, y_, trim_backend, values_, z_start, z_end, false);
+         internal_, x_, y_, trim_backend, values_, z_start, z_end, true);
    }
-
-   //return make_projection_impl< wpi::carray_3d >(nx, ny, nz, indices_, faces_,
-   //   internal_, x_, y_, tops_, values_, z_start, z_end, false);
 }
 
 // XYZ tops direction on
@@ -589,10 +597,11 @@ bp::tuple make_projection_xyz(t_ulong nx, t_ulong ny, t_ulong nz,
 }
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(make_projection_xyz_overl, make_projection_xyz, 11, 12)
-BOOST_PYTHON_FUNCTION_OVERLOADS(make_projection_overl, make_projection, 12, 13)
+BOOST_PYTHON_FUNCTION_OVERLOADS(make_projection1_overl, make_projection1, 12, 13)
 
 void py_export_well_edit() {
-    def("make_projection", &make_projection, make_projection_overl());
+    def("make_projection", &make_projection);
+    def("make_projection1", &make_projection1, make_projection1_overl());
     def("make_projection_xyz", &make_projection_xyz, make_projection_xyz_overl());
 }
 
