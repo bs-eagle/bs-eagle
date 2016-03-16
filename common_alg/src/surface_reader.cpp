@@ -49,9 +49,11 @@ T convert_arrayF2C(const T& src, const ulong nx, const ulong ny, const ulong nz)
 
 } // eof hidden namespace
 
-void read_surface(const std::string& fname, ulong nx, ulong ny,
-	smart_ptr< h5_pool_iface > pool, const std::string& surf_name = "")
-{
+ulong read_surface(
+	const std::string& fname, ulong nx, ulong ny,
+	smart_ptr< h5_pool_iface > pool, const std::string& surf_name = "",
+	const bool invert_z = false
+) {
 	// set C locale for proper numbers reading
 	setlocale(LC_NUMERIC, "C");
 
@@ -59,7 +61,7 @@ void read_surface(const std::string& fname, ulong nx, ulong ny,
 	std::ifstream f(fname.c_str(), std::ios::in);
 	if(!f) {
 		BSERR << "Error opening file " << fname << bs_end;
-		return;
+		return 0;
 	}
 
 	std::string linebuf;
@@ -115,13 +117,13 @@ void read_surface(const std::string& fname, ulong nx, ulong ny,
 	// check if we read nothing
 	if(!n_points) {
 		BSERR << "No valid data is read from " << fname << bs_end;
-		return;
+		return n_points;
 	}
 	else {
 		BSOUT << "read_surface: succefully read " << n_points << " points from " << fname << bs_end;
 	}
 
-	// write array to pool
+	// find out surface name
 	std::string surf_name_ = surf_name;
 	if(!surf_name.size()) {
 		surf_name_ = fname.substr(0, fname.rfind('.'));
@@ -130,11 +132,18 @@ void read_surface(const std::string& fname, ulong nx, ulong ny,
 			surf_name_ = surf_name_.substr(slashpos + 1);
 	}
 
+	// write array to pool
+	if(invert_z) {
+		for(ulong i = 0; i < databuf->size() / 3; ++i) {
+			databuf->ss(i*3 + 2) = -databuf->ss(i*3 + 2);
+		}
+	}
 	//npy_intp h5p_dims[] = { 0, npy_intp(dims[0]), 0, npy_intp(dims[1]), 0, 1 };
 	npy_intp h5p_dims[] = { npy_intp(dims[0]), npy_intp(dims[1]), 3 };
 	//pool->declare_fp_data(surf_name_, 0, 3, &h5p_dims[0], 1);
 	pool->declare_fp_data(surf_name_, 0, 3, &h5p_dims[0], 0);
 	pool->set_fp_data(surf_name_, databuf);
+	return n_points;
 }
 
 } /* blue_sky */
