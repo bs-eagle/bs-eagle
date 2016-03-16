@@ -59,7 +59,7 @@ namespace blue_sky {
 
   spv_float wlog_mean_projection(spv_float wlog_data, spv_float wlog_dept, spv_float dest_grid);
 
-  void read_surface(const std::string& fname, ulong nx, ulong ny,
+  ulong read_surface(const std::string& fname, ulong nx, ulong ny,
     smart_ptr< h5_pool_iface > pool, const std::string& surf_name = "", const bool = false);
 }
 
