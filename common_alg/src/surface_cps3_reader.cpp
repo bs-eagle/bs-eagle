@@ -107,7 +107,7 @@ ulong read_cps3_grid(std::ifstream& f, ulong* dims, spv_float& databuf) {
 		while(line_s >> val) {
 			// store x, y, z surface value
 			const v_float::iterator dest = databuf->begin() + (dims[1] * i + j) * 3;
-			if(dest >= databuf->end() - 3) {
+			if(dest > databuf->end() - 3) {
 				overflow = true;
 				break;
 			}
