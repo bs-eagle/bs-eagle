@@ -95,7 +95,8 @@ namespace blue_sky
       int read_wel_info (sp_prop_iface prop, std::string &s, double ver);
       int read_par_info (sp_prop_iface prop, std::string &s, double ver);
       int read_cur_info (sp_prop_iface prop, std::string &s, int n);
-      int read_asc_info (std::vector<t_double> &v, std::string &s, int n, std::ifstream &file);
+      int read_asc_info (std::vector<t_double> &v, std::string &s, int n, std::ifstream &file, const double);
+      int read_asc_info2 (std::vector<t_double> &v, std::string &s, int n, std::ifstream &file, const double);
       //int read_ver_info (sp_prop_iface prop, const string &s);
       //int read_ver_info (sp_prop_iface prop, const string &s);
       //int read_ver_info (sp_prop_iface prop, const string &s);
