@@ -13,6 +13,7 @@
 #include <vector>
 
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
@@ -33,6 +34,7 @@ using namespace boost::python;
 
 #endif //BSPY_EXPORTING_PLUGIN
 
+#define DEF_NULL_VALUE -999.25
 
 namespace blue_sky
 {
@@ -86,8 +88,9 @@ namespace blue_sky
           trim (units);
         }
     }
+
   template <class T>
-  T str2T (std::string &s)
+  T str2T (std::string &s, const T def_val = T())
     {
       T f;
       trim (s);
@@ -97,10 +100,11 @@ namespace blue_sky
         }
       catch (boost::bad_lexical_cast &)
         {
-          f = 0;
+          f = def_val;
         }
       return f;
     }
+
   int 
   gis::read_ver_info (sp_prop_iface prop, std::string &s)
     {
@@ -135,15 +139,20 @@ namespace blue_sky
 
       std::cout << "SEC WELL:" << s << std::endl;
 
+      // always add default null value
+      prop->add_property_f(DEF_NULL_VALUE, L"NULL", L"");
+
       split_str (s, name, units, data, description);
       if (name == "STRT"
           || name == "STOP"
-          || name == "STEP"
-          || name == "NULL")
+          || name == "STEP")
         {
           prop->add_property_f (0, str2wstr (name), str2wstr(units));
           prop->set_f (str2wstr (name), str2T<double> (data));
         }
+      else if(name == "NULL") {
+          prop->set_f(L"NULL", str2T<double>(data, DEF_NULL_VALUE));
+      }
       else if (name == "LIC")
         {
           prop->add_property_i (0, str2wstr (name), str2wstr(description));
@@ -212,22 +221,92 @@ namespace blue_sky
       prop->set_s (str2wstr (param), str2wstr (name));
       return 0;
     }
+
+  int gis::read_asc_info2(
+      std::vector<t_double> &v, std::string &s, int n, std::ifstream &file, const double null_v
+  ) {
+      namespace qi = boost::spirit::qi;
+      namespace phx = boost::phoenix;
+      namespace ascii = boost::spirit::ascii;
+      using qi::_1;
+      using ascii::space;
+      using phx::push_back;
+
+      std::string::iterator begin = s.begin();
+      std::string::iterator end = s.end();
+
+      v.reserve(n);
+      while(begin != end) {
+        qi::phrase_parse (
+              begin, end,
+              *qi::double_[push_back(phx::ref(v), _1)],
+              //*qi::double_[push_back(phx::ref(v), _1)] | *qi::lexeme[*ascii::alpha][push_back(phx::ref(v), null_v)],
+              //*( qi::double_[push_back(phx::ref(v), _1)] | *ascii::alpha ), //| bad_num[push_back(phx::ref(v), null_v)]),
+              space
+        );
+
+        if(begin != end) {
+          // something wrong happened during line parsing = for ex we met non-number string
+          // eat that string, place NULL value to resulting vector and continue parsing
+          if(qi::phrase_parse(
+                begin, end,
+                *qi::char_, //| qi::lexeme['"' >> *qi::char_ >> '"'] | qi::lexeme['\'' >> *qi::char_ >> '\''],
+                space
+          ))
+            v.push_back(null_v);
+          continue;
+        }
+
+        if(v.size() < n) {
+          if(file && sp_prop->get_s (L"WRAP") == L"YES") {
+            // read next line
+            std::getline(file, s);
+            begin = s.begin();
+            end = s.end();
+          }
+          else {
+            std::cerr << "Error: wrong number of numbers in line " << v.size() 
+                      << " should be " << n << std::endl;
+            return -1;
+          }
+        }
+        else if(v.size() > n)
+          v.resize(n);
+      }
+      return 0;
+  }
+
   int 
   gis::read_asc_info (std::vector<t_double> &v, std::string &s, 
-                      int n, std::ifstream &file)
+                      int n, std::ifstream &file, const double null_v)
     {
       namespace qi = boost::spirit::qi;
-      using boost::spirit::ascii::space;
+      namespace phx = boost::phoenix;
+      namespace ascii = boost::spirit::ascii;
+      using qi::_1;
+      using ascii::space;
+      using phx::push_back;
+
+      //std::vector< std::string > S;
+
+      // create rule that eats alphanumeric characters
+      qi::rule< std::string::iterator, ascii::space_type > bad_num = *ascii::alpha;
 
       //std::cout << "SEC ASCII:" << s << std::endl;
       for (;!file.eof ();)
         {
           std::string::iterator begin = s.begin();
           std::string::iterator end = s.end();
-          if (!qi::phrase_parse (begin, end, *qi::double_, space, v))
+          if (!qi::phrase_parse (
+            begin, end,
+            *qi::double_[push_back(phx::ref(v), _1)] | *qi::lexeme[*ascii::alpha][push_back(phx::ref(v), null_v)],
+            //*( qi::double_[push_back(phx::ref(v), _1)] | *ascii::alpha ), //| bad_num[push_back(phx::ref(v), null_v)]),
+            space
+          ))
             {
               std::cout << "Error: Parsing failed double\n";
             }
+          std::cout << "YOOO! " << v.size() << std::endl;
           if ((int)v.size () < n)
             {
               if (sp_prop->get_s (L"WRAP") != L"YES")
@@ -358,8 +437,9 @@ namespace blue_sky
                 }
               else if (state == 6)
                 {
+                  // obtain NULL value
                   v.clear ();
-                  int ret_code = read_asc_info (v, s, param_counter, file);
+                  int ret_code = read_asc_info2 (v, s, param_counter, file, sp_prop->get_f(L"NULL"));
                   if (ret_code)
                     return -1;
                   sp_table->push_back (v);

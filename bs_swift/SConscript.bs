@@ -6,19 +6,19 @@ tar_name = "bs_swift"
 
 env = custom_env.Clone ()
 env.Append (CPPPATH = ["include",
-    includes["bs_bos_core_base"],
-    includes["bs_mtx"],
-    includes["common_types"],
-    includes["bs_lsolvers"]
-    ] + includes["kernel"])
+	includes["bs_bos_core_base"],
+	includes["bs_mtx"],
+	includes["common_types"],
+	includes["bs_lsolvers"]
+	] + includes["kernel"])
 
 libs = ["blue_sky", "bs_bos_core_base"]
 
 if (build_kind == "debug") :
-    env.AppendUnique (LIBS = list_suffix (libs, "_d"))
-    lib_name += "_d"
+	env.AppendUnique (LIBS = list_suffix (libs, "_d"))
+	lib_name += "_d"
 elif (build_kind == "release") :
-    env.AppendUnique (LIBS = libs)
+	env.AppendUnique (LIBS = libs)
 
 bs_swift = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
 
@@ -26,6 +26,6 @@ env.Alias (tar_name, bs_swift)
 Export ("bs_swift")
 
 if (env["install"] == 1) :
-    inst_tar = env.Install ("$plugins_prefix", bs_swift)
-    env.Alias (tar_name, inst_tar)
+	inst_tar = env.Install ("$plugins_prefix", bs_swift)
+	env.Alias (tar_name, inst_tar)
 

@@ -17,7 +17,7 @@
 // DEBUG
 //#include <iostream>
 
-#define MD_TOL 1e-10
+#define MD_TOL 1e-6
 
 namespace blue_sky { namespace wpi {
 
@@ -67,13 +67,25 @@ public:
 
 	typedef std::vector< ulong > hit_idx_t;
 
-	//template< int N >
+	// implement spatial sorting operation of intersection points
 	struct spatial_sort {
 		typedef typename intersect_path::iterator x_iterator;
 
 		spatial_sort(const dirvec_t& dir, const vertex_pos_i& mesh_size)
-			: dir_(dir), m_size_(mesh_size)
-		{}
+			: m_size_(mesh_size)
+		{
+			std::copy(&dir[0], &dir[D], &dir_[0]);
+		}
+
+		// calc direction vector based on well passed well segment
+		spatial_sort(const well_data& seg, const vertex_pos_i& mesh_size)
+			: m_size_(mesh_size)
+		{
+			const Point& start = seg.start();
+			const Point& finish = seg.finish();
+			for(uint i = 0; i < D; ++i)
+				dir_[i] = start[i] <= finish[i] ? 0 : 1;
+		}
 
 		spatial_sort(const spatial_sort& rhs)
 			: dir_(rhs.dir_), m_size_(rhs.m_size_)
@@ -116,10 +128,74 @@ public:
 			return dir_[ndim] == 0 ? v1 > v2 : v2 > v1;
 		}
 
-		const dirvec_t& dir_;
+		dirvec_t dir_;
 		const vertex_pos_i& m_size_;
 	};
 
+	// helper to ease inserting unique intersection points into storage
+	// based on spatial sorting
+	struct top_surv {
+		typedef std::set< x_iterator, spatial_sort > spat_storage_t;
+		typedef typename spat_storage_t::iterator spat_iterator;
+
+		top_surv(const dirvec_t& dir, const vertex_pos_i& mesh_size, intersect_path& x)
+			: sr_(dir, mesh_size), x_(x)
+		{}
+
+		// ctor using well segment
+		top_surv(const well_data& seg, const vertex_pos_i& mesh_size, intersect_path& x)
+			: sr_(seg, mesh_size), x_(x)
+		{}
+
+		// select unique element in range from...to based on spatial sort
+		x_iterator operator()(x_iterator from, x_iterator to) {
+			//spat_storage_t sr(spatial_sort(dir_, m_size_));
+			sr_.clear();
+
+			// spatially sort iterators
+			for(x_iterator px = from; px != to; ++px)
+				sr_.insert(px);
+			// save only frst element
+			while(from != to) {
+				if(from != *sr_.begin())
+					x_.erase(from++);
+				else ++from;
+			}
+
+			return *sr_.begin();
+		}
+
+		// insert new intersection point into container x_
+		// such that all duplicates are removed based on spatial sort
+		// and elements comparison with tolerance
+		x_iterator unique_insert(const well_hit_cell& new_x) {
+			// if intersection for that point exists
+			// append new intersection only if it is 'greater' than existing
+			// btree: btree_multiset destroy iterators on insertion
+			// account that in spatial sorting algo
+			// first always insert new point
+			x_.insert(new_x);
+
+			// find start of range of equal points
+			x_iterator px = x_.lower_bound(well_hit_cell(new_x.md - MD_TOL));
+			x_iterator pn = px; ++pn;
+			while(pn != x_.end() && std::abs< double >(pn->md - px->md) < MD_TOL) {
+				if(sr_.greater(*px, *pn)) {
+					x_.erase(pn);
+					pn = px;
+				}
+				else {
+					x_.erase(px);
+					px = pn;
+				}
+				++pn;
+			}
+			return px;
+		}
+
+		const spatial_sort sr_;
+		intersect_path& x_;
+	};
 
 	// helper to resolve issue with CGAL that can intersect only Bbox_3 in 3D
 	// and Iso_rectangle_2 in 2D! holy shit
@@ -229,36 +305,6 @@ public:
 
 	//template< int N >
 	void remove_dups2() {
-
-		struct top_surv {
-			typedef std::set< x_iterator, spatial_sort > spat_storage_t;
-			typedef typename spat_storage_t::iterator spat_iterator;
-
-			top_surv(const dirvec_t& dir, intersect_path& x, const vertex_pos_i& mesh_size)
-				: dir_(dir), x_(x), m_size_(mesh_size)
-			{}
-
-			x_iterator operator()(x_iterator from, x_iterator to) {
-				spat_storage_t sr(spatial_sort(dir_, m_size_));
-
-				// spatially sort iterators
-				for(x_iterator px = from; px != to; ++px)
-					sr.insert(px);
-				// save only frst element
-				while(from != to) {
-					if(from != *sr.begin())
-						x_.erase(from++);
-					else ++from;
-				}
-
-				return *sr.begin();
-			}
-
-			const dirvec_t& dir_;
-			intersect_path& x_;
-			const vertex_pos_i& m_size_;
-		};
-
 		// main processing cycle
 		// sanity check
 		if(x_.size() < 2) return;
@@ -267,25 +313,15 @@ public:
 		x_iterator px = x_.begin();
 		// walk the nodes and determine direction of trajectory
 		double max_md;
-		dirvec_t dir;
+		//dirvec_t dir;
 		for(wp_iterator pw = wp_.begin(), end = wp_.end(); pw != end; ++pw) {
-			// identify direction
-			const well_data& seg = *pw;
-			// calc direction vector
-			Point start = seg.start();
-			Point finish = seg.finish();
-			for(uint i = 0; i < D; ++i)
-				dir[i] = start[i] <= finish[i] ? 0 : 1;
 			// judge
-			top_surv judge(dir, x_, m_.size());
+			const well_data& seg = *pw;
+			top_surv judge(*pw, m_.size(), x_);
 
 			// remove dups lying on current well segment
 			max_md = seg.md() + seg.len();
 			for(; px != x_.end() && px->md <= max_md; ++px) {
-				// skeep well node points if any
-				//if(px->facet == 4)
-				//	continue;
-
 				// find range of cross points with equal MD
 				// upper_bound
 				ulong cnt = 0;
@@ -329,7 +365,6 @@ public:
 		return x_;
 	}
 
-//protected:
 	x_iterator insert_wp_node(ulong cell_id, ulong wseg_id, x_iterator px, bool end_point = false) {
 		// initialization
 		const well_data& wseg = wp_[wseg_id];
@@ -384,35 +419,12 @@ public:
 		//m_.cache_cell(cell_id, c);
 
 		// add all points to interscetion path
+		top_surv judge(wp_[wseg_id], m_.size(), x_);
 		for(typename xpoints_list::const_iterator px = res.begin(), end = res.end(); px != end; ++px) {
-			// prepare intersection to insert
-			well_hit_cell new_x(px->first, wseg_id, cell_id, calc_md(wseg_id, px->first), px->second);
-			// if intersection for that point exists
-			// append new intersection only if it is 'greater' than existing
-			// btree: btree_multiset destroy iterators on insertion
-			// account that in spatial sorting algo
-			// first always insert new point
-			x_.insert(new_x);
-			// we expect here max 2 points with identical MD
-			// check for such case
-			std::pair< x_iterator, x_iterator > eqx = x_.equal_range(new_x);
-			x_iterator p_secx = eqx.first;
-			++p_secx;
-			if(p_secx != eqx.second) {
-				// calc direction vector
-				dirvec_t dir;
-				Point start = wp_[wseg_id].start();
-				Point finish = wp_[wseg_id].finish();
-				for(uint i = 0; i < D; ++i)
-					dir[i] = start[i] <= finish[i] ? 0 : 1;
-
-				// because we expect max 2 equal points, compare them
-				// end remove one that is lower
-				if(spatial_sort(dir, m_.size()).greater(*eqx.first, *p_secx))
-					x_.erase(p_secx);
-				else
-					x_.erase(eqx.first);
-			}
+			// insert new intersection
+			judge.unique_insert(
+				well_hit_cell(px->first, wseg_id, cell_id, calc_md(wseg_id, px->first), px->second)
+			);
 		}
 	}
 

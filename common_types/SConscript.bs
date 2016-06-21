@@ -12,17 +12,18 @@ env.Append (CPPPATH = ["include", "src",
 	LIBS=["hdf5"])
 
 libs = ["blue_sky"]
-boost_libs = list_suffix(["boost_serialization"], env["boost_suffix"])
+boost_libs = ["serialization"];
 
 if (build_kind == "debug") :
-	env.AppendUnique(LIBS = list_suffix(libs, "_d"))
-	env.AppendUnique(LIBS = list_suffix(boost_libs, "-d"))
 	lib_name += "_d"
+	env.AppendUnique(LIBS = list_suffix(libs, "_d") + map(lambda x : boost_libnames_d[x], boost_libs));
 elif (build_kind == "release") :
-	env.AppendUnique(LIBS = libs)
-	env.AppendUnique(LIBS = boost_libs)
+	env.AppendUnique(LIBS = libs + map(lambda x : boost_libnames[x], boost_libs));
 
-common_types = env.SharedLibrary (target = os.path.join (tar_exe_plugin_dir, lib_name), source = files (["."]).sources)
+common_types = env.SharedLibrary(
+	target = os.path.join (tar_exe_plugin_dir, lib_name),
+	source = files (["."]).sources
+)
 
 env.Alias (tar_name, common_types)
 Export ("common_types")

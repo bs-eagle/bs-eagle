@@ -34,12 +34,8 @@ void projection_impl(
 	grid_iterator& p_grid, const grid_iterator& p_grid_end,
 	res_iterator& p_res
 ) {
-	// setup iterators
-	//const cvf_iterator p_dept_begin = wlog_dept->begin();
-	//const cvf_iterator p_dept_end = p_dept_begin + wlog_sz;
-
+	// calc wlog size
 	const ulong wlog_sz = std::min< ulong >(p_data_end - p_data_begin, p_dept_end - p_dept_begin);
-	//const ulong wlog_sz = std::min(wlog_data->size(), wlog_dept->size());
 	if(wlog_sz == 0)
 		return;
 
@@ -51,15 +47,12 @@ void projection_impl(
 		// grid is fully outside of well log depths
 		return;
 
+	// setup iterators
 	data_iterator p_data = p_data_begin + (p_dept - p_dept_begin);
+	const res_iterator p_res_end = p_res + (p_grid_end - p_grid - 1);
 
-	// DEBUG
-	//std::cout << "++wlog_mean_projection:" << std::endl;
-	//std::cout << "log_dept = [" << *p_dept << ", " << *(p_dept_end - 1) << "]" << std::endl;
-	//std::cout << "grid = [" << *p_grid << ", " << *(p_grid_end - 1) << "]" << std::endl;
 	// position dest grid to next boundary
 	++p_grid;
-	const res_iterator p_res_end = p_res + (p_grid_end - p_grid - 1);
 
 	// main cycle
 	t_float win_sum = 0;
